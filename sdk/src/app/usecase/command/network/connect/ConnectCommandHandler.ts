@@ -203,11 +203,11 @@
 
 */
 
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand.js';
-import { ConnectCommandError } from './error/ConnectCommandError.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import TransactionService from '@service/transaction/TransactionService';
+import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand';
+import { ConnectCommandError } from './error/ConnectCommandError';
 
 @CommandHandler(ConnectCommand)
 export class ConnectCommandHandler implements ICommandHandler<ConnectCommand> {

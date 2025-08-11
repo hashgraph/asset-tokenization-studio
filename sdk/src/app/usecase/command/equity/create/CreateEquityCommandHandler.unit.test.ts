@@ -204,28 +204,28 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CreateEquityCommandHandler } from './CreateEquityCommandHandler.js';
+import { CreateEquityCommandHandler } from './CreateEquityCommandHandler';
 import {
   CreateEquityCommand,
   CreateEquityCommandResponse,
-} from './CreateEquityCommand.js';
-import TransactionService from '../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+} from './CreateEquityCommand';
+import TransactionService from '@service/transaction/TransactionService';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   HederaIdZeroAddressFixture,
   TransactionIdFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import AccountService from '../../../../service/account/AccountService.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import NetworkService from '../../../../service/network/NetworkService.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { CreateEquityCommandFixture } from '../../../../../../__tests__/fixtures/equity/EquityFixture.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
-import { CreateEquityCommandError } from './error/CreateEquityCommandError.js';
+} from '@test/fixtures/shared/DataFixture';
+import AccountService from '@service/account/AccountService';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import NetworkService from '@service/network/NetworkService';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { CreateEquityCommandFixture } from '@test/fixtures/equity/EquityFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { CreateEquityCommandError } from './error/CreateEquityCommandError';
 
 describe('CreateEquityCommandHandler', () => {
   let handler: CreateEquityCommandHandler;

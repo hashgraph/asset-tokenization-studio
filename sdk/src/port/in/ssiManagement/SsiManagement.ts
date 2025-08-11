@@ -204,25 +204,25 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import Injectable from '../../../core/Injectable.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import IsIssuerRequest from '../request/security/operations/issue/IsIssuerRequest.js';
-import { IsIssuerQuery } from '../../../app/usecase/query/security/ssi/isIssuer/IsIssuerQuery.js';
-import { AddIssuerCommand } from '../../../app/usecase/command/security/ssi/addIssuer/AddIssuerCommand.js';
-import { SetRevocationRegistryAddressCommand } from '../../../app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand.js';
-import { RemoveIssuerCommand } from '../../../app/usecase/command/security/ssi/removeIssuer/RemoveIssuerCommand.js';
-import SetRevocationRegistryAddressRequest from '../request/security/ssi/SetRevocationRegistryAddressRequest.js';
-import AddIssuerRequest from '../request/security/ssi/AddIssuerRequest.js';
-import RemoveIssuerRequest from '../request/security/operations/issue/RemoveIssuerRequest.js';
-import GetRevocationRegistryAddressRequest from '../request/security/ssi/GetRevocationRegistryAddressRequest.js';
-import GetIssuerListCountRequest from '../request/security/ssi/GetIssuerListCountRequest.js';
-import GetIssuerListMembersRequest from '../request/security/ssi/GetIssuerListMembersRequest.js';
-import { GetRevocationRegistryAddressQuery } from '../../../app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery.js';
-import { GetIssuerListCountQuery } from '../../../app/usecase/query/security/ssi/getIssuerListCount/GetIssuerListCountQuery.js';
-import { GetIssuerListMembersQuery } from '../../../app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQuery.js';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { QueryBus } from '@core/query/QueryBus';
+import Injectable from '@core/injectable/Injectable';
+import { CommandBus } from '@core/command/CommandBus';
+import IsIssuerRequest from '../request/security/operations/issue/IsIssuerRequest';
+import { IsIssuerQuery } from '@query/security/ssi/isIssuer/IsIssuerQuery';
+import { AddIssuerCommand } from '@command/security/ssi/addIssuer/AddIssuerCommand';
+import { SetRevocationRegistryAddressCommand } from '@command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand';
+import { RemoveIssuerCommand } from '@command/security/ssi/removeIssuer/RemoveIssuerCommand';
+import SetRevocationRegistryAddressRequest from '../request/security/ssi/SetRevocationRegistryAddressRequest';
+import AddIssuerRequest from '../request/security/ssi/AddIssuerRequest';
+import RemoveIssuerRequest from '../request/security/operations/issue/RemoveIssuerRequest';
+import GetRevocationRegistryAddressRequest from '../request/security/ssi/GetRevocationRegistryAddressRequest';
+import GetIssuerListCountRequest from '../request/security/ssi/GetIssuerListCountRequest';
+import GetIssuerListMembersRequest from '../request/security/ssi/GetIssuerListMembersRequest';
+import { GetRevocationRegistryAddressQuery } from '@query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery';
+import { GetIssuerListCountQuery } from '@query/security/ssi/getIssuerListCount/GetIssuerListCountQuery';
+import { GetIssuerListMembersQuery } from '@query/security/ssi/getIssuerListMembers/GetIssuerListMembersQuery';
 
 interface ISsiManagementInPort {
   setRevocationRegistryAddress(

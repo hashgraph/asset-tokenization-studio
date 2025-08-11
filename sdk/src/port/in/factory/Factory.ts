@@ -203,16 +203,16 @@
 
 */
 
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import Injectable from '../../../core/Injectable.js';
-import GetRegulationDetailsRequest from '../request/factory/GetRegulationDetailsRequest.js';
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import RegulationViewModel from '../response/RegulationViewModel.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
+import { QueryBus } from '@core/query/QueryBus';
+import Injectable from '@core/injectable/Injectable';
+import GetRegulationDetailsRequest from '../request/factory/GetRegulationDetailsRequest';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import RegulationViewModel from '../response/RegulationViewModel';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
-import { GetRegulationDetailsQuery } from '../../../app/usecase/query/factory/get/GetRegulationDetailsQuery.js';
-import ContractId from '../../../domain/context/contract/ContractId.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
+import { GetRegulationDetailsQuery } from '@query/factory/get/GetRegulationDetailsQuery';
+import ContractId from '@domain/context/contract/ContractId';
+import NetworkService from '@service/network/NetworkService';
 
 interface IFactoryInPort {
   getRegulationDetails(

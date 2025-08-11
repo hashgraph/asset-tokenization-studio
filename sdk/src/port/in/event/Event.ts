@@ -204,14 +204,14 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import Injectable from '../../../core/Injectable.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
+import Injectable from '@core/injectable/Injectable';
+import NetworkService from '@service/network/NetworkService';
 import WalletEvent, {
   ConnectionState,
   WalletEvents,
-} from '../../../app/service/event/WalletEvent.js';
-import EventService from '../../../app/service/event/EventService.js';
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
+} from '@service/event/WalletEvent';
+import EventService from '@service/event/EventService';
+import { LogError } from '@core/decorator/LogErrorDecorator';
 
 export { WalletEvent, WalletEvents, ConnectionState };
 

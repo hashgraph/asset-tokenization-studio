@@ -203,25 +203,25 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RemoveFromControlListCommandHandler } from './RemoveFromControlListCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import { RemoveFromControlListCommandHandler } from './RemoveFromControlListCommandHandler';
 import {
   RemoveFromControlListCommand,
   RemoveFromControlListCommandResponse,
-} from './RemoveFromControlListCommand.js';
-import { RemoveFromControlListCommandError } from './error/RemoveFromControlListCommandError.js';
-import { AddToControlListCommandFixture } from '../../../../../../../__tests__/fixtures/controlList/ControlListFixture.js';
+} from './RemoveFromControlListCommand';
+import { RemoveFromControlListCommandError } from './error/RemoveFromControlListCommandError';
+import { AddToControlListCommandFixture } from '@test/fixtures/controlList/ControlListFixture';
 
 describe('RemoveFromControlListCommandHandler', () => {
   let handler: RemoveFromControlListCommandHandler;

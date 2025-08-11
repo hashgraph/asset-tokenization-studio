@@ -203,29 +203,29 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
 
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
-import { BatchSetAddressFrozenCommandError } from './error/BatchSetAddressFrozenCommandError.js';
+import { ErrorCode } from '@core/error/BaseError';
+import { BatchSetAddressFrozenCommandError } from './error/BatchSetAddressFrozenCommandError';
 import {
   BatchSetAddressFrozenCommand,
   BatchSetAddressFrozenResponse,
-} from './BatchSetAddressFrozenCommand.js';
-import { BatchSetAddressFrozenCommandHandler } from './BatchSetAddressFrozenCommandHandler.js';
+} from './BatchSetAddressFrozenCommand';
+import { BatchSetAddressFrozenCommandHandler } from './BatchSetAddressFrozenCommandHandler';
 
-import { BatchSetAddressFrozenCommandFixture } from '../../../../../../../../__tests__/fixtures/batch/BatchFixture.js';
+import { BatchSetAddressFrozenCommandFixture } from '@test/fixtures/batch/BatchFixture';
 
 describe('BatchSetAddressFrozenCommandHandler', () => {
   let handler: BatchSetAddressFrozenCommandHandler;

@@ -204,13 +204,13 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { SetConfigurationCommandHandler } from './SetConfigurationCommandHandler.js';
+import { SetConfigurationCommandHandler } from './SetConfigurationCommandHandler';
 import {
   SetConfigurationCommand,
   SetConfigurationCommandResponse,
-} from './SetConfigurationCommand.js';
-import NetworkService from '../../../../../app/service/network/NetworkService.js';
-import { SetConfigurationCommandFixture } from '../../../../../../__tests__/fixtures/network/NetworkFixture.js';
+} from './SetConfigurationCommand';
+import NetworkService from '@service/network/NetworkService';
+import { SetConfigurationCommandFixture } from '@test/fixtures/network/NetworkFixture';
 
 describe('SetConfigurationCommandHandler', () => {
   let handler: SetConfigurationCommandHandler;

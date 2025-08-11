@@ -239,7 +239,7 @@ task(
     .addOptionalParam(
         'fileName',
         'The output file name',
-        undefined,
+        'deployedContracts',
         types.string
     )
     .setAction(async (args: DeployAllArgs, hre) => {
@@ -300,6 +300,7 @@ task(
             erc3643Facet,
             erc3643BatchFacet,
             freeze,
+            erc20Permit,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -360,6 +361,7 @@ task(
             'ERC3643 Facet': erc3643Facet.address,
             'ERC3643 Batch Facet': erc3643BatchFacet.address,
             Freeze: freeze.address,
+            ERC20Permit: erc20Permit.address,
         }
 
         const contractAddress = []

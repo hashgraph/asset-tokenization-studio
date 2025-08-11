@@ -203,20 +203,20 @@
 
 */
 
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 import {
   RecoveryAddressCommand,
   RecoveryAddressCommandResponse,
 } from './RecoveryAddressCommand';
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import AccountService from '../../../../../service/account/AccountService';
-import TransactionService from '../../../../../service/transaction/TransactionService';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
-import ValidationService from '../../../../../service/validation/ValidationService';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import AccountService from '@service/account/AccountService';
+import TransactionService from '@service/transaction/TransactionService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import ValidationService from '@service/validation/ValidationService';
 import { RecoveryAddressCommandError } from './error/RecoveryAddressCommandError';
-import ContractService from '../../../../../service/contract/ContractService';
+import ContractService from '@service/contract/ContractService';
 
 @CommandHandler(RecoveryAddressCommand)
 export class RecoveryAddressCommandHandler

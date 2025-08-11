@@ -207,6 +207,18 @@ export default {
   tabs: {
     program: "Program coupon",
     see: "See coupon",
+    holders: "Holders",
+    list: "List",
+  },
+  list: {
+    columns: {
+      id: "ID",
+      recordDate: "Record Date",
+      executionDate: "Execution Date",
+      rate: "Coupon Rate",
+      snapshotId: "Snapshot",
+    },
+    emptyTable: "No coupons found",
   },
   program: {
     input: {
@@ -250,6 +262,20 @@ export default {
       title: "Detail",
       paymentDay: "Payment day",
       amount: "Amount",
+    },
+  },
+  holders: {
+    title: "Holders",
+    couponIdInput: {
+      label: "Coupon ID",
+      placeholder: "1",
+      tooltip: "ID of the coupon to display.",
+    },
+    searchButton: "Search",
+    emptyTable: "No data",
+    table: {
+      couponId: "Coupon ID",
+      holderAddress: "Holder address",
     },
   },
   messages: {

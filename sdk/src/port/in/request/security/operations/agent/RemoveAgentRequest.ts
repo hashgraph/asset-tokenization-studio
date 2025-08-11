@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../../FormatValidation.js';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../../../FormatValidation';
 
 export default class RemoveAgentRequest extends ValidatedRequest<RemoveAgentRequest> {
   securityId: string;

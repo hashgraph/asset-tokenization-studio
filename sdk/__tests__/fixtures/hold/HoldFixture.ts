@@ -209,28 +209,28 @@ import {
   PartitionIdFixture,
 } from '../shared/DataFixture';
 
-import CreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/CreateHoldByPartition';
-import CreateHoldFromByPartitionRequest from '../../../src/port/in/request/security/operations/hold/CreateHoldFromByPartition';
-import ControllerCreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/ControllerCreateHoldFromByPartition';
-import ProtectedCreateHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/ProtectedCreateHoldFromByPartition';
-import GetHeldAmountForRequest from '../../../src/port/in/request/security/operations/hold/GetHeldAmountForRequest';
-import GetHeldAmountForByPartitionRequest from '../../../src/port/in/request/security/operations/hold/GetHeldAmountForByPartitionRequest';
-import GetHoldCountForByPartitionRequest from '../../../src/port/in/request/security/operations/hold/GetHoldCountForByPartitionRequest';
-import GetHoldsIdForByPartitionRequest from '../../../src/port/in/request/security/operations/hold/GetHoldsIdForByPartitionRequest';
-import GetHoldForByPartitionRequest from '../../../src/port/in/request/security/operations/hold/GetHoldForByPartitionRequest';
-import ReleaseHoldByPartitionRequest from '../../../src/port/in/request/security/operations/release/ReleaseHoldByPartitionRequest';
-import ReclaimHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/ReclaimHoldByPartitionRequest';
-import ExecuteHoldByPartitionRequest from '../../../src/port/in/request/security/operations/hold/ExecuteHoldByPartitionRequest';
+import CreateHoldByPartitionRequest from '@port/in/request/security/operations/hold/CreateHoldByPartition';
+import CreateHoldFromByPartitionRequest from '@port/in/request/security/operations/hold/CreateHoldFromByPartition';
+import ControllerCreateHoldByPartitionRequest from '@port/in/request/security/operations/hold/ControllerCreateHoldFromByPartition';
+import ProtectedCreateHoldByPartitionRequest from '@port/in/request/security/operations/hold/ProtectedCreateHoldFromByPartition';
+import GetHeldAmountForRequest from '@port/in/request/security/operations/hold/GetHeldAmountForRequest';
+import GetHeldAmountForByPartitionRequest from '@port/in/request/security/operations/hold/GetHeldAmountForByPartitionRequest';
+import GetHoldCountForByPartitionRequest from '@port/in/request/security/operations/hold/GetHoldCountForByPartitionRequest';
+import GetHoldsIdForByPartitionRequest from '@port/in/request/security/operations/hold/GetHoldsIdForByPartitionRequest';
+import GetHoldForByPartitionRequest from '@port/in/request/security/operations/hold/GetHoldForByPartitionRequest';
+import ReleaseHoldByPartitionRequest from '@port/in/request/security/operations/release/ReleaseHoldByPartitionRequest';
+import ReclaimHoldByPartitionRequest from '@port/in/request/security/operations/hold/ReclaimHoldByPartitionRequest';
+import ExecuteHoldByPartitionRequest from '@port/in/request/security/operations/hold/ExecuteHoldByPartitionRequest';
 import { BigNumber } from 'ethers';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
-import { GetHeldAmountForQuery } from '../../../src/app/usecase/query/security/hold/getHeldAmountFor/GetHeldAmountForQuery';
-import { GetHeldAmountForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQuery';
-import { GetHoldCountForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQuery';
-import { GetHoldForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery';
-import { HoldDetails } from '../../../src/domain/context/security/Hold';
-import { GetHoldsIdForByPartitionQuery } from '../../../src/app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery';
-import { ExecuteHoldByPartitionCommand } from '../../../src/app/usecase/command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommand';
-import { ProtectedCreateHoldByPartitionCommand } from '../../../src/app/usecase/command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommand';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { GetHeldAmountForQuery } from '@query/security/hold/getHeldAmountFor/GetHeldAmountForQuery';
+import { GetHeldAmountForByPartitionQuery } from '@query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQuery';
+import { GetHoldCountForByPartitionQuery } from '@query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQuery';
+import { GetHoldForByPartitionQuery } from '@query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery';
+import { HoldDetails } from '@domain/context/security/Hold';
+import { GetHoldsIdForByPartitionQuery } from '@query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery';
+import { ExecuteHoldByPartitionCommand } from '@command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommand';
+import { ProtectedCreateHoldByPartitionCommand } from '@command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommand';
 
 export const CreateHoldByPartitionRequestFixture =
   createFixture<CreateHoldByPartitionRequest>((request) => {

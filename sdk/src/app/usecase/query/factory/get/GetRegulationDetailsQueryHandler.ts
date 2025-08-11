@@ -203,19 +203,19 @@
 
 */
 
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
 import {
   GetRegulationDetailsQuery,
   GetRegulationDetailsQueryResponse,
-} from './GetRegulationDetailsQuery.js';
-import { Regulation } from '../../../../../domain/context/factory/Regulation.js';
-import AccountService from '../../../../service/account/AccountService.js';
-import { InvalidRequest } from '../../error/InvalidRequest.js';
-import { GetRegulationDetailsQueryError } from './error/GetRegulationDetailsQueryError.js';
+} from './GetRegulationDetailsQuery';
+import { Regulation } from '@domain/context/factory/Regulation';
+import AccountService from '@service/account/AccountService';
+import { InvalidRequest } from '@command/error/InvalidRequest';
+import { GetRegulationDetailsQueryError } from './error/GetRegulationDetailsQueryError';
 
 @QueryHandler(GetRegulationDetailsQuery)
 export class GetRegulationDetailsQueryHandler

@@ -204,9 +204,9 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import Injectable from '../../../core/Injectable.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import Injectable from '@core/injectable/Injectable';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   AddExternalPauseRequest,
   RemoveExternalPauseRequest,
@@ -216,18 +216,18 @@ import {
   IsExternalPauseRequest,
   IsPausedMockRequest,
   SetPausedMockRequest,
-} from '../request/index.js';
-import { UpdateExternalPausesCommand } from '../../../app/usecase/command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand.js';
-import { SetPausedMockCommand } from '../../../app/usecase/command/security/externalPauses/mock/setPaused/SetPausedMockCommand.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import { IsPausedMockQuery } from '../../../app/usecase/query/security/externalPauses/mock/isPaused/IsPausedMockQuery.js';
-import { AddExternalPauseCommand } from '../../../app/usecase/command/security/externalPauses/addExternalPause/AddExternalPauseCommand.js';
-import { RemoveExternalPauseCommand } from '../../../app/usecase/command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand.js';
-import { IsExternalPauseQuery } from '../../../app/usecase/query/security/externalPauses/isExternalPause/IsExternalPauseQuery.js';
-import { GetExternalPausesCountQuery } from '../../../app/usecase/query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery.js';
-import { GetExternalPausesMembersQuery } from '../../../app/usecase/query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery.js';
-import { CreateExternalPauseMockCommand } from '../../../app/usecase/command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommand.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
+} from '../request/index';
+import { UpdateExternalPausesCommand } from '@command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommand';
+import { SetPausedMockCommand } from '@command/security/externalPauses/mock/setPaused/SetPausedMockCommand';
+import { QueryBus } from '@core/query/QueryBus';
+import { IsPausedMockQuery } from '@query/security/externalPauses/mock/isPaused/IsPausedMockQuery';
+import { AddExternalPauseCommand } from '@command/security/externalPauses/addExternalPause/AddExternalPauseCommand';
+import { RemoveExternalPauseCommand } from '@command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommand';
+import { IsExternalPauseQuery } from '@query/security/externalPauses/isExternalPause/IsExternalPauseQuery';
+import { GetExternalPausesCountQuery } from '@query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQuery';
+import { GetExternalPausesMembersQuery } from '@query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQuery';
+import { CreateExternalPauseMockCommand } from '@command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommand';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
 interface IExternalPausesInPort {
   updateExternalPauses(

@@ -211,17 +211,17 @@
 import { ethers } from 'ethers';
 import { BigNumber } from '@ethersproject/bignumber';
 import { singleton } from 'tsyringe';
-import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
-import LogService from '../../../app/service/log/LogService.js';
-import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
-import { Security } from '../../../domain/context/security/Security.js';
-import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
-import { Dividend } from '../../../domain/context/equity/Dividend.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import { HederaId } from '../../../domain/context/shared/HederaId.js';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import NetworkService from '@service/network/NetworkService';
+import LogService from '@service/log/LogService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter';
+import { Security } from '@domain/context/security/Security';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import { Dividend } from '@domain/context/equity/Dividend';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { HederaId } from '@domain/context/shared/HederaId';
 import {
   ERC1594__factory,
   ERC1644__factory,
@@ -259,14 +259,14 @@ import {
   ERC1410ReadFacet__factory,
   HoldReadFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
-import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
-import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
-import { Coupon } from '../../../domain/context/bond/Coupon.js';
-import { EquityDetails } from '../../../domain/context/equity/EquityDetails.js';
-import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
-import { CastSecurityType } from '../../../domain/context/factory/SecurityType.js';
-import { Regulation } from '../../../domain/context/factory/Regulation.js';
-import { _PARTITION_ID_1 } from '../../../core/Constants.js';
+import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
+import { VotingRights } from '@domain/context/equity/VotingRights';
+import { Coupon } from '@domain/context/bond/Coupon';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import { CastDividendType } from '@domain/context/equity/DividendType';
+import { CastSecurityType } from '@domain/context/factory/SecurityType';
+import { Regulation } from '@domain/context/factory/Regulation';
+import { _PARTITION_ID_1 } from '@core/Constants';
 import {
   CastAccreditedInvestors,
   CastManualInvestorVerification,
@@ -274,20 +274,20 @@ import {
   CastResaleHoldPeriodorscation,
   CastRegulationSubType,
   CastRegulationType,
-} from '../../../domain/context/factory/RegulationType.js';
-import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
-import { DividendFor } from '../../../domain/context/equity/DividendFor';
-import { VotingFor } from '../../../domain/context/equity/VotingFor';
-import { Kyc } from '../../../domain/context/kyc/Kyc.js';
-import { KycAccountData } from '../../../domain/context/kyc/KycAccountData.js';
+} from '@domain/context/factory/RegulationType';
+import { ScheduledBalanceAdjustment } from '@domain/context/equity/ScheduledBalanceAdjustment';
+import { DividendFor } from '@domain/context/equity/DividendFor';
+import { VotingFor } from '@domain/context/equity/VotingFor';
+import { Kyc } from '@domain/context/kyc/Kyc';
+import { KycAccountData } from '@domain/context/kyc/KycAccountData';
 import {
   CastClearingOperationType,
   ClearingHoldCreation,
   ClearingOperationType,
   ClearingRedeem,
   ClearingTransfer,
-} from '../../../domain/context/security/Clearing.js';
-import { HoldDetails } from '../../../domain/context/security/Hold.js';
+} from '@domain/context/security/Clearing';
+import { HoldDetails } from '@domain/context/security/Hold';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -1827,10 +1827,7 @@ export class RPCQueryAdapter {
   async onchainID(address: EvmAddress): Promise<string> {
     LogService.logTrace(`Getting OnchainID for security ${address.toString()}`);
 
-    return await this.connect(
-      ERC3643Facet__factory,
-      address.toString(),
-    ).onchainID();
+    return await this.connect(ERC3643__factory, address.toString()).onchainID();
   }
 
   async identityRegistry(address: EvmAddress): Promise<string> {
@@ -1839,7 +1836,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC3643Facet__factory,
+      ERC3643__factory,
       address.toString(),
     ).identityRegistry();
   }
@@ -1850,7 +1847,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC3643Facet__factory,
+      ERC3643__factory,
       address.toString(),
     ).compliance();
   }
@@ -1878,10 +1875,161 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting recovery status of ${targetId}`);
 
     const isAddressRecovered = await this.connect(
-      ERC3643Facet__factory,
+      ERC3643__factory,
       address.toString(),
     ).isAddressRecovered(targetId.toString());
 
     return isAddressRecovered;
+  }
+
+  async getTokenHoldersAtSnapshot(
+    address: EvmAddress,
+    snapshotId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting token holders at snapshot ${snapshotId} for security ${address.toString()}`,
+    );
+    return await this.connect(
+      Snapshots__factory,
+      address.toString(),
+    ).getTokenHoldersAtSnapshot(snapshotId, start, end);
+  }
+
+  async getTotalTokenHoldersAtSnapshot(
+    address: EvmAddress,
+    snapshotId: number,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting total token holders at snapshot ${snapshotId} for security ${address.toString()}`,
+    );
+
+    const total = await this.connect(
+      Snapshots__factory,
+      address.toString(),
+    ).getTotalTokenHoldersAtSnapshot(snapshotId);
+
+    return total.toNumber();
+  }
+
+  async getCouponHolders(
+    address: EvmAddress,
+    couponId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting coupon holders for coupon ${couponId} for security ${address.toString()}`,
+    );
+    return await this.connect(
+      Bond__factory,
+      address.toString(),
+    ).getCouponHolders(couponId, start, end);
+  }
+
+  async getTotalCouponHolders(
+    address: EvmAddress,
+    couponId: number,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting total coupon holders for coupon ${couponId} for security ${address.toString()}`,
+    );
+
+    const total = await this.connect(
+      Bond__factory,
+      address.toString(),
+    ).getTotalCouponHolders(couponId);
+
+    return total.toNumber();
+  }
+
+  async getDividendHolders(
+    address: EvmAddress,
+    dividendId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting dividend holders for dividend ${dividendId} for security ${address.toString()}`,
+    );
+    return await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getDividendHolders(dividendId, start, end);
+  }
+
+  async getTotalDividendHolders(
+    address: EvmAddress,
+    dividendId: number,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting total dividend holders for dividend ${dividendId} for security ${address.toString()}`,
+    );
+
+    const total = await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getTotalDividendHolders(dividendId);
+
+    return total.toNumber();
+  }
+
+  async getVotingHolders(
+    address: EvmAddress,
+    voteId: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting voting holders for vote ${voteId} for security ${address.toString()}`,
+    );
+    return await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getVotingHolders(voteId, start, end);
+  }
+
+  async getTotalVotingHolders(
+    address: EvmAddress,
+    voteId: number,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting total voting holders for vote ${voteId} for security ${address.toString()}`,
+    );
+
+    const total = await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getTotalVotingHolders(voteId);
+
+    return total.toNumber();
+  }
+
+  async getSecurityHolders(
+    address: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting security holders for security ${address.toString()}`,
+    );
+    return await this.connect(
+      Security__factory,
+      address.toString(),
+    ).getSecurityHolders(start, end);
+  }
+
+  async getTotalSecurityHolders(address: EvmAddress): Promise<number> {
+    LogService.logTrace(
+      `Getting total security holders for security ${address.toString()}`,
+    );
+
+    const total = await this.connect(
+      Security__factory,
+      address.toString(),
+    ).getTotalSecurityHolders();
+
+    return total.toNumber();
   }
 }

@@ -322,3 +322,23 @@ task('createVC', 'Prints the VC for a given issuer and holder')
         const vcString = JSON.stringify(vc)
         console.log(`The VC for the holder is: '${vcString}'`)
     })
+
+task(
+    'extract-methods',
+    'Extracts all public and external function signatures from contracts'
+).setAction(async () => {
+    try {
+        const { main } = await import('@scripts')
+        // Redirect output so it is not logged
+        const originalConsoleLog = console.log
+        console.log = () => {}
+        try {
+            main() // ! Called when importing the script directly
+        } finally {
+            console.log = originalConsoleLog
+        }
+    } catch (error) {
+        console.error('❌ An error occurred while extracting methods:')
+        console.error(error)
+    }
+})

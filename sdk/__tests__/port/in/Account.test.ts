@@ -203,15 +203,18 @@
 
 */
 
-import { Account, Network } from '../../../src/index.js';
-import { GetAccountInfoRequest } from '../../../src/port/in/request/index.js';
+import '../environmentMock';
+import Network from '@port/in/network/Network';
+
+import { GetAccountInfoRequest } from '@port/in/request/index';
 import ConnectRequest, {
   SupportedWallets,
-} from '../../../src/port/in/request/network/ConnectRequest.js';
+} from '@port/in/request/network/ConnectRequest';
 
-import { CLIENT_ACCOUNT_ECDSA, CLIENT_PUBLIC_KEY_ECDSA } from '../../config.js';
-import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
+import { CLIENT_ACCOUNT_ECDSA, CLIENT_PUBLIC_KEY_ECDSA } from '@test/config';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import Account from '@port/in/account/Account';
 
 describe('🧪 Account test', () => {
   beforeAll(async () => {

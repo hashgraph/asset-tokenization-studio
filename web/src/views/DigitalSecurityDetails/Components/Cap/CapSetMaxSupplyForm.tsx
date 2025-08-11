@@ -33,6 +33,10 @@ export const CapSetMaxSupplyForm = () => {
     securityId: string;
   }>({
     mode: "onChange",
+    defaultValues: {
+      securityId,
+      maxSupply: "",
+    },
   });
 
   const { mutate: setCapMaxSupplyMutation, isLoading } = useSetCapMaxSupply();
@@ -104,8 +108,6 @@ export const CapSetMaxSupplyForm = () => {
                   validate: { isValidHederaId: isValidHederaId },
                 }}
                 placeholder={securityId}
-                defaultValue={securityId}
-                value={securityId}
                 isDisabled
               />
             </Stack>

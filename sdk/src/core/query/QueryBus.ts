@@ -205,15 +205,15 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { injectable } from 'tsyringe';
-import { QUERY_HANDLER_METADATA, QUERY_METADATA } from '../Constants.js';
-import { QueryMetadata } from '../decorator/QueryMetadata.js';
-import Injectable from '../Injectable.js';
-import { Type } from '../Type.js';
-import { Query } from './Query.js';
-import { IQueryHandler } from './QueryHandler.js';
-import { QueryResponse } from './QueryResponse.js';
-import { QueryHandlerNotFoundException } from './error/QueryHandlerNotFoundException.js';
-import { InvalidQueryHandlerException } from './error/InvalidQueryHandlerException.js';
+import { QUERY_HANDLER_METADATA, QUERY_METADATA } from '@core/Constants';
+import { QueryMetadata } from '@core/decorator/QueryMetadata';
+import Injectable from '@core/injectable/Injectable';
+import { Type } from '@core/Type';
+import { Query } from './Query';
+import { IQueryHandler } from './QueryHandler';
+import { QueryResponse } from './QueryResponse';
+import { QueryHandlerNotFoundException } from './error/QueryHandlerNotFoundException';
+import { InvalidQueryHandlerException } from './error/InvalidQueryHandlerException';
 
 export type QueryHandlerType = IQueryHandler<Query<QueryResponse>>;
 

@@ -257,6 +257,17 @@ abstract contract SnapshotsStorageWrapper1 is
         }
     }
 
+    function _updateSnapshotAddress(
+        SnapshotsAddress storage snapshots,
+        address currentValue
+    ) internal {
+        uint256 currentId = _getCurrentSnapshotId();
+        if (_lastSnapshotId(snapshots.ids) < currentId) {
+            snapshots.ids.push(currentId);
+            snapshots.values.push(currentValue);
+        }
+    }
+
     function _updateSnapshotPartitions(
         Snapshots storage snapshots,
         PartitionSnapshots storage partitionSnapshots,
@@ -290,6 +301,15 @@ abstract contract SnapshotsStorageWrapper1 is
         (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
 
         return (found, found ? snapshots.values[index] : 0);
+    }
+
+    function _addressValueAt(
+        uint256 snapshotId,
+        SnapshotsAddress storage snapshots
+    ) internal view returns (bool, address) {
+        (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
+
+        return (found, found ? snapshots.values[index] : address(0));
     }
 
     function _indexFor(

@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedRequest from '../../../../../core/validation/ValidatedArgs';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { InvalidValue } from '../../error/InvalidValue';
 import FormatValidation from '../../FormatValidation';
-import { InvalidValue } from '../../error/InvalidValue.js';
 
 export default class UpdateExternalControlListsRequest extends ValidatedRequest<UpdateExternalControlListsRequest> {
   securityId: string;

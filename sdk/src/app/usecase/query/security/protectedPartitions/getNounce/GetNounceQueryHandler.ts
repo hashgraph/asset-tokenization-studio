@@ -203,15 +203,15 @@
 
 */
 
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { GetNounceQuery, GetNounceQueryResponse } from './GetNounceQuery.js';
-import AccountService from '../../../../../service/account/AccountService';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { GetNounceQueryError } from './error/GetNounceQueryError.js';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { GetNounceQuery, GetNounceQueryResponse } from './GetNounceQuery';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetNounceQueryError } from './error/GetNounceQueryError';
 
 @QueryHandler(GetNounceQuery)
 export class GetNounceQueryHandler implements IQueryHandler<GetNounceQuery> {

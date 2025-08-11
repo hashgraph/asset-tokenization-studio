@@ -203,6 +203,7 @@
 
 */
 
+import '../environmentMock';
 import {
   AddIssuerRequest,
   CreateEquityRequest,
@@ -216,31 +217,31 @@ import {
   RoleRequest,
   SDK,
   SetRevocationRegistryAddressRequest,
-} from '../../../src';
+} from '@port/in';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../../../src/domain/context/factory/RegulationType';
-import { MirrorNode } from '../../../src/domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay';
-import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter';
-import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter';
-import NetworkService from '../../../src/app/service/network/NetworkService';
-import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter';
-import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel';
+} from '@domain/context/factory/RegulationType';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import NetworkService from '@service/network/NetworkService';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import SecurityViewModel from '@port/in/response/SecurityViewModel';
 import {
   CLIENT_ACCOUNT_ECDSA,
   CLIENT_ACCOUNT_ECDSA_A,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
-} from '../../config';
-import Injectable from '../../../src/core/Injectable';
-import Account from '../../../src/domain/context/account/Account';
+} from '@test/config';
+import Injectable from '@core/injectable/Injectable';
+import Account from '@domain/context/account/Account';
 import { ethers, Wallet } from 'ethers';
-import SsiManagement from '../../../src/port/in/ssiManagement/SsiManagement';
-import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
+import SsiManagement from '@port/in/ssiManagement/SsiManagement';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -288,11 +289,6 @@ describe('🧪 SSI Management tests', () => {
   const url = 'http://127.0.0.1:7546';
   const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
-  const wallet = new Wallet(
-    CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-    customHttpProvider,
-  );
-
   beforeAll(async () => {
     try {
       mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
@@ -321,7 +317,12 @@ describe('🧪 SSI Management tests', () => {
       });
       await th.register(account, true);
 
-      th.signerOrProvider = wallet;
+      th.setSignerOrProvider(
+        new Wallet(
+          CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
+          customHttpProvider,
+        ),
+      );
 
       const requestST = new CreateEquityRequest({
         name,

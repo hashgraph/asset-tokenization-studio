@@ -203,19 +203,19 @@
 
 */
 
-import Injectable from '../../../core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { createMock } from '@golevelup/ts-jest';
-import { MirrorNodeAdapter } from '../../../port/out/mirror/MirrorNodeAdapter';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import TransactionService from './TransactionService';
-import { SetCouponCommandHandler } from '../../usecase/command/bond/coupon/set/SetCouponCommandHandler';
-import TransactionResponse from '../../../domain/context/transaction/TransactionResponse';
+import { SetCouponCommandHandler } from '@command/bond/coupon/set/SetCouponCommandHandler';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
 import { EmptyResponse } from './error/EmptyResponse';
-import { TransactionResponseFixture } from '../../../../__tests__/fixtures/shared/DataFixture';
-import { InvalidResponse } from '../../../core/error/InvalidResponse';
+import { TransactionResponseFixture } from '@test/fixtures/shared/DataFixture';
+import { InvalidResponse } from '@core/error/InvalidResponse';
 import { faker } from '@faker-js/faker/.';
-import { CreateEquityCommandHandler } from '../../usecase/command/equity/create/CreateEquityCommandHandler';
-import { CreateBondCommandHandler } from '../../usecase/command/bond/create/CreateBondCommandHandler';
-import { ADDRESS_LENGTH, BYTES_32_LENGTH } from '../../../core/Constants';
+import { CreateEquityCommandHandler } from '@command/equity/create/CreateEquityCommandHandler';
+import { CreateBondCommandHandler } from '@command/bond/create/CreateBondCommandHandler';
+import { ADDRESS_LENGTH, BYTES_32_LENGTH } from '@core/Constants';
 
 describe('TransactioNService', () => {
   let service: TransactionService;

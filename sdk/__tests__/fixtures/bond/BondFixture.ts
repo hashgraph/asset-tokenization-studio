@@ -203,42 +203,49 @@
 
 */
 
-import { CreateBondCommand } from '../../../src/app/usecase/command/bond/create/CreateBondCommand';
-import { SetCouponCommand } from '../../../src/app/usecase/command/bond/coupon/set/SetCouponCommand';
+import { CreateBondCommand } from '@command/bond/create/CreateBondCommand';
+import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
 import { createFixture } from '../config';
-import ContractId from '../../../src/domain/context/contract/ContractId';
+import ContractId from '@domain/context/contract/ContractId';
 import {
   ContractIdPropFixture,
   HederaIdPropsFixture,
+  PartitionIdFixture,
 } from '../shared/DataFixture';
 import { SecurityPropsFixture } from '../shared/SecurityFixture';
-import { UpdateMaturityDateCommand } from '../../../src/app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand';
-import { BondDetails } from '../../../src/domain/context/bond/BondDetails';
-import { GetCouponQuery } from '../../../src/app/usecase/query/bond/coupons/getCoupon/GetCouponQuery';
-import { GetCouponCountQuery } from '../../../src/app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQuery';
-import { GetCouponForQuery } from '../../../src/app/usecase/query/bond/coupons/getCouponFor/GetCouponForQuery';
-import { GetCouponDetailsQuery } from '../../../src/app/usecase/query/bond/get/getCouponDetails/GetCouponDetailsQuery';
-import { GetBondDetailsQuery } from '../../../src/app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
-import CreateBondRequest from '../../../src/port/in/request/bond/CreateBondRequest';
+import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
+import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
+import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetCouponDetailsQuery } from '@query/bond/get/getCouponDetails/GetCouponDetailsQuery';
+import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
+import { HederaId } from '@domain/context/shared/HederaId';
+import CreateBondRequest from '@port/in/request/bond/CreateBondRequest';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../../../src/domain/context/factory/RegulationType';
+} from '@domain/context/factory/RegulationType';
 import { faker } from '@faker-js/faker/.';
-import GetBondDetailsRequest from '../../../src/port/in/request/bond/GetBondDetailsRequest';
-import SetCouponRequest from '../../../src/port/in/request/bond/SetCouponRequest';
-import GetCouponDetailsRequest from '../../../src/port/in/request/bond/GetCouponDetailsRequest';
-import GetCouponForRequest from '../../../src/port/in/request/bond/GetCouponForRequest';
-import GetCouponRequest from '../../../src/port/in/request/bond/GetCouponRequest';
-import GetAllCouponsRequest from '../../../src/port/in/request/bond/GetAllCouponsRequest';
-import UpdateMaturityDateRequest from '../../../src/port/in/request/bond/UpdateMaturityDateRequest';
-import { CouponDetails } from '../../../src/domain/context/bond/CouponDetails';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
+import GetBondDetailsRequest from '@port/in/request/bond/GetBondDetailsRequest';
+import SetCouponRequest from '@port/in/request/bond/SetCouponRequest';
+import GetCouponDetailsRequest from '@port/in/request/bond/GetCouponDetailsRequest';
+import GetCouponForRequest from '@port/in/request/bond/GetCouponForRequest';
+import GetCouponRequest from '@port/in/request/bond/GetCouponRequest';
+import GetAllCouponsRequest from '@port/in/request/bond/GetAllCouponsRequest';
+import UpdateMaturityDateRequest from '@port/in/request/bond/UpdateMaturityDateRequest';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
-import { Coupon } from '../../../src/domain/context/bond/Coupon';
+import { Coupon } from '@domain/context/bond/Coupon';
+import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
+import RedeemAtMaturityByPartitionRequest from '@port/in/request/bond/RedeemAtMaturityByPartitionRequest';
+import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
+import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
+import GetCouponHoldersRequest from '@port/in/request/bond/GetCouponHoldersRequest';
+import GetTotalCouponHoldersRequest from '@port/in/request/bond/GetTotalCouponHoldersRequest';
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   (command) => {
@@ -305,6 +312,16 @@ export const UpdateMaturityDateCommandFixture =
     command.securityId.as(() => HederaIdPropsFixture.create().value);
   });
 
+export const RedeemAtMaturityByPartitionCommandFixture =
+  createFixture<RedeemAtMaturityByPartitionCommand>((command) => {
+    command.amount.faker((faker) =>
+      faker.number.int({ min: 1, max: 1000 }).toString(),
+    );
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+    command.partitionId.as(() => PartitionIdFixture.create().value);
+  });
+
 export const BondDetailsFixture = createFixture<BondDetails>((props) => {
   props.currency.faker((faker) => faker.finance.currencyCode());
   props.nominalValue.faker((faker) =>
@@ -344,6 +361,20 @@ export const GetCouponDetailsQueryFixture =
     query.bondId.as(() => new HederaId(HederaIdPropsFixture.create().value));
   });
 
+export const GetCouponHoldersQueryFixture =
+  createFixture<GetCouponHoldersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetTotalCouponHoldersQueryFixture =
+  createFixture<GetTotalCouponHoldersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
 export const CouponDetailsFixture = createFixture<CouponDetails>((props) => {
   props.couponFrequency.faker((faker) => faker.number.int({ min: 1, max: 5 }));
   props.couponRate.faker(
@@ -365,6 +396,20 @@ export const CouponFixture = createFixture<Coupon>((props) => {
       new BigDecimal(BigNumber.from(faker.number.int({ min: 1, max: 5 }))),
   );
 });
+
+export const GetCouponHoldersRequestFixture =
+  createFixture<GetCouponHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    request.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetTotalCouponHoldersRequestFixture =
+  createFixture<GetTotalCouponHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
 
 export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
   (request) => {
@@ -514,4 +559,14 @@ export const UpdateMaturityDateRequestFixture =
     request.maturityDate.faker((faker) =>
       faker.date.future().getTime().toString(),
     );
+  });
+
+export const RedeemAtMaturityByPartitionRequestFixture =
+  createFixture<RedeemAtMaturityByPartitionRequest>((request) => {
+    request.amount.faker((faker) =>
+      faker.number.int({ min: 1, max: 1000 }).toString(),
+    );
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.sourceId.as(() => HederaIdPropsFixture.create().value);
+    request.partitionId.as(() => PartitionIdFixture.create().value);
   });

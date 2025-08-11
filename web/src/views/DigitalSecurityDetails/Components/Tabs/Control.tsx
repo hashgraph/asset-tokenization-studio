@@ -9,6 +9,7 @@ import { ExternalPause } from "../ExternalPause/ExternalPause";
 import { ExternalControl } from "../ExternalControl/ExternalControl";
 import { ExternalKYC } from "../ExternalKYC/ExternalKYC";
 import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
+import { AdminControlActionsButtons } from "../AdminControlActionsButtons";
 
 interface ControlTabProps {
   details: SecurityViewModel;
@@ -57,7 +58,8 @@ export const ControlTab = ({ details, config }: ControlTabProps) => {
 
   return (
     <Box w={"full"} h={"full"}>
-      <PanelTabs tabs={tabs} />
+      <AdminControlActionsButtons />
+      <Tabs tabs={tabs} variant="secondary" isLazy />
     </Box>
   );
 };

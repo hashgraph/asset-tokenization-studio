@@ -203,60 +203,68 @@
 
 */
 
-import CreateEquityRequest from '../../../src/port/in/request/equity/CreateEquityRequest';
+import CreateEquityRequest from '@port/in/request/equity/CreateEquityRequest';
 import { createFixture } from '../config';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../../../src/domain/context/factory/RegulationType';
+} from '@domain/context/factory/RegulationType';
 import {
   ContractIdPropFixture,
   HederaIdPropsFixture,
 } from '../shared/DataFixture';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
-import { GetScheduledBalanceAdjustmentQuery } from '../../../src/app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery';
+import { HederaId } from '@domain/context/shared/HederaId';
+import { GetScheduledBalanceAdjustmentQuery } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery';
 import { faker } from '@faker-js/faker/.';
-import GetEquityDetailsRequest from '../../../src/port/in/request/equity/GetEquityDetailsRequest';
-import SetDividendsRequest from '../../../src/port/in/request/equity/SetDividendsRequest';
-import GetDividendsForRequest from '../../../src/port/in/request/equity/GetDividendsForRequest';
-import GetDividendsRequest from '../../../src/port/in/request/equity/GetDividendsRequest';
-import GetAllDividendsRequest from '../../../src/port/in/request/equity/GetAllDividendsRequest';
-import SetVotingRightsRequest from '../../../src/port/in/request/equity/SetVotingRightsRequest';
-import GetVotingRightsForRequest from '../../../src/port/in/request/equity/GetVotingRightsForRequest';
-import GetVotingRightsRequest from '../../../src/port/in/request/equity/GetVotingRightsRequest';
-import GetAllVotingRightsRequest from '../../../src/port/in/request/equity/GetAllVotingRightsRequest';
-import SetScheduledBalanceAdjustmentRequest from '../../../src/port/in/request/equity/SetScheduledBalanceAdjustmentRequest';
-import GetScheduledBalanceAdjustmentCountRequest from '../../../src/port/in/request/equity/GetScheduledBalanceAdjustmentsCountRequest';
-import GetScheduledBalanceAdjustmentRequest from '../../../src/port/in/request/equity/GetScheduledBalanceAdjustmentRequest';
-import GetAllScheduledBalanceAdjustmentsRequest from '../../../src/port/in/request/equity/GetAllScheduledBalanceAdjustmentst';
-import { ScheduledBalanceAdjustment } from '../../../src/domain/context/equity/ScheduledBalanceAdjustment';
-import { GetScheduledBalanceAdjustmentCountQuery } from '../../../src/app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
-import { Dividend } from '../../../src/domain/context/equity/Dividend';
-import { GetDividendsCountQuery } from '../../../src/app/usecase/query/equity/dividends/getDividendsCount/GetDividendsCountQuery';
-import { GetDividendsQuery } from '../../../src/app/usecase/query/equity/dividends/getDividends/GetDividendsQuery';
-import { GetDividendsForQuery } from '../../../src/app/usecase/query/equity/dividends/getDividendsFor/GetDividendsForQuery';
-import { DividendFor } from '../../../src/domain/context/equity/DividendFor';
-import { GetEquityDetailsQuery } from '../../../src/app/usecase/query/equity/get/getEquityDetails/GetEquityDetailsQuery';
-import { EquityDetails } from '../../../src/domain/context/equity/EquityDetails';
-import { GetVotingQuery } from '../../../src/app/usecase/query/equity/votingRights/getVoting/GetVotingQuery';
-import { GetVotingCountQuery } from '../../../src/app/usecase/query/equity/votingRights/getVotingCount/GetVotingCountQuery';
-import { GetVotingForQuery } from '../../../src/app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery';
+import GetEquityDetailsRequest from '@port/in/request/equity/GetEquityDetailsRequest';
+import SetDividendsRequest from '@port/in/request/equity/SetDividendsRequest';
+import GetDividendsForRequest from '@port/in/request/equity/GetDividendsForRequest';
+import GetDividendsRequest from '@port/in/request/equity/GetDividendsRequest';
+import GetAllDividendsRequest from '@port/in/request/equity/GetAllDividendsRequest';
+import SetVotingRightsRequest from '@port/in/request/equity/SetVotingRightsRequest';
+import GetVotingRightsForRequest from '@port/in/request/equity/GetVotingRightsForRequest';
+import GetVotingRightsRequest from '@port/in/request/equity/GetVotingRightsRequest';
+import GetAllVotingRightsRequest from '@port/in/request/equity/GetAllVotingRightsRequest';
+import SetScheduledBalanceAdjustmentRequest from '@port/in/request/equity/SetScheduledBalanceAdjustmentRequest';
+import GetScheduledBalanceAdjustmentCountRequest from '@port/in/request/equity/GetScheduledBalanceAdjustmentsCountRequest';
+import GetScheduledBalanceAdjustmentRequest from '@port/in/request/equity/GetScheduledBalanceAdjustmentRequest';
+import GetAllScheduledBalanceAdjustmentsRequest from '@port/in/request/equity/GetAllScheduledBalanceAdjustmentst';
+import { ScheduledBalanceAdjustment } from '@domain/context/equity/ScheduledBalanceAdjustment';
+import { GetScheduledBalanceAdjustmentCountQuery } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
+import { Dividend } from '@domain/context/equity/Dividend';
+import { GetDividendsCountQuery } from '@query/equity/dividends/getDividendsCount/GetDividendsCountQuery';
+import { GetDividendsQuery } from '@query/equity/dividends/getDividends/GetDividendsQuery';
+import { GetDividendsForQuery } from '@query/equity/dividends/getDividendsFor/GetDividendsForQuery';
+import { DividendFor } from '@domain/context/equity/DividendFor';
+import { GetEquityDetailsQuery } from '@query/equity/get/getEquityDetails/GetEquityDetailsQuery';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import { GetVotingQuery } from '@query/equity/votingRights/getVoting/GetVotingQuery';
+import { GetVotingCountQuery } from '@query/equity/votingRights/getVotingCount/GetVotingCountQuery';
+import { GetVotingForQuery } from '@query/equity/votingRights/getVotingFor/GetVotingForQuery';
 import {
   CastDividendType,
   DividendType,
-} from '../../../src/domain/context/equity/DividendType';
-import { VotingFor } from '../../../src/domain/context/equity/VotingFor';
-import { VotingRights } from '../../../src/domain/context/equity/VotingRights';
-import { GetRegulationDetailsQuery } from '../../../src/app/usecase/query/factory/get/GetRegulationDetailsQuery';
-import { GetConfigInfoQuery } from '../../../src/app/usecase/query/management/GetConfigInfoQuery';
-import { SetScheduledBalanceAdjustmentCommand } from '../../../src/app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand';
-import { SetDividendsCommand } from '../../../src/app/usecase/command/equity/dividends/set/SetDividendsCommand';
-import { SetVotingRightsCommand } from '../../../src/app/usecase/command/equity/votingRights/set/SetVotingRightsCommand';
-import { CreateEquityCommand } from '../../../src/app/usecase/command/equity/create/CreateEquityCommand';
+} from '@domain/context/equity/DividendType';
+import { VotingFor } from '@domain/context/equity/VotingFor';
+import { VotingRights } from '@domain/context/equity/VotingRights';
+import { GetRegulationDetailsQuery } from '@query/factory/get/GetRegulationDetailsQuery';
+import { GetConfigInfoQuery } from '@query/management/GetConfigInfoQuery';
+import { SetScheduledBalanceAdjustmentCommand } from '@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand';
+import { CreateEquityCommand } from '@command/equity/create/CreateEquityCommand';
+import { SetDividendsCommand } from '@command/equity/dividends/set/SetDividendsCommand';
+import { SetVotingRightsCommand } from '@command/equity/votingRights/set/SetVotingRightsCommand';
+import ContractId from '@domain/context/contract/ContractId';
 import { SecurityPropsFixture } from '../shared/SecurityFixture';
-import ContractId from '../../../src/domain/context/contract/ContractId';
+import { GetDividendHoldersQuery } from '@query/equity/dividends/getDividendHolders/GetDividendHoldersQuery';
+import { GetTotalDividendHoldersQuery } from '@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQuery';
+import { GetVotingHoldersQuery } from '@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery';
+import { GetTotalVotingHoldersQuery } from '@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery';
+import GetDividendHoldersRequest from '@port/in/request/equity/GetDividendHoldersRequest';
+import GetTotalDividendHoldersRequest from '@port/in/request/equity/GetTotalDividendHoldersRequest';
+import GetVotingHoldersRequest from '@port/in/request/equity/GetVotingHoldersRequest';
+import GetTotalVotingHoldersRequest from '@port/in/request/equity/GetTotalVotingHoldersRequest';
 
 export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
   (request) => {
@@ -440,6 +448,34 @@ export const GetAllScheduledBalanceAdjustmentsRequestFixture =
     request.securityId.as(() => HederaIdPropsFixture.create().value);
   });
 
+export const GetDividendHoldersRequestFixture =
+  createFixture<GetDividendHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    request.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetTotalDividendHoldersRequestFixture =
+  createFixture<GetTotalDividendHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const GetVotingHoldersRequestFixture =
+  createFixture<GetVotingHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.voteId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    request.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetTotalVotingHoldersRequestFixture =
+  createFixture<GetTotalVotingHoldersRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.voteId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
 export const GetScheduledBalanceAdjustmentQueryFixture =
   createFixture<GetScheduledBalanceAdjustmentQuery>((query) => {
     query.securityId.as(
@@ -525,6 +561,34 @@ export const GetConfigInfoQueryFixture = createFixture<GetConfigInfoQuery>(
     );
   },
 );
+
+export const GetDividendHoldersQueryFixture =
+  createFixture<GetDividendHoldersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetTotalDividendHoldersQueryFixture =
+  createFixture<GetTotalDividendHoldersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
+
+export const GetVotingHoldersQueryFixture =
+  createFixture<GetVotingHoldersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.voteId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    query.start.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+    query.end.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetTotalVotingHoldersQueryFixture =
+  createFixture<GetTotalVotingHoldersQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.voteId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  });
 
 export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
   (command) => {

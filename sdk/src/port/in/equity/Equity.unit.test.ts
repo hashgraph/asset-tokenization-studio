@@ -204,7 +204,7 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   CreateEquityRequest,
   GetEquityDetailsRequest,
@@ -220,25 +220,29 @@ import {
   GetScheduledBalanceAdjustmentCountRequest,
   GetScheduledBalanceAdjustmentRequest,
   GetAllScheduledBalanceAdjustmentsRequest,
+  GetDividendHoldersRequest,
+  GetTotalDividendHoldersRequest,
+  GetVotingHoldersRequest,
+  GetTotalVotingHoldersRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
-import NetworkService from '../../../app/service/network/NetworkService';
-import { SecurityPropsFixture } from '../../../../__tests__/fixtures/shared/SecurityFixture';
-import { Security } from '../../../domain/context/security/Security';
-import ContractId from '../../../domain/context/contract/ContractId';
+} from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import NetworkService from '@service/network/NetworkService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import ContractId from '@domain/context/contract/ContractId';
 import {
   CastRegulationSubType,
   CastRegulationType,
-} from '../../../domain/context/factory/RegulationType';
-import BigDecimal from '../../../domain/context/shared/BigDecimal';
-import { ONE_THOUSAND } from '../../../domain/context/shared/SecurityDate';
+} from '@domain/context/factory/RegulationType';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
 import { BigNumber } from 'ethers';
 import EquityToken from './Equity';
 import {
@@ -248,11 +252,15 @@ import {
   GetAllDividendsRequestFixture,
   GetAllScheduledBalanceAdjustmentsRequestFixture,
   GetAllVotingRightsRequestFixture,
+  GetDividendHoldersRequestFixture,
   GetDividendsForRequestFixture,
   GetDividendsRequestFixture,
   GetEquityDetailsRequestFixture,
   GetScheduledBalanceAdjustmentCountRequestFixture,
   GetScheduledBalanceAdjustmentRequestFixture,
+  GetTotalDividendHoldersRequestFixture,
+  GetTotalVotingHoldersRequestFixture,
+  GetVotingHoldersRequestFixture,
   GetVotingRightsForRequestFixture,
   GetVotingRightsRequestFixture,
   ScheduledBalanceAdjustmentFixture,
@@ -260,21 +268,25 @@ import {
   SetScheduledBalanceAdjustmentRequestFixture,
   SetVotingRightsRequestFixture,
   VotingRightsFixture,
-} from '../../../../__tests__/fixtures/equity/EquityFixture';
-import { CreateEquityCommand } from '../../../app/usecase/command/equity/create/CreateEquityCommand';
-import { CastDividendType } from '../../../domain/context/equity/DividendType';
-import { GetEquityDetailsQuery } from '../../../app/usecase/query/equity/get/getEquityDetails/GetEquityDetailsQuery';
-import { SetVotingRightsCommand } from '../../../app/usecase/command/equity/votingRights/set/SetVotingRightsCommand';
-import { GetVotingForQuery } from '../../../app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery';
-import { GetVotingQuery } from '../../../app/usecase/query/equity/votingRights/getVoting/GetVotingQuery';
-import { GetVotingCountQuery } from '../../../app/usecase/query/equity/votingRights/getVotingCount/GetVotingCountQuery';
-import { SetDividendsCommand } from '../../../app/usecase/command/equity/dividends/set/SetDividendsCommand';
-import { GetDividendsForQuery } from '../../../app/usecase/query/equity/dividends/getDividendsFor/GetDividendsForQuery';
-import { GetDividendsQuery } from '../../../app/usecase/query/equity/dividends/getDividends/GetDividendsQuery';
-import { GetDividendsCountQuery } from '../../../app/usecase/query/equity/dividends/getDividendsCount/GetDividendsCountQuery';
-import { SetScheduledBalanceAdjustmentCommand } from '../../../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand';
-import { GetScheduledBalanceAdjustmentQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery';
-import { GetScheduledBalanceAdjustmentCountQuery } from '../../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
+} from '@test/fixtures/equity/EquityFixture';
+import { CreateEquityCommand } from '@command/equity/create/CreateEquityCommand';
+import { CastDividendType } from '@domain/context/equity/DividendType';
+import { GetEquityDetailsQuery } from '@query/equity/get/getEquityDetails/GetEquityDetailsQuery';
+import { SetVotingRightsCommand } from '@command/equity/votingRights/set/SetVotingRightsCommand';
+import { GetVotingForQuery } from '@query/equity/votingRights/getVotingFor/GetVotingForQuery';
+import { GetVotingQuery } from '@query/equity/votingRights/getVoting/GetVotingQuery';
+import { GetVotingCountQuery } from '@query/equity/votingRights/getVotingCount/GetVotingCountQuery';
+import { SetDividendsCommand } from '@command/equity/dividends/set/SetDividendsCommand';
+import { GetDividendsForQuery } from '@query/equity/dividends/getDividendsFor/GetDividendsForQuery';
+import { GetDividendsQuery } from '@query/equity/dividends/getDividends/GetDividendsQuery';
+import { GetDividendsCountQuery } from '@query/equity/dividends/getDividendsCount/GetDividendsCountQuery';
+import { SetScheduledBalanceAdjustmentCommand } from '@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand';
+import { GetScheduledBalanceAdjustmentQuery } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery';
+import { GetScheduledBalanceAdjustmentCountQuery } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
+import { GetDividendHoldersQuery } from '@query/equity/dividends/getDividendHolders/GetDividendHoldersQuery';
+import { GetTotalDividendHoldersQuery } from '@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQuery';
+import { GetVotingHoldersQuery } from '@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery';
+import { GetTotalVotingHoldersQuery } from '@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery';
 
 describe('Equity', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -295,6 +307,10 @@ describe('Equity', () => {
   let getScheduledBalanceAdjustmentCountRequest: GetScheduledBalanceAdjustmentCountRequest;
   let getScheduledBalanceAdjustmentRequest: GetScheduledBalanceAdjustmentRequest;
   let getAllScheduledBalanceAdjustmentsRequest: GetAllScheduledBalanceAdjustmentsRequest;
+  let getDividendHoldersRequest: GetDividendHoldersRequest;
+  let getTotalDividendHoldersRequest: GetTotalDividendHoldersRequest;
+  let getVotingHoldersRequest: GetVotingHoldersRequest;
+  let getTotalVotingHoldersRequest: GetTotalVotingHoldersRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -1855,6 +1871,366 @@ describe('Equity', () => {
           getAllScheduledBalanceAdjustmentsRequest.securityId,
         ),
       );
+    });
+  });
+
+  describe('getDividendHolders', () => {
+    getDividendHoldersRequest = new GetDividendHoldersRequest(
+      GetDividendHoldersRequestFixture.create(),
+    );
+    it('should get dividend token holders successfully', async () => {
+      const expectedResponse = {
+        payload: [transactionId],
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await EquityToken.getDividendHolders(
+        getDividendHoldersRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetDividendHoldersRequest.name,
+        getDividendHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetDividendHoldersQuery(
+          getDividendHoldersRequest.securityId,
+          getDividendHoldersRequest.dividendId,
+          getDividendHoldersRequest.start,
+          getDividendHoldersRequest.end,
+        ),
+      );
+      expect(result).toStrictEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        EquityToken.getDividendHolders(getDividendHoldersRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetDividendHoldersRequest.name,
+        getDividendHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetDividendHoldersQuery(
+          getDividendHoldersRequest.securityId,
+          getDividendHoldersRequest.dividendId,
+          getDividendHoldersRequest.start,
+          getDividendHoldersRequest.end,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getDividendHoldersRequest = new GetDividendHoldersRequest({
+        ...GetDividendHoldersRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        EquityToken.getDividendHolders(getDividendHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if dividendId is invalid', async () => {
+      getDividendHoldersRequest = new GetDividendHoldersRequest({
+        ...GetDividendHoldersRequestFixture.create(),
+        dividendId: -1,
+      });
+
+      await expect(
+        EquityToken.getDividendHolders(getDividendHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if start is invalid', async () => {
+      getDividendHoldersRequest = new GetDividendHoldersRequest({
+        ...GetDividendHoldersRequestFixture.create(),
+        start: -1,
+      });
+
+      await expect(
+        EquityToken.getDividendHolders(getDividendHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if end is invalid', async () => {
+      getDividendHoldersRequest = new GetDividendHoldersRequest({
+        ...GetDividendHoldersRequestFixture.create(),
+        end: -1,
+      });
+
+      await expect(
+        EquityToken.getDividendHolders(getDividendHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getTotalDividendHolders', () => {
+    getTotalDividendHoldersRequest = new GetTotalDividendHoldersRequest(
+      GetTotalDividendHoldersRequestFixture.create(),
+    );
+    it('should get total dividend holders successfully', async () => {
+      const expectedResponse = {
+        payload: 1,
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await EquityToken.getTotalDividendHolders(
+        getTotalDividendHoldersRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetTotalDividendHoldersRequest.name,
+        getTotalDividendHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetTotalDividendHoldersQuery(
+          getTotalDividendHoldersRequest.securityId,
+          getTotalDividendHoldersRequest.dividendId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetTotalDividendHoldersRequest.name,
+        getTotalDividendHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetTotalDividendHoldersQuery(
+          getTotalDividendHoldersRequest.securityId,
+          getTotalDividendHoldersRequest.dividendId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getTotalDividendHoldersRequest = new GetTotalDividendHoldersRequest({
+        ...GetTotalDividendHoldersRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if dividendId is invalid', async () => {
+      getTotalDividendHoldersRequest = new GetTotalDividendHoldersRequest({
+        ...GetTotalDividendHoldersRequestFixture.create(),
+        dividendId: -1,
+      });
+
+      await expect(
+        EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getVotingHolders', () => {
+    getVotingHoldersRequest = new GetVotingHoldersRequest(
+      GetVotingHoldersRequestFixture.create(),
+    );
+    it('should get voting token holders successfully', async () => {
+      const expectedResponse = {
+        payload: [transactionId],
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await EquityToken.getVotingHolders(
+        getVotingHoldersRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetVotingHoldersRequest.name,
+        getVotingHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetVotingHoldersQuery(
+          getVotingHoldersRequest.securityId,
+          getVotingHoldersRequest.voteId,
+          getVotingHoldersRequest.start,
+          getVotingHoldersRequest.end,
+        ),
+      );
+      expect(result).toStrictEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        EquityToken.getVotingHolders(getVotingHoldersRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetVotingHoldersRequest.name,
+        getVotingHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetVotingHoldersQuery(
+          getVotingHoldersRequest.securityId,
+          getVotingHoldersRequest.voteId,
+          getVotingHoldersRequest.start,
+          getVotingHoldersRequest.end,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getVotingHoldersRequest = new GetVotingHoldersRequest({
+        ...GetVotingHoldersRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        EquityToken.getVotingHolders(getVotingHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if voteId is invalid', async () => {
+      getVotingHoldersRequest = new GetVotingHoldersRequest({
+        ...GetVotingHoldersRequestFixture.create(),
+        voteId: -1,
+      });
+
+      await expect(
+        EquityToken.getVotingHolders(getVotingHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if start is invalid', async () => {
+      getVotingHoldersRequest = new GetVotingHoldersRequest({
+        ...GetVotingHoldersRequestFixture.create(),
+        start: -1,
+      });
+
+      await expect(
+        EquityToken.getVotingHolders(getVotingHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if end is invalid', async () => {
+      getVotingHoldersRequest = new GetVotingHoldersRequest({
+        ...GetVotingHoldersRequestFixture.create(),
+        end: -1,
+      });
+
+      await expect(
+        EquityToken.getVotingHolders(getVotingHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getTotalVotingHolders', () => {
+    getTotalVotingHoldersRequest = new GetTotalVotingHoldersRequest(
+      GetTotalVotingHoldersRequestFixture.create(),
+    );
+    it('should get total voting holders successfully', async () => {
+      const expectedResponse = {
+        payload: 1,
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await EquityToken.getTotalVotingHolders(
+        getTotalVotingHoldersRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetTotalVotingHoldersRequest.name,
+        getTotalVotingHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetTotalVotingHoldersQuery(
+          getTotalVotingHoldersRequest.securityId,
+          getTotalVotingHoldersRequest.voteId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        EquityToken.getTotalVotingHolders(getTotalVotingHoldersRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetTotalVotingHoldersRequest.name,
+        getTotalVotingHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetTotalVotingHoldersQuery(
+          getTotalVotingHoldersRequest.securityId,
+          getTotalVotingHoldersRequest.voteId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getTotalVotingHoldersRequest = new GetTotalVotingHoldersRequest({
+        ...GetTotalVotingHoldersRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        EquityToken.getTotalVotingHolders(getTotalVotingHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if voteId is invalid', async () => {
+      getTotalVotingHoldersRequest = new GetTotalVotingHoldersRequest({
+        ...GetTotalVotingHoldersRequestFixture.create(),
+        voteId: -1,
+      });
+
+      await expect(
+        EquityToken.getTotalVotingHolders(getTotalVotingHoldersRequest),
+      ).rejects.toThrow(ValidationError);
     });
   });
 });

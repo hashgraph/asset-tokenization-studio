@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export class AccountNotKycd extends BaseError {
   constructor(account: string, kycStatus: number) {

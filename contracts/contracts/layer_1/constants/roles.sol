@@ -281,3 +281,6 @@ bytes32 constant _AGENT_ROLE = 0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138
 
 // keccak256('security.token.standard.role.trex.owner');
 bytes32 constant _TREX_OWNER_ROLE = 0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f910aa17b627f801a6aafab7;
+
+// keccak256('security.token.standard.role.maturity.redeemer');
+bytes32 constant _MATURITY_REDEEMER_ROLE = 0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c;

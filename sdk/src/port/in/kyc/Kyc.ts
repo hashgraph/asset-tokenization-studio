@@ -204,34 +204,34 @@
   */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import Injectable from '../../../core/Injectable.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import GrantKycRequest from '../request/security/kyc/GrantKycRequest.js';
-import RevokeKycRequest from '../request/security/kyc/RevokeKycRequest.js';
-import GetKycAccountsCountRequest from '../request/security/kyc/GetKycAccountsCountRequest.js';
-import GetKycForRequest from '../request/security/kyc/GetKycForRequest.js';
-import { GrantKycCommand } from '../../../app/usecase/command/security/kyc/grantKyc/GrantKycCommand.js';
-import { RevokeKycCommand } from '../../../app/usecase/command/security/kyc/revokeKyc/RevokeKycCommand.js';
-import { GetKycForQuery } from '../../../app/usecase/query/security/kyc/getKycFor/GetKycForQuery.js';
-import { GetKycAccountsCountQuery } from '../../../app/usecase/query/security/kyc/getKycAccountsCount/GetKycAccountsCountQuery.js';
-import { GetKycAccountsDataQuery } from '../../../app/usecase/query/security/kyc/getKycAccountsData/GetKycAccountsDataQuery.js';
-import KycViewModel from '../response/KycViewModel.js';
-import KycAccountDataViewModel from '../response/KycAccountDataViewModel.js';
-import GetKycAccountsDataRequest from '../request/security/kyc/GetKycAccountsDataRequest.js';
-import GetKycStatusForRequest from '../request/security/kyc/GetKycStatusForRequest.js';
-import { GetKycStatusForQuery } from '../../../app/usecase/query/security/kyc/getKycStatusFor/GetKycStatusForQuery.js';
+import { QueryBus } from '@core/query/QueryBus';
+import Injectable from '@core/injectable/Injectable';
+import { CommandBus } from '@core/command/CommandBus';
+import GrantKycRequest from '../request/security/kyc/GrantKycRequest';
+import RevokeKycRequest from '../request/security/kyc/RevokeKycRequest';
+import GetKycAccountsCountRequest from '../request/security/kyc/GetKycAccountsCountRequest';
+import GetKycForRequest from '../request/security/kyc/GetKycForRequest';
+import { GrantKycCommand } from '@command/security/kyc/grantKyc/GrantKycCommand';
+import { RevokeKycCommand } from '@command/security/kyc/revokeKyc/RevokeKycCommand';
+import { GetKycForQuery } from '@query/security/kyc/getKycFor/GetKycForQuery';
+import { GetKycAccountsCountQuery } from '@query/security/kyc/getKycAccountsCount/GetKycAccountsCountQuery';
+import { GetKycAccountsDataQuery } from '@query/security/kyc/getKycAccountsData/GetKycAccountsDataQuery';
+import KycViewModel from '../response/KycViewModel';
+import KycAccountDataViewModel from '../response/KycAccountDataViewModel';
+import GetKycAccountsDataRequest from '../request/security/kyc/GetKycAccountsDataRequest';
+import GetKycStatusForRequest from '../request/security/kyc/GetKycStatusForRequest';
+import { GetKycStatusForQuery } from '@query/security/kyc/getKycStatusFor/GetKycStatusForQuery';
 import {
   ActivateInternalKycRequest,
   DeactivateInternalKycRequest,
   IsInternalKycActivatedRequest,
-} from '../request/index.js';
-import { ActivateInternalKycCommand } from '../../../app/usecase/command/security/kyc/activateInternalKyc/ActivateInternalKycCommand.js';
-import { DeactivateInternalKycCommand } from '../../../app/usecase/command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommand.js';
-import { IsInternalKycActivatedQuery } from '../../../app/usecase/query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery.js';
+} from '../request/index';
+import { ActivateInternalKycCommand } from '@command/security/kyc/activateInternalKyc/ActivateInternalKycCommand';
+import { DeactivateInternalKycCommand } from '@command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommand';
+import { IsInternalKycActivatedQuery } from '@query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
 
 interface IKycInPort {
   grantKyc(

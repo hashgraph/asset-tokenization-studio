@@ -203,6 +203,7 @@
 
 */
 
+import '../environmentMock';
 import {
   SDK,
   LoggerTransports,
@@ -211,23 +212,23 @@ import {
   Network,
   Bond,
   InitializationRequest,
-} from '../../../src/index.js';
+} from '@port/in';
 import {
   FACTORY_ADDRESS,
   FIREBLOCKS_SETTINGS,
   RESOLVER_ADDRESS,
-} from '../../config.js';
-import ConnectRequest from '../../../src/port/in/request/network/ConnectRequest.js';
-import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
-import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
-import Injectable from '../../../src/core/Injectable.js';
+} from '@test/config';
+import ConnectRequest from '@port/in/request/network/ConnectRequest';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import SecurityViewModel from '@port/in/response/SecurityViewModel';
+import Injectable from '@core/injectable/Injectable';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../../../src/domain/context/factory/RegulationType.js';
+} from '@domain/context/factory/RegulationType';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 

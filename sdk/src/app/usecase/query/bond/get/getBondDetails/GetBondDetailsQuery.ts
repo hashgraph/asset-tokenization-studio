@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import { BondDetails } from '../../../../../../domain/context/bond/BondDetails.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
+import { BondDetails } from '@domain/context/bond/BondDetails';
 
 export class GetBondDetailsQueryResponse implements QueryResponse {
   constructor(public readonly bond: BondDetails) {}

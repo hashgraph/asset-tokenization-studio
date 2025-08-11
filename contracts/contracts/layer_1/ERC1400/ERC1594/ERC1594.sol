@@ -214,6 +214,7 @@ import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
 import {Common} from '../../common/Common.sol';
 import {DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
+import {Common} from '../../common/Common.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -266,6 +267,11 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
             ''
         )
     {
+        {
+            _checkRecoveredAddress(_msgSender());
+            _checkRecoveredAddress(_to);
+            _checkRecoveredAddress(_from);
+        }
         // Add a function to validate the `_data` parameter
         _transferFrom(_msgSender(), _from, _to, _value);
     }
@@ -353,6 +359,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
             _data,
             ''
         )
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_tokenHolder)
     {
         _redeemFrom(_tokenHolder, _value, _data);
     }

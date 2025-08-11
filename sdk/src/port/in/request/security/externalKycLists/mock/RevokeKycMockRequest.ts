@@ -204,8 +204,8 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs';
-import FormatValidation from '../../../FormatValidation';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '@port/in/request/FormatValidation';
 
 export default class RevokeKycMockRequest extends ValidatedRequest<RevokeKycMockRequest> {
   contractId: string;

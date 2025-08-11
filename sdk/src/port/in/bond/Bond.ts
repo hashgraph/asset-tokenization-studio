@@ -203,43 +203,51 @@
 
 */
 
-import { GetBondDetailsQuery } from '../../../app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery.js';
-import { GetCouponDetailsQuery } from '../../../app/usecase/query/bond/get/getCouponDetails/GetCouponDetailsQuery.js';
-import Injectable from '../../../core/Injectable.js';
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
+import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
+import { GetCouponDetailsQuery } from '@query/bond/get/getCouponDetails/GetCouponDetailsQuery';
+import Injectable from '@core/injectable/Injectable';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
-import GetBondDetailsRequest from '../request/bond/GetBondDetailsRequest.js';
-import GetCouponDetailsRequest from '../request/bond/GetCouponDetailsRequest.js';
-import BondDetailsViewModel from '../response/BondDetailsViewModel.js';
-import CouponDetailsViewModel from '../response/CouponDetailsViewModel.js';
-import CouponViewModel from '../response/CouponViewModel.js';
-import CouponForViewModel from '../response/CouponForViewModel.js';
-import GetAllCouponsRequest from '../request/bond/GetAllCouponsRequest.js';
-import GetCouponForRequest from '../request/bond/GetCouponForRequest.js';
-import GetCouponRequest from '../request/bond/GetCouponRequest.js';
-import { GetCouponForQuery } from '../../../app/usecase/query/bond/coupons/getCouponFor/GetCouponForQuery.js';
-import { GetCouponQuery } from '../../../app/usecase/query/bond/coupons/getCoupon/GetCouponQuery.js';
-import { GetCouponCountQuery } from '../../../app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQuery.js';
-import { ONE_THOUSAND } from '../../../domain/context/shared/SecurityDate.js';
-import CreateBondRequest from '../request/bond/CreateBondRequest.js';
-import { SecurityViewModel } from '../security/Security.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
-import { SecurityProps } from '../../../domain/context/security/Security.js';
-import { CreateBondCommand } from '../../../app/usecase/command/bond/create/CreateBondCommand.js';
-import ContractId from '../../../domain/context/contract/ContractId.js';
-import { GetSecurityQuery } from '../../../app/usecase/query/security/get/GetSecurityQuery.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import SetCouponRequest from '../request/bond/SetCouponRequest.js';
-import { SetCouponCommand } from '../../../app/usecase/command/bond/coupon/set/SetCouponCommand.js';
+import GetBondDetailsRequest from '../request/bond/GetBondDetailsRequest';
+import GetCouponDetailsRequest from '../request/bond/GetCouponDetailsRequest';
+import BondDetailsViewModel from '../response/BondDetailsViewModel';
+import CouponDetailsViewModel from '../response/CouponDetailsViewModel';
+import CouponViewModel from '../response/CouponViewModel';
+import CouponForViewModel from '../response/CouponForViewModel';
+import GetAllCouponsRequest from '../request/bond/GetAllCouponsRequest';
+import GetCouponForRequest from '../request/bond/GetCouponForRequest';
+import GetCouponRequest from '../request/bond/GetCouponRequest';
+import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
+import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
+import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
+import CreateBondRequest from '../request/bond/CreateBondRequest';
+import { SecurityViewModel } from '../security/Security';
+import { CommandBus } from '@core/command/CommandBus';
+import NetworkService from '@service/network/NetworkService';
+import { SecurityProps } from '@domain/context/security/Security';
+import { CreateBondCommand } from '@command/bond/create/CreateBondCommand';
+import ContractId from '@domain/context/contract/ContractId';
+import { GetSecurityQuery } from '@query/security/get/GetSecurityQuery';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import SetCouponRequest from '../request/bond/SetCouponRequest';
+import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
 import {
   CastRegulationSubType,
   CastRegulationType,
-} from '../../../domain/context/factory/RegulationType.js';
-import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest.js';
-import { UpdateMaturityDateCommand } from '../../../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand.js';
+} from '@domain/context/factory/RegulationType';
+import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest';
+import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
+import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
+import RedeemAtMaturityByPartitionRequest from '../request/bond/RedeemAtMaturityByPartitionRequest';
+import {
+  GetCouponHoldersRequest,
+  GetTotalCouponHoldersRequest,
+} from '../request';
+import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
+import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 
 interface IBondInPort {
   create(
@@ -258,6 +266,11 @@ interface IBondInPort {
   updateMaturityDate(
     request: UpdateMaturityDateRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  redeemAtMaturityByPartition(
+    request: RedeemAtMaturityByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]>;
+  getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
 }
 
 class BondInPort implements IBondInPort {
@@ -483,6 +496,55 @@ class BondInPort implements IBondInPort {
     return await this.commandBus.execute(
       new UpdateMaturityDateCommand(maturityDate, securityId),
     );
+  }
+
+  @LogError
+  async redeemAtMaturityByPartition(
+    request: RedeemAtMaturityByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, partitionId, sourceId, amount } = request;
+    ValidatedRequest.handleValidation(
+      RedeemAtMaturityByPartitionRequest.name,
+      request,
+    );
+
+    return await this.commandBus.execute(
+      new RedeemAtMaturityByPartitionCommand(
+        securityId,
+        partitionId,
+        sourceId,
+        amount,
+      ),
+    );
+  }
+
+  @LogError
+  async getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]> {
+    const { securityId, couponId, start, end } = request;
+    ValidatedRequest.handleValidation(GetCouponHoldersRequest.name, request);
+
+    return (
+      await this.queryBus.execute(
+        new GetCouponHoldersQuery(securityId, couponId, start, end),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getTotalCouponHolders(
+    request: GetTotalCouponHoldersRequest,
+  ): Promise<number> {
+    const { securityId, couponId } = request;
+    ValidatedRequest.handleValidation(
+      GetTotalCouponHoldersRequest.name,
+      request,
+    );
+
+    return (
+      await this.queryBus.execute(
+        new GetTotalCouponHoldersQuery(securityId, couponId),
+      )
+    ).payload;
   }
 }
 

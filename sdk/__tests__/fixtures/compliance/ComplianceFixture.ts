@@ -205,10 +205,10 @@
 
 import { createFixture } from '../config';
 import { HederaIdPropsFixture } from '../shared/DataFixture';
-import { SetComplianceCommand } from '../../../src/app/usecase/command/security/compliance/setCompliance/SetComplianceCommand';
-import { ComplianceQuery } from '../../../src/app/usecase/query/security/compliance/compliance/ComplianceQuery';
-import SetComplianceRequest from '../../../src/port/in/request/security/compliance/SetComplianceRequest';
-import ComplianceRequest from '../../../src/port/in/request/security/compliance/ComplianceRequest';
+import { SetComplianceCommand } from '@command/security/compliance/setCompliance/SetComplianceCommand';
+import { ComplianceQuery } from '@query/security/compliance/compliance/ComplianceQuery';
+import SetComplianceRequest from '@port/in/request/security/compliance/SetComplianceRequest';
+import ComplianceRequest from '@port/in/request/security/compliance/ComplianceRequest';
 
 export const SetComplianceCommandFixture = createFixture<SetComplianceCommand>(
   (command) => {

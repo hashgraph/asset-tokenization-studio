@@ -214,6 +214,7 @@ import {
     IERC1410StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
 import {LockStorageWrapper1} from '../../lock/LockStorageWrapper1.sol';
+import {LibCommon} from '../../../layer_0/common/libraries/LibCommon.sol';
 
 abstract contract ERC1410BasicStorageWrapperRead is
     IERC1410StorageWrapper,
@@ -237,6 +238,9 @@ abstract contract ERC1410BasicStorageWrapperRead is
         mapping(address => mapping(bytes32 => uint256)) partitionToIndex;
         bool multiPartition;
         bool initialized;
+        mapping(address => uint256) tokenHolderIndex;
+        mapping(uint256 => address) tokenHolders;
+        uint256 totalTokenHolders;
     }
 
     modifier onlyWithoutMultiPartition() {
@@ -342,6 +346,84 @@ abstract contract ERC1410BasicStorageWrapperRead is
         ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
         _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
         _adjustTotalBalanceFor(basicStorage, abaf, account);
+    }
+
+    function _replaceTokenHolder(
+        address newTokenHolder,
+        address oldTokenHolder
+    ) internal {
+        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
+
+        uint256 index = basicStorage.tokenHolderIndex[oldTokenHolder];
+        basicStorage.tokenHolderIndex[newTokenHolder] = index;
+        basicStorage.tokenHolders[index] = newTokenHolder;
+        basicStorage.tokenHolderIndex[oldTokenHolder] = 0;
+    }
+
+    function _addNewTokenHolder(address tokenHolder) internal {
+        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
+
+        uint256 nextIndex = ++basicStorage.totalTokenHolders;
+        basicStorage.tokenHolders[nextIndex] = tokenHolder;
+        basicStorage.tokenHolderIndex[tokenHolder] = nextIndex;
+    }
+
+    function _removeTokenHolder(address tokenHolder) internal {
+        ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
+
+        uint256 lastIndex = basicStorage.totalTokenHolders;
+        if (lastIndex > 1) {
+            uint256 tokenHolderIndex = basicStorage.tokenHolderIndex[
+                tokenHolder
+            ];
+            if (tokenHolderIndex < lastIndex) {
+                address lastTokenHolder = basicStorage.tokenHolders[lastIndex];
+
+                basicStorage.tokenHolderIndex[
+                    lastTokenHolder
+                ] = tokenHolderIndex;
+                basicStorage.tokenHolders[tokenHolderIndex] = lastTokenHolder;
+            }
+        }
+
+        basicStorage.tokenHolderIndex[tokenHolder] = 0;
+        basicStorage.totalTokenHolders--;
+    }
+
+    function _getTokenHolders(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory holders_) {
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
+            _pageIndex,
+            _pageLength
+        );
+
+        holders_ = new address[](
+            LibCommon.getSize(start, end, _getTotalTokenHolders())
+        );
+
+        start++; // because tokenHolders starts from 1
+
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
+
+        for (uint256 i = 0; i < holders_.length; i++) {
+            holders_[i] = erc1410Storage.tokenHolders[start + i];
+        }
+    }
+
+    function _getTokenHolder(uint256 _index) internal view returns (address) {
+        return _erc1410BasicStorage().tokenHolders[_index];
+    }
+
+    function _getTotalTokenHolders() internal view returns (uint256) {
+        return _erc1410BasicStorage().totalTokenHolders;
+    }
+
+    function _getTokenHolderIndex(
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        return _erc1410BasicStorage().tokenHolderIndex[_tokenHolder];
     }
 
     function _totalSupply() internal view returns (uint256) {

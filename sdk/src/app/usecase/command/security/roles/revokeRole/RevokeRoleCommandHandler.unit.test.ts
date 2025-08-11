@@ -203,25 +203,25 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { GrantRoleCommandFixture } from '../../../../../../../__tests__/fixtures/role/RoleFixture.js';
-import { RevokeRoleCommandHandler } from './RevokeRoleCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import { GrantRoleCommandFixture } from '@test/fixtures/role/RoleFixture';
+import { RevokeRoleCommandHandler } from './RevokeRoleCommandHandler';
 import {
   RevokeRoleCommand,
   RevokeRoleCommandResponse,
-} from './RevokeRoleCommand.js';
-import { RevokeRoleCommandError } from './error/RevokeRoleCommandError.js';
+} from './RevokeRoleCommand';
+import { RevokeRoleCommandError } from './error/RevokeRoleCommandError';
 
 describe('RevokeRoleCommandHandler', () => {
   let handler: RevokeRoleCommandHandler;

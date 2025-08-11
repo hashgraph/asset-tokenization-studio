@@ -226,33 +226,30 @@ import {
 import { SignClientTypes } from '@walletconnect/types';
 import { HederaTransactionAdapter } from '../HederaTransactionAdapter';
 import { HederaTransactionResponseAdapter } from '../HederaTransactionResponseAdapter';
-import { SigningError } from '../../error/SigningError';
-import { InitializationData } from '../../TransactionAdapter';
-import { MirrorNodeAdapter } from '../../mirror/MirrorNodeAdapter';
-import {
-  WalletEvents,
-  WalletPairedEvent,
-} from '../../../../app/service/event/WalletEvent';
-import LogService from '../../../../app/service/log/LogService';
-import EventService from '../../../../app/service/event/EventService';
-import NetworkService from '../../../../app/service/network/NetworkService';
-import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator';
-import Injectable from '../../../../core/Injectable';
-import Hex from '../../../../core/Hex';
-import Account from '../../../../domain/context/account/Account';
-import TransactionResponse from '../../../../domain/context/transaction/TransactionResponse.js';
+import { SigningError } from '@port/out/error/SigningError';
+import { InitializationData } from '@port/out/TransactionAdapter';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { WalletEvents, WalletPairedEvent } from '@service/event/WalletEvent';
+import LogService from '@service/log/LogService';
+import EventService from '@service/event/EventService';
+import NetworkService from '@service/network/NetworkService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import Injectable from '@core/injectable/Injectable';
+import Hex from '@core/Hex';
+import Account from '@domain/context/account/Account';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
 import {
   Environment,
   mainnet,
   previewnet,
   testnet,
-} from '../../../../domain/context/network/Environment';
-import { SupportedWallets } from '../../../../domain/context/network/Wallet';
-import HWCSettings from '../../../../core/settings/walletConnect/HWCSettings';
+} from '@domain/context/network/Environment';
+import { SupportedWallets } from '@domain/context/network/Wallet';
+import HWCSettings from '@core/settings/walletConnect/HWCSettings';
 import { NotInitialized } from './error/NotInitialized';
 import { AccountNotSet } from './error/AccountNotSet';
 import { NoSettings } from './error/NoSettings';
-import { UnsupportedNetwork } from '../../../../domain/context/network/error/UnsupportedNetwork';
+import { UnsupportedNetwork } from '@domain/context/network/error/UnsupportedNetwork';
 import { NoSigners } from './error/NoSigners';
 import { AccountNotRetrievedFromSigners } from './error/AccountNotRetrievedFromSigners';
 import { AccountNotFound } from '../error/AccountNotFound';

@@ -207,19 +207,19 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../service/contract/ContractService.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
 import {
   IsAddressRecoveredQuery,
   IsAddressRecoveredQueryResponse,
-} from './IsAddressRecoveredQuery.js';
-import { IsAddressRecoveredQueryHandler } from './IsAddressRecoveredQueryHandler.js';
-import AccountService from '../../../../service/account/AccountService.js';
-import { IsAddressRecoveredQueryError } from './error/IsAddressRecoveredQueryError.js';
-import { IsAddressRecoveredQueryFixture } from '../../../../../../__tests__/fixtures/recovery/RecoveryFixture.js';
+} from './IsAddressRecoveredQuery';
+import { IsAddressRecoveredQueryHandler } from './IsAddressRecoveredQueryHandler';
+import AccountService from '@service/account/AccountService';
+import { IsAddressRecoveredQueryError } from './error/IsAddressRecoveredQueryError';
+import { IsAddressRecoveredQueryFixture } from '@test/fixtures/recovery/RecoveryFixture';
 
 describe('IsAddressRecoveredQueryHandler', () => {
   let handler: IsAddressRecoveredQueryHandler;

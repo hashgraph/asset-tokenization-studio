@@ -203,14 +203,14 @@
 
 */
 
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import Injectable from '../../../../../core/Injectable.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import Injectable from '@core/injectable/Injectable';
 import {
   DisconnectCommand,
   DisconnectCommandResponse,
-} from './DisconnectCommand.js';
-import { DisconnectCommandError } from './error/DisconnectCommandError.js';
+} from './DisconnectCommand';
+import { DisconnectCommandError } from './error/DisconnectCommandError';
 
 @CommandHandler(DisconnectCommand)
 export class DisconnectCommandHandler

@@ -205,7 +205,7 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import ExternalControlListsManagement from './ExternalControlListsManagement';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   AddExternalControlListRequest,
   RemoveExternalControlListRequest,
@@ -220,7 +220,7 @@ import {
   IsAuthorizedBlackListMockRequest,
   IsAuthorizedWhiteListMockRequest,
 } from '../request';
-import { UpdateExternalControlListsCommand } from '../../../app/usecase/command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
+import { UpdateExternalControlListsCommand } from '@command/security/externalControlLists/updateExternalControlLists/UpdateExternalControlListsCommand';
 import {
   AddExternalControlListsRequestFixture,
   RemoveExternalControlListsRequestFixture,
@@ -234,28 +234,28 @@ import {
   RemoveFromWhiteListMockRequestFixture,
   IsAuthorizedBlackListMockRequestFixture,
   IsAuthorizedWhiteListMockRequestFixture,
-} from '../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture';
+} from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { AddExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
-import { RemoveExternalControlListCommand } from '../../../app/usecase/command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
-import { QueryBus } from '../../../core/query/QueryBus';
-import { IsExternalControlListQuery } from '../../../app/usecase/query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery';
-import { GetExternalControlListsCountQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery';
-import { GetExternalControlListsMembersQuery } from '../../../app/usecase/query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery';
-import { AddToBlackListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/addToBlackListMock/AddToBlackListMockCommand';
-import { AddToWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/addToWhiteListMock/AddToWhiteListMockCommand';
-import { RemoveFromBlackListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommand';
-import { RemoveFromWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommand';
-import { CreateExternalBlackListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/createExternalBlackListMock/CreateExternalBlackListMockCommand';
-import { CreateExternalWhiteListMockCommand } from '../../../app/usecase/command/security/externalControlLists/mock/createExternalWhiteListMock/CreateExternalWhiteListMockCommand';
-import { IsAuthorizedBlackListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQuery';
-import { IsAuthorizedWhiteListMockQuery } from '../../../app/usecase/query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
+} from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { AddExternalControlListCommand } from '@command/security/externalControlLists/addExternalControlList/AddExternalControlListCommand';
+import { RemoveExternalControlListCommand } from '@command/security/externalControlLists/removeExternalControlList/RemoveExternalControlListCommand';
+import { QueryBus } from '@core/query/QueryBus';
+import { IsExternalControlListQuery } from '@query/security/externalControlLists/isExternalControlList/IsExternalControlListQuery';
+import { GetExternalControlListsCountQuery } from '@query/security/externalControlLists/getExternalControlListsCount/GetExternalControlListsCountQuery';
+import { GetExternalControlListsMembersQuery } from '@query/security/externalControlLists/getExternalControlListsMembers/GetExternalControlListsMembersQuery';
+import { AddToBlackListMockCommand } from '@command/security/externalControlLists/mock/addToBlackListMock/AddToBlackListMockCommand';
+import { AddToWhiteListMockCommand } from '@command/security/externalControlLists/mock/addToWhiteListMock/AddToWhiteListMockCommand';
+import { RemoveFromBlackListMockCommand } from '@command/security/externalControlLists/mock/removeFromBlackListMock/RemoveFromBlackListMockCommand';
+import { RemoveFromWhiteListMockCommand } from '@command/security/externalControlLists/mock/removeFromWhiteListMock/RemoveFromWhiteListMockCommand';
+import { CreateExternalBlackListMockCommand } from '@command/security/externalControlLists/mock/createExternalBlackListMock/CreateExternalBlackListMockCommand';
+import { CreateExternalWhiteListMockCommand } from '@command/security/externalControlLists/mock/createExternalWhiteListMock/CreateExternalWhiteListMockCommand';
+import { IsAuthorizedBlackListMockQuery } from '@query/security/externalControlLists/mock/isAuthorizedBlackListMock/IsAuthorizedBlackListMockQuery';
+import { IsAuthorizedWhiteListMockQuery } from '@query/security/externalControlLists/mock/isAuthorizedWhiteListMock/IsAuthorizedWhiteListMockQuery';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
 describe('ExternalControlListsManagement', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;

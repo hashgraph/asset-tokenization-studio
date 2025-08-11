@@ -203,30 +203,30 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import Account from '@domain/context/account/Account';
 
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
-import { BatchMintCommandError } from './error/BatchMintCommandError.js';
-import { BatchMintCommand, BatchMintResponse } from './BatchMintCommand.js';
-import { BatchMintCommandHandler } from './BatchMintCommandHandler.js';
+import { ErrorCode } from '@core/error/BaseError';
+import { BatchMintCommandError } from './error/BatchMintCommandError';
+import { BatchMintCommand, BatchMintResponse } from './BatchMintCommand';
+import { BatchMintCommandHandler } from './BatchMintCommandHandler';
 
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import SecurityService from '../../../../../../service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../../domain/context/security/Security.js';
-import { BatchMintCommandFixture } from '../../../../../../../../__tests__/fixtures/batch/BatchFixture.js';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import SecurityService from '@service/security/SecurityService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import { BatchMintCommandFixture } from '@test/fixtures/batch/BatchFixture';
 
 describe('BatchMintCommandHandler', () => {
   let handler: BatchMintCommandHandler;

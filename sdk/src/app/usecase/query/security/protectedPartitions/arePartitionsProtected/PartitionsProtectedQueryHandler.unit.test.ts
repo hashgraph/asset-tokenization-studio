@@ -207,18 +207,18 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ContractService from '../../../../../../app/service/contract/ContractService.js';
-import { IsOperatorQueryFixture } from '../../../../../../../__tests__/fixtures/erc1400/ERC1400Fixture.js';
-import { PartitionsProtectedQueryHandler } from './PartitionsProtectedQueryHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { IsOperatorQueryFixture } from '@test/fixtures/erc1400/ERC1400Fixture';
+import { PartitionsProtectedQueryHandler } from './PartitionsProtectedQueryHandler';
 import {
   PartitionsProtectedQuery,
   PartitionsProtectedQueryResponse,
-} from './PartitionsProtectedQuery.js';
-import { PartitionsProtectedQueryError } from './error/PartitionsProtectedQueryError.js';
+} from './PartitionsProtectedQuery';
+import { PartitionsProtectedQueryError } from './error/PartitionsProtectedQueryError';
 
 describe('PartitionsProtectedQueryHandler', () => {
   let handler: PartitionsProtectedQueryHandler;

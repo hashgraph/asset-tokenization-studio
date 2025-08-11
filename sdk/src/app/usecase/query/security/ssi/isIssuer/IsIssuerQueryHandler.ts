@@ -203,14 +203,14 @@
 
 */
 
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import { IsIssuerQuery, IsIssuerQueryResponse } from './IsIssuerQuery';
-import ContractService from '../../../../../service/contract/ContractService';
-import AccountService from '../../../../../service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
 import { IsIssuerQueryError } from './error/IsIssuerQueryError';
 
 @QueryHandler(IsIssuerQuery)

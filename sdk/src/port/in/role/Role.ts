@@ -203,30 +203,30 @@
 
 */
 
-import NetworkService from '../../../app/service/network/NetworkService.js';
-import SecurityService from '../../../app/service/security/SecurityService.js';
-import { GrantRoleCommand } from '../../../app/usecase/command/security/roles/grantRole/GrantRoleCommand.js';
-import { RevokeRoleCommand } from '../../../app/usecase/command/security/roles/revokeRole/RevokeRoleCommand.js';
-import { GetRoleCountForQuery } from '../../../app/usecase/query/security/roles/getRoleCountFor/GetRoleCountForQuery.js';
-import { GetRoleMemberCountQuery } from '../../../app/usecase/query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery.js';
-import { GetRoleMembersQuery } from '../../../app/usecase/query/security/roles/getRoleMembers/GetRoleMembersQuery.js';
-import { GetRolesForQuery } from '../../../app/usecase/query/security/roles/getRolesFor/GetRolesForQuery.js';
-import { HasRoleQuery } from '../../../app/usecase/query/security/roles/hasRole/HasRoleQuery.js';
-import Injectable from '../../../core/Injectable.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import { MirrorNodeAdapter } from '../../out/mirror/MirrorNodeAdapter.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
+import NetworkService from '@service/network/NetworkService';
+import SecurityService from '@service/security/SecurityService';
+import { GrantRoleCommand } from '@command/security/roles/grantRole/GrantRoleCommand';
+import { RevokeRoleCommand } from '@command/security/roles/revokeRole/RevokeRoleCommand';
+import { GetRoleCountForQuery } from '@query/security/roles/getRoleCountFor/GetRoleCountForQuery';
+import { GetRoleMemberCountQuery } from '@query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery';
+import { GetRoleMembersQuery } from '@query/security/roles/getRoleMembers/GetRoleMembersQuery';
+import { GetRolesForQuery } from '@query/security/roles/getRolesFor/GetRolesForQuery';
+import { HasRoleQuery } from '@query/security/roles/hasRole/HasRoleQuery';
+import Injectable from '@core/injectable/Injectable';
+import { CommandBus } from '@core/command/CommandBus';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import { QueryBus } from '@core/query/QueryBus';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
-import GetRoleCountForRequest from '../request/security/roles/GetRoleCountForRequest.js';
-import GetRoleMemberCountRequest from '../request/security/roles/GetRoleMemberCountRequest.js';
-import GetRoleMembersRequest from '../request/security/roles/GetRoleMembersRequest.js';
-import GetRolesForRequest from '../request/security/roles/GetRolesForRequest.js';
-import RoleRequest from '../request/security/roles/RoleRequest.js';
-import ApplyRolesRequest from '../request/security/roles/ApplyRolesRequest.js';
-import { ApplyRolesCommand } from '../../../app/usecase/command/security/roles/applyRoles/ApplyRolesCommand.js';
+import GetRoleCountForRequest from '../request/security/roles/GetRoleCountForRequest';
+import GetRoleMemberCountRequest from '../request/security/roles/GetRoleMemberCountRequest';
+import GetRoleMembersRequest from '../request/security/roles/GetRoleMembersRequest';
+import GetRolesForRequest from '../request/security/roles/GetRolesForRequest';
+import RoleRequest from '../request/security/roles/RoleRequest';
+import ApplyRolesRequest from '../request/security/roles/ApplyRolesRequest';
+import { ApplyRolesCommand } from '@command/security/roles/applyRoles/ApplyRolesCommand';
 
 interface IRole {
   hasRole(request: RoleRequest): Promise<boolean>;

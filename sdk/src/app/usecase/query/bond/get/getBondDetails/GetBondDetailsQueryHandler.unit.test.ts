@@ -207,21 +207,21 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   BondDetailsFixture,
   GetBondDetailsQueryFixture,
-} from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetBondDetailsQueryHandler } from './GetBondDetailsQueryHandler.js';
+} from '@test/fixtures/bond/BondFixture';
+import AccountService from '@service/account/AccountService';
+import { GetBondDetailsQueryHandler } from './GetBondDetailsQueryHandler';
 import {
   GetBondDetailsQuery,
   GetBondDetailsQueryResponse,
-} from './GetBondDetailsQuery.js';
-import { GetBondDetailsQueryError } from './error/GetBondDetailsQueryError.js';
+} from './GetBondDetailsQuery';
+import { GetBondDetailsQueryError } from './error/GetBondDetailsQueryError';
 
 describe('GetBondDetailsQueryHandler', () => {
   let handler: GetBondDetailsQueryHandler;

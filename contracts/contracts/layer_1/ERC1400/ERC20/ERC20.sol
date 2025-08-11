@@ -237,10 +237,12 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         onlyCompliant(_msgSender(), spender, false)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(spender)
         onlyWithoutMultiPartition
         returns (bool)
     {
-        return _approve(spender, value);
+        return _approve(_msgSender(), spender, value);
     }
 
     function transfer(

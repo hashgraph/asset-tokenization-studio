@@ -204,17 +204,17 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { EvmAddressPropsFixture } from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { GetKycStatusMockQueryHandler } from './GetKycStatusMockQueryHandler.js';
+import { EvmAddressPropsFixture } from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { GetKycStatusMockQueryHandler } from './GetKycStatusMockQueryHandler';
 import {
   GetKycStatusMockQuery,
   GetKycStatusMockQueryResponse,
-} from './GetKycStatusMockQuery.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import { GetKycStatusMockQueryFixture } from '../../../../../../../../__tests__/fixtures/externalKycLists/ExternalKycListsFixture.js';
+} from './GetKycStatusMockQuery';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import AccountService from '@service/account/AccountService';
+import { GetKycStatusMockQueryFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
 
 describe('GetKycStatusMockQueryHandler', () => {
   let handler: GetKycStatusMockQueryHandler;

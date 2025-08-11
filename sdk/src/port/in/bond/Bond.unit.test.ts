@@ -204,7 +204,7 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '../../../core/command/CommandBus';
+import { CommandBus } from '@core/command/CommandBus';
 import {
   CreateBondRequest,
   GetBondDetailsRequest,
@@ -214,16 +214,19 @@ import {
   GetCouponRequest,
   GetAllCouponsRequest,
   UpdateMaturityDateRequest,
+  RedeemAtMaturityByPartitionRequest,
+  GetCouponHoldersRequest,
+  GetTotalCouponHoldersRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../__tests__/fixtures/shared/DataFixture';
-import LogService from '../../../app/service/log/LogService';
-import { QueryBus } from '../../../core/query/QueryBus';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs';
-import { ValidationError } from '../../../core/validation/ValidationError';
-import NetworkService from '../../../app/service/network/NetworkService';
+} from '@test/fixtures/shared/DataFixture';
+import LogService from '@service/log/LogService';
+import { QueryBus } from '@core/query/QueryBus';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ValidationError } from '@core/validation/ValidationError';
+import NetworkService from '@service/network/NetworkService';
 import BondToken from './Bond';
 import {
   BondDetailsFixture,
@@ -234,29 +237,35 @@ import {
   GetBondDetailsRequestFixture,
   GetCouponDetailsRequestFixture,
   GetCouponForRequestFixture,
+  GetCouponHoldersQueryFixture,
   GetCouponRequestFixture,
+  RedeemAtMaturityByPartitionRequestFixture,
+  GetTotalCouponHoldersRequestFixture,
   SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,
-} from '../../../../__tests__/fixtures/bond/BondFixture';
-import { SecurityPropsFixture } from '../../../../__tests__/fixtures/shared/SecurityFixture';
-import { Security } from '../../../domain/context/security/Security';
-import { CreateBondCommand } from '../../../app/usecase/command/bond/create/CreateBondCommand';
-import ContractId from '../../../domain/context/contract/ContractId';
+} from '@test/fixtures/bond/BondFixture';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import { CreateBondCommand } from '@command/bond/create/CreateBondCommand';
+import ContractId from '@domain/context/contract/ContractId';
 import {
   CastRegulationSubType,
   CastRegulationType,
-} from '../../../domain/context/factory/RegulationType';
-import BigDecimal from '../../../domain/context/shared/BigDecimal';
+} from '@domain/context/factory/RegulationType';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import { faker } from '@faker-js/faker/.';
-import { GetBondDetailsQuery } from '../../../app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery';
-import { ONE_THOUSAND } from '../../../domain/context/shared/SecurityDate';
-import { SetCouponCommand } from '../../../app/usecase/command/bond/coupon/set/SetCouponCommand';
-import { GetCouponDetailsQuery } from '../../../app/usecase/query/bond/get/getCouponDetails/GetCouponDetailsQuery';
+import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
+import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
+import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
+import { GetCouponDetailsQuery } from '@query/bond/get/getCouponDetails/GetCouponDetailsQuery';
 import { BigNumber } from 'ethers';
-import { GetCouponForQuery } from '../../../app/usecase/query/bond/coupons/getCouponFor/GetCouponForQuery';
-import { GetCouponQuery } from '../../../app/usecase/query/bond/coupons/getCoupon/GetCouponQuery';
-import { GetCouponCountQuery } from '../../../app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQuery';
-import { UpdateMaturityDateCommand } from '../../../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand';
+import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
+import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
+import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
+import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
+import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
+import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 
 describe('Bond', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -271,6 +280,9 @@ describe('Bond', () => {
   let getCouponRequest: GetCouponRequest;
   let getAllCouponsRequest: GetAllCouponsRequest;
   let updateMaturityDateRequest: UpdateMaturityDateRequest;
+  let redeemAtMaturityByPartitionRequest: RedeemAtMaturityByPartitionRequest;
+  let getCouponHoldersRequest: GetCouponHoldersRequest;
+  let getTotalCouponHoldersRequest: GetTotalCouponHoldersRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -1241,6 +1253,301 @@ describe('Bond', () => {
 
       await expect(
         BondToken.updateMaturityDate(updateMaturityDateRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('redeemAtMaturityByPartition', () => {
+    redeemAtMaturityByPartitionRequest = new RedeemAtMaturityByPartitionRequest(
+      RedeemAtMaturityByPartitionRequestFixture.create(),
+    );
+    it('should redeem at maturity by partition successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.redeemAtMaturityByPartition(
+        redeemAtMaturityByPartitionRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        RedeemAtMaturityByPartitionRequest.name,
+        redeemAtMaturityByPartitionRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RedeemAtMaturityByPartitionCommand(
+          redeemAtMaturityByPartitionRequest.securityId,
+          redeemAtMaturityByPartitionRequest.partitionId,
+          redeemAtMaturityByPartitionRequest.sourceId,
+          redeemAtMaturityByPartitionRequest.amount,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.redeemAtMaturityByPartition(
+          redeemAtMaturityByPartitionRequest,
+        ),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        RedeemAtMaturityByPartitionRequest.name,
+        redeemAtMaturityByPartitionRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RedeemAtMaturityByPartitionCommand(
+          redeemAtMaturityByPartitionRequest.securityId,
+          redeemAtMaturityByPartitionRequest.partitionId,
+          redeemAtMaturityByPartitionRequest.sourceId,
+          redeemAtMaturityByPartitionRequest.amount,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      redeemAtMaturityByPartitionRequest =
+        new RedeemAtMaturityByPartitionRequest({
+          ...RedeemAtMaturityByPartitionRequestFixture.create(),
+          securityId: 'invalid',
+        });
+
+      await expect(
+        BondToken.redeemAtMaturityByPartition(
+          redeemAtMaturityByPartitionRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if partitionId is invalid', async () => {
+      redeemAtMaturityByPartitionRequest =
+        new RedeemAtMaturityByPartitionRequest({
+          ...RedeemAtMaturityByPartitionRequestFixture.create(),
+          partitionId: 'invalid',
+        });
+
+      await expect(
+        BondToken.redeemAtMaturityByPartition(
+          redeemAtMaturityByPartitionRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if sourceId is invalid', async () => {
+      redeemAtMaturityByPartitionRequest =
+        new RedeemAtMaturityByPartitionRequest({
+          ...RedeemAtMaturityByPartitionRequestFixture.create(),
+          sourceId: 'invalid',
+        });
+
+      await expect(
+        BondToken.redeemAtMaturityByPartition(
+          redeemAtMaturityByPartitionRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if amount is invalid', async () => {
+      redeemAtMaturityByPartitionRequest =
+        new RedeemAtMaturityByPartitionRequest({
+          ...RedeemAtMaturityByPartitionRequestFixture.create(),
+          amount: 'invalid',
+        });
+
+      await expect(
+        BondToken.redeemAtMaturityByPartition(
+          redeemAtMaturityByPartitionRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getCouponHolders', () => {
+    getCouponHoldersRequest = new GetCouponHoldersRequest(
+      GetCouponHoldersQueryFixture.create(),
+    );
+    it('should get coupon holders successfully', async () => {
+      const expectedResponse = {
+        payload: [transactionId],
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.getCouponHolders(getCouponHoldersRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetCouponHoldersRequest.name,
+        getCouponHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetCouponHoldersQuery(
+          getCouponHoldersRequest.securityId,
+          getCouponHoldersRequest.couponId,
+          getCouponHoldersRequest.start,
+          getCouponHoldersRequest.end,
+        ),
+      );
+
+      expect(result).toStrictEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.getCouponHolders(getCouponHoldersRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetCouponHoldersRequest.name,
+        getCouponHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetCouponHoldersQuery(
+          getCouponHoldersRequest.securityId,
+          getCouponHoldersRequest.couponId,
+          getCouponHoldersRequest.start,
+          getCouponHoldersRequest.end,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getCouponHoldersRequest = new GetCouponHoldersRequest({
+        ...GetCouponHoldersQueryFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getCouponHolders(getCouponHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if couponId is invalid', async () => {
+      getCouponHoldersRequest = new GetCouponHoldersRequest({
+        ...GetCouponHoldersQueryFixture.create(),
+        couponId: -1,
+      });
+
+      await expect(
+        BondToken.getCouponHolders(getCouponHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if start is invalid', async () => {
+      getCouponHoldersRequest = new GetCouponHoldersRequest({
+        ...GetCouponHoldersQueryFixture.create(),
+        start: -1,
+      });
+
+      await expect(
+        BondToken.getCouponHolders(getCouponHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+    it('should throw error if end is invalid', async () => {
+      getCouponHoldersRequest = new GetCouponHoldersRequest({
+        ...GetCouponHoldersQueryFixture.create(),
+        end: -1,
+      });
+
+      await expect(
+        BondToken.getCouponHolders(getCouponHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getTotalCouponHolders', () => {
+    getTotalCouponHoldersRequest = new GetTotalCouponHoldersRequest(
+      GetTotalCouponHoldersRequestFixture.create(),
+    );
+    it('should get total coupon holders successfully', async () => {
+      const expectedResponse = {
+        payload: 1,
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.getTotalCouponHolders(
+        getTotalCouponHoldersRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetTotalCouponHoldersRequest.name,
+        getTotalCouponHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetTotalCouponHoldersQuery(
+          getTotalCouponHoldersRequest.securityId,
+          getTotalCouponHoldersRequest.couponId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        GetTotalCouponHoldersRequest.name,
+        getTotalCouponHoldersRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetTotalCouponHoldersQuery(
+          getTotalCouponHoldersRequest.securityId,
+          getTotalCouponHoldersRequest.couponId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getTotalCouponHoldersRequest = new GetTotalCouponHoldersRequest({
+        ...GetTotalCouponHoldersRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if couponId is invalid', async () => {
+      getTotalCouponHoldersRequest = new GetTotalCouponHoldersRequest({
+        ...GetTotalCouponHoldersRequestFixture.create(),
+        couponId: -1,
+      });
+
+      await expect(
+        BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest),
       ).rejects.toThrow(ValidationError);
     });
   });

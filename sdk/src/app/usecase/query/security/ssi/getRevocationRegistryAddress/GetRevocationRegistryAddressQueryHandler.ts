@@ -203,17 +203,17 @@
 
 */
 
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
-import AccountService from '../../../../../service/account/AccountService';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   GetRevocationRegistryAddressQuery,
   GetRevocationRegistryAddressQueryResponse,
 } from './GetRevocationRegistryAddressQuery';
-import ContractService from '../../../../../service/contract/ContractService';
+import ContractService from '@service/contract/ContractService';
 import { GetRevocationRegistryAddressQueryError } from './error/GetRevocationRegistryAddressQueryError';
 
 @QueryHandler(GetRevocationRegistryAddressQuery)

@@ -135,3 +135,6 @@ asset-tokenization-studio.iml
 
 # Kiro files
 .kiro/
+
+# Extracted methods from contracts
+contracts/extracted-methods.txt

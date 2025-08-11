@@ -203,10 +203,10 @@
 
 */
 
-import { InvalidValue } from '../../../error/InvalidValue.js';
-import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
+import { InvalidValue } from '../../../error/InvalidValue';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
-import FormatValidation from '../../../FormatValidation.js';
+import FormatValidation from '../../../FormatValidation';
 
 export default class BatchTransferRequest extends ValidatedRequest<BatchTransferRequest> {
   securityId: string;

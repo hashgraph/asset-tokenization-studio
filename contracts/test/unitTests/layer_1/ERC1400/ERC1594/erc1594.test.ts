@@ -996,6 +996,18 @@ describe('ERC1594 Tests', () => {
             })
         })
 
+        describe('AccessControl', () => {
+            it('GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole', async () => {
+                // Using account C (non role)
+                erc1594Facet = erc1594Facet.connect(signer_B)
+
+                // add to list fails
+                await expect(
+                    erc1594Facet.issue(account_E, AMOUNT, DATA)
+                ).to.be.rejectedWith('AccountHasNoRole')
+            })
+        })
+
         it(
             'GIVEN blocked accounts (sender, to, from) ' +
                 'WHEN canTransfer or canTransferFrom ' +

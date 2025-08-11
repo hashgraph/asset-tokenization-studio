@@ -221,6 +221,11 @@ export const EQUITY_CONFIG_ID =
 export const BOND_CONFIG_ID =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 
+// Extract Methods // TODO: Use OUTPUT_FILE as input parameter (CONTRACTS_DIR?)
+export const CONTRACTS_DIR = 'contracts'
+export const OUTPUT_FILE = 'extracted-methods.txt'
+export const REGEX_SELECTOR = /function\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)/g
+
 // * Roles
 export const DEFAULT_ADMIN_ROLE =
     '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -279,8 +284,29 @@ export const INTERNAL_KYC_MANAGER_ROLE =
     '0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e'
 export const AGENT_ROLE =
     '0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6'
+export const MATURITY_REDEEMER_ROLE =
+    '0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c'
 export const TREX_OWNER_ROLE =
     '0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f910aa17b627f801a6aafab7'
+// * Errors
+export const IS_PAUSED_ERROR_ID = '0x40'
+export const OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = '0x41'
+export const FROM_ACCOUNT_BLOCKED_ERROR_ID = '0x42'
+export const TO_ACCOUNT_BLOCKED_ERROR_ID = '0x43'
+export const FROM_ACCOUNT_NULL_ERROR_ID = '0x44'
+export const TO_ACCOUNT_NULL_ERROR_ID = '0x45'
+export const NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = '0x46'
+export const IS_NOT_OPERATOR_ERROR_ID = '0x47'
+export const WRONG_PARTITION_ERROR_ID = '0x48'
+export const ALLOWANCE_REACHED_ERROR_ID = '0x49'
+export const FROM_ACCOUNT_KYC_ERROR_ID = '0x50'
+export const TO_ACCOUNT_KYC_ERROR_ID = '0x51'
+export const CLEARING_ACTIVE_ERROR_ID = '0x52'
+export const ADDRESS_RECOVERED_OPERATOR_ERROR_ID = '0x53'
+export const ADDRESS_RECOVERED_FROM_ERROR_ID = '0x54'
+export const ADDRESS_RECOVERED_TO_ERROR_ID = '0x55'
+
+export const SUCCESS = '0x00'
 
 // * Events
 export const EVENTS = {

@@ -207,21 +207,21 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { GetExternalControlListsMembersQueryFixture } from '../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { GetExternalControlListsMembersQueryHandler } from './GetExternalControlListsMembersQueryHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { GetExternalControlListsMembersQueryFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
+import SecurityService from '@service/security/SecurityService';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { Security } from '@domain/context/security/Security';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { GetExternalControlListsMembersQueryHandler } from './GetExternalControlListsMembersQueryHandler';
 import {
   GetExternalControlListsMembersQuery,
   GetExternalControlListsMembersQueryResponse,
-} from './GetExternalControlListsMembersQuery.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
-import Account from '../../../../../../domain/context/account/Account.js';
+} from './GetExternalControlListsMembersQuery';
+import AccountService from '@service/account/AccountService';
+import Account from '@domain/context/account/Account';
 
 describe('GetExternalControlListsMembersQueryHandler', () => {
   let handler: GetExternalControlListsMembersQueryHandler;

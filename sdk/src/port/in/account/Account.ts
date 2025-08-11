@@ -203,18 +203,18 @@
 
 */
 
-import AccountViewModel from './../response/AccountViewModel.js';
-import GetAccountInfoRequest from './../request/account/GetAccountInfoRequest.js';
-import GetAccountBalanceRequest from './../request/account/GetAccountBalanceRequest.js';
-import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
+import AccountViewModel from './../response/AccountViewModel';
+import GetAccountInfoRequest from './../request/account/GetAccountInfoRequest';
+import GetAccountBalanceRequest from './../request/account/GetAccountBalanceRequest';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
 
-import { GetAccountInfoQuery } from '../../../app/usecase/query/account/info/GetAccountInfoQuery.js';
-import { QueryBus } from '../../../core/query/QueryBus.js';
-import Injectable from '../../../core/Injectable.js';
-import { HederaId } from '../../../domain/context/shared/HederaId.js';
-import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
-import { GetAccountBalanceQuery } from '../../../app/usecase/query/account/balance/GetAccountBalanceQuery.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
+import { GetAccountInfoQuery } from '@query/account/info/GetAccountInfoQuery';
+import { QueryBus } from '@core/query/QueryBus';
+import Injectable from '@core/injectable/Injectable';
+import { HederaId } from '@domain/context/shared/HederaId';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import { GetAccountBalanceQuery } from '@query/account/balance/GetAccountBalanceQuery';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 
 interface IAccountInPort {
   getInfo(request: GetAccountInfoRequest): Promise<AccountViewModel>;

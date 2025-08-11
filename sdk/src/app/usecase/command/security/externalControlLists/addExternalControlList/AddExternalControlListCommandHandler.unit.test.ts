@@ -203,25 +203,28 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { AddExternalControlListCommandFixture } from '../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { AddExternalControlListCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 import { AddExternalControlListCommandHandler } from './AddExternalControlListCommandHandler.js';
 import {
   AddExternalControlListCommand,
   AddExternalControlListCommandResponse,
 } from './AddExternalControlListCommand.js';
+import { AddExternalControlListCommandError } from './error/AddExternalControlListCommandError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('AddExternalControlListCommandHandler', () => {
   let handler: AddExternalControlListCommandHandler;
@@ -241,6 +244,7 @@ describe('AddExternalControlListCommandHandler', () => {
     evmAddress: EvmAddressPropsFixture.create().value,
   });
   const transactionId = TransactionIdFixture.create().id;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new AddExternalControlListCommandHandler(
@@ -257,6 +261,23 @@ describe('AddExternalControlListCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws AddExternalControlListCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        AddExternalControlListCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while adding external control list: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
     it('should successfully add external control list', async () => {
       contractServiceMock.getContractEvmAddress
         .mockResolvedValueOnce(evmAddress)

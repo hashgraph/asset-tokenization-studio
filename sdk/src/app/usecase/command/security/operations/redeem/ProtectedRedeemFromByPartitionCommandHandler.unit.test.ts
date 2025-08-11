@@ -203,31 +203,31 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { AccountPropsFixture } from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { RedeemCommandFixture } from '../../../../../../../__tests__/fixtures/redeem/RedeemFixture.js';
-import { ProtectedRedeemFromByPartitionCommandHandler } from './ProtectedRedeemFromByPartitionCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import SecurityService from '@service/security/SecurityService';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import { Security } from '@domain/context/security/Security';
+import Account from '@domain/context/account/Account';
+import { AccountPropsFixture } from '@test/fixtures/shared/DataFixture';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { RedeemCommandFixture } from '@test/fixtures/redeem/RedeemFixture';
+import { ProtectedRedeemFromByPartitionCommandHandler } from './ProtectedRedeemFromByPartitionCommandHandler';
 import {
   ProtectedRedeemFromByPartitionCommand,
   ProtectedRedeemFromByPartitionCommandResponse,
-} from './ProtectedRedeemFromByPartitionCommand.js';
-import { ProtectedRedeemFromByPartitionCommandError } from './error/ProtectedRedeemFromByPartitionCommandError.js';
+} from './ProtectedRedeemFromByPartitionCommand';
+import { ProtectedRedeemFromByPartitionCommandError } from './error/ProtectedRedeemFromByPartitionCommandError';
 
 describe('ProtectedRedeemFromByPartitionCommandHandler', () => {
   let handler: ProtectedRedeemFromByPartitionCommandHandler;

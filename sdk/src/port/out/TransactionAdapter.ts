@@ -205,24 +205,22 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
-import BigDecimal from '../../domain/context/shared/BigDecimal.js';
-import Account from '../../domain/context/account/Account.js';
-import { HederaId } from '../../domain/context/shared/HederaId.js';
-import { MirrorNodeAdapter } from './mirror/MirrorNodeAdapter.js';
-import { Environment } from '../../domain/context/network/Environment.js';
-import LogService from '../../app/service/log/LogService.js';
-import { Security } from '../../domain/context/security/Security.js';
-import EvmAddress from '../../domain/context/contract/EvmAddress.js';
-import { BondDetails } from '../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../domain/context/bond/CouponDetails.js';
-import { EquityDetails } from '../../domain/context/equity/EquityDetails.js';
-import HWCSettings from '../../core/settings/walletConnect/HWCSettings.js';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import Account from '@domain/context/account/Account';
+import { Environment } from '@domain/context/network/Environment';
+import LogService from '@service/log/LogService';
+import { Security } from '@domain/context/security/Security';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import HWCSettings from '@core/settings/walletConnect/HWCSettings';
 import { ContractId } from '@hashgraph/sdk';
-import DfnsSettings from '../../core/settings/custodialWalletSettings/DfnsSettings.js';
-import FireblocksSettings from '../../core/settings/custodialWalletSettings/FireblocksSettings.js';
-import AWSKMSSettings from '../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
-import { ClearingOperationType } from '../../domain/context/security/Clearing.js';
+import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
+import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
+import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
+import { ClearingOperationType } from '@domain/context/security/Clearing';
 
 export interface InitializationData {
   account?: Account;
@@ -238,6 +236,20 @@ export interface NetworkData {
   businessLogicKeysCommon?: string[];
   businessLogicKeysEquity?: string[];
   businessLogicKeysBond?: string[];
+}
+
+export interface WalletAdapter {
+  init(): Promise<Environment>;
+  register(
+    input?:
+      | Account
+      | HWCSettings
+      | DfnsSettings
+      | FireblocksSettings
+      | AWSKMSSettings,
+  ): Promise<InitializationData>;
+  stop(): Promise<boolean>;
+  getAccount(): Account;
 }
 
 interface ITransactionAdapter {
@@ -272,20 +284,7 @@ interface ITransactionAdapter {
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  init(): Promise<Environment>;
-  register(
-    input?:
-      | Account
-      | HWCSettings
-      | DfnsSettings
-      | FireblocksSettings
-      | AWSKMSSettings,
-  ): Promise<InitializationData>;
-  stop(): Promise<boolean>;
-  balanceOf(
-    security: HederaId,
-    targetId: HederaId,
-  ): Promise<TransactionResponse<BigDecimal, Error>>;
+
   controllerTransfer(
     security: EvmAddress,
     sourceId: EvmAddress,
@@ -453,8 +452,7 @@ interface ITransactionAdapter {
     lockId: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  getAccount(): Account;
-  getMirrorNodeAdapter(): MirrorNodeAdapter;
+
   updateMaturityDate(
     security: EvmAddress,
     maturityDate: number,
@@ -508,6 +506,13 @@ interface ITransactionAdapter {
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
+  redeemAtMaturityByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 interface RoleTransactionAdapter {
@@ -535,31 +540,6 @@ interface RoleTransactionAdapter {
     role: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  hasRole(
-    security: EvmAddress,
-    targetId: EvmAddress,
-    role: string,
-  ): Promise<TransactionResponse<boolean, Error>>;
-  getRolesFor(
-    security: EvmAddress,
-    targetId: EvmAddress,
-    start: number,
-    end: number,
-  ): Promise<TransactionResponse<string[], Error>>;
-  getRoleMembers(
-    security: EvmAddress,
-    role: string,
-    start: number,
-    end: number,
-  ): Promise<TransactionResponse<string[], Error>>;
-  getRoleCountFor(
-    security: EvmAddress,
-    targetId: EvmAddress,
-  ): Promise<TransactionResponse<number, Error>>;
-  getRoleMemberCount(
-    security: EvmAddress,
-    role: string,
-  ): Promise<TransactionResponse<number, Error>>;
 }
 
 interface IManagementTransactionAdapter {
@@ -1078,6 +1058,7 @@ interface IAgent {
 
 export default abstract class TransactionAdapter
   implements
+    WalletAdapter,
     ITransactionAdapter,
     RoleTransactionAdapter,
     IManagementTransactionAdapter,
@@ -1087,7 +1068,6 @@ export default abstract class TransactionAdapter
     IClearingAdapter,
     IExternalPausesAdapter,
     IExternalPausesMockAdapter,
-    IClearingAdapter,
     IExternalControlListsAdapter,
     IExternalControlListsMockAdapter,
     IExternalKycListsAdapter,
@@ -1101,88 +1081,47 @@ export default abstract class TransactionAdapter
     IBatchAdapter,
     IAgent
 {
-  triggerPendingScheduledSnapshots(
+  abstract triggerPendingScheduledSnapshots(
     security: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  triggerScheduledSnapshots(
+  ): Promise<TransactionResponse>;
+
+  abstract triggerScheduledSnapshots(
     security: EvmAddress,
     max: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  authorizeOperator(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract authorizeOperator(
     security: EvmAddress,
     targetId: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  revokeOperator(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract revokeOperator(
     security: EvmAddress,
     targetId: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  authorizeOperatorByPartition(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract authorizeOperatorByPartition(
     security: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  revokeOperatorByPartition(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract revokeOperatorByPartition(
     security: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  operatorTransferByPartition(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract operatorTransferByPartition(
     security: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  getRolesFor(
-    security: EvmAddress,
-    targetId: EvmAddress,
-    start: number,
-    end: number,
-  ): Promise<TransactionResponse<string[], Error>> {
-    throw new Error('Method not implemented.');
-  }
-  getRoleMembers(
-    security: EvmAddress,
-    role: string,
-    start: number,
-    end: number,
-  ): Promise<TransactionResponse<string[], Error>> {
-    throw new Error('Method not implemented.');
-  }
-  getRoleCountFor(
-    security: EvmAddress,
-    targetId: EvmAddress,
-  ): Promise<TransactionResponse<number, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  getRoleMemberCount(
-    security: EvmAddress,
-    role: string,
-  ): Promise<TransactionResponse<number, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  createEquity(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract createEquity(
     security: Security,
     equityDetails: EquityDetails,
     factory: EvmAddress,
@@ -1196,10 +1135,8 @@ export default abstract class TransactionAdapter
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  createBond(
+  ): Promise<TransactionResponse>;
+  abstract createBond(
     security: Security,
     bondDetails: BondDetails,
     couponDetails: CouponDetails,
@@ -1214,52 +1151,33 @@ export default abstract class TransactionAdapter
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  grantRole(
+  ): Promise<TransactionResponse>;
+  abstract grantRole(
     security: EvmAddress,
     targetId: EvmAddress,
     role: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  applyRoles(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract applyRoles(
     security: EvmAddress,
     targetId: EvmAddress,
     roles: string[],
     actives: boolean[],
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  revokeRole(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract revokeRole(
     security: EvmAddress,
     targetId: EvmAddress,
     role: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  renounceRole(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract renounceRole(
     security: EvmAddress,
     role: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  hasRole(
-    security: EvmAddress,
-    targetId: EvmAddress,
-    role: string,
-  ): Promise<TransactionResponse<boolean, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  init(): Promise<string> {
-    throw new Error('Method not implemented.');
-  }
-  register(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract init(): Promise<string>;
+  abstract register(
     input?:
       | Account
       | HWCSettings
@@ -1267,19 +1185,9 @@ export default abstract class TransactionAdapter
       | FireblocksSettings
       | AWSKMSSettings,
     debug?: boolean,
-  ): Promise<InitializationData> {
-    throw new Error('Method not implemented.');
-  }
-  stop(): Promise<boolean> {
-    throw new Error('Method not implemented.');
-  }
-  balanceOf(
-    security: HederaId,
-    targetId: HederaId,
-  ): Promise<TransactionResponse<BigDecimal, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  controllerTransfer(
+  ): Promise<InitializationData>;
+  abstract stop(): Promise<boolean>;
+  abstract controllerTransfer(
     security: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1294,10 +1202,15 @@ export default abstract class TransactionAdapter
     target: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  controllerRedeem(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract forcedTransfer(
+    security: EvmAddress,
+    source: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract controllerRedeem(
     security: EvmAddress,
     sourceId: EvmAddress,
     amount: BigDecimal,
@@ -1310,10 +1223,14 @@ export default abstract class TransactionAdapter
     source: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  issue(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract burn(
+    security: EvmAddress,
+    source: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract issue(
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
@@ -1326,138 +1243,105 @@ export default abstract class TransactionAdapter
     target: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  transfer(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract mint(
+    security: EvmAddress,
+    target: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract transfer(
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  transferAndLock(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract transferAndLock(
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  redeem(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract redeem(
     security: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  addToControlList(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract addToControlList(
     security: EvmAddress,
     targetId: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  removeFromControlList(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract removeFromControlList(
     security: EvmAddress,
     targetId: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  pause(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract pause(
     security: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  unpause(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract unpause(
     security: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  takeSnapshot(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract takeSnapshot(
     security: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  getAccount(): Account {
-    throw new Error('Method not implemented.');
-  }
-  getMirrorNodeAdapter(): MirrorNodeAdapter {
-    throw new Error('Method not implemented.');
-  }
-  setDividends(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract getAccount(): Account;
+  abstract setDividends(
     security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     amount: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  setCoupon(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract setCoupon(
     security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  setVotingRights(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract setVotingRights(
     security: EvmAddress,
     recordDate: BigDecimal,
     data: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
+  ): Promise<TransactionResponse<any, Error>>;
 
-  setDocument(
+  abstract setDocument(
     security: EvmAddress,
     name: string,
     uri: string,
     hash: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  removeDocument(
+  ): Promise<TransactionResponse>;
+  abstract removeDocument(
     security: EvmAddress,
     name: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  setMaxSupply(
+  ): Promise<TransactionResponse>;
+  abstract setMaxSupply(
     security: EvmAddress,
     maxSupply: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  lock(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract lock(
     security: EvmAddress,
     sourceId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  release(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract release(
     security: EvmAddress,
     sourceId: EvmAddress,
     lockId: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
+  ): Promise<TransactionResponse<any, Error>>;
   logTransaction(id: string, network: string): void {
     const HASHSCAN_URL = `https://hashscan.io/${network}/transactionsById/`;
     const HASHSCAN_TX_URL = `https://hashscan.io/${network}/tx/`;
@@ -1467,31 +1351,25 @@ export default abstract class TransactionAdapter
     LogService.logInfo(msg);
     console.log(msg);
   }
-  updateConfigVersion(
+  abstract updateConfigVersion(
     security: EvmAddress,
     configVersion: number,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  updateConfig(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract updateConfig(
     security: EvmAddress,
     configId: string,
     configVersion: number,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  updateResolver(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract updateResolver(
     security: EvmAddress,
     resolver: EvmAddress,
     configVersion: number,
     configId: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  protectedTransferFromByPartition(
+  ): Promise<TransactionResponse>;
+  abstract protectedTransferFromByPartition(
     security: EvmAddress,
     partitionId: string,
     sourceId: EvmAddress,
@@ -1501,10 +1379,8 @@ export default abstract class TransactionAdapter
     nounce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  protectedRedeemFromByPartition(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract protectedRedeemFromByPartition(
     security: EvmAddress,
     partitionId: string,
     sourceId: EvmAddress,
@@ -1513,22 +1389,16 @@ export default abstract class TransactionAdapter
     nounce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  protectPartitions(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract protectPartitions(
     security: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  unprotectPartitions(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract unprotectPartitions(
     security: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  protectedTransferAndLockByPartition(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract protectedTransferAndLockByPartition(
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
@@ -1539,26 +1409,20 @@ export default abstract class TransactionAdapter
     nounce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  updateMaturityDate(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract updateMaturityDate(
     security: EvmAddress,
     maturityDate: number,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  setScheduledBalanceAdjustment(
+  ): Promise<TransactionResponse>;
+  abstract setScheduledBalanceAdjustment(
     security: EvmAddress,
     executionDate: BigDecimal,
     factor: BigDecimal,
     decimals: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  createHoldByPartition(
+  ): Promise<TransactionResponse>;
+  abstract createHoldByPartition(
     security: EvmAddress,
     partitionId: string,
     escrow: EvmAddress,
@@ -1566,22 +1430,8 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  createHoldFromByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    escrow: EvmAddress,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  controllerCreateHoldByPartition(
+  ): Promise<TransactionResponse>;
+  abstract createHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
     escrow: EvmAddress,
@@ -1590,10 +1440,18 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  protectedCreateHoldByPartition(
+  ): Promise<TransactionResponse>;
+  abstract controllerCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract protectedCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
@@ -1605,29 +1463,23 @@ export default abstract class TransactionAdapter
     nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  releaseHoldByPartition(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract releaseHoldByPartition(
     security: EvmAddress,
     partitionId: string,
     holdId: number,
     targetId: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  reclaimHoldByPartition(
+  ): Promise<TransactionResponse>;
+  abstract reclaimHoldByPartition(
     security: EvmAddress,
     partitionId: string,
     holdId: number,
     targetId: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  executeHoldByPartition(
+  ): Promise<TransactionResponse>;
+  abstract executeHoldByPartition(
     security: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1635,31 +1487,23 @@ export default abstract class TransactionAdapter
     partitionId: string,
     holdId: number,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  addIssuer(
+  ): Promise<TransactionResponse>;
+  abstract addIssuer(
     security: EvmAddress,
     issuer: EvmAddress,
     securityId: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  setRevocationRegistryAddress(
+  ): Promise<TransactionResponse>;
+  abstract setRevocationRegistryAddress(
     security: EvmAddress,
     revocationRegistry: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  removeIssuer(
+  ): Promise<TransactionResponse>;
+  abstract removeIssuer(
     security: EvmAddress,
     issuer: EvmAddress,
     securityId: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  grantKyc(
+  ): Promise<TransactionResponse>;
+  abstract grantKyc(
     security: EvmAddress,
     targetId: EvmAddress,
     vcId: string,
@@ -1667,39 +1511,29 @@ export default abstract class TransactionAdapter
     validTo: BigDecimal,
     issuer: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  revokeKyc(
+  ): Promise<TransactionResponse>;
+  abstract revokeKyc(
     security: EvmAddress,
     targetId: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  activateClearing(
+  ): Promise<TransactionResponse>;
+  abstract activateClearing(
     security: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  deactivateClearing(
+  ): Promise<TransactionResponse>;
+  abstract deactivateClearing(
     security: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  clearingTransferByPartition(
+  ): Promise<TransactionResponse>;
+  abstract clearingTransferByPartition(
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  clearingTransferFromByPartition(
+  ): Promise<TransactionResponse>;
+  abstract clearingTransferFromByPartition(
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
@@ -1707,10 +1541,8 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  protectedClearingTransferByPartition(
+  ): Promise<TransactionResponse>;
+  abstract protectedClearingTransferByPartition(
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
@@ -1721,59 +1553,47 @@ export default abstract class TransactionAdapter
     nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  approveClearingOperationByPartition(
+  ): Promise<TransactionResponse>;
+  abstract approveClearingOperationByPartition(
     security: EvmAddress,
     partitionId: string,
     targetId: EvmAddress,
     clearingId: number,
     clearingOperationType: ClearingOperationType,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  cancelClearingOperationByPartition(
+  ): Promise<TransactionResponse>;
+  abstract cancelClearingOperationByPartition(
     security: EvmAddress,
     partitionId: string,
     targetId: EvmAddress,
     clearingId: number,
     clearingOperationType: ClearingOperationType,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  reclaimClearingOperationByPartition(
+  ): Promise<TransactionResponse>;
+  abstract reclaimClearingOperationByPartition(
     security: EvmAddress,
     partitionId: string,
     targetId: EvmAddress,
     clearingId: number,
     clearingOperationType: ClearingOperationType,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  clearingRedeemByPartition(
+  ): Promise<TransactionResponse>;
+  abstract clearingRedeemByPartition(
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  clearingRedeemFromByPartition(
+  ): Promise<TransactionResponse>;
+  abstract clearingRedeemFromByPartition(
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
     sourceId: EvmAddress,
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  protectedClearingRedeemByPartition(
+  ): Promise<TransactionResponse>;
+  abstract protectedClearingRedeemByPartition(
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
@@ -1783,10 +1603,8 @@ export default abstract class TransactionAdapter
     nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  clearingCreateHoldByPartition(
+  ): Promise<TransactionResponse>;
+  abstract clearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
     escrow: EvmAddress,
@@ -1795,10 +1613,8 @@ export default abstract class TransactionAdapter
     clearingExpirationDate: BigDecimal,
     holdExpirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  clearingCreateHoldFromByPartition(
+  ): Promise<TransactionResponse>;
+  abstract clearingCreateHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
     escrow: EvmAddress,
@@ -1808,10 +1624,8 @@ export default abstract class TransactionAdapter
     clearingExpirationDate: BigDecimal,
     holdExpirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  protectedClearingCreateHoldByPartition(
+  ): Promise<TransactionResponse>;
+  abstract protectedClearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
@@ -1824,10 +1638,8 @@ export default abstract class TransactionAdapter
     nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    throw new Error('Method not implemented.');
-  }
-  operatorClearingCreateHoldByPartition(
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract operatorClearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
     escrow: EvmAddress,
@@ -1837,20 +1649,16 @@ export default abstract class TransactionAdapter
     clearingExpirationDate: BigDecimal,
     holdExpirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  operatorClearingRedeemByPartition(
+  ): Promise<TransactionResponse>;
+  abstract operatorClearingRedeemByPartition(
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
     sourceId: EvmAddress,
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  operatorClearingTransferByPartition(
+  ): Promise<TransactionResponse>;
+  abstract operatorClearingTransferByPartition(
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
@@ -1858,140 +1666,121 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  updateExternalPauses(
+  ): Promise<TransactionResponse>;
+  abstract updateExternalPauses(
     security: EvmAddress,
     externalPausesAddresses: EvmAddress[],
     actives: boolean[],
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  addExternalPause(
+  ): Promise<TransactionResponse>;
+  abstract addExternalPause(
     security: EvmAddress,
     externalPauseAddress: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  removeExternalPause(
+  ): Promise<TransactionResponse>;
+  abstract removeExternalPause(
     security: EvmAddress,
     externalPauseAddress: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  setPausedMock(
+  ): Promise<TransactionResponse>;
+  abstract setPausedMock(
     contract: EvmAddress,
     paused: boolean,
     contractId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  createExternalPauseMock(): Promise<string | TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  updateExternalControlLists(
+  ): Promise<TransactionResponse>;
+  abstract createExternalPauseMock(): Promise<string | TransactionResponse>;
+  abstract updateExternalControlLists(
     security: EvmAddress,
     externalControlListsAddresses: EvmAddress[],
     actives: boolean[],
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  addExternalControlList(
+  ): Promise<TransactionResponse>;
+  abstract addExternalControlList(
     security: EvmAddress,
     externalControlListAddress: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  removeExternalControlList(
+  ): Promise<TransactionResponse>;
+  abstract removeExternalControlList(
     security: EvmAddress,
     externalControlListAddress: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  addToBlackListMock(
+  ): Promise<TransactionResponse>;
+  abstract addToBlackListMock(
     contract: EvmAddress,
     targetId: EvmAddress,
     contractId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  addToWhiteListMock(
+  ): Promise<TransactionResponse>;
+  abstract addToWhiteListMock(
     contract: EvmAddress,
     targetId: EvmAddress,
     contractId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  removeFromWhiteListMock(
+  ): Promise<TransactionResponse>;
+  abstract removeFromWhiteListMock(
     contract: EvmAddress,
     targetId: EvmAddress,
     contractId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  removeFromBlackListMock(
+  ): Promise<TransactionResponse>;
+  abstract removeFromBlackListMock(
     contract: EvmAddress,
     targetId: EvmAddress,
     contractId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  createExternalBlackListMock(): Promise<string | TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  createExternalWhiteListMock(): Promise<string | TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  updateExternalKycLists(
+  ): Promise<TransactionResponse>;
+  abstract createExternalBlackListMock(): Promise<string | TransactionResponse>;
+  abstract createExternalWhiteListMock(): Promise<string | TransactionResponse>;
+  abstract updateExternalKycLists(
     security: EvmAddress,
     externalKycListsAddresses: EvmAddress[],
     actives: boolean[],
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  addExternalKycList(
+  ): Promise<TransactionResponse>;
+  abstract addExternalKycList(
     security: EvmAddress,
     externalKycListAddress: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  removeExternalKycList(
+  ): Promise<TransactionResponse>;
+  abstract removeExternalKycList(
     security: EvmAddress,
     externalKycListAddress: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  activateInternalKyc(
+  ): Promise<TransactionResponse>;
+  abstract activateInternalKyc(
     security: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  deactivateInternalKyc(
+  ): Promise<TransactionResponse>;
+  abstract deactivateInternalKyc(
     security: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  grantKycMock(
+  ): Promise<TransactionResponse>;
+  abstract grantKycMock(
     security: EvmAddress,
     targetId: EvmAddress,
     securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
-    throw new Error('Method not implemented.');
-  }
-  revokeKycMock(
+  ): Promise<TransactionResponse>;
+  abstract revokeKycMock(
     security: EvmAddress,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract createExternalKycListMock(): Promise<string | TransactionResponse>;
+  abstract setName(
+    security: EvmAddress,
+    name: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract setSymbol(
+    security: EvmAddress,
+    symbol: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract setAddressFrozen(
+    security: EvmAddress,
+    status: boolean,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract freezePartialTokens(
+    security: EvmAddress,
+    amount: BigDecimal,
     targetId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {

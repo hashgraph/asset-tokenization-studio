@@ -75,13 +75,13 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
     >
       <div
         aria-orientation="horizontal"
-        class="chakra-tabs__tablist css-1xns9mo"
+        class="chakra-tabs__tablist css-1t2akcu"
         role="tablist"
       >
         <button
           aria-controls="tabs-:r0:--tabpanel-0"
           aria-selected="true"
-          class="chakra-tabs__tab css-1pb76tb"
+          class="chakra-tabs__tab css-1fryz8v"
           data-index="0"
           id="tabs-:r0:--tab-0"
           role="tab"
@@ -93,7 +93,7 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
         <button
           aria-controls="tabs-:r0:--tabpanel-1"
           aria-selected="false"
-          class="chakra-tabs__tab css-1pb76tb"
+          class="chakra-tabs__tab css-1fryz8v"
           data-index="1"
           id="tabs-:r0:--tab-1"
           role="tab"
@@ -104,11 +104,15 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
         </button>
       </div>
       <div
-        class="chakra-tabs__tab-panels css-4mrpka"
+        class="chakra-tabs__tab-indicator css-1axjpr8"
+        style="position: absolute; transition-property: left, right, top, bottom, height, width; transition-duration: 0ms; transition-timing-function: cubic-bezier(0, 0, 0.2, 1); left: 0px; width: 0px;"
+      />
+      <div
+        class="chakra-tabs__tab-panels css-1oiq8y1"
       >
         <div
           aria-labelledby="tabs-:r0:--tab-0"
-          class="chakra-tabs__tab-panel css-12r0y8x"
+          class="chakra-tabs__tab-panel css-uzjpue"
           id="tabs-:r0:--tabpanel-0"
           role="tabpanel"
           tabindex="0"
@@ -604,251 +608,21 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                     </div>
                   </div>
                 </div>
+                <div
+                  class="chakra-stack css-n21gh5"
+                />
               </div>
             </div>
           </div>
         </div>
         <div
           aria-labelledby="tabs-:r0:--tab-1"
-          class="chakra-tabs__tab-panel css-12r0y8x"
+          class="chakra-tabs__tab-panel css-uzjpue"
           hidden=""
           id="tabs-:r0:--tabpanel-1"
           role="tabpanel"
           tabindex="0"
-        >
-          <div
-            class="chakra-stack css-frx4bb"
-          >
-            <div
-              class="chakra-stack css-169eia3"
-            >
-              <div
-                class="chakra-stack css-1qx0yhn"
-              >
-                <h2
-                  class="css-1mk5tlk"
-                >
-                  Display balances
-                </h2>
-                <p
-                  class="css-j9h4p6"
-                >
-                  Add the ID account to preview its balance
-                </p>
-                <form
-                  class="chakra-stack css-1y1dtud"
-                >
-                  <div
-                    class="chakra-form-control css-1kxonj9"
-                    role="group"
-                  >
-                    <label
-                      class="css-1fey8w1"
-                      for="search"
-                    >
-                      <div
-                        class="chakra-input__group css-pwmwmr"
-                        data-group="true"
-                      >
-                        <input
-                          class="chakra-input css-1ymw93l"
-                          data-testid="search"
-                          id="search"
-                          name="search"
-                          placeholder="0.0.19253"
-                          value=""
-                        />
-                        <div
-                          class="chakra-input__right-element css-1akgnmh"
-                        >
-                          <button
-                            aria-label="search"
-                            class="chakra-button css-kdxsnu"
-                            data-testid="search-icon-button"
-                            disabled=""
-                            type="button"
-                          >
-                            <svg
-                              aria-hidden="true"
-                              class="chakra-icon css-kpbtv0"
-                              fill="currentColor"
-                              focusable="false"
-                              height="1em"
-                              viewBox="0 0 256 256"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"
-                              />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                  <button
-                    class="chakra-button css-gobc5v"
-                    disabled=""
-                    type="submit"
-                  >
-                    <p
-                      class="css-15hpv2u"
-                    >
-                      Search ID
-                    </p>
-                  </button>
-                </form>
-              </div>
-            </div>
-            <div
-              class="chakra-stack css-13czc0d"
-            >
-              <div
-                class="chakra-stack css-159zjtk"
-              >
-                <div
-                  class="chakra-stack css-1yqmcpo"
-                >
-                  <div
-                    class="css-1dixb64"
-                  >
-                    <p
-                      class="chakra-text css-1an6htx"
-                    >
-                      Details
-                    </p>
-                  </div>
-                  <div
-                    class="css-tvba8"
-                    data-testid="definition-list-item-ID"
-                    tabindex="0"
-                  >
-                    <p
-                      class="chakra-text css-vbc1qe"
-                    >
-                      ID
-                    </p>
-                    <p
-                      class="chakra-text css-uivqlt"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div
-                class="chakra-stack css-b1sb84"
-              >
-                <div
-                  class="chakra-stack css-19rghx9"
-                >
-                  <p
-                    class="css-kwpule"
-                  >
-                    Total Balance
-                  </p>
-                  <div
-                    class="chakra-stack css-apqn8k"
-                  >
-                    <p
-                      class="css-1ysbn4y"
-                    >
-                      -
-                      <span
-                        class="css-650xeh"
-                      />
-                    </p>
-                  </div>
-                  <div
-                    class="chakra-stack css-1ok80jm"
-                  >
-                    <div
-                      class="chakra-stack css-1h4ws66"
-                    >
-                      <p
-                        class="css-ncp2jn"
-                      >
-                        Available balance
-                      </p>
-                      <p
-                        class="css-vzbq89"
-                      >
-                        - 
-                      </p>
-                    </div>
-                    <div
-                      class="chakra-stack css-nkhb6s"
-                    />
-                    <div
-                      class="chakra-stack css-1h4ws66"
-                    >
-                      <p
-                        class="css-ncp2jn"
-                      >
-                        Lock balance
-                      </p>
-                      <p
-                        class="css-vzbq89"
-                      >
-                        - 
-                      </p>
-                    </div>
-                    <div
-                      class="chakra-stack css-nkhb6s"
-                    />
-                    <div
-                      class="chakra-stack css-1h4ws66"
-                    >
-                      <p
-                        class="css-ncp2jn"
-                      >
-                        Held balance
-                      </p>
-                      <p
-                        class="css-vzbq89"
-                      >
-                        - 
-                      </p>
-                    </div>
-                    <div
-                      class="chakra-stack css-nkhb6s"
-                    />
-                    <div
-                      class="chakra-stack css-1h4ws66"
-                    >
-                      <p
-                        class="css-ncp2jn"
-                      >
-                        Cleared balance
-                      </p>
-                      <p
-                        class="css-vzbq89"
-                      >
-                        - 
-                      </p>
-                    </div>
-                    <div
-                      class="chakra-stack css-nkhb6s"
-                    />
-                    <div
-                      class="chakra-stack css-1h4ws66"
-                    >
-                      <p
-                        class="css-ncp2jn"
-                      >
-                        Frozen balance
-                      </p>
-                      <p
-                        class="css-vzbq89"
-                      >
-                        - 
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        />
       </div>
     </div>
   </div>

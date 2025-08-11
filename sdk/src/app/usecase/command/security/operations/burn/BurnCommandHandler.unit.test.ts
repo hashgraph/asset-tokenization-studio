@@ -206,26 +206,26 @@
 import { createMock } from '@golevelup/ts-jest';
 import { BurnCommandHandler } from './BurnCommandHandler';
 import { BurnCommand, BurnCommandResponse } from './BurnCommand';
-import SecurityService from '../../../../../service/security/SecurityService';
-import ValidationService from '../../../../../service/validation/ValidationService';
-import { BurnCommandFixture } from '../../../../../../../__tests__/fixtures/burn/BurnFixture';
-import TransactionService from 'app/service/transaction/TransactionService';
-import AccountService from '../../../../../service/account/AccountService';
-import ContractService from '../../../../../service/contract/ContractService';
+import SecurityService from '@service/security/SecurityService';
+import ValidationService from '@service/validation/ValidationService';
+import { BurnCommandFixture } from '@test/fixtures/burn/BurnFixture';
+import TransactionService from '@service/transaction/TransactionService';
+import AccountService from '@service/account/AccountService';
+import ContractService from '@service/contract/ContractService';
 
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture';
-import Account from '../../../../../../domain/context/account/Account';
-import { Security } from '../../../../../../domain/context/security/Security';
-import { _PARTITION_ID_1 } from '../../../../../../core/Constants';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
+} from '@test/fixtures/shared/DataFixture';
+import Account from '@domain/context/account/Account';
+import { Security } from '@domain/context/security/Security';
+import { _PARTITION_ID_1 } from '@core/Constants';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import { BurnCommandError } from './error/BurnCommandError';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import TransactionAdapter from '../../../../../../port/out/TransactionAdapter';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import TransactionAdapter from '@port/out/TransactionAdapter';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 
 describe('BurnCommandHandler', () => {
   let handler: BurnCommandHandler;

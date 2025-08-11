@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../../../FormatValidation.js';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '@port/in/request/FormatValidation';
 
 export default class GetHoldsIdForByPartitionRequest extends ValidatedRequest<GetHoldsIdForByPartitionRequest> {
   securityId: string;
