@@ -230,9 +230,12 @@ export const StepERC3643 = () => {
     ICreateEquityFormValues | ICreateBondFormValues
   >();
 
-  const stepFormState = useFormState({
+  const { errors, isSubmitting } = useFormState({
     control,
   });
+
+  // Can proceed if there are no validation errors and the form isn't submitting
+  const canProceed = Object.keys(errors ?? {}).length === 0 && !isSubmitting;
 
   return (
     <FormStepContainer>
