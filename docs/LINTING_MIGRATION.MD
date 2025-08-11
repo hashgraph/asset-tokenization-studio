@@ -1,21 +1,5 @@
 # Prettier Flat Config Clarification and Migration Notes
 
-## Does Prettier have a flat config version?
-
-No. Prettier does not currently support an ESLint-style flat config. It still uses its established configuration file formats:
-
-- .prettierrc (JSON)
-- .prettierrc.json (JSON)
-- .prettierrc.yml / .prettierrc.yaml (YAML)
-- .prettierrc.js / .prettierrc.cjs (CommonJS)
-- .prettierrc.mjs (ES Module)
-- prettier.config.js / prettier.config.cjs (CommonJS)
-- prettier.config.mjs (ES Module)
-
-For consistency with an ESLint flat config in ESM, using `prettier.config.mjs` is recommended.
-
----
-
 ## Root Prettier Config (ES Module)
 
 Example configuration placed at `prettier.config.mjs`:
