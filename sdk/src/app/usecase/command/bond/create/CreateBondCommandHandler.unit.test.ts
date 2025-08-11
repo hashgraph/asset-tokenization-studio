@@ -414,6 +414,7 @@ describe('CreateBondCommandHandler', () => {
           command.configId,
           command.configVersion,
           evmAddress,
+          evmAddress,
           [externalPauseEvmAddress],
           [externalControlEvmAddress],
           [externalKycEvmAddress],
