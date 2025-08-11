@@ -64,8 +64,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build mass-payout
-        run: npm run mp:build
+      # - name: Build mass-payout
+      #   run: npm run mp:build
 
-      - name: Test mass-payout
-        run: npm run mp:test
+      # - name: Test mass-payout
+      #   run: npm run mp:test

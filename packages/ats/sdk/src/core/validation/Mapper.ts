@@ -211,10 +211,9 @@ export default class Mapper {
       return keys.startsWith('_') || keys.startsWith('#')
         ? keys.substring(1)
         : keys;
-    } else {
-      return keys.map((key) =>
-        key.startsWith('_') || key.startsWith('#') ? key.substring(1) : key,
-      );
     }
+    return keys.map((key) =>
+      key.startsWith('_') || key.startsWith('#') ? key.substring(1) : key,
+    );
   }
 }
