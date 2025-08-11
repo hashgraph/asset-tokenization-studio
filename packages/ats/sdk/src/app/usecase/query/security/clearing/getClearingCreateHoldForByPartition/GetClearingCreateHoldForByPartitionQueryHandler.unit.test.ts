@@ -253,7 +253,7 @@ describe('GetClearingCreateHoldForByPartitionQueryHandler', () => {
     clearingHoldProps.expirationTimestamp,
     clearingHoldProps.data,
     clearingHoldProps.operatorData,
-    clearingHoldProps.holdEscrow,
+    clearingHoldProps.holdEscrowId,
     clearingHoldProps.holdExpirationTimestamp,
     clearingHoldProps.holdTo,
     clearingHoldProps.holdData,
@@ -331,7 +331,7 @@ describe('GetClearingCreateHoldForByPartitionQueryHandler', () => {
 
       expect(accountServiceMock.getAccountInfo).toHaveBeenNthCalledWith(
         1,
-        clearingHoldProps.holdEscrow,
+        clearingHoldProps.holdEscrowId,
       );
       expect(accountServiceMock.getAccountInfo).toHaveBeenNthCalledWith(
         2,

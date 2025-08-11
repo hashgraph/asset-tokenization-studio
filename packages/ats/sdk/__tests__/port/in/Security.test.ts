@@ -1036,7 +1036,7 @@ describe('🧪 Security tests', () => {
             securityId: equity.evmDiamondAddress!,
             partitionId: _PARTITION_ID_1,
             amount: heldAmount,
-            escrow: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            escrowId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
             targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
             expirationDate: expirationTimeStamp,
           }),
@@ -1367,7 +1367,7 @@ describe('🧪 Security tests', () => {
             deadline: '9999999999',
             nonce: 3,
             signature: 'vvvv',
-            escrow: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            escrowId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
           }),
         )
       ).payload,
@@ -1488,7 +1488,7 @@ describe('🧪 Security tests', () => {
               securityId: equity.evmDiamondAddress!,
               partitionId: _PARTITION_ID_1,
               amount: clearedAmount,
-              escrow: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+              escrowId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
               targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
               clearingExpirationDate: expirationTimeStamp,
               holdExpirationDate: expirationTimeStamp,
@@ -1531,7 +1531,7 @@ describe('🧪 Security tests', () => {
       expect(clearing.expirationDate).toEqual(date);
       expect(clearing.data).toEqual('0x');
       expect(clearing.operatorData).toEqual('0x');
-      expect(clearing.holdEscrow).toEqual(
+      expect(clearing.holdEscrowId).toEqual(
         CLIENT_ACCOUNT_ECDSA_A.id!.toString(),
       );
       expect(clearing.holdExpirationDate).toEqual(date);
@@ -2122,7 +2122,7 @@ describe('🧪 Security tests', () => {
               partitionId: _PARTITION_ID_1,
               amount: clearedAmount,
               sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-              escrow: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+              escrowId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
               targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
               clearingExpirationDate: expirationTimeStamp,
               holdExpirationDate: expirationTimeStamp,
@@ -2288,7 +2288,7 @@ describe('🧪 Security tests', () => {
               deadline: '9999999999',
               nonce: 3,
               signature: 'vvvv',
-              escrow: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+              escrowId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
             }),
           )
         ).payload,

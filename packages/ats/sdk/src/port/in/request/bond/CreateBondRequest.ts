@@ -230,13 +230,13 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   internalKycActivated: boolean;
 
   @OptionalField()
-  externalPauses?: string[];
+  externalPausesIds?: string[];
 
   @OptionalField()
-  externalControlLists?: string[];
+  externalControlListsIds?: string[];
 
   @OptionalField()
-  externalKycLists?: string[];
+  externalKycListsIds?: string[];
 
   @OptionalField()
   diamondOwnerAccount?: string;
@@ -274,9 +274,9 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     isMultiPartition,
     clearingActive,
     internalKycActivated,
-    externalPauses,
-    externalControlLists,
-    externalKycLists,
+    externalPausesIds,
+    externalControlListsIds,
+    externalKycListsIds,
     diamondOwnerAccount,
     currency,
     numberOfUnits,
@@ -306,9 +306,9 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     isMultiPartition: boolean;
     clearingActive: boolean;
     internalKycActivated: boolean;
-    externalPauses?: string[];
-    externalControlLists?: string[];
-    externalKycLists?: string[];
+    externalPausesIds?: string[];
+    externalControlListsIds?: string[];
+    externalKycListsIds?: string[];
     diamondOwnerAccount?: string;
     currency: string;
     numberOfUnits: string;
@@ -378,24 +378,24 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
       configId: FormatValidation.checkBytes32Format(),
-      externalPauses: (val) => {
+      externalPausesIds: (val) => {
         return FormatValidation.checkHederaIdOrEvmAddressArray(
           val ?? [],
-          'externalPauses',
+          'externalPausesIds',
           true,
         );
       },
-      externalControlLists: (val) => {
+      externalControlListsIds: (val) => {
         return FormatValidation.checkHederaIdOrEvmAddressArray(
           val ?? [],
-          'externalControlLists',
+          'externalControlListsIds',
           true,
         );
       },
-      externalKycLists: (val) => {
+      externalKycListsIds: (val) => {
         return FormatValidation.checkHederaIdOrEvmAddressArray(
           val ?? [],
-          'externalKycLists',
+          'externalKycListsIds',
           true,
         );
       },
@@ -415,9 +415,9 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.clearingActive = clearingActive;
     this.internalKycActivated = internalKycActivated;
     this.diamondOwnerAccount = diamondOwnerAccount;
-    this.externalPauses = externalPauses;
-    this.externalControlLists = externalControlLists;
-    this.externalKycLists = externalKycLists;
+    this.externalPausesIds = externalPausesIds;
+    this.externalControlListsIds = externalControlListsIds;
+    this.externalKycListsIds = externalKycListsIds;
     this.currency = currency;
     this.numberOfUnits = numberOfUnits;
     this.nominalValue = nominalValue;

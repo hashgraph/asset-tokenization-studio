@@ -561,7 +561,7 @@ interface IHoldTransactionAdapter {
   createHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
@@ -570,7 +570,7 @@ interface IHoldTransactionAdapter {
   createHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -580,7 +580,7 @@ interface IHoldTransactionAdapter {
   controllerCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -591,7 +591,7 @@ interface IHoldTransactionAdapter {
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
@@ -760,7 +760,7 @@ interface IClearingAdapter {
   clearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -770,7 +770,7 @@ interface IClearingAdapter {
   clearingCreateHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -782,7 +782,7 @@ interface IClearingAdapter {
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -795,7 +795,7 @@ interface IClearingAdapter {
   operatorClearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1391,7 +1391,7 @@ export default abstract class TransactionAdapter
   abstract createHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
@@ -1400,7 +1400,7 @@ export default abstract class TransactionAdapter
   abstract createHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1410,7 +1410,7 @@ export default abstract class TransactionAdapter
   abstract controllerCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1421,7 +1421,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
@@ -1573,7 +1573,7 @@ export default abstract class TransactionAdapter
   abstract clearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -1583,7 +1583,7 @@ export default abstract class TransactionAdapter
   abstract clearingCreateHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1595,7 +1595,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -1608,7 +1608,7 @@ export default abstract class TransactionAdapter
   abstract operatorClearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
