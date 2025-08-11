@@ -292,7 +292,7 @@ export const StepERC3643 = () => {
       >
         <CancelButton />
         <PreviousStepButton />
-        <NextStepButton isDisabled={!stepFormState.isValid} />
+        <NextStepButton isDisabled={!canProceed} />
       </HStack>
     </FormStepContainer>
   );
