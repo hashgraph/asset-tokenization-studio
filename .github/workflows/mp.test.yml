@@ -64,18 +64,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build mass-payout/contracts
-        run: npm run build:mp:contracts
+      - name: Build mass-payout
+        run: npm run mp:build
 
-      - name: Build mass-payout/sdk
-        run: npm run build:mp:sdk
-
-      - name: Install mass-payout/web dependencies
-        run: npm run install:mp:web:lock
-
-      - name: Build mass-payout/web
-        run: npm run build:mp:web
-
-      - name: Run mass-payout/contracts tests
-        working-directory: packages/mass-payout/contracts
-        run: npm run test
+      - name: Test mass-payout
+        run: npm run mp:test
