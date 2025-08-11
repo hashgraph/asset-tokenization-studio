@@ -377,7 +377,7 @@ describe('CreateBondCommandHandler', () => {
         expect(result.securityId.value).toBe(transactionId);
         expect(result.transactionId).toBe(transactionId);
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          3,
+          4,
         );
         expect(
           contractServiceMock.getEvmAddressesFromHederaIds,
