@@ -221,7 +221,6 @@ import {
 } from '@test/fixtures/shared/DataFixture';
 import AccountService from '@service/account/AccountService';
 import BigDecimal from '@domain/context/shared/BigDecimal';
-import NetworkService from '@service/network/NetworkService';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import { CreateEquityCommandFixture } from '@test/fixtures/equity/EquityFixture';
 import { ErrorCode } from '@core/error/BaseError';
@@ -232,7 +231,6 @@ describe('CreateEquityCommandHandler', () => {
   let command: CreateEquityCommand;
 
   const transactionServiceMock = createMock<TransactionService>();
-  const networkServiceMock = createMock<NetworkService>();
   const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
   const accountServiceMock = createMock<AccountService>();
   const contractServiceMock = createMock<ContractService>();
@@ -255,7 +253,6 @@ describe('CreateEquityCommandHandler', () => {
   beforeEach(() => {
     handler = new CreateEquityCommandHandler(
       transactionServiceMock,
-      networkServiceMock,
       mirrorNodeAdapterMock,
       contractServiceMock,
       accountServiceMock,

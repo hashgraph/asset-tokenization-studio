@@ -374,9 +374,9 @@ describe('Bond', () => {
           createBondRequest.configId,
           createBondRequest.configVersion,
           createBondRequest.diamondOwnerAccount,
-          createBondRequest.externalPauses,
-          createBondRequest.externalControlLists,
-          createBondRequest.externalKycLists,
+          createBondRequest.externalPausesIds,
+          createBondRequest.externalControlListsIds,
+          createBondRequest.externalKycListsIds,
           createBondRequest.complianceId,
           createBondRequest.identityRegistryId,
         ),
@@ -440,9 +440,9 @@ describe('Bond', () => {
           createBondRequest.configId,
           createBondRequest.configVersion,
           createBondRequest.diamondOwnerAccount,
-          createBondRequest.externalPauses,
-          createBondRequest.externalControlLists,
-          createBondRequest.externalKycLists,
+          createBondRequest.externalPausesIds,
+          createBondRequest.externalControlListsIds,
+          createBondRequest.externalKycListsIds,
           createBondRequest.complianceId,
           createBondRequest.identityRegistryId,
         ),
@@ -641,10 +641,10 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if externalPauses is invalid', async () => {
+    it('should throw error if externalPausesIds is invalid', async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          externalPauses: ['invalid'],
+          externalPausesIds: ['invalid'],
         }),
       );
 
@@ -653,10 +653,10 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if externalControlLists is invalid', async () => {
+    it('should throw error if externalControlListsIds is invalid', async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          externalControlLists: ['invalid'],
+          externalControlListsIds: ['invalid'],
         }),
       );
 
@@ -665,10 +665,10 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if externalKycLists is invalid', async () => {
+    it('should throw error if externalKycListsIds is invalid', async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          externalKycLists: ['invalid'],
+          externalKycListsIds: ['invalid'],
         }),
       );
 
