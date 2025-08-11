@@ -4,14 +4,15 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc && vite build",
-    "test": "NODE_ENV=test jest --ci --runInBand",
+    "test": "NODE_ENV=test jest",
+    "test:ci": "NODE_ENV=test jest --ci --runInBand",
     "clean": "npx --yes npm-run-all --parallel clean:node clean:build",
     "dev": "vite",
     "start": "vite preview",
     "clean:node": "npx --yes rimraf node_modules",
     "clean:build": "npx --yes rimraf build",
     "clean:lock": "npx --yes rimraf package-lock.json yarn.lock",
-    "test:update": "NODE_ENV=test jest --ci --runInBand --updateSnapshot",
+    "test:update": "NODE_ENV=test jest --updateSnapshot",
     "test:clear:cache": "npx jest --clearCache",
     "theme": "chakra-cli tokens src/theme/index.ts"
   },
