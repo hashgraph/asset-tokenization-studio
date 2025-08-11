@@ -232,9 +232,8 @@ import {
     DiamondFacet,
     FreezeFacet,
     ComplianceMock,
-    IERC3643,
     IdentityRegistryMock,
-    IERC3643,
+    IERC3643
 } from '@typechain'
 import {
     PAUSER_ROLE,
