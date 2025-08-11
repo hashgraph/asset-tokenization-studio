@@ -332,6 +332,7 @@ describe('ERC3643 Tests', () => {
     enum ClearingOperationType {
         Transfer,
         Redeem,
+        HoldCreation,
     }
     describe('single partition', () => {
         let erc3643Issuer: IERC3643
