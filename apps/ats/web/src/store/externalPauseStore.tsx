@@ -203,8 +203,8 @@
 
 */
 
-import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 
 export interface ExternalPauseStore {
   address: string;
@@ -222,7 +222,7 @@ interface ExternalPauseStoreProps {
   reset: () => void;
 }
 
-const EXTERNAL_PAUSE_STORE_KEY = "EXTERNAL_PAUSE_STORE_KEY";
+const EXTERNAL_PAUSE_STORE_KEY = 'EXTERNAL_PAUSE_STORE_KEY';
 
 export const useExternalPauseStore = create<ExternalPauseStoreProps>()(
   persist(

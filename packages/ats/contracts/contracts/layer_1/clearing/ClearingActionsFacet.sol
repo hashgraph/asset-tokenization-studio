@@ -206,70 +206,46 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from '../common/Common.sol';
-import {IClearingActions} from '../interfaces/clearing/IClearingActions.sol';
-import {IClearing} from '../interfaces/clearing/IClearing.sol';
-import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CLEARING_ACTIONS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
-import {_CLEARING_ROLE} from '../constants/roles.sol';
+import { Common } from '../common/Common.sol';
+import { IClearingActions } from '../interfaces/clearing/IClearingActions.sol';
+import { IClearing } from '../interfaces/clearing/IClearing.sol';
+import { _CLEARING_VALIDATOR_ROLE } from '../constants/roles.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _CLEARING_ACTIONS_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { IKyc } from '../interfaces/kyc/IKyc.sol';
+import { _CLEARING_ROLE } from '../constants/roles.sol';
 
-contract ClearingActionsFacet is
-    IStaticFunctionSelectors,
-    IClearingActions,
-    Common
-{
-    function initializeClearing(
-        bool _clearingActive
-    ) external onlyUninitialized(_clearingStorage().initialized) {
-        IClearing.ClearingDataStorage
-            storage clearingStorage = _clearingStorage();
+contract ClearingActionsFacet is IStaticFunctionSelectors, IClearingActions, Common {
+    function initializeClearing(bool _clearingActive) external onlyUninitialized(_clearingStorage().initialized) {
+        IClearing.ClearingDataStorage storage clearingStorage = _clearingStorage();
         clearingStorage.initialized = true;
         clearingStorage.activated = _clearingActive;
     }
 
-    function activateClearing()
-        external
-        onlyRole(_CLEARING_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    function activateClearing() external onlyRole(_CLEARING_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _setClearing(true);
         emit ClearingActivated(_msgSender());
     }
 
-    function deactivateClearing()
-        external
-        onlyRole(_CLEARING_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    function deactivateClearing() external onlyRole(_CLEARING_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _setClearing(false);
         emit ClearingDeactivated(_msgSender());
     }
 
     function approveClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
         external
         override
         onlyRole(_CLEARING_VALIDATOR_ROLE)
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationIdentifier.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyClearingActivated
         validateExpirationTimestamp(_clearingOperationIdentifier, false)
         returns (bool success_)
     {
-        success_ = _approveClearingOperationByPartition(
-            _clearingOperationIdentifier
-        );
+        success_ = _approveClearingOperationByPartition(_clearingOperationIdentifier);
 
         emit ClearingOperationApproved(
             _msgSender(),
@@ -281,24 +257,19 @@ contract ClearingActionsFacet is
     }
 
     function cancelClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
         external
         override
         onlyRole(_CLEARING_VALIDATOR_ROLE)
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationIdentifier.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyClearingActivated
         validateExpirationTimestamp(_clearingOperationIdentifier, false)
         returns (bool success_)
     {
-        success_ = _cancelClearingOperationByPartition(
-            _clearingOperationIdentifier
-        );
+        success_ = _cancelClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationCanceled(
             _msgSender(),
             _clearingOperationIdentifier.tokenHolder,
@@ -309,27 +280,19 @@ contract ClearingActionsFacet is
     }
 
     function reclaimClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
         external
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationIdentifier.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
-        onlyValidKycStatus(
-            IKyc.KycStatus.GRANTED,
-            _clearingOperationIdentifier.tokenHolder
-        )
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationIdentifier.tokenHolder)
         onlyClearingActivated
         validateExpirationTimestamp(_clearingOperationIdentifier, true)
         returns (bool success_)
     {
-        success_ = _reclaimClearingOperationByPartition(
-            _clearingOperationIdentifier
-        );
+        success_ = _reclaimClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationReclaimed(
             _msgSender(),
             _clearingOperationIdentifier.tokenHolder,
@@ -343,52 +306,23 @@ contract ClearingActionsFacet is
         return _isClearingActivated();
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _CLEARING_ACTIONS_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initializeClearing
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .activateClearing
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .deactivateClearing
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .approveClearingOperationByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .cancelClearingOperationByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .reclaimClearingOperationByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isClearingActivated
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initializeClearing.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.activateClearing.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.deactivateClearing.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.approveClearingOperationByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.cancelClearingOperationByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.reclaimClearingOperationByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isClearingActivated.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IClearing).interfaceId;

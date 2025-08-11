@@ -203,9 +203,9 @@
 
 */
 
-import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
-import { User } from "../utils/constants";
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+import { User } from '../utils/constants';
 
 type UserType = User.admin | User.general | User.holder;
 
@@ -214,7 +214,7 @@ interface UserStore {
   setType: (type: UserType) => void;
 }
 
-const USER_STORE_KEY = "USER_STORE_KEY";
+const USER_STORE_KEY = 'USER_STORE_KEY';
 
 export const useUserStore = create<UserStore>()(
   persist(

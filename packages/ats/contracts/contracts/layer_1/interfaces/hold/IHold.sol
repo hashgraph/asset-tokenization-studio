@@ -206,10 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { ThirdPartyType } from '../../../layer_0/common/types/ThirdPartyType.sol';
 
 interface IHold {
     enum OperationType {
@@ -373,13 +371,9 @@ interface IHold {
         uint256 _amount
     ) external returns (bool success_);
 
-    function reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier
-    ) external returns (bool success_);
+    function reclaimHoldByPartition(HoldIdentifier calldata _holdIdentifier) external returns (bool success_);
 
-    function getHeldAmountFor(
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
+    function getHeldAmountFor(address _tokenHolder) external view returns (uint256 amount_);
 
     function getHeldAmountForByPartition(
         bytes32 _partition,
@@ -413,7 +407,5 @@ interface IHold {
             ThirdPartyType thirdPartyType_
         );
 
-    function getHoldThirdParty(
-        HoldIdentifier calldata _holdIdentifier
-    ) external view returns (address thirdParty_);
+    function getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) external view returns (address thirdParty_);
 }

@@ -14,10 +14,13 @@
     "setup": "npm install",
     "lint": "npm run lint:js && npm run lint:sol",
     "lint:js": "eslint . --cache",
-    "lint:sol": "solhint 'packages/ats/contracts/contracts/**/*.sol'",
+    "lint:sol": "solhint 'packages/ats/contracts/contracts/**/*.sol' --config packages/ats/contracts/.solhint.json",
     "lint:fix": "eslint . --fix && npm run format",
     "format": "prettier --write . --cache",
     "format:check": "prettier --check . --cache",
+    "lint:staged:js": "eslint --cache",
+    "lint:staged:sol": "solhint --config packages/ats/contracts/.solhint.json",
+    "format:staged": "prettier --check",
     "ats:contracts:build": "npm run build --workspace=packages/ats/contracts",
     "ats:sdk:build": "npm run build --workspace=packages/ats/sdk",
     "ats:web:build": "npm run build --workspace=apps/ats/web",
@@ -71,8 +74,11 @@
     "typescript": "^5.8.2"
   },
   "lint-staged": {
-    "*.sol": ["prettier --write", "solhint"],
-    "*.{js,mjs,cjs,ts,tsx,mts}": ["eslint --fix", "prettier --write"],
-    "*.{json,md,yml,yaml}": ["prettier --write"]
+    "*.sol": ["npm run lint:staged:sol --", "npm run format:staged --"],
+    "*.{js,mjs,cjs,ts,tsx,mts}": [
+      "npm run lint:staged:js -- --fix",
+      "npm run format:staged --"
+    ],
+    "*.{json,md,yml,yaml}": ["npm run format:staged --"]
   }
 }

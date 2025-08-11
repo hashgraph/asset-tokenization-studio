@@ -206,41 +206,24 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {Common} from '../common/Common.sol';
-import {_SSI_MANAGER_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_SSI_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {ISsiManagement} from '../interfaces/ssi/ISsiManagement.sol';
+import { Common } from '../common/Common.sol';
+import { _SSI_MANAGER_ROLE } from '../constants/roles.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _SSI_MANAGEMENT_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { ISsiManagement } from '../interfaces/ssi/ISsiManagement.sol';
 
 contract SsiManagement is ISsiManagement, IStaticFunctionSelectors, Common {
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_SSI_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
         address oldRevocationRegistryAddress = _getRevocationRegistryAddress();
         success_ = _setRevocationRegistryAddress(_revocationRegistryAddress);
-        emit RevocationRegistryUpdated(
-            oldRevocationRegistryAddress,
-            _getRevocationRegistryAddress()
-        );
+        emit RevocationRegistryUpdated(oldRevocationRegistryAddress, _getRevocationRegistryAddress());
     }
 
     function addIssuer(
         address _issuer
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_SSI_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _addIssuer(_issuer);
         if (!success_) {
             revert ListedIssuer(_issuer);
@@ -250,13 +233,7 @@ contract SsiManagement is ISsiManagement, IStaticFunctionSelectors, Common {
 
     function removeIssuer(
         address _issuer
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_SSI_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _removeIssuer(_issuer);
         if (!success_) {
             revert UnlistedIssuer(_issuer);
@@ -264,12 +241,7 @@ contract SsiManagement is ISsiManagement, IStaticFunctionSelectors, Common {
         emit RemovedFromIssuerList(_msgSender(), _issuer);
     }
 
-    function getRevocationRegistryAddress()
-        external
-        view
-        override
-        returns (address revocationRegistryAddress_)
-    {
+    function getRevocationRegistryAddress() external view override returns (address revocationRegistryAddress_) {
         return _getRevocationRegistryAddress();
     }
 
@@ -277,12 +249,7 @@ contract SsiManagement is ISsiManagement, IStaticFunctionSelectors, Common {
         return _isIssuer(_issuer);
     }
 
-    function getIssuerListCount()
-        external
-        view
-        override
-        returns (uint256 issuerListCount_)
-    {
+    function getIssuerListCount() external view override returns (uint256 issuerListCount_) {
         return _getIssuerListCount();
     }
 
@@ -293,13 +260,7 @@ contract SsiManagement is ISsiManagement, IStaticFunctionSelectors, Common {
         return _getIssuerListMembers(_pageIndex, _pageLength);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _SSI_MANAGEMENT_RESOLVER_KEY;
     }
 
@@ -312,33 +273,18 @@ contract SsiManagement is ISsiManagement, IStaticFunctionSelectors, Common {
     {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setRevocationRegistryAddress
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setRevocationRegistryAddress.selector;
         staticFunctionSelectors_[selectorIndex++] = this.addIssuer.selector;
         staticFunctionSelectors_[selectorIndex++] = this.removeIssuer.selector;
         staticFunctionSelectors_[selectorIndex++] = this.isIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getRevocationRegistryAddress
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getIssuerListCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getIssuerListMembers
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getRevocationRegistryAddress.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getIssuerListCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getIssuerListMembers.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure virtual override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISsiManagement)
-            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(ISsiManagement).interfaceId;
     }
 }

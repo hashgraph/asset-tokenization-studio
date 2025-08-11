@@ -22,39 +22,38 @@ The standard used for security token is ERC-1400.
 
 Version 1.15.0 introduces partial compatibility with the ERC-3643 (TREX) standard; full identity and compliance support will be added in future releases.
 
-## ERC-3643 compatibility 
+## ERC-3643 compatibility
 
-| **function**   | **status**  |
-| -------------- | ----------- | 
-| onchainID() external view returns (address) | Pending |
-| version() external view returns (string memory) | Done | 
-| identityRegistry() external view returns (IIdentityRegistry) | Pending | 
-| compliance() external view returns (ICompliance) | Pending | 
-| paused() external view returns (bool) | Done |
-| isFrozen(address _userAddress) external view returns (bool) | Done | 
-| getFrozenTokens(address _userAddress) external view returns (uint256) | Done |
-| setName(string calldata _name) external | Done |
-| setSymbol(string calldata _symbol) external | Done |
-| setOnchainID(address _onchainID) external | Pending | 
-| pause() external | Done |
-| unpause() external | Done |
-| setAddressFrozen(address _userAddress, bool _freeze) external | Done | 
-| freezePartialTokens(address _userAddress, uint256 _amount) external | Done |
-| unfreezePartialTokens(address _userAddress, uint256 _amount) external | Done |
-| setIdentityRegistry(address _identityRegistry) external | Pending | 
-| setCompliance(address _compliance) external | Pending | 
-| forcedTransfer(address _from, address _to, uint256 _amount) external returns (bool) | Done | 
-| mint(address _to, uint256 _amount) external | Done | 
-| burn(address _userAddress, uint256 _amount) external | Done | 
-| recoveryAddress(address _lostWallet, address _newWallet, address _investorOnchainID) external returns (bool) | Done |
-| batchTransfer(address[] calldata _toList, uint256[] calldata _amounts) external | Done |
-| batchForcedTransfer(address[] calldata _fromList, address[] calldata _toList, uint256[] calldata _amounts) external | Done |
-| batchMint(address[] calldata _toList, uint256[] calldata _amounts) external | Done |
-| batchBurn(address[] calldata _userAddresses, uint256[] calldata _amounts) external | Done |
-| batchSetAddressFrozen(address[] calldata _userAddresses, bool[] calldata _freeze) external | Done |
-| batchFreezePartialTokens(address[] calldata _userAddresses, uint256[] calldata _amounts) external | Done |
-| batchUnfreezePartialTokens(address[] calldata _userAddresses, uint256[] calldata _amounts) external | Done |
-
+| **function**                                                                                                           | **status** |
+| ---------------------------------------------------------------------------------------------------------------------- | ---------- |
+| onchainID() external view returns (address)                                                                            | Pending    |
+| version() external view returns (string memory)                                                                        | Done       |
+| identityRegistry() external view returns (IIdentityRegistry)                                                           | Pending    |
+| compliance() external view returns (ICompliance)                                                                       | Pending    |
+| paused() external view returns (bool)                                                                                  | Done       |
+| isFrozen(address \_userAddress) external view returns (bool)                                                           | Done       |
+| getFrozenTokens(address \_userAddress) external view returns (uint256)                                                 | Done       |
+| setName(string calldata \_name) external                                                                               | Done       |
+| setSymbol(string calldata \_symbol) external                                                                           | Done       |
+| setOnchainID(address \_onchainID) external                                                                             | Pending    |
+| pause() external                                                                                                       | Done       |
+| unpause() external                                                                                                     | Done       |
+| setAddressFrozen(address \_userAddress, bool \_freeze) external                                                        | Done       |
+| freezePartialTokens(address \_userAddress, uint256 \_amount) external                                                  | Done       |
+| unfreezePartialTokens(address \_userAddress, uint256 \_amount) external                                                | Done       |
+| setIdentityRegistry(address \_identityRegistry) external                                                               | Pending    |
+| setCompliance(address \_compliance) external                                                                           | Pending    |
+| forcedTransfer(address \_from, address \_to, uint256 \_amount) external returns (bool)                                 | Done       |
+| mint(address \_to, uint256 \_amount) external                                                                          | Done       |
+| burn(address \_userAddress, uint256 \_amount) external                                                                 | Done       |
+| recoveryAddress(address \_lostWallet, address \_newWallet, address \_investorOnchainID) external returns (bool)        | Done       |
+| batchTransfer(address[] calldata \_toList, uint256[] calldata \_amounts) external                                      | Done       |
+| batchForcedTransfer(address[] calldata \_fromList, address[] calldata \_toList, uint256[] calldata \_amounts) external | Done       |
+| batchMint(address[] calldata \_toList, uint256[] calldata \_amounts) external                                          | Done       |
+| batchBurn(address[] calldata \_userAddresses, uint256[] calldata \_amounts) external                                   | Done       |
+| batchSetAddressFrozen(address[] calldata \_userAddresses, bool[] calldata \_freeze) external                           | Done       |
+| batchFreezePartialTokens(address[] calldata \_userAddresses, uint256[] calldata \_amounts) external                    | Done       |
+| batchUnfreezePartialTokens(address[] calldata \_userAddresses, uint256[] calldata \_amounts) external                  | Done       |
 
 # Installation
 
@@ -111,7 +110,7 @@ Calculates and prints the Keccak-256 hash of a given string.
 
 **Parameters:**
 
--   `input` (required): The string to be hashed.
+- `input` (required): The string to be hashed.
 
 ```bash
 npx hardhat keccak256 "ADMIN_ROLE"
@@ -123,9 +122,9 @@ Fetches and displays detailed information about all facets (implementations) ass
 
 **Parameters:**
 
--   `resolver` (required): The resolver proxy admin address.
--   `configurationId` (required): The configuration ID.
--   `network` (required): The network to use (e.g., local, previewnet, testnet, mainnet).
+- `resolver` (required): The resolver proxy admin address.
+- `configurationId` (required): The configuration ID.
+- `network` (required): The network to use (e.g., local, previewnet, testnet, mainnet).
 
 ```bash
 npx hardhat getConfigurationInfo  <resolverAddress> <configurationId> --network <network-name>
@@ -137,8 +136,8 @@ Retrieves and lists all registered business logic keys (contract identifiers) fr
 
 **Parameters:**
 
--   `resolver` (required): The resolver proxy admin address.
--   `network` (required): The network to use (e.g., local, previewnet, testnet, mainnet).
+- `resolver` (required): The resolver proxy admin address.
+- `network` (required): The network to use (e.g., local, previewnet, testnet, mainnet).
 
 ```bash
 npx hardhat getResolverBusinessLogics <resolverAddress> --network <network-name>
@@ -146,15 +145,16 @@ npx hardhat getResolverBusinessLogics <resolverAddress> --network <network-name>
 
 ### updateBusinessLogicKeys
 
-Registers or updates the addresses of a list of business logic implementation contracts in a specified `BusinessLogicResolver`. 
+Registers or updates the addresses of a list of business logic implementation contracts in a specified `BusinessLogicResolver`.
 
 **Parameters:**
--   `resolverAddress` (required): The address of the `BusinessLogicResolver` contract.
--   `implementationAddressList` (required): A comma-separated list of contract addresses to be registered or updated in the resolver.At least all facets already registered must be included.
--   `privateKey` (optional): The private key in raw hexadecimal format of the account that will sign the transaction.
--   `signerAddress` (optional): The address of the signer to select from the Hardhat signers array.
--   `signerPosition` (optional): The index of the signer to select from the Hardhat signers array.
--   `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
+
+- `resolverAddress` (required): The address of the `BusinessLogicResolver` contract.
+- `implementationAddressList` (required): A comma-separated list of contract addresses to be registered or updated in the resolver.At least all facets already registered must be included.
+- `privateKey` (optional): The private key in raw hexadecimal format of the account that will sign the transaction.
+- `signerAddress` (optional): The address of the signer to select from the Hardhat signers array.
+- `signerPosition` (optional): The index of the signer to select from the Hardhat signers array.
+- `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
 
 ```bash
 npx hardhat updateBusinessLogicKeys <resolverAddress> <allFacetsAddressList> --network <network-name>
@@ -166,13 +166,13 @@ Upgrades the implementation address for a given transparent proxy contract. This
 
 **Parameters:**
 
-*   `proxyAdminAddress` (required): The address of the `ProxyAdmin` contract that owns the proxy.
-*   `transparentProxyAddress` (required): The address of the transparent proxy contract to be upgraded.
-*   `newImplementationAddress` (required): The address of the new implementation contract.
-*   `privateKey` (optional): The private key in raw hexadecimal format of the account that will sign the transaction.
-*   `signerAddress` (optional): The address of the signer to select from the Hardhat signers array.
-*   `signerPosition` (optional): The index of the signer to select from the Hardhat signers array.
-*   `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
+- `proxyAdminAddress` (required): The address of the `ProxyAdmin` contract that owns the proxy.
+- `transparentProxyAddress` (required): The address of the transparent proxy contract to be upgraded.
+- `newImplementationAddress` (required): The address of the new implementation contract.
+- `privateKey` (optional): The private key in raw hexadecimal format of the account that will sign the transaction.
+- `signerAddress` (optional): The address of the signer to select from the Hardhat signers array.
+- `signerPosition` (optional): The index of the signer to select from the Hardhat signers array.
+- `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
 
 ```bash
 npx hardhat updateProxyImplementation <proxyAdminAddress> <transparentProxyAddress> <newImplementationAddress> --network <networkName>
@@ -184,9 +184,9 @@ Retrieves key configuration details from a `ProxyAdmin` contract. It fetches the
 
 **Parameters:**
 
-*   `proxyAdmin` (required): The address of the `ProxyAdmin` contract.
-*   `proxy` (required): The address of the proxy contract managed by the `ProxyAdmin`.
-*   `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
+- `proxyAdmin` (required): The address of the `ProxyAdmin` contract.
+- `proxy` (required): The address of the proxy contract managed by the `ProxyAdmin`.
+- `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
 
 ```bash
 npx hardhat getProxyAdminConfig <proxyAdminAddress> <proxyAddress> --network <networkName>
@@ -207,14 +207,13 @@ npm run test
 When introducing a new facet to the project, make sure to follow these steps:
 
 1. **Register the contract name** <br>
-  Add the name of the new facet to the `CONTRACT_NAMES` array in the `Configuration.ts` file.
+   Add the name of the new facet to the `CONTRACT_NAMES` array in the `Configuration.ts` file.
 
 2. **Update the deploy task listener** <br>
-  In the `deployAll` task, include the new facet so its contract address is properly tracked via the mirror node.
+   In the `deployAll` task, include the new facet so its contract address is properly tracked via the mirror node.
 
 3. **Deploy the facet** <br>
    In `scripts/deploy.ts`, within the `deployAtsContracts` function, add the logic to deploy the new facet and ensure the script awaits its deployment.
-
 
 # Latest Deployed Smart Contracts
 

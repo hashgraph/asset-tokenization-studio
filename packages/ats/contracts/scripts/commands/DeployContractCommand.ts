@@ -203,23 +203,23 @@
 
 */
 
-import { Signer } from 'ethers'
-import { ContractName } from '@configuration'
+import { Signer } from 'ethers';
+import { ContractName } from '@configuration';
 
 interface DeployContractCommandParams {
-    name: ContractName
-    signer: Signer
-    args?: Array<unknown>
+  name: ContractName;
+  signer: Signer;
+  args?: Array<unknown>;
 }
 
 export default class DeployContractCommand {
-    public readonly name: ContractName
-    public readonly signer: Signer
-    public readonly args: Array<unknown> = []
+  public readonly name: ContractName;
+  public readonly signer: Signer;
+  public readonly args: Array<unknown> = [];
 
-    constructor({ name, signer, args = [] }: DeployContractCommandParams) {
-        this.name = name
-        this.signer = signer
-        this.args = args
-    }
+  constructor({ name, signer, args = [] }: DeployContractCommandParams) {
+    this.name = name;
+    this.signer = signer;
+    this.args = args;
+  }
 }

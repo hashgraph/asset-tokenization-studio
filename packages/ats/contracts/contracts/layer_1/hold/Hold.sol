@@ -205,15 +205,13 @@
 
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
-import {Common} from '../common/Common.sol';
-import {_CONTROLLER_ROLE} from '../constants/roles.sol';
-import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { IHold } from '../interfaces/hold/IHold.sol';
+import { Common } from '../common/Common.sol';
+import { _CONTROLLER_ROLE } from '../constants/roles.sol';
+import { _HOLD_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { IKyc } from '../../layer_1/interfaces/kyc/IKyc.sol';
+import { ThirdPartyType } from '../../layer_0/common/types/ThirdPartyType.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -234,22 +232,9 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _msgSender(),
-            _hold,
-            '',
-            ThirdPartyType.NULL
-        );
+        (success_, holdId_) = _createHoldByPartition(_partition, _msgSender(), _hold, '', ThirdPartyType.NULL);
 
-        emit HeldByPartition(
-            _msgSender(),
-            _msgSender(),
-            _partition,
-            holdId_,
-            _hold,
-            ''
-        );
+        emit HeldByPartition(_msgSender(), _msgSender(), _partition, holdId_, _hold, '');
     }
 
     function createHoldFromByPartition(
@@ -282,21 +267,9 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             ThirdPartyType.AUTHORIZED
         );
 
-        _decreaseAllowedBalanceForHold(
-            _partition,
-            _from,
-            _hold.amount,
-            holdId_
-        );
+        _decreaseAllowedBalanceForHold(_partition, _from, _hold.amount, holdId_);
 
-        emit HeldFromByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
+        emit HeldFromByPartition(_msgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
     function operatorCreateHoldByPartition(
@@ -322,22 +295,9 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _checkRecoveredAddress(_hold.to);
             _checkRecoveredAddress(_from);
         }
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _from,
-            _hold,
-            _operatorData,
-            ThirdPartyType.OPERATOR
-        );
+        (success_, holdId_) = _createHoldByPartition(_partition, _from, _hold, _operatorData, ThirdPartyType.OPERATOR);
 
-        emit OperatorHeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
+        emit OperatorHeldByPartition(_msgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
     function controllerCreateHoldByPartition(
@@ -365,14 +325,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             ThirdPartyType.CONTROLLER
         );
 
-        emit ControllerHeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
+        emit ControllerHeldByPartition(_msgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
     function protectedCreateHoldByPartition(
@@ -390,27 +343,13 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyUnrecoveredAddress(_from)
         onlyUnrecoveredAddress(_protectedHold.hold.to)
         onlyRole(_protectedPartitionsRole(_partition))
-        onlyWithValidExpirationTimestamp(
-            _protectedHold.hold.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_protectedHold.hold.expirationTimestamp)
         onlyProtectedPartitions
         returns (bool success_, uint256 holdId_)
     {
-        (success_, holdId_) = _protectedCreateHoldByPartition(
-            _partition,
-            _from,
-            _protectedHold,
-            _signature
-        );
+        (success_, holdId_) = _protectedCreateHoldByPartition(_partition, _from, _protectedHold, _signature);
 
-        emit ProtectedHeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _protectedHold.hold,
-            ''
-        );
+        emit ProtectedHeldByPartition(_msgSender(), _from, _partition, holdId_, _protectedHold.hold, '');
     }
 
     function executeHoldByPartition(
@@ -481,9 +420,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         );
     }
 
-    function getHeldAmountFor(
-        address _tokenHolder
-    ) external view override returns (uint256 amount_) {
+    function getHeldAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
         return _getHeldAmountForAdjusted(_tokenHolder);
     }
 
@@ -507,13 +444,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory holdsId_) {
-        return
-            _getHoldsIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _pageIndex,
-                _pageLength
-            );
+        return _getHoldsIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
     }
 
     function getHoldForByPartition(
@@ -535,79 +466,34 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         return _getHoldForByPartitionAdjusted(_holdIdentifier);
     }
 
-    function getHoldThirdParty(
-        HoldIdentifier calldata _holdIdentifier
-    ) external view override returns (address) {
+    function getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) external view override returns (address) {
         return _getHoldThirdParty(_holdIdentifier);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _HOLD_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](14);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .createHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .createHoldFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .executeHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .releaseHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .reclaimHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHeldAmountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldCountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldsIdForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHeldAmountFor
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldThirdParty
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.createHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.createHoldFromByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.operatorCreateHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.controllerCreateHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.protectedCreateHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.executeHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.releaseHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.reclaimHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getHeldAmountForByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getHoldCountForByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getHoldsIdForByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getHoldForByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getHeldAmountFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getHoldThirdParty.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IHold).interfaceId;

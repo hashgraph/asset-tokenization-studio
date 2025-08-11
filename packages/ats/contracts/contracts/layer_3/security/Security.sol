@@ -206,13 +206,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ISecurity} from '../interfaces/ISecurity.sol';
-import {SecurityStorageWrapper} from './SecurityStorageWrapper.sol';
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
-import {Common} from '../../layer_1/common/Common.sol';
+import { ISecurity } from '../interfaces/ISecurity.sol';
+import { SecurityStorageWrapper } from './SecurityStorageWrapper.sol';
+import { RegulationData, AdditionalSecurityData } from '../constants/regulation.sol';
+import { Common } from '../../layer_1/common/Common.sol';
 
 abstract contract Security is ISecurity, SecurityStorageWrapper, Common {
     function getSecurityRegulationData()

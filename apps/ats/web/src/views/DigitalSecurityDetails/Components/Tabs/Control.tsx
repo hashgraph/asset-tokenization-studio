@@ -1,15 +1,15 @@
-import { Box } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { KYC } from "../KYC/KYC";
-import { SSIManager } from "../SSIManager/SSIManager";
-import { ControlList } from "../ControlList";
-import { SecurityViewModel } from "@hashgraph/asset-tokenization-sdk";
-import { useMemo } from "react";
-import { ExternalPause } from "../ExternalPause/ExternalPause";
-import { ExternalControl } from "../ExternalControl/ExternalControl";
-import { ExternalKYC } from "../ExternalKYC/ExternalKYC";
-import { AdminControlActionsButtons } from "../AdminControlActionsButtons";
+import { Box } from '@chakra-ui/react';
+import { Tabs } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { KYC } from '../KYC/KYC';
+import { SSIManager } from '../SSIManager/SSIManager';
+import { ControlList } from '../ControlList';
+import { SecurityViewModel } from '@hashgraph/asset-tokenization-sdk';
+import { useMemo } from 'react';
+import { ExternalPause } from '../ExternalPause/ExternalPause';
+import { ExternalControl } from '../ExternalControl/ExternalControl';
+import { ExternalKYC } from '../ExternalKYC/ExternalKYC';
+import { AdminControlActionsButtons } from '../AdminControlActionsButtons';
 
 interface ControlTabProps {
   details: SecurityViewModel;
@@ -21,8 +21,8 @@ interface ControlTabProps {
 }
 
 export const ControlTab = ({ details, config }: ControlTabProps) => {
-  const { t: tTabs } = useTranslation("security", {
-    keyPrefix: "details.tabs",
+  const { t: tTabs } = useTranslation('security', {
+    keyPrefix: 'details.tabs',
   });
 
   const isWhiteList = details.isWhiteList;
@@ -33,31 +33,31 @@ export const ControlTab = ({ details, config }: ControlTabProps) => {
     if (config.showControlList) {
       tabs.push({
         content: <ControlList />,
-        header: isWhiteList ? tTabs("allowedList") : tTabs("blockedList"),
+        header: isWhiteList ? tTabs('allowedList') : tTabs('blockedList'),
       });
     }
     if (config.showKYC) {
-      tabs.push({ content: <KYC />, header: tTabs("kyc") });
+      tabs.push({ content: <KYC />, header: tTabs('kyc') });
     }
     if (config.showSSIManager) {
-      tabs.push({ content: <SSIManager />, header: tTabs("ssiManager") });
+      tabs.push({ content: <SSIManager />, header: tTabs('ssiManager') });
     }
 
-    tabs.push({ content: <ExternalPause />, header: tTabs("externalPause") });
+    tabs.push({ content: <ExternalPause />, header: tTabs('externalPause') });
     tabs.push({
       content: <ExternalControl />,
-      header: tTabs("externalControlList"),
+      header: tTabs('externalControlList'),
     });
     tabs.push({
       content: <ExternalKYC />,
-      header: tTabs("externalKYCList"),
+      header: tTabs('externalKYCList'),
     });
 
     return tabs;
   }, [config, tTabs, isWhiteList]);
 
   return (
-    <Box w={"full"} h={"full"}>
+    <Box w={'full'} h={'full'}>
       <AdminControlActionsButtons />
       <Tabs tabs={tabs} variant="secondary" />
     </Box>

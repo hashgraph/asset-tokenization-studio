@@ -203,16 +203,16 @@
 
 */
 
-import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
-import { SDKService } from "../../services/SDKService";
-import { useToast } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
+import { UseQueryOptions, useMutation, useQuery } from '@tanstack/react-query';
+import { SDKService } from '../../services/SDKService';
+import { useToast } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
 import {
   ScheduledBalanceAdjustmentViewModel,
   GetScheduledBalanceAdjustmentRequest,
   SetScheduledBalanceAdjustmentRequest,
   GetAllScheduledBalanceAdjustmentsRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 export const GET_SECURITY_BALANCE_ADJUSTMENT_FOR = (
   securityId: string,
@@ -231,8 +231,8 @@ export const GET_SECURITY_ALL_BALANCE_ADJUSTMENT = (securityId: string) =>
 
 export const useBalanceAdjustment = () => {
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.balanceAdjustment",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.balanceAdjustment',
   });
 
   return useMutation(
@@ -245,7 +245,7 @@ export const useBalanceAdjustment = () => {
     {
       onSuccess: (data) => {
         console.log(
-          "SDK message --> Scheduled balance adjustment success: ",
+          'SDK message --> Scheduled balance adjustment success: ',
           data,
         );
 
@@ -253,23 +253,23 @@ export const useBalanceAdjustment = () => {
 
         toast.show({
           duration: 3000,
-          title: t("messages.success"),
-          description: t("messages.creationSuccessful"),
-          variant: "subtle",
-          status: "success",
+          title: t('messages.success'),
+          description: t('messages.creationSuccessful'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Scheduled balance adjustment creation error: ",
+          'SDK message --> Scheduled balance adjustment creation error: ',
           error,
         );
         toast.show({
           duration: 3000,
-          title: t("messages.error"),
-          description: t("messages.creationFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('messages.error'),
+          description: t('messages.creationFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },

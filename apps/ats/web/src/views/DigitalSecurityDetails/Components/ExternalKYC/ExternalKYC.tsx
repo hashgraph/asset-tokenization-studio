@@ -1,5 +1,5 @@
-import { Checkbox, HStack, Stack, useDisclosure } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/table-core";
+import { Checkbox, HStack, Stack, useDisclosure } from '@chakra-ui/react';
+import { createColumnHelper } from '@tanstack/table-core';
 import {
   Button,
   PhosphorIcon,
@@ -7,32 +7,32 @@ import {
   Table,
   Text,
   useToast,
-} from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { Trash } from "@phosphor-icons/react";
-import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useRolesStore } from "../../../../store/rolesStore";
-import { hasRole } from "../../../../utils/helpers";
-import { SecurityRole } from "../../../../utils/SecurityRole";
-import { AddExternalKYCModal } from "./AddExternalKYCModal";
-import { useGetExternalKyc } from "../../../../hooks/queries/useExternalKYC";
+} from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { Trash } from '@phosphor-icons/react';
+import { useState, type ChangeEvent } from 'react';
+import { useParams } from 'react-router-dom';
+import { useRolesStore } from '../../../../store/rolesStore';
+import { hasRole } from '../../../../utils/helpers';
+import { SecurityRole } from '../../../../utils/SecurityRole';
+import { AddExternalKYCModal } from './AddExternalKYCModal';
+import { useGetExternalKyc } from '../../../../hooks/queries/useExternalKYC';
 import {
   useRemoveExternalKYCList,
   useUpdateExternalKYCLists,
-} from "../../../../hooks/mutations/useExternalKYC";
+} from '../../../../hooks/mutations/useExternalKYC';
 import {
   RemoveExternalKycListRequest,
   UpdateExternalKycListsRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
-type ExternalKYC = {
+type ExternalKYCRow = {
   address: string;
 };
 
 export const ExternalKYC = () => {
   const toast = useToast();
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
 
   const {
     isOpen: isOpenAddModal,
@@ -54,20 +54,20 @@ export const ExternalKYC = () => {
 
   const hasKYCManagerRole = hasRole(roles, SecurityRole._KYC_MANAGER_ROLE);
 
-  const { t: tList } = useTranslation("security", {
-    keyPrefix: "details.externalKYC.list",
+  const { t: tList } = useTranslation('security', {
+    keyPrefix: 'details.externalKYC.list',
   });
-  const { t: tTable } = useTranslation("security", {
-    keyPrefix: "details.externalKYC.table",
+  const { t: tTable } = useTranslation('security', {
+    keyPrefix: 'details.externalKYC.table',
   });
-  const { t: tRemove } = useTranslation("security", {
-    keyPrefix: "details.externalKYC.remove",
+  const { t: tRemove } = useTranslation('security', {
+    keyPrefix: 'details.externalKYC.remove',
   });
-  const { t: tMessage } = useTranslation("externalKYC", {
-    keyPrefix: "list.messages",
+  const { t: tMessage } = useTranslation('externalKYC', {
+    keyPrefix: 'list.messages',
   });
 
-  const [externalKYCToRemove, setExternalKYCToRemove] = useState<string>("");
+  const [externalKYCToRemove, setExternalKYCToRemove] = useState<string>('');
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
 
   const { data: externalKYCs, isLoading } = useGetExternalKyc(securityId);
@@ -85,7 +85,7 @@ export const ExternalKYC = () => {
     }));
   };
 
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectAll = (e: ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
     const newSelectedRows = externalKYCs.reduce(
       (acc, item) => ({ ...acc, [item.address]: isChecked }),
@@ -94,13 +94,13 @@ export const ExternalKYC = () => {
     setSelectedRows(newSelectedRows);
   };
 
-  const columnsHelper = createColumnHelper<ExternalKYC>();
+  const columnsHelper = createColumnHelper<ExternalKYCRow>();
 
   const columns = [
     ...(hasKYCManagerRole
       ? [
           columnsHelper.display({
-            id: "selection",
+            id: 'selection',
             header: () => {
               const totalRows = externalKYCs.length;
               const selectedCount =
@@ -134,13 +134,13 @@ export const ExternalKYC = () => {
           }),
         ]
       : []),
-    columnsHelper.accessor("address", {
-      header: tTable("fields.id"),
+    columnsHelper.accessor('address', {
+      header: tTable('fields.id'),
       enableSorting: false,
     }),
     columnsHelper.display({
-      id: "remove",
-      header: tTable("fields.actions"),
+      id: 'remove',
+      header: tTable('fields.actions'),
       size: 5,
       enableSorting: false,
       cell(props) {
@@ -162,7 +162,7 @@ export const ExternalKYC = () => {
             variant="table"
             size="xs"
           >
-            <PhosphorIcon as={Trash} sx={{ color: "secondary.500" }} />
+            <PhosphorIcon as={Trash} sx={{ color: 'secondary.500' }} />
           </Button>
         );
       },
@@ -187,10 +187,10 @@ export const ExternalKYC = () => {
         onCloseRemoveMultipleModal();
         toast.show({
           duration: 3000,
-          title: tMessage("removeExternalKYC.success"),
-          description: tMessage("removeExternalKYC.descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: tMessage('removeExternalKYC.success'),
+          description: tMessage('removeExternalKYC.descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       });
     }
@@ -203,7 +203,7 @@ export const ExternalKYC = () => {
         externalKycListAddress: externalKYCToRemove,
       }),
     ).finally(() => {
-      setExternalKYCToRemove("");
+      setExternalKYCToRemove('');
       onCloseRemoveModal();
     });
   };
@@ -219,9 +219,9 @@ export const ExternalKYC = () => {
         pt={6}
         gap={4}
       >
-        <HStack justifyContent={"space-between"}>
+        <HStack justifyContent={'space-between'}>
           <Text textStyle="ElementsSemiboldLG" color="neutral.light">
-            {tList("title")}
+            {tList('title')}
           </Text>
           {hasKYCManagerRole && (
             <HStack>
@@ -230,10 +230,10 @@ export const ExternalKYC = () => {
                   onOpenRemoveMultipleModal();
                 }}
                 size="sm"
-                variant={"secondary"}
+                variant={'secondary'}
                 isDisabled={disabledRemoveItems}
               >
-                {tList("removeItemsSelected")}
+                {tList('removeItemsSelected')}
               </Button>
               <Button
                 onClick={() => {
@@ -241,7 +241,7 @@ export const ExternalKYC = () => {
                 }}
                 size="sm"
               >
-                {tList("add")}
+                {tList('add')}
               </Button>
             </HStack>
           )}
@@ -252,7 +252,7 @@ export const ExternalKYC = () => {
           columns={columns}
           data={externalKYCs ?? []}
           isLoading={isLoading}
-          emptyComponent={<Text>{tTable("empty")}</Text>}
+          emptyComponent={<Text>{tTable('empty')}</Text>}
         />
       </Stack>
       <AddExternalKYCModal isOpen={isOpenAddModal} onClose={onCloseAddModal} />
@@ -260,21 +260,21 @@ export const ExternalKYC = () => {
         id="removeExternalKYC"
         isOpen={isOpenRemoveModal}
         onClose={() => {
-          setExternalKYCToRemove("");
+          setExternalKYCToRemove('');
           onCloseRemoveModal();
         }}
         icon={<PhosphorIcon as={Trash} size="md" />}
-        title={tRemove("title")}
-        description={tRemove("description")}
-        confirmText={tRemove("confirmText")}
+        title={tRemove('title')}
+        description={tRemove('description')}
+        confirmText={tRemove('confirmText')}
         onConfirm={() => {
           handleRemove();
         }}
         onCancel={() => {
-          setExternalKYCToRemove("");
+          setExternalKYCToRemove('');
           onCloseRemoveModal();
         }}
-        cancelText={tRemove("cancelText")}
+        cancelText={tRemove('cancelText')}
         confirmButtonProps={{
           isLoading: isLoadingRemove,
         }}
@@ -284,14 +284,14 @@ export const ExternalKYC = () => {
         isOpen={isOpenRemoveMultipleModal}
         onClose={onCloseRemoveMultipleModal}
         icon={<PhosphorIcon as={Trash} size="md" />}
-        title={tRemove("title")}
-        description={tRemove("description")}
-        confirmText={tRemove("confirmText")}
+        title={tRemove('title')}
+        description={tRemove('description')}
+        confirmText={tRemove('confirmText')}
         onConfirm={() => {
           handleMultipleRemove();
         }}
         onCancel={onCloseRemoveMultipleModal}
-        cancelText={tRemove("cancelText")}
+        cancelText={tRemove('cancelText')}
         confirmButtonProps={{
           isLoading: isLoadingUpdateExternalKYCs,
         }}

@@ -203,15 +203,15 @@
 
 */
 
-import { Stack } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { EditRole } from "./EditRole";
-import { SearchByRole } from "./SearchByRole";
+import { Stack } from '@chakra-ui/react';
+import { Tabs } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { EditRole } from './EditRole';
+import { SearchByRole } from './SearchByRole';
 
 export const RoleManagement = () => {
-  const { t: tTabs } = useTranslation("security", {
-    keyPrefix: "details.roleManagement.tabs",
+  const { t: tTabs } = useTranslation('security', {
+    keyPrefix: 'details.roleManagement.tabs',
   });
 
   return (
@@ -220,9 +220,9 @@ export const RoleManagement = () => {
         tabs={[
           {
             content: <EditRole />,
-            header: tTabs("edit"),
+            header: tTabs('edit'),
           },
-          { content: <SearchByRole />, header: tTabs("search") },
+          { content: <SearchByRole />, header: tTabs('search') },
         ]}
         isFitted
       />

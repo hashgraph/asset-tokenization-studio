@@ -203,23 +203,23 @@
 
 */
 
-import { useMemo, useState } from "react";
-import { AccordionPanel, SimpleGrid } from "@chakra-ui/react";
-import { Accordion, AccordionItem, AccordionProps } from "io-bricks-ui";
-import { AccordionItemCustomTitle } from "./AccordionItemCustomTitle";
-import { SecurityCard } from "./SecurityCard";
-import { User } from "../../../utils/constants";
-import { AddFavorite } from "./AddFavorite";
-import { useAccountStore } from "../../../store/accountStore";
-import { useWalletStore } from "../../../store/walletStore";
-import { SecurityStore, useSecurityStore } from "../../../store/securityStore";
+import { useMemo, useState } from 'react';
+import { AccordionPanel, SimpleGrid } from '@chakra-ui/react';
+import { Accordion, AccordionItem, AccordionProps } from 'io-bricks-ui';
+import { AccordionItemCustomTitle } from './AccordionItemCustomTitle';
+import { SecurityCard } from './SecurityCard';
+import { User } from '../../../utils/constants';
+import { AddFavorite } from './AddFavorite';
+import { useAccountStore } from '../../../store/accountStore';
+import { useWalletStore } from '../../../store/walletStore';
+import { SecurityStore, useSecurityStore } from '../../../store/securityStore';
 
-export interface FavoritesList
-  extends Omit<AccordionProps, "children" | "title"> {
+export interface FavoritesListProps
+  extends Omit<AccordionProps, 'children' | 'title'> {
   type: User;
 }
 
-export const FavoritesList = (props: FavoritesList) => {
+export const FavoritesList = (props: FavoritesListProps) => {
   const { type = User.admin } = props;
   const isAdmin = type === User.admin;
   const [isExpanded, setIsExpanded] = useState<boolean>(true);

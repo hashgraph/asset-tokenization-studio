@@ -87,7 +87,18 @@ export default [
       'packages/ats/contracts/**/*.test.ts',
       'packages/ats/contracts/**/*.spec.ts',
       'packages/ats/contracts/test/**/*.ts',
+      'packages/ats/contracts/**/*.test.js',
+      'packages/ats/contracts/**/*.spec.js',
+      'packages/ats/contracts/test/**/*.js',
     ],
+    languageOptions: {
+      // Include mocha globals used by Hardhat tests (describe, it, before, after, etc.)
+      globals: {
+        ...globals.node,
+        ...globals.es2020,
+        ...globals.mocha,
+      },
+    },
     rules: {
       '@typescript-eslint/no-unused-expressions': 'off',
     },
@@ -108,9 +119,35 @@ export default [
 
   // SDK test files - additional test-specific overrides
   {
-    files: ['packages/ats/sdk/**/*.test.ts', 'packages/ats/sdk/**/*.spec.ts'],
+    files: [
+      'packages/ats/sdk/**/*.test.ts',
+      'packages/ats/sdk/**/*.spec.ts',
+      'packages/ats/sdk/__tests__/**/*.ts',
+      'packages/ats/sdk/**/__tests__/**/*.ts',
+      'packages/ats/sdk/**/jest-setup-file.ts',
+    ],
+    languageOptions: {
+      // Extend existing globals with Jest testing globals so describe/it/expect are defined
+      globals: {
+        ...globals.node,
+        ...globals.es2020,
+        ...globals.jest,
+      },
+    },
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',
+    },
+  },
+
+  // SDK jest mock files (__mocks__ folders)
+  {
+    files: ['packages/ats/sdk/**/__mocks__/**/*.{js,ts,tsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.es2020,
+        ...globals.jest,
+      },
     },
   },
 

@@ -214,11 +214,7 @@ interface IERC1410Standard {
         bytes data;
     }
 
-    function redeemByPartition(
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function redeemByPartition(bytes32 _partition, uint256 _value, bytes calldata _data) external;
 
     function operatorRedeemByPartition(
         bytes32 _partition,
@@ -228,9 +224,7 @@ interface IERC1410Standard {
         bytes calldata _operatorData
     ) external;
 
-    function issueByPartition(
-        IERC1410Standard.IssueData calldata _issueData
-    ) external;
+    function issueByPartition(IERC1410Standard.IssueData calldata _issueData) external;
 
     function canRedeemByPartition(
         address _from,

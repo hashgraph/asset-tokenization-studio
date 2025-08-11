@@ -206,8 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IHold} from '../hold/IHold.sol';
-import {IClearing} from './IClearing.sol';
+import { IHold } from '../hold/IHold.sol';
+import { IClearing } from './IClearing.sol';
 
 interface IClearingHoldCreation is IClearing {
     function clearingCreateHoldByPartition(
@@ -235,8 +235,5 @@ interface IClearingHoldCreation is IClearing {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    )
-        external
-        view
-        returns (ClearingHoldCreationData memory clearingHoldCreationData_);
+    ) external view returns (ClearingHoldCreationData memory clearingHoldCreationData_);
 }

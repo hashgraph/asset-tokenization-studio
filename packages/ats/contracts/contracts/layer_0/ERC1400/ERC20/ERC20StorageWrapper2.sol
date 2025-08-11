@@ -206,34 +206,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
-import {
-    IERC20StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
-import {
-    ERC1410StandardStorageWrapper
-} from '../ERC1410/ERC1410StandardStorageWrapper.sol';
-import {
-    IERC1410Basic
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
-import {
-    IERC1410Standard
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+import { _DEFAULT_PARTITION } from '../../../layer_0/constants/values.sol';
+import { IERC20StorageWrapper } from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
+import { ERC1410StandardStorageWrapper } from '../ERC1410/ERC1410StandardStorageWrapper.sol';
+import { IERC1410Basic } from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import { IERC1410Standard } from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
 
-abstract contract ERC20StorageWrapper2 is
-    IERC20StorageWrapper,
-    ERC1410StandardStorageWrapper
-{
+abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardStorageWrapper {
     function _beforeAllowanceUpdate(address _owner, address _spender) internal {
         _triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
 
         _updateAllowanceAndLabaf(_owner, _spender);
     }
 
-    function _updateAllowanceAndLabaf(
-        address _owner,
-        address _spender
-    ) internal {
+    function _updateAllowanceAndLabaf(address _owner, address _spender) internal {
         uint256 abaf = _getAbaf();
         uint256 labaf = _getAllowanceLabaf(_owner, _spender);
 
@@ -264,10 +250,7 @@ abstract contract ERC20StorageWrapper2 is
      * @param spender The address which will spend the funds.
      * @param addedValue The amount of tokens to increase the allowance by.
      */
-    function _increaseAllowance(
-        address spender,
-        uint256 addedValue
-    ) internal returns (bool) {
+    function _increaseAllowance(address spender, uint256 addedValue) internal returns (bool) {
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
@@ -286,60 +269,28 @@ abstract contract ERC20StorageWrapper2 is
      * @param spender The address which will spend the funds.
      * @param subtractedValue The amount of tokens to decrease the allowance by.
      */
-    function _decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    ) internal returns (bool) {
+    function _decreaseAllowance(address spender, uint256 subtractedValue) internal returns (bool) {
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
         _decreaseAllowedBalance(_msgSender(), spender, subtractedValue);
-        emit Approval(
-            _msgSender(),
-            spender,
-            _erc20Storage().allowed[_msgSender()][spender]
-        );
+        emit Approval(_msgSender(), spender, _erc20Storage().allowed[_msgSender()][spender]);
         return true;
     }
 
-    function _transferFrom(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) internal returns (bool) {
+    function _transferFrom(address spender, address from, address to, uint256 value) internal returns (bool) {
         _decreaseAllowedBalance(from, spender, value);
-        _transferByPartition(
-            from,
-            IERC1410Basic.BasicTransferInfo(to, value),
-            _DEFAULT_PARTITION,
-            '',
-            spender,
-            ''
-        );
+        _transferByPartition(from, IERC1410Basic.BasicTransferInfo(to, value), _DEFAULT_PARTITION, '', spender, '');
         return _emitTransferEvent(from, to, value);
     }
 
-    function _transfer(
-        address from,
-        address to,
-        uint256 value
-    ) internal returns (bool) {
-        _transferByPartition(
-            from,
-            IERC1410Basic.BasicTransferInfo(to, value),
-            _DEFAULT_PARTITION,
-            '',
-            address(0),
-            ''
-        );
+    function _transfer(address from, address to, uint256 value) internal returns (bool) {
+        _transferByPartition(from, IERC1410Basic.BasicTransferInfo(to, value), _DEFAULT_PARTITION, '', address(0), '');
         return _emitTransferEvent(from, to, value);
     }
 
     function _mint(address to, uint256 value) internal {
-        _issueByPartition(
-            IERC1410Standard.IssueData(_DEFAULT_PARTITION, to, value, '')
-        );
+        _issueByPartition(IERC1410Standard.IssueData(_DEFAULT_PARTITION, to, value, ''));
         _emitTransferEvent(address(0), to, value);
     }
 
@@ -353,11 +304,7 @@ abstract contract ERC20StorageWrapper2 is
         _burn(account, value);
     }
 
-    function _decreaseAllowedBalance(
-        address from,
-        address spender,
-        uint256 value
-    ) internal {
+    function _decreaseAllowedBalance(address from, address spender, uint256 value) internal {
         _beforeAllowanceUpdate(from, spender);
 
         ERC20Storage storage erc20Storage = _erc20Storage();
@@ -369,11 +316,7 @@ abstract contract ERC20StorageWrapper2 is
         erc20Storage.allowed[from][spender] -= value;
     }
 
-    function _increaseAllowedBalance(
-        address from,
-        address spender,
-        uint256 value
-    ) internal {
+    function _increaseAllowedBalance(address from, address spender, uint256 value) internal {
         _beforeAllowanceUpdate(from, spender);
 
         ERC20Storage storage erc20Storage = _erc20Storage();
@@ -383,11 +326,7 @@ abstract contract ERC20StorageWrapper2 is
         emit Approval(from, spender, _erc20Storage().allowed[from][spender]);
     }
 
-    function _emitTransferEvent(
-        address from,
-        address to,
-        uint256 value
-    ) private returns (bool) {
+    function _emitTransferEvent(address from, address to, uint256 value) private returns (bool) {
         emit Transfer(from, to, value);
         return true;
     }

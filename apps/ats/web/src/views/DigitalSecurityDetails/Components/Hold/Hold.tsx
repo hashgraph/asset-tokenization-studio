@@ -1,13 +1,13 @@
-import { Stack } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
-import { HoldList } from "./HoldList";
-import { HoldCreate } from "./HoldCreate";
-import { useTranslation } from "react-i18next";
-import { HoldManage } from "./HoldManage";
+import { Stack } from '@chakra-ui/react';
+import { Tabs } from 'io-bricks-ui';
+import { HoldList } from './HoldList';
+import { HoldCreate } from './HoldCreate';
+import { useTranslation } from 'react-i18next';
+import { HoldManage } from './HoldManage';
 
 export const Hold = () => {
-  const { t: tTabs } = useTranslation("security", {
-    keyPrefix: "details.hold.tabs",
+  const { t: tTabs } = useTranslation('security', {
+    keyPrefix: 'details.hold.tabs',
   });
 
   return (
@@ -17,10 +17,10 @@ export const Hold = () => {
         tabs={[
           {
             content: <HoldList />,
-            header: tTabs("list"),
+            header: tTabs('list'),
           },
-          { content: <HoldCreate />, header: tTabs("create") },
-          { content: <HoldManage />, header: tTabs("manage") },
+          { content: <HoldCreate />, header: tTabs('create') },
+          { content: <HoldManage />, header: tTabs('manage') },
         ]}
         isFitted
       />

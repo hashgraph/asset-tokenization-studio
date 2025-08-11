@@ -1,4 +1,4 @@
-import { Center, HStack, Stack, useDisclosure, VStack } from "@chakra-ui/react";
+import { Center, HStack, Stack, useDisclosure, VStack } from '@chakra-ui/react';
 import {
   Button,
   Heading,
@@ -7,32 +7,32 @@ import {
   PhosphorIcon,
   PopUp,
   Text,
-} from "io-bricks-ui";
-import { isHederaValidAddress, min, required } from "../../../../utils/rules";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
-import { useSetCapMaxSupply } from "../../../../hooks/mutations/useSetCapMaxSupply";
-import { SetMaxSupplyRequest } from "@hashgraph/asset-tokenization-sdk";
-import { WarningCircle } from "@phosphor-icons/react";
+} from 'io-bricks-ui';
+import { isHederaValidAddress, min, required } from '../../../../utils/rules';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { useSetCapMaxSupply } from '../../../../hooks/mutations/useSetCapMaxSupply';
+import { SetMaxSupplyRequest } from '@hashgraph/asset-tokenization-sdk';
+import { WarningCircle } from '@phosphor-icons/react';
 
 export const CapSetMaxSupplyForm = () => {
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
 
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "details.cap.form",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'details.cap.form',
   });
-  const { t: tActions } = useTranslation("security", {
-    keyPrefix: "details.cap.actions",
+  const { t: tActions } = useTranslation('security', {
+    keyPrefix: 'details.cap.actions',
   });
-  const { t: tGlobal } = useTranslation("globals");
+  const { t: tGlobal } = useTranslation('globals');
 
   const { control, formState, watch, handleSubmit, reset } = useForm<{
     maxSupply: string;
     securityId: string;
   }>({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const { mutate: setCapMaxSupplyMutation, isLoading } = useSetCapMaxSupply();
@@ -42,7 +42,7 @@ export const CapSetMaxSupplyForm = () => {
   };
 
   const handleSetMaxSupply = () => {
-    const maxSupply = watch("maxSupply");
+    const maxSupply = watch('maxSupply');
 
     const setMaxSupplyRequest = new SetMaxSupplyRequest({
       maxSupply: maxSupply.toString(),
@@ -63,9 +63,9 @@ export const CapSetMaxSupplyForm = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={WarningCircle} size="md" />}
-        title={tActions("confirmPopUp.title")}
-        description={tActions("confirmPopUp.description")}
-        confirmText={tActions("confirmPopUp.confirmText")}
+        title={tActions('confirmPopUp.title')}
+        description={tActions('confirmPopUp.description')}
+        confirmText={tActions('confirmPopUp.confirmText')}
         onConfirm={() => {
           onClose();
           handleSetMaxSupply();
@@ -73,14 +73,14 @@ export const CapSetMaxSupplyForm = () => {
         onCancel={() => {
           onClose();
         }}
-        cancelText={tActions("confirmPopUp.cancelText")}
-        confirmButtonProps={{ status: "danger" }}
+        cancelText={tActions('confirmPopUp.cancelText')}
+        confirmButtonProps={{ status: 'danger' }}
       />
       <Center w="full" h="full" bg="neutral.dark.600">
         <VStack align="flex-start" p={6} gap={4}>
           <VStack align="flex-start" gap={0}>
-            <Heading textStyle="HeadingMediumLG">{tForm("title")}</Heading>
-            <Text textStyle="BodyRegularMD">{tForm("description")}</Text>
+            <Heading textStyle="HeadingMediumLG">{tForm('title')}</Heading>
+            <Text textStyle="BodyRegularMD">{tForm('description')}</Text>
           </VStack>
           <VStack
             as="form"
@@ -93,7 +93,7 @@ export const CapSetMaxSupplyForm = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("securityId.label")}*
+                  {tForm('securityId.label')}*
                 </Text>
               </HStack>
               <InputController
@@ -109,7 +109,7 @@ export const CapSetMaxSupplyForm = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("maxSupply.label")}*
+                  {tForm('maxSupply.label')}*
                 </Text>
               </HStack>
               <InputNumberController
@@ -117,7 +117,7 @@ export const CapSetMaxSupplyForm = () => {
                 control={control}
                 id="maxSupply"
                 rules={{ required, min: min(0) }}
-                placeholder={tForm("maxSupply.placeholder")}
+                placeholder={tForm('maxSupply.placeholder')}
               />
             </Stack>
 
@@ -128,7 +128,7 @@ export const CapSetMaxSupplyForm = () => {
               isDisabled={!formState.isValid}
               type="submit"
             >
-              {isLoading ? tGlobal("sending") : tGlobal("send")}
+              {isLoading ? tGlobal('sending') : tGlobal('send')}
             </Button>
           </VStack>
         </VStack>

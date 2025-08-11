@@ -206,45 +206,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IExternalKycListManagement
-} from '../interfaces/externalKycLists/IExternalKycListManagement.sol';
-import {Common} from '../common/Common.sol';
-import {_KYC_MANAGER_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_KYC_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    _KYC_MANAGEMENT_STORAGE_POSITION
-} from '../../layer_0/constants/storagePositions.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
+import { IExternalKycListManagement } from '../interfaces/externalKycLists/IExternalKycListManagement.sol';
+import { Common } from '../common/Common.sol';
+import { _KYC_MANAGER_ROLE } from '../constants/roles.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _KYC_MANAGEMENT_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { _KYC_MANAGEMENT_STORAGE_POSITION } from '../../layer_0/constants/storagePositions.sol';
+import { IKyc } from '../interfaces/kyc/IKyc.sol';
 
-contract ExternalKycListManagement is
-    IExternalKycListManagement,
-    IStaticFunctionSelectors,
-    Common
-{
+contract ExternalKycListManagement is IExternalKycListManagement, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalKycLists(
         address[] calldata _kycLists
-    )
-        external
-        override
-        onlyUninitialized(
-            _externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized
-        )
-    {
-        ExternalListDataStorage
-            storage externalKycListDataStorage = _externalListStorage(
-                _KYC_MANAGEMENT_STORAGE_POSITION
-            );
+    ) external override onlyUninitialized(_externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized) {
+        ExternalListDataStorage storage externalKycListDataStorage = _externalListStorage(
+            _KYC_MANAGEMENT_STORAGE_POSITION
+        );
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {
-            _addExternalList(
-                _KYC_MANAGEMENT_STORAGE_POSITION,
-                _kycLists[index]
-            );
+            _addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists[index]);
             unchecked {
                 ++index;
             }
@@ -263,11 +243,7 @@ contract ExternalKycListManagement is
         onlyConsistentActivations(_kycLists, _actives)
         returns (bool success_)
     {
-        success_ = _updateExternalLists(
-            _KYC_MANAGEMENT_STORAGE_POSITION,
-            _kycLists,
-            _actives
-        );
+        success_ = _updateExternalLists(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists, _actives);
         if (!success_) {
             revert ExternalKycListsNotUpdated(_kycLists, _actives);
         }
@@ -276,17 +252,8 @@ contract ExternalKycListManagement is
 
     function addExternalKycList(
         address _kycLists
-    )
-        external
-        override
-        onlyRole(_KYC_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
-        success_ = _addExternalList(
-            _KYC_MANAGEMENT_STORAGE_POSITION,
-            _kycLists
-        );
+    ) external override onlyRole(_KYC_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
+        success_ = _addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert ListedKycList(_kycLists);
         }
@@ -295,42 +262,23 @@ contract ExternalKycListManagement is
 
     function removeExternalKycList(
         address _kycLists
-    )
-        external
-        override
-        onlyRole(_KYC_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
-        success_ = _removeExternalList(
-            _KYC_MANAGEMENT_STORAGE_POSITION,
-            _kycLists
-        );
+    ) external override onlyRole(_KYC_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
+        success_ = _removeExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert UnlistedKycList(_kycLists);
         }
         emit RemovedFromExternalKycLists(_msgSender(), _kycLists);
     }
 
-    function isExternalKycList(
-        address _kycList
-    ) external view override returns (bool) {
+    function isExternalKycList(address _kycList) external view override returns (bool) {
         return _isExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycList);
     }
 
-    function isExternallyGranted(
-        address _account,
-        IKyc.KycStatus _kycStatus
-    ) external view override returns (bool) {
+    function isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) external view override returns (bool) {
         return _isExternallyGranted(_account, _kycStatus);
     }
 
-    function getExternalKycListsCount()
-        external
-        view
-        override
-        returns (uint256 externalKycListsCount_)
-    {
+    function getExternalKycListsCount() external view override returns (uint256 externalKycListsCount_) {
         return _getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
     }
 
@@ -338,66 +286,29 @@ contract ExternalKycListManagement is
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        return
-            _getExternalListsMembers(
-                _KYC_MANAGEMENT_STORAGE_POSITION,
-                _pageIndex,
-                _pageLength
-            );
+        return _getExternalListsMembers(_KYC_MANAGEMENT_STORAGE_POSITION, _pageIndex, _pageLength);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _KYC_MANAGEMENT_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](8);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_ExternalKycLists
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .updateExternalKycLists
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .addExternalKycList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .removeExternalKycList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isExternalKycList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isExternallyGranted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getExternalKycListsCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getExternalKycListsMembers
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initialize_ExternalKycLists.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.updateExternalKycLists.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.addExternalKycList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.removeExternalKycList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isExternalKycList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isExternallyGranted.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getExternalKycListsCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getExternalKycListsMembers.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IExternalKycListManagement)
-            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IExternalKycListManagement).interfaceId;
     }
 }

@@ -208,10 +208,10 @@ import {
   GetHoldForByPartitionRequest,
   GetHoldsIdForByPartitionRequest,
   HoldViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
-import { DEFAULT_PARTITION } from "../../utils/constants";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
+import { DEFAULT_PARTITION } from '../../utils/constants';
 
 export const GET_HOLDS = (securityId: string, targetId: string) =>
   `GET_HOLDS_${securityId}_${targetId}`;
@@ -249,7 +249,7 @@ export const useGetHolds = (
           (hold): hold is HoldViewModel => hold !== null,
         );
       } catch (error) {
-        console.error("Error fetching holds", error);
+        console.error('Error fetching holds', error);
         throw error;
       }
     },
@@ -269,7 +269,7 @@ export const useGetHeldAmountFor = (
 
         return heldAmount;
       } catch (error) {
-        console.error("Error fetching holds", error);
+        console.error('Error fetching holds', error);
         throw error;
       }
     },

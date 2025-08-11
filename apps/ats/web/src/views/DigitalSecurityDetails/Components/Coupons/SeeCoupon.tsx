@@ -203,7 +203,7 @@
 
 */
 
-import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
+import { Button, Center, HStack, Stack, VStack } from '@chakra-ui/react';
 import {
   InputController,
   InputNumberController,
@@ -212,23 +212,23 @@ import {
   PhosphorIcon,
   Text,
   Tooltip,
-} from "io-bricks-ui";
-import { isHederaValidAddress, min, required } from "../../../../utils/rules";
-import { useForm } from "react-hook-form";
-import { Info } from "@phosphor-icons/react";
-import { useTranslation } from "react-i18next";
+} from 'io-bricks-ui';
+import { isHederaValidAddress, min, required } from '../../../../utils/rules';
+import { useForm } from 'react-hook-form';
+import { Info } from '@phosphor-icons/react';
+import { useTranslation } from 'react-i18next';
 import {
   GetCouponForRequest,
   GetCouponRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   useGetCoupons,
   useGetCouponsFor,
-} from "../../../../hooks/queries/useCoupons";
-import { formatDate } from "../../../../utils/format";
-import { DATE_TIME_FORMAT } from "../../../../utils/constants";
+} from '../../../../hooks/queries/useCoupons';
+import { formatDate } from '../../../../utils/format';
+import { DATE_TIME_FORMAT } from '../../../../utils/constants';
 
 interface SeeCouponFormValues {
   couponId: number;
@@ -236,13 +236,13 @@ interface SeeCouponFormValues {
 }
 
 const defaultCouponForRequest = new GetCouponForRequest({
-  securityId: "",
+  securityId: '',
   couponId: 0,
-  targetId: "",
+  targetId: '',
 });
 
 const defaultCouponRequest = new GetCouponRequest({
-  securityId: "",
+  securityId: '',
   couponId: 0,
 });
 
@@ -252,16 +252,16 @@ export const SeeCoupon = () => {
     handleSubmit,
     formState: { isValid },
   } = useForm<SeeCouponFormValues>({
-    mode: "all",
+    mode: 'all',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "details.coupons.see.input",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'details.coupons.see.input',
   });
-  const { t: tDetail } = useTranslation("security", {
-    keyPrefix: "details.coupons.see.details",
+  const { t: tDetail } = useTranslation('security', {
+    keyPrefix: 'details.coupons.see.details',
   });
-  const { t: tGlobal } = useTranslation("globals");
-  const { id: securityId = "" } = useParams();
+  const { t: tGlobal } = useTranslation('globals');
+  const { id: securityId = '' } = useParams();
   const [couponsRequest, setCouponsRequest] = useState<GetCouponRequest>();
   const [couponForRequest, setCouponsForRequest] =
     useState<GetCouponForRequest>();
@@ -269,8 +269,8 @@ export const SeeCoupon = () => {
     useState<boolean>(false);
   const [isCouponsLoading, setIsCouponsLoading] = useState<boolean>(false);
   const toast = useToast();
-  const { t: tError } = useTranslation("security", {
-    keyPrefix: "details.Coupons.see.error",
+  const { t: tError } = useTranslation('security', {
+    keyPrefix: 'details.Coupons.see.error',
   });
 
   const { data: couponsFor, refetch: refetchCouponsFor } = useGetCouponsFor(
@@ -283,8 +283,8 @@ export const SeeCoupon = () => {
       onError: () => {
         setIsCouponsForLoading(false);
         toast.show({
-          title: tError("general"),
-          status: "error",
+          title: tError('general'),
+          status: 'error',
         });
       },
     },
@@ -300,8 +300,8 @@ export const SeeCoupon = () => {
       onError: () => {
         setIsCouponsLoading(false);
         toast.show({
-          title: tError("general"),
-          status: "error",
+          title: tError('general'),
+          status: 'error',
         });
       },
     },
@@ -353,9 +353,9 @@ export const SeeCoupon = () => {
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {tForm("coupon.label")}*
+                {tForm('coupon.label')}*
               </Text>
-              <Tooltip label={tForm("coupon.tooltip")} placement="right">
+              <Tooltip label={tForm('coupon.tooltip')} placement="right">
                 <PhosphorIcon as={Info} />
               </Tooltip>
             </HStack>
@@ -364,15 +364,15 @@ export const SeeCoupon = () => {
               control={control}
               id="couponId"
               rules={{ required, min: min(0) }}
-              placeholder={tForm("coupon.placeholder")}
+              placeholder={tForm('coupon.placeholder')}
             />
           </Stack>
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {tForm("account.label")}*
+                {tForm('account.label')}*
               </Text>
-              <Tooltip label={tForm("account.tooltip")} placement="right">
+              <Tooltip label={tForm('account.tooltip')} placement="right">
                 <PhosphorIcon as={Info} />
               </Tooltip>
             </HStack>
@@ -380,7 +380,7 @@ export const SeeCoupon = () => {
               control={control}
               id="targetId"
               rules={{ required, isHederaValidAddress }}
-              placeholder={tForm("account.placeholder")}
+              placeholder={tForm('account.placeholder')}
             />
           </Stack>
           <Button
@@ -390,14 +390,14 @@ export const SeeCoupon = () => {
             isLoading={isCouponsForLoading || isCouponsLoading}
             type="submit"
           >
-            {tGlobal("check")}
+            {tGlobal('check')}
           </Button>
         </VStack>
         {couponsFor && coupons && (
           <DefinitionList
             items={[
               {
-                title: tDetail("paymentDay"),
+                title: tDetail('paymentDay'),
                 description: formatDate(
                   coupons.executionDate,
                   DATE_TIME_FORMAT,
@@ -406,13 +406,13 @@ export const SeeCoupon = () => {
                 valueToCopy: coupons.executionDate.toDateString(),
               },
               {
-                title: tDetail("amount"),
+                title: tDetail('amount'),
                 description: couponsFor.value,
                 canCopy: true,
                 valueToCopy: couponsFor.value,
               },
             ]}
-            title={tDetail("title")}
+            title={tDetail('title')}
           />
         )}
       </VStack>

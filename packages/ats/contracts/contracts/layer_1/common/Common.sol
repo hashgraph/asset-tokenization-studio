@@ -206,11 +206,9 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {IClearing} from '../interfaces/clearing/IClearing.sol';
-import {
-    ERC1594StorageWrapper
-} from '../../layer_0/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
+import { _WILD_CARD_ROLE } from '../constants/roles.sol';
+import { IClearing } from '../interfaces/clearing/IClearing.sol';
+import { ERC1594StorageWrapper } from '../../layer_0/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
 
 abstract contract Common is ERC1594StorageWrapper {
     error AlreadyInitialized();
@@ -237,14 +235,8 @@ abstract contract Common is ERC1594StorageWrapper {
     }
 
     function _checkUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
+        if (_arePartitionsProtected() && !_hasRole(_WILD_CARD_ROLE, _msgSender())) {
+            revert PartitionsAreProtectedAndNoRole(_msgSender(), _WILD_CARD_ROLE);
         }
     }
 

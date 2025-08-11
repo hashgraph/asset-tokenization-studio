@@ -203,8 +203,8 @@
 
 */
 
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
 import {
   BalanceViewModel,
   DividendsViewModel,
@@ -225,8 +225,8 @@ import {
   BondDetailsViewModel,
   GetRegulationDetailsRequest,
   RegulationViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useSecurityStore } from "../../store/securityStore";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useSecurityStore } from '../../store/securityStore';
 
 export const GET_SECURITY_DETAILS = (equityId: string) =>
   `GET_SECURITY_DETAILS${equityId}`;

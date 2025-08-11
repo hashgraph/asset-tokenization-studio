@@ -203,25 +203,25 @@
 
 */
 
-import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { History } from "../../components/History";
-import { useTranslation } from "react-i18next";
+import { HStack, Stack, VStack } from '@chakra-ui/react';
+import { History } from '../../components/History';
+import { useTranslation } from 'react-i18next';
 import {
   Text,
   InputController,
   InputNumberController,
   Button,
-} from "io-bricks-ui";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { required, min } from "../../utils/rules";
-import { CancelButton } from "../../components/CancelButton";
-import { useTransferSecurity } from "../../hooks/queries/useTransferSecurity";
-import { TransferRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router";
-import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
-import { useWalletStore } from "../../store/walletStore";
-import { useDetailsBalancePanel } from "../../hooks/useDetailsBalancePanel";
-import { useSecurityStore } from "../../store/securityStore";
+} from 'io-bricks-ui';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { required, min } from '../../utils/rules';
+import { CancelButton } from '../../components/CancelButton';
+import { useTransferSecurity } from '../../hooks/queries/useTransferSecurity';
+import { TransferRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useParams } from 'react-router';
+import { DetailsBalancePanel } from '../../components/DetailsBalancePanel';
+import { useWalletStore } from '../../store/walletStore';
+import { useDetailsBalancePanel } from '../../hooks/useDetailsBalancePanel';
+import { useSecurityStore } from '../../store/securityStore';
 
 interface TransferFormValues {
   amount: number;
@@ -229,22 +229,22 @@ interface TransferFormValues {
 }
 
 export const DigitalSecurityTransfer = () => {
-  const { t: tHeader } = useTranslation("security", {
-    keyPrefix: "transfer.header",
+  const { t: tHeader } = useTranslation('security', {
+    keyPrefix: 'transfer.header',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "transfer.input",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'transfer.input',
   });
-  const { t } = useTranslation("security", { keyPrefix: "transfer" });
-  const { t: tGlobal } = useTranslation("globals");
+  const { t } = useTranslation('security', { keyPrefix: 'transfer' });
+  const { t: tGlobal } = useTranslation('globals');
   const { control, formState, handleSubmit, reset } =
     useForm<TransferFormValues>({
-      mode: "all",
+      mode: 'all',
     });
-  const { t: TButton } = useTranslation("security", {
-    keyPrefix: "transfer.button",
+  const { t: TButton } = useTranslation('security', {
+    keyPrefix: 'transfer.button',
   });
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
   const { details } = useSecurityStore();
   const { address: walletAddress } = useWalletStore();
 
@@ -270,7 +270,7 @@ export const DigitalSecurityTransfer = () => {
 
   return (
     <>
-      <History label={tHeader("title")} />
+      <History label={tHeader('title')} />
       <HStack
         layerStyle="container"
         mt={6}
@@ -289,12 +289,12 @@ export const DigitalSecurityTransfer = () => {
           as="form"
           onSubmit={handleSubmit(submit)}
         >
-          <Text textStyle="HeadingMediumLG">{t("title")}</Text>
+          <Text textStyle="HeadingMediumLG">{t('title')}</Text>
           <Text textStyle="BodyRegularMD" mt={2}>
-            {t("subtitle")}
+            {t('subtitle')}
           </Text>
           <Text textStyle="ElementsRegularSM" mt={8}>
-            {tGlobal("mandatoryFields")}
+            {tGlobal('mandatoryFields')}
           </Text>
           <Stack mt={6} w="full">
             <InputController
@@ -302,8 +302,8 @@ export const DigitalSecurityTransfer = () => {
               control={control}
               id="destination"
               rules={{ required }}
-              label={tForm("destination.label")}
-              placeholder={tForm("destination.placeholder")}
+              label={tForm('destination.label')}
+              placeholder={tForm('destination.placeholder')}
               size="md"
             />
           </Stack>
@@ -318,8 +318,8 @@ export const DigitalSecurityTransfer = () => {
               }}
               size="md"
               allowNegative={false}
-              label={tForm("amount.label")}
-              placeholder={tForm("amount.placeholder")}
+              label={tForm('amount.label')}
+              placeholder={tForm('amount.placeholder')}
               decimalScale={details?.decimals}
               fixedDecimalScale={true}
               thousandSeparator=","
@@ -331,7 +331,7 @@ export const DigitalSecurityTransfer = () => {
             w="full"
             mt={10}
             align="end"
-            justifyContent={"flex-end"}
+            justifyContent={'flex-end'}
           >
             <CancelButton />
             <Button
@@ -343,7 +343,7 @@ export const DigitalSecurityTransfer = () => {
               minW="unset"
               isLoading={isLoading}
             >
-              {TButton("accept")}
+              {TButton('accept')}
             </Button>
           </HStack>
         </VStack>

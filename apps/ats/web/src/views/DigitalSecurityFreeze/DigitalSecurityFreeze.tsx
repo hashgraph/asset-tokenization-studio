@@ -202,10 +202,10 @@
    limitations under the License.
 
 */
-import { useWatch } from "react-hook-form";
-import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { History } from "../../components/History";
-import { useTranslation } from "react-i18next";
+import { useWatch } from 'react-hook-form';
+import { HStack, Stack, VStack } from '@chakra-ui/react';
+import { History } from '../../components/History';
+import { useTranslation } from 'react-i18next';
 import {
   Text,
   InputController,
@@ -214,24 +214,24 @@ import {
   ToggleController,
   Tooltip,
   PhosphorIcon,
-} from "io-bricks-ui";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { required, min } from "../../utils/rules";
-import { CancelButton } from "../../components/CancelButton";
-import { useParams } from "react-router";
-import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
-import { useDetailsBalancePanel } from "../../hooks/useDetailsBalancePanel";
-import { useWalletStore } from "../../store/walletStore";
-import { useSecurityStore } from "../../store/securityStore";
-import { Info } from "@phosphor-icons/react";
+} from 'io-bricks-ui';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { required, min } from '../../utils/rules';
+import { CancelButton } from '../../components/CancelButton';
+import { useParams } from 'react-router';
+import { DetailsBalancePanel } from '../../components/DetailsBalancePanel';
+import { useDetailsBalancePanel } from '../../hooks/useDetailsBalancePanel';
+import { useWalletStore } from '../../store/walletStore';
+import { useSecurityStore } from '../../store/securityStore';
+import { Info } from '@phosphor-icons/react';
 import {
   useFreezeSecurity,
   useUnfreezeSecurity,
-} from "../../hooks/mutations/useFreezeSecurity";
+} from '../../hooks/mutations/useFreezeSecurity';
 import {
   UnfreezePartialTokensRequest,
   FreezePartialTokensRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 interface MintFormValues {
   amount: number;
@@ -240,20 +240,20 @@ interface MintFormValues {
 }
 
 export const DigitalSecurityFreeze = () => {
-  const { t: tHeader } = useTranslation("security", {
-    keyPrefix: "freeze.header",
+  const { t: tHeader } = useTranslation('security', {
+    keyPrefix: 'freeze.header',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "freeze.input",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'freeze.input',
   });
-  const { t } = useTranslation("security", { keyPrefix: "freeze" });
-  const { t: tGlobal } = useTranslation("globals");
-  const { t: tProperties } = useTranslation("properties");
+  const { t } = useTranslation('security', { keyPrefix: 'freeze' });
+  const { t: tGlobal } = useTranslation('globals');
+  const { t: tProperties } = useTranslation('properties');
   const { control, formState, handleSubmit, reset } = useForm<MintFormValues>({
-    mode: "all",
+    mode: 'all',
   });
   const { address: walletAddress } = useWalletStore();
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
   const { details } = useSecurityStore();
   const { isLoading: isBalancePanelLoading, update } = useDetailsBalancePanel(
     id,
@@ -266,7 +266,7 @@ export const DigitalSecurityFreeze = () => {
 
   const isUnfreeze = useWatch({
     control,
-    name: "isUnfreeze",
+    name: 'isUnfreeze',
     defaultValue: false,
   });
 
@@ -304,7 +304,7 @@ export const DigitalSecurityFreeze = () => {
 
   return (
     <>
-      <History label={tHeader("title")} />
+      <History label={tHeader('title')} />
       <HStack
         layerStyle="container"
         mt={6}
@@ -324,17 +324,17 @@ export const DigitalSecurityFreeze = () => {
           onSubmit={handleSubmit(submit)}
           gap={3}
         >
-          <Text textStyle="HeadingMediumLG">{t("title")}</Text>
+          <Text textStyle="HeadingMediumLG">{t('title')}</Text>
           <Text textStyle="BodyRegularMD" mt={2}>
-            {t("subtitle")}
+            {t('subtitle')}
           </Text>
           <Text textStyle="ElementsRegularSM" mt={8}>
-            {tGlobal("mandatoryFields")}
+            {tGlobal('mandatoryFields')}
           </Text>
           <VStack>
-            <Tooltip label={tForm("isUnfreeze.tooltip")} placement="right">
+            <Tooltip label={tForm('isUnfreeze.tooltip')} placement="right">
               <HStack>
-                <Text>{tForm("isUnfreeze.label")}</Text>
+                <Text>{tForm('isUnfreeze.label')}</Text>
                 <PhosphorIcon as={Info} />
               </HStack>
             </Tooltip>
@@ -352,12 +352,12 @@ export const DigitalSecurityFreeze = () => {
               size="md"
               allowNegative={false}
               label={tForm(
-                isUnfreeze ? "amountUnfreeze.label" : "amountFreeze.label",
+                isUnfreeze ? 'amountUnfreeze.label' : 'amountFreeze.label',
               )}
               placeholder={tForm(
                 isUnfreeze
-                  ? "amountUnfreeze.placeholder"
-                  : "amountFreeze.placeholder",
+                  ? 'amountUnfreeze.placeholder'
+                  : 'amountFreeze.placeholder',
               )}
               decimalScale={details?.decimals}
               fixedDecimalScale={true}
@@ -371,8 +371,8 @@ export const DigitalSecurityFreeze = () => {
               control={control}
               id="destination"
               rules={{ required }}
-              label={tForm("destination.label")}
-              placeholder={tForm("destination.placeholder")}
+              label={tForm('destination.label')}
+              placeholder={tForm('destination.placeholder')}
               size="md"
             />
           </Stack>
@@ -381,7 +381,7 @@ export const DigitalSecurityFreeze = () => {
             w="full"
             mt={10}
             align="end"
-            justifyContent={"flex-end"}
+            justifyContent={'flex-end'}
           >
             <CancelButton />
             <Button
@@ -393,14 +393,14 @@ export const DigitalSecurityFreeze = () => {
               minW="unset"
               isLoading={isFreezeLoading || isUnfreezeLoading}
             >
-              {tGlobal("submit")}
+              {tGlobal('submit')}
             </Button>
           </HStack>
         </VStack>
         <DetailsBalancePanel
           balance={details?.totalSupply}
           isLoading={isBalancePanelLoading}
-          title={tProperties("totalSupply")}
+          title={tProperties('totalSupply')}
         />
       </HStack>
     </>

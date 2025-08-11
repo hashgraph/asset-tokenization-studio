@@ -203,8 +203,8 @@
 
 */
 
-import { tabsPartsList } from "io-bricks-ui";
-import type { TabsThemeConfiguration } from "io-bricks-ui";
+import { tabsPartsList } from 'io-bricks-ui';
+import type { TabsThemeConfiguration } from 'io-bricks-ui';
 
 export const Tabs: TabsThemeConfiguration = {
   parts: tabsPartsList,
@@ -214,8 +214,8 @@ export const Tabs: TabsThemeConfiguration = {
         boxShadow: 0,
       },
       _selected: {
-        borderBottomWidth: "4px",
-        borderColor: "none",
+        borderBottomWidth: '4px',
+        borderColor: 'none',
         _hover: {
           _before: {
             height: 0,
@@ -227,26 +227,26 @@ export const Tabs: TabsThemeConfiguration = {
       },
     },
     tabpanels: {
-      h: "full",
+      h: 'full',
       py: 6,
     },
     tabpanel: {
-      h: "full",
+      h: 'full',
       py: 0,
     },
     tablist: {
-      borderBottom: "1px solid",
-      "& button[aria-selected=true]": {
-        borderColor: "none",
+      borderBottom: '1px solid',
+      '& button[aria-selected=true]': {
+        borderColor: 'none',
       },
     },
   },
   variants: {
     primary: {
       tablist: {
-        w: "full",
-        borderBottom: "1px solid",
-        borderColor: "neutral.400",
+        w: 'full',
+        borderBottom: '1px solid',
+        borderColor: 'neutral.400',
       },
       tab: {
         _focus: {
@@ -254,13 +254,13 @@ export const Tabs: TabsThemeConfiguration = {
         },
       },
       tabpanels: {
-        h: "full",
-        w: "full",
+        h: 'full',
+        w: 'full',
         py: 6,
       },
       tabpanel: {
-        h: "full",
-        w: "full",
+        h: 'full',
+        w: 'full',
         py: 0,
       },
     },
@@ -271,8 +271,8 @@ export const Tabs: TabsThemeConfiguration = {
           boxShadow: 0,
         },
         _selected: {
-          borderBottomWidth: "4px",
-          borderColor: "primary.500",
+          borderBottomWidth: '4px',
+          borderColor: 'primary.500',
           mb: 0,
           _hover: {
             _before: {
@@ -285,22 +285,22 @@ export const Tabs: TabsThemeConfiguration = {
         },
       },
       tablist: {
-        position: "relative",
-        bgColor: "neutral.50",
-        borderBottom: "1px solid",
-        borderColor: "neutral.400",
-        "& button[aria-selected=true]": {
-          borderColor: "none",
+        position: 'relative',
+        bgColor: 'neutral.50',
+        borderBottom: '1px solid',
+        borderColor: 'neutral.400',
+        '& button[aria-selected=true]': {
+          borderColor: 'none',
           mb: 0,
         },
       },
       tabpanels: {
-        h: "full",
+        h: 'full',
         py: 6,
-        bgColor: "neutral.50",
+        bgColor: 'neutral.50',
       },
       tabpanel: {
-        h: "full",
+        h: 'full',
         py: 0,
       },
     },

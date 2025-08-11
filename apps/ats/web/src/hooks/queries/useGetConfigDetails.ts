@@ -206,9 +206,9 @@
 import {
   GetConfigInfoRequest,
   ConfigInfoViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
 
 export const GET_CONFIG_INFO = (securityId: string) =>
   `GET_CONFIG_INFO_${securityId}}`;

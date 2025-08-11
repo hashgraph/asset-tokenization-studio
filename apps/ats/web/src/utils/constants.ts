@@ -203,26 +203,26 @@
 
 */
 
-export const METAMASK_URL = "https://metamask.io/download/";
+export const METAMASK_URL = 'https://metamask.io/download/';
 
 export enum WalletStatus {
-  connected = "CONNECTED",
-  connecting = "CONNECTING",
-  disconnected = "DISCONNECTED",
-  uninstalled = "UNINSTALLED",
+  connected = 'CONNECTED',
+  connecting = 'CONNECTING',
+  disconnected = 'DISCONNECTED',
+  uninstalled = 'UNINSTALLED',
 }
 
 export enum User {
-  admin = "admin",
-  holder = "holder",
-  general = "general",
+  admin = 'admin',
+  holder = 'holder',
+  general = 'general',
 }
 
-export const LOCALE = "en-US";
+export const LOCALE = 'en-US';
 export const COUPONS_FACTOR = 1000;
 export const NOMINAL_VALUE_FACTOR = 100;
 
-export const DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
+export const DATE_TIME_FORMAT = 'dd/MM/yyyy HH:mm:ss';
 
 export const DEFAULT_PARTITION =
-  "0x0000000000000000000000000000000000000000000000000000000000000001";
+  '0x0000000000000000000000000000000000000000000000000000000000000001';

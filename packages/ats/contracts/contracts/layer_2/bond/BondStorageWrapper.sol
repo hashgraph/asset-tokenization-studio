@@ -206,14 +206,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {_BOND_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
-import {IBond} from '../interfaces/bond/IBond.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {IBondStorageWrapper} from '../interfaces/bond/IBondStorageWrapper.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { _BOND_STORAGE_POSITION } from '../constants/storagePositions.sol';
+import { COUPON_CORPORATE_ACTION_TYPE } from '../constants/values.sol';
+import { IBond } from '../interfaces/bond/IBond.sol';
+import { Common } from '../../layer_1/common/Common.sol';
+import { IBondStorageWrapper } from '../interfaces/bond/IBondStorageWrapper.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -235,9 +233,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         _;
     }
 
-    function _storeBondDetails(
-        IBond.BondDetailsData memory _bondDetails
-    ) internal {
+    function _storeBondDetails(IBond.BondDetailsData memory _bondDetails) internal {
         _bondStorage().bondDetail = _bondDetails;
     }
 
@@ -248,10 +244,8 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     ) internal {
         _bondStorage().couponDetail = _couponDetails;
         if (_couponDetails.firstCouponDate == 0) return;
-        if (
-            _couponDetails.firstCouponDate < _startingDate ||
-            _couponDetails.firstCouponDate > _maturityDate
-        ) revert CouponFirstDateWrong();
+        if (_couponDetails.firstCouponDate < _startingDate || _couponDetails.firstCouponDate > _maturityDate)
+            revert CouponFirstDateWrong();
         if (_couponDetails.couponFrequency == 0) revert CouponFrequencyWrong();
 
         _setFixedCoupons(
@@ -264,10 +258,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
 
     function _setCoupon(
         IBond.Coupon memory _newCoupon
-    )
-        internal
-        returns (bool success_, bytes32 corporateActionId_, uint256 couponID_)
-    {
+    ) internal returns (bool success_, bytes32 corporateActionId_, uint256 couponID_) {
         (success_, corporateActionId_, couponID_) = _addCorporateAction(
             COUPON_CORPORATE_ACTION_TYPE,
             abi.encode(_newCoupon)
@@ -279,26 +270,16 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
      * @param _maturityDate The new maturity date to be set.
      * @return success_ True if the maturity date was set successfully.
      */
-    function _setMaturityDate(
-        uint256 _maturityDate
-    ) internal returns (bool success_) {
+    function _setMaturityDate(uint256 _maturityDate) internal returns (bool success_) {
         _bondStorage().bondDetail.maturityDate = _maturityDate;
         return true;
     }
 
-    function _getBondDetails()
-        internal
-        view
-        returns (IBond.BondDetailsData memory bondDetails_)
-    {
+    function _getBondDetails() internal view returns (IBond.BondDetailsData memory bondDetails_) {
         bondDetails_ = _bondStorage().bondDetail;
     }
 
-    function _getCouponDetails()
-        internal
-        view
-        returns (IBond.CouponDetailsData memory couponDetails_)
-    {
+    function _getCouponDetails() internal view returns (IBond.CouponDetailsData memory couponDetails_) {
         couponDetails_ = _bondStorage().couponDetail;
     }
 
@@ -306,12 +287,8 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         return _bondStorage().bondDetail.maturityDate;
     }
 
-    function _getCoupon(
-        uint256 _couponID
-    ) internal view returns (IBond.RegisteredCoupon memory registeredCoupon_) {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[COUPON_CORPORATE_ACTION_TYPE]
-            .at(_couponID - 1);
+    function _getCoupon(uint256 _couponID) internal view returns (IBond.RegisteredCoupon memory registeredCoupon_) {
+        bytes32 actionId = _corporateActionsStorage().actionsByType[COUPON_CORPORATE_ACTION_TYPE].at(_couponID - 1);
 
         (, bytes memory data) = _getCorporateAction(actionId);
 
@@ -337,21 +314,10 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
 
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
                 ? (_balanceOfAtSnapshot(registeredCoupon.snapshotId, _account) +
-                    _lockedBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    ) +
-                    _heldBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    )) +
-                    _clearedBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    )
-                : (_balanceOf(_account) +
-                    _getLockedAmountFor(_account) +
-                    _getHeldAmountFor(_account)) +
+                    _lockedBalanceOfAtSnapshot(registeredCoupon.snapshotId, _account) +
+                    _heldBalanceOfAtSnapshot(registeredCoupon.snapshotId, _account)) +
+                    _clearedBalanceOfAtSnapshot(registeredCoupon.snapshotId, _account)
+                : (_balanceOf(_account) + _getLockedAmountFor(_account) + _getHeldAmountFor(_account)) +
                     _getClearedAmountFor(_account);
 
             couponFor_.decimals = _decimalsAdjusted();
@@ -362,11 +328,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }
 
-    function _bondStorage()
-        internal
-        pure
-        returns (BondDataStorage storage bondData_)
-    {
+    function _bondStorage() internal pure returns (BondDataStorage storage bondData_) {
         bytes32 position = _BOND_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -380,8 +342,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         uint256 _maturityDate,
         uint256 _rate
     ) private returns (bool) {
-        uint256 numberOfSubsequentCoupons = (_maturityDate - _firstCouponDate) /
-            _couponFrequency;
+        uint256 numberOfSubsequentCoupons = (_maturityDate - _firstCouponDate) / _couponFrequency;
         bool success;
         for (uint256 i = 0; i <= numberOfSubsequentCoupons; i++) {
             uint256 runDate = _firstCouponDate + i * _couponFrequency;

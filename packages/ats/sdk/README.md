@@ -69,7 +69,6 @@ npm run test
 Initialises the SDK.
 
 - Request
-
   - network : ‘testnet’, ‘mainnet’, …
   - mirrorNode: name and url of the mirror node the SDK will connect too.
   - rpcNode: name and url of the rpc node the SDK will connect too.
@@ -86,7 +85,6 @@ Initialises the SDK.
 Connects an account to the SDK.
 
 - Request
-
   - account : connected account
   - network : ‘testnet’, ‘mainnet’, …
   - mirrorNode: name and url of the mirror node the SDK will connect too.
@@ -111,7 +109,6 @@ Disconnects an account from the SDK.
 Sets a new network into the SDK.
 
 - Request
-
   - environment : network that we are connecting too
   - mirrorNode: name and url of the mirror node the SDK will connect too.
   - rpcNode: name and url of the rpc node the SDK will connect too.
@@ -129,7 +126,6 @@ Sets a new network into the SDK.
 Sets a new configuration into the SDK.
 
 - Request
-
   - factoryAddress: new factory address.
   - resolverAddress: new resolver address.
 
@@ -143,7 +139,6 @@ Sets a new configuration into the SDK.
 ### create
 
 - Request
-
   - diamondOwnerAccount: Hedera id of the account deploying the security
   - Currency: hexadecimal of the currency’s 3 letter ISO code
   - numberOfUnits: maximum supply
@@ -177,7 +172,6 @@ Sets a new configuration into the SDK.
 Creates a new coupon for the bond.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset.
   - rate: coupon percentage rate.
   - recordTimestamp: date (in seconds) at which token holders balances will be snapshotted.
@@ -193,7 +187,6 @@ Creates a new coupon for the bond.
 ### create
 
 - Request
-
   - diamondOwnerAccount: Hedera id of the account deploying the security
   - votingRight: the equity grants voting rights to its holders.
   - informationRight: the equity grants information rights to its holders.
@@ -230,7 +223,6 @@ Creates a new coupon for the bond.
 Creates a new dividend for the equity.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset.
   - amountPerUnitOfSecurity: dividend amount per security.
   - recordTimestamp: date (in seconds) at which token holders balances will be snapshotted.
@@ -246,7 +238,6 @@ Creates a new dividend for the equity.
 Creates a new voting right for the equity.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset.
   - recordTimestamp: date (in seconds) at which token holders balances will be snapshotted.
   - data : metadata associated to the voting rights.
@@ -263,7 +254,6 @@ Creates a new voting right for the equity.
 Mints new assets to a given account
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - targetId: accounts hedera id
   - amount: amount to be minted with decimals included
@@ -278,7 +268,6 @@ Mints new assets to a given account
 Redeems assets
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - amount: amount to be redeemed with decimals included
 
@@ -292,7 +281,6 @@ Redeems assets
 Redeems assets from a given account
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - sourceId: accounts hedera id
   - amount: amount to be redeemed with decimals included
@@ -307,7 +295,6 @@ Redeems assets from a given account
 Transfer assets from a given account
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - sourceId: source accounts hedera id
   - targetId: destination accounts hedera id
@@ -323,7 +310,6 @@ Transfer assets from a given account
 Pauses the Security (can only be executed if the security is not paused)
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
 
 - Response
@@ -336,7 +322,6 @@ Pauses the Security (can only be executed if the security is not paused)
 Unpauses the Security (can only be executed if the security is paused)
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
 
 - Response
@@ -349,7 +334,6 @@ Unpauses the Security (can only be executed if the security is paused)
 Adds an account to the control list (either blacklist or whitelist depending on how the asset was configured during deployment)
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - targetId: accounts hedera id
 
@@ -375,7 +359,6 @@ Removes an account from the control list (either blacklist or whitelist dependin
 Transfer fund to an account
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - targetId: accounts hedera id
   - amount: amount to be transferred with decimals included
@@ -390,7 +373,6 @@ Transfer fund to an account
 Transfer fund to an account and locks them for a given amount of time
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - targetId: accounts hedera id
   - amount: amount to be transferred with decimals included
@@ -406,7 +388,6 @@ Transfer fund to an account and locks them for a given amount of time
 Updates the max supply. Setting max supply to "0" means removing it (unllimited max supply).
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - maxSupply: new max supply
 
@@ -420,7 +401,6 @@ Updates the max supply. Setting max supply to "0" means removing it (unllimited 
 Locks funds into an account for a certain period of time
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - targetId: accounts hedera id where funds will be locked
   - amount: amount to be locked with decimals included
@@ -436,7 +416,6 @@ Locks funds into an account for a certain period of time
 Releases locked funds from an account
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - targetId: accounts hedera id where funds will be released
   - lockId: Id of the lock to be released
@@ -555,7 +534,6 @@ Creates a new clearing hold for a specific partition by the token holder.
   - `clearingExpirationDate`: Date when the clearing expires.
   - `holdExpirationDate`: Date when the hold expires.
 - **Response**:
-
   - `payload`: `true` (success) or `false` (failed).
   - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
 
@@ -573,7 +551,6 @@ Similar to "Clearing Create Hold by Partition", but can only be executed by an a
   - `clearingExpirationDate`: Date when the clearing expires.
   - `holdExpirationDate`: Date when the hold expires.
 - **Response**:
-
   - `payload`: `true` (success) or `false` (failed).
   - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
 
@@ -752,7 +729,6 @@ Revoke KYC from a target account.
   - `securityId`: Identifier of the security token.
   - `targetId`: Identifier of the target account.
 - **Response**:
-
   - `payload`: `true` (success) or `false` (failed).
   - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
 
@@ -763,7 +739,6 @@ Activate internal KYC of a security.
 - **Request**:
   - `securityId`: Identifier of the security token.
 - **Response**:
-
   - `payload`: `true` (success) or `false` (failed).
   - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
 
@@ -819,7 +794,6 @@ Add revocation registry address.
 Assigns a new set of roles for a given account
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - targetId: accounts hedera id
   - roles: list of roles.
@@ -835,7 +809,6 @@ Assigns a new set of roles for a given account
 Grants a role to an account
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - targetId: accounts hedera id
   - role: role to be granted.
@@ -850,7 +823,6 @@ Grants a role to an account
 Revokes a role from an account
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - targetId: accounts hedera id
   - role: role to be revoked.
@@ -867,7 +839,6 @@ Revokes a role from an account
 Adds a new external pause address to a specific asset.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - externalPauseAddress: address of the external pause to be added.
 
@@ -881,7 +852,6 @@ Adds a new external pause address to a specific asset.
 Removes an existing external pause address from a specific asset.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - externalPauseAddress: address of the external pause to be removed.
 
@@ -895,7 +865,6 @@ Removes an existing external pause address from a specific asset.
 Updates the active status of multiple external pause addresses for a specific asset.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - externalPausesAddresses: List of external pause addresses.
   - actives: list of boolean indicating whether the correspond externalPause (from the above mentioned external pauses list) should be added or removed.
@@ -912,7 +881,6 @@ Updates the active status of multiple external pause addresses for a specific as
 Adds a new external control list address to a specific asset.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - externalControlListAddress: address of the external control list to be added.
 
@@ -926,7 +894,6 @@ Adds a new external control list address to a specific asset.
 Removes an existing external control list address from a specific asset.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - externalControlListAddress: address of the external control list to be removed.
 
@@ -940,7 +907,6 @@ Removes an existing external control list address from a specific asset.
 Updates the active status of multiple external control list addresses for a specific asset.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - externalControlListsAddresses: List of external control list addresses.
   - actives: list of boolean indicating whether the correspond externalControlList (from the above mentioned external control list) should be added or removed.
@@ -957,7 +923,6 @@ Updates the active status of multiple external control list addresses for a spec
 Adds a new external kyc list address to a specific asset.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - externalKycListAddress: address of the external kyc list to be added.
 
@@ -971,7 +936,6 @@ Adds a new external kyc list address to a specific asset.
 Removes an existing external kyc list address from a specific asset.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - externalKycListAddress: address of the external kyc list to be removed.
 
@@ -985,7 +949,6 @@ Removes an existing external kyc list address from a specific asset.
 Updates the active status of multiple external kyc list addresses for a specific asset.
 
 - Request
-
   - securityId: Hedera id of the diamond contract representing the asset
   - externalKycListsAddresses: List of external kyc list addresses.
   - actives: list of boolean indicating whether the correspond externalKycList (from the above mentioned external kyc list) should be added or removed.
@@ -1002,7 +965,6 @@ Updates the active status of multiple external kyc list addresses for a specific
 Returns the details of a specific regulation and subregulation.
 
 - Request
-
   - regulationType:
     - 0 : no regulation
     - 1 : Reg S

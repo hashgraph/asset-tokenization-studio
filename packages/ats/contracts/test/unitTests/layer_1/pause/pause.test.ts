@@ -203,245 +203,242 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
-    type ResolverProxy,
-    type Pause,
-    AccessControl,
-    IFactory,
-    BusinessLogicResolver,
-    AccessControlFacet__factory,
-    PauseFacet__factory,
-    MockedExternalPause,
-    MockedExternalPause__factory,
-    ExternalPauseManagement,
-    ExternalPauseManagement__factory,
-} from '@typechain'
+  type ResolverProxy,
+  type Pause,
+  AccessControl,
+  IFactory,
+  BusinessLogicResolver,
+  AccessControlFacet__factory,
+  PauseFacet__factory,
+  MockedExternalPause,
+  MockedExternalPause__factory,
+  ExternalPauseManagement,
+  ExternalPauseManagement__factory,
+} from '@typechain';
 import {
-    PAUSER_ROLE,
-    PAUSE_MANAGER_ROLE,
-    deployEquityFromFactory,
-    RegulationSubType,
-    RegulationType,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    MAX_UINT256,
-    GAS_LIMIT,
-} from '@scripts'
-import { grantRoleAndPauseToken } from '../../../common'
+  PAUSER_ROLE,
+  PAUSE_MANAGER_ROLE,
+  deployEquityFromFactory,
+  RegulationSubType,
+  RegulationType,
+  deployAtsFullInfrastructure,
+  DeployAtsFullInfrastructureCommand,
+  MAX_UINT256,
+  GAS_LIMIT,
+} from '@scripts';
+import { grantRoleAndPauseToken } from '../../../common';
 
 describe('Pause Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
+  let diamond: ResolverProxy;
+  let signer_A: SignerWithAddress;
+  let signer_B: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
+  let account_A: string;
+  let account_B: string;
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
-    let externalPauseManagement: ExternalPauseManagement
-    let externalPauseMock: MockedExternalPause
+  let factory: IFactory;
+  let businessLogicResolver: BusinessLogicResolver;
+  let accessControlFacet: AccessControl;
+  let pauseFacet: Pause;
+  let externalPauseManagement: ExternalPauseManagement;
+  let externalPauseMock: MockedExternalPause;
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
+  before(async () => {
+    // mute | mock console.log
+    console.log = () => {};
+    [signer_A, signer_B] = await ethers.getSigners();
+    account_A = signer_A.address;
+    account_B = signer_B.address;
 
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: false,
-                timeTravelEnabled: true,
-            })
-        )
+    const { ...deployedContracts } = await deployAtsFullInfrastructure(
+      await DeployAtsFullInfrastructureCommand.newInstance({
+        signer: signer_A,
+        useDeployed: false,
+        useEnvironment: false,
+        timeTravelEnabled: true,
+      }),
+    );
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
+    factory = deployedContracts.factory.contract;
+    businessLogicResolver = deployedContracts.businessLogicResolver.contract;
+  });
 
-    beforeEach(async () => {
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: true,
-            isMultiPartition: false,
-            name: 'TEST_AccessControl',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_S,
-            regulationSubType: RegulationSubType.NONE,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            factory: factory,
-            businessLogicResolver: businessLogicResolver.address,
-        })
+  beforeEach(async () => {
+    diamond = await deployEquityFromFactory({
+      adminAccount: account_A,
+      isWhiteList: false,
+      isControllable: true,
+      arePartitionsProtected: false,
+      clearingActive: false,
+      internalKycActivated: true,
+      isMultiPartition: false,
+      name: 'TEST_AccessControl',
+      symbol: 'TAC',
+      decimals: 6,
+      isin: isinGenerator(),
+      votingRight: false,
+      informationRight: false,
+      liquidationRight: false,
+      subscriptionRight: true,
+      conversionRight: true,
+      redemptionRight: true,
+      putRight: false,
+      dividendRight: 1,
+      currency: '0x345678',
+      numberOfShares: MAX_UINT256,
+      nominalValue: 100,
+      regulationType: RegulationType.REG_S,
+      regulationSubType: RegulationSubType.NONE,
+      countriesControlListType: true,
+      listOfCountries: 'ES,FR,CH',
+      info: 'nothing',
+      factory: factory,
+      businessLogicResolver: businessLogicResolver.address,
+    });
 
-        accessControlFacet = AccessControlFacet__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
-        externalPauseManagement = ExternalPauseManagement__factory.connect(
-            diamond.address,
-            signer_A
-        )
+    accessControlFacet = AccessControlFacet__factory.connect(
+      diamond.address,
+      signer_A,
+    );
+    pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A);
+    externalPauseManagement = ExternalPauseManagement__factory.connect(
+      diamond.address,
+      signer_A,
+    );
 
-        // Deploy mock external pause contract
-        externalPauseMock = await new MockedExternalPause__factory(
-            signer_A
-        ).deploy({ gasLimit: GAS_LIMIT.high })
-        await externalPauseMock.deployed()
+    // Deploy mock external pause contract
+    externalPauseMock = await new MockedExternalPause__factory(signer_A).deploy(
+      { gasLimit: GAS_LIMIT.high },
+    );
+    await externalPauseMock.deployed();
 
-        // Add external pause to the token
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_A)
-        await accessControlFacet.grantRole(PAUSE_MANAGER_ROLE, account_A)
-        await externalPauseManagement.addExternalPause(
-            externalPauseMock.address,
-            { gasLimit: GAS_LIMIT.high }
-        )
-    })
+    // Add external pause to the token
+    await accessControlFacet.grantRole(PAUSER_ROLE, account_A);
+    await accessControlFacet.grantRole(PAUSE_MANAGER_ROLE, account_A);
+    await externalPauseManagement.addExternalPause(externalPauseMock.address, {
+      gasLimit: GAS_LIMIT.high,
+    });
+  });
 
-    it('GIVEN an account without pause role WHEN pause THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account B (non role)
-        pauseFacet = pauseFacet.connect(signer_B)
-        // pause fails
-        await expect(pauseFacet.pause()).to.be.rejectedWith('AccountHasNoRole')
-    })
+  it('GIVEN an account without pause role WHEN pause THEN transaction fails with AccountHasNoRole', async () => {
+    // Using account B (non role)
+    pauseFacet = pauseFacet.connect(signer_B);
+    // pause fails
+    await expect(pauseFacet.pause()).to.be.rejectedWith('AccountHasNoRole');
+  });
 
-    it('GIVEN an account without pause role WHEN unpause THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account B (non role)
-        pauseFacet = pauseFacet.connect(signer_B)
+  it('GIVEN an account without pause role WHEN unpause THEN transaction fails with AccountHasNoRole', async () => {
+    // Using account B (non role)
+    pauseFacet = pauseFacet.connect(signer_B);
 
-        // unpause fails
-        await expect(pauseFacet.unpause()).to.be.rejectedWith(
-            'AccountHasNoRole'
-        )
-    })
+    // unpause fails
+    await expect(pauseFacet.unpause()).to.be.rejectedWith('AccountHasNoRole');
+  });
 
-    it('GIVEN a paused Token WHEN pause THEN transaction fails with TokenIsPaused', async () => {
-        // Granting Role to account C and Pause
-        await grantRoleAndPauseToken(
-            accessControlFacet,
-            pauseFacet,
-            PAUSER_ROLE,
-            signer_A,
-            signer_B,
-            account_B
-        )
+  it('GIVEN a paused Token WHEN pause THEN transaction fails with TokenIsPaused', async () => {
+    // Granting Role to account C and Pause
+    await grantRoleAndPauseToken(
+      accessControlFacet,
+      pauseFacet,
+      PAUSER_ROLE,
+      signer_A,
+      signer_B,
+      account_B,
+    );
 
-        // pause fails
-        pauseFacet = pauseFacet.connect(signer_B)
-        await expect(pauseFacet.pause()).to.be.revertedWithCustomError(
-            pauseFacet,
-            'TokenIsPaused'
-        )
-    })
+    // pause fails
+    pauseFacet = pauseFacet.connect(signer_B);
+    await expect(pauseFacet.pause()).to.be.revertedWithCustomError(
+      pauseFacet,
+      'TokenIsPaused',
+    );
+  });
 
-    it('GIVEN an unpause Token WHEN unpause THEN transaction fails with TokenIsUnpaused', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_B)
-        pauseFacet = pauseFacet.connect(signer_B)
+  it('GIVEN an unpause Token WHEN unpause THEN transaction fails with TokenIsUnpaused', async () => {
+    // Granting Role to account C
+    accessControlFacet = accessControlFacet.connect(signer_A);
+    await accessControlFacet.grantRole(PAUSER_ROLE, account_B);
+    pauseFacet = pauseFacet.connect(signer_B);
 
-        // unpause fails
-        await expect(pauseFacet.unpause()).to.be.revertedWithCustomError(
-            pauseFacet,
-            'TokenIsUnpaused'
-        )
-    })
+    // unpause fails
+    await expect(pauseFacet.unpause()).to.be.revertedWithCustomError(
+      pauseFacet,
+      'TokenIsUnpaused',
+    );
+  });
 
-    it('GIVEN an account with pause role WHEN pause and unpause THEN transaction succeeds', async () => {
-        // PAUSE ------------------------------------------------------------------
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_B)
-        // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
+  it('GIVEN an account with pause role WHEN pause and unpause THEN transaction succeeds', async () => {
+    // PAUSE ------------------------------------------------------------------
+    // Granting Role to account C
+    accessControlFacet = accessControlFacet.connect(signer_A);
+    await accessControlFacet.grantRole(PAUSER_ROLE, account_B);
+    // Pausing the token
+    pauseFacet = pauseFacet.connect(signer_B);
 
-        await expect(pauseFacet.pause())
-            .to.emit(pauseFacet, 'TokenPaused')
-            .withArgs(account_B)
-        // check is paused
-        let paused = await pauseFacet.isPaused()
-        expect(paused).to.be.equal(true)
+    await expect(pauseFacet.pause())
+      .to.emit(pauseFacet, 'TokenPaused')
+      .withArgs(account_B);
+    // check is paused
+    let paused = await pauseFacet.isPaused();
+    expect(paused).to.be.equal(true);
 
-        // UNPAUSE ------------------------------------------------------------------
-        // remove From list
-        await expect(pauseFacet.unpause())
-            .to.emit(pauseFacet, 'TokenUnpaused')
-            .withArgs(account_B)
-        // check is unpaused
-        paused = await pauseFacet.isPaused()
-        expect(paused).to.be.equal(false)
-    })
+    // UNPAUSE ------------------------------------------------------------------
+    // remove From list
+    await expect(pauseFacet.unpause())
+      .to.emit(pauseFacet, 'TokenUnpaused')
+      .withArgs(account_B);
+    // check is unpaused
+    paused = await pauseFacet.isPaused();
+    expect(paused).to.be.equal(false);
+  });
 
-    it('GIVEN an external pause WHEN isPaused THEN it reflects the external pause state', async () => {
-        // Initially unpaused
-        let isPaused = await pauseFacet.isPaused()
-        expect(isPaused).to.be.false
+  it('GIVEN an external pause WHEN isPaused THEN it reflects the external pause state', async () => {
+    // Initially unpaused
+    let isPaused = await pauseFacet.isPaused();
+    expect(isPaused).to.be.false;
 
-        // Set external pause to true
-        await externalPauseMock.setPaused(true, { gasLimit: GAS_LIMIT.default })
-        isPaused = await pauseFacet.isPaused()
-        expect(isPaused).to.be.true
+    // Set external pause to true
+    await externalPauseMock.setPaused(true, { gasLimit: GAS_LIMIT.default });
+    isPaused = await pauseFacet.isPaused();
+    expect(isPaused).to.be.true;
 
-        // Set external pause to false
-        await externalPauseMock.setPaused(false, {
-            gasLimit: GAS_LIMIT.default,
-        })
-        isPaused = await pauseFacet.isPaused()
-        expect(isPaused).to.be.false
-    })
+    // Set external pause to false
+    await externalPauseMock.setPaused(false, {
+      gasLimit: GAS_LIMIT.default,
+    });
+    isPaused = await pauseFacet.isPaused();
+    expect(isPaused).to.be.false;
+  });
 
-    it('GIVEN an external pause WHEN token is paused THEN isPaused returns true', async () => {
-        // Pause the token
-        await pauseFacet.pause({ gasLimit: GAS_LIMIT.default })
+  it('GIVEN an external pause WHEN token is paused THEN isPaused returns true', async () => {
+    // Pause the token
+    await pauseFacet.pause({ gasLimit: GAS_LIMIT.default });
 
-        // Check isPaused
-        const isPaused = await pauseFacet.isPaused()
-        expect(isPaused).to.be.true
-    })
+    // Check isPaused
+    const isPaused = await pauseFacet.isPaused();
+    expect(isPaused).to.be.true;
+  });
 
-    it('GIVEN an external pause WHEN token is unpaused THEN isPaused reflects external pause state', async () => {
-        // Pause and then unpause the token
-        await pauseFacet.pause({ gasLimit: GAS_LIMIT.default })
-        await pauseFacet.unpause({ gasLimit: GAS_LIMIT.default })
+  it('GIVEN an external pause WHEN token is unpaused THEN isPaused reflects external pause state', async () => {
+    // Pause and then unpause the token
+    await pauseFacet.pause({ gasLimit: GAS_LIMIT.default });
+    await pauseFacet.unpause({ gasLimit: GAS_LIMIT.default });
 
-        // Set external pause to true
-        await externalPauseMock.setPaused(true, { gasLimit: GAS_LIMIT.default })
-        let isPaused = await pauseFacet.isPaused()
-        expect(isPaused).to.be.true
+    // Set external pause to true
+    await externalPauseMock.setPaused(true, { gasLimit: GAS_LIMIT.default });
+    let isPaused = await pauseFacet.isPaused();
+    expect(isPaused).to.be.true;
 
-        // Set external pause to false
-        await externalPauseMock.setPaused(false, {
-            gasLimit: GAS_LIMIT.default,
-        })
-        isPaused = await pauseFacet.isPaused()
-        expect(isPaused).to.be.false
-    })
-})
+    // Set external pause to false
+    await externalPauseMock.setPaused(false, {
+      gasLimit: GAS_LIMIT.default,
+    });
+    isPaused = await pauseFacet.isPaused();
+    expect(isPaused).to.be.false;
+  });
+});

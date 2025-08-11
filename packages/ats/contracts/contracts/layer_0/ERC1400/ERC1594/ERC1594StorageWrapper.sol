@@ -206,10 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {
-    IERC1594StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol';
+import { _ERC1594_STORAGE_POSITION } from '../../constants/storagePositions.sol';
+import { IERC1594StorageWrapper } from '../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol';
 import {
     _IS_PAUSED_ERROR_ID,
     _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
@@ -226,14 +224,11 @@ import {
     _ADDRESS_RECOVERED_FROM_ERROR_ID,
     _ADDRESS_RECOVERED_TO_ERROR_ID
 } from '../../constants/values.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {CapStorageWrapper2} from '../../cap/CapStorageWrapper2.sol';
+import { IKyc } from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import { _CONTROLLER_ROLE, _AGENT_ROLE } from '../../constants/roles.sol';
+import { CapStorageWrapper2 } from '../../cap/CapStorageWrapper2.sol';
 
-abstract contract ERC1594StorageWrapper is
-    IERC1594StorageWrapper,
-    CapStorageWrapper2
-{
+abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWrapper2 {
     struct ERC1594Storage {
         bool issuance;
         bool initialized;
@@ -260,11 +255,7 @@ abstract contract ERC1594StorageWrapper is
      * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
      */
     // TODO: In this case are able to perform that operation another role?
-    function _issue(
-        address _tokenHolder,
-        uint256 _value,
-        bytes memory _data
-    ) internal {
+    function _issue(address _tokenHolder, uint256 _value, bytes memory _data) internal {
         // Add a function to validate the `_data` parameter
         _mint(_tokenHolder, _value);
         emit Issued(_msgSender(), _tokenHolder, _value, _data);
@@ -292,11 +283,7 @@ abstract contract ERC1594StorageWrapper is
      * @param _value The amount of tokens need to be redeemed
      * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
      */
-    function _redeemFrom(
-        address _tokenHolder,
-        uint256 _value,
-        bytes memory _data
-    ) internal {
+    function _redeemFrom(address _tokenHolder, uint256 _value, bytes memory _data) internal {
         // Add a function to validate the `_data` parameter
         _burnFrom(_tokenHolder, _value);
         emit Redeemed(_msgSender(), _tokenHolder, _value, _data);
@@ -360,11 +347,7 @@ abstract contract ERC1594StorageWrapper is
         roles[1] = _AGENT_ROLE;
         if (!_hasAnyRole(roles, _msgSender())) {
             if (_isRecovered(_msgSender())) {
-                return (
-                    false,
-                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-                    bytes32(0)
-                );
+                return (false, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, bytes32(0));
             }
             if (_isRecovered(_to)) {
                 return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
@@ -392,11 +375,7 @@ abstract contract ERC1594StorageWrapper is
                     return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
                 }
                 if (_isRecovered(_from)) {
-                    return (
-                        false,
-                        _ADDRESS_RECOVERED_FROM_ERROR_ID,
-                        bytes32(0)
-                    );
+                    return (false, _ADDRESS_RECOVERED_FROM_ERROR_ID, bytes32(0));
                 }
             }
             if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
@@ -412,11 +391,7 @@ abstract contract ERC1594StorageWrapper is
         return (true, _SUCCESS, bytes32(0));
     }
 
-    function _erc1594Storage()
-        internal
-        pure
-        returns (ERC1594Storage storage erc1594Storage_)
-    {
+    function _erc1594Storage() internal pure returns (ERC1594Storage storage erc1594Storage_) {
         bytes32 position = _ERC1594_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

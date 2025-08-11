@@ -203,10 +203,10 @@
 
 */
 
-import { ActionsButtons } from "../ActionsButtons";
-import { render } from "../../../../test-utils";
-import { useUserStore } from "../../../../store/userStore";
-import { User } from "../../../../utils/constants";
+import { ActionsButtons } from '../ActionsButtons';
+import { render } from '../../../../test-utils';
+import { useUserStore } from '../../../../store/userStore';
+import { User } from '../../../../utils/constants';
 
 const initialStoreState = useUserStore.getState();
 
@@ -217,7 +217,7 @@ describe(`${ActionsButtons.name}`, () => {
 
   const factoryComponent = () => render(<ActionsButtons />);
 
-  test("should render correctly admin buttons", () => {
+  test('should render correctly admin buttons', () => {
     useUserStore.setState({
       ...initialStoreState,
       type: User.admin,
@@ -225,10 +225,10 @@ describe(`${ActionsButtons.name}`, () => {
 
     const component = factoryComponent();
 
-    expect(component.asFragment()).toMatchSnapshot("admin");
+    expect(component.asFragment()).toMatchSnapshot('admin');
   });
 
-  test("should render correctly holder buttons", () => {
+  test('should render correctly holder buttons', () => {
     useUserStore.setState({
       ...initialStoreState,
       type: User.holder,
@@ -236,6 +236,6 @@ describe(`${ActionsButtons.name}`, () => {
 
     const component = factoryComponent();
 
-    expect(component.asFragment()).toMatchSnapshot("holder");
+    expect(component.asFragment()).toMatchSnapshot('holder');
   });
 });

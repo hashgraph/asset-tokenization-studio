@@ -206,11 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
-import {Common} from '../../common/Common.sol';
+import { IERC1410Standard } from '../../interfaces/ERC1400/IERC1410Standard.sol';
+import { Common } from '../../common/Common.sol';
 
-import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import { _ISSUER_ROLE, _AGENT_ROLE } from '../../constants/roles.sol';
+import { IKyc } from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410Standard is IERC1410Standard, Common {
     function issueByPartition(
@@ -257,14 +257,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
     {
         // Add the function to validate the `_data` parameter
-        _redeemByPartition(
-            _partition,
-            _msgSender(),
-            address(0),
-            _value,
-            _data,
-            ''
-        );
+        _redeemByPartition(_partition, _msgSender(), address(0), _value, _data, '');
     }
 
     /// @notice Decreases totalSupply and the corresponding amount of the specified partition of tokenHolder
@@ -296,14 +289,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
             _checkRecoveredAddress(_msgSender());
             _checkRecoveredAddress(_tokenHolder);
         }
-        _redeemByPartition(
-            _partition,
-            _tokenHolder,
-            _msgSender(),
-            _value,
-            _data,
-            _operatorData
-        );
+        _redeemByPartition(_partition, _tokenHolder, _msgSender(), _value, _data, _operatorData);
     }
 
     function canRedeemByPartition(
@@ -313,13 +299,6 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external view override returns (bool, bytes1, bytes32) {
-        return
-            _canRedeemByPartition(
-                _from,
-                _partition,
-                _value,
-                _data,
-                _operatorData
-            );
+        return _canRedeemByPartition(_from, _partition, _value, _data, _operatorData);
     }
 }

@@ -206,24 +206,14 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from '../common/Common.sol';
-import {
-    IClearingHoldCreation
-} from '../interfaces/clearing/IClearingHoldCreation.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {
-    _CLEARING_HOLDCREATION_RESOLVER_KEY
-} from '../constants/resolverKeys.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import { Common } from '../common/Common.sol';
+import { IClearingHoldCreation } from '../interfaces/clearing/IClearingHoldCreation.sol';
+import { IHold } from '../interfaces/hold/IHold.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _CLEARING_HOLDCREATION_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { ThirdPartyType } from '../../layer_0/common/types/ThirdPartyType.sol';
 
-contract ClearingHoldCreationFacet is
-    IStaticFunctionSelectors,
-    IClearingHoldCreation,
-    Common
-{
+contract ClearingHoldCreationFacet is IStaticFunctionSelectors, IClearingHoldCreation, Common {
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
         IHold.Hold calldata _hold
@@ -262,12 +252,8 @@ contract ClearingHoldCreationFacet is
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         validateAddress(_hold.escrow)
         validateAddress(_clearingOperationFrom.from)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -305,20 +291,13 @@ contract ClearingHoldCreationFacet is
         onlyUnrecoveredAddress(_hold.to)
         validateAddress(_hold.escrow)
         validateAddress(_clearingOperationFrom.from)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
-            _checkOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
+            _checkOperator(_clearingOperationFrom.clearingOperation.partition, _clearingOperationFrom.from);
             _checkExpirationTimestamp(_hold.expirationTimestamp);
             _checkUnProtectedPartitionsOrWildCardRole();
         }
@@ -344,14 +323,8 @@ contract ClearingHoldCreationFacet is
         onlyUnrecoveredAddress(_hold.to)
         onlyProtectedPartitions
         validateAddress(_protectedClearingOperation.from)
-        onlyWithValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        )
-        onlyRole(
-            _protectedPartitionsRole(
-                _protectedClearingOperation.clearingOperation.partition
-            )
-        )
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
+        onlyRole(_protectedPartitionsRole(_protectedClearingOperation.clearingOperation.partition))
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -366,63 +339,27 @@ contract ClearingHoldCreationFacet is
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    )
-        external
-        view
-        override
-        returns (ClearingHoldCreationData memory clearingHoldCreationData_)
-    {
-        return
-            _getClearingHoldCreationForByPartitionAdjusted(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
+    ) external view override returns (ClearingHoldCreationData memory clearingHoldCreationData_) {
+        return _getClearingHoldCreationForByPartitionAdjusted(_partition, _tokenHolder, _clearingId);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _CLEARING_HOLDCREATION_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingCreateHoldFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorClearingCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedClearingCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingCreateHoldForByPartition
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearingCreateHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearingCreateHoldFromByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.operatorClearingCreateHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.protectedClearingCreateHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getClearingCreateHoldForByPartition.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IClearingHoldCreation)
-            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IClearingHoldCreation).interfaceId;
     }
 }

@@ -203,16 +203,16 @@
 
 */
 
-import { AddSecurityButton } from "../AddSecurityButton";
-import { render } from "../../../../test-utils";
-import userEvent from "@testing-library/user-event";
-import { RouterManager } from "../../../../router/RouterManager";
-import { RouteName } from "../../../../router/RouteName";
-import { waitFor } from "@testing-library/react";
+import { AddSecurityButton } from '../AddSecurityButton';
+import { render } from '../../../../test-utils';
+import userEvent from '@testing-library/user-event';
+import { RouterManager } from '../../../../router/RouterManager';
+import { RouteName } from '../../../../router/RouteName';
+import { waitFor } from '@testing-library/react';
 
-jest.mock("../../../../router/RouterManager", () => ({
+jest.mock('../../../../router/RouterManager', () => ({
   RouterManager: {
-    ...jest.requireActual("../../../../router/RouterManager").RouterManager,
+    ...jest.requireActual('../../../../router/RouterManager').RouterManager,
     getUrl: jest.fn(),
   },
 }));
@@ -222,16 +222,16 @@ describe(`${AddSecurityButton.name}`, () => {
     jest.clearAllMocks();
   });
 
-  test("render correctly", () => {
+  test('render correctly', () => {
     const component = render(<AddSecurityButton />);
 
     expect(component.asFragment()).toMatchSnapshot();
   });
 
-  test("if click on button then redirect to Add Security page", async () => {
+  test('if click on button then redirect to Add Security page', async () => {
     const component = render(<AddSecurityButton />);
 
-    const button = component.getByTestId("add-security-button");
+    const button = component.getByTestId('add-security-button');
     userEvent.click(button);
 
     await waitFor(() => {

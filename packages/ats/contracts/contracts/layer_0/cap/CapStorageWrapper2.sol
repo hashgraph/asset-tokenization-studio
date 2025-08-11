@@ -205,24 +205,18 @@
 
 pragma solidity 0.8.18;
 
-import {
-    ICapStorageWrapper
-} from '../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
-import {LockStorageWrapper2} from '../lock/LockStorageWrapper2.sol';
+import { ICapStorageWrapper } from '../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
+import { LockStorageWrapper2 } from '../lock/LockStorageWrapper2.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract CapStorageWrapper2 is
-    ICapStorageWrapper,
-    LockStorageWrapper2
-{
+abstract contract CapStorageWrapper2 is ICapStorageWrapper, LockStorageWrapper2 {
     // modifiers
     modifier onlyWithinMaxSupply(uint256 _amount) {
         _checkWithinMaxSupply(_amount);
         _;
     }
 
-    modifier onlyWithinMaxSupplyByPartition(bytes32 _partition, uint256 _amount)
-    {
+    modifier onlyWithinMaxSupplyByPartition(bytes32 _partition, uint256 _amount) {
         _checkWithinMaxSupplyByPartition(_partition, _amount);
         _;
     }
@@ -232,10 +226,7 @@ abstract contract CapStorageWrapper2 is
         _;
     }
 
-    modifier onlyValidNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) {
+    modifier onlyValidNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) {
         _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
         _;
     }
@@ -247,44 +238,21 @@ abstract contract CapStorageWrapper2 is
         emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
     }
 
-    function _setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
-    ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
-        );
+    function _setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) internal {
+        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(_partition);
         _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
+        emit MaxSupplyByPartitionSet(_msgSender(), _partition, _maxSupply, previousMaxSupplyByPartition);
     }
 
-    function _checkNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) internal view {
+    function _checkNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) internal view {
         if (_newMaxSupply == 0) return;
-        uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjusted(
-            _partition
-        );
+        uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjusted(_partition);
         if (totalSupplyForPartition > _newMaxSupply) {
-            revert NewMaxSupplyForPartitionTooLow(
-                _partition,
-                _newMaxSupply,
-                totalSupplyForPartition
-            );
+            revert NewMaxSupplyForPartitionTooLow(_partition, _newMaxSupply, totalSupplyForPartition);
         }
         uint256 maxSupplyOverall = _getMaxSupplyAdjusted();
         if (_newMaxSupply > maxSupplyOverall) {
-            revert NewMaxSupplyByPartitionTooHigh(
-                _partition,
-                _newMaxSupply,
-                maxSupplyOverall
-            );
+            revert NewMaxSupplyByPartitionTooHigh(_partition, _newMaxSupply, maxSupplyOverall);
         }
     }
 
@@ -295,21 +263,10 @@ abstract contract CapStorageWrapper2 is
         }
     }
 
-    function _checkWithinMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _amount
-    ) private view {
+    function _checkWithinMaxSupplyByPartition(bytes32 _partition, uint256 _amount) private view {
         uint256 maxSupplyForPartition = _getMaxSupplyByPartition(_partition);
-        if (
-            !_isCorrectMaxSupply(
-                _totalSupplyByPartition(_partition) + _amount,
-                maxSupplyForPartition
-            )
-        ) {
-            revert ICapStorageWrapper.MaxSupplyReachedForPartition(
-                _partition,
-                maxSupplyForPartition
-            );
+        if (!_isCorrectMaxSupply(_totalSupplyByPartition(_partition) + _amount, maxSupplyForPartition)) {
+            revert ICapStorageWrapper.MaxSupplyReachedForPartition(_partition, maxSupplyForPartition);
         }
     }
 

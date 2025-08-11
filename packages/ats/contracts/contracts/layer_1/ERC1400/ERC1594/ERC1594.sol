@@ -206,22 +206,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
-import {Common} from '../../common/Common.sol';
+import { IStaticFunctionSelectors } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _ERC1594_RESOLVER_KEY } from '../../constants/resolverKeys.sol';
+import { _ISSUER_ROLE, _AGENT_ROLE } from '../../constants/roles.sol';
+import { IERC1594 } from '../../interfaces/ERC1400/IERC1594.sol';
+import { IKyc } from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import { Common } from '../../common/Common.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594()
-        external
-        override
-        onlyUninitialized(_erc1594Storage().initialized)
-    {
+    function initialize_ERC1594() external override onlyUninitialized(_erc1594Storage().initialized) {
         super._initialize_ERC1594();
     }
 
@@ -387,13 +381,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         address _to,
         uint256 _value,
         bytes calldata _data
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        returns (bool, bytes1, bytes32)
-    {
+    ) external view override onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
         return _canTransfer(_to, _value, _data);
     }
 
@@ -414,58 +402,29 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         address _to,
         uint256 _value,
         bytes calldata _data
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        returns (bool, bytes1, bytes32)
-    {
+    ) external view override onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
         return _canTransferFrom(_from, _to, _value, _data);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _ERC1594_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](9);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC1594
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .transferWithData
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .transferFromWithData
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.initialize_ERC1594.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.transferWithData.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.transferFromWithData.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.isIssuable.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.issue.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.redeem.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.redeemFrom.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.canTransfer.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .canTransferFrom
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.canTransferFrom.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC1594).interfaceId;

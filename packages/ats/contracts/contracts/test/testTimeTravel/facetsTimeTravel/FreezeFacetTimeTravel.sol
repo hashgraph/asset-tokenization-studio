@@ -208,19 +208,12 @@
 
 pragma solidity 0.8.18;
 
-import {FreezeFacet} from '../../../layer_1/ERC3643/FreezeFacet.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+import { FreezeFacet } from '../../../layer_1/ERC3643/FreezeFacet.sol';
+import { TimeTravelStorageWrapper } from '../timeTravel/TimeTravelStorageWrapper.sol';
+import { LocalContext } from '../../../layer_0/context/LocalContext.sol';
 
 contract FreezeFacetTimeTravel is FreezeFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

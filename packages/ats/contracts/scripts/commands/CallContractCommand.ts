@@ -203,28 +203,28 @@
 
 */
 
-import { Contract, Overrides } from 'ethers'
+import { Contract, Overrides } from 'ethers';
 
 export default class CallContractCommand {
-    public readonly contract: Contract
-    public readonly method: string
-    public readonly args: Array<unknown>
-    public readonly overrides?: Overrides
+  public readonly contract: Contract;
+  public readonly method: string;
+  public readonly args: Array<unknown>;
+  public readonly overrides?: Overrides;
 
-    constructor({
-        contract,
-        method,
-        args,
-        overrides,
-    }: {
-        contract: Contract
-        method: string
-        args: Array<unknown>
-        overrides?: Overrides
-    }) {
-        this.contract = contract
-        this.method = method
-        this.args = args
-        this.overrides = overrides ?? {}
-    }
+  constructor({
+    contract,
+    method,
+    args,
+    overrides,
+  }: {
+    contract: Contract;
+    method: string;
+    args: Array<unknown>;
+    overrides?: Overrides;
+  }) {
+    this.contract = contract;
+    this.method = method;
+    this.args = args;
+    this.overrides = overrides ?? {};
+  }
 }

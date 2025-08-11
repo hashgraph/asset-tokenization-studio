@@ -206,12 +206,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
-import {Common} from '../../common/Common.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
-import {
-    IERC1410Operator
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
+import { IERC1410Operator } from '../../interfaces/ERC1400/IERC1410Operator.sol';
+import { Common } from '../../common/Common.sol';
+import { IKyc } from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import { IERC1410Operator } from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
 
 abstract contract ERC1410Operator is IERC1410Operator, Common {
     ///////////////////////
@@ -236,9 +234,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
 
     /// @notice Revokes authorisation of an operator previously given for all partitions of `msg.sender`
     /// @param _operator An address which is being de-authorised
-    function revokeOperator(
-        address _operator
-    ) external override onlyUnpaused onlyListedAllowed(_msgSender()) {
+    function revokeOperator(address _operator) external override onlyUnpaused onlyListedAllowed(_msgSender()) {
         _revokeOperator(_operator);
     }
 
@@ -290,10 +286,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_operatorTransferData.from)
         onlyListedAllowed(_operatorTransferData.to)
-        onlyOperator(
-            _operatorTransferData.partition,
-            _operatorTransferData.from
-        )
+        onlyOperator(_operatorTransferData.partition, _operatorTransferData.from)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.to)
@@ -312,10 +305,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
     /// @param _operator The operator to check
     /// @param _tokenHolder The token holder to check
     /// @return Whether the `_operator` is an operator for all partitions of `_tokenHolder`
-    function isOperator(
-        address _operator,
-        address _tokenHolder
-    ) public view override returns (bool) {
+    function isOperator(address _operator, address _tokenHolder) public view override returns (bool) {
         return _isOperator(_operator, _tokenHolder);
     }
 

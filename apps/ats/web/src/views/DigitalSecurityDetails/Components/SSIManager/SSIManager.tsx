@@ -4,34 +4,34 @@ import {
   Stack,
   useDisclosure,
   VStack,
-} from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/table-core";
-import { Button, PhosphorIcon, PopUp, Table, Text } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { SSIManagerModal } from "./SSIManagerModal";
-import { Trash } from "@phosphor-icons/react";
-import { useMemo, useState } from "react";
-import { SSIManagerRevocationModal } from "./SSIManagerRevocationModal";
+} from '@chakra-ui/react';
+import { createColumnHelper } from '@tanstack/table-core';
+import { Button, PhosphorIcon, PopUp, Table, Text } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { SSIManagerModal } from './SSIManagerModal';
+import { Trash } from '@phosphor-icons/react';
+import { useMemo, useState } from 'react';
+import { SSIManagerRevocationModal } from './SSIManagerRevocationModal';
 import {
   useGetIssuersList,
   useGetRevocationRegistryAddress,
-} from "../../../../hooks/queries/useSSIManager";
+} from '../../../../hooks/queries/useSSIManager';
 import {
   GetIssuerListMembersRequest,
   GetRevocationRegistryAddressRequest,
   RemoveIssuerRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router-dom";
-import { useRolesStore } from "../../../../store/rolesStore";
-import { SecurityRole } from "../../../../utils/SecurityRole";
-import { useRemoveIssuer } from "../../../../hooks/mutations/useSSIManager";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useParams } from 'react-router-dom';
+import { useRolesStore } from '../../../../store/rolesStore';
+import { SecurityRole } from '../../../../utils/SecurityRole';
+import { useRemoveIssuer } from '../../../../hooks/mutations/useSSIManager';
 
 interface AllowedListFields {
   accountId: string;
 }
 
 export const SSIManager = () => {
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
 
   const { roles: accountRoles } = useRolesStore();
 
@@ -47,20 +47,20 @@ export const SSIManager = () => {
     onOpen: onOpenRemoveModal,
   } = useDisclosure();
 
-  const { t: tRevocation } = useTranslation("security", {
-    keyPrefix: "details.ssiManager.revocation",
+  const { t: tRevocation } = useTranslation('security', {
+    keyPrefix: 'details.ssiManager.revocation',
   });
-  const { t: tList } = useTranslation("security", {
-    keyPrefix: "details.ssiManager.list",
+  const { t: tList } = useTranslation('security', {
+    keyPrefix: 'details.ssiManager.list',
   });
-  const { t: tTable } = useTranslation("security", {
-    keyPrefix: "details.ssiManager.table",
+  const { t: tTable } = useTranslation('security', {
+    keyPrefix: 'details.ssiManager.table',
   });
-  const { t: tRemove } = useTranslation("security", {
-    keyPrefix: "details.ssiManager.removePopUp",
+  const { t: tRemove } = useTranslation('security', {
+    keyPrefix: 'details.ssiManager.removePopUp',
   });
 
-  const [accountToRemove, setAccountToRemove] = useState<string>("");
+  const [accountToRemove, setAccountToRemove] = useState<string>('');
   const [isRemoving, setIsRemoving] = useState(false);
 
   const columnsHelper = createColumnHelper<AllowedListFields>();
@@ -101,15 +101,15 @@ export const SSIManager = () => {
   );
 
   const columns = [
-    columnsHelper.accessor("accountId", {
-      header: tTable("fields.accountId"),
+    columnsHelper.accessor('accountId', {
+      header: tTable('fields.accountId'),
       enableSorting: false,
     }),
     ...(hasSSIManagerRole
       ? [
           columnsHelper.display({
-            id: "remove",
-            header: tTable("fields.actions"),
+            id: 'remove',
+            header: tTable('fields.actions'),
             size: 5,
             enableSorting: false,
             cell(props) {
@@ -129,7 +129,7 @@ export const SSIManager = () => {
                   variant="table"
                   size="xs"
                 >
-                  <PhosphorIcon as={Trash} sx={{ color: "secondary.500" }} />
+                  <PhosphorIcon as={Trash} sx={{ color: 'secondary.500' }} />
                 </Button>
               );
             },
@@ -149,16 +149,16 @@ export const SSIManager = () => {
         gap={4}
         mb={4}
       >
-        <HStack justifyContent={"space-between"}>
-          <VStack w={"full"} alignItems={"flex-start"}>
+        <HStack justifyContent={'space-between'}>
+          <VStack w={'full'} alignItems={'flex-start'}>
             <Text textStyle="ElementsSemiboldLG" color="neutral.light">
-              {tRevocation("title")}
+              {tRevocation('title')}
             </Text>
             {isLoadingRevocationRegistryAddress ? (
               <SkeletonText w={40} skeletonHeight={2} noOfLines={1} />
             ) : (
               <Text textStyle="ElementsRegularMD" color="neutral.light">
-                {revocationRegistryAddress ?? "-"}
+                {revocationRegistryAddress ?? '-'}
               </Text>
             )}
           </VStack>
@@ -169,7 +169,7 @@ export const SSIManager = () => {
               }}
               size="sm"
             >
-              {tRevocation("change")}
+              {tRevocation('change')}
             </Button>
           )}
         </HStack>
@@ -183,9 +183,9 @@ export const SSIManager = () => {
         pt={6}
         gap={4}
       >
-        <HStack justifyContent={"space-between"}>
+        <HStack justifyContent={'space-between'}>
           <Text textStyle="ElementsSemiboldLG" color="neutral.light">
-            {tList("title")}
+            {tList('title')}
           </Text>
           {hasSSIManagerRole && (
             <Button
@@ -194,7 +194,7 @@ export const SSIManager = () => {
               }}
               size="sm"
             >
-              {tList("add")}
+              {tList('add')}
             </Button>
           )}
         </HStack>
@@ -215,9 +215,9 @@ export const SSIManager = () => {
         isOpen={isOpenRemoveModal}
         onClose={onCloseRemoveModal}
         icon={<PhosphorIcon as={Trash} size="md" />}
-        title={tRemove("title")}
-        description={tRemove("description")}
-        confirmText={tRemove("confirmText")}
+        title={tRemove('title')}
+        description={tRemove('description')}
+        confirmText={tRemove('confirmText')}
         onConfirm={() => {
           setIsRemoving(true);
 
@@ -236,7 +236,7 @@ export const SSIManager = () => {
           });
         }}
         onCancel={onCloseRemoveModal}
-        cancelText={tRemove("cancelText")}
+        cancelText={tRemove('cancelText')}
         confirmButtonProps={{
           isLoading: isRemoving,
         }}

@@ -205,37 +205,37 @@
 
 export default {
   header: {
-    title: "Force transfer digital security",
+    title: 'Force transfer digital security',
   },
-  title: "Force transfer securities",
+  title: 'Force transfer securities',
   subtitle:
-    "Choose the security and the account to which you want to transfer securities",
+    'Choose the security and the account to which you want to transfer securities',
   input: {
     amount: {
-      label: "Amount to transfer",
-      placeholder: "Enter the amount to transfer",
+      label: 'Amount to transfer',
+      placeholder: 'Enter the amount to transfer',
     },
     source: {
-      label: "Add source Account",
-      placeholder: "Enter the account",
+      label: 'Add source Account',
+      placeholder: 'Enter the account',
     },
     destination: {
-      label: "Account to transfer",
-      placeholder: "Enter the account to transfer",
+      label: 'Account to transfer',
+      placeholder: 'Enter the account to transfer',
     },
   },
   list: {
     details: {
-      label: "Details",
+      label: 'Details',
     },
   },
   button: {
-    accept: "Transfer",
+    accept: 'Transfer',
   },
   messages: {
-    success: "Success: ",
-    descriptionSuccess: "The transfer operation has been executed successfully",
-    error: "Error: ",
-    descriptionFailed: "The transfer operation has failed",
+    success: 'Success: ',
+    descriptionSuccess: 'The transfer operation has been executed successfully',
+    error: 'Error: ',
+    descriptionFailed: 'The transfer operation has failed',
   },
 };

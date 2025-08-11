@@ -1,5 +1,5 @@
-import { Checkbox, HStack, Stack, useDisclosure } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/table-core";
+import { Checkbox, HStack, Stack, useDisclosure } from '@chakra-ui/react';
+import { createColumnHelper } from '@tanstack/table-core';
 import {
   Button,
   PhosphorIcon,
@@ -7,32 +7,32 @@ import {
   Table,
   Text,
   useToast,
-} from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { Trash } from "@phosphor-icons/react";
-import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useRolesStore } from "../../../../store/rolesStore";
-import { hasRole } from "../../../../utils/helpers";
-import { SecurityRole } from "../../../../utils/SecurityRole";
-import { AddExternalControlModal } from "./AddExternalControlModal";
+} from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { Trash } from '@phosphor-icons/react';
+import { useState, type ChangeEvent } from 'react';
+import { useParams } from 'react-router-dom';
+import { useRolesStore } from '../../../../store/rolesStore';
+import { hasRole } from '../../../../utils/helpers';
+import { SecurityRole } from '../../../../utils/SecurityRole';
+import { AddExternalControlModal } from './AddExternalControlModal';
 import {
   useRemoveExternalControlList,
   useUpdateExternalControlLists,
-} from "../../../../hooks/mutations/useExternalControl";
-import { useGetExternalControls } from "../../../../hooks/queries/useExternalControl";
+} from '../../../../hooks/mutations/useExternalControl';
+import { useGetExternalControls } from '../../../../hooks/queries/useExternalControl';
 import {
   RemoveExternalControlListRequest,
   UpdateExternalControlListsRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
-type ExternalControl = {
+type ExternalControlRow = {
   address: string;
 };
 
 export const ExternalControl = () => {
   const toast = useToast();
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
 
   const {
     isOpen: isOpenAddModal,
@@ -57,21 +57,21 @@ export const ExternalControl = () => {
     SecurityRole._CONTROL_LIST_MANAGER_ROLE,
   );
 
-  const { t: tList } = useTranslation("security", {
-    keyPrefix: "details.externalControl.list",
+  const { t: tList } = useTranslation('security', {
+    keyPrefix: 'details.externalControl.list',
   });
-  const { t: tTable } = useTranslation("security", {
-    keyPrefix: "details.externalControl.table",
+  const { t: tTable } = useTranslation('security', {
+    keyPrefix: 'details.externalControl.table',
   });
-  const { t: tRemove } = useTranslation("security", {
-    keyPrefix: "details.externalControl.remove",
+  const { t: tRemove } = useTranslation('security', {
+    keyPrefix: 'details.externalControl.remove',
   });
-  const { t: tMessage } = useTranslation("externalControl", {
-    keyPrefix: "list.messages",
+  const { t: tMessage } = useTranslation('externalControl', {
+    keyPrefix: 'list.messages',
   });
 
   const [externalControlToRemove, setExternalControlToRemove] =
-    useState<string>("");
+    useState<string>('');
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
 
   const { data: externalControls, isLoading } =
@@ -90,7 +90,7 @@ export const ExternalControl = () => {
     }));
   };
 
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectAll = (e: ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
     const newSelectedRows = externalControls.reduce(
       (acc, item) => ({ ...acc, [item.address]: isChecked }),
@@ -99,13 +99,13 @@ export const ExternalControl = () => {
     setSelectedRows(newSelectedRows);
   };
 
-  const columnsHelper = createColumnHelper<ExternalControl>();
+  const columnsHelper = createColumnHelper<ExternalControlRow>();
 
   const columns = [
     ...(hasControlManagerRole
       ? [
           columnsHelper.display({
-            id: "selection",
+            id: 'selection',
             header: () => {
               const totalRows = externalControls.length;
               const selectedCount =
@@ -139,13 +139,13 @@ export const ExternalControl = () => {
           }),
         ]
       : []),
-    columnsHelper.accessor("address", {
-      header: tTable("fields.id"),
+    columnsHelper.accessor('address', {
+      header: tTable('fields.id'),
       enableSorting: false,
     }),
     columnsHelper.display({
-      id: "remove",
-      header: tTable("fields.actions"),
+      id: 'remove',
+      header: tTable('fields.actions'),
       size: 5,
       enableSorting: false,
       cell(props) {
@@ -167,7 +167,7 @@ export const ExternalControl = () => {
             variant="table"
             size="xs"
           >
-            <PhosphorIcon as={Trash} sx={{ color: "secondary.500" }} />
+            <PhosphorIcon as={Trash} sx={{ color: 'secondary.500' }} />
           </Button>
         );
       },
@@ -192,10 +192,10 @@ export const ExternalControl = () => {
         onCloseRemoveMultipleModal();
         toast.show({
           duration: 3000,
-          title: tMessage("removeExternalControl.success"),
-          description: tMessage("removeExternalControl.descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: tMessage('removeExternalControl.success'),
+          description: tMessage('removeExternalControl.descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       });
     }
@@ -208,7 +208,7 @@ export const ExternalControl = () => {
         externalControlListAddress: externalControlToRemove,
       }),
     ).finally(() => {
-      setExternalControlToRemove("");
+      setExternalControlToRemove('');
       onCloseRemoveModal();
     });
   };
@@ -224,9 +224,9 @@ export const ExternalControl = () => {
         pt={6}
         gap={4}
       >
-        <HStack justifyContent={"space-between"}>
+        <HStack justifyContent={'space-between'}>
           <Text textStyle="ElementsSemiboldLG" color="neutral.light">
-            {tList("title")}
+            {tList('title')}
           </Text>
           {hasControlManagerRole && (
             <HStack>
@@ -235,10 +235,10 @@ export const ExternalControl = () => {
                   onOpenRemoveMultipleModal();
                 }}
                 size="sm"
-                variant={"secondary"}
+                variant={'secondary'}
                 isDisabled={disabledRemoveItems}
               >
-                {tList("removeItemsSelected")}
+                {tList('removeItemsSelected')}
               </Button>
               <Button
                 onClick={() => {
@@ -246,7 +246,7 @@ export const ExternalControl = () => {
                 }}
                 size="sm"
               >
-                {tList("add")}
+                {tList('add')}
               </Button>
             </HStack>
           )}
@@ -257,7 +257,7 @@ export const ExternalControl = () => {
           columns={columns}
           data={externalControls ?? []}
           isLoading={isLoading}
-          emptyComponent={<Text>{tTable("empty")}</Text>}
+          emptyComponent={<Text>{tTable('empty')}</Text>}
         />
       </Stack>
       <AddExternalControlModal
@@ -272,17 +272,17 @@ export const ExternalControl = () => {
           onCloseRemoveModal();
         }}
         icon={<PhosphorIcon as={Trash} size="md" />}
-        title={tRemove("title")}
-        description={tRemove("description")}
-        confirmText={tRemove("confirmText")}
+        title={tRemove('title')}
+        description={tRemove('description')}
+        confirmText={tRemove('confirmText')}
         onConfirm={() => {
           handleRemove();
         }}
         onCancel={() => {
-          setExternalControlToRemove("");
+          setExternalControlToRemove('');
           onCloseRemoveModal();
         }}
-        cancelText={tRemove("cancelText")}
+        cancelText={tRemove('cancelText')}
         confirmButtonProps={{
           isLoading: isLoadingRemove,
         }}
@@ -292,14 +292,14 @@ export const ExternalControl = () => {
         isOpen={isOpenRemoveMultipleModal}
         onClose={onCloseRemoveMultipleModal}
         icon={<PhosphorIcon as={Trash} size="md" />}
-        title={tRemove("title")}
-        description={tRemove("description")}
-        confirmText={tRemove("confirmText")}
+        title={tRemove('title')}
+        description={tRemove('description')}
+        confirmText={tRemove('confirmText')}
         onConfirm={() => {
           handleMultipleRemove();
         }}
         onCancel={onCloseRemoveMultipleModal}
-        cancelText={tRemove("cancelText")}
+        cancelText={tRemove('cancelText')}
         confirmButtonProps={{
           isLoading: isLoadingUpdateExternalControls,
         }}

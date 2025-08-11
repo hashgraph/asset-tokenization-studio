@@ -203,14 +203,14 @@
 
 */
 
-import { UseQueryOptions, useQueries, useQuery } from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
+import { UseQueryOptions, useQueries, useQuery } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
 import {
   GetExternalPausesCountRequest,
   GetExternalPausesMembersRequest,
   IsExternalPauseRequest,
   IsPausedMockRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 export const GET_EXTERNAL_PAUSES_COUNT = (securityId: string) =>
   `GET_EXTERNAL_PAUSES_COUNT_${securityId}`;

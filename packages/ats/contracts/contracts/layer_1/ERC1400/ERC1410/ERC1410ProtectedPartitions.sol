@@ -206,16 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IERC1410ProtectedPartitions
-} from '../../interfaces/ERC1400/IERC1410ProtectedPartitions.sol';
-import {Common} from '../../common/Common.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import { IERC1410ProtectedPartitions } from '../../interfaces/ERC1400/IERC1410ProtectedPartitions.sol';
+import { Common } from '../../common/Common.sol';
+import { IKyc } from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
-abstract contract ERC1410ProtectedPartitions is
-    IERC1410ProtectedPartitions,
-    Common
-{
+abstract contract ERC1410ProtectedPartitions is IERC1410ProtectedPartitions, Common {
     function protectedTransferFromByPartition(
         bytes32 _partition,
         address _from,
@@ -240,15 +235,7 @@ abstract contract ERC1410ProtectedPartitions is
             _checkRecoveredAddress(_from);
             _checkRecoveredAddress(_to);
         }
-        _protectedTransferFromByPartition(
-            _partition,
-            _from,
-            _to,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
+        _protectedTransferFromByPartition(_partition, _from, _to, _amount, _deadline, _nounce, _signature);
     }
 
     function protectedRedeemFromByPartition(
@@ -269,13 +256,6 @@ abstract contract ERC1410ProtectedPartitions is
         onlyProtectedPartitions
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
     {
-        _protectedRedeemFromByPartition(
-            _partition,
-            _from,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
+        _protectedRedeemFromByPartition(_partition, _from, _amount, _deadline, _nounce, _signature);
     }
 }

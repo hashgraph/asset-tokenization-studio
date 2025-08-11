@@ -206,16 +206,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {IBond} from '../interfaces/bond/IBond.sol';
-import {BondStorageWrapper} from './BondStorageWrapper.sol';
-import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
-import {
-    _CORPORATE_ACTION_ROLE,
-    _BOND_MANAGER_ROLE
-} from '../../layer_1/constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { IBond } from '../interfaces/bond/IBond.sol';
+import { BondStorageWrapper } from './BondStorageWrapper.sol';
+import { COUPON_CORPORATE_ACTION_TYPE } from '../constants/values.sol';
+import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE } from '../../layer_1/constants/roles.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
 abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     function setCoupon(
@@ -255,30 +250,16 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         onlyAfterCurrentMaturityDate(_newMaturityDate)
         returns (bool success_)
     {
-        emit MaturityDateUpdated(
-            address(this),
-            _newMaturityDate,
-            _getMaturityDate()
-        );
+        emit MaturityDateUpdated(address(this), _newMaturityDate, _getMaturityDate());
         success_ = _setMaturityDate(_newMaturityDate);
         return success_;
     }
 
-    function getBondDetails()
-        external
-        view
-        override
-        returns (BondDetailsData memory bondDetailsData_)
-    {
+    function getBondDetails() external view override returns (BondDetailsData memory bondDetailsData_) {
         return _getBondDetails();
     }
 
-    function getCouponDetails()
-        external
-        view
-        override
-        returns (CouponDetailsData memory couponDetails_)
-    {
+    function getCouponDetails() external view override returns (CouponDetailsData memory couponDetails_) {
         return _getCouponDetails();
     }
 
@@ -307,12 +288,7 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         return _getCouponFor(_couponID, _account);
     }
 
-    function getCouponCount()
-        external
-        view
-        override
-        returns (uint256 couponCount_)
-    {
+    function getCouponCount() external view override returns (uint256 couponCount_) {
         return _getCouponCount();
     }
 
@@ -322,19 +298,12 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         CouponDetailsData calldata _couponDetailsData
     )
         internal
-        validateDates(
-            _bondDetailsData.startingDate,
-            _bondDetailsData.maturityDate
-        )
+        validateDates(_bondDetailsData.startingDate, _bondDetailsData.maturityDate)
         onlyValidTimestamp(_bondDetailsData.startingDate)
     {
         BondDataStorage storage bondStorage = _bondStorage();
         bondStorage.initialized = true;
         _storeBondDetails(_bondDetailsData);
-        _storeCouponDetails(
-            _couponDetailsData,
-            _bondDetailsData.startingDate,
-            _bondDetailsData.maturityDate
-        );
+        _storeCouponDetails(_couponDetailsData, _bondDetailsData.startingDate, _bondDetailsData.maturityDate);
     }
 }

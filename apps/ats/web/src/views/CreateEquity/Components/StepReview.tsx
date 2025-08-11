@@ -209,9 +209,9 @@ import {
   Stack,
   VStack,
   useDisclosure,
-} from "@chakra-ui/react";
-import { useTranslation } from "react-i18next";
-import { PreviousStepButton } from "./PreviousStepButton";
+} from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
+import { PreviousStepButton } from './PreviousStepButton';
 import {
   PhosphorIcon,
   Text,
@@ -220,30 +220,30 @@ import {
   DetailReviewProps,
   InfoDivider,
   PopUp,
-} from "io-bricks-ui";
-import { useFormContext } from "react-hook-form";
-import { ICreateEquityFormValues } from "../ICreateEquityFormValues";
-import { useCreateEquity } from "../../../hooks/queries/useCreateEquity";
-import { useWalletStore } from "../../../store/walletStore";
-import { CreateEquityRequest } from "@hashgraph/asset-tokenization-sdk";
-import { transformDividendType } from "../DividendType";
-import { WarningCircle, Question } from "@phosphor-icons/react";
-import { RouterManager } from "../../../router/RouterManager";
-import { RouteName } from "../../../router/RouteName";
-import { numberToExponential } from "../../../utils/format";
-import { FormStepContainer } from "../../../components/FormStepContainer";
-import { NOMINAL_VALUE_FACTOR } from "../../../utils/constants";
-import { formatNumber } from "../../../utils/format";
-import { CountriesList } from "../../CreateSecurityCommons/CountriesList";
+} from 'io-bricks-ui';
+import { useFormContext } from 'react-hook-form';
+import { ICreateEquityFormValues } from '../ICreateEquityFormValues';
+import { useCreateEquity } from '../../../hooks/queries/useCreateEquity';
+import { useWalletStore } from '../../../store/walletStore';
+import { CreateEquityRequest } from '@hashgraph/asset-tokenization-sdk';
+import { transformDividendType } from '../DividendType';
+import { WarningCircle, Question } from '@phosphor-icons/react';
+import { RouterManager } from '../../../router/RouterManager';
+import { RouteName } from '../../../router/RouteName';
+import { numberToExponential } from '../../../utils/format';
+import { FormStepContainer } from '../../../components/FormStepContainer';
+import { NOMINAL_VALUE_FACTOR } from '../../../utils/constants';
+import { formatNumber } from '../../../utils/format';
+import { CountriesList } from '../../CreateSecurityCommons/CountriesList';
 import {
   COUNTRY_LIST_ALLOWED,
   COUNTRY_LIST_BLOCKED,
-} from "../../../utils/countriesConfig";
+} from '../../../utils/countriesConfig';
 
 export const StepReview = () => {
-  const { t } = useTranslation("security", { keyPrefix: "createEquity" });
-  const { t: tRegulation } = useTranslation("security", {
-    keyPrefix: "regulation",
+  const { t } = useTranslation('security', { keyPrefix: 'createEquity' });
+  const { t: tRegulation } = useTranslation('security', {
+    keyPrefix: 'regulation',
   });
 
   const { getValues } = useFormContext<ICreateEquityFormValues>();
@@ -261,35 +261,35 @@ export const StepReview = () => {
     onOpen: onOpenCreate,
   } = useDisclosure();
 
-  const name = getValues("name");
-  const symbol = getValues("symbol");
-  const isin = getValues("isin");
-  const decimals = getValues("decimals");
-  const isControllable = getValues("isControllable");
-  const isBlocklist = getValues("isBlocklist");
-  const isClearing = getValues("isClearing");
-  const nominalValue = getValues("nominalValue");
-  const currency = getValues("currency");
-  const numberOfShares = getValues("numberOfShares");
-  const totalAmount = getValues("totalAmount");
+  const name = getValues('name');
+  const symbol = getValues('symbol');
+  const isin = getValues('isin');
+  const decimals = getValues('decimals');
+  const isControllable = getValues('isControllable');
+  const isBlocklist = getValues('isBlocklist');
+  const isClearing = getValues('isClearing');
+  const nominalValue = getValues('nominalValue');
+  const currency = getValues('currency');
+  const numberOfShares = getValues('numberOfShares');
+  const totalAmount = getValues('totalAmount');
   const rights = {
-    votingRights: getValues("isVotingRight"),
-    informationRights: getValues("isInformationRight"),
-    liquidationRights: getValues("isLiquidationRight"),
-    subscriptionRights: getValues("isSubscriptionRight"),
-    conversionRights: getValues("isConversionRight"),
-    redemptionRights: getValues("isRedemptionRight"),
-    putRights: getValues("isPutRight"),
+    votingRights: getValues('isVotingRight'),
+    informationRights: getValues('isInformationRight'),
+    liquidationRights: getValues('isLiquidationRight'),
+    subscriptionRights: getValues('isSubscriptionRight'),
+    conversionRights: getValues('isConversionRight'),
+    redemptionRights: getValues('isRedemptionRight'),
+    putRights: getValues('isPutRight'),
   };
-  const dividendType = getValues("dividendType");
-  const regulationType = getValues("regulationType");
-  const regulationSubType = getValues("regulationSubType");
-  const countriesListType = getValues("countriesListType");
-  let countriesList: string[] = getValues("countriesList");
-  const externalPausesList = getValues("externalPausesList");
-  const externalControlList = getValues("externalControlList");
-  const externalKYCList = getValues("externalKYCList");
-  const internalKycActivated = getValues("internalKycActivated");
+  const dividendType = getValues('dividendType');
+  const regulationType = getValues('regulationType');
+  const regulationSubType = getValues('regulationSubType');
+  const countriesListType = getValues('countriesListType');
+  let countriesList: string[] = getValues('countriesList');
+  const externalPausesList = getValues('externalPausesList');
+  const externalControlList = getValues('externalControlList');
+  const externalKYCList = getValues('externalKYCList');
+  const internalKycActivated = getValues('internalKycActivated');
 
   countriesList = countriesList.concat(
     countriesListType === 2 ? COUNTRY_LIST_ALLOWED : COUNTRY_LIST_BLOCKED,
@@ -316,7 +316,7 @@ export const StepReview = () => {
       putRight: rights.putRights,
       dividendRight: dividendType,
       currency:
-        "0x" +
+        '0x' +
         currency.charCodeAt(0) +
         currency.charCodeAt(1) +
         currency.charCodeAt(2),
@@ -326,10 +326,10 @@ export const StepReview = () => {
       regulationSubType: regulationSubType,
       isCountryControlListWhiteList: countriesListType === 2,
       countries: countriesList.map((country) => country).toString(),
-      info: "",
-      configId: process.env.REACT_APP_EQUITY_CONFIG_ID ?? "",
+      info: '',
+      configId: process.env.REACT_APP_EQUITY_CONFIG_ID ?? '',
       configVersion: parseInt(
-        process.env.REACT_APP_EQUITY_CONFIG_VERSION ?? "0",
+        process.env.REACT_APP_EQUITY_CONFIG_VERSION ?? '0',
       ),
       ...(externalPausesList &&
         externalPausesList.length > 0 && {
@@ -351,88 +351,88 @@ export const StepReview = () => {
 
   const tokenDetails: DetailReviewProps[] = [
     {
-      title: t("stepTokenDetails.name"),
+      title: t('stepTokenDetails.name'),
       value: name,
     },
     {
-      title: t("stepTokenDetails.symbol"),
+      title: t('stepTokenDetails.symbol'),
       value: symbol,
     },
     {
-      title: t("stepTokenDetails.decimals"),
+      title: t('stepTokenDetails.decimals'),
       value: decimals,
     },
     {
-      title: t("stepTokenDetails.isin"),
+      title: t('stepTokenDetails.isin'),
       value: isin,
     },
   ];
 
   const configurationNewSerieDetails: DetailReviewProps[] = [
     {
-      title: t("stepNewSerie.nominalValue"),
+      title: t('stepNewSerie.nominalValue'),
       value: formatNumber(nominalValue, {}, 2),
     },
     {
-      title: t("stepNewSerie.currency"),
+      title: t('stepNewSerie.currency'),
       value: currency,
     },
     {
-      title: t("stepNewSerie.numberOfShares"),
+      title: t('stepNewSerie.numberOfShares'),
       value: formatNumber(numberOfShares, {}, decimals),
     },
     {
-      title: t("stepNewSerie.totalAmount"),
+      title: t('stepNewSerie.totalAmount'),
       value: totalAmount,
     },
   ];
 
   const configurationRightsDetails: DetailReviewProps[] = [
     {
-      title: t("stepNewSerie.dividendType"),
+      title: t('stepNewSerie.dividendType'),
       value: transformDividendType(dividendType.toString()),
     },
   ];
 
   const externalManagement: DetailReviewProps[] = [
     {
-      title: t("stepExternalManagement.externalPause"),
+      title: t('stepExternalManagement.externalPause'),
       value: externalPausesList
-        ? externalPausesList?.map((pause) => " " + pause).toString()
-        : "-",
+        ? externalPausesList?.map((pause) => ' ' + pause).toString()
+        : '-',
     },
     {
-      title: t("stepExternalManagement.externalControl"),
+      title: t('stepExternalManagement.externalControl'),
       value: externalControlList
-        ? externalControlList?.map((control) => " " + control).toString()
-        : "-",
+        ? externalControlList?.map((control) => ' ' + control).toString()
+        : '-',
     },
     {
-      title: t("stepExternalManagement.externalKYC"),
+      title: t('stepExternalManagement.externalKYC'),
       value: externalKYCList
-        ? externalKYCList?.map((control) => " " + control).toString()
-        : "-",
+        ? externalKYCList?.map((control) => ' ' + control).toString()
+        : '-',
     },
   ];
 
   const regulationDetails: DetailReviewProps[] = [
     {
-      title: tRegulation("regulationTypeReview"),
+      title: tRegulation('regulationTypeReview'),
       value: tRegulation(`regulationType_${regulationType}`),
     },
     {
-      title: tRegulation("regulationSubTypeReview"),
+      title: tRegulation('regulationSubTypeReview'),
       value: tRegulation(`regulationSubType_${regulationSubType}`),
     },
     {
       title:
         countriesListType === 2
-          ? tRegulation("allowedCountriesReview")
-          : tRegulation("blockedCountriesReview"),
+          ? tRegulation('allowedCountriesReview')
+          : tRegulation('blockedCountriesReview'),
       value: countriesList
         .map(
           (country) =>
-            " " + CountriesList[country as keyof typeof CountriesList],
+            ' ' + CountriesList[country as keyof typeof CountriesList],
         )
         .toString(),
     },
@@ -444,7 +444,7 @@ export const StepReview = () => {
         <VStack gap={5}>
           <InfoDivider
             step={1}
-            title={t("stepTokenDetails.title")}
+            title={t('stepTokenDetails.title')}
             type="main"
           />
           <SimpleGrid columns={1} gap={6} w="full">
@@ -455,7 +455,7 @@ export const StepReview = () => {
 
           <InfoDivider
             step={2}
-            title={t("stepReview.configurationDetails")}
+            title={t('stepReview.configurationDetails')}
             type="main"
           />
           <InfoDivider title="Economic information" type="secondary" />
@@ -468,7 +468,7 @@ export const StepReview = () => {
           <InfoDivider title="Rights and privileges" type="secondary" />
           <VStack gap={1} w="full">
             <Text textStyle="HeadingMediumMD" w="full" color="neutral.900">
-              {t("stepNewSerie.choosenRights")}
+              {t('stepNewSerie.choosenRights')}
             </Text>
             {Object.entries(rights)
               .filter(([_key, value]) => value)
@@ -492,7 +492,7 @@ export const StepReview = () => {
 
           <InfoDivider
             step={3}
-            title={t("stepExternalManagement.title")}
+            title={t('stepExternalManagement.title')}
             type="main"
           />
           <SimpleGrid columns={1} gap={6} w="full">
@@ -501,7 +501,7 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
-          <InfoDivider step={4} title={tRegulation("title")} type="main" />
+          <InfoDivider step={4} title={tRegulation('title')} type="main" />
           <SimpleGrid columns={1} gap={6} w="full">
             {regulationDetails.map((props) => (
               <DetailReview {...props} />
@@ -513,10 +513,10 @@ export const StepReview = () => {
             w="full"
             h="100px"
             align="end"
-            justifyContent={"flex-end"}
+            justifyContent={'flex-end'}
           >
             <Button size="md" variant="secondary" onClick={onOpenCancel}>
-              {t("cancelButton")}
+              {t('cancelButton')}
             </Button>
             <PreviousStepButton />
             <Button
@@ -525,7 +525,7 @@ export const StepReview = () => {
               onClick={onOpenCreate}
               isLoading={isLoading}
             >
-              {t("createTokenButton")}
+              {t('createTokenButton')}
             </Button>
           </HStack>
         </VStack>
@@ -535,31 +535,31 @@ export const StepReview = () => {
         isOpen={isOpenCancel}
         onClose={onCloseCancel}
         icon={<PhosphorIcon as={WarningCircle} size="md" />}
-        title={t("cancelSecurityPopUp.title")}
-        description={t("cancelSecurityPopUp.description")}
-        confirmText={t("cancelSecurityPopUp.confirmText")}
+        title={t('cancelSecurityPopUp.title')}
+        description={t('cancelSecurityPopUp.description')}
+        confirmText={t('cancelSecurityPopUp.confirmText')}
         onConfirm={() => {
           RouterManager.to(RouteName.Dashboard);
           onCloseCancel();
         }}
         onCancel={onCloseCancel}
-        cancelText={t("cancelSecurityPopUp.cancelText")}
-        confirmButtonProps={{ status: "danger" }}
+        cancelText={t('cancelSecurityPopUp.cancelText')}
+        confirmButtonProps={{ status: 'danger' }}
       />
       <PopUp
         id="createEquity"
         isOpen={isOpenCreate}
         onClose={onCloseCreate}
         icon={<PhosphorIcon as={Question} size="md" />}
-        title={t("createSecurityPopUp.title")}
-        description={t("createSecurityPopUp.description")}
-        confirmText={t("createSecurityPopUp.confirmText")}
+        title={t('createSecurityPopUp.title')}
+        description={t('createSecurityPopUp.description')}
+        confirmText={t('createSecurityPopUp.confirmText')}
         onConfirm={() => {
           submit();
           onCloseCreate();
         }}
         onCancel={onCloseCreate}
-        cancelText={t("createSecurityPopUp.cancelText")}
+        cancelText={t('createSecurityPopUp.cancelText')}
       />
     </FormStepContainer>
   );

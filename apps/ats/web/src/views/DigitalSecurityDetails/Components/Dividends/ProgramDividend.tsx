@@ -203,23 +203,23 @@
 
 */
 
-import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
+import { Button, Center, HStack, Stack, VStack } from '@chakra-ui/react';
 import {
   CalendarInputController,
   InputNumberController,
   PhosphorIcon,
   Text,
   Tooltip,
-} from "io-bricks-ui";
-import { min, required } from "../../../../utils/rules";
-import { Info } from "@phosphor-icons/react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { useDividends } from "../../../../hooks/queries/useDividends";
-import { SetDividendsRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router-dom";
-import { dateToUnixTimestamp } from "../../../../utils/format";
-import { DATE_TIME_FORMAT } from "../../../../utils/constants";
+} from 'io-bricks-ui';
+import { min, required } from '../../../../utils/rules';
+import { Info } from '@phosphor-icons/react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { useDividends } from '../../../../hooks/queries/useDividends';
+import { SetDividendsRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useParams } from 'react-router-dom';
+import { dateToUnixTimestamp } from '../../../../utils/format';
+import { DATE_TIME_FORMAT } from '../../../../utils/constants';
 
 interface ProgramDividendFormValues {
   amountPerUnitOfSecurity: string;
@@ -231,18 +231,18 @@ export const ProgramDividend = () => {
   const { mutate: createDividend, isLoading } = useDividends();
   const { control, formState, handleSubmit, reset } =
     useForm<ProgramDividendFormValues>({
-      mode: "all",
+      mode: 'all',
     });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "details.dividends.program.input",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'details.dividends.program.input',
   });
-  const { t: tGlobal } = useTranslation("globals");
+  const { t: tGlobal } = useTranslation('globals');
 
   const { id } = useParams();
 
   const submit: SubmitHandler<ProgramDividendFormValues> = (params) => {
     const request = new SetDividendsRequest({
-      securityId: id ?? "",
+      securityId: id ?? '',
       amountPerUnitOfSecurity: params.amountPerUnitOfSecurity.toString(),
       recordTimestamp: dateToUnixTimestamp(params.recordTimestamp),
       executionTimestamp: dateToUnixTimestamp(params.executionTimestamp),
@@ -268,9 +268,9 @@ export const ProgramDividend = () => {
         <Stack w="full">
           <HStack justifySelf="flex-start">
             <Text textStyle="BodyTextRegularSM">
-              {tForm("recordDate.label")}*
+              {tForm('recordDate.label')}*
             </Text>
-            <Tooltip label={tForm("recordDate.tooltip")} placement="right">
+            <Tooltip label={tForm('recordDate.tooltip')} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -279,7 +279,7 @@ export const ProgramDividend = () => {
             id="recordTimestamp"
             rules={{ required }}
             fromDate={new Date()}
-            placeholder={tForm("recordDate.placeholder")}
+            placeholder={tForm('recordDate.placeholder')}
             withTimeInput
             format={DATE_TIME_FORMAT}
           />
@@ -287,9 +287,9 @@ export const ProgramDividend = () => {
         <Stack w="full">
           <HStack justifySelf="flex-start">
             <Text textStyle="BodyTextRegularSM">
-              {tForm("paymentDate.label")}*
+              {tForm('paymentDate.label')}*
             </Text>
-            <Tooltip label={tForm("paymentDate.tooltip")} placement="right">
+            <Tooltip label={tForm('paymentDate.tooltip')} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -298,15 +298,15 @@ export const ProgramDividend = () => {
             id="executionTimestamp"
             rules={{ required }}
             fromDate={new Date()}
-            placeholder={tForm("paymentDate.placeholder")}
+            placeholder={tForm('paymentDate.placeholder')}
             withTimeInput
             format={DATE_TIME_FORMAT}
           />
         </Stack>
         <Stack w="full">
           <HStack justifySelf="flex-start">
-            <Text textStyle="BodyTextRegularSM">{tForm("amount.label")}*</Text>
-            <Tooltip label={tForm("amount.tooltip")} placement="right">
+            <Text textStyle="BodyTextRegularSM">{tForm('amount.label')}*</Text>
+            <Tooltip label={tForm('amount.tooltip')} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -315,7 +315,7 @@ export const ProgramDividend = () => {
             control={control}
             id="amountPerUnitOfSecurity"
             rules={{ required, min: min(0) }}
-            placeholder={tForm("amount.placeholder")}
+            placeholder={tForm('amount.placeholder')}
           />
         </Stack>
         <Button
@@ -326,7 +326,7 @@ export const ProgramDividend = () => {
           isDisabled={!formState.isValid}
           type="submit"
         >
-          {tGlobal("send")}
+          {tGlobal('send')}
         </Button>
       </VStack>
     </Center>

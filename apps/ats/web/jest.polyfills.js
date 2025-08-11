@@ -45,11 +45,11 @@ class LRU {
 }
 
 // Override require for lru-cache to return our mock
-const Module = require("module");
+const Module = require('module');
 const originalRequire = Module.prototype.require;
 
 Module.prototype.require = function (id) {
-  if (id === "lru-cache") {
+  if (id === 'lru-cache') {
     return LRU;
   }
   return originalRequire.apply(this, arguments);

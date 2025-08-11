@@ -1,21 +1,21 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
 import {
   CreateHoldByPartitionRequest,
   CreateHoldFromByPartitionRequest,
   ExecuteHoldByPartitionRequest,
   ReclaimHoldByPartitionRequest,
   ReleaseHoldByPartitionRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useTranslation } from "react-i18next";
-import { useToast } from "io-bricks-ui";
-import { GET_HOLDS } from "../queries/useGetHolds";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useTranslation } from 'react-i18next';
+import { useToast } from 'io-bricks-ui';
+import { GET_HOLDS } from '../queries/useGetHolds';
 
 export const useCreateHoldFromByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.hold.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.hold.messages',
   });
 
   return useMutation(
@@ -27,7 +27,7 @@ export const useCreateHoldFromByPartition = () => {
           queryKey: [GET_HOLDS(variables.securityId, variables.targetId)],
         });
 
-        console.log("SDK message --> Hold operation success: ", data);
+        console.log('SDK message --> Hold operation success: ', data);
 
         if (!data) {
           return;
@@ -35,21 +35,21 @@ export const useCreateHoldFromByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
-        console.log("SDK message --> Hold operation error: ", error);
+        console.log('SDK message --> Hold operation error: ', error);
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -59,8 +59,8 @@ export const useCreateHoldFromByPartition = () => {
 export const useCreateHoldByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.hold.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.hold.messages',
   });
 
   return useMutation(
@@ -72,7 +72,7 @@ export const useCreateHoldByPartition = () => {
           queryKey: [GET_HOLDS(variables.securityId, variables.targetId)],
         });
 
-        console.log("SDK message --> Hold operation success: ", data);
+        console.log('SDK message --> Hold operation success: ', data);
 
         if (!data) {
           return;
@@ -80,21 +80,21 @@ export const useCreateHoldByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
-        console.log("SDK message --> Hold operation error: ", error);
+        console.log('SDK message --> Hold operation error: ', error);
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -104,8 +104,8 @@ export const useCreateHoldByPartition = () => {
 export const useForceCreateHoldFromByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.hold.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.hold.messages',
   });
 
   return useMutation(
@@ -117,7 +117,7 @@ export const useForceCreateHoldFromByPartition = () => {
           queryKey: [GET_HOLDS(variables.securityId, variables.targetId)],
         });
 
-        console.log("SDK message --> Hold operation success: ", data);
+        console.log('SDK message --> Hold operation success: ', data);
 
         if (!data) {
           return;
@@ -125,21 +125,21 @@ export const useForceCreateHoldFromByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
-        console.log("SDK message --> Hold operation error: ", error);
+        console.log('SDK message --> Hold operation error: ', error);
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -149,8 +149,8 @@ export const useForceCreateHoldFromByPartition = () => {
 export const useReleaseHoldByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.hold.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.hold.messages',
   });
 
   return useMutation(
@@ -162,7 +162,7 @@ export const useReleaseHoldByPartition = () => {
           queryKey: [GET_HOLDS(variables.securityId, variables.targetId)],
         });
 
-        console.log("SDK message --> Hold operation success: ", data);
+        console.log('SDK message --> Hold operation success: ', data);
 
         if (!data) {
           return;
@@ -170,21 +170,21 @@ export const useReleaseHoldByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
-        console.log("SDK message --> Hold operation error: ", error);
+        console.log('SDK message --> Hold operation error: ', error);
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -194,8 +194,8 @@ export const useReleaseHoldByPartition = () => {
 export const useExecuteHoldByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.hold.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.hold.messages',
   });
 
   return useMutation(
@@ -207,7 +207,7 @@ export const useExecuteHoldByPartition = () => {
           queryKey: [GET_HOLDS(variables.securityId, variables.targetId)],
         });
 
-        console.log("SDK message --> Hold operation success: ", data);
+        console.log('SDK message --> Hold operation success: ', data);
 
         if (!data) {
           return;
@@ -215,21 +215,21 @@ export const useExecuteHoldByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
-        console.log("SDK message --> Hold operation error: ", error);
+        console.log('SDK message --> Hold operation error: ', error);
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -239,8 +239,8 @@ export const useExecuteHoldByPartition = () => {
 export const useReclaimHoldByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.hold.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.hold.messages',
   });
 
   return useMutation(
@@ -252,7 +252,7 @@ export const useReclaimHoldByPartition = () => {
           queryKey: [GET_HOLDS(variables.securityId, variables.targetId)],
         });
 
-        console.log("SDK message --> Hold operation success: ", data);
+        console.log('SDK message --> Hold operation success: ', data);
 
         if (!data) {
           return;
@@ -260,21 +260,21 @@ export const useReclaimHoldByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
-        console.log("SDK message --> Hold operation error: ", error);
+        console.log('SDK message --> Hold operation error: ', error);
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },

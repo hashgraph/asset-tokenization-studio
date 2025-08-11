@@ -206,18 +206,13 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IStaticFunctionSelectors} from './IStaticFunctionSelectors.sol';
-import {
-    IBusinessLogicResolver
-} from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
+import { IStaticFunctionSelectors } from './IStaticFunctionSelectors.sol';
+import { IBusinessLogicResolver } from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
 
 interface IDiamondCut is IStaticFunctionSelectors {
     function updateConfigVersion(uint256 _newVersion) external;
 
-    function updateConfig(
-        bytes32 _newConfigurationId,
-        uint256 _newVersion
-    ) external;
+    function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion) external;
 
     function updateResolver(
         IBusinessLogicResolver _newResolver,
@@ -225,8 +220,5 @@ interface IDiamondCut is IStaticFunctionSelectors {
         uint256 _newVersion
     ) external;
 
-    function getConfigInfo()
-        external
-        view
-        returns (address resolver_, bytes32 configurationId_, uint256 version_);
+    function getConfigInfo() external view returns (address resolver_, bytes32 configurationId_, uint256 version_);
 }

@@ -1,33 +1,33 @@
-import { Box, HStack, Stack, VStack } from "@chakra-ui/react";
-import { History } from "../../components/History";
-import { RouteName } from "../../router/RouteName";
-import { useTranslation } from "react-i18next";
-import { RoutePath } from "../../router/RoutePath";
+import { Box, HStack, Stack, VStack } from '@chakra-ui/react';
+import { History } from '../../components/History';
+import { RouteName } from '../../router/RouteName';
+import { useTranslation } from 'react-i18next';
+import { RoutePath } from '../../router/RoutePath';
 import {
   Button,
   InputController,
   SelectController,
   Text,
   useToast,
-} from "io-bricks-ui";
-import { isHederaValidAddress, required } from "../../utils/rules";
-import { useForm } from "react-hook-form";
-import { RouterManager } from "../../router/RouterManager";
-import { useState } from "react";
-import { useExternalControlStore } from "../../store/externalControlStore";
+} from 'io-bricks-ui';
+import { isHederaValidAddress, required } from '../../utils/rules';
+import { useForm } from 'react-hook-form';
+import { RouterManager } from '../../router/RouterManager';
+import { useState } from 'react';
+import { useExternalControlStore } from '../../store/externalControlStore';
 
 export interface FormValues {
   externalControlId: string;
-  type: "whitelist" | "blacklist";
+  type: 'whitelist' | 'blacklist';
 }
 
 export const AddExternalControl = () => {
   const toast = useToast();
 
-  const { t: tRoutes } = useTranslation("routes");
+  const { t: tRoutes } = useTranslation('routes');
 
-  const { t: tAdd } = useTranslation("externalControl", {
-    keyPrefix: "add",
+  const { t: tAdd } = useTranslation('externalControl', {
+    keyPrefix: 'add',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,7 +39,7 @@ export const AddExternalControl = () => {
     formState: { isValid },
     handleSubmit,
   } = useForm<FormValues>({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const onSubmit = async (values: FormValues) => {
@@ -51,9 +51,9 @@ export const AddExternalControl = () => {
     });
 
     toast.show({
-      status: "success",
-      title: tAdd("messages.addExternalControl.success"),
-      description: tAdd("messages.addExternalControl.descriptionSuccess"),
+      status: 'success',
+      title: tAdd('messages.addExternalControl.success'),
+      description: tAdd('messages.addExternalControl.descriptionSuccess'),
     });
 
     setIsSubmitting(false);
@@ -68,32 +68,32 @@ export const AddExternalControl = () => {
         excludePaths={[RoutePath.DASHBOARD]}
       />
       <Box
-        layerStyle={"container"}
-        w={"full"}
-        h={"full"}
+        layerStyle={'container'}
+        w={'full'}
+        h={'full'}
         flex={1}
-        alignItems={"center"}
+        alignItems={'center'}
       >
         <Stack
           gap={2}
-          alignItems={"start"}
-          justifyContent={"center"}
+          alignItems={'start'}
+          justifyContent={'center'}
           maxW={500}
-          justifySelf={"center"}
+          justifySelf={'center'}
         >
-          <Text textStyle="HeadingMediumLG">{tAdd("title")}</Text>
-          <Text textStyle="BodyTextRegularMD">{tAdd("subtitle")}</Text>
+          <Text textStyle="HeadingMediumLG">{tAdd('title')}</Text>
+          <Text textStyle="BodyTextRegularMD">{tAdd('subtitle')}</Text>
           <Text textStyle="ElementsRegularSM" py={6}>
-            {tAdd("mandatoryFields")}
+            {tAdd('mandatoryFields')}
           </Text>
           <Text textStyle="BodyTextRegularSM" mt={4}>
-            {tAdd("input.id.label")}
+            {tAdd('input.id.label')}
           </Text>
           <VStack w="450px" alignItems="flex-start">
             <InputController
               id="externalControlId"
               control={control}
-              placeholder={tAdd("input.id.placeholder")}
+              placeholder={tAdd('input.id.placeholder')}
               backgroundColor="neutral.white"
               size="md"
               rules={{
@@ -103,21 +103,21 @@ export const AddExternalControl = () => {
             />
           </VStack>
           <Text textStyle="BodyTextRegularSM" mt={4}>
-            {tAdd("input.type.label")}
+            {tAdd('input.type.label')}
           </Text>
           <VStack w="450px" alignItems="flex-start">
             <SelectController
               id="type"
               control={control}
-              placeholder={tAdd("input.type.placeholder")}
+              placeholder={tAdd('input.type.placeholder')}
               options={[
                 {
-                  label: "Whitelist",
-                  value: "whitelist",
+                  label: 'Whitelist',
+                  value: 'whitelist',
                 },
                 {
-                  label: "Blacklist",
-                  value: "blacklist",
+                  label: 'Blacklist',
+                  value: 'blacklist',
                 },
               ]}
               rules={{
@@ -125,21 +125,21 @@ export const AddExternalControl = () => {
               }}
             />
           </VStack>
-          <HStack pt={20} justifyContent={"flex-end"} w={"full"}>
+          <HStack pt={20} justifyContent={'flex-end'} w={'full'}>
             <Button
-              variant={"secondary"}
-              size={"md"}
+              variant={'secondary'}
+              size={'md'}
               onClick={() => RouterManager.goBack()}
             >
-              {tAdd("cancel")}
+              {tAdd('cancel')}
             </Button>
             <Button
-              size={"md"}
+              size={'md'}
               onClick={handleSubmit(onSubmit)}
               isDisabled={!isValid || isSubmitting}
               isLoading={isSubmitting}
             >
-              {tAdd("create")}
+              {tAdd('create')}
             </Button>
           </HStack>
         </Stack>

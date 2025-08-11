@@ -203,12 +203,12 @@
 
 */
 
-import { Center, SkeletonText, Stack } from "@chakra-ui/react";
-import { useTranslation } from "react-i18next";
-import { Text } from "io-bricks-ui";
-import { SecurityDetails } from "../views/DigitalSecurityDetails/Components/SecurityDetails";
-import { Panel } from "./Panel";
-import { useSecurityStore } from "../store/securityStore";
+import { Center, SkeletonText, Stack } from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
+import { Text } from 'io-bricks-ui';
+import { SecurityDetails } from '../views/DigitalSecurityDetails/Components/SecurityDetails';
+import { Panel } from './Panel';
+import { useSecurityStore } from '../store/securityStore';
 
 export interface DetailsBalancePanelProps {
   balance?: string;
@@ -217,18 +217,18 @@ export interface DetailsBalancePanelProps {
 }
 
 export const DetailsBalancePanel = ({
-  balance = "",
+  balance = '',
   isLoading = true,
   title,
 }: DetailsBalancePanelProps) => {
-  const { t: tProperties } = useTranslation("properties");
+  const { t: tProperties } = useTranslation('properties');
   const { details } = useSecurityStore();
 
   return (
     <Stack w="472px" gap={8}>
       <Panel
         data-testid="current-available-balance-panel"
-        title={title ?? tProperties("currentAvailableBalance")}
+        title={title ?? tProperties('currentAvailableBalance')}
         background="neutral.white"
       >
         <Center w="full" minH={8}>
@@ -245,7 +245,7 @@ export const DetailsBalancePanel = ({
             <Text textStyle="ElementsSemibold2XL">
               {balance}
               <Text ml={1} as="span" textStyle="ElementsRegularMD">
-                {details?.symbol ?? ""}
+                {details?.symbol ?? ''}
               </Text>
             </Text>
           )}

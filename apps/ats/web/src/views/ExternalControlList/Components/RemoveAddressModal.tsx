@@ -8,25 +8,25 @@ import {
   ModalOverlay,
   ModalProps,
   VStack,
-} from "@chakra-ui/react";
-import { Button, InputController } from "io-bricks-ui";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { ExternalControl } from "../ExternalControlList";
+} from '@chakra-ui/react';
+import { Button, InputController } from 'io-bricks-ui';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { ExternalControl } from '../ExternalControlList';
 import {
   useRemoveFromBlackListMock,
   useRemoveFromWhiteListMock,
-} from "../../../hooks/mutations/useExternalControl";
+} from '../../../hooks/mutations/useExternalControl';
 import {
   RemoveFromBlackListMockRequest,
   RemoveFromWhiteListMockRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 interface FormValues {
   accountId: string;
 }
 
-interface RemoveAddressModalProps extends Omit<ModalProps, "children"> {
+interface RemoveAddressModalProps extends Omit<ModalProps, 'children'> {
   externalControlSelected?: ExternalControl;
 }
 
@@ -35,12 +35,12 @@ export const RemoveAddressModal = ({
   isOpen,
   onClose,
 }: RemoveAddressModalProps) => {
-  const { t: tRemoveAddress } = useTranslation("externalControl", {
-    keyPrefix: "removeAddress",
+  const { t: tRemoveAddress } = useTranslation('externalControl', {
+    keyPrefix: 'removeAddress',
   });
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const {
@@ -53,7 +53,7 @@ export const RemoveAddressModal = ({
   } = useRemoveFromWhiteListMock();
 
   const onSubmit = (values: FormValues) => {
-    if (externalControlSelected?.type === "blacklist") {
+    if (externalControlSelected?.type === 'blacklist') {
       return removeFromBlackListMockMutate(
         new RemoveFromBlackListMockRequest({
           contractId: externalControlSelected.address,
@@ -62,7 +62,7 @@ export const RemoveAddressModal = ({
       ).finally(onClose);
     }
 
-    if (externalControlSelected?.type === "whitelist") {
+    if (externalControlSelected?.type === 'whitelist') {
       return removeFromWhiteListMockMutate(
         new RemoveFromWhiteListMockRequest({
           contractId: externalControlSelected.address,
@@ -86,16 +86,16 @@ export const RemoveAddressModal = ({
       }}
     >
       <ModalOverlay />
-      <ModalContent bgColor={"white"}>
-        <ModalHeader>{tRemoveAddress("title")}</ModalHeader>
+      <ModalContent bgColor={'white'}>
+        <ModalHeader>{tRemoveAddress('title')}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack gap={4}>
             <InputController
               control={control}
               id="accountId"
-              label={tRemoveAddress("input.label")}
-              placeholder={tRemoveAddress("input.placeholder")}
+              label={tRemoveAddress('input.label')}
+              placeholder={tRemoveAddress('input.placeholder')}
             />
           </VStack>
         </ModalBody>
@@ -106,7 +106,7 @@ export const RemoveAddressModal = ({
             type="submit"
             onClick={handleSubmit(onSubmit)}
           >
-            {tRemoveAddress("remove")}
+            {tRemoveAddress('remove')}
           </Button>
         </ModalFooter>
       </ModalContent>

@@ -203,9 +203,9 @@
 
 */
 
-import { useEffect } from "react";
-import { HStack, Stack } from "@chakra-ui/react";
-import { useTranslation } from "react-i18next";
+import { useEffect } from 'react';
+import { HStack, Stack } from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
 import {
   PhosphorIcon,
   Text,
@@ -213,30 +213,30 @@ import {
   InputController,
   InputNumberController,
   Tooltip,
-} from "io-bricks-ui";
-import { CancelButton } from "../../../components/CancelButton";
-import { NextStepButton } from "./NextStepButton";
-import { PreviousStepButton } from "./PreviousStepButton";
-import { required, isAfterDate, min } from "../../../utils/rules";
-import { ICreateBondFormValues } from "../ICreateBondFormValues";
-import { useFormContext, useFormState } from "react-hook-form";
-import { FormStepContainer } from "../../../components/FormStepContainer";
-import { formatNumber } from "../../../utils/format";
-import { Info } from "@phosphor-icons/react";
-import { addDays } from "date-fns";
+} from 'io-bricks-ui';
+import { CancelButton } from '../../../components/CancelButton';
+import { NextStepButton } from './NextStepButton';
+import { PreviousStepButton } from './PreviousStepButton';
+import { required, isAfterDate, min } from '../../../utils/rules';
+import { ICreateBondFormValues } from '../ICreateBondFormValues';
+import { useFormContext, useFormState } from 'react-hook-form';
+import { FormStepContainer } from '../../../components/FormStepContainer';
+import { formatNumber } from '../../../utils/format';
+import { Info } from '@phosphor-icons/react';
+import { addDays } from 'date-fns';
 
 export const StepConfiguration = () => {
-  const { t } = useTranslation("security", { keyPrefix: "createBond" });
+  const { t } = useTranslation('security', { keyPrefix: 'createBond' });
   const { control, watch, setValue, getValues } =
     useFormContext<ICreateBondFormValues>();
   const stepFormState = useFormState({ control });
 
   const today = new Date();
-  const startingDate = watch("startingDate");
-  const nominalValue = watch("nominalValue");
-  const numberOfUnits = watch("numberOfUnits");
-  const totalAmount = watch("totalAmount");
-  const decimals = getValues("decimals");
+  const startingDate = watch('startingDate');
+  const nominalValue = watch('nominalValue');
+  const numberOfUnits = watch('numberOfUnits');
+  const totalAmount = watch('totalAmount');
+  const decimals = getValues('decimals');
 
   useEffect(() => {
     let totalAmount = 0;
@@ -244,23 +244,23 @@ export const StepConfiguration = () => {
       totalAmount = Number(nominalValue) * Number(numberOfUnits);
     }
 
-    setValue("totalAmount", formatNumber(totalAmount, {}, 2));
+    setValue('totalAmount', formatNumber(totalAmount, {}, 2));
   }, [nominalValue, numberOfUnits, setValue]);
 
   return (
     <FormStepContainer>
       <Stack gap={2}>
-        <Text textStyle="HeadingMediumLG">{t("stepConfiguration.title")}</Text>
+        <Text textStyle="HeadingMediumLG">{t('stepConfiguration.title')}</Text>
         <Text textStyle="BodyTextRegularMD">
-          {t("stepConfiguration.subtitle")}
+          {t('stepConfiguration.subtitle')}
         </Text>
         <Text textStyle="ElementsRegularSM" mt={6}>
-          {t("stepConfiguration.mandatoryFields")}
+          {t('stepConfiguration.mandatoryFields')}
         </Text>
       </Stack>
       <Stack w="full">
         <Text textStyle="BodyTextRegularSM">
-          {t("stepConfiguration.currency")}
+          {t('stepConfiguration.currency')}
         </Text>
         <InputController
           control={control}
@@ -275,10 +275,10 @@ export const StepConfiguration = () => {
       <Stack w="full">
         <HStack justifySelf="flex-start">
           <Text textStyle="BodyTextRegularSM">
-            {t("stepConfiguration.numberOfUnits")}*
+            {t('stepConfiguration.numberOfUnits')}*
           </Text>
           <Tooltip
-            label={t("stepConfiguration.numberOfUnitsTooltip")}
+            label={t('stepConfiguration.numberOfUnitsTooltip')}
             placement="right"
           >
             <PhosphorIcon as={Info} />
@@ -294,7 +294,7 @@ export const StepConfiguration = () => {
           }}
           decimalScale={decimals}
           fixedDecimalScale={true}
-          placeholder={t("stepConfiguration.numberOfUnitsPlaceHolder")}
+          placeholder={t('stepConfiguration.numberOfUnitsPlaceHolder')}
           backgroundColor="neutral.600"
           size="md"
           thousandSeparator=","
@@ -304,10 +304,10 @@ export const StepConfiguration = () => {
       <Stack w="full">
         <HStack justifySelf="flex-start">
           <Text textStyle="BodyTextRegularSM">
-            {t("stepConfiguration.nominalValue")}*
+            {t('stepConfiguration.nominalValue')}*
           </Text>
           <Tooltip
-            label={t("stepConfiguration.nominalValueTooltip")}
+            label={t('stepConfiguration.nominalValueTooltip')}
             placement="right"
           >
             <PhosphorIcon as={Info} />
@@ -322,7 +322,7 @@ export const StepConfiguration = () => {
           }}
           decimalScale={2}
           fixedDecimalScale={true}
-          placeholder={t("stepConfiguration.nominalValuePlaceHolder")}
+          placeholder={t('stepConfiguration.nominalValuePlaceHolder')}
           backgroundColor="neutral.600"
           size="md"
           thousandSeparator=","
@@ -332,10 +332,10 @@ export const StepConfiguration = () => {
       <Stack w="full">
         <HStack justifySelf="flex-start">
           <Text textStyle="BodyTextRegularSM">
-            {t("stepConfiguration.totalAmount")}*
+            {t('stepConfiguration.totalAmount')}*
           </Text>
           <Tooltip
-            label={t("stepConfiguration.totalAmountTooltip")}
+            label={t('stepConfiguration.totalAmountTooltip')}
             placement="right"
           >
             <PhosphorIcon as={Info} />
@@ -355,10 +355,10 @@ export const StepConfiguration = () => {
       <Stack w="full">
         <HStack justifySelf="flex-start">
           <Text textStyle="BodyTextRegularSM">
-            {t("stepConfiguration.startingDate")}*
+            {t('stepConfiguration.startingDate')}*
           </Text>
           <Tooltip
-            label={t("stepConfiguration.startingDateTooltip")}
+            label={t('stepConfiguration.startingDateTooltip')}
             placement="right"
           >
             <PhosphorIcon as={Info} />
@@ -371,7 +371,7 @@ export const StepConfiguration = () => {
           rules={{
             required,
           }}
-          placeholder={t("stepConfiguration.startingDatePlaceHolder")}
+          placeholder={t('stepConfiguration.startingDatePlaceHolder')}
           backgroundColor="neutral.600"
           size="md"
         />
@@ -379,10 +379,10 @@ export const StepConfiguration = () => {
       <Stack w="full">
         <HStack justifySelf="flex-start">
           <Text textStyle="BodyTextRegularSM">
-            {t("stepConfiguration.maturityDate")}*
+            {t('stepConfiguration.maturityDate')}*
           </Text>
           <Tooltip
-            label={t("stepConfiguration.maturityDateTooltip")}
+            label={t('stepConfiguration.maturityDateTooltip')}
             placement="right"
           >
             <PhosphorIcon as={Info} />
@@ -396,7 +396,7 @@ export const StepConfiguration = () => {
             required,
             validate: isAfterDate(new Date(startingDate)),
           }}
-          placeholder={t("stepConfiguration.maturityDatePlaceHolder")}
+          placeholder={t('stepConfiguration.maturityDatePlaceHolder')}
           backgroundColor="neutral.600"
           size="md"
         />
@@ -406,7 +406,7 @@ export const StepConfiguration = () => {
         w="full"
         h="100px"
         align="end"
-        justifyContent={"flex-end"}
+        justifyContent={'flex-end'}
       >
         <CancelButton />
         <PreviousStepButton />

@@ -8,30 +8,30 @@ import {
   ModalOverlay,
   ModalProps,
   VStack,
-} from "@chakra-ui/react";
-import { Button, InputController } from "io-bricks-ui";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { useSetRevocationRegistryAddress } from "../../../../hooks/mutations/useSSIManager";
-import { useState } from "react";
-import { SetRevocationRegistryAddressRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router-dom";
-import { isHederaValidAddress, required } from "../../../../utils/rules";
+} from '@chakra-ui/react';
+import { Button, InputController } from 'io-bricks-ui';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { useSetRevocationRegistryAddress } from '../../../../hooks/mutations/useSSIManager';
+import { useState } from 'react';
+import { SetRevocationRegistryAddressRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useParams } from 'react-router-dom';
+import { isHederaValidAddress, required } from '../../../../utils/rules';
 
 interface FormValues {
   accountId: string;
 }
 
-interface SSIManagerRevocationModalProps extends Omit<ModalProps, "children"> {}
+interface SSIManagerRevocationModalProps extends Omit<ModalProps, 'children'> {}
 
 export const SSIManagerRevocationModal = ({
   isOpen,
   onClose,
 }: SSIManagerRevocationModalProps) => {
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
 
-  const { t: tRevocation } = useTranslation("security", {
-    keyPrefix: "details.ssiManager.revocation",
+  const { t: tRevocation } = useTranslation('security', {
+    keyPrefix: 'details.ssiManager.revocation',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +41,7 @@ export const SSIManagerRevocationModal = ({
     formState: { isValid },
     handleSubmit,
   } = useForm<FormValues>({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const { mutate } = useSetRevocationRegistryAddress();
@@ -67,16 +67,16 @@ export const SSIManagerRevocationModal = ({
   return (
     <Modal isCentered isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent bgColor={"white"}>
-        <ModalHeader>{tRevocation("title")}</ModalHeader>
+      <ModalContent bgColor={'white'}>
+        <ModalHeader>{tRevocation('title')}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack gap={4}>
             <InputController
               control={control}
               id="accountId"
-              label={tRevocation("form.account.label")}
-              placeholder={tRevocation("form.account.placeholder")}
+              label={tRevocation('form.account.label')}
+              placeholder={tRevocation('form.account.placeholder')}
               rules={{ required, validate: { isHederaValidAddress } }}
             />
           </VStack>
@@ -88,7 +88,7 @@ export const SSIManagerRevocationModal = ({
             onClick={handleSubmit(onSubmit)}
             isLoading={isLoading}
           >
-            {tRevocation("change")}
+            {tRevocation('change')}
           </Button>
         </ModalFooter>
       </ModalContent>

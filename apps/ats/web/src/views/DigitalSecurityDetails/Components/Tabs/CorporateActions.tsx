@@ -1,11 +1,11 @@
-import { Box } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { BalanceAdjustment } from "../BalanceAdjustment/BalanceAdjustment";
-import { Dividends } from "../Dividends/Dividends";
-import { VotingRights } from "../VotingRights/VotingRights";
-import { Coupons } from "../Coupons/Coupons";
-import { useMemo } from "react";
+import { Box } from '@chakra-ui/react';
+import { Tabs } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { BalanceAdjustment } from '../BalanceAdjustment/BalanceAdjustment';
+import { Dividends } from '../Dividends/Dividends';
+import { VotingRights } from '../VotingRights/VotingRights';
+import { Coupons } from '../Coupons/Coupons';
+import { useMemo } from 'react';
 
 interface OperationsTabProps {
   config: {
@@ -17,8 +17,8 @@ interface OperationsTabProps {
 }
 
 export const CorporateActionsTab = ({ config }: OperationsTabProps) => {
-  const { t: tTabs } = useTranslation("security", {
-    keyPrefix: "details.tabs",
+  const { t: tTabs } = useTranslation('security', {
+    keyPrefix: 'details.tabs',
   });
 
   const tabs = useMemo(() => {
@@ -27,19 +27,19 @@ export const CorporateActionsTab = ({ config }: OperationsTabProps) => {
     if (config.showBalanceAdjustment) {
       tabs.push({
         content: <BalanceAdjustment />,
-        header: tTabs("balanceAdjustment"),
+        header: tTabs('balanceAdjustment'),
       });
     }
     if (config.showDividends) {
-      tabs.push({ content: <Dividends />, header: tTabs("dividends") });
+      tabs.push({ content: <Dividends />, header: tTabs('dividends') });
     }
     if (config.showVotingRights) {
-      tabs.push({ content: <VotingRights />, header: tTabs("votingRights") });
+      tabs.push({ content: <VotingRights />, header: tTabs('votingRights') });
     }
     if (config.showCoupons) {
       tabs.push({
         content: <Coupons />,
-        header: tTabs("coupons"),
+        header: tTabs('coupons'),
       });
     }
 
@@ -47,7 +47,7 @@ export const CorporateActionsTab = ({ config }: OperationsTabProps) => {
   }, [config, tTabs]);
 
   return (
-    <Box w={"full"} h={"full"}>
+    <Box w={'full'} h={'full'}>
       <Tabs tabs={tabs} variant="secondary" />
     </Box>
   );
