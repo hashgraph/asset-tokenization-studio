@@ -496,11 +496,13 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
     );
     request.configVersion.as(() => 1);
     request.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
-    request.externalPauses?.as(() => [HederaIdPropsFixture.create().value]);
-    request.externalControlLists?.as(() => [
+    request.externalPausesIds?.as(() => [HederaIdPropsFixture.create().value]);
+    request.externalControlListsIds?.as(() => [
       HederaIdPropsFixture.create().value,
     ]);
-    request.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+    request.externalKycListsIds?.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
   },
 );
 

@@ -340,11 +340,13 @@ export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
     );
     request.configVersion.as(() => 1);
     request.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
-    request.externalPauses?.as(() => [HederaIdPropsFixture.create().value]);
-    request.externalControlLists?.as(() => [
+    request.externalPausesIds?.as(() => [HederaIdPropsFixture.create().value]);
+    request.externalControlListsIds?.as(() => [
       HederaIdPropsFixture.create().value,
     ]);
-    request.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+    request.externalKycListsIds?.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
   },
 );
 
@@ -619,10 +621,12 @@ export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
       faker.number.int({ min: 1, max: 5 }),
     );
     command.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
-    command.externalControlLists?.as(() => [
+    command.externalControlListsIds?.as(() => [
       HederaIdPropsFixture.create().value,
     ]);
-    command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+    command.externalKycListsIds?.as(() => [
+      HederaIdPropsFixture.create().value,
+    ]);
   },
 );
 
