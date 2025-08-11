@@ -233,7 +233,7 @@ import {
     FreezeFacet,
     ComplianceMock,
     IdentityRegistryMock,
-    IERC3643
+    IERC3643,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -284,7 +284,6 @@ const MAX_SUPPLY = 10000000
 const EMPTY_VC_ID = EMPTY_STRING
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
 const onchainId = ethers.Wallet.createRandom().address
-const identityRegistry = ethers.Wallet.createRandom().address
 
 describe('ERC3643 Tests', () => {
     let diamond: ResolverProxy
@@ -333,7 +332,6 @@ describe('ERC3643 Tests', () => {
     enum ClearingOperationType {
         Transfer,
         Redeem,
-        HoldCreation,
     }
     describe('single partition', () => {
         let erc3643Issuer: IERC3643
