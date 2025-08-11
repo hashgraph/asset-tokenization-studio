@@ -37,6 +37,7 @@ For example:
 
 (If fixing a bug, reference the issue for reproduction steps and explain how the fix resolves it.)
 
+### Test Results (if any)
 -->
 
 **Node version**:
@@ -44,8 +45,6 @@ For example:
 -   [ ] 20
 -   [ ] 22
 -   [ ] 24
-
-### Test Results (if any)
 
 ## Checklist
 
