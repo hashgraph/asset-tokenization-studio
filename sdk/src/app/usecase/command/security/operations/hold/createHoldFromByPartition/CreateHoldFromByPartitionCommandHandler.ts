@@ -243,7 +243,7 @@ export class CreateHoldFromByPartitionCommandHandler
       const {
         securityId,
         partitionId,
-        escrow,
+        escrowId,
         amount,
         sourceId,
         targetId,
@@ -255,7 +255,7 @@ export class CreateHoldFromByPartitionCommandHandler
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
       const escrowEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(escrow);
+        await this.accountService.getAccountEvmAddress(escrowId);
 
       const sourceEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(sourceId);

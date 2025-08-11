@@ -326,7 +326,7 @@ describe('ControllerCreateHoldByPartitionCommandHandler', () => {
         );
         expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
           1,
-          command.escrow,
+          command.escrowId,
         );
         expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
           2,

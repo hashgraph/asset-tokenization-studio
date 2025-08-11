@@ -319,7 +319,7 @@ describe('Hold', () => {
         new CreateHoldByPartitionCommand(
           createHoldByPartitionRequest.securityId,
           createHoldByPartitionRequest.partitionId,
-          createHoldByPartitionRequest.escrow,
+          createHoldByPartitionRequest.escrowId,
           createHoldByPartitionRequest.amount,
           createHoldByPartitionRequest.targetId,
           createHoldByPartitionRequest.expirationDate,
@@ -345,7 +345,7 @@ describe('Hold', () => {
         new CreateHoldByPartitionCommand(
           createHoldByPartitionRequest.securityId,
           createHoldByPartitionRequest.partitionId,
-          createHoldByPartitionRequest.escrow,
+          createHoldByPartitionRequest.escrowId,
           createHoldByPartitionRequest.amount,
           createHoldByPartitionRequest.targetId,
           createHoldByPartitionRequest.expirationDate,
@@ -389,10 +389,10 @@ describe('Hold', () => {
       ).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrow is invalid', async () => {
+    it('should throw error if escrowId is invalid', async () => {
       createHoldByPartitionRequest = new CreateHoldByPartitionRequest({
         ...CreateHoldByPartitionRequestFixture.create({
-          escrow: 'invalid',
+          escrowId: 'invalid',
         }),
       });
 
@@ -440,7 +440,7 @@ describe('Hold', () => {
         new CreateHoldFromByPartitionCommand(
           createHoldFromByPartitionRequest.securityId,
           createHoldFromByPartitionRequest.partitionId,
-          createHoldFromByPartitionRequest.escrow,
+          createHoldFromByPartitionRequest.escrowId,
           createHoldFromByPartitionRequest.amount,
           createHoldFromByPartitionRequest.sourceId,
           createHoldFromByPartitionRequest.targetId,
@@ -467,7 +467,7 @@ describe('Hold', () => {
         new CreateHoldFromByPartitionCommand(
           createHoldFromByPartitionRequest.securityId,
           createHoldFromByPartitionRequest.partitionId,
-          createHoldFromByPartitionRequest.escrow,
+          createHoldFromByPartitionRequest.escrowId,
           createHoldFromByPartitionRequest.amount,
           createHoldFromByPartitionRequest.sourceId,
           createHoldFromByPartitionRequest.targetId,
@@ -512,10 +512,10 @@ describe('Hold', () => {
       ).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrow is invalid', async () => {
+    it('should throw error if escrowId is invalid', async () => {
       createHoldFromByPartitionRequest = new CreateHoldFromByPartitionRequest({
         ...CreateHoldFromByPartitionRequestFixture.create({
-          escrow: 'invalid',
+          escrowId: 'invalid',
         }),
       });
 
@@ -575,7 +575,7 @@ describe('Hold', () => {
         new ControllerCreateHoldByPartitionCommand(
           controllerCreateHoldByPartitionRequest.securityId,
           controllerCreateHoldByPartitionRequest.partitionId,
-          controllerCreateHoldByPartitionRequest.escrow,
+          controllerCreateHoldByPartitionRequest.escrowId,
           controllerCreateHoldByPartitionRequest.amount,
           controllerCreateHoldByPartitionRequest.sourceId,
           controllerCreateHoldByPartitionRequest.targetId,
@@ -604,7 +604,7 @@ describe('Hold', () => {
         new ControllerCreateHoldByPartitionCommand(
           controllerCreateHoldByPartitionRequest.securityId,
           controllerCreateHoldByPartitionRequest.partitionId,
-          controllerCreateHoldByPartitionRequest.escrow,
+          controllerCreateHoldByPartitionRequest.escrowId,
           controllerCreateHoldByPartitionRequest.amount,
           controllerCreateHoldByPartitionRequest.sourceId,
           controllerCreateHoldByPartitionRequest.targetId,
@@ -658,11 +658,11 @@ describe('Hold', () => {
       ).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrow is invalid', async () => {
+    it('should throw error if escrowId is invalid', async () => {
       controllerCreateHoldByPartitionRequest =
         new ControllerCreateHoldByPartitionRequest({
           ...ControllerCreateHoldByPartitionRequestFixture.create({
-            escrow: 'invalid',
+            escrowId: 'invalid',
           }),
         });
 
@@ -730,7 +730,7 @@ describe('Hold', () => {
         new ProtectedCreateHoldByPartitionCommand(
           protectedCreateHoldByPartitionRequest.securityId,
           protectedCreateHoldByPartitionRequest.partitionId,
-          protectedCreateHoldByPartitionRequest.escrow,
+          protectedCreateHoldByPartitionRequest.escrowId,
           protectedCreateHoldByPartitionRequest.amount,
           protectedCreateHoldByPartitionRequest.sourceId,
           protectedCreateHoldByPartitionRequest.targetId,
@@ -762,7 +762,7 @@ describe('Hold', () => {
         new ProtectedCreateHoldByPartitionCommand(
           protectedCreateHoldByPartitionRequest.securityId,
           protectedCreateHoldByPartitionRequest.partitionId,
-          protectedCreateHoldByPartitionRequest.escrow,
+          protectedCreateHoldByPartitionRequest.escrowId,
           protectedCreateHoldByPartitionRequest.amount,
           protectedCreateHoldByPartitionRequest.sourceId,
           protectedCreateHoldByPartitionRequest.targetId,
@@ -819,11 +819,11 @@ describe('Hold', () => {
       ).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrow is invalid', async () => {
+    it('should throw error if escrowId is invalid', async () => {
       protectedCreateHoldByPartitionRequest =
         new ProtectedCreateHoldByPartitionRequest({
           ...ProtectedCreateHoldByPartitionRequestFixture.create({
-            escrow: 'invalid',
+            escrowId: 'invalid',
           }),
         });
 

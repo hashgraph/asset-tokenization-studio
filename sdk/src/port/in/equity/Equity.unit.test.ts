@@ -407,9 +407,9 @@ describe('Equity', () => {
           createEquityRequest.configId,
           createEquityRequest.configVersion,
           createEquityRequest.diamondOwnerAccount,
-          createEquityRequest.externalPauses,
-          createEquityRequest.externalControlLists,
-          createEquityRequest.externalKycLists,
+          createEquityRequest.externalPausesIds,
+          createEquityRequest.externalControlListsIds,
+          createEquityRequest.externalKycListsIds,
         ),
       );
 
@@ -476,9 +476,9 @@ describe('Equity', () => {
           createEquityRequest.configId,
           createEquityRequest.configVersion,
           createEquityRequest.diamondOwnerAccount,
-          createEquityRequest.externalPauses,
-          createEquityRequest.externalControlLists,
-          createEquityRequest.externalKycLists,
+          createEquityRequest.externalPausesIds,
+          createEquityRequest.externalControlListsIds,
+          createEquityRequest.externalKycListsIds,
         ),
       );
     });
@@ -625,10 +625,10 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if externalPauses is invalid', async () => {
+    it('should throw error if externalPausesIds is invalid', async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          externalPauses: ['invalid'],
+          externalPausesIds: ['invalid'],
         }),
       );
 
@@ -637,10 +637,10 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if externalControlLists is invalid', async () => {
+    it('should throw error if externalControlListsIds is invalid', async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          externalControlLists: ['invalid'],
+          externalControlListsIds: ['invalid'],
         }),
       );
 
@@ -649,10 +649,10 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if externalKycLists is invalid', async () => {
+    it('should throw error if externalKycListsIds is invalid', async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          externalKycLists: ['invalid'],
+          externalKycListsIds: ['invalid'],
         }),
       );
 

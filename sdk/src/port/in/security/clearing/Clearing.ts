@@ -327,7 +327,7 @@ export class SecurityInPortClearing
       new ClearingCreateHoldByPartitionCommand(
         request.securityId,
         request.partitionId,
-        request.escrow,
+        request.escrowId,
         request.amount,
         request.targetId,
         request.clearingExpirationDate,
@@ -348,7 +348,7 @@ export class SecurityInPortClearing
       new ClearingCreateHoldFromByPartitionCommand(
         request.securityId,
         request.partitionId,
-        request.escrow,
+        request.escrowId,
         request.amount,
         request.sourceId,
         request.targetId,
@@ -370,7 +370,7 @@ export class SecurityInPortClearing
       new ProtectedClearingCreateHoldByPartitionCommand(
         request.securityId,
         request.partitionId,
-        request.escrow,
+        request.escrowId,
         request.amount,
         request.sourceId,
         request.targetId,
@@ -463,7 +463,7 @@ export class SecurityInPortClearing
       expirationDate: new Date(res.expirationTimestamp * ONE_THOUSAND),
       data: res.data,
       operatorData: res.operatorData,
-      holdEscrow: res.holdEscrow,
+      holdEscrowId: res.holdEscrowId,
       holdExpirationDate: new Date(res.holdExpirationTimestamp * ONE_THOUSAND),
       holdTo: res.holdTo,
       holdData: res.holdData,
@@ -580,7 +580,7 @@ export class SecurityInPortClearing
       new OperatorClearingCreateHoldByPartitionCommand(
         request.securityId,
         request.partitionId,
-        request.escrow,
+        request.escrowId,
         request.amount,
         request.sourceId,
         request.targetId,

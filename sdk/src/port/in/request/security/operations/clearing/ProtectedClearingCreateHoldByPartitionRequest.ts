@@ -212,7 +212,7 @@ export default class ProtectedClearingCreateHoldByPartitionRequest extends Valid
   securityId: string;
   partitionId: string;
   amount: string;
-  escrow: string;
+  escrowId: string;
   sourceId: string;
   targetId: string;
   clearingExpirationDate: string;
@@ -225,7 +225,7 @@ export default class ProtectedClearingCreateHoldByPartitionRequest extends Valid
     securityId,
     partitionId,
     amount,
-    escrow,
+    escrowId,
     sourceId,
     targetId,
     clearingExpirationDate,
@@ -237,7 +237,7 @@ export default class ProtectedClearingCreateHoldByPartitionRequest extends Valid
     securityId: string;
     partitionId: string;
     amount: string;
-    escrow: string;
+    escrowId: string;
     sourceId: string;
     targetId: string;
     clearingExpirationDate: string;
@@ -250,7 +250,7 @@ export default class ProtectedClearingCreateHoldByPartitionRequest extends Valid
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       partitionId: FormatValidation.checkBytes32Format(),
       amount: FormatValidation.checkAmount(),
-      escrow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      escrowId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       sourceId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       nonce: FormatValidation.checkNumber({ min: 0 }),
@@ -277,7 +277,7 @@ export default class ProtectedClearingCreateHoldByPartitionRequest extends Valid
     this.securityId = securityId;
     this.partitionId = partitionId;
     this.amount = amount;
-    this.escrow = escrow;
+    this.escrowId = escrowId;
     this.sourceId = sourceId;
     this.targetId = targetId;
     this.clearingExpirationDate = clearingExpirationDate;
