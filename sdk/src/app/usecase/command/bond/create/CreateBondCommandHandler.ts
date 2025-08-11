@@ -263,6 +263,7 @@ export class CreateBondCommandHandler
         externalControlLists,
         externalKycLists,
         compliance,
+        identityRegistry,
       } = command;
 
       //TODO: Boy scout: remove request validations and adjust test
@@ -305,6 +306,10 @@ export class CreateBondCommandHandler
         ? await this.contractService.getContractEvmAddress(compliance)
         : new EvmAddress(EVM_ZERO_ADDRESS);
 
+      const identityRegistryAddress = identityRegistry
+        ? await this.contractService.getContractEvmAddress(identityRegistry)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
       const handler = this.transactionService.getHandler();
 
       const bondInfo = new BondDetails(
@@ -329,6 +334,7 @@ export class CreateBondCommandHandler
         configId,
         configVersion,
         complianceEvmAddress,
+        identityRegistryAddress,
         externalPausesEvmAddresses,
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,

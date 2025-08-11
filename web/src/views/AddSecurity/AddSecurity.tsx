@@ -216,7 +216,7 @@ import {
   GetRoleCountForRequest,
   GetSecurityDetailsRequest,
 } from "@hashgraph/asset-tokenization-sdk";
-import { isHederaValidAddress, required } from "../../utils/rules";
+import { isValidHederaId, required } from "../../utils/rules";
 import { RouterManager } from "../../router/RouterManager";
 import { useEffect, useState } from "react";
 import { useWalletStore } from "../../store/walletStore";
@@ -324,7 +324,7 @@ export const AddSecurity = () => {
               size="md"
               rules={{
                 required,
-                validate: { isHederaValidAddress },
+                validate: { isValidHederaId: isValidHederaId },
               }}
             />
           </VStack>

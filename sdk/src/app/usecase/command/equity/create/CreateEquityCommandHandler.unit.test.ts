@@ -356,6 +356,7 @@ describe('CreateEquityCommandHandler', () => {
         contractServiceMock.getContractEvmAddress
           .mockResolvedValueOnce(evmAddress)
           .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress)
           .mockResolvedValueOnce(evmAddress);
         contractServiceMock.getEvmAddressesFromHederaIds
           .mockResolvedValueOnce([externalPauseEvmAddress])
@@ -382,7 +383,7 @@ describe('CreateEquityCommandHandler', () => {
         expect(result.securityId.value).toBe(hederaId);
         expect(result.transactionId).toBe(transactionId);
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          3,
+          4,
         );
         expect(
           contractServiceMock.getEvmAddressesFromHederaIds,
@@ -419,6 +420,7 @@ describe('CreateEquityCommandHandler', () => {
           evmAddress,
           command.configId,
           command.configVersion,
+          evmAddress,
           evmAddress,
           [externalPauseEvmAddress],
           [externalControlEvmAddress],

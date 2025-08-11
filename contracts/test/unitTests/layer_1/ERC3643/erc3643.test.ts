@@ -232,6 +232,7 @@ import {
     DiamondFacet,
     FreezeFacet,
     ComplianceMock,
+    IdentityRegistryMock,
     IERC3643,
 } from '@typechain'
 import {
@@ -283,7 +284,6 @@ const MAX_SUPPLY = 10000000
 const EMPTY_VC_ID = EMPTY_STRING
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
 const onchainId = ethers.Wallet.createRandom().address
-const identityRegistry = ethers.Wallet.createRandom().address
 
 describe('ERC3643 Tests', () => {
     let diamond: ResolverProxy
@@ -324,6 +324,8 @@ describe('ERC3643 Tests', () => {
     let protectedPartitionsFacet: ProtectedPartitions
     let diamondFacet: DiamondFacet
     let freezeFacet: FreezeFacet
+    let identityRegistryAddress: string
+    let identityRegistryMock: IdentityRegistryMock
     let complianceMock: ComplianceMock
     let complianceMockAddress: string
 
@@ -418,6 +420,16 @@ describe('ERC3643 Tests', () => {
                 )
             ).address
 
+            identityRegistryAddress = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'IdentityRegistryMock',
+                        signer: signer_A,
+                        args: [true, false],
+                    })
+                )
+            ).address
+
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
                 isWhiteList: false,
@@ -450,6 +462,7 @@ describe('ERC3643 Tests', () => {
                 factory,
                 businessLogicResolver: businessLogicResolver.address,
                 compliance: complianceMockAddress,
+                identityRegistry: identityRegistryAddress,
             })
 
             accessControlFacet = await ethers.getContractAt(
@@ -539,6 +552,12 @@ describe('ERC3643 Tests', () => {
                 diamond.address
             )
             lockFacet = await ethers.getContractAt('Lock', diamond.address)
+
+            identityRegistryMock = await ethers.getContractAt(
+                'IdentityRegistryMock',
+                identityRegistryAddress
+            )
+
             const clearingRedeemFacet = await ethers.getContractAt(
                 'ClearingRedeemFacet',
                 diamond.address,
@@ -1061,16 +1080,346 @@ describe('ERC3643 Tests', () => {
             it('GIVEN an initialized token WHEN updating the identityRegistry THEN setIdentityRegistry emits IdentityRegistryAdded with updated identityRegistry', async () => {
                 const retrieved_identityRegistry =
                     await erc3643Facet.identityRegistry()
-                expect(retrieved_identityRegistry).to.equal(ADDRESS_ZERO)
+                expect(retrieved_identityRegistry).to.equal(
+                    identityRegistryAddress
+                )
 
                 //Update identityRegistry
-                expect(await erc3643Facet.setIdentityRegistry(identityRegistry))
+                expect(
+                    await erc3643Facet.setIdentityRegistry(
+                        identityRegistryAddress
+                    )
+                )
                     .to.emit(erc3643Facet, 'IdentityRegistryAdded')
-                    .withArgs(identityRegistry)
+                    .withArgs(identityRegistryAddress)
 
                 const retrieved_newIdentityRegistry =
                     await erc3643Facet.identityRegistry()
-                expect(retrieved_newIdentityRegistry).to.equal(identityRegistry)
+                expect(retrieved_newIdentityRegistry).to.equal(
+                    identityRegistryAddress
+                )
+            })
+
+            it('GIVEN non verified account with balance WHEN transfer THEN reverts with AddressNotVerified', async () => {
+                // Setup
+                const erc20FacetE = erc20Facet.connect(signer_E)
+                await erc3643Facet.mint(account_E, 2 * AMOUNT)
+                await erc20FacetE.approve(account_D, MAX_UINT256)
+                await erc1410Facet
+                    .connect(signer_E)
+                    .authorizeOperator(account_D)
+
+                await identityRegistryMock.setFlags(false, false) // canTransfer = false
+
+                // Transfers
+                await expect(
+                    erc20FacetE.transfer(account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc20Facet
+                        .connect(signer_D)
+                        .transferFrom(account_E, account_D, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+
+                const basicTransferInfo = {
+                    to: account_D,
+                    value: AMOUNT,
+                }
+                await expect(
+                    erc1410Facet
+                        .connect(signer_E)
+                        .transferByPartition(
+                            DEFAULT_PARTITION,
+                            basicTransferInfo,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+
+                const operatorTransferData = {
+                    partition: DEFAULT_PARTITION,
+                    from: account_E,
+                    to: account_D,
+                    value: AMOUNT,
+                    data: EMPTY_HEX_BYTES,
+                    operatorData: EMPTY_HEX_BYTES,
+                }
+                await expect(
+                    erc1410Facet
+                        .connect(signer_D)
+                        .operatorTransferByPartition(operatorTransferData)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_E)
+                        .transferWithData(account_D, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_D)
+                        .transferFromWithData(
+                            account_E,
+                            account_D,
+                            AMOUNT,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc3643Facet
+                        .connect(signer_E)
+                        .batchTransfer([account_D], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+            })
+
+            it('GIVEN non verified account WHEN issue THEN reverts with AddressNotVerified', async () => {
+                await identityRegistryMock.setFlags(false, false) // canTransfer = false
+
+                // Issue
+                await expect(
+                    erc3643Facet.batchMint([account_E], [AMOUNT])
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc3643Facet.mint(account_E, AMOUNT)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1410Facet.issueByPartition({
+                        partition: DEFAULT_PARTITION,
+                        tokenHolder: account_E,
+                        value: AMOUNT,
+                        data: EMPTY_HEX_BYTES,
+                    })
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1594Facet.issue(account_E, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+            })
+
+            it('GIVEN non verified account WHEN redeem THEN reverts with AddressNotVerified', async () => {
+                await identityRegistryMock.setFlags(false, false) // canTransfer = false
+
+                //Redeem
+                await expect(
+                    erc1410Facet
+                        .connect(signer_E)
+                        .redeemByPartition(
+                            DEFAULT_PARTITION,
+                            AMOUNT,
+                            EMPTY_HEX_BYTES
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_E)
+                        .redeem(AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+                await expect(
+                    erc1594Facet
+                        .connect(signer_D)
+                        .redeemFrom(account_E, AMOUNT, EMPTY_HEX_BYTES)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+            })
+
+            it('GIVEN non verified account WHEN Revoke THEN reverts with AddressNotVerified', async () => {
+                // Setup: mint tokens
+                await erc3643Facet.mint(account_E, 2 * AMOUNT)
+
+                await identityRegistryMock.setFlags(false, false) // canTransfer = false
+
+                // Clearings
+                await clearingActionsFacet.activateClearing()
+                const clearingOperation = {
+                    partition: DEFAULT_PARTITION,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:09Z'
+                    ),
+                    data: EMPTY_HEX_BYTES,
+                }
+                await clearingFacet
+                    .connect(signer_E)
+                    .clearingTransferByPartition(
+                        clearingOperation,
+                        AMOUNT,
+                        account_D
+                    )
+                const clearingIdentifier = {
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_E,
+                    clearingId: 1,
+                    clearingOperationType: ClearingOperationType.Transfer,
+                }
+                await expect(
+                    clearingFacet.approveClearingOperationByPartition(
+                        clearingIdentifier
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'AddressNotVerified'
+                )
+            })
+        })
+
+        describe('ERC3643 canTransfer Compliance Integration', () => {
+            it('GIVEN ComplianceMock.canTransfer returns false THEN transfers fail with ComplianceNotAllowed', async () => {
+                // Setup: mint tokens and set compliance to return false for canTransfer
+                await erc3643Facet.mint(account_E, AMOUNT)
+                await complianceMock.setFlags(false, false) // canTransfer = false
+
+                const erc20FacetE = erc20Facet.connect(signer_E)
+
+                await expect(
+                    erc20FacetE.transfer(account_D, AMOUNT / 2)
+                ).to.be.revertedWithCustomError(
+                    erc3643Facet,
+                    'ComplianceNotAllowed'
+                )
+            })
+
+            it('GIVEN ComplianceMock.canTransfer returns true THEN transfers succeed', async () => {
+                // Setup: mint tokens and set compliance to return true for canTransfer
+                await erc3643Facet.mint(account_E, AMOUNT)
+                await complianceMock.setFlags(true, false) // canTransfer = true
+
+                const erc20FacetE = erc20Facet.connect(signer_E)
+
+                await expect(erc20FacetE.transfer(account_D, AMOUNT / 2)).to.not
+                    .be.reverted
+
+                expect(
+                    await erc1410SnapshotFacet.balanceOf(account_E)
+                ).to.equal(AMOUNT / 2)
+                expect(
+                    await erc1410SnapshotFacet.balanceOf(account_D)
+                ).to.equal(AMOUNT / 2)
+            })
+
+            it('GIVEN zero address compliance THEN transfers succeed without compliance checks', async () => {
+                // Deploy token without compliance contract (zero address)
+                const diamond = await deployEquityFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList: false,
+                    isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
+                    isMultiPartition: false,
+                    name,
+                    symbol,
+                    decimals,
+                    isin,
+                    votingRight: false,
+                    informationRight: false,
+                    liquidationRight: false,
+                    subscriptionRight: true,
+                    conversionRight: true,
+                    redemptionRight: true,
+                    putRight: false,
+                    dividendRight: 1,
+                    currency: '0x345678',
+                    numberOfShares: BigInt(MAX_SUPPLY),
+                    nominalValue: 100,
+                    regulationType: RegulationType.REG_S,
+                    regulationSubType: RegulationSubType.NONE,
+                    countriesControlListType: true,
+                    listOfCountries: 'ES,FR,CH',
+                    info: 'nothing',
+                    init_rbacs: [
+                        { role: ISSUER_ROLE, members: [account_A] },
+                        { role: KYC_ROLE, members: [account_B] },
+                    ],
+                    factory,
+                    businessLogicResolver: businessLogicResolver.address,
+                    compliance: ADDRESS_ZERO, // No compliance contract
+                })
+
+                const erc3643NoCompliance = await ethers.getContractAt(
+                    'ERC3643',
+                    diamond.address
+                )
+                const kycNoCompliance = await ethers.getContractAt(
+                    'Kyc',
+                    diamond.address,
+                    signer_B
+                )
+                const erc20NoCompliance = await ethers.getContractAt(
+                    'ERC20',
+                    diamond.address,
+                    signer_E
+                )
+                const ssiNoCompliance = await ethers.getContractAt(
+                    'SsiManagement',
+                    diamond.address
+                )
+
+                // Grant SSI_MANAGER_ROLE to account_A first, then add account_E as an issuer
+                const accessControlNoCompliance = await ethers.getContractAt(
+                    'AccessControl',
+                    diamond.address
+                )
+                await accessControlNoCompliance.grantRole(
+                    SSI_MANAGER_ROLE,
+                    account_A
+                )
+                await ssiNoCompliance.addIssuer(account_E)
+                await kycNoCompliance.grantKyc(
+                    account_E,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_E
+                )
+                await kycNoCompliance.grantKyc(
+                    account_D,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_E
+                )
+
+                await erc3643NoCompliance.mint(account_E, AMOUNT)
+
+                await expect(erc20NoCompliance.transfer(account_D, AMOUNT / 2))
+                    .to.not.be.reverted
             })
         })
 
@@ -2498,7 +2847,7 @@ describe('ERC3643 Tests', () => {
 
                 // set IdentityRegistry fails
                 await expect(
-                    erc3643Facet.setIdentityRegistry(identityRegistry)
+                    erc3643Facet.setIdentityRegistry(identityRegistryAddress)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
             it('GIVEN an account without TREX_OWNER role WHEN setCompliance THEN transaction fails with AccountHasNoRole', async () => {
@@ -2590,7 +2939,7 @@ describe('ERC3643 Tests', () => {
                     erc3643Facet.setOnchainID(onchainId)
                 ).to.be.rejectedWith('TokenIsPaused')
                 await expect(
-                    erc3643Facet.setIdentityRegistry(identityRegistry)
+                    erc3643Facet.setIdentityRegistry(identityRegistryAddress)
                 ).to.be.rejectedWith('TokenIsPaused')
                 await expect(
                     erc3643Facet.setCompliance(complianceMockAddress)

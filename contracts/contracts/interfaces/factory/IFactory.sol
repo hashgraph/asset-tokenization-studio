@@ -246,6 +246,7 @@ interface IFactory {
         address[] externalControlLists;
         address[] externalKycLists;
         address compliance;
+        address identityRegistry;
     }
 
     struct EquityData {

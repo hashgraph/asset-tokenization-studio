@@ -294,12 +294,25 @@ interface IERC3643Basic {
     error ComplianceNotAllowed();
 
     /**
+     * @notice Thrown when the calls to the methods in the identity contract fail
+     */
+    error IdentityRegistryCallFailed();
+
+    /**
+     * @notice Thrown when the identity contract returns false
+     */
+    error AddressNotVerified();
+
+    /**
      * @dev Facet initializer
      *
      * Sets the compliance contract address
      */
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC3643(address _compliance) external;
+    function initialize_ERC3643(
+        address _compliance,
+        address _identityRegistry
+    ) external;
 
     /**
      * @dev Sets the name of the token to `_name`.

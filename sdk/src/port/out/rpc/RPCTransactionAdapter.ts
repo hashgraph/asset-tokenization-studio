@@ -509,6 +509,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     configId: string,
     configVersion: number,
     compliance: EvmAddress,
+    identityRegistry: EvmAddress,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -561,6 +562,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         externalKycLists:
           externalKycLists?.map((address) => address.toString()) ?? [],
         compliance: compliance.toString(),
+        identityRegistry: identityRegistry.toString(),
       };
 
       const equityDetails: EquityDetailsData = {
@@ -631,6 +633,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     configId: string,
     configVersion: number,
     compliance: EvmAddress,
+    identityRegistry: EvmAddress,
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -683,6 +686,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         externalKycLists:
           externalKycLists?.map((address) => address.toString()) ?? [],
         compliance: compliance.toString(),
+        identityRegistry: identityRegistry.toString(),
       };
 
       const bondDetails = new BondDetailsData(

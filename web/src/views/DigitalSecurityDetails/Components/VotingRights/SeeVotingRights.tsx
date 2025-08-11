@@ -212,7 +212,7 @@ import {
   Tooltip,
 } from "io-bricks-ui";
 import {
-  isHederaValidAddress,
+  isValidHederaId,
   required,
   greaterThanZero,
 } from "../../../../utils/rules";
@@ -334,7 +334,7 @@ export const SeeVotingRights = () => {
             <InputController
               control={control}
               id="accountId"
-              rules={{ required, isHederaValidAddress }}
+              rules={{ required, isValidHederaId: isValidHederaId }}
               placeholder={tForm("account.placeholder")}
             />
           </Stack>

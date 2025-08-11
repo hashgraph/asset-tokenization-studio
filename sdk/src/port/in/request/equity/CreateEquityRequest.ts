@@ -244,6 +244,9 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   @OptionalField()
   compliance?: string;
 
+  @OptionalField()
+  identityRegistry?: string;
+
   votingRight: boolean;
   informationRight: boolean;
   liquidationRight: boolean;
@@ -297,6 +300,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     configId,
     configVersion,
     compliance,
+    identityRegistry,
   }: {
     name: string;
     symbol: string;
@@ -331,6 +335,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     configId: string;
     configVersion: number;
     compliance?: string;
+    identityRegistry?: string;
   }) {
     super({
       name: (val) => {
@@ -417,5 +422,6 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.configId = configId;
     this.configVersion = configVersion;
     this.compliance = compliance;
+    this.identityRegistry = identityRegistry;
   }
 }
