@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { ValidationSchema, ValidatedArgsKey } from './ValidationSchema.js';
 import ValidationResponse from './ValidationResponse.js';
@@ -307,7 +306,7 @@ export default class ValidatedArgs<T extends BaseArgs> extends Validation {
   ): void {
     try {
       const err = this.runValidation(key, this.getProperty(key as keyof this));
-      err && vals.push(err);
+      if (err) vals.push(err);
     } catch (err) {
       vals.push(new ValidationResponse(key.toString(), [err as BaseError]));
     }

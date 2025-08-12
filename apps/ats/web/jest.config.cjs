@@ -21,10 +21,9 @@ module.exports = {
     './jest.setup.tsx',
   ],
   moduleNameMapper: {
-    '^react$': '<rootDir>/node_modules/react',
-    '^react-dom$': '<rootDir>/node_modules/react-dom',
     '^@hashgraph/io-axios-services/(.*)$':
       '<rootDir>/node_modules/@hashgraph/io-axios-services/lib/$1.js',
+    '^@terminal3/(.*)$': '<rootDir>/__mocks__/@terminal3/$1.js',
     '\\.(css|less|scss|sass|ttf|png)$': 'ts-jest',
   },
   moduleDirectories: [

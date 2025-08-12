@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-const { promises: fs } = require('fs');
-const path = require('path');
+import { promises as fs } from 'fs';
+import path from 'path';
 
 async function findFiles(dir, extension) {
   let files = [];

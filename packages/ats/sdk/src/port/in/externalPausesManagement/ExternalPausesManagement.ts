@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
 import Injectable from '../../../core/Injectable.js';
 import { CommandBus } from '../../../core/command/CommandBus.js';

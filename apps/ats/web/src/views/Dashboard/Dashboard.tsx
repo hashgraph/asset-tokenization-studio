@@ -230,7 +230,6 @@ export const Dashboard = () => {
   }, []);
 
   const userHasTokens =
-    // eslint-disable-next-line no-prototype-builtins
     adminSecurities.hasOwnProperty(address) ||
     holderSecurities.hasOwnProperty(address);
 

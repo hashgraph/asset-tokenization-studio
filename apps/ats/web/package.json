@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc && vite build",
-    "test": "NODE_ENV=test jest",
+    "test": "NODE_ENV=test jest --runInBand",
     "test:ci": "NODE_ENV=test jest --ci --runInBand",
     "clean": "npx --yes npm-run-all --parallel clean:node clean:build",
     "dev": "vite",

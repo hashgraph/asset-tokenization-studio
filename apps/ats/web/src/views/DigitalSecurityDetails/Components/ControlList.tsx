@@ -296,8 +296,6 @@ export const ControlList = () => {
 
       setAccounts(accounts);
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlListResponse]);
 
   const columnsHelper = createColumnHelper<AllowedListFields>();
@@ -345,7 +343,7 @@ export const ControlList = () => {
 
   const paginatedData = useMemo(
     () => _chunk(accounts, pageSize),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [accounts, pageSize],
   );
 

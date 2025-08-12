@@ -325,7 +325,6 @@ export const DigitalSecuritiesList = () => {
     );
 
     return list;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, securitiesToShow]);
 
   const renderFavorite = (

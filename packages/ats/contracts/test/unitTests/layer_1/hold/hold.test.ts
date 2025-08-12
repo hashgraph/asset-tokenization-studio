@@ -276,7 +276,7 @@ const balanceOf_B_Original = [20 * _AMOUNT, 200 * _AMOUNT];
 const adjustFactor = 253;
 const adjustDecimals = 2;
 const decimals_Original = 6;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 let holdIdentifier: any;
 enum ThirdPartyType {
   NULL,
@@ -323,7 +323,6 @@ describe('Hold Tests', () => {
 
   let snapshot: SnapshotRestorer;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let hold: any;
 
   function set_initRbacs(): Rbac[] {

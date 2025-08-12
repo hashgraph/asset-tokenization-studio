@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Command } from '../../../src/core/command/Command.js';
 import { ICommandHandler } from '../../../src/core/command/CommandHandler.js';
 import { CommandResponse } from '../../../src/core/command/CommandResponse.js';

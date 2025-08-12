@@ -203,8 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { BaseContract } from '@ethersproject/contracts';
 import { Constructible } from './Type.js';
 
@@ -223,7 +221,7 @@ export const isConstructible = (value: any): value is Constructible => {
       },
     })();
     return true;
-  } catch (err) {
+  } catch (_err) {
     return false;
   }
 };

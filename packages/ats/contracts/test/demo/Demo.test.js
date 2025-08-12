@@ -1,8 +1,8 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
-const hardhat_network_helpers_1 = require('@nomicfoundation/hardhat-network-helpers');
-const chai_1 = require('chai');
-const hardhat_1 = require('hardhat');
+import * as hardhat_network_helpers_1 from '@nomicfoundation/hardhat-network-helpers';
+import * as chai_1 from 'chai';
+import * as hardhat_1 from 'hardhat';
 var VersionStatus;
 (function (VersionStatus) {
   VersionStatus[(VersionStatus['NONE'] = 0)] = 'NONE';

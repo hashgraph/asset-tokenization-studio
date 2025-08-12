@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ContractFactory } from 'ethers';
 import { Interface } from 'ethers/lib/utils';
 import {

@@ -369,7 +369,6 @@ export default class BigDecimal implements FixedNumber {
   }
 
   public setDecimals(value: number): BigDecimal {
-    // eslint-disable-next-line prefer-const
     let [int, float] = this.value.split(SEPARATOR);
     if (float && float.length && float.length > value) {
       float = float.substring(0, float.length - value);
@@ -438,7 +437,7 @@ export default class BigDecimal implements FixedNumber {
       if (value instanceof BigDecimal) return true;
       BigDecimal.fromString(value);
       return true;
-    } catch (err) {
+    } catch (_err) {
       return false;
     }
   }

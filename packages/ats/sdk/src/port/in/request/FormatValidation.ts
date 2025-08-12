@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { RequestAccount, RequestPublicKey } from './BaseRequest.js';
 import { EmptyValue } from '../../../core/error/EmptyValue.js';
 import { InvalidLength } from './error/InvalidLength.js';

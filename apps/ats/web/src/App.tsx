@@ -228,7 +228,6 @@ function App() {
     process.env.REACT_APP_SHOW_DISCLAIMER !== undefined &&
     process.env.REACT_APP_SHOW_DISCLAIMER === 'true';
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   const showErrorToast = (error: any) => {
     const description = error?.message || t('error');
     toast.show({

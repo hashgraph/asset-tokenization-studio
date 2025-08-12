@@ -203,7 +203,7 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import {
   Signer,
   TransactionReceipt,

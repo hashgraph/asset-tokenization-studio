@@ -203,7 +203,7 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
 import BigDecimal from '../../domain/context/shared/BigDecimal.js';

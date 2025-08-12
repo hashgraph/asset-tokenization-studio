@@ -228,9 +228,11 @@ export const SecurityCard = (props: SecurityProps) => {
   const { setType } = useUserStore();
 
   const handleClickOnFavorite = () => {
-    isAdmin
-      ? toggleAdminFavorite(walletAddress, address)
-      : toggleHolderFavorite(walletAddress, address);
+    if (isAdmin) {
+      toggleAdminFavorite(walletAddress, address);
+    } else {
+      toggleHolderFavorite(walletAddress, address);
+    }
   };
 
   return (
