@@ -296,8 +296,7 @@ export const SecurityDetailsExtended = ({
         } ${details?.symbol}`,
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [details],
+    [details, id, nominalValue, tProperties],
   );
 
   useEffect(() => {

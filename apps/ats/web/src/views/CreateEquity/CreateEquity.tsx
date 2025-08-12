@@ -275,8 +275,7 @@ export const CreateEquity = () => {
 
   useEffect(() => {
     setType(User.admin);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setType]);
 
   return (
     <>

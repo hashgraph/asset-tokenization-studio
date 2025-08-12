@@ -216,7 +216,7 @@ interface ITimeTravelStorageWrapper {
      * @param legacySystemTime The legacy system timestamp (0 if not changed)
      * @param newSystemTime The new system timestamp
      */
-    event SystemTimestampChanged(uint256 legacySystemTime, uint256 newSystemTime);
+    event SystemTimestampChanged(uint256 indexed legacySystemTime, uint256 indexed newSystemTime);
 
     /**
      * @notice Emitted when the system timestamp is reset

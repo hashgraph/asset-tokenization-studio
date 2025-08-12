@@ -288,18 +288,14 @@ export const SearchByRole = () => {
     if (roleToSearch) {
       refetchRoleMemberCount();
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roleToSearch]);
+  }, [roleToSearch, refetchRoleMemberCount]);
 
   useEffect(() => {
     if (roleMemberCount) {
       setIsRoleMembersLoading(true);
       refetchRoleMembers();
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roleMemberCount]);
+  }, [roleMemberCount, refetchRoleMembers]);
 
   const onSubmit = ({ role }: SearchByRoleFieldValue) => {
     setIsRoleMemberCountLoading(true);

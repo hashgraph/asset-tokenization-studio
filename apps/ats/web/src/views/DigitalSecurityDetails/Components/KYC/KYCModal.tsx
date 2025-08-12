@@ -25,7 +25,7 @@ interface FormValues {
   vcFile: string;
 }
 
-interface KYCModalProps extends Omit<ModalProps, 'children'> {}
+type KYCModalProps = Omit<ModalProps, 'children'>;
 
 export const KYCModal = ({ isOpen, onClose }: KYCModalProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);

@@ -219,9 +219,7 @@ interface RequestKey {
   type?: string;
 }
 
-// Extend as empty interface for future changes
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface RequestPublicKey extends RequestKey {}
+export type RequestPublicKey = RequestKey;
 
 export interface AccountBaseRequest {
   account: RequestAccount;

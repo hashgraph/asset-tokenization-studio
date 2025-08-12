@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import Injectable from '../../../core/Injectable.js';
 import { CommandBus } from '../../../core/command/CommandBus.js';
 import {
@@ -341,16 +340,23 @@ class NetworkInPort implements INetworkInPort {
       }),
     );
 
-    if (req.configuration)
-      if (req.configuration.factoryAddress && req.configuration.resolverAddress)
+    if (req.configuration) {
+      if (
+        req.configuration.factoryAddress &&
+        req.configuration.resolverAddress
+      ) {
         await this.setConfig(
           new SetConfigurationRequest({
             factoryAddress: req.configuration.factoryAddress,
             resolverAddress: req.configuration.resolverAddress,
           }),
         );
+      }
+    }
 
-    req.events && Event.register(req.events);
+    if (req.events) {
+      Event.register(req.events);
+    }
     const wallets: SupportedWallets[] = [];
     const instances = Injectable.registerTransactionAdapterInstances();
     for (const val of instances) {

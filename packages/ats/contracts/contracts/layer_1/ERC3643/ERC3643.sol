@@ -358,12 +358,12 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
         onlyListedAllowed(_msgSender())
     {
-        for (uint256 i = 0; i < _toList.length; i++) {
+        for (uint256 i = 0; i < _toList.length; ++i) {
             _checkRecoveredAddress(_toList[i]);
             _checkControlList(_toList[i]);
             _checkValidKycStatus(IKyc.KycStatus.GRANTED, _toList[i]);
         }
-        for (uint256 i = 0; i < _toList.length; i++) {
+        for (uint256 i = 0; i < _toList.length; ++i) {
             _transfer(_msgSender(), _toList[i], _amounts[i]);
         }
     }
@@ -386,7 +386,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        for (uint256 i = 0; i < _fromList.length; i++) {
+        for (uint256 i = 0; i < _fromList.length; ++i) {
             _controllerTransfer(_fromList[i], _toList[i], _amounts[i], '', '');
         }
     }
@@ -401,14 +401,14 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        for (uint256 i = 0; i < _toList.length; i++) {
+        for (uint256 i = 0; i < _toList.length; ++i) {
             _checkRecoveredAddress(_toList[i]);
             _checkControlList(_toList[i]);
             _checkWithinMaxSupply(_amounts[i]);
             _checkControlList(_toList[i]);
             _checkValidKycStatus(IKyc.KycStatus.GRANTED, _toList[i]);
         }
-        for (uint256 i = 0; i < _toList.length; i++) {
+        for (uint256 i = 0; i < _toList.length; ++i) {
             _issue(_toList[i], _amounts[i], '');
         }
     }
@@ -429,7 +429,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
+        for (uint256 i = 0; i < _userAddresses.length; ++i) {
             _controllerRedeem(_userAddresses[i], _amounts[i], '', '');
         }
     }
@@ -467,34 +467,34 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](23);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.forcedTransfer.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.identityRegistry.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setCompliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setIdentityRegistry.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.recoveryAddress.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.isAddressRecovered.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.batchTransfer.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.batchForcedTransfer.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.batchMint.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.batchBurn.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.burn.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.compliance.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.forcedTransfer.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.identityRegistry.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.mint.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.onchainID.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.setCompliance.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.setName.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.setOnchainID.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.setSymbol.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.setIdentityRegistry.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.setName.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.setSymbol.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.version.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.addAgent.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.removeAgent.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.isAgent.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.recoveryAddress.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.isAddressRecovered.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.batchTransfer.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.batchForcedTransfer.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.batchMint.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.batchBurn.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC3643).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IERC3643).interfaceId;
     }
 }

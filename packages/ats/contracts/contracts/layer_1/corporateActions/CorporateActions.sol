@@ -215,7 +215,7 @@ import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProx
 contract CorporateActions is ICorporateActions, IStaticFunctionSelectors, Common {
     function addCorporateAction(
         bytes32 _actionType,
-        bytes memory _data
+        bytes calldata _data
     )
         external
         override
@@ -269,17 +269,17 @@ contract CorporateActions is ICorporateActions, IStaticFunctionSelectors, Common
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](6);
-        staticFunctionSelectors_[selectorIndex++] = this.addCorporateAction.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCorporateAction.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCorporateActionCount.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCorporateActionIds.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCorporateActionCountByType.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCorporateActionIdsByType.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.addCorporateAction.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getCorporateAction.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getCorporateActionCount.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getCorporateActionIds.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getCorporateActionCountByType.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getCorporateActionIdsByType.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ICorporateActions).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(ICorporateActions).interfaceId;
     }
 }

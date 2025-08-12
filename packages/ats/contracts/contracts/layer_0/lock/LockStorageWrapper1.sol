@@ -329,7 +329,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
 
         if (_lockIndex == 0) return LockData(0, 0, 0);
 
-        _lockIndex--;
+        --_lockIndex;
 
         assert(_lockIndex < lockStorage.lockIdsByAccountAndPartition[_tokenHolder][_partition].length());
 

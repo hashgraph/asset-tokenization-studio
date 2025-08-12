@@ -212,7 +212,7 @@ interface IClearingStorageWrapper {
     event ClearedRedeemByPartition(
         address indexed operator,
         address indexed tokenHolder,
-        bytes32 partition,
+        bytes32 indexed partition,
         uint256 clearingId,
         uint256 amount,
         uint256 expirationDate,
@@ -223,7 +223,7 @@ interface IClearingStorageWrapper {
     event ClearedRedeemFromByPartition(
         address indexed operator,
         address indexed tokenHolder,
-        bytes32 partition,
+        bytes32 indexed partition,
         uint256 clearingId,
         uint256 amount,
         uint256 expirationDate,
@@ -234,7 +234,7 @@ interface IClearingStorageWrapper {
     event ClearedOperatorRedeemByPartition(
         address indexed operator,
         address indexed tokenHolder,
-        bytes32 partition,
+        bytes32 indexed partition,
         uint256 clearingId,
         uint256 amount,
         uint256 expirationDate,
@@ -245,7 +245,7 @@ interface IClearingStorageWrapper {
     event ProtectedClearedRedeemByPartition(
         address indexed operator,
         address indexed tokenHolder,
-        bytes32 partition,
+        bytes32 indexed partition,
         uint256 clearingId,
         uint256 amount,
         uint256 expirationDate,

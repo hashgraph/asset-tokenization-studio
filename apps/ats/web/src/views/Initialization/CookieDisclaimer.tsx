@@ -220,8 +220,7 @@ const Disclaimer = ({ setAccepted }: DisclaimerProps) => {
 
   useEffect(() => {
     onOpen();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onOpen]);
 
   return (
     <ChakraProvider theme={theme}>

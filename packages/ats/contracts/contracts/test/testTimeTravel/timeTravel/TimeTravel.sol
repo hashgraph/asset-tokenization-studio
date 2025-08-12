@@ -244,15 +244,15 @@ contract TimeTravel is IStaticFunctionSelectors, ITimeTravel, TimeTravelStorageW
     {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](4);
-        staticFunctionSelectors_[selectorIndex++] = this.changeSystemTimestamp.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.resetSystemTimestamp.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.blockTimestamp.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.checkBlockChainid.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.changeSystemTimestamp.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.resetSystemTimestamp.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.blockTimestamp.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.checkBlockChainid.selector;
     }
 
     function getStaticInterfaceIds() external pure virtual override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ITimeTravel).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(ITimeTravel).interfaceId;
     }
 }

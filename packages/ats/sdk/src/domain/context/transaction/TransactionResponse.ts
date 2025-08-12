@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Response } from './Response.js';
 
 export default class TransactionResponse<

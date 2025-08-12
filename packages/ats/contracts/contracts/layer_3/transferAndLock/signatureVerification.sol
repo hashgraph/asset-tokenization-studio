@@ -211,6 +211,7 @@ import {
     _PROTECTED_TRANSFER_AND_LOCK_BY_PARTITION_FROM_PARTITION_TYPEHASH
 } from '../constants/values.sol';
 
+// solhint-disable-next-line private-vars-leading-underscore
 function getMessageHashTransferAndLock(
     address _from,
     address _to,
@@ -235,6 +236,7 @@ function getMessageHashTransferAndLock(
         );
 }
 
+// solhint-disable-next-line private-vars-leading-underscore
 function getMessageHashTransferAndLockByPartition(
     bytes32 _partition,
     address _from,

@@ -220,7 +220,7 @@ contract BondUSA is IBondUSA, Bond, Security {
     function _initialize_bondUSA(
         BondDetailsData calldata _bondDetailsData,
         CouponDetailsData calldata _couponDetailsData,
-        RegulationData memory _regulationData,
+        RegulationData calldata _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
     ) external override onlyUninitialized(_bondStorage().initialized) {
         _initialize_bond(_bondDetailsData, _couponDetailsData);
@@ -234,22 +234,22 @@ contract BondUSA is IBondUSA, Bond, Security {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](9);
-        staticFunctionSelectors_[selectorIndex++] = this._initialize_bondUSA.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.updateMaturityDate.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getBondDetails.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponDetails.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponCount.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getSecurityRegulationData.selector;
+        staticFunctionSelectors_[++selectorIndex] = this._initialize_bondUSA.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.setCoupon.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.updateMaturityDate.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getBondDetails.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getCouponDetails.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getCoupon.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getCouponFor.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getCouponCount.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getSecurityRegulationData.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](3);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IBond).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IBond).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(ISecurity).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IBondUSA).interfaceId;
     }
 }

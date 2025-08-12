@@ -219,14 +219,14 @@ contract PauseFacet is Pause, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[selectorIndex++] = this.pause.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.unpause.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isPaused.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.pause.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.unpause.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.isPaused.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IPause).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IPause).interfaceId;
     }
 }

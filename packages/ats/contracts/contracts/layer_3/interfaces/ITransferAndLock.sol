@@ -218,7 +218,7 @@ interface ITransferAndLock {
     event PartitionTransferredAndLocked(
         bytes32 indexed partition,
         address indexed from,
-        address to,
+        address indexed to,
         uint256 value,
         bytes data,
         uint256 expirationTimestamp,

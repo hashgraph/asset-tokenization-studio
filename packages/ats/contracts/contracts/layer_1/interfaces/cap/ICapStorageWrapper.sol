@@ -212,7 +212,7 @@ interface ICapStorageWrapper {
      *
      * @param operator The caller of the function that emitted the event
      */
-    event MaxSupplySet(address indexed operator, uint256 newMaxSupply, uint256 previousMaxSupply);
+    event MaxSupplySet(address indexed operator, uint256 indexed newMaxSupply, uint256 indexed previousMaxSupply);
 
     /**
      * @dev Emitted when the token max supply is set for a partition
@@ -222,7 +222,7 @@ interface ICapStorageWrapper {
     event MaxSupplyByPartitionSet(
         address indexed operator,
         bytes32 indexed partition,
-        uint256 newMaxSupply,
+        uint256 indexed newMaxSupply,
         uint256 previousMaxSupply
     );
 

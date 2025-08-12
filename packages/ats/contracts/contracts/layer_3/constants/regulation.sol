@@ -206,6 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+/* solhint-disable private-vars-leading-underscore */
+
 uint256 constant _REGS_DEAL_SIZE = 0;
 AccreditedInvestors constant _REGS_ACCREDITED_INVESTORS = AccreditedInvestors.ACCREDITATION_REQUIRED;
 uint256 constant _REGS_MAX_NON_ACCREDITED_INVESTORS = 0;
@@ -287,6 +289,7 @@ struct RegulationData {
 
 error RegulationTypeAndSubTypeForbidden(RegulationType regulationType, RegulationSubType regulationSubType);
 
+// solhint-disable-next-line private-vars-leading-underscore
 function buildRegulationData(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
@@ -303,6 +306,7 @@ function buildRegulationData(
     });
 }
 
+// solhint-disable-next-line private-vars-leading-underscore
 function buildDealSize(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
@@ -316,6 +320,7 @@ function buildDealSize(
     dealSize_ = _REGD_506_C_DEAL_SIZE;
 }
 
+// solhint-disable-next-line private-vars-leading-underscore
 function buildAccreditedInvestors(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
@@ -329,6 +334,7 @@ function buildAccreditedInvestors(
     accreditedInvestors_ = _REGD_506_C_ACCREDITED_INVESTORS;
 }
 
+// solhint-disable-next-line private-vars-leading-underscore
 function buildMaxNonAccreditedInvestors(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
@@ -342,6 +348,7 @@ function buildMaxNonAccreditedInvestors(
     maxNonAccreditedInvestors_ = _REGD_506_C_MAX_NON_ACCREDITED_INVESTORS;
 }
 
+// solhint-disable-next-line private-vars-leading-underscore
 function buildManualInvestorVerification(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
@@ -355,6 +362,7 @@ function buildManualInvestorVerification(
     manualInvestorVerification_ = _REGD_506_C_MANUAL_INVESTOR_VERIFICATION;
 }
 
+// solhint-disable-next-line private-vars-leading-underscore
 function buildInternationalInvestors(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
@@ -368,6 +376,7 @@ function buildInternationalInvestors(
     internationalInvestors_ = _REGD_506_C_INTERNATIONAL_INVESTORS;
 }
 
+// solhint-disable-next-line private-vars-leading-underscore
 function buildResaleHoldPeriod(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
@@ -381,6 +390,7 @@ function buildResaleHoldPeriod(
     resaleHoldPeriod_ = _REGD_506_C_RESALE_HOLD_PERIOD;
 }
 
+// solhint-disable-next-line private-vars-leading-underscore
 function checkRegulationTypeAndSubType(RegulationType _regulationType, RegulationSubType _regulationSubType) pure {
     if (isValidTypeAndSubType(_regulationType, _regulationSubType)) {
         return;
@@ -388,6 +398,7 @@ function checkRegulationTypeAndSubType(RegulationType _regulationType, Regulatio
     revert RegulationTypeAndSubTypeForbidden(_regulationType, _regulationSubType);
 }
 
+// solhint-disable-next-line private-vars-leading-underscore
 function isValidTypeAndSubType(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
@@ -397,6 +408,7 @@ function isValidTypeAndSubType(
         isValidTypeAndSubTypeForRegD(_regulationType, _regulationSubType);
 }
 
+// solhint-disable-next-line private-vars-leading-underscore
 function isValidTypeAndSubTypeForRegS(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
@@ -404,6 +416,7 @@ function isValidTypeAndSubTypeForRegS(
     isValid_ = _regulationType == RegulationType.REG_S && _regulationSubType == RegulationSubType.NONE;
 }
 
+// solhint-disable-next-line private-vars-leading-underscore
 function isValidTypeAndSubTypeForRegD(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType

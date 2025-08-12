@@ -251,9 +251,13 @@ describe('TransferCommandHandler', () => {
       contractServiceMock,
     );
     const commandRaw = TransferCommandFixture.create();
-    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-    const { deadline, nounce, signature, sourceId, ...commandFiltered } =
-      commandRaw;
+    const {
+      deadline: _deadline,
+      nounce: _nounce,
+      signature: _signature,
+      sourceId: _sourceId,
+      ...commandFiltered
+    } = commandRaw;
     command = commandFiltered;
   });
 

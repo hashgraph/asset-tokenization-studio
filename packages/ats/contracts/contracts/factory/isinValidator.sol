@@ -206,6 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+/* solhint-disable private-vars-leading-underscore */
+
 import {
     _ISIN_LENGTH,
     _CHECKSUM_POSITION_IN_ISIN,

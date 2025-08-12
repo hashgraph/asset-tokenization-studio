@@ -170,7 +170,7 @@ export const ExternalControlList = () => {
         title: tMessages('removeExternalControl.success'),
         description: tMessages('removeExternalControl.descriptionSuccess'),
       });
-    } catch (error) {
+    } catch (_error) {
       toast.show({
         status: 'error',
         title: tMessages('removeExternalControl.error'),

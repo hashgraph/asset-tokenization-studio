@@ -255,13 +255,13 @@ contract Factory is IFactory, LocalContext {
         bool adminFound;
 
         // Looking for admin role within initialization rbacas in order to add the factory
-        for (uint256 rbacsIndex = 0; rbacsIndex < rbacs.length; rbacsIndex++) {
+        for (uint256 rbacsIndex = 0; rbacsIndex < rbacs.length; ++rbacsIndex) {
             if (rbacs[rbacsIndex].role == _DEFAULT_ADMIN_ROLE) {
                 if (rbacs[rbacsIndex].members.length > 0) {
                     for (
                         uint256 adminMemberIndex = 0;
                         adminMemberIndex < rbacs[rbacsIndex].members.length;
-                        adminMemberIndex++
+                        ++adminMemberIndex
                     ) {
                         if (rbacs[rbacsIndex].members[adminMemberIndex] != address(0)) {
                             adminFound = true;

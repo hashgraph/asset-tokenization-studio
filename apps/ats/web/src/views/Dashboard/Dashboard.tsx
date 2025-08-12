@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable no-prototype-builtins */
 import { useEffect } from 'react';
 import { Header } from './Components/Header';
 import { NoTokens } from './Components/NoTokens';
@@ -226,13 +225,11 @@ export const Dashboard = () => {
     setRoles([]);
     setType(User.general);
     setDetails(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setRoles, setType, setDetails]);
 
   const userHasTokens =
-    // eslint-disable-next-line no-prototype-builtins
-    adminSecurities.hasOwnProperty(address) ||
-    holderSecurities.hasOwnProperty(address);
+    Object.prototype.hasOwnProperty.call(adminSecurities, address) ||
+    Object.prototype.hasOwnProperty.call(holderSecurities, address);
 
   return (
     <>

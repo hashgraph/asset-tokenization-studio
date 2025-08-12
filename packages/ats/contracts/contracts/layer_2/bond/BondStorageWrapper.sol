@@ -344,7 +344,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     ) private returns (bool) {
         uint256 numberOfSubsequentCoupons = (_maturityDate - _firstCouponDate) / _couponFrequency;
         bool success;
-        for (uint256 i = 0; i <= numberOfSubsequentCoupons; i++) {
+        for (uint256 i = 0; i < numberOfSubsequentCoupons + 1; ++i) {
             uint256 runDate = _firstCouponDate + i * _couponFrequency;
 
             IBond.Coupon memory _newCoupon;
@@ -363,6 +363,6 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     }
 
     function _checkMaturityDate(uint256 _maturityDate) private view {
-        if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();
+        if (_maturityDate < _getMaturityDate() + 1) revert BondMaturityDateWrong();
     }
 }

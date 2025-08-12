@@ -210,12 +210,12 @@ interface IFreeze {
     /**
      *  @notice This event is emitted when a certain amount of tokens is frozen on a wallet
      */
-    event TokensFrozen(address indexed account, uint256 amount, bytes32 partition);
+    event TokensFrozen(address indexed account, uint256 indexed amount, bytes32 indexed partition);
 
     /**
      *  @notice This event is emitted when a certain amount of tokens is unfrozen on a wallet
      */
-    event TokensUnfrozen(address indexed account, uint256 amount, bytes32 partition);
+    event TokensUnfrozen(address indexed account, uint256 indexed amount, bytes32 indexed partition);
 
     /**
      *  @dev This event is emitted when the wallet of an investor is frozen or unfrozen

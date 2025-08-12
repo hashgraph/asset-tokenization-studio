@@ -255,8 +255,8 @@ abstract contract ResolverProxyUnstructured is AccessControlStorageWrapper, Paus
     }
 
     function _assignRbacRoles(IResolverProxy.Rbac[] memory _rbacs) internal {
-        for (uint256 rbacIndex; rbacIndex < _rbacs.length; rbacIndex++) {
-            for (uint256 memberIndex; memberIndex < _rbacs[rbacIndex].members.length; memberIndex++) {
+        for (uint256 rbacIndex; rbacIndex < _rbacs.length; ++rbacIndex) {
+            for (uint256 memberIndex; memberIndex < _rbacs[rbacIndex].members.length; ++memberIndex) {
                 _grantRole(_rbacs[rbacIndex].role, _rbacs[rbacIndex].members[memberIndex]);
             }
         }

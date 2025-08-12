@@ -260,8 +260,12 @@ describe('CreateHoldByPartitionCommandHandler', () => {
       validationServiceMock,
     );
     const commandRaw = CreateHoldCommandFixture.omit('sourceId').create();
-    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-    const { deadline, nonce, signature, ...commandFiltered } = commandRaw;
+    const {
+      deadline: _deadline,
+      nonce: _nonce,
+      signature: _signature,
+      ...commandFiltered
+    } = commandRaw;
     command = commandFiltered;
   });
 

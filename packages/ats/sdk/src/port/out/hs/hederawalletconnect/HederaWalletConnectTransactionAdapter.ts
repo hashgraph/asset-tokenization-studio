@@ -245,13 +245,9 @@ import Injectable from '../../../../core/Injectable';
 // type mismatches (private fields differ). We relax typing at the boundary with
 // WalletConnect helper functions so the runtime objects can interoperate.
 // ---------------------------------------------------------------------------
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const txToBase64Bridge = transactionToBase64String as unknown as (tx: any) => string;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const txToBodyBridge = transactionToTransactionBody as unknown as (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tx: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   accountId: any,
 ) => unknown;
 import Hex from '../../../../core/Hex';
@@ -693,7 +689,6 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
         `Signature result: ${JSON.stringify(signResult, null, 2)}`,
       );
       const decodedSignatureMap = base64StringToSignatureMap(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (signResult as any).signatureMap,
       );
       LogService.logTrace(

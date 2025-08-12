@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createLogger, LoggerOptions, transports, format } from 'winston';
 import safeStringify from 'fast-safe-stringify';
 import BaseError from '../../../core/error/BaseError.js';

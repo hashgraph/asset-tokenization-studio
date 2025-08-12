@@ -252,7 +252,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledSnapshot
 
         uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(scheduledBalanceAdjustments);
 
-        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
+        for (uint256 i = 1; i < scheduledTaskCount + 1; ++i) {
             uint256 pos = scheduledTaskCount - i;
 
             ScheduledTasksLib.ScheduledTask memory scheduledTask = ScheduledTasksLib.getScheduledTasksByIndex(

@@ -208,8 +208,8 @@ pragma solidity 0.8.18;
 
 interface IExternalControlListManagement {
     event ExternalControlListsUpdated(address indexed operator, address[] controlLists, bool[] actives);
-    event AddedToExternalControlLists(address indexed operator, address controlList);
-    event RemovedFromExternalControlLists(address indexed operator, address controlList);
+    event AddedToExternalControlLists(address indexed operator, address indexed controlList);
+    event RemovedFromExternalControlLists(address indexed operator, address indexed controlList);
 
     error ListedControlList(address controlList);
 

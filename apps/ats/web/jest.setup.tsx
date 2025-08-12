@@ -5,11 +5,11 @@ jest.mock('@terminal3/verify_vc');
 jest.mock('@terminal3/bbs_vc');
 
 import Select from 'react-select';
+import { TextEncoder, TextDecoder } from 'util';
 
-// Polyfill for TextEncoder and TextDecoder
-const { TextEncoder, TextDecoder } = require('util');
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder;
+// Cast to any to bridge Node util types with JSDOM globals
+(global as any).TextEncoder = TextEncoder as any;
+(global as any).TextDecoder = TextDecoder as any;
 
 jest.doMock('chakra-react-select', () => ({
   ...jest.requireActual('chakra-react-select'),

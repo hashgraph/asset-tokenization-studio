@@ -300,7 +300,7 @@ abstract contract AccessControlStorageWrapper is
     }
 
     function _hasAnyRole(bytes32[] memory _roles, address _account) internal view returns (bool) {
-        for (uint256 i; i < _roles.length; i++) {
+        for (uint256 i; i < _roles.length; ++i) {
             if (_has(_rolesStorage(), _roles[i], _account)) {
                 return true;
             }

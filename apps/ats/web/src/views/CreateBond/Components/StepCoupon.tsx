@@ -248,8 +248,7 @@ export const StepCoupon = () => {
     if (couponType === undefined) {
       setValue('couponType', 1);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [couponType, setValue]);
 
   useEffect(() => {
     if (

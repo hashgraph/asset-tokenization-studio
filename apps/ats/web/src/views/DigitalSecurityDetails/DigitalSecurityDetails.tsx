@@ -255,7 +255,7 @@ export const DigitalSecurityDetails = () => {
 
   const { address: walletAddress } = useWalletStore();
   const { type: userType } = useUserStore();
-  const { roles: accountRoles, setRoles } = useRolesStore();
+  const { setRoles } = useRolesStore();
   const { setDetails } = useSecurityStore();
 
   const { data: securityDetails } = useGetSecurityDetails(
@@ -288,8 +288,7 @@ export const DigitalSecurityDetails = () => {
 
   useEffect(() => {
     setDetails(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setDetails]);
 
   // ROLE COUNT FOR
   const { data: roleCountFor } = useGetSecurityRoleCountFor(
@@ -468,8 +467,18 @@ export const DigitalSecurityDetails = () => {
     }
 
     return adminTabs;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [securityDetails, id, roles, isPaused, accountRoles]);
+  }, [
+    securityDetails,
+    id,
+    roles,
+    isPaused,
+    bondDetails,
+    equityDetails,
+    isLoadingIsPaused,
+    isLoadingRoles,
+    tTabs,
+    userType,
+  ]);
 
   return (
     <>

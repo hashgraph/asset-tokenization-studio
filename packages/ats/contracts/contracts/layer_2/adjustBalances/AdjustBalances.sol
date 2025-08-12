@@ -228,12 +228,12 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](1);
-        staticFunctionSelectors_[selectorIndex++] = this.adjustBalances.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.adjustBalances.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IAdjustBalances).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IAdjustBalances).interfaceId;
     }
 }

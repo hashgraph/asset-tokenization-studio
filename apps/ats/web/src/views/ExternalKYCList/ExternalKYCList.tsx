@@ -156,7 +156,7 @@ export const ExternalKYCList = () => {
         title: tMessages('removeExternalKYC.success'),
         description: tMessages('removeExternalKYC.descriptionSuccess'),
       });
-    } catch (error) {
+    } catch (_error) {
       toast.show({
         status: 'error',
         title: tMessages('removeExternalKYC.error'),

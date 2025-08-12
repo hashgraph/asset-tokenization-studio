@@ -158,7 +158,7 @@ export const ExternalPauseList = () => {
         title: tMessages('removeExternalPause.success'),
         description: tMessages('removeExternalPause.descriptionSuccess'),
       });
-    } catch (error) {
+    } catch (_error) {
       toast.show({
         status: 'error',
         title: tMessages('removeExternalPause.error'),

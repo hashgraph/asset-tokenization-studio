@@ -259,7 +259,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
     }
 
     function _isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure returns (bool) {
-        return (_maxSupply == 0) || (_amount <= _maxSupply);
+        return (_maxSupply == 0) || (_amount < _maxSupply + 1);
     }
 
     function _capStorage() internal pure returns (CapDataStorage storage cap_) {

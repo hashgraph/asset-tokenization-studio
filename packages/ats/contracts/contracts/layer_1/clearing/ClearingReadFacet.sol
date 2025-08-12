@@ -257,16 +257,16 @@ contract ClearingReadFacet is IStaticFunctionSelectors, IClearingRead, Common {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.getClearedAmountFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getClearedAmountForByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getClearingCountForByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getClearingsIdForByPartition.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getClearingThirdParty.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getClearedAmountFor.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getClearedAmountForByPartition.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getClearingCountForByPartition.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getClearingsIdForByPartition.selector;
+        staticFunctionSelectors_[++selectorIndex] = this.getClearingThirdParty.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IClearingRead).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IClearingRead).interfaceId;
     }
 }

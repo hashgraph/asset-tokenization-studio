@@ -261,16 +261,16 @@ contract DiamondCutFacet is IDiamondCut, ResolverProxyUnstructured {
         staticFunctionSelectors_ = new bytes4[](4);
         uint256 selectorIndex;
         unchecked {
-            staticFunctionSelectors_[selectorIndex++] = this.updateConfigVersion.selector;
-            staticFunctionSelectors_[selectorIndex++] = this.updateConfig.selector;
-            staticFunctionSelectors_[selectorIndex++] = this.updateResolver.selector;
-            staticFunctionSelectors_[selectorIndex++] = this.getConfigInfo.selector;
+            staticFunctionSelectors_[++selectorIndex] = this.updateConfigVersion.selector;
+            staticFunctionSelectors_[++selectorIndex] = this.updateConfig.selector;
+            staticFunctionSelectors_[++selectorIndex] = this.updateResolver.selector;
+            staticFunctionSelectors_[++selectorIndex] = this.getConfigInfo.selector;
         }
     }
 
     function getStaticInterfaceIds() external pure virtual override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamondCut).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IDiamondCut).interfaceId;
     }
 }

@@ -223,7 +223,7 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     }
 
     function _checkTimestamp(uint256 _timestamp) private view {
-        if (_timestamp <= _blockTimestamp()) revert WrongTimestamp(_timestamp);
+        if (_timestamp < _blockTimestamp() + 1) revert WrongTimestamp(_timestamp);
     }
 
     function _checkAutoCalling(bool _autoCalling) private pure {

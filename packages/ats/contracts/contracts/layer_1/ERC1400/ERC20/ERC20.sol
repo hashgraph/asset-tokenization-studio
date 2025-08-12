@@ -359,23 +359,23 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](12);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.initialize_ERC20.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.approve.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.transfer.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.transferFrom.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.increaseAllowance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.decreaseAllowance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.allowance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getERC20Metadata.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.name.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.symbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.decimals.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.decimalsAt.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.initialize_ERC20.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.approve.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.transfer.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.transferFrom.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.increaseAllowance.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.decreaseAllowance.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.allowance.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getERC20Metadata.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.name.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.symbol.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.decimals.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.decimalsAt.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC20).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IERC20).interfaceId;
     }
 }

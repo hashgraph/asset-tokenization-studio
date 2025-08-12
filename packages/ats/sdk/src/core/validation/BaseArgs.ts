@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface BaseArgs {
   [n: string]: any;
 }

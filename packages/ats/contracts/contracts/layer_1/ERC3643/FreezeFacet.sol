@@ -275,7 +275,7 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
+        for (uint256 i = 0; i < _userAddresses.length; ++i) {
             _setAddressFrozen(_userAddresses[i], _freeze[i]);
             emit AddressFrozen(_userAddresses[i], _freeze[i], _msgSender());
         }
@@ -291,10 +291,10 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
+        for (uint256 i = 0; i < _userAddresses.length; ++i) {
             _checkRecoveredAddress(_userAddresses[i]);
         }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
+        for (uint256 i = 0; i < _userAddresses.length; ++i) {
             _freezeTokens(_userAddresses[i], _amounts[i]);
             emit TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
         }
@@ -310,7 +310,7 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
+        for (uint256 i = 0; i < _userAddresses.length; ++i) {
             _unfreezeTokens(_userAddresses[i], _amounts[i]);
             emit TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
         }
@@ -321,6 +321,7 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
     function getFrozenTokens(address _userAddress) external view override returns (uint256) {
         return _getFrozenAmountForAdjusted(_userAddress);
     }
+
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _FREEZE_RESOLVER_KEY;
     }
@@ -328,18 +329,18 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](7);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.freezePartialTokens.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.unfreezePartialTokens.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFrozenTokens.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setAddressFrozen.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.batchSetAddressFrozen.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.batchFreezePartialTokens.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.batchUnfreezePartialTokens.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.freezePartialTokens.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.unfreezePartialTokens.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFrozenTokens.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.setAddressFrozen.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.batchSetAddressFrozen.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.batchFreezePartialTokens.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.batchUnfreezePartialTokens.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IFreeze).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IFreeze).interfaceId;
     }
 }

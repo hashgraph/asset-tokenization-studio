@@ -208,8 +208,8 @@ pragma solidity 0.8.18;
 
 interface IExternalPauseManagement {
     event ExternalPausesUpdated(address indexed operator, address[] pauses, bool[] actives);
-    event AddedToExternalPauses(address indexed operator, address pause);
-    event RemovedFromExternalPauses(address indexed operator, address pause);
+    event AddedToExternalPauses(address indexed operator, address indexed pause);
+    event RemovedFromExternalPauses(address indexed operator, address indexed pause);
 
     error ListedPause(address pause);
 

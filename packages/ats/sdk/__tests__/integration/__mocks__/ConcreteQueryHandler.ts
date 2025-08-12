@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Query } from '../../../src/core/query/Query.js';
 import { IQueryHandler } from '../../../src/core/query/QueryHandler.js';
 import { QueryResponse } from '../../../src/core/query/QueryResponse.js';

@@ -203,8 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Client,
   TransactionResponse as HTransactionResponse,
@@ -254,7 +252,12 @@ export class HTSTransactionResponseAdapter extends TransactionResponseAdapter {
             message: 'Invalid response type',
             network: network,
           });
-        results = this.decodeFunctionResult(nameFunction, record, abi, network);
+        results = this.decodeFunctionResult(
+          nameFunction,
+          record,
+          abi as unknown as string,
+          network,
+        );
       }
       if (record instanceof Uint32Array) {
         return this.createTransactionResponse(
@@ -296,9 +299,9 @@ export class HTSTransactionResponseAdapter extends TransactionResponseAdapter {
 
   public static createTransactionResponse(
     transactionId: TransactionId | undefined,
-    responseType: TransactionType,
+    _responseType: TransactionType,
     response: Uint8Array,
-    receipt?: TransactionReceipt,
+    _receipt?: TransactionReceipt,
   ): TransactionResponse {
     return new TransactionResponse((transactionId ?? '').toString(), response);
   }

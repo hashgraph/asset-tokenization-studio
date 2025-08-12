@@ -281,8 +281,7 @@ export const DigitalSecuritiesList = () => {
   useEffect(() => {
     setType(type as User);
     setDetails(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setDetails, setType, type]);
 
   const userSecurities =
     type === User.admin ? adminSecurities[address] : holderSecurities[address];
@@ -306,8 +305,7 @@ export const DigitalSecuritiesList = () => {
     );
 
     return securitiesList;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adminSecurities, holderSecurities]);
+  }, [securities, userSecurities]);
 
   const digitalSecuritiesList = useMemo(() => {
     if (!search) return securitiesToShow;
@@ -325,7 +323,6 @@ export const DigitalSecuritiesList = () => {
     );
 
     return list;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, securitiesToShow]);
 
   const renderFavorite = (

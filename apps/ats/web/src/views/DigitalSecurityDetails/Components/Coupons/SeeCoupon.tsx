@@ -311,15 +311,13 @@ export const SeeCoupon = () => {
     if (couponForRequest) {
       refetchCouponsFor();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [couponForRequest]);
+  }, [couponForRequest, refetchCouponsFor]);
 
   useEffect(() => {
     if (couponsRequest) {
       refetchCoupons();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [couponsRequest]);
+  }, [couponsRequest, refetchCoupons]);
 
   const submitForm = ({ couponId, targetId }: SeeCouponFormValues) => {
     setIsCouponsForLoading(true);

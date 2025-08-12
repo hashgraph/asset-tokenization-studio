@@ -235,24 +235,24 @@ contract DiamondFacet is IDiamond, DiamondCutFacet, DiamondLoupeFacet {
     {
         staticFunctionSelectors_ = new bytes4[](18);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.updateConfigVersion.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.updateConfig.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.updateResolver.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getConfigInfo.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacets.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetsLength.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetsByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetSelectors.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetSelectorsLength.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetSelectorsByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetIds.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetIdsByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetAddresses.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetAddressesByPage.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetIdBySelector.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacet.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.getFacetAddress.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.supportsInterface.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.updateConfigVersion.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.updateConfig.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.updateResolver.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getConfigInfo.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacets.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacetsLength.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacetsByPage.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacetSelectors.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacetSelectorsLength.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacetSelectorsByPage.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacetIds.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacetIdsByPage.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacetAddresses.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacetAddressesByPage.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacetIdBySelector.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacet.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.getFacetAddress.selector;
+        staticFunctionSelectors_[++selectorsIndex] = this.supportsInterface.selector;
     }
 
     function getStaticInterfaceIds()
@@ -263,9 +263,9 @@ contract DiamondFacet is IDiamond, DiamondCutFacet, DiamondLoupeFacet {
     {
         staticInterfaceIds_ = new bytes4[](4);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamond).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamondCut).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamondLoupe).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC165).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IDiamond).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IDiamondCut).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IDiamondLoupe).interfaceId;
+        staticInterfaceIds_[++selectorsIndex] = type(IERC165).interfaceId;
     }
 }

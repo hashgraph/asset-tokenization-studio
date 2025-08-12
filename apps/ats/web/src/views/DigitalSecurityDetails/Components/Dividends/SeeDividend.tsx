@@ -312,16 +312,14 @@ export const SeeDividend = () => {
     if (dividendsForRequest) {
       refetchDividendsFor();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dividendsForRequest]);
+  }, [dividendsForRequest, refetchDividendsFor]);
 
   useEffect(() => {
     if (dividendsRequest) {
       refetchDividendsFor();
       refetchDividends();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dividendsRequest]);
+  }, [dividendsRequest, refetchDividends, refetchDividendsFor]);
 
   const submitForm = ({ dividendId, targetId }: SeeDividendFormValues) => {
     setIsDivididendForLoading(true);

@@ -393,8 +393,15 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
       refetchClearedBalance();
       refetchFrozenBalance();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetId]);
+  }, [
+    targetId,
+    balance,
+    refetch,
+    refetchClearedBalance,
+    refetchFrozenBalance,
+    refetchHolds,
+    refetchLockers,
+  ]);
 
   const isLoadingTotal = useMemo(() => {
     return (

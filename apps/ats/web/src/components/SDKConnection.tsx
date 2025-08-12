@@ -237,15 +237,15 @@ export const SDKConnection = () => {
     if (isConnected) {
       setIsMetamaskConnected(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [window?.ethereum?.isConnected]);
+  }, []);
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (isMetamaskConnected) {
       init(walletEvents);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMetamaskConnected]);
+  }, [isMetamaskConnected, init]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   useEffect(() => {
     if (data) {
@@ -261,8 +261,7 @@ export const SDKConnection = () => {
         });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, [data, t, toast]);
 
   useEffect(() => {
     if (network?.name) {
@@ -282,8 +281,7 @@ export const SDKConnection = () => {
 
       setCurrentNetworkName(network.name);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [network]);
+  }, [network, currentNetworkName, t, toast]);
 
   const walletPaired = (event: EventParameter<'walletPaired'>) => {
     console.log('SDK message --> Wallet paired', event);

@@ -220,9 +220,7 @@ const AppRouter = () => {
       resetAccountStore();
       reserSecurityStore();
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isResetted, resetAccountStore, reserSecurityStore]);
 
   return <RouterProvider router={router} />;
 };
