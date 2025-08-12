@@ -249,13 +249,17 @@ import {
   ControlList__factory,
   DiamondFacet__factory,
   Equity__factory,
-  ERC1410ScheduledTasks__factory,
+  ERC1410ManagementFacet__factory,
   ERC1643__factory,
+  ERC3643BatchFacet__factory,
+  ERC3643Facet__factory,
   ExternalControlListManagement__factory,
   ExternalKycListManagement__factory,
   ExternalPauseManagement__factory,
   Factory__factory,
   FreezeFacet__factory,
+  HoldManagementFacet__factory,
+  HoldTokenHolderFacet__factory,
   IBond,
   IEquity,
   Kyc__factory,
@@ -459,7 +463,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       value: amount.toHexString(),
     };
     return this.executeTransaction(
-      ERC1410ScheduledTasks__factory.connect(
+      ERC1410TokenHolderFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
