@@ -225,7 +225,7 @@ import {
     ComplianceMock,
 } from '@typechain'
 import {
-    _DEFAULT_PARTITION,
+    DEFAULT_PARTITION,
     PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
     deployEquityFromFactory,
     Rbac,
@@ -257,7 +257,7 @@ const amount = 1
 
 const packedData = ethers.utils.defaultAbiCoder.encode(
     ['bytes32', 'bytes32'],
-    [PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION]
+    [PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION]
 )
 const packedDataWithoutPrefix = packedData.slice(2)
 
@@ -777,7 +777,7 @@ describe('ProtectedPartitions Tests', () => {
         }
 
         operatorTransferData = {
-            partition: _DEFAULT_PARTITION,
+            partition: DEFAULT_PARTITION,
             from: account_A,
             to: account_B,
             value: amount,

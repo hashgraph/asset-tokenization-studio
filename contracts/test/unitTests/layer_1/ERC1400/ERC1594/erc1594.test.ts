@@ -223,7 +223,7 @@ import {
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
-    _DEFAULT_PARTITION,
+    DEFAULT_PARTITION,
     ISSUER_ROLE,
     KYC_ROLE,
     SSI_MANAGER_ROLE,
@@ -1319,13 +1319,13 @@ describe('ERC1594 Tests', () => {
             )
             expect(
                 await erc1410SnapshotFacet.balanceOfByPartition(
-                    _DEFAULT_PARTITION,
+                    DEFAULT_PARTITION,
                     account_E
                 )
             ).to.be.equal(AMOUNT / 2)
             expect(
                 await erc1410SnapshotFacet.totalSupplyByPartition(
-                    _DEFAULT_PARTITION
+                    DEFAULT_PARTITION
                 )
             ).to.be.equal(AMOUNT / 2)
         })
@@ -1359,19 +1359,19 @@ describe('ERC1594 Tests', () => {
             )
             expect(
                 await erc1410SnapshotFacet.balanceOfByPartition(
-                    _DEFAULT_PARTITION,
+                    DEFAULT_PARTITION,
                     account_E
                 )
             ).to.be.equal(AMOUNT / 2)
             expect(
                 await erc1410SnapshotFacet.balanceOfByPartition(
-                    _DEFAULT_PARTITION,
+                    DEFAULT_PARTITION,
                     account_D
                 )
             ).to.be.equal(AMOUNT / 2)
             expect(
                 await erc1410SnapshotFacet.totalSupplyByPartition(
-                    _DEFAULT_PARTITION
+                    DEFAULT_PARTITION
                 )
             ).to.be.equal(AMOUNT)
         })

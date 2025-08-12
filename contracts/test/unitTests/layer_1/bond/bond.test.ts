@@ -240,7 +240,7 @@ import {
     ISSUER_ROLE,
     KYC_ROLE,
     SSI_MANAGER_ROLE,
-    _DEFAULT_PARTITION,
+    DEFAULT_PARTITION,
     Rbac,
     deployBondFromFactory,
     RegulationSubType,
@@ -480,7 +480,7 @@ describe('Bond Tests', () => {
                 await expect(
                     bondFacet.redeemAtMaturityByPartition(
                         ADDRESS_ZERO,
-                        _DEFAULT_PARTITION,
+                        DEFAULT_PARTITION,
                         amount
                     )
                 ).to.be.revertedWithCustomError(
@@ -510,7 +510,7 @@ describe('Bond Tests', () => {
                         .connect(signer_A)
                         .redeemAtMaturityByPartition(
                             account_B,
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             amount
                         )
                 ).to.be.revertedWithCustomError(bondFacet, 'AccountIsBlocked')
@@ -522,7 +522,7 @@ describe('Bond Tests', () => {
                         .connect(signer_B)
                         .redeemAtMaturityByPartition(
                             account_C,
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             amount
                         )
                 ).to.be.revertedWithCustomError(bondFacet, 'AccountHasNoRole')
@@ -533,7 +533,7 @@ describe('Bond Tests', () => {
                 await expect(
                     bondFacet.redeemAtMaturityByPartition(
                         account_C,
-                        _DEFAULT_PARTITION,
+                        DEFAULT_PARTITION,
                         amount
                     )
                 ).to.be.revertedWithCustomError(
@@ -548,7 +548,7 @@ describe('Bond Tests', () => {
                 await expect(
                     bondFacet.redeemAtMaturityByPartition(
                         account_C,
-                        _DEFAULT_PARTITION,
+                        DEFAULT_PARTITION,
                         amount
                     )
                 ).to.be.revertedWithCustomError(
@@ -572,7 +572,7 @@ describe('Bond Tests', () => {
                         .connect(signer_C)
                         .redeemAtMaturityByPartition(
                             account_C,
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             amount
                         )
                 ).to.be.revertedWithCustomError(bondFacet, 'TokenIsPaused')
@@ -582,7 +582,7 @@ describe('Bond Tests', () => {
                 await expect(
                     bondFacet.redeemAtMaturityByPartition(
                         account_C,
-                        _DEFAULT_PARTITION,
+                        DEFAULT_PARTITION,
                         amount
                     )
                 ).to.be.revertedWithCustomError(bondFacet, 'InvalidKycStatus')

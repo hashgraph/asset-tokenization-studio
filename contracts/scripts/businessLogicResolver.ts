@@ -275,7 +275,6 @@ export interface DeployedBusinessLogics {
     freeze: IStaticFunctionSelectors
     ERC3643: IStaticFunctionSelectors
     ERC3643Batch: IStaticFunctionSelectors
-    ERC3643: IStaticFunctionSelectors
 }
 
 export let businessLogicResolver: IBusinessLogicResolver

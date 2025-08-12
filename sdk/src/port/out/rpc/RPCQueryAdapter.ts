@@ -257,6 +257,7 @@ import {
   Security__factory,
   Snapshots__factory,
   SsiManagement__factory,
+  ERC3643__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -287,7 +288,6 @@ import {
   ClearingTransfer,
 } from '@domain/context/security/Clearing';
 import { HoldDetails } from '@domain/context/security/Hold';
-import { ERC3643__factory } from '@hashgraph/asset-tokenization-contracts/typechain-types';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 

@@ -225,7 +225,7 @@ import {
     ISSUER_ROLE,
     CONTROLLER_ROLE,
     PAUSER_ROLE,
-    _DEFAULT_PARTITION,
+    DEFAULT_PARTITION,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
@@ -493,7 +493,7 @@ describe('ERC1644 Tests', () => {
                     account_E
                 )
                 await erc1410Facet.connect(signer_B).issueByPartition({
-                    partition: _DEFAULT_PARTITION,
+                    partition: DEFAULT_PARTITION,
                     tokenHolder: account_D,
                     value: amount * 2,
                     data: data,
@@ -536,7 +536,7 @@ describe('ERC1644 Tests', () => {
                     )
                     expect(
                         await erc1410Facet.totalSupplyByPartition(
-                            _DEFAULT_PARTITION
+                            DEFAULT_PARTITION
                         )
                     ).to.equal(amount * 2)
                     expect(

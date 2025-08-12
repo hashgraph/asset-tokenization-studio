@@ -289,6 +289,12 @@ import {
     ExternalKycListManagementTimeTravel__factory,
     ERC1410TokenHolderFacet__factory,
     ERC1410TokenHolderTimeTravel__factory,
+    ERC3643Facet__factory,
+    ERC3643BatchFacet__factory,
+    ERC3643BatchTimeTravel__factory,
+    ERC3643TimeTravel__factory,
+    FreezeFacet__factory,
+    FreezeFacetTimeTravel__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {

@@ -224,7 +224,7 @@ import {
     CONTROL_LIST_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
-    _DEFAULT_PARTITION,
+    DEFAULT_PARTITION,
     MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
@@ -760,7 +760,7 @@ describe('ERC20 Tests', () => {
                     expect(await erc1410Facet.totalSupply()).to.be.equal(amount)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_C
                         )
                     ).to.be.equal(amount / 2)

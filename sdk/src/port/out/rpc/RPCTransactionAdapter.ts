@@ -274,6 +274,7 @@ import {
   Snapshots__factory,
   SsiManagement__factory,
   TransferAndLock__factory,
+  ERC1410TokenHolderFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { Resolvers } from '@domain/context/factory/Resolvers';
 import EvmAddress from '@domain/context/contract/EvmAddress';
@@ -304,7 +305,6 @@ import {
 import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
 import NetworkService from '@service/network/NetworkService';
 import MetamaskService from '@service/wallet/metamask/MetamaskService';
-import { ERC1410TokenHolderFacet__factory } from '@hashgraph/asset-tokenization-contracts/typechain-types';
 
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {
