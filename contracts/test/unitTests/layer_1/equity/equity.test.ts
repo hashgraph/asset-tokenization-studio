@@ -229,7 +229,7 @@ import {
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
-    DEFAULT_PARTITION,
+    _DEFAULT_PARTITION,
     ISSUER_ROLE,
     LOCKER_ROLE,
     PAUSER_ROLE,
@@ -584,7 +584,7 @@ describe('Equity Tests', () => {
             const LockedAmount = TotalAmount - 5n
 
             await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
+                partition: _DEFAULT_PARTITION,
                 tokenHolder: account_A,
                 value: TotalAmount,
                 data: '0x',
@@ -638,7 +638,7 @@ describe('Equity Tests', () => {
             const HeldAmount = TotalAmount - 5n
 
             await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
+                partition: _DEFAULT_PARTITION,
                 tokenHolder: account_A,
                 value: TotalAmount,
                 data: '0x',

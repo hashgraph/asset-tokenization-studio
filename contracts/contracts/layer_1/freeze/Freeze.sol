@@ -210,7 +210,7 @@ import {Common} from '../common/Common.sol';
 import {IFreeze} from '../interfaces/freeze/IFreeze.sol';
 
 import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
-import {DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
 abstract contract Freeze is IFreeze, Common {
     // ====== External functions (state-changing) ======
@@ -247,7 +247,7 @@ abstract contract Freeze is IFreeze, Common {
             _checkAnyRole(roles, _msgSender());
         }
         _freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, DEFAULT_PARTITION);
+        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
     function unfreezePartialTokens(
@@ -267,7 +267,7 @@ abstract contract Freeze is IFreeze, Common {
             _checkAnyRole(roles, _msgSender());
         }
         _unfreezeTokens(_userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, DEFAULT_PARTITION);
+        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
     function batchSetAddressFrozen(
@@ -309,7 +309,7 @@ abstract contract Freeze is IFreeze, Common {
             emit TokensFrozen(
                 _userAddresses[i],
                 _amounts[i],
-                DEFAULT_PARTITION
+                _DEFAULT_PARTITION
             );
         }
     }
@@ -334,7 +334,7 @@ abstract contract Freeze is IFreeze, Common {
             emit TokensUnfrozen(
                 _userAddresses[i],
                 _amounts[i],
-                DEFAULT_PARTITION
+                _DEFAULT_PARTITION
             );
         }
     }

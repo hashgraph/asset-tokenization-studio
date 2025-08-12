@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {DEFAULT_PARTITION} from '../constants/values.sol';
+import {_DEFAULT_PARTITION} from '../constants/values.sol';
 import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 import {
     IERC3643Basic
@@ -461,7 +461,7 @@ abstract contract HoldStorageWrapper2 is
             );
             if (
                 _holdIdentifier.tokenHolder != _to &&
-                _holdIdentifier.partition == DEFAULT_PARTITION
+                _holdIdentifier.partition == _DEFAULT_PARTITION
             ) {
                 (_erc3643Storage().compliance).functionCall(
                     abi.encodeWithSelector(
@@ -478,7 +478,7 @@ abstract contract HoldStorageWrapper2 is
         _addPartitionTo(_amount, _to, _holdIdentifier.partition);
         if (
             _holdIdentifier.tokenHolder != _to &&
-            _holdIdentifier.partition == DEFAULT_PARTITION
+            _holdIdentifier.partition == _DEFAULT_PARTITION
         ) {
             (_erc3643Storage().compliance).functionCall(
                 abi.encodeWithSelector(

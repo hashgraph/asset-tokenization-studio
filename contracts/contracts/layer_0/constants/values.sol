@@ -225,10 +225,16 @@ bytes32 constant BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE = 0x1256aa1b36483ca651
 
 uint256 constant SNAPSHOT_RESULT_ID = 0;
 
-bytes32 constant DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
+uint256 constant _MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
 // keccak256('security.token.standard.balanceAdjustment.scheduledTasks');
 bytes32 constant BALANCE_ADJUSTMENT_TASK_TYPE = 0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d;
 
 // keccak256('security.token.standard.snapshot.scheduledTasks');
 bytes32 constant SNAPSHOT_TASK_TYPE = 0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c;
+
+bytes32 constant _DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
+
+bytes32 constant _ERC20PERMIT_TYPEHASH = keccak256(
+    'Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)'
+);

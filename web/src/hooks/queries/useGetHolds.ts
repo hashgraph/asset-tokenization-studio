@@ -211,7 +211,7 @@ import {
 } from "@hashgraph/asset-tokenization-sdk";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import SDKService from "../../services/SDKService";
-import { DEFAULT_PARTITION } from "../../utils/constants";
+import { _DEFAULT_PARTITION } from "../../utils/constants";
 
 export const GET_HOLDS = (securityId: string, targetId: string) =>
   `GET_HOLDS_${securityId}_${targetId}`;

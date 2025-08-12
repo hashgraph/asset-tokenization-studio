@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {DEFAULT_PARTITION} from '../../constants/values.sol';
+import {_DEFAULT_PARTITION} from '../../constants/values.sol';
 import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {
     IERC3643Basic
@@ -263,7 +263,7 @@ abstract contract ERC1410BasicStorageWrapper is
 
             if (
                 _from != _basicTransferInfo.to &&
-                _partition == DEFAULT_PARTITION
+                _partition == _DEFAULT_PARTITION
             ) {
                 (_erc3643Storage().compliance).functionCall(
                     abi.encodeWithSelector(
@@ -282,7 +282,9 @@ abstract contract ERC1410BasicStorageWrapper is
             _basicTransferInfo.value,
             _partition
         );
-        if (_from != _basicTransferInfo.to && _partition == DEFAULT_PARTITION) {
+        if (
+            _from != _basicTransferInfo.to && _partition == _DEFAULT_PARTITION
+        ) {
             (_erc3643Storage().compliance).functionCall(
                 abi.encodeWithSelector(
                     ICompliance.transferred.selector,

@@ -213,7 +213,7 @@ import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
 import {Common} from '../../common/Common.sol';
-import {DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
+import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
 import {Common} from '../../common/Common.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
@@ -238,7 +238,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         onlyCanTransferFromByPartition(
             _msgSender(),
             _to,
-            DEFAULT_PARTITION,
+            _DEFAULT_PARTITION,
             _value,
             '',
             ''
@@ -261,7 +261,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         onlyCanTransferFromByPartition(
             _from,
             _to,
-            DEFAULT_PARTITION,
+            _DEFAULT_PARTITION,
             _value,
             '',
             ''
@@ -325,7 +325,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(
             _msgSender(),
-            DEFAULT_PARTITION,
+            _DEFAULT_PARTITION,
             _value,
             _data,
             ''
@@ -354,7 +354,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         onlyUnProtectedPartitionsOrWildCardRole
         onlyCanRedeemFromByPartition(
             _tokenHolder,
-            DEFAULT_PARTITION,
+            _DEFAULT_PARTITION,
             _value,
             _data,
             ''
@@ -406,7 +406,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         ) = _isAbleToTransferFromByPartition(
                 _msgSender(),
                 _to,
-                DEFAULT_PARTITION,
+                _DEFAULT_PARTITION,
                 _value,
                 _data,
                 ''
@@ -440,7 +440,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         ) = _isAbleToTransferFromByPartition(
                 _from,
                 _to,
-                DEFAULT_PARTITION,
+                _DEFAULT_PARTITION,
                 _value,
                 _data,
                 ''

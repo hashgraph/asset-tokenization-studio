@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
 import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
@@ -281,19 +281,19 @@ contract TransferAndLock is
         _transferByPartition(
             _msgSender(),
             BasicTransferInfo(_to, _amount),
-            DEFAULT_PARTITION,
+            _DEFAULT_PARTITION,
             _data,
             _msgSender(),
             ''
         );
         (success_, lockId_) = _lockByPartition(
-            DEFAULT_PARTITION,
+            _DEFAULT_PARTITION,
             _amount,
             _to,
             _expirationTimestamp
         );
         emit PartitionTransferredAndLocked(
-            DEFAULT_PARTITION,
+            _DEFAULT_PARTITION,
             _msgSender(),
             _to,
             _amount,
@@ -341,7 +341,7 @@ contract TransferAndLock is
         external
         override
         onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
-        onlyRole(_protectedPartitionsRole(DEFAULT_PARTITION))
+        onlyRole(_protectedPartitionsRole(_DEFAULT_PARTITION))
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyWithValidExpirationTimestamp(

@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {DEFAULT_PARTITION} from '../../constants/values.sol';
+import {_DEFAULT_PARTITION} from '../../constants/values.sol';
 import {
     _ERC1410_BASIC_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
@@ -505,7 +505,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
     function _checkDefaultPartitionWithSinglePartition(
         bytes32 partition
     ) internal view {
-        if (!_isMultiPartition() && partition != DEFAULT_PARTITION)
+        if (!_isMultiPartition() && partition != _DEFAULT_PARTITION)
             revert PartitionNotAllowedInSinglePartitionMode(partition);
     }
 

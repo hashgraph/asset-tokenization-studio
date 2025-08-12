@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 import {
     ZERO_ADDRESS,
     EMPTY_BYTES,
-    DEFAULT_PARTITION
+    _DEFAULT_PARTITION
 } from '../../../layer_0/constants/values.sol';
 import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
@@ -825,7 +825,7 @@ abstract contract ERC1594StorageWrapper is
                         _from,
                         currentAllowance,
                         _value,
-                        DEFAULT_PARTITION
+                        _DEFAULT_PARTITION
                     )
                 );
             }

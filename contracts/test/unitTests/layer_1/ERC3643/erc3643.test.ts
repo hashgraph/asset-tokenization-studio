@@ -259,7 +259,7 @@ import {
     dateToUnixTimestamp,
     EMPTY_HEX_BYTES,
     CORPORATE_ACTION_ROLE,
-    DEFAULT_PARTITION,
+    _DEFAULT_PARTITION,
     AGENT_ROLE,
     PROTECTED_PARTITIONS_ROLE,
     PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
@@ -660,13 +660,13 @@ describe('ERC3643 Tests', () => {
                 ).to.be.equal(AMOUNT / 2)
                 expect(
                     await erc1410SnapshotFacet.balanceOfByPartition(
-                        DEFAULT_PARTITION,
+                        _DEFAULT_PARTITION,
                         account_E
                     )
                 ).to.be.equal(AMOUNT / 2)
                 expect(
                     await erc1410SnapshotFacet.totalSupplyByPartition(
-                        DEFAULT_PARTITION
+                        _DEFAULT_PARTITION
                     )
                 ).to.be.equal(AMOUNT / 2)
             })
@@ -747,13 +747,13 @@ describe('ERC3643 Tests', () => {
                 ).to.be.equal(AMOUNT / 2)
                 expect(
                     await erc1410SnapshotFacet.balanceOfByPartition(
-                        DEFAULT_PARTITION,
+                        _DEFAULT_PARTITION,
                         account_E
                     )
                 ).to.be.equal(AMOUNT / 2)
                 expect(
                     await erc1410SnapshotFacet.totalSupplyByPartition(
-                        DEFAULT_PARTITION
+                        _DEFAULT_PARTITION
                     )
                 ).to.be.equal(AMOUNT / 2)
             })
