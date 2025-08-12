@@ -258,7 +258,7 @@ export class TakeSnapshotCommandHandler
         res,
         result: res.response?.snapshotId,
         className: TakeSnapshotCommandHandler.name,
-        position: 1,
+        position: 0,
         numberOfResultsItems: 1,
       });
 
