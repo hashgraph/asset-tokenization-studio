@@ -224,7 +224,9 @@ export const PrivateRoute = ({ children }: { children: ReactElement }) => {
     ) {
       setLocations(location.pathname);
     }
-  }, [location.pathname, locations, setLocations]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   return connected ? children : <Navigate to={RoutePath.LANDING} replace />;
 };

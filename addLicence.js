@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable @typescript-eslint/no-require-imports */
 const { promises: fs } = require('fs');
 const path = require('path');
 

@@ -307,24 +307,24 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](13);
-        staticFunctionSelectors_[++selectorIndex] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.balanceOfAtSnapshot.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.totalSupplyAtSnapshot.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.balanceOfAtSnapshotByPartition.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.partitionsOfAtSnapshot.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.totalSupplyAtSnapshotByPartition.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.lockedBalanceOfAtSnapshot.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.lockedBalanceOfAtSnapshotByPartition.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.heldBalanceOfAtSnapshot.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.heldBalanceOfAtSnapshotByPartition.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.clearedBalanceOfAtSnapshot.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.clearedBalanceOfAtSnapshotByPartition.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.decimalsAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.balanceOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.totalSupplyAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.balanceOfAtSnapshotByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.partitionsOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.totalSupplyAtSnapshotByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.lockedBalanceOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.lockedBalanceOfAtSnapshotByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.heldBalanceOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.heldBalanceOfAtSnapshotByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearedBalanceOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearedBalanceOfAtSnapshotByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.decimalsAtSnapshot.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[++selectorsIndex] = type(ISnapshots).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
     }
 }

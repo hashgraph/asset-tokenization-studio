@@ -203,6 +203,7 @@
 
 */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Signer,
   TransactionReceipt,
@@ -277,12 +278,7 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
             message: 'Invalid response type',
             network: network,
           });
-        results = this.decodeFunctionResult(
-          nameFunction,
-          record,
-          abi as unknown as string,
-          network,
-        );
+        results = this.decodeFunctionResult(nameFunction, record, abi, network);
       }
       const transactionId = transactionResponse.transactionId.toString();
       LogService.logTrace(

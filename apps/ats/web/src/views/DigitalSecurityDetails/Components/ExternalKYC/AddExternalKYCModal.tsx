@@ -37,7 +37,7 @@ interface FormValues {
   vcFile: string;
 }
 
-type AddExternalKYCModalProps = Omit<ModalProps, 'children'>;
+interface AddExternalKYCModalProps extends Omit<ModalProps, 'children'> {}
 
 export const AddExternalKYCModal = ({
   isOpen,

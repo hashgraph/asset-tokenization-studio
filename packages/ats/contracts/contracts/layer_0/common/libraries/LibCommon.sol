@@ -226,7 +226,7 @@ library LibCommon {
 
         items_ = new bytes32[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; ++i) {
+        for (uint256 i = 0; i < items_.length; i++) {
             items_[i] = _set.at(start + i);
         }
     }
@@ -241,7 +241,7 @@ library LibCommon {
 
         items_ = new uint256[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; ++i) {
+        for (uint256 i = 0; i < items_.length; i++) {
             items_[i] = _set.at(start + i);
         }
     }
@@ -256,7 +256,7 @@ library LibCommon {
 
         items_ = new address[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; ++i) {
+        for (uint256 i = 0; i < items_.length; i++) {
             items_[i] = _set.at(start + i);
         }
     }
@@ -271,16 +271,16 @@ library LibCommon {
 
         items_ = new bytes4[](getSize(start, end, listCount));
 
-        for (uint256 i = 0; i < items_.length; ++i) {
+        for (uint256 i = 0; i < items_.length; i++) {
             items_[i] = _set.at(start + i);
         }
     }
 
     function getSize(uint256 _start, uint256 _end, uint256 _listCount) internal pure returns (uint256) {
-        if (_start > _end - 1) {
+        if (_start >= _end) {
             return 0;
         }
-        if (_start > _listCount - 1) {
+        if (_start >= _listCount) {
             return 0;
         }
 

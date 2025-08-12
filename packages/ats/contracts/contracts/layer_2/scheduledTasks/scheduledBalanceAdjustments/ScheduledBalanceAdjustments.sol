@@ -207,6 +207,7 @@
 pragma solidity 0.8.18;
 
 import { IStaticFunctionSelectors } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { Common } from '../../../layer_1/common/Common.sol';
 import { _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY } from '../../constants/resolverKeys.sol';
 import { Common } from '../../../layer_1/common/Common.sol';
 import {
@@ -221,7 +222,7 @@ contract ScheduledBalanceAdjustments is IStaticFunctionSelectors, IScheduledBala
     function onScheduledBalanceAdjustmentTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
-        bytes calldata _data
+        bytes memory _data
     ) external override onlyAutoCalling(_scheduledBalanceAdjustmentStorage().autoCalling) {
         _onScheduledBalanceAdjustmentTriggered(_data);
     }
@@ -244,14 +245,14 @@ contract ScheduledBalanceAdjustments is IStaticFunctionSelectors, IScheduledBala
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[++selectorIndex] = this.scheduledBalanceAdjustmentCount.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getScheduledBalanceAdjustments.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.onScheduledBalanceAdjustmentTriggered.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.scheduledBalanceAdjustmentCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getScheduledBalanceAdjustments.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.onScheduledBalanceAdjustmentTriggered.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[++selectorsIndex] = type(IScheduledBalanceAdjustments).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IScheduledBalanceAdjustments).interfaceId;
     }
 }

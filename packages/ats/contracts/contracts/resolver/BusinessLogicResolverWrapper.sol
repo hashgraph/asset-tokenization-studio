@@ -206,6 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import { IBusinessLogicResolver } from '../interfaces/resolver/IBusinessLogicResolver.sol';
 import { LibCommon } from '../layer_0/common/libraries/LibCommon.sol';
 import { EnumerableSetBytes4 } from '../layer_0/common/libraries/EnumerableSetBytes4.sol';
 import { IBusinessLogicResolverWrapper } from '../interfaces/resolver/IBusinessLogicResolverWrapper.sol';
@@ -244,9 +245,9 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
     ) internal returns (uint256 latestVersion_) {
         BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
 
-        ++businessLogicResolverDataStorage.latestVersion;
+        businessLogicResolverDataStorage.latestVersion++;
         IBusinessLogicResolver.BusinessLogicRegistryData memory _businessLogicsRegistryData;
-        for (uint256 index; index < _businessLogicsRegistryDatas.length; ++index) {
+        for (uint256 index; index < _businessLogicsRegistryDatas.length; index++) {
             _businessLogicsRegistryData = _businessLogicsRegistryDatas[index];
 
             if (!businessLogicResolverDataStorage.businessLogicActive[_businessLogicsRegistryData.businessLogicKey]) {
@@ -351,7 +352,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
         uint256 size = LibCommon.getSize(start, end, businessLogicResolverDataStorage.activeBusinessLogics.length);
         businessLogicKeys_ = new bytes32[](size);
 
-        for (uint256 index; index < size; ++index) {
+        for (uint256 index; index < size; index++) {
             businessLogicKeys_[index] = businessLogicResolverDataStorage.activeBusinessLogics[index + start];
         }
     }

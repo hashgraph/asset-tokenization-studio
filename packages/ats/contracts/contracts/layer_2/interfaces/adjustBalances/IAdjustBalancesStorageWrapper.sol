@@ -204,11 +204,10 @@
 */
 
 pragma solidity 0.8.18;
-
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 interface IAdjustBalancesStorageWrapper {
-    event AdjustmentBalanceSet(address indexed operator, uint256 indexed factor, uint8 indexed decimals);
+    event AdjustmentBalanceSet(address indexed operator, uint256 factor, uint8 decimals);
 
     error FactorIsZero();
 }

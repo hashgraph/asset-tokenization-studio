@@ -259,7 +259,7 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionFrozenBalanceSnapshots;
     }
 
-    event SnapshotTriggered(address indexed operator, uint256 indexed snapshotId);
+    event SnapshotTriggered(address indexed operator, uint256 snapshotId);
 
     function _takeSnapshot() internal returns (uint256 snapshotID_) {
         snapshotID_ = _snapshot();

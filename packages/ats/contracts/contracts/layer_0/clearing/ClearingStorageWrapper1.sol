@@ -208,9 +208,10 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 import { _CLEARING_STORAGE_POSITION } from '../constants/storagePositions.sol';
 import { HoldStorageWrapper1 } from '../hold/HoldStorageWrapper1.sol';
-import { IClearingTransfer } from '../../layer_1/interfaces/clearing/IClearingTransfer.sol';
 import { IClearing } from '../../layer_1/interfaces/clearing/IClearing.sol';
+import { IClearingTransfer } from '../../layer_1/interfaces/clearing/IClearingTransfer.sol';
 import { IClearingRedeem } from '../../layer_1/interfaces/clearing/IClearingRedeem.sol';
+import { IClearing } from '../../layer_1/interfaces/clearing/IClearing.sol';
 import { IClearingHoldCreation } from '../../layer_1/interfaces/clearing/IClearingHoldCreation.sol';
 import { LibCommon } from '../common/libraries/LibCommon.sol';
 import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';

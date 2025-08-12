@@ -22,7 +22,7 @@ interface FormValues {
   accountId: string;
 }
 
-type SSIManagerModalProps = Omit<ModalProps, 'children'>;
+interface SSIManagerModalProps extends Omit<ModalProps, 'children'> {}
 
 export const SSIManagerModal = ({ isOpen, onClose }: SSIManagerModalProps) => {
   const { id: securityId = '' } = useParams();

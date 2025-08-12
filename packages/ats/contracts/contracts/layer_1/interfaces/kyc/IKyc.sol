@@ -207,17 +207,17 @@
 pragma solidity 0.8.18;
 
 interface IKyc {
-    enum KycStatus {
-        NOT_GRANTED,
-        GRANTED
-    }
-
     struct KycData {
         uint256 validFrom;
         uint256 validTo;
         string vcId;
         address issuer;
         KycStatus status;
+    }
+
+    enum KycStatus {
+        NOT_GRANTED,
+        GRANTED
     }
 
     /**
@@ -236,7 +236,7 @@ interface IKyc {
      * @param activated The status of the internal Kyc
      */
 
-    event InternalKycStatusUpdated(address indexed operator, bool indexed activated);
+    event InternalKycStatusUpdated(address indexed operator, bool activated);
 
     /**
      * @dev Emitted when a Kyc is revoked

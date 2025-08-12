@@ -219,7 +219,7 @@ contract EquityUSA is IEquityUSA, Equity, Security {
     // solhint-disable-next-line private-vars-leading-underscore
     function _initialize_equityUSA(
         EquityDetailsData calldata _equityDetailsData,
-        RegulationData calldata _regulationData,
+        RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
     ) external override onlyUninitialized(_equityStorage().initialized) {
         _initializeEquity(_equityDetailsData);
@@ -233,27 +233,27 @@ contract EquityUSA is IEquityUSA, Equity, Security {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](14);
-        staticFunctionSelectors_[++selectorIndex] = this._initialize_equityUSA.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getEquityDetails.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.setDividends.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getDividends.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getDividendsFor.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getDividendsCount.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.setVoting.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getVoting.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getVotingFor.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getVotingCount.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.setScheduledBalanceAdjustment.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getScheduledBalanceAdjustment.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getScheduledBalanceAdjustmentCount.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getSecurityRegulationData.selector;
+        staticFunctionSelectors_[selectorIndex++] = this._initialize_equityUSA.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getEquityDetails.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setDividends.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getDividends.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getDividendsFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getDividendsCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setVoting.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getVoting.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getVotingFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getVotingCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setScheduledBalanceAdjustment.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getScheduledBalanceAdjustment.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getScheduledBalanceAdjustmentCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getSecurityRegulationData.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](3);
         uint256 selectorsIndex;
-        staticInterfaceIds_[++selectorsIndex] = type(IEquity).interfaceId;
-        staticInterfaceIds_[++selectorsIndex] = type(ISecurity).interfaceId;
-        staticInterfaceIds_[++selectorsIndex] = type(IEquityUSA).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IEquity).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IEquityUSA).interfaceId;
     }
 }

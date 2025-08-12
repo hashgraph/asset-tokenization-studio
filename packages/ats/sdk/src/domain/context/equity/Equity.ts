@@ -208,7 +208,7 @@ import { Security, SecurityProps } from '../security/Security.js';
 import { CastDividendType, DividendType } from './DividendType.js';
 import { InvalidDividendType } from './error/InvalidDividendType.js';
 
-export type EquityProps = SecurityProps;
+export interface EquityProps extends SecurityProps {}
 
 export class Equity extends Security implements EquityProps {
   public static checkDividend(value: number | DividendType): BaseError[] {

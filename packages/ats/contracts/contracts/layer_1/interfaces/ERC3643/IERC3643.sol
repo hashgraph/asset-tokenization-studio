@@ -261,7 +261,7 @@ interface IERC3643 {
      * @param _newWallet Address of the new wallet
      * @param _investorOnchainID OnchainID
      */
-    event RecoverySuccess(address indexed _lostWallet, address indexed _newWallet, address indexed _investorOnchainID);
+    event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID);
 
     /**
      * @notice Thrown when calling from a recovered wallet

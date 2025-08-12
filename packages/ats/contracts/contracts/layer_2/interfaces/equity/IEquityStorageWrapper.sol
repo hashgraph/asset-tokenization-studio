@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 interface IEquityStorageWrapper {
     event VotingSet(
         bytes32 corporateActionId,
-        uint256 indexed voteId,
+        uint256 voteId,
         address indexed operator,
         uint256 indexed recordDate,
         bytes data
@@ -226,7 +226,7 @@ interface IEquityStorageWrapper {
 
     event ScheduledBalanceAdjustmentSet(
         bytes32 corporateActionId,
-        uint256 indexed balanceAdjustmentId,
+        uint256 balanceAdjustmentId,
         address indexed operator,
         uint256 indexed executionDate,
         uint256 factor,

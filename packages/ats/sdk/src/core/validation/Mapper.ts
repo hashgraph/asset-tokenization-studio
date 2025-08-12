@@ -203,6 +203,8 @@
 
 */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export default class Mapper {
   public static renamePrivateProps(keys: string | string[]): string | string[] {
     if (typeof keys === 'string') {

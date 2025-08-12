@@ -203,6 +203,7 @@
 
 */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { injectable } from 'tsyringe';
 import { QUERY_HANDLER_METADATA, QUERY_METADATA } from '../Constants.js';
 import { QueryMetadata } from '../decorator/QueryMetadata.js';

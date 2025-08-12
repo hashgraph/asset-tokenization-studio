@@ -310,16 +310,16 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](4);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[++selectorsIndex] = this.getDocument.selector;
-        staticFunctionSelectors_[++selectorsIndex] = this.setDocument.selector;
-        staticFunctionSelectors_[++selectorsIndex] = this.removeDocument.selector;
-        staticFunctionSelectors_[++selectorsIndex] = this.getAllDocuments.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.getDocument.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setDocument.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.removeDocument.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.getAllDocuments.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[++selectorsIndex] = type(IERC1643).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC1643).interfaceId;
     }
 
     function _erc1643Storage() internal pure returns (ERC1643Storage storage erc1643Storage) {

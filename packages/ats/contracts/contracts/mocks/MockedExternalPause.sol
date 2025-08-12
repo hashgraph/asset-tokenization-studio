@@ -6,7 +6,7 @@ import { IExternalPause } from '../layer_1/interfaces/externalPauses/IExternalPa
 contract MockedExternalPause is IExternalPause {
     bool private _paused;
 
-    event PausedStateChanged(bool indexed isPaused);
+    event PausedStateChanged(bool isPaused);
 
     function setPaused(bool paused) external {
         _paused = paused;

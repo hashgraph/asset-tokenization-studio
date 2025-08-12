@@ -220,7 +220,8 @@ export default class PrivateKey implements KeyProps {
     this.publicKey = PublicKey.fromHederaKey(this.toHashgraphKey().publicKey);
   }
 
-  public static validate(_val?: string | object): BaseError[] {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public static validate(val?: string | object): BaseError[] {
     const err: BaseError[] = [];
     return err;
   }

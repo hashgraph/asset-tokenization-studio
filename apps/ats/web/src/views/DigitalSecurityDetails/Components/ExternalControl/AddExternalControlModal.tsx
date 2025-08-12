@@ -37,7 +37,7 @@ interface FormValues {
   vcFile: string;
 }
 
-type AddExternalControlModalProps = Omit<ModalProps, 'children'>;
+interface AddExternalControlModalProps extends Omit<ModalProps, 'children'> {}
 
 export const AddExternalControlModal = ({
   isOpen,

@@ -231,20 +231,20 @@ interface IFactory {
 
     // TODO: Separete common data in new struct
     struct SecurityData {
+        bool arePartitionsProtected;
+        bool isMultiPartition;
         IBusinessLogicResolver resolver;
         ResolverProxyConfiguration resolverProxyConfiguration;
         IResolverProxy.Rbac[] rbacs;
+        bool isControllable;
+        bool isWhiteList;
         uint256 maxSupply;
         ERC20.ERC20MetadataInfo erc20MetadataInfo;
+        bool clearingActive;
+        bool internalKycActivated;
         address[] externalPauses;
         address[] externalControlLists;
         address[] externalKycLists;
-        bool arePartitionsProtected;
-        bool isMultiPartition;
-        bool isControllable;
-        bool isWhiteList;
-        bool clearingActive;
-        bool internalKycActivated;
     }
 
     struct EquityData {

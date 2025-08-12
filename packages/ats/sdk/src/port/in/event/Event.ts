@@ -203,6 +203,7 @@
 
 */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Injectable from '../../../core/Injectable.js';
 import NetworkService from '../../../app/service/network/NetworkService.js';
 import WalletEvent, {

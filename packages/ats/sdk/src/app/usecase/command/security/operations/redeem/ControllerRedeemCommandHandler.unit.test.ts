@@ -255,13 +255,9 @@ describe('ControllerRedeemCommandHandler', () => {
       contractServiceMock,
     );
     const commandRaw = RedeemCommandFixture.create();
-    const {
-      deadline: _deadline,
-      nounce: _nounce,
-      signature: _signature,
-      partitionId: _partitionId,
-      ...commandFiltered
-    } = commandRaw;
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+    const { deadline, nounce, signature, partitionId, ...commandFiltered } =
+      commandRaw;
     command = commandFiltered;
   });
 

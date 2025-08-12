@@ -219,7 +219,7 @@ contract ScheduledSnapshots is IStaticFunctionSelectors, IScheduledSnapshots, Co
     function onScheduledSnapshotTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,
-        bytes calldata _data
+        bytes memory _data
     ) external override onlyAutoCalling(_scheduledSnapshotStorage().autoCalling) {
         uint256 newSnapShotID;
         if (_pos == _scheduledTasksLength - 1) {
@@ -247,14 +247,14 @@ contract ScheduledSnapshots is IStaticFunctionSelectors, IScheduledSnapshots, Co
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[++selectorIndex] = this.scheduledSnapshotCount.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getScheduledSnapshots.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.onScheduledSnapshotTriggered.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.scheduledSnapshotCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getScheduledSnapshots.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.onScheduledSnapshotTriggered.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[++selectorsIndex] = type(IScheduledSnapshots).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IScheduledSnapshots).interfaceId;
     }
 }

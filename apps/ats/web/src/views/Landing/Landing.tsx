@@ -267,7 +267,9 @@ export const Landing = () => {
     if (disconnected) {
       setType(User.general);
     }
-  }, [connectionStatus, setType]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectionStatus]);
 
   const isLoading =
     connectionStatus === WalletStatus.connecting &&

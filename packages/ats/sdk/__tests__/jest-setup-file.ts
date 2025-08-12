@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -203,6 +202,8 @@
    limitations under the License.
 
 */
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import 'reflect-metadata';
 import BigDecimal from '../src/domain/context/shared/BigDecimal.js';

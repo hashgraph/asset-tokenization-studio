@@ -13,23 +13,15 @@
     "no-empty-blocks": "error",
     "no-unused-vars": "error",
     "payable-fallback": "error",
-    "reason-string": [
-      "error",
-      {
-        "maxLength": 80
-      }
-    ],
+    "reason-string": ["error", { "maxLength": 80 }],
     "constructor-syntax": "error",
     "const-name-snakecase": "error",
+    "contract-name-camelcase": "error",
+    "event-name-camelcase": "error",
     "func-name-mixedcase": "error",
     "func-param-name-mixedcase": "error",
     "modifier-name-mixedcase": "error",
-    "private-vars-leading-underscore": [
-      "error",
-      {
-        "strict": false
-      }
-    ],
+    "private-vars-leading-underscore": ["error", { "strict": false }],
     "use-forbidden-name": "error",
     "var-name-mixedcase": "error",
     "imports-on-top": "error",
@@ -41,19 +33,12 @@
     "avoid-tx-origin": "error",
     "check-send-result": "error",
     "compiler-version": ["error", "^0.8.11"],
-    "func-visibility": [
-      "warn",
-      {
-        "ignoreConstructors": true
-      }
-    ],
+    "func-visibility": ["warn", { "ignoreConstructors": true }],
     "multiple-sends": "error",
     "reentrancy": "error",
     "state-visibility": "error",
     "quotes": ["error", "single"],
     "not-rely-on-time": "off",
-    "ordering": "error",
-    "use-natspec": "off",
-    "function-max-lines": "off"
+    "ordering": "error"
   }
 }

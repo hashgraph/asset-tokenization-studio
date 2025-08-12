@@ -22,7 +22,7 @@ interface FormValues {
   accountId: string;
 }
 
-type SSIManagerRevocationModalProps = Omit<ModalProps, 'children'>;
+interface SSIManagerRevocationModalProps extends Omit<ModalProps, 'children'> {}
 
 export const SSIManagerRevocationModal = ({
   isOpen,

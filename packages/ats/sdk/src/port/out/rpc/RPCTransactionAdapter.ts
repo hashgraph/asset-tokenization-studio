@@ -203,7 +203,10 @@
 
 */
 
+/* eslint-disable no-case-declarations */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
 import TransactionAdapter, { InitializationData } from '../TransactionAdapter';
 import { ethers, Signer } from 'ethers';
@@ -480,9 +483,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   }
 
   async init(debug = false): Promise<string> {
-    if (!debug) {
-      await this.connectMetamask(false);
-    }
+    !debug && (await this.connectMetamask(false));
     const eventData = {
       initData: {
         account: this.account,
@@ -765,9 +766,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       this.account.publicKey = accountMirror.publicKey;
     }
     Injectable.registerTransactionHandler(this);
-    if (!debug) {
-      await this.connectMetamask();
-    }
+    !debug && (await this.connectMetamask());
 
     LogService.logTrace('Metamask registered as handler');
     return Promise.resolve({ account });
@@ -814,9 +813,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           if (!ethereum.isConnected())
             throw new WalletConnectError('Metamask is not connected!');
 
-          if (pair) {
-            await this.pairWallet();
-          }
+          pair && (await this.pairWallet());
           this.signerOrProvider = new ethers.providers.Web3Provider(
             // @ts-expect-error No TS compatibility
             ethereum,
@@ -892,7 +889,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           if (result) {
             factoryId = result.factory.toString();
           }
-  } catch (_e) {
+        } catch (e) {
           LogService.logError(
             `Factories could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
           );
@@ -928,7 +925,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           );
         }
       }
-  if (this.jsonRpcRelays) {
+      if ((this, this.jsonRpcRelays)) {
         try {
           const result = this.jsonRpcRelays.nodes.find(
             (i: EnvironmentJsonRpcRelay) =>

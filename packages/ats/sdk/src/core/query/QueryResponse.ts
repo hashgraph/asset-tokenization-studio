@@ -203,4 +203,5 @@
 
 */
 
-export type QueryResponse = object;
+/* eslint-disable @typescript-eslint/no-empty-interface */
+export interface QueryResponse {}

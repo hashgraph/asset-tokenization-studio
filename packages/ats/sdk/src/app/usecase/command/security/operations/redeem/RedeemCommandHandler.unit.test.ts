@@ -227,6 +227,7 @@ import { RedeemCommandHandler } from './RedeemCommandHandler.js';
 import { RedeemCommand, RedeemCommandResponse } from './RedeemCommand.js';
 import { RedeemCommandError } from './error/RedeemCommandError.js';
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 describe('RedeemCommandHandler', () => {
   let handler: RedeemCommandHandler;
   let command: RedeemCommand;
@@ -253,11 +254,11 @@ describe('RedeemCommandHandler', () => {
     );
     const commandRaw = RedeemCommandFixture.create();
     const {
-      deadline: _deadline,
-      nounce: _nounce,
-      signature: _signature,
-      partitionId: _partitionId,
-      sourceId: _sourceId,
+      deadline,
+      nounce,
+      signature,
+      partitionId,
+      sourceId,
       ...commandFiltered
     } = commandRaw;
     command = commandFiltered;

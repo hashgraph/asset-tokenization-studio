@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
 const hardhat_network_helpers_1 = require('@nomicfoundation/hardhat-network-helpers');
@@ -12,7 +11,8 @@ var VersionStatus;
 })(VersionStatus || (VersionStatus = {}));
 describe('Demo RedSwam', () => {
   let businessLogicResolver,
-    _diamond,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    diamond,
     diamondLoupe,
     diamondCut,
     testFacet1,
@@ -39,7 +39,7 @@ describe('Demo RedSwam', () => {
       await testFacet2.getStaticResolverKey(),
     ];
     const resolver = await businessLogicResolver.address;
-    _diamond = await hardhat_1.ethers
+    diamond = await hardhat_1.ethers
       .getContractFactory('Diamond')
       .then(
         async (contract) =>

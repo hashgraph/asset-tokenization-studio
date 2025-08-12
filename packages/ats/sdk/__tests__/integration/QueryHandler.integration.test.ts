@@ -203,8 +203,8 @@
 
 */
 
+/* eslint-disable jest/no-mocks-import */
 import { QueryBus } from '../../src/core/query/QueryBus.js';
-// eslint-disable-next-line jest/no-mocks-import
 import {
   ConcreteQuery,
   ConcreteQueryResponse,

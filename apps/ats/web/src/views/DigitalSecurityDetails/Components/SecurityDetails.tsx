@@ -209,7 +209,7 @@ import { useSecurityStore } from '../../../store/securityStore';
 import { useParams } from 'react-router-dom';
 import { toNumber } from '../../../utils/format';
 
-type SecurityDetailsProps = Omit<DefinitionListProps, 'items'>;
+interface SecurityDetailsProps extends Omit<DefinitionListProps, 'items'> {}
 
 export const SecurityDetails = (props: SecurityDetailsProps) => {
   const { t: tProperties } = useTranslation('properties');

@@ -1,0 +1,41 @@
+# Dependencies
+node_modules
+
+# Build outputs
+build
+dist
+out
+coverage
+.turbo
+
+# Generated files
+typechain-types
+artifacts
+cache
+
+# Hardhat
+*.sol-coverage
+gas-report.txt
+
+# Environment files
+.env*
+
+# Documentation
+*.pdf
+docs
+
+# IDE
+.vscode
+.idea
+
+# Test fixtures
+fixtures
+__mocks__
+
+# Config files
+*.config.js
+*.config.cjs
+*.config.mjs
+commitlint.config.ts
+jest.config.js
+hardhat.config.ts

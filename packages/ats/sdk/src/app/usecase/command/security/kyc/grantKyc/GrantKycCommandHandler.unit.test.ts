@@ -227,8 +227,7 @@ import { Terminal3Vc } from '../../../../../../domain/context/kyc/Terminal3.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 import { GrantKycCommandError } from './error/GrantKycCommandError.js';
-import * as verifyVc from '@terminal3/verify_vc';
-const { setVerificationValid } = verifyVc as any;
+const { setVerificationValid } = require('@terminal3/verify_vc');
 
 describe('GrantKycCommandHandler', () => {
   let handler: GrantKycCommandHandler;

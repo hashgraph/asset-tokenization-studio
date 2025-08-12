@@ -377,7 +377,7 @@ describe('DiamondCutManager', () => {
     for (
       let selectorIndex = 0;
       selectorIndex < selectorsLength;
-      ++selectorIndex
+      selectorIndex++
     ) {
       const selectorId = facet.selectors[selectorIndex];
 

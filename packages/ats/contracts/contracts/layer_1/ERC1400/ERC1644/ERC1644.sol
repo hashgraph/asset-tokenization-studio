@@ -301,16 +301,16 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](5);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[++selectorsIndex] = this.initialize_ERC1644.selector;
-        staticFunctionSelectors_[++selectorsIndex] = this.isControllable.selector;
-        staticFunctionSelectors_[++selectorsIndex] = this.controllerTransfer.selector;
-        staticFunctionSelectors_[++selectorsIndex] = this.controllerRedeem.selector;
-        staticFunctionSelectors_[++selectorsIndex] = this.finalizeControllable.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.initialize_ERC1644.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.isControllable.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.controllerTransfer.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.controllerRedeem.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.finalizeControllable.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[++selectorsIndex] = type(IERC1644).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC1644).interfaceId;
     }
 }

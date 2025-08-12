@@ -203,6 +203,7 @@
 
 */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Account from '../../../../domain/context/account/Account.js';
 import PublicKey from '../../../../domain/context/account/PublicKey.js';
 import { RequestAccount } from '../BaseRequest.js';

@@ -219,7 +219,7 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     function onScheduledTaskTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
-        bytes calldata _data
+        bytes memory _data
     ) external override onlyAutoCalling(_scheduledTaskStorage().autoCalling) {
         _onScheduledTaskTriggered(_data);
     }
@@ -250,16 +250,16 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[++selectorIndex] = this.triggerPendingScheduledTasks.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.triggerScheduledTasks.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.scheduledTaskCount.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getScheduledTasks.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.onScheduledTaskTriggered.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.triggerPendingScheduledTasks.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.triggerScheduledTasks.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.scheduledTaskCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getScheduledTasks.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.onScheduledTaskTriggered.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[++selectorsIndex] = type(IScheduledTasks).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IScheduledTasks).interfaceId;
     }
 }

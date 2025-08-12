@@ -245,7 +245,8 @@ export const FavoritesList = (props: FavoritesListProps) => {
     );
 
     return favorites;
-  }, [userSecurities, securities]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, adminSecurities, holderSecurities]);
 
   return (
     <Accordion

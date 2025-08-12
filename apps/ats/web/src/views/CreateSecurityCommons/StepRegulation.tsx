@@ -270,7 +270,8 @@ export const StepRegulation = () => {
       setValue('regulationSubType', 1);
       setValue('countriesListType', 2);
     }
-  }, [regulationType, setValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [regulationType]);
 
   // GET Regulation Details
   const { data: regulationDetails, refetch: refetchRegulations } =
@@ -286,7 +287,9 @@ export const StepRegulation = () => {
 
   useEffect(() => {
     refetchRegulations();
-  }, [regulationType, regulationSubType, refetchRegulations]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [regulationType, regulationSubType]);
 
   const addCountryOnSubmit = () => {
     if (countryToAdd !== '') {

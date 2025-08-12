@@ -342,7 +342,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
     function _partitionsOf(address _tokenHolder) internal view returns (bytes32[] memory) {
         ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
         bytes32[] memory partitionsList = new bytes32[](erc1410Storage.partitions[_tokenHolder].length);
-        for (uint256 i = 0; i < erc1410Storage.partitions[_tokenHolder].length; ++i) {
+        for (uint256 i = 0; i < erc1410Storage.partitions[_tokenHolder].length; i++) {
             partitionsList[i] = erc1410Storage.partitions[_tokenHolder][i].partition;
         }
         return partitionsList;

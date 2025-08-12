@@ -227,6 +227,7 @@ export default class CreateConfigurationsForDeployedContractsCommand extends Bas
     overrides,
   }: CreateConfigurationsForDeployedContractsCommandParams) {
     const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       deployer: _,
       businessLogicResolver,
       equityUsa,

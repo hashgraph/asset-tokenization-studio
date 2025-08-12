@@ -209,6 +209,7 @@ pragma solidity 0.8.18;
 import { IERC1410Operator } from '../../interfaces/ERC1400/IERC1410Operator.sol';
 import { Common } from '../../common/Common.sol';
 import { IKyc } from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import { IERC1410Operator } from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
 
 abstract contract ERC1410Operator is IERC1410Operator, Common {
     ///////////////////////

@@ -212,17 +212,14 @@ export class TransactionResponseAdapter {
   manageResponse(): TransactionResponse {
     throw new Error('Method not implemented.');
   }
-   public static decodeFunctionResult(
-      functionName: string,
-      resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
-      abi: ethers.utils.Interface | Array<string | ethers.utils.Fragment> | string,
-      network: string,
-   ): Uint8Array {
+  public static decodeFunctionResult(
+    functionName: string,
+    resultAsBytes: Uint8Array<ArrayBufferLike> | Uint32Array<ArrayBufferLike>,
+    abi: any, // eslint-disable-line
+    network: string,
+  ): Uint8Array {
     try {
-         const iface =
-            abi instanceof ethers.utils.Interface
-               ? abi
-               : new ethers.utils.Interface(abi);
+      const iface = new ethers.utils.Interface(abi);
 
       if (!iface.functions[functionName]) {
         throw new TransactionResponseError({

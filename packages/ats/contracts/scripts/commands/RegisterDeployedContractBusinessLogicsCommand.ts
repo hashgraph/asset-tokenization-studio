@@ -221,11 +221,9 @@ export default class RegisterDeployedContractBusinessLogicsCommand extends BaseA
     signer,
     overrides,
   }: RegisterDeployedContractBusinessLogicsCommandParams) {
-    const {
-      deployer: _deployer,
-      businessLogicResolver,
-      ...contractListToRegister
-    } = deployedContractList;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { deployer, businessLogicResolver, ...contractListToRegister } =
+      deployedContractList;
     const contractAddressList = Object.values(contractListToRegister).map(
       (contract) => contract.address,
     );

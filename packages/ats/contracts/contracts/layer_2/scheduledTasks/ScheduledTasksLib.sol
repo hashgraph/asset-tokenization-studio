@@ -234,7 +234,7 @@ library ScheduledTasksLib {
         bool added = false;
 
         if (scheduledTasksLength > 0) {
-            for (uint256 index = 1; index < scheduledTasksLength + 1; ++index) {
+            for (uint256 index = 1; index <= scheduledTasksLength; index++) {
                 uint256 scheduledTaskPosition = scheduledTasksLength - index;
 
                 if (_scheduledTasks.scheduledTasks[scheduledTaskPosition].scheduledTimestamp < _newScheduledTimestamp) {
@@ -272,7 +272,7 @@ library ScheduledTasksLib {
             max = scheduledTasksLength;
         }
 
-        for (uint256 j = 1; j < max + 1; ++j) {
+        for (uint256 j = 1; j <= max; j++) {
             uint256 pos = scheduledTasksLength - j;
 
             ScheduledTask memory currentScheduledTask = getScheduledTasksByIndex(_scheduledTasks, pos);
@@ -299,7 +299,7 @@ library ScheduledTasksLib {
                             revert(add(32, data), returndata_size)
                         }
                     } else {
-                        // solhint-disable-next-line
+                        // solhint-disable-next-line custom-errors
                         revert('onScheduledTaskTriggered method failed without reason');
                     }
                 }
@@ -333,7 +333,7 @@ library ScheduledTasksLib {
 
         scheduledTask_ = new ScheduledTask[](LibCommon.getSize(start, end, getScheduledTaskCount(_scheduledTasks)));
 
-        for (uint256 i = 0; i < scheduledTask_.length; ++i) {
+        for (uint256 i = 0; i < scheduledTask_.length; i++) {
             scheduledTask_[i] = getScheduledTasksByIndex(_scheduledTasks, start + i);
         }
     }
@@ -352,7 +352,7 @@ library ScheduledTasksLib {
     ) private {
         _scheduledTasks.scheduledTasks[_pos].scheduledTimestamp = scheduledTaskToInsert.scheduledTimestamp;
         _scheduledTasks.scheduledTasks[_pos].data = scheduledTaskToInsert.data;
-        ++_scheduledTasks.scheduledTaskCount;
+        _scheduledTasks.scheduledTaskCount++;
     }
 
     function _popScheduledTask(ScheduledTasksDataStorage storage _scheduledTasks) private {
@@ -361,6 +361,6 @@ library ScheduledTasksLib {
             return;
         }
         delete (_scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
-        --_scheduledTasks.scheduledTaskCount;
+        _scheduledTasks.scheduledTaskCount--;
     }
 }

@@ -205,6 +205,7 @@
 
 import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export default class CheckNums {
   public static isWithinRange<T extends number | bigint | BigDecimal>(
     value: T,
@@ -257,7 +258,7 @@ export default class CheckNums {
     try {
       BigInt(value);
       return true;
-    } catch (_err) {
+    } catch (err) {
       return false;
     }
   }
@@ -267,7 +268,7 @@ export default class CheckNums {
       if (value instanceof BigDecimal) return true;
       BigDecimal.fromString(value);
       return true;
-    } catch (_err) {
+    } catch (err) {
       return false;
     }
   }
@@ -284,7 +285,7 @@ export default class CheckNums {
   public static isNumber(value: any): value is number | bigint {
     try {
       return !isNaN(parseInt(value)) || !this.isBigInt(value);
-    } catch (_error) {
+    } catch (error) {
       return false;
     }
   }

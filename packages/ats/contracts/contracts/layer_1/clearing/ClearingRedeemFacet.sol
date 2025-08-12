@@ -331,16 +331,16 @@ contract ClearingRedeemFacet is IStaticFunctionSelectors, IClearingRedeem, Commo
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[++selectorIndex] = this.clearingRedeemByPartition.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.clearingRedeemFromByPartition.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.operatorClearingRedeemByPartition.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.protectedClearingRedeemByPartition.selector;
-        staticFunctionSelectors_[++selectorIndex] = this.getClearingRedeemForByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearingRedeemByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearingRedeemFromByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.operatorClearingRedeemByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.protectedClearingRedeemByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getClearingRedeemForByPartition.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[++selectorsIndex] = type(IClearingRedeem).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IClearingRedeem).interfaceId;
     }
 }

@@ -264,7 +264,8 @@ export const AddSecurity = () => {
       setIsRoleCountForLoading(true);
       getSecurityRoleCountFor();
     }
-  }, [addSecurityResult, getSecurityRoleCountFor]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addSecurityResult]);
 
   useEffect(() => {
     if (typeof roleCountFor !== 'undefined') {
@@ -290,15 +291,9 @@ export const AddSecurity = () => {
         RouterManager.to(RouteName.Dashboard);
       }
     }
-  }, [
-    roleCountFor,
-    addSecurityResult?.diamondAddress,
-    addSecurityToAdmin,
-    address,
-    adminSecurities,
-    t,
-    toast,
-  ]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roleCountFor]);
 
   return (
     <Stack h="full" as="form" onSubmit={handleSubmit(submit)}>

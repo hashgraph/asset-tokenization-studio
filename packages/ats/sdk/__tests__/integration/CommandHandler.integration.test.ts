@@ -203,8 +203,8 @@
 
 */
 
+/* eslint-disable jest/no-mocks-import */
 import { CommandBus } from '../../src/core/command/CommandBus.js';
-// eslint-disable-next-line jest/no-mocks-import
 import {
   ConcreteCommand,
   ConcreteCommandResponse,

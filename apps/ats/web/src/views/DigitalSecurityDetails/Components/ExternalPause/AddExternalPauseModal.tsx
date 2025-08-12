@@ -37,7 +37,7 @@ interface FormValues {
   vcFile: string;
 }
 
-type AddExternalPauseModalProps = Omit<ModalProps, 'children'>;
+interface AddExternalPauseModalProps extends Omit<ModalProps, 'children'> {}
 
 export const AddExternalPauseModal = ({
   isOpen,

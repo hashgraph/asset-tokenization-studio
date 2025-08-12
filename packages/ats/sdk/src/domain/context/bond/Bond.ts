@@ -205,6 +205,6 @@
 
 import { Security, SecurityProps } from '../security/Security.js';
 
-export type BondProps = SecurityProps;
+export interface BondProps extends SecurityProps {}
 
 export class Bond extends Security implements BondProps {}

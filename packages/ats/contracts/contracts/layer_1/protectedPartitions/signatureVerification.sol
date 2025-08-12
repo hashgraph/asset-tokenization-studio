@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-/* solhint-disable private-vars-leading-underscore */
-
 import {
     _DOMAIN_TYPE_HASH,
     _SALT,
@@ -15,7 +13,8 @@ import {
     _PROTECTED_CLEARING_REDEEM_TYPEHASH,
     _CLEARING_OPERATION_TYPEHASH,
     _PROTECTED_CLEARING_OPERATION_TYPEHASH,
-    _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH
+    _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
+    _PROTECTED_CLEARING_OPERATION_TYPEHASH
 } from '../constants/values.sol';
 import { IHold } from '../interfaces/hold/IHold.sol';
 import { IClearing } from '../interfaces/clearing/IClearing.sol';
@@ -24,7 +23,6 @@ error WrongSignatureLength();
 error WrongNounce(uint256 nounce, address account);
 error ExpiredDeadline(uint256 deadline);
 
-// solhint-disable-next-line private-vars-leading-underscore
 function getMessageHashTransfer(
     bytes32 _partition,
     address _from,
@@ -39,7 +37,6 @@ function getMessageHashTransfer(
         );
 }
 
-// solhint-disable-next-line private-vars-leading-underscore
 function getMessageHashRedeem(
     bytes32 _partition,
     address _from,
@@ -53,7 +50,6 @@ function getMessageHashRedeem(
         );
 }
 
-// solhint-disable-next-line private-vars-leading-underscore
 function getMessageHashCreateHold(
     bytes32 _partition,
     address _from,
@@ -86,7 +82,6 @@ function getMessageHashCreateHold(
         );
 }
 
-// solhint-disable-next-line private-vars-leading-underscore
 function getMessageHashClearingTransfer(
     IClearing.ProtectedClearingOperation memory _protectedClearing,
     address _to,
@@ -197,7 +192,7 @@ function checkNounceAndDeadline(
 }
 
 function isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure returns (bool) {
-    return _deadline > _blockTimestamp - 1;
+    return _deadline >= _blockTimestamp;
 }
 
 function isNounceValid(uint256 _nounce, uint256 _currentNounce) pure returns (bool) {
@@ -242,7 +237,7 @@ function recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure retu
 }
 
 function splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, uint8 v) {
-    if (!(sig.length == 65)) revert WrongSignatureLength();
+    if (sig.length != 65) revert WrongSignatureLength();
     // solhint-disable-next-line no-inline-assembly
     assembly {
         // first 32 bytes, after the length prefix which are 32 bytes long too

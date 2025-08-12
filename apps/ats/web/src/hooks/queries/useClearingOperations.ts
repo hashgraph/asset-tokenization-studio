@@ -271,6 +271,7 @@ export const useGetClearingOperations = (
 
             const operations = await Promise.all(
               clearingIds.map(async (clearingId) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 let result: any = null;
 
                 if (operationType === 0) {

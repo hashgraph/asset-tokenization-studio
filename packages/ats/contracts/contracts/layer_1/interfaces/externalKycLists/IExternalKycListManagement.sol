@@ -210,8 +210,8 @@ import { IKyc } from '../kyc/IKyc.sol';
 
 interface IExternalKycListManagement {
     event ExternalKycListsUpdated(address indexed operator, address[] kycLists, bool[] actives);
-    event AddedToExternalKycLists(address indexed operator, address indexed kycList);
-    event RemovedFromExternalKycLists(address indexed operator, address indexed kycList);
+    event AddedToExternalKycLists(address indexed operator, address kycList);
+    event RemovedFromExternalKycLists(address indexed operator, address kycList);
 
     error ListedKycList(address kycList);
 

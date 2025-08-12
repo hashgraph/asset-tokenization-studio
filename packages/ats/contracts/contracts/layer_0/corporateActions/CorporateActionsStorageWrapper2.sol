@@ -358,7 +358,7 @@ abstract contract CorporateActionsStorageWrapper2 is AdjustBalancesStorageWrappe
     }
 
     function _checkMatchingActionType(bytes32 _actionType, uint256 _index) private view {
-        if (_getCorporateActionCountByType(_actionType) < _index + 1)
+        if (_getCorporateActionCountByType(_actionType) <= _index)
             revert ICorporateActionsStorageWrapper.WrongIndexForAction(_index, _actionType);
     }
 }

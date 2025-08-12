@@ -203,6 +203,7 @@
   
   */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { LogError } from '../../../core/decorator/LogErrorDecorator.js';
 import ValidatedRequest from '../../../core/validation/ValidatedArgs.js';
 
