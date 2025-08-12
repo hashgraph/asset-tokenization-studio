@@ -225,7 +225,6 @@ import { CanTransferQuery, CanTransferQueryResponse } from './CanTransferQuery';
 import ValidationService from '@service/validation/ValidationService';
 import { CanTransferQueryError } from './error/CanTransferQueryError';
 import Account from '@domain/context/account/Account';
-import Account from '../../../../../domain/context/account/Account.js';
 
 describe('CanTransferQueryHandler', () => {
   let handler: CanTransferQueryHandler;

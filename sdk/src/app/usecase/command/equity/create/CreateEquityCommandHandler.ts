@@ -225,7 +225,7 @@ import { Response } from '@domain/context/transaction/Response';
 import { CreateEquityCommandError } from './error/CreateEquityCommandError';
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
-import { EVM_ZERO_ADDRESS } from '../../../../../core/Constants.js';
+import { EVM_ZERO_ADDRESS } from '@core/Constants';
 
 @CommandHandler(CreateEquityCommand)
 export class CreateEquityCommandHandler

@@ -223,41 +223,40 @@ import { Dividend } from '@domain/context/equity/Dividend';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import { HederaId } from '@domain/context/shared/HederaId';
 import {
-  ERC1594__factory,
-  ERC1644__factory,
   AccessControl__factory,
-  ControlList__factory,
-  Pause__factory,
-  ERC20__factory,
   Bond__factory,
   Cap__factory,
-  ERC1643__factory,
-  Equity__factory,
-  ScheduledSnapshots__factory,
-  Snapshots__factory,
-  Factory__factory,
-  Lock__factory,
-  Security__factory,
-  DiamondFacet__factory,
-  ProtectedPartitions__factory,
-  SsiManagement__factory,
-  Kyc__factory,
-  ClearingReadFacet__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
+  ClearingReadFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
-  ExternalPauseManagement__factory,
-  MockedExternalPause__factory,
-  ExternalControlListManagement__factory,
-  MockedWhitelist__factory,
-  MockedBlacklist__factory,
-  ExternalKycListManagement__factory,
-  MockedExternalKycList__factory,
-  FreezeFacet__factory,
-  ERC3643Facet__factory,
+  ControlList__factory,
+  DiamondFacet__factory,
+  Equity__factory,
   ERC1410ReadFacet__factory,
+  ERC1594__factory,
+  ERC1643__factory,
+  ERC1644__factory,
+  ERC20__factory,
+  ExternalControlListManagement__factory,
+  ExternalKycListManagement__factory,
+  ExternalPauseManagement__factory,
+  Factory__factory,
+  FreezeFacet__factory,
   HoldReadFacet__factory,
+  Kyc__factory,
+  Lock__factory,
+  MockedBlacklist__factory,
+  MockedExternalKycList__factory,
+  MockedExternalPause__factory,
+  MockedWhitelist__factory,
+  Pause__factory,
+  ProtectedPartitions__factory,
+  ScheduledSnapshots__factory,
+  Security__factory,
+  Snapshots__factory,
+  SsiManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -269,11 +268,11 @@ import { Regulation } from '@domain/context/factory/Regulation';
 import { _PARTITION_ID_1 } from '@core/Constants';
 import {
   CastAccreditedInvestors,
-  CastManualInvestorVerification,
   CastInternationalInvestorscation,
-  CastResaleHoldPeriodorscation,
+  CastManualInvestorVerification,
   CastRegulationSubType,
   CastRegulationType,
+  CastResaleHoldPeriodorscation,
 } from '@domain/context/factory/RegulationType';
 import { ScheduledBalanceAdjustment } from '@domain/context/equity/ScheduledBalanceAdjustment';
 import { DividendFor } from '@domain/context/equity/DividendFor';
@@ -288,6 +287,7 @@ import {
   ClearingTransfer,
 } from '@domain/context/security/Clearing';
 import { HoldDetails } from '@domain/context/security/Hold';
+import { ERC3643__factory } from '@hashgraph/asset-tokenization-contracts/typechain-types';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 

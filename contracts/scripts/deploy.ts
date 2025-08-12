@@ -1286,6 +1286,7 @@ export async function deployContractWithFactory<
         implementationContract = (await factory
             .connect(signer)
             .deploy(...args, overrides)) as C
+        await implementationContract.deployed()
         txResponseList.push(implementationContract.deployTransaction)
     }
 

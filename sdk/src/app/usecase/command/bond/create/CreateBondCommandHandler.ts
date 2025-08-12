@@ -225,7 +225,7 @@ import { CreateBondCommandError } from './error/CreateBondCommandError';
 import { Response } from '@domain/context/transaction/Response';
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
-import { EVM_ZERO_ADDRESS } from '../../../../../core/Constants.js';
+import { EVM_ZERO_ADDRESS } from '@core/Constants';
 
 @CommandHandler(CreateBondCommand)
 export class CreateBondCommandHandler

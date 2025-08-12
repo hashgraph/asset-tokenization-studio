@@ -666,9 +666,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeWithArgs(
-        new ERC1410TokenHolderFacet__factory().attach(
-            security.toString(),
-        ),
+      new ERC1410TokenHolderFacet__factory().attach(security.toString()),
       'transferByPartition',
       securityId,
       GAS.TRANSFER,
@@ -1011,7 +1009,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       [source.toString(), target.toString(), amount.toHexString()],
     );
   }
-
 
   async controllerRedeem(
     security: EvmAddress,
@@ -3157,7 +3154,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       [sourceId.toString(), partitionId, amount.toBigNumber()],
     );
   }
-
 
   // * Definition of the abstract methods
   abstract signAndSendTransaction(

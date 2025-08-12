@@ -227,7 +227,6 @@ import {
 import { CanTransferByPartitionQueryHandler } from './CanTransferByPartitionQueryHandler';
 import { CanTransferByPartitionQueryError } from './error/CanTransferByPartitionQueryError';
 import Account from '@domain/context/account/Account';
-import Account from '../../../../../domain/context/account/Account.js';
 
 describe('CanTransferByPartitionQueryHandler', () => {
   let handler: CanTransferByPartitionQueryHandler;

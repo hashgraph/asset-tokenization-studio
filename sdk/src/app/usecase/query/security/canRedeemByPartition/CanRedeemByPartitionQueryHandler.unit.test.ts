@@ -227,7 +227,6 @@ import {
 import { CanRedeemByPartitionQueryError } from './error/CanRedeemByPartitionQueryError';
 import { EMPTY_BYTES } from '@core/Constants';
 import Account from '@domain/context/account/Account';
-import Account from '../../../../../domain/context/account/Account.js';
 
 describe('CanRedeemByPartitionQueryHandler', () => {
   let handler: CanRedeemByPartitionQueryHandler;

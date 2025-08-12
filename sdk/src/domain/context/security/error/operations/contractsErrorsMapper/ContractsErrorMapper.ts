@@ -216,7 +216,6 @@ import { AccountNotInControlList } from '../AccountNotInControlList';
 import { SecurityPaused } from '../SecurityPaused';
 import { KycStatus } from '@domain/context/kyc/Kyc';
 import { AddressRecovered } from '../AddressRecovered';
-import { AddressRecovered } from '../AddressRecovered.js';
 
 export class ContractsErrorMapper {
   static mapError(
