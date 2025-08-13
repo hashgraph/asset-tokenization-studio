@@ -212,7 +212,7 @@ import {
     type Security,
     BusinessLogicResolver,
     IFactory,
-    ERC1410ScheduledTasks,
+    type IERC1410,
 } from '@typechain'
 import {
     Rbac,
@@ -248,7 +248,7 @@ describe('Security Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let securityFacet: Security
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
 
     beforeEach(async () => {
         // mute | mock console.log
@@ -311,7 +311,7 @@ describe('Security Tests', () => {
         securityFacet = await ethers.getContractAt('Security', diamond.address)
 
         erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
+            'IERC1410',
             diamond.address
         )
     })

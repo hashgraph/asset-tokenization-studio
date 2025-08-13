@@ -579,7 +579,6 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        erc1410ReadFacet: new DeployContractWithFactoryCommand({
         erc20Permit: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ERC20Permit__factory(),
@@ -591,7 +590,7 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        erc1410ScheduledTasks: new DeployContractWithFactoryCommand({
+        erc1410ReadFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ERC1410ReadFacet__factory(),
                 new ERC1410ReadTimeTravel__factory()
@@ -1041,14 +1040,6 @@ export async function deployAtsContracts({
             ).then((result) => {
                 console.log(
                     `ERC20Permit has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            erc1410ScheduledTasks: await deployContractWithFactory(
-                commands.erc1410ScheduledTasks
-            ).then((result) => {
-                console.log(
-                    'ERC1410ManagementFacet has been deployed successfully'
                 )
                 return result
             }),

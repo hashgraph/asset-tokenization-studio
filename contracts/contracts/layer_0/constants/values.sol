@@ -210,7 +210,7 @@ pragma solidity 0.8.18;
 uint256 constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 address constant ZERO_ADDRESS = address(0);
 bytes32 constant EMPTY_BYTES32 = bytes32(0);
-bytes constant EMPTY_BYTES = bytes("");
+bytes constant EMPTY_BYTES = bytes('');
 // keccak256('security.token.standard.dividend.corporateAction');
 bytes32 constant DIVIDEND_CORPORATE_ACTION_TYPE = 0x1c29d09f87f2b0c8192a7719a2acdfdfa320dc2835b5a0398e5bd8dc34c14b0e;
 
@@ -234,5 +234,5 @@ bytes32 constant BALANCE_ADJUSTMENT_TASK_TYPE = 0x9ce9cffaccaf68fc544ce4df9e5e27
 bytes32 constant SNAPSHOT_TASK_TYPE = 0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c;
 
 bytes32 constant _ERC20PERMIT_TYPEHASH = keccak256(
-    "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+    'Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)'
 );
