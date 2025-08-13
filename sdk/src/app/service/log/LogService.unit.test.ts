@@ -203,57 +203,105 @@
 
 */
 
-import '../environmentMock';
-import Network from '@port/in/network/Network';
+import LogService, { LogLevel } from './LogService';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
+import * as winston from 'winston';
 
-import { GetAccountInfoRequest } from '@port/in/request/index';
-import ConnectRequest, {
-  SupportedWallets,
-} from '@port/in/request/network/ConnectRequest';
+jest.mock('winston', () => {
+  const originalWinston = jest.requireActual('winston');
+  return {
+    ...originalWinston,
+    createLogger: jest.fn(() => ({
+      log: jest.fn(),
+    })),
+  };
+});
 
-import { CLIENT_ACCOUNT_ECDSA, CLIENT_PUBLIC_KEY_ECDSA } from '@test/config';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
-import Account from '@port/in/account/Account';
+describe('LogService', () => {
+  const mockLogger = {
+    log: jest.fn(),
+  };
 
-describe('🧪 Account test', () => {
-  beforeAll(async () => {
-    const mirrorNode: MirrorNode = {
-      name: 'testmirrorNode',
-      baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
-    };
+  beforeEach(() => {
+    (winston.createLogger as jest.Mock).mockReturnValue(mockLogger);
+    // Re-initialize LogService singleton to inject the mock logger
+    new LogService();
+    jest.clearAllMocks();
+  });
 
-    const rpcNode: JsonRpcRelay = {
-      name: 'testrpcNode',
-      baseUrl: 'http://127.0.0.1:7546/api',
-    };
+  it('should log TRACE level messages', () => {
+    LogService.logTrace('Trace message', { key: 'value' });
 
-    await Network.connect(
-      new ConnectRequest({
-        account: {
-          accountId: CLIENT_ACCOUNT_ECDSA.id.toString(),
-        },
-        network: 'testnet',
-        wallet: SupportedWallets.METAMASK,
-        mirrorNode: mirrorNode,
-        rpcNode: rpcNode,
-        debug: true,
-      }),
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      LogLevel.TRACE,
+      'Trace message',
+      {
+        timestamp: expect.any(String),
+        other: [{ key: 'value' }],
+      },
     );
-  }, 60_000);
+  });
 
-  it('Gets account info', async () => {
-    const res = await Account.getInfo(
-      new GetAccountInfoRequest({
-        account: {
-          accountId: CLIENT_ACCOUNT_ECDSA.id.toString(),
-        },
-      }),
+  it('should log INFO level messages', () => {
+    LogService.logInfo('Info message', 123);
+
+    expect(mockLogger.log).toHaveBeenCalledWith(LogLevel.INFO, 'Info message', {
+      timestamp: expect.any(String),
+      other: [123],
+    });
+  });
+
+  it('should log ERROR level messages', () => {
+    LogService.logError('Some error message');
+
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      LogLevel.ERROR,
+      'Some error message',
+      {
+        timestamp: expect.any(String),
+        other: [],
+      },
     );
-    expect(res).not.toBeFalsy();
-    expect(res.id).toBeDefined();
-    expect(res.id).toEqual(CLIENT_ACCOUNT_ECDSA.id.toString());
-    expect(res.publicKey).toBeDefined();
-    expect(res.publicKey).toEqual(CLIENT_PUBLIC_KEY_ECDSA);
-  }, 10_000);
+  });
+
+  it('should log BaseError properly', () => {
+    class TestBaseError extends BaseError {
+      constructor(code: ErrorCode, message: string) {
+        super(code, message);
+      }
+
+      toString() {
+        return `BaseError: ${this.message}`;
+      }
+    }
+
+    const error = new TestBaseError(
+      ErrorCode.Unexpected,
+      'Something went wrong',
+    );
+
+    LogService.logError(error, 'context');
+
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      LogLevel.ERROR,
+      'BaseError: Something went wrong',
+      {
+        timestamp: expect.any(String),
+        other: ['context'],
+      },
+    );
+  });
+
+  it('should fallback to default log when non-BaseError thrown', () => {
+    LogService.logError(new Error('Generic error'), 'extra');
+
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      LogLevel.ERROR,
+      new Error('Generic error'),
+      {
+        timestamp: expect.any(String),
+        other: ['extra'],
+      },
+    );
+  });
 });

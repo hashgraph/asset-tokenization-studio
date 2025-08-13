@@ -203,6 +203,7 @@
 
 */
 
+import '../environmentMock';
 import {
   CreateEquityRequest,
   Equity,
