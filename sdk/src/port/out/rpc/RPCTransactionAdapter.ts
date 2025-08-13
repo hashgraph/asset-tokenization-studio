@@ -219,7 +219,10 @@ import EventService from '@service/event/EventService';
 import LogService from '@service/log/LogService';
 import { CommandBus } from '@core/command/CommandBus';
 import { MirrorNode, MirrorNodes } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay, JsonRpcRelays } from '@domain/context/network/JsonRpcRelay';
+import {
+  JsonRpcRelay,
+  JsonRpcRelays,
+} from '@domain/context/network/JsonRpcRelay';
 import { Factories } from '@domain/context/factory/Factories';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter';
@@ -1480,8 +1483,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         deadline.toBigNumber(),
         nounce.toBigNumber(),
         signature,
-  ],
-  GAS.PROTECTED_TRANSFER_AND_LOCK,
+      ],
+      GAS.PROTECTED_TRANSFER_AND_LOCK,
     );
   }
 
