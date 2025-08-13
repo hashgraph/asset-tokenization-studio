@@ -346,8 +346,12 @@ export const StepReview = () => {
           externalKycLists: externalKYCList,
         }),
       internalKycActivated,
-      compliance: complianceId,
-      identityRegistry: identityRegistryId,
+      ...(complianceId && {
+        complianceId: complianceId,
+      }),
+      ...(identityRegistryId && {
+        identityRegistryId: identityRegistryId,
+      }),
     });
 
     createSecurity(request);

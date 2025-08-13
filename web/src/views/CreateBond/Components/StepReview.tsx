@@ -354,7 +354,12 @@ export const StepReview = () => {
           externalKycLists: externalKYCList,
         }),
       internalKycActivated,
-      compliance: complianceId,
+      ...(complianceId && {
+        complianceId: complianceId,
+      }),
+      ...(identityRegistryId && {
+        identityRegistryId: identityRegistryId,
+      }),
     });
 
     createBond(request);

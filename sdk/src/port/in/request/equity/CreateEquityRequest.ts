@@ -387,6 +387,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
         );
       },
       compliance: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+        identityRegistry: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
     });
     this.name = name;
     this.symbol = symbol;

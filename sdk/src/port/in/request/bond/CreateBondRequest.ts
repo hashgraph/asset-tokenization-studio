@@ -400,6 +400,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
         );
       },
       compliance: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      identityRegistry: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
     });
     this.name = name;
     this.symbol = symbol;
