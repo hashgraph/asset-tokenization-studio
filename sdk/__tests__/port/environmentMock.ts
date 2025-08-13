@@ -1072,7 +1072,7 @@ jest.mock('@port/out/rpc/RPCQueryAdapter', () => {
 
       if (securityInfo.clearingActive) return [false, '0x52', ''];
 
-      return [true, '0x00', ''];
+      return [true, '0x01', ''];
     },
   );
 
@@ -1124,7 +1124,7 @@ jest.mock('@port/out/rpc/RPCQueryAdapter', () => {
 
       if (securityInfo.clearingActive) return [false, '0x52', ''];
 
-      return [true, '0x00', ''];
+      return [true, '0x01', ''];
     },
   );
 
@@ -1195,7 +1195,7 @@ jest.mock('@port/out/rpc/RPCQueryAdapter', () => {
 
       if (securityInfo.clearingActive) return [false, '0x52', ''];
 
-      return [true, '0x00', ''];
+      return [true, '0x01', ''];
     },
   );
 
