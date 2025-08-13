@@ -206,23 +206,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    ArraysUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
-import {
-    CountersUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {
-    ISnapshotsStorageWrapper,
-    SnapshotStorage,
-    Snapshots,
-    PartitionSnapshots,
-    ListOfPartitions
-} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
-import {
-    CorporateActionsStorageWrapper1
-} from '../corporateActions/CorporateActionsStorageWrapper1.sol';
+import {ArraysUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol";
+import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import {_SNAPSHOT_STORAGE_POSITION} from "../constants/storagePositions.sol";
+import {ISnapshotsStorageWrapper, SnapshotStorage, Snapshots, SnapshotsAddress, PartitionSnapshots, ListOfPartitions} from "../../layer_1/interfaces/snapshots/ISnapshots.sol";
+import {CorporateActionsStorageWrapper1} from "../corporateActions/CorporateActionsStorageWrapper1.sol";
 
 abstract contract SnapshotsStorageWrapper1 is
     ISnapshotsStorageWrapper,
@@ -249,6 +237,17 @@ abstract contract SnapshotsStorageWrapper1 is
     function _updateSnapshot(
         Snapshots storage snapshots,
         uint256 currentValue
+    ) internal {
+        uint256 currentId = _getCurrentSnapshotId();
+        if (_lastSnapshotId(snapshots.ids) < currentId) {
+            snapshots.ids.push(currentId);
+            snapshots.values.push(currentValue);
+        }
+    }
+
+    function _updateSnapshotAddress(
+        SnapshotsAddress storage snapshots,
+        address currentValue
     ) internal {
         uint256 currentId = _getCurrentSnapshotId();
         if (_lastSnapshotId(snapshots.ids) < currentId) {
@@ -290,6 +289,15 @@ abstract contract SnapshotsStorageWrapper1 is
         (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
 
         return (found, found ? snapshots.values[index] : 0);
+    }
+
+    function _addressValueAt(
+        uint256 snapshotId,
+        SnapshotsAddress storage snapshots
+    ) internal view returns (bool, address) {
+        (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
+
+        return (found, found ? snapshots.values[index] : address(0));
     }
 
     function _indexFor(

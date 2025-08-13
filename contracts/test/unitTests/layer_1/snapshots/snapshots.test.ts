@@ -463,6 +463,19 @@ describe('Snapshots Tests', () => {
         await expect(
             snapshotFacet.partitionsOfAtSnapshot(0, account_A)
         ).to.be.rejectedWith('SnapshotIdNull')
+
+        await expect(
+            snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 1)
+        ).to.be.rejectedWith('SnapshotIdDoesNotExists')
+        await expect(
+            snapshotFacet.getTokenHoldersAtSnapshot(0, 0, 1)
+        ).to.be.rejectedWith('SnapshotIdNull')
+        await expect(
+            snapshotFacet.getTotalTokenHoldersAtSnapshot(1)
+        ).to.be.rejectedWith('SnapshotIdDoesNotExists')
+        await expect(
+            snapshotFacet.getTotalTokenHoldersAtSnapshot(0)
+        ).to.be.rejectedWith('SnapshotIdNull')
     })
 
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds', async () => {
@@ -582,6 +595,14 @@ describe('Snapshots Tests', () => {
             1,
             account_C
         )
+        const snapshot_TotalTokenHolders_1 =
+            await snapshotFacet.getTotalTokenHoldersAtSnapshot(1)
+        const snapshot_TokenHolders_1 =
+            await snapshotFacet.getTokenHoldersAtSnapshot(
+                1,
+                0,
+                snapshot_TotalTokenHolders_1
+            )
         const snapshot_Balance_Of_A_1_Partition_1 =
             await snapshotFacet.balanceOfAtSnapshotByPartition(
                 _PARTITION_ID_1,
@@ -690,6 +711,14 @@ describe('Snapshots Tests', () => {
             2,
             account_C
         )
+        const snapshot_TotalTokenHolders_2 =
+            await snapshotFacet.getTotalTokenHoldersAtSnapshot(2)
+        const snapshot_TokenHolders_2 =
+            await snapshotFacet.getTokenHoldersAtSnapshot(
+                2,
+                0,
+                snapshot_TotalTokenHolders_2
+            )
         const snapshot_Balance_Of_A_2_Partition_1 =
             await snapshotFacet.balanceOfAtSnapshotByPartition(
                 _PARTITION_ID_1,
@@ -901,6 +930,18 @@ describe('Snapshots Tests', () => {
             balanceOf_C_Original + amount
         )
         expect(snapshot_TotalSupply_2_Partition_2).to.equal(amount)
+
+        expect(snapshot_TotalTokenHolders_1).to.equal(1)
+        expect(snapshot_TokenHolders_1.length).to.equal(
+            snapshot_TotalTokenHolders_1
+        )
+        expect(snapshot_TokenHolders_1).to.have.members([account_C])
+
+        expect(snapshot_TotalTokenHolders_2).to.equal(2)
+        expect(snapshot_TokenHolders_2.length).to.equal(
+            snapshot_TotalTokenHolders_2
+        )
+        expect(snapshot_TokenHolders_2).to.have.members([account_A, account_C])
     })
 
     describe('Scheduled tasks', async () => {

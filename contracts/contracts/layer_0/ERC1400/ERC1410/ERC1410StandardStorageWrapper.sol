@@ -206,16 +206,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {DEFAULT_PARTITION} from '../../constants/values.sol';
-import {
-    IERC3643Basic
-} from '../../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
-import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
-import {IssueData} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
-import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
-import {
-    ERC1410OperatorStorageWrapper
-} from './ERC1410OperatorStorageWrapper.sol';
+import {DEFAULT_PARTITION} from "../../constants/values.sol";
+import {IERC3643Basic} from "../../../layer_1/interfaces/ERC3643/IERC3643Basic.sol";
+import {ICompliance} from "../../../layer_1/interfaces/ERC3643/ICompliance.sol";
+import {IssueData} from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
+import {LowLevelCall} from "../../common/libraries/LowLevelCall.sol";
+import {ERC1410OperatorStorageWrapper} from "./ERC1410OperatorStorageWrapper.sol";
 
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
@@ -226,23 +222,54 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 partition,
         address from,
         address to,
-        uint256 /*amount*/
+        uint256 amount
     ) internal override {
         _triggerAndSyncAll(partition, from, to);
+
+        bool addTo;
+        bool removeFrom;
 
         if (from == address(0)) {
             // mint | issue
             _updateAccountSnapshot(to, partition);
-            return _updateTotalSupplySnapshot(partition);
-        }
-        if (to == address(0)) {
-            // burn | redeem
+            _updateTotalSupplySnapshot(partition);
+            // _balanceOf instead of _balanceOfAdjusted because we are comparing it to 0
+            if (amount > 0 && _balanceOf(to) == 0) addTo = true;
+        } else if (to == address(0)) {
+            // burn
             _updateAccountSnapshot(from, partition);
-            return _updateTotalSupplySnapshot(partition);
+            _updateTotalSupplySnapshot(partition);
+            if (amount > 0 && _balanceOfAdjusted(from) == amount)
+                removeFrom = true;
         }
         // transfer
-        _updateAccountSnapshot(from, partition);
-        _updateAccountSnapshot(to, partition);
+        else {
+            _updateAccountSnapshot(from, partition);
+            _updateAccountSnapshot(to, partition);
+            // _balanceOf instead of _balanceOfAdjusted because we are comparing it to 0
+            if (amount > 0 && _balanceOf(to) == 0) addTo = true;
+            if (amount > 0 && _balanceOfAdjusted(from) == amount)
+                removeFrom = true;
+        }
+
+        if (addTo && removeFrom) {
+            _updateTokenHolderSnapshot(from);
+            _replaceTokenHolder(to, from);
+            return;
+        }
+        if (addTo) {
+            _updateTotalTokenHolderSnapshot();
+            _addNewTokenHolder(to);
+            return;
+        }
+        if (removeFrom) {
+            _updateTokenHolderSnapshot(from);
+            _updateTokenHolderSnapshot(
+                _getTokenHolder(_getTotalTokenHolders())
+            );
+            _updateTotalTokenHolderSnapshot();
+            _removeTokenHolder(from);
+        }
     }
 
     function _triggerAndSyncAll(
@@ -400,6 +427,10 @@ abstract contract ERC1410StandardStorageWrapper is
     ) internal virtual;
 
     function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
+
+    function _updateTokenHolderSnapshot(address account) internal virtual;
+
+    function _updateTotalTokenHolderSnapshot() internal virtual;
 
     function _adjustTotalAndMaxSupplyForPartition(
         bytes32 _partition

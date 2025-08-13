@@ -731,6 +731,13 @@ describe('Bond Tests', () => {
                     numberOfCoupons + 1,
                     account_A
                 )
+                const couponTotalHolders =
+                    await bondFacet.getTotalCouponHolders(numberOfCoupons + 1)
+                const couponHolders = await bondFacet.getCouponHolders(
+                    numberOfCoupons + 1,
+                    0,
+                    couponTotalHolders
+                )
 
                 expect(listCount).to.equal(numberOfCoupons + 1)
                 expect(coupon.snapshotId).to.equal(0)
@@ -748,6 +755,8 @@ describe('Bond Tests', () => {
                 expect(couponFor.rate).to.equal(couponRate)
                 expect(couponFor.tokenBalance).to.equal(0)
                 expect(couponFor.recordDateReached).to.equal(false)
+                expect(couponTotalHolders).to.equal(0)
+                expect(couponHolders.length).to.equal(couponTotalHolders)
             })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds', async () => {
@@ -799,9 +808,19 @@ describe('Bond Tests', () => {
                     numberOfCoupons + 1,
                     account_A
                 )
+                const couponTotalHolders =
+                    await bondFacet.getTotalCouponHolders(numberOfCoupons + 1)
+                const couponHolders = await bondFacet.getCouponHolders(
+                    numberOfCoupons + 1,
+                    0,
+                    couponTotalHolders
+                )
 
                 expect(couponFor.tokenBalance).to.equal(TotalAmount)
                 expect(couponFor.recordDateReached).to.equal(true)
+                expect(couponTotalHolders).to.equal(1)
+                expect(couponHolders.length).to.equal(couponTotalHolders)
+                expect(couponHolders).to.have.members([account_A])
             })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds', async () => {
@@ -859,9 +878,19 @@ describe('Bond Tests', () => {
                     numberOfCoupons + 1,
                     account_A
                 )
+                const couponTotalHolders =
+                    await bondFacet.getTotalCouponHolders(numberOfCoupons + 1)
+                const couponHolders = await bondFacet.getCouponHolders(
+                    numberOfCoupons + 1,
+                    0,
+                    couponTotalHolders
+                )
 
                 expect(couponFor.tokenBalance).to.equal(TotalAmount)
                 expect(couponFor.recordDateReached).to.equal(true)
+                expect(couponTotalHolders).to.equal(1)
+                expect(couponHolders.length).to.equal(couponTotalHolders)
+                expect(couponHolders).to.have.members([account_A])
             })
 
             it('GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds', async () => {
@@ -998,6 +1027,13 @@ describe('Bond Tests', () => {
                 for (let i = 1; i <= numberOfCoupons; i++) {
                     const coupon = await bondFacet.getCoupon(i)
                     const couponFor = await bondFacet.getCouponFor(i, account_A)
+                    const couponTotalHolders =
+                        await bondFacet.getTotalCouponHolders(i)
+                    const couponHolders = await bondFacet.getCouponHolders(
+                        i,
+                        0,
+                        couponTotalHolders
+                    )
 
                     expect(coupon.coupon.recordDate).to.equal(
                         firstCouponDate + (i - 1) * frequency
@@ -1016,6 +1052,8 @@ describe('Bond Tests', () => {
                     expect(couponFor.tokenBalance).to.equal(0)
                     expect(couponFor.rate).to.equal(rate)
                     expect(couponFor.recordDateReached).to.equal(false)
+                    expect(couponTotalHolders).to.equal(0)
+                    expect(couponHolders.length).to.equal(couponTotalHolders)
                 }
             })
         })

@@ -381,6 +381,16 @@ import SetAddressFrozenRequest from './security/operations/freeze/SetAddressFroz
 import DeactivateInternalKycRequest from './security/kyc/DeactivateInternalKycRequest';
 import TakeSnapshotRequest from './security/operations/snapshot/TakeSnapshotRequest';
 import RedeemAtMaturityByPartitionRequest from './bond/RedeemAtMaturityByPartitionRequest';
+import GetTokenHoldersAtSnapshotRequest from './security/operations/snapshot/GetTokenHoldersAtSnapshotRequest';
+import GetTotalTokenHoldersAtSnapshotRequest from './security/operations/snapshot/GetTotalTokenHoldersAtSnapshotRequest';
+import GetCouponHoldersRequest from './bond/GetCouponHoldersRequest';
+import GetTotalCouponHoldersRequest from './bond/GetTotalCouponHoldersRequest';
+import GetDividendHoldersRequest from './equity/GetDividendHoldersRequest';
+import GetTotalDividendHoldersRequest from './equity/GetTotalDividendHoldersRequest';
+import GetTotalVotingHoldersRequest from './equity/GetTotalVotingHoldersRequest';
+import GetVotingHoldersRequest from './equity/GetVotingHoldersRequest';
+import GetSecurityHoldersRequest from './security/GetSecurityHoldersRequest';
+import GetTotalSecurityHoldersRequest from './security/GetTotalSecurityHoldersRequest';
 
 export {
   CreateEquityRequest,
@@ -560,4 +570,14 @@ export {
   SetAddressFrozenRequest,
   TakeSnapshotRequest,
   RedeemAtMaturityByPartitionRequest,
+  GetTokenHoldersAtSnapshotRequest,
+  GetTotalTokenHoldersAtSnapshotRequest,
+  GetCouponHoldersRequest,
+  GetTotalCouponHoldersRequest,
+  GetDividendHoldersRequest,
+  GetTotalDividendHoldersRequest,
+  GetVotingHoldersRequest,
+  GetTotalVotingHoldersRequest,
+  GetSecurityHoldersRequest,
+  GetTotalSecurityHoldersRequest,
 };

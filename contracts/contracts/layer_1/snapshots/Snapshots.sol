@@ -241,6 +241,20 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         balance_ = _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
+    function getTokenHoldersAtSnapshot(
+        uint256 _snapshotID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_) {
+        return _tokenHoldersAt(_snapshotID, _pageIndex, _pageLength);
+    }
+
+    function getTotalTokenHoldersAtSnapshot(
+        uint256 _snapshotID
+    ) external view returns (uint256) {
+        return _totalTokenHoldersAt(_snapshotID);
+    }
+
     function balanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,
@@ -349,7 +363,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](13);
+        staticFunctionSelectors_ = new bytes4[](15);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfAtSnapshot
@@ -386,6 +400,12 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .decimalsAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTokenHoldersAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalTokenHoldersAtSnapshot
             .selector;
     }
 

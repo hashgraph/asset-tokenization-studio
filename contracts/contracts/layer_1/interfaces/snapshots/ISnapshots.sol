@@ -206,16 +206,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    CountersUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-import {ISnapshotsStorageWrapper} from './ISnapshotsStorageWrapper.sol';
+import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import {ISnapshotsStorageWrapper} from "./ISnapshotsStorageWrapper.sol";
 
 // Snapshotted values have arrays of ids and the value corresponding to that id. These could be an array of a
 // Snapshot struct, but that would impede usage of functions that work on an array.
 struct Snapshots {
     uint256[] ids;
     uint256[] values;
+}
+
+struct SnapshotsAddress {
+    uint256[] ids;
+    address[] values;
 }
 
 struct ListOfPartitions {
@@ -252,6 +255,8 @@ struct SnapshotStorage {
     Snapshots decimals;
     mapping(address => Snapshots) accountFrozenBalanceSnapshots;
     mapping(address => mapping(bytes32 => Snapshots)) accountPartitionFrozenBalanceSnapshots;
+    mapping(uint256 => SnapshotsAddress) tokenHoldersSnapshots;
+    Snapshots totalTokenHoldersSnapshots;
 }
 
 interface ISnapshots is ISnapshotsStorageWrapper {
@@ -296,4 +301,14 @@ interface ISnapshots is ISnapshotsStorageWrapper {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_);
+
+    function getTokenHoldersAtSnapshot(
+        uint256 _snapshotID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalTokenHoldersAtSnapshot(
+        uint256 _snapshotID
+    ) external view returns (uint256);
 }
