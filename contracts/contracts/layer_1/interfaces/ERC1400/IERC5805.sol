@@ -204,35 +204,11 @@
 */
 
 // SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.18;
 
-import {
-    TransferAndLock
-} from '../../../layer_3/transferAndLock/TransferAndLock.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+import '@openzeppelin/contracts/interfaces/IERC6372.sol';
+import {IVotes} from './IVotes.sol';
 
-contract TransferAndLockTimeTravel is
-    TransferAndLock,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+// solhint-disable no-empty-blocks
+interface IERC5805 is IERC6372, IVotes {}

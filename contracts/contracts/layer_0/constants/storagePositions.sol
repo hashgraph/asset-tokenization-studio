@@ -220,6 +220,12 @@ bytes32 constant _ERC1410_BASIC_STORAGE_POSITION = 0x67661db80d37d3b9810c430f789
 // keccak256('security.token.standard.erc20.storage');
 bytes32 constant _ERC20_STORAGE_POSITION = 0xd5228ac65cba3eaaef0669de6709c44cfdf33c0f1cce2989d4a133e0214cce57;
 
+// keccak256('security.token.standard.erc20permit.storage');
+bytes32 constant _ERC20PERMIT_STORAGE_POSITION = 0x2eab7c044bb5364d7d7f71ddae6058a0259318944e16332fb2c4b0d4df71bb00;
+
+// keccak256('security.token.standard.erc20votes.storage');
+bytes32 constant _ERC20VOTES_STORAGE_POSITION = 0x267abaf3c47dd2e587e53273fad716e2b95949f6838b817b0c728f0beea38c12;
+
 // keccak256('security.token.standard.corporateactions.storage');
 bytes32 constant _CORPORATE_ACTION_STORAGE_POSITION = 0x9db84024bbea48a7580380e27785cf3e0d08fada233c84760c8a5aff47f86e12;
 

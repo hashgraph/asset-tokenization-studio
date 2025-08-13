@@ -214,6 +214,8 @@ import {
 import {_DEFAULT_ADMIN_ROLE} from '../layer_1/constants/roles.sol';
 import {IControlList} from '../layer_1/interfaces/controlList/IControlList.sol';
 import {IERC20} from '../layer_1/interfaces/ERC1400/IERC20.sol';
+import {IERC20Permit} from '../layer_1/interfaces/ERC1400/IERC20Permit.sol';
+import {IERC20Votes} from '../layer_1/interfaces/ERC1400/IERC20Votes.sol';
 import {IERC1644} from '../layer_1/interfaces/ERC1400/IERC1644.sol';
 import {IERC1410Basic} from '../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 import {ICap} from '../layer_1/interfaces/cap/ICap.sol';
@@ -454,5 +456,11 @@ contract Factory is IFactory, LocalContext {
 
         IExternalKycListManagement(securityAddress_)
             .initialize_ExternalKycLists(_securityData.externalKycLists);
+
+        IERC20Votes(securityAddress_).initialize_ERC20Votes(
+            _securityData.erc20VotesActivated
+        );
+
+        IERC20Permit(securityAddress_).initialize_ERC20Permit();
     }
 }

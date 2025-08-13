@@ -235,6 +235,10 @@ bytes32 constant _ERC20PERMIT_TYPEHASH = keccak256(
     'Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)'
 );
 
+bytes32 constant _DELEGATION_ERC20VOTES_TYPEHASH = keccak256(
+    'Delegation(address delegatee,uint256 nonce,uint256 expiry)'
+);
+
 bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
 bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
 bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
