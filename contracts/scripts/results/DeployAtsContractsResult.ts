@@ -246,6 +246,7 @@ import {
     ERC1410TokenHolderFacet,
     ERC3643Facet,
     ERC3643BatchFacet,
+    ERC20Permit,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -261,6 +262,7 @@ export interface DeployAtsContractsResultParams {
     erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
     erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
     erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>
+    erc20Permit: DeployContractWithFactoryResult<ERC20Permit>
     erc1594: DeployContractWithFactoryResult<ERC1594>
     erc1643: DeployContractWithFactoryResult<ERC1643>
     erc1644: DeployContractWithFactoryResult<ERC1644>
@@ -306,6 +308,7 @@ export default class DeployAtsContractsResult {
     public readonly erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
     public readonly erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
     public readonly erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>
+    public readonly erc20Permit: DeployContractWithFactoryResult<ERC20Permit>
     public readonly erc1594: DeployContractWithFactoryResult<ERC1594>
     public readonly erc1643: DeployContractWithFactoryResult<ERC1643>
     public readonly erc1644: DeployContractWithFactoryResult<ERC1644>
@@ -350,6 +353,7 @@ export default class DeployAtsContractsResult {
         erc1410ReadFacet,
         erc1410ManagementFacet,
         erc1410TokenHolderFacet,
+        erc20Permit,
         erc1594,
         erc1643,
         erc1644,
@@ -393,6 +397,7 @@ export default class DeployAtsContractsResult {
         this.erc1410ReadFacet = erc1410ReadFacet
         this.erc1410ManagementFacet = erc1410ManagementFacet
         this.erc1410TokenHolderFacet = erc1410TokenHolderFacet
+        this.erc20Permit = erc20Permit
         this.erc1594 = erc1594
         this.erc1643 = erc1643
         this.erc1644 = erc1644

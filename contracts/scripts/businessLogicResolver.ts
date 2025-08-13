@@ -248,6 +248,7 @@ export interface DeployedBusinessLogics {
     corporateActions: IStaticFunctionSelectors
     pause: IStaticFunctionSelectors
     ERC20: IStaticFunctionSelectors
+    ERC20Permit: IStaticFunctionSelectors
     ERC1644: IStaticFunctionSelectors
     erc1410ReadFacet: IStaticFunctionSelectors
     erc1410ManagementFacet: IStaticFunctionSelectors

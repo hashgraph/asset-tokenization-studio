@@ -234,6 +234,7 @@ export const CONTRACT_NAMES = [
     'ERC1410ReadFacet',
     'ERC1410ManagementFacet',
     'ERC1410TokenHolderFacet',
+    'ERC20Permit',
     'ERC1594',
     'ERC1643',
     'ERC1644',
