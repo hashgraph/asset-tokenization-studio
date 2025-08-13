@@ -203,6 +203,62 @@ In order to execute all the tests run this command from the _contracts_ folder:
 npm run test
 ```
 
+### Architecture
+
+The Asset Tokenization Studio uses a modular diamond pattern architecture where functionality is split into facets. This approach allows for upgradeable contracts while maintaining gas efficiency.
+
+#### Core Facets
+
+**ERC1400 Token Standard Facets:**
+
+- `ERC1410ManagementFacet`: Token partition management and administrative functions
+- `ERC1410ReadFacet`: Read-only token state queries
+- `ERC1410TokenHolderFacet`: Token holder operations (transfers, approvals)
+- `ERC20`: Basic ERC20 compatibility layer
+- `ERC1594`: Security token issuance and redemption
+- `ERC1644`: Controller operations for forced transfers
+
+**ERC3643 (T-REX) Compliance Facets:**
+
+- `ERC3643Facet`: Core ERC3643 token operations (mint, burn, forced transfers)
+- `ERC3643BatchFacet`: Batch operations for gas-efficient bulk actions
+- `FreezeFacet`: Advanced freeze functionality for partial and full address freezing
+
+**Hold & Clearing Facets:**
+
+- `HoldManagementFacet`: Hold creation and management
+- `HoldReadFacet`: Hold state queries
+- `HoldTokenHolderFacet`: Token holder hold operations
+- `ClearingHoldCreationFacet`: Clearing-specific hold creation
+- `ClearingTransferFacet`: Clearing transfers
+- `ClearingRedeemFacet`: Clearing redemptions
+- `ClearingActionsFacet`: Clearing operation approvals
+- `ClearingReadFacet`: Clearing state queries
+
+### Security Roles
+
+The platform implements a comprehensive role-based access control system:
+
+#### Administrative Roles
+
+- **Admin Role**: Full administrative control over the security token
+- **TREX Owner**: Owner of ERC3643 tokens with special privileges for compliance configuration
+- **Diamond Owner**: Contract upgrade and facet management permissions
+
+#### Operational Roles
+
+- **Agent**: Can perform mint, burn, and forced transfer operations
+- **Freeze Manager**: Can freeze/unfreeze tokens and addresses
+- **Controller**: Can execute controller transfers and redemptions
+- **Minter**: Can mint new tokens (legacy role, use Agent for ERC3643)
+- **Locker**: Can lock tokens for specified periods
+- **Control List Manager**: Manages whitelist/blacklist entries
+- **KYC Manager**: Manages KYC status for investors
+- **SSI Manager**: Manages self-sovereign identity configurations
+- **Pause Manager**: Can pause/unpause token operations
+- **Snapshot Manager**: Can create token balance snapshots
+- **Corporate Actions Manager**: Can execute dividends, voting rights, etc.
+
 ### Adding a new facet
 
 When introducing a new facet to the project, make sure to follow these steps:
@@ -216,7 +272,11 @@ When introducing a new facet to the project, make sure to follow these steps:
 3. **Deploy the facet** <br>
    In `scripts/deploy.ts`, within the `deployAtsContracts` function, add the logic to deploy the new facet and ensure the script awaits its deployment.
 
-# Latest Deployed Smart Contracts
+4. **Configure facet selectors** <br>
+   Ensure the facet's function selectors are properly registered in the diamond cut process.
+
+# Deployed Smart Contracts
+
 | **Contract**                           | **Address**                                | **ID**      |
 | -------------------------------------- | ------------------------------------------ | ----------- |
 | Access Control                         | 0x2b1a41557be3cE6c2BF0cC9bdb79D679c284A066 | 0.0.6564711 |
@@ -266,7 +326,6 @@ When introducing a new facet to the project, make sure to follow these steps:
 | SsiManagement                          | 0xD72dbf497e3917d3Ef64FB7C668731D4CFd3466E | 0.0.6564725 |
 | Transfer and Lock                      | 0xa50647E96C08f2C4c164d2050A1F00BDE4F6B725 | 0.0.6564801 |
 
-
 # 🔐 Role Definitions by Layer
 
 This project follows a layered smart contract architecture with role-based access control using `AccessControl`. Roles are defined in three distinct layers to separate responsibilities and permissions.
@@ -293,7 +352,7 @@ bytes32 constant _WILD_CARD_ROLE = 0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec01
 bytes32 constant _AGENT_ROLE = 0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6;
 ```
 
-## 🟨 Layer 1: 
+## 🟨 Layer 1:
 
 ```solidity
 bytes32 constant _DEFAULT_ADMIN_ROLE = 0x00;
@@ -309,7 +368,7 @@ bytes32 constant _FREEZE_MANAGER_ROLE = 0xd0e5294c1fc630933e135c5b668c5d57757675
 bytes32 constant _MATURITY_REDEEMER_ROLE = 0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c;
 ```
 
-## 🟩 Layer 2: 
+## 🟩 Layer 2:
 
 ```solidity
 bytes32 constant _ADJUSTMENT_BALANCE_ROLE = 0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9;
@@ -319,4 +378,4 @@ bytes32 constant _ADJUSTMENT_BALANCE_ROLE = 0x6d0d63b623e69df3a6ea8aebd01f360a02
 
 ## 🧩 Notes:
 
-- All roles are `bytes32` constants derived using:  `keccak256("security.token.standard.role.<roleName>")` *(replace `<roleName>` with the actual role string)*
+- All roles are `bytes32` constants derived using: `keccak256("security.token.standard.role.<roleName>")` _(replace `<roleName>` with the actual role string)_

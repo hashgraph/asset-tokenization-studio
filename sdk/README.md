@@ -145,12 +145,12 @@ Sets a new configuration into the SDK.
 - Request
 
   - diamondOwnerAccount: Hedera id of the account deploying the security
-  - Currency: hexadecimal of the currency’s 3 letter ISO code
+  - Currency: hexadecimal of the currency's 3 letter ISO code
   - numberOfUnits: maximum supply
   - nominalValue: only for information, represents the value of a single bond.
-  - startingDate: Bond’s starting date in seconds
-  - maturityDate: Bond’s maturity date in seconds
-  - couponFrequency: seconds in between two consecutives coupon’s record date
+  - startingDate: Bond's starting date in seconds
+  - maturityDate: Bond's maturity date in seconds
+  - couponFrequency: seconds in between two consecutives coupon's record date
   - couponRate: coupon interest rate in percentage. Only for information.
   - firstCouponDate: record date, in seconds, of the first coupon.
   - regulationType:
@@ -162,9 +162,12 @@ Sets a new configuration into the SDK.
     - 1 : 506 B
     - 2 : 506 C
   - isCountryControlListWhiteList :
-    - True: list of “countries” are the not banned, all other countries are banned
-    - False: list of “countries” are banned, all other countries are not banned.
+    - True: list of "countries" are the not banned, all other countries are banned
+    - False: list of "countries" are banned, all other countries are not banned.
   - countries: comma separated list of banned/not banned countries in 2-letters ISO format.
+  - enableERC3643 (optional): boolean to enable ERC3643 compliance features
+  - complianceModules (optional): array of compliance module addresses (requires enableERC3643)
+  - identityRegistry (optional): identity registry contract address (requires enableERC3643)
 
 - Response
   - SecurityViewModel:
@@ -203,7 +206,7 @@ Creates a new coupon for the bond.
   - redemptionRight: the equity grants redemption rights to its holders
   - putRight: the equity grants put rights to its holders
   - dividendRight: the equity grants dividend rights to its holders
-  - Currency: hexadecimal of the currency’s 3 letter ISO code
+  - Currency: hexadecimal of the currency's 3 letter ISO code
   - numberOfShares: maximum supply
   - nominalValue: only for information, represents the value of a single equity.
   - regulationType:
@@ -215,9 +218,12 @@ Creates a new coupon for the bond.
     - 1 : 506 B
     - 2 : 506 C
   - isCountryControlListWhiteList :
-    - True: list of “countries” are the not banned, all other countries are banned
-    - False: list of “countries” are banned, all other countries are not banned.
+    - True: list of "countries" are the not banned, all other countries are banned
+    - False: list of "countries" are banned, all other countries are not banned.
   - countries: comma separated list of banned/not banned countries in 2-letters ISO format.
+  - enableERC3643 (optional): boolean to enable ERC3643 compliance features
+  - complianceModules (optional): array of compliance module addresses (requires enableERC3643)
+  - identityRegistry (optional): identity registry contract address (requires enableERC3643)
 
 - Response
   - SecurityViewModel:
@@ -272,6 +278,353 @@ Mints new assets to a given account
   - Payload: True (success), false (failed)
   - TransactionId:
     Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### mint
+
+Mints new tokens to a specified account. Requires the Agent role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - targetId: account's Hedera id
+  - amount: amount to be minted with decimals included
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+### burn
+
+Burns tokens from a specified account. Requires the Agent role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - targetId: account's Hedera id (optional, defaults to sender)
+  - amount: amount to be burned with decimals included
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+### forcedTransfer
+
+Forces a transfer between accounts, bypassing normal transfer restrictions. Requires the Agent role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - sourceId: source account's Hedera id
+  - targetId: destination account's Hedera id
+  - amount: amount to be transferred with decimals included
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+### freezePartialTokens
+
+Freezes a partial amount of tokens for a target account (ERC3643 freeze). Requires the Freeze Manager role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - targetId: account's Hedera id
+  - amount: amount to be frozen with decimals included
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+### unfreezePartialTokens
+
+Unfreezes a partial amount of tokens for a target account. Requires the Freeze Manager role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - targetId: account's Hedera id
+  - amount: amount to be unfrozen with decimals included
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+### setAddressFrozen
+
+Freezes or unfreezes an entire address. Requires the Freeze Manager role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - targetId: account's Hedera id
+  - frozen: boolean (true to freeze, false to unfreeze)
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+### getFrozenPartialTokens
+
+Returns the frozen token amount for a target account.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - targetId: account's Hedera id
+
+- Response
+  - Payload: BalanceViewModel
+
+### Batch Operations
+
+#### batchTransfer
+
+Performs multiple transfers in a single transaction. Requires appropriate permissions.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - sourceIds: array of source account Hedera ids
+  - targetIds: array of destination account Hedera ids
+  - amounts: array of amounts to be transferred with decimals included
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### batchMint
+
+Mints tokens to multiple accounts in a single transaction. Requires the Agent role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - targetIds: array of account Hedera ids
+  - amounts: array of amounts to be minted with decimals included
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### batchBurn
+
+Burns tokens from multiple accounts in a single transaction. Requires the Agent role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - targetIds: array of account Hedera ids
+  - amounts: array of amounts to be burned with decimals included
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### batchForcedTransfer
+
+Forces multiple transfers in a single transaction. Requires the Agent role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - sourceIds: array of source account Hedera ids
+  - targetIds: array of destination account Hedera ids
+  - amounts: array of amounts to be transferred with decimals included
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### batchFreezePartialTokens
+
+Freezes partial amounts for multiple accounts. Requires the Freeze Manager role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - targetIds: array of account Hedera ids
+  - amounts: array of amounts to be frozen with decimals included
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### batchUnfreezePartialTokens
+
+Unfreezes partial amounts for multiple accounts. Requires the Freeze Manager role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - targetIds: array of account Hedera ids
+  - amounts: array of amounts to be unfrozen with decimals included
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### batchSetAddressFrozen
+
+Freezes or unfreezes multiple addresses. Requires the Freeze Manager role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - targetIds: array of account Hedera ids
+  - frozen: array of booleans (true to freeze, false to unfreeze)
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+### ERC3643 Compliance Features
+
+#### setCompliance
+
+Sets the compliance module for a security. Requires the TREX Owner role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - complianceAddress: address of the compliance module contract
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### compliance
+
+Returns the configured compliance module address (if any) for a security.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+
+- Response
+  - Payload: string (compliance module address)
+
+#### setIdentityRegistry
+
+Sets the identity registry for a security. Requires the TREX Owner role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - identityRegistryAddress: address of the identity registry contract
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### identityRegistry
+
+Returns the configured identity registry address (if any) for a security.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+
+- Response
+  - Payload: string (identity registry address)
+
+### Agent Management
+
+#### addAgent
+
+Adds an agent to the security token. Requires the TREX Owner role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - agentAddress: address of the agent to add
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### removeAgent
+
+Removes an agent from the security token. Requires the TREX Owner role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - agentAddress: address of the agent to remove
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+### Token Metadata Management
+
+#### setName
+
+Updates the token name. Requires the TREX Owner role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - name: new token name
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### setSymbol
+
+Updates the token symbol. Requires the TREX Owner role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - symbol: new token symbol
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### setOnchainID
+
+Sets the on-chain identity for the token. Requires the TREX Owner role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - onchainId: on-chain identity address
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+### Recovery Operations
+
+#### recoveryAddress
+
+Recovers tokens from a lost address to a recovery address. Requires the Agent role.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - lostAddress: address that lost access
+  - recoveryAddress: address to receive the recovered tokens
+  - investorOnchainId: on-chain identity of the investor
+
+- Response
+  - Payload: True (success), false (failed)
+  - TransactionId: Id of the Hedera transaction
+
+#### isAddressRecovered
+
+Checks if an address has been recovered.
+
+- Request
+
+  - securityId: Hedera id of the diamond contract representing the asset
+  - address: address to check
+
+- Response
+  - Payload: boolean (true if recovered, false otherwise)
 
 ### redeem
 
