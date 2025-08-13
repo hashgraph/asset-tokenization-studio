@@ -242,6 +242,8 @@ string constant _CONTRACT_NAME_PROTECTEDPARTITIONS = 'ProtectedPartitions';
 string constant _CONTRACT_VERSION_PROTECTEDPARTITIONS = '1.0.0';
 string constant _CONTRACT_NAME_ERC20VOTES = 'ERC20Votes';
 string constant _CONTRACT_VERSION_ERC20VOTES = '1.0.0';
+string constant _CONTRACT_NAME_ERC20PERMIT = 'ERC20Permit';
+string constant _CONTRACT_VERSION_ERC20PERMIT = '1.0.0';
 //keccak256(
 //    'protectedTransferFromByPartition(bytes32 _partition,address _from,address _to,uint256 _amount,uint256 _deadline,uint256 _nounce)'
 //);
