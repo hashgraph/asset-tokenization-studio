@@ -211,6 +211,8 @@ import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import ContractService from '@service/contract/ContractService';
 import { ComplianceQueryError } from './error/ComplianceQueryError';
+import { EVM_ZERO_ADDRESS, HEDERA_ZERO_ADDRESS } from '@core/Constants';
+import AccountService from '@service/account/AccountService';
 
 @QueryHandler(ComplianceQuery)
 export class ComplianceQueryHandler implements IQueryHandler<ComplianceQuery> {
@@ -219,6 +221,8 @@ export class ComplianceQueryHandler implements IQueryHandler<ComplianceQuery> {
     private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(query: ComplianceQuery): Promise<ComplianceQueryResponse> {
@@ -228,7 +232,12 @@ export class ComplianceQueryHandler implements IQueryHandler<ComplianceQuery> {
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
 
-      const res = await this.queryAdapter.compliance(securityEvmAddress);
+      let res = await this.queryAdapter.compliance(securityEvmAddress);
+
+      res =
+        res === EVM_ZERO_ADDRESS
+          ? HEDERA_ZERO_ADDRESS
+          : (await this.accountService.getAccountInfo(res)).id.toString();
 
       return new ComplianceQueryResponse(res);
     } catch (error) {
