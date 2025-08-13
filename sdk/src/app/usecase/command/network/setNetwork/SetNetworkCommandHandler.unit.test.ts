@@ -213,7 +213,7 @@ import {
   SetNetworkCommandResponse,
 } from './SetNetworkCommand';
 import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { ErrorMsgFixture } from '@test/fixtures/shared/DataFixture';
 import { SetNetworkCommandError } from './error/SetNetworkCommandError';
 import { ErrorCode } from '@core/error/BaseError';

@@ -239,7 +239,7 @@ import EventService from '@service/event/EventService';
 import LogService from '@service/log/LogService';
 import { Signer, ethers } from 'ethers';
 import type { Provider } from '@ethersproject/providers';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import TransactionAdapter, {
   InitializationData,
 } from '@port/out/TransactionAdapter';

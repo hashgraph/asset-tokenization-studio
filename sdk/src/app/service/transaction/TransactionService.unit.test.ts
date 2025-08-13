@@ -203,7 +203,7 @@
 
 */
 
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { createMock } from '@golevelup/ts-jest';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import TransactionService from './TransactionService';

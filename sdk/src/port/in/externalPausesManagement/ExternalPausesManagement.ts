@@ -205,7 +205,7 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { LogError } from '@core/decorator/LogErrorDecorator';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { CommandBus } from '@core/command/CommandBus';
 import {
   AddExternalPauseRequest,

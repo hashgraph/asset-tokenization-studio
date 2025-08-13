@@ -210,7 +210,7 @@ import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { createMock } from '@golevelup/ts-jest';
 import { QueryBus } from '@core/query/QueryBus';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,

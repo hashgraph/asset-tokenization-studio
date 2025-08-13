@@ -204,7 +204,7 @@
 */
 
 import { singleton } from 'tsyringe';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { QueryBus } from '@core/query/QueryBus';
 import NetworkService from '@service/network/NetworkService';
 import Service from '@service/Service';

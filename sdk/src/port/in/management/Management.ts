@@ -209,7 +209,7 @@ import { LogError } from '@core/decorator/LogErrorDecorator';
 import ValidatedRequest from '@core/validation/ValidatedArgs';
 import { UpdateConfigVersionCommand } from '@command/management/updateConfigVersion/updateConfigVersionCommand';
 import { QueryBus } from '@core/query/QueryBus';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { CommandBus } from '@core/command/CommandBus';
 import { GetConfigInfoRequest } from '../request';
 import UpdateResolverRequest from '../request/management/UpdateResolverRequest';

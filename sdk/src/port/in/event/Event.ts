@@ -204,7 +204,7 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import NetworkService from '@service/network/NetworkService';
 import WalletEvent, {
   ConnectionState,

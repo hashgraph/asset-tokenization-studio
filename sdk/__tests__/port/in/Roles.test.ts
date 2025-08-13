@@ -218,7 +218,7 @@ import {
   Equity,
   ApplyRolesRequest,
 } from '@port/in';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { MirrorNode } from '@domain/context/network/MirrorNode';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';

@@ -217,7 +217,7 @@ import ConnectRequest from '@port/in/request/network/ConnectRequest';
 import { MirrorNode } from '@domain/context/network/MirrorNode';
 import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
 import SecurityViewModel from '@port/in/response/SecurityViewModel';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import {
   CastRegulationSubType,
   CastRegulationType,

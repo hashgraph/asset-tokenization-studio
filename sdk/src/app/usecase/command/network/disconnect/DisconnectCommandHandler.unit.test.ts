@@ -207,7 +207,7 @@ import { createMock } from '@golevelup/ts-jest';
 import TransactionAdapter from '@port/out/TransactionAdapter';
 import { DisconnectCommandHandler } from './DisconnectCommandHandler';
 import { DisconnectCommandResponse } from './DisconnectCommand';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import { ErrorMsgFixture } from '@test/fixtures/shared/DataFixture';
 import { DisconnectCommandError } from './error/DisconnectCommandError';
 import { ErrorCode } from '@core/error/BaseError';

@@ -204,7 +204,7 @@
 */
 
 import { QueryBus } from '@core/query/QueryBus';
-import Injectable from '@core/Injectable';
+import Injectable from '@core/injectable/Injectable';
 import GetRegulationDetailsRequest from '../request/factory/GetRegulationDetailsRequest';
 import { LogError } from '@core/decorator/LogErrorDecorator';
 import RegulationViewModel from '../response/RegulationViewModel';
