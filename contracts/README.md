@@ -84,6 +84,7 @@ Deploys the full infrastructure (factory, resolver, facets, and initialized cont
 - `privateKey` (optional): Private key in raw hexadecimal format.
 - `signerAddress` (optional): Signer address from the Hardhat signers array.
 - `signerPosition` (optional): Index of the signer in the Hardhat signers array.
+- `network` (optional): The network to run the command on (e.g., localhost, mainnet, testnet).
 
 ```bash
 npx hardhat deployAll --useDeployed false

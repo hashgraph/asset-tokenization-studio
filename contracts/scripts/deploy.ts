@@ -1000,19 +1000,19 @@ export async function deployAtsContracts({
             holdReadFacet: await deployContractWithFactory(
                 commands.holdReadFacet
             ).then((result) => {
-                console.log('HoldRead has been deployed successfully')
+                console.log(`HoldRead has been deployed successfully at ${result.address}`)
                 return result
             }),
             holdManagementFacet: await deployContractWithFactory(
                 commands.holdManagementFacet
             ).then((result) => {
-                console.log('HoldManagement has been deployed successfully')
+                console.log(`HoldManagement has been deployed successfully at ${result.address}`)
                 return result
             }),
             holdTokenHolderFacet: await deployContractWithFactory(
                 commands.holdTokenHolderFacet
             ).then((result) => {
-                console.log('HoldTokenHolder has been deployed successfully')
+                console.log(`HoldTokenHolder has been deployed successfully at ${result.address}`)
                 return result
             }),
             erc20: await deployContractWithFactory(commands.erc20).then(
@@ -1026,14 +1026,14 @@ export async function deployAtsContracts({
             erc1410ReadFacet: await deployContractWithFactory(
                 commands.erc1410ReadFacet
             ).then((result) => {
-                console.log('ERC1410ReadFacet has been deployed successfully')
+                console.log(`ERC1410ReadFacet has been deployed successfully at ${result.address}`)
                 return result
             }),
             erc1410ManagementFacet: await deployContractWithFactory(
                 commands.erc1410ManagementFacet
             ).then((result) => {
                 console.log(
-                    'ERC1410ManagementFacet has been deployed successfully'
+                    `ERC1410ManagementFacet has been deployed successfully at ${result.address}`
                 )
                 return result
             }),
@@ -1041,7 +1041,7 @@ export async function deployAtsContracts({
                 commands.erc1410TokenHolderFacet
             ).then((result) => {
                 console.log(
-                    'ERC1410TokenHolderFacet has been deployed successfully'
+                    `ERC1410TokenHolderFacet has been deployed successfully at ${result.address}`
                 )
                 return result
             }),
@@ -1232,18 +1232,18 @@ export async function deployAtsContracts({
             erc3643Facet: await deployContractWithFactory(
                 commands.erc3643Facet
             ).then((result) => {
-                console.log('ERC3643Basic has been deployed successfully')
+                console.log(`ERC3643Basic has been deployed successfully at ${result.address}`)
                 return result
             }),
             erc3643BatchFacet: await deployContractWithFactory(
                 commands.erc3643BatchFacet
             ).then((result) => {
-                console.log('ERC3643Batch has been deployed successfully')
+                console.log(`ERC3643Batch has been deployed successfully at ${result.address}`)
                 return result
             }),
             freeze: await deployContractWithFactory(commands.freeze).then(
                 (result) => {
-                    console.log('Freeze has been deployed successfully')
+                    console.log(`Freeze has been deployed successfully at ${result.address}`)
                     return result
                 }
             ),
