@@ -57,7 +57,8 @@ export const ControlTab = ({ details, config }: ControlTabProps) => {
 
   return (
     <Box w={"full"} h={"full"}>
-      <PanelTabs tabs={tabs} />
+      <AdminControlActionsButtons />
+      <Tabs tabs={tabs} variant="secondary" isLazy />
     </Box>
   );
 };

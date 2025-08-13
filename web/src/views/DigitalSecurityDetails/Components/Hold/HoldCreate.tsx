@@ -68,6 +68,13 @@ export const HoldCreate = () => {
 
   const { control, formState, getValues, reset } = useForm<FormValues>({
     mode: "onChange",
+    defaultValues: {
+      originalAccount: address,
+      destinationAccount: "",
+      escrowAccount: "",
+      expirationDate: "",
+      amount: "",
+    },
   });
 
   const onSubmit = () => {
@@ -176,7 +183,6 @@ export const HoldCreate = () => {
               <InputController
                 control={control}
                 id="originalAccount"
-                defaultValue={address}
                 isDisabled={!forceHold}
                 rules={{ required, validate: { isHederaValidAddress } }}
                 placeholder={tCreate("originalAccount.label")}

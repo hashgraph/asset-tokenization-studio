@@ -205,6 +205,8 @@
 
 import {
   GetAllVotingRightsRequest,
+  GetTotalVotingHoldersRequest,
+  GetVotingHoldersRequest,
   GetVotingRightsForRequest,
   GetVotingRightsRequest,
   SetVotingRightsRequest,
@@ -227,6 +229,16 @@ export const GET_VOTING_RIGHTS_FOR = (
 
 export const GET_VOTING_RIGHTS = (securityId: string, votingId: number) =>
   `GET_VOTING_RIGHTS_${securityId}_${votingId}`;
+
+export const GET_VOTING_RIGHTS_HOLDERS = (
+  securityId: string,
+  votingId: number,
+) => `GET_VOTING_RIGHTS_HOLDERS_${securityId}_${votingId}`;
+
+export const GET_VOTING_RIGHTS_TOTAL_HOLDERS = (
+  securityId: string,
+  votingId: number,
+) => `GET_VOTING_RIGHTS_TOTAL_HOLDERS_${securityId}_${votingId}`;
 
 export const useSetVotingRights = () => {
   const toast = useToast();
@@ -295,6 +307,28 @@ export const useGetVotingRights = <TError, TData = VotingRightsViewModel>(
   return useQuery(
     [GET_VOTING_RIGHTS(params.securityId, params.votingId)],
     () => SDKService.getVotingRights(params),
+    options,
+  );
+};
+
+export const useGetVotingHolders = <TError, TData = string[]>(
+  params: GetVotingHoldersRequest,
+  options: UseQueryOptions<string[], TError, TData, [string]> = {},
+) => {
+  return useQuery(
+    [GET_VOTING_RIGHTS_HOLDERS(params.securityId, params.voteId)],
+    () => SDKService.getVotingHolders(params),
+    options,
+  );
+};
+
+export const useGetTotalVotingHolders = <TError, TData = number>(
+  params: GetTotalVotingHoldersRequest,
+  options: UseQueryOptions<number, TError, TData, [string]> = {},
+) => {
+  return useQuery(
+    [GET_VOTING_RIGHTS_TOTAL_HOLDERS(params.securityId, params.voteId)],
+    () => SDKService.getTotalVotingHolders(params),
     options,
   );
 };

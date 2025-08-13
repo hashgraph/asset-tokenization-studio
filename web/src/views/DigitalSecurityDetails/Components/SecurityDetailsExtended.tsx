@@ -208,7 +208,6 @@ import {
   DefinitionListProps,
   ClipboardButton,
   Text,
-  BasicDefinitionListItem,
 } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import {
@@ -222,19 +221,24 @@ import { Flex } from "@chakra-ui/react";
 import {
   BondDetailsViewModel,
   ComplianceRequest,
+  EquityDetailsViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useMemo } from "react";
 import { MaturityDateItem } from "./MadurityDateItem";
 import { DATE_TIME_FORMAT } from "../../../utils/constants";
 import { useGetCompliance } from "../../../hooks/queries/useCompliance";
 interface SecurityDetailsExtended extends Omit<DefinitionListProps, "items"> {
-  nominalValue?: number;
   bondDetailsResponse?: BondDetailsViewModel;
+  equityDetailsResponse?: EquityDetailsViewModel;
+  isLoadingSecurityDetails: boolean;
+  isFetchingSecurityDetails: boolean;
 }
 
 export const SecurityDetailsExtended = ({
-  nominalValue,
   bondDetailsResponse,
+  equityDetailsResponse,
+  isLoadingSecurityDetails,
+  isFetchingSecurityDetails,
   ...props
 }: SecurityDetailsExtended) => {
   const { t: tProperties } = useTranslation("properties");
@@ -250,8 +254,15 @@ export const SecurityDetailsExtended = ({
     },
   );
 
-  const defaultItems: BasicDefinitionListItem[] = useMemo(() => {
-    const items: BasicDefinitionListItem[] = [
+  const nominalValue = useMemo(() => {
+    return toNumber(
+      equityDetailsResponse?.nominalValue || bondDetailsResponse?.nominalValue,
+      2,
+    );
+  }, [equityDetailsResponse, bondDetailsResponse]);
+
+  const listItems = useMemo(() => {
+    const items = [
       {
         title: tProperties("name"),
         description: details?.name ?? "",
@@ -316,26 +327,23 @@ export const SecurityDetailsExtended = ({
       });
     }
 
-    if (details?.type === "BOND") {
-      if (!items.find(({ title }) => title === tProperties("startingDate"))) {
-        items.push({
-          title: tProperties("startingDate"),
-          description: formatDate(
-            bondDetailsResponse?.startingDate,
-            DATE_TIME_FORMAT,
-          ),
-        });
-      }
-      if (
-        bondDetailsResponse?.maturityDate &&
-        id &&
-        !items.find(({ title }) => title === tProperties("maturityDate"))
-      ) {
-        items.push({
-          title: tProperties("maturityDate"),
-          description: <MaturityDateItem securityId={id} />,
-        });
-      }
+    const isBond = details?.type === "BOND";
+
+    if (isBond && bondDetailsResponse?.startingDate) {
+      items.push({
+        title: tProperties("startingDate"),
+        description: formatDate(
+          bondDetailsResponse.startingDate,
+          DATE_TIME_FORMAT,
+        ),
+      });
+    }
+
+    if (isBond && bondDetailsResponse?.maturityDate && id) {
+      items.push({
+        title: tProperties("maturityDate"),
+        description: <MaturityDateItem securityId={id} />,
+      });
     }
 
     return items;
@@ -344,8 +352,8 @@ export const SecurityDetailsExtended = ({
   return (
     <DefinitionList
       data-testid="security-details"
-      isLoading={details === null}
-      items={defaultItems}
+      isLoading={isLoadingSecurityDetails || isFetchingSecurityDetails}
+      items={listItems}
       title="Details"
       {...props}
     />
