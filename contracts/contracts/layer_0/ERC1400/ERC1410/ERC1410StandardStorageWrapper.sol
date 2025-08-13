@@ -206,16 +206,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {DEFAULT_PARTITION} from '../../constants/values.sol';
-import {
-    IERC3643Basic
-} from '../../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
-import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
-import {IssueData} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
-import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
-import {
-    ERC1410OperatorStorageWrapper
-} from './ERC1410OperatorStorageWrapper.sol';
+import {DEFAULT_PARTITION} from "../../constants/values.sol";
+import {IERC3643Basic} from "../../../layer_1/interfaces/ERC3643/IERC3643Basic.sol";
+import {ICompliance} from "../../../layer_1/interfaces/ERC3643/ICompliance.sol";
+import {IssueData} from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
+import {LowLevelCall} from "../../common/libraries/LowLevelCall.sol";
+import {ERC1410OperatorStorageWrapper} from "./ERC1410OperatorStorageWrapper.sol";
 
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper

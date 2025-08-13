@@ -506,6 +506,13 @@ interface ITransactionAdapter {
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
+  redeemAtMaturityByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 interface RoleTransactionAdapter {
@@ -2142,6 +2149,15 @@ export default abstract class TransactionAdapter
   removeAgent(
     security: EvmAddress,
     agentId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  redeemAtMaturityByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
