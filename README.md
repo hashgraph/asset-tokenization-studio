@@ -27,21 +27,21 @@
 Asset Tokenization Studio (ATS) is a suite designed to enable the creation, management, and trading of security tokens on the Hedera network.
 
 The ATS facilitates the tokenization of traditional financial assets (equities and bonds) onto the Hedera distributed ledger, providing a framework for:
-- Creating and deploying security tokens
-- Managing token lifecycles
-- Implementing compliance and regulatory requirements
-- Enabling secure token transfers and operations
+
+-   Creating and deploying security tokens
+-   Managing token lifecycles
+-   Implementing compliance and regulatory requirements
+-   Enabling secure token transfers and operations
 
 The ATS consists of three primary components that work together to provide a complete tokenization solution:
 
-- Smart Contracts - The on-chain components deployed on the Hedera network
-- SDK - A software development kit that provides programmatic access to the contracts
-- Web Application - A user interface for interacting with the tokenized assets
+-   Smart Contracts - The on-chain components deployed on the Hedera network
+-   SDK - A software development kit that provides programmatic access to the contracts
+-   Web Application - A user interface for interacting with the tokenized assets
 
 The standard ERC for security tokens used in the smart contracts is ERC1400.
 
 Version 1.15.0 introduces partial compatibility with the ERC-3643 (TREX) standard; full support will follow in upcoming releases.
-
 
 # Development manifesto
 
@@ -51,13 +51,20 @@ The development of the project follows enterprise-grade practices for software d
 
 By using DDD (Domain-Driven Design), we aim to create a shared language among all members of the project team, which allows us to focus our development efforts on thoroughly understanding the processes and rules of the domain. This helps to bring benefits such as increased efficiency and improved communication.
 
+## Token Standards Support
+
+The Asset Tokenization Studio supports multiple security token standards:
+
+-   **ERC1400**: Core security token standard with partition-based token management
+-   **ERC3643 (T-REX)**: Advanced compliance framework with identity registry, compliance modules, and sophisticated freeze capabilities
+
 # Prerequisites
 
-Ensure the following tools are installed with these versions:
+Ensure the following tools are installed:
 
--   **Node:**`v20.17.0`
--   **NPM:** `v10.8.3`
--   **Yarn:** `v1.22.22`
+-   **Node:** v20.19.4 (LTS: Iron) or newer
+-   **NPM :** v10.8.2 or newer
+-   **Yarn:** v1.22.22
 
 # Installation
 
@@ -151,6 +158,26 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 ## Critical Setup Recommendation for Optimal Performance
 
 For the best experience, we strongly recommend installing the [hiero-json-rpc-relay](https://github.com/hiero-ledger/hiero-json-rpc-relay/tree/main) on your local machine. The hashio API (`REACT_APP_RPC_NODE="https://testnet.hashio.io/api"`) has rate limits that may cause errors during operations. By setting up the relay locally, you can replace the `REACT_APP_RPC_NODE` environment variable with a local endpoint (e.g., `REACT_APP_RPC_NODE="http://localhost:7546"`) to ensure stable and uninterrupted performance.
+
+## Key Features
+
+### ERC3643 Compliance Framework
+
+The platform now includes comprehensive ERC3643 (T-REX) support featuring:
+
+-   **Identity Registry**: Manage investor identities and compliance status
+-   **Compliance Module**: Configurable compliance rules and restrictions
+-   **Advanced Freeze Capabilities**: Partial token freezing and address-level freeze controls
+-   **Agent Management**: Dedicated agent roles for compliance operations
+-   **Batch Operations**: Efficient batch transfers, mints, burns, and freeze operations
+-   **Recovery Address**: Account recovery mechanisms for lost access scenarios
+
+### Enhanced Token Operations
+
+-   **Forced Transfers**: Controller-initiated transfers for regulatory compliance
+-   **Batch Processing**: Multiple operations in single transactions for gas efficiency
+-   **Granular Freeze Controls**: Freeze specific amounts or entire addresses
+-   **Token Metadata Management**: On-chain token name, symbol, and metadata updates
 
 ## Custodian Integration
 
