@@ -8,8 +8,8 @@ import { useMemo } from "react";
 import { ExternalPause } from "../ExternalPause/ExternalPause";
 import { ExternalControl } from "../ExternalControl/ExternalControl";
 import { ExternalKYC } from "../ExternalKYC/ExternalKYC";
-import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 import { AdminControlActionsButtons } from "../AdminControlActionsButtons";
+import { Tabs } from "io-bricks-ui";
 
 interface ControlTabProps {
   details: SecurityViewModel;

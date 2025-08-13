@@ -238,7 +238,6 @@ import { OperationsTab } from "./Components/Tabs/Operations";
 import { ControlTab } from "./Components/Tabs/Control";
 import { CorporateActionsTab } from "./Components/Tabs/CorporateActions";
 import { hasRole } from "../../utils/helpers";
-import { PanelTabs } from "../../components/PanelTabs/PanelTabs";
 
 export const DigitalSecurityDetails = () => {
   const { id = "" } = useParams();
