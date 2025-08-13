@@ -203,31 +203,31 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { TransferCommandFixture } from '../../../../../../../__tests__/fixtures/transfer/TransferFixture.js';
-import SecurityService from 'app/service/security/SecurityService.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { ControllerTransferCommandHandler } from './ControllerTransferCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import { TransferCommandFixture } from '@test/fixtures/transfer/TransferFixture';
+import Account from '@domain/context/account/Account';
+import { Security } from '@domain/context/security/Security';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { ControllerTransferCommandHandler } from './ControllerTransferCommandHandler';
 import {
   ControllerTransferCommand,
   ControllerTransferCommandResponse,
-} from './ControllerTransferCommand.js';
-import { ControllerTransferCommandError } from './error/ControllerTransferCommandError.js';
+} from './ControllerTransferCommand';
+import { ControllerTransferCommandError } from './error/ControllerTransferCommandError';
+import SecurityService from '@service/security/SecurityService';
 
 describe('ControllerTransferCommandHandler', () => {
   let handler: ControllerTransferCommandHandler;

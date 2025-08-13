@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from './BaseError.js';
+import BaseError, { ErrorCode } from './BaseError';
 
 export class InvalidTimeUnits extends BaseError {
   constructor() {

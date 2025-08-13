@@ -203,18 +203,18 @@
 
 */
 
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import Injectable from '../../../../../core/Injectable.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import NetworkService from '../../../../service/network/NetworkService.js';
-import { SetNetworkCommandError } from './error/SetNetworkCommandError.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import Injectable from '@core/Injectable';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import NetworkService from '@service/network/NetworkService';
+import { SetNetworkCommandError } from './error/SetNetworkCommandError';
 import {
   SetNetworkCommand,
   SetNetworkCommandResponse,
-} from './SetNetworkCommand.js';
+} from './SetNetworkCommand';
 
 @CommandHandler(SetNetworkCommand)
 export class SetNetworkCommandHandler

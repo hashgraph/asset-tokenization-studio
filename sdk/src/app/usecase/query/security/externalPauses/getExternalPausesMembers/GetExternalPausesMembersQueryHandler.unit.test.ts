@@ -207,21 +207,21 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import SecurityService from '../../../../../service/security/SecurityService.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { Security } from '../../../../../../domain/context/security/Security.js';
-import { SecurityPropsFixture } from '../../../../../../../__tests__/fixtures/shared/SecurityFixture.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { GetExternalPausesMembersQueryHandler } from './GetExternalPausesMembersQueryHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import SecurityService from '@service/security/SecurityService';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { Security } from '@domain/context/security/Security';
+import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
+import AccountService from '@service/account/AccountService';
+import Account from '@domain/context/account/Account';
+import { GetExternalPausesMembersQueryHandler } from './GetExternalPausesMembersQueryHandler';
 import {
   GetExternalPausesMembersQuery,
   GetExternalPausesMembersQueryResponse,
-} from './GetExternalPausesMembersQuery.js';
-import { GetExternalPausesMembersQueryFixture } from '../../../../../../../__tests__/fixtures/externalPauses/ExternalPausesFixture.js';
+} from './GetExternalPausesMembersQuery';
+import { GetExternalPausesMembersQueryFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture';
 
 describe('GetExternalPausesMembersQueryHandler', () => {
   let handler: GetExternalPausesMembersQueryHandler;

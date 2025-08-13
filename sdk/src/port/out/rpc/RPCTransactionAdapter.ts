@@ -207,179 +207,38 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
 import TransactionAdapter, { InitializationData } from '../TransactionAdapter';
-import { ethers, Signer } from 'ethers';
+import { Signer } from 'ethers';
 import { singleton } from 'tsyringe';
-import Injectable from '../../../core/Injectable.js';
-import type { Provider } from '@ethersproject/providers';
-import detectEthereumProvider from '@metamask/detect-provider';
-import { RuntimeError } from '../../../core/error/RuntimeError.js';
-import Account from '../../../domain/context/account/Account.js';
-import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
-import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
-import NetworkService from '../../../app/service/network/NetworkService.js';
-import { MetaMaskInpageProvider } from '@metamask/providers';
-import { WalletConnectError } from '../../../domain/context/network/error/WalletConnectError.js';
-import EventService from '../../../app/service/event/EventService.js';
-import {
-  ConnectionState,
-  WalletEvents,
-} from '../../../app/service/event/WalletEvent.js';
-import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
-import LogService from '../../../app/service/log/LogService.js';
-import { WalletConnectRejectedError } from '../../../domain/context/network/error/WalletConnectRejectedError.js';
-import {
-  HederaNetworks,
-  unrecognized,
-} from '../../../domain/context/network/Environment.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import { SetNetworkCommand } from '../../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';
-import { SetConfigurationCommand } from '../../../app/usecase/command/network/setConfiguration/SetConfigurationCommand.js';
-import {
-  EnvironmentMirrorNode,
-  MirrorNode,
-  MirrorNodes,
-} from '../../../domain/context/network/MirrorNode.js';
-import {
-  EnvironmentJsonRpcRelay,
-  JsonRpcRelay,
-  JsonRpcRelays,
-} from '../../../domain/context/network/JsonRpcRelay.js';
-import {
-  EnvironmentFactory,
-  Factories,
-} from '../../../domain/context/factory/Factories.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter.js';
+import { RuntimeError } from '@core/error/RuntimeError';
+import Account from '@domain/context/account/Account';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter';
+import EventService from '@service/event/EventService';
+import LogService from '@service/log/LogService';
+import { CommandBus } from '@core/command/CommandBus';
+import { MirrorNode, MirrorNodes } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay, JsonRpcRelays } from '@domain/context/network/JsonRpcRelay';
+import { Factories } from '@domain/context/factory/Factories';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter';
 import {
   _PARTITION_ID_1,
-  ADD_TO_CONTROL_LIST_GAS,
-  AUTHORIZE_OPERATOR_GAS,
-  CONTROLLER_REDEEM_GAS,
-  CONTROLLER_TRANSFER_GAS,
-  CREATE_BOND_ST_GAS,
-  CREATE_EQUITY_ST_GAS,
-  GRANT_ROLES_GAS,
-  ISSUE_GAS,
-  LOCK_GAS,
-  MAX_ROLES_GAS,
-  PAUSE_GAS,
-  REDEEM_GAS,
-  RELEASE_GAS,
-  REMOVE_DOCUMENT_GAS,
-  REMOVE_FROM_CONTROL_LIST_GAS,
-  RENOUNCE_ROLES_GAS,
-  REVOKE_OPERATOR_GAS,
-  SET_COUPON_EVENT,
-  SET_COUPON_GAS,
-  SET_DIVIDEND_EVENT,
-  SET_DIVIDENDS_GAS,
-  SET_DOCUMENT_GAS,
-  SET_MAX_SUPPLY_GAS,
-  SET_VOTING_RIGHTS_EVENT,
-  SET_VOTING_RIGHTS_GAS,
-  TAKE_SNAPSHOT_GAS,
-  TRANSFER_AND_LOCK_GAS,
-  TRANSFER_GAS,
-  TRANSFER_OPERATOR_GAS,
-  TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
-  UNPAUSE_GAS,
-  UPDATE_CONFIG_GAS,
-  UPDATE_CONFIG_VERSION_GAS,
-  UPDATE_RESOLVER_GAS,
-  UPDATE_MATURITY_DATE_GAS,
-  SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
-  SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
-  PROTECT_PARTITION_GAS,
-  PROTECTED_TRANSFER_GAS,
-  PROTECTED_REDEEM_GAS,
-  UNPROTECT_PARTITION_GAS,
-  PROTECTED_TRANSFER_AND_LOCK_GAS,
-  CREATE_HOLD_GAS,
-  CREATE_HOLD_FROM_GAS,
-  CONTROLLER_CREATE_HOLD_GAS,
-  PROTECTED_CREATE_HOLD_GAS,
-  RELEASE_HOLD_GAS,
-  RECLAIM_HOLD_GAS,
-  EXECUTE_HOLD_BY_PARTITION_GAS,
-  ADD_ISSUER_GAS,
-  SET_REVOCATION_REGISTRY_GAS,
-  REMOVE_ISSUER_GAS,
-  GRANT_KYC_GAS,
-  REVOKE_KYC_GAS,
-  ACTIVATE_CLEARING_GAS,
-  DEACTIVATE_CLEARING_GAS,
-  CLEARING_TRANSFER_BY_PARTITION,
-  CLEARING_TRANSFER_FROM_BY_PARTITION,
-  PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
-  APPROVE_CLEARING_TRANSFER_BY_PARTITION,
-  CANCEL_CLEARING_TRANSFER_BY_PARTITION,
-  RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
-  CLEARING_REDEEM_BY_PARTITION,
-  CLEARING_REDEEM_FROM_BY_PARTITION,
-  PROTECTED_CLEARING_REDEEM_BY_PARTITION,
-  CLEARING_CREATE_HOLD_BY_PARTITION,
-  CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
-  PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
-  OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
-  OPERATOR_CLEARING_REDEEM_BY_PARTITION,
-  OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
-  UPDATE_EXTERNAL_PAUSES_GAS,
-  ADD_EXTERNAL_PAUSE_GAS,
-  REMOVE_EXTERNAL_PAUSE_GAS,
-  SET_PAUSED_MOCK_GAS,
-  CREATE_EXTERNAL_PAUSE_MOCK_GAS,
-  UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
-  ADD_EXTERNAL_CONTROL_LIST_GAS,
-  REMOVE_EXTERNAL_CONTROL_LIST_GAS,
-  ADD_TO_BLACK_LIST_MOCK_GAS,
-  ADD_TO_WHITE_LIST_MOCK_GAS,
-  REMOVE_FROM_BLACK_LIST_MOCK_GAS,
-  REMOVE_FROM_WHITE_LIST_MOCK_GAS,
-  CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
-  CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
-  UPDATE_EXTERNAL_KYC_LISTS_GAS,
-  ADD_EXTERNAL_KYC_LIST_GAS,
-  REMOVE_EXTERNAL_KYC_LIST_GAS,
-  GRANT_KYC_MOCK_GAS,
-  REVOKE_KYC_MOCK_GAS,
-  CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
-  ACTIVATE_INTERNAL_KYC_GAS,
-  DEACTIVATE_INTERNAL_KYC_GAS,
-  SET_NAME_GAS,
-  SET_SYMBOL_GAS,
-  BURN_GAS,
-  MINT_GAS,
-  FORCED_TRANSFER_GAS,
-  SET_ONCHAIN_ID_GAS,
-  SET_IDENTITY_REGISTRY_GAS,
-  SET_COMPLIANCE_GAS,
-  FREEZE_PARTIAL_TOKENS_GAS,
-  UNFREEZE_PARTIAL_TOKENS_GAS,
-  BATCH_TRANSFER_GAS,
-  BATCH_FORCED_TRANSFER_GAS,
-  BATCH_MINT_GAS,
-  BATCH_BURN_GAS,
-  BATCH_SET_ADDRESS_FROZEN_GAS,
-  BATCH_FREEZE_PARTIAL_TOKENS_GAS,
-  BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
   EVM_ZERO_ADDRESS,
-  RECOVERY_ADDRESS_GAS,
-  ADD_AGENT_GAS,
-  REMOVE_AGENT_GAS,
-  SET_ADDRESS_FROZEN_GAS,
-} from '../../../core/Constants.js';
-import { Security } from '../../../domain/context/security/Security.js';
-import { Rbac } from '../../../domain/context/factory/Rbac.js';
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
+  GAS,
+  SET_COUPON_EVENT,
+  SET_DIVIDEND_EVENT,
+  SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
+  SET_VOTING_RIGHTS_EVENT,
+} from '@core/Constants';
+import { Security } from '@domain/context/security/Security';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 import {
   FactoryBondToken,
   FactoryEquityToken,
-  FactoryRegulationData,
-} from '../../../domain/context/factory/FactorySecurityToken.js';
-import { ERC20MetadataInfo } from '../../../domain/context/factory/ERC20Metadata.js';
-import { SigningError } from '../error/SigningError.js';
+} from '@domain/context/factory/FactorySecurityToken';
+import { SigningError } from '../error/SigningError';
 import {
   AccessControl__factory,
   Bond__factory,
@@ -411,43 +270,28 @@ import {
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
   FreezeFacet__factory,
-  ERC3643BatchFacet__factory,
-  ERC1410TokenHolderFacet__factory,
-  ERC1410ManagementFacet__factory,
-  HoldTokenHolderFacet__factory,
-  HoldManagementFacet__factory,
-  ERC3643Facet__factory,
+  ERC1410ScheduledTasks__factory,
+  ERC3643__factory,
+  Hold__factory,
 } from '@hashgraph/asset-tokenization-contracts';
-import {
-  EnvironmentResolver,
-  Resolvers,
-} from '../../../domain/context/factory/Resolvers.js';
-import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
-import { BondDetailsData } from '../../../domain/context/factory/BondDetailsData.js';
-import { CouponDetailsData } from '../../../domain/context/factory/CouponDetailsData.js';
-import { EquityDetails } from '../../../domain/context/equity/EquityDetails.js';
-import { EquityDetailsData } from '../../../domain/context/factory/EquityDetailsData.js';
-import { SecurityData } from '../../../domain/context/factory/SecurityData.js';
-import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
-import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
-import {
-  CastRegulationSubType,
-  CastRegulationType,
-} from '../../../domain/context/factory/RegulationType.js';
-import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
-import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
+import { Resolvers } from '@domain/context/factory/Resolvers';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import { SecurityData } from '@domain/context/factory/SecurityData';
+import { TransferAndLock } from '@domain/context/security/TransferAndLock';
+import type { Provider } from '@ethersproject/providers';
 import {
   Hold,
   HoldIdentifier,
   ProtectedHold,
-} from '../../../domain/context/security/Hold.js';
+} from '@domain/context/security/Hold';
 import {
   BasicTransferInfo,
   IssueData,
   OperatorTransferData,
-} from '../../../domain/context/factory/ERC1410Metadata.js';
+} from '@domain/context/factory/ERC1410Metadata';
 import {
   CastClearingOperationType,
   ClearingOperation,
@@ -455,50 +299,81 @@ import {
   ClearingOperationIdentifier,
   ClearingOperationType,
   ProtectedClearingOperation,
-} from '../../../domain/context/security/Clearing.js';
-import { MissingRegulationSubType } from '../../../domain/context/factory/error/MissingRegulationSubType.js';
-import { MissingRegulationType } from '../../../domain/context/factory/error/MissingRegulationType.js';
-import { ContractId } from '@hashgraph/sdk';
-
-declare const ethereum: MetaMaskInpageProvider;
+} from '@domain/context/security/Clearing';
+import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
+import NetworkService from '@service/network/NetworkService';
+import MetamaskService from '@service/wallet/metamask/MetamaskService';
 
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {
-  account: Account;
-  signerOrProvider: Signer | Provider;
-  mirrorNodes: MirrorNodes;
-  jsonRpcRelays: JsonRpcRelays;
-  factories: Factories;
-  resolvers: Resolvers;
+  private metamaskService: MetamaskService;
 
   constructor(
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(NetworkService)
-    private readonly networkService: NetworkService,
-    @lazyInject(EventService)
-    private readonly eventService: EventService,
-    @lazyInject(CommandBus)
-    private readonly commandBus: CommandBus,
+    @lazyInject(NetworkService) private readonly networkService: NetworkService,
+    @lazyInject(EventService) private readonly eventService: EventService,
+    @lazyInject(CommandBus) private readonly commandBus: CommandBus,
   ) {
     super();
-    this.registerMetamaskEvents();
+    this.metamaskService = new MetamaskService(
+      this.eventService,
+      this.commandBus,
+      this.networkService,
+      this.mirrorNodeAdapter,
+    );
+    this.metamaskService.registerMetamaskEvents();
   }
 
   async init(debug = false): Promise<string> {
-    !debug && (await this.connectMetamask(false));
-    const eventData = {
-      initData: {
-        account: this.account,
-        pairing: '',
-        topic: '',
-      },
-      wallet: SupportedWallets.METAMASK,
-    };
-    this.eventService.emit(WalletEvents.walletInit, eventData);
-    LogService.logTrace('Metamask Initialized ', eventData);
+    return this.metamaskService.init(debug);
+  }
 
-    return this.networkService.environment;
+  async register(
+    account?: Account,
+    debug = false,
+  ): Promise<InitializationData> {
+    return this.metamaskService.register(this, account, debug);
+  }
+
+  async stop(): Promise<boolean> {
+    return this.metamaskService.stop();
+  }
+
+  async signAndSendTransaction(
+    t: RPCTransactionAdapter,
+  ): Promise<TransactionResponse> {
+    throw new RuntimeError('Method not implemented.');
+  }
+
+  getMirrorNodeAdapter(): MirrorNodeAdapter {
+    return this.mirrorNodeAdapter;
+  }
+
+  getAccount(): Account {
+    return this.metamaskService.getAccount();
+  }
+
+  setConfig(config: {
+    mirrorNodes?: MirrorNodes;
+    jsonRpcRelays?: JsonRpcRelays;
+    factories?: Factories;
+    resolvers?: Resolvers;
+  }): void {
+    this.metamaskService.setConfig({
+      mirrorNodes: config.mirrorNodes,
+      jsonRpcRelays: config.jsonRpcRelays,
+      factories: config.factories,
+      resolvers: config.resolvers,
+    });
+  }
+
+  getSignerOrProvider(): Signer | Provider {
+    return this.metamaskService.getSignerOrProvider();
+  }
+
+  setSignerOrProvider(signerOrProvider: Signer | Provider): void {
+    return this.metamaskService.setSignerOrProvider(signerOrProvider);
   }
 
   async createEquity(
@@ -514,112 +389,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
-    try {
-      if (!securityInfo.regulationType) {
-        throw new MissingRegulationType();
-      }
-      if (!securityInfo.regulationsubType) {
-        throw new MissingRegulationSubType();
-      }
-
-      const rbacAdmin: Rbac = {
-        role: SecurityRole._DEFAULT_ADMIN_ROLE,
-        members: [diamondOwnerAccount!.toString()],
-      };
-      const rbacs: Rbac[] = [rbacAdmin];
-
-      const erc20MetadataInfo: ERC20MetadataInfo = {
-        name: securityInfo.name,
-        symbol: securityInfo.symbol,
-        isin: securityInfo.isin,
-        decimals: securityInfo.decimals,
-      };
-
-      const resolverProxyConfiguration: ResolverProxyConfiguration = {
-        key: configId,
-        version: configVersion,
-      };
-
-      const security: SecurityData = {
-        arePartitionsProtected: securityInfo.arePartitionsProtected,
-        isMultiPartition: securityInfo.isMultiPartition,
-        resolver: resolver.toString(),
-        resolverProxyConfiguration: resolverProxyConfiguration,
-        rbacs: rbacs,
-        isControllable: securityInfo.isControllable,
-        isWhiteList: securityInfo.isWhiteList,
-        maxSupply: securityInfo.maxSupply
-          ? securityInfo.maxSupply.toString()
-          : '0',
-        erc20MetadataInfo: erc20MetadataInfo,
-        clearingActive: securityInfo.clearingActive,
-        internalKycActivated: securityInfo.internalKycActivated,
-        externalPauses:
-          externalPauses?.map((address) => address.toString()) ?? [],
-        externalControlLists:
-          externalControlLists?.map((address) => address.toString()) ?? [],
-        externalKycLists:
-          externalKycLists?.map((address) => address.toString()) ?? [],
-        compliance: compliance.toString(),
-      };
-
-      const equityDetails: EquityDetailsData = {
-        votingRight: equityInfo.votingRight,
-        informationRight: equityInfo.informationRight,
-        liquidationRight: equityInfo.liquidationRight,
-        subscriptionRight: equityInfo.subscriptionRight,
-        conversionRight: equityInfo.conversionRight,
-        redemptionRight: equityInfo.redemptionRight,
-        putRight: equityInfo.putRight,
-        dividendRight: CastDividendType.toNumber(equityInfo.dividendRight),
-        currency: equityInfo.currency,
-        nominalValue: equityInfo.nominalValue.toString(),
-      };
-
-      const securityTokenToCreate = new FactoryEquityToken(
-        security,
-        equityDetails,
-      );
-
-      const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: securityInfo.isCountryControlListWhiteList,
-        listOfCountries: securityInfo.countries ?? '',
-        info: securityInfo.info ?? '',
-      };
-
-      const factoryRegulationData = new FactoryRegulationData(
-        CastRegulationType.toNumber(securityInfo.regulationType),
-        CastRegulationSubType.toNumber(securityInfo.regulationsubType),
-        additionalSecurityData,
-      );
-
-      const factoryInstance = Factory__factory.connect(
-        factory.toString(),
-        this.signerOrProvider,
-      );
-      LogService.logTrace('Deploying factory: ', {
-        security: securityTokenToCreate,
-      });
-      const res = await factoryInstance.deployEquity(
-        securityTokenToCreate,
-        factoryRegulationData,
-        {
-          gasLimit: CREATE_EQUITY_ST_GAS,
-        },
-      );
-
-      // Put it into an array since structs change the response from the event and its not a simple array
-      return await RPCTransactionResponseAdapter.manageResponse(
-        res,
-        this.networkService.environment,
-        'EquityDeployed',
-      );
-    } catch (error) {
-      LogService.logError(error);
-      throw new SigningError(
-        `Unexpected error in RPCTransactionAdapter create operation : ${error}`,
-      );
-    }
+    return this.createSecurity(
+      securityInfo,
+      SecurityDataBuilder.buildEquityDetails(equityInfo),
+      factory,
+      resolver,
+      configId,
+      configVersion,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+      diamondOwnerAccount!,
+      (security, details) => new FactoryEquityToken(security, details),
+      'deployEquity',
+      GAS.CREATE_EQUITY_ST,
+      'EquityDeployed',
+    );
   }
 
   async createBond(
@@ -636,113 +421,30 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
-    try {
-      if (!securityInfo.regulationType) {
-        throw new MissingRegulationType();
-      }
-      if (!securityInfo.regulationsubType) {
-        throw new MissingRegulationSubType();
-      }
-
-      const rbacAdmin: Rbac = {
-        role: SecurityRole._DEFAULT_ADMIN_ROLE,
-        members: [diamondOwnerAccount!.toString()],
-      };
-      const rbacs: Rbac[] = [rbacAdmin];
-
-      const erc20MetadataInfo: ERC20MetadataInfo = {
-        name: securityInfo.name,
-        symbol: securityInfo.symbol,
-        isin: securityInfo.isin,
-        decimals: securityInfo.decimals,
-      };
-
-      const resolverProxyConfiguration: ResolverProxyConfiguration = {
-        key: configId,
-        version: configVersion,
-      };
-
-      const security: SecurityData = {
-        arePartitionsProtected: securityInfo.arePartitionsProtected,
-        isMultiPartition: securityInfo.isMultiPartition,
-        resolver: resolver.toString(),
-        resolverProxyConfiguration: resolverProxyConfiguration,
-        rbacs: rbacs,
-        isControllable: securityInfo.isControllable,
-        isWhiteList: securityInfo.isWhiteList,
-        maxSupply: securityInfo.maxSupply
-          ? securityInfo.maxSupply.toString()
-          : '0',
-        erc20MetadataInfo: erc20MetadataInfo,
-        clearingActive: securityInfo.clearingActive,
-        internalKycActivated: securityInfo.internalKycActivated,
-        externalPauses:
-          externalPauses?.map((address) => address.toString()) ?? [],
-        externalControlLists:
-          externalControlLists?.map((address) => address.toString()) ?? [],
-        externalKycLists:
-          externalKycLists?.map((address) => address.toString()) ?? [],
-        compliance: compliance.toString(),
-      };
-
-      const bondDetails = new BondDetailsData(
-        bondInfo.currency,
-        bondInfo.nominalValue.toString(),
-        bondInfo.startingDate.toString(),
-        bondInfo.maturityDate.toString(),
-      );
-
-      const couponDetails: CouponDetailsData = {
-        couponFrequency: couponInfo.couponFrequency.toString(),
-        couponRate: couponInfo.couponRate.toString(),
-        firstCouponDate: couponInfo.firstCouponDate.toString(),
-      };
-
-      const securityTokenToCreate = new FactoryBondToken(
-        security,
-        bondDetails,
-        couponDetails,
-      );
-
-      const additionalSecurityData: AdditionalSecurityData = {
-        countriesControlListType: securityInfo.isCountryControlListWhiteList,
-        listOfCountries: securityInfo.countries ?? '',
-        info: securityInfo.info ?? '',
-      };
-
-      const factoryRegulationData = new FactoryRegulationData(
-        CastRegulationType.toNumber(securityInfo.regulationType),
-        CastRegulationSubType.toNumber(securityInfo.regulationsubType),
-        additionalSecurityData,
-      );
-
-      const factoryInstance = Factory__factory.connect(
-        factory.toString(),
-        this.signerOrProvider,
-      );
-      LogService.logTrace('Deploying factory: ', {
-        security: securityTokenToCreate,
-      });
-      const res = await factoryInstance.deployBond(
-        securityTokenToCreate,
-        factoryRegulationData,
-        {
-          gasLimit: CREATE_BOND_ST_GAS,
-        },
-      );
-
-      // Put it into an array since structs change the response from the event and its not a simple array
-      return await RPCTransactionResponseAdapter.manageResponse(
-        res,
-        this.networkService.environment,
-        'BondDeployed',
-      );
-    } catch (error) {
-      LogService.logError(error);
-      throw new SigningError(
-        `Unexpected error in RPCTransactionAdapter create operation : ${error}`,
-      );
-    }
+    return this.createSecurity(
+      securityInfo,
+      {
+        bondDetails: SecurityDataBuilder.buildBondDetails(bondInfo),
+        couponDetails: SecurityDataBuilder.buildCouponDetails(couponInfo),
+      },
+      factory,
+      resolver,
+      configId,
+      configVersion,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+      diamondOwnerAccount!,
+      (security, details) =>
+        new FactoryBondToken(
+          security,
+          details.bondDetails,
+          details.couponDetails,
+        ),
+      'deployBond',
+      GAS.CREATE_BOND_ST,
+      'BondDeployed',
+    );
   }
 
   public setMirrorNodes(mirrorNodes?: MirrorNodes): void {
@@ -866,15 +568,15 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   }
 
   private async setMetamaskNetwork(chainId: any): Promise<void> {
-    let network = unrecognized;
-    let factoryId = '';
-    let resolverId = '';
-    let mirrorNode: MirrorNode = {
+    const network = unrecognized;
+    const factoryId = '';
+    const resolverId = '';
+    const mirrorNode: MirrorNode = {
       baseUrl: '',
       apiKey: '',
       headerName: '',
     };
-    let rpcNode: JsonRpcRelay = {
+    const rpcNode: JsonRpcRelay = {
       baseUrl: '',
       apiKey: '',
       headerName: '',
@@ -883,195 +585,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const metamaskNetwork = HederaNetworks.find(
       (i: any) => '0x' + i.chainId.toString(16) === chainId.toString(),
     );
-
-    if (metamaskNetwork) {
-      network = metamaskNetwork.network;
-
-      if (this.factories) {
-        try {
-          const result = this.factories.factories.find(
-            (i: EnvironmentFactory) =>
-              i.environment === metamaskNetwork.network,
-          );
-          if (result) {
-            factoryId = result.factory.toString();
-          }
-        } catch (e) {
-          LogService.logError(
-            `Factories could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
-          );
-        }
-      }
-      if (this.resolvers) {
-        try {
-          const result = this.resolvers.resolvers.find(
-            (i: EnvironmentResolver) =>
-              i.environment === metamaskNetwork.network,
-          );
-          if (result) {
-            resolverId = result.resolver.toString();
-          }
-        } catch (e) {
-          LogService.logError(
-            `Resolvers could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
-          );
-        }
-      }
-      if (this.mirrorNodes) {
-        try {
-          const result = this.mirrorNodes.nodes.find(
-            (i: EnvironmentMirrorNode) =>
-              i.environment === metamaskNetwork.network,
-          );
-          if (result) {
-            mirrorNode = result.mirrorNode;
-          }
-        } catch (e) {
-          LogService.logError(
-            `Mirror Nodes could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
-          );
-        }
-      }
-      if ((this, this.jsonRpcRelays)) {
-        try {
-          const result = this.jsonRpcRelays.nodes.find(
-            (i: EnvironmentJsonRpcRelay) =>
-              i.environment === metamaskNetwork.network,
-          );
-          if (result) {
-            rpcNode = result.jsonRpcRelay;
-          }
-        } catch (e) {
-          LogService.logError(
-            `RPC Nodes could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
-          );
-        }
-      }
-      LogService.logTrace('Metamask Network:', chainId);
-    } else {
-      LogService.logError(chainId + ' not an hedera network');
-    }
-
-    await this.commandBus.execute(
-      new SetNetworkCommand(network, mirrorNode, rpcNode),
-    );
-    await this.commandBus.execute(
-      new SetConfigurationCommand(factoryId, resolverId),
-    );
-
-    this.signerOrProvider = new ethers.providers.Web3Provider(
-      // @ts-expect-error No TS compatibility
-      ethereum,
-    ).getSigner();
-
-    // await new Promise(f => setTimeout(f, 3000));
-  }
-
-  private async pairWallet(): Promise<void> {
-    const accts = await ethereum.request({
-      method: 'eth_requestAccounts',
-    });
-    if (accts && 'length' in accts) {
-      const evmAddress = (accts as string[])[0];
-
-      const chainId = await ethereum.request({ method: 'eth_chainId' });
-      await this.setMetamaskNetwork(chainId);
-      await this.setMetasmaskAccount(evmAddress);
-      this.eventService.emit(WalletEvents.walletPaired, {
-        data: {
-          account: this.account,
-          pairing: '',
-          topic: '',
-        },
-        network: {
-          name: this.networkService.environment,
-          recognized: this.networkService.environment != unrecognized,
-          factoryId: this.networkService.configuration
-            ? this.networkService.configuration.factoryAddress
-            : '',
-          resolverId: this.networkService.configuration
-            ? this.networkService.configuration.resolverAddress
-            : '',
-        },
-        wallet: SupportedWallets.METAMASK,
-      });
-    } else {
-      LogService.logTrace('Paired Metamask failed with no accounts');
-      this.eventService.emit(WalletEvents.walletDisconnect, {
-        wallet: SupportedWallets.METAMASK,
-      });
-    }
-  }
-
-  private registerMetamaskEvents(): void {
-    try {
-      if (typeof window === 'undefined' || !(window as any)?.ethereum) return;
-      ethereum.on('accountsChanged', async (acct) => {
-        const accounts = acct as string[];
-        if (accounts.length == 0) {
-          LogService.logTrace('Metamask disconnected from the wallet');
-          this.eventService.emit(WalletEvents.walletDisconnect, {
-            wallet: SupportedWallets.METAMASK,
-          });
-        } else if (
-          (this.account && accounts[0] !== this.account.evmAddress) ||
-          !this.account
-        ) {
-          await this.setMetasmaskAccount(accounts[0]);
-          this.eventService.emit(WalletEvents.walletPaired, {
-            data: {
-              account: this.account,
-              pairing: '',
-              topic: '',
-            },
-            network: {
-              name: this.networkService.environment,
-              recognized: this.networkService.environment != unrecognized,
-              factoryId: this.networkService.configuration.factoryAddress,
-              resolverId: this.networkService.configuration.resolverAddress,
-            },
-            wallet: SupportedWallets.METAMASK,
-          });
-        }
-      });
-      ethereum.on('chainChanged', async (chainId) => {
-        await this.setMetamaskNetwork(chainId);
-        let evmAddress = this.account.evmAddress;
-        if (!evmAddress) {
-          const accts = await ethereum.request({
-            method: 'eth_requestAccounts',
-          });
-          evmAddress = accts && 'length' in accts ? (accts as string[])[0] : '';
-        }
-        await this.setMetasmaskAccount(evmAddress);
-        this.eventService.emit(WalletEvents.walletPaired, {
-          data: {
-            account: this.account,
-          },
-          network: {
-            name: this.networkService.environment,
-            recognized: this.networkService.environment != unrecognized,
-            factoryId: this.networkService.configuration
-              ? this.networkService.configuration.factoryAddress
-              : '',
-            resolverId: this.networkService.configuration
-              ? this.networkService.configuration.resolverAddress
-              : '',
-          },
-          wallet: SupportedWallets.METAMASK,
-        });
-      });
-    } catch (error) {
-      LogService.logError(error);
-      throw new WalletConnectError('Ethereum is not defined');
-    }
   }
 
   async transfer(
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Transfering ${amount} securities to account ${targetId.toString()}`,
     );
@@ -1080,15 +600,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       value: amount.toHexString(),
     };
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410TokenHolderFacet__factory.connect(
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).transferByPartition(_PARTITION_ID_1, basicTransferInfo, '0x', {
-        gasLimit: TRANSFER_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'transferByPartition',
+      [_PARTITION_ID_1, basicTransferInfo, '0x'],
+      GAS.TRANSFER,
     );
   }
 
@@ -1097,43 +616,41 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Transfering ${amount} securities to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
     );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await TransferAndLock__factory.connect(
+    return this.executeTransaction(
+      TransferAndLock__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).transferAndLockByPartition(
+        this.getSignerOrProvider(),
+      ),
+      'transferAndLockByPartition',
+      [
         _PARTITION_ID_1,
         targetId.toString(),
         amount.toBigNumber(),
         '0x',
         expirationDate.toBigNumber(),
-        {
-          gasLimit: TRANSFER_AND_LOCK_GAS,
-        },
-      ),
-      this.networkService.environment,
+      ],
+      GAS.TRANSFER_AND_LOCK,
     );
   }
 
   async redeem(
     security: EvmAddress,
     amount: BigDecimal,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(`Redeeming ${amount} securities`);
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410TokenHolderFacet__factory.connect(
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).redeemByPartition(_PARTITION_ID_1, amount.toBigNumber(), '0x', {
-        gasLimit: REDEEM_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'redeemByPartition',
+      [_PARTITION_ID_1, amount.toBigNumber(), '0x'],
+      GAS.REDEEM,
     );
   }
 
@@ -1141,45 +658,38 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     source: EvmAddress,
     amount: BigDecimal,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Burning ${amount} securities from source: ${source.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643Facet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).burn(source.toString(), amount.toBigNumber(), {
-        gasLimit: BURN_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'burn',
+      [source.toString(), amount.toBigNumber()],
+      GAS.BURN,
     );
   }
 
-  async pause(security: EvmAddress): Promise<TransactionResponse<any, Error>> {
+  async pause(security: EvmAddress): Promise<TransactionResponse> {
     LogService.logTrace(`Pausing security: ${security.toString()}`);
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Pause__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).pause({ gasLimit: PAUSE_GAS }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Pause__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'pause',
+      [],
+      GAS.PAUSE,
     );
   }
 
-  async unpause(
-    security: EvmAddress,
-  ): Promise<TransactionResponse<any, Error>> {
+  async unpause(security: EvmAddress): Promise<TransactionResponse> {
     LogService.logTrace(`Unpausing security: ${security.toString()}`);
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Pause__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).unpause({ gasLimit: UNPAUSE_GAS }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Pause__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'unpause',
+      [],
+      GAS.UNPAUSE,
     );
   }
 
@@ -1187,17 +697,19 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Granting role ${role.toString()} to account: ${targetId.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await AccessControl__factory.connect(
+    return this.executeTransaction(
+      AccessControl__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).grantRole(role, targetId.toString(), { gasLimit: GRANT_ROLES_GAS }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'grantRole',
+      [role, targetId.toString()],
+      GAS.GRANT_ROLES,
     );
   }
 
@@ -1206,16 +718,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     roles: SecurityRole[],
     actives: boolean[],
-  ): Promise<TransactionResponse<any, Error>> {
-    let gas = roles.length * GRANT_ROLES_GAS;
-    gas = gas > MAX_ROLES_GAS ? MAX_ROLES_GAS : gas;
+  ): Promise<TransactionResponse> {
+    let gas = roles.length * GAS.GRANT_ROLES;
+    gas = gas > GAS.MAX_ROLES ? GAS.MAX_ROLES : gas;
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await AccessControl__factory.connect(
+    return this.executeTransaction(
+      AccessControl__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).applyRoles(roles, actives, targetId.toString(), { gasLimit: gas }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'applyRoles',
+      [roles, actives, targetId.toString()],
+      gas,
     );
   }
 
@@ -1223,32 +737,36 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Revoking role ${role.toString()} to account: ${targetId.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await AccessControl__factory.connect(
+    return this.executeTransaction(
+      AccessControl__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).revokeRole(role, targetId.toString(), { gasLimit: GRANT_ROLES_GAS }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'revokeRole',
+      [role, targetId.toString()],
+      GAS.GRANT_ROLES,
     );
   }
 
   async renounceRole(
     security: EvmAddress,
     role: SecurityRole,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(`Renounce role ${role.toString()}`);
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await AccessControl__factory.connect(
+    return this.executeTransaction(
+      AccessControl__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).renounceRole(role, { gasLimit: RENOUNCE_ROLES_GAS }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'renounceRole',
+      [role],
+      GAS.RENOUNCE_ROLES,
     );
   }
 
@@ -1256,7 +774,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Issue ${amount} ${security} to account: ${targetId.toString()}`,
     );
@@ -1268,12 +786,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ManagementFacet__factory.connect(
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).issueByPartition(issueData, { gasLimit: ISSUE_GAS }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'issueByPartition',
+      [issueData],
+      GAS.ISSUE,
     );
   }
 
@@ -1281,55 +801,54 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     target: EvmAddress,
     amount: BigDecimal,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Minting ${amount} ${security} to account: ${target.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643Facet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).mint(target.toString(), amount.toBigNumber(), { gasLimit: MINT_GAS }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'mint',
+      [target.toString(), amount.toBigNumber()],
+      GAS.MINT,
     );
   }
 
   async addToControlList(
     security: EvmAddress,
     targetId: EvmAddress,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Adding account ${targetId.toString()} to a control list`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ControlList__factory.connect(
+    return this.executeTransaction(
+      ControlList__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).addToControlList(targetId.toString(), {
-        gasLimit: ADD_TO_CONTROL_LIST_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'addToControlList',
+      [targetId.toString()],
+      GAS.ADD_TO_CONTROL_LIST,
     );
   }
 
   async removeFromControlList(
     security: EvmAddress,
     targetId: EvmAddress,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Adding account ${targetId.toString()} to a control list`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ControlList__factory.connect(
+    return this.executeTransaction(
+      ControlList__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).removeFromControlList(targetId.toString(), {
-        gasLimit: REMOVE_FROM_CONTROL_LIST_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'removeFromControlList',
+      [targetId.toString()],
+      GAS.REMOVE_FROM_CONTROL_LIST,
     );
   }
 
@@ -1343,22 +862,21 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Controller transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ManagementFacet__factory.connect(
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).controllerTransferByPartition(
+        this.getSignerOrProvider(),
+      ),
+      'controllerTransferByPartition',
+      [
         _PARTITION_ID_1,
         sourceId.toString(),
         targetId.toString(),
         amount.toBigNumber(),
         '0x',
         '0x',
-        {
-          gasLimit: CONTROLLER_TRANSFER_GAS,
-        },
-      ),
-      this.networkService.environment,
+      ],
+      GAS.CONTROLLER_TRANSFER,
     );
   }
 
@@ -1372,19 +890,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Forced transfer ${amount} tokens from account ${source.toString()} to account ${target.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643Facet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).forcedTransfer(
-        source.toString(),
-        target.toString(),
-        amount.toBigNumber(),
-        {
-          gasLimit: FORCED_TRANSFER_GAS,
-        },
-      ),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'forcedTransfer',
+      [source.toString(), target.toString(), amount.toBigNumber()],
+      GAS.FORCED_TRANSFER,
     );
   }
 
@@ -1397,21 +907,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Force redeem ${amount} tokens from account ${sourceId.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ManagementFacet__factory.connect(
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).controllerRedeemByPartition(
-        _PARTITION_ID_1,
-        sourceId.toString(),
-        amount.toBigNumber(),
-        '0x',
-        '0x',
-        {
-          gasLimit: CONTROLLER_REDEEM_GAS,
-        },
+        this.getSignerOrProvider(),
       ),
-      this.networkService.environment,
+      'controllerRedeemByPartition',
+      [_PARTITION_ID_1, sourceId.toString(), amount.toBigNumber(), '0x', '0x'],
+      GAS.CONTROLLER_REDEEM,
     );
   }
 
@@ -1420,7 +923,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     amount: BigDecimal,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `equity: ${security} ,
       recordDate :${recordDate} , 
@@ -1432,12 +935,12 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       executionDate: executionDate.toBigNumber(),
       amount: amount.toBigNumber(),
     };
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Equity__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).setDividends(dividendStruct, { gasLimit: SET_DIVIDENDS_GAS }),
-      this.networkService.environment,
+
+    return this.executeTransaction(
+      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'setDividends',
+      [dividendStruct],
+      GAS.SET_DIVIDENDS,
       SET_DIVIDEND_EVENT,
     );
   }
@@ -1446,7 +949,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     recordDate: BigDecimal,
     data: string,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `equity: ${security} ,
       recordDate :${recordDate} , `,
@@ -1455,12 +958,12 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       recordDate: recordDate.toBigNumber(),
       data: data,
     };
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Equity__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).setVoting(votingStruct, { gasLimit: SET_VOTING_RIGHTS_GAS }),
-      this.networkService.environment,
+
+    return this.executeTransaction(
+      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'setVoting',
+      [votingStruct],
+      GAS.SET_VOTING_RIGHTS,
       SET_VOTING_RIGHTS_EVENT,
     );
   }
@@ -1470,7 +973,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `bond: ${security} ,
       recordDate :${recordDate} , 
@@ -1482,27 +985,27 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       executionDate: executionDate.toBigNumber(),
       rate: rate.toBigNumber(),
     };
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Bond__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).setCoupon(couponStruct, { gasLimit: SET_COUPON_GAS }),
-      this.networkService.environment,
+
+    return this.executeTransaction(
+      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'setCoupon',
+      [couponStruct],
+      GAS.SET_COUPON,
       SET_COUPON_EVENT,
     );
   }
 
-  async takeSnapshot(
-    security: EvmAddress,
-  ): Promise<TransactionResponse<any, Error>> {
+  async takeSnapshot(security: EvmAddress): Promise<TransactionResponse> {
     LogService.logTrace(`Take snapshot of: ${security.toString()}`);
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Snapshots__factory.connect(
+    return this.executeTransaction(
+      Snapshots__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).takeSnapshot({ gasLimit: TAKE_SNAPSHOT_GAS }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'takeSnapshot',
+      [],
+      GAS.TAKE_SNAPSHOT,
     );
   }
 
@@ -1516,12 +1019,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Setting document: ${name}, with ${uri}, and hash ${hash} for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1643__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).setDocument(name, uri, hash, { gasLimit: SET_DOCUMENT_GAS }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC1643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'setDocument',
+      [name, uri, hash],
+      GAS.SET_DOCUMENT,
     );
   }
 
@@ -1533,94 +1035,99 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Removing document: ${name} for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1643__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).removeDocument(name, { gasLimit: REMOVE_DOCUMENT_GAS }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC1643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'removeDocument',
+      [name],
+      GAS.REMOVE_DOCUMENT,
     );
   }
 
   async authorizeOperator(
     security: EvmAddress,
     targetId: EvmAddress,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `authorizing operator: ${targetId.toString()} for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410TokenHolderFacet__factory.connect(
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).authorizeOperator(targetId.toString(), {
-        gasLimit: AUTHORIZE_OPERATOR_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'authorizeOperator',
+      [targetId.toString()],
+      GAS.AUTHORIZE_OPERATOR,
     );
   }
+
   async revokeOperator(
     security: EvmAddress,
     targetId: EvmAddress,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `revoking operator: ${targetId.toString()} for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410TokenHolderFacet__factory.connect(
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).revokeOperator(targetId.toString(), { gasLimit: REVOKE_OPERATOR_GAS }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'revokeOperator',
+      [targetId.toString()],
+      GAS.REVOKE_OPERATOR,
     );
   }
+
   async authorizeOperatorByPartition(
     security: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `authorizing operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410TokenHolderFacet__factory.connect(
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).authorizeOperatorByPartition(partitionId, targetId.toString(), {
-        gasLimit: AUTHORIZE_OPERATOR_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'authorizeOperatorByPartition',
+      [partitionId, targetId.toString()],
+      GAS.AUTHORIZE_OPERATOR,
     );
   }
+
   async revokeOperatorByPartition(
     security: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `revoking operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410TokenHolderFacet__factory.connect(
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).revokeOperatorByPartition(partitionId, targetId.toString(), {
-        gasLimit: REVOKE_OPERATOR_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'revokeOperatorByPartition',
+      [partitionId, targetId.toString()],
+      GAS.REVOKE_OPERATOR,
     );
   }
+
   async operatorTransferByPartition(
     security: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Transfering ${amount} securities to account ${targetId.toString()} for partition ${partitionId}`,
     );
@@ -1634,67 +1141,67 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ManagementFacet__factory.connect(
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).operatorTransferByPartition(operatorTransferData, {
-        gasLimit: TRANSFER_OPERATOR_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'operatorTransferByPartition',
+      [operatorTransferData],
+      GAS.TRANSFER_OPERATOR,
     );
   }
 
   async setMaxSupply(
     security: EvmAddress,
     maxSupply: BigDecimal,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Setting max supply ${maxSupply} for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Cap__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).setMaxSupply(maxSupply.toBigNumber(), { gasLimit: SET_MAX_SUPPLY_GAS }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Cap__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'setMaxSupply',
+      [maxSupply.toBigNumber()],
+      GAS.SET_MAX_SUPPLY,
     );
   }
 
   async triggerPendingScheduledSnapshots(
     security: EvmAddress,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Triggerring pending scheduled snapshots for ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ScheduledTasks__factory.connect(
+    return this.executeTransaction(
+      ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).triggerPendingScheduledTasks({
-        gasLimit: TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'triggerPendingScheduledTasks',
+      [],
+      GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
     );
   }
+
   async triggerScheduledSnapshots(
     security: EvmAddress,
     max: BigDecimal,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Triggerring up to ${max.toString()} pending scheduled snapshots for ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ScheduledTasks__factory.connect(
+    return this.executeTransaction(
+      ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).triggerScheduledTasks(max.toBigNumber(), {
-        gasLimit: TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'triggerScheduledTasks',
+      [max.toBigNumber()],
+      GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
     );
   }
 
@@ -1708,20 +1215,16 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Locking ${amount} tokens from account ${sourceId.toString()} until ${expirationDate}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Lock__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).lockByPartition(
+    return this.executeTransaction(
+      Lock__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'lockByPartition',
+      [
         _PARTITION_ID_1,
         amount.toBigNumber(),
         sourceId.toString(),
         expirationDate.toBigNumber(),
-        {
-          gasLimit: LOCK_GAS,
-        },
-      ),
-      this.networkService.environment,
+      ],
+      GAS.LOCK,
     );
   }
 
@@ -1734,19 +1237,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Releasing lock ${lockId} from account ${sourceId.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Lock__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).releaseByPartition(
-        _PARTITION_ID_1,
-        lockId.toBigNumber(),
-        sourceId.toString(),
-        {
-          gasLimit: RELEASE_GAS,
-        },
-      ),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Lock__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'releaseByPartition',
+      [_PARTITION_ID_1, lockId.toBigNumber(), sourceId.toString()],
+      GAS.RELEASE,
     );
   }
 
@@ -1758,14 +1253,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Updating config version ${configVersion} for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await DiamondFacet__factory.connect(
+    return this.executeTransaction(
+      DiamondFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).updateConfigVersion(configVersion, {
-        gasLimit: UPDATE_CONFIG_VERSION_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'updateConfigVersion',
+      [configVersion],
+      GAS.UPDATE_CONFIG_VERSION,
     );
   }
 
@@ -1778,14 +1273,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Updating config ${configId} & version ${configVersion} for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await DiamondFacet__factory.connect(
+    return this.executeTransaction(
+      DiamondFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).updateConfig(configId, configVersion, {
-        gasLimit: UPDATE_CONFIG_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'updateConfig',
+      [configId, configVersion],
+      GAS.UPDATE_CONFIG,
     );
   }
 
@@ -1799,14 +1294,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Updating resolver ${resolver.toString()} for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await DiamondFacet__factory.connect(
+    return this.executeTransaction(
+      DiamondFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).updateResolver(resolver.toString(), configId, configVersion, {
-        gasLimit: UPDATE_RESOLVER_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'updateResolver',
+      [resolver.toString(), configId, configVersion],
+      GAS.UPDATE_RESOLVER,
     );
   }
 
@@ -1818,14 +1313,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Updating bond maturity date ${maturityDate} for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Bond__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).updateMaturityDate(maturityDate, {
-        gasLimit: UPDATE_MATURITY_DATE_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'updateMaturityDate',
+      [maturityDate],
+      GAS.UPDATE_MATURITY_DATE,
     );
   }
 
@@ -1834,12 +1326,12 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     executionDate: BigDecimal,
     factor: BigDecimal,
     decimals: BigDecimal,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `equity: ${security} ,
-      executionDate :${executionDate} , 
-      factor: ${factor},
-      decimals : ${decimals}  `,
+            executionDate :${executionDate} ,
+            factor: ${factor},
+            decimals : ${decimals}  `,
     );
     const scheduledBalanceAdjustmentStruct: IEquity.ScheduledBalanceAdjustmentStruct =
       {
@@ -1847,31 +1339,45 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         factor: factor.toBigNumber(),
         decimals: decimals.toBigNumber(),
       };
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Equity__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).setScheduledBalanceAdjustment(scheduledBalanceAdjustmentStruct, {
-        gasLimit: SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
-      }),
-      this.networkService.environment,
+
+    return this.executeTransaction(
+      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'setScheduledBalanceAdjustment',
+      [scheduledBalanceAdjustmentStruct],
+      GAS.SET_SCHEDULED_BALANCE_ADJUSTMENT,
       SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
     );
   }
 
-  async protectPartitions(
-    address: EvmAddress,
-  ): Promise<TransactionResponse<any, Error>> {
+  async protectPartitions(address: EvmAddress): Promise<TransactionResponse> {
     LogService.logTrace(
       `Protecting Partitions for security: ${address.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ProtectedPartitions__factory.connect(
+    return this.executeTransaction(
+      ProtectedPartitions__factory.connect(
         address.toString(),
-        this.signerOrProvider,
-      ).protectPartitions({ gasLimit: PROTECT_PARTITION_GAS }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'protectPartitions',
+      [],
+      GAS.PROTECT_PARTITION,
+    );
+  }
+
+  async unprotectPartitions(address: EvmAddress): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Unprotecting Partitions for security: ${address.toString()}`,
+    );
+
+    return this.executeTransaction(
+      ProtectedPartitions__factory.connect(
+        address.toString(),
+        this.getSignerOrProvider(),
+      ),
+      'unprotectPartitions',
+      [],
+      GAS.UNPROTECT_PARTITION,
     );
   }
 
@@ -1883,43 +1389,59 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     deadline: BigDecimal,
     nounce: BigDecimal,
     signature: string,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Protected Redeeming ${amount} securities from account ${sourceId.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ManagementFacet__factory.connect(
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).protectedRedeemFromByPartition(
+        this.getSignerOrProvider(),
+      ),
+      'protectedRedeemFromByPartition',
+      [
         partitionId,
         sourceId.toString(),
         amount.toBigNumber(),
         deadline.toBigNumber(),
         nounce.toBigNumber(),
         signature,
-        {
-          gasLimit: PROTECTED_REDEEM_GAS,
-        },
-      ),
-      this.networkService.environment,
+      ],
+      GAS.PROTECTED_REDEEM,
     );
   }
 
-  async unprotectPartitions(
-    address: EvmAddress,
-  ): Promise<TransactionResponse<any, Error>> {
+  async protectedTransferFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Unprotecting Partitions for security: ${address.toString()}`,
+      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ProtectedPartitions__factory.connect(
-        address.toString(),
-        this.signerOrProvider,
-      ).unprotectPartitions({ gasLimit: UNPROTECT_PARTITION_GAS }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC1410ScheduledTasks__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
+      'protectedTransferFromByPartition',
+      [
+        partitionId,
+        sourceId.toString(),
+        targetId.toString(),
+        amount.toBigNumber(),
+        deadline.toBigNumber(),
+        nounce.toBigNumber(),
+        signature,
+      ],
+      GAS.PROTECTED_TRANSFER,
     );
   }
 
@@ -1933,7 +1455,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     deadline: BigDecimal,
     nounce: BigDecimal,
     signature: string,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
     );
@@ -1946,55 +1468,20 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       expirationTimestamp: expirationDate.toBigNumber(),
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await TransferAndLock__factory.connect(
+    return this.executeTransaction(
+      TransferAndLock__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).protectedTransferAndLockByPartition(
+        this.getSignerOrProvider(),
+      ),
+      'protectedTransferAndLockByPartition',
+      [
         partitionId,
         transferAndLockData,
         deadline.toBigNumber(),
         nounce.toBigNumber(),
         signature,
-        {
-          gasLimit: PROTECTED_TRANSFER_AND_LOCK_GAS,
-        },
-      ),
-      this.networkService.environment,
-    );
-  }
-
-  async protectedTransferFromByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    amount: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-  ): Promise<TransactionResponse<any, Error>> {
-    LogService.logTrace(
-      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ManagementFacet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).protectedTransferFromByPartition(
-        partitionId,
-        sourceId.toString(),
-        targetId.toString(),
-        amount.toBigNumber(),
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
-        {
-          gasLimit: PROTECTED_TRANSFER_GAS,
-        },
-      ),
-      this.networkService.environment,
+  ],
+  GAS.PROTECTED_TRANSFER_AND_LOCK,
     );
   }
 
@@ -2017,14 +1504,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-    return RPCTransactionResponseAdapter.manageResponse(
-      await HoldTokenHolderFacet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).createHoldByPartition(partitionId, hold, {
-        gasLimit: CREATE_HOLD_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Hold__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'createHoldByPartition',
+      [partitionId, hold],
+      GAS.CREATE_HOLD,
     );
   }
 
@@ -2048,20 +1532,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-    return RPCTransactionResponseAdapter.manageResponse(
-      await HoldTokenHolderFacet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).createHoldFromByPartition(
-        partitionId,
-        sourceId.toString(),
-        hold,
-        '0x',
-        {
-          gasLimit: CREATE_HOLD_FROM_GAS,
-        },
-      ),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Hold__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'createHoldFromByPartition',
+      [partitionId, sourceId.toString(), hold, '0x'],
+      GAS.CREATE_HOLD_FROM,
     );
   }
 
@@ -2085,20 +1560,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
-    return RPCTransactionResponseAdapter.manageResponse(
-      await HoldManagementFacet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).controllerCreateHoldByPartition(
-        partitionId,
-        sourceId.toString(),
-        hold,
-        '0x',
-        {
-          gasLimit: CONTROLLER_CREATE_HOLD_GAS,
-        },
-      ),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Hold__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'controllerCreateHoldByPartition',
+      [partitionId, sourceId.toString(), hold, '0x'],
+      GAS.CONTROLLER_CREATE_HOLD,
     );
   }
 
@@ -2125,26 +1591,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       to: targetId.toString(),
       data: '0x',
     };
+
     const protectedHold: ProtectedHold = {
-      hold: hold,
+      hold,
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await HoldManagementFacet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).protectedCreateHoldByPartition(
-        partitionId,
-        sourceId.toString(),
-        protectedHold,
-        signature,
-        {
-          gasLimit: PROTECTED_CREATE_HOLD_GAS,
-        },
-      ),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Hold__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'protectedCreateHoldByPartition',
+      [partitionId, sourceId.toString(), protectedHold, signature],
+      GAS.PROTECTED_CREATE_HOLD,
     );
   }
 
@@ -2165,14 +1623,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       holdId,
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await HoldTokenHolderFacet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).releaseHoldByPartition(holdIdentifier, amount.toBigNumber(), {
-        gasLimit: RELEASE_HOLD_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Hold__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'releaseHoldByPartition',
+      [holdIdentifier, amount.toBigNumber()],
+      GAS.RELEASE_HOLD,
     );
   }
 
@@ -2192,14 +1647,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       holdId,
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await HoldTokenHolderFacet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).reclaimHoldByPartition(holdIdentifier, {
-        gasLimit: RECLAIM_HOLD_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Hold__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'reclaimHoldByPartition',
+      [holdIdentifier],
+      GAS.RECLAIM_HOLD,
     );
   }
 
@@ -2210,7 +1662,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     amount: BigDecimal,
     partitionId: string,
     holdId: number,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Executing hold with Id ${holdId} from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
@@ -2221,19 +1673,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       holdId,
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await HoldTokenHolderFacet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).executeHoldByPartition(
-        holdIdentifier,
-        targetId.toString(),
-        amount.toBigNumber(),
-        {
-          gasLimit: EXECUTE_HOLD_BY_PARTITION_GAS,
-        },
-      ),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Hold__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'executeHoldByPartition',
+      [holdIdentifier, targetId.toString(), amount.toBigNumber()],
+      GAS.EXECUTE_HOLD_BY_PARTITION,
     );
   }
 
@@ -2245,14 +1689,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Setting revocation registry address ${revocationRegistry}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await SsiManagement__factory.connect(
+    return this.executeTransaction(
+      SsiManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).setRevocationRegistryAddress(revocationRegistry.toString(), {
-        gasLimit: SET_REVOCATION_REGISTRY_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'setRevocationRegistryAddress',
+      [revocationRegistry.toString()],
+      GAS.SET_REVOCATION_REGISTRY,
     );
   }
 
@@ -2262,14 +1706,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Adding issuer ${issuer}`);
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await SsiManagement__factory.connect(
+    return this.executeTransaction(
+      SsiManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).addIssuer(issuer.toString(), {
-        gasLimit: ADD_ISSUER_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'addIssuer',
+      [issuer.toString()],
+      GAS.ADD_ISSUER,
     );
   }
 
@@ -2279,14 +1723,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Removing issuer ${issuer}`);
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await SsiManagement__factory.connect(
+    return this.executeTransaction(
+      SsiManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).removeIssuer(issuer.toString(), {
-        gasLimit: REMOVE_ISSUER_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'removeIssuer',
+      [issuer.toString()],
+      GAS.REMOVE_ISSUER,
     );
   }
 
@@ -2302,21 +1746,17 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Granting KYC from issuer ${issuer.toString()} to address ${targetId.toString()} with VC id ${vcId}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Kyc__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).grantKyc(
+    return this.executeTransaction(
+      Kyc__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'grantKyc',
+      [
         targetId.toString(),
         vcId,
         validFrom.toBigNumber(),
         validTo.toBigNumber(),
         issuer.toString(),
-        {
-          gasLimit: GRANT_KYC_GAS,
-        },
-      ),
-      this.networkService.environment,
+      ],
+      GAS.GRANT_KYC,
     );
   }
 
@@ -2326,14 +1766,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Revoking KYC to address ${targetId.toString()}`);
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Kyc__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).revokeKyc(targetId.toString(), {
-        gasLimit: REVOKE_KYC_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Kyc__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'revokeKyc',
+      [targetId.toString()],
+      GAS.REVOKE_KYC,
     );
   }
 
@@ -2342,14 +1779,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Activating Clearing to address ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingActionsFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingActionsFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).activateClearing({
-        gasLimit: ACTIVATE_CLEARING_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'activateClearing',
+      [],
+      GAS.ACTIVATE_CLEARING,
     );
   }
 
@@ -2358,14 +1795,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Deactivate Clearing to address ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingActionsFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingActionsFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).deactivateClearing({
-        gasLimit: DEACTIVATE_CLEARING_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'deactivateClearing',
+      [],
+      GAS.DEACTIVATE_CLEARING,
     );
   }
 
@@ -2386,19 +1823,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingTransferFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingTransferFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).clearingTransferByPartition(
-        clearingOperation,
-        amount.toBigNumber(),
-        targetId.toString(),
-        {
-          gasLimit: CLEARING_TRANSFER_BY_PARTITION,
-        },
+        this.getSignerOrProvider(),
       ),
-      this.networkService.environment,
+      'clearingTransferByPartition',
+      [clearingOperation, amount.toBigNumber(), targetId.toString()],
+      GAS.CLEARING_TRANSFER_BY_PARTITION,
     );
   }
 
@@ -2424,19 +1856,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingTransferFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingTransferFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).clearingTransferFromByPartition(
-        clearingOperationFrom,
-        amount.toBigNumber(),
-        targetId.toString(),
-        {
-          gasLimit: CLEARING_TRANSFER_FROM_BY_PARTITION,
-        },
+        this.getSignerOrProvider(),
       ),
-      this.networkService.environment,
+      'clearingTransferFromByPartition',
+      [clearingOperationFrom, amount.toBigNumber(), targetId.toString()],
+      GAS.CLEARING_TRANSFER_FROM_BY_PARTITION,
     );
   }
 
@@ -2466,20 +1893,19 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       nonce: nonce.toBigNumber(),
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingTransferFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingTransferFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).protectedClearingTransferByPartition(
+        this.getSignerOrProvider(),
+      ),
+      'protectedClearingTransferByPartition',
+      [
         protectedClearingOperation,
         amount.toBigNumber(),
         targetId.toString(),
         signature,
-        {
-          gasLimit: PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
-        },
-      ),
-      this.networkService.environment,
+      ],
+      GAS.PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
     );
   }
 
@@ -2503,14 +1929,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       clearingId: clearingId,
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingActionsFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingActionsFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).approveClearingOperationByPartition(clearingOperationIdentifier, {
-        gasLimit: APPROVE_CLEARING_TRANSFER_BY_PARTITION,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'approveClearingOperationByPartition',
+      [clearingOperationIdentifier],
+      GAS.APPROVE_CLEARING_TRANSFER_BY_PARTITION,
     );
   }
 
@@ -2534,14 +1960,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       clearingId: clearingId,
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingActionsFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingActionsFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).cancelClearingOperationByPartition(clearingOperationIdentifier, {
-        gasLimit: CANCEL_CLEARING_TRANSFER_BY_PARTITION,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'cancelClearingOperationByPartition',
+      [clearingOperationIdentifier],
+      GAS.CANCEL_CLEARING_TRANSFER_BY_PARTITION,
     );
   }
 
@@ -2565,14 +1991,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       clearingId: clearingId,
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingActionsFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingActionsFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).reclaimClearingOperationByPartition(clearingOperationIdentifier, {
-        gasLimit: RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'reclaimClearingOperationByPartition',
+      [clearingOperationIdentifier],
+      GAS.RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
     );
   }
 
@@ -2592,14 +2018,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingRedeemFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingRedeemFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).clearingRedeemByPartition(clearingOperation, amount.toBigNumber(), {
-        gasLimit: CLEARING_REDEEM_BY_PARTITION,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'clearingRedeemByPartition',
+      [clearingOperation, amount.toBigNumber()],
+      GAS.CLEARING_REDEEM_BY_PARTITION,
     );
   }
 
@@ -2624,18 +2050,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingRedeemFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingRedeemFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).clearingRedeemFromByPartition(
-        clearingOperationFrom,
-        amount.toBigNumber(),
-        {
-          gasLimit: CLEARING_REDEEM_FROM_BY_PARTITION,
-        },
+        this.getSignerOrProvider(),
       ),
-      this.networkService.environment,
+      'clearingRedeemFromByPartition',
+      [clearingOperationFrom, amount.toBigNumber()],
+      GAS.CLEARING_REDEEM_FROM_BY_PARTITION,
     );
   }
 
@@ -2664,19 +2086,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       nonce: nonce.toBigNumber(),
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingRedeemFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingRedeemFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).protectedClearingRedeemByPartition(
-        protectedClearingOperation,
-        amount.toBigNumber(),
-        signature,
-        {
-          gasLimit: PROTECTED_CLEARING_REDEEM_BY_PARTITION,
-        },
+        this.getSignerOrProvider(),
       ),
-      this.networkService.environment,
+      'protectedClearingRedeemByPartition',
+      [protectedClearingOperation, amount.toBigNumber(), signature],
+      GAS.PROTECTED_CLEARING_REDEEM_BY_PARTITION,
     );
   }
 
@@ -2707,14 +2124,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingHoldCreationFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingHoldCreationFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).clearingCreateHoldByPartition(clearingOperation, hold, {
-        gasLimit: CLEARING_CREATE_HOLD_BY_PARTITION,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'clearingCreateHoldByPartition',
+      [clearingOperation, hold],
+      GAS.CLEARING_CREATE_HOLD_BY_PARTITION,
     );
   }
 
@@ -2750,14 +2167,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingHoldCreationFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingHoldCreationFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).clearingCreateHoldFromByPartition(clearingOperationFrom, hold, {
-        gasLimit: CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'clearingCreateHoldFromByPartition',
+      [clearingOperationFrom, hold],
+      GAS.CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
     );
   }
 
@@ -2773,7 +2190,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     deadline: BigDecimal,
     nonce: BigDecimal,
     signature: string,
-  ): Promise<TransactionResponse<any, Error>> {
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Protected Clearing Create Hold By Partition to address ${security.toString()}`,
     );
@@ -2797,19 +2214,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingHoldCreationFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingHoldCreationFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).protectedClearingCreateHoldByPartition(
-        protectedClearingOperation,
-        hold,
-        signature,
-        {
-          gasLimit: PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
-        },
+        this.getSignerOrProvider(),
       ),
-      this.networkService.environment,
+      'protectedClearingCreateHoldByPartition',
+      [protectedClearingOperation, hold, signature],
+      GAS.PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
     );
   }
 
@@ -2845,14 +2257,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingHoldCreationFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingHoldCreationFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold, {
-        gasLimit: OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'operatorClearingCreateHoldByPartition',
+      [clearingOperationFrom, hold],
+      GAS.OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
     );
   }
 
@@ -2877,18 +2289,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingRedeemFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingRedeemFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).operatorClearingRedeemByPartition(
-        clearingOperationFrom,
-        amount.toBigNumber(),
-        {
-          gasLimit: OPERATOR_CLEARING_REDEEM_BY_PARTITION,
-        },
+        this.getSignerOrProvider(),
       ),
-      this.networkService.environment,
+      'operatorClearingRedeemByPartition',
+      [clearingOperationFrom, amount.toBigNumber()],
+      GAS.OPERATOR_CLEARING_REDEEM_BY_PARTITION,
     );
   }
 
@@ -2914,19 +2322,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       operatorData: '0x',
     };
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingTransferFacet__factory.connect(
+    return this.executeTransaction(
+      ClearingTransferFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).clearingTransferFromByPartition(
-        clearingOperationFrom,
-        amount.toBigNumber(),
-        targetId.toString(),
-        {
-          gasLimit: OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
-        },
+        this.getSignerOrProvider(),
       ),
-      this.networkService.environment,
+      'clearingTransferFromByPartition',
+      [clearingOperationFrom, amount.toBigNumber(), targetId.toString()],
+      GAS.OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
     );
   }
 
@@ -2939,18 +2342,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Updating External Pauses for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ExternalPauseManagement__factory.connect(
+    return this.executeTransaction(
+      ExternalPauseManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).updateExternalPauses(
-        externalPausesAddresses.map((address) => address.toString()),
-        actives,
-        {
-          gasLimit: UPDATE_EXTERNAL_PAUSES_GAS,
-        },
+        this.getSignerOrProvider(),
       ),
-      this.networkService.environment,
+      'updateExternalPauses',
+      [externalPausesAddresses.map((addr) => addr.toString()), actives],
+      GAS.UPDATE_EXTERNAL_PAUSES,
     );
   }
 
@@ -2962,14 +2361,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Adding External Pause for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ExternalPauseManagement__factory.connect(
+    return this.executeTransaction(
+      ExternalPauseManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).addExternalPause(externalPauseAddress.toString(), {
-        gasLimit: ADD_EXTERNAL_PAUSE_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'addExternalPause',
+      [externalPauseAddress.toString()],
+      GAS.ADD_EXTERNAL_PAUSE,
     );
   }
 
@@ -2981,14 +2380,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Removing External Pause for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ExternalPauseManagement__factory.connect(
+    return this.executeTransaction(
+      ExternalPauseManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).removeExternalPause(externalPauseAddress.toString(), {
-        gasLimit: REMOVE_EXTERNAL_PAUSE_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'removeExternalPause',
+      [externalPauseAddress.toString()],
+      GAS.REMOVE_EXTERNAL_PAUSE,
     );
   }
 
@@ -3000,14 +2399,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Setting paused to external pause mock contract ${contract.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await MockedExternalPause__factory.connect(
+    return this.executeTransaction(
+      MockedExternalPause__factory.connect(
         contract.toString(),
-        this.signerOrProvider,
-      ).setPaused(paused, {
-        gasLimit: SET_PAUSED_MOCK_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'setPaused',
+      [paused],
+      GAS.SET_PAUSED_MOCK,
     );
   }
 
@@ -3015,11 +2414,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Deploying External Pause Mock contract`);
 
     const factory = new MockedExternalPause__factory(
-      this.signerOrProvider as Signer,
+      this.getSignerOrProvider() as Signer,
     );
 
     const contract = await factory.deploy({
-      gasLimit: CREATE_EXTERNAL_PAUSE_MOCK_GAS,
+      gasLimit: GAS.CREATE_EXTERNAL_PAUSE_MOCK,
     });
     await contract.deployed();
 
@@ -3035,18 +2434,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Updating External Control Lists for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ExternalControlListManagement__factory.connect(
+    return this.executeTransaction(
+      ExternalControlListManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).updateExternalControlLists(
-        externalControlListsAddresses.map((address) => address.toString()),
-        actives,
-        {
-          gasLimit: UPDATE_EXTERNAL_CONTROL_LISTS_GAS,
-        },
+        this.getSignerOrProvider(),
       ),
-      this.networkService.environment,
+      'updateExternalControlLists',
+      [externalControlListsAddresses.map((addr) => addr.toString()), actives],
+      GAS.UPDATE_EXTERNAL_CONTROL_LISTS,
     );
   }
 
@@ -3058,14 +2453,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Adding External Control List for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ExternalControlListManagement__factory.connect(
+    return this.executeTransaction(
+      ExternalControlListManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).addExternalControlList(externalControlListAddress.toString(), {
-        gasLimit: ADD_EXTERNAL_CONTROL_LIST_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'addExternalControlList',
+      [externalControlListAddress.toString()],
+      GAS.ADD_EXTERNAL_CONTROL_LIST,
     );
   }
 
@@ -3077,14 +2472,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Removing External Control List for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ExternalControlListManagement__factory.connect(
+    return this.executeTransaction(
+      ExternalControlListManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).removeExternalControlList(externalControlListAddress.toString(), {
-        gasLimit: REMOVE_EXTERNAL_CONTROL_LIST_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'removeExternalControlList',
+      [externalControlListAddress.toString()],
+      GAS.REMOVE_EXTERNAL_CONTROL_LIST,
     );
   }
 
@@ -3096,14 +2491,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Adding address ${targetId.toString()} to external Control black List mock ${contract.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await MockedBlacklist__factory.connect(
+    return this.executeTransaction(
+      MockedBlacklist__factory.connect(
         contract.toString(),
-        this.signerOrProvider,
-      ).addToBlacklist(targetId.toString(), {
-        gasLimit: ADD_TO_BLACK_LIST_MOCK_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'addToBlacklist',
+      [targetId.toString()],
+      GAS.ADD_TO_BLACK_LIST_MOCK,
     );
   }
 
@@ -3115,14 +2510,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Adding address ${targetId.toString()} to external Control white List mock ${contract.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await MockedWhitelist__factory.connect(
+    return this.executeTransaction(
+      MockedWhitelist__factory.connect(
         contract.toString(),
-        this.signerOrProvider,
-      ).addToWhitelist(targetId.toString(), {
-        gasLimit: ADD_TO_WHITE_LIST_MOCK_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'addToWhitelist',
+      [targetId.toString()],
+      GAS.ADD_TO_WHITE_LIST_MOCK,
     );
   }
 
@@ -3134,14 +2529,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Removing address ${targetId.toString()} from external Control black List mock ${contract.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await MockedBlacklist__factory.connect(
+    return this.executeTransaction(
+      MockedBlacklist__factory.connect(
         contract.toString(),
-        this.signerOrProvider,
-      ).removeFromBlacklist(targetId.toString(), {
-        gasLimit: REMOVE_FROM_BLACK_LIST_MOCK_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'removeFromBlacklist',
+      [targetId.toString()],
+      GAS.REMOVE_FROM_BLACK_LIST_MOCK,
     );
   }
 
@@ -3153,14 +2548,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Removing address ${targetId.toString()} from external Control white List mock ${contract.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await MockedWhitelist__factory.connect(
+    return this.executeTransaction(
+      MockedWhitelist__factory.connect(
         contract.toString(),
-        this.signerOrProvider,
-      ).removeFromWhitelist(targetId.toString(), {
-        gasLimit: REMOVE_FROM_WHITE_LIST_MOCK_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'removeFromWhitelist',
+      [targetId.toString()],
+      GAS.REMOVE_FROM_WHITE_LIST_MOCK,
     );
   }
 
@@ -3168,11 +2563,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Deploying External Control Black List Mock contract`);
 
     const factory = new MockedBlacklist__factory(
-      this.signerOrProvider as Signer,
+      this.getSignerOrProvider() as Signer,
     );
 
     const contract = await factory.deploy({
-      gasLimit: CREATE_EXTERNAL_BLACK_LIST_MOCK_GAS,
+      gasLimit: GAS.CREATE_EXTERNAL_BLACK_LIST_MOCK,
     });
     await contract.deployed();
 
@@ -3183,11 +2578,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Deploying External Control White List Mock contract`);
 
     const factory = new MockedWhitelist__factory(
-      this.signerOrProvider as Signer,
+      this.getSignerOrProvider() as Signer,
     );
 
     const contract = await factory.deploy({
-      gasLimit: CREATE_EXTERNAL_WHITE_LIST_MOCK_GAS,
+      gasLimit: GAS.CREATE_EXTERNAL_WHITE_LIST_MOCK,
     });
     await contract.deployed();
 
@@ -3203,18 +2598,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Updating External Kyc Lists for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ExternalKycListManagement__factory.connect(
+    return this.executeTransaction(
+      ExternalKycListManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).updateExternalKycLists(
-        externalKycListsAddresses.map((address) => address.toString()),
-        actives,
-        {
-          gasLimit: UPDATE_EXTERNAL_KYC_LISTS_GAS,
-        },
+        this.getSignerOrProvider(),
       ),
-      this.networkService.environment,
+      'updateExternalKycLists',
+      [externalKycListsAddresses.map((address) => address.toString()), actives],
+      GAS.UPDATE_EXTERNAL_KYC_LISTS,
     );
   }
 
@@ -3226,14 +2617,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Adding External kyc List for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ExternalKycListManagement__factory.connect(
+    return this.executeTransaction(
+      ExternalKycListManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).addExternalKycList(externalKycListAddress.toString(), {
-        gasLimit: ADD_EXTERNAL_KYC_LIST_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'addExternalKycList',
+      [externalKycListAddress.toString()],
+      GAS.ADD_EXTERNAL_KYC_LIST,
     );
   }
 
@@ -3245,14 +2636,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Removing External kyc List for security ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ExternalKycListManagement__factory.connect(
+    return this.executeTransaction(
+      ExternalKycListManagement__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).removeExternalKycList(externalKycListAddress.toString(), {
-        gasLimit: REMOVE_EXTERNAL_KYC_LIST_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'removeExternalKycList',
+      [externalKycListAddress.toString()],
+      GAS.REMOVE_EXTERNAL_KYC_LIST,
     );
   }
 
@@ -3264,14 +2655,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Grant kyc address ${targetId.toString()} to external kyc mock ${contract.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await MockedExternalKycList__factory.connect(
+    return this.executeTransaction(
+      MockedExternalKycList__factory.connect(
         contract.toString(),
-        this.signerOrProvider,
-      ).grantKyc(targetId.toString(), {
-        gasLimit: GRANT_KYC_MOCK_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'grantKyc',
+      [targetId.toString()],
+      GAS.GRANT_KYC_MOCK,
     );
   }
 
@@ -3283,14 +2674,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Revoke kyc address ${targetId.toString()} to external kyc mock ${contract.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await MockedExternalKycList__factory.connect(
+    return this.executeTransaction(
+      MockedExternalKycList__factory.connect(
         contract.toString(),
-        this.signerOrProvider,
-      ).revokeKyc(targetId.toString(), {
-        gasLimit: REVOKE_KYC_MOCK_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'revokeKyc',
+      [targetId.toString()],
+      GAS.REVOKE_KYC_MOCK,
     );
   }
 
@@ -3298,11 +2689,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Deploying External Kyc List Mock contract`);
 
     const factory = new MockedExternalKycList__factory(
-      this.signerOrProvider as Signer,
+      this.getSignerOrProvider() as Signer,
     );
 
     const contract = await factory.deploy({
-      gasLimit: CREATE_EXTERNAL_KYC_LIST_MOCK_GAS,
+      gasLimit: GAS.CREATE_EXTERNAL_KYC_LIST_MOCK,
     });
     await contract.deployed();
 
@@ -3316,14 +2707,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Activating Internal Kyc to address ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Kyc__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).activateInternalKyc({
-        gasLimit: ACTIVATE_INTERNAL_KYC_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Kyc__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'activateInternalKyc',
+      [],
+      GAS.ACTIVATE_INTERNAL_KYC,
     );
   }
 
@@ -3334,14 +2722,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Deactivate Internal Kyc to address ${security.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await Kyc__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).deactivateInternalKyc({
-        gasLimit: DEACTIVATE_INTERNAL_KYC_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      Kyc__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'deactivateInternalKyc',
+      [],
+      GAS.DEACTIVATE_INTERNAL_KYC,
     );
   }
 
@@ -3350,29 +2735,24 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     name: string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting name to ${security.toString()}`);
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643Facet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).setName(name, {
-        gasLimit: SET_NAME_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'setName',
+      [name],
+      GAS.SET_NAME,
     );
   }
+
   async setSymbol(
     security: EvmAddress,
     symbol: string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643Facet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).setName(symbol, {
-        gasLimit: SET_SYMBOL_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'setSymbol',
+      [symbol],
+      GAS.SET_SYMBOL,
     );
   }
 
@@ -3381,15 +2761,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     onchainID: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting onchainID to ${security.toString()}`);
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643Facet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).setOnchainID(onchainID.toString(), {
-        gasLimit: SET_ONCHAIN_ID_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'setOnchainID',
+      [onchainID.toString()],
+      GAS.SET_ONCHAIN_ID,
     );
   }
 
@@ -3398,15 +2774,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     identityRegistry: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting Identity Registry to ${security.toString()}`);
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643Facet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).setIdentityRegistry(identityRegistry.toString(), {
-        gasLimit: SET_IDENTITY_REGISTRY_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'setIdentityRegistry',
+      [identityRegistry.toString()],
+      GAS.SET_IDENTITY_REGISTRY,
     );
   }
 
@@ -3415,15 +2787,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     compliance: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Setting Compliance to ${security.toString()}`);
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643Facet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).setCompliance(compliance.toString(), {
-        gasLimit: SET_COMPLIANCE_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'setCompliance',
+      [compliance.toString()],
+      GAS.SET_COMPLIANCE,
     );
   }
 
@@ -3431,19 +2799,19 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
-    securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Freezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
     );
-    return RPCTransactionResponseAdapter.manageResponse(
-      await FreezeFacet__factory.connect(
+
+    return this.executeTransaction(
+      FreezeFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).freezePartialTokens(targetId.toString(), amount.toBigNumber(), {
-        gasLimit: FREEZE_PARTIAL_TOKENS_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'freezePartialTokens',
+      [targetId.toString(), amount.toBigNumber()],
+      GAS.FREEZE_PARTIAL_TOKENS,
     );
   }
 
@@ -3451,19 +2819,19 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
-    securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Unfreezing ${amount} tokens ${security.toString()} to account ${targetId.toString()}`,
     );
-    return RPCTransactionResponseAdapter.manageResponse(
-      await FreezeFacet__factory.connect(
+
+    return this.executeTransaction(
+      FreezeFacet__factory.connect(
         security.toString(),
-        this.signerOrProvider,
-      ).unfreezePartialTokens(targetId.toString(), amount.toBigNumber(), {
-        gasLimit: UNFREEZE_PARTIAL_TOKENS_GAS,
-      }),
-      this.networkService.environment,
+        this.getSignerOrProvider(),
+      ),
+      'unfreezePartialTokens',
+      [targetId.toString(), amount.toBigNumber()],
+      GAS.UNFREEZE_PARTIAL_TOKENS,
     );
   }
 
@@ -3476,19 +2844,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Recovering address ${lostWallet.toString()} to ${newWallet.toString()}`,
     );
 
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643Facet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).recoveryAddress(
-        lostWallet.toString(),
-        newWallet.toString(),
-        EVM_ZERO_ADDRESS,
-        {
-          gasLimit: RECOVERY_ADDRESS_GAS,
-        },
-      ),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'recoveryAddress',
+      [lostWallet.toString(), newWallet.toString(), EVM_ZERO_ADDRESS],
+      GAS.RECOVERY_ADDRESS,
     );
   }
 
@@ -3497,15 +2857,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     agentId: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Granting agent role to ${agentId.toString()}`);
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643Facet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).addAgent(agentId.toString(), {
-        gasLimit: ADD_AGENT_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'addAgent',
+      [agentId.toString()],
+      GAS.ADD_AGENT,
     );
   }
 
@@ -3514,15 +2870,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     agentId: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Revoking agent role from ${agentId.toString()}`);
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC3643Facet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).removeAgent(agentId.toString(), {
-        gasLimit: REMOVE_AGENT_GAS,
-      }),
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'removeAgent',
+      [agentId.toString()],
+      GAS.REMOVE_AGENT,
     );
   }
 
@@ -3530,27 +2882,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     amountList: BigDecimal[],
     toList: EvmAddress[],
-    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Batch transferring ${amountList.length} token amounts from ${security.toString()} to ${toList.map((item) => item.toString()).join(', ')}`,
     );
-
-    const contract = ERC3643BatchFacet__factory.connect(
-      security.toString(),
-      this.signerOrProvider,
-    );
-    const tx = await contract.batchTransfer(
-      toList.map((account) => account.toString()),
-      amountList.map((item) => item.toBigNumber()),
-      {
-        gasLimit: BATCH_TRANSFER_GAS,
-      },
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      tx,
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'batchTransfer',
+      [
+        toList.map((account) => account.toString()),
+        amountList.map((item) => item.toBigNumber()),
+      ],
+      GAS.BATCH_TRANSFER,
     );
   }
 
@@ -3559,28 +2902,19 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     amountList: BigDecimal[],
     fromList: EvmAddress[],
     toList: EvmAddress[],
-    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Batch forced transferring ${amountList.length} token amounts from ${fromList.map((item) => item.toString())} to ${toList.map((item) => item.toString())}`,
     );
-
-    const contract = ERC3643BatchFacet__factory.connect(
-      security.toString(),
-      this.signerOrProvider,
-    );
-    const tx = await contract.batchForcedTransfer(
-      fromList.map((item) => item.toString()),
-      toList.map((item) => item.toString()),
-      amountList.map((item) => item.toBigNumber()),
-      {
-        gasLimit: BATCH_FORCED_TRANSFER_GAS,
-      },
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      tx,
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'batchForcedTransfer',
+      [
+        fromList.map((item) => item.toString()),
+        toList.map((item) => item.toString()),
+        amountList.map((item) => item.toBigNumber()),
+      ],
+      GAS.BATCH_FORCED_TRANSFER,
     );
   }
 
@@ -3588,27 +2922,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     amountList: BigDecimal[],
     toList: EvmAddress[],
-    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Batch minting ${amountList.length} token amounts on ${security.toString()} to ${toList.map((item) => item.toString())}`,
     );
-
-    const contract = ERC3643BatchFacet__factory.connect(
-      security.toString(),
-      this.signerOrProvider,
-    );
-    const tx = await contract.batchMint(
-      toList.map((item) => item.toString()),
-      amountList.map((item) => item.toBigNumber()),
-      {
-        gasLimit: BATCH_MINT_GAS,
-      },
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      tx,
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'batchMint',
+      [
+        toList.map((item) => item.toString()),
+        amountList.map((item) => item.toBigNumber()),
+      ],
+      GAS.BATCH_MINT,
     );
   }
 
@@ -3616,27 +2941,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     amountList: BigDecimal[],
     targetList: EvmAddress[],
-    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Batch burning ${amountList.length} token amounts from ${targetList.map((item) => item.toString())}`,
     );
-
-    const contract = ERC3643BatchFacet__factory.connect(
-      security.toString(),
-      this.signerOrProvider,
-    );
-    const tx = await contract.batchBurn(
-      targetList.map((item) => item.toString()),
-      amountList.map((item) => item.toBigNumber()),
-      {
-        gasLimit: BATCH_BURN_GAS,
-      },
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      tx,
-      this.networkService.environment,
+    return this.executeTransaction(
+      ERC3643__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'batchBurn',
+      [
+        targetList.map((item) => item.toString()),
+        amountList.map((item) => item.toBigNumber()),
+      ],
+      GAS.BATCH_BURN,
     );
   }
 
@@ -3644,27 +2960,19 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     freezeList: boolean[],
     targetList: EvmAddress[],
-    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Batch setting address frozen status on ${targetList.length} addresses from ${security.toString()}`,
     );
 
-    const contract = FreezeFacet__factory.connect(
-      security.toString(),
-      this.signerOrProvider,
-    );
-    const tx = await contract.batchSetAddressFrozen(
-      targetList.map((item) => item.toString()),
-      freezeList,
-      {
-        gasLimit: BATCH_SET_ADDRESS_FROZEN_GAS,
-      },
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      tx,
-      this.networkService.environment,
+    return this.executeTransaction(
+      FreezeFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
+      'batchSetAddressFrozen',
+      [targetList.map((item) => item.toString()), freezeList],
+      GAS.BATCH_SET_ADDRESS_FROZEN,
     );
   }
 
@@ -3672,27 +2980,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     amountList: BigDecimal[],
     targetList: EvmAddress[],
-    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Batch freezing partial tokens (${amountList.length}) on ${security.toString()} for targets ${targetList.map((item) => item.toString())}`,
     );
 
-    const contract = FreezeFacet__factory.connect(
-      security.toString(),
-      this.signerOrProvider,
-    );
-    const tx = await contract.batchFreezePartialTokens(
-      targetList.map((item) => item.toString()),
-      amountList.map((item) => item.toBigNumber()),
-      {
-        gasLimit: BATCH_FREEZE_PARTIAL_TOKENS_GAS,
-      },
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      tx,
-      this.networkService.environment,
+    return this.executeTransaction(
+      FreezeFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
+      'batchFreezePartialTokens',
+      [
+        targetList.map((item) => item.toString()),
+        amountList.map((item) => item.toBigNumber()),
+      ],
+      GAS.BATCH_FREEZE_PARTIAL_TOKENS,
     );
   }
 
@@ -3700,27 +3003,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     amountList: BigDecimal[],
     targetList: EvmAddress[],
-    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Batch unfreezing partial tokens (${amountList.length}) on ${security.toString()} for targets ${targetList.map((item) => item.toString())}`,
     );
 
-    const contract = FreezeFacet__factory.connect(
-      security.toString(),
-      this.signerOrProvider,
-    );
-    const tx = await contract.batchUnfreezePartialTokens(
-      targetList.map((item) => item.toString()),
-      amountList.map((item) => item.toBigNumber()),
-      {
-        gasLimit: BATCH_UNFREEZE_PARTIAL_TOKENS_GAS,
-      },
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      tx,
-      this.networkService.environment,
+    return this.executeTransaction(
+      FreezeFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
+      'batchUnfreezePartialTokens',
+      [
+        targetList.map((item) => item.toString()),
+        amountList.map((item) => item.toBigNumber()),
+      ],
+      GAS.BATCH_UNFREEZE_PARTIAL_TOKENS,
     );
   }
 
@@ -3728,21 +3026,89 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     status: boolean,
     target: EvmAddress,
-    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Freezing address ${target.toString()}`);
 
-    const contract = FreezeFacet__factory.connect(
-      security.toString(),
-      this.signerOrProvider,
+    return this.executeTransaction(
+      FreezeFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
+      'setAddressFrozen',
+      [target.toString(), status],
+      GAS.SET_ADDRESS_FROZEN,
     );
-    const tx = await contract.setAddressFrozen(target.toString(), status, {
-      gasLimit: SET_ADDRESS_FROZEN_GAS,
-    });
+  }
 
+  private async executeTransaction<T>(
+    factory: any,
+    method: string,
+    args: any[],
+    gasLimit: number,
+    eventName?: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Executing ${method} with args:`, args);
+    const tx = await factory[method](...args, { gasLimit });
     return RPCTransactionResponseAdapter.manageResponse(
       tx,
       this.networkService.environment,
+      eventName,
     );
+  }
+
+  private async createSecurity<T>(
+    securityInfo: Security,
+    details: T,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    externalPauses: EvmAddress[] = [],
+    externalControlLists: EvmAddress[] = [],
+    externalKycLists: EvmAddress[] = [],
+    diamondOwnerAccount: EvmAddress,
+    createToken: (security: SecurityData, details: T) => any,
+    deployMethod: string,
+    gasLimit: number,
+    eventName: string,
+  ): Promise<TransactionResponse> {
+    try {
+      const securityData = SecurityDataBuilder.buildSecurityData(
+        securityInfo,
+        resolver,
+        configId,
+        configVersion,
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+        diamondOwnerAccount,
+      );
+      const regulationData =
+        SecurityDataBuilder.buildRegulationData(securityInfo);
+      const securityToken = createToken(securityData, details);
+      const factoryInstance = Factory__factory.connect(
+        factory.toString(),
+        this.getSignerOrProvider(),
+      );
+
+      LogService.logTrace(`Deploying ${deployMethod}: `, {
+        security: securityToken,
+      });
+      const res = await (factoryInstance as any)[deployMethod](
+        securityToken,
+        regulationData,
+        { gasLimit },
+      );
+      return await RPCTransactionResponseAdapter.manageResponse(
+        res,
+        this.networkService.environment,
+        eventName,
+      );
+    } catch (error) {
+      LogService.logError(error);
+      throw new SigningError(
+        `Unexpected error in ${deployMethod} operation: ${error}`,
+      );
+    }
   }
 }

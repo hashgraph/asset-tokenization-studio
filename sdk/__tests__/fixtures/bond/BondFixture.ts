@@ -203,42 +203,42 @@
 
 */
 
-import { CreateBondCommand } from '../../../src/app/usecase/command/bond/create/CreateBondCommand';
-import { SetCouponCommand } from '../../../src/app/usecase/command/bond/coupon/set/SetCouponCommand';
+import { CreateBondCommand } from '@command/bond/create/CreateBondCommand';
+import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
 import { createFixture } from '../config';
-import ContractId from '../../../src/domain/context/contract/ContractId';
+import ContractId from '@domain/context/contract/ContractId';
 import {
   ContractIdPropFixture,
   HederaIdPropsFixture,
 } from '../shared/DataFixture';
 import { SecurityPropsFixture } from '../shared/SecurityFixture';
-import { UpdateMaturityDateCommand } from '../../../src/app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand';
-import { BondDetails } from '../../../src/domain/context/bond/BondDetails';
-import { GetCouponQuery } from '../../../src/app/usecase/query/bond/coupons/getCoupon/GetCouponQuery';
-import { GetCouponCountQuery } from '../../../src/app/usecase/query/bond/coupons/getCouponCount/GetCouponCountQuery';
-import { GetCouponForQuery } from '../../../src/app/usecase/query/bond/coupons/getCouponFor/GetCouponForQuery';
-import { GetCouponDetailsQuery } from '../../../src/app/usecase/query/bond/get/getCouponDetails/GetCouponDetailsQuery';
-import { GetBondDetailsQuery } from '../../../src/app/usecase/query/bond/get/getBondDetails/GetBondDetailsQuery';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
-import CreateBondRequest from '../../../src/port/in/request/bond/CreateBondRequest';
+import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
+import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
+import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetCouponDetailsQuery } from '@query/bond/get/getCouponDetails/GetCouponDetailsQuery';
+import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
+import { HederaId } from '@domain/context/shared/HederaId';
+import CreateBondRequest from '@port/in/request/bond/CreateBondRequest';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../../../src/domain/context/factory/RegulationType';
+} from '@domain/context/factory/RegulationType';
 import { faker } from '@faker-js/faker/.';
-import GetBondDetailsRequest from '../../../src/port/in/request/bond/GetBondDetailsRequest';
-import SetCouponRequest from '../../../src/port/in/request/bond/SetCouponRequest';
-import GetCouponDetailsRequest from '../../../src/port/in/request/bond/GetCouponDetailsRequest';
-import GetCouponForRequest from '../../../src/port/in/request/bond/GetCouponForRequest';
-import GetCouponRequest from '../../../src/port/in/request/bond/GetCouponRequest';
-import GetAllCouponsRequest from '../../../src/port/in/request/bond/GetAllCouponsRequest';
-import UpdateMaturityDateRequest from '../../../src/port/in/request/bond/UpdateMaturityDateRequest';
-import { CouponDetails } from '../../../src/domain/context/bond/CouponDetails';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
+import GetBondDetailsRequest from '@port/in/request/bond/GetBondDetailsRequest';
+import SetCouponRequest from '@port/in/request/bond/SetCouponRequest';
+import GetCouponDetailsRequest from '@port/in/request/bond/GetCouponDetailsRequest';
+import GetCouponForRequest from '@port/in/request/bond/GetCouponForRequest';
+import GetCouponRequest from '@port/in/request/bond/GetCouponRequest';
+import GetAllCouponsRequest from '@port/in/request/bond/GetAllCouponsRequest';
+import UpdateMaturityDateRequest from '@port/in/request/bond/UpdateMaturityDateRequest';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import BigDecimal from '@domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
-import { Coupon } from '../../../src/domain/context/bond/Coupon';
+import { Coupon } from '@domain/context/bond/Coupon';
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   (command) => {

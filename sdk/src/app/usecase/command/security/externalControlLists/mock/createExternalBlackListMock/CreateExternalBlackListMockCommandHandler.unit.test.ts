@@ -203,20 +203,20 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
+} from '@test/fixtures/shared/DataFixture';
 import { CreateExternalBlackListMockCommandHandler } from './CreateExternalBlackListMockCommandHandler.js';
 import { CreateExternalBlackListMockCommandResponse } from './CreateExternalBlackListMockCommand.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import Account from '../../../../../../../domain/context/account/Account.js';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import Account from '@domain/context/account/Account';
 import { CreateExternalBlackListMockCommandError } from './error/CreateExternalBlackListMockCommandError.js';
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('CreateExternalBlackListMockCommandHandler', () => {
   let handler: CreateExternalBlackListMockCommandHandler;

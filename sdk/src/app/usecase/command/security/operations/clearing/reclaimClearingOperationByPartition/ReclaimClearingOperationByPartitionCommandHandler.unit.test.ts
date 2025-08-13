@@ -203,25 +203,25 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import { HandleClearingOperationByPartitionCommandFixture } from '../../../../../../../../__tests__/fixtures/clearing/ClearingFixture.js';
-import { ReclaimClearingOperationByPartitionCommandHandler } from './ReclaimClearingOperationByPartitionCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { HandleClearingOperationByPartitionCommandFixture } from '@test/fixtures/clearing/ClearingFixture';
+import { ReclaimClearingOperationByPartitionCommandHandler } from './ReclaimClearingOperationByPartitionCommandHandler';
 import {
   ReclaimClearingOperationByPartitionCommand,
   ReclaimClearingOperationByPartitionCommandResponse,
-} from './ReclaimClearingOperationByPartitionCommand.js';
-import { ReclaimClearingOperationByPartitionCommandError } from './error/ReclaimClearingOperationByPartitionCommandError.js';
-import { ErrorCode } from '../../../../../../../core/error/BaseError.js';
+} from './ReclaimClearingOperationByPartitionCommand';
+import { ReclaimClearingOperationByPartitionCommandError } from './error/ReclaimClearingOperationByPartitionCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('ReclaimClearingOperationByPartitionCommandHandler', () => {
   let handler: ReclaimClearingOperationByPartitionCommandHandler;

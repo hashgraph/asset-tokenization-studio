@@ -204,28 +204,28 @@
 */
 
 import { createMock } from '@golevelup/ts-jest';
-import { SetScheduledBalanceAdjustmentCommandHandler } from './SetScheduledBalanceAdjustmentCommandHandler.js';
+import { SetScheduledBalanceAdjustmentCommandHandler } from './SetScheduledBalanceAdjustmentCommandHandler';
 import {
   SetScheduledBalanceAdjustmentCommand,
   SetScheduledBalanceAdjustmentCommandResponse,
-} from './SetScheduledBalanceAdjustmentCommand.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+} from './SetScheduledBalanceAdjustmentCommand';
+import TransactionService from '@service/transaction/TransactionService';
+import ContractService from '@service/contract/ContractService';
+import ValidationService from '@service/validation/ValidationService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import { SetScheduledBalanceAdjustmentCommandFixture } from '../../../../../../../__tests__/fixtures/equity/EquityFixture.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import Account from '../../../../../../domain/context/account/Account.js';
+} from '@test/fixtures/shared/DataFixture';
+import AccountService from '@service/account/AccountService';
+import { SetScheduledBalanceAdjustmentCommandFixture } from '@test/fixtures/equity/EquityFixture';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import Account from '@domain/context/account/Account';
 import { faker } from '@faker-js/faker/.';
-import { SetScheduledBalanceAdjustmentCommandError } from './error/SetScheduledBalanceAdjustmentCommandError.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
+import { SetScheduledBalanceAdjustmentCommandError } from './error/SetScheduledBalanceAdjustmentCommandError';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('SetScheduledBalanceAdjustmentCommandHandler', () => {
   let handler: SetScheduledBalanceAdjustmentCommandHandler;

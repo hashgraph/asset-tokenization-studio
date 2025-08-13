@@ -203,28 +203,28 @@
 
 */
 
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
-import AccountService from '../../../../../service/account/AccountService.js';
+import AccountService from '@service/account/AccountService';
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { AddIssuerCommandFixture } from '../../../../../../../__tests__/fixtures/ssi/SsiFixture.js';
-import Account from '../../../../../../domain/context/account/Account.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import { RemoveIssuerCommandHandler } from './RemoveIssuerCommandHandler.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import { ErrorCode } from '@core/error/BaseError';
+import { AddIssuerCommandFixture } from '@test/fixtures/ssi/SsiFixture';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { RemoveIssuerCommandHandler } from './RemoveIssuerCommandHandler';
 import {
   RemoveIssuerCommand,
   RemoveIssuerCommandResponse,
-} from './RemoveIssuerCommand.js';
-import { RemoveIssuerCommandError } from './error/RemoveIssuerCommandError.js';
+} from './RemoveIssuerCommand';
+import { RemoveIssuerCommandError } from './error/RemoveIssuerCommandError';
 
 describe('RemoveIssuerCommandHandler', () => {
   let handler: RemoveIssuerCommandHandler;

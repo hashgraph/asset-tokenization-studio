@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../error/BaseError.js';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export class CommandHandlerNotFoundException extends BaseError {
   constructor(commandName: string) {

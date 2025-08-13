@@ -205,10 +205,10 @@
 
 import { container } from 'tsyringe';
 import NetworkService, { NetworkProps } from './NetworkService'; // Adjust path as needed
-import { Environment } from '../../../domain/context/network/Environment';
-import { MirrorNode } from '../../../domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay';
-import Configuration from '../../../domain/context/network/Configuration';
+import { Environment } from '@domain/context/network/Environment';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import Configuration from '@domain/context/network/Configuration';
 
 describe('NetworkService', () => {
   let networkService: NetworkService;

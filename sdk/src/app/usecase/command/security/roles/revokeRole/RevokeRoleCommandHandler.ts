@@ -203,19 +203,19 @@
 
 */
 
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import AccountService from '@service/account/AccountService';
+import TransactionService from '@service/transaction/TransactionService';
 import {
   RevokeRoleCommand,
   RevokeRoleCommandResponse,
-} from './RevokeRoleCommand.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { RevokeRoleCommandError } from './error/RevokeRoleCommandError.js';
+} from './RevokeRoleCommand';
+import ValidationService from '@service/validation/ValidationService';
+import ContractService from '@service/contract/ContractService';
+import { RevokeRoleCommandError } from './error/RevokeRoleCommandError';
 
 @CommandHandler(RevokeRoleCommand)
 export class RevokeRoleCommandHandler

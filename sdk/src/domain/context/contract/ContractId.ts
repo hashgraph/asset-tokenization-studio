@@ -209,12 +209,12 @@ import {
   Long,
 } from '@hashgraph/sdk';
 import { proto } from '@hashgraph/proto';
-import InvalidKeyForContract from './error/InvalidKeyForContract.js';
-import BaseError from '../../../core/error/BaseError.js';
-import CheckStrings from '../../../core/checks/strings/CheckStrings.js';
-import { InvalidContractId } from './error/InvalidContractId.js';
-import { HederaId } from '../shared/HederaId.js';
-import LogService from '../../../app/service/log/LogService.js';
+import InvalidKeyForContract from './error/InvalidKeyForContract';
+import BaseError from '@core/error/BaseError';
+import CheckStrings from '@core/checks/strings/CheckStrings';
+import { InvalidContractId } from './error/InvalidContractId';
+import { HederaId } from '../shared/HederaId';
+import LogService from '@service/log/LogService';
 
 export default class ContractId extends HederaId {
   public readonly value: string;

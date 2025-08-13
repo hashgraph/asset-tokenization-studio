@@ -204,33 +204,34 @@
 */
 
 import {
-  SDK,
-  LoggerTransports,
-  GetRegulationDetailsRequest,
-  SupportedWallets,
-  Network,
-  Factory,
-} from '../../../src/index.js';
-import {
   CLIENT_ACCOUNT_ECDSA,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
-} from '../../config.js';
-import ConnectRequest from '../../../src/port/in/request/network/ConnectRequest.js';
+} from '@test/config';
+import ConnectRequest, {
+  SupportedWallets,
+} from '@port/in/request/network/ConnectRequest';
 import { Wallet, ethers } from 'ethers';
-import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
-import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter.js';
-import NetworkService from '../../../src/app/service/network/NetworkService.js';
-import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
-import Injectable from '../../../src/core/Injectable.js';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
+import NetworkService from '@service/network/NetworkService';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import Injectable from '@core/Injectable';
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../../../src/domain/context/factory/RegulationType.js';
+} from '@domain/context/factory/RegulationType';
+import {
+  SDK,
+  LoggerTransports,
+  Network,
+  Factory,
+  GetRegulationDetailsRequest,
+} from '@port/in';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -276,9 +277,11 @@ describe('🧪 Factory test', () => {
     const url = 'http://127.0.0.1:7546';
     const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
-    th.signerOrProvider = new Wallet(
-      CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-      customHttpProvider,
+    th.setSignerOrProvider(
+      new Wallet(
+        CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
+        customHttpProvider,
+      ),
     );
 
     await Network.connect(

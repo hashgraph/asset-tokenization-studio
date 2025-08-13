@@ -207,21 +207,21 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import { ErrorCode } from '../../../../../../core/error/BaseError.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 import {
   CouponDetailsFixture,
   GetCouponDetailsQueryFixture,
-} from '../../../../../../../__tests__/fixtures/bond/BondFixture.js';
-import AccountService from '../../../../../../app/service/account/AccountService.js';
-import { GetCouponDetailsQueryHandler } from './GetCouponDetailsQueryHandler.js';
+} from '@test/fixtures/bond/BondFixture';
+import AccountService from '@service/account/AccountService';
+import { GetCouponDetailsQueryHandler } from './GetCouponDetailsQueryHandler';
 import {
   GetCouponDetailsQuery,
   GetCouponDetailsQueryResponse,
-} from './GetCouponDetailsQuery.js';
-import { GetCouponDetailsQueryError } from './error/GetCouponDetailsQueryError.js';
+} from './GetCouponDetailsQuery';
+import { GetCouponDetailsQueryError } from './error/GetCouponDetailsQueryError';
 
 describe('GetCouponDetailsQueryHandler', () => {
   let handler: GetCouponDetailsQueryHandler;

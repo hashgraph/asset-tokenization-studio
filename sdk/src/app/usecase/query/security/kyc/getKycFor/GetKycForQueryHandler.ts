@@ -203,15 +203,15 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { GetKycForQuery, GetKycForQueryResponse } from './GetKycForQuery.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { GetKycForQueryError } from './error/GetKycForQueryError.js';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { GetKycForQuery, GetKycForQueryResponse } from './GetKycForQuery';
+import ContractService from '@service/contract/ContractService';
+import { GetKycForQueryError } from './error/GetKycForQueryError';
 
 @QueryHandler(GetKycForQuery)
 export class GetKycForQueryHandler implements IQueryHandler<GetKycForQuery> {

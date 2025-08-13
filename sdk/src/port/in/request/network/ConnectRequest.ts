@@ -203,14 +203,14 @@
 
 */
 
-import { OptionalField } from '../../../../core/decorator/OptionalDecorator.js';
-import { Environment } from '../../../../domain/context/network/Environment.js';
-import { MirrorNode } from '../../../../domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../../../domain/context/network/JsonRpcRelay.js';
-import { SupportedWallets } from '../../../../domain/context/network/Wallet.js';
-import { BaseRequest, RequestAccount } from '../BaseRequest.js';
-import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../FormatValidation.js';
+import { OptionalField } from '@core/decorator/OptionalDecorator';
+import { Environment } from '@domain/context/network/Environment';
+import { MirrorNode } from '@domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import { SupportedWallets } from '@domain/context/network/Wallet';
+import { BaseRequest, RequestAccount } from '../BaseRequest';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../FormatValidation';
 
 export { SupportedWallets };
 

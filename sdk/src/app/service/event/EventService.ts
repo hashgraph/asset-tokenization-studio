@@ -203,12 +203,12 @@
 
 */
 
-import EventEmitter from '../../../core/EventEmitter.js';
-import Service from '../Service.js';
-import { EventListenerNotFound } from './error/EventListenerNotFound.js';
-import { EventNotFound } from './error/EventNotFound.js';
+import EventEmitter from '@core/EventEmitter';
+import Service from '@service/Service';
+import { EventListenerNotFound } from './error/EventListenerNotFound';
+import { EventNotFound } from './error/EventNotFound';
 import { singleton } from 'tsyringe';
-import WalletEvent, { WalletEvents } from './WalletEvent.js';
+import WalletEvent, { WalletEvents } from './WalletEvent';
 import { inject } from 'tsyringe';
 
 type WalletEventIndex = Record<keyof WalletEvent, WalletEvent>;

@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export class InvalidBytes3 extends BaseError {
   constructor(value: string) {

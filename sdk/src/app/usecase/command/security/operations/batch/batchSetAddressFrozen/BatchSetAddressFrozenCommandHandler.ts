@@ -203,20 +203,20 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/account/AccountService.js';
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import ValidationService from '../../../../../../service/validation/ValidationService.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import { BatchSetAddressFrozenCommandError } from './error/BatchSetAddressFrozenCommandError.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import AccountService from '@service/account/AccountService';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ValidationService from '@service/validation/ValidationService';
+import ContractService from '@service/contract/ContractService';
+import { BatchSetAddressFrozenCommandError } from './error/BatchSetAddressFrozenCommandError';
 import {
   BatchSetAddressFrozenCommand,
   BatchSetAddressFrozenResponse,
-} from './BatchSetAddressFrozenCommand.js';
-import { KycStatus } from '../../../../../../../domain/context/kyc/Kyc.js';
+} from './BatchSetAddressFrozenCommand';
+import { KycStatus } from '@domain/context/kyc/Kyc';
 
 @CommandHandler(BatchSetAddressFrozenCommand)
 export class BatchSetAddressFrozenCommandHandler

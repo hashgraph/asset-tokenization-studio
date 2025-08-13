@@ -210,23 +210,23 @@ import {
   ForcedTransferCommandResponse,
 } from './ForcedTransferCommand';
 
-import AccountService from '../../../../../service/account/AccountService';
-import SecurityService from '../../../../../service/security/SecurityService';
-import TransactionService from '../../../../../service/transaction/TransactionService';
-import ValidationService from '../../../../../service/validation/ValidationService';
-import ContractService from '../../../../../service/contract/ContractService';
+import AccountService from '@service/account/AccountService';
+import SecurityService from '@service/security/SecurityService';
+import TransactionService from '@service/transaction/TransactionService';
+import ValidationService from '@service/validation/ValidationService';
+import ContractService from '@service/contract/ContractService';
 
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../__tests__/fixtures/shared/DataFixture';
-import Account from '../../../../../../domain/context/account/Account';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
-import TransactionAdapter from '../../../../../../port/out/TransactionAdapter';
-import { Security } from '../../../../../../domain/context/security/Security';
-import { FocedTransferCommandFixture } from '../../../../../../../__tests__/fixtures/transfer/TransferFixture';
+} from '@test/fixtures/shared/DataFixture';
+import Account from '@domain/context/account/Account';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import TransactionAdapter from '@port/out/TransactionAdapter';
+import { Security } from '@domain/context/security/Security';
+import { FocedTransferCommandFixture } from '@test/fixtures/transfer/TransferFixture';
 import { ForcedTransferCommandError } from './error/ForcedTransferCommandError';
 
 describe('ForcedTransferCommandHandler', () => {

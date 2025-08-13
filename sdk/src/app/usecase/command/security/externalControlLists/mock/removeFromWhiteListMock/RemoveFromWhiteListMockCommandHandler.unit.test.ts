@@ -203,21 +203,24 @@
 
 */
 
-import TransactionService from '../../../../../../service/transaction/TransactionService.js';
+import TransactionService from '@service/transaction/TransactionService';
 import { createMock } from '@golevelup/ts-jest';
 import {
+  ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '../../../../../../../../__tests__/fixtures/shared/DataFixture.js';
-import ContractService from '../../../../../../service/contract/ContractService.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { RemoveFromWhiteListMockCommandFixture } from '../../../../../../../../__tests__/fixtures/externalControlLists/ExternalControlListsFixture.js';
-import AccountService from '../../../../../../../app/service/account/AccountService.js';
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { RemoveFromWhiteListMockCommandFixture } from '@test/fixtures/externalControlLists/ExternalControlListsFixture';
+import AccountService from '@service/account/AccountService';
 import {
   RemoveFromWhiteListMockCommand,
   RemoveFromWhiteListMockCommandResponse,
 } from './RemoveFromWhiteListMockCommand.js';
 import { RemoveFromWhiteListMockCommandHandler } from './RemoveFromWhiteListMockCommandHandler.js';
+import { RemoveFromWhiteListMockCommandError } from './error/RemoveFromWhiteListMockCommandError.js';
+import { ErrorCode } from '@core/error/BaseError';
 
 describe('RemoveFromWhiteListMockCommandHandler', () => {
   let handler: RemoveFromWhiteListMockCommandHandler;
@@ -233,7 +236,7 @@ describe('RemoveFromWhiteListMockCommandHandler', () => {
   const targetEvmAddress = new EvmAddress(
     EvmAddressPropsFixture.create().value,
   );
-
+  const errorMsg = ErrorMsgFixture.create().msg;
   const transactionId = TransactionIdFixture.create().id;
 
   beforeEach(() => {
@@ -250,6 +253,24 @@ describe('RemoveFromWhiteListMockCommandHandler', () => {
   });
 
   describe('execute', () => {
+    it('throws RemoveFromWhiteListMockCommandError when command fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        RemoveFromWhiteListMockCommandError,
+      );
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while removing from whitelist: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtCommandError,
+      });
+    });
+
     it('should successfully remove from white list mock', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         contractEvmAddress,

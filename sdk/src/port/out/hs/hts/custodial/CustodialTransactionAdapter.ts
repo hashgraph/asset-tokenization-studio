@@ -212,32 +212,29 @@ import {
   CustodialWalletService,
   SignatureRequest,
 } from '@hashgraph/hedera-custodians-integration';
-import TransactionResponse from '../../../../../domain/context/transaction/TransactionResponse.js';
-import Account from '../../../../../domain/context/account/Account';
-import { InitializationData } from '../../../TransactionAdapter';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
-import EventService from '../../../../../app/service/event/EventService';
-import { MirrorNodeAdapter } from '../../../mirror/MirrorNodeAdapter';
-import NetworkService from '../../../../../app/service/network/NetworkService';
-import { Environment } from '../../../../../domain/context/network/Environment';
-import LogService from '../../../../../app/service/log/LogService';
-import { SigningError } from '../../../error/SigningError.js';
-import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
-import {
-  WalletEvents,
-  WalletPairedEvent,
-} from '../../../../../app/service/event/WalletEvent';
-import Injectable from '../../../../../core/Injectable';
-import { TransactionType } from '../../../TransactionResponseEnums';
-import Hex from '../../../../../core/Hex.js';
-import { HederaTransactionAdapter } from '../../HederaTransactionAdapter.js';
-import { HTSTransactionResponseAdapter } from '../HTSTransactionResponseAdapter.js';
-import DfnsSettings from '../../../../../core/settings/custodialWalletSettings/DfnsSettings.js';
-import { HederaId } from '../../../../../domain/context/shared/HederaId.js';
-import FireblocksSettings from '../../../../../core/settings/custodialWalletSettings/FireblocksSettings.js';
-import AWSKMSSettings from '../../../../../core/settings/custodialWalletSettings/AWSKMSSettings.js';
-import { PublickKeyNotFound } from './error/PublickKeyNotFound.js';
-import { UnsupportedNetwork } from '../../../../../domain/context/network/error/UnsupportedNetwork.js';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
+import Account from '@domain/context/account/Account';
+import { InitializationData } from '@port/out/TransactionAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EventService from '@service/event/EventService';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import NetworkService from '@service/network/NetworkService';
+import { Environment } from '@domain/context/network/Environment';
+import LogService from '@service/log/LogService';
+import { SigningError } from '@port/out/error/SigningError';
+import { SupportedWallets } from '@domain/context/network/Wallet';
+import { WalletEvents, WalletPairedEvent } from '@service/event/WalletEvent';
+import Injectable from '@core/Injectable';
+import { TransactionType } from '@port/out/TransactionResponseEnums';
+import Hex from '@core/Hex';
+import { HederaTransactionAdapter } from '@port/out/hs/HederaTransactionAdapter';
+import { HTSTransactionResponseAdapter } from '../HTSTransactionResponseAdapter';
+import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
+import { HederaId } from '@domain/context/shared/HederaId';
+import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
+import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
+import { PublickKeyNotFound } from './error/PublickKeyNotFound';
+import { UnsupportedNetwork } from '@domain/context/network/error/UnsupportedNetwork';
 
 export abstract class CustodialTransactionAdapter extends HederaTransactionAdapter {
   protected client: Client;

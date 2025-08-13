@@ -203,17 +203,17 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 import {
   SetDividendsCommand,
   SetDividendsCommandResponse,
-} from './SetDividendsCommand.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { SetDividendsCommandError } from './error/SetDividendsCommandError.js';
+} from './SetDividendsCommand';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import ContractService from '@service/contract/ContractService';
+import { SetDividendsCommandError } from './error/SetDividendsCommandError';
 
 @CommandHandler(SetDividendsCommand)
 export class SetDividendsCommandHandler

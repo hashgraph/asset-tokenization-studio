@@ -203,9 +203,9 @@
 
 */
 
-import { MIN_ID } from '../../../../domain/context/security/CorporateAction.js';
-import ValidatedRequest from '../../../../core/validation/ValidatedArgs.js';
-import FormatValidation from '../FormatValidation.js';
+import { MIN_ID } from '@domain/context/security/CorporateAction';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../FormatValidation';
 
 export default class GetVotingRightsRequest extends ValidatedRequest<GetVotingRightsRequest> {
   securityId: string;

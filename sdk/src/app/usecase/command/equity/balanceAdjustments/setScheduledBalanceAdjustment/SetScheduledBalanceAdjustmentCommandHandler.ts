@@ -203,21 +203,21 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 import {
   SetScheduledBalanceAdjustmentCommand,
   SetScheduledBalanceAdjustmentCommandResponse,
-} from './SetScheduledBalanceAdjustmentCommand.js';
-import TransactionService from '../../../../../service/transaction/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import AccountService from '../../../../../service/account/AccountService.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
-import ValidationService from '../../../../../service/validation/ValidationService.js';
-import ContractService from '../../../../../service/contract/ContractService.js';
-import { SetScheduledBalanceAdjustmentCommandError } from './error/SetScheduledBalanceAdjustmentCommandError.js';
+} from './SetScheduledBalanceAdjustmentCommand';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import AccountService from '@service/account/AccountService';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import ValidationService from '@service/validation/ValidationService';
+import ContractService from '@service/contract/ContractService';
+import { SetScheduledBalanceAdjustmentCommandError } from './error/SetScheduledBalanceAdjustmentCommandError';
 
 @CommandHandler(SetScheduledBalanceAdjustmentCommand)
 export class SetScheduledBalanceAdjustmentCommandHandler

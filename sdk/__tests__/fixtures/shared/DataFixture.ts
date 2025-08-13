@@ -203,12 +203,12 @@
 
 */
 
+import { AccountProps } from '@domain/context/account/Account';
 import { createFixture } from '../config';
-import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
-import BigDecimal from '../../../src/domain/context/shared/BigDecimal';
-import TransactionResponse from '../../../src/domain/context/transaction/TransactionResponse';
-import { AccountProps } from '../../../src/domain/context/account/Account';
-import { HederaId } from '../../../src/domain/context/shared/HederaId';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { HederaId } from '@domain/context/shared/HederaId';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
 
 export const EvmAddressPropsFixture = createFixture<{ value: string }>(
   (props) => {

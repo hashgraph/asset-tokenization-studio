@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import { VotingRights } from '../../../../../../domain/context/equity/VotingRights.js';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
+import { VotingRights } from '@domain/context/equity/VotingRights';
 
 export class GetVotingQueryResponse implements QueryResponse {
   constructor(public readonly voting: VotingRights) {}
