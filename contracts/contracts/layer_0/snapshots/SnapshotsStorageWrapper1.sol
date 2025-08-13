@@ -206,11 +206,24 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {ArraysUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol";
-import {CountersUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import {_SNAPSHOT_STORAGE_POSITION} from "../constants/storagePositions.sol";
-import {ISnapshotsStorageWrapper, SnapshotStorage, Snapshots, SnapshotsAddress, PartitionSnapshots, ListOfPartitions} from "../../layer_1/interfaces/snapshots/ISnapshots.sol";
-import {CorporateActionsStorageWrapper1} from "../corporateActions/CorporateActionsStorageWrapper1.sol";
+import {
+    ArraysUpgradeable
+} from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
+import {
+    CountersUpgradeable
+} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
+import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {
+    ISnapshotsStorageWrapper,
+    SnapshotStorage,
+    Snapshots,
+    SnapshotsAddress,
+    PartitionSnapshots,
+    ListOfPartitions
+} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
+import {
+    CorporateActionsStorageWrapper1
+} from '../corporateActions/CorporateActionsStorageWrapper1.sol';
 
 abstract contract SnapshotsStorageWrapper1 is
     ISnapshotsStorageWrapper,
