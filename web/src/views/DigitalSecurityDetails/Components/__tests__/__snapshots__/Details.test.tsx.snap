@@ -34,13 +34,9 @@ exports[`Details should render correctly 1`] = `
             >
               Name
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
-            >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+            <p
+              class="chakra-text css-uivqlt"
+            />
           </div>
           <div
             class="css-tvba8"
@@ -52,13 +48,9 @@ exports[`Details should render correctly 1`] = `
             >
               Symbol
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
-            >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+            <p
+              class="chakra-text css-uivqlt"
+            />
           </div>
           <div
             class="css-tvba8"
@@ -70,13 +62,9 @@ exports[`Details should render correctly 1`] = `
             >
               Decimal
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
-            >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+            <p
+              class="chakra-text css-uivqlt"
+            />
           </div>
           <div
             class="css-tvba8"
@@ -88,13 +76,9 @@ exports[`Details should render correctly 1`] = `
             >
               ISIN
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
-            >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+            <p
+              class="chakra-text css-uivqlt"
+            />
           </div>
           <div
             class="css-tvba8"
@@ -106,13 +90,9 @@ exports[`Details should render correctly 1`] = `
             >
               EVM Address
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
-            >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+            <p
+              class="chakra-text css-uivqlt"
+            />
           </div>
           <div
             class="css-tvba8"
@@ -125,11 +105,40 @@ exports[`Details should render correctly 1`] = `
               ID
             </p>
             <div
-              class="chakra-skeleton__group css-1rr4qq7"
+              class="css-uivqlt"
             >
               <div
-                class="chakra-skeleton css-5dkehc"
-              />
+                class="css-1c2za90"
+              >
+                <p
+                  class="css-w4vgn5"
+                />
+                <button
+                  aria-label="Copy to clipboard-undefined"
+                  class="chakra-button css-qz167m"
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="chakra-icon css-kpbtv0"
+                    fill="currentColor"
+                    focusable="false"
+                    height="1em"
+                    viewBox="0 0 256 256"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z"
+                    />
+                  </svg>
+                </button>
+                <p
+                  class="css-16r1lxz"
+                >
+                  *Copy and save the ID to import into other browsers.
+                </p>
+              </div>
             </div>
           </div>
           <div
@@ -142,13 +151,11 @@ exports[`Details should render correctly 1`] = `
             >
               Currency
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              USD
+            </p>
           </div>
           <div
             class="css-tvba8"
@@ -160,13 +167,11 @@ exports[`Details should render correctly 1`] = `
             >
               Nominal Value
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              0.00
+            </p>
           </div>
           <div
             class="css-tvba8"
@@ -178,13 +183,11 @@ exports[`Details should render correctly 1`] = `
             >
               Max Supply
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              undefined undefined
+            </p>
           </div>
           <div
             class="css-tvba8"
@@ -196,13 +199,11 @@ exports[`Details should render correctly 1`] = `
             >
               Total Supply
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              undefined undefined
+            </p>
           </div>
           <div
             class="css-tvba8"
@@ -214,13 +215,11 @@ exports[`Details should render correctly 1`] = `
             >
               Pending to be minted
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              0 undefined
+            </p>
           </div>
         </div>
       </div>
@@ -273,13 +272,11 @@ exports[`Details should render correctly 1`] = `
             >
               Controllable
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              Not allowed
+            </p>
           </div>
           <div
             class="css-tvba8"
@@ -291,13 +288,11 @@ exports[`Details should render correctly 1`] = `
             >
               Blocklist
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              Allowed
+            </p>
           </div>
           <div
             class="css-tvba8"
@@ -309,13 +304,11 @@ exports[`Details should render correctly 1`] = `
             >
               Approval list
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              Not allowed
+            </p>
           </div>
         </div>
         <div
@@ -340,13 +333,11 @@ exports[`Details should render correctly 1`] = `
             >
               Regulation type
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              regulation.regulationType_undefined
+            </p>
           </div>
           <div
             class="css-tvba8"
@@ -358,13 +349,11 @@ exports[`Details should render correctly 1`] = `
             >
               Regulation sub-type
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              -
+            </p>
           </div>
           <div
             class="css-tvba8"
@@ -376,13 +365,9 @@ exports[`Details should render correctly 1`] = `
             >
               Blocked countries
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
-            >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+            <p
+              class="chakra-text css-uivqlt"
+            />
           </div>
           <div
             class="css-tvba8"
@@ -394,13 +379,11 @@ exports[`Details should render correctly 1`] = `
             >
               Deal size
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              undefined $
+            </p>
           </div>
           <div
             class="css-tvba8"
@@ -412,13 +395,9 @@ exports[`Details should render correctly 1`] = `
             >
               Accredited investors
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
-            >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+            <p
+              class="chakra-text css-uivqlt"
+            />
           </div>
           <div
             class="css-tvba8"
@@ -430,13 +409,11 @@ exports[`Details should render correctly 1`] = `
             >
               Max non-accredited investors
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
+            <p
+              class="chakra-text css-uivqlt"
             >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+              undefined
+            </p>
           </div>
           <div
             class="css-tvba8"
@@ -448,13 +425,9 @@ exports[`Details should render correctly 1`] = `
             >
               Manual investor verification
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
-            >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+            <p
+              class="chakra-text css-uivqlt"
+            />
           </div>
           <div
             class="css-tvba8"
@@ -466,13 +439,9 @@ exports[`Details should render correctly 1`] = `
             >
               International investors
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
-            >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+            <p
+              class="chakra-text css-uivqlt"
+            />
           </div>
           <div
             class="css-tvba8"
@@ -484,15 +453,14 @@ exports[`Details should render correctly 1`] = `
             >
               Resale hold period
             </p>
-            <div
-              class="chakra-skeleton__group css-1rr4qq7"
-            >
-              <div
-                class="chakra-skeleton css-5dkehc"
-              />
-            </div>
+            <p
+              class="chakra-text css-uivqlt"
+            />
           </div>
         </div>
+        <div
+          class="chakra-stack css-n21gh5"
+        />
       </div>
     </div>
   </div>

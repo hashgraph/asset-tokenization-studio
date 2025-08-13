@@ -203,6 +203,7 @@
 
 */
 
+import '../environmentMock';
 import Network from '@port/in/network/Network';
 
 import { GetAccountInfoRequest } from '@port/in/request/index';

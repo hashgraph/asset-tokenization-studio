@@ -231,6 +231,10 @@ bytes32 constant SNAPSHOT_TASK_TYPE = 0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a
 
 bytes32 constant _DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
 
+bytes32 constant _ERC20PERMIT_TYPEHASH = keccak256(
+    'Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)'
+);
+
 bytes32 constant _DELEGATION_ERC20VOTES_TYPEHASH = keccak256(
     'Delegation(address delegatee,uint256 nonce,uint256 expiry)'
 );
