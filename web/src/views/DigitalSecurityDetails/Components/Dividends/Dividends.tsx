@@ -204,10 +204,10 @@
 */
 
 import { Stack } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { ProgramDividend } from "./ProgramDividend";
 import { SeeDividend } from "./SeeDividend";
+import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 
 export const Dividends = () => {
   const { t: tTabs } = useTranslation("security", {
@@ -216,7 +216,7 @@ export const Dividends = () => {
 
   return (
     <Stack w="full" h="full" layerStyle="container">
-      <Tabs
+      <PanelTabs
         tabs={[
           { content: <ProgramDividend />, header: tTabs("program") },
           { content: <SeeDividend />, header: tTabs("see") },

@@ -210,7 +210,7 @@ import {Common} from '../common/Common.sol';
 import {
     IClearingHoldCreation
 } from '../interfaces/clearing/IClearingHoldCreation.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
+import {Hold} from '../interfaces/hold/IHold.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
@@ -226,11 +226,13 @@ contract ClearingHoldCreationFacet is
 {
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
-        IHold.Hold calldata _hold
+        Hold calldata _hold
     )
         external
         override
         onlyUnpaused
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_hold.to)
         validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
@@ -250,13 +252,16 @@ contract ClearingHoldCreationFacet is
 
     function clearingCreateHoldFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        IHold.Hold calldata _hold
+        Hold calldata _hold
     )
         external
         override
         onlyUnpaused
-        validateAddress(_clearingOperationFrom.from)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_hold.to)
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
         validateAddress(_hold.escrow)
+        validateAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
@@ -290,13 +295,16 @@ contract ClearingHoldCreationFacet is
 
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        IHold.Hold calldata _hold
+        Hold calldata _hold
     )
         external
         override
         onlyUnpaused
-        validateAddress(_clearingOperationFrom.from)
+        onlyUnrecoveredAddress(_msgSender())
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
+        onlyUnrecoveredAddress(_hold.to)
         validateAddress(_hold.escrow)
+        validateAddress(_clearingOperationFrom.from)
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
@@ -326,12 +334,14 @@ contract ClearingHoldCreationFacet is
 
     function protectedClearingCreateHoldByPartition(
         ProtectedClearingOperation calldata _protectedClearingOperation,
-        IHold.Hold calldata _hold,
+        Hold calldata _hold,
         bytes calldata _signature
     )
         external
         override
         onlyUnpaused
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
+        onlyUnrecoveredAddress(_hold.to)
         onlyProtectedPartitions
         validateAddress(_protectedClearingOperation.from)
         onlyWithValidExpirationTimestamp(

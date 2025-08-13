@@ -223,6 +223,7 @@ import AccountService from '../../../../service/account/AccountService.js';
 import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
 import { Response } from '../../../../../domain/context/transaction/Response';
 import { CreateEquityCommandError } from './error/CreateEquityCommandError.js';
+import { EVM_ZERO_ADDRESS } from '../../../../../core/Constants.js';
 
 @CommandHandler(CreateEquityCommand)
 export class CreateEquityCommandHandler
@@ -266,6 +267,7 @@ export class CreateEquityCommandHandler
         externalPauses,
         externalControlLists,
         externalKycLists,
+        compliance,
       } = command;
 
       if (!factory) {
@@ -303,6 +305,10 @@ export class CreateEquityCommandHandler
         this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
       ]);
 
+      const complianceEvmAddress = compliance
+        ? await this.contractService.getContractEvmAddress(compliance)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
       const handler = this.transactionService.getHandler();
 
       const equityInfo = new EquityDetails(
@@ -325,6 +331,7 @@ export class CreateEquityCommandHandler
         resolverEvmAddress,
         configId,
         configVersion,
+        complianceEvmAddress,
         externalPausesEvmAddresses,
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,

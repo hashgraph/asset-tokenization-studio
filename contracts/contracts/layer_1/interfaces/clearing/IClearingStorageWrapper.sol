@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IHold} from '../hold/IHold.sol';
+import {Hold} from '../hold/IHold.sol';
 
 interface IClearingStorageWrapper {
     event ClearedRedeemByPartition(
@@ -257,7 +257,7 @@ interface IClearingStorageWrapper {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        IHold.Hold hold,
+        Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData
@@ -268,7 +268,7 @@ interface IClearingStorageWrapper {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        IHold.Hold hold,
+        Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData
@@ -279,7 +279,7 @@ interface IClearingStorageWrapper {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        IHold.Hold hold,
+        Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData
@@ -290,7 +290,7 @@ interface IClearingStorageWrapper {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        IHold.Hold hold,
+        Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData

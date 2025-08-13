@@ -238,7 +238,7 @@ export class TransferCommandHandler
       const { securityId, targetId, amount } = command;
 
       const handler = this.transactionService.getHandler();
-
+      const account = this.accountService.getCurrentAccount();
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
       const targetEvmAddress: EvmAddress =
@@ -250,6 +250,7 @@ export class TransferCommandHandler
         securityId,
         targetId,
         amount,
+        account.id.toString(),
       );
 
       const amountBd: BigDecimal = BigDecimal.fromString(

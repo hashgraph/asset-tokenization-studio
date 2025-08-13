@@ -210,7 +210,7 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ERC20,
-    type ERC1410Snapshot,
+    type IERC1410,
     type Pause,
     type ControlList,
     type ERC1594,
@@ -412,83 +412,6 @@ describe('ERC20 Tests', () => {
             expect(retrieved_decimals).to.equal(decimals)
         })
 
-        it('GIVEN a paused ERC20 WHEN running any state changing method THEN transaction fails with TokenIsPaused', async () => {
-            await pauseFacet.pause()
-
-            await expect(
-                erc20Facet.approve(account_E, amount)
-            ).to.be.rejectedWith('TokenIsPaused')
-
-            await expect(
-                erc20Facet.transfer(account_E, amount)
-            ).to.be.rejectedWith('TokenIsPaused')
-
-            await expect(
-                erc20Facet.transferFrom(account_C, account_E, amount)
-            ).to.be.rejectedWith('TokenIsPaused')
-
-            await expect(
-                erc20Facet.increaseAllowance(account_C, amount)
-            ).to.be.rejectedWith('TokenIsPaused')
-
-            await expect(
-                erc20Facet.decreaseAllowance(account_C, amount)
-            ).to.be.rejectedWith('TokenIsPaused')
-        })
-
-        it('GIVEN an ERC20 with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
-            await clearingActionsFacet.activateClearing()
-            await expect(
-                erc20Facet.transfer(account_E, amount)
-            ).to.be.rejectedWith('ClearingIsActivated')
-
-            await expect(
-                erc20Facet.transferFrom(account_C, account_E, amount)
-            ).to.be.rejectedWith('ClearingIsActivated')
-        })
-
-        it('GIVEN a initializer ERC20 WHEN try to use a non authorized account THEN transaction fails with AccountIsBlocked', async () => {
-            await controlListFacet.addToControlList(account_E)
-
-            await expect(
-                erc20FacetBlackList.approve(account_A, amount)
-            ).to.be.rejectedWith('AccountIsBlocked')
-            await expect(
-                erc20Facet.approve(account_E, amount)
-            ).to.be.rejectedWith('AccountIsBlocked')
-
-            await expect(
-                erc20FacetBlackList.transfer(account_A, amount)
-            ).to.be.rejectedWith('AccountIsBlocked')
-            await expect(
-                erc20Facet.transfer(account_E, amount)
-            ).to.be.rejectedWith('AccountIsBlocked')
-
-            await expect(
-                erc20FacetBlackList.transferFrom(account_A, account_B, amount)
-            ).to.be.rejectedWith('AccountIsBlocked')
-            await expect(
-                erc20Facet.transferFrom(account_E, account_C, amount)
-            ).to.be.rejectedWith('AccountIsBlocked')
-            await expect(
-                erc20Facet.transferFrom(account_C, account_E, amount)
-            ).to.be.rejectedWith('AccountIsBlocked')
-
-            await expect(
-                erc20FacetBlackList.increaseAllowance(account_A, amount)
-            ).to.be.rejectedWith('AccountIsBlocked')
-            await expect(
-                erc20Facet.increaseAllowance(account_E, amount)
-            ).to.be.rejectedWith('AccountIsBlocked')
-
-            await expect(
-                erc20FacetBlackList.decreaseAllowance(account_A, amount)
-            ).to.be.rejectedWith('AccountIsBlocked')
-            await expect(
-                erc20Facet.decreaseAllowance(account_E, amount)
-            ).to.be.rejectedWith('AccountIsBlocked')
-        })
-
         it('GIVEN a initialized ERC20 WHEN running any state changing method THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
             erc20Facet = erc20Facet.connect(signer_A)
 
@@ -517,7 +440,7 @@ describe('ERC20 Tests', () => {
     describe('Single partition', () => {
         let erc20SignerC: ERC20
         let erc20SignerE: ERC20
-        let erc1410Facet: ERC1410Snapshot
+        let erc1410Facet: IERC1410
 
         before(async () => {
             // mute | mock console.log
@@ -555,7 +478,26 @@ describe('ERC20 Tests', () => {
                 role: SSI_MANAGER_ROLE,
                 members: [account_A],
             }
-            const init_rbacs: Rbac[] = [rbacIssuer, rbacKYC, rbacSSI]
+            const rbacPause: Rbac = {
+                role: PAUSER_ROLE,
+                members: [account_B],
+            }
+            const rbacClearing: Rbac = {
+                role: CLEARING_ROLE,
+                members: [account_A],
+            }
+            const rbacControlList: Rbac = {
+                role: CONTROL_LIST_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [
+                rbacIssuer,
+                rbacKYC,
+                rbacSSI,
+                rbacPause,
+                rbacClearing,
+                rbacControlList,
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -591,6 +533,11 @@ describe('ERC20 Tests', () => {
             })
 
             erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
+            erc20FacetBlackList = await ethers.getContractAt(
+                'ERC20',
+                diamond.address,
+                signer_E
+            )
             erc20SignerC = await ethers.getContractAt(
                 'ERC20',
                 diamond.address,
@@ -602,7 +549,7 @@ describe('ERC20 Tests', () => {
                 signer_E
             )
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410Snapshot',
+                'IERC1410',
                 diamond.address
             )
             erc1594Facet = await ethers.getContractAt(
@@ -617,6 +564,22 @@ describe('ERC20 Tests', () => {
             )
             ssiManagementFacet = await ethers.getContractAt(
                 'SsiManagement',
+                diamond.address,
+                signer_A
+            )
+            pauseFacet = await ethers.getContractAt(
+                'Pause',
+                diamond.address,
+                signer_B
+            )
+
+            clearingActionsFacet = await ethers.getContractAt(
+                'ClearingActionsFacet',
+                diamond.address,
+                signer_A
+            )
+            controlListFacet = await ethers.getContractAt(
+                'ControlList',
                 diamond.address,
                 signer_A
             )
@@ -765,7 +728,7 @@ describe('ERC20 Tests', () => {
                 await kycFacet.revokeKyc(account_E)
                 await expect(
                     erc20SignerC.transfer(account_E, amount / 2)
-                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
+                ).to.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
 
                 await kycFacet.grantKyc(
                     account_E,
@@ -778,7 +741,7 @@ describe('ERC20 Tests', () => {
                 await kycFacet.revokeKyc(account_C)
                 await expect(
                     erc20SignerC.transfer(account_E, amount / 2)
-                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
+                ).to.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             })
             it(
                 'GIVEN an account with balance ' +
@@ -828,14 +791,14 @@ describe('ERC20 Tests', () => {
                     erc20Facet
                         .connect(signer_A)
                         .transferFrom(account_E, account_C, amount / 2)
-                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
+                ).to.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
 
                 // non kyc'd receiver
                 await expect(
                     erc20Facet
                         .connect(signer_A)
                         .transferFrom(account_C, account_E, amount / 2)
-                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
+                ).to.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             })
 
             it(
@@ -878,6 +841,103 @@ describe('ERC20 Tests', () => {
                     ).to.be.equal(amount)
                 }
             )
+        })
+
+        it('GIVEN a paused ERC20 WHEN running any state changing method THEN transaction fails with TokenIsPaused', async () => {
+            await pauseFacet.pause()
+
+            await expect(
+                erc20Facet.approve(account_E, amount)
+            ).to.be.rejectedWith('TokenIsPaused')
+
+            await expect(
+                erc20Facet.transfer(account_E, amount)
+            ).to.be.rejectedWith('TokenIsPaused')
+
+            await expect(
+                erc20Facet.transferFrom(account_C, account_E, amount)
+            ).to.be.rejectedWith('TokenIsPaused')
+
+            await expect(
+                erc20Facet.increaseAllowance(account_C, amount)
+            ).to.be.rejectedWith('TokenIsPaused')
+
+            await expect(
+                erc20Facet.decreaseAllowance(account_C, amount)
+            ).to.be.rejectedWith('TokenIsPaused')
+        })
+
+        it('GIVEN an ERC20 with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
+            await clearingActionsFacet.activateClearing()
+            const clearingInterface = await ethers.getContractAt(
+                'IClearing',
+                diamond.address
+            )
+            await expect(
+                erc20Facet.transfer(account_E, amount)
+            ).to.be.revertedWithCustomError(
+                clearingInterface,
+                'ClearingIsActivated'
+            )
+
+            await expect(
+                erc20Facet.transferFrom(account_C, account_E, amount)
+            ).to.be.revertedWithCustomError(
+                clearingInterface,
+                'ClearingIsActivated'
+            )
+        })
+
+        it('GIVEN a initializer ERC20 WHEN try to use a non authorized account THEN transaction fails with AccountIsBlocked', async () => {
+            await controlListFacet.addToControlList(account_E)
+            await expect(
+                erc20FacetBlackList.approve(account_A, amount)
+            ).to.be.rejectedWith('AccountIsBlocked')
+            await expect(
+                erc20Facet.approve(account_E, amount)
+            ).to.be.rejectedWith('AccountIsBlocked')
+            await expect(
+                erc20FacetBlackList.transfer(account_A, amount)
+            ).to.be.rejectedWith('AccountIsBlocked')
+            await expect(
+                erc20Facet.transfer(account_E, amount)
+            ).to.be.rejectedWith('AccountIsBlocked')
+            await kycFacet.grantKyc(
+                account_A,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.grantKyc(
+                account_B,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+
+            await expect(
+                erc20FacetBlackList.transferFrom(account_A, account_B, amount)
+            ).to.be.rejectedWith('AccountIsBlocked')
+            await expect(
+                erc20Facet.transferFrom(account_E, account_C, amount)
+            ).to.be.rejectedWith('AccountIsBlocked')
+            await expect(
+                erc20Facet.transferFrom(account_C, account_E, amount)
+            ).to.be.rejectedWith('AccountIsBlocked')
+            await expect(
+                erc20FacetBlackList.increaseAllowance(account_A, amount)
+            ).to.be.rejectedWith('AccountIsBlocked')
+            await expect(
+                erc20Facet.increaseAllowance(account_E, amount)
+            ).to.be.rejectedWith('AccountIsBlocked')
+            await expect(
+                erc20FacetBlackList.decreaseAllowance(account_A, amount)
+            ).to.be.rejectedWith('AccountIsBlocked')
+            await expect(
+                erc20Facet.decreaseAllowance(account_E, amount)
+            ).to.be.rejectedWith('AccountIsBlocked')
         })
     })
 })

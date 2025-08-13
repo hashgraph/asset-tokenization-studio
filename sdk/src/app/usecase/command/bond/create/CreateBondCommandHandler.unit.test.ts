@@ -350,6 +350,7 @@ describe('CreateBondCommandHandler', () => {
       it('should successfully create a bond with bondAddress in response', async () => {
         contractServiceMock.getContractEvmAddress
           .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress)
           .mockResolvedValueOnce(evmAddress);
         contractServiceMock.getEvmAddressesFromHederaIds
           .mockResolvedValueOnce([externalPauseEvmAddress])
@@ -376,7 +377,7 @@ describe('CreateBondCommandHandler', () => {
         expect(result.securityId.value).toBe(transactionId);
         expect(result.transactionId).toBe(transactionId);
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          2,
+          3,
         );
         expect(
           contractServiceMock.getEvmAddressesFromHederaIds,
@@ -412,6 +413,7 @@ describe('CreateBondCommandHandler', () => {
           evmAddress,
           command.configId,
           command.configVersion,
+          evmAddress,
           [externalPauseEvmAddress],
           [externalControlEvmAddress],
           [externalKycEvmAddress],

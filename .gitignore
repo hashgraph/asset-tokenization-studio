@@ -132,3 +132,6 @@ asset-tokenization-studio.iml
 
 # IntelliJ Idea
 /.idea/
+
+# Kiro files
+.kiro/

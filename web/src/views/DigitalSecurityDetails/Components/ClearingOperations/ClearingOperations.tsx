@@ -1,11 +1,11 @@
 import { Stack } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { ClearingOperationsList } from "./ClearingOperationList";
 import { ClearingOperationsCreate } from "./ClearingOperationCreate";
 import { ClearingOperationsManage } from "./ClearingOperationManage";
 import { useRolesStore } from "../../../../store/rolesStore";
 import { SecurityRole } from "../../../../utils/SecurityRole";
+import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 
 export const ClearingOperations = () => {
   const { t: tTabs } = useTranslation("security", {
@@ -35,7 +35,7 @@ export const ClearingOperations = () => {
 
   return (
     <Stack w="full" h="full" layerStyle="container">
-      <Tabs tabs={tabs} isFitted />
+      <PanelTabs tabs={tabs} isFitted />
     </Stack>
   );
 };

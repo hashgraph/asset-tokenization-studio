@@ -209,7 +209,7 @@ import {
     AdjustBalancesStorageWrapper1
 } from '../adjustBalances/AdjustBalancesStorageWrapper1.sol';
 import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {_MAX_UINT256} from '../constants/values.sol';
+import {MAX_UINT256} from '../constants/values.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -222,7 +222,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
 
     function _adjustMaxSupply(uint256 factor) internal {
         CapDataStorage storage capStorage = _capStorage();
-        if (capStorage.maxSupply == _MAX_UINT256) return;
+        if (capStorage.maxSupply == MAX_UINT256) return;
         capStorage.maxSupply *= factor;
     }
 
@@ -231,7 +231,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         uint256 factor
     ) internal {
         CapDataStorage storage capStorage = _capStorage();
-        if (capStorage.maxSupplyByPartition[partition] == _MAX_UINT256) return;
+        if (capStorage.maxSupplyByPartition[partition] == MAX_UINT256) return;
         capStorage.maxSupplyByPartition[partition] *= factor;
     }
 
@@ -257,7 +257,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         uint256 timestamp
     ) internal view returns (uint256) {
         CapDataStorage storage capStorage = _capStorage();
-        if (capStorage.maxSupply == _MAX_UINT256) return _MAX_UINT256;
+        if (capStorage.maxSupply == MAX_UINT256) return MAX_UINT256;
         (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(
             timestamp
         );

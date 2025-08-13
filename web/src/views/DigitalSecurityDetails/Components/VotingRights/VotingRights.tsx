@@ -204,10 +204,10 @@
 */
 
 import { Stack } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { ProgramVotingRights } from "./ProgramVotingRights";
 import { SeeVotingRights } from "./SeeVotingRights";
+import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 
 export const VotingRights = () => {
   const { t: tTabs } = useTranslation("security", {
@@ -216,7 +216,7 @@ export const VotingRights = () => {
 
   return (
     <Stack w="full" h="full" layerStyle="container">
-      <Tabs
+      <PanelTabs
         tabs={[
           { content: <ProgramVotingRights />, header: tTabs("program") },
           { content: <SeeVotingRights />, header: tTabs("see") },

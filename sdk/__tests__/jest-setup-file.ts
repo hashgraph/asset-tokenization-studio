@@ -249,7 +249,7 @@ import {
 import { HoldDetails } from '../src/domain/context/security/Hold.js';
 
 //* Mock console.log() method
-// global.console.log = jest.fn();
+global.console.log = jest.fn();
 //* Mock isWeb() method
 Injectable.isWeb = jest.fn(() => true);
 
@@ -504,6 +504,7 @@ function createBondMockImplementation(
   _resolver: EvmAddress,
   _configId: string,
   _configVersion: number,
+  _compliance: EvmAddress,
   _externalPauses?: EvmAddress[],
   _diamondOwnerAccount?: EvmAddress,
 ): Promise<TransactionResponse> {
@@ -1653,6 +1654,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       _resolver: EvmAddress,
       _configId: string,
       _configVersion: number,
+      _compliance: EvmAddress,
       _externalPauses?: EvmAddress[],
       _diamondOwnerAccount?: EvmAddress,
     ) => {

@@ -229,7 +229,6 @@ import {
   ControlList__factory,
   Pause__factory,
   ERC20__factory,
-  ERC1410ScheduledTasks__factory,
   Bond__factory,
   Cap__factory,
   ERC1643__factory,
@@ -241,7 +240,6 @@ import {
   Security__factory,
   DiamondFacet__factory,
   ProtectedPartitions__factory,
-  Hold__factory,
   SsiManagement__factory,
   Kyc__factory,
   ClearingReadFacet__factory,
@@ -256,6 +254,10 @@ import {
   MockedBlacklist__factory,
   ExternalKycListManagement__factory,
   MockedExternalKycList__factory,
+  FreezeFacet__factory,
+  ERC3643Facet__factory,
+  ERC1410ReadFacet__factory,
+  HoldReadFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -333,7 +335,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).balanceOf(target.toString());
   }
@@ -348,7 +350,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).balanceOfByPartition(partitionId, target.toString());
   }
@@ -409,7 +411,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).partitionsOf(targetId.toString());
   }
@@ -435,7 +437,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).totalSupply();
   }
@@ -536,7 +538,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getERC20Metadata();
     const totalSupply = await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).totalSupply();
     const maxSupply = await this.connect(
@@ -564,7 +566,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).isInternalKycActivated();
     const isMultiPartition = await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).isMultiPartition();
     const isIssuable = await this.connect(
@@ -902,11 +904,12 @@ export class RPCQueryAdapter {
     partitionId: string,
     data: string,
     operatorData: string,
+    operatorId: string,
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can transfer by partition`);
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).canTransferByPartition(
       sourceId.toString(),
@@ -915,6 +918,9 @@ export class RPCQueryAdapter {
       amount.toBigNumber(),
       data,
       operatorData,
+      {
+        from: operatorId,
+      },
     );
   }
 
@@ -923,6 +929,7 @@ export class RPCQueryAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     data: string,
+    operatorId: string,
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can transfer`);
 
@@ -930,6 +937,9 @@ export class RPCQueryAdapter {
       targetId.toString(),
       amount.toBigNumber(),
       data,
+      {
+        from: operatorId,
+      },
     );
   }
 
@@ -940,11 +950,12 @@ export class RPCQueryAdapter {
     partitionId: string,
     data: string,
     operatorData: string,
+    operatorId: string,
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can redeem`);
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).canRedeemByPartition(
       sourceId.toString(),
@@ -952,6 +963,9 @@ export class RPCQueryAdapter {
       amount.toBigNumber(),
       data,
       operatorData,
+      {
+        from: operatorId,
+      },
     );
   }
 
@@ -986,7 +1000,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).isOperatorForPartition(
       partitionId,
@@ -1005,7 +1019,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).isOperator(operator.toString(), target.toString());
   }
@@ -1070,7 +1084,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).totalSupplyByPartition(partitionId);
   }
@@ -1219,7 +1233,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Held Amount For ${targetId}`);
 
     const heldAmountFor = await this.connect(
-      Hold__factory,
+      HoldReadFacet__factory,
       address.toString(),
     ).getHeldAmountFor(targetId.toString());
 
@@ -1236,7 +1250,7 @@ export class RPCQueryAdapter {
     );
 
     const heldAmountForByPartition = await this.connect(
-      Hold__factory,
+      HoldReadFacet__factory,
       address.toString(),
     ).getHeldAmountForByPartition(partitionId, targetId.toString());
 
@@ -1253,7 +1267,7 @@ export class RPCQueryAdapter {
     );
 
     const holdCountForByPartition = await this.connect(
-      Hold__factory,
+      HoldReadFacet__factory,
       address.toString(),
     ).getHoldCountForByPartition(partitionId, targetId.toString());
 
@@ -1272,7 +1286,7 @@ export class RPCQueryAdapter {
     );
 
     const holdsIdForByPartition = await this.connect(
-      Hold__factory,
+      HoldReadFacet__factory,
       address.toString(),
     ).getHoldsIdForByPartition(partitionId, target.toString(), start, end);
 
@@ -1290,7 +1304,7 @@ export class RPCQueryAdapter {
     );
 
     const hold = await this.connect(
-      Hold__factory,
+      HoldReadFacet__factory,
       address.toString(),
     ).getHoldForByPartition({
       partition: partitionId,
@@ -1808,5 +1822,66 @@ export class RPCQueryAdapter {
     ).getKycStatus(targetId.toString());
 
     return kycStatus;
+  }
+
+  async onchainID(address: EvmAddress): Promise<string> {
+    LogService.logTrace(`Getting OnchainID for security ${address.toString()}`);
+
+    return await this.connect(
+      ERC3643Facet__factory,
+      address.toString(),
+    ).onchainID();
+  }
+
+  async identityRegistry(address: EvmAddress): Promise<string> {
+    LogService.logTrace(
+      `Getting IdentityRegistry for security ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ERC3643Facet__factory,
+      address.toString(),
+    ).identityRegistry();
+  }
+
+  async compliance(address: EvmAddress): Promise<string> {
+    LogService.logTrace(
+      `Getting Compliance for security ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ERC3643Facet__factory,
+      address.toString(),
+    ).compliance();
+  }
+
+  async getFrozenPartialTokens(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting frozen partial tokens for account ${targetId}} for the mock contract ${address.toString()}`,
+    );
+
+    const frozenTokens = await this.connect(
+      FreezeFacet__factory,
+      address.toString(),
+    ).getFrozenTokens(targetId.toString());
+
+    return frozenTokens.toNumber();
+  }
+
+  async isAddressRecovered(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(`Getting recovery status of ${targetId}`);
+
+    const isAddressRecovered = await this.connect(
+      ERC3643Facet__factory,
+      address.toString(),
+    ).isAddressRecovered(targetId.toString());
+
+    return isAddressRecovered;
   }
 }

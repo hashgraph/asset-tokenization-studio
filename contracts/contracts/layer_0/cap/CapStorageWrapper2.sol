@@ -203,13 +203,13 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
 import {
     ICapStorageWrapper
 } from '../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
 import {LockStorageWrapper2} from '../lock/LockStorageWrapper2.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract CapStorageWrapper2 is
     ICapStorageWrapper,
@@ -288,7 +288,7 @@ abstract contract CapStorageWrapper2 is
         }
     }
 
-    function _checkWithinMaxSupply(uint256 _amount) private view {
+    function _checkWithinMaxSupply(uint256 _amount) internal view {
         uint256 maxSupply = _getMaxSupply();
         if (!_isCorrectMaxSupply(_totalSupply() + _amount, maxSupply)) {
             revert ICapStorageWrapper.MaxSupplyReached(maxSupply);

@@ -222,4 +222,5 @@ export class SecurityData {
   public externalPauses: string[];
   public externalControlLists: string[];
   public externalKycLists: string[];
+  public compliance: string;
 }

@@ -206,30 +206,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {DEFAULT_PARTITION} from '../../constants/values.sol';
+import {
+    IERC3643Basic
+} from '../../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
+import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
+import {IssueData} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 import {
     ERC1410OperatorStorageWrapper
 } from './ERC1410OperatorStorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS,
-    _FROM_ACCOUNT_KYC_ERROR_ID,
-    _CLEARING_ACTIVE_ERROR_ID
-} from '../../constants/values.sol';
-import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
-import {
-    IERC1410Standard
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
 
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
 {
+    using LowLevelCall for address;
+
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
@@ -239,12 +231,12 @@ abstract contract ERC1410StandardStorageWrapper is
         _triggerAndSyncAll(partition, from, to);
 
         if (from == address(0)) {
-            // mint
+            // mint | issue
             _updateAccountSnapshot(to, partition);
             return _updateTotalSupplySnapshot(partition);
         }
         if (to == address(0)) {
-            // burn
+            // burn | redeem
             _updateAccountSnapshot(from, partition);
             return _updateTotalSupplySnapshot(partition);
         }
@@ -296,9 +288,7 @@ abstract contract ERC1410StandardStorageWrapper is
         if (_value != 0) erc1410Storage.balances[_account] += _value;
     }
 
-    function _issueByPartition(
-        IERC1410Standard.IssueData memory _issueData
-    ) internal {
+    function _issueByPartition(IssueData memory _issueData) internal {
         _validateParams(_issueData.partition, _issueData.value);
 
         _beforeTokenTransfer(
@@ -329,6 +319,17 @@ abstract contract ERC1410StandardStorageWrapper is
 
         _increaseTotalSupplyByPartition(_issueData.partition, _issueData.value);
 
+        if (_issueData.partition == DEFAULT_PARTITION) {
+            _erc3643Storage().compliance.functionCall(
+                abi.encodeWithSelector(
+                    ICompliance.created.selector,
+                    _issueData.tokenHolder,
+                    _issueData.value
+                ),
+                IERC3643Basic.ComplianceCallFailed.selector
+            );
+        }
+
         emit IssuedByPartition(
             _issueData.partition,
             _msgSender(),
@@ -351,6 +352,17 @@ abstract contract ERC1410StandardStorageWrapper is
         _reduceBalanceByPartition(_from, _value, _partition);
 
         _reduceTotalSupplyByPartition(_partition, _value);
+
+        if (_partition == DEFAULT_PARTITION) {
+            _erc3643Storage().compliance.functionCall(
+                abi.encodeWithSelector(
+                    ICompliance.destroyed.selector,
+                    _from,
+                    _value
+                ),
+                IERC3643Basic.ComplianceCallFailed.selector
+            );
+        }
 
         emit RedeemedByPartition(
             _partition,
@@ -392,51 +404,6 @@ abstract contract ERC1410StandardStorageWrapper is
     function _adjustTotalAndMaxSupplyForPartition(
         bytes32 _partition
     ) internal virtual;
-
-    function _canRedeemByPartition(
-        address _from,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata /*_data*/,
-        bytes calldata /*_operatorData*/
-    ) internal view returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_isClearingActivated()) {
-            return (false, _CLEARING_ACTIVE_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_isAbleToAccess(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
-            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
-        if (!_validPartition(_partition, _from)) {
-            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
-        }
-
-        uint256 balance = _balanceOfByPartition(_partition, _from);
-
-        if (balance < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (
-            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
-        ) {
-            if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-            }
-        }
-
-        return (true, _SUCCESS, bytes32(0));
-    }
 
     function _totalSupplyAdjusted() internal view returns (uint256) {
         return _totalSupplyAdjustedAt(_blockTimestamp());
