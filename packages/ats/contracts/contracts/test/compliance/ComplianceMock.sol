@@ -2,11 +2,6 @@
 pragma solidity 0.8.18;
 
 contract ComplianceMock {
-    error MockErrorTransfer(address _from, address _to, uint256 _amount);
-    error MockErrorMint(address _to, uint256 _amount);
-    error MockErrorBurn(address _from, uint256 _amount);
-    error MockErrorCanTransfer(address _from, address _to, uint256 _amount);
-
     uint256 public transferredHit;
     uint256 public createdHit;
     uint256 public destroyedHit;
@@ -14,34 +9,13 @@ contract ComplianceMock {
     mapping(bytes32 => bool) private _canTransfer;
     mapping(bytes32 => bool) private _revert;
 
+    error MockErrorTransfer(address _from, address _to, uint256 _amount);
+    error MockErrorMint(address _to, uint256 _amount);
+    error MockErrorBurn(address _from, uint256 _amount);
+    error MockErrorCanTransfer(address _from, address _to, uint256 _amount);
+
     constructor(bool _canTransferFlag, bool _revertFlag) {
         setFlags(_canTransferFlag, _revertFlag);
-    }
-
-    function setFlags(bool _canTransferFlag, bool _revertFlag) public virtual {
-        _canTransfer[keccak256('from')] = _canTransferFlag;
-        _canTransfer[keccak256('to')] = _canTransferFlag;
-        _canTransfer[keccak256('sender')] = _canTransferFlag;
-
-        _revert[keccak256('transferred')] = _revertFlag;
-        _revert[keccak256('created')] = _revertFlag;
-        _revert[keccak256('destroyed')] = _revertFlag;
-        _revert[keccak256('canTransfer')] = _revertFlag;
-    }
-
-    function setFlagsByMethod(
-        bool[] memory _canTransferFlag,
-        bytes32[] memory _canTransferKey,
-        bool[] memory _revertFlag,
-        bytes32[] memory _revertKey
-    ) public virtual {
-        for (uint256 i; i < _canTransferFlag.length; i++) {
-            _canTransfer[_canTransferKey[i]] = _canTransferFlag[i];
-        }
-
-        for (uint256 i; i < _revertFlag.length; i++) {
-            _revert[_revertKey[i]] = _revertFlag[i];
-        }
     }
 
     function transferred(
@@ -82,5 +56,31 @@ contract ComplianceMock {
             if (!_canTransfer[keccak256('to')]) return false;
         }
         return true;
+    }
+
+    function setFlags(bool _canTransferFlag, bool _revertFlag) public virtual {
+        _canTransfer[keccak256('from')] = _canTransferFlag;
+        _canTransfer[keccak256('to')] = _canTransferFlag;
+        _canTransfer[keccak256('sender')] = _canTransferFlag;
+
+        _revert[keccak256('transferred')] = _revertFlag;
+        _revert[keccak256('created')] = _revertFlag;
+        _revert[keccak256('destroyed')] = _revertFlag;
+        _revert[keccak256('canTransfer')] = _revertFlag;
+    }
+
+    function setFlagsByMethod(
+        bool[] memory _canTransferFlag,
+        bytes32[] memory _canTransferKey,
+        bool[] memory _revertFlag,
+        bytes32[] memory _revertKey
+    ) public virtual {
+        for (uint256 i; i < _canTransferFlag.length; i++) {
+            _canTransfer[_canTransferKey[i]] = _canTransferFlag[i];
+        }
+
+        for (uint256 i; i < _revertFlag.length; i++) {
+            _revert[_revertKey[i]] = _revertFlag[i];
+        }
     }
 }

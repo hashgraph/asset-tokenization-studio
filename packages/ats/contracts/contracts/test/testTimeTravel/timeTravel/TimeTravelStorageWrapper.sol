@@ -224,10 +224,6 @@ abstract contract TimeTravelStorageWrapper is
         _checkBlockChainid(_blockChainid());
     }
 
-    function _checkBlockChainid(uint256 chainId) internal pure {
-        if (chainId != 1337) revert WrongChainId();
-    }
-
     function _changeSystemTimestamp(uint256 _newSystemTime) internal {
         if (_newSystemTime == 0) {
             revert InvalidTimestamp(_newSystemTime);
@@ -252,5 +248,9 @@ abstract contract TimeTravelStorageWrapper is
         returns (uint256)
     {
         return _timestamp == 0 ? block.timestamp : _timestamp;
+    }
+
+    function _checkBlockChainid(uint256 chainId) internal pure {
+        if (chainId != 1337) revert WrongChainId();
     }
 }

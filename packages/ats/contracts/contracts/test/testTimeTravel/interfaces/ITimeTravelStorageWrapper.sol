@@ -211,17 +211,7 @@ pragma solidity 0.8.18;
  * @notice Interface for the TimeTravelStorageWrapper contract
  */
 interface ITimeTravelStorageWrapper {
-    /**
-     * @notice Error thrown when attempting to set an invalid new system timestamp
-     * @param newSystemTime The new system timestamp that caused the error
-     */
-    error InvalidTimestamp(uint256 newSystemTime);
-
-    /**
-     * @notice Emitted when using time travel out of test environment
-     */
-    error WrongChainId();
-
+    // * Events
     /**
      * @notice Emitted when the system timestamp is changed
      * @param legacySystemTime The legacy system timestamp (0 if not changed)
@@ -236,4 +226,16 @@ interface ITimeTravelStorageWrapper {
      * @notice Emitted when the system timestamp is reset
      */
     event SystemTimestampReset();
+
+    // * Errors
+    /**
+     * @notice Error thrown when attempting to set an invalid new system timestamp
+     * @param newSystemTime The new system timestamp that caused the error
+     */
+    error InvalidTimestamp(uint256 newSystemTime);
+
+    /**
+     * @notice Emitted when using time travel out of test environment
+     */
+    error WrongChainId();
 }

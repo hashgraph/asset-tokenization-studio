@@ -2,12 +2,11 @@
 pragma solidity 0.8.18;
 
 contract IdentityRegistryMock {
-    error MockErrorVerified(address _userAddress);
-
     bool private _isVerified;
     bool private _revert;
+    mapping(address => bool) private _verifiedUsers;
 
-    mapping(address => bool) private verifiedUsers;
+    error MockErrorVerified(address _userAddress);
 
     constructor(bool _isVerifiedFlag, bool _revertFlag) {
         _isVerified = _isVerifiedFlag;
