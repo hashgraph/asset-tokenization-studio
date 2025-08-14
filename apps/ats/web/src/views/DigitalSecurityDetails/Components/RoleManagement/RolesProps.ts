@@ -203,7 +203,7 @@
 
 */
 
-import { SecurityViewModel } from "@hashgraph/asset-tokenization-sdk";
+import { SecurityViewModel } from '@hashgraph/asset-tokenization-sdk';
 
 export interface RolesProps {
   roles: string[];

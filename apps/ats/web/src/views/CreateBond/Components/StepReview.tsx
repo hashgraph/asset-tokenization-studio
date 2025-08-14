@@ -209,43 +209,43 @@ import {
   Stack,
   VStack,
   useDisclosure,
-} from "@chakra-ui/react";
-import { useTranslation } from "react-i18next";
-import { PreviousStepButton } from "./PreviousStepButton";
-import { PhosphorIcon } from "io-bricks-ui";
-import { useFormContext } from "react-hook-form";
+} from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
+import { PreviousStepButton } from './PreviousStepButton';
+import { PhosphorIcon } from 'io-bricks-ui';
+import { useFormContext } from 'react-hook-form';
 import {
   Button,
   DetailReview,
   DetailReviewProps,
   InfoDivider,
   PopUp,
-} from "io-bricks-ui";
-import { useCreateBond } from "../../../hooks/queries/useCreateBond";
-import { useWalletStore } from "../../../store/walletStore";
-import { CreateBondRequest } from "@hashgraph/asset-tokenization-sdk";
-import { ICreateBondFormValues } from "../ICreateBondFormValues";
-import { RouterManager } from "../../../router/RouterManager";
-import { RouteName } from "../../../router/RouteName";
-import { WarningCircle, Question } from "@phosphor-icons/react";
-import { transformCouponType } from "../CouponType";
+} from 'io-bricks-ui';
+import { useCreateBond } from '../../../hooks/queries/useCreateBond';
+import { useWalletStore } from '../../../store/walletStore';
+import { CreateBondRequest } from '@hashgraph/asset-tokenization-sdk';
+import { ICreateBondFormValues } from '../ICreateBondFormValues';
+import { RouterManager } from '../../../router/RouterManager';
+import { RouteName } from '../../../router/RouteName';
+import { WarningCircle, Question } from '@phosphor-icons/react';
+import { transformCouponType } from '../CouponType';
 import {
   dateToUnixTimestamp,
   formatNumber,
   numberToExponential,
-} from "../../../utils/format";
-import { FormStepContainer } from "../../../components/FormStepContainer";
-import { COUPONS_FACTOR, NOMINAL_VALUE_FACTOR } from "../../../utils/constants";
-import { CountriesList } from "../../CreateSecurityCommons/CountriesList";
+} from '../../../utils/format';
+import { FormStepContainer } from '../../../components/FormStepContainer';
+import { COUPONS_FACTOR, NOMINAL_VALUE_FACTOR } from '../../../utils/constants';
+import { CountriesList } from '../../CreateSecurityCommons/CountriesList';
 import {
   COUNTRY_LIST_ALLOWED,
   COUNTRY_LIST_BLOCKED,
-} from "../../../utils/countriesConfig";
+} from '../../../utils/countriesConfig';
 
 export const StepReview = () => {
-  const { t } = useTranslation("security", { keyPrefix: "createBond" });
-  const { t: tRegulation } = useTranslation("security", {
-    keyPrefix: "regulation",
+  const { t } = useTranslation('security', { keyPrefix: 'createBond' });
+  const { t: tRegulation } = useTranslation('security', {
+    keyPrefix: 'regulation',
   });
 
   const { mutate: createBond, isLoading } = useCreateBond();
@@ -264,35 +264,35 @@ export const StepReview = () => {
 
   const { getValues } = useFormContext<ICreateBondFormValues>();
 
-  const name = getValues("name");
-  const symbol = getValues("symbol");
-  const decimals = getValues("decimals");
-  const isin = getValues("isin");
-  const currency = getValues("currency");
-  const numberOfUnits = getValues("numberOfUnits");
-  const nominalValue = getValues("nominalValue");
-  const totalAmount = getValues("totalAmount");
-  const startingDate = getValues("startingDate");
-  const maturityDate = getValues("maturityDate");
-  const couponType = getValues("couponType");
-  let couponFrequency = getValues("couponFrequency");
-  let couponRate = getValues("couponRate");
-  let firstCouponDate = getValues("firstCouponDate");
-  const lastCouponDate = getValues("lastCouponDate");
-  const totalCoupons = getValues("totalCoupons");
-  const isBlocklist = getValues("isBlocklist");
-  const isControllable = getValues("isControllable");
-  const isClearing = getValues("isClearing");
-  const regulationType = getValues("regulationType");
-  const regulationSubType = getValues("regulationSubType");
-  const countriesListType = getValues("countriesListType");
-  let countriesList = getValues("countriesList");
-  const externalPausesList = getValues("externalPausesList");
-  const externalControlList = getValues("externalControlList");
-  const externalKYCList = getValues("externalKYCList");
-  const internalKycActivated = getValues("internalKycActivated");
-  const complianceId = getValues("complianceId");
-  const identityRegistryId = getValues("identityRegistryId");
+  const name = getValues('name');
+  const symbol = getValues('symbol');
+  const decimals = getValues('decimals');
+  const isin = getValues('isin');
+  const currency = getValues('currency');
+  const numberOfUnits = getValues('numberOfUnits');
+  const nominalValue = getValues('nominalValue');
+  const totalAmount = getValues('totalAmount');
+  const startingDate = getValues('startingDate');
+  const maturityDate = getValues('maturityDate');
+  const couponType = getValues('couponType');
+  let couponFrequency = getValues('couponFrequency');
+  let couponRate = getValues('couponRate');
+  let firstCouponDate = getValues('firstCouponDate');
+  const lastCouponDate = getValues('lastCouponDate');
+  const totalCoupons = getValues('totalCoupons');
+  const isBlocklist = getValues('isBlocklist');
+  const isControllable = getValues('isControllable');
+  const isClearing = getValues('isClearing');
+  const regulationType = getValues('regulationType');
+  const regulationSubType = getValues('regulationSubType');
+  const countriesListType = getValues('countriesListType');
+  let countriesList = getValues('countriesList');
+  const externalPausesList = getValues('externalPausesList');
+  const externalControlList = getValues('externalControlList');
+  const externalKYCList = getValues('externalKYCList');
+  const internalKycActivated = getValues('internalKycActivated');
+  const complianceId = getValues('complianceId');
+  const identityRegistryId = getValues('identityRegistryId');
 
   countriesList = countriesList.concat(
     countriesListType === 2 ? COUNTRY_LIST_ALLOWED : COUNTRY_LIST_BLOCKED,
@@ -301,8 +301,8 @@ export const StepReview = () => {
   const submit = () => {
     if (couponType === 2) {
       couponRate = 0;
-      couponFrequency = "0";
-      firstCouponDate = "0";
+      couponFrequency = '0';
+      firstCouponDate = '0';
     }
 
     const request = new CreateBondRequest({
@@ -326,11 +326,11 @@ export const StepReview = () => {
       ).toString(),
       couponRate: (couponRate * COUPONS_FACTOR).toString(),
       firstCouponDate:
-        firstCouponDate != "0"
+        firstCouponDate != '0'
           ? dateToUnixTimestamp(firstCouponDate)
           : firstCouponDate,
       currency:
-        "0x" +
+        '0x' +
         currency.charCodeAt(0) +
         currency.charCodeAt(1) +
         currency.charCodeAt(2),
@@ -338,9 +338,9 @@ export const StepReview = () => {
       regulationSubType: regulationSubType,
       isCountryControlListWhiteList: countriesListType === 2,
       countries: countriesList.map((country) => country).toString(),
-      info: "",
-      configId: process.env.REACT_APP_BOND_CONFIG_ID ?? "",
-      configVersion: parseInt(process.env.REACT_APP_BOND_CONFIG_VERSION ?? "0"),
+      info: '',
+      configId: process.env.REACT_APP_BOND_CONFIG_ID ?? '',
+      configVersion: parseInt(process.env.REACT_APP_BOND_CONFIG_VERSION ?? '0'),
       ...(externalPausesList &&
         externalPausesList.length > 0 && {
           externalPauses: externalPausesList,
@@ -367,107 +367,107 @@ export const StepReview = () => {
 
   const tokenDetails: DetailReviewProps[] = [
     {
-      title: t("stepTokenDetails.name"),
+      title: t('stepTokenDetails.name'),
       value: name,
     },
     {
-      title: t("stepTokenDetails.symbol"),
+      title: t('stepTokenDetails.symbol'),
       value: symbol,
     },
     {
-      title: t("stepTokenDetails.decimals"),
+      title: t('stepTokenDetails.decimals'),
       value: decimals,
     },
     {
-      title: t("stepTokenDetails.isin"),
+      title: t('stepTokenDetails.isin'),
       value: isin,
     },
   ];
 
   const configurationDetails: DetailReviewProps[] = [
     {
-      title: t("stepConfiguration.currency"),
+      title: t('stepConfiguration.currency'),
       value: currency,
     },
     {
-      title: t("stepConfiguration.numberOfUnits"),
+      title: t('stepConfiguration.numberOfUnits'),
       value: formatNumber(numberOfUnits, {}, decimals),
     },
     {
-      title: t("stepConfiguration.nominalValue"),
+      title: t('stepConfiguration.nominalValue'),
       value: formatNumber(nominalValue, {}, 2),
     },
     {
-      title: t("stepConfiguration.totalAmount"),
+      title: t('stepConfiguration.totalAmount'),
       value: totalAmount,
     },
     {
-      title: t("stepConfiguration.startingDate"),
+      title: t('stepConfiguration.startingDate'),
       value: new Date(startingDate).toLocaleDateString(),
     },
     {
-      title: t("stepConfiguration.maturityDate"),
+      title: t('stepConfiguration.maturityDate'),
       value: new Date(maturityDate).toLocaleDateString(),
     },
   ];
 
   const erc3643Details: DetailReviewProps[] = [
     {
-      title: t("stepERC3643.complianceId"),
-      value: complianceId ?? "-",
+      title: t('stepERC3643.complianceId'),
+      value: complianceId ?? '-',
     },
     {
-      title: t("stepERC3643.identityRegistryId"),
-      value: identityRegistryId ?? "-",
+      title: t('stepERC3643.identityRegistryId'),
+      value: identityRegistryId ?? '-',
     },
   ];
   const externalManagement: DetailReviewProps[] = [
     {
-      title: t("stepExternalManagement.externalPause"),
+      title: t('stepExternalManagement.externalPause'),
       value: externalPausesList
-        ? externalPausesList?.map((pause) => " " + pause).toString()
-        : "-",
+        ? externalPausesList?.map((pause) => ' ' + pause).toString()
+        : '-',
     },
     {
-      title: t("stepExternalManagement.externalControl"),
+      title: t('stepExternalManagement.externalControl'),
       value: externalControlList
-        ? externalControlList?.map((control) => " " + control).toString()
-        : "-",
+        ? externalControlList?.map((control) => ' ' + control).toString()
+        : '-',
     },
     {
-      title: t("stepExternalManagement.externalKYC"),
+      title: t('stepExternalManagement.externalKYC'),
       value: externalKYCList
-        ? externalKYCList?.map((control) => " " + control).toString()
-        : "-",
+        ? externalKYCList?.map((control) => ' ' + control).toString()
+        : '-',
     },
   ];
 
   const couponDetails: DetailReviewProps[] = [
     {
-      title: t("stepCoupon.couponType"),
+      title: t('stepCoupon.couponType'),
       value: transformCouponType(couponType),
     },
   ];
   if (couponType === 1) {
     couponDetails.push(
       {
-        title: t("stepCoupon.couponRate"),
-        value: formatNumber(couponRate) + " %",
+        title: t('stepCoupon.couponRate'),
+        value: formatNumber(couponRate) + ' %',
       },
       {
-        title: t("stepCoupon.couponFrequency"),
-        value: "Every " + couponFrequency + " months",
+        title: t('stepCoupon.couponFrequency'),
+        value: 'Every ' + couponFrequency + ' months',
       },
       {
-        title: t("stepCoupon.firstCouponDate"),
+        title: t('stepCoupon.firstCouponDate'),
         value: new Date(firstCouponDate).toLocaleDateString(),
       },
       {
-        title: t("stepCoupon.lastCouponDate"),
+        title: t('stepCoupon.lastCouponDate'),
         value: lastCouponDate,
       },
       {
-        title: t("stepCoupon.totalCoupons"),
+        title: t('stepCoupon.totalCoupons'),
         value: totalCoupons,
       },
     );
@@ -475,22 +475,22 @@ export const StepReview = () => {
 
   const regulationDetails: DetailReviewProps[] = [
     {
-      title: tRegulation("regulationTypeReview"),
+      title: tRegulation('regulationTypeReview'),
       value: tRegulation(`regulationType_${regulationType}`),
     },
     {
-      title: tRegulation("regulationSubTypeReview"),
+      title: tRegulation('regulationSubTypeReview'),
       value: tRegulation(`regulationSubType_${regulationSubType}`),
     },
     {
       title:
         countriesListType === 2
-          ? tRegulation("allowedCountriesReview")
-          : tRegulation("blockedCountriesReview"),
+          ? tRegulation('allowedCountriesReview')
+          : tRegulation('blockedCountriesReview'),
       value: countriesList
         .map(
           (country) =>
-            " " + CountriesList[country as keyof typeof CountriesList],
+            ' ' + CountriesList[country as keyof typeof CountriesList],
         )
         .toString(),
     },
@@ -502,7 +502,7 @@ export const StepReview = () => {
         <VStack gap={5}>
           <InfoDivider
             step={1}
-            title={"Token " + t("header.details")}
+            title={'Token ' + t('header.details')}
             type="main"
           />
           <SimpleGrid columns={1} gap={6} w="full">
@@ -513,7 +513,7 @@ export const StepReview = () => {
 
           <InfoDivider
             step={2}
-            title={t("header.configuration") + " details"}
+            title={t('header.configuration') + ' details'}
             type="main"
           />
           <SimpleGrid columns={1} gap={6} w="full">
@@ -524,7 +524,7 @@ export const StepReview = () => {
 
           <InfoDivider
             step={3}
-            title={t("header.coupon") + " details"}
+            title={t('header.coupon') + ' details'}
             type="main"
           />
           <SimpleGrid columns={1} gap={6} w="full">
@@ -533,7 +533,7 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
-          <InfoDivider step={4} title={t("stepERC3643.title")} type="main" />
+          <InfoDivider step={4} title={t('stepERC3643.title')} type="main" />
           <SimpleGrid columns={1} gap={6} w="full">
             {erc3643Details.map((props) => (
               <DetailReview {...props} />
@@ -542,7 +542,7 @@ export const StepReview = () => {
 
           <InfoDivider
             step={5}
-            title={t("stepExternalManagement.title")}
+            title={t('stepExternalManagement.title')}
             type="main"
           />
           <SimpleGrid columns={1} gap={6} w="full">
@@ -551,7 +551,7 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
-          <InfoDivider step={6} title={t("header.regulation")} type="main" />
+          <InfoDivider step={6} title={t('header.regulation')} type="main" />
           <SimpleGrid columns={1} gap={6} w="full">
             {regulationDetails.map((props) => (
               <DetailReview {...props} />
@@ -563,10 +563,10 @@ export const StepReview = () => {
             w="full"
             h="100px"
             align="end"
-            justifyContent={"flex-end"}
+            justifyContent={'flex-end'}
           >
             <Button size="md" variant="secondary" onClick={onOpenCancel}>
-              {t("cancelButton")}
+              {t('cancelButton')}
             </Button>
             <PreviousStepButton />
             <Button
@@ -575,7 +575,7 @@ export const StepReview = () => {
               onClick={onOpenCreate}
               isLoading={isLoading}
             >
-              {t("createTokenButton")}
+              {t('createTokenButton')}
             </Button>
           </HStack>
         </VStack>
@@ -586,31 +586,31 @@ export const StepReview = () => {
         isOpen={isOpenCancel}
         onClose={onCloseCancel}
         icon={<PhosphorIcon as={WarningCircle} size="md" />}
-        title={t("cancelSecurityPopUp.title")}
-        description={t("cancelSecurityPopUp.description")}
-        confirmText={t("cancelSecurityPopUp.confirmText")}
+        title={t('cancelSecurityPopUp.title')}
+        description={t('cancelSecurityPopUp.description')}
+        confirmText={t('cancelSecurityPopUp.confirmText')}
         onConfirm={() => {
           RouterManager.to(RouteName.Dashboard);
           onCloseCancel();
         }}
         onCancel={onCloseCancel}
-        cancelText={t("cancelSecurityPopUp.cancelText")}
-        confirmButtonProps={{ status: "danger" }}
+        cancelText={t('cancelSecurityPopUp.cancelText')}
+        confirmButtonProps={{ status: 'danger' }}
       />
       <PopUp
         id="createBond"
         isOpen={isOpenCreate}
         onClose={onCloseCreate}
         icon={<PhosphorIcon as={Question} size="md" />}
-        title={t("createSecurityPopUp.title")}
-        description={t("createSecurityPopUp.description")}
-        confirmText={t("createSecurityPopUp.confirmText")}
+        title={t('createSecurityPopUp.title')}
+        description={t('createSecurityPopUp.description')}
+        confirmText={t('createSecurityPopUp.confirmText')}
         onConfirm={() => {
           submit();
           onCloseCreate();
         }}
         onCancel={onCloseCreate}
-        cancelText={t("createSecurityPopUp.cancelText")}
+        cancelText={t('createSecurityPopUp.cancelText')}
       />
     </FormStepContainer>
   );

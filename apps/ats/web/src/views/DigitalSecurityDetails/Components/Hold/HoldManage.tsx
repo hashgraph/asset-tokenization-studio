@@ -6,7 +6,7 @@ import {
   Stack,
   useDisclosure,
   VStack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 import {
   Button,
   Heading,
@@ -15,26 +15,26 @@ import {
   PhosphorIcon,
   PopUp,
   Text,
-} from "io-bricks-ui";
-import { isValidHederaId, min, required } from "../../../../utils/rules";
-import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { useForm } from "react-hook-form";
-import { WarningCircle } from "@phosphor-icons/react";
-import { useState } from "react";
+} from 'io-bricks-ui';
+import { isValidHederaId, min, required } from '../../../../utils/rules';
+import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { WarningCircle } from '@phosphor-icons/react';
+import { useState } from 'react';
 import {
   useExecuteHoldByPartition,
   useReleaseHoldByPartition,
-} from "../../../../hooks/mutations/useHold";
+} from '../../../../hooks/mutations/useHold';
 import {
   ExecuteHoldByPartitionRequest,
   ReleaseHoldByPartitionRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { DEFAULT_PARTITION } from "../../../../utils/constants";
+} from '@hashgraph/asset-tokenization-sdk';
+import { DEFAULT_PARTITION } from '../../../../utils/constants';
 
 enum TypeMode {
-  execute = "execute",
-  release = "release",
+  execute = 'execute',
+  release = 'release',
 }
 
 interface FormValues {
@@ -46,32 +46,32 @@ interface FormValues {
 
 export const HoldManage = () => {
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
 
   const [isMutating, setIsMutating] = useState(false);
   const [manageMode, setManageMode] = useState<keyof typeof TypeMode>(
     TypeMode.execute,
   );
 
-  const { t: tType } = useTranslation("security", {
+  const { t: tType } = useTranslation('security', {
     keyPrefix:
       manageMode === TypeMode.execute
-        ? "details.hold.execute"
-        : "details.hold.release",
+        ? 'details.hold.execute'
+        : 'details.hold.release',
   });
-  const { t: tManage } = useTranslation("security", {
-    keyPrefix: "details.hold.manage",
+  const { t: tManage } = useTranslation('security', {
+    keyPrefix: 'details.hold.manage',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "details.hold.form",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'details.hold.form',
   });
-  const { t: tActions } = useTranslation("security", {
-    keyPrefix: "details.hold.actions.confirmManage",
+  const { t: tActions } = useTranslation('security', {
+    keyPrefix: 'details.hold.actions.confirmManage',
   });
-  const { t: tGlobal } = useTranslation("globals");
+  const { t: tGlobal } = useTranslation('globals');
 
   const { control, formState, getValues, reset } = useForm<FormValues>({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const { mutate: releaseHoldByPartitionMutate } = useReleaseHoldByPartition();
@@ -90,7 +90,7 @@ export const HoldManage = () => {
       targetId: destinationAccount!,
     };
 
-    if (manageMode === "execute") {
+    if (manageMode === 'execute') {
       const request = new ExecuteHoldByPartitionRequest({
         ...defaultRequest,
         sourceId: originalAccount!,
@@ -107,7 +107,7 @@ export const HoldManage = () => {
       return;
     }
 
-    if (manageMode === "release") {
+    if (manageMode === 'release') {
       const request = new ReleaseHoldByPartitionRequest({
         ...defaultRequest,
       });
@@ -130,10 +130,10 @@ export const HoldManage = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={WarningCircle} size="md" />}
-        title={tActions("title")}
-        description={tActions("description")}
-        confirmText={tActions("confirmText")}
-        cancelText={tActions("cancelText")}
+        title={tActions('title')}
+        description={tActions('description')}
+        confirmText={tActions('confirmText')}
+        cancelText={tActions('cancelText')}
         onConfirm={() => {
           onSubmit();
           onClose();
@@ -142,11 +142,11 @@ export const HoldManage = () => {
           onClose();
         }}
       />
-      <HStack justifyContent={"center"}>
+      <HStack justifyContent={'center'}>
         <Flex
           borderWidth={1}
-          borderColor={"primary.100"}
-          alignItems={"center"}
+          borderColor={'primary.100'}
+          alignItems={'center'}
           borderRadius={10}
           p={1}
         >
@@ -163,14 +163,14 @@ export const HoldManage = () => {
               position="relative"
               zIndex={1}
               {...(manageMode === mode && {
-                bgColor: "primary.200",
+                bgColor: 'primary.200',
               })}
-              _hover={{ cursor: "pointer" }}
+              _hover={{ cursor: 'pointer' }}
             >
               <Text
-                textStyle={"BodyMediumMD"}
+                textStyle={'BodyMediumMD'}
                 {...(manageMode === mode && {
-                  color: "white",
+                  color: 'white',
                 })}
               >
                 {tManage(mode)}
@@ -182,8 +182,8 @@ export const HoldManage = () => {
       <Center w="full" h="full" bg="neutral.dark.600">
         <VStack align="flex-start" p={6} gap={4}>
           <VStack align="flex-start" gap={0}>
-            <Heading textStyle="HeadingMediumLG">{tType("title")}</Heading>
-            <Text textStyle="BodyRegularMD">{tType("description")}</Text>
+            <Heading textStyle="HeadingMediumLG">{tType('title')}</Heading>
+            <Text textStyle="BodyRegularMD">{tType('description')}</Text>
           </VStack>
           <VStack
             as="form"
@@ -198,7 +198,7 @@ export const HoldManage = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("holdId.label")}*
+                  {tForm('holdId.label')}*
                 </Text>
               </HStack>
               <InputController
@@ -207,20 +207,20 @@ export const HoldManage = () => {
                 rules={{
                   required,
                 }}
-                placeholder={tForm("holdId.label")}
+                placeholder={tForm('holdId.label')}
               />
             </Stack>
-            {manageMode === "execute" && (
+            {manageMode === 'execute' && (
               <Stack w="full">
                 <HStack justifySelf="flex-start">
                   <Text textStyle="BodyTextRegularSM">
-                    {tForm("originalAccount.label")}
+                    {tForm('originalAccount.label')}
                   </Text>
                 </HStack>
                 <InputController
                   control={control}
                   id="originalAccount"
-                  placeholder={tForm("originalAccount.label")}
+                  placeholder={tForm('originalAccount.label')}
                   isRequired={true}
                   rules={{
                     required,
@@ -232,13 +232,13 @@ export const HoldManage = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("destinationAccount.label")}
+                  {tForm('destinationAccount.label')}
                 </Text>
               </HStack>
               <InputController
                 control={control}
                 id="destinationAccount"
-                placeholder={tForm("destinationAccount.label")}
+                placeholder={tForm('destinationAccount.label')}
                 isRequired={true}
                 rules={{
                   required,
@@ -249,14 +249,14 @@ export const HoldManage = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("amount.label")}*
+                  {tForm('amount.label')}*
                 </Text>
               </HStack>
               <InputNumberController
                 control={control}
                 id="amount"
                 rules={{ required, min: min(0) }}
-                placeholder={tForm("amount.placeholder")}
+                placeholder={tForm('amount.placeholder')}
               />
             </Stack>
 
@@ -269,7 +269,7 @@ export const HoldManage = () => {
                 onOpen();
               }}
             >
-              {tGlobal("send")}
+              {tGlobal('send')}
             </Button>
           </VStack>
         </VStack>

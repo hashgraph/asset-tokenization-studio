@@ -1,4 +1,4 @@
-const { execSync } = require("node:child_process");
+const { execSync } = require('node:child_process');
 
 const dir = __dirname;
 const webDir = `${dir}/web`;
@@ -11,40 +11,43 @@ const handleError = (error, stdout, stderr) => {
   }
 };
 
-const npmInstall = (dir, name = "module") => {
+const npmInstall = (dir, name = 'module') => {
   process.stdout.write(`Installing dependencies for ${name}...`);
   execSync(`cd ${dir} && npm ci`, handleError);
-  console.log("\tDone");
+  console.log('\tDone');
 };
 
-const yarnInstall = (dir, name = "module") => {
+const yarnInstall = (dir, name = 'module') => {
   process.stdout.write(`Installing dependencies for ${name}...`);
   execSync(`cd ${dir} && yarn install --frozen-lockfile`, handleError);
-  console.log("\tDone");
+  console.log('\tDone');
 };
 
-const yarnInstallPeer = (dir, name = "module") => {
+const yarnInstallPeer = (dir, name = 'module') => {
   process.stdout.write(`Installing dependencies for ${name}...`);
-  execSync(`cd ${dir} && yarn install --frozen-lockfile && yarn install-peers`, handleError);
-  console.log("\tDone");
+  execSync(
+    `cd ${dir} && yarn install --frozen-lockfile && yarn install-peers`,
+    handleError,
+  );
+  console.log('\tDone');
 };
 
-const npmBuild = (dir, name = "module") => {
+const npmBuild = (dir, name = 'module') => {
   process.stdout.write(`Build for ${name}...`);
   execSync(`cd ${dir} && npm run build`, handleError);
-  console.log("\tDone");
+  console.log('\tDone');
 };
 
-const npmCompile = (dir, name = "module") => {
+const npmCompile = (dir, name = 'module') => {
   process.stdout.write(`Compile for ${name}...`);
   execSync(`cd ${dir} && npm run compile:force`, handleError);
-  console.log("\tDone");
+  console.log('\tDone');
 };
 
-const npmRollup = (dir, name = "module") => {
+const npmRollup = (dir, name = 'module') => {
   process.stdout.write(`Rollup for ${name}...`);
   execSync(`cd ${dir} && npm run rollup`, handleError);
-  console.log("\tDone");
+  console.log('\tDone');
 };
 
 let option = process.argv.slice(2)[0];
@@ -52,11 +55,11 @@ let option = process.argv.slice(2)[0];
 if (option) {
   npmInstall(`${dir}/${option}`, option.toUpperCase());
 } else {
-  npmInstall(conDir, "CONTRACTS");
-  npmCompile(conDir, "CONTRACTS");
-  npmInstall(sdkDir, "SDK");
-  npmBuild(sdkDir, "SDK");
-  yarnInstall(webDir, "WEB");
+  npmInstall(conDir, 'CONTRACTS');
+  npmCompile(conDir, 'CONTRACTS');
+  npmInstall(sdkDir, 'SDK');
+  npmBuild(sdkDir, 'SDK');
+  yarnInstall(webDir, 'WEB');
 }
 
 // npmLinkProject(cliDir);

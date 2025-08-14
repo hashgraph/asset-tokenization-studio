@@ -203,14 +203,14 @@
 
 */
 
-import { Center, HStack, VStack } from "@chakra-ui/react";
-import { Text } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { AddSecurityButton } from "./AddSecurityButton";
-import { CreateNewSecurityButton } from "./CreateNewSecurityButton";
+import { Center, HStack, VStack } from '@chakra-ui/react';
+import { Text } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { AddSecurityButton } from './AddSecurityButton';
+import { CreateNewSecurityButton } from './CreateNewSecurityButton';
 
 export const NoTokens = () => {
-  const { t } = useTranslation("dashboard", { keyPrefix: "noTokens" });
+  const { t } = useTranslation('dashboard', { keyPrefix: 'noTokens' });
 
   return (
     <Center w="full" h="full" bg="neutral.600" p={8}>
@@ -226,10 +226,10 @@ export const NoTokens = () => {
       >
         <VStack w="407px" gap={4}>
           <Text data-testid="title" textStyle="HeadingMediumXL">
-            {t("title")}
+            {t('title')}
           </Text>
           <Text data-testid="title" textStyle="BodyMediumSM" textAlign="center">
-            {t("subTitle")}
+            {t('subTitle')}
           </Text>
         </VStack>
         <HStack gap={6}>

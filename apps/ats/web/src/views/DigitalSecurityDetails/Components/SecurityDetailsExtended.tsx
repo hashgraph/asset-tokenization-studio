@@ -208,27 +208,27 @@ import {
   DefinitionListProps,
   ClipboardButton,
   Text,
-} from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
+} from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
 import {
   formatDate,
   formatNumberLocale,
   toNumber,
-} from "../../../utils/format";
-import { useSecurityStore } from "../../../store/securityStore";
-import { useParams } from "react-router-dom";
-import { Flex } from "@chakra-ui/react";
+} from '../../../utils/format';
+import { useSecurityStore } from '../../../store/securityStore';
+import { useParams } from 'react-router-dom';
+import { Flex } from '@chakra-ui/react';
 import {
   BondDetailsViewModel,
   ComplianceRequest,
   EquityDetailsViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useMemo } from "react";
-import { MaturityDateItem } from "./MadurityDateItem";
-import { DATE_TIME_FORMAT } from "../../../utils/constants";
-import { useGetCompliance } from "../../../hooks/queries/useCompliance";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useMemo } from 'react';
+import { MaturityDateItem } from './MadurityDateItem';
+import { DATE_TIME_FORMAT } from '../../../utils/constants';
+import { useGetCompliance } from '../../../hooks/queries/useCompliance';
 
-interface SecurityDetailsExtended extends Omit<DefinitionListProps, "items"> {
+interface SecurityDetailsExtended extends Omit<DefinitionListProps, 'items'> {
   bondDetailsResponse?: BondDetailsViewModel;
   equityDetailsResponse?: EquityDetailsViewModel;
   isLoadingSecurityDetails: boolean;
@@ -242,7 +242,7 @@ export const SecurityDetailsExtended = ({
   isFetchingSecurityDetails,
   ...props
 }: SecurityDetailsExtended) => {
-  const { t: tProperties } = useTranslation("properties");
+  const { t: tProperties } = useTranslation('properties');
   const { details } = useSecurityStore();
   const { id } = useParams();
 
@@ -265,56 +265,56 @@ export const SecurityDetailsExtended = ({
   const listItems = useMemo(() => {
     const items = [
       {
-        title: tProperties("name"),
-        description: details?.name ?? "",
+        title: tProperties('name'),
+        description: details?.name ?? '',
       },
       {
-        title: tProperties("symbol"),
-        description: details?.symbol ?? "",
+        title: tProperties('symbol'),
+        description: details?.symbol ?? '',
       },
       {
-        title: tProperties("decimal"),
-        description: details?.decimals ?? "",
+        title: tProperties('decimal'),
+        description: details?.decimals ?? '',
       },
       {
-        title: tProperties("isin"),
-        description: details?.isin ?? "",
+        title: tProperties('isin'),
+        description: details?.isin ?? '',
       },
       {
-        title: tProperties("evmAddress"),
-        description: details?.evmDiamondAddress ?? "",
+        title: tProperties('evmAddress'),
+        description: details?.evmDiamondAddress ?? '',
         canCopy: true,
       },
       {
-        title: tProperties("id"),
+        title: tProperties('id'),
         description: (
           <Flex w="full" align="center">
             <Text textStyle="ElementsRegularSM">{id}</Text>
             <ClipboardButton value={id!} />
             <Text textStyle="ElementsSemiboldXS" ml={4}>
-              {tProperties("copyId")}
+              {tProperties('copyId')}
             </Text>
           </Flex>
         ),
       },
       {
-        title: tProperties("currency"),
-        description: "USD",
+        title: tProperties('currency'),
+        description: 'USD',
       }, // TODO: - format from ASCII when more currencies are available
       {
-        title: tProperties("nominalValue"),
+        title: tProperties('nominalValue'),
         description: formatNumberLocale(nominalValue, 2),
       },
       {
-        title: tProperties("maxSupply"),
+        title: tProperties('maxSupply'),
         description: `${details?.maxSupply} ${details?.symbol}`,
       },
       {
-        title: tProperties("totalSupply"),
+        title: tProperties('totalSupply'),
         description: `${details?.totalSupply} ${details?.symbol}`,
       },
       {
-        title: tProperties("pendingToBeMinted"),
+        title: tProperties('pendingToBeMinted'),
         description: `${
           toNumber(details?.maxSupply) - toNumber(details?.totalSupply)
         } ${details?.symbol}`,
@@ -323,16 +323,16 @@ export const SecurityDetailsExtended = ({
 
     if (compliance !== undefined) {
       items.push({
-        title: tProperties("compliance"),
+        title: tProperties('compliance'),
         description: `${compliance}`,
       });
     }
 
-    const isBond = details?.type === "BOND";
+    const isBond = details?.type === 'BOND';
 
     if (isBond && bondDetailsResponse?.startingDate) {
       items.push({
-        title: tProperties("startingDate"),
+        title: tProperties('startingDate'),
         description: formatDate(
           bondDetailsResponse.startingDate,
           DATE_TIME_FORMAT,
@@ -342,7 +342,7 @@ export const SecurityDetailsExtended = ({
 
     if (isBond && bondDetailsResponse?.maturityDate && id) {
       items.push({
-        title: tProperties("maturityDate"),
+        title: tProperties('maturityDate'),
         description: <MaturityDateItem securityId={id} />,
       });
     }

@@ -1,4 +1,4 @@
-import { Center, HStack, Stack, VStack } from "@chakra-ui/react";
+import { Center, HStack, Stack, VStack } from '@chakra-ui/react';
 import {
   Button,
   CalendarInputController,
@@ -6,15 +6,15 @@ import {
   InputController,
   InputNumberController,
   Text,
-} from "io-bricks-ui";
-import { DATE_TIME_FORMAT } from "../../utils/constants";
-import { useLocker } from "../../hooks/mutations/useLocker";
-import { useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { LockRequest } from "@hashgraph/asset-tokenization-sdk";
-import { dateToUnixTimestamp } from "../../utils/format";
-import { isAfterDate, isValidHederaId, min, required } from "../../utils/rules";
+} from 'io-bricks-ui';
+import { DATE_TIME_FORMAT } from '../../utils/constants';
+import { useLocker } from '../../hooks/mutations/useLocker';
+import { useForm } from 'react-hook-form';
+import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { LockRequest } from '@hashgraph/asset-tokenization-sdk';
+import { dateToUnixTimestamp } from '../../utils/format';
+import { isAfterDate, isValidHederaId, min, required } from '../../utils/rules';
 
 interface DigitalSecurityLockerFormValues {
   expirationDate: string;
@@ -25,17 +25,17 @@ interface DigitalSecurityLockerFormValues {
 export const DigitalSecurityLockerForm = () => {
   const { id: securityId } = useParams();
 
-  const { t: tLocker } = useTranslation("security", {
-    keyPrefix: "details.locker",
+  const { t: tLocker } = useTranslation('security', {
+    keyPrefix: 'details.locker',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "details.locker.form",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'details.locker.form',
   });
-  const { t: tGlobal } = useTranslation("globals");
+  const { t: tGlobal } = useTranslation('globals');
 
   const { formState, control, handleSubmit, reset } =
     useForm<DigitalSecurityLockerFormValues>({
-      mode: "onChange",
+      mode: 'onChange',
     });
 
   const { mutate: lockMutation, isLoading: isLoadingLockMutation } =
@@ -43,7 +43,7 @@ export const DigitalSecurityLockerForm = () => {
 
   const onSubmit = (data: DigitalSecurityLockerFormValues) => {
     const request = new LockRequest({
-      securityId: securityId ?? "",
+      securityId: securityId ?? '',
       expirationTimestamp: dateToUnixTimestamp(data.expirationDate),
       amount: data.amount.toString(),
       targetId: data.targetId.toString(),
@@ -59,8 +59,8 @@ export const DigitalSecurityLockerForm = () => {
   return (
     <Stack w="full" h="full" layerStyle="container">
       <Center w="full" h="full" bg="neutral.dark.600">
-        <VStack align={"flex-start"}>
-          <Heading textStyle="HeadingMediumLG">{tLocker("title")}</Heading>
+        <VStack align={'flex-start'}>
+          <Heading textStyle="HeadingMediumLG">{tLocker('title')}</Heading>
           <VStack
             as="form"
             onSubmit={handleSubmit(onSubmit)}
@@ -72,7 +72,7 @@ export const DigitalSecurityLockerForm = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("targetId.label")}*
+                  {tForm('targetId.label')}*
                 </Text>
               </HStack>
               <InputController
@@ -82,13 +82,13 @@ export const DigitalSecurityLockerForm = () => {
                   required,
                   validate: { isValidHederaId: isValidHederaId },
                 }}
-                placeholder={tForm("targetId.placeholder")}
+                placeholder={tForm('targetId.placeholder')}
               />
             </Stack>
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("amount.label")}*
+                  {tForm('amount.label')}*
                 </Text>
               </HStack>
               <InputNumberController
@@ -96,13 +96,13 @@ export const DigitalSecurityLockerForm = () => {
                 control={control}
                 id="amount"
                 rules={{ required, min: min(0) }}
-                placeholder={tForm("amount.placeholder")}
+                placeholder={tForm('amount.placeholder')}
               />
             </Stack>
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("expirationDate.label")}*
+                  {tForm('expirationDate.label')}*
                 </Text>
               </HStack>
               <CalendarInputController
@@ -113,7 +113,7 @@ export const DigitalSecurityLockerForm = () => {
                   validate: isAfterDate(new Date(), DATE_TIME_FORMAT),
                 }}
                 fromDate={new Date()}
-                placeholder={tForm("expirationDate.placeholder")}
+                placeholder={tForm('expirationDate.placeholder')}
                 withTimeInput
                 format={DATE_TIME_FORMAT}
               />
@@ -126,7 +126,7 @@ export const DigitalSecurityLockerForm = () => {
               isDisabled={!formState.isValid}
               type="submit"
             >
-              {isLoadingLockMutation ? tGlobal("sending") : tGlobal("send")}
+              {isLoadingLockMutation ? tGlobal('sending') : tGlobal('send')}
             </Button>
           </VStack>
         </VStack>

@@ -1,4 +1,4 @@
-import { CapSetMaxSupplyForm } from "./CapSetMaxSupplyForm";
+import { CapSetMaxSupplyForm } from './CapSetMaxSupplyForm';
 
 export const Cap = () => {
   return <CapSetMaxSupplyForm />;

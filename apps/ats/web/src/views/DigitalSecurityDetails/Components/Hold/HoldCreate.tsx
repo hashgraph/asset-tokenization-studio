@@ -1,4 +1,4 @@
-import { Center, HStack, Stack, useDisclosure, VStack } from "@chakra-ui/react";
+import { Center, HStack, Stack, useDisclosure, VStack } from '@chakra-ui/react';
 import {
   Button,
   CalendarInputController,
@@ -8,29 +8,29 @@ import {
   PhosphorIcon,
   PopUp,
   Text,
-} from "io-bricks-ui";
-import { isValidHederaId, min, required } from "../../../../utils/rules";
-import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { useForm } from "react-hook-form";
-import { WarningCircle } from "@phosphor-icons/react";
+} from 'io-bricks-ui';
+import { isValidHederaId, min, required } from '../../../../utils/rules';
+import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { WarningCircle } from '@phosphor-icons/react';
 import {
   DATE_TIME_FORMAT,
   DEFAULT_PARTITION,
-} from "../../../../utils/constants";
-import { useWalletStore } from "../../../../store/walletStore";
-import { useState } from "react";
+} from '../../../../utils/constants';
+import { useWalletStore } from '../../../../store/walletStore';
+import { useState } from 'react';
 import {
   useCreateHoldByPartition,
   useForceCreateHoldFromByPartition,
-} from "../../../../hooks/mutations/useHold";
+} from '../../../../hooks/mutations/useHold';
 import {
   CreateHoldByPartitionRequest,
   CreateHoldFromByPartitionRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { dateToUnixTimestamp } from "../../../../utils/format";
-import { useRolesStore } from "../../../../store/rolesStore";
-import { SecurityRole } from "../../../../utils/SecurityRole";
+} from '@hashgraph/asset-tokenization-sdk';
+import { dateToUnixTimestamp } from '../../../../utils/format';
+import { useRolesStore } from '../../../../store/rolesStore';
+import { SecurityRole } from '../../../../utils/SecurityRole';
 
 interface FormValues {
   originalAccount: string;
@@ -42,7 +42,7 @@ interface FormValues {
 
 export const HoldCreate = () => {
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
   const { address } = useWalletStore();
   const { roles } = useRolesStore();
 
@@ -56,24 +56,24 @@ export const HoldCreate = () => {
     isLoading: isLoadingForceHoldFromByPartitionMutate,
   } = useForceCreateHoldFromByPartition();
 
-  const { t: tCreate } = useTranslation("security", {
-    keyPrefix: "details.hold.create",
+  const { t: tCreate } = useTranslation('security', {
+    keyPrefix: 'details.hold.create',
   });
-  const { t: tActions } = useTranslation("security", {
-    keyPrefix: "details.hold.actions.confirmHoldPopUp",
+  const { t: tActions } = useTranslation('security', {
+    keyPrefix: 'details.hold.actions.confirmHoldPopUp',
   });
-  const { t: tGlobal } = useTranslation("globals");
+  const { t: tGlobal } = useTranslation('globals');
 
   const [forceHold, setForceHold] = useState(false);
 
   const { control, formState, getValues, reset } = useForm<FormValues>({
-    mode: "onChange",
+    mode: 'onChange',
     defaultValues: {
       originalAccount: address,
-      destinationAccount: "",
-      escrowAccount: "",
-      expirationDate: "",
-      amount: "",
+      destinationAccount: '',
+      escrowAccount: '',
+      expirationDate: '',
+      amount: '',
     },
   });
 
@@ -92,7 +92,7 @@ export const HoldCreate = () => {
       expirationDate: dateToUnixTimestamp(expirationDate),
       partitionId: DEFAULT_PARTITION,
       securityId,
-      targetId: destinationAccount ?? "0.0.0",
+      targetId: destinationAccount ?? '0.0.0',
     };
 
     if (forceHold) {
@@ -133,10 +133,10 @@ export const HoldCreate = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={WarningCircle} size="md" />}
-        title={tActions("title")}
-        description={tActions("description")}
-        confirmText={tActions("confirmText")}
-        cancelText={tActions("cancelText")}
+        title={tActions('title')}
+        description={tActions('description')}
+        confirmText={tActions('confirmText')}
+        cancelText={tActions('cancelText')}
         onConfirm={() => {
           onSubmit();
           onClose();
@@ -148,7 +148,7 @@ export const HoldCreate = () => {
       <Center w="full" h="full" bg="neutral.dark.600">
         <VStack align="flex-start" p={6} gap={4}>
           {roles.includes(SecurityRole._CONTROLLER_ROLE) && (
-            <HStack w={"full"} justifyContent={"flex-end"}>
+            <HStack w={'full'} justifyContent={'flex-end'}>
               <Button
                 data-testid="force-hold-button"
                 variant="secondary"
@@ -161,8 +161,8 @@ export const HoldCreate = () => {
             </HStack>
           )}
           <VStack align="flex-start" gap={0}>
-            <Heading textStyle="HeadingMediumLG">{tCreate("title")}</Heading>
-            <Text textStyle="BodyRegularMD">{tCreate("description")}</Text>
+            <Heading textStyle="HeadingMediumLG">{tCreate('title')}</Heading>
+            <Text textStyle="BodyRegularMD">{tCreate('description')}</Text>
           </VStack>
           <VStack
             as="form"
@@ -177,7 +177,7 @@ export const HoldCreate = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tCreate("originalAccount.label")}*
+                  {tCreate('originalAccount.label')}*
                 </Text>
               </HStack>
               <InputController
@@ -188,19 +188,19 @@ export const HoldCreate = () => {
                   required,
                   validate: { isValidHederaId: isValidHederaId },
                 }}
-                placeholder={tCreate("originalAccount.label")}
+                placeholder={tCreate('originalAccount.label')}
               />
             </Stack>
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tCreate("destinationAccount.label")}
+                  {tCreate('destinationAccount.label')}
                 </Text>
               </HStack>
               <InputController
                 control={control}
                 id="destinationAccount"
-                placeholder={tCreate("destinationAccount.label")}
+                placeholder={tCreate('destinationAccount.label')}
                 rules={{
                   validate: (value: string) => {
                     if (!value || value === undefined) return true;
@@ -213,7 +213,7 @@ export const HoldCreate = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tCreate("escrowAccount.label")}*
+                  {tCreate('escrowAccount.label')}*
                 </Text>
               </HStack>
               <InputController
@@ -223,13 +223,13 @@ export const HoldCreate = () => {
                   required,
                   validate: { isValidHederaId: isValidHederaId },
                 }}
-                placeholder={tCreate("escrowAccount.label")}
+                placeholder={tCreate('escrowAccount.label')}
               />
             </Stack>
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tCreate("expirationDate.label")}*
+                  {tCreate('expirationDate.label')}*
                 </Text>
               </HStack>
               <CalendarInputController
@@ -237,7 +237,7 @@ export const HoldCreate = () => {
                 id="expirationDate"
                 rules={{ required }}
                 fromDate={new Date()}
-                placeholder={tCreate("expirationDate.placeholder")}
+                placeholder={tCreate('expirationDate.placeholder')}
                 withTimeInput
                 format={DATE_TIME_FORMAT}
               />
@@ -245,14 +245,14 @@ export const HoldCreate = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tCreate("amount.label")}*
+                  {tCreate('amount.label')}*
                 </Text>
               </HStack>
               <InputNumberController
                 control={control}
                 id="amount"
                 rules={{ required, min: min(0) }}
-                placeholder={tCreate("amount.placeholder")}
+                placeholder={tCreate('amount.placeholder')}
               />
             </Stack>
 
@@ -265,7 +265,7 @@ export const HoldCreate = () => {
                 onOpen();
               }}
             >
-              {showLoading ? tGlobal("sending") : tGlobal("send")}
+              {showLoading ? tGlobal('sending') : tGlobal('send')}
             </Button>
           </VStack>
         </VStack>

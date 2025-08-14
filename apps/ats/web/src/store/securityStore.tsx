@@ -203,9 +203,9 @@
 
 */
 
-import type { SecurityViewModel } from "@hashgraph/asset-tokenization-sdk";
-import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import type { SecurityViewModel } from '@hashgraph/asset-tokenization-sdk';
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 
 export interface SecurityStore {
   name: string;
@@ -226,7 +226,7 @@ interface SecurityArrayStore {
   reset: () => void;
 }
 
-const SECURITIES_STORE_KEY = "SECURITIES_STORE_KEY";
+const SECURITIES_STORE_KEY = 'SECURITIES_STORE_KEY';
 
 export const useSecurityStore = create<SecurityArrayStore>()(
   persist(

@@ -203,9 +203,9 @@
 
 */
 
-import { useEffect } from "react";
-import { HStack, Stack } from "@chakra-ui/react";
-import { useTranslation } from "react-i18next";
+import { useEffect } from 'react';
+import { HStack, Stack } from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
 import {
   PhosphorIcon,
   Text,
@@ -213,40 +213,40 @@ import {
   InputController,
   InputNumberController,
   SelectController,
-} from "io-bricks-ui";
-import { CancelButton } from "../../../components/CancelButton";
-import { NextStepButton } from "./NextStepButton";
-import { PreviousStepButton } from "./PreviousStepButton";
+} from 'io-bricks-ui';
+import { CancelButton } from '../../../components/CancelButton';
+import { NextStepButton } from './NextStepButton';
+import { PreviousStepButton } from './PreviousStepButton';
 import {
   greaterThan,
   isBetweenInclusiveDates,
   required,
-} from "../../../utils/rules";
-import { ICreateBondFormValues } from "../ICreateBondFormValues";
-import { useFormContext, useFormState } from "react-hook-form";
-import { formatDate } from "../../../utils/format";
-import { CouponTypeOptions } from "../CouponType";
-import { Tooltip } from "io-bricks-ui";
-import { Info } from "@phosphor-icons/react";
-import { Trans } from "react-i18next";
-import { FormStepContainer } from "../../../components/FormStepContainer";
+} from '../../../utils/rules';
+import { ICreateBondFormValues } from '../ICreateBondFormValues';
+import { useFormContext, useFormState } from 'react-hook-form';
+import { formatDate } from '../../../utils/format';
+import { CouponTypeOptions } from '../CouponType';
+import { Tooltip } from 'io-bricks-ui';
+import { Info } from '@phosphor-icons/react';
+import { Trans } from 'react-i18next';
+import { FormStepContainer } from '../../../components/FormStepContainer';
 
 export const StepCoupon = () => {
-  const { t } = useTranslation("security", { keyPrefix: "createBond" });
+  const { t } = useTranslation('security', { keyPrefix: 'createBond' });
   const { control, watch, setValue } = useFormContext<ICreateBondFormValues>();
   const stepFormState = useFormState({ control });
 
-  const startingDate = watch("startingDate");
-  const couponType = watch("couponType");
-  const firstCouponDate = watch("firstCouponDate");
-  const couponFrequency = watch("couponFrequency");
-  const maturityDate = watch("maturityDate");
-  const lastCouponDate = watch("lastCouponDate");
-  const totalCoupons = watch("totalCoupons");
+  const startingDate = watch('startingDate');
+  const couponType = watch('couponType');
+  const firstCouponDate = watch('firstCouponDate');
+  const couponFrequency = watch('couponFrequency');
+  const maturityDate = watch('maturityDate');
+  const lastCouponDate = watch('lastCouponDate');
+  const totalCoupons = watch('totalCoupons');
 
   useEffect(() => {
     if (couponType === undefined) {
-      setValue("couponType", 1);
+      setValue('couponType', 1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -271,28 +271,28 @@ export const StepCoupon = () => {
         );
       }
 
-      setValue("totalCoupons", Math.floor(totalCoupons));
-      setValue("lastCouponDate", formatDate(new Date(lastCouponDate)));
+      setValue('totalCoupons', Math.floor(totalCoupons));
+      setValue('lastCouponDate', formatDate(new Date(lastCouponDate)));
     }
   }, [firstCouponDate, maturityDate, couponFrequency, setValue]);
 
   return (
     <FormStepContainer>
       <Stack gap={8}>
-        <Text textStyle="HeadingMediumLG">{t("stepCoupon.title")}</Text>
+        <Text textStyle="HeadingMediumLG">{t('stepCoupon.title')}</Text>
         <Text textStyle="ElementsRegularSM">
-          {t("stepCoupon.mandatoryFields")}
+          {t('stepCoupon.mandatoryFields')}
         </Text>
       </Stack>
       <Stack w="full">
         <HStack justifySelf="flex-start">
           <Text textStyle="BodyTextRegularSM">
-            {t("stepCoupon.couponType")}*
+            {t('stepCoupon.couponType')}*
           </Text>
           <Tooltip
             label={
               <Trans i18nkey="stepCoupon.couponTypeTooltip">
-                {t("stepCoupon.couponTypeTooltip")}
+                {t('stepCoupon.couponTypeTooltip')}
               </Trans>
             }
             placement="right"
@@ -304,7 +304,7 @@ export const StepCoupon = () => {
           control={control}
           id="couponType"
           rules={{ required }}
-          placeholder={t("stepCoupon.couponTypePlaceHolder")}
+          placeholder={t('stepCoupon.couponTypePlaceHolder')}
           size="md"
           options={CouponTypeOptions}
         />
@@ -314,10 +314,10 @@ export const StepCoupon = () => {
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {t("stepCoupon.couponRate")}*
+                {t('stepCoupon.couponRate')}*
               </Text>
               <Tooltip
-                label={t("stepCoupon.couponRateTooltip")}
+                label={t('stepCoupon.couponRateTooltip')}
                 placement="right"
               >
                 <PhosphorIcon as={Info} />
@@ -331,7 +331,7 @@ export const StepCoupon = () => {
                 required,
                 validate: greaterThan(0),
               }}
-              placeholder={t("stepCoupon.couponRatePlaceHolder")}
+              placeholder={t('stepCoupon.couponRatePlaceHolder')}
               backgroundColor="neutral.600"
               size="md"
               decimalScale={3}
@@ -344,10 +344,10 @@ export const StepCoupon = () => {
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {t("stepCoupon.couponFrequency")}*
+                {t('stepCoupon.couponFrequency')}*
               </Text>
               <Tooltip
-                label={t("stepCoupon.couponFrequencyTooltip")}
+                label={t('stepCoupon.couponFrequencyTooltip')}
                 placement="right"
               >
                 <PhosphorIcon as={Info} />
@@ -360,7 +360,7 @@ export const StepCoupon = () => {
                 required,
                 validate: greaterThan(0),
               }}
-              placeholder={t("stepCoupon.couponFrequencyPlaceHolder")}
+              placeholder={t('stepCoupon.couponFrequencyPlaceHolder')}
               backgroundColor="neutral.600"
               size="md"
             />
@@ -368,10 +368,10 @@ export const StepCoupon = () => {
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {t("stepCoupon.firstCouponDate")}*
+                {t('stepCoupon.firstCouponDate')}*
               </Text>
               <Tooltip
-                label={t("stepCoupon.firstCouponDateTooltip")}
+                label={t('stepCoupon.firstCouponDateTooltip')}
                 placement="right"
               >
                 <PhosphorIcon as={Info} />
@@ -389,14 +389,14 @@ export const StepCoupon = () => {
                   new Date(maturityDate),
                 ),
               }}
-              placeholder={t("stepCoupon.firstCouponDatePlaceHolder")}
+              placeholder={t('stepCoupon.firstCouponDatePlaceHolder')}
               backgroundColor="neutral.600"
               size="md"
             />
           </Stack>
           <Stack w="full">
             <Text textStyle="BodyTextRegularSM">
-              {t("stepCoupon.lastCouponDate")}
+              {t('stepCoupon.lastCouponDate')}
             </Text>
             <InputController
               control={control}
@@ -411,7 +411,7 @@ export const StepCoupon = () => {
           </Stack>
           <Stack w="full">
             <Text textStyle="BodyTextRegularSM">
-              {t("stepCoupon.totalCoupons")}
+              {t('stepCoupon.totalCoupons')}
             </Text>
             <InputController
               control={control}
@@ -431,7 +431,7 @@ export const StepCoupon = () => {
         w="full"
         h="100px"
         align="end"
-        justifyContent={"flex-end"}
+        justifyContent={'flex-end'}
       >
         <CancelButton />
         <PreviousStepButton />

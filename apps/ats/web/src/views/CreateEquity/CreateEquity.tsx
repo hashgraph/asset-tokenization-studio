@@ -203,31 +203,31 @@
 
 */
 
-import { Box, HStack, Stack } from "@chakra-ui/react";
-import { StepTokenDetails } from "./Components/StepTokenDetails";
-import { FormProvider, useForm } from "react-hook-form";
-import { useSteps, Wizard } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { History } from "../../components/History";
-import { RouteName } from "../../router/RouteName";
-import { ICreateEquityFormValues } from "./ICreateEquityFormValues";
-import { useEffect } from "react";
-import { User } from "../../utils/constants";
-import { useUserStore } from "../../store/userStore";
-import { StepNewSerie } from "./Components/StepNewSerie";
-import { StepReview } from "./Components/StepReview";
-import { StepRegulation } from "../CreateSecurityCommons/StepRegulation";
-import { StepExternalManagement } from "../CreateSecurityCommons/StepExternalManagement";
-import { StepERC3643 } from "../CreateSecurityCommons/StepERC3643";
+import { Box, HStack, Stack } from '@chakra-ui/react';
+import { StepTokenDetails } from './Components/StepTokenDetails';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useSteps, Wizard } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { History } from '../../components/History';
+import { RouteName } from '../../router/RouteName';
+import { ICreateEquityFormValues } from './ICreateEquityFormValues';
+import { useEffect } from 'react';
+import { User } from '../../utils/constants';
+import { useUserStore } from '../../store/userStore';
+import { StepNewSerie } from './Components/StepNewSerie';
+import { StepReview } from './Components/StepReview';
+import { StepRegulation } from '../CreateSecurityCommons/StepRegulation';
+import { StepExternalManagement } from '../CreateSecurityCommons/StepExternalManagement';
+import { StepERC3643 } from '../CreateSecurityCommons/StepERC3643';
 
 export const CreateEquity = () => {
-  const { t } = useTranslation("security", { keyPrefix: "createEquity" });
-  const { t: tRoutes } = useTranslation("routes");
+  const { t } = useTranslation('security', { keyPrefix: 'createEquity' });
+  const { t: tRoutes } = useTranslation('routes');
   const { setType } = useUserStore();
 
   const steps = useSteps();
   const form = useForm<ICreateEquityFormValues>({
-    mode: "all",
+    mode: 'all',
     defaultValues: {
       isControllable: true,
       isBlocklist: true,
@@ -253,27 +253,27 @@ export const CreateEquity = () => {
 
   const wizardSteps = [
     {
-      title: t("stepTokenDetails.title"),
+      title: t('stepTokenDetails.title'),
       content: <StepTokenDetails />,
     },
     {
-      title: t("stepNewSerie.title"),
+      title: t('stepNewSerie.title'),
       content: <StepNewSerie />,
     },
     {
-      title: t("stepExternalManagement.title"),
+      title: t('stepExternalManagement.title'),
       content: <StepExternalManagement />,
     },
     {
-      title: t("stepERC3643.title"),
+      title: t('stepERC3643.title'),
       content: <StepERC3643 />,
     },
     {
-      title: t("header.regulation"),
+      title: t('header.regulation'),
       content: <StepRegulation />,
     },
     {
-      title: t("stepReview.title"),
+      title: t('stepReview.title'),
       content: <StepReview />,
     },
   ];

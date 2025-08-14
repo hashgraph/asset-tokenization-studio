@@ -205,32 +205,32 @@
 
 export default {
   header: {
-    title: "Force redeem digital security",
+    title: 'Force redeem digital security',
   },
-  title: "Force redeem securities",
-  subtitle: "Choose the amount you want to redeem",
+  title: 'Force redeem securities',
+  subtitle: 'Choose the amount you want to redeem',
   input: {
     amount: {
-      label: "Amount to redeem",
-      placeholder: "Enter the amount to redeem",
+      label: 'Amount to redeem',
+      placeholder: 'Enter the amount to redeem',
     },
     source: {
-      label: "Add source Account",
-      placeholder: "Enter the account",
+      label: 'Add source Account',
+      placeholder: 'Enter the account',
     },
   },
   list: {
     details: {
-      label: "Details",
+      label: 'Details',
     },
   },
   button: {
-    accept: "Redeem",
+    accept: 'Redeem',
   },
   messages: {
-    success: "Success: ",
-    descriptionSuccess: "The redeem operation has been executed successfully",
-    error: "Error: ",
-    descriptionFailed: "The redeem operation has failed",
+    success: 'Success: ',
+    descriptionSuccess: 'The redeem operation has been executed successfully',
+    error: 'Error: ',
+    descriptionFailed: 'The redeem operation has failed',
   },
 };

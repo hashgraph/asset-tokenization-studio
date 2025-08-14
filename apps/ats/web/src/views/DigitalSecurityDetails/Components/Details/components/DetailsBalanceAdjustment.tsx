@@ -1,13 +1,13 @@
-import { DefinitionList } from "io-bricks-ui";
-import { useGetAllBalanceAdjustments } from "../../../../../hooks/queries/useBalanceAdjustment";
+import { DefinitionList } from 'io-bricks-ui';
+import { useGetAllBalanceAdjustments } from '../../../../../hooks/queries/useBalanceAdjustment';
 import {
   GetAllScheduledBalanceAdjustmentsRequest,
   SecurityViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useTranslation } from "react-i18next";
-import { formatDate } from "../../../../../utils/format";
-import { DATE_TIME_FORMAT } from "../../../../../utils/constants";
-import { Stack } from "@chakra-ui/react";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useTranslation } from 'react-i18next';
+import { formatDate } from '../../../../../utils/format';
+import { DATE_TIME_FORMAT } from '../../../../../utils/constants';
+import { Stack } from '@chakra-ui/react';
 
 interface DetailsBalanceAdjustmentProps {
   id: string;
@@ -18,8 +18,8 @@ export const DetailsBalanceAdjustment = ({
   id,
   details,
 }: DetailsBalanceAdjustmentProps) => {
-  const { t: tBenefits } = useTranslation("security", {
-    keyPrefix: "details.benefits",
+  const { t: tBenefits } = useTranslation('security', {
+    keyPrefix: 'details.benefits',
   });
 
   const { data: balanceAdjustments } = useGetAllBalanceAdjustments(
@@ -27,7 +27,7 @@ export const DetailsBalanceAdjustment = ({
       securityId: id,
     }),
     {
-      enabled: details?.type === "EQUITY",
+      enabled: details?.type === 'EQUITY',
     },
   );
 
@@ -38,21 +38,21 @@ export const DetailsBalanceAdjustment = ({
           key={balanceAdjustment.id}
           items={[
             {
-              title: tBenefits("executionDate"),
+              title: tBenefits('executionDate'),
               description:
                 formatDate(balanceAdjustment.executionDate, DATE_TIME_FORMAT) ??
-                "",
+                '',
             },
             {
-              title: tBenefits("factor"),
+              title: tBenefits('factor'),
               description:
                 (
                   Number(balanceAdjustment.factor) /
                   Math.pow(10, Number(balanceAdjustment.decimals))
-                ).toString() ?? "",
+                ).toString() ?? '',
             },
           ]}
-          title={tBenefits("balanceAdjustments")}
+          title={tBenefits('balanceAdjustments')}
           layerStyle="container"
         />
       ))}

@@ -203,12 +203,12 @@
 
 */
 
-import { Button } from "io-bricks-ui";
-import type { ButtonProps } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
+import { Button } from 'io-bricks-ui';
+import type { ButtonProps } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
 
 export const CreateTokenButton = (props: ButtonProps) => {
-  const { t } = useTranslation("security", { keyPrefix: "createBond" });
+  const { t } = useTranslation('security', { keyPrefix: 'createBond' });
 
   return (
     <Button
@@ -217,7 +217,7 @@ export const CreateTokenButton = (props: ButtonProps) => {
       variant="primary"
       {...props}
     >
-      {t("createTokenButton")}
+      {t('createTokenButton')}
     </Button>
   );
 };

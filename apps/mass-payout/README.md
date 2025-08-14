@@ -8,10 +8,10 @@ This workspace is currently a placeholder for the future mass payout web applica
 
 This application will contain:
 
--   Web interface for mass payout operations
--   User dashboard for payment management
--   Integration with mass payout package components
--   Administrative tools for batch processing
+- Web interface for mass payout operations
+- User dashboard for payment management
+- Integration with mass payout package components
+- Administrative tools for batch processing
 
 ## Current Structure
 
@@ -36,10 +36,10 @@ npm run start   # Placeholder start command
 
 When implemented, this application will likely use:
 
--   React with TypeScript
--   Vite for build tooling
--   Integration with the mass payout package
--   Hedera SDK integration
+- React with TypeScript
+- Vite for build tooling
+- Integration with the mass payout package
+- Hedera SDK integration
 
 ## Contributing
 

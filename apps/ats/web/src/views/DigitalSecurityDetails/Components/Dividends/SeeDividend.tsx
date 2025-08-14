@@ -203,7 +203,7 @@
 
 */
 
-import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
+import { Button, Center, HStack, Stack, VStack } from '@chakra-ui/react';
 import {
   InputController,
   InputNumberController,
@@ -212,23 +212,23 @@ import {
   PhosphorIcon,
   Text,
   Tooltip,
-} from "io-bricks-ui";
-import { Info } from "@phosphor-icons/react";
-import { isValidHederaId, min, required } from "../../../../utils/rules";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+} from 'io-bricks-ui';
+import { Info } from '@phosphor-icons/react';
+import { isValidHederaId, min, required } from '../../../../utils/rules';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import {
   useGetDividends,
   useGetDividendsFor,
-} from "../../../../hooks/queries/useDividends";
+} from '../../../../hooks/queries/useDividends';
 import {
   GetDividendsForRequest,
   GetDividendsRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { formatDate, formatNumberLocale } from "../../../../utils/format";
-import { DATE_TIME_FORMAT } from "../../../../utils/constants";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { formatDate, formatNumberLocale } from '../../../../utils/format';
+import { DATE_TIME_FORMAT } from '../../../../utils/constants';
 
 interface SeeDividendFormValues {
   dividendId: number;
@@ -236,13 +236,13 @@ interface SeeDividendFormValues {
 }
 
 const defaultDividendsForRequest = new GetDividendsForRequest({
-  securityId: "",
+  securityId: '',
   dividendId: 0,
-  targetId: "",
+  targetId: '',
 });
 
 const defaultDividendsRequest = new GetDividendsRequest({
-  securityId: "",
+  securityId: '',
   dividendId: 0,
 });
 
@@ -252,16 +252,16 @@ export const SeeDividend = () => {
     handleSubmit,
     formState: { isValid },
   } = useForm<SeeDividendFormValues>({
-    mode: "all",
+    mode: 'all',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "details.dividends.see.input",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'details.dividends.see.input',
   });
-  const { t: tDetail } = useTranslation("security", {
-    keyPrefix: "details.dividends.see.details",
+  const { t: tDetail } = useTranslation('security', {
+    keyPrefix: 'details.dividends.see.details',
   });
-  const { t: tGlobal } = useTranslation("globals");
-  const { id: securityId = "" } = useParams();
+  const { t: tGlobal } = useTranslation('globals');
+  const { id: securityId = '' } = useParams();
   const [dividendsRequest, setDividendsRequest] =
     useState<GetDividendsRequest>();
   const [dividendsForRequest, setDividendsForRequest] =
@@ -270,8 +270,8 @@ export const SeeDividend = () => {
     useState<boolean>(false);
   const [isDividendsLoading, setIsDivididendLoading] = useState<boolean>(false);
   const toast = useToast();
-  const { t: tError } = useTranslation("security", {
-    keyPrefix: "details.dividends.see.error",
+  const { t: tError } = useTranslation('security', {
+    keyPrefix: 'details.dividends.see.error',
   });
 
   const { data: dividendsFor, refetch: refetchDividendsFor } =
@@ -284,8 +284,8 @@ export const SeeDividend = () => {
         setIsDivididendForLoading(false);
         toast.show({
           duration: 3000,
-          title: tError("general"),
-          status: "error",
+          title: tError('general'),
+          status: 'error',
         });
       },
     });
@@ -301,8 +301,8 @@ export const SeeDividend = () => {
         setIsDivididendLoading(false);
         toast.show({
           duration: 3000,
-          title: tError("general"),
-          status: "error",
+          title: tError('general'),
+          status: 'error',
         });
       },
     },
@@ -341,8 +341,8 @@ export const SeeDividend = () => {
     setDividendsRequest(dividendsReq);
   };
 
-  let dividendsPaymentDay = "";
-  let dividendsAmount = "0";
+  let dividendsPaymentDay = '';
+  let dividendsAmount = '0';
 
   if (dividends && dividendsFor) {
     dividendsPaymentDay = dividends.executionDate.toDateString();
@@ -371,9 +371,9 @@ export const SeeDividend = () => {
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {tForm("dividend.label")}*
+                {tForm('dividend.label')}*
               </Text>
-              <Tooltip label={tForm("dividend.tooltip")} placement="right">
+              <Tooltip label={tForm('dividend.tooltip')} placement="right">
                 <PhosphorIcon as={Info} />
               </Tooltip>
             </HStack>
@@ -382,15 +382,15 @@ export const SeeDividend = () => {
               control={control}
               id="dividendId"
               rules={{ required, min: min(0) }}
-              placeholder={tForm("dividend.placeholder")}
+              placeholder={tForm('dividend.placeholder')}
             />
           </Stack>
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {tForm("account.label")}*
+                {tForm('account.label')}*
               </Text>
-              <Tooltip label={tForm("account.tooltip")} placement="right">
+              <Tooltip label={tForm('account.tooltip')} placement="right">
                 <PhosphorIcon as={Info} />
               </Tooltip>
             </HStack>
@@ -398,7 +398,7 @@ export const SeeDividend = () => {
               control={control}
               id="targetId"
               rules={{ required, isValidHederaId: isValidHederaId }}
-              placeholder={tForm("account.placeholder")}
+              placeholder={tForm('account.placeholder')}
             />
           </Stack>
           <Button
@@ -408,26 +408,26 @@ export const SeeDividend = () => {
             isLoading={isDividendsForLoading || isDividendsLoading}
             type="submit"
           >
-            {tGlobal("check")}
+            {tGlobal('check')}
           </Button>
         </VStack>
         {dividends && dividendsFor && (
           <DefinitionList
             items={[
               {
-                title: tDetail("paymentDay"),
+                title: tDetail('paymentDay'),
                 description: formatDate(dividendsPaymentDay, DATE_TIME_FORMAT),
                 canCopy: true,
                 valueToCopy: dividendsPaymentDay,
               },
               {
-                title: tDetail("amount"),
+                title: tDetail('amount'),
                 description: dividendsAmount,
                 canCopy: true,
                 valueToCopy: dividendsAmount,
               },
             ]}
-            title={tDetail("title")}
+            title={tDetail('title')}
           />
         )}
       </VStack>

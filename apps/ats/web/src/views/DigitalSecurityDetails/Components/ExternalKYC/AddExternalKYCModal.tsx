@@ -9,7 +9,7 @@ import {
   ModalOverlay,
   ModalProps,
   VStack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 import {
   Button,
   PhosphorIcon,
@@ -17,15 +17,15 @@ import {
   Tag,
   Text,
   useToast,
-} from "io-bricks-ui";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
-import { useState } from "react";
-import { X } from "@phosphor-icons/react";
-import { useExternalKYCStore } from "../../../../store/externalKYCStore";
-import { useUpdateExternalKYCLists } from "../../../../hooks/mutations/useExternalKYC";
-import { UpdateExternalKycListsRequest } from "@hashgraph/asset-tokenization-sdk";
+} from 'io-bricks-ui';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { X } from '@phosphor-icons/react';
+import { useExternalKYCStore } from '../../../../store/externalKYCStore';
+import { useUpdateExternalKYCLists } from '../../../../hooks/mutations/useExternalKYC';
+import { UpdateExternalKycListsRequest } from '@hashgraph/asset-tokenization-sdk';
 
 type SelectOption = {
   value: string;
@@ -37,7 +37,7 @@ interface FormValues {
   vcFile: string;
 }
 
-interface AddExternalKYCModalProps extends Omit<ModalProps, "children"> {}
+interface AddExternalKYCModalProps extends Omit<ModalProps, 'children'> {}
 
 export const AddExternalKYCModal = ({
   isOpen,
@@ -47,13 +47,13 @@ export const AddExternalKYCModal = ({
 
   const [selectedKYCs, setSelectedKYCs] = useState<SelectOption[]>([]);
 
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
 
-  const { t: tCreate } = useTranslation("security", {
-    keyPrefix: "details.externalKYC.create",
+  const { t: tCreate } = useTranslation('security', {
+    keyPrefix: 'details.externalKYC.create',
   });
-  const { t: tMessage } = useTranslation("externalKYC", {
-    keyPrefix: "add.messages",
+  const { t: tMessage } = useTranslation('externalKYC', {
+    keyPrefix: 'add.messages',
   });
 
   const { externalKYCs } = useExternalKYCStore();
@@ -69,7 +69,7 @@ export const AddExternalKYCModal = ({
   }));
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const onSubmit = (_values: FormValues) => {
@@ -83,10 +83,10 @@ export const AddExternalKYCModal = ({
       onClose();
       toast.show({
         duration: 3000,
-        title: tMessage("updateExternalKYC.success"),
-        description: tMessage("updateExternalKYC.descriptionSuccess"),
-        variant: "subtle",
-        status: "success",
+        title: tMessage('updateExternalKYC.success'),
+        description: tMessage('updateExternalKYC.descriptionSuccess'),
+        variant: 'subtle',
+        status: 'success',
       });
     });
   };
@@ -126,23 +126,23 @@ export const AddExternalKYCModal = ({
       }}
     >
       <ModalOverlay />
-      <ModalContent bgColor={"white"}>
-        <ModalHeader>{tCreate("title")}</ModalHeader>
+      <ModalContent bgColor={'white'}>
+        <ModalHeader>{tCreate('title')}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack gap={4}>
             <SelectController
               control={control}
               id="accountId"
-              label={tCreate("form.selector.label")}
-              placeholder={tCreate("form.selector.placeholder")}
+              label={tCreate('form.selector.label')}
+              placeholder={tCreate('form.selector.placeholder')}
               options={options}
               setsFullOption
               onChange={(option) => handleSelectChange(option as SelectOption)}
             />
           </VStack>
           {selectedKYCs.length > 0 && (
-            <VStack alignItems={"flex-start"} mt={6}>
+            <VStack alignItems={'flex-start'} mt={6}>
               <Text>External KYCs selected:</Text>
               <HStack
                 layerStyle="whiteContainer"
@@ -171,7 +171,7 @@ export const AddExternalKYCModal = ({
             type="submit"
             onClick={handleSubmit(onSubmit)}
           >
-            {tCreate("form.add")}
+            {tCreate('form.add')}
           </Button>
         </ModalFooter>
       </ModalContent>

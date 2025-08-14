@@ -203,7 +203,7 @@
 
 */
 
-import { GenericRoute } from "./GenericRoute";
+import { GenericRoute } from './GenericRoute';
 
 export const OnboardingRoute = ({
   children,

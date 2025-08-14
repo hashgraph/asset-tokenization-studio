@@ -212,11 +212,11 @@ import {
   SetVotingRightsRequest,
   VotingRightsForViewModel,
   VotingRightsViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
-import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
-import { SDKService } from "../../services/SDKService";
-import { useToast } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
+} from '@hashgraph/asset-tokenization-sdk';
+import { UseQueryOptions, useMutation, useQuery } from '@tanstack/react-query';
+import { SDKService } from '../../services/SDKService';
+import { useToast } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
 
 export const GET_ALL_VOTING_RIGHTS = (securityId: string) =>
   `GET_ALL_VOTING_RIGHTS_${securityId}`;
@@ -242,8 +242,8 @@ export const GET_VOTING_RIGHTS_TOTAL_HOLDERS = (
 
 export const useSetVotingRights = () => {
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.votingRights.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.votingRights.messages',
   });
 
   return useMutation(
@@ -253,10 +253,10 @@ export const useSetVotingRights = () => {
       onSuccess: () =>
         toast.show({
           duration: 3000,
-          title: `${t("success")}`,
-          description: `${t("descriptionSuccess")}`,
-          variant: "subtle",
-          status: "success",
+          title: `${t('success')}`,
+          description: `${t('descriptionSuccess')}`,
+          variant: 'subtle',
+          status: 'success',
         }),
     },
   );

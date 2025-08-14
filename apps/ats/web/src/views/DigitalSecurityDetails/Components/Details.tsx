@@ -203,22 +203,22 @@
 
 */
 
-import { HStack, VStack } from "@chakra-ui/react";
+import { HStack, VStack } from '@chakra-ui/react';
 import {
   BondDetailsViewModel,
   EquityDetailsViewModel,
   SecurityViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useUserStore } from "../../../store/userStore";
-import { User } from "../../../utils/constants";
-import { SecurityDetailsExtended } from "./SecurityDetailsExtended";
-import _capitalize from "lodash/capitalize";
-import { HolderActionsButtons } from "./HolderActionsButtons";
-import { DetailsRegulations } from "./Details/components/DetailsRegulations";
-import { DetailsPermissions } from "./Details/components/DetailsPermissions";
-import { DetailsTotalSupply } from "./Details/components/DetailsTotalSupply";
-import { DetailsCurrentAvailableSupply } from "./Details/components/DetailsCurrentAvailableSupply";
-import { DetailsBalanceAdjustment } from "./Details/components/DetailsBalanceAdjustment";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useUserStore } from '../../../store/userStore';
+import { User } from '../../../utils/constants';
+import { SecurityDetailsExtended } from './SecurityDetailsExtended';
+import _capitalize from 'lodash/capitalize';
+import { HolderActionsButtons } from './HolderActionsButtons';
+import { DetailsRegulations } from './Details/components/DetailsRegulations';
+import { DetailsPermissions } from './Details/components/DetailsPermissions';
+import { DetailsTotalSupply } from './Details/components/DetailsTotalSupply';
+import { DetailsCurrentAvailableSupply } from './Details/components/DetailsCurrentAvailableSupply';
+import { DetailsBalanceAdjustment } from './Details/components/DetailsBalanceAdjustment';
 
 interface DetailsProps {
   id?: string;
@@ -230,7 +230,7 @@ interface DetailsProps {
 }
 
 export const Details = ({
-  id = "",
+  id = '',
   equityDetailsResponse,
   bondDetailsResponse,
   detailsResponse,

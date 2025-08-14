@@ -203,12 +203,12 @@
 
 */
 
-import { Button, useStepContext } from "io-bricks-ui";
-import type { ButtonProps } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
+import { Button, useStepContext } from 'io-bricks-ui';
+import type { ButtonProps } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
 
 export const NextStepButton = (props: ButtonProps) => {
-  const { t } = useTranslation("security", { keyPrefix: "createEquity" });
+  const { t } = useTranslation('security', { keyPrefix: 'createEquity' });
 
   const { goToNext } = useStepContext();
 
@@ -222,7 +222,7 @@ export const NextStepButton = (props: ButtonProps) => {
       onClick={goToNext}
       {...props}
     >
-      {t("nextStepButton")}
+      {t('nextStepButton')}
     </Button>
   );
 };

@@ -203,28 +203,28 @@
 
 */
 
-import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
+import { Button, Center, HStack, Stack, VStack } from '@chakra-ui/react';
 import {
   CalendarInputController,
   InputNumberController,
   PhosphorIcon,
   Text,
   Tooltip,
-} from "io-bricks-ui";
-import { Info } from "@phosphor-icons/react";
-import { isAfterDate, min, required } from "../../../../utils/rules";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+} from 'io-bricks-ui';
+import { Info } from '@phosphor-icons/react';
+import { isAfterDate, min, required } from '../../../../utils/rules';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import {
   GetBondDetailsRequest,
   SetCouponRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router-dom";
-import { useCoupons } from "../../../../hooks/queries/useCoupons";
-import { useGetBondDetails } from "../../../../hooks/queries/useGetSecurityDetails";
-import { dateToUnixTimestamp } from "../../../../utils/format";
-import { COUPONS_FACTOR, DATE_TIME_FORMAT } from "../../../../utils/constants";
-import { isBeforeDate } from "../../../../utils/helpers";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useParams } from 'react-router-dom';
+import { useCoupons } from '../../../../hooks/queries/useCoupons';
+import { useGetBondDetails } from '../../../../hooks/queries/useGetSecurityDetails';
+import { dateToUnixTimestamp } from '../../../../utils/format';
+import { COUPONS_FACTOR, DATE_TIME_FORMAT } from '../../../../utils/constants';
+import { isBeforeDate } from '../../../../utils/helpers';
 
 interface ProgramCouponFormValues {
   rate: number;
@@ -236,14 +236,14 @@ export const ProgramCoupon = () => {
   const { mutate: createCoupon, isLoading } = useCoupons();
   const { control, formState, handleSubmit, watch, reset } =
     useForm<ProgramCouponFormValues>({
-      mode: "all",
+      mode: 'all',
     });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "details.coupons.program.input",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'details.coupons.program.input',
   });
-  const { t: tGlobal } = useTranslation("globals");
-  const { id = "" } = useParams();
-  const recordTimestamp = watch("recordTimestamp");
+  const { t: tGlobal } = useTranslation('globals');
+  const { id = '' } = useParams();
+  const recordTimestamp = watch('recordTimestamp');
 
   const { data: bondDetails } = useGetBondDetails(
     new GetBondDetailsRequest({
@@ -253,7 +253,7 @@ export const ProgramCoupon = () => {
 
   const submit: SubmitHandler<ProgramCouponFormValues> = (params) => {
     const request = new SetCouponRequest({
-      securityId: id ?? "",
+      securityId: id ?? '',
       rate: (params.rate * COUPONS_FACTOR).toString(),
       recordTimestamp: dateToUnixTimestamp(params.recordTimestamp),
       executionTimestamp: dateToUnixTimestamp(params.executionTimestamp),
@@ -281,9 +281,9 @@ export const ProgramCoupon = () => {
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {tForm("recordDate.label")}*
+                {tForm('recordDate.label')}*
               </Text>
-              <Tooltip label={tForm("recordDate.tooltip")} placement="right">
+              <Tooltip label={tForm('recordDate.tooltip')} placement="right">
                 <PhosphorIcon as={Info} />
               </Tooltip>
             </HStack>
@@ -294,7 +294,7 @@ export const ProgramCoupon = () => {
                 rules={{ required }}
                 fromDate={new Date()}
                 toDate={new Date(bondDetails.maturityDate)}
-                placeholder={tForm("recordDate.placeholder")}
+                placeholder={tForm('recordDate.placeholder')}
                 withTimeInput
                 format={DATE_TIME_FORMAT}
               />
@@ -303,9 +303,9 @@ export const ProgramCoupon = () => {
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {tForm("paymentDate.label")}*
+                {tForm('paymentDate.label')}*
               </Text>
-              <Tooltip label={tForm("paymentDate.tooltip")} placement="right">
+              <Tooltip label={tForm('paymentDate.tooltip')} placement="right">
                 <PhosphorIcon as={Info} />
               </Tooltip>
             </HStack>
@@ -319,7 +319,7 @@ export const ProgramCoupon = () => {
                 }}
                 fromDate={new Date()}
                 toDate={new Date(bondDetails.maturityDate)}
-                placeholder={tForm("paymentDate.placeholder")}
+                placeholder={tForm('paymentDate.placeholder')}
                 withTimeInput
                 format={DATE_TIME_FORMAT}
               />
@@ -327,8 +327,8 @@ export const ProgramCoupon = () => {
           </Stack>
           <Stack w="full">
             <HStack justifySelf="flex-start">
-              <Text textStyle="BodyTextRegularSM">{tForm("rate.label")}*</Text>
-              <Tooltip label={tForm("rate.tooltip")} placement="right">
+              <Text textStyle="BodyTextRegularSM">{tForm('rate.label')}*</Text>
+              <Tooltip label={tForm('rate.tooltip')} placement="right">
                 <PhosphorIcon as={Info} />
               </Tooltip>
             </HStack>
@@ -337,7 +337,7 @@ export const ProgramCoupon = () => {
               control={control}
               id="rate"
               rules={{ required, min: min(0) }}
-              placeholder={tForm("rate.placeholder")}
+              placeholder={tForm('rate.placeholder')}
               decimalScale={3}
               fixedDecimalScale={true}
               suffix="%"
@@ -353,12 +353,12 @@ export const ProgramCoupon = () => {
             isDisabled={!formState.isValid}
             type="submit"
           >
-            {tGlobal("send")}
+            {tGlobal('send')}
           </Button>
         </VStack>
       ) : (
         <Text textStyle="BodyRegularSM" data-testid="expired-warning">
-          {tForm("expired")}
+          {tForm('expired')}
         </Text>
       )}
     </Center>

@@ -8,10 +8,10 @@ This workspace is currently a placeholder for future mass payout functionality. 
 
 This package will contain:
 
--   Core mass payout business logic
--   Smart contracts for batch payment processing
--   SDK components for mass payout operations
--   Utilities and helpers for payment distribution
+- Core mass payout business logic
+- Smart contracts for batch payment processing
+- SDK components for mass payout operations
+- Utilities and helpers for payment distribution
 
 ## Current Structure
 

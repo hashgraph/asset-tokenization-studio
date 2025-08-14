@@ -203,9 +203,9 @@
 
 */
 
-import type { Dispatch, SetStateAction } from "react";
-import { useState } from "react";
-import type { PaginationState, SortingState } from "@tanstack/react-table";
+import type { Dispatch, SetStateAction } from 'react';
+import { useState } from 'react';
+import type { PaginationState, SortingState } from '@tanstack/react-table';
 
 export interface UseTableReturn {
   pagination: {

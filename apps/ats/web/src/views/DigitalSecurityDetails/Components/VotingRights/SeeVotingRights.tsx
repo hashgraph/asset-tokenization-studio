@@ -203,33 +203,33 @@
 
 */
 
-import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
+import { Button, Center, HStack, Stack, VStack } from '@chakra-ui/react';
 import {
   InputController,
   InputNumberController,
   PhosphorIcon,
   Text,
   Tooltip,
-} from "io-bricks-ui";
+} from 'io-bricks-ui';
 import {
   isValidHederaId,
   required,
   greaterThanZero,
-} from "../../../../utils/rules";
-import { Info } from "@phosphor-icons/react";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+} from '../../../../utils/rules';
+import { Info } from '@phosphor-icons/react';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import {
   useGetVotingRights,
   useGetVotingRightsFor,
-} from "../../../../hooks/queries/VotingRights";
+} from '../../../../hooks/queries/VotingRights';
 import {
   GetVotingRightsForRequest,
   GetVotingRightsRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router-dom";
-import { Panel } from "../../../../components/Panel";
-import { hexToText } from "../../../../utils/format";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useParams } from 'react-router-dom';
+import { Panel } from '../../../../components/Panel';
+import { hexToText } from '../../../../utils/format';
 
 interface SeeVotingRightsFormValues {
   votingId: number;
@@ -243,18 +243,18 @@ export const SeeVotingRights = () => {
     formState: { isValid },
     watch,
   } = useForm<SeeVotingRightsFormValues>({
-    mode: "all",
+    mode: 'all',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "details.votingRights.see.input",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'details.votingRights.see.input',
   });
-  const { t: tGlobal } = useTranslation("globals");
-  const { t: tDetails } = useTranslation("security", {
-    keyPrefix: "details.votingRights.see.details",
+  const { t: tGlobal } = useTranslation('globals');
+  const { t: tDetails } = useTranslation('security', {
+    keyPrefix: 'details.votingRights.see.details',
   });
-  const { id = "" } = useParams();
-  const accountId = watch("accountId");
-  const votingId = watch("votingId");
+  const { id = '' } = useParams();
+  const accountId = watch('accountId');
+  const votingId = watch('votingId');
 
   const getVotingRightsForRequest = new GetVotingRightsForRequest({
     securityId: id,
@@ -288,7 +288,7 @@ export const SeeVotingRights = () => {
     refetchGetVotingRights();
   };
 
-  const votingIsPending = new Date(votingRights?.recordDate ?? "") < new Date();
+  const votingIsPending = new Date(votingRights?.recordDate ?? '') < new Date();
 
   return (
     <Center h="full" bg="neutral.dark.600">
@@ -304,9 +304,9 @@ export const SeeVotingRights = () => {
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {tForm("voting.label")}*
+                {tForm('voting.label')}*
               </Text>
-              <Tooltip label={tForm("voting.tooltip")} placement="right">
+              <Tooltip label={tForm('voting.tooltip')} placement="right">
                 <PhosphorIcon as={Info} />
               </Tooltip>
             </HStack>
@@ -319,15 +319,15 @@ export const SeeVotingRights = () => {
                   min: greaterThanZero,
                 },
               }}
-              placeholder={tForm("voting.placeholder")}
+              placeholder={tForm('voting.placeholder')}
             />
           </Stack>
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {tForm("account.label")}*
+                {tForm('account.label')}*
               </Text>
-              <Tooltip label={tForm("account.tooltip")} placement="right">
+              <Tooltip label={tForm('account.tooltip')} placement="right">
                 <PhosphorIcon as={Info} />
               </Tooltip>
             </HStack>
@@ -335,7 +335,7 @@ export const SeeVotingRights = () => {
               control={control}
               id="accountId"
               rules={{ required, isValidHederaId: isValidHederaId }}
-              placeholder={tForm("account.placeholder")}
+              placeholder={tForm('account.placeholder')}
             />
           </Stack>
           <Button
@@ -347,18 +347,18 @@ export const SeeVotingRights = () => {
             }
             type="submit"
           >
-            {tGlobal("check")}
+            {tGlobal('check')}
           </Button>
         </VStack>
         {votingRights && votingRightsFor && (
           <Panel
-            title={tDetails("title", { name: hexToText(votingRights.data) })}
+            title={tDetails('title', { name: hexToText(votingRights.data) })}
           >
             <Center w="full">
               <Text textStyle="ElementsSemibold2XL">
                 {votingIsPending
-                  ? tDetails("pending")
-                  : tDetails("number", {
+                  ? tDetails('pending')
+                  : tDetails('number', {
                       number: votingRightsFor.tokenBalance,
                     })}
               </Text>

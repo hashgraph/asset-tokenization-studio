@@ -203,7 +203,7 @@
 
 */
 
-import { Center, HStack, Stack, VStack } from "@chakra-ui/react";
+import { Center, HStack, Stack, VStack } from '@chakra-ui/react';
 import {
   Button,
   CalendarInputController,
@@ -212,19 +212,19 @@ import {
   PhosphorIcon,
   Text,
   Tooltip,
-} from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { Info } from "@phosphor-icons/react";
-import { useForm } from "react-hook-form";
-import { required, min, isAfterDate } from "../../../../utils/rules";
-import { useParams } from "react-router-dom";
-import { useBalanceAdjustment } from "../../../../hooks/queries/useBalanceAdjustment";
+} from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { Info } from '@phosphor-icons/react';
+import { useForm } from 'react-hook-form';
+import { required, min, isAfterDate } from '../../../../utils/rules';
+import { useParams } from 'react-router-dom';
+import { useBalanceAdjustment } from '../../../../hooks/queries/useBalanceAdjustment';
 import {
   calculateFactorDecimals,
   dateToUnixTimestamp,
-} from "../../../../utils/format";
-import { SetScheduledBalanceAdjustmentRequest } from "@hashgraph/asset-tokenization-sdk";
-import { DATE_TIME_FORMAT } from "../../../../utils/constants";
+} from '../../../../utils/format';
+import { SetScheduledBalanceAdjustmentRequest } from '@hashgraph/asset-tokenization-sdk';
+import { DATE_TIME_FORMAT } from '../../../../utils/constants';
 
 interface ProgramBalanceAdjustmentFormValues {
   executionDate: string;
@@ -234,26 +234,26 @@ interface ProgramBalanceAdjustmentFormValues {
 export const ProgramBalanceAdjustment = () => {
   const { id: securityId } = useParams();
 
-  const { t: tProgram } = useTranslation("security", {
-    keyPrefix: "details.balanceAdjustment.program",
+  const { t: tProgram } = useTranslation('security', {
+    keyPrefix: 'details.balanceAdjustment.program',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "details.balanceAdjustment.program.form",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'details.balanceAdjustment.program.form',
   });
-  const { t: tGlobal } = useTranslation("globals");
+  const { t: tGlobal } = useTranslation('globals');
 
   const { mutate: createBalanceAdjustment, isLoading } = useBalanceAdjustment();
 
   const { control, formState, handleSubmit, reset } =
     useForm<ProgramBalanceAdjustmentFormValues>({
-      mode: "all",
+      mode: 'all',
     });
 
   const onSubmit = (data: ProgramBalanceAdjustmentFormValues) => {
     const { factor, decimals } = calculateFactorDecimals(Number(data.factor));
 
     const request = new SetScheduledBalanceAdjustmentRequest({
-      securityId: securityId ?? "",
+      securityId: securityId ?? '',
       executionDate: dateToUnixTimestamp(data.executionDate),
       factor: factor.toString(),
       decimals: decimals.toString(),
@@ -269,7 +269,7 @@ export const ProgramBalanceAdjustment = () => {
   return (
     <Center h="full" bg="neutral.dark.600">
       <Stack w="500px">
-        <Heading textStyle="HeadingMediumLG">{tProgram("title")}</Heading>
+        <Heading textStyle="HeadingMediumLG">{tProgram('title')}</Heading>
 
         <VStack
           as="form"
@@ -282,9 +282,9 @@ export const ProgramBalanceAdjustment = () => {
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {tForm("executionDate.label")}*
+                {tForm('executionDate.label')}*
               </Text>
-              <Tooltip label={tForm("executionDate.tooltip")} placement="right">
+              <Tooltip label={tForm('executionDate.tooltip')} placement="right">
                 <PhosphorIcon as={Info} />
               </Tooltip>
             </HStack>
@@ -296,7 +296,7 @@ export const ProgramBalanceAdjustment = () => {
                 validate: isAfterDate(new Date(), DATE_TIME_FORMAT),
               }}
               fromDate={new Date()}
-              placeholder={tForm("executionDate.placeholder")}
+              placeholder={tForm('executionDate.placeholder')}
               withTimeInput
               format={DATE_TIME_FORMAT}
             />
@@ -304,7 +304,7 @@ export const ProgramBalanceAdjustment = () => {
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {tForm("factor.label")}*
+                {tForm('factor.label')}*
               </Text>
             </HStack>
             <InputNumberController
@@ -312,7 +312,7 @@ export const ProgramBalanceAdjustment = () => {
               control={control}
               id="factor"
               rules={{ required, min: min(0) }}
-              placeholder={tForm("factor.placeholder")}
+              placeholder={tForm('factor.placeholder')}
             />
           </Stack>
           <Button
@@ -323,7 +323,7 @@ export const ProgramBalanceAdjustment = () => {
             isDisabled={!formState.isValid}
             type="submit"
           >
-            {tGlobal("send")}
+            {tGlobal('send')}
           </Button>
         </VStack>
       </Stack>

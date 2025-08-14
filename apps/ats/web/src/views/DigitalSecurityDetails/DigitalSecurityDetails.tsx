@@ -203,12 +203,12 @@
 
 */
 
-import { HStack, Stack } from "@chakra-ui/react";
-import { Tag, Tabs, Spinner, Text, TabProps } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { History } from "../../components/History";
-import { Details } from "./Components/Details";
-import { Balance } from "./Components/Balance";
+import { HStack, Stack } from '@chakra-ui/react';
+import { Tag, Tabs, Spinner, Text, TabProps } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { History } from '../../components/History';
+import { Details } from './Components/Details';
+import { Balance } from './Components/Balance';
 import {
   GetSecurityDetailsRequest,
   GetRoleCountForRequest,
@@ -217,7 +217,7 @@ import {
   SecurityViewModel,
   GetEquityDetailsRequest,
   GetBondDetailsRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 import {
   useGetBondDetails,
   useGetEquityDetails,
@@ -225,28 +225,28 @@ import {
   useGetSecurityDetails,
   useGetSecurityRoleCountFor,
   useGetSecurityRolesFor,
-} from "../../hooks/queries/useGetSecurityDetails";
-import { useParams } from "react-router-dom";
-import { useWalletStore } from "../../store/walletStore";
-import { useMemo } from "react";
-import { User } from "../../utils/constants";
-import { useUserStore } from "../../store/userStore";
-import { SecurityRole } from "../../utils/SecurityRole";
-import { useRolesStore } from "../../store/rolesStore";
-import { ManagementTab } from "./Components/Tabs/Management";
-import { OperationsTab } from "./Components/Tabs/Operations";
-import { ControlTab } from "./Components/Tabs/Control";
-import { CorporateActionsTab } from "./Components/Tabs/CorporateActions";
-import { hasRole } from "../../utils/helpers";
+} from '../../hooks/queries/useGetSecurityDetails';
+import { useParams } from 'react-router-dom';
+import { useWalletStore } from '../../store/walletStore';
+import { useMemo } from 'react';
+import { User } from '../../utils/constants';
+import { useUserStore } from '../../store/userStore';
+import { SecurityRole } from '../../utils/SecurityRole';
+import { useRolesStore } from '../../store/rolesStore';
+import { ManagementTab } from './Components/Tabs/Management';
+import { OperationsTab } from './Components/Tabs/Operations';
+import { ControlTab } from './Components/Tabs/Control';
+import { CorporateActionsTab } from './Components/Tabs/CorporateActions';
+import { hasRole } from '../../utils/helpers';
 
 export const DigitalSecurityDetails = () => {
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
 
-  const { t: tHeader } = useTranslation("security", {
-    keyPrefix: "details.header",
+  const { t: tHeader } = useTranslation('security', {
+    keyPrefix: 'details.header',
   });
-  const { t: tTabs } = useTranslation("security", {
-    keyPrefix: "details.tabs",
+  const { t: tTabs } = useTranslation('security', {
+    keyPrefix: 'details.tabs',
   });
 
   const { address: walletAddress } = useWalletStore();
@@ -273,7 +273,7 @@ export const DigitalSecurityDetails = () => {
     }),
     {
       retry: false,
-      enabled: securityDetails?.type === "EQUITY",
+      enabled: securityDetails?.type === 'EQUITY',
     },
   );
 
@@ -284,7 +284,7 @@ export const DigitalSecurityDetails = () => {
     }),
     {
       retry: false,
-      enabled: securityDetails?.type === "BOND",
+      enabled: securityDetails?.type === 'BOND',
     },
   );
 
@@ -335,11 +335,11 @@ export const DigitalSecurityDetails = () => {
             bondDetailsResponse={bondDetails}
           />
         ),
-        header: tTabs("details"),
+        header: tTabs('details'),
       },
       {
         content: <Balance id={id} detailsResponse={securityDetails ?? {}} />,
-        header: tTabs("balance"),
+        header: tTabs('balance'),
       },
     ];
 
@@ -357,11 +357,11 @@ export const DigitalSecurityDetails = () => {
             bondDetailsResponse={bondDetails}
           />
         ),
-        header: tTabs("details"),
+        header: tTabs('details'),
       },
       {
         content: <Balance id={id} detailsResponse={securityDetails ?? {}} />,
-        header: tTabs("balance"),
+        header: tTabs('balance'),
       },
     ];
 
@@ -382,19 +382,19 @@ export const DigitalSecurityDetails = () => {
     const corporateActionsConfig = {
       showBalanceAdjustment:
         !isSecurityPaused &&
-        securityDetails?.type === "EQUITY" &&
+        securityDetails?.type === 'EQUITY' &&
         hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
       showDividends:
         !isSecurityPaused &&
-        securityDetails?.type === "EQUITY" &&
+        securityDetails?.type === 'EQUITY' &&
         hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
       showVotingRights:
         !isSecurityPaused &&
-        securityDetails?.type === "EQUITY" &&
+        securityDetails?.type === 'EQUITY' &&
         hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
       showCoupons:
         !isSecurityPaused &&
-        securityDetails?.type === "BOND" &&
+        securityDetails?.type === 'BOND' &&
         hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
     };
 
@@ -439,14 +439,14 @@ export const DigitalSecurityDetails = () => {
     if (showOperationTab) {
       adminTabs.push({
         content: <OperationsTab config={operationsConfig} />,
-        header: tTabs("operations"),
+        header: tTabs('operations'),
       });
     }
 
     if (showCorporateActionsTab) {
       adminTabs.push({
         content: <CorporateActionsTab config={corporateActionsConfig} />,
-        header: tTabs("corporateActions"),
+        header: tTabs('corporateActions'),
       });
     }
 
@@ -455,14 +455,14 @@ export const DigitalSecurityDetails = () => {
         content: (
           <ControlTab details={securityDetails ?? {}} config={controlConfig} />
         ),
-        header: tTabs("control"),
+        header: tTabs('control'),
       });
     }
 
     if (showManagementTab) {
       adminTabs.push({
         content: <ManagementTab config={managementConfig} />,
-        header: tTabs("management"),
+        header: tTabs('management'),
       });
     }
 
@@ -497,7 +497,7 @@ export const DigitalSecurityDetails = () => {
   return (
     <>
       <HStack align="flex-start" gap="54px">
-        <History label={tHeader("title")} />
+        <History label={tHeader('title')} />
         {isPaused && (
           <Tag label="Digital security paused" variant="paused" mt={1} />
         )}

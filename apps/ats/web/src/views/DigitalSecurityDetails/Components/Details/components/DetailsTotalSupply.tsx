@@ -1,11 +1,11 @@
-import { Center, Box, Text, SkeletonText } from "@chakra-ui/react";
-import { Panel } from "../../../../../components/Panel";
-import { useTranslation } from "react-i18next";
-import { formatNumberLocale, toNumber } from "../../../../../utils/format";
-import { SecurityViewModel } from "@hashgraph/asset-tokenization-sdk";
-import { EquityDetailsViewModel } from "@hashgraph/asset-tokenization-sdk";
-import { BondDetailsViewModel } from "@hashgraph/asset-tokenization-sdk";
-import { useMemo } from "react";
+import { Center, Box, Text, SkeletonText } from '@chakra-ui/react';
+import { Panel } from '../../../../../components/Panel';
+import { useTranslation } from 'react-i18next';
+import { formatNumberLocale, toNumber } from '../../../../../utils/format';
+import { SecurityViewModel } from '@hashgraph/asset-tokenization-sdk';
+import { EquityDetailsViewModel } from '@hashgraph/asset-tokenization-sdk';
+import { BondDetailsViewModel } from '@hashgraph/asset-tokenization-sdk';
+import { useMemo } from 'react';
 
 interface DetailsTotalSupplyProps {
   detailsResponse: SecurityViewModel;
@@ -18,7 +18,7 @@ export const DetailsTotalSupply = ({
   equityDetailsResponse,
   bondDetailsResponse,
 }: DetailsTotalSupplyProps) => {
-  const { t: tProperties } = useTranslation("properties");
+  const { t: tProperties } = useTranslation('properties');
 
   const nominalValue = useMemo(() => {
     return toNumber(
@@ -35,20 +35,20 @@ export const DetailsTotalSupply = ({
   }, [nominalValue, detailsResponse]);
 
   return (
-    <Panel title={tProperties("totalSupply")}>
+    <Panel title={tProperties('totalSupply')}>
       <Center w="full">
         {detailsResponse &&
         (equityDetailsResponse?.nominalValue !== undefined ||
           bondDetailsResponse?.nominalValue !== undefined) ? (
           <Box>
             <Text textStyle="ElementsSemibold2XL">
-              {detailsResponse?.totalSupply ?? ""}
+              {detailsResponse?.totalSupply ?? ''}
               <Text ml={1} as="span" textStyle="ElementsRegularMD">
-                {detailsResponse?.symbol ?? ""}
+                {detailsResponse?.symbol ?? ''}
               </Text>
             </Text>
             <Text ml={1} as="span" textStyle="ElementsRegularMD">
-              {tProperties("nominalTotalValue")}
+              {tProperties('nominalTotalValue')}
               {nominalTotalValue}
             </Text>
           </Box>

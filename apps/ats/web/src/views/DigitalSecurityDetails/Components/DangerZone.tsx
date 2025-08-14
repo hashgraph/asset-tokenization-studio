@@ -1,12 +1,12 @@
-import { Divider, HStack, VStack } from "@chakra-ui/react";
-import { Text, Toggle } from "io-bricks-ui";
-import { useRolesStore } from "../../../store/rolesStore";
-import { useMemo } from "react";
-import { hasRole } from "../../../utils/helpers";
-import { SecurityRole } from "../../../utils/SecurityRole";
-import { useParams } from "react-router-dom";
-import { useGetIsClearingActivated } from "../../../hooks/queries/useClearingOperations";
-import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";
+import { Divider, HStack, VStack } from '@chakra-ui/react';
+import { Text, Toggle } from 'io-bricks-ui';
+import { useRolesStore } from '../../../store/rolesStore';
+import { useMemo } from 'react';
+import { hasRole } from '../../../utils/helpers';
+import { SecurityRole } from '../../../utils/SecurityRole';
+import { useParams } from 'react-router-dom';
+import { useGetIsClearingActivated } from '../../../hooks/queries/useClearingOperations';
+import { useGetIsPaused } from '../../../hooks/queries/useGetSecurityDetails';
 import {
   ActivateClearingRequest,
   ActivateInternalKycRequest,
@@ -15,26 +15,26 @@ import {
   IsClearingActivatedRequest,
   IsInternalKycActivatedRequest,
   PauseRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { usePauseSecurity } from "../../../hooks/queries/usePauseSecurity";
-import { useUnpauseSecurity } from "../../../hooks/queries/useUnpauseSecurity";
+} from '@hashgraph/asset-tokenization-sdk';
+import { usePauseSecurity } from '../../../hooks/queries/usePauseSecurity';
+import { useUnpauseSecurity } from '../../../hooks/queries/useUnpauseSecurity';
 import {
   useActivateClearing,
   useDeactivateClearing,
-} from "../../../hooks/mutations/useClearingOperations";
-import { useTranslation } from "react-i18next";
-import { useGetIsInternalKycActivated } from "../../../hooks/queries/useKYC";
+} from '../../../hooks/mutations/useClearingOperations';
+import { useTranslation } from 'react-i18next';
+import { useGetIsInternalKycActivated } from '../../../hooks/queries/useKYC';
 import {
   useActivateInternalKyc,
   useDeactivateInternalKyc,
-} from "../../../hooks/mutations/useKYC";
+} from '../../../hooks/mutations/useKYC';
 
 export const DangerZone = () => {
-  const { t: tButtons } = useTranslation("security", {
-    keyPrefix: "details.actions",
+  const { t: tButtons } = useTranslation('security', {
+    keyPrefix: 'details.actions',
   });
 
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
 
   const { roles: accountRoles } = useRolesStore();
 
@@ -137,40 +137,40 @@ export const DangerZone = () => {
   };
 
   return (
-    <VStack w={"full"} layerStyle="container" align="start" gap={8} py={8}>
+    <VStack w={'full'} layerStyle="container" align="start" gap={8} py={8}>
       {hasPauserRole && (
-        <HStack w={"full"} justifyContent={"space-between"}>
+        <HStack w={'full'} justifyContent={'space-between'}>
           <VStack align="start">
             <Text textStyle="ElementsSemiboldLG">
-              {tButtons("dangerZone.pauseSecurityTokenTitle")}
+              {tButtons('dangerZone.pauseSecurityTokenTitle')}
             </Text>
             <Text textStyle="BodyRegularSM">
-              {tButtons("dangerZone.pauseSecurityTokenDescription")}
+              {tButtons('dangerZone.pauseSecurityTokenDescription')}
             </Text>
           </VStack>
           <Toggle
             data-testid="pauser-button"
-            size={"lg"}
+            size={'lg'}
             defaultChecked={isPaused}
             onChange={handlePauseToggle}
             isDisabled={isPauseLoading || isUnpauseLoading}
           />
         </HStack>
       )}
-      {hasClearingRole && hasPauserRole && <Divider bgColor={"neutral.500"} />}
+      {hasClearingRole && hasPauserRole && <Divider bgColor={'neutral.500'} />}
       {hasClearingRole && (
-        <HStack w={"full"} justifyContent={"space-between"}>
+        <HStack w={'full'} justifyContent={'space-between'}>
           <VStack align="start">
             <Text textStyle="ElementsSemiboldLG">
-              {tButtons("dangerZone.clearingModeTitle")}
+              {tButtons('dangerZone.clearingModeTitle')}
             </Text>
             <Text textStyle="BodyRegularSM">
-              {tButtons("dangerZone.clearingModeDescription")}
+              {tButtons('dangerZone.clearingModeDescription')}
             </Text>
           </VStack>
           <Toggle
             data-testid="pauser-button"
-            size={"lg"}
+            size={'lg'}
             defaultChecked={isClearingActivated}
             onChange={handleClearingModeToggle}
             isDisabled={
@@ -182,21 +182,21 @@ export const DangerZone = () => {
         </HStack>
       )}
       {(hasClearingRole || hasPauserRole) && hasInternalKYCManagerRole && (
-        <Divider bgColor={"neutral.500"} />
+        <Divider bgColor={'neutral.500'} />
       )}
       {hasInternalKYCManagerRole && (
-        <HStack w={"full"} justifyContent={"space-between"}>
+        <HStack w={'full'} justifyContent={'space-between'}>
           <VStack align="start">
             <Text textStyle="ElementsSemiboldLG">
-              {tButtons("dangerZone.internalKYCManagerTitle")}
+              {tButtons('dangerZone.internalKYCManagerTitle')}
             </Text>
             <Text textStyle="BodyRegularSM">
-              {tButtons("dangerZone.internalKYCManagerDescription")}
+              {tButtons('dangerZone.internalKYCManagerDescription')}
             </Text>
           </VStack>
           <Toggle
             data-testid="internal-kyc-manager-button"
-            size={"lg"}
+            size={'lg'}
             defaultChecked={isInternalKycActivated}
             onChange={handleInternalKYCManagerToggle}
             isDisabled={

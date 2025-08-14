@@ -203,18 +203,18 @@
 
 */
 
-import { Button, HStack, Stack, VStack } from "@chakra-ui/react";
-import { Text, useToast, SearchInputController } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { required, isValidHederaId } from "../../../../utils/rules";
-import { useForm } from "react-hook-form";
-import { SecurityDetails } from "../SecurityDetails";
-import { GetRolesForRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useGetSecurityRolesFor } from "../../../../hooks/queries/useGetSecurityDetails";
-import { useParams } from "react-router-dom";
-import { useState } from "react";
-import { rolesList } from "./rolesList";
-import { HandleRoles } from "./HandleRoles";
+import { Button, HStack, Stack, VStack } from '@chakra-ui/react';
+import { Text, useToast, SearchInputController } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { required, isValidHederaId } from '../../../../utils/rules';
+import { useForm } from 'react-hook-form';
+import { SecurityDetails } from '../SecurityDetails';
+import { GetRolesForRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useGetSecurityRolesFor } from '../../../../hooks/queries/useGetSecurityDetails';
+import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { rolesList } from './rolesList';
+import { HandleRoles } from './HandleRoles';
 
 interface FieldValue {
   address: string;
@@ -226,14 +226,14 @@ const COLUMN_MAX_WIDTH = `${COLUMN_WIDTH}px`;
 const TITLE_WIDTH = `${COLUMN_WIDTH * 2 + COLUMNS_GAP}px`;
 
 export const EditRole = () => {
-  const { t: tInputs } = useTranslation("security", {
-    keyPrefix: "details.roleManagement.edit.inputs",
+  const { t: tInputs } = useTranslation('security', {
+    keyPrefix: 'details.roleManagement.edit.inputs',
   });
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.roleManagement.edit",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.roleManagement.edit',
   });
 
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
   const [currentRoles, setCurrentRoles] = useState<string[] | null>(null);
   const toast = useToast();
 
@@ -244,16 +244,16 @@ export const EditRole = () => {
     handleSubmit: searchHandleSubmit,
     watch,
   } = useForm<FieldValue>({
-    mode: "onSubmit",
+    mode: 'onSubmit',
   });
 
-  const addressToSearch = watch("address");
+  const addressToSearch = watch('address');
 
   // GET ROLES
   const { refetch, isFetching: isSearchFetching } = useGetSecurityRolesFor(
     new GetRolesForRequest({
       securityId: id,
-      targetId: addressToSearch ?? "",
+      targetId: addressToSearch ?? '',
       start: 0,
       end: 1000,
     }),
@@ -262,13 +262,13 @@ export const EditRole = () => {
       refetchOnMount: false,
       onSuccess: (data) => {
         handleCurrentRoles(data);
-        toast.show({ duration: 3000, title: "Roles found", status: "success" });
+        toast.show({ duration: 3000, title: 'Roles found', status: 'success' });
       },
       onError: () => {
         toast.show({
           duration: 3000,
-          title: "Roles not found",
-          status: "error",
+          title: 'Roles not found',
+          status: 'error',
         });
       },
     },
@@ -300,8 +300,8 @@ export const EditRole = () => {
         w={TITLE_WIDTH}
         minW={COLUMN_WIDTH}
       >
-        <Text textStyle="HeadingMediumLG">{t("title")}</Text>
-        <Text textStyle="BodyTextRegularMD">{t("subtitle")}</Text>
+        <Text textStyle="HeadingMediumLG">{t('title')}</Text>
+        <Text textStyle="BodyTextRegularMD">{t('subtitle')}</Text>
       </VStack>
       <HStack gap={`${COLUMNS_GAP}px`} justify="center" align="flex-start">
         <VStack gap={10}>
@@ -318,7 +318,7 @@ export const EditRole = () => {
                 <Stack w="320px">
                   <SearchInputController
                     id="address"
-                    placeholder={tInputs("search.placeholder")}
+                    placeholder={tInputs('search.placeholder')}
                     onSearch={() => {}}
                     control={searchControl}
                     size="sm"
@@ -334,7 +334,7 @@ export const EditRole = () => {
                   isLoading={isSearchFetching}
                   type="submit"
                 >
-                  {tInputs("search.button")}
+                  {tInputs('search.button')}
                 </Button>
               </HStack>
             </VStack>

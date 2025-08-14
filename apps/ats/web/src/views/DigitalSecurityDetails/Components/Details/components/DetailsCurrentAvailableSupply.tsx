@@ -1,17 +1,17 @@
-import { Center, Box, Text, SkeletonText } from "@chakra-ui/react";
-import { Panel } from "../../../../../components/Panel";
-import { useTranslation } from "react-i18next";
-import { formatNumberLocale, toNumber } from "../../../../../utils/format";
+import { Center, Box, Text, SkeletonText } from '@chakra-ui/react';
+import { Panel } from '../../../../../components/Panel';
+import { useTranslation } from 'react-i18next';
+import { formatNumberLocale, toNumber } from '../../../../../utils/format';
 import {
   GetAccountBalanceRequest,
   SecurityViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
-import { EquityDetailsViewModel } from "@hashgraph/asset-tokenization-sdk";
-import { BondDetailsViewModel } from "@hashgraph/asset-tokenization-sdk";
-import { useUserStore } from "../../../../../store/userStore";
-import { User } from "../../../../../utils/constants";
-import { useWalletStore } from "../../../../../store/walletStore";
-import { useGetBalanceOf } from "../../../../../hooks/queries/useGetSecurityDetails";
+} from '@hashgraph/asset-tokenization-sdk';
+import { EquityDetailsViewModel } from '@hashgraph/asset-tokenization-sdk';
+import { BondDetailsViewModel } from '@hashgraph/asset-tokenization-sdk';
+import { useUserStore } from '../../../../../store/userStore';
+import { User } from '../../../../../utils/constants';
+import { useWalletStore } from '../../../../../store/walletStore';
+import { useGetBalanceOf } from '../../../../../hooks/queries/useGetSecurityDetails';
 
 interface DetailsCurrentAvailableSupplyProps {
   id: string;
@@ -26,7 +26,7 @@ export const DetailsCurrentAvailableSupply = ({
   equityDetailsResponse,
   bondDetailsResponse,
 }: DetailsCurrentAvailableSupplyProps) => {
-  const { t: tProperties } = useTranslation("properties");
+  const { t: tProperties } = useTranslation('properties');
 
   const { type } = useUserStore();
   const { address: walletAddress } = useWalletStore();
@@ -53,20 +53,20 @@ export const DetailsCurrentAvailableSupply = ({
   }
 
   return (
-    <Panel title={tProperties("currentAvailableBalance")}>
+    <Panel title={tProperties('currentAvailableBalance')}>
       <Center w="full">
         {isAvailableBalanceLoading ? (
           <SkeletonText skeletonHeight={2} flex={1} noOfLines={1} />
         ) : (
           <Box>
             <Text textStyle="ElementsSemibold2XL">
-              {detailsResponse?.totalSupply ?? ""}
+              {detailsResponse?.totalSupply ?? ''}
               <Text ml={1} as="span" textStyle="ElementsRegularMD">
-                {detailsResponse?.symbol ?? ""}
+                {detailsResponse?.symbol ?? ''}
               </Text>
             </Text>
             <Text ml={1} as="span" textStyle="ElementsRegularMD">
-              {tProperties("nominalTotalValue")}
+              {tProperties('nominalTotalValue')}
               {formatNumberLocale(totalAvailableBalanceValue, 2)}
             </Text>
           </Box>

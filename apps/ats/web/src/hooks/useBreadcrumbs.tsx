@@ -206,9 +206,9 @@
 import getBreadcrumbs, {
   BreadcrumbData,
   Options as RouterBreadcrumbsOptions,
-} from "use-react-router-breadcrumbs";
-import { routes } from "../router/Routes";
-import { Link as RouterLink } from "react-router-dom";
+} from 'use-react-router-breadcrumbs';
+import { routes } from '../router/Routes';
+import { Link as RouterLink } from 'react-router-dom';
 
 export const useBreadcrumbs = (options?: RouterBreadcrumbsOptions) => {
   return getBreadcrumbs(routes, {
@@ -218,7 +218,7 @@ export const useBreadcrumbs = (options?: RouterBreadcrumbsOptions) => {
     const label = (() => {
       const { breadcrumb } = props.match.route!;
       // @ts-ignore
-      return typeof breadcrumb === "string" ? breadcrumb : breadcrumb(props);
+      return typeof breadcrumb === 'string' ? breadcrumb : breadcrumb(props);
     })();
 
     return {

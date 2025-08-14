@@ -1,5 +1,5 @@
-import { Button, HStack } from "@chakra-ui/react";
-import { OperationContractType } from "../views/DigitalSecurityDetails/Components/Tabs/Operations";
+import { Button, HStack } from '@chakra-ui/react';
+import { OperationContractType } from '../views/DigitalSecurityDetails/Components/Tabs/Operations';
 
 interface SegmentedButtonProps {
   selectedOperationContractType: OperationContractType;
@@ -16,40 +16,40 @@ export const SegmentedButton = ({
       p={1}
       borderRadius="lg"
       display="inline-flex"
-      h={"full"}
-      minH={"full"}
+      h={'full'}
+      minH={'full'}
     >
-      {["ERC 1400", "ERC 3643"].map((label) => (
+      {['ERC 1400', 'ERC 3643'].map((label) => (
         <Button
-          h={"full"}
-          minH={"full"}
-          borderRadius={"md"}
-          border={"none"}
+          h={'full'}
+          minH={'full'}
+          borderRadius={'md'}
+          border={'none'}
           bgColor={
-            selectedOperationContractType === label ? "white" : "transparent"
+            selectedOperationContractType === label ? 'white' : 'transparent'
           }
           style={{
-            padding: "8px 24px",
+            padding: '8px 24px',
           }}
           _hover={{
-            bgColor: "white",
-            color: "#0B0712",
+            bgColor: 'white',
+            color: '#0B0712',
           }}
           _active={{
-            boxShadow: "none",
+            boxShadow: 'none',
           }}
           _focus={{
-            boxShadow: "none",
+            boxShadow: 'none',
           }}
           key={label}
           onClick={() =>
             setSelectedOperationContractType(label as OperationContractType)
           }
           color={
-            selectedOperationContractType === label ? "#0B0712" : "#656070"
+            selectedOperationContractType === label ? '#0B0712' : '#656070'
           }
           fontWeight={600}
-          fontSize={"md"}
+          fontSize={'md'}
         >
           {label}
         </Button>

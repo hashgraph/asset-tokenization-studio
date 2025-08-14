@@ -203,28 +203,28 @@
 
 */
 
-import isBefore from "date-fns/isBefore";
-import { toDate } from "./format";
-import { SecurityRole } from "./SecurityRole";
+import isBefore from 'date-fns/isBefore';
+import { toDate } from './format';
+import { SecurityRole } from './SecurityRole';
 
 export const checkIsApprovalError = (error: unknown) => {
-  if (typeof error !== "object" || error === null) return false;
+  if (typeof error !== 'object' || error === null) return false;
 
   // @ts-ignore
-  return error?.message?.includes("is not in white list");
+  return error?.message?.includes('is not in white list');
 };
 
 export const checkIsBlockedError = (error: unknown) => {
-  if (typeof error !== "object" || error === null) return false;
+  if (typeof error !== 'object' || error === null) return false;
 
   // @ts-ignore
-  return error?.message?.includes("is in black list");
+  return error?.message?.includes('is in black list');
 };
 
 export enum KnownErrors {
-  blocked = "blocked",
-  not_approved = "not_approved",
-  unknown = "unknown",
+  blocked = 'blocked',
+  not_approved = 'not_approved',
+  unknown = 'unknown',
 }
 
 export const checkError = (error: unknown) => {

@@ -1,21 +1,21 @@
-import { Flex, HStack } from "@chakra-ui/react";
-import { Button, InputController, Table, Text } from "io-bricks-ui";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { required } from "../../../../utils/rules";
-import { createColumnHelper } from "@tanstack/table-core";
-import { useParams } from "react-router-dom";
-import { useGetVotingHolders } from "../../../../hooks/queries/VotingRights";
-import { GetVotingHoldersRequest } from "@hashgraph/asset-tokenization-sdk";
+import { Flex, HStack } from '@chakra-ui/react';
+import { Button, InputController, Table, Text } from 'io-bricks-ui';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { required } from '../../../../utils/rules';
+import { createColumnHelper } from '@tanstack/table-core';
+import { useParams } from 'react-router-dom';
+import { useGetVotingHolders } from '../../../../hooks/queries/VotingRights';
+import { GetVotingHoldersRequest } from '@hashgraph/asset-tokenization-sdk';
 
 type VotingRightsHoldersData = {
   holderAddress: string;
 };
 
 export const VotingRightsHolders = () => {
-  const { id: securityId = "" } = useParams();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.votingRights.holders",
+  const { id: securityId = '' } = useParams();
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.votingRights.holders',
   });
 
   const {
@@ -24,10 +24,10 @@ export const VotingRightsHolders = () => {
     formState: { isValid },
     handleSubmit,
   } = useForm({
-    mode: "onSubmit",
+    mode: 'onSubmit',
   });
 
-  const voteId = watch("voteId");
+  const voteId = watch('voteId');
 
   const { data, refetch, isFetching } = useGetVotingHolders<
     unknown,
@@ -56,8 +56,8 @@ export const VotingRightsHolders = () => {
   const columnHelper = createColumnHelper<VotingRightsHoldersData>();
 
   const columns = [
-    columnHelper.accessor("holderAddress", {
-      header: t("table.holderAddress"),
+    columnHelper.accessor('holderAddress', {
+      header: t('table.holderAddress'),
       enableSorting: false,
     }),
   ];
@@ -67,39 +67,39 @@ export const VotingRightsHolders = () => {
   };
 
   return (
-    <Flex flexDir={"column"} gap={4}>
+    <Flex flexDir={'column'} gap={4}>
       <HStack
         gap={4}
-        justifyContent={"flex-end"}
-        alignItems={"flex-end"}
-        w={"400px"}
+        justifyContent={'flex-end'}
+        alignItems={'flex-end'}
+        w={'400px'}
       >
         <InputController
-          label={t("voteIdInput.label")}
+          label={t('voteIdInput.label')}
           control={control}
           id="voteId"
           rules={{
             required,
           }}
-          placeholder={t("voteIdInput.placeholder")}
+          placeholder={t('voteIdInput.placeholder')}
           showErrors={false}
         />
         <Button
-          variant={"primary"}
+          variant={'primary'}
           onClick={handleSubmit(onSubmit)}
           isDisabled={!isValid || isFetching}
           isLoading={isFetching}
-          size={"md"}
-          width={"150px"}
+          size={'md'}
+          width={'150px'}
         >
-          {t("searchButton")}
+          {t('searchButton')}
         </Button>
       </HStack>
       <Table
         columns={columns}
         data={data ?? []}
         name="voting-rights-holders"
-        emptyComponent={<Text>{t("emptyTable")}</Text>}
+        emptyComponent={<Text>{t('emptyTable')}</Text>}
         isLoading={isFetching}
       />
     </Flex>

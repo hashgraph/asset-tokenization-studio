@@ -203,12 +203,12 @@
 
 */
 
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
 import {
   GetIssuerListMembersRequest,
   GetRevocationRegistryAddressRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 export const GET_ISSUERS_LIST = (securityId: string) =>
   `GET_ISSUERS_LIST_${securityId}`;
@@ -232,7 +232,7 @@ export const useGetIssuersList = (
         const issuersIds = await SDKService.getIssuerListMembers(request);
         return issuersIds;
       } catch (error) {
-        console.error("Error fetching lockers", error);
+        console.error('Error fetching lockers', error);
         throw error;
       }
     },
@@ -252,7 +252,7 @@ export const useGetRevocationRegistryAddress = (
           await SDKService.getRevocationRegistryAddress(request);
         return revocationRegistryAddress;
       } catch (error) {
-        console.error("Error fetching revocation registry address", error);
+        console.error('Error fetching revocation registry address', error);
         throw error;
       }
     },

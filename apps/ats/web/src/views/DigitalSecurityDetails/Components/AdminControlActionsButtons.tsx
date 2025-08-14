@@ -203,22 +203,22 @@
 
 */
 
-import { Link as RouterLink, useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { HStack } from "@chakra-ui/react";
-import { Button } from "io-bricks-ui";
-import { RouteName } from "../../../router/RouteName";
-import { RouterManager } from "../../../router/RouterManager";
-import { PauseRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";
-import { useRolesStore } from "../../../store/rolesStore";
-import { SecurityRole } from "../../../utils/SecurityRole";
+import { Link as RouterLink, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { HStack } from '@chakra-ui/react';
+import { Button } from 'io-bricks-ui';
+import { RouteName } from '../../../router/RouteName';
+import { RouterManager } from '../../../router/RouterManager';
+import { PauseRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useGetIsPaused } from '../../../hooks/queries/useGetSecurityDetails';
+import { useRolesStore } from '../../../store/rolesStore';
+import { SecurityRole } from '../../../utils/SecurityRole';
 
 export const AdminControlActionsButtons = () => {
-  const { t: tButtons } = useTranslation("security", {
-    keyPrefix: "details.actions",
+  const { t: tButtons } = useTranslation('security', {
+    keyPrefix: 'details.actions',
   });
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
   const { data: isPaused } = useGetIsPaused(
     new PauseRequest({ securityId: id }),
   );
@@ -241,7 +241,7 @@ export const AdminControlActionsButtons = () => {
           })}
           variant="secondary"
         >
-          {tButtons("freeze")}
+          {tButtons('freeze')}
         </Button>
       )}
     </HStack>

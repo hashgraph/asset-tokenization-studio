@@ -203,8 +203,8 @@
 
 */
 
-import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 
 export interface ExternalKYCStore {
   address: string;
@@ -217,7 +217,7 @@ interface ExternalKYCStoreProps {
   reset: () => void;
 }
 
-const EXTERNAL_KYC_STORE_KEY = "EXTERNAL_KYC_STORE_KEY";
+const EXTERNAL_KYC_STORE_KEY = 'EXTERNAL_KYC_STORE_KEY';
 
 export const useExternalKYCStore = create<ExternalKYCStoreProps>()(
   persist(

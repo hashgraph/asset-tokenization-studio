@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { SystemStyleObject as ChakraSystemStyleObject } from "@chakra-ui/system";
+import type { SystemStyleObject as ChakraSystemStyleObject } from '@chakra-ui/system';
 import type {
   ComponentMultiStyleConfig as ChakraComponentMultiStyleConfig,
   ThemingPropsThunk as ChakraThemingPropsThunk,
-} from "@chakra-ui/theme";
+} from '@chakra-ui/theme';
 
 export type PartsStyleInterpolation<TParts extends string[]> = Partial<
   Record<TParts[number], ChakraThemingPropsThunk<ChakraSystemStyleObject>>
@@ -13,7 +13,7 @@ export type PartsStyleInterpolation<TParts extends string[]> = Partial<
 export interface BaseMultiStyleConfiguration<TParts extends string[]>
   extends Omit<
     ChakraComponentMultiStyleConfig,
-    "parts" | "sizes" | "baseStyle" | "variants"
+    'parts' | 'sizes' | 'baseStyle' | 'variants'
   > {
   parts: TParts;
   sizes?:

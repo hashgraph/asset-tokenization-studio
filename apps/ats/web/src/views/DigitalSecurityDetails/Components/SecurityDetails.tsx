@@ -203,18 +203,18 @@
 
 */
 
-import { DefinitionList, DefinitionListProps } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { useSecurityStore } from "../../../store/securityStore";
-import { useParams } from "react-router-dom";
-import { toNumber } from "../../../utils/format";
-import { useGetCompliance } from "../../../hooks/queries/useCompliance";
-import { ComplianceRequest } from "@hashgraph/asset-tokenization-sdk";
+import { DefinitionList, DefinitionListProps } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { useSecurityStore } from '../../../store/securityStore';
+import { useParams } from 'react-router-dom';
+import { toNumber } from '../../../utils/format';
+import { useGetCompliance } from '../../../hooks/queries/useCompliance';
+import { ComplianceRequest } from '@hashgraph/asset-tokenization-sdk';
 
-interface SecurityDetails extends Omit<DefinitionListProps, "items"> {}
+interface SecurityDetails extends Omit<DefinitionListProps, 'items'> {}
 
 export const SecurityDetails = (props: SecurityDetails) => {
-  const { t: tProperties } = useTranslation("properties");
+  const { t: tProperties } = useTranslation('properties');
   const { details } = useSecurityStore();
   const { id } = useParams();
 
@@ -237,35 +237,35 @@ export const SecurityDetails = (props: SecurityDetails) => {
           description: details?.securityType ?? "",
         },*/
         {
-          title: tProperties("name"),
-          description: details?.name ?? "",
+          title: tProperties('name'),
+          description: details?.name ?? '',
         },
         {
-          title: tProperties("symbol"),
-          description: details?.symbol ?? "",
+          title: tProperties('symbol'),
+          description: details?.symbol ?? '',
         },
         {
-          title: tProperties("decimal"),
-          description: details?.decimals ?? "",
+          title: tProperties('decimal'),
+          description: details?.decimals ?? '',
         },
         {
-          title: tProperties("isin"),
-          description: details?.isin ?? "",
+          title: tProperties('isin'),
+          description: details?.isin ?? '',
         },
         {
-          title: tProperties("id"),
-          description: id ?? "",
+          title: tProperties('id'),
+          description: id ?? '',
         },
         {
-          title: tProperties("maxSupply"),
+          title: tProperties('maxSupply'),
           description: `${details?.maxSupply} ${details?.symbol}`,
         },
         {
-          title: tProperties("totalSupply"),
+          title: tProperties('totalSupply'),
           description: `${details?.totalSupply} ${details?.symbol}`,
         },
         {
-          title: tProperties("pendingToBeMinted"),
+          title: tProperties('pendingToBeMinted'),
           description: `${
             toNumber(details?.maxSupply) - toNumber(details?.totalSupply)
           } ${details?.symbol}`,
@@ -273,8 +273,8 @@ export const SecurityDetails = (props: SecurityDetails) => {
         ...(compliance
           ? [
               {
-                title: tProperties("compliance"),
-                description: compliance ?? "",
+                title: tProperties('compliance'),
+                description: compliance ?? '',
               },
             ]
           : []),

@@ -1,4 +1,4 @@
-import { Center, HStack, Stack, useDisclosure, VStack } from "@chakra-ui/react";
+import { Center, HStack, Stack, useDisclosure, VStack } from '@chakra-ui/react';
 import {
   Button,
   Heading,
@@ -7,32 +7,32 @@ import {
   PopUp,
   SelectController,
   Text,
-} from "io-bricks-ui";
-import { isValidHederaId, required } from "../../../../utils/rules";
-import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { useForm } from "react-hook-form";
-import { WarningCircle } from "@phosphor-icons/react";
-import { useState } from "react";
+} from 'io-bricks-ui';
+import { isValidHederaId, required } from '../../../../utils/rules';
+import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { WarningCircle } from '@phosphor-icons/react';
+import { useState } from 'react';
 import {
   useApproveClearingByPartition,
   useCancelClearingByPartition,
-} from "../../../../hooks/mutations/useClearingOperations";
+} from '../../../../hooks/mutations/useClearingOperations';
 import {
   ApproveClearingOperationByPartitionRequest,
   CancelClearingOperationByPartitionRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { DEFAULT_PARTITION } from "../../../../utils/constants";
+} from '@hashgraph/asset-tokenization-sdk';
+import { DEFAULT_PARTITION } from '../../../../utils/constants';
 
 enum ManageOperationType {
-  APPROVE = "Approve",
-  CANCEL = "Cancel",
+  APPROVE = 'Approve',
+  CANCEL = 'Cancel',
 }
 
 enum ClearingOperationType {
-  TRANSFER = "Transfer",
-  REDEEM = "Redeem",
-  HOLD = "Hold",
+  TRANSFER = 'Transfer',
+  REDEEM = 'Redeem',
+  HOLD = 'Hold',
 }
 
 const clearingOperationTypeToNumber = {
@@ -51,23 +51,23 @@ interface FormValues {
 export const ClearingOperationsManage = () => {
   const { isOpen, onClose, onOpen } = useDisclosure();
 
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
 
   const [isMutating, setIsMutating] = useState(false);
 
-  const { t: tManage } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.manage",
+  const { t: tManage } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.manage',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.manage.form",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.manage.form',
   });
-  const { t: tActions } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.actions.confirmManage",
+  const { t: tActions } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.actions.confirmManage',
   });
-  const { t: tGlobal } = useTranslation("globals");
+  const { t: tGlobal } = useTranslation('globals');
 
   const { control, formState, getValues, reset } = useForm<FormValues>({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const { mutate: approveClearing } = useApproveClearingByPartition();
@@ -136,10 +136,10 @@ export const ClearingOperationsManage = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={WarningCircle} size="md" />}
-        title={tActions("title")}
-        description={tActions("description")}
-        confirmText={tActions("confirmText")}
-        cancelText={tActions("cancelText")}
+        title={tActions('title')}
+        description={tActions('description')}
+        confirmText={tActions('confirmText')}
+        cancelText={tActions('cancelText')}
         onConfirm={() => {
           onSubmit();
           onClose();
@@ -151,7 +151,7 @@ export const ClearingOperationsManage = () => {
       <Center w="full" h="full" bg="neutral.dark.600">
         <VStack align="flex-start" p={6} gap={4}>
           <VStack align="flex-start" gap={0}>
-            <Heading textStyle="HeadingMediumLG">{tManage("title")}</Heading>
+            <Heading textStyle="HeadingMediumLG">{tManage('title')}</Heading>
           </VStack>
           <VStack
             as="form"
@@ -166,7 +166,7 @@ export const ClearingOperationsManage = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("operationType.label")}*
+                  {tForm('operationType.label')}*
                 </Text>
               </HStack>
               <SelectController
@@ -188,13 +188,13 @@ export const ClearingOperationsManage = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("clearingOperationId.label")}*
+                  {tForm('clearingOperationId.label')}*
                 </Text>
               </HStack>
               <InputController
                 control={control}
                 id="clearingOperationId"
-                placeholder={tForm("clearingOperationId.placeholder")}
+                placeholder={tForm('clearingOperationId.placeholder')}
                 isRequired={true}
                 rules={{
                   required,
@@ -204,7 +204,7 @@ export const ClearingOperationsManage = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("clearingOperationType.label")}*
+                  {tForm('clearingOperationType.label')}*
                 </Text>
               </HStack>
               <SelectController
@@ -230,13 +230,13 @@ export const ClearingOperationsManage = () => {
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
-                  {tForm("sourceId.label")}
+                  {tForm('sourceId.label')}
                 </Text>
               </HStack>
               <InputController
                 control={control}
                 id="sourceId"
-                placeholder={tForm("sourceId.placeholder")}
+                placeholder={tForm('sourceId.placeholder')}
                 isRequired={true}
                 rules={{
                   required,
@@ -254,7 +254,7 @@ export const ClearingOperationsManage = () => {
                 onOpen();
               }}
             >
-              {tGlobal("execute")}
+              {tGlobal('execute')}
             </Button>
           </VStack>
         </VStack>

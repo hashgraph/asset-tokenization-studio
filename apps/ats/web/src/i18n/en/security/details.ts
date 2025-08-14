@@ -203,75 +203,75 @@
 
 */
 
-import dividends from "./dividends";
-import coupons from "./coupons";
-import roleManagement from "./roleManagement";
-import management from "./management";
-import allowedList from "./allowedList";
-import votingRights from "./votingRight";
-import balanceAdjustment from "./balanceAdjustment";
-import locker from "./locker";
-import cap from "./cap";
-import hold from "./hold";
-import kyc from "./kyc";
-import ssiManager from "./ssiManager";
-import clearingOperations from "./clearingOperations";
-import externalPause from "./externalPause";
-import externalControl from "./externalControl";
-import externalKYC from "./externalKYC";
+import dividends from './dividends';
+import coupons from './coupons';
+import roleManagement from './roleManagement';
+import management from './management';
+import allowedList from './allowedList';
+import votingRights from './votingRight';
+import balanceAdjustment from './balanceAdjustment';
+import locker from './locker';
+import cap from './cap';
+import hold from './hold';
+import kyc from './kyc';
+import ssiManager from './ssiManager';
+import clearingOperations from './clearingOperations';
+import externalPause from './externalPause';
+import externalControl from './externalControl';
+import externalKYC from './externalKYC';
 
 export default {
   header: {
-    title: "Digital security details",
+    title: 'Digital security details',
   },
   tabs: {
-    balance: "Balance",
-    allowedList: "Allowed list",
-    blockedList: "Blocked list",
-    details: "Details",
-    dividends: "Dividends",
-    balanceAdjustment: "Balance Adjustment",
-    coupons: "Coupons",
-    votingRights: "Voting rights",
-    roleManagement: "Role management",
-    management: "Management",
-    locker: "Locker",
-    cap: "Cap",
-    hold: "Hold",
-    kyc: "KYC",
-    ssiManager: "SSI Manager",
-    clearingOperations: "Clearing Operations",
-    configuration: "Configuration",
-    operations: "Operations",
-    control: "Control",
-    corporateActions: "Corporate Actions",
-    externalControlList: "External Control",
-    externalPause: "External Pause",
-    externalKYCList: "External KYC",
-    freeze: "Freeze",
+    balance: 'Balance',
+    allowedList: 'Allowed list',
+    blockedList: 'Blocked list',
+    details: 'Details',
+    dividends: 'Dividends',
+    balanceAdjustment: 'Balance Adjustment',
+    coupons: 'Coupons',
+    votingRights: 'Voting rights',
+    roleManagement: 'Role management',
+    management: 'Management',
+    locker: 'Locker',
+    cap: 'Cap',
+    hold: 'Hold',
+    kyc: 'KYC',
+    ssiManager: 'SSI Manager',
+    clearingOperations: 'Clearing Operations',
+    configuration: 'Configuration',
+    operations: 'Operations',
+    control: 'Control',
+    corporateActions: 'Corporate Actions',
+    externalControlList: 'External Control',
+    externalPause: 'External Pause',
+    externalKYCList: 'External KYC',
+    freeze: 'Freeze',
   },
   actions: {
-    redeem: "Redeem",
-    transfer: "Transfer",
-    mint: "Mint",
-    freeze: "Freeze / Unfreeze",
-    forceTransfer: "Force transfer",
-    forceRedeem: "Force redeem",
+    redeem: 'Redeem',
+    transfer: 'Transfer',
+    mint: 'Mint',
+    freeze: 'Freeze / Unfreeze',
+    forceTransfer: 'Force transfer',
+    forceRedeem: 'Force redeem',
     dangerZone: {
-      title: "Danger zone",
-      pauseSecurityTokenTitle: "Pause Security Token",
+      title: 'Danger zone',
+      pauseSecurityTokenTitle: 'Pause Security Token',
       pauseSecurityTokenDescription:
-        "Pause all activity related to the security token as a protective measure. While paused, transfers and interactions will be restricted",
-      buttonActive: "Active",
-      buttonInactive: "Inactive",
-      clearingModeTitle: "Clearing mode",
+        'Pause all activity related to the security token as a protective measure. While paused, transfers and interactions will be restricted',
+      buttonActive: 'Active',
+      buttonInactive: 'Inactive',
+      clearingModeTitle: 'Clearing mode',
       clearingModeDescription:
-        "Restrict token interactions to clearing operations only. While enabled, other types of transactions will be blocked",
-      activate: "Activate",
-      deactivate: "Deactivate",
-      internalKYCManagerTitle: "Internal KYC",
+        'Restrict token interactions to clearing operations only. While enabled, other types of transactions will be blocked',
+      activate: 'Activate',
+      deactivate: 'Deactivate',
+      internalKYCManagerTitle: 'Internal KYC',
       internalKYCManagerDescription:
-        "While activated, internal KYC will be enable",
+        'While activated, internal KYC will be enable',
     },
   },
   dividends,
@@ -279,21 +279,21 @@ export default {
   coupons,
   balance: {
     search: {
-      title: "Display balances",
-      subtitle: "Add the ID account to preview its balance",
-      placeholder: "0.0.19253",
-      button: "Search ID",
+      title: 'Display balances',
+      subtitle: 'Add the ID account to preview its balance',
+      placeholder: '0.0.19253',
+      button: 'Search ID',
     },
     details: {
-      title: "Details",
-      availableBalance: "Available balance",
-      lockBalance: "Lock balance",
-      heldBalance: "Held balance",
-      clearedBalance: "Cleared balance",
-      frozenBalance: "Frozen balance",
+      title: 'Details',
+      availableBalance: 'Available balance',
+      lockBalance: 'Lock balance',
+      heldBalance: 'Held balance',
+      clearedBalance: 'Cleared balance',
+      frozenBalance: 'Frozen balance',
     },
     error: {
-      targetId: "Sorry, there was an error. Probably wrong address",
+      targetId: 'Sorry, there was an error. Probably wrong address',
     },
   },
   roleManagement,
@@ -310,32 +310,32 @@ export default {
   externalControl,
   externalKYC,
   benefits: {
-    dividends: "Dividends",
-    balanceAdjustments: "Balance Adjustments",
-    coupons: "Coupons",
-    id: "Id",
-    recordDate: "Record date",
-    executionDate: "Execution date",
-    dividendAmount: "Dividend amount",
-    couponRate: "Rate",
-    snapshot: "Snapshot Id",
-    factor: "Factor",
-    decimals: "Decimals",
+    dividends: 'Dividends',
+    balanceAdjustments: 'Balance Adjustments',
+    coupons: 'Coupons',
+    id: 'Id',
+    recordDate: 'Record date',
+    executionDate: 'Execution date',
+    dividendAmount: 'Dividend amount',
+    couponRate: 'Rate',
+    snapshot: 'Snapshot Id',
+    factor: 'Factor',
+    decimals: 'Decimals',
   },
   bond: {
     updateMaturityDate: {
       toast: {
-        title: "Confirmation",
-        subtitle: "Are you sure you want to change the maturity date?",
-        cancelButtonText: "Cancel",
-        confirmButtonText: "Confirm",
+        title: 'Confirmation',
+        subtitle: 'Are you sure you want to change the maturity date?',
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Confirm',
       },
       messages: {
-        success: "Success: ",
+        success: 'Success: ',
         updateMaturityDateSuccessful:
-          "Maturity date has been updated successfully",
-        error: "Error: ",
-        updateMaturityDateFailed: "Update maturity date failed",
+          'Maturity date has been updated successfully',
+        error: 'Error: ',
+        updateMaturityDateFailed: 'Update maturity date failed',
       },
     },
   },

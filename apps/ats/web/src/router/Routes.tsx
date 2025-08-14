@@ -203,36 +203,36 @@
 
 */
 
-import i18n from "i18next";
-import { MainLayout } from "../layouts/MainLayout";
-import { GenericRoute } from "./components/GenericRoute";
-import { PrivateRoute } from "./components/PrivateRoute";
-import { RouteName } from "./RouteName";
-import { RoutePath } from "./RoutePath";
-import { Landing } from "../views/Landing/Landing";
-import { AddSecurity } from "../views/AddSecurity/AddSecurity";
-import { CreateSecurity } from "../views/Dashboard/Components/CreateSecurity";
-import { CreateEquity } from "../views/CreateEquity/CreateEquity";
-import { CreateBond } from "../views/CreateBond/CreateBond";
-import { Dashboard } from "../views/Dashboard/Dashboard";
-import { DigitalSecuritiesList } from "../views/DigitalSecuritiesList/DigitalSecuritiesList";
-import { DigitalSecurityDetails } from "../views/DigitalSecurityDetails/DigitalSecurityDetails";
-import { DigitalSecurityMint } from "../views/DigitalSecurityMint/DigitalSecurityMint";
-import { DigitalSecurityTransfer } from "../views/DigitalSecurityTransfer/DigitalSecurityTransfer";
-import { DigitalSecurityRedeem } from "../views/DigitalSecurityRedeem/DigitalSecurityRedeem";
-import { DigitalSecurityForceTransfer } from "../views/DigitalSecurityForceTransfer/DigitalSecurityForceTransfer";
-import { DigitalSecurityForceRedeem } from "../views/DigitalSecurityForceRedeem/DigitalSecurityForceRedeem";
-import { DigitalSecurityLocker } from "../views/DigitalSecurityLocker/DigitalSecurityLocker";
-import { ExternalPauseList } from "../views/ExternalPauseList/ExternalPauseList";
-import { CreateExternalPause } from "../views/CreateExternalPause/CreateExternalPause";
-import { AddExternalPause } from "../views/AddExternalPause/AddExternalPause";
-import { ExternalControlList } from "../views/ExternalControlList/ExternalControlList";
-import { CreateExternalControl } from "../views/CreateExternalControl/CreateExternalControl";
-import { AddExternalControl } from "../views/AddExternalControl/AddExternalControl";
-import { ExternalControlDetails } from "../views/ExternalControlDetails/ExternalControlDetails";
-import { ExternalKYCList } from "../views/ExternalKYCList/ExternalKYCList";
-import { AddExternalKYC } from "../views/AddExternalKYC/AddExternalKYC";
-import { DigitalSecurityFreeze } from "../views/DigitalSecurityFreeze/DigitalSecurityFreeze";
+import i18n from 'i18next';
+import { MainLayout } from '../layouts/MainLayout';
+import { GenericRoute } from './components/GenericRoute';
+import { PrivateRoute } from './components/PrivateRoute';
+import { RouteName } from './RouteName';
+import { RoutePath } from './RoutePath';
+import { Landing } from '../views/Landing/Landing';
+import { AddSecurity } from '../views/AddSecurity/AddSecurity';
+import { CreateSecurity } from '../views/Dashboard/Components/CreateSecurity';
+import { CreateEquity } from '../views/CreateEquity/CreateEquity';
+import { CreateBond } from '../views/CreateBond/CreateBond';
+import { Dashboard } from '../views/Dashboard/Dashboard';
+import { DigitalSecuritiesList } from '../views/DigitalSecuritiesList/DigitalSecuritiesList';
+import { DigitalSecurityDetails } from '../views/DigitalSecurityDetails/DigitalSecurityDetails';
+import { DigitalSecurityMint } from '../views/DigitalSecurityMint/DigitalSecurityMint';
+import { DigitalSecurityTransfer } from '../views/DigitalSecurityTransfer/DigitalSecurityTransfer';
+import { DigitalSecurityRedeem } from '../views/DigitalSecurityRedeem/DigitalSecurityRedeem';
+import { DigitalSecurityForceTransfer } from '../views/DigitalSecurityForceTransfer/DigitalSecurityForceTransfer';
+import { DigitalSecurityForceRedeem } from '../views/DigitalSecurityForceRedeem/DigitalSecurityForceRedeem';
+import { DigitalSecurityLocker } from '../views/DigitalSecurityLocker/DigitalSecurityLocker';
+import { ExternalPauseList } from '../views/ExternalPauseList/ExternalPauseList';
+import { CreateExternalPause } from '../views/CreateExternalPause/CreateExternalPause';
+import { AddExternalPause } from '../views/AddExternalPause/AddExternalPause';
+import { ExternalControlList } from '../views/ExternalControlList/ExternalControlList';
+import { CreateExternalControl } from '../views/CreateExternalControl/CreateExternalControl';
+import { AddExternalControl } from '../views/AddExternalControl/AddExternalControl';
+import { ExternalControlDetails } from '../views/ExternalControlDetails/ExternalControlDetails';
+import { ExternalKYCList } from '../views/ExternalKYCList/ExternalKYCList';
+import { AddExternalKYC } from '../views/AddExternalKYC/AddExternalKYC';
+import { DigitalSecurityFreeze } from '../views/DigitalSecurityFreeze/DigitalSecurityFreeze';
 
 const t = (key: RouteName) => i18n.t(`routes:${key}`);
 
@@ -456,7 +456,7 @@ export const routes = [
     ],
   },
   {
-    path: "*",
+    path: '*',
     element: (
       <PrivateRoute>
         <GenericRoute />

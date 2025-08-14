@@ -1,13 +1,13 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import SDKService from "../../services/SDKService";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import SDKService from '../../services/SDKService';
 import {
   AddExternalPauseRequest,
   SetPausedMockRequest,
   UpdateExternalPausesRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { GET_EXTERNAL_PAUSES_COUNT } from "../queries/useExternalPause";
+} from '@hashgraph/asset-tokenization-sdk';
+import { GET_EXTERNAL_PAUSES_COUNT } from '../queries/useExternalPause';
 
 export const useUpdateExternalPauses = () => {
   const queryClient = useQueryClient();
@@ -21,13 +21,13 @@ export const useUpdateExternalPauses = () => {
         });
 
         console.log(
-          "SDK message --> Update external pause operation success: ",
+          'SDK message --> Update external pause operation success: ',
           data,
         );
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Update external pause operation error: ",
+          'SDK message --> Update external pause operation error: ',
           error,
         );
       },
@@ -38,8 +38,8 @@ export const useUpdateExternalPauses = () => {
 export const useAddExternalPause = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("externalPause", {
-    keyPrefix: "messages",
+  const { t } = useTranslation('externalPause', {
+    keyPrefix: 'messages',
   });
 
   return useMutation(
@@ -51,7 +51,7 @@ export const useAddExternalPause = () => {
         });
 
         console.log(
-          "SDK message --> Add external pause operation success: ",
+          'SDK message --> Add external pause operation success: ',
           data,
         );
 
@@ -61,24 +61,24 @@ export const useAddExternalPause = () => {
 
         toast.show({
           duration: 3000,
-          title: t("addExternalPause.success"),
-          description: t("addExternalPause.descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('addExternalPause.success'),
+          description: t('addExternalPause.descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Add external pause operation error: ",
+          'SDK message --> Add external pause operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("addExternalPause.error"),
-          description: t("addExternalPause.descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('addExternalPause.error'),
+          description: t('addExternalPause.descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -88,8 +88,8 @@ export const useAddExternalPause = () => {
 export const useRemoveExternalPause = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("externalPause", {
-    keyPrefix: "list.messages",
+  const { t } = useTranslation('externalPause', {
+    keyPrefix: 'list.messages',
   });
 
   return useMutation(
@@ -101,7 +101,7 @@ export const useRemoveExternalPause = () => {
         });
 
         console.log(
-          "SDK message --> Remove external pause operation success: ",
+          'SDK message --> Remove external pause operation success: ',
           data,
         );
 
@@ -111,24 +111,24 @@ export const useRemoveExternalPause = () => {
 
         toast.show({
           duration: 3000,
-          title: t("removeExternalPause.success"),
-          description: t("removeExternalPause.descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('removeExternalPause.success'),
+          description: t('removeExternalPause.descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Remove external pause operation error: ",
+          'SDK message --> Remove external pause operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("removeExternalPause.error"),
-          description: t("removeExternalPause.descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('removeExternalPause.error'),
+          description: t('removeExternalPause.descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -137,8 +137,8 @@ export const useRemoveExternalPause = () => {
 
 export const useSetPausedMock = () => {
   const toast = useToast();
-  const { t } = useTranslation("externalPause", {
-    keyPrefix: "list.messages",
+  const { t } = useTranslation('externalPause', {
+    keyPrefix: 'list.messages',
   });
 
   return useMutation(
@@ -146,7 +146,7 @@ export const useSetPausedMock = () => {
     {
       onSuccess(data) {
         console.log(
-          "SDK message --> Set external pause operation success: ",
+          'SDK message --> Set external pause operation success: ',
           data,
         );
 
@@ -156,24 +156,24 @@ export const useSetPausedMock = () => {
 
         toast.show({
           duration: 3000,
-          title: t("changeState.success"),
-          description: t("changeState.descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('changeState.success'),
+          description: t('changeState.descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Set external pause operation error: ",
+          'SDK message --> Set external pause operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("changeState.error"),
-          description: t("changeState.descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('changeState.error'),
+          description: t('changeState.descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -182,13 +182,13 @@ export const useSetPausedMock = () => {
 
 export const useCreatePauseMock = () => {
   const toast = useToast();
-  const { t } = useTranslation("externalPause", {
-    keyPrefix: "list.messages",
+  const { t } = useTranslation('externalPause', {
+    keyPrefix: 'list.messages',
   });
 
   return useMutation(() => SDKService.createMock(), {
     onSuccess(data) {
-      console.log("SDK message --> Pause mock created success: ", data);
+      console.log('SDK message --> Pause mock created success: ', data);
 
       if (!data) {
         return;
@@ -196,21 +196,21 @@ export const useCreatePauseMock = () => {
 
       toast.show({
         duration: 3000,
-        title: t("createMock.success"),
-        description: t("createMock.descriptionSuccess"),
-        variant: "subtle",
-        status: "success",
+        title: t('createMock.success'),
+        description: t('createMock.descriptionSuccess'),
+        variant: 'subtle',
+        status: 'success',
       });
     },
     onError: (error) => {
-      console.log("SDK message --> Pause mock created error: ", error);
+      console.log('SDK message --> Pause mock created error: ', error);
 
       toast.show({
         duration: 3000,
-        title: t("createMock.error"),
-        description: t("createMock.descriptionFailed"),
-        variant: "subtle",
-        status: "error",
+        title: t('createMock.error'),
+        description: t('createMock.descriptionFailed'),
+        variant: 'subtle',
+        status: 'error',
       });
     },
   });

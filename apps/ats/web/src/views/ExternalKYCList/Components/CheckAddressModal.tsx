@@ -8,19 +8,19 @@ import {
   ModalOverlay,
   ModalProps,
   VStack,
-} from "@chakra-ui/react";
-import { Button, InputController } from "io-bricks-ui";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { ExternalKYC } from "../ExternalKYCList";
-import { useIsAuthorizedKYCListMock } from "../../../hooks/mutations/useExternalKYC";
-import { GetKycStatusMockRequest } from "@hashgraph/asset-tokenization-sdk";
+} from '@chakra-ui/react';
+import { Button, InputController } from 'io-bricks-ui';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { ExternalKYC } from '../ExternalKYCList';
+import { useIsAuthorizedKYCListMock } from '../../../hooks/mutations/useExternalKYC';
+import { GetKycStatusMockRequest } from '@hashgraph/asset-tokenization-sdk';
 
 interface FormValues {
   accountId: string;
 }
 
-interface CheckAddressModalProps extends Omit<ModalProps, "children"> {
+interface CheckAddressModalProps extends Omit<ModalProps, 'children'> {
   externalKYCSelected?: ExternalKYC;
 }
 
@@ -29,12 +29,12 @@ export const CheckAddressModal = ({
   isOpen,
   onClose,
 }: CheckAddressModalProps) => {
-  const { t: tRemoveAddress } = useTranslation("externalKYC", {
-    keyPrefix: "checkAddress",
+  const { t: tRemoveAddress } = useTranslation('externalKYC', {
+    keyPrefix: 'checkAddress',
   });
 
   const { control, handleSubmit, reset, watch } = useForm<FormValues>({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const {
@@ -65,27 +65,27 @@ export const CheckAddressModal = ({
       }}
     >
       <ModalOverlay />
-      <ModalContent bgColor={"white"}>
-        <ModalHeader>{tRemoveAddress("title")}</ModalHeader>
+      <ModalContent bgColor={'white'}>
+        <ModalHeader>{tRemoveAddress('title')}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack gap={4}>
             <InputController
               control={control}
               id="accountId"
-              label={tRemoveAddress("input.label")}
-              placeholder={tRemoveAddress("input.placeholder")}
+              label={tRemoveAddress('input.label')}
+              placeholder={tRemoveAddress('input.placeholder')}
             />
           </VStack>
         </ModalBody>
         <ModalFooter>
           <Button
             isLoading={isLoading}
-            isDisabled={isLoading || !watch("accountId")}
+            isDisabled={isLoading || !watch('accountId')}
             type="submit"
             onClick={handleSubmit(onSubmit)}
           >
-            {tRemoveAddress("check")}
+            {tRemoveAddress('check')}
           </Button>
         </ModalFooter>
       </ModalContent>

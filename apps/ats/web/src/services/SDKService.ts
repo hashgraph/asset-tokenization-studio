@@ -371,15 +371,15 @@ import {
   GetDividendHoldersRequest,
   GetTotalVotingHoldersRequest,
   GetVotingHoldersRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 export class SDKService {
   static initData?: InitializationData = undefined;
-  static testnetNetwork = "testnet";
+  static testnetNetwork = 'testnet';
   static testnetMirrorNode = {
-    baseUrl: process.env.REACT_APP_MIRROR_NODE ?? "",
-    apiKey: "",
-    headerName: "",
+    baseUrl: process.env.REACT_APP_MIRROR_NODE ?? '',
+    apiKey: '',
+    headerName: '',
   };
   static testnetMirrorNodes = {
     nodes: [
@@ -390,10 +390,10 @@ export class SDKService {
     ],
   };
   static testnetRPCNode = {
-    baseUrl: process.env.REACT_APP_RPC_NODE ?? "",
+    baseUrl: process.env.REACT_APP_RPC_NODE ?? '',
     //baseUrl: "http://127.0.0.1:7546",
-    apiKey: "",
-    headerName: "",
+    apiKey: '',
+    headerName: '',
   };
   static testnetRPCNodes = {
     nodes: [
@@ -403,8 +403,8 @@ export class SDKService {
       },
     ],
   };
-  static testnetResolverAddress = process.env.REACT_APP_RPC_RESOLVER ?? "0.0.0";
-  static testnetFactoryAddress = process.env.REACT_APP_RPC_FACTORY ?? "0.0.0";
+  static testnetResolverAddress = process.env.REACT_APP_RPC_RESOLVER ?? '0.0.0';
+  static testnetFactoryAddress = process.env.REACT_APP_RPC_FACTORY ?? '0.0.0';
 
   static testnetConfiguration = {
     factoryAddress: this.testnetFactoryAddress,
@@ -434,11 +434,11 @@ export class SDKService {
   public static async connectWallet(wallet: SupportedWallets) {
     let hwcSettings;
     if (wallet === SupportedWallets.HWALLETCONNECT) {
-      const projectId = process.env.REACT_APP_PROJECT_ID ?? "";
-      const dappName = process.env.REACT_APP_DAPP_NAME ?? "";
-      const dappDescription = process.env.REACT_APP_DAPP_DESCRIPTION ?? "";
-      const dappURL = process.env.REACT_APP_DAPP_URL ?? "";
-      const dappIcons = process.env.REACT_APP_DAPP_ICONS?.split(",") ?? [];
+      const projectId = process.env.REACT_APP_PROJECT_ID ?? '';
+      const dappName = process.env.REACT_APP_DAPP_NAME ?? '';
+      const dappDescription = process.env.REACT_APP_DAPP_DESCRIPTION ?? '';
+      const dappURL = process.env.REACT_APP_DAPP_URL ?? '';
+      const dappIcons = process.env.REACT_APP_DAPP_ICONS?.split(',') ?? [];
 
       if (projectId) {
         hwcSettings = {
@@ -481,9 +481,9 @@ export class SDKService {
 
       return init;
     } catch (e) {
-      console.error("Error initializing the Network : " + e);
+      console.error('Error initializing the Network : ' + e);
       console.error(
-        "There was an error initializing the network, please check your .env file and make sure the configuration is correct",
+        'There was an error initializing the network, please check your .env file and make sure the configuration is correct',
       );
     }
   }

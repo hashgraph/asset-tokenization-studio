@@ -209,21 +209,21 @@ import {
   SimpleGrid,
   Stack,
   VStack,
-} from "@chakra-ui/react";
-import { useTranslation } from "react-i18next";
-import { InfoDivider, InputController, Text } from "io-bricks-ui";
-import { useFormContext, useFormState } from "react-hook-form";
-import { ICreateEquityFormValues } from "../CreateEquity/ICreateEquityFormValues";
-import { ICreateBondFormValues } from "../CreateBond/ICreateBondFormValues";
-import { FormStepContainer } from "../../components/FormStepContainer";
-import { CancelButton } from "../../components/CancelButton";
-import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
-import { NextStepButton } from "../CreateEquity/Components/NextStepButton";
-import { isValidHederaId } from "../../utils/rules";
+} from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
+import { InfoDivider, InputController, Text } from 'io-bricks-ui';
+import { useFormContext, useFormState } from 'react-hook-form';
+import { ICreateEquityFormValues } from '../CreateEquity/ICreateEquityFormValues';
+import { ICreateBondFormValues } from '../CreateBond/ICreateBondFormValues';
+import { FormStepContainer } from '../../components/FormStepContainer';
+import { CancelButton } from '../../components/CancelButton';
+import { PreviousStepButton } from '../CreateEquity/Components/PreviousStepButton';
+import { NextStepButton } from '../CreateEquity/Components/NextStepButton';
+import { isValidHederaId } from '../../utils/rules';
 
 export const StepERC3643 = () => {
-  const { t } = useTranslation("security", {
-    keyPrefix: "createEquity.stepERC3643",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'createEquity.stepERC3643',
   });
 
   const { control } = useFormContext<
@@ -240,37 +240,37 @@ export const StepERC3643 = () => {
   return (
     <FormStepContainer>
       <Stack gap={2}>
-        <Text textStyle="HeadingMediumLG">{t("title")}</Text>
-        <Text textStyle="BodyTextRegularMD">{t("subtitle")}</Text>
+        <Text textStyle="HeadingMediumLG">{t('title')}</Text>
+        <Text textStyle="BodyTextRegularMD">{t('subtitle')}</Text>
       </Stack>
 
-      <InfoDivider title={t("compliance")} type="main" />
+      <InfoDivider title={t('compliance')} type="main" />
       <VStack w="full">
         <FormControl gap={4} as={SimpleGrid} columns={{ base: 7, lg: 1 }}>
           <Stack w="full">
             <HStack justifySelf="flex-start">
-              <Text textStyle="BodyTextRegularSM">{t("complianceId")}</Text>
+              <Text textStyle="BodyTextRegularSM">{t('complianceId')}</Text>
             </HStack>
             <InputController
               control={control}
               id="complianceId"
               rules={{
                 validate: (value: string) =>
-                  !value || isValidHederaId(value) || t("invalidHederaId"),
+                  !value || isValidHederaId(value) || t('invalidHederaId'),
               }}
-              placeholder={t("complianceIdPlaceholder")}
+              placeholder={t('complianceIdPlaceholder')}
             />
           </Stack>
         </FormControl>
       </VStack>
 
-      <InfoDivider title={t("identityRegistry")} type="main" />
+      <InfoDivider title={t('identityRegistry')} type="main" />
       <VStack w="full">
         <FormControl gap={4} as={SimpleGrid} columns={{ base: 7, lg: 1 }}>
           <Stack w="full">
             <HStack justifySelf="flex-start">
               <Text textStyle="BodyTextRegularSM">
-                {t("identityRegistryId")}
+                {t('identityRegistryId')}
               </Text>
             </HStack>
             <InputController
@@ -278,9 +278,9 @@ export const StepERC3643 = () => {
               id="identityRegistryId"
               rules={{
                 validate: (value: string) =>
-                  !value || isValidHederaId(value) || t("invalidHederaId"),
+                  !value || isValidHederaId(value) || t('invalidHederaId'),
               }}
-              placeholder={t("identityRegistryIdPlaceholder")}
+              placeholder={t('identityRegistryIdPlaceholder')}
             />
           </Stack>
         </FormControl>
@@ -291,7 +291,7 @@ export const StepERC3643 = () => {
         w="full"
         h="100px"
         align="end"
-        justifyContent={"flex-end"}
+        justifyContent={'flex-end'}
       >
         <CancelButton />
         <PreviousStepButton />

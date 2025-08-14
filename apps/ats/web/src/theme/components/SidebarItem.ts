@@ -207,30 +207,30 @@ import {
   SidebarItemConfigProps,
   SidebarItemThemeConfiguration,
   sidebarPartsList,
-} from "io-bricks-ui";
+} from 'io-bricks-ui';
 
 const iconStyles = {
   hover: {
-    bgColor: "neutral.150",
+    bgColor: 'neutral.150',
   },
 
   selected: {
-    bgColor: "neutral.100",
-    color: "neutral.650",
+    bgColor: 'neutral.100',
+    color: 'neutral.650',
   },
 
   disabled: {
-    color: "neutral.600",
+    color: 'neutral.600',
   },
 };
 
 const labelStyles = {
   selected: {
-    textStyle: "ElementsSemiboldXS",
+    textStyle: 'ElementsSemiboldXS',
   },
 
   disabled: {
-    color: "neutral.600",
+    color: 'neutral.600',
   },
 };
 
@@ -241,15 +241,15 @@ export const SidebarItem: SidebarItemThemeConfiguration = {
 
     return {
       icon: {
-        color: "neutral.800",
+        color: 'neutral.800',
         ...(isSelected && iconStyles.selected),
         ...(isHovered && !isSelected && iconStyles.hover),
         ...(isDisabled && iconStyles.disabled),
       },
 
       label: {
-        textStyle: "ElementsMediumXS",
-        color: "neutral.800",
+        textStyle: 'ElementsMediumXS',
+        color: 'neutral.800',
         ...(isSelected && labelStyles.selected),
         ...(isDisabled && labelStyles.disabled),
       },

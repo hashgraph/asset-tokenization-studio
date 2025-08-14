@@ -203,8 +203,8 @@
 
 */
 
-import { Stack } from "@chakra-ui/react";
-import { ProgramBalanceAdjustment } from "./ProgramBalanceAdjustment";
+import { Stack } from '@chakra-ui/react';
+import { ProgramBalanceAdjustment } from './ProgramBalanceAdjustment';
 
 export const BalanceAdjustment = () => {
   return (

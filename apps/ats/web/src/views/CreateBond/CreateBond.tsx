@@ -203,32 +203,32 @@
 
 */
 
-import { Box, HStack, Stack } from "@chakra-ui/react";
-import { StepTokenDetails } from "./Components/StepTokenDetails";
-import { FormProvider, useForm } from "react-hook-form";
-import { useSteps, Wizard } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { History } from "../../components/History";
-import { RouteName } from "../../router/RouteName";
-import { ICreateBondFormValues } from "./ICreateBondFormValues";
-import { useEffect } from "react";
-import { User } from "../../utils/constants";
-import { useUserStore } from "../../store/userStore";
-import { StepConfiguration } from "./Components/StepConfiguration";
-import { StepReview } from "./Components/StepReview";
-import { StepCoupon } from "./Components/StepCoupon";
-import { StepRegulation } from "../CreateSecurityCommons/StepRegulation";
-import { StepExternalManagement } from "../CreateSecurityCommons/StepExternalManagement";
-import { StepERC3643 } from "../CreateSecurityCommons/StepERC3643";
+import { Box, HStack, Stack } from '@chakra-ui/react';
+import { StepTokenDetails } from './Components/StepTokenDetails';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useSteps, Wizard } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { History } from '../../components/History';
+import { RouteName } from '../../router/RouteName';
+import { ICreateBondFormValues } from './ICreateBondFormValues';
+import { useEffect } from 'react';
+import { User } from '../../utils/constants';
+import { useUserStore } from '../../store/userStore';
+import { StepConfiguration } from './Components/StepConfiguration';
+import { StepReview } from './Components/StepReview';
+import { StepCoupon } from './Components/StepCoupon';
+import { StepRegulation } from '../CreateSecurityCommons/StepRegulation';
+import { StepExternalManagement } from '../CreateSecurityCommons/StepExternalManagement';
+import { StepERC3643 } from '../CreateSecurityCommons/StepERC3643';
 
 export const CreateBond = () => {
-  const { t } = useTranslation("security", { keyPrefix: "createBond" });
-  const { t: tRoutes } = useTranslation("routes");
+  const { t } = useTranslation('security', { keyPrefix: 'createBond' });
+  const { t: tRoutes } = useTranslation('routes');
   const { setType } = useUserStore();
 
   const steps = useSteps();
   const form = useForm<ICreateBondFormValues>({
-    mode: "all",
+    mode: 'all',
     defaultValues: {
       isControllable: true,
       isBlocklist: true,
@@ -247,31 +247,31 @@ export const CreateBond = () => {
 
   const wizardSteps = [
     {
-      title: t("header.details"),
+      title: t('header.details'),
       content: <StepTokenDetails />,
     },
     {
-      title: t("header.configuration"),
+      title: t('header.configuration'),
       content: <StepConfiguration />,
     },
     {
-      title: t("header.coupon"),
+      title: t('header.coupon'),
       content: <StepCoupon />,
     },
     {
-      title: t("stepERC3643.title"),
+      title: t('stepERC3643.title'),
       content: <StepERC3643 />,
     },
     {
-      title: t("stepExternalManagement.title"),
+      title: t('stepExternalManagement.title'),
       content: <StepExternalManagement />,
     },
     {
-      title: t("header.regulation"),
+      title: t('header.regulation'),
       content: <StepRegulation />,
     },
     {
-      title: t("header.review"),
+      title: t('header.review'),
       content: <StepReview />,
     },
   ];
