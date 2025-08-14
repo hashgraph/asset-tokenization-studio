@@ -248,6 +248,7 @@ export default {
     externalControlList: "External Control",
     externalPause: "External Pause",
     externalKYCList: "External KYC",
+    freeze: "Freeze",
   },
   actions: {
     redeem: "Redeem",

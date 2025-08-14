@@ -224,6 +224,7 @@ interface IERC20 is IERC20StorageWrapper {
         IFactory.SecurityType securityType;
     }
 
+    // Initialization function
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(ERC20Metadata calldata erc1594Metadata) external;
 
@@ -267,11 +268,41 @@ interface IERC20 is IERC20StorageWrapper {
         uint256 amount
     ) external returns (bool);
 
-    function name() external view returns (string memory);
+    /**
+     * @dev Atomically increases the allowance granted to `spender` by the caller.
+     *
+     * This is an alternative to {approve} that can be used as a mitigation for
+     * problems described in {IERC20-approve}.
+     *
+     * Emits an {Approval} event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     */
+    function increaseAllowance(
+        address spender,
+        uint256 addedValue
+    ) external returns (bool);
 
-    function symbol() external view returns (string memory);
-
-    function decimals() external view returns (uint8);
+    /**
+     * @dev Atomically decreases the allowance granted to `spender` by the caller.
+     *
+     * This is an alternative to {approve} that can be used as a mitigation for
+     * problems described in {IERC20-approve}.
+     *
+     * Emits an {Approval} event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     * - `spender` must have allowance for the caller of at least
+     * `subtractedValue`.
+     */
+    function decreaseAllowance(
+        address spender,
+        uint256 subtractedValue
+    ) external returns (bool);
 
     /**
      * @dev Returns the remaining number of tokens that `spender` will be
@@ -285,5 +316,19 @@ interface IERC20 is IERC20StorageWrapper {
         address spender
     ) external view returns (uint256);
 
+    function decimalsAdjusted() external view returns (uint8);
+
+    function decimalsAdjustedAt(
+        uint256 _timestamp
+    ) external view returns (uint8);
+
+    function name() external view returns (string memory);
+
+    function symbol() external view returns (string memory);
+
+    function decimals() external view returns (uint8);
+
     function decimalsAt(uint256 _timestamp) external view returns (uint8);
+
+    function getERC20Metadata() external view returns (ERC20Metadata memory);
 }

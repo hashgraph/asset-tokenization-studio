@@ -214,13 +214,12 @@ import {
     type AccessControl,
     TimeTravel,
     ScheduledTasks,
-    ERC1410ScheduledTasks,
+    type IERC1410,
     BusinessLogicResolver,
     IFactory,
     AccessControl__factory,
     EquityUSA__factory,
     Pause__factory,
-    ERC1410ScheduledTasks__factory,
     ScheduledTasks__factory,
     TimeTravel__factory,
     Kyc,
@@ -268,7 +267,7 @@ describe('Scheduled Tasks Tests', () => {
     let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
@@ -323,10 +322,7 @@ describe('Scheduled Tasks Tests', () => {
             signer_A
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(

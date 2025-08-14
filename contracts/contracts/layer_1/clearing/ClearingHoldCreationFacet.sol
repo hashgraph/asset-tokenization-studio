@@ -210,7 +210,7 @@ import {Common} from '../common/Common.sol';
 import {
     IClearingHoldCreation
 } from '../interfaces/clearing/IClearingHoldCreation.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
+import {Hold} from '../interfaces/hold/IHold.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
@@ -226,7 +226,7 @@ contract ClearingHoldCreationFacet is
 {
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
-        IHold.Hold calldata _hold
+        Hold calldata _hold
     )
         external
         override
@@ -252,7 +252,7 @@ contract ClearingHoldCreationFacet is
 
     function clearingCreateHoldFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        IHold.Hold calldata _hold
+        Hold calldata _hold
     )
         external
         override
@@ -295,7 +295,7 @@ contract ClearingHoldCreationFacet is
 
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        IHold.Hold calldata _hold
+        Hold calldata _hold
     )
         external
         override
@@ -334,7 +334,7 @@ contract ClearingHoldCreationFacet is
 
     function protectedClearingCreateHoldByPartition(
         ProtectedClearingOperation calldata _protectedClearingOperation,
-        IHold.Hold calldata _hold,
+        Hold calldata _hold,
         bytes calldata _signature
     )
         external

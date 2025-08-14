@@ -334,7 +334,7 @@ describe('TakeSnapshotCommandHandler', () => {
         ).toHaveBeenCalledWith({
           res: { id: transactionId },
           className: TakeSnapshotCommandHandler.name,
-          position: 1,
+          position: 0,
           numberOfResultsItems: 1,
         });
       });

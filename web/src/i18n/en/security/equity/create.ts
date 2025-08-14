@@ -292,6 +292,17 @@ export default {
     externalKYCsSelected: "External KYCs selected:",
   },
 
+  stepERC3643: {
+    title: "ERC3643",
+    subtitle: "Add ERC3643 configurations",
+    compliance: "Compliance",
+    complianceId: "Compliance Id",
+    complianceIdPlaceholder: "0.0.123456",
+    identityRegistry: "Identity registry",
+    identityRegistryId: "Identity registry id",
+    identityRegistryIdPlaceholder: "0.0.123456",
+  },
+
   stepReview: {
     title: "Review",
     tokenDetails: "Digital security details",

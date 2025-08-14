@@ -205,130 +205,25 @@
 
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+interface IERC3643Batch {
+    function batchTransfer(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
 
-import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
-import {Common} from '../../common/Common.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
-import {
-    IERC1410Operator
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
+    function batchForcedTransfer(
+        address[] calldata _fromList,
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
 
-abstract contract ERC1410Operator is IERC1410Operator, Common {
-    ///////////////////////
-    /// Operator Management
-    ///////////////////////
+    function batchMint(
+        address[] calldata _toList,
+        uint256[] calldata _amounts
+    ) external;
 
-    /// @notice Authorises an operator for all partitions of `msg.sender`
-    /// @param _operator An address which is being authorised
-    function authorizeOperator(
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(_operator)
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_operator)
-    {
-        _authorizeOperator(_operator);
-    }
-
-    /// @notice Revokes authorisation of an operator previously given for all partitions of `msg.sender`
-    /// @param _operator An address which is being de-authorised
-    function revokeOperator(
-        address _operator
-    ) external override onlyUnpaused onlyListedAllowed(_msgSender()) {
-        _revokeOperator(_operator);
-    }
-
-    /// @notice Authorises an operator for a given partition of `msg.sender`
-    /// @param _partition The partition to which the operator is authorised
-    /// @param _operator An address which is being authorised
-    function authorizeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(_operator)
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_operator)
-    {
-        _authorizeOperatorByPartition(_partition, _operator);
-    }
-
-    /// @notice Revokes authorisation of an operator previously given for a specified partition of `msg.sender`
-    /// @param _partition The partition to which the operator is de-authorised
-    /// @param _operator An address which is being de-authorised
-    function revokeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyListedAllowed(_msgSender())
-    {
-        _revokeOperatorByPartition(_partition, _operator);
-    }
-
-    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
-    /// @param _operatorTransferData contains all the information about the operator transfer
-    function operatorTransferByPartition(
-        OperatorTransferData calldata _operatorTransferData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_operatorTransferData.from)
-        onlyListedAllowed(_operatorTransferData.to)
-        onlyOperator(
-            _operatorTransferData.partition,
-            _operatorTransferData.from
-        )
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.to)
-        returns (bytes32)
-    {
-        {
-            _checkValidAddress(_operatorTransferData.to);
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_operatorTransferData.to);
-            _checkRecoveredAddress(_operatorTransferData.from);
-        }
-        return _operatorTransferByPartition(_operatorTransferData);
-    }
-
-    /// @notice Determines whether `_operator` is an operator for all partitions of `_tokenHolder`
-    /// @param _operator The operator to check
-    /// @param _tokenHolder The token holder to check
-    /// @return Whether the `_operator` is an operator for all partitions of `_tokenHolder`
-    function isOperator(
-        address _operator,
-        address _tokenHolder
-    ) public view override returns (bool) {
-        return _isOperator(_operator, _tokenHolder);
-    }
-
-    /// @notice Determines whether `_operator` is an operator for a specified partition of `_tokenHolder`
-    /// @param _partition The partition to check
-    /// @param _operator The operator to check
-    /// @param _tokenHolder The token holder to check
-    /// @return Whether the `_operator` is an operator for a specified partition of `_tokenHolder`
-    function isOperatorForPartition(
-        bytes32 _partition,
-        address _operator,
-        address _tokenHolder
-    ) public view override returns (bool) {
-        return _isOperatorForPartition(_partition, _operator, _tokenHolder);
-    }
+    function batchBurn(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external;
 }

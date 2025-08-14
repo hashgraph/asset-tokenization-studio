@@ -223,41 +223,41 @@ import { Dividend } from '@domain/context/equity/Dividend';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import { HederaId } from '@domain/context/shared/HederaId';
 import {
-  ERC1594__factory,
-  ERC1644__factory,
   AccessControl__factory,
-  ControlList__factory,
-  Pause__factory,
-  ERC20__factory,
-  ERC1410ScheduledTasks__factory,
   Bond__factory,
   Cap__factory,
-  ERC1643__factory,
-  Equity__factory,
-  ScheduledSnapshots__factory,
-  Snapshots__factory,
-  Factory__factory,
-  Lock__factory,
-  Security__factory,
-  DiamondFacet__factory,
-  ProtectedPartitions__factory,
-  Hold__factory,
-  SsiManagement__factory,
-  Kyc__factory,
-  ClearingReadFacet__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
+  ClearingReadFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
-  ExternalPauseManagement__factory,
-  MockedExternalPause__factory,
+  ControlList__factory,
+  DiamondFacet__factory,
+  Equity__factory,
+  ERC1410ReadFacet__factory,
+  ERC1594__factory,
+  ERC1643__factory,
+  ERC1644__factory,
+  ERC20__factory,
   ExternalControlListManagement__factory,
-  MockedWhitelist__factory,
-  MockedBlacklist__factory,
   ExternalKycListManagement__factory,
-  MockedExternalKycList__factory,
-  ERC3643__factory,
+  ExternalPauseManagement__factory,
+  Factory__factory,
   FreezeFacet__factory,
+  HoldReadFacet__factory,
+  Kyc__factory,
+  Lock__factory,
+  MockedBlacklist__factory,
+  MockedExternalKycList__factory,
+  MockedExternalPause__factory,
+  MockedWhitelist__factory,
+  Pause__factory,
+  ProtectedPartitions__factory,
+  ScheduledSnapshots__factory,
+  Security__factory,
+  Snapshots__factory,
+  SsiManagement__factory,
+  ERC3643__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -269,11 +269,11 @@ import { Regulation } from '@domain/context/factory/Regulation';
 import { _PARTITION_ID_1 } from '@core/Constants';
 import {
   CastAccreditedInvestors,
-  CastManualInvestorVerification,
   CastInternationalInvestorscation,
-  CastResaleHoldPeriodorscation,
+  CastManualInvestorVerification,
   CastRegulationSubType,
   CastRegulationType,
+  CastResaleHoldPeriodorscation,
 } from '@domain/context/factory/RegulationType';
 import { ScheduledBalanceAdjustment } from '@domain/context/equity/ScheduledBalanceAdjustment';
 import { DividendFor } from '@domain/context/equity/DividendFor';
@@ -335,7 +335,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).balanceOf(target.toString());
   }
@@ -350,7 +350,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).balanceOfByPartition(partitionId, target.toString());
   }
@@ -411,7 +411,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).partitionsOf(targetId.toString());
   }
@@ -437,7 +437,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).totalSupply();
   }
@@ -538,7 +538,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getERC20Metadata();
     const totalSupply = await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).totalSupply();
     const maxSupply = await this.connect(
@@ -566,7 +566,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).isInternalKycActivated();
     const isMultiPartition = await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).isMultiPartition();
     const isIssuable = await this.connect(
@@ -909,7 +909,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Checking can transfer by partition`);
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).canTransferByPartition(
       sourceId.toString(),
@@ -955,7 +955,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Checking can redeem`);
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).canRedeemByPartition(
       sourceId.toString(),
@@ -1000,7 +1000,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).isOperatorForPartition(
       partitionId,
@@ -1019,7 +1019,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).isOperator(operator.toString(), target.toString());
   }
@@ -1084,7 +1084,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledTasks__factory,
+      ERC1410ReadFacet__factory,
       address.toString(),
     ).totalSupplyByPartition(partitionId);
   }
@@ -1233,7 +1233,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Held Amount For ${targetId}`);
 
     const heldAmountFor = await this.connect(
-      Hold__factory,
+      HoldReadFacet__factory,
       address.toString(),
     ).getHeldAmountFor(targetId.toString());
 
@@ -1250,7 +1250,7 @@ export class RPCQueryAdapter {
     );
 
     const heldAmountForByPartition = await this.connect(
-      Hold__factory,
+      HoldReadFacet__factory,
       address.toString(),
     ).getHeldAmountForByPartition(partitionId, targetId.toString());
 
@@ -1267,7 +1267,7 @@ export class RPCQueryAdapter {
     );
 
     const holdCountForByPartition = await this.connect(
-      Hold__factory,
+      HoldReadFacet__factory,
       address.toString(),
     ).getHoldCountForByPartition(partitionId, targetId.toString());
 
@@ -1286,7 +1286,7 @@ export class RPCQueryAdapter {
     );
 
     const holdsIdForByPartition = await this.connect(
-      Hold__factory,
+      HoldReadFacet__factory,
       address.toString(),
     ).getHoldsIdForByPartition(partitionId, target.toString(), start, end);
 
@@ -1304,7 +1304,7 @@ export class RPCQueryAdapter {
     );
 
     const hold = await this.connect(
-      Hold__factory,
+      HoldReadFacet__factory,
       address.toString(),
     ).getHoldForByPartition({
       partition: partitionId,

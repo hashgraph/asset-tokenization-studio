@@ -231,6 +231,8 @@ export class SecurityDataBuilder {
     externalControlLists: EvmAddress[] = [],
     externalKycLists: EvmAddress[] = [],
     diamondOwnerAccount: EvmAddress,
+    compliance: EvmAddress,
+    identityRegistry: EvmAddress,
   ): SecurityData {
     const rbacAdmin: Rbac = {
       role: SecurityRole._DEFAULT_ADMIN_ROLE,
@@ -257,6 +259,8 @@ export class SecurityDataBuilder {
       externalPauses: externalPauses.map((addr) => addr.toString()),
       externalControlLists: externalControlLists.map((addr) => addr.toString()),
       externalKycLists: externalKycLists.map((addr) => addr.toString()),
+      compliance: compliance.toString(),
+      identityRegistry: identityRegistry.toString(),
     };
   }
 

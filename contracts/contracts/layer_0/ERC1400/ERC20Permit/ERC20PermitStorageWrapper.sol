@@ -213,7 +213,7 @@ import {
     IERC20Permit
 } from '../../../layer_1/interfaces/ERC1400/IERC20Permit.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
-import {_ERC20PERMIT_TYPEHASH} from '../../constants/values.sol';
+import {ERC20PERMIT_TYPEHASH} from '../../constants/values.sol';
 import {
     _CONTRACT_NAME,
     _CONTRACT_VERSION
@@ -238,7 +238,7 @@ abstract contract ERC20PermitStorageWrapper is ERC1594StorageWrapper {
 
         bytes32 structHash = keccak256(
             abi.encode(
-                _ERC20PERMIT_TYPEHASH,
+                ERC20PERMIT_TYPEHASH,
                 owner,
                 spender,
                 value,

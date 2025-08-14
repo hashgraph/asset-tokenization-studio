@@ -228,6 +228,7 @@ import { Tag } from "./Tag";
 import { Textarea } from "./Forms/Textarea";
 import { Toggle } from "./Forms/Toggle";
 import { Tooltip } from "./Tooltip";
+import { ConfigPanelTabs } from "./PanelTabs";
 
 export const components = {
   Accordion,
@@ -252,6 +253,7 @@ export const components = {
   Switch: Toggle,
   Table,
   Tabs,
+  PanelTabs: ConfigPanelTabs,
   Tag,
   Textarea,
   Tooltip,

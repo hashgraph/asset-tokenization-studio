@@ -225,6 +225,7 @@ import { CreateBondCommandError } from './error/CreateBondCommandError';
 import { Response } from '@domain/context/transaction/Response';
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
+import { EVM_ZERO_ADDRESS } from '@core/Constants';
 
 @CommandHandler(CreateBondCommand)
 export class CreateBondCommandHandler
@@ -263,6 +264,8 @@ export class CreateBondCommandHandler
         externalPauses,
         externalControlLists,
         externalKycLists,
+        compliance,
+        identityRegistry,
       } = command;
 
       //TODO: Boy scout: remove request validations and adjust test
@@ -307,6 +310,14 @@ export class CreateBondCommandHandler
         this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
       ]);
 
+      const complianceEvmAddress = compliance
+        ? await this.contractService.getContractEvmAddress(compliance)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
+      const identityRegistryAddress = identityRegistry
+        ? await this.contractService.getContractEvmAddress(identityRegistry)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
       const handler = this.transactionService.getHandler();
 
       const bondInfo = new BondDetails(
@@ -330,6 +341,8 @@ export class CreateBondCommandHandler
         resolverEvmAddress,
         configId,
         configVersion,
+        complianceEvmAddress,
+        identityRegistryAddress,
         externalPausesEvmAddresses,
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,

@@ -206,43 +206,50 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface IERC1410Operator {
-    struct OperatorTransferData {
-        bytes32 partition;
-        address from;
-        address to;
-        uint256 value;
-        bytes data;
-        bytes operatorData;
+import {IERC3643Batch} from '../interfaces/ERC3643/IERC3643Batch.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_ERC3643_BATCH_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ERC3643Batch} from './ERC3643Batch.sol';
+
+contract ERC3643BatchFacet is ERC3643Batch, IStaticFunctionSelectors {
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _ERC3643_BATCH_RESOLVER_KEY;
     }
-    function operatorTransferByPartition(
-        OperatorTransferData calldata _operatorTransferData
-    ) external returns (bytes32);
 
-    // Operator Management
-    function authorizeOperator(address _operator) external;
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](4);
+        uint256 selectorsIndex;
 
-    function revokeOperator(address _operator) external;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .batchForcedTransfer
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchMint.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchBurn.selector;
+    }
 
-    function authorizeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    ) external;
-
-    function revokeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    ) external;
-
-    // Operator Information
-    function isOperator(
-        address _operator,
-        address _tokenHolder
-    ) external view returns (bool);
-
-    function isOperatorForPartition(
-        bytes32 _partition,
-        address _operator,
-        address _tokenHolder
-    ) external view returns (bool);
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Batch).interfaceId;
+    }
 }

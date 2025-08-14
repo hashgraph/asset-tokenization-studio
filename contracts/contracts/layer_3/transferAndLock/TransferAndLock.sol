@@ -206,19 +206,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
+import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
-import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
+import {BasicTransferInfo} from '../../layer_1/interfaces/ERC1400/IERC1410.sol';
 import {
     TransferAndLockStorageWrapper
 } from './TransferAndLockStorageWrapper.sol';
-import {
-    IERC1410Basic
-} from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 
 contract TransferAndLock is
     IStaticFunctionSelectors,
@@ -242,7 +240,7 @@ contract TransferAndLock is
     {
         _transferByPartition(
             _msgSender(),
-            IERC1410Basic.BasicTransferInfo(_to, _amount),
+            BasicTransferInfo(_to, _amount),
             _partition,
             _data,
             _msgSender(),
@@ -282,7 +280,7 @@ contract TransferAndLock is
     {
         _transferByPartition(
             _msgSender(),
-            IERC1410Basic.BasicTransferInfo(_to, _amount),
+            BasicTransferInfo(_to, _amount),
             _DEFAULT_PARTITION,
             _data,
             _msgSender(),

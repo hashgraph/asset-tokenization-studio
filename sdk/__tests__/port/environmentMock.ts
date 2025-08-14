@@ -503,6 +503,8 @@ function createBondMockImplementation(
   _resolver: EvmAddress,
   _configId: string,
   _configVersion: number,
+  _compliance?: EvmAddress,
+  _identityRegistryAddress?: EvmAddress,
   _externalPauses?: EvmAddress[],
   _diamondOwnerAccount?: EvmAddress,
 ): Promise<TransactionResponse> {
@@ -1070,7 +1072,7 @@ jest.mock('@port/out/rpc/RPCQueryAdapter', () => {
 
       if (securityInfo.clearingActive) return [false, '0x52', ''];
 
-      return [true, '0x00', ''];
+      return [true, '0x01', ''];
     },
   );
 
@@ -1122,7 +1124,7 @@ jest.mock('@port/out/rpc/RPCQueryAdapter', () => {
 
       if (securityInfo.clearingActive) return [false, '0x52', ''];
 
-      return [true, '0x00', ''];
+      return [true, '0x01', ''];
     },
   );
 
@@ -1193,7 +1195,7 @@ jest.mock('@port/out/rpc/RPCQueryAdapter', () => {
 
       if (securityInfo.clearingActive) return [false, '0x52', ''];
 
-      return [true, '0x00', ''];
+      return [true, '0x01', ''];
     },
   );
 
@@ -1650,6 +1652,8 @@ jest.mock('@port/out/rpc/RPCTransactionAdapter', () => {
       _resolver: EvmAddress,
       _configId: string,
       _configVersion: number,
+      _compliance?: EvmAddress,
+      _identityRegistryAddress?: EvmAddress,
       _externalPauses?: EvmAddress[],
       _diamondOwnerAccount?: EvmAddress,
     ) => {

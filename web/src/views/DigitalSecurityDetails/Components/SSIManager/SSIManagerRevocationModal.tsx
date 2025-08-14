@@ -16,7 +16,7 @@ import { useSetRevocationRegistryAddress } from "../../../../hooks/mutations/use
 import { useState } from "react";
 import { SetRevocationRegistryAddressRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
-import { isHederaValidAddress, required } from "../../../../utils/rules";
+import { isValidHederaId, required } from "../../../../utils/rules";
 
 interface FormValues {
   accountId: string;
@@ -77,7 +77,10 @@ export const SSIManagerRevocationModal = ({
               id="accountId"
               label={tRevocation("form.account.label")}
               placeholder={tRevocation("form.account.placeholder")}
-              rules={{ required, validate: { isHederaValidAddress } }}
+              rules={{
+                required,
+                validate: { isValidHederaId: isValidHederaId },
+              }}
             />
           </VStack>
         </ModalBody>

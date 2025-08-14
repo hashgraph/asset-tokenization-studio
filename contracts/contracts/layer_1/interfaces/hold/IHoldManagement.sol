@@ -206,23 +206,54 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface IERC1410ProtectedPartitions {
-    function protectedTransferFromByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) external;
+import {Hold, ProtectedHold} from './IHold.sol';
 
-    function protectedRedeemFromByPartition(
+interface IHoldManagement {
+    event OperatorHeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event ControllerHeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event ProtectedHeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    function operatorCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external returns (bool success_, uint256 holdId_);
+
+    function controllerCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external returns (bool success_, uint256 holdId_);
+
+    function protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        ProtectedHold memory _protectedHold,
         bytes calldata _signature
-    ) external;
+    ) external returns (bool success_, uint256 holdId_);
 }

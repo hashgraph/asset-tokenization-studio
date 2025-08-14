@@ -291,6 +291,8 @@ export const StepReview = () => {
   const externalControlList = getValues("externalControlList");
   const externalKYCList = getValues("externalKYCList");
   const internalKycActivated = getValues("internalKycActivated");
+  const complianceId = getValues("complianceId");
+  const identityRegistryId = getValues("identityRegistryId");
 
   countriesList = countriesList.concat(
     countriesListType === 2 ? COUNTRY_LIST_ALLOWED : COUNTRY_LIST_BLOCKED,
@@ -352,6 +354,12 @@ export const StepReview = () => {
           externalKycLists: externalKYCList,
         }),
       internalKycActivated,
+      ...(complianceId && {
+        complianceId: complianceId,
+      }),
+      ...(identityRegistryId && {
+        identityRegistryId: identityRegistryId,
+      }),
     });
 
     createBond(request);
@@ -403,6 +411,16 @@ export const StepReview = () => {
     },
   ];
 
+  const erc3643Details: DetailReviewProps[] = [
+    {
+      title: t("stepERC3643.complianceId"),
+      value: complianceId ?? "-",
+    },
+    {
+      title: t("stepERC3643.identityRegistryId"),
+      value: identityRegistryId ?? "-",
+    },
+  ];
   const externalManagement: DetailReviewProps[] = [
     {
       title: t("stepExternalManagement.externalPause"),
@@ -515,8 +533,15 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
+          <InfoDivider step={4} title={t("stepERC3643.title")} type="main" />
+          <SimpleGrid columns={1} gap={6} w="full">
+            {erc3643Details.map((props) => (
+              <DetailReview {...props} />
+            ))}
+          </SimpleGrid>
+
           <InfoDivider
-            step={4}
+            step={5}
             title={t("stepExternalManagement.title")}
             type="main"
           />
@@ -526,7 +551,7 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
-          <InfoDivider step={5} title={t("header.regulation")} type="main" />
+          <InfoDivider step={6} title={t("header.regulation")} type="main" />
           <SimpleGrid columns={1} gap={6} w="full">
             {regulationDetails.map((props) => (
               <DetailReview {...props} />

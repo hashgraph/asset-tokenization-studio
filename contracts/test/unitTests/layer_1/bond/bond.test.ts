@@ -214,20 +214,20 @@ import {
     AccessControl,
     Pause,
     Lock,
-    Hold,
     TimeTravel,
-    ERC1410ScheduledTasks,
+    type IERC1410,
     IFactory,
     BusinessLogicResolver,
-    ERC1410ScheduledTasks__factory,
     Lock__factory,
-    Hold__factory,
     Pause__factory,
     AccessControl__factory,
     BondUSATimeTravel__factory,
     TimeTravel__factory,
     Kyc,
     SsiManagement,
+    IHold,
+    IHold__factory,
+    SsiManagement__factory,
     ControlList,
     ClearingActionsFacet,
     ProtectedPartitions,
@@ -303,8 +303,8 @@ describe('Bond Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock
-    let holdFacet: Hold
-    let erc1410Facet: ERC1410ScheduledTasks
+    let holdFacet: IHold
+    let erc1410Facet: IERC1410
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
@@ -363,15 +363,11 @@ describe('Bond Tests', () => {
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
         lockFacet = Lock__factory.connect(diamond.address, signer_A)
-        holdFacet = Hold__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        holdFacet = IHold__factory.connect(diamond.address, signer_A)
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
-        ssiManagementFacet = await ethers.getContractAt(
-            'SsiManagement',
+        ssiManagementFacet = SsiManagement__factory.connect(
             diamond.address,
             signer_A
         )

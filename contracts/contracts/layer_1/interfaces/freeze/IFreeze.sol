@@ -206,37 +206,69 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface IERC1410Basic {
-    struct BasicTransferInfo {
-        address to;
-        uint256 value;
-    }
+interface IFreeze {
+    /**
+     *  @notice This event is emitted when a certain amount of tokens is frozen on a wallet
+     */
+    event TokensFrozen(
+        address indexed account,
+        uint256 amount,
+        bytes32 partition
+    );
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410_Basic(bool _multiPartition) external;
+    /**
+     *  @notice This event is emitted when a certain amount of tokens is unfrozen on a wallet
+     */
+    event TokensUnfrozen(
+        address indexed account,
+        uint256 amount,
+        bytes32 partition
+    );
 
-    function transferByPartition(
-        bytes32 _partition,
-        BasicTransferInfo calldata _basicTransferInfo,
-        bytes calldata _data
-    ) external returns (bytes32);
+    /**
+     *  @dev This event is emitted when the wallet of an investor is frozen or unfrozen
+     *  @dev The event is emitted by setAddressFrozen and batchSetAddressFrozen functions
+     *  @param userAddress Is the wallet of the investor that is concerned by the freezing status
+     *  @param isFrozen Is the freezing status of the wallet
+     *  @param owner Is the address of the agent who called the function to freeze the wallet
+     */
+    event AddressFrozen(
+        address indexed userAddress,
+        bool indexed isFrozen,
+        address indexed owner
+    );
 
-    function balanceOf(address _tokenHolder) external view returns (uint256);
+    /*
+     * @dev Freezes a partial amount of the user's tokens across all partitions.
+     * Emits a TokensFrozen event.
+     */
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    ) external;
 
-    function balanceOfByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256);
+    /*
+     * @dev Unfreezes a partial amount of the user's previously frozen tokens across all partitions.
+     * Emits a TokensUnfrozen event.
+     */
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    ) external;
 
-    function partitionsOf(
-        address _tokenHolder
-    ) external view returns (bytes32[] memory);
+    /*
+     * @dev Freezes the user's address entirely, disabling all token operations.
+     * Emits a TokensFrozen event.
+     */
+    function setAddressFrozen(
+        address _userAddress,
+        bool _freezeStatus
+    ) external;
 
-    function totalSupply() external view returns (uint256);
-
-    function isMultiPartition() external view returns (bool);
-
-    function totalSupplyByPartition(
-        bytes32 _partition
+    /*
+     * @dev Returns the total amount of tokens currently frozen for the given user across all partitions.
+     */
+    function getFrozenTokens(
+        address _userAddress
     ) external view returns (uint256);
 }

@@ -204,10 +204,10 @@
 */
 
 import { Stack } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { ProgramCoupon } from "./ProgramCoupon";
 import { SeeCoupon } from "./SeeCoupon";
+import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 import { CouponsHolders } from "./CouponsHolders";
 import { CouponsList } from "./CouponsList";
 
@@ -218,7 +218,7 @@ export const Coupons = () => {
 
   return (
     <Stack w="full" h="full" layerStyle="container" pt={0}>
-      <Tabs
+      <PanelTabs
         tabs={[
           { content: <CouponsList />, header: tTabs("list") },
           { content: <ProgramCoupon />, header: tTabs("program") },

@@ -250,9 +250,11 @@ export interface DeployedBusinessLogics {
     ERC20: IStaticFunctionSelectors
     ERC20Permit: IStaticFunctionSelectors
     ERC1644: IStaticFunctionSelectors
-    eRC1410ScheduledTasks: IStaticFunctionSelectors
+    erc1410ReadFacet: IStaticFunctionSelectors
+    erc1410ManagementFacet: IStaticFunctionSelectors
+    erc1410TokenHolderFacet: IStaticFunctionSelectors
     ERC1594: IStaticFunctionSelectors
-    eRC1643: IStaticFunctionSelectors
+    ERC1643: IStaticFunctionSelectors
     equityUSA: IStaticFunctionSelectors
     bondUSA: IStaticFunctionSelectors
     Snapshots: IStaticFunctionSelectors
@@ -264,11 +266,15 @@ export interface DeployedBusinessLogics {
     transferAndLock: IStaticFunctionSelectors
     adjustBalances: IStaticFunctionSelectors
     protectedPartitions: IStaticFunctionSelectors
-    Hold: IStaticFunctionSelectors
+    holdReadFacet: IStaticFunctionSelectors
+    holdManagementFacet: IStaticFunctionSelectors
+    holdTokenHolderFacet: IStaticFunctionSelectors
     externalPauseManagement: IStaticFunctionSelectors
     externalControlListManagement: IStaticFunctionSelectors
     externalKycListManagement: IStaticFunctionSelectors
+    freeze: IStaticFunctionSelectors
     ERC3643: IStaticFunctionSelectors
+    ERC3643Batch: IStaticFunctionSelectors
 }
 
 export let businessLogicResolver: IBusinessLogicResolver

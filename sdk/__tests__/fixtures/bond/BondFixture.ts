@@ -299,6 +299,8 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
       HederaIdPropsFixture.create().value,
     ]);
     command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+    command.compliance?.as(() => HederaIdPropsFixture.create().value);
+    command.identityRegistry?.as(() => HederaIdPropsFixture.create().value);
   },
 );
 
@@ -501,6 +503,7 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
       HederaIdPropsFixture.create().value,
     ]);
     request.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
+    request.compliance?.as(() => HederaIdPropsFixture.create().value);
   },
 );
 

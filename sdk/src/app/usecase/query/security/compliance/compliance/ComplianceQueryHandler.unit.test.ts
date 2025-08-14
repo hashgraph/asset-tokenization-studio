@@ -205,6 +205,7 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import {
+  AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
 } from '@test/fixtures/shared/DataFixture';
@@ -216,6 +217,8 @@ import { ComplianceQuery, ComplianceQueryResponse } from './ComplianceQuery';
 import { ComplianceQueryHandler } from './ComplianceQueryHandler';
 import { ComplianceQueryError } from './error/ComplianceQueryError';
 import { ComplianceQueryFixture } from '@test/fixtures/compliance/ComplianceFixture';
+import AccountService from '@service/account/AccountService';
+import Account from '@domain/context/account/Account';
 
 describe('ComplianceQueryHandler', () => {
   let handler: ComplianceQueryHandler;
@@ -223,16 +226,19 @@ describe('ComplianceQueryHandler', () => {
 
   const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
   const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const compliance = new EvmAddress(EvmAddressPropsFixture.create().value)
     .value;
   const errorMsg = ErrorMsgFixture.create().msg;
+  const account = new Account(AccountPropsFixture.create());
 
   beforeEach(() => {
     handler = new ComplianceQueryHandler(
       queryAdapterServiceMock,
       contractServiceMock,
+      accountServiceMock,
     );
     query = ComplianceQueryFixture.create();
   });
@@ -264,19 +270,25 @@ describe('ComplianceQueryHandler', () => {
         evmAddress,
       );
       queryAdapterServiceMock.compliance.mockResolvedValueOnce(compliance);
+      accountServiceMock.getAccountInfo.mockResolvedValueOnce(account);
 
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(ComplianceQueryResponse);
-      expect(result.payload).toBe(compliance);
+      expect(result.payload).toBe(account.id.toString());
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
         1,
       );
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledTimes(1);
+
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
         query.securityId,
       );
       expect(queryAdapterServiceMock.compliance).toHaveBeenCalledWith(
         evmAddress,
+      );
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(
+        compliance,
       );
     });
   });

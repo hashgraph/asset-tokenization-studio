@@ -1,11 +1,11 @@
 import { Box } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { BalanceAdjustment } from "../BalanceAdjustment/BalanceAdjustment";
 import { Dividends } from "../Dividends/Dividends";
 import { VotingRights } from "../VotingRights/VotingRights";
 import { Coupons } from "../Coupons/Coupons";
 import { useMemo } from "react";
+import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 
 interface OperationsTabProps {
   config: {
@@ -48,7 +48,7 @@ export const CorporateActionsTab = ({ config }: OperationsTabProps) => {
 
   return (
     <Box w={"full"} h={"full"}>
-      <Tabs tabs={tabs} variant="secondary" />
+      <PanelTabs tabs={tabs} />
     </Box>
   );
 };

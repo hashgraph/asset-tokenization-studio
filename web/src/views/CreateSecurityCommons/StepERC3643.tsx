@@ -203,200 +203,100 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
-
-import {Common} from '../common/Common.sol';
-import {IFreeze} from '../interfaces/ERC3643/IFreeze.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_FREEZE_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+  FormControl,
+  HStack,
+  SimpleGrid,
+  Stack,
+  VStack,
+} from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
+import { InfoDivider, InputController, Text } from "io-bricks-ui";
+import { useFormContext, useFormState } from "react-hook-form";
+import { ICreateEquityFormValues } from "../CreateEquity/ICreateEquityFormValues";
+import { ICreateBondFormValues } from "../CreateBond/ICreateBondFormValues";
+import { FormStepContainer } from "../../components/FormStepContainer";
+import { CancelButton } from "../../components/CancelButton";
+import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
+import { NextStepButton } from "../CreateEquity/Components/NextStepButton";
+import { isValidHederaId } from "../../utils/rules";
 
-contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
-    // ====== External functions (state-changing) ======
+export const StepERC3643 = () => {
+  const { t } = useTranslation("security", {
+    keyPrefix: "createEquity.stepERC3643",
+  });
 
-    function setAddressFrozen(
-        address _userAddress,
-        bool _freezStatus
-    ) external override onlyUnpaused validateAddress(_userAddress) {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _setAddressFrozen(_userAddress, _freezStatus);
-        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
-    }
+  const { control } = useFormContext<
+    ICreateEquityFormValues | ICreateBondFormValues
+  >();
 
-    function freezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyUnrecoveredAddress(_userAddress)
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
+  const { errors, isSubmitting } = useFormState({
+    control,
+  });
 
-    function unfreezePartialTokens(
-        address _userAddress,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        _unfreezeTokens(_userAddress, _amount);
-        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
-    }
+  // Can proceed if there are no validation errors and the form isn't submitting
+  const canProceed = Object.keys(errors ?? {}).length === 0 && !isSubmitting;
 
-    function batchSetAddressFrozen(
-        address[] calldata _userAddresses,
-        bool[] calldata _freeze
-    ) external onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _setAddressFrozen(_userAddresses[i], _freeze[i]);
-            emit AddressFrozen(_userAddresses[i], _freeze[i], _msgSender());
-        }
-    }
+  return (
+    <FormStepContainer>
+      <Stack gap={2}>
+        <Text textStyle="HeadingMediumLG">{t("title")}</Text>
+        <Text textStyle="BodyTextRegularMD">{t("subtitle")}</Text>
+      </Stack>
 
-    function batchFreezePartialTokens(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _checkRecoveredAddress(_userAddresses[i]);
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _freezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensFrozen(
-                _userAddresses[i],
-                _amounts[i],
-                _DEFAULT_PARTITION
-            );
-        }
-    }
+      <InfoDivider title={t("compliance")} type="main" />
+      <VStack w="full">
+        <FormControl gap={4} as={SimpleGrid} columns={{ base: 7, lg: 1 }}>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">{t("complianceId")}</Text>
+            </HStack>
+            <InputController
+              control={control}
+              id="complianceId"
+              rules={{
+                validate: (value: string) =>
+                  !value || isValidHederaId(value) || t("invalidHederaId"),
+              }}
+              placeholder={t("complianceIdPlaceholder")}
+            />
+          </Stack>
+        </FormControl>
+      </VStack>
 
-    function batchUnfreezePartialTokens(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _FREEZE_MANAGER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _unfreezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensUnfrozen(
-                _userAddresses[i],
-                _amounts[i],
-                _DEFAULT_PARTITION
-            );
-        }
-    }
+      <InfoDivider title={t("identityRegistry")} type="main" />
+      <VStack w="full">
+        <FormControl gap={4} as={SimpleGrid} columns={{ base: 7, lg: 1 }}>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">
+                {t("identityRegistryId")}
+              </Text>
+            </HStack>
+            <InputController
+              control={control}
+              id="identityRegistryId"
+              rules={{
+                validate: (value: string) =>
+                  !value || isValidHederaId(value) || t("invalidHederaId"),
+              }}
+              placeholder={t("identityRegistryIdPlaceholder")}
+            />
+          </Stack>
+        </FormControl>
+      </VStack>
 
-    // ====== External functions (view/pure) ======
-
-    function getFrozenTokens(
-        address _userAddress
-    ) external view override returns (uint256) {
-        return _getFrozenAmountForAdjusted(_userAddress);
-    }
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _FREEZE_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](7);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .freezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .unfreezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getFrozenTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setAddressFrozen
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchSetAddressFrozen
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchFreezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchUnfreezePartialTokens
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IFreeze).interfaceId;
-    }
-}
+      <HStack
+        gap={4}
+        w="full"
+        h="100px"
+        align="end"
+        justifyContent={"flex-end"}
+      >
+        <CancelButton />
+        <PreviousStepButton />
+        <NextStepButton isDisabled={!canProceed} />
+      </HStack>
+    </FormStepContainer>
+  );
+};

@@ -220,11 +220,13 @@ import { useParams } from "react-router-dom";
 import { Flex } from "@chakra-ui/react";
 import {
   BondDetailsViewModel,
+  ComplianceRequest,
   EquityDetailsViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useMemo } from "react";
 import { MaturityDateItem } from "./MadurityDateItem";
 import { DATE_TIME_FORMAT } from "../../../utils/constants";
+import { useGetCompliance } from "../../../hooks/queries/useCompliance";
 
 interface SecurityDetailsExtended extends Omit<DefinitionListProps, "items"> {
   bondDetailsResponse?: BondDetailsViewModel;
@@ -243,6 +245,15 @@ export const SecurityDetailsExtended = ({
   const { t: tProperties } = useTranslation("properties");
   const { details } = useSecurityStore();
   const { id } = useParams();
+
+  const { data: compliance } = useGetCompliance(
+    new ComplianceRequest({
+      securityId: id!,
+    }),
+    {
+      enabled: !!id,
+    },
+  );
 
   const nominalValue = useMemo(() => {
     return toNumber(
@@ -310,6 +321,13 @@ export const SecurityDetailsExtended = ({
       },
     ];
 
+    if (compliance !== undefined) {
+      items.push({
+        title: tProperties("compliance"),
+        description: `${compliance}`,
+      });
+    }
+
     const isBond = details?.type === "BOND";
 
     if (isBond && bondDetailsResponse?.startingDate) {
@@ -330,7 +348,7 @@ export const SecurityDetailsExtended = ({
     }
 
     return items;
-  }, [details, id, nominalValue, tProperties, bondDetailsResponse]);
+  }, [details, id, nominalValue, tProperties, bondDetailsResponse, compliance]);
 
   return (
     <DefinitionList

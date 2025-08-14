@@ -214,7 +214,7 @@ import {
     type ERC1594,
     type AccessControl,
     type Equity,
-    ERC1410ScheduledTasks,
+    type IERC1410,
     IFactory,
     BusinessLogicResolver,
     SsiManagement,
@@ -265,7 +265,7 @@ describe('ERC1644 Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let equityFacet: Equity
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
 
@@ -376,7 +376,7 @@ describe('ERC1644 Tests', () => {
             pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
+                'IERC1410',
                 diamond.address,
                 signer_B
             )

@@ -232,4 +232,6 @@ export interface ICreateEquityFormValues {
   externalControlList?: string[];
   externalKYCList?: string[];
   internalKycActivated: boolean;
+  complianceId?: string;
+  identityRegistryId?: string;
 }
