@@ -287,7 +287,7 @@ export const SDKConnection = () => {
 
   const walletPaired = (event: EventParameter<'walletPaired'>) => {
     console.log('SDK message --> Wallet paired', event);
-    const { data, network } = event;
+    const { data, network } = event as { data: any; network: any };
 
     showErrors(data, network);
     if (data.account?.id.value != '0.0.0') {

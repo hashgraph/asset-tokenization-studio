@@ -202,7 +202,6 @@
    limitations under the License.
 
 */
-
 import SecurityViewModel from '../response/SecurityViewModel';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import Injectable from '@core/injectable/Injectable';
@@ -263,7 +262,7 @@ import {
 
 export { SecurityViewModel, SecurityControlListType };
 
-/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging, no-redeclare */
 interface SecurityInPort
   extends ISecurityInPortAgent,
     ISecurityInPortBalance,
