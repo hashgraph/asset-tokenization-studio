@@ -1,0 +1,24 @@
+{
+  // Force Prettier as default formatter for all, and specifically Solidity
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[solidity]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  // Avoid VS Code built-in or other extensions re-formatting
+  "editor.formatOnSave": true,
+  // Ensure any other formatters (like solidity language server) do not auto format on save
+  "solidity.formatter": "prettier", // for JuanBlanco.solidity extension
+  "solidity.compileUsingRemoteVersion": "v0.8.18+commit.87f61d96",
+  // Consistent tab size override for Solidity if needed (Prettier overrides with its config anyway)
+  "[solidity][*.sol]": {
+    "editor.tabSize": 4
+  },
+  // Respect EditorConfig but Prettier should take precedence on format run
+  "editor.useEditorConfig": true,
+  // Disable any ESLint format on save to avoid double-format passes; rely on Prettier only
+  "editor.codeActionsOnSave": {
+    // Keep ESLint fix separate; if you want ESLint fixes too, set to "explicit" or true, but avoid formatting flip-flop
+    // "source.fixAll.eslint": "explicit"
+  }
+}
