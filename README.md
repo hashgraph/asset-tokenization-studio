@@ -8,19 +8,19 @@
 
 ### Table of Contents
 
--   **[Development manifesto](#development-manifesto)**<br>
--   **[Prerequisites](#prerequisites)**<br>
--   **[Installation](#installation)**<br>
--   **[Build](#build)**<br>
--   **[Setting Up the Environment](#setting-up-the-environment)**<br>
-    -   **[Required Environment Variables](#required-environment-variables)**<br>
-    -   **[Optional Environment Variables (Hedera Wallet Connect)](#optional-environment-variables-hedera-wallet-connect)**<br>
-    -   **[Steps to set up the `.env` file](#steps-to-set-up-the-env-file)**<br>
--   **[Run](#run)**<br>
--   **[Support](#support)**<br>
--   **[Contributing](#contributing)**<br>
--   **[Code of conduct](#code-of-conduct)**<br>
--   **[License](#license)**<br>
+- **[Development manifesto](#development-manifesto)**<br>
+- **[Prerequisites](#prerequisites)**<br>
+- **[Installation](#installation)**<br>
+- **[Build](#build)**<br>
+- **[Setting Up the Environment](#setting-up-the-environment)**<br>
+  - **[Required Environment Variables](#required-environment-variables)**<br>
+  - **[Optional Environment Variables (Hedera Wallet Connect)](#optional-environment-variables-hedera-wallet-connect)**<br>
+  - **[Steps to set up the `.env` file](#steps-to-set-up-the-env-file)**<br>
+- **[Run](#run)**<br>
+- **[Support](#support)**<br>
+- **[Contributing](#contributing)**<br>
+- **[Code of conduct](#code-of-conduct)**<br>
+- **[License](#license)**<br>
 
 # Description
 
@@ -28,16 +28,16 @@ Asset Tokenization Studio (ATS) is a suite designed to enable the creation, mana
 
 The ATS facilitates the tokenization of traditional financial assets (equities and bonds) onto the Hedera distributed ledger, providing a framework for:
 
--   Creating and deploying security tokens
--   Managing token lifecycles
--   Implementing compliance and regulatory requirements
--   Enabling secure token transfers and operations
+- Creating and deploying security tokens
+- Managing token lifecycles
+- Implementing compliance and regulatory requirements
+- Enabling secure token transfers and operations
 
 The ATS consists of three primary components that work together to provide a complete tokenization solution:
 
--   Smart Contracts - The on-chain components deployed on the Hedera network
--   SDK - A software development kit that provides programmatic access to the contracts
--   Web Application - A user interface for interacting with the tokenized assets
+- Smart Contracts - The on-chain components deployed on the Hedera network
+- SDK - A software development kit that provides programmatic access to the contracts
+- Web Application - A user interface for interacting with the tokenized assets
 
 The standard ERC for security tokens used in the smart contracts is ERC1400.
 
@@ -55,16 +55,16 @@ By using DDD (Domain-Driven Design), we aim to create a shared language among al
 
 The Asset Tokenization Studio supports multiple security token standards:
 
--   **ERC1400**: Core security token standard with partition-based token management
--   **ERC3643 (T-REX)**: Advanced compliance framework with identity registry, compliance modules, and sophisticated freeze capabilities
+- **ERC1400**: Core security token standard with partition-based token management
+- **ERC3643 (T-REX)**: Advanced compliance framework with identity registry, compliance modules, and sophisticated freeze capabilities
 
 # Prerequisites
 
 Ensure the following tools are installed:
 
--   **Node:** v20.19.4 (LTS: Iron) or newer
--   **NPM :** v10.8.2 or newer
--   **Yarn:** v1.22.22
+- **Node:** v20.19.4 (LTS: Iron) or newer
+- **NPM :** v10.8.2 or newer
+- **Yarn:** v1.22.22
 
 # Installation
 
@@ -99,59 +99,59 @@ To run the project, you'll need to configure environment variables in the `.env`
 
 ### _General Settings_
 
--   **`REACT_APP_EQUITY_CONFIG_ID`**: Configuration Id for Equities.
--   **`REACT_APP_EQUITY_CONFIG_VERSION`**: Equity Version.
--   **`REACT_APP_BOND_CONFIG_ID`**: configuration Id for Bonds.
--   **`REACT_APP_BOND_CONFIG_VERSION`**: Bond Version.
--   **`REACT_APP_SHOW_DISCLAIMER`**: Set this value to `"true"` to show a disclaimer in the application.
+- **`REACT_APP_EQUITY_CONFIG_ID`**: Configuration Id for Equities.
+- **`REACT_APP_EQUITY_CONFIG_VERSION`**: Equity Version.
+- **`REACT_APP_BOND_CONFIG_ID`**: configuration Id for Bonds.
+- **`REACT_APP_BOND_CONFIG_VERSION`**: Bond Version.
+- **`REACT_APP_SHOW_DISCLAIMER`**: Set this value to `"true"` to show a disclaimer in the application.
 
 ### _Network Configuration_
 
--   **`REACT_APP_MIRROR_NODE`**: The URL of the Hedera Mirror Node API used to query historical data from the Hedera testnet. Example: `https://testnet.mirrornode.hedera.com/api/v1/`
--   **`REACT_APP_RPC_NODE`**: The RPC node URL used to communicate with the Hedera testnet. Example: `https://testnet.hashio.io/api`
--   **`REACT_APP_RPC_RESOLVER`**: The Hedera testnet account ID for the resolver. Example: `0.0.5479997`
--   **`REACT_APP_RPC_FACTORY`**: The Hedera testnet account ID for the factory. Example: `0.0.5480051`
+- **`REACT_APP_MIRROR_NODE`**: The URL of the Hedera Mirror Node API used to query historical data from the Hedera testnet. Example: `https://testnet.mirrornode.hedera.com/api/v1/`
+- **`REACT_APP_RPC_NODE`**: The RPC node URL used to communicate with the Hedera testnet. Example: `https://testnet.hashio.io/api`
+- **`REACT_APP_RPC_RESOLVER`**: The Hedera testnet account ID for the resolver. Example: `0.0.5479997`
+- **`REACT_APP_RPC_FACTORY`**: The Hedera testnet account ID for the factory. Example: `0.0.5480051`
 
 ## Optional Environment Variables (Hedera Wallet Connect)
 
 These variables are only required if you are integrating Hedera Wallet Connect for decentralized application (dApp) interactions. If not needed, they can be omitted.
 
--   **`REACT_APP_PROJECT_ID`**: Project ID for Wallet Connect integration. You can obtain it from the [WalletConnect website](https://walletconnect.com/).
--   **`REACT_APP_DAPP_NAME`**: The name of your dApp as displayed in Wallet Connect.
--   **`REACT_APP_DAPP_DESCRIPTION`**: A description of your dApp, typically displayed in Wallet Connect.
--   **`REACT_APP_DAPP_URL`**: The URL of your dApp that will be referenced in Wallet Connect.
--   **`REACT_APP_DAPP_ICONS`**: An array of URLs pointing to icons for the dApp, typically used in Wallet Connect interfaces. Example: `['https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg']`
+- **`REACT_APP_PROJECT_ID`**: Project ID for Wallet Connect integration. You can obtain it from the [WalletConnect website](https://walletconnect.com/).
+- **`REACT_APP_DAPP_NAME`**: The name of your dApp as displayed in Wallet Connect.
+- **`REACT_APP_DAPP_DESCRIPTION`**: A description of your dApp, typically displayed in Wallet Connect.
+- **`REACT_APP_DAPP_URL`**: The URL of your dApp that will be referenced in Wallet Connect.
+- **`REACT_APP_DAPP_ICONS`**: An array of URLs pointing to icons for the dApp, typically used in Wallet Connect interfaces. Example: `['https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg']`
 
 ## Steps to set up the `.env` file:
 
 1. Navigate to the `web` module folder.
 2. Copy the `.env.sample` file to create a new `.env` file:
 
-    ```bash
-    cp .env.sample .env
-    ```
+   ```bash
+   cp .env.sample .env
+   ```
 
 3. Open the `.env` file in your preferred text editor.
 4. Replace the placeholder values with your actual environment settings. For example:
 
-    ```bash
-    REACT_APP_EQUITY_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000001'
-    REACT_APP_EQUITY_CONFIG_VERSION="0"
-    REACT_APP_BOND_CONFIG_ID="0x0000000000000000000000000000000000000000000000000000000000000002"
-    REACT_APP_BOND_CONFIG_VERSION="0"
-    REACT_APP_SHOW_DISCLAIMER="true"
+   ```bash
+   REACT_APP_EQUITY_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000001'
+   REACT_APP_EQUITY_CONFIG_VERSION="0"
+   REACT_APP_BOND_CONFIG_ID="0x0000000000000000000000000000000000000000000000000000000000000002"
+   REACT_APP_BOND_CONFIG_VERSION="0"
+   REACT_APP_SHOW_DISCLAIMER="true"
 
-    REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
-    REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
-    REACT_APP_RPC_RESOLVER='0.0.6457760'
-    REACT_APP_RPC_FACTORY='0.0.6457855'
+   REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
+   REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
+   REACT_APP_RPC_RESOLVER='0.0.6457760'
+   REACT_APP_RPC_FACTORY='0.0.6457855'
 
-    REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
-    REACT_APP_DAPP_NAME="Asset Tokenization Studio"
-    REACT_APP_DAPP_DESCRIPTION="Asset Tokenization Studio. Built on Hedera Hashgraph."
-    REACT_APP_DAPP_URL="https://wc.ats.com/"
-    REACT_APP_DAPP_ICONS='["https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg"]'
-    ```
+   REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
+   REACT_APP_DAPP_NAME="Asset Tokenization Studio"
+   REACT_APP_DAPP_DESCRIPTION="Asset Tokenization Studio. Built on Hedera Hashgraph."
+   REACT_APP_DAPP_URL="https://wc.ats.com/"
+   REACT_APP_DAPP_ICONS='["https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg"]'
+   ```
 
 5. Save the file and proceed with running the application.
 
@@ -165,19 +165,19 @@ For the best experience, we strongly recommend installing the [hiero-json-rpc-re
 
 The platform now includes comprehensive ERC3643 (T-REX) support featuring:
 
--   **Identity Registry**: Manage investor identities and compliance status
--   **Compliance Module**: Configurable compliance rules and restrictions
--   **Advanced Freeze Capabilities**: Partial token freezing and address-level freeze controls
--   **Agent Management**: Dedicated agent roles for compliance operations
--   **Batch Operations**: Efficient batch transfers, mints, burns, and freeze operations
--   **Recovery Address**: Account recovery mechanisms for lost access scenarios
+- **Identity Registry**: Manage investor identities and compliance status
+- **Compliance Module**: Configurable compliance rules and restrictions
+- **Advanced Freeze Capabilities**: Partial token freezing and address-level freeze controls
+- **Agent Management**: Dedicated agent roles for compliance operations
+- **Batch Operations**: Efficient batch transfers, mints, burns, and freeze operations
+- **Recovery Address**: Account recovery mechanisms for lost access scenarios
 
 ### Enhanced Token Operations
 
--   **Forced Transfers**: Controller-initiated transfers for regulatory compliance
--   **Batch Processing**: Multiple operations in single transactions for gas efficiency
--   **Granular Freeze Controls**: Freeze specific amounts or entire addresses
--   **Token Metadata Management**: On-chain token name, symbol, and metadata updates
+- **Forced Transfers**: Controller-initiated transfers for regulatory compliance
+- **Batch Processing**: Multiple operations in single transactions for gas efficiency
+- **Granular Freeze Controls**: Freeze specific amounts or entire addresses
+- **Token Metadata Management**: On-chain token name, symbol, and metadata updates
 
 ## Custodian Integration
 
@@ -191,9 +191,9 @@ At the time the integration was first built, the SDKs provided by Dfns and Fireb
 
 The following custody providers are supported through their respective SDKs within the ATS `custodians` library:
 
--   **Dfns:** SDK Version `0.1.0-beta.5`
--   **Fireblocks:** SDK Version `5.11.0`
--   **AWS KMS:** AWS SDK Version `3.624.0`
+- **Dfns:** SDK Version `0.1.0-beta.5`
+- **Fireblocks:** SDK Version `5.11.0`
+- **AWS KMS:** AWS SDK Version `3.624.0`
 
 For further details or assistance regarding the custodian integration, please consult the relevant source code within the SDK or reach out to the development team. [Custodians Library](https://github.com/hashgraph/hedera-custodians-library)
 
@@ -201,12 +201,12 @@ For further details or assistance regarding the custodian integration, please co
 
 In order to run the application locally:
 
--   Clone the repository
--   Install the application as described in the _Installation_ section
--   Create a ".env" file in the _web_ module (using the ".env.sample" file as a template)
--   Open a terminal and go to the _web_ folder
--   Run the command : **yarn dev**
--   Open a browser and type in the URL displayed in the terminal (by default it will be : _http://localhost:5173_)
+- Clone the repository
+- Install the application as described in the _Installation_ section
+- Create a ".env" file in the _web_ module (using the ".env.sample" file as a template)
+- Open a terminal and go to the _web_ folder
+- Run the command : **yarn dev**
+- Open a browser and type in the URL displayed in the terminal (by default it will be : _http://localhost:5173_)
 
 # Support
 
