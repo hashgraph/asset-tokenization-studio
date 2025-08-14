@@ -228,7 +228,6 @@ import {
     BusinessLogicResolver,
     IClearing,
     ISnapshots,
-    ERC1410TokenHolderFacet__factory,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
