@@ -1,10 +1,19 @@
 process.env.VITE_API_URL = 'http://localhost:8080/api/v1';
+
+// Mock Terminal3 modules to avoid LRU cache issues
+jest.mock('@terminal3/verify_vc');
+jest.mock('@terminal3/bbs_vc');
+
 import Select from 'react-select';
 
 // Polyfill for TextEncoder and TextDecoder
-const { TextEncoder, TextDecoder } = require('util');
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder;
+import { TextEncoder, TextDecoder } from 'util';
+if (typeof (global as any).TextEncoder === 'undefined') {
+  (global as any).TextEncoder = TextEncoder;
+}
+if (typeof (global as any).TextDecoder === 'undefined') {
+  (global as any).TextDecoder = TextDecoder;
+}
 
 jest.doMock('chakra-react-select', () => ({
   ...jest.requireActual('chakra-react-select'),
