@@ -227,7 +227,7 @@ export function getOptionalFields(origin: IndexableObject): IndexableObject {
   const properties: string[] = Reflect.getMetadata(OPTIONAL_KEYS, origin) ?? [];
   const result: IndexableObject = {};
   properties.forEach(
-    (key) => (result[Mapper.renamePrivateProps(key)] = origin[key]),
+    (key) => (result[Mapper.renamePrivateProps(key) as string] = origin[key]),
   );
   return result;
 }
