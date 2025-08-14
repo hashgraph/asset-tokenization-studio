@@ -245,10 +245,10 @@ export default class EventService extends Service {
       );
     }
     if (!Object.keys(this.emitters).includes(event.toString())) {
-      const type = this.events[event];
-      this.emitters[event] = new EventEmitter<typeof type>();
+      const _type = this.events[event];
+      this.emitters[event] = new EventEmitter<typeof _type>();
     }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     return this.emitters[event]!;
   }
 

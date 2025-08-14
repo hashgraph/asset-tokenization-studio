@@ -13,9 +13,9 @@
 - **[Installation](#installation)**<br>
 - **[Build](#build)**<br>
 - **[Setting Up the Environment](#setting-up-the-environment)**<br>
-    - **[Required Environment Variables](#required-environment-variables)**<br>
-    - **[Optional Environment Variables (Hedera Wallet Connect)](#optional-environment-variables-hedera-wallet-connect)**<br>
-    - **[Steps to set up the `.env` file](#steps-to-set-up-the-env-file)**<br>
+  - **[Required Environment Variables](#required-environment-variables)**<br>
+  - **[Optional Environment Variables (Hedera Wallet Connect)](#optional-environment-variables-hedera-wallet-connect)**<br>
+  - **[Steps to set up the `.env` file](#steps-to-set-up-the-env-file)**<br>
 - **[Run](#run)**<br>
 - **[Support](#support)**<br>
 - **[Contributing](#contributing)**<br>
@@ -68,10 +68,10 @@ This project is organized as a monorepo using npm workspaces to manage multiple 
 ATS (Asset Tokenization Studio) is one of the main applications in the monorepo. Its components are organized as follows:
 
 - `packages/ats/` Contains the core business logic of ATS:
-    - `contracts/` Smart contracts that implement the tokenization logic.
-    - `sdk/` A TypeScript SDK to interact with the contracts from frontend or backend applications.
+  - `contracts/` Smart contracts that implement the tokenization logic.
+  - `sdk/` A TypeScript SDK to interact with the contracts from frontend or backend applications.
 - `apps/ats/` Contains the applications that consume the SDK:
-    - `web/` A React + Vite-based web application for interacting with ATS.
+  - `web/` A React + Vite-based web application for interacting with ATS.
 
 ⚠️ Note: The web module is not currently included in the npm workspaces because it uses Yarn for installation and build. This separation is due to compatibility constraints with some of its tooling. In future phases, we plan to integrate web into the npm workspaces once full compatibility is ensured.
 
@@ -138,31 +138,31 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 1. Navigate to the `web` module folder.
 2. Copy the `.env.sample` file to create a new `.env` file:
 
-    ```bash
-    cp .env.sample .env
-    ```
+   ```bash
+   cp .env.sample .env
+   ```
 
 3. Open the `.env` file in your preferred text editor.
 4. Replace the placeholder values with your actual environment settings. For example:
 
-    ```bash
-    REACT_APP_EQUITY_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000001'
-    REACT_APP_EQUITY_CONFIG_VERSION="0"
-    REACT_APP_BOND_CONFIG_ID="0x0000000000000000000000000000000000000000000000000000000000000002"
-    REACT_APP_BOND_CONFIG_VERSION="0"
-    REACT_APP_SHOW_DISCLAIMER="true"
+   ```bash
+   REACT_APP_EQUITY_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000001'
+   REACT_APP_EQUITY_CONFIG_VERSION="0"
+   REACT_APP_BOND_CONFIG_ID="0x0000000000000000000000000000000000000000000000000000000000000002"
+   REACT_APP_BOND_CONFIG_VERSION="0"
+   REACT_APP_SHOW_DISCLAIMER="true"
 
-    REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
-    REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
-    REACT_APP_RESOLVER='0.0.6349503'
-    REACT_APP_FACTORY='0.0.6349546'
+   REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
+   REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
+   REACT_APP_RESOLVER='0.0.6349503'
+   REACT_APP_FACTORY='0.0.6349546'
 
-    REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
-    REACT_APP_DAPP_NAME="Asset Tokenization Studio"
-    REACT_APP_DAPP_DESCRIPTION="Asset Tokenization Studio. Built on Hedera Hashgraph."
-    REACT_APP_DAPP_URL="https://wc.ats.com/"
-    REACT_APP_DAPP_ICONS='["https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg"]'
-    ```
+   REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
+   REACT_APP_DAPP_NAME="Asset Tokenization Studio"
+   REACT_APP_DAPP_DESCRIPTION="Asset Tokenization Studio. Built on Hedera Hashgraph."
+   REACT_APP_DAPP_URL="https://wc.ats.com/"
+   REACT_APP_DAPP_ICONS='["https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg"]'
+   ```
 
 5. Save the file and proceed with running the application.
 

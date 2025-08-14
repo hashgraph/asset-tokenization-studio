@@ -206,15 +206,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ERC1410ProtectedPartitions} from './ERC1410ProtectedPartitions.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ERC1410Basic} from './ERC1410Basic.sol';
-import {ERC1410Controller} from './ERC1410Controller.sol';
-import {ERC1410Operator} from './ERC1410Operator.sol';
+import { ERC1410ProtectedPartitions } from './ERC1410ProtectedPartitions.sol';
+import { IStaticFunctionSelectors } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { ERC1410Basic } from './ERC1410Basic.sol';
+import { ERC1410Controller } from './ERC1410Controller.sol';
+import { ERC1410Operator } from './ERC1410Operator.sol';
 
-import {ERC1410Standard} from './ERC1410Standard.sol';
+import { ERC1410Standard } from './ERC1410Standard.sol';
 
 // solhint-disable-next-line no-empty-blocks
 abstract contract ERC1410Snapshot is

@@ -206,9 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import { _CONTROLLER_ROLE, _AGENT_ROLE } from '../../constants/roles.sol';
+import { ERC1644StorageWrapper } from '../ERC1644/ERC1644StorageWrapper.sol';
+import { IKyc } from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
     _IS_PAUSED_ERROR_ID,
     _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
@@ -242,11 +242,7 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
         roles[1] = _AGENT_ROLE;
         if (!_hasAnyRole(roles, _msgSender())) {
             if (_isRecovered(_msgSender())) {
-                return (
-                    false,
-                    _ADDRESS_RECOVERED_OPERATOR_ERROR_ID,
-                    bytes32(0)
-                );
+                return (false, _ADDRESS_RECOVERED_OPERATOR_ERROR_ID, bytes32(0));
             }
             if (_isRecovered(_to)) {
                 return (false, _ADDRESS_RECOVERED_TO_ERROR_ID, bytes32(0));
@@ -285,11 +281,7 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
                 }
 
                 if (_isRecovered(_from)) {
-                    return (
-                        false,
-                        _ADDRESS_RECOVERED_FROM_ERROR_ID,
-                        bytes32(0)
-                    );
+                    return (false, _ADDRESS_RECOVERED_FROM_ERROR_ID, bytes32(0));
                 }
             }
         }

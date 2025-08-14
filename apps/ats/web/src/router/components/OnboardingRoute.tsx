@@ -203,13 +203,10 @@
 
 */
 
-import { GenericRoute } from "./GenericRoute";
+import { GenericRoute } from './GenericRoute';
+import type { ReactElement } from 'react';
 
-export const OnboardingRoute = ({
-  children,
-}: {
-  children: React.ReactElement;
-}) => {
+export const OnboardingRoute = ({ children }: { children: ReactElement }) => {
   const user = false;
   return !user ? children : <GenericRoute />;
 };

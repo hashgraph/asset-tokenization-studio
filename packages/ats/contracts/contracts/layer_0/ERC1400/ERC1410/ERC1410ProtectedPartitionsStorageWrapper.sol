@@ -206,19 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ERC1410ControllerStorageWrapper
-} from './ERC1410ControllerStorageWrapper.sol';
-import {
-    checkNounceAndDeadline
-} from '../../../layer_1/protectedPartitions/signatureVerification.sol';
-import {
-    IERC1410Basic
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import { ERC1410ControllerStorageWrapper } from './ERC1410ControllerStorageWrapper.sol';
+import { checkNounceAndDeadline } from '../../../layer_1/protectedPartitions/signatureVerification.sol';
+import { IERC1410Basic } from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 
-abstract contract ERC1410ProtectedPartitionsStorageWrapper is
-    ERC1410ControllerStorageWrapper
-{
+abstract contract ERC1410ProtectedPartitionsStorageWrapper is ERC1410ControllerStorageWrapper {
     function _protectedTransferFromByPartition(
         bytes32 _partition,
         address _from,
@@ -228,34 +220,13 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is
         uint256 _nounce,
         bytes calldata _signature
     ) internal {
-        checkNounceAndDeadline(
-            _nounce,
-            _from,
-            _getNounceFor(_from),
-            _deadline,
-            _blockTimestamp()
-        );
+        checkNounceAndDeadline(_nounce, _from, _getNounceFor(_from), _deadline, _blockTimestamp());
 
-        _checkTransferSignature(
-            _partition,
-            _from,
-            _to,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
+        _checkTransferSignature(_partition, _from, _to, _amount, _deadline, _nounce, _signature);
 
         _setNounce(_nounce, _from);
 
-        _transferByPartition(
-            _from,
-            IERC1410Basic.BasicTransferInfo(_to, _amount),
-            _partition,
-            '',
-            _msgSender(),
-            ''
-        );
+        _transferByPartition(_from, IERC1410Basic.BasicTransferInfo(_to, _amount), _partition, '', _msgSender(), '');
     }
 
     function _protectedRedeemFromByPartition(
@@ -266,22 +237,9 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is
         uint256 _nounce,
         bytes calldata _signature
     ) internal {
-        checkNounceAndDeadline(
-            _nounce,
-            _from,
-            _getNounceFor(_from),
-            _deadline,
-            _blockTimestamp()
-        );
+        checkNounceAndDeadline(_nounce, _from, _getNounceFor(_from), _deadline, _blockTimestamp());
 
-        _checkRedeemSignature(
-            _partition,
-            _from,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
+        _checkRedeemSignature(_partition, _from, _amount, _deadline, _nounce, _signature);
         _setNounce(_nounce, _from);
 
         _redeemByPartition(_partition, _from, _msgSender(), _amount, '', '');

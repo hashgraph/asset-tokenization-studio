@@ -203,30 +203,30 @@
 
 */
 
-import { AdminActionsButtons } from "../AdminActionsButtons";
-import { render } from "../../../../test-utils";
-import { useRolesStore } from "../../../../store/rolesStore";
-import { SecurityRole } from "../../../../utils/SecurityRole";
-import userEvent from "@testing-library/user-event";
-import { RouterManager } from "../../../../router/RouterManager";
-import { RouteName } from "../../../../router/RouteName";
+import { AdminActionsButtons } from '../AdminActionsButtons';
+import { render } from '../../../../test-utils';
+import { useRolesStore } from '../../../../store/rolesStore';
+import { SecurityRole } from '../../../../utils/SecurityRole';
+import userEvent from '@testing-library/user-event';
+import { RouterManager } from '../../../../router/RouterManager';
+import { RouteName } from '../../../../router/RouteName';
 
-jest.mock("../../../../router/RouterManager", () => ({
+jest.mock('../../../../router/RouterManager', () => ({
   RouterManager: {
-    ...jest.requireActual("../../../../router/RouterManager").RouterManager,
+    ...jest.requireActual('../../../../router/RouterManager').RouterManager,
     getUrl: jest.fn(),
     to: jest.fn(),
   },
 }));
 
-jest.mock("../../../../hooks/queries/usePauseSecurity", () => ({
+jest.mock('../../../../hooks/queries/usePauseSecurity', () => ({
   usePauseSecurity: jest.fn(() => ({
     mutate: jest.fn(),
     isLoading: false,
   })),
 }));
 
-jest.mock("../../../../hooks/queries/useUnpauseSecurity", () => ({
+jest.mock('../../../../hooks/queries/useUnpauseSecurity', () => ({
   useUnpauseSecurity: jest.fn(() => ({
     mutate: jest.fn(),
     isLoading: false,
@@ -244,30 +244,30 @@ describe(`${AdminActionsButtons.name}`, () => {
 
   const factoryComponent = () => render(<AdminActionsButtons />);
 
-  test("should render correctly", () => {
+  test('should render correctly', () => {
     const component = factoryComponent();
 
-    expect(component.asFragment()).toMatchSnapshot("defaultAdminRole");
+    expect(component.asFragment()).toMatchSnapshot('defaultAdminRole');
   });
 
-  test("by default admin has not minter role", () => {
+  test('by default admin has not minter role', () => {
     const component = factoryComponent();
 
-    expect(component.queryByTestId("mint-button")).not.toBeInTheDocument();
+    expect(component.queryByTestId('mint-button')).not.toBeInTheDocument();
   });
 
-  test("by default admin has not controller role", () => {
+  test('by default admin has not controller role', () => {
     const component = factoryComponent();
 
     expect(
-      component.queryByTestId("force-transfer-button"),
+      component.queryByTestId('force-transfer-button'),
     ).not.toBeInTheDocument();
     expect(
-      component.queryByTestId("force-redeem-button"),
+      component.queryByTestId('force-redeem-button'),
     ).not.toBeInTheDocument();
   });
 
-  describe("Admin has minter role", () => {
+  describe('Admin has minter role', () => {
     beforeEach(() => {
       useRolesStore.setState({
         ...initialStoreState,
@@ -275,22 +275,22 @@ describe(`${AdminActionsButtons.name}`, () => {
       });
     });
 
-    test("should render correctly", () => {
+    test('should render correctly', () => {
       const component = factoryComponent();
 
-      expect(component.asFragment()).toMatchSnapshot("minterRole");
+      expect(component.asFragment()).toMatchSnapshot('minterRole');
     });
 
-    test("should show mint button", () => {
+    test('should show mint button', () => {
       const component = factoryComponent();
 
-      expect(component.getByTestId("mint-button")).toBeInTheDocument();
+      expect(component.getByTestId('mint-button')).toBeInTheDocument();
     });
 
-    test("if click on mint button should redirect to mint page", async () => {
+    test('if click on mint button should redirect to mint page', async () => {
       const component = factoryComponent();
 
-      const button = component.getByTestId("mint-button");
+      const button = component.getByTestId('mint-button');
       expect(button).toBeInTheDocument();
 
       await userEvent.click(button);
@@ -298,12 +298,12 @@ describe(`${AdminActionsButtons.name}`, () => {
       expect(RouterManager.getUrl).toHaveBeenCalled();
       expect(RouterManager.getUrl).toHaveBeenCalledWith(
         RouteName.DigitalSecurityMint,
-        { params: { id: "" } },
+        { params: { id: '' } },
       );
     });
   });
 
-  describe("Admin has controller role", () => {
+  describe('Admin has controller role', () => {
     beforeEach(() => {
       useRolesStore.setState({
         ...initialStoreState,
@@ -311,25 +311,25 @@ describe(`${AdminActionsButtons.name}`, () => {
       });
     });
 
-    test("should render correctly", () => {
+    test('should render correctly', () => {
       const component = factoryComponent();
 
-      expect(component.asFragment()).toMatchSnapshot("controllerRole");
+      expect(component.asFragment()).toMatchSnapshot('controllerRole');
     });
 
-    test("should show force transfer and force redeem buttons", () => {
+    test('should show force transfer and force redeem buttons', () => {
       const component = factoryComponent();
 
       expect(
-        component.getByTestId("force-transfer-button"),
+        component.getByTestId('force-transfer-button'),
       ).toBeInTheDocument();
-      expect(component.getByTestId("force-redeem-button")).toBeInTheDocument();
+      expect(component.getByTestId('force-redeem-button')).toBeInTheDocument();
     });
 
-    test("if click on force transfer button should redirect to force transfer page", async () => {
+    test('if click on force transfer button should redirect to force transfer page', async () => {
       const component = factoryComponent();
 
-      const button = component.getByTestId("force-transfer-button");
+      const button = component.getByTestId('force-transfer-button');
       expect(button).toBeInTheDocument();
 
       await userEvent.click(button);
@@ -337,14 +337,14 @@ describe(`${AdminActionsButtons.name}`, () => {
       expect(RouterManager.getUrl).toHaveBeenCalled();
       expect(RouterManager.getUrl).toHaveBeenCalledWith(
         RouteName.DigitalSecurityForceTransfer,
-        { params: { id: "" } },
+        { params: { id: '' } },
       );
     });
 
-    test("if click on force redeem button should redirect to force redeem page", async () => {
+    test('if click on force redeem button should redirect to force redeem page', async () => {
       const component = factoryComponent();
 
-      const button = component.getByTestId("force-redeem-button");
+      const button = component.getByTestId('force-redeem-button');
       expect(button).toBeInTheDocument();
 
       await userEvent.click(button);
@@ -352,7 +352,7 @@ describe(`${AdminActionsButtons.name}`, () => {
       expect(RouterManager.getUrl).toHaveBeenCalled();
       expect(RouterManager.getUrl).toHaveBeenCalledWith(
         RouteName.DigitalSecurityForceRedeem,
-        { params: { id: "" } },
+        { params: { id: '' } },
       );
     });
   });

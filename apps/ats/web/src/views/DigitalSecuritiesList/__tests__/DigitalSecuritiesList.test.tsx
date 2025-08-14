@@ -203,11 +203,11 @@
 
 */
 
-import { DigitalSecuritiesList } from "../DigitalSecuritiesList";
-import { render } from "../../../test-utils";
+import { DigitalSecuritiesList } from '../DigitalSecuritiesList';
+import { render } from '../../../test-utils';
 
 describe(`${DigitalSecuritiesList.name}`, () => {
-  test("render correctly", () => {
+  test('render correctly', () => {
     const component = render(<DigitalSecuritiesList />);
 
     expect(component.asFragment()).toMatchSnapshot();

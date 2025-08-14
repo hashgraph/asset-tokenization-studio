@@ -212,28 +212,28 @@ import {
   Button,
   ClipboardButton,
   useToast,
-} from "io-bricks-ui";
-import { CellContext, createColumnHelper } from "@tanstack/react-table";
-import { useTranslation } from "react-i18next";
-import { Trash } from "@phosphor-icons/react";
-import { HStack, Stack, useDisclosure } from "@chakra-ui/react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { useEffect, useMemo, useState } from "react";
-import { useTable } from "../../../hooks/useTable";
-import _chunk from "lodash/chunk";
-import { isHederaValidAddress, required } from "../../../utils/rules";
+} from 'io-bricks-ui';
+import { CellContext, createColumnHelper } from '@tanstack/react-table';
+import { useTranslation } from 'react-i18next';
+import { Trash } from '@phosphor-icons/react';
+import { HStack, Stack, useDisclosure } from '@chakra-ui/react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { useEffect, useMemo, useState } from 'react';
+import { useTable } from '../../../hooks/useTable';
+import _chunk from 'lodash/chunk';
+import { isHederaValidAddress, required } from '../../../utils/rules';
 import {
   useAddToControlList,
   useGetControlListCount,
   useGetControlListMembers,
   useRemoveFromControlList,
-} from "../../../hooks/queries/useControlList";
+} from '../../../hooks/queries/useControlList';
 import {
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router-dom";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useParams } from 'react-router-dom';
 
 type securitiesSearch = {
   search: string;
@@ -244,7 +244,7 @@ interface AllowedListFields {
 }
 
 export const ControlList = () => {
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
   const [accounts, setAccounts] = useState<AllowedListFields[]>([]);
   const [isRefetchAccountsLoading, setIsRefetchAccountsLoading] =
     useState<boolean>(true);
@@ -257,11 +257,11 @@ export const ControlList = () => {
       }),
       {
         onError: (error) => {
-          console.log("SDK message --> Control list count error: ", error);
+          console.log('SDK message --> Control list count error: ', error);
           toast.show({
             duration: 3000,
-            title: t("messages.error"),
-            status: "error",
+            title: t('messages.error'),
+            status: 'error',
           });
           setIsRefetchAccountsLoading(false);
         },
@@ -275,7 +275,7 @@ export const ControlList = () => {
       end: controlListCount ?? 0,
     }),
     {
-      enabled: typeof controlListCount !== "undefined",
+      enabled: typeof controlListCount !== 'undefined',
       onSettled: () => setIsRefetchAccountsLoading(false),
     },
   );
@@ -296,23 +296,21 @@ export const ControlList = () => {
 
       setAccounts(accounts);
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlListResponse]);
 
   const columnsHelper = createColumnHelper<AllowedListFields>();
-  const { t: tTable } = useTranslation("security", {
-    keyPrefix: "details.allowedList.table",
+  const { t: tTable } = useTranslation('security', {
+    keyPrefix: 'details.allowedList.table',
   });
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.allowedList.search",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.allowedList.search',
   });
-  const { t: tRemove } = useTranslation("security", {
-    keyPrefix: "details.allowedList.popUp",
+  const { t: tRemove } = useTranslation('security', {
+    keyPrefix: 'details.allowedList.popUp',
   });
 
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const [accountToRemove, setAccountToRemove] = useState<string>("");
+  const [accountToRemove, setAccountToRemove] = useState<string>('');
   const {
     pagination: { pageIndex, pageSize },
     ...table
@@ -340,12 +338,12 @@ export const ControlList = () => {
     formState: { isValid },
     reset,
   } = useForm<securitiesSearch>({
-    mode: "onSubmit",
+    mode: 'onSubmit',
   });
 
   const paginatedData = useMemo(
     () => _chunk(accounts, pageSize),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [accounts, pageSize],
   );
 
@@ -375,14 +373,14 @@ export const ControlList = () => {
         size="xs"
         isLoading={isLoadingRemove}
       >
-        <PhosphorIcon as={Trash} sx={{ color: "secondary.500" }} />
+        <PhosphorIcon as={Trash} sx={{ color: 'secondary.500' }} />
       </Button>
     );
   };
 
   const columns = [
-    columnsHelper.accessor("account", {
-      header: tTable("account"),
+    columnsHelper.accessor('account', {
+      header: tTable('account'),
       enableSorting: false,
       size: 995,
       cell: ({ getValue }) => {
@@ -391,14 +389,14 @@ export const ControlList = () => {
         return (
           <HStack gap={1.5}>
             <Text>{account}</Text>
-            <ClipboardButton sx={{ color: "secondary.500" }} value={account} />
+            <ClipboardButton sx={{ color: 'secondary.500' }} value={account} />
           </HStack>
         );
       },
     }),
     columnsHelper.display({
-      id: "remove",
-      header: tTable("action"),
+      id: 'remove',
+      header: tTable('action'),
       size: 5,
       enableSorting: false,
       cell: (props) => renderRemove(props),
@@ -408,18 +406,18 @@ export const ControlList = () => {
   const removeSecurityFromAllowedList = (address: string) => {
     const requestToRemove = new ControlListRequest({
       securityId: id!,
-      targetId: address ?? "",
+      targetId: address ?? '',
     });
-    console.log("request to remove from control list: ", requestToRemove);
+    console.log('request to remove from control list: ', requestToRemove);
     removeFromControlList(requestToRemove);
   };
 
   const onSubmit: SubmitHandler<securitiesSearch> = (params) => {
     const requestToAdd = new ControlListRequest({
       securityId: id!,
-      targetId: params.search ?? "",
+      targetId: params.search ?? '',
     });
-    console.log("request to add to control list: ", requestToAdd);
+    console.log('request to add to control list: ', requestToAdd);
     addToControlList(requestToAdd);
   };
 
@@ -435,7 +433,7 @@ export const ControlList = () => {
         gap={4}
       >
         <Text textStyle="ElementsSemiboldLG" color="neutral.light">
-          {t("title")}
+          {t('title')}
         </Text>
         <HStack
           as="form"
@@ -446,8 +444,8 @@ export const ControlList = () => {
           <Stack w="280px">
             <SearchInputController
               id="search"
-              placeholder={t("placeholder")}
-              onSearch={(search) => console.log("SEARCHING: ", search)}
+              placeholder={t('placeholder')}
+              onSearch={(search) => console.log('SEARCHING: ', search)}
               control={control}
               size="sm"
               rules={{
@@ -464,7 +462,7 @@ export const ControlList = () => {
               isLoadingAdd || isLoadingRemove || isRefetchAccountsLoading
             }
           >
-            {t("button")}
+            {t('button')}
           </Button>
         </HStack>
         <Table
@@ -482,15 +480,15 @@ export const ControlList = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={Trash} size="md" />}
-        title={tRemove("title")}
-        description={tRemove("description")}
-        confirmText={tRemove("confirmText")}
+        title={tRemove('title')}
+        description={tRemove('description')}
+        confirmText={tRemove('confirmText')}
         onConfirm={() => {
           removeSecurityFromAllowedList(accountToRemove);
           onClose();
         }}
         onCancel={onClose}
-        cancelText={tRemove("cancelText")}
+        cancelText={tRemove('cancelText')}
       />
     </>
   );

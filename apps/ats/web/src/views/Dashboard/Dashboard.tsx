@@ -204,16 +204,16 @@
 */
 
 /* eslint-disable no-prototype-builtins */
-import { useEffect } from "react";
-import { Header } from "./Components/Header";
-import { NoTokens } from "./Components/NoTokens";
-import { TokensList } from "./Components/TokensList";
-import { useUserStore } from "../../store/userStore";
-import { User } from "../../utils/constants";
-import { useAccountStore } from "../../store/accountStore";
-import { useRolesStore } from "../../store/rolesStore";
-import { useWalletStore } from "../../store/walletStore";
-import { useSecurityStore } from "../../store/securityStore";
+import { useEffect } from 'react';
+import { Header } from './Components/Header';
+import { NoTokens } from './Components/NoTokens';
+import { TokensList } from './Components/TokensList';
+import { useUserStore } from '../../store/userStore';
+import { User } from '../../utils/constants';
+import { useAccountStore } from '../../store/accountStore';
+import { useRolesStore } from '../../store/rolesStore';
+import { useWalletStore } from '../../store/walletStore';
+import { useSecurityStore } from '../../store/securityStore';
 
 export const Dashboard = () => {
   const { setType } = useUserStore();
@@ -230,7 +230,6 @@ export const Dashboard = () => {
   }, []);
 
   const userHasTokens =
-    // eslint-disable-next-line no-prototype-builtins
     adminSecurities.hasOwnProperty(address) ||
     holderSecurities.hasOwnProperty(address);
 

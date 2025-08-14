@@ -206,13 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../../common/Common.sol';
+import { Common } from '../../common/Common.sol';
 
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {
-    IERC1410Controller
-} from '../../interfaces/ERC1400/IERC1410Controller.sol';
-import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
+import { _CONTROLLER_ROLE, _AGENT_ROLE } from '../../constants/roles.sol';
+import { IERC1410Controller } from '../../interfaces/ERC1400/IERC1410Controller.sol';
+import { IERC1410Basic } from '../../interfaces/ERC1400/IERC1410Basic.sol';
 
 abstract contract ERC1410Controller is IERC1410Controller, Common {
     function controllerTransferByPartition(
@@ -222,13 +220,7 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
-    {
+    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) onlyControllable {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -251,27 +243,14 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
-    {
+    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) onlyControllable {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        _redeemByPartition(
-            _partition,
-            _tokenHolder,
-            _msgSender(),
-            _value,
-            _data,
-            _operatorData
-        );
+        _redeemByPartition(_partition, _tokenHolder, _msgSender(), _value, _data, _operatorData);
     }
 
     function canTransferByPartition(
@@ -282,14 +261,6 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external view override returns (bool, bytes1, bytes32) {
-        return
-            _canTransferByPartition(
-                _from,
-                _to,
-                _partition,
-                _value,
-                _data,
-                _operatorData
-            );
+        return _canTransferByPartition(_from, _to, _partition, _value, _data, _operatorData);
     }
 }

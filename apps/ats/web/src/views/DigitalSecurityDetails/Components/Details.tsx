@@ -203,10 +203,10 @@
 
 */
 
-import { Box, Center, Flex, HStack, VStack } from "@chakra-ui/react";
-import { Text, DefinitionList, Spinner } from "io-bricks-ui";
-import { Panel } from "../../../components/Panel";
-import { useTranslation } from "react-i18next";
+import { Box, Center, Flex, HStack, VStack } from '@chakra-ui/react';
+import { Text, DefinitionList, Spinner } from 'io-bricks-ui';
+import { Panel } from '../../../components/Panel';
+import { useTranslation } from 'react-i18next';
 import {
   BondDetailsViewModel,
   EquityDetailsViewModel,
@@ -215,31 +215,31 @@ import {
   GetAllDividendsRequest,
   GetAllScheduledBalanceAdjustmentsRequest,
   SecurityViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 import {
   formatDate,
   formatNumberLocale,
   toNumber,
-} from "../../../utils/format";
-import { useUserStore } from "../../../store/userStore";
+} from '../../../utils/format';
+import { useUserStore } from '../../../store/userStore';
 import {
   COUPONS_FACTOR,
   DATE_TIME_FORMAT,
   User,
-} from "../../../utils/constants";
-import { useSecurityStore } from "../../../store/securityStore";
-import { SkeletonText } from "@chakra-ui/react";
+} from '../../../utils/constants';
+import { useSecurityStore } from '../../../store/securityStore';
+import { SkeletonText } from '@chakra-ui/react';
 import {
   useGetAllDividends,
   useGetBalanceOf,
-} from "../../../hooks/queries/useGetSecurityDetails";
-import { useWalletStore } from "../../../store/walletStore";
-import { SecurityDetailsExtended } from "./SecurityDetailsExtended";
-import { useGetAllCoupons } from "../../../hooks/queries/useCoupons";
-import { CountriesList } from "../../CreateSecurityCommons/CountriesList";
-import _capitalize from "lodash/capitalize";
-import { useGetAllBalanceAdjustments } from "../../../hooks/queries/useBalanceAdjustment";
-import { HolderActionsButtons } from "./HolderActionsButtons";
+} from '../../../hooks/queries/useGetSecurityDetails';
+import { useWalletStore } from '../../../store/walletStore';
+import { SecurityDetailsExtended } from './SecurityDetailsExtended';
+import { useGetAllCoupons } from '../../../hooks/queries/useCoupons';
+import { CountriesList } from '../../CreateSecurityCommons/CountriesList';
+import _capitalize from 'lodash/capitalize';
+import { useGetAllBalanceAdjustments } from '../../../hooks/queries/useBalanceAdjustment';
+import { HolderActionsButtons } from './HolderActionsButtons';
 
 interface DetailsProps {
   id?: string;
@@ -249,26 +249,26 @@ interface DetailsProps {
 }
 
 export const Details = ({
-  id = "",
+  id = '',
   equityDetailsResponse,
   bondDetailsResponse,
   detailsResponse,
 }: DetailsProps) => {
-  const { t: tProperties } = useTranslation("properties");
-  const { t: tPermissions } = useTranslation("properties", {
-    keyPrefix: "permissions",
+  const { t: tProperties } = useTranslation('properties');
+  const { t: tPermissions } = useTranslation('properties', {
+    keyPrefix: 'permissions',
   });
-  const { t: tRights } = useTranslation("security", {
-    keyPrefix: "createEquity",
+  const { t: tRights } = useTranslation('security', {
+    keyPrefix: 'createEquity',
   });
-  const { t: tBenefits } = useTranslation("security", {
-    keyPrefix: "details.benefits",
+  const { t: tBenefits } = useTranslation('security', {
+    keyPrefix: 'details.benefits',
   });
-  const { t: tRegulations } = useTranslation("properties", {
-    keyPrefix: "regulations",
+  const { t: tRegulations } = useTranslation('properties', {
+    keyPrefix: 'regulations',
   });
-  const { t: tRegulation } = useTranslation("security", {
-    keyPrefix: "regulation",
+  const { t: tRegulation } = useTranslation('security', {
+    keyPrefix: 'regulation',
   });
 
   const { type: userType } = useUserStore();
@@ -284,7 +284,7 @@ export const Details = ({
       securityId: id,
     }),
     {
-      enabled: details?.type === "EQUITY",
+      enabled: details?.type === 'EQUITY',
     },
   );
 
@@ -293,7 +293,7 @@ export const Details = ({
       securityId: id,
     }),
     {
-      enabled: details?.type === "EQUITY",
+      enabled: details?.type === 'EQUITY',
     },
   );
 
@@ -306,7 +306,7 @@ export const Details = ({
       securityId: id,
     }),
     {
-      enabled: details?.type === "BOND",
+      enabled: details?.type === 'BOND',
     },
   );
 
@@ -334,93 +334,93 @@ export const Details = ({
 
   const permissionsItems = [
     {
-      title: tPermissions("controllable"),
+      title: tPermissions('controllable'),
       description: details?.isControllable
-        ? tPermissions("allowed")
-        : tPermissions("notAllowed"),
+        ? tPermissions('allowed')
+        : tPermissions('notAllowed'),
     },
     {
-      title: tPermissions("blocklist"),
+      title: tPermissions('blocklist'),
       description: details?.isWhiteList
-        ? tPermissions("notAllowed")
-        : tPermissions("allowed"),
+        ? tPermissions('notAllowed')
+        : tPermissions('allowed'),
     },
     {
-      title: tPermissions("approvalList"),
+      title: tPermissions('approvalList'),
       description: details?.isWhiteList
-        ? tPermissions("allowed")
-        : tPermissions("notAllowed"),
+        ? tPermissions('allowed')
+        : tPermissions('notAllowed'),
     },
   ];
 
   const {
     type,
-    subType = "",
-    dealSize = "",
-    accreditedInvestors = "",
-    maxNonAccreditedInvestors = "",
-    manualInvestorVerification = "",
-    internationalInvestors = "",
-    resaleHoldPeriod = "",
+    subType = '',
+    dealSize = '',
+    accreditedInvestors = '',
+    maxNonAccreditedInvestors = '',
+    manualInvestorVerification = '',
+    internationalInvestors = '',
+    resaleHoldPeriod = '',
   } = details?.regulation || {};
 
   const regulationItems = [
     {
-      title: tRegulations("regulationType"),
+      title: tRegulations('regulationType'),
       description: tRegulation(`regulationType_${type}`),
     },
     {
-      title: tRegulations("regulationSubType"),
-      description: subType.replace("_", " "),
+      title: tRegulations('regulationSubType'),
+      description: subType.replace('_', ' '),
     },
     {
       title: details?.isCountryControlListWhiteList
-        ? tRegulations("allowedCountries")
-        : tRegulations("blockedCountries"),
+        ? tRegulations('allowedCountries')
+        : tRegulations('blockedCountries'),
       description:
         details?.countries
-          ?.split(",")
+          ?.split(',')
           .map(
             (country) => CountriesList[country as keyof typeof CountriesList],
           )
-          .join(" - ") ?? "",
+          .join(' - ') ?? '',
     },
     {
-      title: tRegulations("dealSize"),
+      title: tRegulations('dealSize'),
       description:
-        dealSize !== "0"
+        dealSize !== '0'
           ? `${dealSize} $`
-          : tRegulations("dealSizePlaceHolder"),
+          : tRegulations('dealSizePlaceHolder'),
     },
     {
-      title: tRegulations("accreditedInvestors"),
+      title: tRegulations('accreditedInvestors'),
       description: _capitalize(accreditedInvestors),
     },
     {
-      title: tRegulations("maxNonAccreditedInvestors"),
+      title: tRegulations('maxNonAccreditedInvestors'),
       description:
         maxNonAccreditedInvestors !== 0
           ? `${maxNonAccreditedInvestors}`
-          : tRegulations("maxNonAccreditedInvestorsPlaceHolder"),
+          : tRegulations('maxNonAccreditedInvestorsPlaceHolder'),
     },
     {
-      title: tRegulations("manualInvestorVerification"),
+      title: tRegulations('manualInvestorVerification'),
       description: _capitalize(manualInvestorVerification),
     },
     {
-      title: tRegulations("internationalInvestors"),
+      title: tRegulations('internationalInvestors'),
       description: _capitalize(internationalInvestors),
     },
     {
-      title: tRegulations("resaleHoldPeriod"),
+      title: tRegulations('resaleHoldPeriod'),
       description: _capitalize(resaleHoldPeriod),
     },
   ];
 
   if (Object.keys(equityDetailsResponse).length > 0) {
     permissionsItems.push({
-      title: tPermissions("rightsAndPrivileges"),
-      description: rightsAndPrivilegesFiltered.join(", "),
+      title: tPermissions('rightsAndPrivileges'),
+      description: rightsAndPrivilegesFiltered.join(', '),
     });
   }
 
@@ -450,8 +450,8 @@ export const Details = ({
           />
           {(isLoadingDividends || isFetchingDividends) &&
             !dividends &&
-            detailsResponse.type === "EQUITY" && (
-              <Flex gap={4} alignItems={"center"}>
+            detailsResponse.type === 'EQUITY' && (
+              <Flex gap={4} alignItems={'center'}>
                 <Spinner />
                 <Text>Checking for dividends...</Text>
               </Flex>
@@ -461,40 +461,40 @@ export const Details = ({
               key={dividend.dividendId}
               items={[
                 {
-                  title: tBenefits("id"),
-                  description: dividend.dividendId ?? "",
+                  title: tBenefits('id'),
+                  description: dividend.dividendId ?? '',
                 },
                 {
-                  title: tBenefits("recordDate"),
+                  title: tBenefits('recordDate'),
                   description:
-                    formatDate(dividend.recordDate, DATE_TIME_FORMAT) ?? "",
+                    formatDate(dividend.recordDate, DATE_TIME_FORMAT) ?? '',
                 },
                 {
-                  title: tBenefits("executionDate"),
+                  title: tBenefits('executionDate'),
                   description:
-                    formatDate(dividend.executionDate, DATE_TIME_FORMAT) ?? "",
+                    formatDate(dividend.executionDate, DATE_TIME_FORMAT) ?? '',
                 },
                 {
-                  title: tBenefits("dividendAmount"),
-                  description: dividend.amountPerUnitOfSecurity ?? "",
+                  title: tBenefits('dividendAmount'),
+                  description: dividend.amountPerUnitOfSecurity ?? '',
                 },
                 ...(dividend.snapshotId
                   ? [
                       {
-                        title: "Snapshot Id",
+                        title: 'Snapshot Id',
                         description: dividend.snapshotId,
                       },
                     ]
                   : []),
               ]}
-              title={tBenefits("dividends")}
+              title={tBenefits('dividends')}
               layerStyle="container"
             />
           ))}
           {(isLoadingCoupons || isFetchingCoupons) &&
             !coupons &&
-            detailsResponse.type === "BOND" && (
-              <Flex gap={4} alignItems={"center"}>
+            detailsResponse.type === 'BOND' && (
+              <Flex gap={4} alignItems={'center'}>
                 <Spinner />
                 <Text>Checking for coupons...</Text>
               </Flex>
@@ -504,40 +504,40 @@ export const Details = ({
               key={coupon.couponId}
               items={[
                 {
-                  title: tBenefits("id"),
-                  description: coupon.couponId ?? "",
+                  title: tBenefits('id'),
+                  description: coupon.couponId ?? '',
                 },
                 {
-                  title: tBenefits("recordDate"),
+                  title: tBenefits('recordDate'),
                   description:
-                    formatDate(coupon.recordDate, DATE_TIME_FORMAT) ?? "",
+                    formatDate(coupon.recordDate, DATE_TIME_FORMAT) ?? '',
                 },
                 {
-                  title: tBenefits("executionDate"),
+                  title: tBenefits('executionDate'),
                   description:
-                    formatDate(coupon.executionDate, DATE_TIME_FORMAT) ?? "",
+                    formatDate(coupon.executionDate, DATE_TIME_FORMAT) ?? '',
                 },
                 {
-                  title: tBenefits("couponRate"),
+                  title: tBenefits('couponRate'),
                   description: `${parseInt(coupon.rate) / COUPONS_FACTOR}%`,
                 },
                 ...(coupon.snapshotId
                   ? [
                       {
-                        title: tBenefits("snapshot"),
+                        title: tBenefits('snapshot'),
                         description: coupon.snapshotId,
                       },
                     ]
                   : []),
               ]}
-              title={tBenefits("coupons")}
+              title={tBenefits('coupons')}
               layerStyle="container"
             />
           ))}
         </VStack>
         <VStack w="full" gap={8}>
           {userType === User.holder && (
-            <Panel title={tProperties("currentAvailableBalance")}>
+            <Panel title={tProperties('currentAvailableBalance')}>
               <Center w="full">
                 {isAvailableBalanceLoading ? (
                   <SkeletonText skeletonHeight={2} flex={1} noOfLines={1} />
@@ -546,11 +546,11 @@ export const Details = ({
                     <Text textStyle="ElementsSemibold2XL">
                       {currentAvailableBalance}
                       <Text ml={1} as="span" textStyle="ElementsRegularMD">
-                        {details?.symbol ?? ""}
+                        {details?.symbol ?? ''}
                       </Text>
                     </Text>
                     <Text ml={1} as="span" textStyle="ElementsRegularMD">
-                      {tProperties("nominalTotalValue")}
+                      {tProperties('nominalTotalValue')}
                       {formatNumberLocale(totalAvailableBalanceValue, 2)}
                     </Text>
                   </Box>
@@ -558,18 +558,18 @@ export const Details = ({
               </Center>
             </Panel>
           )}
-          <Panel title={tProperties("totalSupply")}>
+          <Panel title={tProperties('totalSupply')}>
             <Center w="full">
               {details ? (
                 <Box>
                   <Text textStyle="ElementsSemibold2XL">
-                    {details?.totalSupply ?? ""}
+                    {details?.totalSupply ?? ''}
                     <Text ml={1} as="span" textStyle="ElementsRegularMD">
-                      {details?.symbol ?? ""}
+                      {details?.symbol ?? ''}
                     </Text>
                   </Text>
                   <Text ml={1} as="span" textStyle="ElementsRegularMD">
-                    {tProperties("nominalTotalValue")}
+                    {tProperties('nominalTotalValue')}
                     {nominalTotalValue}
                   </Text>
                 </Box>
@@ -581,14 +581,14 @@ export const Details = ({
           <DefinitionList
             isLoading={details === null}
             items={permissionsItems}
-            title={tPermissions("label")}
+            title={tPermissions('label')}
             layerStyle="container"
           />
 
           <DefinitionList
             isLoading={details === null}
             items={regulationItems}
-            title={tRegulations("label")}
+            title={tRegulations('label')}
             layerStyle="container"
           />
 
@@ -597,23 +597,23 @@ export const Details = ({
               key={balanceAdjustment.id}
               items={[
                 {
-                  title: tBenefits("executionDate"),
+                  title: tBenefits('executionDate'),
                   description:
                     formatDate(
                       balanceAdjustment.executionDate,
                       DATE_TIME_FORMAT,
-                    ) ?? "",
+                    ) ?? '',
                 },
                 {
-                  title: tBenefits("factor"),
+                  title: tBenefits('factor'),
                   description:
                     (
                       Number(balanceAdjustment.factor) /
                       Math.pow(10, Number(balanceAdjustment.decimals))
-                    ).toString() ?? "",
+                    ).toString() ?? '',
                 },
               ]}
-              title={tBenefits("balanceAdjustments")}
+              title={tBenefits('balanceAdjustments')}
               layerStyle="container"
             />
           ))}

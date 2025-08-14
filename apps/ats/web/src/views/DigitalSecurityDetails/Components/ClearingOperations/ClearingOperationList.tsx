@@ -1,4 +1,4 @@
-import { Box, Stack, useDisclosure } from "@chakra-ui/react";
+import { Box, Stack, useDisclosure } from '@chakra-ui/react';
 import {
   Button,
   PhosphorIcon,
@@ -6,27 +6,27 @@ import {
   Table,
   Text,
   useToast,
-} from "io-bricks-ui";
-import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { WarningCircle } from "@phosphor-icons/react";
-import { useState } from "react";
+} from 'io-bricks-ui';
+import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { WarningCircle } from '@phosphor-icons/react';
+import { useState } from 'react';
 import {
   DATE_TIME_FORMAT,
   DEFAULT_PARTITION,
-} from "../../../../utils/constants";
-import { formatDate } from "../../../../utils/format";
-import { useSecurityStore } from "../../../../store/securityStore";
+} from '../../../../utils/constants';
+import { formatDate } from '../../../../utils/format';
+import { useSecurityStore } from '../../../../store/securityStore';
 import {
   ClearingOperationViewModel,
   GET_CLEARING_OPERATIONS_LIST,
   useGetClearingOperations,
-} from "../../../../hooks/queries/useClearingOperations";
-import { ReclaimClearingOperationByPartitionRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useWalletStore } from "../../../../store/walletStore";
-import { useReclaimClearingByPartition } from "../../../../hooks/mutations/useClearingOperations";
-import { useQueryClient } from "@tanstack/react-query";
-import { createColumnHelper } from "@tanstack/table-core";
+} from '../../../../hooks/queries/useClearingOperations';
+import { ReclaimClearingOperationByPartitionRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useWalletStore } from '../../../../store/walletStore';
+import { useReclaimClearingByPartition } from '../../../../hooks/mutations/useClearingOperations';
+import { useQueryClient } from '@tanstack/react-query';
+import { createColumnHelper } from '@tanstack/table-core';
 
 export const ClearingOperationsList = () => {
   const queryClient = useQueryClient();
@@ -34,7 +34,7 @@ export const ClearingOperationsList = () => {
 
   const { isOpen, onClose, onOpen } = useDisclosure();
 
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
 
   const { details } = useSecurityStore();
   const { address } = useWalletStore();
@@ -43,14 +43,14 @@ export const ClearingOperationsList = () => {
     useState<ClearingOperationViewModel>();
   const [isReclaiming, setIsReclaiming] = useState(false);
 
-  const { t: tList } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.list",
+  const { t: tList } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.list',
   });
-  const { t: tActions } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.actions.confirmReclaimPopUp",
+  const { t: tActions } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.actions.confirmReclaimPopUp',
   });
-  const { t: tMessages } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.messages",
+  const { t: tMessages } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.messages',
   });
 
   const { mutate } = useReclaimClearingByPartition();
@@ -83,10 +83,10 @@ export const ClearingOperationsList = () => {
 
         toast.show({
           duration: 3000,
-          title: tMessages("success"),
-          description: tMessages("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: tMessages('success'),
+          description: tMessages('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
     });
@@ -107,13 +107,13 @@ export const ClearingOperationsList = () => {
 
   const columnsHelper = createColumnHelper<ClearingOperationViewModel>();
 
-  const columnId = columnsHelper.accessor("id", {
-    header: tList("id"),
+  const columnId = columnsHelper.accessor('id', {
+    header: tList('id'),
     enableSorting: false,
   });
 
-  const columnAmount = columnsHelper.accessor("amount", {
-    header: tList("amount"),
+  const columnAmount = columnsHelper.accessor('amount', {
+    header: tList('amount'),
     enableSorting: false,
     cell({ getValue }) {
       return (
@@ -124,8 +124,8 @@ export const ClearingOperationsList = () => {
     },
   });
 
-  const columnExpirationDate = columnsHelper.accessor("expirationDate", {
-    header: tList("expirationDate"),
+  const columnExpirationDate = columnsHelper.accessor('expirationDate', {
+    header: tList('expirationDate'),
     enableSorting: false,
     cell({ getValue }) {
       const formattedDate = formatDate(Number(getValue()), DATE_TIME_FORMAT);
@@ -134,8 +134,8 @@ export const ClearingOperationsList = () => {
   });
 
   const columnActions = columnsHelper.display({
-    id: "remove",
-    header: tList("actions"),
+    id: 'remove',
+    header: tList('actions'),
     enableSorting: false,
     size: 100,
     cell({ row: { original } }) {
@@ -158,7 +158,7 @@ export const ClearingOperationsList = () => {
           disabled={isReclaiming && clearOperationSelected?.id === original.id}
           isLoading={isReclaiming && clearOperationSelected?.id === original.id}
         >
-          {tList("reclaim")}
+          {tList('reclaim')}
         </Button>
       );
     },
@@ -168,12 +168,12 @@ export const ClearingOperationsList = () => {
     columnId,
     columnAmount,
     columnExpirationDate,
-    columnsHelper.accessor("destination", {
-      header: tList("targetId"),
+    columnsHelper.accessor('destination', {
+      header: tList('targetId'),
       enableSorting: false,
       cell({ getValue }) {
         const value = getValue();
-        return <Box>{value ?? "-"}</Box>;
+        return <Box>{value ?? '-'}</Box>;
       },
     }),
     columnActions,
@@ -190,8 +190,8 @@ export const ClearingOperationsList = () => {
     columnId,
     columnAmount,
     columnExpirationDate,
-    columnsHelper.accessor("holdExpirationDate", {
-      header: tList("holdExpirationDate"),
+    columnsHelper.accessor('holdExpirationDate', {
+      header: tList('holdExpirationDate'),
       enableSorting: false,
       cell({ getValue }) {
         const value = getValue();
@@ -203,12 +203,12 @@ export const ClearingOperationsList = () => {
         return <Box>{formattedDate}</Box>;
       },
     }),
-    columnsHelper.accessor("holdEscrow", {
-      header: tList("escrowAddress"),
+    columnsHelper.accessor('holdEscrow', {
+      header: tList('escrowAddress'),
       enableSorting: false,
       cell({ getValue }) {
         const value = getValue();
-        return <Box>{value ?? "-"}</Box>;
+        return <Box>{value ?? '-'}</Box>;
       },
     }),
     columnActions,
@@ -221,10 +221,10 @@ export const ClearingOperationsList = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={WarningCircle} size="md" />}
-        title={tActions("title")}
-        description={tActions("description")}
-        confirmText={tActions("confirmText")}
-        cancelText={tActions("cancelText")}
+        title={tActions('title')}
+        description={tActions('description')}
+        confirmText={tActions('confirmText')}
+        cancelText={tActions('cancelText')}
         onConfirm={() => {
           setIsReclaiming(true);
           onSubmit();
@@ -238,7 +238,7 @@ export const ClearingOperationsList = () => {
       <Stack w="full" h="full" bg="neutral.50" borderRadius={1} pt={6} gap={8}>
         <Stack w="full" h="full" pt={6} gap={4}>
           <Text textStyle="ElementsSemiboldLG" color="neutral.light">
-            {tList("clearingOperationsTransfer")}
+            {tList('clearingOperationsTransfer')}
           </Text>
           <Table
             name="clearingOperationsTransfer-list"
@@ -251,7 +251,7 @@ export const ClearingOperationsList = () => {
         </Stack>
         <Stack w="full" h="full" pt={6} gap={4}>
           <Text textStyle="ElementsSemiboldLG" color="neutral.light">
-            {tList("clearingOperationsRedeem")}
+            {tList('clearingOperationsRedeem')}
           </Text>
           <Table
             name="clearingOperationsRedeem-list"
@@ -264,7 +264,7 @@ export const ClearingOperationsList = () => {
         </Stack>
         <Stack w="full" h="full" pt={6} gap={4}>
           <Text textStyle="ElementsSemiboldLG" color="neutral.light">
-            {tList("clearingOperationsHold")}
+            {tList('clearingOperationsHold')}
           </Text>
           <Table
             name="clearingOperationsHold-list"

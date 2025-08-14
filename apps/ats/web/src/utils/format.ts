@@ -203,11 +203,11 @@
 
 */
 
-import _capitalize from "lodash/capitalize";
-import _formatDate from "date-fns/format";
-import { TimeUnit } from "./types";
-import i18n from "../i18n";
-import { LOCALE } from "./constants";
+import _capitalize from 'lodash/capitalize';
+import _formatDate from 'date-fns/format';
+import { TimeUnit } from './types';
+import i18n from '../i18n';
+import { LOCALE } from './constants';
 
 export const formatAddressAccount = (address: string) => `${_capitalize(
   address.slice(0, 2),
@@ -217,7 +217,7 @@ export const formatAddressAccount = (address: string) => `${_capitalize(
 export const formatCurrency = (
   amount: number,
   {
-    currency = "EUR",
+    currency = 'EUR',
     locale = LOCALE,
     options,
   }: {
@@ -227,7 +227,7 @@ export const formatCurrency = (
   } = {},
 ) => {
   return (amount ?? 0).toLocaleString(locale, {
-    style: "currency",
+    style: 'currency',
     currency,
     minimumFractionDigits: 3,
     maximumFractionDigits: 3,
@@ -245,12 +245,12 @@ export const toDate = (date: string | Date = new Date()) =>
 
 export const formatDate = (
   date?: string | Date | number,
-  format = "dd/MM/yyyy",
-  defaultValue = "",
+  format = 'dd/MM/yyyy',
+  defaultValue = '',
 ) => {
   if (!date) return defaultValue;
 
-  if (typeof date === "number") return _formatDate(date, format);
+  if (typeof date === 'number') return _formatDate(date, format);
 
   return _formatDate(toDate(date), format);
 };
@@ -278,7 +278,7 @@ export const formatFrequency = ({
   timeUnit: TimeUnit;
 }) => {
   const unit = i18n.t(`timeUnit.${timeUnit}`, { count: amount });
-  return `${i18n.t("every")} ${amount} ${unit}`;
+  return `${i18n.t('every')} ${amount} ${unit}`;
 };
 
 export const formatPeriod = ({
@@ -299,7 +299,7 @@ export const formatNumber = (
   decimals = 3,
 ) =>
   (+(value || 0)).toLocaleString(i18n.language, {
-    style: "decimal",
+    style: 'decimal',
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
     ...options,
@@ -311,9 +311,9 @@ export const toNumber = (value?: string, decimals: number = 0) => {
 };
 
 export const formatNumberLocale = (value?: string | number, decimals = 0) => {
-  if (value === undefined) return "";
+  if (value === undefined) return '';
   const valueNumber =
-    typeof value === "string" ? toNumber(value, decimals) : value;
+    typeof value === 'string' ? toNumber(value, decimals) : value;
   return valueNumber.toLocaleString(LOCALE, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
@@ -321,7 +321,7 @@ export const formatNumberLocale = (value?: string | number, decimals = 0) => {
 };
 
 export const textToHex = (text: string) => {
-  let ascii = "0x";
+  let ascii = '0x';
 
   for (let index = 0; index < text.length; index++) {
     ascii = ascii + text.charCodeAt(index).toString(16);
@@ -331,7 +331,7 @@ export const textToHex = (text: string) => {
 };
 
 export const hexToText = (hexString: string) => {
-  let asciiString = "";
+  let asciiString = '';
 
   for (let i = 0; i < hexString.length; i += 2) {
     const hexChar = hexString.substring(i, i + 2);
@@ -356,7 +356,7 @@ export const calculateCouponFrequency = (couponFrequency: string) => {
 };
 
 export const calculateFactorDecimals = (number: number, separator?: string) => {
-  const [integerPart, decimalPart] = number.toString().split(separator ?? ".");
+  const [integerPart, decimalPart] = number.toString().split(separator ?? '.');
 
   const factorNumber = Number(
     decimalPart ? integerPart + decimalPart : integerPart,

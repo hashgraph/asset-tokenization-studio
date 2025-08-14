@@ -206,26 +206,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _CORPORATE_ACTION_ROLE } from '../../layer_1/constants/roles.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from '../constants/values.sol';
-import {IEquity} from '../interfaces/equity/IEquity.sol';
-import {EquityStorageWrapper} from './EquityStorageWrapper.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { IEquity } from '../interfaces/equity/IEquity.sol';
+import { EquityStorageWrapper } from './EquityStorageWrapper.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-abstract contract Equity is
-    IEquity,
-    IStaticFunctionSelectors,
-    EquityStorageWrapper
-{
+abstract contract Equity is IEquity, IStaticFunctionSelectors, EquityStorageWrapper {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     function setDividends(
@@ -240,9 +232,7 @@ abstract contract Equity is
         returns (bool success_, uint256 dividendID_)
     {
         bytes32 corporateActionID;
-        (success_, corporateActionID, dividendID_) = _setDividends(
-            _newDividend
-        );
+        (success_, corporateActionID, dividendID_) = _setDividends(_newDividend);
         emit DividendSet(
             corporateActionID,
             dividendID_,
@@ -265,13 +255,7 @@ abstract contract Equity is
     {
         bytes32 corporateActionID;
         (success_, corporateActionID, voteID_) = _setVoting(_newVoting);
-        emit VotingSet(
-            corporateActionID,
-            voteID_,
-            _msgSender(),
-            _newVoting.recordDate,
-            _newVoting.data
-        );
+        emit VotingSet(corporateActionID, voteID_, _msgSender(), _newVoting.recordDate, _newVoting.data);
     }
 
     function setScheduledBalanceAdjustment(
@@ -286,11 +270,7 @@ abstract contract Equity is
         returns (bool success_, uint256 balanceAdjustmentID_)
     {
         bytes32 corporateActionID;
-        (
-            success_,
-            corporateActionID,
-            balanceAdjustmentID_
-        ) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
+        (success_, corporateActionID, balanceAdjustmentID_) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
         emit ScheduledBalanceAdjustmentSet(
             corporateActionID,
             balanceAdjustmentID_,
@@ -301,12 +281,7 @@ abstract contract Equity is
         );
     }
 
-    function getEquityDetails()
-        external
-        view
-        override
-        returns (EquityDetailsData memory equityDetailsData_)
-    {
+    function getEquityDetails() external view override returns (EquityDetailsData memory equityDetailsData_) {
         return _getEquityDetails();
     }
 
@@ -350,12 +325,7 @@ abstract contract Equity is
      * @dev returns the dividends count.
      *
      */
-    function getDividendsCount()
-        external
-        view
-        override
-        returns (uint256 dividendCount_)
-    {
+    function getDividendsCount() external view override returns (uint256 dividendCount_) {
         return _getDividendsCount();
     }
 
@@ -384,12 +354,7 @@ abstract contract Equity is
         return _getVotingFor(_voteID, _account);
     }
 
-    function getVotingCount()
-        external
-        view
-        override
-        returns (uint256 votingCount_)
-    {
+    function getVotingCount() external view override returns (uint256 votingCount_) {
         return _getVotingCount();
     }
 
@@ -399,28 +364,18 @@ abstract contract Equity is
         external
         view
         override
-        onlyMatchingActionType(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-            _balanceAdjustmentID - 1
-        )
+        onlyMatchingActionType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, _balanceAdjustmentID - 1)
         returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
     {
         return _getScheduledBalanceAdjusment(_balanceAdjustmentID);
     }
 
-    function getScheduledBalanceAdjustmentCount()
-        external
-        view
-        override
-        returns (uint256 balanceAdjustmentCount_)
-    {
+    function getScheduledBalanceAdjustmentCount() external view override returns (uint256 balanceAdjustmentCount_) {
         return _getScheduledBalanceAdjustmentsCount();
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initializeEquity(
-        EquityDetailsData calldata _equityDetailsData
-    ) internal {
+    function _initializeEquity(EquityDetailsData calldata _equityDetailsData) internal {
         EquityDataStorage storage equityStorage = _equityStorage();
         equityStorage.initialized = true;
         _storeEquityDetails(_equityDetailsData);

@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import ValidatedRequest from '../../../../../../core/validation/ValidatedArgs';
 import FormatValidation from '../../../FormatValidation';
 

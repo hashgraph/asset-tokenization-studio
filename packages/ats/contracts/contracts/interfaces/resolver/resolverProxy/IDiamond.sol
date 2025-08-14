@@ -204,8 +204,8 @@
 */
 
 pragma solidity 0.8.18;
-import {IDiamondCut} from './IDiamondCut.sol';
-import {IDiamondLoupe} from './IDiamondLoupe.sol';
+import { IDiamondCut } from './IDiamondCut.sol';
+import { IDiamondLoupe } from './IDiamondLoupe.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 

@@ -1,4 +1,4 @@
-import { Box, HStack, Stack, useDisclosure } from "@chakra-ui/react";
+import { Box, HStack, Stack, useDisclosure } from '@chakra-ui/react';
 import {
   Button,
   PhosphorIcon,
@@ -6,29 +6,29 @@ import {
   Table,
   Text,
   useToast,
-} from "io-bricks-ui";
-import { createColumnHelper } from "@tanstack/table-core";
+} from 'io-bricks-ui';
+import { createColumnHelper } from '@tanstack/table-core';
 import {
   Question,
   Trash,
   UserCirclePlus,
   UserCircleMinus,
   MagnifyingGlass,
-} from "@phosphor-icons/react";
-import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
-import { useExternalControlStore } from "../../store/externalControlStore";
-import { useUserStore } from "../../store/userStore";
-import { useRolesStore } from "../../store/rolesStore";
-import { User } from "../../utils/constants";
-import { Header } from "./Components/Header";
-import { AddAddressModal } from "./Components/AddAddressModal";
-import { RemoveAddressModal } from "./Components/RemoveAddressModal";
-import { CheckAddressModal } from "./Components/CheckAddressModal";
+} from '@phosphor-icons/react';
+import { useTranslation } from 'react-i18next';
+import { useEffect, useState } from 'react';
+import { useExternalControlStore } from '../../store/externalControlStore';
+import { useUserStore } from '../../store/userStore';
+import { useRolesStore } from '../../store/rolesStore';
+import { User } from '../../utils/constants';
+import { Header } from './Components/Header';
+import { AddAddressModal } from './Components/AddAddressModal';
+import { RemoveAddressModal } from './Components/RemoveAddressModal';
+import { CheckAddressModal } from './Components/CheckAddressModal';
 
 export type ExternalControl = {
   address: string;
-  type: "whitelist" | "blacklist";
+  type: 'whitelist' | 'blacklist';
 };
 
 export const ExternalControlList = () => {
@@ -50,14 +50,14 @@ export const ExternalControlList = () => {
     onOpen: onOpenCheckModal,
   } = useDisclosure();
 
-  const { t: tTable } = useTranslation("externalControl", {
-    keyPrefix: "list.table",
+  const { t: tTable } = useTranslation('externalControl', {
+    keyPrefix: 'list.table',
   });
-  const { t: tModal } = useTranslation("externalControl", {
-    keyPrefix: "list.modal",
+  const { t: tModal } = useTranslation('externalControl', {
+    keyPrefix: 'list.modal',
   });
-  const { t: tMessages } = useTranslation("externalControl", {
-    keyPrefix: "list.messages",
+  const { t: tMessages } = useTranslation('externalControl', {
+    keyPrefix: 'list.messages',
   });
 
   const [externalControlSelected, setExternalControlSelected] = useState<
@@ -76,26 +76,26 @@ export const ExternalControlList = () => {
   const columnHelper = createColumnHelper<ExternalControl>();
 
   const columns = [
-    columnHelper.accessor("address", {
-      header: tTable("address"),
+    columnHelper.accessor('address', {
+      header: tTable('address'),
       enableSorting: false,
       size: 100,
     }),
-    columnHelper.accessor("type", {
-      header: tTable("state"),
+    columnHelper.accessor('type', {
+      header: tTable('state'),
       enableSorting: false,
       size: 600,
       cell({ getValue }) {
         const value = getValue();
         return (
-          <Text _firstLetter={{ textTransform: "uppercase" }}>
-            {value === "blacklist" ? tTable("blacklist") : tTable("whitelist")}
+          <Text _firstLetter={{ textTransform: 'uppercase' }}>
+            {value === 'blacklist' ? tTable('blacklist') : tTable('whitelist')}
           </Text>
         );
       },
     }),
     columnHelper.display({
-      header: tTable("actions"),
+      header: tTable('actions'),
       enableSorting: false,
       cell(props) {
         const {
@@ -114,7 +114,7 @@ export const ExternalControlList = () => {
             >
               <PhosphorIcon
                 as={UserCirclePlus}
-                sx={{ color: "secondary.500" }}
+                sx={{ color: 'secondary.500' }}
               />
             </Button>
             <Button
@@ -127,7 +127,7 @@ export const ExternalControlList = () => {
             >
               <PhosphorIcon
                 as={UserCircleMinus}
-                sx={{ color: "secondary.500" }}
+                sx={{ color: 'secondary.500' }}
               />
             </Button>
             <Button
@@ -140,13 +140,13 @@ export const ExternalControlList = () => {
             >
               <PhosphorIcon
                 as={MagnifyingGlass}
-                sx={{ color: "secondary.500" }}
+                sx={{ color: 'secondary.500' }}
               />
             </Button>
             <Button variant="table" size="xs">
               <PhosphorIcon
                 as={Trash}
-                sx={{ color: "secondary.500" }}
+                sx={{ color: 'secondary.500' }}
                 onClick={() => {
                   setExternalControlSelected(original);
                   onOpen();
@@ -166,15 +166,15 @@ export const ExternalControlList = () => {
       removeExternalControl(externalControlSelected.address);
 
       toast.show({
-        status: "success",
-        title: tMessages("removeExternalControl.success"),
-        description: tMessages("removeExternalControl.descriptionSuccess"),
+        status: 'success',
+        title: tMessages('removeExternalControl.success'),
+        description: tMessages('removeExternalControl.descriptionSuccess'),
       });
-    } catch (error) {
+    } catch (_error) {
       toast.show({
-        status: "error",
-        title: tMessages("removeExternalControl.error"),
-        description: tMessages("removeExternalControl.descriptionFailed"),
+        status: 'error',
+        title: tMessages('removeExternalControl.error'),
+        description: tMessages('removeExternalControl.descriptionFailed'),
       });
     }
   };
@@ -207,24 +207,24 @@ export const ExternalControlList = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={Question} size="md" />}
-        title={tModal("removeExternalControlPopUp.title")}
-        description={tModal("removeExternalControlPopUp.description")}
-        confirmText={tModal("removeExternalControlPopUp.confirmText")}
+        title={tModal('removeExternalControlPopUp.title')}
+        description={tModal('removeExternalControlPopUp.description')}
+        confirmText={tModal('removeExternalControlPopUp.confirmText')}
         onConfirm={() => {
           handleDelete();
           onClose();
         }}
         onCancel={onClose}
-        cancelText={tModal("removeExternalControlPopUp.cancelText")}
+        cancelText={tModal('removeExternalControlPopUp.cancelText')}
       />
 
       <Header />
-      <Box layerStyle={"container"}>
+      <Box layerStyle={'container'}>
         <Table
           data={externalControls}
           columns={columns}
           name="externalControlList"
-          emptyComponent={<Text>{tTable("empty")}</Text>}
+          emptyComponent={<Text>{tTable('empty')}</Text>}
         />
       </Box>
     </Stack>

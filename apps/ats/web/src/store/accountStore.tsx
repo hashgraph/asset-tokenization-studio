@@ -203,8 +203,8 @@
 
 */
 
-import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 
 export interface AccountData {
   address: string;
@@ -233,11 +233,11 @@ interface AccountArrayStore {
   reset: () => void;
 }
 
-const ACCOUNT_STORE_KEY = "ACCOUNT_STORE_KEY";
+const ACCOUNT_STORE_KEY = 'ACCOUNT_STORE_KEY';
 
 const toggleFavorite = (
   state: AccountArrayStore,
-  key: "adminSecurities" | "holderSecurities",
+  key: 'adminSecurities' | 'holderSecurities',
   walletAddress: string,
   securityAddress: string,
 ) => {
@@ -295,7 +295,7 @@ export const useAccountStore = create<AccountArrayStore>()(
         set((state) =>
           toggleFavorite(
             state,
-            "adminSecurities",
+            'adminSecurities',
             walletAddress,
             securityAddress,
           ),
@@ -304,7 +304,7 @@ export const useAccountStore = create<AccountArrayStore>()(
         set((state) =>
           toggleFavorite(
             state,
-            "holderSecurities",
+            'holderSecurities',
             walletAddress,
             securityAddress,
           ),

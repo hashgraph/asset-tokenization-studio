@@ -1,31 +1,31 @@
-import { Box, HStack, Stack, useDisclosure } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/table-core";
-import { Button, PhosphorIcon, PopUp, Table, Text } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { KYCModal } from "./KYCModal";
-import { Trash } from "@phosphor-icons/react";
-import { useMemo, useState } from "react";
+import { Box, HStack, Stack, useDisclosure } from '@chakra-ui/react';
+import { createColumnHelper } from '@tanstack/table-core';
+import { Button, PhosphorIcon, PopUp, Table, Text } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { KYCModal } from './KYCModal';
+import { Trash } from '@phosphor-icons/react';
+import { useMemo, useState } from 'react';
 import {
   KycAccountDataViewModelResponse,
   useGetKYCList,
-} from "../../../../hooks/queries/useKYC";
+} from '../../../../hooks/queries/useKYC';
 import {
   GetKycAccountsDataRequest,
   RevokeKycRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router-dom";
-import { useRevokeKYC } from "../../../../hooks/mutations/useKYC";
-import { useRolesStore } from "../../../../store/rolesStore";
-import { SecurityRole } from "../../../../utils/SecurityRole";
-import { DATE_TIME_FORMAT } from "../../../../utils/constants";
-import { formatDate } from "../../../../utils/format";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useParams } from 'react-router-dom';
+import { useRevokeKYC } from '../../../../hooks/mutations/useKYC';
+import { useRolesStore } from '../../../../store/rolesStore';
+import { SecurityRole } from '../../../../utils/SecurityRole';
+import { DATE_TIME_FORMAT } from '../../../../utils/constants';
+import { formatDate } from '../../../../utils/format';
 
 const STATUS = {
-  VALID: { status: "Valid", color: "green" },
-  EXPIRED: { status: "Expired", color: "red" },
-  PENDING: { status: "Pending", color: "orange" },
-  UNTRUSTED: { status: "Untrusted", color: "red" },
-  REVOKED: { status: "Revoked", color: "red" },
+  VALID: { status: 'Valid', color: 'green' },
+  EXPIRED: { status: 'Expired', color: 'red' },
+  PENDING: { status: 'Pending', color: 'orange' },
+  UNTRUSTED: { status: 'Untrusted', color: 'red' },
+  REVOKED: { status: 'Revoked', color: 'red' },
 };
 
 const getStatus = ({ kyc }: { kyc: KycAccountDataViewModelResponse }) => {
@@ -47,7 +47,7 @@ const getStatus = ({ kyc }: { kyc: KycAccountDataViewModelResponse }) => {
 };
 
 export const KYC = () => {
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
 
   const { roles: accountRoles } = useRolesStore();
 
@@ -58,17 +58,17 @@ export const KYC = () => {
     onOpen: onOpenRevokeModal,
   } = useDisclosure();
 
-  const { t: tList } = useTranslation("security", {
-    keyPrefix: "details.kyc.list",
+  const { t: tList } = useTranslation('security', {
+    keyPrefix: 'details.kyc.list',
   });
-  const { t: tTable } = useTranslation("security", {
-    keyPrefix: "details.kyc.table",
+  const { t: tTable } = useTranslation('security', {
+    keyPrefix: 'details.kyc.table',
   });
-  const { t: tRevoke } = useTranslation("security", {
-    keyPrefix: "details.kyc.revoke",
+  const { t: tRevoke } = useTranslation('security', {
+    keyPrefix: 'details.kyc.revoke',
   });
 
-  const [accountToRemove, setAccountToRemove] = useState<string>("");
+  const [accountToRemove, setAccountToRemove] = useState<string>('');
   const [isRemoving, setIsRemoving] = useState(false);
 
   const { mutate: revokeKYC } = useRevokeKYC();
@@ -90,28 +90,16 @@ export const KYC = () => {
   );
 
   const columns = [
-    columnsHelper.accessor("issuer", {
-      header: tTable("fields.issuerId"),
+    columnsHelper.accessor('issuer', {
+      header: tTable('fields.issuerId'),
       enableSorting: false,
     }),
-    columnsHelper.accessor("account", {
-      header: tTable("fields.accountId"),
+    columnsHelper.accessor('account', {
+      header: tTable('fields.accountId'),
       enableSorting: false,
     }),
-    columnsHelper.accessor("validFrom", {
-      header: tTable("fields.validFrom"),
-      enableSorting: false,
-      cell({ getValue }) {
-        const formattedDate = formatDate(
-          Number(getValue()) * 1000,
-          DATE_TIME_FORMAT,
-        );
-
-        return <Box>{formattedDate}</Box>;
-      },
-    }),
-    columnsHelper.accessor("validTo", {
-      header: tTable("fields.validTo"),
+    columnsHelper.accessor('validFrom', {
+      header: tTable('fields.validFrom'),
       enableSorting: false,
       cell({ getValue }) {
         const formattedDate = formatDate(
@@ -122,12 +110,24 @@ export const KYC = () => {
         return <Box>{formattedDate}</Box>;
       },
     }),
-    columnsHelper.accessor("vcId", {
-      header: tTable("fields.vcId"),
+    columnsHelper.accessor('validTo', {
+      header: tTable('fields.validTo'),
+      enableSorting: false,
+      cell({ getValue }) {
+        const formattedDate = formatDate(
+          Number(getValue()) * 1000,
+          DATE_TIME_FORMAT,
+        );
+
+        return <Box>{formattedDate}</Box>;
+      },
+    }),
+    columnsHelper.accessor('vcId', {
+      header: tTable('fields.vcId'),
       enableSorting: false,
     }),
-    columnsHelper.accessor("status", {
-      header: tTable("fields.status"),
+    columnsHelper.accessor('status', {
+      header: tTable('fields.status'),
       enableSorting: false,
       cell({ row }) {
         const { color, status } = getStatus({
@@ -144,8 +144,8 @@ export const KYC = () => {
     ...(hasKYCRole
       ? [
           columnsHelper.display({
-            id: "remove",
-            header: tTable("fields.actions"),
+            id: 'remove',
+            header: tTable('fields.actions'),
             size: 5,
             enableSorting: false,
             cell(props) {
@@ -165,7 +165,7 @@ export const KYC = () => {
                   variant="table"
                   size="xs"
                 >
-                  <PhosphorIcon as={Trash} sx={{ color: "secondary.500" }} />
+                  <PhosphorIcon as={Trash} sx={{ color: 'secondary.500' }} />
                 </Button>
               );
             },
@@ -185,9 +185,9 @@ export const KYC = () => {
         pt={6}
         gap={4}
       >
-        <HStack justifyContent={"space-between"}>
+        <HStack justifyContent={'space-between'}>
           <Text textStyle="ElementsSemiboldLG" color="neutral.light">
-            {tList("title")}
+            {tList('title')}
           </Text>
           {hasKYCRole && (
             <Button
@@ -196,7 +196,7 @@ export const KYC = () => {
               }}
               size="sm"
             >
-              {tList("add")}
+              {tList('add')}
             </Button>
           )}
         </HStack>
@@ -213,9 +213,9 @@ export const KYC = () => {
         isOpen={isOpenRevokeModal}
         onClose={onCloseRevokeModal}
         icon={<PhosphorIcon as={Trash} size="md" />}
-        title={tRevoke("title")}
-        description={tRevoke("description")}
-        confirmText={tRevoke("confirmText")}
+        title={tRevoke('title')}
+        description={tRevoke('description')}
+        confirmText={tRevoke('confirmText')}
         onConfirm={() => {
           setIsRemoving(true);
 
@@ -234,7 +234,7 @@ export const KYC = () => {
           });
         }}
         onCancel={onCloseRevokeModal}
-        cancelText={tRevoke("cancelText")}
+        cancelText={tRevoke('cancelText')}
         confirmButtonProps={{
           isLoading: isRemoving,
         }}

@@ -243,10 +243,7 @@ interface ILock {
         uint256 _expirationTimestamp
     ) external returns (bool success_, uint256 lockId_);
 
-    function release(
-        uint256 _lockId,
-        address _tokenHolder
-    ) external returns (bool success_);
+    function release(uint256 _lockId, address _tokenHolder) external returns (bool success_);
 
     function getLockedAmountForByPartition(
         bytes32 _partition,
@@ -271,13 +268,9 @@ interface ILock {
         uint256 _lockId
     ) external view returns (uint256 amount_, uint256 expirationTimestamp_);
 
-    function getLockedAmountFor(
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
+    function getLockedAmountFor(address _tokenHolder) external view returns (uint256 amount_);
 
-    function getLockCountFor(
-        address _tokenHolder
-    ) external view returns (uint256 lockCount_);
+    function getLockCountFor(address _tokenHolder) external view returns (uint256 lockCount_);
 
     function getLocksIdFor(
         address _tokenHolder,

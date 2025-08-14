@@ -8,27 +8,27 @@ import {
   ModalOverlay,
   ModalProps,
   VStack,
-} from "@chakra-ui/react";
-import { Button, InputController } from "io-bricks-ui";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { isHederaValidAddress, required } from "../../../../utils/rules";
-import { useAddIssuer } from "../../../../hooks/mutations/useSSIManager";
-import { AddIssuerRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router-dom";
-import { useState } from "react";
+} from '@chakra-ui/react';
+import { Button, InputController } from 'io-bricks-ui';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { isHederaValidAddress, required } from '../../../../utils/rules';
+import { useAddIssuer } from '../../../../hooks/mutations/useSSIManager';
+import { AddIssuerRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 
 interface FormValues {
   accountId: string;
 }
 
-interface SSIManagerModalProps extends Omit<ModalProps, "children"> {}
+type SSIManagerModalProps = Omit<ModalProps, 'children'>;
 
 export const SSIManagerModal = ({ isOpen, onClose }: SSIManagerModalProps) => {
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
 
-  const { t: tCreate } = useTranslation("security", {
-    keyPrefix: "details.ssiManager.create",
+  const { t: tCreate } = useTranslation('security', {
+    keyPrefix: 'details.ssiManager.create',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +38,7 @@ export const SSIManagerModal = ({ isOpen, onClose }: SSIManagerModalProps) => {
     formState: { isValid },
     handleSubmit,
   } = useForm<FormValues>({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const { mutate } = useAddIssuer();
@@ -64,16 +64,16 @@ export const SSIManagerModal = ({ isOpen, onClose }: SSIManagerModalProps) => {
   return (
     <Modal isCentered isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent bgColor={"white"}>
-        <ModalHeader>{tCreate("title")}</ModalHeader>
+      <ModalContent bgColor={'white'}>
+        <ModalHeader>{tCreate('title')}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack gap={4}>
             <InputController
               control={control}
               id="accountId"
-              label={tCreate("form.account.label")}
-              placeholder={tCreate("form.account.placeholder")}
+              label={tCreate('form.account.label')}
+              placeholder={tCreate('form.account.placeholder')}
               rules={{ required, validate: { isHederaValidAddress } }}
             />
           </VStack>

@@ -203,17 +203,17 @@
 
 */
 
-import { Button, HStack, VStack } from "@chakra-ui/react";
-import { useTranslation } from "react-i18next";
-import { CheckboxGroupController, Text } from "io-bricks-ui";
-import { required } from "../../../../utils/rules";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { ApplyRolesRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router-dom";
-import { useApplyRoles } from "../../../../hooks/queries/useApplyRoles";
-import { rolesList, TSecurityType } from "./rolesList";
-import { SecurityRole } from "../../../../utils/SecurityRole";
-import { useSecurityStore } from "../../../../store/securityStore";
+import { Button, HStack, VStack } from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
+import { CheckboxGroupController, Text } from 'io-bricks-ui';
+import { required } from '../../../../utils/rules';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { ApplyRolesRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useParams } from 'react-router-dom';
+import { useApplyRoles } from '../../../../hooks/queries/useApplyRoles';
+import { rolesList, TSecurityType } from './rolesList';
+import { SecurityRole } from '../../../../utils/SecurityRole';
+import { useSecurityStore } from '../../../../store/securityStore';
 
 interface EditRolesFormValues {
   roles: string[];
@@ -229,21 +229,21 @@ export const HandleRoles = ({
   currentRoles: string[];
   address: string;
 }) => {
-  const { t: tRoles } = useTranslation("roles");
-  const { t: tInputs } = useTranslation("security", {
-    keyPrefix: "details.roleManagement.edit.inputs",
+  const { t: tRoles } = useTranslation('roles');
+  const { t: tInputs } = useTranslation('security', {
+    keyPrefix: 'details.roleManagement.edit.inputs',
   });
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.roleManagement.edit",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.roleManagement.edit',
   });
   const { details: securityDetails } = useSecurityStore();
 
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
 
   const { mutate: applyRoles, isLoading: isLoadingApply } = useApplyRoles();
   const { handleSubmit: onHandleSubmit, control: controlRoles } =
     useForm<EditRolesFormValues>({
-      mode: "onSubmit",
+      mode: 'onSubmit',
       defaultValues: {
         roles: currentRoles,
       },
@@ -277,11 +277,11 @@ export const HandleRoles = ({
       onSubmit={onHandleSubmit(onSubmitRoles)}
     >
       <HStack h={16} layerStyle="whiteContainer">
-        <Text textStyle="HeadingMediumLG">{t("rolesDefinitions")}</Text>
+        <Text textStyle="HeadingMediumLG">{t('rolesDefinitions')}</Text>
       </HStack>
       <CheckboxGroupController
         control={controlRoles}
-        flexDirection={"column"}
+        flexDirection={'column'}
         id="roles"
         options={rolesList
           .filter((role) => {
@@ -307,7 +307,7 @@ export const HandleRoles = ({
           type="submit"
           isLoading={isLoadingApply}
         >
-          {tInputs("apply.button")}
+          {tInputs('apply.button')}
         </Button>
       </HStack>
     </VStack>

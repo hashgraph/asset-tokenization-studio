@@ -224,21 +224,12 @@ interface IERC1410Operator {
 
     function revokeOperator(address _operator) external;
 
-    function authorizeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    ) external;
+    function authorizeOperatorByPartition(bytes32 _partition, address _operator) external;
 
-    function revokeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    ) external;
+    function revokeOperatorByPartition(bytes32 _partition, address _operator) external;
 
     // Operator Information
-    function isOperator(
-        address _operator,
-        address _tokenHolder
-    ) external view returns (bool);
+    function isOperator(address _operator, address _tokenHolder) external view returns (bool);
 
     function isOperatorForPartition(
         bytes32 _partition,

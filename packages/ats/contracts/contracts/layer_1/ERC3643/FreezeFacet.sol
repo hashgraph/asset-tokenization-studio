@@ -206,14 +206,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {IFreeze} from '../interfaces/ERC3643/IFreeze.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_FREEZE_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import { Common } from '../common/Common.sol';
+import { IFreeze } from '../interfaces/ERC3643/IFreeze.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _FREEZE_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from '../constants/roles.sol';
+import { _DEFAULT_PARTITION } from '../../layer_0/constants/values.sol';
 
 contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
     // ====== External functions (state-changing) ======
@@ -256,13 +254,7 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
     function unfreezePartialTokens(
         address _userAddress,
         uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
+    ) external override onlyUnpaused validateAddress(_userAddress) onlyWithoutMultiPartition {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _FREEZE_MANAGER_ROLE;
@@ -292,12 +284,7 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
     function batchFreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
+    ) external onlyUnpaused onlyWithoutMultiPartition onlyValidInputAmountsArrayLength(_userAddresses, _amounts) {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _FREEZE_MANAGER_ROLE;
@@ -309,23 +296,14 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
             _freezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensFrozen(
-                _userAddresses[i],
-                _amounts[i],
-                _DEFAULT_PARTITION
-            );
+            emit TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
         }
     }
 
     function batchUnfreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
+    ) external onlyUnpaused onlyWithoutMultiPartition onlyValidInputAmountsArrayLength(_userAddresses, _amounts) {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _FREEZE_MANAGER_ROLE;
@@ -334,67 +312,32 @@ contract FreezeFacet is IFreeze, IStaticFunctionSelectors, Common {
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
             _unfreezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensUnfrozen(
-                _userAddresses[i],
-                _amounts[i],
-                _DEFAULT_PARTITION
-            );
+            emit TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
         }
     }
 
     // ====== External functions (view/pure) ======
 
-    function getFrozenTokens(
-        address _userAddress
-    ) external view override returns (uint256) {
+    function getFrozenTokens(address _userAddress) external view override returns (uint256) {
         return _getFrozenAmountForAdjusted(_userAddress);
     }
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _FREEZE_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](7);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .freezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .unfreezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getFrozenTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setAddressFrozen
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchSetAddressFrozen
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchFreezePartialTokens
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchUnfreezePartialTokens
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.freezePartialTokens.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.unfreezePartialTokens.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.getFrozenTokens.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setAddressFrozen.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchSetAddressFrozen.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchFreezePartialTokens.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchUnfreezePartialTokens.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IFreeze).interfaceId;

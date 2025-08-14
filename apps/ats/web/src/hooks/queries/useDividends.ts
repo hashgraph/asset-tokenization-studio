@@ -203,17 +203,17 @@
 
 */
 
-import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
-import { SDKService } from "../../services/SDKService";
-import { useToast } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
+import { UseQueryOptions, useMutation, useQuery } from '@tanstack/react-query';
+import { SDKService } from '../../services/SDKService';
+import { useToast } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
 import {
   DividendsForViewModel,
   DividendsViewModel,
   GetDividendsForRequest,
   GetDividendsRequest,
   SetDividendsRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 export const GET_SECURITY_DIVIDENDS_FOR = (
   securityId: string,
@@ -228,33 +228,33 @@ export const GET_SECURITY_DIVIDENDS = (
 
 export const useDividends = () => {
   const toast = useToast();
-  const { t } = useTranslation("security", { keyPrefix: "details.dividends" });
+  const { t } = useTranslation('security', { keyPrefix: 'details.dividends' });
 
   return useMutation(
     (setDividendsRequest: SetDividendsRequest) =>
       SDKService.setDividends(setDividendsRequest),
     {
       onSuccess: (data) => {
-        console.log("SDK message --> Dividend creation success: ", data);
+        console.log('SDK message --> Dividend creation success: ', data);
 
         if (!data) return;
 
         toast.show({
           duration: 3000,
-          title: t("messages.succes"),
-          description: t("messages.creationSuccessful"),
-          variant: "subtle",
-          status: "success",
+          title: t('messages.succes'),
+          description: t('messages.creationSuccessful'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
-        console.log("SDK message --> Dividend creation error: ", error);
+        console.log('SDK message --> Dividend creation error: ', error);
         toast.show({
           duration: 3000,
-          title: t("messages.error"),
-          description: t("messages.creationFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('messages.error'),
+          description: t('messages.creationFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },

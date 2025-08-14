@@ -203,1259 +203,1086 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
-    type ResolverProxy,
-    type Pause,
-    type ERC1594,
-    type AccessControl,
-    type ControlList,
-    type ERC1410Snapshot,
-    ERC20,
-    IFactory,
-    BusinessLogicResolver,
-    Kyc,
-    SsiManagement,
-    ClearingActionsFacet,
-} from '@typechain'
+  type ResolverProxy,
+  type Pause,
+  type ERC1594,
+  type AccessControl,
+  type ControlList,
+  type ERC1410Snapshot,
+  ERC20,
+  IFactory,
+  BusinessLogicResolver,
+  Kyc,
+  SsiManagement,
+  ClearingActionsFacet,
+} from '@typechain';
 import {
-    CONTROL_LIST_ROLE,
-    DEFAULT_PARTITION,
-    FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    IS_PAUSED_ERROR_ID,
-    ISSUER_ROLE,
-    KYC_ROLE,
-    SSI_MANAGER_ROLE,
-    NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    PAUSER_ROLE,
-    CLEARING_ROLE,
-    SUCCESS,
-    TO_ACCOUNT_BLOCKED_ERROR_ID,
-    TO_ACCOUNT_NULL_ERROR_ID,
-    ALLOWANCE_REACHED_ERROR_ID,
-    OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    deployEquityFromFactory,
-    Rbac,
-    RegulationSubType,
-    RegulationType,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    MAX_UINT256,
-    FROM_ACCOUNT_KYC_ERROR_ID,
-    TO_ACCOUNT_KYC_ERROR_ID,
-    HASH_ZERO,
-    ZERO,
-    EMPTY_STRING,
-} from '@scripts'
+  CONTROL_LIST_ROLE,
+  DEFAULT_PARTITION,
+  FROM_ACCOUNT_BLOCKED_ERROR_ID,
+  IS_PAUSED_ERROR_ID,
+  ISSUER_ROLE,
+  KYC_ROLE,
+  SSI_MANAGER_ROLE,
+  NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+  PAUSER_ROLE,
+  CLEARING_ROLE,
+  SUCCESS,
+  TO_ACCOUNT_BLOCKED_ERROR_ID,
+  TO_ACCOUNT_NULL_ERROR_ID,
+  ALLOWANCE_REACHED_ERROR_ID,
+  OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+  deployEquityFromFactory,
+  Rbac,
+  RegulationSubType,
+  RegulationType,
+  deployAtsFullInfrastructure,
+  DeployAtsFullInfrastructureCommand,
+  MAX_UINT256,
+  FROM_ACCOUNT_KYC_ERROR_ID,
+  TO_ACCOUNT_KYC_ERROR_ID,
+  HASH_ZERO,
+  ZERO,
+  EMPTY_STRING,
+} from '@scripts';
 
-const AMOUNT = 1000
-const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
-const DATA = '0x1234'
-const MAX_SUPPLY = 10000000
-const EMPTY_VC_ID = EMPTY_STRING
+const AMOUNT = 1000;
+const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT;
+const DATA = '0x1234';
+const MAX_SUPPLY = 10000000;
+const EMPTY_VC_ID = EMPTY_STRING;
 
 describe('ERC1594 Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
-    let signer_D: SignerWithAddress
-    let signer_E: SignerWithAddress
-
-    let account_A: string
-    let account_B: string
-    let account_C: string
-    let account_D: string
-    let account_E: string
-
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let erc1594Facet: ERC1594
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
-    let controlList: ControlList
-    let kycFacet: Kyc
-    let ssiManagementFacet: SsiManagement
-    let clearingActionsFacet: ClearingActionsFacet
-
-    describe('Multi partition mode', () => {
-        before(async () => {
-            // mute | mock console.log
-            console.log = () => {}
-            ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
-                await ethers.getSigners()
-            account_A = signer_A.address
-            account_B = signer_B.address
-            account_C = signer_C.address
-            account_D = signer_D.address
-            account_E = signer_E.address
-
-            const { ...deployedContracts } = await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                    timeTravelEnabled: true,
-                })
-            )
-
-            factory = deployedContracts.factory.contract
-            businessLogicResolver =
-                deployedContracts.businessLogicResolver.contract
-        })
-
-        beforeEach(async () => {
-            const rbacPause: Rbac = {
-                role: PAUSER_ROLE,
-                members: [account_B],
-            }
-            const rbacClearing: Rbac = {
-                role: CLEARING_ROLE,
-                members: [account_B],
-            }
-            const init_rbacs: Rbac[] = [rbacPause, rbacClearing]
-
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                internalKycActivated: true,
-                isMultiPartition: true,
-                name: 'TEST_AccessControl',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: BigInt(MAX_SUPPLY),
-                nominalValue: 100,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_B,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                factory,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
-                diamond.address
-            )
-
-            erc1594Facet = await ethers.getContractAt(
-                'ERC1594',
-                diamond.address
-            )
-
-            pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
-            controlList = await ethers.getContractAt(
-                'ControlList',
-                diamond.address
-            )
-
-            clearingActionsFacet = await ethers.getContractAt(
-                'ClearingActionsFacet',
-                diamond.address,
-                signer_B
-            )
-
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-        })
-
-        it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
-            await expect(erc1594Facet.initialize_ERC1594()).to.be.rejectedWith(
-                'AlreadyInitialized'
-            )
-        })
-
-        describe('Cap', () => {
-            it('GIVEN a max supply WHEN issue more than the max supply THEN transaction fails with MaxSupplyReached', async () => {
-                // Using account A (with role)
-                erc1594Facet = erc1594Facet.connect(signer_A)
-
-                // add to list fails
-                await expect(
-                    erc1594Facet.issue(account_E, MAX_SUPPLY + 1, DATA)
-                ).to.be.rejectedWith('MaxSupplyReached')
-            })
-        })
-
-        describe('Paused', () => {
-            beforeEach(async () => {
-                // Pausing the token
-                pauseFacet = pauseFacet.connect(signer_B)
-                await pauseFacet.pause()
-            })
-
-            it('GIVEN a paused Token WHEN transfer THEN transaction fails with TokenIsPaused', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // transfer with data fails
-                await expect(
-                    erc1594Facet.transferWithData(account_D, AMOUNT, DATA)
-                ).to.be.rejectedWith('TokenIsPaused')
-
-                // transfer from with data fails
-                await expect(
-                    erc1594Facet.transferFromWithData(
-                        account_E,
-                        account_D,
-                        AMOUNT,
-                        DATA
-                    )
-                ).to.be.rejectedWith('TokenIsPaused')
-            })
-
-            it('GIVEN a paused Token WHEN issue THEN transaction fails with TokenIsPaused', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // issue fails
-                await expect(
-                    erc1594Facet.issue(account_E, AMOUNT, DATA)
-                ).to.be.revertedWithCustomError(erc1594Facet, 'TokenIsPaused')
-            })
-
-            it('GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // transfer with data fails
-                await expect(
-                    erc1594Facet.redeem(AMOUNT, DATA)
-                ).to.be.rejectedWith('TokenIsPaused')
-
-                // transfer from with data fails
-                await expect(
-                    erc1594Facet.redeemFrom(account_E, AMOUNT, DATA)
-                ).to.be.rejectedWith('TokenIsPaused')
-            })
-        })
-
-        describe('Clearing', () => {
-            beforeEach(async () => {
-                await clearingActionsFacet.activateClearing()
-            })
-            it('GIVEN a token with clearing mode active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // transfer with data fails
-                await expect(
-                    erc1594Facet.transferWithData(account_D, AMOUNT, DATA)
-                ).to.be.rejectedWith('ClearingIsActivated')
-
-                // transfer from with data fails
-                await expect(
-                    erc1594Facet.transferFromWithData(
-                        account_E,
-                        account_D,
-                        AMOUNT,
-                        DATA
-                    )
-                ).to.be.rejectedWith('ClearingIsActivated')
-            })
-
-            it('GIVEN a token with clearing mode active WHEN redeem THEN transaction fails with ClearingIsActivated', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                await expect(
-                    erc1594Facet.redeem(AMOUNT, DATA)
-                ).to.be.rejectedWith('ClearingIsActivated')
-
-                await expect(
-                    erc1594Facet.redeemFrom(account_E, AMOUNT, DATA)
-                ).to.be.rejectedWith('ClearingIsActivated')
-            })
-        })
-
-        describe('ControlList', () => {
-            it('GIVEN blocked accounts (sender, to, from) WHEN transfer THEN transaction fails with AccountIsBlocked', async () => {
-                // Blacklisting accounts
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-                controlList = controlList.connect(signer_A)
-                await controlList.addToControlList(account_C)
-
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // transfer with data fails
-                await expect(
-                    erc1594Facet.transferWithData(account_D, AMOUNT, DATA)
-                ).to.be.rejectedWith('AccountIsBlocked')
-
-                // transfer from with data fails
-                await expect(
-                    erc1594Facet.transferFromWithData(
-                        account_E,
-                        account_D,
-                        AMOUNT,
-                        DATA
-                    )
-                ).to.be.rejectedWith('AccountIsBlocked')
-
-                // Update blacklist
-                await controlList.removeFromControlList(account_C)
-                await controlList.addToControlList(account_D)
-
-                // transfer with data fails
-                await expect(
-                    erc1594Facet.transferWithData(account_D, AMOUNT, DATA)
-                ).to.be.rejectedWith('AccountIsBlocked')
-
-                // transfer from with data fails
-                await expect(
-                    erc1594Facet.transferFromWithData(
-                        account_E,
-                        account_D,
-                        AMOUNT,
-                        DATA
-                    )
-                ).to.be.rejectedWith('AccountIsBlocked')
-
-                // Update blacklist
-                await controlList.removeFromControlList(account_D)
-                await controlList.addToControlList(account_E)
-
-                // transfer from with data fails
-                await expect(
-                    erc1594Facet.transferFromWithData(
-                        account_E,
-                        account_D,
-                        AMOUNT,
-                        DATA
-                    )
-                ).to.be.rejectedWith('AccountIsBlocked')
-            })
-
-            it('GIVEN blocked accounts (to) USING WHITELIST WHEN issue THEN transaction fails with AccountIsBlocked', async () => {
-                // First deploy a new token using white list
-                const isWhiteList = true
-                const newDiamond = await deployEquityFromFactory({
-                    adminAccount: account_A,
-                    isWhiteList,
-                    isControllable: true,
-                    arePartitionsProtected: false,
-                    clearingActive: false,
-                    internalKycActivated: true,
-                    isMultiPartition: false,
-                    name: 'TEST_AccessControl',
-                    symbol: 'TAC',
-                    decimals: 6,
-                    isin: isinGenerator(),
-                    votingRight: false,
-                    informationRight: false,
-                    liquidationRight: false,
-                    subscriptionRight: true,
-                    conversionRight: true,
-                    redemptionRight: true,
-                    putRight: false,
-                    dividendRight: 1,
-                    currency: '0x345678',
-                    numberOfShares: MAX_UINT256,
-                    nominalValue: 100,
-                    regulationType: RegulationType.REG_D,
-                    regulationSubType: RegulationSubType.REG_D_506_B,
-                    countriesControlListType: true,
-                    listOfCountries: 'ES,FR,CH',
-                    info: 'nothing',
-                    init_rbacs: [],
-                    factory,
-                    businessLogicResolver: businessLogicResolver.address,
-                })
-                accessControlFacet = await ethers.getContractAt(
-                    'AccessControl',
-                    newDiamond.address
-                )
-
-                erc1594Facet = await ethers.getContractAt(
-                    'ERC1594',
-                    newDiamond.address
-                )
-                // accounts are blacklisted by default (white list)
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-
-                // Using account A (with role)
-                erc1594Facet = erc1594Facet.connect(signer_A)
-
-                // issue fails
-                await expect(
-                    erc1594Facet.issue(account_E, AMOUNT, DATA)
-                ).to.be.revertedWithCustomError(
-                    erc1594Facet,
-                    'AccountIsBlocked'
-                )
-            })
-
-            it('GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked', async () => {
-                // Blacklisting accounts
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-                controlList = controlList.connect(signer_A)
-                await controlList.addToControlList(account_C)
-
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // redeem with data fails
-                await expect(
-                    erc1594Facet.redeem(AMOUNT, DATA)
-                ).to.be.rejectedWith('AccountIsBlocked')
-
-                // redeem from with data fails
-                await expect(
-                    erc1594Facet.redeemFrom(account_E, AMOUNT, DATA)
-                ).to.be.rejectedWith('AccountIsBlocked')
-
-                // Update blacklist
-                await controlList.removeFromControlList(account_C)
-                await controlList.addToControlList(account_E)
-
-                // redeem from with data fails
-                await expect(
-                    erc1594Facet.redeemFrom(account_E, AMOUNT, DATA)
-                ).to.be.rejectedWith('AccountIsBlocked')
-            })
-        })
-
-        describe('NotAllowedInMultiPartitionMode', () => {
-            it('GIVEN an initialized token WHEN transferWithData THEN fails with NotAllowedInMultiPartitionMode', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // transfer with data fails
-                await expect(
-                    erc1594Facet.transferWithData(
-                        account_D,
-                        2 * BALANCE_OF_C_ORIGINAL,
-                        DATA
-                    )
-                ).to.be.revertedWithCustomError(
-                    erc1594Facet,
-                    'NotAllowedInMultiPartitionMode'
-                )
-            })
-
-            it('GIVEN an initialized token WHEN transferFromWithData THEN fails with NotAllowedInMultiPartitionMode', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // transfer with data fails
-                await expect(
-                    erc1594Facet.transferFromWithData(
-                        account_B,
-                        account_D,
-                        2 * BALANCE_OF_C_ORIGINAL,
-                        DATA
-                    )
-                ).to.be.revertedWithCustomError(
-                    erc1594Facet,
-                    'NotAllowedInMultiPartitionMode'
-                )
-            })
-
-            it('GIVEN an initialized token WHEN issue THEN fails with NotAllowedInMultiPartitionMode', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_A)
-
-                // transfer with data fails
-                expect(await erc1594Facet.isIssuable()).to.be.true
-                await expect(
-                    erc1594Facet.issue(
-                        account_D,
-                        2 * BALANCE_OF_C_ORIGINAL,
-                        DATA
-                    )
-                ).to.be.revertedWithCustomError(
-                    erc1594Facet,
-                    'NotAllowedInMultiPartitionMode'
-                )
-            })
-
-            it('GIVEN an initialized token WHEN redeem THEN fails with NotAllowedInMultiPartitionMode', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // transfer with data fails
-                await expect(
-                    erc1594Facet.redeem(2 * BALANCE_OF_C_ORIGINAL, DATA)
-                ).to.be.revertedWithCustomError(
-                    erc1594Facet,
-                    'NotAllowedInMultiPartitionMode'
-                )
-            })
-
-            it('GIVEN an initialized token WHEN redeemFrom THEN fails with NotAllowedInMultiPartitionMode', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // transfer with data fails
-                await expect(
-                    erc1594Facet.redeemFrom(
-                        account_D,
-                        2 * BALANCE_OF_C_ORIGINAL,
-                        DATA
-                    )
-                ).to.be.revertedWithCustomError(
-                    erc1594Facet,
-                    'NotAllowedInMultiPartitionMode'
-                )
-            })
-
-            it('GIVEN an initialized token WHEN canTransfer THEN fails with NotAllowedInMultiPartitionMode', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // transfer with data fails
-                await expect(
-                    erc1594Facet.canTransfer(
-                        account_D,
-                        2 * BALANCE_OF_C_ORIGINAL,
-                        DATA
-                    )
-                ).to.revertedWithCustomError(
-                    erc1594Facet,
-                    'NotAllowedInMultiPartitionMode'
-                )
-            })
-
-            it('GIVEN an initialized token WHEN canTransferFrom THEN fails with NotAllowedInMultiPartitionMode', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                // transfer with data fails
-                await expect(
-                    erc1594Facet.canTransferFrom(
-                        account_B,
-                        account_D,
-                        2 * BALANCE_OF_C_ORIGINAL,
-                        DATA
-                    )
-                ).to.revertedWithCustomError(
-                    erc1594Facet,
-                    'NotAllowedInMultiPartitionMode'
-                )
-            })
-        })
-    })
-
-    describe('Single partition mode', () => {
-        let erc1594Issuer: ERC1594
-        let erc1594Transferor: ERC1594
-        let erc1594Approved: ERC1594
-        let erc1410SnapshotFacet: ERC1410Snapshot
-        let erc20Facet: ERC20
-        before(async () => {
-            // mute | mock console.log
-            console.log = () => {}
-            ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
-                await ethers.getSigners()
-            account_A = signer_A.address
-            account_B = signer_B.address
-            account_C = signer_C.address
-            account_D = signer_D.address
-            account_E = signer_E.address
-
-            const { ...deployedContracts } = await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                })
-            )
-
-            factory = deployedContracts.factory.contract
-            businessLogicResolver =
-                deployedContracts.businessLogicResolver.contract
-        })
-        beforeEach(async () => {
-            const rbacPause: Rbac = {
-                role: PAUSER_ROLE,
-                members: [account_B],
-            }
-            const rbacIssuer: Rbac = {
-                role: ISSUER_ROLE,
-                members: [account_C],
-            }
-            const rbacKYC: Rbac = {
-                role: KYC_ROLE,
-                members: [account_B],
-            }
-            const rbacSSI: Rbac = {
-                role: SSI_MANAGER_ROLE,
-                members: [account_A],
-            }
-            const init_rbacs: Rbac[] = [rbacPause, rbacIssuer, rbacKYC, rbacSSI]
-
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                internalKycActivated: true,
-                isMultiPartition: false,
-                name: 'TEST_AccessControl',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_S,
-                regulationSubType: RegulationSubType.NONE,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                factory,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
-                diamond.address
-            )
-
-            erc1594Facet = await ethers.getContractAt(
-                'ERC1594',
-                diamond.address
-            )
-            erc1594Issuer = erc1594Facet.connect(signer_C)
-            erc1594Transferor = erc1594Facet.connect(signer_E)
-            erc1594Approved = erc1594Facet.connect(signer_D)
-            erc20Facet = await ethers.getContractAt(
-                'ERC20',
-                diamond.address,
-                signer_E
-            )
-            erc1410SnapshotFacet = await ethers.getContractAt(
-                'ERC1410Snapshot',
-                diamond.address
-            )
-
-            pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
-            controlList = await ethers.getContractAt(
-                'ControlList',
-                diamond.address
-            )
-
-            kycFacet = await ethers.getContractAt(
-                'Kyc',
-                diamond.address,
-                signer_B
-            )
-            ssiManagementFacet = await ethers.getContractAt(
-                'SsiManagement',
-                diamond.address,
-                signer_A
-            )
-
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-            await ssiManagementFacet.addIssuer(account_E)
-            await kycFacet.grantKyc(
-                account_E,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_E
-            )
-            await kycFacet.grantKyc(
-                account_D,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_E
-            )
-        })
-
-        describe('Paused', () => {
-            beforeEach(async () => {
-                // Pausing the token
-                pauseFacet = pauseFacet.connect(signer_B)
-                await kycFacet.grantKyc(
-                    account_C,
-                    EMPTY_VC_ID,
-                    ZERO,
-                    MAX_UINT256,
-                    account_E
-                )
-                await erc1594Issuer.issue(account_C, AMOUNT, DATA)
-                await erc1594Issuer.issue(account_E, AMOUNT, DATA)
-                await erc20Facet
-                    .connect(signer_E)
-                    .increaseAllowance(account_C, AMOUNT)
-                await pauseFacet.pause()
-            })
-
-            it('GIVEN a paused Token WHEN transfer THEN transaction fails with TokenIsPaused', async () => {
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                expect(
-                    await erc1594Facet.canTransfer(account_D, AMOUNT, DATA)
-                ).to.be.deep.equal([false, IS_PAUSED_ERROR_ID, HASH_ZERO])
-
-                expect(
-                    await erc1594Facet.canTransferFrom(
-                        account_E,
-                        account_D,
-                        AMOUNT,
-                        DATA
-                    )
-                ).to.be.deep.equal([false, IS_PAUSED_ERROR_ID, HASH_ZERO])
-            })
-        })
-
-        describe('AccessControl', () => {
-            it('GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc1594Facet = erc1594Facet.connect(signer_B)
-
-                // add to list fails
-                await expect(
-                    erc1594Facet.issue(account_E, AMOUNT, DATA)
-                ).to.be.rejectedWith('AccountHasNoRole')
-            })
-        })
-
-        it(
-            'GIVEN blocked accounts (sender, to, from) ' +
-                'WHEN canTransfer or canTransferFrom ' +
-                'THEN transaction returns _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, ' +
-                '_FROM_ACCOUNT_BLOCKED_ERROR_ID or _TO_ACCOUNT_BLOCKED_ERROR_ID',
-            async () => {
-                await kycFacet.grantKyc(
-                    account_C,
-                    EMPTY_VC_ID,
-                    ZERO,
-                    MAX_UINT256,
-                    account_E
-                )
-                await erc1594Issuer.issue(account_C, AMOUNT, DATA)
-                await erc20Facet
-                    .connect(signer_C)
-                    .increaseAllowance(account_A, AMOUNT)
-                await erc20Facet
-                    .connect(signer_E)
-                    .increaseAllowance(account_C, AMOUNT)
-                // Blacklisting accounts
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-                controlList = controlList.connect(signer_A)
-                await controlList.addToControlList(account_C)
-
-                // Using account C (with role)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                expect(
-                    await erc1594Facet.canTransfer(account_D, AMOUNT, DATA)
-                ).to.be.deep.equal([
-                    false,
-                    FROM_ACCOUNT_BLOCKED_ERROR_ID,
-                    HASH_ZERO,
-                ])
-                await erc1594Issuer.issue(account_D, AMOUNT, DATA)
-                expect(
-                    await erc1594Facet
-                        .connect(account_D)
-                        .canTransfer(account_C, AMOUNT, DATA)
-                ).to.be.deep.equal([
-                    false,
-                    TO_ACCOUNT_BLOCKED_ERROR_ID,
-                    HASH_ZERO,
-                ])
-
-                await erc1594Issuer.issue(account_E, AMOUNT, DATA)
-                expect(
-                    await erc1594Facet.canTransferFrom(
-                        account_E,
-                        account_D,
-                        AMOUNT,
-                        DATA
-                    )
-                ).to.be.deep.equal([
-                    false,
-                    OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-                    HASH_ZERO,
-                ])
-                erc1594Facet = erc1594Facet.connect(signer_A)
-                expect(
-                    await erc1594Facet.canTransferFrom(
-                        account_C,
-                        account_D,
-                        AMOUNT,
-                        DATA
-                    )
-                ).to.be.deep.equal([
-                    false,
-                    FROM_ACCOUNT_BLOCKED_ERROR_ID,
-                    HASH_ZERO,
-                ])
-                await erc20Facet
-                    .connect(signer_E)
-                    .increaseAllowance(account_A, AMOUNT)
-                expect(
-                    await erc1594Facet.canTransferFrom(
-                        account_E,
-                        account_C,
-                        AMOUNT,
-                        DATA
-                    )
-                ).to.be.deep.equal([
-                    false,
-                    TO_ACCOUNT_BLOCKED_ERROR_ID,
-                    HASH_ZERO,
-                ])
-            }
+  let diamond: ResolverProxy;
+  let signer_A: SignerWithAddress;
+  let signer_B: SignerWithAddress;
+  let signer_C: SignerWithAddress;
+  let signer_D: SignerWithAddress;
+  let signer_E: SignerWithAddress;
+
+  let account_A: string;
+  let account_B: string;
+  let account_C: string;
+  let account_D: string;
+  let account_E: string;
+
+  let factory: IFactory;
+  let businessLogicResolver: BusinessLogicResolver;
+  let erc1594Facet: ERC1594;
+  let accessControlFacet: AccessControl;
+  let pauseFacet: Pause;
+  let controlList: ControlList;
+  let kycFacet: Kyc;
+  let ssiManagementFacet: SsiManagement;
+  let clearingActionsFacet: ClearingActionsFacet;
+
+  describe('Multi partition mode', () => {
+    before(async () => {
+      // mute | mock console.log
+      console.log = () => {};
+      [signer_A, signer_B, signer_C, signer_D, signer_E] =
+        await ethers.getSigners();
+      account_A = signer_A.address;
+      account_B = signer_B.address;
+      account_C = signer_C.address;
+      account_D = signer_D.address;
+      account_E = signer_E.address;
+
+      const { ...deployedContracts } = await deployAtsFullInfrastructure(
+        await DeployAtsFullInfrastructureCommand.newInstance({
+          signer: signer_A,
+          useDeployed: false,
+          useEnvironment: true,
+          timeTravelEnabled: true,
+        }),
+      );
+
+      factory = deployedContracts.factory.contract;
+      businessLogicResolver = deployedContracts.businessLogicResolver.contract;
+    });
+
+    beforeEach(async () => {
+      const rbacPause: Rbac = {
+        role: PAUSER_ROLE,
+        members: [account_B],
+      };
+      const rbacClearing: Rbac = {
+        role: CLEARING_ROLE,
+        members: [account_B],
+      };
+      const init_rbacs: Rbac[] = [rbacPause, rbacClearing];
+
+      diamond = await deployEquityFromFactory({
+        adminAccount: account_A,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        clearingActive: false,
+        internalKycActivated: true,
+        isMultiPartition: true,
+        name: 'TEST_AccessControl',
+        symbol: 'TAC',
+        decimals: 6,
+        isin: isinGenerator(),
+        votingRight: false,
+        informationRight: false,
+        liquidationRight: false,
+        subscriptionRight: true,
+        conversionRight: true,
+        redemptionRight: true,
+        putRight: false,
+        dividendRight: 1,
+        currency: '0x345678',
+        numberOfShares: BigInt(MAX_SUPPLY),
+        nominalValue: 100,
+        regulationType: RegulationType.REG_D,
+        regulationSubType: RegulationSubType.REG_D_506_B,
+        countriesControlListType: true,
+        listOfCountries: 'ES,FR,CH',
+        info: 'nothing',
+        init_rbacs,
+        factory,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      accessControlFacet = await ethers.getContractAt(
+        'AccessControl',
+        diamond.address,
+      );
+
+      erc1594Facet = await ethers.getContractAt('ERC1594', diamond.address);
+
+      pauseFacet = await ethers.getContractAt('Pause', diamond.address);
+
+      controlList = await ethers.getContractAt('ControlList', diamond.address);
+
+      clearingActionsFacet = await ethers.getContractAt(
+        'ClearingActionsFacet',
+        diamond.address,
+        signer_B,
+      );
+
+      accessControlFacet = accessControlFacet.connect(signer_A);
+      await accessControlFacet.grantRole(ISSUER_ROLE, account_A);
+    });
+
+    it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
+      await expect(erc1594Facet.initialize_ERC1594()).to.be.rejectedWith(
+        'AlreadyInitialized',
+      );
+    });
+
+    describe('Cap', () => {
+      it('GIVEN a max supply WHEN issue more than the max supply THEN transaction fails with MaxSupplyReached', async () => {
+        // Using account A (with role)
+        erc1594Facet = erc1594Facet.connect(signer_A);
+
+        // add to list fails
+        await expect(
+          erc1594Facet.issue(account_E, MAX_SUPPLY + 1, DATA),
+        ).to.be.rejectedWith('MaxSupplyReached');
+      });
+    });
+
+    describe('Paused', () => {
+      beforeEach(async () => {
+        // Pausing the token
+        pauseFacet = pauseFacet.connect(signer_B);
+        await pauseFacet.pause();
+      });
+
+      it('GIVEN a paused Token WHEN transfer THEN transaction fails with TokenIsPaused', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // transfer with data fails
+        await expect(
+          erc1594Facet.transferWithData(account_D, AMOUNT, DATA),
+        ).to.be.rejectedWith('TokenIsPaused');
+
+        // transfer from with data fails
+        await expect(
+          erc1594Facet.transferFromWithData(account_E, account_D, AMOUNT, DATA),
+        ).to.be.rejectedWith('TokenIsPaused');
+      });
+
+      it('GIVEN a paused Token WHEN issue THEN transaction fails with TokenIsPaused', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // issue fails
+        await expect(
+          erc1594Facet.issue(account_E, AMOUNT, DATA),
+        ).to.be.revertedWithCustomError(erc1594Facet, 'TokenIsPaused');
+      });
+
+      it('GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // transfer with data fails
+        await expect(erc1594Facet.redeem(AMOUNT, DATA)).to.be.rejectedWith(
+          'TokenIsPaused',
+        );
+
+        // transfer from with data fails
+        await expect(
+          erc1594Facet.redeemFrom(account_E, AMOUNT, DATA),
+        ).to.be.rejectedWith('TokenIsPaused');
+      });
+    });
+
+    describe('Clearing', () => {
+      beforeEach(async () => {
+        await clearingActionsFacet.activateClearing();
+      });
+      it('GIVEN a token with clearing mode active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // transfer with data fails
+        await expect(
+          erc1594Facet.transferWithData(account_D, AMOUNT, DATA),
+        ).to.be.rejectedWith('ClearingIsActivated');
+
+        // transfer from with data fails
+        await expect(
+          erc1594Facet.transferFromWithData(account_E, account_D, AMOUNT, DATA),
+        ).to.be.rejectedWith('ClearingIsActivated');
+      });
+
+      it('GIVEN a token with clearing mode active WHEN redeem THEN transaction fails with ClearingIsActivated', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        await expect(erc1594Facet.redeem(AMOUNT, DATA)).to.be.rejectedWith(
+          'ClearingIsActivated',
+        );
+
+        await expect(
+          erc1594Facet.redeemFrom(account_E, AMOUNT, DATA),
+        ).to.be.rejectedWith('ClearingIsActivated');
+      });
+    });
+
+    describe('ControlList', () => {
+      it('GIVEN blocked accounts (sender, to, from) WHEN transfer THEN transaction fails with AccountIsBlocked', async () => {
+        // Blacklisting accounts
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A);
+        controlList = controlList.connect(signer_A);
+        await controlList.addToControlList(account_C);
+
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // transfer with data fails
+        await expect(
+          erc1594Facet.transferWithData(account_D, AMOUNT, DATA),
+        ).to.be.rejectedWith('AccountIsBlocked');
+
+        // transfer from with data fails
+        await expect(
+          erc1594Facet.transferFromWithData(account_E, account_D, AMOUNT, DATA),
+        ).to.be.rejectedWith('AccountIsBlocked');
+
+        // Update blacklist
+        await controlList.removeFromControlList(account_C);
+        await controlList.addToControlList(account_D);
+
+        // transfer with data fails
+        await expect(
+          erc1594Facet.transferWithData(account_D, AMOUNT, DATA),
+        ).to.be.rejectedWith('AccountIsBlocked');
+
+        // transfer from with data fails
+        await expect(
+          erc1594Facet.transferFromWithData(account_E, account_D, AMOUNT, DATA),
+        ).to.be.rejectedWith('AccountIsBlocked');
+
+        // Update blacklist
+        await controlList.removeFromControlList(account_D);
+        await controlList.addToControlList(account_E);
+
+        // transfer from with data fails
+        await expect(
+          erc1594Facet.transferFromWithData(account_E, account_D, AMOUNT, DATA),
+        ).to.be.rejectedWith('AccountIsBlocked');
+      });
+
+      it('GIVEN blocked accounts (to) USING WHITELIST WHEN issue THEN transaction fails with AccountIsBlocked', async () => {
+        // First deploy a new token using white list
+        const isWhiteList = true;
+        const newDiamond = await deployEquityFromFactory({
+          adminAccount: account_A,
+          isWhiteList,
+          isControllable: true,
+          arePartitionsProtected: false,
+          clearingActive: false,
+          internalKycActivated: true,
+          isMultiPartition: false,
+          name: 'TEST_AccessControl',
+          symbol: 'TAC',
+          decimals: 6,
+          isin: isinGenerator(),
+          votingRight: false,
+          informationRight: false,
+          liquidationRight: false,
+          subscriptionRight: true,
+          conversionRight: true,
+          redemptionRight: true,
+          putRight: false,
+          dividendRight: 1,
+          currency: '0x345678',
+          numberOfShares: MAX_UINT256,
+          nominalValue: 100,
+          regulationType: RegulationType.REG_D,
+          regulationSubType: RegulationSubType.REG_D_506_B,
+          countriesControlListType: true,
+          listOfCountries: 'ES,FR,CH',
+          info: 'nothing',
+          init_rbacs: [],
+          factory,
+          businessLogicResolver: businessLogicResolver.address,
+        });
+        accessControlFacet = await ethers.getContractAt(
+          'AccessControl',
+          newDiamond.address,
+        );
+
+        erc1594Facet = await ethers.getContractAt(
+          'ERC1594',
+          newDiamond.address,
+        );
+        // accounts are blacklisted by default (white list)
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A);
+
+        // Using account A (with role)
+        erc1594Facet = erc1594Facet.connect(signer_A);
+
+        // issue fails
+        await expect(
+          erc1594Facet.issue(account_E, AMOUNT, DATA),
+        ).to.be.revertedWithCustomError(erc1594Facet, 'AccountIsBlocked');
+      });
+
+      it('GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked', async () => {
+        // Blacklisting accounts
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A);
+        controlList = controlList.connect(signer_A);
+        await controlList.addToControlList(account_C);
+
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // redeem with data fails
+        await expect(erc1594Facet.redeem(AMOUNT, DATA)).to.be.rejectedWith(
+          'AccountIsBlocked',
+        );
+
+        // redeem from with data fails
+        await expect(
+          erc1594Facet.redeemFrom(account_E, AMOUNT, DATA),
+        ).to.be.rejectedWith('AccountIsBlocked');
+
+        // Update blacklist
+        await controlList.removeFromControlList(account_C);
+        await controlList.addToControlList(account_E);
+
+        // redeem from with data fails
+        await expect(
+          erc1594Facet.redeemFrom(account_E, AMOUNT, DATA),
+        ).to.be.rejectedWith('AccountIsBlocked');
+      });
+    });
+
+    describe('NotAllowedInMultiPartitionMode', () => {
+      it('GIVEN an initialized token WHEN transferWithData THEN fails with NotAllowedInMultiPartitionMode', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // transfer with data fails
+        await expect(
+          erc1594Facet.transferWithData(
+            account_D,
+            2 * BALANCE_OF_C_ORIGINAL,
+            DATA,
+          ),
+        ).to.be.revertedWithCustomError(
+          erc1594Facet,
+          'NotAllowedInMultiPartitionMode',
+        );
+      });
+
+      it('GIVEN an initialized token WHEN transferFromWithData THEN fails with NotAllowedInMultiPartitionMode', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // transfer with data fails
+        await expect(
+          erc1594Facet.transferFromWithData(
+            account_B,
+            account_D,
+            2 * BALANCE_OF_C_ORIGINAL,
+            DATA,
+          ),
+        ).to.be.revertedWithCustomError(
+          erc1594Facet,
+          'NotAllowedInMultiPartitionMode',
+        );
+      });
+
+      it('GIVEN an initialized token WHEN issue THEN fails with NotAllowedInMultiPartitionMode', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_A);
+
+        // transfer with data fails
+        expect(await erc1594Facet.isIssuable()).to.be.true;
+        await expect(
+          erc1594Facet.issue(account_D, 2 * BALANCE_OF_C_ORIGINAL, DATA),
+        ).to.be.revertedWithCustomError(
+          erc1594Facet,
+          'NotAllowedInMultiPartitionMode',
+        );
+      });
+
+      it('GIVEN an initialized token WHEN redeem THEN fails with NotAllowedInMultiPartitionMode', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // transfer with data fails
+        await expect(
+          erc1594Facet.redeem(2 * BALANCE_OF_C_ORIGINAL, DATA),
+        ).to.be.revertedWithCustomError(
+          erc1594Facet,
+          'NotAllowedInMultiPartitionMode',
+        );
+      });
+
+      it('GIVEN an initialized token WHEN redeemFrom THEN fails with NotAllowedInMultiPartitionMode', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // transfer with data fails
+        await expect(
+          erc1594Facet.redeemFrom(account_D, 2 * BALANCE_OF_C_ORIGINAL, DATA),
+        ).to.be.revertedWithCustomError(
+          erc1594Facet,
+          'NotAllowedInMultiPartitionMode',
+        );
+      });
+
+      it('GIVEN an initialized token WHEN canTransfer THEN fails with NotAllowedInMultiPartitionMode', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // transfer with data fails
+        await expect(
+          erc1594Facet.canTransfer(account_D, 2 * BALANCE_OF_C_ORIGINAL, DATA),
+        ).to.revertedWithCustomError(
+          erc1594Facet,
+          'NotAllowedInMultiPartitionMode',
+        );
+      });
+
+      it('GIVEN an initialized token WHEN canTransferFrom THEN fails with NotAllowedInMultiPartitionMode', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        // transfer with data fails
+        await expect(
+          erc1594Facet.canTransferFrom(
+            account_B,
+            account_D,
+            2 * BALANCE_OF_C_ORIGINAL,
+            DATA,
+          ),
+        ).to.revertedWithCustomError(
+          erc1594Facet,
+          'NotAllowedInMultiPartitionMode',
+        );
+      });
+    });
+  });
+
+  describe('Single partition mode', () => {
+    let erc1594Issuer: ERC1594;
+    let erc1594Transferor: ERC1594;
+    let erc1594Approved: ERC1594;
+    let erc1410SnapshotFacet: ERC1410Snapshot;
+    let erc20Facet: ERC20;
+    before(async () => {
+      // mute | mock console.log
+      console.log = () => {};
+      [signer_A, signer_B, signer_C, signer_D, signer_E] =
+        await ethers.getSigners();
+      account_A = signer_A.address;
+      account_B = signer_B.address;
+      account_C = signer_C.address;
+      account_D = signer_D.address;
+      account_E = signer_E.address;
+
+      const { ...deployedContracts } = await deployAtsFullInfrastructure(
+        await DeployAtsFullInfrastructureCommand.newInstance({
+          signer: signer_A,
+          useDeployed: false,
+          useEnvironment: true,
+        }),
+      );
+
+      factory = deployedContracts.factory.contract;
+      businessLogicResolver = deployedContracts.businessLogicResolver.contract;
+    });
+    beforeEach(async () => {
+      const rbacPause: Rbac = {
+        role: PAUSER_ROLE,
+        members: [account_B],
+      };
+      const rbacIssuer: Rbac = {
+        role: ISSUER_ROLE,
+        members: [account_C],
+      };
+      const rbacKYC: Rbac = {
+        role: KYC_ROLE,
+        members: [account_B],
+      };
+      const rbacSSI: Rbac = {
+        role: SSI_MANAGER_ROLE,
+        members: [account_A],
+      };
+      const init_rbacs: Rbac[] = [rbacPause, rbacIssuer, rbacKYC, rbacSSI];
+
+      diamond = await deployEquityFromFactory({
+        adminAccount: account_A,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        clearingActive: false,
+        internalKycActivated: true,
+        isMultiPartition: false,
+        name: 'TEST_AccessControl',
+        symbol: 'TAC',
+        decimals: 6,
+        isin: isinGenerator(),
+        votingRight: false,
+        informationRight: false,
+        liquidationRight: false,
+        subscriptionRight: true,
+        conversionRight: true,
+        redemptionRight: true,
+        putRight: false,
+        dividendRight: 1,
+        currency: '0x345678',
+        numberOfShares: MAX_UINT256,
+        nominalValue: 100,
+        regulationType: RegulationType.REG_S,
+        regulationSubType: RegulationSubType.NONE,
+        countriesControlListType: true,
+        listOfCountries: 'ES,FR,CH',
+        info: 'nothing',
+        init_rbacs,
+        factory,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      accessControlFacet = await ethers.getContractAt(
+        'AccessControl',
+        diamond.address,
+      );
+
+      erc1594Facet = await ethers.getContractAt('ERC1594', diamond.address);
+      erc1594Issuer = erc1594Facet.connect(signer_C);
+      erc1594Transferor = erc1594Facet.connect(signer_E);
+      erc1594Approved = erc1594Facet.connect(signer_D);
+      erc20Facet = await ethers.getContractAt(
+        'ERC20',
+        diamond.address,
+        signer_E,
+      );
+      erc1410SnapshotFacet = await ethers.getContractAt(
+        'ERC1410Snapshot',
+        diamond.address,
+      );
+
+      pauseFacet = await ethers.getContractAt('Pause', diamond.address);
+
+      controlList = await ethers.getContractAt('ControlList', diamond.address);
+
+      kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B);
+      ssiManagementFacet = await ethers.getContractAt(
+        'SsiManagement',
+        diamond.address,
+        signer_A,
+      );
+
+      accessControlFacet = accessControlFacet.connect(signer_A);
+      await accessControlFacet.grantRole(ISSUER_ROLE, account_A);
+      await ssiManagementFacet.addIssuer(account_E);
+      await kycFacet.grantKyc(
+        account_E,
+        EMPTY_VC_ID,
+        ZERO,
+        MAX_UINT256,
+        account_E,
+      );
+      await kycFacet.grantKyc(
+        account_D,
+        EMPTY_VC_ID,
+        ZERO,
+        MAX_UINT256,
+        account_E,
+      );
+    });
+
+    describe('Paused', () => {
+      beforeEach(async () => {
+        // Pausing the token
+        pauseFacet = pauseFacet.connect(signer_B);
+        await kycFacet.grantKyc(
+          account_C,
+          EMPTY_VC_ID,
+          ZERO,
+          MAX_UINT256,
+          account_E,
+        );
+        await erc1594Issuer.issue(account_C, AMOUNT, DATA);
+        await erc1594Issuer.issue(account_E, AMOUNT, DATA);
+        await erc20Facet.connect(signer_E).increaseAllowance(account_C, AMOUNT);
+        await pauseFacet.pause();
+      });
+
+      it('GIVEN a paused Token WHEN transfer THEN transaction fails with TokenIsPaused', async () => {
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        expect(
+          await erc1594Facet.canTransfer(account_D, AMOUNT, DATA),
+        ).to.be.deep.equal([false, IS_PAUSED_ERROR_ID, HASH_ZERO]);
+
+        expect(
+          await erc1594Facet.canTransferFrom(
+            account_E,
+            account_D,
+            AMOUNT,
+            DATA,
+          ),
+        ).to.be.deep.equal([false, IS_PAUSED_ERROR_ID, HASH_ZERO]);
+      });
+    });
+
+    describe('AccessControl', () => {
+      it('GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole', async () => {
+        // Using account C (non role)
+        erc1594Facet = erc1594Facet.connect(signer_B);
+
+        // add to list fails
+        await expect(
+          erc1594Facet.issue(account_E, AMOUNT, DATA),
+        ).to.be.rejectedWith('AccountHasNoRole');
+      });
+    });
+
+    it(
+      'GIVEN blocked accounts (sender, to, from) ' +
+        'WHEN canTransfer or canTransferFrom ' +
+        'THEN transaction returns _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, ' +
+        '_FROM_ACCOUNT_BLOCKED_ERROR_ID or _TO_ACCOUNT_BLOCKED_ERROR_ID',
+      async () => {
+        await kycFacet.grantKyc(
+          account_C,
+          EMPTY_VC_ID,
+          ZERO,
+          MAX_UINT256,
+          account_E,
+        );
+        await erc1594Issuer.issue(account_C, AMOUNT, DATA);
+        await erc20Facet.connect(signer_C).increaseAllowance(account_A, AMOUNT);
+        await erc20Facet.connect(signer_E).increaseAllowance(account_C, AMOUNT);
+        // Blacklisting accounts
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A);
+        controlList = controlList.connect(signer_A);
+        await controlList.addToControlList(account_C);
+
+        // Using account C (with role)
+        erc1594Facet = erc1594Facet.connect(signer_C);
+
+        expect(
+          await erc1594Facet.canTransfer(account_D, AMOUNT, DATA),
+        ).to.be.deep.equal([false, FROM_ACCOUNT_BLOCKED_ERROR_ID, HASH_ZERO]);
+        await erc1594Issuer.issue(account_D, AMOUNT, DATA);
+        expect(
+          await erc1594Facet
+            .connect(account_D)
+            .canTransfer(account_C, AMOUNT, DATA),
+        ).to.be.deep.equal([false, TO_ACCOUNT_BLOCKED_ERROR_ID, HASH_ZERO]);
+
+        await erc1594Issuer.issue(account_E, AMOUNT, DATA);
+        expect(
+          await erc1594Facet.canTransferFrom(
+            account_E,
+            account_D,
+            AMOUNT,
+            DATA,
+          ),
+        ).to.be.deep.equal([
+          false,
+          OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+          HASH_ZERO,
+        ]);
+        erc1594Facet = erc1594Facet.connect(signer_A);
+        expect(
+          await erc1594Facet.canTransferFrom(
+            account_C,
+            account_D,
+            AMOUNT,
+            DATA,
+          ),
+        ).to.be.deep.equal([false, FROM_ACCOUNT_BLOCKED_ERROR_ID, HASH_ZERO]);
+        await erc20Facet.connect(signer_E).increaseAllowance(account_A, AMOUNT);
+        expect(
+          await erc1594Facet.canTransferFrom(
+            account_E,
+            account_C,
+            AMOUNT,
+            DATA,
+          ),
+        ).to.be.deep.equal([false, TO_ACCOUNT_BLOCKED_ERROR_ID, HASH_ZERO]);
+      },
+    );
+    describe('Kyc', () => {
+      it(
+        'GIVEN non kyc accounts (to, from) ' +
+          'WHEN canTransfer or canTransferFrom ' +
+          'THEN transaction returns _FROM_ACCOUNT_KYC_ERROR_ID or _TO_ACCOUNT_KYC_ERROR_ID',
+        async () => {
+          await erc1594Issuer.issue(account_E, AMOUNT, DATA);
+          await erc20Facet
+            .connect(signer_E)
+            .increaseAllowance(account_B, AMOUNT);
+          await kycFacet.revokeKyc(account_E);
+          // non kyc'd sender
+          expect(
+            await erc1594Facet
+              .connect(account_E)
+              .canTransfer(account_D, AMOUNT, DATA),
+          ).to.be.deep.equal([false, FROM_ACCOUNT_KYC_ERROR_ID, HASH_ZERO]);
+          expect(
+            await erc1594Facet
+              .connect(account_B)
+              .canTransferFrom(account_E, account_A, AMOUNT, DATA),
+          ).to.be.deep.equal([false, FROM_ACCOUNT_KYC_ERROR_ID, HASH_ZERO]);
+          // non kyc'd receiver
+          await erc1594Issuer.issue(account_D, AMOUNT, DATA);
+          expect(
+            await erc1594Facet
+              .connect(account_D)
+              .canTransfer(account_E, AMOUNT, DATA),
+          ).to.be.deep.equal([false, TO_ACCOUNT_KYC_ERROR_ID, HASH_ZERO]);
+          await erc20Facet
+            .connect(signer_D)
+            .increaseAllowance(account_A, AMOUNT);
+          expect(
+            await erc1594Facet
+              .connect(account_A)
+              .canTransferFrom(account_D, account_E, AMOUNT, DATA),
+          ).to.be.deep.equal([false, TO_ACCOUNT_KYC_ERROR_ID, HASH_ZERO]);
+        },
+      );
+      it(
+        'GIVEN non kyc accounts (to, from) ' +
+          'WHEN transfer or transferFrom ' +
+          'THEN transaction reverts with InvalidKycStatus',
+        async () => {
+          await kycFacet.revokeKyc(account_E);
+          // non kyc'd sender
+          await expect(
+            erc1594Facet
+              .connect(signer_E)
+              .transferWithData(account_D, AMOUNT, DATA),
+          ).to.revertedWithCustomError(erc1594Facet, 'InvalidKycStatus');
+          await expect(
+            erc1594Facet
+              .connect(signer_B)
+              .transferFromWithData(account_E, account_A, AMOUNT, DATA),
+          ).to.revertedWithCustomError(erc1594Facet, 'InvalidKycStatus');
+          // non kyc'd receiver
+          await expect(
+            erc1594Facet
+              .connect(signer_D)
+              .transferWithData(account_E, AMOUNT, DATA),
+          ).to.revertedWithCustomError(erc1594Facet, 'InvalidKycStatus');
+          await expect(
+            erc1594Facet
+              .connect(signer_A)
+              .transferFromWithData(account_D, account_E, AMOUNT, DATA),
+          ).to.revertedWithCustomError(erc1594Facet, 'InvalidKycStatus');
+        },
+      );
+      it(
+        'GIVEN non kyc account ' +
+          'WHEN redeem or redeemFrom ' +
+          'THEN transaction reverts with InvalidKycStatus',
+        async () => {
+          await kycFacet.revokeKyc(account_E);
+          await expect(
+            erc1594Facet.connect(signer_E).redeem(AMOUNT, DATA),
+          ).to.revertedWithCustomError(erc1594Facet, 'InvalidKycStatus');
+          await expect(
+            erc1594Facet.connect(signer_B).redeemFrom(account_E, AMOUNT, DATA),
+          ).to.revertedWithCustomError(erc1594Facet, 'InvalidKycStatus');
+        },
+      );
+      it(
+        'GIVEN non kyc account ' +
+          'WHEN issue ' +
+          'THEN transaction reverts with InvalidKycStatus',
+        async () => {
+          await kycFacet.revokeKyc(account_E);
+          await expect(
+            erc1594Issuer.issue(account_E, AMOUNT, DATA),
+          ).to.revertedWithCustomError(erc1594Facet, 'InvalidKycStatus');
+        },
+      );
+    });
+
+    it('GIVEN a zero address in to WHEN canTransfer and canTransferFrom THEN responds _TO_ACCOUNT_NULL_ERROR_ID', async () => {
+      await kycFacet.grantKyc(
+        account_A,
+        EMPTY_VC_ID,
+        ZERO,
+        MAX_UINT256,
+        account_E,
+      );
+      await erc1594Issuer.issue(account_A, AMOUNT, DATA);
+      expect(
+        await erc1594Facet.canTransfer(
+          ethers.constants.AddressZero,
+          AMOUNT,
+          DATA,
+        ),
+      ).to.be.deep.equal([false, TO_ACCOUNT_NULL_ERROR_ID, HASH_ZERO]);
+      await erc1594Issuer.issue(account_D, AMOUNT, DATA);
+      await erc20Facet.connect(signer_D).increaseAllowance(account_A, AMOUNT);
+      expect(
+        await erc1594Facet.canTransferFrom(
+          account_D,
+          ethers.constants.AddressZero,
+          AMOUNT,
+          DATA,
+        ),
+      ).to.be.deep.equal([false, TO_ACCOUNT_NULL_ERROR_ID, HASH_ZERO]);
+    });
+
+    it('GIVEN a non allowed WHEN canTransferFrom THEN responds _ALLOWANCE_REACHED_ERROR_ID', async () => {
+      expect(
+        await erc1594Facet.canTransferFrom(account_B, account_D, AMOUNT, DATA),
+      ).to.be.deep.equal([
+        false,
+        ALLOWANCE_REACHED_ERROR_ID,
+        ethers.constants.HashZero,
+      ]);
+    });
+
+    it('GIVEN a non funds account WHEN canTransfer & canTransferFrom THEN responds NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID', async () => {
+      expect(
+        await erc1594Facet.canTransfer(account_D, AMOUNT, DATA),
+      ).to.be.deep.equal([
+        false,
+        NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+        ethers.constants.HashZero,
+      ]);
+
+      await kycFacet.grantKyc(
+        account_C,
+        EMPTY_VC_ID,
+        ZERO,
+        MAX_UINT256,
+        account_E,
+      );
+      await erc20Facet.connect(signer_C).approve(account_A, AMOUNT);
+      expect(
+        await erc1594Facet.canTransferFrom(account_C, account_D, AMOUNT, DATA),
+      ).to.be.deep.equal([
+        false,
+        NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+        ethers.constants.HashZero,
+      ]);
+    });
+
+    it('GIVEN an account with issuer role WHEN issue THEN transaction succeeds', async () => {
+      // issue succeeds
+      expect(await erc1594Issuer.issue(account_E, AMOUNT / 2, DATA))
+        .to.emit(erc1594Issuer, 'Issued')
+        .withArgs(account_C, account_E, AMOUNT / 2);
+      expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT / 2);
+      expect(await erc1410SnapshotFacet.balanceOf(account_E)).to.be.equal(
+        AMOUNT / 2,
+      );
+      expect(
+        await erc1410SnapshotFacet.balanceOfByPartition(
+          DEFAULT_PARTITION,
+          account_E,
+        ),
+      ).to.be.equal(AMOUNT / 2);
+      expect(
+        await erc1410SnapshotFacet.totalSupplyByPartition(DEFAULT_PARTITION),
+      ).to.be.equal(AMOUNT / 2);
+    });
+
+    it('GIVEN an account with balance WHEN transferWithData THEN transaction success', async () => {
+      await erc1594Issuer.issue(account_E, AMOUNT, DATA);
+
+      expect(
+        await erc1594Transferor.canTransfer(account_D, AMOUNT / 2, DATA),
+      ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero]);
+      expect(
+        await erc1594Transferor.transferWithData(account_D, AMOUNT / 2, DATA),
+      )
+        .to.emit(erc1594Transferor, 'Transferred')
+        .withArgs(account_E, account_D, AMOUNT / 2);
+
+      expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT);
+      expect(await erc1410SnapshotFacet.balanceOf(account_E)).to.be.equal(
+        AMOUNT / 2,
+      );
+      expect(await erc1410SnapshotFacet.balanceOf(account_D)).to.be.equal(
+        AMOUNT / 2,
+      );
+      expect(
+        await erc1410SnapshotFacet.balanceOfByPartition(
+          DEFAULT_PARTITION,
+          account_E,
+        ),
+      ).to.be.equal(AMOUNT / 2);
+      expect(
+        await erc1410SnapshotFacet.balanceOfByPartition(
+          DEFAULT_PARTITION,
+          account_D,
+        ),
+      ).to.be.equal(AMOUNT / 2);
+      expect(
+        await erc1410SnapshotFacet.totalSupplyByPartition(DEFAULT_PARTITION),
+      ).to.be.equal(AMOUNT);
+    });
+
+    it(
+      'GIVEN an account with balance and another with allowance ' +
+        'WHEN transferFromWithData ' +
+        'THEN transaction success',
+      async () => {
+        await erc1594Issuer.issue(account_E, AMOUNT, DATA);
+        await erc20Facet.approve(account_D, AMOUNT / 2);
+
+        expect(
+          await erc1594Approved.canTransferFrom(
+            account_E,
+            account_D,
+            AMOUNT / 2,
+            DATA,
+          ),
+        ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero]);
+        expect(
+          await erc1594Approved.transferFromWithData(
+            account_E,
+            account_D,
+            AMOUNT / 2,
+            DATA,
+          ),
         )
-        describe('Kyc', () => {
-            it(
-                'GIVEN non kyc accounts (to, from) ' +
-                    'WHEN canTransfer or canTransferFrom ' +
-                    'THEN transaction returns _FROM_ACCOUNT_KYC_ERROR_ID or _TO_ACCOUNT_KYC_ERROR_ID',
-                async () => {
-                    await erc1594Issuer.issue(account_E, AMOUNT, DATA)
-                    await erc20Facet
-                        .connect(signer_E)
-                        .increaseAllowance(account_B, AMOUNT)
-                    await kycFacet.revokeKyc(account_E)
-                    // non kyc'd sender
-                    expect(
-                        await erc1594Facet
-                            .connect(account_E)
-                            .canTransfer(account_D, AMOUNT, DATA)
-                    ).to.be.deep.equal([
-                        false,
-                        FROM_ACCOUNT_KYC_ERROR_ID,
-                        HASH_ZERO,
-                    ])
-                    expect(
-                        await erc1594Facet
-                            .connect(account_B)
-                            .canTransferFrom(account_E, account_A, AMOUNT, DATA)
-                    ).to.be.deep.equal([
-                        false,
-                        FROM_ACCOUNT_KYC_ERROR_ID,
-                        HASH_ZERO,
-                    ])
-                    // non kyc'd receiver
-                    await erc1594Issuer.issue(account_D, AMOUNT, DATA)
-                    expect(
-                        await erc1594Facet
-                            .connect(account_D)
-                            .canTransfer(account_E, AMOUNT, DATA)
-                    ).to.be.deep.equal([
-                        false,
-                        TO_ACCOUNT_KYC_ERROR_ID,
-                        HASH_ZERO,
-                    ])
-                    await erc20Facet
-                        .connect(signer_D)
-                        .increaseAllowance(account_A, AMOUNT)
-                    expect(
-                        await erc1594Facet
-                            .connect(account_A)
-                            .canTransferFrom(account_D, account_E, AMOUNT, DATA)
-                    ).to.be.deep.equal([
-                        false,
-                        TO_ACCOUNT_KYC_ERROR_ID,
-                        HASH_ZERO,
-                    ])
-                }
-            )
-            it(
-                'GIVEN non kyc accounts (to, from) ' +
-                    'WHEN transfer or transferFrom ' +
-                    'THEN transaction reverts with InvalidKycStatus',
-                async () => {
-                    await kycFacet.revokeKyc(account_E)
-                    // non kyc'd sender
-                    await expect(
-                        erc1594Facet
-                            .connect(signer_E)
-                            .transferWithData(account_D, AMOUNT, DATA)
-                    ).to.revertedWithCustomError(
-                        erc1594Facet,
-                        'InvalidKycStatus'
-                    )
-                    await expect(
-                        erc1594Facet
-                            .connect(signer_B)
-                            .transferFromWithData(
-                                account_E,
-                                account_A,
-                                AMOUNT,
-                                DATA
-                            )
-                    ).to.revertedWithCustomError(
-                        erc1594Facet,
-                        'InvalidKycStatus'
-                    )
-                    // non kyc'd receiver
-                    await expect(
-                        erc1594Facet
-                            .connect(signer_D)
-                            .transferWithData(account_E, AMOUNT, DATA)
-                    ).to.revertedWithCustomError(
-                        erc1594Facet,
-                        'InvalidKycStatus'
-                    )
-                    await expect(
-                        erc1594Facet
-                            .connect(signer_A)
-                            .transferFromWithData(
-                                account_D,
-                                account_E,
-                                AMOUNT,
-                                DATA
-                            )
-                    ).to.revertedWithCustomError(
-                        erc1594Facet,
-                        'InvalidKycStatus'
-                    )
-                }
-            )
-            it(
-                'GIVEN non kyc account ' +
-                    'WHEN redeem or redeemFrom ' +
-                    'THEN transaction reverts with InvalidKycStatus',
-                async () => {
-                    await kycFacet.revokeKyc(account_E)
-                    await expect(
-                        erc1594Facet.connect(signer_E).redeem(AMOUNT, DATA)
-                    ).to.revertedWithCustomError(
-                        erc1594Facet,
-                        'InvalidKycStatus'
-                    )
-                    await expect(
-                        erc1594Facet
-                            .connect(signer_B)
-                            .redeemFrom(account_E, AMOUNT, DATA)
-                    ).to.revertedWithCustomError(
-                        erc1594Facet,
-                        'InvalidKycStatus'
-                    )
-                }
-            )
-            it(
-                'GIVEN non kyc account ' +
-                    'WHEN issue ' +
-                    'THEN transaction reverts with InvalidKycStatus',
-                async () => {
-                    await kycFacet.revokeKyc(account_E)
-                    await expect(
-                        erc1594Issuer.issue(account_E, AMOUNT, DATA)
-                    ).to.revertedWithCustomError(
-                        erc1594Facet,
-                        'InvalidKycStatus'
-                    )
-                }
-            )
-        })
+          .to.emit(erc1594Transferor, 'Transferred')
+          .withArgs(account_E, account_D, AMOUNT / 2);
 
-        it('GIVEN a zero address in to WHEN canTransfer and canTransferFrom THEN responds _TO_ACCOUNT_NULL_ERROR_ID', async () => {
-            await kycFacet.grantKyc(
-                account_A,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_E
-            )
-            await erc1594Issuer.issue(account_A, AMOUNT, DATA)
-            expect(
-                await erc1594Facet.canTransfer(
-                    ethers.constants.AddressZero,
-                    AMOUNT,
-                    DATA
-                )
-            ).to.be.deep.equal([false, TO_ACCOUNT_NULL_ERROR_ID, HASH_ZERO])
-            await erc1594Issuer.issue(account_D, AMOUNT, DATA)
-            await erc20Facet
-                .connect(signer_D)
-                .increaseAllowance(account_A, AMOUNT)
-            expect(
-                await erc1594Facet.canTransferFrom(
-                    account_D,
-                    ethers.constants.AddressZero,
-                    AMOUNT,
-                    DATA
-                )
-            ).to.be.deep.equal([false, TO_ACCOUNT_NULL_ERROR_ID, HASH_ZERO])
-        })
+        expect(await erc20Facet.allowance(account_E, account_D)).to.be.equal(0);
+        expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT);
+        expect(await erc1410SnapshotFacet.balanceOf(account_E)).to.be.equal(
+          AMOUNT / 2,
+        );
+        expect(await erc1410SnapshotFacet.balanceOf(account_D)).to.be.equal(
+          AMOUNT / 2,
+        );
+        expect(
+          await erc1410SnapshotFacet.balanceOfByPartition(
+            DEFAULT_PARTITION,
+            account_E,
+          ),
+        ).to.be.equal(AMOUNT / 2);
+        expect(
+          await erc1410SnapshotFacet.balanceOfByPartition(
+            DEFAULT_PARTITION,
+            account_D,
+          ),
+        ).to.be.equal(AMOUNT / 2);
+        expect(
+          await erc1410SnapshotFacet.totalSupplyByPartition(DEFAULT_PARTITION),
+        ).to.be.equal(AMOUNT);
+      },
+    );
 
-        it('GIVEN a non allowed WHEN canTransferFrom THEN responds _ALLOWANCE_REACHED_ERROR_ID', async () => {
-            expect(
-                await erc1594Facet.canTransferFrom(
-                    account_B,
-                    account_D,
-                    AMOUNT,
-                    DATA
-                )
-            ).to.be.deep.equal([
-                false,
-                ALLOWANCE_REACHED_ERROR_ID,
-                ethers.constants.HashZero,
-            ])
-        })
+    it('GIVEN an account with balance WHEN redeem THEN transaction succeeds', async () => {
+      // issue succeeds
+      await erc1594Issuer.issue(account_E, AMOUNT, DATA);
 
-        it('GIVEN a non funds account WHEN canTransfer & canTransferFrom THEN responds NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID', async () => {
-            expect(
-                await erc1594Facet.canTransfer(account_D, AMOUNT, DATA)
-            ).to.be.deep.equal([
-                false,
-                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-                ethers.constants.HashZero,
-            ])
+      expect(await erc1594Transferor.redeem(AMOUNT / 2, DATA))
+        .to.emit(erc1594Issuer, 'Redeemed')
+        .withArgs(account_E, account_E, AMOUNT / 2);
+      expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT / 2);
+      expect(await erc1410SnapshotFacet.balanceOf(account_E)).to.be.equal(
+        AMOUNT / 2,
+      );
+      expect(
+        await erc1410SnapshotFacet.balanceOfByPartition(
+          DEFAULT_PARTITION,
+          account_E,
+        ),
+      ).to.be.equal(AMOUNT / 2);
+      expect(
+        await erc1410SnapshotFacet.totalSupplyByPartition(DEFAULT_PARTITION),
+      ).to.be.equal(AMOUNT / 2);
+    });
 
-            await kycFacet.grantKyc(
-                account_C,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_E
-            )
-            await erc20Facet.connect(signer_C).approve(account_A, AMOUNT)
-            expect(
-                await erc1594Facet.canTransferFrom(
-                    account_C,
-                    account_D,
-                    AMOUNT,
-                    DATA
-                )
-            ).to.be.deep.equal([
-                false,
-                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-                ethers.constants.HashZero,
-            ])
-        })
+    it(
+      'GIVEN an account with balance and another with allowance ' +
+        'WHEN redeemFrom ' +
+        'THEN transaction succeeds',
+      async () => {
+        // issue succeeds
+        await erc1594Issuer.issue(account_E, AMOUNT, DATA);
 
-        it('GIVEN an account with issuer role WHEN issue THEN transaction succeeds', async () => {
-            // issue succeeds
-            expect(await erc1594Issuer.issue(account_E, AMOUNT / 2, DATA))
-                .to.emit(erc1594Issuer, 'Issued')
-                .withArgs(account_C, account_E, AMOUNT / 2)
-            expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(
-                AMOUNT / 2
-            )
-            expect(await erc1410SnapshotFacet.balanceOf(account_E)).to.be.equal(
-                AMOUNT / 2
-            )
-            expect(
-                await erc1410SnapshotFacet.balanceOfByPartition(
-                    DEFAULT_PARTITION,
-                    account_E
-                )
-            ).to.be.equal(AMOUNT / 2)
-            expect(
-                await erc1410SnapshotFacet.totalSupplyByPartition(
-                    DEFAULT_PARTITION
-                )
-            ).to.be.equal(AMOUNT / 2)
-        })
+        erc20Facet = erc20Facet.connect(signer_E);
 
-        it('GIVEN an account with balance WHEN transferWithData THEN transaction success', async () => {
-            await erc1594Issuer.issue(account_E, AMOUNT, DATA)
+        await erc20Facet.approve(account_D, AMOUNT / 2);
 
-            expect(
-                await erc1594Transferor.canTransfer(account_D, AMOUNT / 2, DATA)
-            ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero])
-            expect(
-                await erc1594Transferor.transferWithData(
-                    account_D,
-                    AMOUNT / 2,
-                    DATA
-                )
-            )
-                .to.emit(erc1594Transferor, 'Transferred')
-                .withArgs(account_E, account_D, AMOUNT / 2)
+        erc1594Approved = erc1594Approved.connect(signer_D);
 
-            expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT)
-            expect(await erc1410SnapshotFacet.balanceOf(account_E)).to.be.equal(
-                AMOUNT / 2
-            )
-            expect(await erc1410SnapshotFacet.balanceOf(account_D)).to.be.equal(
-                AMOUNT / 2
-            )
-            expect(
-                await erc1410SnapshotFacet.balanceOfByPartition(
-                    DEFAULT_PARTITION,
-                    account_E
-                )
-            ).to.be.equal(AMOUNT / 2)
-            expect(
-                await erc1410SnapshotFacet.balanceOfByPartition(
-                    DEFAULT_PARTITION,
-                    account_D
-                )
-            ).to.be.equal(AMOUNT / 2)
-            expect(
-                await erc1410SnapshotFacet.totalSupplyByPartition(
-                    DEFAULT_PARTITION
-                )
-            ).to.be.equal(AMOUNT)
-        })
+        expect(await erc1594Approved.redeemFrom(account_E, AMOUNT / 2, DATA))
+          .to.emit(erc1594Issuer, 'Redeemed')
+          .withArgs(account_D, account_E, AMOUNT / 2);
 
-        it(
-            'GIVEN an account with balance and another with allowance ' +
-                'WHEN transferFromWithData ' +
-                'THEN transaction success',
-            async () => {
-                await erc1594Issuer.issue(account_E, AMOUNT, DATA)
-                await erc20Facet.approve(account_D, AMOUNT / 2)
-
-                expect(
-                    await erc1594Approved.canTransferFrom(
-                        account_E,
-                        account_D,
-                        AMOUNT / 2,
-                        DATA
-                    )
-                ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero])
-                expect(
-                    await erc1594Approved.transferFromWithData(
-                        account_E,
-                        account_D,
-                        AMOUNT / 2,
-                        DATA
-                    )
-                )
-                    .to.emit(erc1594Transferor, 'Transferred')
-                    .withArgs(account_E, account_D, AMOUNT / 2)
-
-                expect(
-                    await erc20Facet.allowance(account_E, account_D)
-                ).to.be.equal(0)
-                expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(
-                    AMOUNT
-                )
-                expect(
-                    await erc1410SnapshotFacet.balanceOf(account_E)
-                ).to.be.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.balanceOf(account_D)
-                ).to.be.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.balanceOfByPartition(
-                        DEFAULT_PARTITION,
-                        account_E
-                    )
-                ).to.be.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.balanceOfByPartition(
-                        DEFAULT_PARTITION,
-                        account_D
-                    )
-                ).to.be.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.totalSupplyByPartition(
-                        DEFAULT_PARTITION
-                    )
-                ).to.be.equal(AMOUNT)
-            }
-        )
-
-        it('GIVEN an account with balance WHEN redeem THEN transaction succeeds', async () => {
-            // issue succeeds
-            await erc1594Issuer.issue(account_E, AMOUNT, DATA)
-
-            expect(await erc1594Transferor.redeem(AMOUNT / 2, DATA))
-                .to.emit(erc1594Issuer, 'Redeemed')
-                .withArgs(account_E, account_E, AMOUNT / 2)
-            expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(
-                AMOUNT / 2
-            )
-            expect(await erc1410SnapshotFacet.balanceOf(account_E)).to.be.equal(
-                AMOUNT / 2
-            )
-            expect(
-                await erc1410SnapshotFacet.balanceOfByPartition(
-                    DEFAULT_PARTITION,
-                    account_E
-                )
-            ).to.be.equal(AMOUNT / 2)
-            expect(
-                await erc1410SnapshotFacet.totalSupplyByPartition(
-                    DEFAULT_PARTITION
-                )
-            ).to.be.equal(AMOUNT / 2)
-        })
-
-        it(
-            'GIVEN an account with balance and another with allowance ' +
-                'WHEN redeemFrom ' +
-                'THEN transaction succeeds',
-            async () => {
-                // issue succeeds
-                await erc1594Issuer.issue(account_E, AMOUNT, DATA)
-
-                erc20Facet = erc20Facet.connect(signer_E)
-
-                await erc20Facet.approve(account_D, AMOUNT / 2)
-
-                erc1594Approved = erc1594Approved.connect(signer_D)
-
-                expect(
-                    await erc1594Approved.redeemFrom(
-                        account_E,
-                        AMOUNT / 2,
-                        DATA
-                    )
-                )
-                    .to.emit(erc1594Issuer, 'Redeemed')
-                    .withArgs(account_D, account_E, AMOUNT / 2)
-
-                expect(
-                    await erc20Facet.allowance(account_E, account_D)
-                ).to.be.equal(0)
-                expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(
-                    AMOUNT / 2
-                )
-                expect(
-                    await erc1410SnapshotFacet.balanceOf(account_E)
-                ).to.be.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.balanceOfByPartition(
-                        DEFAULT_PARTITION,
-                        account_E
-                    )
-                ).to.be.equal(AMOUNT / 2)
-                expect(
-                    await erc1410SnapshotFacet.totalSupplyByPartition(
-                        DEFAULT_PARTITION
-                    )
-                ).to.be.equal(AMOUNT / 2)
-            }
-        )
-    })
-})
+        expect(await erc20Facet.allowance(account_E, account_D)).to.be.equal(0);
+        expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(
+          AMOUNT / 2,
+        );
+        expect(await erc1410SnapshotFacet.balanceOf(account_E)).to.be.equal(
+          AMOUNT / 2,
+        );
+        expect(
+          await erc1410SnapshotFacet.balanceOfByPartition(
+            DEFAULT_PARTITION,
+            account_E,
+          ),
+        ).to.be.equal(AMOUNT / 2);
+        expect(
+          await erc1410SnapshotFacet.totalSupplyByPartition(DEFAULT_PARTITION),
+        ).to.be.equal(AMOUNT / 2);
+      },
+    );
+  });
+});

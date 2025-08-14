@@ -206,47 +206,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IExternalControlListManagement
-} from '../interfaces/externalControlLists/IExternalControlListManagement.sol';
-import {Common} from '../common/Common.sol';
-import {_CONTROL_LIST_MANAGER_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {
-    _CONTROL_LIST_MANAGEMENT_RESOLVER_KEY
-} from '../constants/resolverKeys.sol';
-import {
-    _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
-} from '../../layer_0/constants/storagePositions.sol';
+import { IExternalControlListManagement } from '../interfaces/externalControlLists/IExternalControlListManagement.sol';
+import { Common } from '../common/Common.sol';
+import { _CONTROL_LIST_MANAGER_ROLE } from '../constants/roles.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _CONTROL_LIST_MANAGEMENT_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from '../../layer_0/constants/storagePositions.sol';
 
-contract ExternalControlListManagement is
-    IExternalControlListManagement,
-    IStaticFunctionSelectors,
-    Common
-{
+contract ExternalControlListManagement is IExternalControlListManagement, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalControlLists(
         address[] calldata _controlLists
-    )
-        external
-        override
-        onlyUninitialized(
-            _externalListStorage(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION)
-                .initialized
-        )
-    {
-        ExternalListDataStorage
-            storage externalControlListDataStorage = _externalListStorage(
-                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
-            );
+    ) external override onlyUninitialized(_externalListStorage(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION).initialized) {
+        ExternalListDataStorage storage externalControlListDataStorage = _externalListStorage(
+            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+        );
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
-            _addExternalList(
-                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
-                _controlLists[index]
-            );
+            _addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists[index]);
             unchecked {
                 ++index;
             }
@@ -265,11 +242,7 @@ contract ExternalControlListManagement is
         onlyConsistentActivations(_controlLists, _actives)
         returns (bool success_)
     {
-        success_ = _updateExternalLists(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
-            _controlLists,
-            _actives
-        );
+        success_ = _updateExternalLists(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists, _actives);
         if (!success_) {
             revert ExternalControlListsNotUpdated(_controlLists, _actives);
         }
@@ -278,17 +251,8 @@ contract ExternalControlListManagement is
 
     function addExternalControlList(
         address _controlList
-    )
-        external
-        override
-        onlyRole(_CONTROL_LIST_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
-        success_ = _addExternalList(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
-            _controlList
-        );
+    ) external override onlyRole(_CONTROL_LIST_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
+        success_ = _addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
         if (!success_) {
             revert ListedControlList(_controlList);
         }
@@ -297,105 +261,48 @@ contract ExternalControlListManagement is
 
     function removeExternalControlList(
         address _controlList
-    )
-        external
-        override
-        onlyRole(_CONTROL_LIST_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
-        success_ = _removeExternalList(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
-            _controlList
-        );
+    ) external override onlyRole(_CONTROL_LIST_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
+        success_ = _removeExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
         if (!success_) {
             revert UnlistedControlList(_controlList);
         }
         emit RemovedFromExternalControlLists(_msgSender(), _controlList);
     }
 
-    function isExternalControlList(
-        address _controlList
-    ) external view override returns (bool) {
-        return
-            _isExternalList(
-                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
-                _controlList
-            );
+    function isExternalControlList(address _controlList) external view override returns (bool) {
+        return _isExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
     }
 
-    function getExternalControlListsCount()
-        external
-        view
-        override
-        returns (uint256 externalControlListsCount_)
-    {
-        return
-            _getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
+    function getExternalControlListsCount() external view override returns (uint256 externalControlListsCount_) {
+        return _getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
     }
 
     function getExternalControlListsMembers(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        return
-            _getExternalListsMembers(
-                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
-                _pageIndex,
-                _pageLength
-            );
+        return _getExternalListsMembers(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _pageIndex, _pageLength);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _CONTROL_LIST_MANAGEMENT_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_ExternalControlLists
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .updateExternalControlLists
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .addExternalControlList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .removeExternalControlList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isExternalControlList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getExternalControlListsCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getExternalControlListsMembers
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initialize_ExternalControlLists.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.updateExternalControlLists.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.addExternalControlList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.removeExternalControlList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isExternalControlList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getExternalControlListsCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getExternalControlListsMembers.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(
-            IExternalControlListManagement
-        ).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IExternalControlListManagement).interfaceId;
     }
 }

@@ -203,25 +203,25 @@
 
 */
 
-import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { History } from "../../components/History";
-import { useTranslation } from "react-i18next";
+import { HStack, Stack, VStack } from '@chakra-ui/react';
+import { History } from '../../components/History';
+import { useTranslation } from 'react-i18next';
 import {
   Text,
   InputController,
   InputNumberController,
   Button,
-} from "io-bricks-ui";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { required, min } from "../../utils/rules";
-import { CancelButton } from "../../components/CancelButton";
-import { ForceTransferRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router";
-import { useForceTransferSecurity } from "../../hooks/queries/useForceTransferSecurity";
-import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
-import { useWalletStore } from "../../store/walletStore";
-import { useDetailsBalancePanel } from "../../hooks/useDetailsBalancePanel";
-import { useSecurityStore } from "../../store/securityStore";
+} from 'io-bricks-ui';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { required, min } from '../../utils/rules';
+import { CancelButton } from '../../components/CancelButton';
+import { ForceTransferRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useParams } from 'react-router';
+import { useForceTransferSecurity } from '../../hooks/queries/useForceTransferSecurity';
+import { DetailsBalancePanel } from '../../components/DetailsBalancePanel';
+import { useWalletStore } from '../../store/walletStore';
+import { useDetailsBalancePanel } from '../../hooks/useDetailsBalancePanel';
+import { useSecurityStore } from '../../store/securityStore';
 
 interface ForceTransferFormValues {
   source: string;
@@ -230,20 +230,20 @@ interface ForceTransferFormValues {
 }
 
 export const DigitalSecurityForceTransfer = () => {
-  const { t: tHeader } = useTranslation("security", {
-    keyPrefix: "forceTransfer.header",
+  const { t: tHeader } = useTranslation('security', {
+    keyPrefix: 'forceTransfer.header',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "forceTransfer.input",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'forceTransfer.input',
   });
-  const { t } = useTranslation("security", { keyPrefix: "forceTransfer" });
-  const { t: tGlobal } = useTranslation("globals");
+  const { t } = useTranslation('security', { keyPrefix: 'forceTransfer' });
+  const { t: tGlobal } = useTranslation('globals');
   const { control, formState, handleSubmit, reset } =
-    useForm<ForceTransferFormValues>({ mode: "all" });
-  const { t: tButton } = useTranslation("security", {
-    keyPrefix: "forceTransfer.button",
+    useForm<ForceTransferFormValues>({ mode: 'all' });
+  const { t: tButton } = useTranslation('security', {
+    keyPrefix: 'forceTransfer.button',
   });
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
   const { details } = useSecurityStore();
   const { address: walletAddress } = useWalletStore();
 
@@ -275,7 +275,7 @@ export const DigitalSecurityForceTransfer = () => {
 
   return (
     <>
-      <History label={tHeader("title")} />
+      <History label={tHeader('title')} />
       <HStack
         layerStyle="container"
         mt={6}
@@ -294,12 +294,12 @@ export const DigitalSecurityForceTransfer = () => {
           as="form"
           onSubmit={handleSubmit(submit)}
         >
-          <Text textStyle="HeadingMediumLG">{t("title")}</Text>
+          <Text textStyle="HeadingMediumLG">{t('title')}</Text>
           <Text textStyle="BodyRegularMD" mt={2}>
-            {t("subtitle")}
+            {t('subtitle')}
           </Text>
           <Text textStyle="ElementsRegularSM" mt={8}>
-            {tGlobal("mandatoryFields")}
+            {tGlobal('mandatoryFields')}
           </Text>
           <Stack mt={6} w="full">
             <InputController
@@ -307,8 +307,8 @@ export const DigitalSecurityForceTransfer = () => {
               control={control}
               id="source"
               rules={{ required }}
-              label={tForm("source.label")}
-              placeholder={tForm("source.placeholder")}
+              label={tForm('source.label')}
+              placeholder={tForm('source.placeholder')}
               size="md"
             />
           </Stack>
@@ -318,8 +318,8 @@ export const DigitalSecurityForceTransfer = () => {
               control={control}
               id="destination"
               rules={{ required }}
-              label={tForm("destination.label")}
-              placeholder={tForm("destination.placeholder")}
+              label={tForm('destination.label')}
+              placeholder={tForm('destination.placeholder')}
               size="md"
             />
           </Stack>
@@ -334,8 +334,8 @@ export const DigitalSecurityForceTransfer = () => {
               }}
               size="md"
               allowNegative={false}
-              label={tForm("amount.label")}
-              placeholder={tForm("amount.placeholder")}
+              label={tForm('amount.label')}
+              placeholder={tForm('amount.placeholder')}
               decimalScale={details?.decimals}
               fixedDecimalScale={true}
               thousandSeparator=","
@@ -347,7 +347,7 @@ export const DigitalSecurityForceTransfer = () => {
             w="full"
             mt={10}
             align="end"
-            justifyContent={"flex-end"}
+            justifyContent={'flex-end'}
           >
             <CancelButton />
             <Button
@@ -359,7 +359,7 @@ export const DigitalSecurityForceTransfer = () => {
               minW="unset"
               isLoading={isLoading}
             >
-              {tButton("accept")}
+              {tButton('accept')}
             </Button>
           </HStack>
         </VStack>

@@ -206,16 +206,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Bond} from '../../layer_2/bond/Bond.sol';
-import {Security} from '../security/Security.sol';
-import {IBondUSA} from '../interfaces/IBondUSA.sol';
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
-import {_BOND_RESOLVER_KEY} from '../../layer_2/constants/resolverKeys.sol';
-import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
-import {ISecurity} from '../interfaces/ISecurity.sol';
+import { Bond } from '../../layer_2/bond/Bond.sol';
+import { Security } from '../security/Security.sol';
+import { IBondUSA } from '../interfaces/IBondUSA.sol';
+import { RegulationData, AdditionalSecurityData } from '../constants/regulation.sol';
+import { _BOND_RESOLVER_KEY } from '../../layer_2/constants/resolverKeys.sol';
+import { IBond } from '../../layer_2/interfaces/bond/IBond.sol';
+import { ISecurity } from '../interfaces/ISecurity.sol';
 
 contract BondUSA is IBondUSA, Bond, Security {
     // solhint-disable func-name-mixedcase
@@ -230,52 +227,25 @@ contract BondUSA is IBondUSA, Bond, Security {
         _initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _BOND_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](9);
-        staticFunctionSelectors_[selectorIndex++] = this
-            ._initialize_bondUSA
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this._initialize_bondUSA.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .updateMaturityDate
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getBondDetails
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponDetails
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.updateMaturityDate.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getBondDetails.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCouponDetails.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getSecurityRegulationData
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCouponCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getSecurityRegulationData.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](3);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IBond).interfaceId;

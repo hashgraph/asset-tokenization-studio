@@ -8,25 +8,25 @@ import {
   ModalOverlay,
   ModalProps,
   VStack,
-} from "@chakra-ui/react";
-import { Button, InputController } from "io-bricks-ui";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { ExternalControl } from "../ExternalControlList";
+} from '@chakra-ui/react';
+import { Button, InputController } from 'io-bricks-ui';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { ExternalControl } from '../ExternalControlList';
 import {
   useIsAuthorizedBlackListMock,
   useIsAuthorizedWhiteListMock,
-} from "../../../hooks/mutations/useExternalControl";
+} from '../../../hooks/mutations/useExternalControl';
 import {
   IsAuthorizedBlackListMockRequest,
   IsAuthorizedWhiteListMockRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 interface FormValues {
   accountId: string;
 }
 
-interface CheckAddressModalProps extends Omit<ModalProps, "children"> {
+interface CheckAddressModalProps extends Omit<ModalProps, 'children'> {
   externalControlSelected?: ExternalControl;
 }
 
@@ -35,12 +35,12 @@ export const CheckAddressModal = ({
   isOpen,
   onClose,
 }: CheckAddressModalProps) => {
-  const { t: tRemoveAddress } = useTranslation("externalControl", {
-    keyPrefix: "checkAddress",
+  const { t: tRemoveAddress } = useTranslation('externalControl', {
+    keyPrefix: 'checkAddress',
   });
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const {
@@ -53,7 +53,7 @@ export const CheckAddressModal = ({
   } = useIsAuthorizedWhiteListMock();
 
   const onSubmit = (values: FormValues) => {
-    if (externalControlSelected?.type === "blacklist") {
+    if (externalControlSelected?.type === 'blacklist') {
       isAuthorizedBlackListMockMutate(
         new IsAuthorizedBlackListMockRequest({
           contractId: externalControlSelected.address,
@@ -63,7 +63,7 @@ export const CheckAddressModal = ({
       return;
     }
 
-    if (externalControlSelected?.type === "whitelist") {
+    if (externalControlSelected?.type === 'whitelist') {
       isAuthorizedWhiteListMockMutate(
         new IsAuthorizedWhiteListMockRequest({
           contractId: externalControlSelected.address,
@@ -88,16 +88,16 @@ export const CheckAddressModal = ({
       }}
     >
       <ModalOverlay />
-      <ModalContent bgColor={"white"}>
-        <ModalHeader>{tRemoveAddress("title")}</ModalHeader>
+      <ModalContent bgColor={'white'}>
+        <ModalHeader>{tRemoveAddress('title')}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack gap={4}>
             <InputController
               control={control}
               id="accountId"
-              label={tRemoveAddress("input.label")}
-              placeholder={tRemoveAddress("input.placeholder")}
+              label={tRemoveAddress('input.label')}
+              placeholder={tRemoveAddress('input.placeholder')}
             />
           </VStack>
         </ModalBody>
@@ -108,7 +108,7 @@ export const CheckAddressModal = ({
             type="submit"
             onClick={handleSubmit(onSubmit)}
           >
-            {tRemoveAddress("check")}
+            {tRemoveAddress('check')}
           </Button>
         </ModalFooter>
       </ModalContent>

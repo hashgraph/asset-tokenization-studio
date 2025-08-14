@@ -206,9 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
-import {Common} from '../../common/Common.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import { IERC1410Basic } from '../../interfaces/ERC1400/IERC1410Basic.sol';
+import { Common } from '../../common/Common.sol';
+import { IKyc } from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410Basic is IERC1410Basic, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -254,15 +254,7 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         // out of bound error).
         // Note- There is no operator used for the execution of this call so `_operator` value in
         // in event is address(0) same for the `_operatorData`
-        return
-            _transferByPartition(
-                msg.sender,
-                _basicTransferInfo,
-                _partition,
-                _data,
-                address(0),
-                ''
-            );
+        return _transferByPartition(msg.sender, _basicTransferInfo, _partition, _data, address(0), '');
     }
 
     /**
@@ -277,9 +269,7 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
     /// @notice Use to get the list of partitions `_tokenHolder` is associated with
     /// @param _tokenHolder An address corresponds whom partition list is queried
     /// @return List of partitions
-    function partitionsOf(
-        address _tokenHolder
-    ) external view override returns (bytes32[] memory) {
+    function partitionsOf(address _tokenHolder) external view override returns (bytes32[] memory) {
         return _partitionsOf(_tokenHolder);
     }
 }

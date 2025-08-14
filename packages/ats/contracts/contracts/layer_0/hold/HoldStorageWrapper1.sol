@@ -205,14 +205,12 @@
 
 pragma solidity 0.8.18;
 
-import {LibCommon} from '../common/libraries/LibCommon.sol';
-import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {ERC3643StorageWrapper1} from '../ERC3643/ERC3643StorageWrapper1.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
+import { LibCommon } from '../common/libraries/LibCommon.sol';
+import { _HOLD_STORAGE_POSITION } from '../constants/storagePositions.sol';
+import { ERC3643StorageWrapper1 } from '../ERC3643/ERC3643StorageWrapper1.sol';
+import { IHold } from '../../layer_1/interfaces/hold/IHold.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { ThirdPartyType } from '../common/types/ThirdPartyType.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -220,30 +218,23 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    modifier onlyWithValidHoldId(IHold.HoldIdentifier calldata _holdIdentifier)
-    {
+    modifier onlyWithValidHoldId(IHold.HoldIdentifier calldata _holdIdentifier) {
         _checkHoldId(_holdIdentifier);
         _;
     }
 
-    function _isHoldIdValid(
-        IHold.HoldIdentifier memory _holdIdentifier
-    ) internal view returns (bool) {
+    function _isHoldIdValid(IHold.HoldIdentifier memory _holdIdentifier) internal view returns (bool) {
         return _getHold(_holdIdentifier).id != 0;
     }
 
-    function _getHold(
-        IHold.HoldIdentifier memory _holdIdentifier
-    ) internal view returns (IHold.HoldData memory) {
+    function _getHold(IHold.HoldIdentifier memory _holdIdentifier) internal view returns (IHold.HoldData memory) {
         return
-            _holdStorage().holdsByAccountPartitionAndId[
-                _holdIdentifier.tokenHolder
-            ][_holdIdentifier.partition][_holdIdentifier.holdId];
+            _holdStorage().holdsByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
+                _holdIdentifier.holdId
+            ];
     }
 
-    function _getHeldAmountFor(
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
+    function _getHeldAmountFor(address _tokenHolder) internal view returns (uint256 amount_) {
         return _holdStorage().totalHeldAmountByAccount[_tokenHolder];
     }
 
@@ -251,10 +242,7 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder
     ) internal view returns (uint256 amount_) {
-        return
-            _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][
-                _partition
-            ];
+        return _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition];
     }
 
     function _getHoldsIdForByPartition(
@@ -264,11 +252,7 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
         uint256 _pageLength
     ) internal view returns (uint256[] memory holdsId_) {
         return
-            _holdStorage()
-            .holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(
-                    _pageIndex,
-                    _pageLength
-                );
+            _holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(_pageIndex, _pageLength);
     }
 
     function _getHoldForByPartition(
@@ -298,41 +282,23 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
         );
     }
 
-    function _getHoldCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256) {
-        return
-            _holdStorage()
-            .holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
+    function _getHoldCountForByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
+        return _holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
     }
 
-    function _isHoldExpired(
-        IHold.Hold memory _hold
-    ) internal view returns (bool) {
+    function _isHoldExpired(IHold.Hold memory _hold) internal view returns (bool) {
         return _blockTimestamp() > _hold.expirationTimestamp;
     }
 
-    function _isEscrow(
-        IHold.Hold memory _hold,
-        address _escrow
-    ) internal pure returns (bool) {
+    function _isEscrow(IHold.Hold memory _hold, address _escrow) internal pure returns (bool) {
         return _escrow == _hold.escrow;
     }
 
-    function _checkHoldAmount(
-        uint256 _amount,
-        IHold.HoldData memory holdData
-    ) internal pure {
-        if (_amount > holdData.hold.amount)
-            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
+    function _checkHoldAmount(uint256 _amount, IHold.HoldData memory holdData) internal pure {
+        if (_amount > holdData.hold.amount) revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
     }
 
-    function _holdStorage()
-        internal
-        pure
-        returns (IHold.HoldDataStorage storage hold_)
-    {
+    function _holdStorage() internal pure returns (IHold.HoldDataStorage storage hold_) {
         bytes32 position = _HOLD_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -340,9 +306,7 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
         }
     }
 
-    function _checkHoldId(
-        IHold.HoldIdentifier calldata _holdIdentifier
-    ) private view {
+    function _checkHoldId(IHold.HoldIdentifier calldata _holdIdentifier) private view {
         if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
     }
 }

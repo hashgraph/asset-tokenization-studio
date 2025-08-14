@@ -203,23 +203,23 @@
 
 */
 
-import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
+import { Button, Center, HStack, Stack, VStack } from '@chakra-ui/react';
 import {
   CalendarInputController,
   InputController,
   PhosphorIcon,
   Text,
   Tooltip,
-} from "io-bricks-ui";
-import { Info } from "@phosphor-icons/react";
-import { required } from "../../../../utils/rules";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
-import { SetVotingRightsRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useSetVotingRights } from "../../../../hooks/queries/VotingRights";
-import { dateToUnixTimestamp, textToHex } from "../../../../utils/format";
-import { DATE_TIME_FORMAT } from "../../../../utils/constants";
+} from 'io-bricks-ui';
+import { Info } from '@phosphor-icons/react';
+import { required } from '../../../../utils/rules';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { SetVotingRightsRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useSetVotingRights } from '../../../../hooks/queries/VotingRights';
+import { dateToUnixTimestamp, textToHex } from '../../../../utils/format';
+import { DATE_TIME_FORMAT } from '../../../../utils/constants';
 
 interface ProgramVotingRightsFormValues {
   name: string;
@@ -229,16 +229,16 @@ interface ProgramVotingRightsFormValues {
 export const ProgramVotingRights = () => {
   const { control, formState, handleSubmit, reset } =
     useForm<ProgramVotingRightsFormValues>({
-      mode: "all",
+      mode: 'all',
     });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "details.votingRights.program.input",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'details.votingRights.program.input',
   });
-  const { t: t } = useTranslation("security", {
-    keyPrefix: "details.votingRights.program",
+  const { t: t } = useTranslation('security', {
+    keyPrefix: 'details.votingRights.program',
   });
 
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
 
   const { mutate: setVotingRights, isLoading } = useSetVotingRights();
 
@@ -274,8 +274,8 @@ export const ProgramVotingRights = () => {
       >
         <Stack w="full">
           <HStack justifySelf="flex-start">
-            <Text textStyle="BodyTextRegularSM">{tForm("name.label")}*</Text>
-            <Tooltip label={tForm("name.tooltip")} placement="right">
+            <Text textStyle="BodyTextRegularSM">{tForm('name.label')}*</Text>
+            <Tooltip label={tForm('name.tooltip')} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -284,13 +284,13 @@ export const ProgramVotingRights = () => {
             control={control}
             id="name"
             rules={{ required }}
-            placeholder={tForm("name.placeholder")}
+            placeholder={tForm('name.placeholder')}
           />
         </Stack>
         <Stack w="full">
           <HStack justifySelf="flex-start">
-            <Text textStyle="BodyTextRegularSM">{tForm("date.label")}*</Text>
-            <Tooltip label={tForm("date.tooltip")} placement="right">
+            <Text textStyle="BodyTextRegularSM">{tForm('date.label')}*</Text>
+            <Tooltip label={tForm('date.tooltip')} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -299,7 +299,7 @@ export const ProgramVotingRights = () => {
             id="date"
             rules={{ required }}
             fromDate={new Date()}
-            placeholder={tForm("date.placeholder")}
+            placeholder={tForm('date.placeholder')}
             withTimeInput
             format={DATE_TIME_FORMAT}
           />
@@ -311,7 +311,7 @@ export const ProgramVotingRights = () => {
           isDisabled={!formState.isValid}
           type="submit"
         >
-          {t("button")}
+          {t('button')}
         </Button>
       </VStack>
     </Center>

@@ -2,11 +2,11 @@ import {
   useMutation,
   UseMutationOptions,
   useQueryClient,
-} from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
-import { useTranslation } from "react-i18next";
-import { useToast } from "io-bricks-ui";
-import { GET_CLEARING_OPERATIONS_LIST } from "../queries/useClearingOperations";
+} from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
+import { useTranslation } from 'react-i18next';
+import { useToast } from 'io-bricks-ui';
+import { GET_CLEARING_OPERATIONS_LIST } from '../queries/useClearingOperations';
 import {
   ActivateClearingRequest,
   ApproveClearingOperationByPartitionRequest,
@@ -16,13 +16,13 @@ import {
   ClearingTransferByPartitionRequest,
   DeactivateClearingRequest,
   ReclaimClearingOperationByPartitionRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 export const useCreateClearingTransferByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.messages',
   });
 
   return useMutation(
@@ -35,7 +35,7 @@ export const useCreateClearingTransferByPartition = () => {
         });
 
         console.log(
-          "SDK message --> Clearing Operation operation success: ",
+          'SDK message --> Clearing Operation operation success: ',
           data,
         );
 
@@ -45,24 +45,24 @@ export const useCreateClearingTransferByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Clearing Operation operation error: ",
+          'SDK message --> Clearing Operation operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -72,8 +72,8 @@ export const useCreateClearingTransferByPartition = () => {
 export const useCreateClearingRedeemByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.messages',
   });
 
   return useMutation(
@@ -86,7 +86,7 @@ export const useCreateClearingRedeemByPartition = () => {
         });
 
         console.log(
-          "SDK message --> Clearing Operation operation success: ",
+          'SDK message --> Clearing Operation operation success: ',
           data,
         );
 
@@ -96,24 +96,24 @@ export const useCreateClearingRedeemByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Clearing Operation operation error: ",
+          'SDK message --> Clearing Operation operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -123,8 +123,8 @@ export const useCreateClearingRedeemByPartition = () => {
 export const useCreateClearingHoldByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.messages',
   });
 
   return useMutation(
@@ -137,7 +137,7 @@ export const useCreateClearingHoldByPartition = () => {
         });
 
         console.log(
-          "SDK message --> Clearing Operation operation success: ",
+          'SDK message --> Clearing Operation operation success: ',
           data,
         );
 
@@ -147,24 +147,24 @@ export const useCreateClearingHoldByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Clearing Operation operation error: ",
+          'SDK message --> Clearing Operation operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -174,8 +174,8 @@ export const useCreateClearingHoldByPartition = () => {
 export const useApproveClearingByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.messages',
   });
 
   return useMutation(
@@ -188,7 +188,7 @@ export const useApproveClearingByPartition = () => {
         });
 
         console.log(
-          "SDK message --> Clearing Operation operation success: ",
+          'SDK message --> Clearing Operation operation success: ',
           data,
         );
 
@@ -198,24 +198,24 @@ export const useApproveClearingByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Clearing Operation operation error: ",
+          'SDK message --> Clearing Operation operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -225,8 +225,8 @@ export const useApproveClearingByPartition = () => {
 export const useCancelClearingByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.messages',
   });
 
   return useMutation(
@@ -239,7 +239,7 @@ export const useCancelClearingByPartition = () => {
         });
 
         console.log(
-          "SDK message --> Clearing Operation operation success: ",
+          'SDK message --> Clearing Operation operation success: ',
           data,
         );
 
@@ -249,24 +249,24 @@ export const useCancelClearingByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Clearing Operation operation error: ",
+          'SDK message --> Clearing Operation operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -276,8 +276,8 @@ export const useCancelClearingByPartition = () => {
 export const useReclaimClearingByPartition = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.messages',
   });
 
   return useMutation(
@@ -290,7 +290,7 @@ export const useReclaimClearingByPartition = () => {
         });
 
         console.log(
-          "SDK message --> Clearing Operation operation success: ",
+          'SDK message --> Clearing Operation operation success: ',
           data,
         );
 
@@ -300,24 +300,24 @@ export const useReclaimClearingByPartition = () => {
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Clearing Operation operation error: ",
+          'SDK message --> Clearing Operation operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -329,8 +329,8 @@ export const useActivateClearing = (
 ) => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.messages',
   });
 
   return useMutation(
@@ -342,7 +342,7 @@ export const useActivateClearing = (
         });
 
         console.log(
-          "SDK message --> Clearing Operation operation success: ",
+          'SDK message --> Clearing Operation operation success: ',
           data,
         );
 
@@ -352,24 +352,24 @@ export const useActivateClearing = (
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Clearing Operation operation error: ",
+          'SDK message --> Clearing Operation operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
       ...options,
@@ -382,8 +382,8 @@ export const useDeactivateClearing = (
 ) => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.messages",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.messages',
   });
 
   return useMutation(
@@ -395,7 +395,7 @@ export const useDeactivateClearing = (
         });
 
         console.log(
-          "SDK message --> Clearing Operation operation success: ",
+          'SDK message --> Clearing Operation operation success: ',
           data,
         );
 
@@ -405,24 +405,24 @@ export const useDeactivateClearing = (
 
         toast.show({
           duration: 3000,
-          title: t("success"),
-          description: t("descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('success'),
+          description: t('descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Clearing Operation operation error: ",
+          'SDK message --> Clearing Operation operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("error"),
-          description: t("descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('error'),
+          description: t('descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
       ...options,

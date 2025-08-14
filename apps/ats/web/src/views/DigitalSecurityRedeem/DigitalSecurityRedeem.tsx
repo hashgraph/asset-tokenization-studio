@@ -203,43 +203,43 @@
 
 */
 
-import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { History } from "../../components/History";
-import { useTranslation } from "react-i18next";
-import { Text, InputNumberController, Button } from "io-bricks-ui";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { required, min } from "../../utils/rules";
-import { CancelButton } from "../../components/CancelButton";
-import { useParams } from "react-router";
-import { useRedeemSecurity } from "../../hooks/queries/useRedeemSecurity";
-import { RedeemRequest } from "@hashgraph/asset-tokenization-sdk";
-import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
-import { useDetailsBalancePanel } from "../../hooks/useDetailsBalancePanel";
-import { useWalletStore } from "../../store/walletStore";
-import { useSecurityStore } from "../../store/securityStore";
+import { HStack, Stack, VStack } from '@chakra-ui/react';
+import { History } from '../../components/History';
+import { useTranslation } from 'react-i18next';
+import { Text, InputNumberController, Button } from 'io-bricks-ui';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { required, min } from '../../utils/rules';
+import { CancelButton } from '../../components/CancelButton';
+import { useParams } from 'react-router';
+import { useRedeemSecurity } from '../../hooks/queries/useRedeemSecurity';
+import { RedeemRequest } from '@hashgraph/asset-tokenization-sdk';
+import { DetailsBalancePanel } from '../../components/DetailsBalancePanel';
+import { useDetailsBalancePanel } from '../../hooks/useDetailsBalancePanel';
+import { useWalletStore } from '../../store/walletStore';
+import { useSecurityStore } from '../../store/securityStore';
 
 interface RedeemFormValues {
   amount: number;
 }
 
 export const DigitalSecurityRedeem = () => {
-  const { t: tHeader } = useTranslation("security", {
-    keyPrefix: "redeem.header",
+  const { t: tHeader } = useTranslation('security', {
+    keyPrefix: 'redeem.header',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "redeem.input",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'redeem.input',
   });
-  const { t } = useTranslation("security", { keyPrefix: "redeem" });
-  const { t: tGlobal } = useTranslation("globals");
+  const { t } = useTranslation('security', { keyPrefix: 'redeem' });
+  const { t: tGlobal } = useTranslation('globals');
   const { control, formState, handleSubmit, reset } = useForm<RedeemFormValues>(
     {
-      mode: "all",
+      mode: 'all',
     },
   );
-  const { t: TButton } = useTranslation("security", {
-    keyPrefix: "redeem.button",
+  const { t: TButton } = useTranslation('security', {
+    keyPrefix: 'redeem.button',
   });
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
   const { details } = useSecurityStore();
   const { address: walletAddress } = useWalletStore();
 
@@ -264,7 +264,7 @@ export const DigitalSecurityRedeem = () => {
 
   return (
     <>
-      <History label={tHeader("title")} />
+      <History label={tHeader('title')} />
       <HStack
         layerStyle="container"
         mt={6}
@@ -283,12 +283,12 @@ export const DigitalSecurityRedeem = () => {
           as="form"
           onSubmit={handleSubmit(submit)}
         >
-          <Text textStyle="HeadingMediumLG">{t("title")}</Text>
+          <Text textStyle="HeadingMediumLG">{t('title')}</Text>
           <Text textStyle="BodyRegularMD" mt={2}>
-            {t("subtitle")}
+            {t('subtitle')}
           </Text>
           <Text textStyle="ElementsRegularSM" mt={8}>
-            {tGlobal("mandatoryFields")}
+            {tGlobal('mandatoryFields')}
           </Text>
           <Stack mt={6} w="full">
             <InputNumberController
@@ -301,8 +301,8 @@ export const DigitalSecurityRedeem = () => {
               }}
               size="md"
               allowNegative={false}
-              label={tForm("amount.label")}
-              placeholder={tForm("amount.placeholder")}
+              label={tForm('amount.label')}
+              placeholder={tForm('amount.placeholder')}
               decimalScale={details?.decimals}
               fixedDecimalScale={true}
               thousandSeparator=","
@@ -314,7 +314,7 @@ export const DigitalSecurityRedeem = () => {
             w="full"
             mt={10}
             align="end"
-            justifyContent={"flex-end"}
+            justifyContent={'flex-end'}
           >
             <CancelButton />
             <Button
@@ -326,7 +326,7 @@ export const DigitalSecurityRedeem = () => {
               minW="unset"
               isLoading={isLoading}
             >
-              {TButton("accept")}
+              {TButton('accept')}
             </Button>
           </HStack>
         </VStack>

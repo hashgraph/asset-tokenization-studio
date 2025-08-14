@@ -203,26 +203,26 @@
 
 */
 
-import { BaseBlockchainCommand, BaseBlockchainCommandParams } from '../index'
+import { BaseBlockchainCommand, BaseBlockchainCommandParams } from '../index';
 
 interface DeployUpgradeableProxyCommandParams
-    extends BaseBlockchainCommandParams {
-    proxyAdminAddress: string
-    implementationAddress: string
+  extends BaseBlockchainCommandParams {
+  proxyAdminAddress: string;
+  implementationAddress: string;
 }
 
 export default class DeployUpgradeableProxyCommand extends BaseBlockchainCommand {
-    public readonly proxyAdminAddress: string
-    public readonly implementationAddress: string
+  public readonly proxyAdminAddress: string;
+  public readonly implementationAddress: string;
 
-    constructor({
-        proxyAdminAddress,
-        implementationAddress,
-        signer,
-        overrides,
-    }: DeployUpgradeableProxyCommandParams) {
-        super({ signer, overrides })
-        this.proxyAdminAddress = proxyAdminAddress
-        this.implementationAddress = implementationAddress
-    }
+  constructor({
+    proxyAdminAddress,
+    implementationAddress,
+    signer,
+    overrides,
+  }: DeployUpgradeableProxyCommandParams) {
+    super({ signer, overrides });
+    this.proxyAdminAddress = proxyAdminAddress;
+    this.implementationAddress = implementationAddress;
+  }
 }

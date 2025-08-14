@@ -203,13 +203,13 @@
 
 */
 
-import { UseQueryOptions, useQuery } from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
+import { UseQueryOptions, useQuery } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
 import {
   GetExternalKycListsCountRequest,
   GetExternalKycListsMembersRequest,
   GetKycStatusMockRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 export const GET_EXTERNAL_KYC_STATUS = (securityId: string) =>
   `GET_EXTERNAL_KYC_COUNT_${securityId}`;

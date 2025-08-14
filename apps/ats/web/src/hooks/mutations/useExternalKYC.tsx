@@ -1,7 +1,7 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import SDKService from "../../services/SDKService";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import SDKService from '../../services/SDKService';
 import {
   AddExternalKycListRequest,
   GetKycStatusMockRequest,
@@ -9,8 +9,8 @@ import {
   RemoveExternalKycListRequest,
   RevokeKycMockRequest,
   UpdateExternalKycListsRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { GET_EXTERNAL_KYC_COUNT } from "../queries/useExternalKYC";
+} from '@hashgraph/asset-tokenization-sdk';
+import { GET_EXTERNAL_KYC_COUNT } from '../queries/useExternalKYC';
 
 export const useUpdateExternalKYCLists = () => {
   const queryClient = useQueryClient();
@@ -25,13 +25,13 @@ export const useUpdateExternalKYCLists = () => {
         });
 
         console.log(
-          "SDK message --> Update external KYC operation success: ",
+          'SDK message --> Update external KYC operation success: ',
           data,
         );
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Update external KYC operation error: ",
+          'SDK message --> Update external KYC operation error: ',
           error,
         );
       },
@@ -42,8 +42,8 @@ export const useUpdateExternalKYCLists = () => {
 export const useAddExternalKYCList = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t: tAdd } = useTranslation("externalKYC", {
-    keyPrefix: "add.messages",
+  const { t: tAdd } = useTranslation('externalKYC', {
+    keyPrefix: 'add.messages',
   });
 
   return useMutation(
@@ -55,7 +55,7 @@ export const useAddExternalKYCList = () => {
         });
 
         console.log(
-          "SDK message --> Add external KYC operation success: ",
+          'SDK message --> Add external KYC operation success: ',
           data,
         );
 
@@ -65,24 +65,24 @@ export const useAddExternalKYCList = () => {
 
         toast.show({
           duration: 3000,
-          title: tAdd("addExternalKYC.success"),
-          description: tAdd("addExternalKYC.descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: tAdd('addExternalKYC.success'),
+          description: tAdd('addExternalKYC.descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Add external control operation error: ",
+          'SDK message --> Add external control operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: tAdd("addExternalControl.error"),
-          description: tAdd("addExternalControl.descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: tAdd('addExternalControl.error'),
+          description: tAdd('addExternalControl.descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -92,8 +92,8 @@ export const useAddExternalKYCList = () => {
 export const useRemoveExternalKYCList = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { t } = useTranslation("externalKYC", {
-    keyPrefix: "list.messages",
+  const { t } = useTranslation('externalKYC', {
+    keyPrefix: 'list.messages',
   });
 
   return useMutation(
@@ -106,7 +106,7 @@ export const useRemoveExternalKYCList = () => {
         });
 
         console.log(
-          "SDK message --> Remove external KYC operation success: ",
+          'SDK message --> Remove external KYC operation success: ',
           data,
         );
 
@@ -116,24 +116,24 @@ export const useRemoveExternalKYCList = () => {
 
         toast.show({
           duration: 3000,
-          title: t("removeExternalKYC.success"),
-          description: t("removeExternalKYC.descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: t('removeExternalKYC.success'),
+          description: t('removeExternalKYC.descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Remove external KYC operation error: ",
+          'SDK message --> Remove external KYC operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: t("removeExternalKYC.error"),
-          description: t("removeExternalKYC.descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('removeExternalKYC.error'),
+          description: t('removeExternalKYC.descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -142,13 +142,13 @@ export const useRemoveExternalKYCList = () => {
 
 export const useCreateExternalKYCMock = () => {
   const toast = useToast();
-  const { t } = useTranslation("externalKYC", {
-    keyPrefix: "create.messages",
+  const { t } = useTranslation('externalKYC', {
+    keyPrefix: 'create.messages',
   });
 
   return useMutation(() => SDKService.createExternalKycMock(), {
     onSuccess(data) {
-      console.log("SDK message --> KYC mock created success: ", data);
+      console.log('SDK message --> KYC mock created success: ', data);
 
       if (!data) {
         return;
@@ -156,21 +156,21 @@ export const useCreateExternalKYCMock = () => {
 
       toast.show({
         duration: 3000,
-        title: t("createExternalKYC.success"),
-        description: t("createExternalKYC.descriptionSuccess"),
-        variant: "subtle",
-        status: "success",
+        title: t('createExternalKYC.success'),
+        description: t('createExternalKYC.descriptionSuccess'),
+        variant: 'subtle',
+        status: 'success',
       });
     },
     onError: (error) => {
-      console.log("SDK message --> KYC mock created error: ", error);
+      console.log('SDK message --> KYC mock created error: ', error);
 
       toast.show({
         duration: 3000,
-        title: t("createExternalKYC.error"),
-        description: t("createExternalKYC.descriptionFailed"),
-        variant: "subtle",
-        status: "error",
+        title: t('createExternalKYC.error'),
+        description: t('createExternalKYC.descriptionFailed'),
+        variant: 'subtle',
+        status: 'error',
       });
     },
   });
@@ -178,15 +178,15 @@ export const useCreateExternalKYCMock = () => {
 
 export const useGrantKycMock = () => {
   const toast = useToast();
-  const { t: tAdd } = useTranslation("externalKYC", {
-    keyPrefix: "add.messages",
+  const { t: tAdd } = useTranslation('externalKYC', {
+    keyPrefix: 'add.messages',
   });
 
   return useMutation(
     (req: GrantKycMockRequest) => SDKService.grantKycMock(req),
     {
       onSuccess(data) {
-        console.log("SDK message --> Add address operation success: ", data);
+        console.log('SDK message --> Add address operation success: ', data);
 
         if (!data) {
           return;
@@ -194,21 +194,21 @@ export const useGrantKycMock = () => {
 
         toast.show({
           duration: 3000,
-          title: tAdd("addAddressKYC.success"),
-          description: tAdd("addAddressKYC.descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: tAdd('addAddressKYC.success'),
+          description: tAdd('addAddressKYC.descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
-        console.log("SDK message --> Add address operation error: ", error);
+        console.log('SDK message --> Add address operation error: ', error);
 
         toast.show({
           duration: 3000,
-          title: tAdd("addAddressKYC.error"),
-          description: tAdd("addAddressKYC.descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: tAdd('addAddressKYC.error'),
+          description: tAdd('addAddressKYC.descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -217,15 +217,15 @@ export const useGrantKycMock = () => {
 
 export const useRevokeKycMock = () => {
   const toast = useToast();
-  const { t: tAdd } = useTranslation("externalKYC", {
-    keyPrefix: "add.messages",
+  const { t: tAdd } = useTranslation('externalKYC', {
+    keyPrefix: 'add.messages',
   });
 
   return useMutation(
     (req: RevokeKycMockRequest) => SDKService.revokeKycMock(req),
     {
       onSuccess(data) {
-        console.log("SDK message --> Remove address operation success: ", data);
+        console.log('SDK message --> Remove address operation success: ', data);
 
         if (!data) {
           return;
@@ -233,24 +233,24 @@ export const useRevokeKycMock = () => {
 
         toast.show({
           duration: 3000,
-          title: tAdd("removeAddressKYC.success"),
-          description: tAdd("removeAddressKYC.descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: tAdd('removeAddressKYC.success'),
+          description: tAdd('removeAddressKYC.descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Remove external KYC operation error: ",
+          'SDK message --> Remove external KYC operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: tAdd("removeAddressKYC.error"),
-          description: tAdd("removeAddressKYC.descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: tAdd('removeAddressKYC.error'),
+          description: tAdd('removeAddressKYC.descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },
@@ -259,8 +259,8 @@ export const useRevokeKycMock = () => {
 
 export const useIsAuthorizedKYCListMock = () => {
   const toast = useToast();
-  const { t: tAdd } = useTranslation("externalKYC", {
-    keyPrefix: "add.messages",
+  const { t: tAdd } = useTranslation('externalKYC', {
+    keyPrefix: 'add.messages',
   });
 
   return useMutation(
@@ -268,41 +268,41 @@ export const useIsAuthorizedKYCListMock = () => {
     {
       onSuccess(data) {
         console.log(
-          "SDK message --> Is authorized address operation success: ",
+          'SDK message --> Is authorized address operation success: ',
           data,
         );
 
         if (data) {
           toast.show({
             duration: 3000,
-            title: tAdd("isAddressAuthorized.success"),
-            description: tAdd("isAddressAuthorized.descriptionSuccess"),
-            variant: "subtle",
-            status: "success",
+            title: tAdd('isAddressAuthorized.success'),
+            description: tAdd('isAddressAuthorized.descriptionSuccess'),
+            variant: 'subtle',
+            status: 'success',
           });
           return;
         }
 
         toast.show({
           duration: 3000,
-          title: tAdd("isAddressNotAuthorized.success"),
-          description: tAdd("isAddressNotAuthorized.descriptionSuccess"),
-          variant: "subtle",
-          status: "success",
+          title: tAdd('isAddressNotAuthorized.success'),
+          description: tAdd('isAddressNotAuthorized.descriptionSuccess'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
         console.log(
-          "SDK message --> Add external control operation error: ",
+          'SDK message --> Add external control operation error: ',
           error,
         );
 
         toast.show({
           duration: 3000,
-          title: tAdd("isAddressAuthorized.error"),
-          description: tAdd("isAddressAuthorized.descriptionFailed"),
-          variant: "subtle",
-          status: "error",
+          title: tAdd('isAddressAuthorized.error'),
+          description: tAdd('isAddressAuthorized.descriptionFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },

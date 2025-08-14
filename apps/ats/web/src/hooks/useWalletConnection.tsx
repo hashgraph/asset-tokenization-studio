@@ -203,10 +203,10 @@
 
 */
 
-import { useWalletStore } from "../store/walletStore";
-import { WalletStatus } from "../utils/constants";
-import { useSDKConnectToWallet } from "./queries/SDKConnection";
-import { SupportedWallets } from "@hashgraph/asset-tokenization-sdk";
+import { useWalletStore } from '../store/walletStore';
+import { WalletStatus } from '../utils/constants';
+import { useSDKConnectToWallet } from './queries/SDKConnection';
+import { SupportedWallets } from '@hashgraph/asset-tokenization-sdk';
 
 export const useWalletConnection = () => {
   const { setConnectionStatus } = useWalletStore();
@@ -226,7 +226,7 @@ export const useWalletConnection = () => {
       } else if (wallet === SupportedWallets.HWALLETCONNECT) {
         connectWallet(wallet);
       } else {
-        throw new Error("Wallet not supported");
+        throw new Error('Wallet not supported');
       }
     } catch (error) {
       console.error(error);

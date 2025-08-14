@@ -206,11 +206,11 @@
 import {
   GetAccountBalanceRequest,
   GetSecurityDetailsRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 import {
   useGetBalanceOf,
   useGetSecurityDetails,
-} from "./queries/useGetSecurityDetails";
+} from './queries/useGetSecurityDetails';
 
 export const useDetailsBalancePanel = (
   securityId: string,

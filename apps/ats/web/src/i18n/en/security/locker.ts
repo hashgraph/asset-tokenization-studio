@@ -204,55 +204,55 @@
 */
 
 export default {
-  title: "Locker",
+  title: 'Locker',
   search: {
-    title: "Display Locks",
-    description: "Add the ID account to preview its locks",
-    search: "Search",
+    title: 'Display Locks',
+    description: 'Add the ID account to preview its locks',
+    search: 'Search',
   },
   list: {
-    lockId: "Lock ID",
-    amount: "Amount",
-    expirationDate: "Expiration Date",
-    release: "Release",
-    noLocks: "No locks found",
+    lockId: 'Lock ID',
+    amount: 'Amount',
+    expirationDate: 'Expiration Date',
+    release: 'Release',
+    noLocks: 'No locks found',
   },
   form: {
     expirationDate: {
-      label: "Expiration date",
-      placeholder: "Select expiration date",
+      label: 'Expiration date',
+      placeholder: 'Select expiration date',
     },
     targetId: {
-      label: "Target ID",
-      placeholder: "0.0.12345",
+      label: 'Target ID',
+      placeholder: '0.0.12345',
     },
     amount: {
-      label: "Amount",
-      placeholder: "Amount",
+      label: 'Amount',
+      placeholder: 'Amount',
     },
   },
   actions: {
-    lock: "Lock",
+    lock: 'Lock',
   },
   release: {
     confirmPopUp: {
-      title: "Release locker",
-      description: "Are you sure you want to release this locker?",
-      confirmText: "Confirm",
-      cancelText: "Cancel",
+      title: 'Release locker',
+      description: 'Are you sure you want to release this locker?',
+      confirmText: 'Confirm',
+      cancelText: 'Cancel',
     },
     messages: {
-      success: "Success: ",
+      success: 'Success: ',
       descriptionSuccess:
-        "The release operation has been executed successfully",
-      error: "Error: ",
-      descriptionFailed: "The release operation has failed",
+        'The release operation has been executed successfully',
+      error: 'Error: ',
+      descriptionFailed: 'The release operation has failed',
     },
   },
   messages: {
-    success: "Success: ",
-    descriptionSuccess: "The lock operation has been executed successfully",
-    error: "Error: ",
-    descriptionFailed: "The lock operation has failed",
+    success: 'Success: ',
+    descriptionSuccess: 'The lock operation has been executed successfully',
+    error: 'Error: ',
+    descriptionFailed: 'The lock operation has failed',
   },
 };

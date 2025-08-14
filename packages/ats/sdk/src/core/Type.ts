@@ -203,11 +203,7 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-types */
-export interface Type<T = any> extends Function {
-  new (...args: any[]): T;
-}
+export type Type<T = any> = new (...args: any[]) => T;
 
 export interface IndexableObject {
   [n: string | number | symbol]: any;

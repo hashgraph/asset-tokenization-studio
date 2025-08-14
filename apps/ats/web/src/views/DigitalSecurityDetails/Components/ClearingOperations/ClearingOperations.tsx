@@ -1,15 +1,15 @@
-import { Stack } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
-import { ClearingOperationsList } from "./ClearingOperationList";
-import { ClearingOperationsCreate } from "./ClearingOperationCreate";
-import { ClearingOperationsManage } from "./ClearingOperationManage";
-import { useRolesStore } from "../../../../store/rolesStore";
-import { SecurityRole } from "../../../../utils/SecurityRole";
+import { Stack } from '@chakra-ui/react';
+import { Tabs } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
+import { ClearingOperationsList } from './ClearingOperationList';
+import { ClearingOperationsCreate } from './ClearingOperationCreate';
+import { ClearingOperationsManage } from './ClearingOperationManage';
+import { useRolesStore } from '../../../../store/rolesStore';
+import { SecurityRole } from '../../../../utils/SecurityRole';
 
 export const ClearingOperations = () => {
-  const { t: tTabs } = useTranslation("security", {
-    keyPrefix: "details.clearingOperations.tabs",
+  const { t: tTabs } = useTranslation('security', {
+    keyPrefix: 'details.clearingOperations.tabs',
   });
 
   const { roles } = useRolesStore();
@@ -21,15 +21,15 @@ export const ClearingOperations = () => {
   const tabs = [
     {
       content: <ClearingOperationsList />,
-      header: tTabs("list"),
+      header: tTabs('list'),
     },
-    { content: <ClearingOperationsCreate />, header: tTabs("create") },
+    { content: <ClearingOperationsCreate />, header: tTabs('create') },
   ];
 
   if (hasClearingValidatorRole) {
     tabs.push({
       content: <ClearingOperationsManage />,
-      header: tTabs("manage"),
+      header: tTabs('manage'),
     });
   }
 

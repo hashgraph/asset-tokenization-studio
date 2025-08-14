@@ -203,10 +203,10 @@
 
 */
 
-import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
-import { SDKService } from "../../services/SDKService";
-import { useToast } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
+import { UseQueryOptions, useMutation, useQuery } from '@tanstack/react-query';
+import { SDKService } from '../../services/SDKService';
+import { useToast } from 'io-bricks-ui';
+import { useTranslation } from 'react-i18next';
 import {
   CouponForViewModel,
   CouponViewModel,
@@ -214,7 +214,7 @@ import {
   GetCouponForRequest,
   GetCouponRequest,
   SetCouponRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 export const GET_SECURITY_COUPONS_FOR = (
   securityId: string,
@@ -230,31 +230,31 @@ export const GET_SECURITY_ALL_COUPONS = (securityId: string) =>
 
 export const useCoupons = () => {
   const toast = useToast();
-  const { t } = useTranslation("security", { keyPrefix: "details.coupons" });
+  const { t } = useTranslation('security', { keyPrefix: 'details.coupons' });
 
   return useMutation(
     (setCouponRequest: SetCouponRequest) =>
       SDKService.setCoupon(setCouponRequest),
     {
       onSuccess: (data) => {
-        console.log("SDK message --> Coupon creation success: ", data);
+        console.log('SDK message --> Coupon creation success: ', data);
 
         if (!data) return;
 
         toast.show({
-          title: t("messages.success"),
-          description: t("messages.creationSuccessful"),
-          variant: "subtle",
-          status: "success",
+          title: t('messages.success'),
+          description: t('messages.creationSuccessful'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
-        console.log("SDK message --> Coupon creation error: ", error);
+        console.log('SDK message --> Coupon creation error: ', error);
         toast.show({
-          title: t("messages.error"),
-          description: t("messages.creationFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('messages.error'),
+          description: t('messages.creationFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
     },

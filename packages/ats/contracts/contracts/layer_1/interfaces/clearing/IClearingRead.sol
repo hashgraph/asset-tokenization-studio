@@ -206,12 +206,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IClearing} from './IClearing.sol';
+import { IClearing } from './IClearing.sol';
 
 interface IClearingRead is IClearing {
-    function getClearedAmountFor(
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
+    function getClearedAmountFor(address _tokenHolder) external view returns (uint256 amount_);
 
     function getClearedAmountForByPartition(
         bytes32 _partition,

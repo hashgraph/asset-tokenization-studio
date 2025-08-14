@@ -208,15 +208,15 @@ import {
   UseQueryOptions,
   useMutation,
   useQuery,
-} from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
-import { useTranslation } from "react-i18next";
+} from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
+import { useTranslation } from 'react-i18next';
 import {
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useToast } from "io-bricks-ui";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useToast } from 'io-bricks-ui';
 
 export const GET_CONTROL_LIST_COUNT = (securityId: string) =>
   `GET_CONTROL_LIST_COUNT${securityId}`;
@@ -258,8 +258,8 @@ export const useAddToControlList = (
   > = {},
 ) => {
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.allowedList",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.allowedList',
   });
 
   return useMutation(
@@ -267,26 +267,26 @@ export const useAddToControlList = (
       SDKService.addToControlList(controlListRequest),
     {
       onSuccess: (data) => {
-        console.log("SDK message --> Add to control list success: ", data);
+        console.log('SDK message --> Add to control list success: ', data);
 
         if (!data) return;
 
         toast.show({
           duration: 3000,
-          title: t("messages.succes"),
-          description: t("messages.addToControlListSuccessful"),
-          variant: "subtle",
-          status: "success",
+          title: t('messages.succes'),
+          description: t('messages.addToControlListSuccessful'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
-        console.log("SDK message --> Add to control list error: ", error);
+        console.log('SDK message --> Add to control list error: ', error);
         toast.show({
           duration: 3000,
-          title: t("messages.error"),
-          description: t("messages.addFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('messages.error'),
+          description: t('messages.addFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
       ...options,
@@ -303,8 +303,8 @@ export const useRemoveFromControlList = (
   > = {},
 ) => {
   const toast = useToast();
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.allowedList",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.allowedList',
   });
 
   return useMutation(
@@ -312,26 +312,26 @@ export const useRemoveFromControlList = (
       SDKService.removeFromControlList(controlListRequest),
     {
       onSuccess: (data) => {
-        console.log("SDK message --> Remove from control list success: ", data);
+        console.log('SDK message --> Remove from control list success: ', data);
 
         if (!data) return;
 
         toast.show({
           duration: 3000,
-          title: t("messages.succes"),
-          description: t("messages.removeFromControlListSuccessful"),
-          variant: "subtle",
-          status: "success",
+          title: t('messages.succes'),
+          description: t('messages.removeFromControlListSuccessful'),
+          variant: 'subtle',
+          status: 'success',
         });
       },
       onError: (error) => {
-        console.log("SDK message --> Remove from control list error: ", error);
+        console.log('SDK message --> Remove from control list error: ', error);
         toast.show({
           duration: 3000,
-          title: t("messages.error"),
-          description: t("messages.removeFailed"),
-          variant: "subtle",
-          status: "error",
+          title: t('messages.error'),
+          description: t('messages.removeFailed'),
+          variant: 'subtle',
+          status: 'error',
         });
       },
       ...options,

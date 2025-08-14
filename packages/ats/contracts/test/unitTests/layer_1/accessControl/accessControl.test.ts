@@ -203,479 +203,452 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
-    type ResolverProxy,
-    type AccessControl,
-    type Pause,
-    IFactory,
-    BusinessLogicResolver,
-} from '@typechain'
+  type ResolverProxy,
+  type AccessControl,
+  type Pause,
+  IFactory,
+  BusinessLogicResolver,
+} from '@typechain';
 import {
-    DEFAULT_ADMIN_ROLE,
-    PAUSER_ROLE,
-    CAP_ROLE,
-    CONTROLLER_ROLE,
-    CORPORATE_ACTION_ROLE,
-    DOCUMENTER_ROLE,
-    LOCKER_ROLE,
-    MAX_UINT256,
-    deployEquityFromFactory,
-    Rbac,
-    RegulationSubType,
-    RegulationType,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-} from '@scripts'
+  DEFAULT_ADMIN_ROLE,
+  PAUSER_ROLE,
+  CAP_ROLE,
+  CONTROLLER_ROLE,
+  CORPORATE_ACTION_ROLE,
+  DOCUMENTER_ROLE,
+  LOCKER_ROLE,
+  MAX_UINT256,
+  deployEquityFromFactory,
+  Rbac,
+  RegulationSubType,
+  RegulationType,
+  deployAtsFullInfrastructure,
+  DeployAtsFullInfrastructureCommand,
+} from '@scripts';
 
 describe('Access Control Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
-    let signer_D: SignerWithAddress
+  let diamond: ResolverProxy;
+  let signer_A: SignerWithAddress;
+  let signer_B: SignerWithAddress;
+  let signer_C: SignerWithAddress;
+  let signer_D: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
-    let account_D: string
+  let account_A: string;
+  let account_B: string;
+  let account_C: string;
+  let account_D: string;
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
+  let factory: IFactory;
+  let businessLogicResolver: BusinessLogicResolver;
+  let accessControlFacet: AccessControl;
+  let pauseFacet: Pause;
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-        account_D = signer_D.address
+  before(async () => {
+    // mute | mock console.log
+    console.log = () => {};
+    [signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners();
+    account_A = signer_A.address;
+    account_B = signer_B.address;
+    account_C = signer_C.address;
+    account_D = signer_D.address;
 
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: true,
-            })
-        )
+    const { ...deployedContracts } = await deployAtsFullInfrastructure(
+      await DeployAtsFullInfrastructureCommand.newInstance({
+        signer: signer_A,
+        useDeployed: false,
+        useEnvironment: true,
+      }),
+    );
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
+    factory = deployedContracts.factory.contract;
+    businessLogicResolver = deployedContracts.businessLogicResolver.contract;
+  });
 
-    beforeEach(async () => {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause]
+  beforeEach(async () => {
+    const rbacPause: Rbac = {
+      role: PAUSER_ROLE,
+      members: [account_B],
+    };
+    const init_rbacs: Rbac[] = [rbacPause];
 
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            isMultiPartition: false,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: true,
-            name: 'TEST_AccessControl',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_S,
-            regulationSubType: RegulationSubType.NONE,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            businessLogicResolver: businessLogicResolver.address,
-            factory: factory,
-        })
+    diamond = await deployEquityFromFactory({
+      adminAccount: account_A,
+      isWhiteList: false,
+      isControllable: true,
+      isMultiPartition: false,
+      arePartitionsProtected: false,
+      clearingActive: false,
+      internalKycActivated: true,
+      name: 'TEST_AccessControl',
+      symbol: 'TAC',
+      decimals: 6,
+      isin: isinGenerator(),
+      votingRight: false,
+      informationRight: false,
+      liquidationRight: false,
+      subscriptionRight: true,
+      conversionRight: true,
+      redemptionRight: true,
+      putRight: false,
+      dividendRight: 1,
+      currency: '0x345678',
+      numberOfShares: MAX_UINT256,
+      nominalValue: 100,
+      regulationType: RegulationType.REG_S,
+      regulationSubType: RegulationSubType.NONE,
+      countriesControlListType: true,
+      listOfCountries: 'ES,FR,CH',
+      info: 'nothing',
+      init_rbacs,
+      businessLogicResolver: businessLogicResolver.address,
+      factory: factory,
+    });
 
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
-        )
+    accessControlFacet = await ethers.getContractAt(
+      'AccessControl',
+      diamond.address,
+    );
 
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-    })
+    pauseFacet = await ethers.getContractAt('Pause', diamond.address);
+  });
 
-    it('GIVEN an account without administrative role WHEN grantRole THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non admin)
-        accessControlFacet = accessControlFacet.connect(signer_C)
+  it('GIVEN an account without administrative role WHEN grantRole THEN transaction fails with AccountHasNoRole', async () => {
+    // Using account C (non admin)
+    accessControlFacet = accessControlFacet.connect(signer_C);
 
-        // grant role fails
-        await expect(
-            accessControlFacet.grantRole(PAUSER_ROLE, account_D)
-        ).to.be.rejectedWith('AccountHasNoRole')
-    })
+    // grant role fails
+    await expect(
+      accessControlFacet.grantRole(PAUSER_ROLE, account_D),
+    ).to.be.rejectedWith('AccountHasNoRole');
+  });
 
-    it('GIVEN an account without administrative role WHEN revokeRole THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non admin)
-        accessControlFacet = accessControlFacet.connect(signer_C)
+  it('GIVEN an account without administrative role WHEN revokeRole THEN transaction fails with AccountHasNoRole', async () => {
+    // Using account C (non admin)
+    accessControlFacet = accessControlFacet.connect(signer_C);
 
-        // revoke role fails
-        await expect(
-            accessControlFacet.revokeRole(DEFAULT_ADMIN_ROLE, account_B)
-        ).to.be.rejectedWith('AccountHasNoRole')
-    })
+    // revoke role fails
+    await expect(
+      accessControlFacet.revokeRole(DEFAULT_ADMIN_ROLE, account_B),
+    ).to.be.rejectedWith('AccountHasNoRole');
+  });
 
-    it('GIVEN an account without administrative role WHEN applyRoles THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non admin)
-        accessControlFacet = accessControlFacet.connect(signer_C)
+  it('GIVEN an account without administrative role WHEN applyRoles THEN transaction fails with AccountHasNoRole', async () => {
+    // Using account C (non admin)
+    accessControlFacet = accessControlFacet.connect(signer_C);
 
-        // revoke role fails
-        await expect(
-            accessControlFacet.applyRoles(
-                [DEFAULT_ADMIN_ROLE],
-                [true],
-                account_B
-            )
-        ).to.be.rejectedWith('AccountHasNoRole')
-    })
+    // revoke role fails
+    await expect(
+      accessControlFacet.applyRoles([DEFAULT_ADMIN_ROLE], [true], account_B),
+    ).to.be.rejectedWith('AccountHasNoRole');
+  });
 
-    it('GIVEN a list of roles and actives that is not equally long WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch', async () => {
-        // Using account C (non admin)
-        accessControlFacet = accessControlFacet.connect(signer_C)
+  it('GIVEN a list of roles and actives that is not equally long WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch', async () => {
+    // Using account C (non admin)
+    accessControlFacet = accessControlFacet.connect(signer_C);
 
-        // revoke role fails
-        await expect(
-            accessControlFacet.applyRoles([DEFAULT_ADMIN_ROLE], [], account_B)
-        ).to.be.rejectedWith('RolesAndActivesLengthMismatch')
-    })
+    // revoke role fails
+    await expect(
+      accessControlFacet.applyRoles([DEFAULT_ADMIN_ROLE], [], account_B),
+    ).to.be.rejectedWith('RolesAndActivesLengthMismatch');
+  });
 
-    it('GIVEN a list of contradictory roles (enable and disbale) role WHEN applyRoles THEN transaction fails with ApplyRoleContradiction', async () => {
-        // Using account C (non admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
+  it('GIVEN a list of contradictory roles (enable and disbale) role WHEN applyRoles THEN transaction fails with ApplyRoleContradiction', async () => {
+    // Using account C (non admin)
+    accessControlFacet = accessControlFacet.connect(signer_A);
 
-        const Roles_1 = [
-            DEFAULT_ADMIN_ROLE,
-            PAUSER_ROLE,
-            CAP_ROLE,
-            CONTROLLER_ROLE,
-            CORPORATE_ACTION_ROLE,
-            DOCUMENTER_ROLE,
-            CONTROLLER_ROLE,
-            LOCKER_ROLE,
-        ]
+    const Roles_1 = [
+      DEFAULT_ADMIN_ROLE,
+      PAUSER_ROLE,
+      CAP_ROLE,
+      CONTROLLER_ROLE,
+      CORPORATE_ACTION_ROLE,
+      DOCUMENTER_ROLE,
+      CONTROLLER_ROLE,
+      LOCKER_ROLE,
+    ];
 
-        const actives_1 = [true, true, true, true, true, true, false, true]
-        const actives_2 = [true, true, true, false, true, true, true, true]
+    const actives_1 = [true, true, true, true, true, true, false, true];
+    const actives_2 = [true, true, true, false, true, true, true, true];
 
-        // revoke role fails
-        await expect(
-            accessControlFacet.applyRoles(Roles_1, actives_1, account_B)
-        )
-            .to.be.revertedWithCustomError(
-                accessControlFacet,
-                'ContradictoryValuesInArray'
-            )
-            .withArgs(3, 6)
+    // revoke role fails
+    await expect(accessControlFacet.applyRoles(Roles_1, actives_1, account_B))
+      .to.be.revertedWithCustomError(
+        accessControlFacet,
+        'ContradictoryValuesInArray',
+      )
+      .withArgs(3, 6);
 
-        await expect(
-            accessControlFacet.applyRoles(Roles_1, actives_2, account_B)
-        )
-            .to.be.revertedWithCustomError(
-                accessControlFacet,
-                'ContradictoryValuesInArray'
-            )
-            .withArgs(3, 6)
-    })
+    await expect(accessControlFacet.applyRoles(Roles_1, actives_2, account_B))
+      .to.be.revertedWithCustomError(
+        accessControlFacet,
+        'ContradictoryValuesInArray',
+      )
+      .withArgs(3, 6);
+  });
 
-    it('GIVEN a paused Token WHEN grantRole THEN transaction fails with TokenIsPaused', async () => {
-        // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-        await pauseFacet.pause()
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
+  it('GIVEN a paused Token WHEN grantRole THEN transaction fails with TokenIsPaused', async () => {
+    // Pausing the token
+    pauseFacet = pauseFacet.connect(signer_B);
+    await pauseFacet.pause();
+    // Using account A (admin)
+    accessControlFacet = accessControlFacet.connect(signer_A);
 
-        // grant role fails
-        await expect(
-            accessControlFacet.grantRole(PAUSER_ROLE, account_D)
-        ).to.be.rejectedWith('TokenIsPaused')
-    })
+    // grant role fails
+    await expect(
+      accessControlFacet.grantRole(PAUSER_ROLE, account_D),
+    ).to.be.rejectedWith('TokenIsPaused');
+  });
 
-    it('GIVEN a paused Token WHEN revokeRole THEN transaction fails with TokenIsPaused', async () => {
-        // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-        await pauseFacet.pause()
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
+  it('GIVEN a paused Token WHEN revokeRole THEN transaction fails with TokenIsPaused', async () => {
+    // Pausing the token
+    pauseFacet = pauseFacet.connect(signer_B);
+    await pauseFacet.pause();
+    // Using account A (admin)
+    accessControlFacet = accessControlFacet.connect(signer_A);
 
-        // revoke role fails
-        await expect(
-            accessControlFacet.revokeRole(PAUSER_ROLE, account_B)
-        ).to.be.rejectedWith('TokenIsPaused')
-    })
+    // revoke role fails
+    await expect(
+      accessControlFacet.revokeRole(PAUSER_ROLE, account_B),
+    ).to.be.rejectedWith('TokenIsPaused');
+  });
 
-    it('GIVEN a paused Token WHEN renounce THEN transaction fails with TokenIsPaused', async () => {
-        // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-        await pauseFacet.pause()
-        // Using account B (has the role)
-        accessControlFacet = accessControlFacet.connect(signer_B)
+  it('GIVEN a paused Token WHEN renounce THEN transaction fails with TokenIsPaused', async () => {
+    // Pausing the token
+    pauseFacet = pauseFacet.connect(signer_B);
+    await pauseFacet.pause();
+    // Using account B (has the role)
+    accessControlFacet = accessControlFacet.connect(signer_B);
 
-        // revoke role fails
-        await expect(
-            accessControlFacet.renounceRole(PAUSER_ROLE)
-        ).to.be.rejectedWith('TokenIsPaused')
-    })
+    // revoke role fails
+    await expect(
+      accessControlFacet.renounceRole(PAUSER_ROLE),
+    ).to.be.rejectedWith('TokenIsPaused');
+  });
 
-    it('GIVEN an paused Token WHEN applyRoles THEN transaction fails with TokenIsPaused', async () => {
-        // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-        await pauseFacet.pause()
-        // Using account B (has the role)
-        accessControlFacet = accessControlFacet.connect(signer_B)
+  it('GIVEN an paused Token WHEN applyRoles THEN transaction fails with TokenIsPaused', async () => {
+    // Pausing the token
+    pauseFacet = pauseFacet.connect(signer_B);
+    await pauseFacet.pause();
+    // Using account B (has the role)
+    accessControlFacet = accessControlFacet.connect(signer_B);
 
-        // revoke role fails
-        await expect(
-            accessControlFacet.applyRoles(
-                [DEFAULT_ADMIN_ROLE],
-                [true],
-                account_B
-            )
-        ).to.be.rejectedWith('TokenIsPaused')
-    })
+    // revoke role fails
+    await expect(
+      accessControlFacet.applyRoles([DEFAULT_ADMIN_ROLE], [true], account_B),
+    ).to.be.rejectedWith('TokenIsPaused');
+  });
 
-    it('GIVEN an account with administrative role WHEN grantRole THEN transaction succeeds', async () => {
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        // check that C does not have the role
-        let check_C = await accessControlFacet.hasRole(PAUSER_ROLE, account_C)
-        expect(check_C).to.equal(false)
+  it('GIVEN an account with administrative role WHEN grantRole THEN transaction succeeds', async () => {
+    // Using account A (admin)
+    accessControlFacet = accessControlFacet.connect(signer_A);
+    // check that C does not have the role
+    let check_C = await accessControlFacet.hasRole(PAUSER_ROLE, account_C);
+    expect(check_C).to.equal(false);
 
-        // grant Role
-        await expect(accessControlFacet.grantRole(PAUSER_ROLE, account_C))
-            .to.emit(accessControlFacet, 'RoleGranted')
-            .withArgs(account_A, account_C, PAUSER_ROLE)
+    // grant Role
+    await expect(accessControlFacet.grantRole(PAUSER_ROLE, account_C))
+      .to.emit(accessControlFacet, 'RoleGranted')
+      .withArgs(account_A, account_C, PAUSER_ROLE);
 
-        // check that C has the role
-        check_C = await accessControlFacet.hasRole(PAUSER_ROLE, account_C)
-        expect(check_C).to.equal(true)
-        // check roles and members count and lists
-        const roleCountFor_C =
-            await accessControlFacet.getRoleCountFor(account_C)
-        const rolesFor_C = await accessControlFacet.getRolesFor(
-            account_C,
-            0,
-            roleCountFor_C
-        )
-        const memberCountFor_Pause =
-            await accessControlFacet.getRoleMemberCount(PAUSER_ROLE)
-        const membersFor_Pause = await accessControlFacet.getRoleMembers(
-            PAUSER_ROLE,
-            0,
-            memberCountFor_Pause
-        )
-        expect(roleCountFor_C).to.equal(1)
-        expect(rolesFor_C.length).to.equal(roleCountFor_C)
-        expect(rolesFor_C[0].toUpperCase()).to.equal(PAUSER_ROLE.toUpperCase())
-        expect(memberCountFor_Pause).to.equal(2)
-        expect(membersFor_Pause.length).to.equal(memberCountFor_Pause)
-        expect(membersFor_Pause[0].toUpperCase()).to.equal(
-            account_B.toUpperCase()
-        )
-        expect(membersFor_Pause[1].toUpperCase()).to.equal(
-            account_C.toUpperCase()
-        )
-    })
+    // check that C has the role
+    check_C = await accessControlFacet.hasRole(PAUSER_ROLE, account_C);
+    expect(check_C).to.equal(true);
+    // check roles and members count and lists
+    const roleCountFor_C = await accessControlFacet.getRoleCountFor(account_C);
+    const rolesFor_C = await accessControlFacet.getRolesFor(
+      account_C,
+      0,
+      roleCountFor_C,
+    );
+    const memberCountFor_Pause =
+      await accessControlFacet.getRoleMemberCount(PAUSER_ROLE);
+    const membersFor_Pause = await accessControlFacet.getRoleMembers(
+      PAUSER_ROLE,
+      0,
+      memberCountFor_Pause,
+    );
+    expect(roleCountFor_C).to.equal(1);
+    expect(rolesFor_C.length).to.equal(roleCountFor_C);
+    expect(rolesFor_C[0].toUpperCase()).to.equal(PAUSER_ROLE.toUpperCase());
+    expect(memberCountFor_Pause).to.equal(2);
+    expect(membersFor_Pause.length).to.equal(memberCountFor_Pause);
+    expect(membersFor_Pause[0].toUpperCase()).to.equal(account_B.toUpperCase());
+    expect(membersFor_Pause[1].toUpperCase()).to.equal(account_C.toUpperCase());
+  });
 
-    it('GIVEN an account with administrative role WHEN revokeRole THEN transaction succeeds', async () => {
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        // check that B has the role
-        let check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
-        expect(check_B).to.equal(true)
+  it('GIVEN an account with administrative role WHEN revokeRole THEN transaction succeeds', async () => {
+    // Using account A (admin)
+    accessControlFacet = accessControlFacet.connect(signer_A);
+    // check that B has the role
+    let check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B);
+    expect(check_B).to.equal(true);
 
-        // revoke Role
-        await expect(accessControlFacet.revokeRole(PAUSER_ROLE, account_B))
-            .to.emit(accessControlFacet, 'RoleRevoked')
-            .withArgs(account_A, account_B, PAUSER_ROLE)
+    // revoke Role
+    await expect(accessControlFacet.revokeRole(PAUSER_ROLE, account_B))
+      .to.emit(accessControlFacet, 'RoleRevoked')
+      .withArgs(account_A, account_B, PAUSER_ROLE);
 
-        // check that B does not have the role
-        check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
-        expect(check_B).to.equal(false)
-        // check roles and members count and lists
-        const roleCountFor_B =
-            await accessControlFacet.getRoleCountFor(account_B)
-        const rolesFor_B = await accessControlFacet.getRolesFor(
-            account_B,
-            0,
-            roleCountFor_B
-        )
-        const memberCountFor_Pause =
-            await accessControlFacet.getRoleMemberCount(PAUSER_ROLE)
-        const membersFor_Pause = await accessControlFacet.getRoleMembers(
-            PAUSER_ROLE,
-            0,
-            memberCountFor_Pause
-        )
-        expect(roleCountFor_B).to.equal(0)
-        expect(rolesFor_B.length).to.equal(roleCountFor_B)
-        expect(memberCountFor_Pause).to.equal(0)
-        expect(membersFor_Pause.length).to.equal(memberCountFor_Pause)
-    })
+    // check that B does not have the role
+    check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B);
+    expect(check_B).to.equal(false);
+    // check roles and members count and lists
+    const roleCountFor_B = await accessControlFacet.getRoleCountFor(account_B);
+    const rolesFor_B = await accessControlFacet.getRolesFor(
+      account_B,
+      0,
+      roleCountFor_B,
+    );
+    const memberCountFor_Pause =
+      await accessControlFacet.getRoleMemberCount(PAUSER_ROLE);
+    const membersFor_Pause = await accessControlFacet.getRoleMembers(
+      PAUSER_ROLE,
+      0,
+      memberCountFor_Pause,
+    );
+    expect(roleCountFor_B).to.equal(0);
+    expect(rolesFor_B.length).to.equal(roleCountFor_B);
+    expect(memberCountFor_Pause).to.equal(0);
+    expect(membersFor_Pause.length).to.equal(memberCountFor_Pause);
+  });
 
-    it('GIVEN an account with pauser role WHEN renouncing the pauser role THEN transaction succeeds', async () => {
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_B)
-        // check that B has the role
-        let check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
-        expect(check_B).to.equal(true)
+  it('GIVEN an account with pauser role WHEN renouncing the pauser role THEN transaction succeeds', async () => {
+    // Using account A (admin)
+    accessControlFacet = accessControlFacet.connect(signer_B);
+    // check that B has the role
+    let check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B);
+    expect(check_B).to.equal(true);
 
-        // revoke Role
-        await expect(accessControlFacet.renounceRole(PAUSER_ROLE))
-            .to.emit(accessControlFacet, 'RoleRenounced')
-            .withArgs(account_B, PAUSER_ROLE)
+    // revoke Role
+    await expect(accessControlFacet.renounceRole(PAUSER_ROLE))
+      .to.emit(accessControlFacet, 'RoleRenounced')
+      .withArgs(account_B, PAUSER_ROLE);
 
-        // check that B does not have the role
-        check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
-        expect(check_B).to.equal(false)
-        // check roles and members count and lists
-        const roleCountFor_B =
-            await accessControlFacet.getRoleCountFor(account_B)
-        const rolesFor_B = await accessControlFacet.getRolesFor(
-            account_B,
-            0,
-            roleCountFor_B
-        )
-        const memberCountFor_Pause =
-            await accessControlFacet.getRoleMemberCount(PAUSER_ROLE)
-        const membersFor_Pause = await accessControlFacet.getRoleMembers(
-            PAUSER_ROLE,
-            0,
-            memberCountFor_Pause
-        )
-        expect(roleCountFor_B).to.equal(0)
-        expect(rolesFor_B.length).to.equal(roleCountFor_B)
-        expect(memberCountFor_Pause).to.equal(0)
-        expect(membersFor_Pause.length).to.equal(memberCountFor_Pause)
-    })
+    // check that B does not have the role
+    check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B);
+    expect(check_B).to.equal(false);
+    // check roles and members count and lists
+    const roleCountFor_B = await accessControlFacet.getRoleCountFor(account_B);
+    const rolesFor_B = await accessControlFacet.getRolesFor(
+      account_B,
+      0,
+      roleCountFor_B,
+    );
+    const memberCountFor_Pause =
+      await accessControlFacet.getRoleMemberCount(PAUSER_ROLE);
+    const membersFor_Pause = await accessControlFacet.getRoleMembers(
+      PAUSER_ROLE,
+      0,
+      memberCountFor_Pause,
+    );
+    expect(roleCountFor_B).to.equal(0);
+    expect(rolesFor_B.length).to.equal(roleCountFor_B);
+    expect(memberCountFor_Pause).to.equal(0);
+    expect(membersFor_Pause.length).to.equal(memberCountFor_Pause);
+  });
 
-    it('GIVEN an account with administrative role WHEN applyRoles THEN transaction succeeds', async () => {
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        // check that C does not have the role
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_C)
+  it('GIVEN an account with administrative role WHEN applyRoles THEN transaction succeeds', async () => {
+    // Using account A (admin)
+    accessControlFacet = accessControlFacet.connect(signer_A);
+    // check that C does not have the role
+    await accessControlFacet.grantRole(PAUSER_ROLE, account_C);
 
-        // grant Role
-        await expect(
-            accessControlFacet.applyRoles(
-                [PAUSER_ROLE, DEFAULT_ADMIN_ROLE],
-                [false, true],
-                account_C
-            )
-        )
-            .to.emit(accessControlFacet, 'RolesApplied')
-            .withArgs(
-                [PAUSER_ROLE, DEFAULT_ADMIN_ROLE],
-                [false, true],
-                account_C
-            )
+    // grant Role
+    await expect(
+      accessControlFacet.applyRoles(
+        [PAUSER_ROLE, DEFAULT_ADMIN_ROLE],
+        [false, true],
+        account_C,
+      ),
+    )
+      .to.emit(accessControlFacet, 'RolesApplied')
+      .withArgs([PAUSER_ROLE, DEFAULT_ADMIN_ROLE], [false, true], account_C);
 
-        // check that C has the role
-        expect(
-            await accessControlFacet.hasRole(PAUSER_ROLE, account_C)
-        ).to.equal(false)
-        expect(
-            await accessControlFacet.hasRole(DEFAULT_ADMIN_ROLE, account_C)
-        ).to.equal(true)
-        // check roles and members count and lists
-        const roleCountFor_C =
-            await accessControlFacet.getRoleCountFor(account_C)
-        const rolesFor_C = await accessControlFacet.getRolesFor(
-            account_C,
-            0,
-            roleCountFor_C
-        )
-        const memberCountFor_Pause =
-            await accessControlFacet.getRoleMemberCount(PAUSER_ROLE)
-        const membersFor_Pause = await accessControlFacet.getRoleMembers(
-            PAUSER_ROLE,
-            0,
-            memberCountFor_Pause
-        )
-        const memberCountFor_Default =
-            await accessControlFacet.getRoleMemberCount(DEFAULT_ADMIN_ROLE)
-        const membersFor_Default = await accessControlFacet.getRoleMembers(
-            DEFAULT_ADMIN_ROLE,
-            0,
-            memberCountFor_Default
-        )
-        expect(roleCountFor_C).to.equal(1)
-        expect(rolesFor_C.length).to.equal(roleCountFor_C)
-        expect(rolesFor_C[0].toUpperCase()).to.equal(
-            DEFAULT_ADMIN_ROLE.toUpperCase()
-        )
-        expect(memberCountFor_Pause).to.equal(1)
-        expect(membersFor_Pause.length).to.equal(memberCountFor_Pause)
-        expect(memberCountFor_Default).to.equal(2)
-        expect(membersFor_Default.length).to.equal(memberCountFor_Default)
-        expect(membersFor_Pause[0].toUpperCase()).to.equal(
-            account_B.toUpperCase()
-        )
-        expect(membersFor_Default[1].toUpperCase()).to.equal(
-            account_C.toUpperCase()
-        )
-    })
+    // check that C has the role
+    expect(await accessControlFacet.hasRole(PAUSER_ROLE, account_C)).to.equal(
+      false,
+    );
+    expect(
+      await accessControlFacet.hasRole(DEFAULT_ADMIN_ROLE, account_C),
+    ).to.equal(true);
+    // check roles and members count and lists
+    const roleCountFor_C = await accessControlFacet.getRoleCountFor(account_C);
+    const rolesFor_C = await accessControlFacet.getRolesFor(
+      account_C,
+      0,
+      roleCountFor_C,
+    );
+    const memberCountFor_Pause =
+      await accessControlFacet.getRoleMemberCount(PAUSER_ROLE);
+    const membersFor_Pause = await accessControlFacet.getRoleMembers(
+      PAUSER_ROLE,
+      0,
+      memberCountFor_Pause,
+    );
+    const memberCountFor_Default =
+      await accessControlFacet.getRoleMemberCount(DEFAULT_ADMIN_ROLE);
+    const membersFor_Default = await accessControlFacet.getRoleMembers(
+      DEFAULT_ADMIN_ROLE,
+      0,
+      memberCountFor_Default,
+    );
+    expect(roleCountFor_C).to.equal(1);
+    expect(rolesFor_C.length).to.equal(roleCountFor_C);
+    expect(rolesFor_C[0].toUpperCase()).to.equal(
+      DEFAULT_ADMIN_ROLE.toUpperCase(),
+    );
+    expect(memberCountFor_Pause).to.equal(1);
+    expect(membersFor_Pause.length).to.equal(memberCountFor_Pause);
+    expect(memberCountFor_Default).to.equal(2);
+    expect(membersFor_Default.length).to.equal(memberCountFor_Default);
+    expect(membersFor_Pause[0].toUpperCase()).to.equal(account_B.toUpperCase());
+    expect(membersFor_Default[1].toUpperCase()).to.equal(
+      account_C.toUpperCase(),
+    );
+  });
 
-    it('GIVEN an account with administrative role, if roles are duplicated but not contradictory WHEN applyRoles THEN transaction succeeds', async () => {
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        // check that C does not have the role
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_C)
+  it('GIVEN an account with administrative role, if roles are duplicated but not contradictory WHEN applyRoles THEN transaction succeeds', async () => {
+    // Using account A (admin)
+    accessControlFacet = accessControlFacet.connect(signer_A);
+    // check that C does not have the role
+    await accessControlFacet.grantRole(PAUSER_ROLE, account_C);
 
-        // grant Role
-        await expect(
-            accessControlFacet.applyRoles(
-                [PAUSER_ROLE, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE],
-                [true, false, false],
-                account_C
-            )
-        )
-            .to.emit(accessControlFacet, 'RolesApplied')
-            .withArgs(
-                [PAUSER_ROLE, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE],
-                [true, false, false],
-                account_C
-            )
+    // grant Role
+    await expect(
+      accessControlFacet.applyRoles(
+        [PAUSER_ROLE, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE],
+        [true, false, false],
+        account_C,
+      ),
+    )
+      .to.emit(accessControlFacet, 'RolesApplied')
+      .withArgs(
+        [PAUSER_ROLE, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE],
+        [true, false, false],
+        account_C,
+      );
 
-        // check that C has the role
-        expect(
-            await accessControlFacet.hasRole(PAUSER_ROLE, account_C)
-        ).to.equal(true)
-        expect(
-            await accessControlFacet.hasRole(DEFAULT_ADMIN_ROLE, account_C)
-        ).to.equal(false)
-        // check roles and members count and lists
-        const roleCountFor_C =
-            await accessControlFacet.getRoleCountFor(account_C)
-        const rolesFor_C = await accessControlFacet.getRolesFor(
-            account_C,
-            0,
-            roleCountFor_C
-        )
+    // check that C has the role
+    expect(await accessControlFacet.hasRole(PAUSER_ROLE, account_C)).to.equal(
+      true,
+    );
+    expect(
+      await accessControlFacet.hasRole(DEFAULT_ADMIN_ROLE, account_C),
+    ).to.equal(false);
+    // check roles and members count and lists
+    const roleCountFor_C = await accessControlFacet.getRoleCountFor(account_C);
+    const rolesFor_C = await accessControlFacet.getRolesFor(
+      account_C,
+      0,
+      roleCountFor_C,
+    );
 
-        expect(roleCountFor_C).to.equal(1)
-        expect(rolesFor_C.length).to.equal(roleCountFor_C)
-        expect(rolesFor_C[0].toUpperCase()).to.equal(PAUSER_ROLE.toUpperCase())
-    })
-})
+    expect(roleCountFor_C).to.equal(1);
+    expect(rolesFor_C.length).to.equal(roleCountFor_C);
+    expect(rolesFor_C[0].toUpperCase()).to.equal(PAUSER_ROLE.toUpperCase());
+  });
+});

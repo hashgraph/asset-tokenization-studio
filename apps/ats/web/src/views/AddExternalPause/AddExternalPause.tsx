@@ -1,16 +1,16 @@
-import { Box, HStack, Stack, VStack } from "@chakra-ui/react";
-import { History } from "../../components/History";
-import { RouteName } from "../../router/RouteName";
-import { useTranslation } from "react-i18next";
-import { RoutePath } from "../../router/RoutePath";
-import { Button, InputController, Text, useToast } from "io-bricks-ui";
-import { isHederaValidAddress, required } from "../../utils/rules";
-import { useForm } from "react-hook-form";
-import { RouterManager } from "../../router/RouterManager";
-import { useIsPauseMock } from "../../hooks/queries/useExternalPause";
-import { IsPausedMockRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useExternalPauseStore } from "../../store/externalPauseStore";
-import { useState } from "react";
+import { Box, HStack, Stack, VStack } from '@chakra-ui/react';
+import { History } from '../../components/History';
+import { RouteName } from '../../router/RouteName';
+import { useTranslation } from 'react-i18next';
+import { RoutePath } from '../../router/RoutePath';
+import { Button, InputController, Text, useToast } from 'io-bricks-ui';
+import { isHederaValidAddress, required } from '../../utils/rules';
+import { useForm } from 'react-hook-form';
+import { RouterManager } from '../../router/RouterManager';
+import { useIsPauseMock } from '../../hooks/queries/useExternalPause';
+import { IsPausedMockRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useExternalPauseStore } from '../../store/externalPauseStore';
+import { useState } from 'react';
 
 export interface FormValues {
   externalPauseId: string;
@@ -19,13 +19,13 @@ export interface FormValues {
 export const AddExternalPause = () => {
   const toast = useToast();
 
-  const { t: tRoutes } = useTranslation("routes");
+  const { t: tRoutes } = useTranslation('routes');
 
-  const { t: tAdd } = useTranslation("externalPause", {
-    keyPrefix: "add",
+  const { t: tAdd } = useTranslation('externalPause', {
+    keyPrefix: 'add',
   });
-  const { t: tMessages } = useTranslation("externalPause", {
-    keyPrefix: "messages",
+  const { t: tMessages } = useTranslation('externalPause', {
+    keyPrefix: 'messages',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,12 +38,12 @@ export const AddExternalPause = () => {
     handleSubmit,
     watch,
   } = useForm<FormValues>({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const { refetch } = useIsPauseMock(
     new IsPausedMockRequest({
-      contractId: watch("externalPauseId"),
+      contractId: watch('externalPauseId'),
     }),
     {
       enabled: false,
@@ -67,16 +67,16 @@ export const AddExternalPause = () => {
           isPaused: result.data,
         });
         toast.show({
-          status: "success",
-          title: tMessages("addExternalPause.success"),
-          description: tMessages("addExternalPause.descriptionSuccess"),
+          status: 'success',
+          title: tMessages('addExternalPause.success'),
+          description: tMessages('addExternalPause.descriptionSuccess'),
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast.show({
-        status: "error",
-        title: tMessages("addExternalPause.error"),
-        description: tMessages("addExternalPause.descriptionFailed"),
+        status: 'error',
+        title: tMessages('addExternalPause.error'),
+        description: tMessages('addExternalPause.descriptionFailed'),
       });
     } finally {
       setIsSubmitting(false);
@@ -91,32 +91,32 @@ export const AddExternalPause = () => {
         excludePaths={[RoutePath.DASHBOARD]}
       />
       <Box
-        layerStyle={"container"}
-        w={"full"}
-        h={"full"}
+        layerStyle={'container'}
+        w={'full'}
+        h={'full'}
         flex={1}
-        alignItems={"center"}
+        alignItems={'center'}
       >
         <Stack
           gap={2}
-          alignItems={"start"}
-          justifyContent={"center"}
+          alignItems={'start'}
+          justifyContent={'center'}
           maxW={500}
-          justifySelf={"center"}
+          justifySelf={'center'}
         >
-          <Text textStyle="HeadingMediumLG">{tAdd("title")}</Text>
-          <Text textStyle="BodyTextRegularMD">{tAdd("subtitle")}</Text>
+          <Text textStyle="HeadingMediumLG">{tAdd('title')}</Text>
+          <Text textStyle="BodyTextRegularMD">{tAdd('subtitle')}</Text>
           <Text textStyle="ElementsRegularSM" py={6}>
-            {tAdd("mandatoryFields")}
+            {tAdd('mandatoryFields')}
           </Text>
           <Text textStyle="BodyTextRegularSM" mt={4}>
-            {tAdd("input.id.label")}
+            {tAdd('input.id.label')}
           </Text>
           <VStack w="450px" alignItems="flex-start">
             <InputController
               id="externalPauseId"
               control={control}
-              placeholder={tAdd("input.id.placeholder")}
+              placeholder={tAdd('input.id.placeholder')}
               backgroundColor="neutral.white"
               size="md"
               rules={{
@@ -125,21 +125,21 @@ export const AddExternalPause = () => {
               }}
             />
           </VStack>
-          <HStack pt={20} justifyContent={"flex-end"} w={"full"}>
+          <HStack pt={20} justifyContent={'flex-end'} w={'full'}>
             <Button
-              variant={"secondary"}
-              size={"md"}
+              variant={'secondary'}
+              size={'md'}
               onClick={() => RouterManager.goBack()}
             >
-              {tAdd("cancel")}
+              {tAdd('cancel')}
             </Button>
             <Button
-              size={"md"}
+              size={'md'}
               onClick={handleSubmit(onSubmit)}
               isDisabled={!isValid || isSubmitting}
               isLoading={isSubmitting}
             >
-              {tAdd("create")}
+              {tAdd('create')}
             </Button>
           </HStack>
         </Stack>

@@ -206,13 +206,11 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IControlList} from '../interfaces/controlList/IControlList.sol';
-import {Common} from '../common/Common.sol';
-import {_CONTROL_LIST_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CONTROL_LIST_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import { IControlList } from '../interfaces/controlList/IControlList.sol';
+import { Common } from '../common/Common.sol';
+import { _CONTROL_LIST_ROLE } from '../constants/roles.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _CONTROL_LIST_RESOLVER_KEY } from '../constants/resolverKeys.sol';
 
 contract ControlList is IControlList, IStaticFunctionSelectors, Common {
     // TODO: UNPAUSED
@@ -227,13 +225,7 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
 
     function addToControlList(
         address _account
-    )
-        external
-        override
-        onlyRole(_CONTROL_LIST_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_CONTROL_LIST_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _addToControlList(_account);
         if (!success_) {
             revert ListedAccount(_account);
@@ -243,13 +235,7 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
 
     function removeFromControlList(
         address _account
-    )
-        external
-        override
-        onlyRole(_CONTROL_LIST_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_CONTROL_LIST_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _removeFromControlList(_account);
         if (!success_) {
             revert UnlistedAccount(_account);
@@ -261,18 +247,11 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
         return _getControlListType();
     }
 
-    function isInControlList(
-        address _account
-    ) external view override returns (bool) {
+    function isInControlList(address _account) external view override returns (bool) {
         return _isInControlList(_account);
     }
 
-    function getControlListCount()
-        external
-        view
-        override
-        returns (uint256 controlListCount_)
-    {
+    function getControlListCount() external view override returns (uint256 controlListCount_) {
         controlListCount_ = _getControlListCount();
     }
 
@@ -284,52 +263,23 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
         members_ = _getControlListMembers(_pageIndex, _pageLength);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _CONTROL_LIST_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_ControlList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .addToControlList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .removeFromControlList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isInControlList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getControlListType
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getControlListCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getControlListMembers
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initialize_ControlList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.addToControlList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.removeFromControlList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isInControlList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getControlListType.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getControlListCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getControlListMembers.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IControlList).interfaceId;

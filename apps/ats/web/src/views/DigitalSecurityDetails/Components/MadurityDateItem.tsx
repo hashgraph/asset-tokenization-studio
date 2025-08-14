@@ -1,37 +1,37 @@
 import {
   GetBondDetailsRequest,
   UpdateMaturityDateRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useEffect, useState } from "react";
-import { FieldValues, useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { useUpdateBondMaturityDate } from "../../../hooks/mutations/useUpdateBonMaturityDate";
-import { dateToUnixTimestamp, formatDate } from "../../../utils/format";
-import { Flex } from "@chakra-ui/react";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useEffect, useState } from 'react';
+import { FieldValues, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { useUpdateBondMaturityDate } from '../../../hooks/mutations/useUpdateBonMaturityDate';
+import { dateToUnixTimestamp, formatDate } from '../../../utils/format';
+import { Flex } from '@chakra-ui/react';
 import {
   CalendarInputController,
   IconButton,
   PhosphorIcon,
   PopUp,
   Text,
-} from "io-bricks-ui";
-import { Pencil, X, Info, Check } from "@phosphor-icons/react";
-import { useRolesStore } from "../../../store/rolesStore";
-import { SecurityRole } from "../../../utils/SecurityRole";
-import { useGetBondDetails } from "../../../hooks/queries/useGetSecurityDetails";
-import { useParams } from "react-router-dom";
-import { DATE_TIME_FORMAT } from "../../../utils/constants";
+} from 'io-bricks-ui';
+import { Pencil, X, Info, Check } from '@phosphor-icons/react';
+import { useRolesStore } from '../../../store/rolesStore';
+import { SecurityRole } from '../../../utils/SecurityRole';
+import { useGetBondDetails } from '../../../hooks/queries/useGetSecurityDetails';
+import { useParams } from 'react-router-dom';
+import { DATE_TIME_FORMAT } from '../../../utils/constants';
 
 export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
   const { roles: accountRoles } = useRolesStore();
 
-  const { t } = useTranslation("security", {
-    keyPrefix: "details.bond.updateMaturityDate.toast",
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.bond.updateMaturityDate.toast',
   });
 
   const { control, reset, handleSubmit } = useForm({
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -78,12 +78,12 @@ export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
 
   return (
     <Flex
-      alignItems={"center"}
-      justifyContent={"space-between"}
-      w={"full"}
+      alignItems={'center'}
+      justifyContent={'space-between'}
+      w={'full'}
       flex={1}
     >
-      <Flex alignItems={"center"} gap={4}>
+      <Flex alignItems={'center'} gap={4}>
         {isEditMode && (
           <>
             <CalendarInputController
@@ -97,11 +97,11 @@ export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
               withTimeInput
               format={DATE_TIME_FORMAT}
             />
-            <Flex alignItems={"center"} gap={2}>
+            <Flex alignItems={'center'} gap={2}>
               <IconButton
                 icon={<PhosphorIcon as={Check} />}
                 aria-label="save button"
-                size={"sm"}
+                size={'sm'}
                 onClick={() => {
                   setShowConfirmPopUp(true);
                 }}
@@ -109,7 +109,7 @@ export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
               <IconButton
                 icon={<PhosphorIcon as={X} />}
                 aria-label="cancel button"
-                size={"sm"}
+                size={'sm'}
                 onClick={() => setIsEditMode(false)}
               />
             </Flex>
@@ -122,7 +122,7 @@ export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
             </Text>
             {accountRoles.includes(SecurityRole._BOND_MANAGER_ROLE) && (
               <IconButton
-                size={"sm"}
+                size={'sm'}
                 icon={<PhosphorIcon as={Pencil} />}
                 aria-label="edit button"
                 variant="secondary"
@@ -137,14 +137,14 @@ export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
         id="confirmMaturityDate"
         isOpen={showConfirmPopUp}
         onClose={() => {
-          !isLoading && setShowConfirmPopUp(false);
+          if (!isLoading) setShowConfirmPopUp(false);
         }}
         closeOnOverlayClick={!isLoading}
         icon={<PhosphorIcon as={Info} size="md" />}
-        title={t("title")}
-        description={t("subtitle")}
-        cancelText={t("cancelButtonText")}
-        confirmText={t("confirmButtonText")}
+        title={t('title')}
+        description={t('subtitle')}
+        cancelText={t('cancelButtonText')}
+        confirmText={t('confirmButtonText')}
         confirmButtonProps={{
           isLoading: isLoading,
         }}
@@ -152,7 +152,7 @@ export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
           handleSubmit(onSubmit)();
         }}
         onCancel={() => {
-          !isLoading && setShowConfirmPopUp(false);
+          if (!isLoading) setShowConfirmPopUp(false);
         }}
       />
     </Flex>

@@ -203,7 +203,7 @@
 
 */
 
-import { Divider, Flex, HStack, Menu, MenuButton } from "@chakra-ui/react";
+import { Divider, Flex, HStack, Menu, MenuButton } from '@chakra-ui/react';
 import {
   Button,
   Header as HeaderBase,
@@ -212,16 +212,16 @@ import {
   Logo,
   Dropdown,
   DropdownItem,
-} from "io-bricks-ui";
-import { useWalletStore } from "../../store/walletStore";
-import { useTranslation } from "react-i18next";
-import { CaretDown, SignOut, Wallet } from "@phosphor-icons/react";
-import { WalletStatus } from "../../utils/constants";
-import { useUserStore } from "../../store/userStore";
-import { getLayoutBg } from "./helper";
+} from 'io-bricks-ui';
+import { useWalletStore } from '../../store/walletStore';
+import { useTranslation } from 'react-i18next';
+import { CaretDown, SignOut, Wallet } from '@phosphor-icons/react';
+import { WalletStatus } from '../../utils/constants';
+import { useUserStore } from '../../store/userStore';
+import { getLayoutBg } from './helper';
 
 export const Header = () => {
-  const { t } = useTranslation("globals");
+  const { t } = useTranslation('globals');
   const { address, connectionStatus, reset } = useWalletStore();
   const { type: userType } = useUserStore();
   const connected = connectionStatus === WalletStatus.connected;
@@ -240,13 +240,13 @@ export const Header = () => {
                 w="180px"
                 leftIcon={<PhosphorIcon as={Wallet} />}
                 rightIcon={<PhosphorIcon as={CaretDown} />}
-                sx={{ _focus: { bg: "primary.500" } }}
+                sx={{ _focus: { bg: 'primary.500' } }}
               >
                 {address}
               </MenuButton>
               <Dropdown w="180px">
                 <DropdownItem
-                  label={t("walletDisconnect")}
+                  label={t('walletDisconnect')}
                   icon={SignOut}
                   onClick={() => reset()}
                 />

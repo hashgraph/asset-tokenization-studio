@@ -209,14 +209,7 @@
 pragma solidity 0.8.18;
 
 interface IERC1410ScheduledTasks {
-    function triggerAndSyncAll(
-        bytes32 _partition,
-        address _from,
-        address _to
-    ) external;
+    function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external;
 
-    function balanceOfAt(
-        address _tokenHolder,
-        uint256 _timestamp
-    ) external view returns (uint256);
+    function balanceOfAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256);
 }

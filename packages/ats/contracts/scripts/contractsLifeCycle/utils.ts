@@ -203,77 +203,76 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { ContractFactory } from 'ethers'
-import { Interface } from 'ethers/lib/utils'
+import { ContractFactory } from 'ethers';
+import { Interface } from 'ethers/lib/utils';
 import {
-    Client,
-    ContractExecuteTransaction,
-    ContractId,
-    Hbar,
-    Long,
-} from '@hashgraph/sdk'
+  Client,
+  ContractExecuteTransaction,
+  ContractId,
+  Hbar,
+  Long,
+} from '@hashgraph/sdk';
 
 export async function contractCall(
-    contractId: ContractId,
-    functionName: string,
-    parameters: any[],
-    clientOperator: Client,
-    gas: number,
-    abi: any,
-    value: number | string | Long | Hbar = 0
+  contractId: ContractId,
+  functionName: string,
+  parameters: any[],
+  clientOperator: Client,
+  gas: number,
+  abi: any,
+  value: number | string | Long | Hbar = 0,
 ) {
-    const functionCallParameters = encodeFunctionCall(
-        functionName,
-        parameters,
-        abi
-    )
+  const functionCallParameters = encodeFunctionCall(
+    functionName,
+    parameters,
+    abi,
+  );
 
-    const contractTx = await new ContractExecuteTransaction()
-        .setContractId(contractId)
-        .setFunctionParameters(functionCallParameters)
-        .setGas(gas)
-        .setPayableAmount(value)
-        .execute(clientOperator)
+  const contractTx = await new ContractExecuteTransaction()
+    .setContractId(contractId)
+    .setFunctionParameters(functionCallParameters)
+    .setGas(gas)
+    .setPayableAmount(value)
+    .execute(clientOperator);
 
-    const record = await contractTx.getRecord(clientOperator)
-    let results
-    if (record.contractFunctionResult) {
-        results = decodeFunctionResult(
-            abi,
-            functionName,
-            record.contractFunctionResult?.bytes
-        )
-    }
+  const record = await contractTx.getRecord(clientOperator);
+  let results;
+  if (record.contractFunctionResult) {
+    results = decodeFunctionResult(
+      abi,
+      functionName,
+      record.contractFunctionResult?.bytes,
+    );
+  }
 
-    return results
+  return results;
 }
 
 function encodeFunctionCall(functionName: string, parameters: any[], abi: any) {
-    const iface = new Interface(abi)
-    const encodedParametersHex = iface
-        .encodeFunctionData(functionName, parameters)
-        .slice(2)
-    return Buffer.from(encodedParametersHex, 'hex')
+  const iface = new Interface(abi);
+  const encodedParametersHex = iface
+    .encodeFunctionData(functionName, parameters)
+    .slice(2);
+  return Buffer.from(encodedParametersHex, 'hex');
 }
 
 function decodeFunctionResult(
-    abi: any,
-    functionName: string,
-    resultAsBytes: Uint8Array
+  abi: any,
+  functionName: string,
+  resultAsBytes: Uint8Array,
 ) {
-    const iface = new Interface(abi)
-    const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'))
-    const decodedResult = iface.decodeFunctionResult(functionName, resultHex)
+  const iface = new Interface(abi);
+  const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
+  const decodedResult = iface.decodeFunctionResult(functionName, resultHex);
 
-    try {
-        const jsonParsedArray = JSON.parse(JSON.stringify(decodedResult))
-        return jsonParsedArray
-    } catch {
-        return resultHex
-    }
+  try {
+    const jsonParsedArray = JSON.parse(JSON.stringify(decodedResult));
+    return jsonParsedArray;
+  } catch {
+    return resultHex;
+  }
 }
 
 export function createContractFactory(factory: any): ContractFactory {
-    return new ContractFactory(factory.createInterface(), factory.bytecode)
+  return new ContractFactory(factory.createInterface(), factory.bytecode);
 }

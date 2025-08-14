@@ -226,8 +226,10 @@ function registerProperty(target: object, propertyKey: string): void {
 export function getOptionalFields(origin: IndexableObject): IndexableObject {
   const properties: string[] = Reflect.getMetadata(OPTIONAL_KEYS, origin) ?? [];
   const result: IndexableObject = {};
-  properties.forEach(
-    (key) => (result[Mapper.renamePrivateProps(key)] = origin[key]),
-  );
+  properties.forEach((key) => {
+    // renamePrivateProps(key) overload guarantees a string result here
+    const renamedKey = Mapper.renamePrivateProps(key) as string;
+    result[renamedKey] = origin[key];
+  });
   return result;
 }

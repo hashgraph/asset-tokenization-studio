@@ -1,4 +1,4 @@
-import { Box, Center, useDisclosure, VStack } from "@chakra-ui/react";
+import { Box, Center, useDisclosure, VStack } from '@chakra-ui/react';
 import {
   Button,
   DefinitionList,
@@ -6,26 +6,26 @@ import {
   PopUp,
   Text,
   useToast,
-} from "io-bricks-ui";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
-import { useWalletStore } from "../../../../store/walletStore";
+} from 'io-bricks-ui';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { useWalletStore } from '../../../../store/walletStore';
 import {
   DATE_TIME_FORMAT,
   DEFAULT_PARTITION,
-} from "../../../../utils/constants";
-import { formatDate } from "../../../../utils/format";
-import { Question } from "@phosphor-icons/react";
-import { GET_HOLDS, useGetHolds } from "../../../../hooks/queries/useGetHolds";
+} from '../../../../utils/constants';
+import { formatDate } from '../../../../utils/format';
+import { Question } from '@phosphor-icons/react';
+import { GET_HOLDS, useGetHolds } from '../../../../hooks/queries/useGetHolds';
 import {
   GetHoldsIdForByPartitionRequest,
   HoldViewModel,
   ReclaimHoldByPartitionRequest,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useReclaimHoldByPartition } from "../../../../hooks/mutations/useHold";
-import { useQueryClient } from "@tanstack/react-query";
-import { useSecurityStore } from "../../../../store/securityStore";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useReclaimHoldByPartition } from '../../../../hooks/mutations/useHold';
+import { useQueryClient } from '@tanstack/react-query';
+import { useSecurityStore } from '../../../../store/securityStore';
 
 export type THoldMock = {
   originalAccount: string;
@@ -39,17 +39,17 @@ export const HoldList = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
 
-  const { t: tList } = useTranslation("security", {
-    keyPrefix: "details.hold.list",
+  const { t: tList } = useTranslation('security', {
+    keyPrefix: 'details.hold.list',
   });
-  const { t: tActionsConfirm } = useTranslation("security", {
-    keyPrefix: "details.hold.actions.confirmReclaimPopUp",
+  const { t: tActionsConfirm } = useTranslation('security', {
+    keyPrefix: 'details.hold.actions.confirmReclaimPopUp',
   });
-  const { t: tMessages } = useTranslation("security", {
-    keyPrefix: "details.hold.messages",
+  const { t: tMessages } = useTranslation('security', {
+    keyPrefix: 'details.hold.messages',
   });
 
-  const { id: securityId = "" } = useParams();
+  const { id: securityId = '' } = useParams();
   const { address } = useWalletStore();
   const { details } = useSecurityStore();
 
@@ -79,11 +79,11 @@ export const HoldList = () => {
     <VStack gap={12} w="auto" pt={4}>
       {/* List */}
       <Center w={900}>
-        <VStack gap={4} w={"full"}>
+        <VStack gap={4} w={'full'}>
           {isLoading && <Box>Loading...</Box>}
           {showEmpty && (
             <Box>
-              <Text>{tList("noHolds")}</Text>
+              <Text>{tList('noHolds')}</Text>
             </Box>
           )}
           {!showEmpty &&
@@ -96,56 +96,56 @@ export const HoldList = () => {
 
               return (
                 <VStack
-                  w={"full"}
+                  w={'full'}
                   key={index}
-                  bgColor={"neutral.white"}
+                  bgColor={'neutral.white'}
                   py={12}
-                  position={"relative"}
+                  position={'relative'}
                   px={20}
                 >
                   <DefinitionList
                     items={[
                       {
-                        title: tList("id"),
+                        title: tList('id'),
                         description: hold.id,
                       },
                       {
-                        title: tList("originalAccount"),
+                        title: tList('originalAccount'),
                         description: hold.tokenHolderAddress,
                       },
                       ...(hold.destinationAddress
                         ? [
                             {
-                              title: tList("destinationAccount"),
+                              title: tList('destinationAccount'),
                               description: hold.destinationAddress,
                             },
                           ]
                         : []),
                       {
-                        title: tList("escrowAccount"),
+                        title: tList('escrowAccount'),
                         description: hold.escrowAddress,
                       },
                       {
-                        title: tList("expirationDate"),
+                        title: tList('expirationDate'),
                         description: formatDate(
                           Number(hold.expirationDate),
                           DATE_TIME_FORMAT,
                         ),
                       },
                       {
-                        title: tList("amount"),
-                        description: hold.amount + " " + details?.symbol,
+                        title: tList('amount'),
+                        description: hold.amount + ' ' + details?.symbol,
                       },
                     ]}
                   />
                   {isReclaimable && (
                     <Button
-                      size={"md"}
+                      size={'md'}
                       onClick={() => {
                         setHoldSelected(hold);
                         onOpenReclaimConfirmationModal();
                       }}
-                      alignSelf={"end"}
+                      alignSelf={'end'}
                       disabled={isReclaiming && holdSelected?.id === hold.id}
                       isLoading={isReclaiming && holdSelected?.id === hold.id}
                     >
@@ -162,9 +162,9 @@ export const HoldList = () => {
         isOpen={isOpenReclaimConfirmationModal}
         onClose={onCloseReclaimConfirmationModal}
         icon={<PhosphorIcon as={Question} size="md" />}
-        title={tActionsConfirm("title")}
-        description={tActionsConfirm("description")}
-        confirmText={tActionsConfirm("confirmText")}
+        title={tActionsConfirm('title')}
+        description={tActionsConfirm('description')}
+        confirmText={tActionsConfirm('confirmText')}
         onConfirm={() => {
           setIsReclaiming(true);
 
@@ -195,17 +195,17 @@ export const HoldList = () => {
 
               toast.show({
                 duration: 3000,
-                title: tMessages("success"),
-                description: tMessages("descriptionSuccess"),
-                variant: "subtle",
-                status: "success",
+                title: tMessages('success'),
+                description: tMessages('descriptionSuccess'),
+                variant: 'subtle',
+                status: 'success',
               });
             },
           });
           onCloseReclaimConfirmationModal();
         }}
         onCancel={onCloseReclaimConfirmationModal}
-        cancelText={tActionsConfirm("cancelText")}
+        cancelText={tActionsConfirm('cancelText')}
       />
     </VStack>
   );

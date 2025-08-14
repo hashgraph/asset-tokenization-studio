@@ -206,18 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IERC1410StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
-import {
-    IERC1410Basic
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import { IERC1410StorageWrapper } from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
+import { ERC20StorageWrapper1 } from '../ERC20/ERC20StorageWrapper1.sol';
+import { IERC1410Basic } from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 
-abstract contract ERC1410BasicStorageWrapper is
-    IERC1410StorageWrapper,
-    ERC20StorageWrapper1
-{
+abstract contract ERC1410BasicStorageWrapper is IERC1410StorageWrapper, ERC20StorageWrapper1 {
     function _transferByPartition(
         address _from,
         IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
@@ -226,12 +219,7 @@ abstract contract ERC1410BasicStorageWrapper is
         address _operator,
         bytes memory _operatorData
     ) internal returns (bytes32) {
-        _beforeTokenTransfer(
-            _partition,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value
-        );
+        _beforeTokenTransfer(_partition, _from, _basicTransferInfo.to, _basicTransferInfo.value);
 
         _reduceBalanceByPartition(_from, _basicTransferInfo.value, _partition);
 
@@ -247,31 +235,14 @@ abstract contract ERC1410BasicStorageWrapper is
         );
 
         if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
-            _addPartitionTo(
-                _basicTransferInfo.value,
-                _basicTransferInfo.to,
-                _partition
-            );
+            _addPartitionTo(_basicTransferInfo.value, _basicTransferInfo.to, _partition);
             return bytes32(0);
         }
-        _increaseBalanceByPartition(
-            _basicTransferInfo.to,
-            _basicTransferInfo.value,
-            _partition
-        );
+        _increaseBalanceByPartition(_basicTransferInfo.to, _basicTransferInfo.value, _partition);
         return bytes32(0);
     }
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual;
+    function _beforeTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal virtual;
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    ) internal virtual;
+    function _addPartitionTo(uint256 _value, address _account, bytes32 _partition) internal virtual;
 }

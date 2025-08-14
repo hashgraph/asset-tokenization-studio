@@ -3,7 +3,7 @@
 // but newer versions export LRUCache as a named export
 
 // Create a mock LRU constructor that jsonld expects
-class LRU {
+class _LRU {
   constructor(options = {}) {
     this.max = options.max || 100;
     this.cache = new Map();
@@ -44,13 +44,6 @@ class LRU {
   }
 }
 
-// Override require for lru-cache to return our mock
-const Module = require("module");
-const originalRequire = Module.prototype.require;
-
-Module.prototype.require = function (id) {
-  if (id === "lru-cache") {
-    return LRU;
-  }
-  return originalRequire.apply(this, arguments);
-};
+// For ESM, use jest.mock or manual global override if needed
+// Example for Jest:
+// jest.mock('lru-cache', () => LRU);

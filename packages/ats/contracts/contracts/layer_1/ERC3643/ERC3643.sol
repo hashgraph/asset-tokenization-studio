@@ -206,29 +206,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
-import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
-import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    _DEFAULT_ADMIN_ROLE,
-    _CONTROLLER_ROLE,
-    _ISSUER_ROLE,
-    _AGENT_ROLE
-} from '../constants/roles.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
+import { Common } from '../common/Common.sol';
+import { IERC3643 } from '../interfaces/ERC3643/IERC3643.sol';
+import { ICompliance } from '../interfaces/ERC3643/ICompliance.sol';
+import { IIdentityRegistry } from '../interfaces/ERC3643/IIdentityRegistry.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _ERC3643_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { _DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from '../constants/roles.sol';
+import { IKyc } from '../interfaces/kyc/IKyc.sol';
 
 contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     address private constant _ONCHAIN_ID = address(0);
 
     // ====== External functions (state-changing) ======
-    function setName(
-        string calldata _name
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    function setName(string calldata _name) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
         ERC20Storage storage erc20Storage = _setName(_name);
 
         emit UpdatedTokenInformation(
@@ -240,9 +231,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         );
     }
 
-    function setSymbol(
-        string calldata _symbol
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    function setSymbol(string calldata _symbol) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
         ERC20Storage storage erc20Storage = _setSymbol(_symbol);
 
         emit UpdatedTokenInformation(
@@ -254,9 +243,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         );
     }
 
-    function setOnchainID(
-        address _onchainID
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    function setOnchainID(address _onchainID) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
         ERC20Storage storage erc20Storage = _erc20Storage();
         _erc3643Storage().onchainID = _onchainID;
 
@@ -276,23 +263,17 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         emit IdentityRegistryAdded(_identityRegistry);
     }
 
-    function setCompliance(
-        address _compliance
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    function setCompliance(address _compliance) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
         _setCompliance(_compliance);
         emit ComplianceAdded(_compliance);
     }
 
-    function addAgent(
-        address _agent
-    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+    function addAgent(address _agent) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
         _addAgent(_agent);
         emit AgentAdded(_agent);
     }
 
-    function removeAgent(
-        address _agent
-    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+    function removeAgent(address _agent) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
         _removeAgent(_agent);
         emit AgentRemoved(_agent);
     }
@@ -352,13 +333,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         address _from,
         address _to,
         uint256 _amount
-    )
-        external
-        onlyWithoutMultiPartition
-        onlyControllable
-        onlyUnpaused
-        returns (bool)
-    {
+    ) external onlyWithoutMultiPartition onlyControllable onlyUnpaused returns (bool) {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -419,13 +394,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     function batchMint(
         address[] calldata _toList,
         uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-        onlyWithoutMultiPartition
-        onlyIssuable
-    {
+    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_toList, _amounts) onlyWithoutMultiPartition onlyIssuable {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
@@ -471,12 +440,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         return _hasRole(_AGENT_ROLE, _agent);
     }
 
-    function identityRegistry()
-        external
-        view
-        override
-        returns (IIdentityRegistry)
-    {
+    function identityRegistry() external view override returns (IIdentityRegistry) {
         return _getIdentityRegistry();
     }
 
@@ -496,70 +460,39 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         return _version();
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _ERC3643_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](23);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .forcedTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .identityRegistry
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.forcedTransfer.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.identityRegistry.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setCompliance
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setCompliance.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setIdentityRegistry
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setIdentityRegistry.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .recoveryAddress
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .isAddressRecovered
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchForcedTransfer
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.recoveryAddress.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.isAddressRecovered.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchTransfer.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.batchForcedTransfer.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.batchMint.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.batchBurn.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC3643).interfaceId;

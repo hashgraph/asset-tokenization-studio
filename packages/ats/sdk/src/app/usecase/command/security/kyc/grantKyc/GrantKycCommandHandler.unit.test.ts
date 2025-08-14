@@ -227,6 +227,7 @@ import { Terminal3Vc } from '../../../../../../domain/context/kyc/Terminal3.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { ErrorCode } from '../../../../../../core/error/BaseError.js';
 import { GrantKycCommandError } from './error/GrantKycCommandError.js';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { setVerificationValid } = require('@terminal3/verify_vc');
 
 describe('GrantKycCommandHandler', () => {

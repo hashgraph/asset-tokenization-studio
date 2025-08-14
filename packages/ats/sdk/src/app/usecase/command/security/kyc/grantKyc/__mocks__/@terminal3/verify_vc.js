@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 let isVerificationValid = true;
 
 module.exports = {

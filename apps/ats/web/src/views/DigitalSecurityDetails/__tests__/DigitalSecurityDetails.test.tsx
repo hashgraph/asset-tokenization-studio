@@ -203,11 +203,11 @@
 
 */
 
-import { DigitalSecurityDetails } from "../DigitalSecurityDetails";
-import { render } from "../../../test-utils";
+import { DigitalSecurityDetails } from '../DigitalSecurityDetails';
+import { render } from '../../../test-utils';
 
 describe(`${DigitalSecurityDetails.name}`, () => {
-  test("render correctly", () => {
+  test('render correctly', () => {
     const component = render(<DigitalSecurityDetails />);
 
     expect(component.asFragment()).toMatchSnapshot();

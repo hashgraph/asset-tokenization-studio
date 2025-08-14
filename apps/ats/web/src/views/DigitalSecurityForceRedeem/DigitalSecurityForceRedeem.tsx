@@ -203,25 +203,25 @@
 
 */
 
-import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { History } from "../../components/History";
-import { useTranslation } from "react-i18next";
+import { HStack, Stack, VStack } from '@chakra-ui/react';
+import { History } from '../../components/History';
+import { useTranslation } from 'react-i18next';
 import {
   Text,
   InputController,
   InputNumberController,
   Button,
-} from "io-bricks-ui";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { required, min } from "../../utils/rules";
-import { CancelButton } from "../../components/CancelButton";
-import { useParams } from "react-router";
-import { ForceRedeemRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useForceRedeemSecurity } from "../../hooks/queries/useForceRedeemSecurity";
-import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
-import { useWalletStore } from "../../store/walletStore";
-import { useDetailsBalancePanel } from "../../hooks/useDetailsBalancePanel";
-import { useSecurityStore } from "../../store/securityStore";
+} from 'io-bricks-ui';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { required, min } from '../../utils/rules';
+import { CancelButton } from '../../components/CancelButton';
+import { useParams } from 'react-router';
+import { ForceRedeemRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useForceRedeemSecurity } from '../../hooks/queries/useForceRedeemSecurity';
+import { DetailsBalancePanel } from '../../components/DetailsBalancePanel';
+import { useWalletStore } from '../../store/walletStore';
+import { useDetailsBalancePanel } from '../../hooks/useDetailsBalancePanel';
+import { useSecurityStore } from '../../store/securityStore';
 
 interface ForceRedeemFormValues {
   source: string;
@@ -229,22 +229,22 @@ interface ForceRedeemFormValues {
 }
 
 export const DigitalSecurityForceRedeem = () => {
-  const { t: tHeader } = useTranslation("security", {
-    keyPrefix: "forceRedeem.header",
+  const { t: tHeader } = useTranslation('security', {
+    keyPrefix: 'forceRedeem.header',
   });
-  const { t: tForm } = useTranslation("security", {
-    keyPrefix: "forceRedeem.input",
+  const { t: tForm } = useTranslation('security', {
+    keyPrefix: 'forceRedeem.input',
   });
-  const { t } = useTranslation("security", { keyPrefix: "forceRedeem" });
-  const { t: tGlobal } = useTranslation("globals");
+  const { t } = useTranslation('security', { keyPrefix: 'forceRedeem' });
+  const { t: tGlobal } = useTranslation('globals');
   const { control, formState, handleSubmit, reset } =
     useForm<ForceRedeemFormValues>({
-      mode: "all",
+      mode: 'all',
     });
-  const { t: TButton } = useTranslation("security", {
-    keyPrefix: "forceRedeem.button",
+  const { t: TButton } = useTranslation('security', {
+    keyPrefix: 'forceRedeem.button',
   });
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
   const { details } = useSecurityStore();
   const { address: walletAddress } = useWalletStore();
 
@@ -273,7 +273,7 @@ export const DigitalSecurityForceRedeem = () => {
 
   return (
     <>
-      <History label={tHeader("title")} />
+      <History label={tHeader('title')} />
       <HStack
         layerStyle="container"
         mt={6}
@@ -292,12 +292,12 @@ export const DigitalSecurityForceRedeem = () => {
           as="form"
           onSubmit={handleSubmit(submit)}
         >
-          <Text textStyle="HeadingMediumLG">{t("title")}</Text>
+          <Text textStyle="HeadingMediumLG">{t('title')}</Text>
           <Text textStyle="BodyRegularMD" mt={2}>
-            {t("subtitle")}
+            {t('subtitle')}
           </Text>
           <Text textStyle="ElementsRegularSM" mt={8}>
-            {tGlobal("mandatoryFields")}
+            {tGlobal('mandatoryFields')}
           </Text>
           <Stack mt={6} w="full">
             <InputController
@@ -305,8 +305,8 @@ export const DigitalSecurityForceRedeem = () => {
               control={control}
               id="source"
               rules={{ required }}
-              label={tForm("source.label")}
-              placeholder={tForm("source.placeholder")}
+              label={tForm('source.label')}
+              placeholder={tForm('source.placeholder')}
               size="md"
             />
           </Stack>
@@ -321,8 +321,8 @@ export const DigitalSecurityForceRedeem = () => {
               }}
               size="md"
               allowNegative={false}
-              label={tForm("amount.label")}
-              placeholder={tForm("amount.placeholder")}
+              label={tForm('amount.label')}
+              placeholder={tForm('amount.placeholder')}
               decimalScale={details?.decimals}
               fixedDecimalScale={true}
               thousandSeparator=","
@@ -334,7 +334,7 @@ export const DigitalSecurityForceRedeem = () => {
             w="full"
             mt={10}
             align="end"
-            justifyContent={"flex-end"}
+            justifyContent={'flex-end'}
           >
             <CancelButton />
             <Button
@@ -346,7 +346,7 @@ export const DigitalSecurityForceRedeem = () => {
               minW="unset"
               isLoading={isLoading}
             >
-              {TButton("accept")}
+              {TButton('accept')}
             </Button>
           </HStack>
         </VStack>

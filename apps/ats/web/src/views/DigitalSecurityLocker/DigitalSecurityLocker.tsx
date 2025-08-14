@@ -203,18 +203,18 @@
 
 */
 
-import { History } from "../../components/History";
-import { useTranslation } from "react-i18next";
-import { DigitalSecurityLockerForm } from "./DigitalSecurityLockerForm";
+import { History } from '../../components/History';
+import { useTranslation } from 'react-i18next';
+import { DigitalSecurityLockerForm } from './DigitalSecurityLockerForm';
 
 export const DigitalSecurityLocker = () => {
-  const { t: tHeader } = useTranslation("security", {
-    keyPrefix: "details.locker",
+  const { t: tHeader } = useTranslation('security', {
+    keyPrefix: 'details.locker',
   });
 
   return (
     <>
-      <History label={tHeader("title")} />
+      <History label={tHeader('title')} />
       <DigitalSecurityLockerForm />
     </>
   );

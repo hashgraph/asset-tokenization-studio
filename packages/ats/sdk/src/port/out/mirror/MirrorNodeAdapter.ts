@@ -527,10 +527,6 @@ export class MirrorNodeAdapter {
   }
 }
 
-interface IContract {
-  memo: string;
-}
-
 interface IAccount {
   evm_address: string;
   key: IKey;

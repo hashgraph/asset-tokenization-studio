@@ -203,1032 +203,975 @@
 
    */
 
-import { ethers } from 'hardhat'
+import { ethers } from 'hardhat';
 import {
-    Contract,
-    ContractFactory,
-    ContractTransaction,
-    Overrides,
-} from 'ethers'
+  Contract,
+  ContractFactory,
+  ContractTransaction,
+  Overrides,
+} from 'ethers';
 import {
-    AccessControlFacet__factory,
-    AccessControlFacetTimeTravel__factory,
-    AdjustBalances__factory,
-    AdjustBalancesTimeTravel__factory,
-    BondUSA__factory,
-    BondUSATimeTravel__factory,
-    BusinessLogicResolver__factory,
-    Cap__factory,
-    CapTimeTravel__factory,
-    ControlList__factory,
-    ControlListTimeTravel__factory,
-    CorporateActions__factory,
-    CorporateActionsTimeTravel__factory,
-    DiamondFacet__factory,
-    EquityUSA__factory,
-    EquityUSATimeTravel__factory,
-    ERC1410ScheduledTasks__factory,
-    ERC1410ScheduledTasksTimeTravel__factory,
-    ERC1594__factory,
-    ERC1594TimeTravel__factory,
-    ERC1643__factory,
-    ERC1643TimeTravel__factory,
-    ERC1644__factory,
-    ERC1644TimeTravel__factory,
-    ERC20__factory,
-    ERC20TimeTravel__factory,
-    Factory__factory,
-    Kyc__factory,
-    KycTimeTravel__factory,
-    SsiManagement__factory,
-    SsiManagementTimeTravel__factory,
-    Lock__factory,
-    LockTimeTravel__factory,
-    Hold__factory,
-    HoldTimeTravel__factory,
-    PauseFacet__factory,
-    PauseFacetTimeTravel__factory,
-    ProtectedPartitions__factory,
-    ProtectedPartitionsTimeTravel__factory,
-    ProxyAdmin__factory,
-    ScheduledBalanceAdjustments__factory,
-    ScheduledBalanceAdjustmentsTimeTravel__factory,
-    ScheduledSnapshots__factory,
-    ScheduledSnapshotsTimeTravel__factory,
-    ScheduledTasks__factory,
-    ScheduledTasksTimeTravel__factory,
-    Snapshots__factory,
-    SnapshotsTimeTravel__factory,
-    TransferAndLock__factory,
-    TransferAndLockTimeTravel__factory,
-    TransparentUpgradeableProxy__factory,
-    TimeTravel__factory,
-    ClearingTransferFacet__factory,
-    ClearingTransferFacetTimeTravel__factory,
-    ClearingRedeemFacet__factory,
-    ClearingRedeemFacetTimeTravel__factory,
-    ClearingHoldCreationFacet__factory,
-    ClearingHoldCreationFacetTimeTravel__factory,
-    ClearingReadFacet__factory,
-    ClearingReadFacetTimeTravel__factory,
-    ClearingActionsFacet__factory,
-    ClearingActionsFacetTimeTravel__factory,
-    ExternalPauseManagement__factory,
-    ExternalPauseManagementTimeTravel__factory,
-    ExternalControlListManagement__factory,
-    ExternalControlListManagementTimeTravel__factory,
-    ExternalKycListManagement__factory,
-    ExternalKycListManagementTimeTravel__factory,
-    ERC3643__factory,
-    ERC3643TimeTravel__factory,
-    FreezeFacet__factory,
-    FreezeFacetTimeTravel__factory,
-} from '@typechain'
-import Configuration from '@configuration'
+  AccessControlFacet__factory,
+  AccessControlFacetTimeTravel__factory,
+  AdjustBalances__factory,
+  AdjustBalancesTimeTravel__factory,
+  BondUSA__factory,
+  BondUSATimeTravel__factory,
+  BusinessLogicResolver__factory,
+  Cap__factory,
+  CapTimeTravel__factory,
+  ControlList__factory,
+  ControlListTimeTravel__factory,
+  CorporateActions__factory,
+  CorporateActionsTimeTravel__factory,
+  DiamondFacet__factory,
+  EquityUSA__factory,
+  EquityUSATimeTravel__factory,
+  ERC1410ScheduledTasks__factory,
+  ERC1410ScheduledTasksTimeTravel__factory,
+  ERC1594__factory,
+  ERC1594TimeTravel__factory,
+  ERC1643__factory,
+  ERC1643TimeTravel__factory,
+  ERC1644__factory,
+  ERC1644TimeTravel__factory,
+  ERC20__factory,
+  ERC20TimeTravel__factory,
+  Factory__factory,
+  Kyc__factory,
+  KycTimeTravel__factory,
+  SsiManagement__factory,
+  SsiManagementTimeTravel__factory,
+  Lock__factory,
+  LockTimeTravel__factory,
+  Hold__factory,
+  HoldTimeTravel__factory,
+  PauseFacet__factory,
+  PauseFacetTimeTravel__factory,
+  ProtectedPartitions__factory,
+  ProtectedPartitionsTimeTravel__factory,
+  ProxyAdmin__factory,
+  ScheduledBalanceAdjustments__factory,
+  ScheduledBalanceAdjustmentsTimeTravel__factory,
+  ScheduledSnapshots__factory,
+  ScheduledSnapshotsTimeTravel__factory,
+  ScheduledTasks__factory,
+  ScheduledTasksTimeTravel__factory,
+  Snapshots__factory,
+  SnapshotsTimeTravel__factory,
+  TransferAndLock__factory,
+  TransferAndLockTimeTravel__factory,
+  TransparentUpgradeableProxy__factory,
+  TimeTravel__factory,
+  ClearingTransferFacet__factory,
+  ClearingTransferFacetTimeTravel__factory,
+  ClearingRedeemFacet__factory,
+  ClearingRedeemFacetTimeTravel__factory,
+  ClearingHoldCreationFacet__factory,
+  ClearingHoldCreationFacetTimeTravel__factory,
+  ClearingReadFacet__factory,
+  ClearingReadFacetTimeTravel__factory,
+  ClearingActionsFacet__factory,
+  ClearingActionsFacetTimeTravel__factory,
+  ExternalPauseManagement__factory,
+  ExternalPauseManagementTimeTravel__factory,
+  ExternalControlListManagement__factory,
+  ExternalControlListManagementTimeTravel__factory,
+  ExternalKycListManagement__factory,
+  ExternalKycListManagementTimeTravel__factory,
+  ERC3643__factory,
+  ERC3643TimeTravel__factory,
+  FreezeFacet__factory,
+  FreezeFacetTimeTravel__factory,
+} from '@typechain';
+import Configuration from '@configuration';
 import {
-    MESSAGES,
-    DeployContractCommand,
-    DeployContractResult,
-    DeployContractWithFactoryCommand,
-    DeployContractWithFactoryResult,
-    DeployAtsContractsCommand,
-    DeployAtsContractsResult,
-    DeployAtsFullInfrastructureCommand,
-    DeployAtsFullInfrastructureResult,
-    BusinessLogicResolverNotFound,
-    CreateConfigurationsForDeployedContractsCommand,
-    createConfigurationsForDeployedContracts,
-    validateTxResponseList,
-    ValidateTxResponseCommand,
-    GAS_LIMIT,
-    validateTxResponse,
-    RegisterDeployedContractBusinessLogicsCommand,
-    registerDeployedContractBusinessLogics,
-    CreateConfigurationsForDeployedContractsResult,
-} from '@scripts'
-import Environment from './Environment'
+  MESSAGES,
+  DeployContractCommand,
+  DeployContractResult,
+  DeployContractWithFactoryCommand,
+  DeployContractWithFactoryResult,
+  DeployAtsContractsCommand,
+  DeployAtsContractsResult,
+  DeployAtsFullInfrastructureCommand,
+  DeployAtsFullInfrastructureResult,
+  BusinessLogicResolverNotFound,
+  CreateConfigurationsForDeployedContractsCommand,
+  createConfigurationsForDeployedContracts,
+  validateTxResponseList,
+  ValidateTxResponseCommand,
+  GAS_LIMIT,
+  validateTxResponse,
+  RegisterDeployedContractBusinessLogicsCommand,
+  registerDeployedContractBusinessLogics,
+  CreateConfigurationsForDeployedContractsResult,
+} from '@scripts';
+import Environment from './Environment';
 
-export let environment = Environment.empty()
+export let environment = Environment.empty();
 
 export async function deployAtsFullInfrastructure({
-    signer,
-    network,
-    useDeployed,
-    useEnvironment,
-    timeTravelEnabled,
-    partialBatchDeploy,
+  signer,
+  network,
+  useDeployed,
+  useEnvironment,
+  timeTravelEnabled,
+  partialBatchDeploy,
 }: DeployAtsFullInfrastructureCommand): Promise<DeployAtsFullInfrastructureResult> {
-    if (timeTravelEnabled && (await signer.getChainId()) !== 1337) {
-        throw new Error(MESSAGES.timeTravel.error.notSupported)
-    }
-    if (useEnvironment && environment.initialized) {
-        return environment.toDeployAtsFullInfrastructureResult()
-    }
-    const usingDeployed =
-        useDeployed &&
-        Configuration.contracts.BusinessLogicResolver.addresses?.[network]
+  if (timeTravelEnabled && (await signer.getChainId()) !== 1337) {
+    throw new Error(MESSAGES.timeTravel.error.notSupported);
+  }
+  if (useEnvironment && environment.initialized) {
+    return environment.toDeployAtsFullInfrastructureResult();
+  }
+  const usingDeployed =
+    useDeployed &&
+    Configuration.contracts.BusinessLogicResolver.addresses?.[network];
 
-    // * Deploy all contracts
-    const deployCommand = await DeployAtsContractsCommand.newInstance({
-        signer,
-        useDeployed,
-        timeTravelEnabled,
-    })
-    const { deployer, ...deployedContractList } =
-        await deployAtsContracts(deployCommand)
+  // * Deploy all contracts
+  const deployCommand = await DeployAtsContractsCommand.newInstance({
+    signer,
+    useDeployed,
+    timeTravelEnabled,
+  });
+  const { deployer, ...deployedContractList } =
+    await deployAtsContracts(deployCommand);
 
-    // * Check if BusinessLogicResolver is deployed correctly
-    const resolver = deployedContractList.businessLogicResolver
-    if (
-        !resolver.address ||
-        !resolver.proxyAddress ||
-        !resolver.proxyAdminAddress
-    ) {
-        throw new BusinessLogicResolverNotFound()
-    }
+  // * Check if BusinessLogicResolver is deployed correctly
+  const resolver = deployedContractList.businessLogicResolver;
+  if (
+    !resolver.address ||
+    !resolver.proxyAddress ||
+    !resolver.proxyAdminAddress
+  ) {
+    throw new BusinessLogicResolverNotFound();
+  }
 
-    let facetLists = CreateConfigurationsForDeployedContractsResult.empty()
-    if (!usingDeployed) {
-        // * Initialize BusinessLogicResolver
-        console.log(MESSAGES.businessLogicResolver.info.initializing)
-        const initResponse =
-            await resolver.contract.initialize_BusinessLogicResolver({
-                gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
-            })
-        await validateTxResponse(
-            new ValidateTxResponseCommand({
-                txResponse: initResponse,
-                errorMessage: MESSAGES.businessLogicResolver.error.initializing,
-            })
-        )
-        // * Register business logic contracts
-        console.log(MESSAGES.businessLogicResolver.info.registering)
+  let facetLists = CreateConfigurationsForDeployedContractsResult.empty();
+  if (!usingDeployed) {
+    // * Initialize BusinessLogicResolver
+    console.log(MESSAGES.businessLogicResolver.info.initializing);
+    const initResponse =
+      await resolver.contract.initialize_BusinessLogicResolver({
+        gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
+      });
+    await validateTxResponse(
+      new ValidateTxResponseCommand({
+        txResponse: initResponse,
+        errorMessage: MESSAGES.businessLogicResolver.error.initializing,
+      }),
+    );
+    // * Register business logic contracts
+    console.log(MESSAGES.businessLogicResolver.info.registering);
 
-        const registerCommand =
-            new RegisterDeployedContractBusinessLogicsCommand({
-                deployedContractList,
-                signer,
-            })
-        await registerDeployedContractBusinessLogics(registerCommand)
+    const registerCommand = new RegisterDeployedContractBusinessLogicsCommand({
+      deployedContractList,
+      signer,
+    });
+    await registerDeployedContractBusinessLogics(registerCommand);
 
-        // * Create configurations for all Securities (EquityUSA, BondUSA)
-        console.log(MESSAGES.businessLogicResolver.info.creatingConfigurations)
-        const createCommand =
-            new CreateConfigurationsForDeployedContractsCommand({
-                deployedContractList,
-                signer,
-            })
-        facetLists = await createConfigurationsForDeployedContracts(
-            partialBatchDeploy,
-            createCommand
-        )
-    }
-    console.log(MESSAGES.businessLogicResolver.info.configured)
-    console.log(MESSAGES.factory.info.deploying)
-    const factoryDeployCommand = new DeployContractWithFactoryCommand({
-        factory: new Factory__factory(),
-        signer,
-        withProxy: true,
-        deployedContract: useDeployed
-            ? Configuration.contracts.Factory.addresses?.[network]
-            : undefined,
-    })
-    const factory = await deployContractWithFactory(factoryDeployCommand)
+    // * Create configurations for all Securities (EquityUSA, BondUSA)
+    console.log(MESSAGES.businessLogicResolver.info.creatingConfigurations);
+    const createCommand = new CreateConfigurationsForDeployedContractsCommand({
+      deployedContractList,
+      signer,
+    });
+    facetLists = await createConfigurationsForDeployedContracts(
+      partialBatchDeploy,
+      createCommand,
+    );
+  }
+  console.log(MESSAGES.businessLogicResolver.info.configured);
+  console.log(MESSAGES.factory.info.deploying);
+  const factoryDeployCommand = new DeployContractWithFactoryCommand({
+    factory: new Factory__factory(),
+    signer,
+    withProxy: true,
+    deployedContract: useDeployed
+      ? Configuration.contracts.Factory.addresses?.[network]
+      : undefined,
+  });
+  const factory = await deployContractWithFactory(factoryDeployCommand);
 
-    environment = new Environment({
-        commonFacetIdList: facetLists.commonFacetIdList,
-        equityFacetIdList: facetLists.equityFacetIdList,
-        bondFacetIdList: facetLists.bondFacetIdList,
-        equityFacetVersionList: facetLists.equityFacetVersionList,
-        bondFacetVersionList: facetLists.bondFacetVersionList,
-        businessLogicResolver: resolver.contract,
-        factory: factory.contract,
-        deployedContracts: { deployer, ...deployedContractList },
-    })
+  environment = new Environment({
+    commonFacetIdList: facetLists.commonFacetIdList,
+    equityFacetIdList: facetLists.equityFacetIdList,
+    bondFacetIdList: facetLists.bondFacetIdList,
+    equityFacetVersionList: facetLists.equityFacetVersionList,
+    bondFacetVersionList: facetLists.bondFacetVersionList,
+    businessLogicResolver: resolver.contract,
+    factory: factory.contract,
+    deployedContracts: { deployer, ...deployedContractList },
+  });
 
-    return new DeployAtsFullInfrastructureResult({
-        ...deployedContractList,
-        factory: factory,
-        deployer: deployer,
-        facetLists,
-    })
+  return new DeployAtsFullInfrastructureResult({
+    ...deployedContractList,
+    factory: factory,
+    deployer: deployer,
+    facetLists,
+  });
 }
 
 export async function deployAtsContracts({
-    signer,
-    network,
-    useDeployed,
-    timeTravelEnabled = false,
+  signer,
+  network,
+  useDeployed,
+  timeTravelEnabled = false,
 }: DeployAtsContractsCommand) {
-    const overrides: Overrides = { gasLimit: GAS_LIMIT.high } // If you want to override the default parameters
-    const getFactory = <T extends ContractFactory>(
-        standardFactory: T,
-        timeTravelFactory?: T
-    ): T => {
-        if (!timeTravelEnabled || !timeTravelFactory) return standardFactory
-        return timeTravelFactory as T
-    }
-    const commands = {
-        businessLogicResolver: new DeployContractWithFactoryCommand({
-            factory: new BusinessLogicResolver__factory(),
-            signer,
-            withProxy: true,
-            deployedContract: useDeployed
-                ? Configuration.contracts.BusinessLogicResolver.addresses?.[
-                      network
-                  ]
-                : undefined,
-            overrides,
-        }),
-        accessControl: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new AccessControlFacet__factory(),
-                new AccessControlFacetTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.AccessControlFacet.addresses?.[
-                      network
-                  ]
-                : undefined,
-            overrides,
-        }),
-        cap: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new Cap__factory(),
-                new CapTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.Cap.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        controlList: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ControlList__factory(),
-                new ControlListTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ControlList.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        kyc: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new Kyc__factory(),
-                new KycTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.Kyc.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        ssiManagement: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new SsiManagement__factory(),
-                new SsiManagementTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.SsiManagement.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        pause: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new PauseFacet__factory(),
-                new PauseFacetTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.PauseFacet.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        lock: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new Lock__factory(),
-                new LockTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.Lock.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        hold: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new Hold__factory(),
-                new HoldTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.Hold.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        erc20: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ERC20__factory(),
-                new ERC20TimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ERC20.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        erc1410ScheduledTasks: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ERC1410ScheduledTasks__factory(),
-                new ERC1410ScheduledTasksTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ERC1410ScheduledTasks.addresses?.[
-                      network
-                  ]
-                : undefined,
-            overrides,
-        }),
-        erc1594: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ERC1594__factory(),
-                new ERC1594TimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ERC1594.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        erc1643: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ERC1643__factory(),
-                new ERC1643TimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ERC1643.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        erc1644: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ERC1644__factory(),
-                new ERC1644TimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ERC1644.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        snapshots: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new Snapshots__factory(),
-                new SnapshotsTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.Snapshots.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        diamondFacet: new DeployContractWithFactoryCommand({
-            factory: new DiamondFacet__factory(),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.DiamondFacet.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        equityUsa: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new EquityUSA__factory(),
-                new EquityUSATimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.EquityUSA.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        bondUsa: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new BondUSA__factory(),
-                new BondUSATimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.BondUSA.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        scheduledSnapshots: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ScheduledSnapshots__factory(),
-                new ScheduledSnapshotsTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ScheduledSnapshots.addresses?.[
-                      network
-                  ]
-                : undefined,
-            overrides,
-        }),
-        scheduledBalanceAdjustments: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ScheduledBalanceAdjustments__factory(),
-                new ScheduledBalanceAdjustmentsTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ScheduledBalanceAdjustments
-                      .addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        scheduledTasks: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ScheduledTasks__factory(),
-                new ScheduledTasksTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ScheduledTasks.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        corporateActions: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new CorporateActions__factory(),
-                new CorporateActionsTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.CorporateActions.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        transferAndLock: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new TransferAndLock__factory(),
-                new TransferAndLockTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.TransferAndLock.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        adjustBalances: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new AdjustBalances__factory(),
-                new AdjustBalancesTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.AdjustBalances.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        protectedPartitions: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ProtectedPartitions__factory(),
-                new ProtectedPartitionsTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ProtectedPartitions.addresses?.[
-                      network
-                  ]
-                : undefined,
-            overrides,
-        }),
-        clearingTransferFacet: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ClearingTransferFacet__factory(),
-                new ClearingTransferFacetTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ClearingTransferFacet.addresses?.[
-                      network
-                  ]
-                : undefined,
-            overrides,
-        }),
-        clearingRedeemFacet: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ClearingRedeemFacet__factory(),
-                new ClearingRedeemFacetTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ClearingRedeemFacet.addresses?.[
-                      network
-                  ]
-                : undefined,
-            overrides,
-        }),
-        clearingHoldCreationFacet: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ClearingHoldCreationFacet__factory(),
-                new ClearingHoldCreationFacetTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ClearingHoldCreationFacet.addresses?.[
-                      network
-                  ]
-                : undefined,
-            overrides,
-        }),
-        clearingReadFacet: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ClearingReadFacet__factory(),
-                new ClearingReadFacetTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ClearingReadFacet.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        clearingActionsFacet: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ClearingActionsFacet__factory(),
-                new ClearingActionsFacetTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ClearingActionsFacet.addresses?.[
-                      network
-                  ]
-                : undefined,
-            overrides,
-        }),
-        externalPauseManagement: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ExternalPauseManagement__factory(),
-                new ExternalPauseManagementTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ExternalPauseManagement.addresses?.[
-                      network
-                  ]
-                : undefined,
-            overrides,
-        }),
-        externalControlListManagement: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ExternalControlListManagement__factory(),
-                new ExternalControlListManagementTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ExternalControlListManagement
-                      .addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        externalKycListManagement: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ExternalKycListManagement__factory(),
-                new ExternalKycListManagementTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.ExternalKycListManagement.addresses?.[
-                      network
-                  ]
-                : undefined,
-            overrides,
-        }),
-        erc3643: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new ERC3643__factory(),
-                new ERC3643TimeTravel__factory()
-            ),
+  const overrides: Overrides = { gasLimit: GAS_LIMIT.high }; // If you want to override the default parameters
+  const getFactory = <T extends ContractFactory>(
+    standardFactory: T,
+    timeTravelFactory?: T,
+  ): T => {
+    if (!timeTravelEnabled || !timeTravelFactory) return standardFactory;
+    return timeTravelFactory as T;
+  };
+  const commands = {
+    businessLogicResolver: new DeployContractWithFactoryCommand({
+      factory: new BusinessLogicResolver__factory(),
+      signer,
+      withProxy: true,
+      deployedContract: useDeployed
+        ? Configuration.contracts.BusinessLogicResolver.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    accessControl: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new AccessControlFacet__factory(),
+        new AccessControlFacetTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.AccessControlFacet.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    cap: new DeployContractWithFactoryCommand({
+      factory: getFactory(new Cap__factory(), new CapTimeTravel__factory()),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.Cap.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    controlList: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ControlList__factory(),
+        new ControlListTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ControlList.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    kyc: new DeployContractWithFactoryCommand({
+      factory: getFactory(new Kyc__factory(), new KycTimeTravel__factory()),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.Kyc.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    ssiManagement: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new SsiManagement__factory(),
+        new SsiManagementTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.SsiManagement.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    pause: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new PauseFacet__factory(),
+        new PauseFacetTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.PauseFacet.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    lock: new DeployContractWithFactoryCommand({
+      factory: getFactory(new Lock__factory(), new LockTimeTravel__factory()),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.Lock.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    hold: new DeployContractWithFactoryCommand({
+      factory: getFactory(new Hold__factory(), new HoldTimeTravel__factory()),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.Hold.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    erc20: new DeployContractWithFactoryCommand({
+      factory: getFactory(new ERC20__factory(), new ERC20TimeTravel__factory()),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ERC20.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    erc1410ScheduledTasks: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ERC1410ScheduledTasks__factory(),
+        new ERC1410ScheduledTasksTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ERC1410ScheduledTasks.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    erc1594: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ERC1594__factory(),
+        new ERC1594TimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ERC1594.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    erc1643: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ERC1643__factory(),
+        new ERC1643TimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ERC1643.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    erc1644: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ERC1644__factory(),
+        new ERC1644TimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ERC1644.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    snapshots: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new Snapshots__factory(),
+        new SnapshotsTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.Snapshots.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    diamondFacet: new DeployContractWithFactoryCommand({
+      factory: new DiamondFacet__factory(),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.DiamondFacet.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    equityUsa: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new EquityUSA__factory(),
+        new EquityUSATimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.EquityUSA.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    bondUsa: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new BondUSA__factory(),
+        new BondUSATimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.BondUSA.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    scheduledSnapshots: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ScheduledSnapshots__factory(),
+        new ScheduledSnapshotsTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ScheduledSnapshots.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    scheduledBalanceAdjustments: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ScheduledBalanceAdjustments__factory(),
+        new ScheduledBalanceAdjustmentsTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ScheduledBalanceAdjustments.addresses?.[
+            network
+          ]
+        : undefined,
+      overrides,
+    }),
+    scheduledTasks: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ScheduledTasks__factory(),
+        new ScheduledTasksTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ScheduledTasks.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    corporateActions: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new CorporateActions__factory(),
+        new CorporateActionsTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.CorporateActions.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    transferAndLock: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new TransferAndLock__factory(),
+        new TransferAndLockTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.TransferAndLock.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    adjustBalances: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new AdjustBalances__factory(),
+        new AdjustBalancesTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.AdjustBalances.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    protectedPartitions: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ProtectedPartitions__factory(),
+        new ProtectedPartitionsTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ProtectedPartitions.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    clearingTransferFacet: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ClearingTransferFacet__factory(),
+        new ClearingTransferFacetTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ClearingTransferFacet.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    clearingRedeemFacet: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ClearingRedeemFacet__factory(),
+        new ClearingRedeemFacetTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ClearingRedeemFacet.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    clearingHoldCreationFacet: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ClearingHoldCreationFacet__factory(),
+        new ClearingHoldCreationFacetTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ClearingHoldCreationFacet.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    clearingReadFacet: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ClearingReadFacet__factory(),
+        new ClearingReadFacetTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ClearingReadFacet.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    clearingActionsFacet: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ClearingActionsFacet__factory(),
+        new ClearingActionsFacetTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ClearingActionsFacet.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    externalPauseManagement: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ExternalPauseManagement__factory(),
+        new ExternalPauseManagementTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ExternalPauseManagement.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    externalControlListManagement: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ExternalControlListManagement__factory(),
+        new ExternalControlListManagementTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ExternalControlListManagement.addresses?.[
+            network
+          ]
+        : undefined,
+      overrides,
+    }),
+    externalKycListManagement: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ExternalKycListManagement__factory(),
+        new ExternalKycListManagementTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ExternalKycListManagement.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    erc3643: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new ERC3643__factory(),
+        new ERC3643TimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.ERC3643.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    freeze: new DeployContractWithFactoryCommand({
+      factory: getFactory(
+        new FreezeFacet__factory(),
+        new FreezeFacetTimeTravel__factory(),
+      ),
+      signer,
+      deployedContract: useDeployed
+        ? Configuration.contracts.FreezeFacet.addresses?.[network]
+        : undefined,
+      overrides,
+    }),
+    timeTravel:
+      timeTravelEnabled == true
+        ? new DeployContractWithFactoryCommand({
+            factory: new TimeTravel__factory(),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ERC3643.addresses?.[network]
-                : undefined,
+              ? Configuration.contracts.TimeTravel.addresses?.[network]
+              : undefined,
             overrides,
-        }),
-        freeze: new DeployContractWithFactoryCommand({
-            factory: getFactory(
-                new FreezeFacet__factory(),
-                new FreezeFacetTimeTravel__factory()
-            ),
-            signer,
-            deployedContract: useDeployed
-                ? Configuration.contracts.FreezeFacet.addresses?.[network]
-                : undefined,
-            overrides,
-        }),
-        timeTravel:
-            timeTravelEnabled == true
-                ? new DeployContractWithFactoryCommand({
-                      factory: new TimeTravel__factory(),
-                      signer,
-                      deployedContract: useDeployed
-                          ? Configuration.contracts.TimeTravel.addresses?.[
-                                network
-                            ]
-                          : undefined,
-                      overrides,
-                  })
-                : undefined,
-    }
-    const deployedContracts: DeployAtsContractsResult =
-        new DeployAtsContractsResult({
-            businessLogicResolver: await deployContractWithFactory(
-                commands.businessLogicResolver
-            ).then((result) => {
-                console.log(
-                    `BusinessLogicResolver has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            accessControl: await deployContractWithFactory(
-                commands.accessControl
-            ).then((result) => {
-                console.log(
-                    `AccessControl has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            cap: await deployContractWithFactory(commands.cap).then(
-                (result) => {
-                    console.log(
-                        `Cap has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            controlList: await deployContractWithFactory(
-                commands.controlList
-            ).then((result) => {
-                console.log(
-                    `ControlList has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            kyc: await deployContractWithFactory(commands.kyc).then(
-                (result) => {
-                    console.log(
-                        `KYC has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            ssiManagement: await deployContractWithFactory(
-                commands.ssiManagement
-            ).then((result) => {
-                console.log(
-                    `SSIManagement has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            pause: await deployContractWithFactory(commands.pause).then(
-                (result) => {
-                    console.log(
-                        `Pause has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            lock: await deployContractWithFactory(commands.lock).then(
-                (result) => {
-                    console.log(
-                        `Lock has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            hold: await deployContractWithFactory(commands.hold).then(
-                (result) => {
-                    console.log(
-                        `Hold has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            erc20: await deployContractWithFactory(commands.erc20).then(
-                (result) => {
-                    console.log(
-                        `ERC20 has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            erc1410ScheduledTasks: await deployContractWithFactory(
-                commands.erc1410ScheduledTasks
-            ).then((result) => {
-                console.log(
-                    `ERC1410ScheduledTasks has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            erc1594: await deployContractWithFactory(commands.erc1594).then(
-                (result) => {
-                    console.log(
-                        `ERC1594 has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            erc1643: await deployContractWithFactory(commands.erc1643).then(
-                (result) => {
-                    console.log(
-                        `ERC1643 has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            erc1644: await deployContractWithFactory(commands.erc1644).then(
-                (result) => {
-                    console.log(
-                        `ERC1644 has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            snapshots: await deployContractWithFactory(commands.snapshots).then(
-                (result) => {
-                    console.log(
-                        `Snapshots has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            diamondFacet: await deployContractWithFactory(
-                commands.diamondFacet
-            ).then((result) => {
-                console.log(
-                    `DiamondFacet has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            equityUsa: await deployContractWithFactory(commands.equityUsa).then(
-                (result) => {
-                    console.log(
-                        `EquityUSA has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            bondUsa: await deployContractWithFactory(commands.bondUsa).then(
-                (result) => {
-                    console.log(
-                        `BondUSA has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            scheduledSnapshots: await deployContractWithFactory(
-                commands.scheduledSnapshots
-            ).then((result) => {
-                console.log(
-                    `ScheduledSnapshots has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            scheduledBalanceAdjustments: await deployContractWithFactory(
-                commands.scheduledBalanceAdjustments
-            ).then((result) => {
-                console.log(
-                    `ScheduledBalanceAdjustments has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            scheduledTasks: await deployContractWithFactory(
-                commands.scheduledTasks
-            ).then((result) => {
-                console.log(
-                    `ScheduledTasks has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            corporateActions: await deployContractWithFactory(
-                commands.corporateActions
-            ).then((result) => {
-                console.log(
-                    `CorporateActions has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            transferAndLock: await deployContractWithFactory(
-                commands.transferAndLock
-            ).then((result) => {
-                console.log(
-                    `TransferAndLock has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            adjustBalances: await deployContractWithFactory(
-                commands.adjustBalances
-            ).then((result) => {
-                console.log(
-                    `AdjustBalances has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            protectedPartitions: await deployContractWithFactory(
-                commands.protectedPartitions
-            ).then((result) => {
-                console.log(
-                    `ProtectedPartitions has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            clearingTransferFacet: await deployContractWithFactory(
-                commands.clearingTransferFacet
-            ).then((result) => {
-                console.log(
-                    `ClearingTransferFacet has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            clearingRedeemFacet: await deployContractWithFactory(
-                commands.clearingRedeemFacet
-            ).then((result) => {
-                console.log(
-                    `ClearingRedeemFacet has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            clearingHoldCreationFacet: await deployContractWithFactory(
-                commands.clearingHoldCreationFacet
-            ).then((result) => {
-                console.log(
-                    `ClearingHoldCreationFacet has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            clearingReadFacet: await deployContractWithFactory(
-                commands.clearingReadFacet
-            ).then((result) => {
-                console.log(
-                    `ClearingReadFacet has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            clearingActionsFacet: await deployContractWithFactory(
-                commands.clearingActionsFacet
-            ).then((result) => {
-                console.log(
-                    `ClearingActionsFacet has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            externalPauseManagement: await deployContractWithFactory(
-                commands.externalPauseManagement
-            ).then((result) => {
-                console.log(
-                    `ExternalPauseManagement has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            externalControlListManagement: await deployContractWithFactory(
-                commands.externalControlListManagement
-            ).then((result) => {
-                console.log(
-                    `ExternalControlListManagement has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            externalKycListManagement: await deployContractWithFactory(
-                commands.externalKycListManagement
-            ).then((result) => {
-                console.log(
-                    `ExternalKycListManagement has been deployed successfully at ${result.address}`
-                )
-                return result
-            }),
-            erc3643: await deployContractWithFactory(commands.erc3643).then(
-                (result) => {
-                    console.log(
-                        `ERC3643 has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            freeze: await deployContractWithFactory(commands.freeze).then(
-                (result) => {
-                    console.log(
-                        `Freeze has been deployed successfully at ${result.address}`
-                    )
-                    return result
-                }
-            ),
-            timeTravel: commands.timeTravel
-                ? await deployContractWithFactory(commands.timeTravel).then(
-                      (result) => {
-                          console.log(
-                              `TimeTravel has been deployed successfully at ${result.address}`
-                          )
-                          return result
-                      }
-                  )
-                : undefined,
-            deployer: signer,
-        })
+          })
+        : undefined,
+  };
+  const deployedContracts: DeployAtsContractsResult =
+    new DeployAtsContractsResult({
+      businessLogicResolver: await deployContractWithFactory(
+        commands.businessLogicResolver,
+      ).then((result) => {
+        console.log(
+          `BusinessLogicResolver has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      accessControl: await deployContractWithFactory(
+        commands.accessControl,
+      ).then((result) => {
+        console.log(
+          `AccessControl has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      cap: await deployContractWithFactory(commands.cap).then((result) => {
+        console.log(`Cap has been deployed successfully at ${result.address}`);
+        return result;
+      }),
+      controlList: await deployContractWithFactory(commands.controlList).then(
+        (result) => {
+          console.log(
+            `ControlList has been deployed successfully at ${result.address}`,
+          );
+          return result;
+        },
+      ),
+      kyc: await deployContractWithFactory(commands.kyc).then((result) => {
+        console.log(`KYC has been deployed successfully at ${result.address}`);
+        return result;
+      }),
+      ssiManagement: await deployContractWithFactory(
+        commands.ssiManagement,
+      ).then((result) => {
+        console.log(
+          `SSIManagement has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      pause: await deployContractWithFactory(commands.pause).then((result) => {
+        console.log(
+          `Pause has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      lock: await deployContractWithFactory(commands.lock).then((result) => {
+        console.log(`Lock has been deployed successfully at ${result.address}`);
+        return result;
+      }),
+      hold: await deployContractWithFactory(commands.hold).then((result) => {
+        console.log(`Hold has been deployed successfully at ${result.address}`);
+        return result;
+      }),
+      erc20: await deployContractWithFactory(commands.erc20).then((result) => {
+        console.log(
+          `ERC20 has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      erc1410ScheduledTasks: await deployContractWithFactory(
+        commands.erc1410ScheduledTasks,
+      ).then((result) => {
+        console.log(
+          `ERC1410ScheduledTasks has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      erc1594: await deployContractWithFactory(commands.erc1594).then(
+        (result) => {
+          console.log(
+            `ERC1594 has been deployed successfully at ${result.address}`,
+          );
+          return result;
+        },
+      ),
+      erc1643: await deployContractWithFactory(commands.erc1643).then(
+        (result) => {
+          console.log(
+            `ERC1643 has been deployed successfully at ${result.address}`,
+          );
+          return result;
+        },
+      ),
+      erc1644: await deployContractWithFactory(commands.erc1644).then(
+        (result) => {
+          console.log(
+            `ERC1644 has been deployed successfully at ${result.address}`,
+          );
+          return result;
+        },
+      ),
+      snapshots: await deployContractWithFactory(commands.snapshots).then(
+        (result) => {
+          console.log(
+            `Snapshots has been deployed successfully at ${result.address}`,
+          );
+          return result;
+        },
+      ),
+      diamondFacet: await deployContractWithFactory(commands.diamondFacet).then(
+        (result) => {
+          console.log(
+            `DiamondFacet has been deployed successfully at ${result.address}`,
+          );
+          return result;
+        },
+      ),
+      equityUsa: await deployContractWithFactory(commands.equityUsa).then(
+        (result) => {
+          console.log(
+            `EquityUSA has been deployed successfully at ${result.address}`,
+          );
+          return result;
+        },
+      ),
+      bondUsa: await deployContractWithFactory(commands.bondUsa).then(
+        (result) => {
+          console.log(
+            `BondUSA has been deployed successfully at ${result.address}`,
+          );
+          return result;
+        },
+      ),
+      scheduledSnapshots: await deployContractWithFactory(
+        commands.scheduledSnapshots,
+      ).then((result) => {
+        console.log(
+          `ScheduledSnapshots has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      scheduledBalanceAdjustments: await deployContractWithFactory(
+        commands.scheduledBalanceAdjustments,
+      ).then((result) => {
+        console.log(
+          `ScheduledBalanceAdjustments has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      scheduledTasks: await deployContractWithFactory(
+        commands.scheduledTasks,
+      ).then((result) => {
+        console.log(
+          `ScheduledTasks has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      corporateActions: await deployContractWithFactory(
+        commands.corporateActions,
+      ).then((result) => {
+        console.log(
+          `CorporateActions has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      transferAndLock: await deployContractWithFactory(
+        commands.transferAndLock,
+      ).then((result) => {
+        console.log(
+          `TransferAndLock has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      adjustBalances: await deployContractWithFactory(
+        commands.adjustBalances,
+      ).then((result) => {
+        console.log(
+          `AdjustBalances has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      protectedPartitions: await deployContractWithFactory(
+        commands.protectedPartitions,
+      ).then((result) => {
+        console.log(
+          `ProtectedPartitions has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      clearingTransferFacet: await deployContractWithFactory(
+        commands.clearingTransferFacet,
+      ).then((result) => {
+        console.log(
+          `ClearingTransferFacet has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      clearingRedeemFacet: await deployContractWithFactory(
+        commands.clearingRedeemFacet,
+      ).then((result) => {
+        console.log(
+          `ClearingRedeemFacet has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      clearingHoldCreationFacet: await deployContractWithFactory(
+        commands.clearingHoldCreationFacet,
+      ).then((result) => {
+        console.log(
+          `ClearingHoldCreationFacet has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      clearingReadFacet: await deployContractWithFactory(
+        commands.clearingReadFacet,
+      ).then((result) => {
+        console.log(
+          `ClearingReadFacet has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      clearingActionsFacet: await deployContractWithFactory(
+        commands.clearingActionsFacet,
+      ).then((result) => {
+        console.log(
+          `ClearingActionsFacet has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      externalPauseManagement: await deployContractWithFactory(
+        commands.externalPauseManagement,
+      ).then((result) => {
+        console.log(
+          `ExternalPauseManagement has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      externalControlListManagement: await deployContractWithFactory(
+        commands.externalControlListManagement,
+      ).then((result) => {
+        console.log(
+          `ExternalControlListManagement has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      externalKycListManagement: await deployContractWithFactory(
+        commands.externalKycListManagement,
+      ).then((result) => {
+        console.log(
+          `ExternalKycListManagement has been deployed successfully at ${result.address}`,
+        );
+        return result;
+      }),
+      erc3643: await deployContractWithFactory(commands.erc3643).then(
+        (result) => {
+          console.log(
+            `ERC3643 has been deployed successfully at ${result.address}`,
+          );
+          return result;
+        },
+      ),
+      freeze: await deployContractWithFactory(commands.freeze).then(
+        (result) => {
+          console.log(
+            `Freeze has been deployed successfully at ${result.address}`,
+          );
+          return result;
+        },
+      ),
+      timeTravel: commands.timeTravel
+        ? await deployContractWithFactory(commands.timeTravel).then(
+            (result) => {
+              console.log(
+                `TimeTravel has been deployed successfully at ${result.address}`,
+              );
+              return result;
+            },
+          )
+        : undefined,
+      deployer: signer,
+    });
 
-    if (!timeTravelEnabled) {
-        const { ...atsContracts } = deployedContracts
-        delete atsContracts.timeTravel
-        return atsContracts
-    }
-    return deployedContracts
+  if (!timeTravelEnabled) {
+    const { ...atsContracts } = deployedContracts;
+    delete atsContracts.timeTravel;
+    return atsContracts;
+  }
+  return deployedContracts;
 }
 
 export async function deployContractWithFactory<
-    F extends ContractFactory,
-    C extends Contract = ReturnType<F['attach']>,
+  F extends ContractFactory,
+  C extends Contract = ReturnType<F['attach']>,
 >({
-    factory,
-    signer,
-    args,
-    overrides,
-    withProxy,
-    deployedContract,
+  factory,
+  signer,
+  args,
+  overrides,
+  withProxy,
+  deployedContract,
 }: DeployContractWithFactoryCommand<F>): Promise<
-    DeployContractWithFactoryResult<C>
+  DeployContractWithFactoryResult<C>
 > {
-    let implementationContract: C
-    let proxyAddress: string | undefined
-    let proxyAdminAddress: string | undefined
-    const txResponseList: ContractTransaction[] = []
+  let implementationContract: C;
+  let proxyAddress: string | undefined;
+  let proxyAdminAddress: string | undefined;
+  const txResponseList: ContractTransaction[] = [];
 
-    if (deployedContract?.address) {
-        implementationContract = factory.attach(deployedContract.address) as C
-    } else {
-        implementationContract = (await factory
-            .connect(signer)
-            .deploy(...args, overrides)) as C
-        txResponseList.push(implementationContract.deployTransaction)
-    }
+  if (deployedContract?.address) {
+    implementationContract = factory.attach(deployedContract.address) as C;
+  } else {
+    implementationContract = (await factory
+      .connect(signer)
+      .deploy(...args, overrides)) as C;
+    txResponseList.push(implementationContract.deployTransaction);
+  }
 
-    if (!withProxy) {
-        await validateTxResponseList(
-            txResponseList.map(
-                (txResponse) =>
-                    new ValidateTxResponseCommand({
-                        txResponse,
-                        errorMessage: MESSAGES.deploy.error,
-                    })
-            )
-        )
-        return new DeployContractWithFactoryResult({
-            address: implementationContract.address,
-            contract: implementationContract,
-            receipt: await txResponseList[0].wait(),
-        })
-    }
-
-    if (deployedContract?.proxyAdminAddress) {
-        proxyAdminAddress = deployedContract.proxyAdminAddress
-    } else {
-        const proxyAdmin = await new ProxyAdmin__factory(signer).deploy()
-        txResponseList.push(proxyAdmin.deployTransaction)
-        proxyAdminAddress = proxyAdmin.address
-    }
-
-    if (deployedContract?.proxyAddress) {
-        proxyAddress = deployedContract.proxyAddress
-    } else {
-        const proxy = await new TransparentUpgradeableProxy__factory(
-            signer
-        ).deploy(implementationContract.address, proxyAdminAddress, '0x')
-        txResponseList.push(proxy.deployTransaction)
-        proxyAddress = proxy.address
-    }
-
+  if (!withProxy) {
     await validateTxResponseList(
-        txResponseList.map(
-            (txResponse) =>
-                new ValidateTxResponseCommand({
-                    txResponse,
-                    errorMessage: MESSAGES.deploy.error,
-                })
-        )
-    )
-
+      txResponseList.map(
+        (txResponse) =>
+          new ValidateTxResponseCommand({
+            txResponse,
+            errorMessage: MESSAGES.deploy.error,
+          }),
+      ),
+    );
     return new DeployContractWithFactoryResult({
-        address: implementationContract.address,
-        contract: factory.connect(signer).attach(proxyAddress) as C,
-        proxyAddress: proxyAddress,
-        proxyAdminAddress: proxyAdminAddress,
-        receipt: await txResponseList[0].wait(),
-    })
+      address: implementationContract.address,
+      contract: implementationContract,
+      receipt: await txResponseList[0].wait(),
+    });
+  }
+
+  if (deployedContract?.proxyAdminAddress) {
+    proxyAdminAddress = deployedContract.proxyAdminAddress;
+  } else {
+    const proxyAdmin = await new ProxyAdmin__factory(signer).deploy();
+    txResponseList.push(proxyAdmin.deployTransaction);
+    proxyAdminAddress = proxyAdmin.address;
+  }
+
+  if (deployedContract?.proxyAddress) {
+    proxyAddress = deployedContract.proxyAddress;
+  } else {
+    const proxy = await new TransparentUpgradeableProxy__factory(signer).deploy(
+      implementationContract.address,
+      proxyAdminAddress,
+      '0x',
+    );
+    txResponseList.push(proxy.deployTransaction);
+    proxyAddress = proxy.address;
+  }
+
+  await validateTxResponseList(
+    txResponseList.map(
+      (txResponse) =>
+        new ValidateTxResponseCommand({
+          txResponse,
+          errorMessage: MESSAGES.deploy.error,
+        }),
+    ),
+  );
+
+  return new DeployContractWithFactoryResult({
+    address: implementationContract.address,
+    contract: factory.connect(signer).attach(proxyAddress) as C,
+    proxyAddress: proxyAddress,
+    proxyAdminAddress: proxyAdminAddress,
+    receipt: await txResponseList[0].wait(),
+  });
 }
 
 /**
@@ -1248,58 +1191,58 @@ export async function deployContractWithFactory<
  * });
  */
 export async function deployContract({
-    name,
-    signer,
-    args,
+  name,
+  signer,
+  args,
 }: DeployContractCommand): Promise<DeployContractResult> {
-    console.log(`Deploying ${name}. please wait...`)
+  console.log(`Deploying ${name}. please wait...`);
 
-    const contractFactory = await ethers.getContractFactory(name, signer)
-    const contract = await contractFactory.deploy(...args)
-    const receipt = contract.deployTransaction.wait()
+  const contractFactory = await ethers.getContractFactory(name, signer);
+  const contract = await contractFactory.deploy(...args);
+  const receipt = contract.deployTransaction.wait();
 
-    console.log(`${name} deployed at ${contract.address}`)
+  console.log(`${name} deployed at ${contract.address}`);
 
-    // if no proxy, return the contract (BREAK)
-    if (Configuration.contracts[name].deployType !== 'proxy') {
-        return new DeployContractResult({
-            name,
-            contract,
-            address: contract.address,
-            receipt: await receipt,
-        })
-    }
-
-    console.log(`Deploying ${name} Proxy Admin. please wait...`)
-
-    const { address: proxyAdminAddress } = await deployContract(
-        new DeployContractCommand({
-            name: 'ProxyAdmin',
-            signer,
-            args: [],
-        })
-    )
-
-    console.log(`${name} Proxy Admin deployed at ${proxyAdminAddress}`)
-
-    console.log(`Deploying ${name} Proxy. please wait...`)
-
-    const { address: proxyAddress } = await deployContract(
-        new DeployContractCommand({
-            name: 'TransparentUpgradeableProxy',
-            signer,
-            args: [contract.address, proxyAdminAddress, '0x'],
-        })
-    )
-
-    console.log(`${name} Proxy deployed at ${proxyAddress}`)
-
+  // if no proxy, return the contract (BREAK)
+  if (Configuration.contracts[name].deployType !== 'proxy') {
     return new DeployContractResult({
-        name,
-        address: contract.address,
-        contract,
-        proxyAddress,
-        proxyAdminAddress,
-        receipt: await receipt,
-    })
+      name,
+      contract,
+      address: contract.address,
+      receipt: await receipt,
+    });
+  }
+
+  console.log(`Deploying ${name} Proxy Admin. please wait...`);
+
+  const { address: proxyAdminAddress } = await deployContract(
+    new DeployContractCommand({
+      name: 'ProxyAdmin',
+      signer,
+      args: [],
+    }),
+  );
+
+  console.log(`${name} Proxy Admin deployed at ${proxyAdminAddress}`);
+
+  console.log(`Deploying ${name} Proxy. please wait...`);
+
+  const { address: proxyAddress } = await deployContract(
+    new DeployContractCommand({
+      name: 'TransparentUpgradeableProxy',
+      signer,
+      args: [contract.address, proxyAdminAddress, '0x'],
+    }),
+  );
+
+  console.log(`${name} Proxy deployed at ${proxyAddress}`);
+
+  return new DeployContractResult({
+    name,
+    address: contract.address,
+    contract,
+    proxyAddress,
+    proxyAdminAddress,
+    receipt: await receipt,
+  });
 }

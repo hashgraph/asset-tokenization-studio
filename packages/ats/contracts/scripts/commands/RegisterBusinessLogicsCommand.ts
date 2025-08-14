@@ -204,28 +204,28 @@
 */
 
 import {
-    BaseAtsContractListCommand,
-    BaseAtsContractListCommandParams,
-} from '../index'
+  BaseAtsContractListCommand,
+  BaseAtsContractListCommandParams,
+} from '../index';
 
-type RegisterBusinessLogicsCommandParams = BaseAtsContractListCommandParams
+type RegisterBusinessLogicsCommandParams = BaseAtsContractListCommandParams;
 
 export default class RegisterBusinessLogicsCommand extends BaseAtsContractListCommand {
-    constructor({
-        contractAddressList,
-        businessLogicResolverProxyAddress,
-        signer,
-        overrides,
-    }: RegisterBusinessLogicsCommandParams) {
-        super({
-            contractAddressList,
-            businessLogicResolverProxyAddress,
-            signer,
-            overrides,
-        })
-    }
+  constructor({
+    contractAddressList,
+    businessLogicResolverProxyAddress,
+    signer,
+    overrides,
+  }: RegisterBusinessLogicsCommandParams) {
+    super({
+      contractAddressList,
+      businessLogicResolverProxyAddress,
+      signer,
+      overrides,
+    });
+  }
 
-    get contractAddressListToRegister() {
-        return this.contractAddressList
-    }
+  get contractAddressListToRegister() {
+    return this.contractAddressList;
+  }
 }

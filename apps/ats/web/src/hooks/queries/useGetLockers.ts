@@ -207,9 +207,9 @@ import {
   GetLockRequest,
   GetLocksIdRequest,
   LockViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
+} from '@hashgraph/asset-tokenization-sdk';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
 
 export const GET_LOCKERS = (securityId: string, targetId: string) =>
   `GET_LOCKERS_${securityId}_${targetId}`;
@@ -244,7 +244,7 @@ export const useGetLockers = (
           (lock): lock is LockViewModel => lock !== null,
         );
       } catch (error) {
-        console.error("Error fetching lockers", error);
+        console.error('Error fetching lockers', error);
         throw error;
       }
     },

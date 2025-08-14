@@ -203,9 +203,9 @@
 
 */
 
-import { GetFrozenPartialTokensRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
+import { GetFrozenPartialTokensRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
 
 export const GET_FROZEN_BALANCE = (securityId: string, targetId: string) =>
   `GET_FROZEN_BALANCE_${securityId}_${targetId}`;
@@ -224,7 +224,7 @@ export const useGetFrozenTokens = (
 
         return freezeAmount;
       } catch (error) {
-        console.error("Error fetching freeze", error);
+        console.error('Error fetching freeze', error);
         throw error;
       }
     },

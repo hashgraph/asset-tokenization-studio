@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createLogger, LoggerOptions, transports, format } from 'winston';
 import safeStringify from 'fast-safe-stringify';
 import BaseError from '../../../core/error/BaseError.js';
@@ -271,8 +270,7 @@ export default class LogService {
     });
   }
 
-  public static logError(error: unknown, ...params: any[]): void;
-  public static logError(error: BaseError, ...params: any[]): void {
+  public static logError(error: unknown, ...params: any[]): void {
     if (error instanceof BaseError) {
       this.log(
         LogLevel.ERROR,

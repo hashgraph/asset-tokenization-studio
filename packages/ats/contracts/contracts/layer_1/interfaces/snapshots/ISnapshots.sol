@@ -209,14 +209,9 @@ pragma solidity 0.8.18;
 interface ISnapshots {
     function takeSnapshot() external returns (uint256 snapshotID_);
 
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint8 decimals_);
+    function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_);
 
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
+    function balanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (uint256 balance_);
 
     function balanceOfAtSnapshotByPartition(
         bytes32 _partition,
@@ -224,14 +219,9 @@ interface ISnapshots {
         address _tokenHolder
     ) external view returns (uint256 balance_);
 
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (bytes32[] memory);
+    function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (bytes32[] memory);
 
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 totalSupply_);
+    function totalSupplyAtSnapshot(uint256 _snapshotID) external view returns (uint256 totalSupply_);
 
     function totalSupplyAtSnapshotByPartition(
         bytes32 _partition,

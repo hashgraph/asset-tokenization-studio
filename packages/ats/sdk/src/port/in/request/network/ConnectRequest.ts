@@ -302,6 +302,4 @@ export default class ConnectRequest
     this.hwcSettings = hwcSettings;
     this.custodialWalletSettings = custodialWalletSettings;
   }
-
-  [n: string]: any;
 }

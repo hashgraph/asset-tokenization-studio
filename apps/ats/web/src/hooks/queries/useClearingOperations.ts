@@ -203,8 +203,8 @@
 
 */
 
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import SDKService from "../../services/SDKService";
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
 import {
   GetClearingsIdForByPartitionRequest,
   IsClearingActivatedRequest,
@@ -212,7 +212,7 @@ import {
   GetClearingTransferForByPartitionRequest,
   GetClearingCreateHoldForByPartitionRequest,
   GetClearedAmountForRequest,
-} from "@hashgraph/asset-tokenization-sdk";
+} from '@hashgraph/asset-tokenization-sdk';
 
 export const GET_CLEARING_OPERATIONS_LIST = (securityId: string) =>
   `GET_CLEARING_OPERATIONS_LIST_${securityId}`;
@@ -271,7 +271,6 @@ export const useGetClearingOperations = (
 
             const operations = await Promise.all(
               clearingIds.map(async (clearingId) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 let result: any = null;
 
                 if (operationType === 0) {
@@ -304,8 +303,8 @@ export const useGetClearingOperations = (
                   id: clearingId,
                   amount: result.amount,
                   expirationDate: new Date(result.expirationDate),
-                  data: result.data || "",
-                  operatorData: result.operatorData || "",
+                  data: result.data || '',
+                  operatorData: result.operatorData || '',
                   destination: result.destination,
                   holdEscrow: result.holdEscrow,
                   holdExpirationDate: result.holdExpirationDate
@@ -323,7 +322,7 @@ export const useGetClearingOperations = (
 
         return results.flat().filter(Boolean) as ClearingOperationViewModel[];
       } catch (error) {
-        console.error("Error fetching clearing operations", error);
+        console.error('Error fetching clearing operations', error);
         throw error;
       }
     },
@@ -344,7 +343,7 @@ export const useGetIsClearingActivated = (
 
         return isClearingActivated;
       } catch (error) {
-        console.error("Error fetching clearing operations", error);
+        console.error('Error fetching clearing operations', error);
         throw error;
       }
     },
@@ -364,7 +363,7 @@ export const useGetClearedAmountFor = (
 
         return clearedAmount;
       } catch (error) {
-        console.error("Error fetching cleared amount", error);
+        console.error('Error fetching cleared amount', error);
         throw error;
       }
     },

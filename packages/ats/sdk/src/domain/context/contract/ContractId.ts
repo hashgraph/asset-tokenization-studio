@@ -244,11 +244,13 @@ export default class ContractId extends HederaId {
     return new ContractId('0.0.' + id.toString());
   }
 
-  public static fromHederaContractId(con: HContractId | DelegateContractId) {
+  public static fromHederaContractId(
+    con: HContractId | DelegateContractId,
+  ): ContractId {
     return new ContractId(String(con));
   }
 
-  public static fromHederaEthereumAddress(evmAddress: string) {
+  public static fromHederaEthereumAddress(evmAddress: string): ContractId {
     return new ContractId(
       HContractId.fromSolidityAddress(evmAddress).toString(),
     );

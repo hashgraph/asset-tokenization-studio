@@ -238,6 +238,22 @@ import EventService from '../../../../app/service/event/EventService';
 import NetworkService from '../../../../app/service/network/NetworkService';
 import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator';
 import Injectable from '../../../../core/Injectable';
+
+// ---------------------------------------------------------------------------
+// Bridge helpers
+// Duplicate installations of @hashgraph/sdk inside the monorepo cause structural
+// type mismatches (private fields differ). We relax typing at the boundary with
+// WalletConnect helper functions so the runtime objects can interoperate.
+// ---------------------------------------------------------------------------
+ 
+const txToBase64Bridge = transactionToBase64String as unknown as (tx: any) => string;
+ 
+const txToBodyBridge = transactionToTransactionBody as unknown as (
+   
+  tx: any,
+   
+  accountId: any,
+) => unknown;
 import Hex from '../../../../core/Hex';
 import Account from '../../../../domain/context/account/Account';
 import TransactionResponse from '../../../../domain/context/transaction/TransactionResponse.js';
@@ -457,7 +473,15 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
       throw new AccountNotFound();
     }
 
-    this.signer = this.dAppConnector.getSigner(AccountId.fromString(accountId));
+    // NOTE: The Signer type coming from dAppConnector may originate from a different
+    // instance of @hashgraph/sdk than the one resolved in this package (monorepo duplication),
+    // causing private field structural incompatibility. A safe cast is applied because the
+    // runtime object satisfies the Signer interface contract we rely on.
+    // Cast through unknown/any to bridge potential duplicate @hashgraph/sdk installations in monorepo
+    const unifiedAccountId = AccountId.fromString(accountId) as unknown as AccountId;
+    this.signer = (this.dAppConnector.getSigner as unknown as (
+      accountId: AccountId,
+    ) => unknown)(unifiedAccountId) as Signer;
     LogService.logTrace('Signer set to:', this.signer);
 
     this.account = new Account({
@@ -563,7 +587,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
         );
       }
       const params: SignAndExecuteTransactionParams = {
-        transactionList: transactionToBase64String(transaction),
+        transactionList: txToBase64Bridge(transaction as unknown as any),
         signerAccountId: `${this.chainId}:${this.account.id.toString()}`,
       };
       LogService.logTrace(
@@ -652,10 +676,10 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
 
       const params: SignTransactionParams = {
         transactionBody: transactionBodyToBase64String(
-          transactionToTransactionBody(
-            message,
-            AccountId.fromString(this.networkService.consensusNodes[0]),
-          ),
+          txToBodyBridge(
+            message as unknown as any,
+            AccountId.fromString(this.networkService.consensusNodes[0]) as unknown,
+          ) as unknown as any,
         ),
         signerAccountId: `${this.chainId}:${this.account.id.toString()}`,
       };
@@ -669,7 +693,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
         `Signature result: ${JSON.stringify(signResult, null, 2)}`,
       );
       const decodedSignatureMap = base64StringToSignatureMap(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         (signResult as any).signatureMap,
       );
       LogService.logTrace(

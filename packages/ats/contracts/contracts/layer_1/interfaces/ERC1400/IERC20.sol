@@ -208,8 +208,8 @@
 
 pragma solidity 0.8.18;
 
-import {IERC20StorageWrapper} from './IERC20StorageWrapper.sol';
-import {IFactory} from '../../../interfaces/factory/IFactory.sol';
+import { IERC20StorageWrapper } from './IERC20StorageWrapper.sol';
+import { IFactory } from '../../../interfaces/factory/IFactory.sol';
 
 interface IERC20 is IERC20StorageWrapper {
     struct ERC20MetadataInfo {
@@ -261,11 +261,7 @@ interface IERC20 is IERC20StorageWrapper {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
 
     function name() external view returns (string memory);
 
@@ -280,10 +276,7 @@ interface IERC20 is IERC20StorageWrapper {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(
-        address owner,
-        address spender
-    ) external view returns (uint256);
+    function allowance(address owner, address spender) external view returns (uint256);
 
     function decimalsAt(uint256 _timestamp) external view returns (uint8);
 }

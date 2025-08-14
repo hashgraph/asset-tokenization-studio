@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { injectable } from 'tsyringe';
 import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from '../Constants.js';
 import { CommandMetadata } from '../decorator/CommandMetadata.js';
