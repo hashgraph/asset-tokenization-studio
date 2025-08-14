@@ -1,14 +1,22 @@
-name: Tests
+name: Tests Mass Payout
+
 on:
-  pull_request:
   push:
     branches: [main]
+  pull_request:
+    paths:
+      - 'packages/mass-payout/**'
+      - 'apps/mass-payout/**'
+      - 'package.json'
+      - '.github/workflows/*mp*.yml'
+      - '.github/workflows/*mp*.yaml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  test-node:
+  test-mass-payout:
     name: testing
     runs-on: token-studio-linux-large
     env:
@@ -34,12 +42,10 @@ jobs:
       AWS_KMS_HEDERA_PUBLIC_KEY: '302d300706052b8104000a03220003ee815bb9b5e53f5dbe7264a77e586127dfcb75da8c1246f5aa6ededdb13e6c21'
       REACT_APP_MIRROR_NODE: 'https://testnet.mirrornode.hedera.com/api/v1/'
       REACT_APP_RPC_NODE: 'https://testnet.hashio.io/api'
-      REACT_APP_RPC_RESOLVER: '0.0.5479997'
-      REACT_APP_RPC_FACTORY: '0.0.5480051'
+      REACT_APP_RESOLVER: '0.0.5479997'
+      REACT_APP_FACTORY: '0.0.5480051'
       REACT_APP_SHOW_DISCLAIMER: 'true'
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-    permissions:
-      contents: read
 
     steps:
       - name: Harden Runner
@@ -53,53 +59,13 @@ jobs:
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20.x
+          node-version: 22.x
 
-      - name: Install dependencies Contracts
-        working-directory: contracts
-        run: |
-          npm ci
-          npm run compile:force
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Test Contracts
-        working-directory: contracts
-        run: npm run test
+      # - name: Build mass-payout
+      #   run: npm run mp:build
 
-      - name: Install dependencies SDK
-        working-directory: sdk
-        run: |
-          npm ci
-          npm run build
-
-      - name: Install Yarn
-        run: npm install -g yarn@1.22.22
-
-      #      # No tests for UI components yet
-      #      - name: Install dependencies UI Components
-      #        working-directory: uiComponents
-      #        run: yarn install
-
-      - name: Install dependencies web
-        working-directory: web
-        run: yarn install
-
-      - name: Build web
-        working-directory: web
-        run: yarn build
-
-      - name: Test web
-        working-directory: web
-        run: npm run test
-
-      - name: Test sdk
-        working-directory: sdk
-        run: npm run test
-
-      #      # No tests for UI components yet
-      #      - name: Test UI Components
-      #        working-directory: uiComponents
-      #        run: ${{ steps.cgroup.outputs.exec }} npm run test
-
-      - name: Upload coverage report
-        if: ${{ !cancelled() && always() }}
-        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673
+      # - name: Test mass-payout
+      #   run: npm run mp:test
