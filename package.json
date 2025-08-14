@@ -78,11 +78,16 @@
     "typescript": "^5.8.2"
   },
   "lint-staged": {
-    "*.sol": ["npm run lint:staged:sol --", "npm run format:staged --"],
+    "*.sol": [
+      "npm run lint:staged:sol --",
+      "npm run format:staged --"
+    ],
     "*.{js,mjs,cjs,ts,tsx,mts}": [
       "npm run lint:staged:js -- --fix",
       "npm run format:staged --"
     ],
-    "*.{json,md,yml,yaml}": ["npm run format:staged --"]
+    "*.{json,md,yml,yaml}": [
+      "npm run format:staged --"
+    ]
   }
 }
