@@ -27,6 +27,7 @@
     "ats:contracts:test": "npm run test --workspace=packages/ats/contracts",
     "ats:sdk:test": "npm run test --workspace=packages/ats/sdk",
     "ats:web:test": "npm run test --workspace=apps/ats/web",
+    "ats:web:test:update": "npm run test:update --workspace=apps/ats/web",
     "ats:test": "npm run ats:contracts:test && npm run ats:sdk:test && npm run ats:web:test",
     "ats:contracts:test:ci": "npm run test:ci --workspace=packages/ats/contracts --if-present || npm run test --workspace=packages/ats/contracts",
     "ats:sdk:test:ci": "npm run test:ci --workspace=packages/ats/sdk --if-present || npm run test --workspace=packages/ats/sdk",
@@ -78,16 +79,11 @@
     "typescript": "^5.8.2"
   },
   "lint-staged": {
-    "*.sol": [
-      "npm run lint:staged:sol --",
-      "npm run format:staged --"
-    ],
+    "*.sol": ["npm run lint:staged:sol --", "npm run format:staged --"],
     "*.{js,mjs,cjs,ts,tsx,mts}": [
       "npm run lint:staged:js -- --fix",
       "npm run format:staged --"
     ],
-    "*.{json,md,yml,yaml}": [
-      "npm run format:staged --"
-    ]
+    "*.{json,md,yml,yaml}": ["npm run format:staged --"]
   }
 }
