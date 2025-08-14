@@ -8,7 +8,7 @@ module.exports = {
   testPathIgnorePatterns: ['/build/', '/src_old/'],
   modulePathIgnorePatterns: ['/build/'],
   collectCoverage: true,
-  coverageDirectory: '../coverage/sdk',
+  coverageDirectory: '../../../coverage/sdk',
   collectCoverageFrom: [
     'src/**/*.ts',
     'src/**/*.mts',
