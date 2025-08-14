@@ -204,10 +204,10 @@
 */
 
 import { Stack } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { ProgramDividend } from "./ProgramDividend";
 import { SeeDividend } from "./SeeDividend";
+import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 import { DividendsHolders } from "./DividendsHolders";
 import { DividendsList } from "./DividendsList";
 
@@ -218,7 +218,7 @@ export const Dividends = () => {
 
   return (
     <Stack w="full" h="full" layerStyle="container" pt={0}>
-      <Tabs
+      <PanelTabs
         tabs={[
           { content: <DividendsList />, header: tTabs("list") },
           { content: <ProgramDividend />, header: tTabs("program") },

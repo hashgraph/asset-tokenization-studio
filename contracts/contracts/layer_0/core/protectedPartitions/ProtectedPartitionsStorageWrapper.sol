@@ -206,16 +206,18 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {KycStorageWrapper} from '../kyc/KycStorageWrapper.sol';
-import {
-    IProtectedPartitionsStorageWrapper
-} from '../../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol';
 import {
     _PROTECTED_PARTITIONS_PARTICIPANT_ROLE
 } from '../../constants/roles.sol';
 import {
     _PROTECTED_PARTITIONS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
+import {
+    IProtectedPartitionsStorageWrapper
+} from '../../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol';
+import {IClearing} from '../../../layer_1/interfaces/clearing/IClearing.sol';
+import {Hold, ProtectedHold} from '../../../layer_1/interfaces/hold/IHold.sol';
+import {KycStorageWrapper} from '../kyc/KycStorageWrapper.sol';
 import {
     getMessageHashTransfer,
     getMessageHashRedeem,
@@ -225,8 +227,6 @@ import {
     getMessageHashClearingRedeem,
     verify
 } from '../../../layer_1/protectedPartitions/signatureVerification.sol';
-import {IHold} from '../../../layer_1/interfaces/hold/IHold.sol';
-import {IClearing} from '../../../layer_1/interfaces/clearing/IClearing.sol';
 
 abstract contract ProtectedPartitionsStorageWrapper is
     IProtectedPartitionsStorageWrapper,
@@ -373,7 +373,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
     function _checkCreateHoldSignature(
         bytes32 _partition,
         address _from,
-        IHold.ProtectedHold memory _protectedHold,
+        ProtectedHold memory _protectedHold,
         bytes calldata _signature
     ) internal view {
         if (
@@ -389,7 +389,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
     function _isCreateHoldSignatureValid(
         bytes32 _partition,
         address _from,
-        IHold.ProtectedHold memory _protectedHold,
+        ProtectedHold memory _protectedHold,
         bytes calldata _signature
     ) internal view returns (bool) {
         bytes32 functionHash = getMessageHashCreateHold(
@@ -412,7 +412,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
 
     function _checkClearingCreateHoldSignature(
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
-        IHold.Hold memory _hold,
+        Hold memory _hold,
         bytes calldata _signature
     ) internal view {
         if (
@@ -426,7 +426,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
 
     function _isClearingCreateHoldSignatureValid(
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
-        IHold.Hold memory _hold,
+        Hold memory _hold,
         bytes calldata _signature
     ) internal view returns (bool) {
         bytes32 functionHash = getMessageHashClearingCreateHold(

@@ -279,7 +279,7 @@ describe('SetIdentityRegistryCommandHandler', () => {
         command.securityId,
       );
       expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-        SecurityRole._DEFAULT_ADMIN_ROLE,
+        SecurityRole._TREX_OWNER_ROLE,
         account.id.toString(),
         command.securityId,
       );

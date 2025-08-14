@@ -438,7 +438,7 @@ export default class ValidationService extends Service {
       ),
     );
 
-    if (res.payload != '0x00') {
+    if (res.payload != '0x01') {
       throw ContractsErrorMapper.mapError(
         res.payload,
         operatorId,
@@ -460,7 +460,7 @@ export default class ValidationService extends Service {
       new CanRedeemByPartitionQuery(securityId, sourceId, partitionId, amount),
     );
 
-    if (res.payload != '0x00') {
+    if (res.payload != '0x01') {
       throw ContractsErrorMapper.mapError(
         res.payload,
         operatorId,

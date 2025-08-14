@@ -206,30 +206,144 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface IERC1410Controller {
-    function controllerTransferByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external;
+import {Common} from '../common/Common.sol';
+import {IFreeze} from '../interfaces/freeze/IFreeze.sol';
 
-    function controllerRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external;
+import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
-    function canTransferByPartition(
-        address _from,
-        address _to,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external view returns (bool, bytes1, bytes32);
+abstract contract Freeze is IFreeze, Common {
+    // ====== External functions (state-changing) ======
+
+    function setAddressFrozen(
+        address _userAddress,
+        bool _freezStatus
+    ) external override onlyUnpaused validateAddress(_userAddress) {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _setAddressFrozen(_userAddress, _freezStatus);
+        emit AddressFrozen(_userAddress, _freezStatus, _msgSender());
+    }
+
+    function freezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        onlyUnrecoveredAddress(_userAddress)
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _freezeTokens(_userAddress, _amount);
+        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    function unfreezePartialTokens(
+        address _userAddress,
+        uint256 _amount
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        _unfreezeTokens(_userAddress, _amount);
+        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
+    }
+
+    function batchSetAddressFrozen(
+        address[] calldata _userAddresses,
+        bool[] calldata _freeze
+    ) external onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _setAddressFrozen(_userAddresses[i], _freeze[i]);
+            emit AddressFrozen(_userAddresses[i], _freeze[i], _msgSender());
+        }
+    }
+
+    function batchFreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _checkRecoveredAddress(_userAddresses[i]);
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _freezeTokens(_userAddresses[i], _amounts[i]);
+            emit TokensFrozen(
+                _userAddresses[i],
+                _amounts[i],
+                _DEFAULT_PARTITION
+            );
+        }
+    }
+
+    function batchUnfreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    )
+        external
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
+    {
+        {
+            bytes32[] memory roles = new bytes32[](2);
+            roles[0] = _FREEZE_MANAGER_ROLE;
+            roles[1] = _AGENT_ROLE;
+            _checkAnyRole(roles, _msgSender());
+        }
+        for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _unfreezeTokens(_userAddresses[i], _amounts[i]);
+            emit TokensUnfrozen(
+                _userAddresses[i],
+                _amounts[i],
+                _DEFAULT_PARTITION
+            );
+        }
+    }
+
+    // ====== External functions (view/pure) ======
+
+    function getFrozenTokens(
+        address _userAddress
+    ) external view override returns (uint256) {
+        return _getFrozenAmountForAdjusted(_userAddress);
+    }
 }

@@ -656,7 +656,7 @@ describe('ValidationService', () => {
 
   describe('checkCanTransfer', () => {
     it('should work when transfer is possible', async () => {
-      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x00' });
+      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x01' });
 
       await expect(
         service.checkCanTransfer(
@@ -682,7 +682,7 @@ describe('ValidationService', () => {
     });
 
     it('should throw error when transfer fails', async () => {
-      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x01' });
+      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x00' });
       jest.spyOn(ContractsErrorMapper, 'mapError').mockImplementation(() => {
         throw new Error('Transfer failed');
       });
@@ -702,7 +702,7 @@ describe('ValidationService', () => {
 
   describe('checkCanRedeem', () => {
     it('should work when redeem', async () => {
-      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x00' });
+      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x01' });
 
       await expect(
         service.checkCanRedeem(
@@ -726,7 +726,7 @@ describe('ValidationService', () => {
     });
 
     it('should throw error when redeem fails', async () => {
-      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x01' });
+      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x00' });
       jest.spyOn(ContractsErrorMapper, 'mapError').mockImplementation(() => {
         throw new Error('Transfer failed');
       });

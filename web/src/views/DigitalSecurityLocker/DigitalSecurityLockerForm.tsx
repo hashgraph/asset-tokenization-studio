@@ -14,12 +14,7 @@ import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LockRequest } from "@hashgraph/asset-tokenization-sdk";
 import { dateToUnixTimestamp } from "../../utils/format";
-import {
-  isAfterDate,
-  isHederaValidAddress,
-  min,
-  required,
-} from "../../utils/rules";
+import { isAfterDate, isValidHederaId, min, required } from "../../utils/rules";
 
 interface DigitalSecurityLockerFormValues {
   expirationDate: string;
@@ -83,7 +78,10 @@ export const DigitalSecurityLockerForm = () => {
               <InputController
                 control={control}
                 id="targetId"
-                rules={{ required, validate: { isHederaValidAddress } }}
+                rules={{
+                  required,
+                  validate: { isValidHederaId: isValidHederaId },
+                }}
                 placeholder={tForm("targetId.placeholder")}
               />
             </Stack>

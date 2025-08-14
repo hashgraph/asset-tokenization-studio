@@ -1,0 +1,7623 @@
+Obteniendo firmas de eventos (Ethers v5)...
+contractNames
+[
+  '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol:ArraysUpgradeable',
+  '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol:CountersUpgradeable',
+  '@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol:StorageSlotUpgradeable',
+  '@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol:MathUpgradeable',
+  '@openzeppelin/contracts/access/Ownable.sol:Ownable',
+  '@openzeppelin/contracts/interfaces/IERC1967.sol:IERC1967',
+  '@openzeppelin/contracts/interfaces/draft-IERC1822.sol:IERC1822Proxiable',
+  '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy',
+  '@openzeppelin/contracts/proxy/ERC1967/ERC1967Upgrade.sol:ERC1967Upgrade',
+  '@openzeppelin/contracts/proxy/Proxy.sol:Proxy',
+  '@openzeppelin/contracts/proxy/beacon/IBeacon.sol:IBeacon',
+  '@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol:ProxyAdmin',
+  '@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol:ITransparentUpgradeableProxy',
+  '@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol:TransparentUpgradeableProxy',
+  '@openzeppelin/contracts/utils/Address.sol:Address',
+  '@openzeppelin/contracts/utils/Context.sol:Context',
+  '@openzeppelin/contracts/utils/StorageSlot.sol:StorageSlot',
+  '@openzeppelin/contracts/utils/Strings.sol:Strings',
+  '@openzeppelin/contracts/utils/introspection/IERC165.sol:IERC165',
+  '@openzeppelin/contracts/utils/math/Math.sol:Math',
+  '@openzeppelin/contracts/utils/math/SignedMath.sol:SignedMath',
+  '@openzeppelin/contracts/utils/structs/EnumerableSet.sol:EnumerableSet',
+  'contracts/factory/Factory.sol:Factory',
+  'contracts/interfaces/factory/IFactory.sol:IFactory',
+  'contracts/interfaces/resolver/IBusinessLogicResolver.sol:IBusinessLogicResolver',
+  'contracts/interfaces/resolver/IBusinessLogicResolverWrapper.sol:IBusinessLogicResolverWrapper',
+  'contracts/interfaces/resolver/diamondCutManager/IDiamondCutManager.sol:IDiamondCutManager',
+  'contracts/interfaces/resolver/resolverProxy/IDiamond.sol:IDiamond',
+  'contracts/interfaces/resolver/resolverProxy/IDiamondCut.sol:IDiamondCut',
+  'contracts/interfaces/resolver/resolverProxy/IDiamondLoupe.sol:IDiamondLoupe',
+  'contracts/interfaces/resolver/resolverProxy/IERC173.sol:IERC173',
+  'contracts/interfaces/resolver/resolverProxy/IResolverProxy.sol:IResolverProxy',
+  'contracts/interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol:IStaticFunctionSelectors',
+  'contracts/layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol:ERC1410BasicStorageWrapper',
+  'contracts/layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol:ERC1410BasicStorageWrapperRead',
+  'contracts/layer_0/ERC1400/ERC1410/ERC1410OperatorStorageWrapper.sol:ERC1410OperatorStorageWrapper',
+  'contracts/layer_0/ERC1400/ERC1410/ERC1410ProtectedPartitionsStorageWrapper.sol:ERC1410ProtectedPartitionsStorageWrapper',
+  'contracts/layer_0/ERC1400/ERC1410/ERC1410StandardStorageWrapper.sol:ERC1410StandardStorageWrapper',
+  'contracts/layer_0/ERC1400/ERC1410/ERC1410StorageWrapper.sol:ERC1410StorageWrapper',
+  'contracts/layer_0/ERC1400/ERC1594/ERC1594StorageWrapper.sol:ERC1594StorageWrapper',
+  'contracts/layer_0/ERC1400/ERC1644/ERC1644StorageWrapper.sol:ERC1644StorageWrapper',
+  'contracts/layer_0/ERC1400/ERC20/ERC20StorageWrapper1.sol:ERC20StorageWrapper1',
+  'contracts/layer_0/ERC1400/ERC20/ERC20StorageWrapper2.sol:ERC20StorageWrapper2',
+  'contracts/layer_0/ERC3643/ERC3643StorageWrapper1.sol:ERC3643StorageWrapper1',
+  'contracts/layer_0/ERC3643/ERC3643StorageWrapper2.sol:ERC3643StorageWrapper2',
+  'contracts/layer_0/adjustBalances/AdjustBalancesStorageWrapper1.sol:AdjustBalancesStorageWrapper1',
+  'contracts/layer_0/adjustBalances/AdjustBalancesStorageWrapper2.sol:AdjustBalancesStorageWrapper2',
+  'contracts/layer_0/cap/CapStorageWrapper1.sol:CapStorageWrapper1',
+  'contracts/layer_0/cap/CapStorageWrapper2.sol:CapStorageWrapper2',
+  'contracts/layer_0/clearing/ClearingStorageWrapper1.sol:ClearingStorageWrapper1',
+  'contracts/layer_0/clearing/ClearingStorageWrapper2.sol:ClearingStorageWrapper2',
+  'contracts/layer_0/common/libraries/ArrayLib.sol:ArrayLib',
+  'contracts/layer_0/common/libraries/Eip1066Lib.sol:Eip1066Lib',
+  'contracts/layer_0/common/libraries/EnumerableSetBytes4.sol:EnumerableSetBytes4',
+  'contracts/layer_0/common/libraries/LibCommon.sol:LibCommon',
+  'contracts/layer_0/common/libraries/LowLevelCall.sol:LowLevelCall',
+  'contracts/layer_0/constants/eip1066.sol:Eip1066',
+  'contracts/layer_0/context/LocalContext.sol:LocalContext',
+  'contracts/layer_0/core/accessControl/AccessControlStorageWrapper.sol:AccessControlStorageWrapper',
+  'contracts/layer_0/core/controlList/ControlListStorageWrapper.sol:ControlListStorageWrapper',
+  'contracts/layer_0/core/externalControlLists/ExternalControlListManagementStorageWrapper.sol:ExternalControlListManagementStorageWrapper',
+  'contracts/layer_0/core/externalKycLists/ExternalKycListManagementStorageWrapper.sol:ExternalKycListManagementStorageWrapper',
+  'contracts/layer_0/core/externalLists/ExternalListManagementStorageWrapper.sol:ExternalListManagementStorageWrapper',
+  'contracts/layer_0/core/externalPauses/ExternalPauseManagementStorageWrapper.sol:ExternalPauseManagementStorageWrapper',
+  'contracts/layer_0/core/kyc/KycStorageWrapper.sol:KycStorageWrapper',
+  'contracts/layer_0/core/pause/PauseStorageWrapper.sol:PauseStorageWrapper',
+  'contracts/layer_0/core/protectedPartitions/ProtectedPartitionsStorageWrapper.sol:ProtectedPartitionsStorageWrapper',
+  'contracts/layer_0/core/ssi/SsiManagementStorageWrapper.sol:SsiManagementStorageWrapper',
+  'contracts/layer_0/corporateActions/CorporateActionsStorageWrapper1.sol:CorporateActionsStorageWrapper1',
+  'contracts/layer_0/corporateActions/CorporateActionsStorageWrapper2.sol:CorporateActionsStorageWrapper2',
+  'contracts/layer_0/hold/HoldStorageWrapper1.sol:HoldStorageWrapper1',
+  'contracts/layer_0/hold/HoldStorageWrapper2.sol:HoldStorageWrapper2',
+  'contracts/layer_0/lock/LockStorageWrapper1.sol:LockStorageWrapper1',
+  'contracts/layer_0/lock/LockStorageWrapper2.sol:LockStorageWrapper2',
+  'contracts/layer_0/scheduledTasks/ScheduledTasksCommon.sol:ScheduledTasksCommon',
+  'contracts/layer_0/scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol:ScheduledBalanceAdjustmentsStorageWrapper',
+  'contracts/layer_0/scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapperRead.sol:ScheduledSnapshotsStorageWrapperRead',
+  'contracts/layer_0/scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol:ScheduledTasksStorageWrapper',
+  'contracts/layer_0/snapshots/SnapshotsStorageWrapper1.sol:SnapshotsStorageWrapper1',
+  'contracts/layer_0/snapshots/SnapshotsStorageWrapper2.sol:SnapshotsStorageWrapper2',
+  'contracts/layer_1/ERC1400/ERC1410/ERC1410Management.sol:ERC1410Management',
+  'contracts/layer_1/ERC1400/ERC1410/ERC1410ManagementFacet.sol:ERC1410ManagementFacet',
+  'contracts/layer_1/ERC1400/ERC1410/ERC1410Read.sol:ERC1410Read',
+  'contracts/layer_1/ERC1400/ERC1410/ERC1410ReadFacet.sol:ERC1410ReadFacet',
+  'contracts/layer_1/ERC1400/ERC1410/ERC1410TokenHolder.sol:ERC1410TokenHolder',
+  'contracts/layer_1/ERC1400/ERC1410/ERC1410TokenHolderFacet.sol:ERC1410TokenHolderFacet',
+  'contracts/layer_1/ERC1400/ERC1594/ERC1594.sol:ERC1594',
+  'contracts/layer_1/ERC1400/ERC1643/ERC1643.sol:ERC1643',
+  'contracts/layer_1/ERC1400/ERC1644/ERC1644.sol:ERC1644',
+  'contracts/layer_1/ERC1400/ERC20/ERC20.sol:ERC20',
+  'contracts/layer_1/ERC3643/ERC3643.sol:ERC3643',
+  'contracts/layer_1/ERC3643/ERC3643Batch.sol:ERC3643Batch',
+  'contracts/layer_1/ERC3643/ERC3643BatchFacet.sol:ERC3643BatchFacet',
+  'contracts/layer_1/ERC3643/ERC3643Facet.sol:ERC3643Facet',
+  'contracts/layer_1/accessControl/AccessControl.sol:AccessControl',
+  'contracts/layer_1/accessControl/AccessControlFacet.sol:AccessControlFacet',
+  'contracts/layer_1/cap/Cap.sol:Cap',
+  'contracts/layer_1/clearing/ClearingActionsFacet.sol:ClearingActionsFacet',
+  'contracts/layer_1/clearing/ClearingHoldCreationFacet.sol:ClearingHoldCreationFacet',
+  'contracts/layer_1/clearing/ClearingReadFacet.sol:ClearingReadFacet',
+  ... 168 more items
+]
+{
+  "Ownable": [
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    }
+  ],
+  "IERC1822Proxiable": [
+    {
+      "name": "proxiableUUID",
+      "selector": "0x52d1902d"
+    }
+  ],
+  "IBeacon": [
+    {
+      "name": "implementation",
+      "selector": "0x5c60da1b"
+    }
+  ],
+  "ProxyAdmin": [
+    {
+      "name": "changeProxyAdmin",
+      "selector": "0x7eff275e"
+    },
+    {
+      "name": "getProxyAdmin",
+      "selector": "0xf3b7dead"
+    },
+    {
+      "name": "getProxyImplementation",
+      "selector": "0x204e1c7a"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    },
+    {
+      "name": "upgrade",
+      "selector": "0x99a88ec4"
+    },
+    {
+      "name": "upgradeAndCall",
+      "selector": "0x9623609d"
+    }
+  ],
+  "ITransparentUpgradeableProxy": [
+    {
+      "name": "admin",
+      "selector": "0xf851a440"
+    },
+    {
+      "name": "changeAdmin",
+      "selector": "0x8f283970"
+    },
+    {
+      "name": "implementation",
+      "selector": "0x5c60da1b"
+    },
+    {
+      "name": "upgradeTo",
+      "selector": "0x3659cfe6"
+    },
+    {
+      "name": "upgradeToAndCall",
+      "selector": "0x4f1ef286"
+    }
+  ],
+  "IERC165": [
+    {
+      "name": "supportsInterface",
+      "selector": "0x01ffc9a7"
+    }
+  ],
+  "Factory": [
+    {
+      "name": "deployBond",
+      "selector": "0xddfc5275"
+    },
+    {
+      "name": "deployEquity",
+      "selector": "0xa18a439e"
+    },
+    {
+      "name": "getAppliedRegulationData",
+      "selector": "0x7b5208d0"
+    }
+  ],
+  "IFactory": [
+    {
+      "name": "deployBond",
+      "selector": "0xddfc5275"
+    },
+    {
+      "name": "deployEquity",
+      "selector": "0xa18a439e"
+    },
+    {
+      "name": "getAppliedRegulationData",
+      "selector": "0x7b5208d0"
+    }
+  ],
+  "IBusinessLogicResolver": [
+    {
+      "name": "addSelectorsToBlacklist",
+      "selector": "0xe87c5d71"
+    },
+    {
+      "name": "cancelBatchConfiguration",
+      "selector": "0xc5977c1f"
+    },
+    {
+      "name": "checkResolverProxyConfigurationRegistered",
+      "selector": "0xc595992a"
+    },
+    {
+      "name": "createBatchConfiguration",
+      "selector": "0xf4ec1fe4"
+    },
+    {
+      "name": "createConfiguration",
+      "selector": "0xf4d2a095"
+    },
+    {
+      "name": "getBusinessLogicCount",
+      "selector": "0x8373989d"
+    },
+    {
+      "name": "getBusinessLogicKeys",
+      "selector": "0xe7e936ee"
+    },
+    {
+      "name": "getConfigurations",
+      "selector": "0xd826514c"
+    },
+    {
+      "name": "getConfigurationsLength",
+      "selector": "0x55ff30e3"
+    },
+    {
+      "name": "getFacetAddressByConfigurationIdVersionAndFacetId",
+      "selector": "0xcb17c131"
+    },
+    {
+      "name": "getFacetAddressesByConfigurationIdAndVersion",
+      "selector": "0x10933836"
+    },
+    {
+      "name": "getFacetByConfigurationIdVersionAndFacetId",
+      "selector": "0x9e6030d1"
+    },
+    {
+      "name": "getFacetIdByConfigurationIdVersionAndSelector",
+      "selector": "0x6204479f"
+    },
+    {
+      "name": "getFacetIdsByConfigurationIdAndVersion",
+      "selector": "0xe5ccd17c"
+    },
+    {
+      "name": "getFacetSelectorsByConfigurationIdVersionAndFacetId",
+      "selector": "0x45613a52"
+    },
+    {
+      "name": "getFacetSelectorsLengthByConfigurationIdVersionAndFacetId",
+      "selector": "0xf1d3d2f9"
+    },
+    {
+      "name": "getFacetsByConfigurationIdAndVersion",
+      "selector": "0x6118ce2b"
+    },
+    {
+      "name": "getFacetsLengthByConfigurationIdAndVersion",
+      "selector": "0x45348bd8"
+    },
+    {
+      "name": "getLatestVersion",
+      "selector": "0x0e6d1de9"
+    },
+    {
+      "name": "getLatestVersionByConfiguration",
+      "selector": "0x5bf316cf"
+    },
+    {
+      "name": "getSelectorsBlacklist",
+      "selector": "0xbf3af9ea"
+    },
+    {
+      "name": "getVersionStatus",
+      "selector": "0x65b24dfc"
+    },
+    {
+      "name": "initialize_BusinessLogicResolver",
+      "selector": "0xb86ffa1a"
+    },
+    {
+      "name": "isResolverProxyConfigurationRegistered",
+      "selector": "0x2b85c192"
+    },
+    {
+      "name": "registerBusinessLogics",
+      "selector": "0xb0f57ddb"
+    },
+    {
+      "name": "removeSelectorsFromBlacklist",
+      "selector": "0xcccae751"
+    },
+    {
+      "name": "resolveBusinessLogicByVersion",
+      "selector": "0x9f77ad81"
+    },
+    {
+      "name": "resolveLatestBusinessLogic",
+      "selector": "0xbbced3bb"
+    },
+    {
+      "name": "resolveResolverProxyCall",
+      "selector": "0xb9ec2620"
+    },
+    {
+      "name": "resolveSupportsInterface",
+      "selector": "0x99ecdbd0"
+    }
+  ],
+  "IDiamondCutManager": [
+    {
+      "name": "cancelBatchConfiguration",
+      "selector": "0xc5977c1f"
+    },
+    {
+      "name": "checkResolverProxyConfigurationRegistered",
+      "selector": "0xc595992a"
+    },
+    {
+      "name": "createBatchConfiguration",
+      "selector": "0xf4ec1fe4"
+    },
+    {
+      "name": "createConfiguration",
+      "selector": "0xf4d2a095"
+    },
+    {
+      "name": "getConfigurations",
+      "selector": "0xd826514c"
+    },
+    {
+      "name": "getConfigurationsLength",
+      "selector": "0x55ff30e3"
+    },
+    {
+      "name": "getFacetAddressByConfigurationIdVersionAndFacetId",
+      "selector": "0xcb17c131"
+    },
+    {
+      "name": "getFacetAddressesByConfigurationIdAndVersion",
+      "selector": "0x10933836"
+    },
+    {
+      "name": "getFacetByConfigurationIdVersionAndFacetId",
+      "selector": "0x9e6030d1"
+    },
+    {
+      "name": "getFacetIdByConfigurationIdVersionAndSelector",
+      "selector": "0x6204479f"
+    },
+    {
+      "name": "getFacetIdsByConfigurationIdAndVersion",
+      "selector": "0xe5ccd17c"
+    },
+    {
+      "name": "getFacetSelectorsByConfigurationIdVersionAndFacetId",
+      "selector": "0x45613a52"
+    },
+    {
+      "name": "getFacetSelectorsLengthByConfigurationIdVersionAndFacetId",
+      "selector": "0xf1d3d2f9"
+    },
+    {
+      "name": "getFacetsByConfigurationIdAndVersion",
+      "selector": "0x6118ce2b"
+    },
+    {
+      "name": "getFacetsLengthByConfigurationIdAndVersion",
+      "selector": "0x45348bd8"
+    },
+    {
+      "name": "getLatestVersionByConfiguration",
+      "selector": "0x5bf316cf"
+    },
+    {
+      "name": "isResolverProxyConfigurationRegistered",
+      "selector": "0x2b85c192"
+    },
+    {
+      "name": "resolveResolverProxyCall",
+      "selector": "0xb9ec2620"
+    },
+    {
+      "name": "resolveSupportsInterface",
+      "selector": "0x99ecdbd0"
+    }
+  ],
+  "IDiamond": [
+    {
+      "name": "getConfigInfo",
+      "selector": "0x78a1bf05"
+    },
+    {
+      "name": "getFacet",
+      "selector": "0xe317d12f"
+    },
+    {
+      "name": "getFacetAddress",
+      "selector": "0x7a070c2d"
+    },
+    {
+      "name": "getFacetAddresses",
+      "selector": "0x3bed2f49"
+    },
+    {
+      "name": "getFacetAddressesByPage",
+      "selector": "0x9fea53e7"
+    },
+    {
+      "name": "getFacetIdBySelector",
+      "selector": "0xb3fd6894"
+    },
+    {
+      "name": "getFacetIds",
+      "selector": "0xcd25d535"
+    },
+    {
+      "name": "getFacetIdsByPage",
+      "selector": "0x20202e6d"
+    },
+    {
+      "name": "getFacetSelectors",
+      "selector": "0x8214de3e"
+    },
+    {
+      "name": "getFacetSelectorsByPage",
+      "selector": "0x39a9e956"
+    },
+    {
+      "name": "getFacetSelectorsLength",
+      "selector": "0xca1f70ec"
+    },
+    {
+      "name": "getFacets",
+      "selector": "0x662ea47d"
+    },
+    {
+      "name": "getFacetsByPage",
+      "selector": "0xbf02c5b9"
+    },
+    {
+      "name": "getFacetsLength",
+      "selector": "0x430720f9"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "updateConfig",
+      "selector": "0x0b3bad61"
+    },
+    {
+      "name": "updateConfigVersion",
+      "selector": "0x002eeb22"
+    },
+    {
+      "name": "updateResolver",
+      "selector": "0xe5d3a872"
+    }
+  ],
+  "IDiamondCut": [
+    {
+      "name": "getConfigInfo",
+      "selector": "0x78a1bf05"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "updateConfig",
+      "selector": "0x0b3bad61"
+    },
+    {
+      "name": "updateConfigVersion",
+      "selector": "0x002eeb22"
+    },
+    {
+      "name": "updateResolver",
+      "selector": "0xe5d3a872"
+    }
+  ],
+  "IDiamondLoupe": [
+    {
+      "name": "getFacet",
+      "selector": "0xe317d12f"
+    },
+    {
+      "name": "getFacetAddress",
+      "selector": "0x7a070c2d"
+    },
+    {
+      "name": "getFacetAddresses",
+      "selector": "0x3bed2f49"
+    },
+    {
+      "name": "getFacetAddressesByPage",
+      "selector": "0x9fea53e7"
+    },
+    {
+      "name": "getFacetIdBySelector",
+      "selector": "0xb3fd6894"
+    },
+    {
+      "name": "getFacetIds",
+      "selector": "0xcd25d535"
+    },
+    {
+      "name": "getFacetIdsByPage",
+      "selector": "0x20202e6d"
+    },
+    {
+      "name": "getFacetSelectors",
+      "selector": "0x8214de3e"
+    },
+    {
+      "name": "getFacetSelectorsByPage",
+      "selector": "0x39a9e956"
+    },
+    {
+      "name": "getFacetSelectorsLength",
+      "selector": "0xca1f70ec"
+    },
+    {
+      "name": "getFacets",
+      "selector": "0x662ea47d"
+    },
+    {
+      "name": "getFacetsByPage",
+      "selector": "0xbf02c5b9"
+    },
+    {
+      "name": "getFacetsLength",
+      "selector": "0x430720f9"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "IERC173": [
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    }
+  ],
+  "IStaticFunctionSelectors": [
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "Eip1066": [
+    {
+      "name": "ABOVE_RANGE_OR_OVERFLOW",
+      "selector": "0x031dceba"
+    },
+    {
+      "name": "ACCEPTED",
+      "selector": "0x4324efd7"
+    },
+    {
+      "name": "ALLOWED_OR_GO",
+      "selector": "0xe86a14ac"
+    },
+    {
+      "name": "ALREADY_DONE",
+      "selector": "0xe405de13"
+    },
+    {
+      "name": "ALREADY_SIGNED_OR_NOT_ENCRYPTED",
+      "selector": "0x5599d44c"
+    },
+    {
+      "name": "ALREADY_VOTED",
+      "selector": "0xeb209711"
+    },
+    {
+      "name": "APP_SPECIFIC_ACCEPTANCE",
+      "selector": "0x12de650a"
+    },
+    {
+      "name": "APP_SPECIFIC_AWAITING_OTHERS",
+      "selector": "0xaf8f39f5"
+    },
+    {
+      "name": "APP_SPECIFIC_BELOW_CONDITION",
+      "selector": "0xd386cfc9"
+    },
+    {
+      "name": "APP_SPECIFIC_EXPIRY_OR_LIMIT",
+      "selector": "0xa0fc86d3"
+    },
+    {
+      "name": "APP_SPECIFIC_FAILURE",
+      "selector": "0x75ef1a5b"
+    },
+    {
+      "name": "APP_SPECIFIC_INAPPLICABLE_CONDITION",
+      "selector": "0xa08961b5"
+    },
+    {
+      "name": "APP_SPECIFIC_META_OR_INFO",
+      "selector": "0xd273a788"
+    },
+    {
+      "name": "APP_SPECIFIC_RECEIVER_ACTION_REQUESTED",
+      "selector": "0x065e268d"
+    },
+    {
+      "name": "APP_SPECIFIC_SUCCESS",
+      "selector": "0x858a720a"
+    },
+    {
+      "name": "AVAILABILITY_RULES_OR_INFO",
+      "selector": "0x6dbfeab7"
+    },
+    {
+      "name": "AVAILABLE",
+      "selector": "0xa2dc2365"
+    },
+    {
+      "name": "AWAITING_MATCH",
+      "selector": "0xd6b41a9c"
+    },
+    {
+      "name": "AWAITING_OFF_CHAIN_PROCESS",
+      "selector": "0x4956ce17"
+    },
+    {
+      "name": "AWAITING_OTHERS",
+      "selector": "0x82145143"
+    },
+    {
+      "name": "AWAITING_OTHERS_PERMISSION",
+      "selector": "0xc0bb3259"
+    },
+    {
+      "name": "AWAITING_OTHER_SIGNATURES_OR_KEYS",
+      "selector": "0x47f9fc33"
+    },
+    {
+      "name": "AWAITING_PAYMENT_FROM_OTHERS",
+      "selector": "0xd1496a4c"
+    },
+    {
+      "name": "AWAITING_RATIFICATION",
+      "selector": "0xe3bcf239"
+    },
+    {
+      "name": "AWAITING_YOUR_AVAILABILITY",
+      "selector": "0x06e57ce9"
+    },
+    {
+      "name": "BELOW_RANGE_OR_UNDERFLOW",
+      "selector": "0x9c5e6f6a"
+    },
+    {
+      "name": "CRYPTOGRAPHY_ID_OR_PROOF_METADATA",
+      "selector": "0x3d6bf758"
+    },
+    {
+      "name": "DECRYPT_FAILURE",
+      "selector": "0xa4772947"
+    },
+    {
+      "name": "DECRYPT_SUCCESS",
+      "selector": "0xbc9497d3"
+    },
+    {
+      "name": "DISALLOWED_OR_STOP",
+      "selector": "0x51e89942"
+    },
+    {
+      "name": "DUPLICATE_CONFLICT_OR_COLLISION",
+      "selector": "0x6b43b9c3"
+    },
+    {
+      "name": "DUPLICATE_OFF_CHAIN_REQUEST",
+      "selector": "0x91284655"
+    },
+    {
+      "name": "DUPLICATE_UNNECESSARY_OR_INAPPLICABLE",
+      "selector": "0x1a947181"
+    },
+    {
+      "name": "EXPIRED",
+      "selector": "0x414ac85b"
+    },
+    {
+      "name": "FAILURE",
+      "selector": "0x6c2c70e8"
+    },
+    {
+      "name": "FOUND_EQUAL_OR_IN_RANGE",
+      "selector": "0xbdea7465"
+    },
+    {
+      "name": "FUNDS_NOT_REQUIRED",
+      "selector": "0x45a0c7d5"
+    },
+    {
+      "name": "FUNDS_REQUESTED",
+      "selector": "0x399bb0be"
+    },
+    {
+      "name": "HOLD_OR_ESCROW",
+      "selector": "0xb0e81631"
+    },
+    {
+      "name": "INFORMATIONAL_OR_METADATA",
+      "selector": "0xdff4682a"
+    },
+    {
+      "name": "INSUFFICIENT_FUNDS",
+      "selector": "0xe7931438"
+    },
+    {
+      "name": "KNOWN_TO_BE_COMPROMISED",
+      "selector": "0xf47c73a4"
+    },
+    {
+      "name": "LOWER_LIMIT_OR_INSUFFICIENT",
+      "selector": "0xd3212195"
+    },
+    {
+      "name": "MATCHING_META_OR_INFO",
+      "selector": "0x66a96210"
+    },
+    {
+      "name": "MATCH_REQUEST_SENT",
+      "selector": "0x9d9264a8"
+    },
+    {
+      "name": "NEEDS_YOUR_PERMISSION_OR_CONTINUATION",
+      "selector": "0x52bb9f84"
+    },
+    {
+      "name": "NEGOTIATION_RULES_OR_PARTICIPATION_INFO",
+      "selector": "0xc9d95841"
+    },
+    {
+      "name": "NOT_APPLICABLE_TO_CURRENT_STATE",
+      "selector": "0x79886ac1"
+    },
+    {
+      "name": "NOT_AVAILABLE_YET",
+      "selector": "0x463eac49"
+    },
+    {
+      "name": "NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE",
+      "selector": "0x23324216"
+    },
+    {
+      "name": "OFFER_OR_VOTE_LIMIT_REACHED",
+      "selector": "0x6ddf9cd1"
+    },
+    {
+      "name": "OFFER_SENT_OR_VOTED",
+      "selector": "0xa4ba4dc4"
+    },
+    {
+      "name": "OFF_CHAIN_ACTION_REQUIRED",
+      "selector": "0x9547ae58"
+    },
+    {
+      "name": "OFF_CHAIN_EXPIRY_OR_LIMIT_REACHED",
+      "selector": "0xaa870741"
+    },
+    {
+      "name": "OFF_CHAIN_FAILURE",
+      "selector": "0x349a57c8"
+    },
+    {
+      "name": "OFF_CHAIN_INFO_OR_META",
+      "selector": "0x0b029a79"
+    },
+    {
+      "name": "OFF_CHAIN_PROCESS_STARTED",
+      "selector": "0xf9c683b8"
+    },
+    {
+      "name": "OFF_CHAIN_SERVICE_UNREACHABLE",
+      "selector": "0xe753fd71"
+    },
+    {
+      "name": "OFF_CHAIN_SUCCESS",
+      "selector": "0x57de840b"
+    },
+    {
+      "name": "PAUSED",
+      "selector": "0xa9aad58c"
+    },
+    {
+      "name": "PERMISSION_DETAILS_OR_CONTROL_CONDITIONS",
+      "selector": "0x78754e2f"
+    },
+    {
+      "name": "PERMISSION_REQUESTED",
+      "selector": "0x07b0d8a5"
+    },
+    {
+      "name": "QUEUED",
+      "selector": "0xe4906529"
+    },
+    {
+      "name": "QUORUM_NOT_REACHED",
+      "selector": "0xd0bdaca4"
+    },
+    {
+      "name": "RECEIVER_ACTION_REQUESTED",
+      "selector": "0x8890fab1"
+    },
+    {
+      "name": "RECEIVER_RATIFICATION_REQUESTED",
+      "selector": "0x602b9eed"
+    },
+    {
+      "name": "REQUEST_FOR_MATCH",
+      "selector": "0x07757222"
+    },
+    {
+      "name": "RESERVED_07",
+      "selector": "0x9cb586e0"
+    },
+    {
+      "name": "RESERVED_09",
+      "selector": "0x5fe1a328"
+    },
+    {
+      "name": "RESERVED_0A",
+      "selector": "0xfbb7319c"
+    },
+    {
+      "name": "RESERVED_0B",
+      "selector": "0x5221aef4"
+    },
+    {
+      "name": "RESERVED_0C",
+      "selector": "0x1c400e4a"
+    },
+    {
+      "name": "RESERVED_0D",
+      "selector": "0xb03ac608"
+    },
+    {
+      "name": "RESERVED_0E",
+      "selector": "0xa31e1e5d"
+    },
+    {
+      "name": "RESERVED_17",
+      "selector": "0xf1a82a9f"
+    },
+    {
+      "name": "RESERVED_19",
+      "selector": "0xa311b475"
+    },
+    {
+      "name": "RESERVED_1A",
+      "selector": "0x6fcaf8db"
+    },
+    {
+      "name": "RESERVED_1B",
+      "selector": "0x7b4cf699"
+    },
+    {
+      "name": "RESERVED_1C",
+      "selector": "0xffcb2532"
+    },
+    {
+      "name": "RESERVED_1D",
+      "selector": "0x7f30811e"
+    },
+    {
+      "name": "RESERVED_1E",
+      "selector": "0xb734a546"
+    },
+    {
+      "name": "RESERVED_27",
+      "selector": "0x03677d79"
+    },
+    {
+      "name": "RESERVED_29",
+      "selector": "0x25806066"
+    },
+    {
+      "name": "RESERVED_2A",
+      "selector": "0x172fdd47"
+    },
+    {
+      "name": "RESERVED_2B",
+      "selector": "0x397e99d1"
+    },
+    {
+      "name": "RESERVED_2C",
+      "selector": "0x41b9eac6"
+    },
+    {
+      "name": "RESERVED_2D",
+      "selector": "0x12fd5cda"
+    },
+    {
+      "name": "RESERVED_2E",
+      "selector": "0xad4f3dab"
+    },
+    {
+      "name": "RESERVED_37",
+      "selector": "0xf193bba1"
+    },
+    {
+      "name": "RESERVED_39",
+      "selector": "0x383eb436"
+    },
+    {
+      "name": "RESERVED_3A",
+      "selector": "0xf91d1081"
+    },
+    {
+      "name": "RESERVED_3B",
+      "selector": "0x0f20306d"
+    },
+    {
+      "name": "RESERVED_3C",
+      "selector": "0x4479d111"
+    },
+    {
+      "name": "RESERVED_3D",
+      "selector": "0xc985bace"
+    },
+    {
+      "name": "RESERVED_3E",
+      "selector": "0x8cd514ac"
+    },
+    {
+      "name": "RESERVED_47",
+      "selector": "0x3c06e050"
+    },
+    {
+      "name": "RESERVED_49",
+      "selector": "0x0b870686"
+    },
+    {
+      "name": "RESERVED_4A",
+      "selector": "0xa9c8e1d9"
+    },
+    {
+      "name": "RESERVED_4B",
+      "selector": "0x7e44cc0d"
+    },
+    {
+      "name": "RESERVED_4C",
+      "selector": "0x6961caa0"
+    },
+    {
+      "name": "RESERVED_4D",
+      "selector": "0x7a12b8db"
+    },
+    {
+      "name": "RESERVED_4E",
+      "selector": "0x56716b55"
+    },
+    {
+      "name": "RESERVED_57",
+      "selector": "0x949d3ec4"
+    },
+    {
+      "name": "RESERVED_59",
+      "selector": "0xe3f4e1e1"
+    },
+    {
+      "name": "RESERVED_5A",
+      "selector": "0x04c75aa7"
+    },
+    {
+      "name": "RESERVED_5B",
+      "selector": "0xf49a159d"
+    },
+    {
+      "name": "RESERVED_5C",
+      "selector": "0x0bc950b6"
+    },
+    {
+      "name": "RESERVED_5D",
+      "selector": "0xaba0a2f0"
+    },
+    {
+      "name": "RESERVED_5E",
+      "selector": "0x6f4c730f"
+    },
+    {
+      "name": "RESERVED_A7",
+      "selector": "0x130afd79"
+    },
+    {
+      "name": "RESERVED_A9",
+      "selector": "0x91aa6187"
+    },
+    {
+      "name": "RESERVED_AA",
+      "selector": "0xecd1faa9"
+    },
+    {
+      "name": "RESERVED_AB",
+      "selector": "0x108aefc4"
+    },
+    {
+      "name": "RESERVED_AC",
+      "selector": "0xf7a71835"
+    },
+    {
+      "name": "RESERVED_AD",
+      "selector": "0x702b1253"
+    },
+    {
+      "name": "RESERVED_AE",
+      "selector": "0xc0a68728"
+    },
+    {
+      "name": "RESERVED_E7",
+      "selector": "0xccc6d289"
+    },
+    {
+      "name": "RESERVED_E9",
+      "selector": "0xdb8a3832"
+    },
+    {
+      "name": "RESERVED_EA",
+      "selector": "0x93bd65df"
+    },
+    {
+      "name": "RESERVED_EB",
+      "selector": "0x41ad8e96"
+    },
+    {
+      "name": "RESERVED_EC",
+      "selector": "0x14601d88"
+    },
+    {
+      "name": "RESERVED_ED",
+      "selector": "0x409e5ecb"
+    },
+    {
+      "name": "RESERVED_EE",
+      "selector": "0x41124f47"
+    },
+    {
+      "name": "RESERVED_F7",
+      "selector": "0x0102e1f4"
+    },
+    {
+      "name": "RESERVED_F9",
+      "selector": "0xa2b57916"
+    },
+    {
+      "name": "RESERVED_FA",
+      "selector": "0xc169022a"
+    },
+    {
+      "name": "RESERVED_FB",
+      "selector": "0x927c6e22"
+    },
+    {
+      "name": "RESERVED_FC",
+      "selector": "0x91100e75"
+    },
+    {
+      "name": "RESERVED_FD",
+      "selector": "0x8143db0d"
+    },
+    {
+      "name": "RESERVED_FE",
+      "selector": "0x6d7400ba"
+    },
+    {
+      "name": "REVOKED_OR_BANNED",
+      "selector": "0x44550799"
+    },
+    {
+      "name": "SENDER_AGREES_OR_YEA",
+      "selector": "0x096d081d"
+    },
+    {
+      "name": "SENDER_DISAGREES_OR_NAY",
+      "selector": "0xfba08d19"
+    },
+    {
+      "name": "SIGNATURE_REQUIRED",
+      "selector": "0xf25e376a"
+    },
+    {
+      "name": "SIGNED",
+      "selector": "0x9bcae07e"
+    },
+    {
+      "name": "SUCCESS",
+      "selector": "0xd0a6d1a6"
+    },
+    {
+      "name": "TOKEN_OR_FINANCIAL_INFORMATION",
+      "selector": "0x4be75c97"
+    },
+    {
+      "name": "TOO_OPEN_OR_INSECURE",
+      "selector": "0x892b6b5c"
+    },
+    {
+      "name": "TRANSFER_FAILED",
+      "selector": "0x3f4ab80e"
+    },
+    {
+      "name": "TRANSFER_SUCCESSFUL",
+      "selector": "0x3bdfc509"
+    },
+    {
+      "name": "TRANSFER_VOLUME_EXCEEDED",
+      "selector": "0x0f17de64"
+    },
+    {
+      "name": "UNAVAILABLE",
+      "selector": "0xce68271d"
+    },
+    {
+      "name": "UNSIGNED_OR_UNTRUSTED",
+      "selector": "0xed3e3705"
+    },
+    {
+      "name": "UPPER_LIMIT",
+      "selector": "0x6c8ef9eb"
+    }
+  ],
+  "ERC1410Management": [
+    {
+      "name": "controllerRedeemByPartition",
+      "selector": "0xb84777cc"
+    },
+    {
+      "name": "controllerTransferByPartition",
+      "selector": "0xfb78befa"
+    },
+    {
+      "name": "initialize_ERC1410",
+      "selector": "0x7b1df196"
+    },
+    {
+      "name": "issueByPartition",
+      "selector": "0x18180262"
+    },
+    {
+      "name": "operatorRedeemByPartition",
+      "selector": "0x13d557bc"
+    },
+    {
+      "name": "operatorTransferByPartition",
+      "selector": "0x6b9894fe"
+    },
+    {
+      "name": "protectedRedeemFromByPartition",
+      "selector": "0xc98d9723"
+    },
+    {
+      "name": "protectedTransferFromByPartition",
+      "selector": "0x12e41c0a"
+    }
+  ],
+  "ERC1410ManagementFacet": [
+    {
+      "name": "controllerRedeemByPartition",
+      "selector": "0xb84777cc"
+    },
+    {
+      "name": "controllerTransferByPartition",
+      "selector": "0xfb78befa"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ERC1410",
+      "selector": "0x7b1df196"
+    },
+    {
+      "name": "issueByPartition",
+      "selector": "0x18180262"
+    },
+    {
+      "name": "operatorRedeemByPartition",
+      "selector": "0x13d557bc"
+    },
+    {
+      "name": "operatorTransferByPartition",
+      "selector": "0x6b9894fe"
+    },
+    {
+      "name": "protectedRedeemFromByPartition",
+      "selector": "0xc98d9723"
+    },
+    {
+      "name": "protectedTransferFromByPartition",
+      "selector": "0x12e41c0a"
+    }
+  ],
+  "ERC1410Read": [
+    {
+      "name": "balanceOf",
+      "selector": "0x70a08231"
+    },
+    {
+      "name": "balanceOfAt",
+      "selector": "0x4ee2cd7e"
+    },
+    {
+      "name": "balanceOfByPartition",
+      "selector": "0x30e82803"
+    },
+    {
+      "name": "canRedeemByPartition",
+      "selector": "0x7b7322c4"
+    },
+    {
+      "name": "canTransferByPartition",
+      "selector": "0xa7b518b1"
+    },
+    {
+      "name": "isMultiPartition",
+      "selector": "0xbd09cc54"
+    },
+    {
+      "name": "isOperator",
+      "selector": "0xb6363cf2"
+    },
+    {
+      "name": "isOperatorForPartition",
+      "selector": "0x6d77cad6"
+    },
+    {
+      "name": "partitionsOf",
+      "selector": "0x740ab8f4"
+    },
+    {
+      "name": "totalSupply",
+      "selector": "0x18160ddd"
+    },
+    {
+      "name": "totalSupplyByPartition",
+      "selector": "0xa26734dc"
+    }
+  ],
+  "ERC1410ReadFacet": [
+    {
+      "name": "balanceOf",
+      "selector": "0x70a08231"
+    },
+    {
+      "name": "balanceOfAt",
+      "selector": "0x4ee2cd7e"
+    },
+    {
+      "name": "balanceOfByPartition",
+      "selector": "0x30e82803"
+    },
+    {
+      "name": "canRedeemByPartition",
+      "selector": "0x7b7322c4"
+    },
+    {
+      "name": "canTransferByPartition",
+      "selector": "0xa7b518b1"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "isMultiPartition",
+      "selector": "0xbd09cc54"
+    },
+    {
+      "name": "isOperator",
+      "selector": "0xb6363cf2"
+    },
+    {
+      "name": "isOperatorForPartition",
+      "selector": "0x6d77cad6"
+    },
+    {
+      "name": "partitionsOf",
+      "selector": "0x740ab8f4"
+    },
+    {
+      "name": "totalSupply",
+      "selector": "0x18160ddd"
+    },
+    {
+      "name": "totalSupplyByPartition",
+      "selector": "0xa26734dc"
+    }
+  ],
+  "ERC1410TokenHolder": [
+    {
+      "name": "authorizeOperator",
+      "selector": "0x959b8c3f"
+    },
+    {
+      "name": "authorizeOperatorByPartition",
+      "selector": "0x103ef9e1"
+    },
+    {
+      "name": "redeemByPartition",
+      "selector": "0x62eb0068"
+    },
+    {
+      "name": "revokeOperator",
+      "selector": "0xfad8b32a"
+    },
+    {
+      "name": "revokeOperatorByPartition",
+      "selector": "0x168ecec5"
+    },
+    {
+      "name": "transferByPartition",
+      "selector": "0x3bc9bcd8"
+    },
+    {
+      "name": "triggerAndSyncAll",
+      "selector": "0x6afb79db"
+    }
+  ],
+  "ERC1410TokenHolderFacet": [
+    {
+      "name": "authorizeOperator",
+      "selector": "0x959b8c3f"
+    },
+    {
+      "name": "authorizeOperatorByPartition",
+      "selector": "0x103ef9e1"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "redeemByPartition",
+      "selector": "0x62eb0068"
+    },
+    {
+      "name": "revokeOperator",
+      "selector": "0xfad8b32a"
+    },
+    {
+      "name": "revokeOperatorByPartition",
+      "selector": "0x168ecec5"
+    },
+    {
+      "name": "transferByPartition",
+      "selector": "0x3bc9bcd8"
+    },
+    {
+      "name": "triggerAndSyncAll",
+      "selector": "0x6afb79db"
+    }
+  ],
+  "ERC1594": [
+    {
+      "name": "canTransfer",
+      "selector": "0x1badb25c"
+    },
+    {
+      "name": "canTransferFrom",
+      "selector": "0x122eb575"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ERC1594",
+      "selector": "0x9be12cea"
+    },
+    {
+      "name": "isIssuable",
+      "selector": "0x2f1cae85"
+    },
+    {
+      "name": "issue",
+      "selector": "0xbb3acde9"
+    },
+    {
+      "name": "redeem",
+      "selector": "0xe77c646d"
+    },
+    {
+      "name": "redeemFrom",
+      "selector": "0x9675193c"
+    },
+    {
+      "name": "transferFromWithData",
+      "selector": "0xee532f31"
+    },
+    {
+      "name": "transferWithData",
+      "selector": "0x2535f762"
+    }
+  ],
+  "ERC1643": [
+    {
+      "name": "getAllDocuments",
+      "selector": "0x9fa5f50b"
+    },
+    {
+      "name": "getDocument",
+      "selector": "0xb10d6b41"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "removeDocument",
+      "selector": "0xc3501848"
+    },
+    {
+      "name": "setDocument",
+      "selector": "0x010648ca"
+    }
+  ],
+  "ERC1644": [
+    {
+      "name": "controllerRedeem",
+      "selector": "0x2bc6acc3"
+    },
+    {
+      "name": "controllerTransfer",
+      "selector": "0xf282527a"
+    },
+    {
+      "name": "finalizeControllable",
+      "selector": "0xa213934f"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ERC1644",
+      "selector": "0xaa4ea38e"
+    },
+    {
+      "name": "isControllable",
+      "selector": "0x4c783bf5"
+    }
+  ],
+  "ERC20": [
+    {
+      "name": "allowance",
+      "selector": "0xdd62ed3e"
+    },
+    {
+      "name": "approve",
+      "selector": "0x095ea7b3"
+    },
+    {
+      "name": "decimals",
+      "selector": "0x313ce567"
+    },
+    {
+      "name": "decimalsAdjusted",
+      "selector": "0xc67f05aa"
+    },
+    {
+      "name": "decimalsAdjustedAt",
+      "selector": "0x065dd252"
+    },
+    {
+      "name": "decimalsAt",
+      "selector": "0x771918ca"
+    },
+    {
+      "name": "decreaseAllowance",
+      "selector": "0xa457c2d7"
+    },
+    {
+      "name": "getERC20Metadata",
+      "selector": "0x8e649195"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "increaseAllowance",
+      "selector": "0x39509351"
+    },
+    {
+      "name": "initialize_ERC20",
+      "selector": "0xe04fb235"
+    },
+    {
+      "name": "name",
+      "selector": "0x06fdde03"
+    },
+    {
+      "name": "symbol",
+      "selector": "0x95d89b41"
+    },
+    {
+      "name": "transfer",
+      "selector": "0xa9059cbb"
+    },
+    {
+      "name": "transferFrom",
+      "selector": "0x23b872dd"
+    }
+  ],
+  "ERC3643": [
+    {
+      "name": "addAgent",
+      "selector": "0x84e79842"
+    },
+    {
+      "name": "batchBurn",
+      "selector": "0x4a6cc677"
+    },
+    {
+      "name": "batchForcedTransfer",
+      "selector": "0x42a47abc"
+    },
+    {
+      "name": "batchMint",
+      "selector": "0x68573107"
+    },
+    {
+      "name": "batchTransfer",
+      "selector": "0x88d695b2"
+    },
+    {
+      "name": "burn",
+      "selector": "0x9dc29fac"
+    },
+    {
+      "name": "compliance",
+      "selector": "0x6290865d"
+    },
+    {
+      "name": "forcedTransfer",
+      "selector": "0x9fc1d0e7"
+    },
+    {
+      "name": "identityRegistry",
+      "selector": "0x134e18f4"
+    },
+    {
+      "name": "initialize_ERC3643",
+      "selector": "0x888d9119"
+    },
+    {
+      "name": "isAddressRecovered",
+      "selector": "0x1b997ec2"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "mint",
+      "selector": "0x40c10f19"
+    },
+    {
+      "name": "onchainID",
+      "selector": "0xaba63705"
+    },
+    {
+      "name": "recoveryAddress",
+      "selector": "0x9285948a"
+    },
+    {
+      "name": "removeAgent",
+      "selector": "0x97a6278e"
+    },
+    {
+      "name": "setCompliance",
+      "selector": "0xf8981789"
+    },
+    {
+      "name": "setIdentityRegistry",
+      "selector": "0xcbf3f861"
+    },
+    {
+      "name": "setName",
+      "selector": "0xc47f0027"
+    },
+    {
+      "name": "setOnchainID",
+      "selector": "0x3d1ddc5b"
+    },
+    {
+      "name": "setSymbol",
+      "selector": "0xb84c8246"
+    },
+    {
+      "name": "version",
+      "selector": "0x54fd4d50"
+    }
+  ],
+  "ERC3643Batch": [
+    {
+      "name": "batchBurn",
+      "selector": "0x4a6cc677"
+    },
+    {
+      "name": "batchForcedTransfer",
+      "selector": "0x42a47abc"
+    },
+    {
+      "name": "batchMint",
+      "selector": "0x68573107"
+    },
+    {
+      "name": "batchTransfer",
+      "selector": "0x88d695b2"
+    }
+  ],
+  "ERC3643BatchFacet": [
+    {
+      "name": "batchBurn",
+      "selector": "0x4a6cc677"
+    },
+    {
+      "name": "batchForcedTransfer",
+      "selector": "0x42a47abc"
+    },
+    {
+      "name": "batchMint",
+      "selector": "0x68573107"
+    },
+    {
+      "name": "batchTransfer",
+      "selector": "0x88d695b2"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "ERC3643Facet": [
+    {
+      "name": "addAgent",
+      "selector": "0x84e79842"
+    },
+    {
+      "name": "burn",
+      "selector": "0x9dc29fac"
+    },
+    {
+      "name": "compliance",
+      "selector": "0x6290865d"
+    },
+    {
+      "name": "forcedTransfer",
+      "selector": "0x9fc1d0e7"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "identityRegistry",
+      "selector": "0x134e18f4"
+    },
+    {
+      "name": "initialize_ERC3643",
+      "selector": "0x888d9119"
+    },
+    {
+      "name": "isAddressRecovered",
+      "selector": "0x1b997ec2"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "mint",
+      "selector": "0x40c10f19"
+    },
+    {
+      "name": "onchainID",
+      "selector": "0xaba63705"
+    },
+    {
+      "name": "recoveryAddress",
+      "selector": "0x9285948a"
+    },
+    {
+      "name": "removeAgent",
+      "selector": "0x97a6278e"
+    },
+    {
+      "name": "setCompliance",
+      "selector": "0xf8981789"
+    },
+    {
+      "name": "setIdentityRegistry",
+      "selector": "0xcbf3f861"
+    },
+    {
+      "name": "setName",
+      "selector": "0xc47f0027"
+    },
+    {
+      "name": "setOnchainID",
+      "selector": "0x3d1ddc5b"
+    },
+    {
+      "name": "setSymbol",
+      "selector": "0xb84c8246"
+    },
+    {
+      "name": "version",
+      "selector": "0x54fd4d50"
+    }
+  ],
+  "AccessControl": [
+    {
+      "name": "applyRoles",
+      "selector": "0xfcfffeec"
+    },
+    {
+      "name": "getRoleCountFor",
+      "selector": "0x8fa9b4fe"
+    },
+    {
+      "name": "getRoleMemberCount",
+      "selector": "0xca15c873"
+    },
+    {
+      "name": "getRoleMembers",
+      "selector": "0x2a861f57"
+    },
+    {
+      "name": "getRolesFor",
+      "selector": "0xa28cf9a9"
+    },
+    {
+      "name": "grantRole",
+      "selector": "0x2f2ff15d"
+    },
+    {
+      "name": "hasRole",
+      "selector": "0x91d14854"
+    },
+    {
+      "name": "renounceRole",
+      "selector": "0x8bb9c5bf"
+    },
+    {
+      "name": "revokeRole",
+      "selector": "0xd547741f"
+    }
+  ],
+  "AccessControlFacet": [
+    {
+      "name": "applyRoles",
+      "selector": "0xfcfffeec"
+    },
+    {
+      "name": "getRoleCountFor",
+      "selector": "0x8fa9b4fe"
+    },
+    {
+      "name": "getRoleMemberCount",
+      "selector": "0xca15c873"
+    },
+    {
+      "name": "getRoleMembers",
+      "selector": "0x2a861f57"
+    },
+    {
+      "name": "getRolesFor",
+      "selector": "0xa28cf9a9"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "grantRole",
+      "selector": "0x2f2ff15d"
+    },
+    {
+      "name": "hasRole",
+      "selector": "0x91d14854"
+    },
+    {
+      "name": "renounceRole",
+      "selector": "0x8bb9c5bf"
+    },
+    {
+      "name": "revokeRole",
+      "selector": "0xd547741f"
+    }
+  ],
+  "Cap": [
+    {
+      "name": "getMaxSupply",
+      "selector": "0x4c0f38c2"
+    },
+    {
+      "name": "getMaxSupplyByPartition",
+      "selector": "0x79f3653f"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_Cap",
+      "selector": "0x56210c4e"
+    },
+    {
+      "name": "setMaxSupply",
+      "selector": "0x6f8b44b0"
+    },
+    {
+      "name": "setMaxSupplyByPartition",
+      "selector": "0x99b69647"
+    }
+  ],
+  "ClearingActionsFacet": [
+    {
+      "name": "activateClearing",
+      "selector": "0xab2d18a9"
+    },
+    {
+      "name": "approveClearingOperationByPartition",
+      "selector": "0xd849cea2"
+    },
+    {
+      "name": "cancelClearingOperationByPartition",
+      "selector": "0x679141fb"
+    },
+    {
+      "name": "deactivateClearing",
+      "selector": "0x65c21860"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initializeClearing",
+      "selector": "0x86a0b46a"
+    },
+    {
+      "name": "isClearingActivated",
+      "selector": "0x4b4d8990"
+    },
+    {
+      "name": "reclaimClearingOperationByPartition",
+      "selector": "0x67e57fe2"
+    }
+  ],
+  "ClearingHoldCreationFacet": [
+    {
+      "name": "clearingCreateHoldByPartition",
+      "selector": "0x6ceae590"
+    },
+    {
+      "name": "clearingCreateHoldFromByPartition",
+      "selector": "0x5f1cf8c9"
+    },
+    {
+      "name": "getClearingCreateHoldForByPartition",
+      "selector": "0x190eb09b"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "operatorClearingCreateHoldByPartition",
+      "selector": "0x7ab0c73f"
+    },
+    {
+      "name": "protectedClearingCreateHoldByPartition",
+      "selector": "0x9b646ab9"
+    }
+  ],
+  "ClearingReadFacet": [
+    {
+      "name": "getClearedAmountFor",
+      "selector": "0x46f8bc94"
+    },
+    {
+      "name": "getClearedAmountForByPartition",
+      "selector": "0xfed5a7d4"
+    },
+    {
+      "name": "getClearingCountForByPartition",
+      "selector": "0xcab70f17"
+    },
+    {
+      "name": "getClearingThirdParty",
+      "selector": "0x2714916d"
+    },
+    {
+      "name": "getClearingsIdForByPartition",
+      "selector": "0xcf38dab5"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "ClearingRedeemFacet": [
+    {
+      "name": "clearingRedeemByPartition",
+      "selector": "0x39921b12"
+    },
+    {
+      "name": "clearingRedeemFromByPartition",
+      "selector": "0x35114a78"
+    },
+    {
+      "name": "getClearingRedeemForByPartition",
+      "selector": "0x4ac3d940"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "operatorClearingRedeemByPartition",
+      "selector": "0xc1d6d5a0"
+    },
+    {
+      "name": "protectedClearingRedeemByPartition",
+      "selector": "0x498f1f65"
+    }
+  ],
+  "ClearingTransferFacet": [
+    {
+      "name": "clearingTransferByPartition",
+      "selector": "0xde32aaa8"
+    },
+    {
+      "name": "clearingTransferFromByPartition",
+      "selector": "0x5c829d67"
+    },
+    {
+      "name": "getClearingTransferForByPartition",
+      "selector": "0x6f438552"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "operatorClearingTransferByPartition",
+      "selector": "0x2ba8508d"
+    },
+    {
+      "name": "protectedClearingTransferByPartition",
+      "selector": "0x1f4eef27"
+    }
+  ],
+  "ControlList": [
+    {
+      "name": "addToControlList",
+      "selector": "0xe8204966"
+    },
+    {
+      "name": "getControlListCount",
+      "selector": "0x6b5d2ea5"
+    },
+    {
+      "name": "getControlListMembers",
+      "selector": "0xcad7e56b"
+    },
+    {
+      "name": "getControlListType",
+      "selector": "0x1d46c292"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ControlList",
+      "selector": "0xf88bd9f2"
+    },
+    {
+      "name": "isInControlList",
+      "selector": "0xfd5b071b"
+    },
+    {
+      "name": "removeFromControlList",
+      "selector": "0x47b52d3b"
+    }
+  ],
+  "CorporateActions": [
+    {
+      "name": "addCorporateAction",
+      "selector": "0xd9e4d92c"
+    },
+    {
+      "name": "getCorporateAction",
+      "selector": "0x911181da"
+    },
+    {
+      "name": "getCorporateActionCount",
+      "selector": "0x8859794c"
+    },
+    {
+      "name": "getCorporateActionCountByType",
+      "selector": "0x539b4e0b"
+    },
+    {
+      "name": "getCorporateActionIds",
+      "selector": "0x1b56ea1e"
+    },
+    {
+      "name": "getCorporateActionIdsByType",
+      "selector": "0xe73bbddb"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "ExternalControlListManagement": [
+    {
+      "name": "addExternalControlList",
+      "selector": "0x995e4649"
+    },
+    {
+      "name": "getExternalControlListsCount",
+      "selector": "0x9bec4167"
+    },
+    {
+      "name": "getExternalControlListsMembers",
+      "selector": "0xc4aa9df3"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ExternalControlLists",
+      "selector": "0x0a0a114f"
+    },
+    {
+      "name": "isExternalControlList",
+      "selector": "0x07c44711"
+    },
+    {
+      "name": "removeExternalControlList",
+      "selector": "0xb8913387"
+    },
+    {
+      "name": "updateExternalControlLists",
+      "selector": "0x0ba2b922"
+    }
+  ],
+  "ExternalKycListManagement": [
+    {
+      "name": "addExternalKycList",
+      "selector": "0x7570e044"
+    },
+    {
+      "name": "getExternalKycListsCount",
+      "selector": "0xd17e889e"
+    },
+    {
+      "name": "getExternalKycListsMembers",
+      "selector": "0x999a2459"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ExternalKycLists",
+      "selector": "0x3ac7fadc"
+    },
+    {
+      "name": "isExternalKycList",
+      "selector": "0x20991e17"
+    },
+    {
+      "name": "isExternallyGranted",
+      "selector": "0x1d7d5749"
+    },
+    {
+      "name": "removeExternalKycList",
+      "selector": "0x16c94d54"
+    },
+    {
+      "name": "updateExternalKycLists",
+      "selector": "0xc391576d"
+    }
+  ],
+  "ExternalPauseManagement": [
+    {
+      "name": "addExternalPause",
+      "selector": "0xd438cff1"
+    },
+    {
+      "name": "getExternalPausesCount",
+      "selector": "0x1e2bc3a6"
+    },
+    {
+      "name": "getExternalPausesMembers",
+      "selector": "0x5b175a35"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ExternalPauses",
+      "selector": "0x8f88d0d5"
+    },
+    {
+      "name": "isExternalPause",
+      "selector": "0xe26e35be"
+    },
+    {
+      "name": "removeExternalPause",
+      "selector": "0x9648d912"
+    },
+    {
+      "name": "updateExternalPauses",
+      "selector": "0x361d714a"
+    }
+  ],
+  "Freeze": [
+    {
+      "name": "batchFreezePartialTokens",
+      "selector": "0xfc7e5fa8"
+    },
+    {
+      "name": "batchSetAddressFrozen",
+      "selector": "0x1a7af379"
+    },
+    {
+      "name": "batchUnfreezePartialTokens",
+      "selector": "0x4710362d"
+    },
+    {
+      "name": "freezePartialTokens",
+      "selector": "0x125c4a33"
+    },
+    {
+      "name": "getFrozenTokens",
+      "selector": "0x158b1a57"
+    },
+    {
+      "name": "setAddressFrozen",
+      "selector": "0xc69c09cf"
+    },
+    {
+      "name": "unfreezePartialTokens",
+      "selector": "0x1fe56f7d"
+    }
+  ],
+  "FreezeFacet": [
+    {
+      "name": "batchFreezePartialTokens",
+      "selector": "0xfc7e5fa8"
+    },
+    {
+      "name": "batchSetAddressFrozen",
+      "selector": "0x1a7af379"
+    },
+    {
+      "name": "batchUnfreezePartialTokens",
+      "selector": "0x4710362d"
+    },
+    {
+      "name": "freezePartialTokens",
+      "selector": "0x125c4a33"
+    },
+    {
+      "name": "getFrozenTokens",
+      "selector": "0x158b1a57"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "setAddressFrozen",
+      "selector": "0xc69c09cf"
+    },
+    {
+      "name": "unfreezePartialTokens",
+      "selector": "0x1fe56f7d"
+    }
+  ],
+  "Hold": [
+    {
+      "name": "controllerCreateHoldByPartition",
+      "selector": "0x5f3d8171"
+    },
+    {
+      "name": "createHoldByPartition",
+      "selector": "0x5d23449e"
+    },
+    {
+      "name": "createHoldFromByPartition",
+      "selector": "0x2361f007"
+    },
+    {
+      "name": "executeHoldByPartition",
+      "selector": "0x25fe8720"
+    },
+    {
+      "name": "operatorCreateHoldByPartition",
+      "selector": "0xc6062c3c"
+    },
+    {
+      "name": "protectedCreateHoldByPartition",
+      "selector": "0xc17f3554"
+    },
+    {
+      "name": "reclaimHoldByPartition",
+      "selector": "0xb437969e"
+    },
+    {
+      "name": "releaseHoldByPartition",
+      "selector": "0xf8bafc1c"
+    }
+  ],
+  "HoldFacet": [
+    {
+      "name": "controllerCreateHoldByPartition",
+      "selector": "0x5f3d8171"
+    },
+    {
+      "name": "createHoldByPartition",
+      "selector": "0x5d23449e"
+    },
+    {
+      "name": "createHoldFromByPartition",
+      "selector": "0x2361f007"
+    },
+    {
+      "name": "executeHoldByPartition",
+      "selector": "0x25fe8720"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "operatorCreateHoldByPartition",
+      "selector": "0xc6062c3c"
+    },
+    {
+      "name": "protectedCreateHoldByPartition",
+      "selector": "0xc17f3554"
+    },
+    {
+      "name": "reclaimHoldByPartition",
+      "selector": "0xb437969e"
+    },
+    {
+      "name": "releaseHoldByPartition",
+      "selector": "0xf8bafc1c"
+    }
+  ],
+  "HoldManagement": [
+    {
+      "name": "controllerCreateHoldByPartition",
+      "selector": "0x5f3d8171"
+    },
+    {
+      "name": "operatorCreateHoldByPartition",
+      "selector": "0xc6062c3c"
+    },
+    {
+      "name": "protectedCreateHoldByPartition",
+      "selector": "0xc17f3554"
+    }
+  ],
+  "HoldManagementFacet": [
+    {
+      "name": "controllerCreateHoldByPartition",
+      "selector": "0x5f3d8171"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "operatorCreateHoldByPartition",
+      "selector": "0xc6062c3c"
+    },
+    {
+      "name": "protectedCreateHoldByPartition",
+      "selector": "0xc17f3554"
+    }
+  ],
+  "HoldRead": [
+    {
+      "name": "getHeldAmountFor",
+      "selector": "0x8493aabb"
+    },
+    {
+      "name": "getHeldAmountForByPartition",
+      "selector": "0x4d60fdc5"
+    },
+    {
+      "name": "getHoldCountForByPartition",
+      "selector": "0xcecb3899"
+    },
+    {
+      "name": "getHoldForByPartition",
+      "selector": "0x8d41523d"
+    },
+    {
+      "name": "getHoldThirdParty",
+      "selector": "0x3c36a695"
+    },
+    {
+      "name": "getHoldsIdForByPartition",
+      "selector": "0xeb89899d"
+    }
+  ],
+  "HoldReadFacet": [
+    {
+      "name": "getHeldAmountFor",
+      "selector": "0x8493aabb"
+    },
+    {
+      "name": "getHeldAmountForByPartition",
+      "selector": "0x4d60fdc5"
+    },
+    {
+      "name": "getHoldCountForByPartition",
+      "selector": "0xcecb3899"
+    },
+    {
+      "name": "getHoldForByPartition",
+      "selector": "0x8d41523d"
+    },
+    {
+      "name": "getHoldThirdParty",
+      "selector": "0x3c36a695"
+    },
+    {
+      "name": "getHoldsIdForByPartition",
+      "selector": "0xeb89899d"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "HoldTokenHolder": [
+    {
+      "name": "createHoldByPartition",
+      "selector": "0x5d23449e"
+    },
+    {
+      "name": "createHoldFromByPartition",
+      "selector": "0x2361f007"
+    },
+    {
+      "name": "executeHoldByPartition",
+      "selector": "0x25fe8720"
+    },
+    {
+      "name": "reclaimHoldByPartition",
+      "selector": "0xb437969e"
+    },
+    {
+      "name": "releaseHoldByPartition",
+      "selector": "0xf8bafc1c"
+    }
+  ],
+  "HoldTokenHolderFacet": [
+    {
+      "name": "createHoldByPartition",
+      "selector": "0x5d23449e"
+    },
+    {
+      "name": "createHoldFromByPartition",
+      "selector": "0x2361f007"
+    },
+    {
+      "name": "executeHoldByPartition",
+      "selector": "0x25fe8720"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "reclaimHoldByPartition",
+      "selector": "0xb437969e"
+    },
+    {
+      "name": "releaseHoldByPartition",
+      "selector": "0xf8bafc1c"
+    }
+  ],
+  "IERC1410": [
+    {
+      "name": "authorizeOperator",
+      "selector": "0x959b8c3f"
+    },
+    {
+      "name": "authorizeOperatorByPartition",
+      "selector": "0x103ef9e1"
+    },
+    {
+      "name": "balanceOf",
+      "selector": "0x70a08231"
+    },
+    {
+      "name": "balanceOfAt",
+      "selector": "0x4ee2cd7e"
+    },
+    {
+      "name": "balanceOfAtSnapshot",
+      "selector": "0x8e00ae2e"
+    },
+    {
+      "name": "balanceOfAtSnapshotByPartition",
+      "selector": "0xe002bcdf"
+    },
+    {
+      "name": "balanceOfByPartition",
+      "selector": "0x30e82803"
+    },
+    {
+      "name": "canRedeemByPartition",
+      "selector": "0x7b7322c4"
+    },
+    {
+      "name": "canTransferByPartition",
+      "selector": "0xa7b518b1"
+    },
+    {
+      "name": "controllerRedeemByPartition",
+      "selector": "0xb84777cc"
+    },
+    {
+      "name": "controllerTransferByPartition",
+      "selector": "0xfb78befa"
+    },
+    {
+      "name": "decimalsAtSnapshot",
+      "selector": "0x69ed346f"
+    },
+    {
+      "name": "initialize_ERC1410",
+      "selector": "0x7b1df196"
+    },
+    {
+      "name": "isMultiPartition",
+      "selector": "0xbd09cc54"
+    },
+    {
+      "name": "isOperator",
+      "selector": "0xb6363cf2"
+    },
+    {
+      "name": "isOperatorForPartition",
+      "selector": "0x6d77cad6"
+    },
+    {
+      "name": "isPaused",
+      "selector": "0xb187bd26"
+    },
+    {
+      "name": "issueByPartition",
+      "selector": "0x18180262"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshot",
+      "selector": "0xd9e6f164"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshotByPartition",
+      "selector": "0x4a13f5d0"
+    },
+    {
+      "name": "operatorRedeemByPartition",
+      "selector": "0x13d557bc"
+    },
+    {
+      "name": "operatorTransferByPartition",
+      "selector": "0x6b9894fe"
+    },
+    {
+      "name": "partitionsOf",
+      "selector": "0x740ab8f4"
+    },
+    {
+      "name": "partitionsOfAtSnapshot",
+      "selector": "0x09e84301"
+    },
+    {
+      "name": "pause",
+      "selector": "0x8456cb59"
+    },
+    {
+      "name": "protectedRedeemFromByPartition",
+      "selector": "0xc98d9723"
+    },
+    {
+      "name": "protectedTransferFromByPartition",
+      "selector": "0x12e41c0a"
+    },
+    {
+      "name": "redeemByPartition",
+      "selector": "0x62eb0068"
+    },
+    {
+      "name": "revokeOperator",
+      "selector": "0xfad8b32a"
+    },
+    {
+      "name": "revokeOperatorByPartition",
+      "selector": "0x168ecec5"
+    },
+    {
+      "name": "takeSnapshot",
+      "selector": "0xb3d3d37e"
+    },
+    {
+      "name": "totalSupply",
+      "selector": "0x18160ddd"
+    },
+    {
+      "name": "totalSupplyAtSnapshot",
+      "selector": "0xda35f8f6"
+    },
+    {
+      "name": "totalSupplyAtSnapshotByPartition",
+      "selector": "0x9657ddb9"
+    },
+    {
+      "name": "totalSupplyByPartition",
+      "selector": "0xa26734dc"
+    },
+    {
+      "name": "transferByPartition",
+      "selector": "0x3bc9bcd8"
+    },
+    {
+      "name": "triggerAndSyncAll",
+      "selector": "0x6afb79db"
+    },
+    {
+      "name": "unpause",
+      "selector": "0x3f4ba83a"
+    }
+  ],
+  "IERC1410Controller": [
+    {
+      "name": "canTransferByPartition",
+      "selector": "0xa7b518b1"
+    },
+    {
+      "name": "controllerRedeemByPartition",
+      "selector": "0xb84777cc"
+    },
+    {
+      "name": "controllerTransferByPartition",
+      "selector": "0xfb78befa"
+    }
+  ],
+  "IERC1410Management": [
+    {
+      "name": "controllerRedeemByPartition",
+      "selector": "0xb84777cc"
+    },
+    {
+      "name": "controllerTransferByPartition",
+      "selector": "0xfb78befa"
+    },
+    {
+      "name": "initialize_ERC1410",
+      "selector": "0x7b1df196"
+    },
+    {
+      "name": "issueByPartition",
+      "selector": "0x18180262"
+    },
+    {
+      "name": "operatorRedeemByPartition",
+      "selector": "0x13d557bc"
+    },
+    {
+      "name": "operatorTransferByPartition",
+      "selector": "0x6b9894fe"
+    },
+    {
+      "name": "protectedRedeemFromByPartition",
+      "selector": "0xc98d9723"
+    },
+    {
+      "name": "protectedTransferFromByPartition",
+      "selector": "0x12e41c0a"
+    }
+  ],
+  "IERC1410Read": [
+    {
+      "name": "balanceOf",
+      "selector": "0x70a08231"
+    },
+    {
+      "name": "balanceOfAt",
+      "selector": "0x4ee2cd7e"
+    },
+    {
+      "name": "balanceOfByPartition",
+      "selector": "0x30e82803"
+    },
+    {
+      "name": "canRedeemByPartition",
+      "selector": "0x7b7322c4"
+    },
+    {
+      "name": "canTransferByPartition",
+      "selector": "0xa7b518b1"
+    },
+    {
+      "name": "isMultiPartition",
+      "selector": "0xbd09cc54"
+    },
+    {
+      "name": "isOperator",
+      "selector": "0xb6363cf2"
+    },
+    {
+      "name": "isOperatorForPartition",
+      "selector": "0x6d77cad6"
+    },
+    {
+      "name": "partitionsOf",
+      "selector": "0x740ab8f4"
+    },
+    {
+      "name": "totalSupply",
+      "selector": "0x18160ddd"
+    },
+    {
+      "name": "totalSupplyByPartition",
+      "selector": "0xa26734dc"
+    }
+  ],
+  "IERC1410TokenHolder": [
+    {
+      "name": "authorizeOperator",
+      "selector": "0x959b8c3f"
+    },
+    {
+      "name": "authorizeOperatorByPartition",
+      "selector": "0x103ef9e1"
+    },
+    {
+      "name": "redeemByPartition",
+      "selector": "0x62eb0068"
+    },
+    {
+      "name": "revokeOperator",
+      "selector": "0xfad8b32a"
+    },
+    {
+      "name": "revokeOperatorByPartition",
+      "selector": "0x168ecec5"
+    },
+    {
+      "name": "transferByPartition",
+      "selector": "0x3bc9bcd8"
+    },
+    {
+      "name": "triggerAndSyncAll",
+      "selector": "0x6afb79db"
+    }
+  ],
+  "IERC1594": [
+    {
+      "name": "canTransfer",
+      "selector": "0x1badb25c"
+    },
+    {
+      "name": "canTransferFrom",
+      "selector": "0x122eb575"
+    },
+    {
+      "name": "initialize_ERC1594",
+      "selector": "0x9be12cea"
+    },
+    {
+      "name": "isIssuable",
+      "selector": "0x2f1cae85"
+    },
+    {
+      "name": "issue",
+      "selector": "0xbb3acde9"
+    },
+    {
+      "name": "redeem",
+      "selector": "0xe77c646d"
+    },
+    {
+      "name": "redeemFrom",
+      "selector": "0x9675193c"
+    },
+    {
+      "name": "transferFromWithData",
+      "selector": "0xee532f31"
+    },
+    {
+      "name": "transferWithData",
+      "selector": "0x2535f762"
+    }
+  ],
+  "IERC1643": [
+    {
+      "name": "getAllDocuments",
+      "selector": "0x9fa5f50b"
+    },
+    {
+      "name": "getDocument",
+      "selector": "0xb10d6b41"
+    },
+    {
+      "name": "removeDocument",
+      "selector": "0xc3501848"
+    },
+    {
+      "name": "setDocument",
+      "selector": "0x010648ca"
+    }
+  ],
+  "IERC1644": [
+    {
+      "name": "controllerRedeem",
+      "selector": "0x2bc6acc3"
+    },
+    {
+      "name": "controllerTransfer",
+      "selector": "0xf282527a"
+    },
+    {
+      "name": "finalizeControllable",
+      "selector": "0xa213934f"
+    },
+    {
+      "name": "initialize_ERC1644",
+      "selector": "0xaa4ea38e"
+    },
+    {
+      "name": "isControllable",
+      "selector": "0x4c783bf5"
+    }
+  ],
+  "IERC20": [
+    {
+      "name": "allowance",
+      "selector": "0xdd62ed3e"
+    },
+    {
+      "name": "approve",
+      "selector": "0x095ea7b3"
+    },
+    {
+      "name": "decimals",
+      "selector": "0x313ce567"
+    },
+    {
+      "name": "decimalsAdjusted",
+      "selector": "0xc67f05aa"
+    },
+    {
+      "name": "decimalsAdjustedAt",
+      "selector": "0x065dd252"
+    },
+    {
+      "name": "decimalsAt",
+      "selector": "0x771918ca"
+    },
+    {
+      "name": "decreaseAllowance",
+      "selector": "0xa457c2d7"
+    },
+    {
+      "name": "getERC20Metadata",
+      "selector": "0x8e649195"
+    },
+    {
+      "name": "increaseAllowance",
+      "selector": "0x39509351"
+    },
+    {
+      "name": "initialize_ERC20",
+      "selector": "0xe04fb235"
+    },
+    {
+      "name": "name",
+      "selector": "0x06fdde03"
+    },
+    {
+      "name": "symbol",
+      "selector": "0x95d89b41"
+    },
+    {
+      "name": "transfer",
+      "selector": "0xa9059cbb"
+    },
+    {
+      "name": "transferFrom",
+      "selector": "0x23b872dd"
+    }
+  ],
+  "ICompliance": [
+    {
+      "name": "canTransfer",
+      "selector": "0xe46638e6"
+    },
+    {
+      "name": "created",
+      "selector": "0x5f8dead3"
+    },
+    {
+      "name": "destroyed",
+      "selector": "0x8d2ea772"
+    },
+    {
+      "name": "transferred",
+      "selector": "0x8baf29b4"
+    }
+  ],
+  "IERC3643": [
+    {
+      "name": "addAgent",
+      "selector": "0x84e79842"
+    },
+    {
+      "name": "authorizeOperator",
+      "selector": "0x959b8c3f"
+    },
+    {
+      "name": "authorizeOperatorByPartition",
+      "selector": "0x103ef9e1"
+    },
+    {
+      "name": "balanceOf",
+      "selector": "0x70a08231"
+    },
+    {
+      "name": "balanceOfAt",
+      "selector": "0x4ee2cd7e"
+    },
+    {
+      "name": "balanceOfAtSnapshot",
+      "selector": "0x8e00ae2e"
+    },
+    {
+      "name": "balanceOfAtSnapshotByPartition",
+      "selector": "0xe002bcdf"
+    },
+    {
+      "name": "balanceOfByPartition",
+      "selector": "0x30e82803"
+    },
+    {
+      "name": "batchBurn",
+      "selector": "0x4a6cc677"
+    },
+    {
+      "name": "batchForcedTransfer",
+      "selector": "0x42a47abc"
+    },
+    {
+      "name": "batchMint",
+      "selector": "0x68573107"
+    },
+    {
+      "name": "batchTransfer",
+      "selector": "0x88d695b2"
+    },
+    {
+      "name": "burn",
+      "selector": "0x9dc29fac"
+    },
+    {
+      "name": "canRedeemByPartition",
+      "selector": "0x7b7322c4"
+    },
+    {
+      "name": "canTransferByPartition",
+      "selector": "0xa7b518b1"
+    },
+    {
+      "name": "compliance",
+      "selector": "0x6290865d"
+    },
+    {
+      "name": "controllerRedeemByPartition",
+      "selector": "0xb84777cc"
+    },
+    {
+      "name": "controllerTransferByPartition",
+      "selector": "0xfb78befa"
+    },
+    {
+      "name": "decimalsAtSnapshot",
+      "selector": "0x69ed346f"
+    },
+    {
+      "name": "forcedTransfer",
+      "selector": "0x9fc1d0e7"
+    },
+    {
+      "name": "identityRegistry",
+      "selector": "0x134e18f4"
+    },
+    {
+      "name": "initialize_ERC1410",
+      "selector": "0x7b1df196"
+    },
+    {
+      "name": "initialize_ERC3643",
+      "selector": "0x888d9119"
+    },
+    {
+      "name": "isAddressRecovered",
+      "selector": "0x1b997ec2"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "isMultiPartition",
+      "selector": "0xbd09cc54"
+    },
+    {
+      "name": "isOperator",
+      "selector": "0xb6363cf2"
+    },
+    {
+      "name": "isOperatorForPartition",
+      "selector": "0x6d77cad6"
+    },
+    {
+      "name": "isPaused",
+      "selector": "0xb187bd26"
+    },
+    {
+      "name": "issueByPartition",
+      "selector": "0x18180262"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshot",
+      "selector": "0xd9e6f164"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshotByPartition",
+      "selector": "0x4a13f5d0"
+    },
+    {
+      "name": "mint",
+      "selector": "0x40c10f19"
+    },
+    {
+      "name": "onchainID",
+      "selector": "0xaba63705"
+    },
+    {
+      "name": "operatorRedeemByPartition",
+      "selector": "0x13d557bc"
+    },
+    {
+      "name": "operatorTransferByPartition",
+      "selector": "0x6b9894fe"
+    },
+    {
+      "name": "partitionsOf",
+      "selector": "0x740ab8f4"
+    },
+    {
+      "name": "partitionsOfAtSnapshot",
+      "selector": "0x09e84301"
+    },
+    {
+      "name": "pause",
+      "selector": "0x8456cb59"
+    },
+    {
+      "name": "protectedRedeemFromByPartition",
+      "selector": "0xc98d9723"
+    },
+    {
+      "name": "protectedTransferFromByPartition",
+      "selector": "0x12e41c0a"
+    },
+    {
+      "name": "recoveryAddress",
+      "selector": "0x9285948a"
+    },
+    {
+      "name": "redeemByPartition",
+      "selector": "0x62eb0068"
+    },
+    {
+      "name": "removeAgent",
+      "selector": "0x97a6278e"
+    },
+    {
+      "name": "revokeOperator",
+      "selector": "0xfad8b32a"
+    },
+    {
+      "name": "revokeOperatorByPartition",
+      "selector": "0x168ecec5"
+    },
+    {
+      "name": "setCompliance",
+      "selector": "0xf8981789"
+    },
+    {
+      "name": "setIdentityRegistry",
+      "selector": "0xcbf3f861"
+    },
+    {
+      "name": "setName",
+      "selector": "0xc47f0027"
+    },
+    {
+      "name": "setOnchainID",
+      "selector": "0x3d1ddc5b"
+    },
+    {
+      "name": "setSymbol",
+      "selector": "0xb84c8246"
+    },
+    {
+      "name": "takeSnapshot",
+      "selector": "0xb3d3d37e"
+    },
+    {
+      "name": "totalSupply",
+      "selector": "0x18160ddd"
+    },
+    {
+      "name": "totalSupplyAtSnapshot",
+      "selector": "0xda35f8f6"
+    },
+    {
+      "name": "totalSupplyAtSnapshotByPartition",
+      "selector": "0x9657ddb9"
+    },
+    {
+      "name": "totalSupplyByPartition",
+      "selector": "0xa26734dc"
+    },
+    {
+      "name": "transferByPartition",
+      "selector": "0x3bc9bcd8"
+    },
+    {
+      "name": "triggerAndSyncAll",
+      "selector": "0x6afb79db"
+    },
+    {
+      "name": "unpause",
+      "selector": "0x3f4ba83a"
+    },
+    {
+      "name": "version",
+      "selector": "0x54fd4d50"
+    }
+  ],
+  "IERC3643Basic": [
+    {
+      "name": "addAgent",
+      "selector": "0x84e79842"
+    },
+    {
+      "name": "burn",
+      "selector": "0x9dc29fac"
+    },
+    {
+      "name": "compliance",
+      "selector": "0x6290865d"
+    },
+    {
+      "name": "forcedTransfer",
+      "selector": "0x9fc1d0e7"
+    },
+    {
+      "name": "identityRegistry",
+      "selector": "0x134e18f4"
+    },
+    {
+      "name": "initialize_ERC3643",
+      "selector": "0x888d9119"
+    },
+    {
+      "name": "isAddressRecovered",
+      "selector": "0x1b997ec2"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "mint",
+      "selector": "0x40c10f19"
+    },
+    {
+      "name": "onchainID",
+      "selector": "0xaba63705"
+    },
+    {
+      "name": "recoveryAddress",
+      "selector": "0x9285948a"
+    },
+    {
+      "name": "removeAgent",
+      "selector": "0x97a6278e"
+    },
+    {
+      "name": "setCompliance",
+      "selector": "0xf8981789"
+    },
+    {
+      "name": "setIdentityRegistry",
+      "selector": "0xcbf3f861"
+    },
+    {
+      "name": "setName",
+      "selector": "0xc47f0027"
+    },
+    {
+      "name": "setOnchainID",
+      "selector": "0x3d1ddc5b"
+    },
+    {
+      "name": "setSymbol",
+      "selector": "0xb84c8246"
+    },
+    {
+      "name": "version",
+      "selector": "0x54fd4d50"
+    }
+  ],
+  "IERC3643Batch": [
+    {
+      "name": "batchBurn",
+      "selector": "0x4a6cc677"
+    },
+    {
+      "name": "batchForcedTransfer",
+      "selector": "0x42a47abc"
+    },
+    {
+      "name": "batchMint",
+      "selector": "0x68573107"
+    },
+    {
+      "name": "batchTransfer",
+      "selector": "0x88d695b2"
+    }
+  ],
+  "IAccessControl": [
+    {
+      "name": "applyRoles",
+      "selector": "0xfcfffeec"
+    },
+    {
+      "name": "getRoleCountFor",
+      "selector": "0x8fa9b4fe"
+    },
+    {
+      "name": "getRoleMemberCount",
+      "selector": "0xca15c873"
+    },
+    {
+      "name": "getRoleMembers",
+      "selector": "0x2a861f57"
+    },
+    {
+      "name": "getRolesFor",
+      "selector": "0xa28cf9a9"
+    },
+    {
+      "name": "grantRole",
+      "selector": "0x2f2ff15d"
+    },
+    {
+      "name": "hasRole",
+      "selector": "0x91d14854"
+    },
+    {
+      "name": "renounceRole",
+      "selector": "0x8bb9c5bf"
+    },
+    {
+      "name": "revokeRole",
+      "selector": "0xd547741f"
+    }
+  ],
+  "ICap": [
+    {
+      "name": "getMaxSupply",
+      "selector": "0x4c0f38c2"
+    },
+    {
+      "name": "getMaxSupplyByPartition",
+      "selector": "0x79f3653f"
+    },
+    {
+      "name": "initialize_Cap",
+      "selector": "0x56210c4e"
+    },
+    {
+      "name": "setMaxSupply",
+      "selector": "0x6f8b44b0"
+    },
+    {
+      "name": "setMaxSupplyByPartition",
+      "selector": "0x99b69647"
+    }
+  ],
+  "IClearingActions": [
+    {
+      "name": "activateClearing",
+      "selector": "0xab2d18a9"
+    },
+    {
+      "name": "approveClearingOperationByPartition",
+      "selector": "0xd849cea2"
+    },
+    {
+      "name": "cancelClearingOperationByPartition",
+      "selector": "0x679141fb"
+    },
+    {
+      "name": "deactivateClearing",
+      "selector": "0x65c21860"
+    },
+    {
+      "name": "initializeClearing",
+      "selector": "0x86a0b46a"
+    },
+    {
+      "name": "isClearingActivated",
+      "selector": "0x4b4d8990"
+    },
+    {
+      "name": "reclaimClearingOperationByPartition",
+      "selector": "0x67e57fe2"
+    }
+  ],
+  "IClearingHoldCreation": [
+    {
+      "name": "clearingCreateHoldByPartition",
+      "selector": "0x6ceae590"
+    },
+    {
+      "name": "clearingCreateHoldFromByPartition",
+      "selector": "0x5f1cf8c9"
+    },
+    {
+      "name": "getClearingCreateHoldForByPartition",
+      "selector": "0x190eb09b"
+    },
+    {
+      "name": "operatorClearingCreateHoldByPartition",
+      "selector": "0x7ab0c73f"
+    },
+    {
+      "name": "protectedClearingCreateHoldByPartition",
+      "selector": "0x9b646ab9"
+    }
+  ],
+  "IClearingRead": [
+    {
+      "name": "getClearedAmountFor",
+      "selector": "0x46f8bc94"
+    },
+    {
+      "name": "getClearedAmountForByPartition",
+      "selector": "0xfed5a7d4"
+    },
+    {
+      "name": "getClearingCountForByPartition",
+      "selector": "0xcab70f17"
+    },
+    {
+      "name": "getClearingThirdParty",
+      "selector": "0x2714916d"
+    },
+    {
+      "name": "getClearingsIdForByPartition",
+      "selector": "0xcf38dab5"
+    }
+  ],
+  "IClearingRedeem": [
+    {
+      "name": "clearingRedeemByPartition",
+      "selector": "0x39921b12"
+    },
+    {
+      "name": "clearingRedeemFromByPartition",
+      "selector": "0x35114a78"
+    },
+    {
+      "name": "getClearingRedeemForByPartition",
+      "selector": "0x4ac3d940"
+    },
+    {
+      "name": "operatorClearingRedeemByPartition",
+      "selector": "0xc1d6d5a0"
+    },
+    {
+      "name": "protectedClearingRedeemByPartition",
+      "selector": "0x498f1f65"
+    }
+  ],
+  "IClearingTransfer": [
+    {
+      "name": "clearingTransferByPartition",
+      "selector": "0xde32aaa8"
+    },
+    {
+      "name": "clearingTransferFromByPartition",
+      "selector": "0x5c829d67"
+    },
+    {
+      "name": "getClearingTransferForByPartition",
+      "selector": "0x6f438552"
+    },
+    {
+      "name": "operatorClearingTransferByPartition",
+      "selector": "0x2ba8508d"
+    },
+    {
+      "name": "protectedClearingTransferByPartition",
+      "selector": "0x1f4eef27"
+    }
+  ],
+  "IControlList": [
+    {
+      "name": "addToControlList",
+      "selector": "0xe8204966"
+    },
+    {
+      "name": "getControlListCount",
+      "selector": "0x6b5d2ea5"
+    },
+    {
+      "name": "getControlListMembers",
+      "selector": "0xcad7e56b"
+    },
+    {
+      "name": "getControlListType",
+      "selector": "0x1d46c292"
+    },
+    {
+      "name": "initialize_ControlList",
+      "selector": "0xf88bd9f2"
+    },
+    {
+      "name": "isInControlList",
+      "selector": "0xfd5b071b"
+    },
+    {
+      "name": "removeFromControlList",
+      "selector": "0x47b52d3b"
+    }
+  ],
+  "ICorporateActions": [
+    {
+      "name": "addCorporateAction",
+      "selector": "0xd9e4d92c"
+    },
+    {
+      "name": "getCorporateAction",
+      "selector": "0x911181da"
+    },
+    {
+      "name": "getCorporateActionCount",
+      "selector": "0x8859794c"
+    },
+    {
+      "name": "getCorporateActionCountByType",
+      "selector": "0x539b4e0b"
+    },
+    {
+      "name": "getCorporateActionIds",
+      "selector": "0x1b56ea1e"
+    },
+    {
+      "name": "getCorporateActionIdsByType",
+      "selector": "0xe73bbddb"
+    }
+  ],
+  "IExternalControlList": [
+    {
+      "name": "isAuthorized",
+      "selector": "0xfe9fbb80"
+    }
+  ],
+  "IExternalControlListManagement": [
+    {
+      "name": "addExternalControlList",
+      "selector": "0x995e4649"
+    },
+    {
+      "name": "getExternalControlListsCount",
+      "selector": "0x9bec4167"
+    },
+    {
+      "name": "getExternalControlListsMembers",
+      "selector": "0xc4aa9df3"
+    },
+    {
+      "name": "initialize_ExternalControlLists",
+      "selector": "0x0a0a114f"
+    },
+    {
+      "name": "isExternalControlList",
+      "selector": "0x07c44711"
+    },
+    {
+      "name": "removeExternalControlList",
+      "selector": "0xb8913387"
+    },
+    {
+      "name": "updateExternalControlLists",
+      "selector": "0x0ba2b922"
+    }
+  ],
+  "IExternalKycList": [
+    {
+      "name": "getKycStatus",
+      "selector": "0xbe88ff49"
+    }
+  ],
+  "IExternalKycListManagement": [
+    {
+      "name": "addExternalKycList",
+      "selector": "0x7570e044"
+    },
+    {
+      "name": "getExternalKycListsCount",
+      "selector": "0xd17e889e"
+    },
+    {
+      "name": "getExternalKycListsMembers",
+      "selector": "0x999a2459"
+    },
+    {
+      "name": "initialize_ExternalKycLists",
+      "selector": "0x3ac7fadc"
+    },
+    {
+      "name": "isExternalKycList",
+      "selector": "0x20991e17"
+    },
+    {
+      "name": "isExternallyGranted",
+      "selector": "0x1d7d5749"
+    },
+    {
+      "name": "removeExternalKycList",
+      "selector": "0x16c94d54"
+    },
+    {
+      "name": "updateExternalKycLists",
+      "selector": "0xc391576d"
+    }
+  ],
+  "IExternalPause": [
+    {
+      "name": "isPaused",
+      "selector": "0xb187bd26"
+    }
+  ],
+  "IExternalPauseManagement": [
+    {
+      "name": "addExternalPause",
+      "selector": "0xd438cff1"
+    },
+    {
+      "name": "getExternalPausesCount",
+      "selector": "0x1e2bc3a6"
+    },
+    {
+      "name": "getExternalPausesMembers",
+      "selector": "0x5b175a35"
+    },
+    {
+      "name": "initialize_ExternalPauses",
+      "selector": "0x8f88d0d5"
+    },
+    {
+      "name": "isExternalPause",
+      "selector": "0xe26e35be"
+    },
+    {
+      "name": "removeExternalPause",
+      "selector": "0x9648d912"
+    },
+    {
+      "name": "updateExternalPauses",
+      "selector": "0x361d714a"
+    }
+  ],
+  "IFreeze": [
+    {
+      "name": "freezePartialTokens",
+      "selector": "0x125c4a33"
+    },
+    {
+      "name": "getFrozenTokens",
+      "selector": "0x158b1a57"
+    },
+    {
+      "name": "setAddressFrozen",
+      "selector": "0xc69c09cf"
+    },
+    {
+      "name": "unfreezePartialTokens",
+      "selector": "0x1fe56f7d"
+    }
+  ],
+  "IHold": [
+    {
+      "name": "applyRoles",
+      "selector": "0xfcfffeec"
+    },
+    {
+      "name": "authorizeOperator",
+      "selector": "0x959b8c3f"
+    },
+    {
+      "name": "authorizeOperatorByPartition",
+      "selector": "0x103ef9e1"
+    },
+    {
+      "name": "balanceOf",
+      "selector": "0x70a08231"
+    },
+    {
+      "name": "balanceOfAt",
+      "selector": "0x4ee2cd7e"
+    },
+    {
+      "name": "balanceOfAtSnapshot",
+      "selector": "0x8e00ae2e"
+    },
+    {
+      "name": "balanceOfAtSnapshotByPartition",
+      "selector": "0xe002bcdf"
+    },
+    {
+      "name": "balanceOfByPartition",
+      "selector": "0x30e82803"
+    },
+    {
+      "name": "canRedeemByPartition",
+      "selector": "0x7b7322c4"
+    },
+    {
+      "name": "canTransferByPartition",
+      "selector": "0xa7b518b1"
+    },
+    {
+      "name": "controllerCreateHoldByPartition",
+      "selector": "0x5f3d8171"
+    },
+    {
+      "name": "controllerRedeemByPartition",
+      "selector": "0xb84777cc"
+    },
+    {
+      "name": "controllerTransferByPartition",
+      "selector": "0xfb78befa"
+    },
+    {
+      "name": "createHoldByPartition",
+      "selector": "0x5d23449e"
+    },
+    {
+      "name": "createHoldFromByPartition",
+      "selector": "0x2361f007"
+    },
+    {
+      "name": "decimalsAtSnapshot",
+      "selector": "0x69ed346f"
+    },
+    {
+      "name": "executeHoldByPartition",
+      "selector": "0x25fe8720"
+    },
+    {
+      "name": "getHeldAmountFor",
+      "selector": "0x8493aabb"
+    },
+    {
+      "name": "getHeldAmountForByPartition",
+      "selector": "0x4d60fdc5"
+    },
+    {
+      "name": "getHoldCountForByPartition",
+      "selector": "0xcecb3899"
+    },
+    {
+      "name": "getHoldForByPartition",
+      "selector": "0x8d41523d"
+    },
+    {
+      "name": "getHoldThirdParty",
+      "selector": "0x3c36a695"
+    },
+    {
+      "name": "getHoldsIdForByPartition",
+      "selector": "0xeb89899d"
+    },
+    {
+      "name": "getRoleCountFor",
+      "selector": "0x8fa9b4fe"
+    },
+    {
+      "name": "getRoleMemberCount",
+      "selector": "0xca15c873"
+    },
+    {
+      "name": "getRoleMembers",
+      "selector": "0x2a861f57"
+    },
+    {
+      "name": "getRolesFor",
+      "selector": "0xa28cf9a9"
+    },
+    {
+      "name": "grantRole",
+      "selector": "0x2f2ff15d"
+    },
+    {
+      "name": "hasRole",
+      "selector": "0x91d14854"
+    },
+    {
+      "name": "initialize_ERC1410",
+      "selector": "0x7b1df196"
+    },
+    {
+      "name": "isMultiPartition",
+      "selector": "0xbd09cc54"
+    },
+    {
+      "name": "isOperator",
+      "selector": "0xb6363cf2"
+    },
+    {
+      "name": "isOperatorForPartition",
+      "selector": "0x6d77cad6"
+    },
+    {
+      "name": "isPaused",
+      "selector": "0xb187bd26"
+    },
+    {
+      "name": "issueByPartition",
+      "selector": "0x18180262"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshot",
+      "selector": "0xd9e6f164"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshotByPartition",
+      "selector": "0x4a13f5d0"
+    },
+    {
+      "name": "operatorCreateHoldByPartition",
+      "selector": "0xc6062c3c"
+    },
+    {
+      "name": "operatorRedeemByPartition",
+      "selector": "0x13d557bc"
+    },
+    {
+      "name": "operatorTransferByPartition",
+      "selector": "0x6b9894fe"
+    },
+    {
+      "name": "partitionsOf",
+      "selector": "0x740ab8f4"
+    },
+    {
+      "name": "partitionsOfAtSnapshot",
+      "selector": "0x09e84301"
+    },
+    {
+      "name": "pause",
+      "selector": "0x8456cb59"
+    },
+    {
+      "name": "protectedCreateHoldByPartition",
+      "selector": "0xc17f3554"
+    },
+    {
+      "name": "protectedRedeemFromByPartition",
+      "selector": "0xc98d9723"
+    },
+    {
+      "name": "protectedTransferFromByPartition",
+      "selector": "0x12e41c0a"
+    },
+    {
+      "name": "reclaimHoldByPartition",
+      "selector": "0xb437969e"
+    },
+    {
+      "name": "redeemByPartition",
+      "selector": "0x62eb0068"
+    },
+    {
+      "name": "releaseHoldByPartition",
+      "selector": "0xf8bafc1c"
+    },
+    {
+      "name": "renounceRole",
+      "selector": "0x8bb9c5bf"
+    },
+    {
+      "name": "revokeOperator",
+      "selector": "0xfad8b32a"
+    },
+    {
+      "name": "revokeOperatorByPartition",
+      "selector": "0x168ecec5"
+    },
+    {
+      "name": "revokeRole",
+      "selector": "0xd547741f"
+    },
+    {
+      "name": "takeSnapshot",
+      "selector": "0xb3d3d37e"
+    },
+    {
+      "name": "totalSupply",
+      "selector": "0x18160ddd"
+    },
+    {
+      "name": "totalSupplyAtSnapshot",
+      "selector": "0xda35f8f6"
+    },
+    {
+      "name": "totalSupplyAtSnapshotByPartition",
+      "selector": "0x9657ddb9"
+    },
+    {
+      "name": "totalSupplyByPartition",
+      "selector": "0xa26734dc"
+    },
+    {
+      "name": "transferByPartition",
+      "selector": "0x3bc9bcd8"
+    },
+    {
+      "name": "triggerAndSyncAll",
+      "selector": "0x6afb79db"
+    },
+    {
+      "name": "unpause",
+      "selector": "0x3f4ba83a"
+    }
+  ],
+  "IHoldManagement": [
+    {
+      "name": "controllerCreateHoldByPartition",
+      "selector": "0x5f3d8171"
+    },
+    {
+      "name": "operatorCreateHoldByPartition",
+      "selector": "0xc6062c3c"
+    },
+    {
+      "name": "protectedCreateHoldByPartition",
+      "selector": "0xc17f3554"
+    }
+  ],
+  "IHoldRead": [
+    {
+      "name": "getHeldAmountFor",
+      "selector": "0x8493aabb"
+    },
+    {
+      "name": "getHeldAmountForByPartition",
+      "selector": "0x4d60fdc5"
+    },
+    {
+      "name": "getHoldCountForByPartition",
+      "selector": "0xcecb3899"
+    },
+    {
+      "name": "getHoldForByPartition",
+      "selector": "0x8d41523d"
+    },
+    {
+      "name": "getHoldThirdParty",
+      "selector": "0x3c36a695"
+    },
+    {
+      "name": "getHoldsIdForByPartition",
+      "selector": "0xeb89899d"
+    }
+  ],
+  "IHoldTokenHolder": [
+    {
+      "name": "createHoldByPartition",
+      "selector": "0x5d23449e"
+    },
+    {
+      "name": "createHoldFromByPartition",
+      "selector": "0x2361f007"
+    },
+    {
+      "name": "executeHoldByPartition",
+      "selector": "0x25fe8720"
+    },
+    {
+      "name": "reclaimHoldByPartition",
+      "selector": "0xb437969e"
+    },
+    {
+      "name": "releaseHoldByPartition",
+      "selector": "0xf8bafc1c"
+    }
+  ],
+  "IKyc": [
+    {
+      "name": "activateInternalKyc",
+      "selector": "0xfbb08f50"
+    },
+    {
+      "name": "deactivateInternalKyc",
+      "selector": "0x4a5df31d"
+    },
+    {
+      "name": "getKycAccountsCount",
+      "selector": "0x5b712c4b"
+    },
+    {
+      "name": "getKycAccountsData",
+      "selector": "0x00497afb"
+    },
+    {
+      "name": "getKycFor",
+      "selector": "0x41322840"
+    },
+    {
+      "name": "getKycStatusFor",
+      "selector": "0xe788a736"
+    },
+    {
+      "name": "grantKyc",
+      "selector": "0x81bea54d"
+    },
+    {
+      "name": "initializeInternalKyc",
+      "selector": "0xdf353624"
+    },
+    {
+      "name": "isInternalKycActivated",
+      "selector": "0x90b6c798"
+    },
+    {
+      "name": "revokeKyc",
+      "selector": "0x12283191"
+    }
+  ],
+  "IRevocationList": [
+    {
+      "name": "revoked",
+      "selector": "0xdcbec712"
+    }
+  ],
+  "ILock": [
+    {
+      "name": "getLockCountFor",
+      "selector": "0x4f131ba4"
+    },
+    {
+      "name": "getLockCountForByPartition",
+      "selector": "0x3b193d92"
+    },
+    {
+      "name": "getLockFor",
+      "selector": "0x6f14b024"
+    },
+    {
+      "name": "getLockForByPartition",
+      "selector": "0xa9acfccb"
+    },
+    {
+      "name": "getLockedAmountFor",
+      "selector": "0x36e74467"
+    },
+    {
+      "name": "getLockedAmountForByPartition",
+      "selector": "0x6e1c55ba"
+    },
+    {
+      "name": "getLocksIdFor",
+      "selector": "0xd2d2b9fc"
+    },
+    {
+      "name": "getLocksIdForByPartition",
+      "selector": "0x3ea8b59d"
+    },
+    {
+      "name": "lock",
+      "selector": "0xcf27cfc4"
+    },
+    {
+      "name": "lockByPartition",
+      "selector": "0x7a87884e"
+    },
+    {
+      "name": "release",
+      "selector": "0x8124fea6"
+    },
+    {
+      "name": "releaseByPartition",
+      "selector": "0xdc6a3e75"
+    }
+  ],
+  "IPause": [
+    {
+      "name": "isPaused",
+      "selector": "0xb187bd26"
+    },
+    {
+      "name": "pause",
+      "selector": "0x8456cb59"
+    },
+    {
+      "name": "unpause",
+      "selector": "0x3f4ba83a"
+    }
+  ],
+  "IProtectedPartitions": [
+    {
+      "name": "arePartitionsProtected",
+      "selector": "0xa151c19f"
+    },
+    {
+      "name": "calculateRoleForPartition",
+      "selector": "0xcb4da6fc"
+    },
+    {
+      "name": "getNounceFor",
+      "selector": "0x9f6b67c2"
+    },
+    {
+      "name": "initialize_ProtectedPartitions",
+      "selector": "0x90c032cc"
+    },
+    {
+      "name": "protectPartitions",
+      "selector": "0x6c5fde55"
+    },
+    {
+      "name": "unprotectPartitions",
+      "selector": "0x1277b323"
+    }
+  ],
+  "ISnapshots": [
+    {
+      "name": "balanceOfAtSnapshot",
+      "selector": "0x8e00ae2e"
+    },
+    {
+      "name": "balanceOfAtSnapshotByPartition",
+      "selector": "0xe002bcdf"
+    },
+    {
+      "name": "decimalsAtSnapshot",
+      "selector": "0x69ed346f"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshot",
+      "selector": "0xd9e6f164"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshotByPartition",
+      "selector": "0x4a13f5d0"
+    },
+    {
+      "name": "partitionsOfAtSnapshot",
+      "selector": "0x09e84301"
+    },
+    {
+      "name": "takeSnapshot",
+      "selector": "0xb3d3d37e"
+    },
+    {
+      "name": "totalSupplyAtSnapshot",
+      "selector": "0xda35f8f6"
+    },
+    {
+      "name": "totalSupplyAtSnapshotByPartition",
+      "selector": "0x9657ddb9"
+    }
+  ],
+  "ISsiManagement": [
+    {
+      "name": "addIssuer",
+      "selector": "0x20694db0"
+    },
+    {
+      "name": "getIssuerListCount",
+      "selector": "0x600b2940"
+    },
+    {
+      "name": "getIssuerListMembers",
+      "selector": "0x25ab0545"
+    },
+    {
+      "name": "getRevocationRegistryAddress",
+      "selector": "0x12023976"
+    },
+    {
+      "name": "isIssuer",
+      "selector": "0x877b9a67"
+    },
+    {
+      "name": "removeIssuer",
+      "selector": "0x47bc7093"
+    },
+    {
+      "name": "setRevocationRegistryAddress",
+      "selector": "0xbb3daeaf"
+    }
+  ],
+  "Kyc": [
+    {
+      "name": "activateInternalKyc",
+      "selector": "0xfbb08f50"
+    },
+    {
+      "name": "deactivateInternalKyc",
+      "selector": "0x4a5df31d"
+    },
+    {
+      "name": "getKycAccountsCount",
+      "selector": "0x5b712c4b"
+    },
+    {
+      "name": "getKycAccountsData",
+      "selector": "0x00497afb"
+    },
+    {
+      "name": "getKycFor",
+      "selector": "0x41322840"
+    },
+    {
+      "name": "getKycStatusFor",
+      "selector": "0xe788a736"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "grantKyc",
+      "selector": "0x81bea54d"
+    },
+    {
+      "name": "initializeInternalKyc",
+      "selector": "0xdf353624"
+    },
+    {
+      "name": "isInternalKycActivated",
+      "selector": "0x90b6c798"
+    },
+    {
+      "name": "revokeKyc",
+      "selector": "0x12283191"
+    }
+  ],
+  "Lock": [
+    {
+      "name": "getLockCountFor",
+      "selector": "0x4f131ba4"
+    },
+    {
+      "name": "getLockCountForByPartition",
+      "selector": "0x3b193d92"
+    },
+    {
+      "name": "getLockFor",
+      "selector": "0x6f14b024"
+    },
+    {
+      "name": "getLockForByPartition",
+      "selector": "0xa9acfccb"
+    },
+    {
+      "name": "getLockedAmountFor",
+      "selector": "0x36e74467"
+    },
+    {
+      "name": "getLockedAmountForByPartition",
+      "selector": "0x6e1c55ba"
+    },
+    {
+      "name": "getLocksIdFor",
+      "selector": "0xd2d2b9fc"
+    },
+    {
+      "name": "getLocksIdForByPartition",
+      "selector": "0x3ea8b59d"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "lock",
+      "selector": "0xcf27cfc4"
+    },
+    {
+      "name": "lockByPartition",
+      "selector": "0x7a87884e"
+    },
+    {
+      "name": "release",
+      "selector": "0x8124fea6"
+    },
+    {
+      "name": "releaseByPartition",
+      "selector": "0xdc6a3e75"
+    }
+  ],
+  "Pause": [
+    {
+      "name": "isPaused",
+      "selector": "0xb187bd26"
+    },
+    {
+      "name": "pause",
+      "selector": "0x8456cb59"
+    },
+    {
+      "name": "unpause",
+      "selector": "0x3f4ba83a"
+    }
+  ],
+  "PauseFacet": [
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "isPaused",
+      "selector": "0xb187bd26"
+    },
+    {
+      "name": "pause",
+      "selector": "0x8456cb59"
+    },
+    {
+      "name": "unpause",
+      "selector": "0x3f4ba83a"
+    }
+  ],
+  "ProtectedPartitions": [
+    {
+      "name": "arePartitionsProtected",
+      "selector": "0xa151c19f"
+    },
+    {
+      "name": "calculateRoleForPartition",
+      "selector": "0xcb4da6fc"
+    },
+    {
+      "name": "getNounceFor",
+      "selector": "0x9f6b67c2"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ProtectedPartitions",
+      "selector": "0x90c032cc"
+    },
+    {
+      "name": "protectPartitions",
+      "selector": "0x6c5fde55"
+    },
+    {
+      "name": "unprotectPartitions",
+      "selector": "0x1277b323"
+    }
+  ],
+  "Snapshots": [
+    {
+      "name": "balanceOfAtSnapshot",
+      "selector": "0x8e00ae2e"
+    },
+    {
+      "name": "balanceOfAtSnapshotByPartition",
+      "selector": "0xe002bcdf"
+    },
+    {
+      "name": "clearedBalanceOfAtSnapshot",
+      "selector": "0x2bc16e9b"
+    },
+    {
+      "name": "clearedBalanceOfAtSnapshotByPartition",
+      "selector": "0x386e1405"
+    },
+    {
+      "name": "decimalsAtSnapshot",
+      "selector": "0x69ed346f"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "heldBalanceOfAtSnapshot",
+      "selector": "0xb52e39aa"
+    },
+    {
+      "name": "heldBalanceOfAtSnapshotByPartition",
+      "selector": "0x977a3a71"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshot",
+      "selector": "0xd9e6f164"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshotByPartition",
+      "selector": "0x4a13f5d0"
+    },
+    {
+      "name": "partitionsOfAtSnapshot",
+      "selector": "0x09e84301"
+    },
+    {
+      "name": "takeSnapshot",
+      "selector": "0xb3d3d37e"
+    },
+    {
+      "name": "totalSupplyAtSnapshot",
+      "selector": "0xda35f8f6"
+    },
+    {
+      "name": "totalSupplyAtSnapshotByPartition",
+      "selector": "0x9657ddb9"
+    }
+  ],
+  "SsiManagement": [
+    {
+      "name": "addIssuer",
+      "selector": "0x20694db0"
+    },
+    {
+      "name": "getIssuerListCount",
+      "selector": "0x600b2940"
+    },
+    {
+      "name": "getIssuerListMembers",
+      "selector": "0x25ab0545"
+    },
+    {
+      "name": "getRevocationRegistryAddress",
+      "selector": "0x12023976"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "isIssuer",
+      "selector": "0x877b9a67"
+    },
+    {
+      "name": "removeIssuer",
+      "selector": "0x47bc7093"
+    },
+    {
+      "name": "setRevocationRegistryAddress",
+      "selector": "0xbb3daeaf"
+    }
+  ],
+  "AdjustBalances": [
+    {
+      "name": "adjustBalances",
+      "selector": "0xe2d77e44"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "Bond": [
+    {
+      "name": "getBondDetails",
+      "selector": "0x4ce02414"
+    },
+    {
+      "name": "getCoupon",
+      "selector": "0x936e3169"
+    },
+    {
+      "name": "getCouponCount",
+      "selector": "0x468bb240"
+    },
+    {
+      "name": "getCouponDetails",
+      "selector": "0x82c5582a"
+    },
+    {
+      "name": "getCouponFor",
+      "selector": "0xbba7b56d"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "setCoupon",
+      "selector": "0xb3a6617d"
+    },
+    {
+      "name": "updateMaturityDate",
+      "selector": "0xc7a6ca35"
+    }
+  ],
+  "Equity": [
+    {
+      "name": "getDividends",
+      "selector": "0x3837ac88"
+    },
+    {
+      "name": "getDividendsCount",
+      "selector": "0x9e676952"
+    },
+    {
+      "name": "getDividendsFor",
+      "selector": "0x323e22da"
+    },
+    {
+      "name": "getEquityDetails",
+      "selector": "0xefcdcad8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustment",
+      "selector": "0x3d5338e8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustmentCount",
+      "selector": "0x7c62c7fc"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "getVoting",
+      "selector": "0x3afc7282"
+    },
+    {
+      "name": "getVotingCount",
+      "selector": "0x9c2aab5e"
+    },
+    {
+      "name": "getVotingFor",
+      "selector": "0x7633eccf"
+    },
+    {
+      "name": "setDividends",
+      "selector": "0x054d2b88"
+    },
+    {
+      "name": "setScheduledBalanceAdjustment",
+      "selector": "0xd1661084"
+    },
+    {
+      "name": "setVoting",
+      "selector": "0x5adaa49e"
+    }
+  ],
+  "IAdjustBalances": [
+    {
+      "name": "adjustBalances",
+      "selector": "0xe2d77e44"
+    }
+  ],
+  "IBond": [
+    {
+      "name": "getBondDetails",
+      "selector": "0x4ce02414"
+    },
+    {
+      "name": "getCoupon",
+      "selector": "0x936e3169"
+    },
+    {
+      "name": "getCouponCount",
+      "selector": "0x468bb240"
+    },
+    {
+      "name": "getCouponDetails",
+      "selector": "0x82c5582a"
+    },
+    {
+      "name": "getCouponFor",
+      "selector": "0xbba7b56d"
+    },
+    {
+      "name": "setCoupon",
+      "selector": "0xb3a6617d"
+    },
+    {
+      "name": "updateMaturityDate",
+      "selector": "0xc7a6ca35"
+    }
+  ],
+  "IEquity": [
+    {
+      "name": "getDividends",
+      "selector": "0x3837ac88"
+    },
+    {
+      "name": "getDividendsCount",
+      "selector": "0x9e676952"
+    },
+    {
+      "name": "getDividendsFor",
+      "selector": "0x323e22da"
+    },
+    {
+      "name": "getEquityDetails",
+      "selector": "0xefcdcad8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustment",
+      "selector": "0x3d5338e8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustmentCount",
+      "selector": "0x7c62c7fc"
+    },
+    {
+      "name": "getVoting",
+      "selector": "0x3afc7282"
+    },
+    {
+      "name": "getVotingCount",
+      "selector": "0x9c2aab5e"
+    },
+    {
+      "name": "getVotingFor",
+      "selector": "0x7633eccf"
+    },
+    {
+      "name": "setDividends",
+      "selector": "0x054d2b88"
+    },
+    {
+      "name": "setScheduledBalanceAdjustment",
+      "selector": "0xd1661084"
+    },
+    {
+      "name": "setVoting",
+      "selector": "0x5adaa49e"
+    }
+  ],
+  "IScheduledBalanceAdjustments": [
+    {
+      "name": "getScheduledBalanceAdjustments",
+      "selector": "0xcb884d41"
+    },
+    {
+      "name": "onScheduledBalanceAdjustmentTriggered",
+      "selector": "0xd300de7a"
+    },
+    {
+      "name": "scheduledBalanceAdjustmentCount",
+      "selector": "0x2de241e3"
+    }
+  ],
+  "IScheduledSnapshots": [
+    {
+      "name": "getScheduledSnapshots",
+      "selector": "0xca21c53a"
+    },
+    {
+      "name": "onScheduledSnapshotTriggered",
+      "selector": "0x8e51d755"
+    },
+    {
+      "name": "scheduledSnapshotCount",
+      "selector": "0xa19e91fe"
+    }
+  ],
+  "IScheduledTasks": [
+    {
+      "name": "getScheduledTasks",
+      "selector": "0xdcff09ba"
+    },
+    {
+      "name": "onScheduledTaskTriggered",
+      "selector": "0xdf1eb071"
+    },
+    {
+      "name": "scheduledTaskCount",
+      "selector": "0x6dfe790e"
+    },
+    {
+      "name": "triggerPendingScheduledTasks",
+      "selector": "0x1507f2a4"
+    },
+    {
+      "name": "triggerScheduledTasks",
+      "selector": "0x28a5d769"
+    }
+  ],
+  "ScheduledBalanceAdjustments": [
+    {
+      "name": "getScheduledBalanceAdjustments",
+      "selector": "0xcb884d41"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "onScheduledBalanceAdjustmentTriggered",
+      "selector": "0xd300de7a"
+    },
+    {
+      "name": "scheduledBalanceAdjustmentCount",
+      "selector": "0x2de241e3"
+    }
+  ],
+  "ScheduledSnapshots": [
+    {
+      "name": "getScheduledSnapshots",
+      "selector": "0xca21c53a"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "onScheduledSnapshotTriggered",
+      "selector": "0x8e51d755"
+    },
+    {
+      "name": "scheduledSnapshotCount",
+      "selector": "0xa19e91fe"
+    }
+  ],
+  "ScheduledTasks": [
+    {
+      "name": "getScheduledTasks",
+      "selector": "0xdcff09ba"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "onScheduledTaskTriggered",
+      "selector": "0xdf1eb071"
+    },
+    {
+      "name": "scheduledTaskCount",
+      "selector": "0x6dfe790e"
+    },
+    {
+      "name": "triggerPendingScheduledTasks",
+      "selector": "0x1507f2a4"
+    },
+    {
+      "name": "triggerScheduledTasks",
+      "selector": "0x28a5d769"
+    }
+  ],
+  "BondUSA": [
+    {
+      "name": "_initialize_bondUSA",
+      "selector": "0xfe8d48bf"
+    },
+    {
+      "name": "getBondDetails",
+      "selector": "0x4ce02414"
+    },
+    {
+      "name": "getCoupon",
+      "selector": "0x936e3169"
+    },
+    {
+      "name": "getCouponCount",
+      "selector": "0x468bb240"
+    },
+    {
+      "name": "getCouponDetails",
+      "selector": "0x82c5582a"
+    },
+    {
+      "name": "getCouponFor",
+      "selector": "0xbba7b56d"
+    },
+    {
+      "name": "getSecurityRegulationData",
+      "selector": "0x8fda5afe"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "setCoupon",
+      "selector": "0xb3a6617d"
+    },
+    {
+      "name": "updateMaturityDate",
+      "selector": "0xc7a6ca35"
+    }
+  ],
+  "EquityUSA": [
+    {
+      "name": "_initialize_equityUSA",
+      "selector": "0xd34090aa"
+    },
+    {
+      "name": "getDividends",
+      "selector": "0x3837ac88"
+    },
+    {
+      "name": "getDividendsCount",
+      "selector": "0x9e676952"
+    },
+    {
+      "name": "getDividendsFor",
+      "selector": "0x323e22da"
+    },
+    {
+      "name": "getEquityDetails",
+      "selector": "0xefcdcad8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustment",
+      "selector": "0x3d5338e8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustmentCount",
+      "selector": "0x7c62c7fc"
+    },
+    {
+      "name": "getSecurityRegulationData",
+      "selector": "0x8fda5afe"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "getVoting",
+      "selector": "0x3afc7282"
+    },
+    {
+      "name": "getVotingCount",
+      "selector": "0x9c2aab5e"
+    },
+    {
+      "name": "getVotingFor",
+      "selector": "0x7633eccf"
+    },
+    {
+      "name": "setDividends",
+      "selector": "0x054d2b88"
+    },
+    {
+      "name": "setScheduledBalanceAdjustment",
+      "selector": "0xd1661084"
+    },
+    {
+      "name": "setVoting",
+      "selector": "0x5adaa49e"
+    }
+  ],
+  "IBondUSA": [
+    {
+      "name": "_initialize_bondUSA",
+      "selector": "0xfe8d48bf"
+    },
+    {
+      "name": "getBondDetails",
+      "selector": "0x4ce02414"
+    },
+    {
+      "name": "getCoupon",
+      "selector": "0x936e3169"
+    },
+    {
+      "name": "getCouponCount",
+      "selector": "0x468bb240"
+    },
+    {
+      "name": "getCouponDetails",
+      "selector": "0x82c5582a"
+    },
+    {
+      "name": "getCouponFor",
+      "selector": "0xbba7b56d"
+    },
+    {
+      "name": "getSecurityRegulationData",
+      "selector": "0x8fda5afe"
+    },
+    {
+      "name": "setCoupon",
+      "selector": "0xb3a6617d"
+    },
+    {
+      "name": "updateMaturityDate",
+      "selector": "0xc7a6ca35"
+    }
+  ],
+  "IEquityUSA": [
+    {
+      "name": "_initialize_equityUSA",
+      "selector": "0xd34090aa"
+    },
+    {
+      "name": "getDividends",
+      "selector": "0x3837ac88"
+    },
+    {
+      "name": "getDividendsCount",
+      "selector": "0x9e676952"
+    },
+    {
+      "name": "getDividendsFor",
+      "selector": "0x323e22da"
+    },
+    {
+      "name": "getEquityDetails",
+      "selector": "0xefcdcad8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustment",
+      "selector": "0x3d5338e8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustmentCount",
+      "selector": "0x7c62c7fc"
+    },
+    {
+      "name": "getSecurityRegulationData",
+      "selector": "0x8fda5afe"
+    },
+    {
+      "name": "getVoting",
+      "selector": "0x3afc7282"
+    },
+    {
+      "name": "getVotingCount",
+      "selector": "0x9c2aab5e"
+    },
+    {
+      "name": "getVotingFor",
+      "selector": "0x7633eccf"
+    },
+    {
+      "name": "setDividends",
+      "selector": "0x054d2b88"
+    },
+    {
+      "name": "setScheduledBalanceAdjustment",
+      "selector": "0xd1661084"
+    },
+    {
+      "name": "setVoting",
+      "selector": "0x5adaa49e"
+    }
+  ],
+  "ISecurity": [
+    {
+      "name": "getSecurityRegulationData",
+      "selector": "0x8fda5afe"
+    }
+  ],
+  "ITransferAndLock": [
+    {
+      "name": "protectedTransferAndLock",
+      "selector": "0xe2e20e05"
+    },
+    {
+      "name": "protectedTransferAndLockByPartition",
+      "selector": "0x8a1d3a47"
+    },
+    {
+      "name": "transferAndLock",
+      "selector": "0x0e92b90b"
+    },
+    {
+      "name": "transferAndLockByPartition",
+      "selector": "0x3bd407b9"
+    }
+  ],
+  "Security": [
+    {
+      "name": "getSecurityRegulationData",
+      "selector": "0x8fda5afe"
+    }
+  ],
+  "TransferAndLock": [
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "protectedTransferAndLock",
+      "selector": "0xe2e20e05"
+    },
+    {
+      "name": "protectedTransferAndLockByPartition",
+      "selector": "0x8a1d3a47"
+    },
+    {
+      "name": "transferAndLock",
+      "selector": "0x0e92b90b"
+    },
+    {
+      "name": "transferAndLockByPartition",
+      "selector": "0x3bd407b9"
+    }
+  ],
+  "TransferAndLockStorageWrapper": [
+    {
+      "name": "protectedTransferAndLock",
+      "selector": "0xe2e20e05"
+    },
+    {
+      "name": "protectedTransferAndLockByPartition",
+      "selector": "0x8a1d3a47"
+    },
+    {
+      "name": "transferAndLock",
+      "selector": "0x0e92b90b"
+    },
+    {
+      "name": "transferAndLockByPartition",
+      "selector": "0x3bd407b9"
+    }
+  ],
+  "MockedBlacklist": [
+    {
+      "name": "addToBlacklist",
+      "selector": "0x44337ea1"
+    },
+    {
+      "name": "isAuthorized",
+      "selector": "0xfe9fbb80"
+    },
+    {
+      "name": "removeFromBlacklist",
+      "selector": "0x537df3b6"
+    }
+  ],
+  "MockedExternalKycList": [
+    {
+      "name": "getKycStatus",
+      "selector": "0xbe88ff49"
+    },
+    {
+      "name": "grantKyc",
+      "selector": "0xbef49813"
+    },
+    {
+      "name": "revokeKyc",
+      "selector": "0x12283191"
+    }
+  ],
+  "MockedExternalPause": [
+    {
+      "name": "isPaused",
+      "selector": "0xb187bd26"
+    },
+    {
+      "name": "setPaused",
+      "selector": "0x16c38b3c"
+    }
+  ],
+  "MockedWhitelist": [
+    {
+      "name": "addToWhitelist",
+      "selector": "0xe43252d7"
+    },
+    {
+      "name": "isAuthorized",
+      "selector": "0xfe9fbb80"
+    },
+    {
+      "name": "removeFromWhitelist",
+      "selector": "0x8ab1d681"
+    }
+  ],
+  "MockedT3RevocationRegistry": [
+    {
+      "name": "cancelRevoke",
+      "selector": "0x07548865"
+    },
+    {
+      "name": "revoke",
+      "selector": "0x65b2a863"
+    },
+    {
+      "name": "revoked",
+      "selector": "0xdcbec712"
+    }
+  ],
+  "BusinessLogicResolver": [
+    {
+      "name": "addSelectorsToBlacklist",
+      "selector": "0xe87c5d71"
+    },
+    {
+      "name": "applyRoles",
+      "selector": "0xfcfffeec"
+    },
+    {
+      "name": "cancelBatchConfiguration",
+      "selector": "0xc5977c1f"
+    },
+    {
+      "name": "checkResolverProxyConfigurationRegistered",
+      "selector": "0xc595992a"
+    },
+    {
+      "name": "createBatchConfiguration",
+      "selector": "0xf4ec1fe4"
+    },
+    {
+      "name": "createConfiguration",
+      "selector": "0xf4d2a095"
+    },
+    {
+      "name": "getBusinessLogicCount",
+      "selector": "0x8373989d"
+    },
+    {
+      "name": "getBusinessLogicKeys",
+      "selector": "0xe7e936ee"
+    },
+    {
+      "name": "getConfigurations",
+      "selector": "0xd826514c"
+    },
+    {
+      "name": "getConfigurationsLength",
+      "selector": "0x55ff30e3"
+    },
+    {
+      "name": "getFacetAddressByConfigurationIdVersionAndFacetId",
+      "selector": "0xcb17c131"
+    },
+    {
+      "name": "getFacetAddressesByConfigurationIdAndVersion",
+      "selector": "0x10933836"
+    },
+    {
+      "name": "getFacetByConfigurationIdVersionAndFacetId",
+      "selector": "0x9e6030d1"
+    },
+    {
+      "name": "getFacetIdByConfigurationIdVersionAndSelector",
+      "selector": "0x6204479f"
+    },
+    {
+      "name": "getFacetIdsByConfigurationIdAndVersion",
+      "selector": "0xe5ccd17c"
+    },
+    {
+      "name": "getFacetSelectorsByConfigurationIdVersionAndFacetId",
+      "selector": "0x45613a52"
+    },
+    {
+      "name": "getFacetSelectorsLengthByConfigurationIdVersionAndFacetId",
+      "selector": "0xf1d3d2f9"
+    },
+    {
+      "name": "getFacetsByConfigurationIdAndVersion",
+      "selector": "0x6118ce2b"
+    },
+    {
+      "name": "getFacetsLengthByConfigurationIdAndVersion",
+      "selector": "0x45348bd8"
+    },
+    {
+      "name": "getLatestVersion",
+      "selector": "0x0e6d1de9"
+    },
+    {
+      "name": "getLatestVersionByConfiguration",
+      "selector": "0x5bf316cf"
+    },
+    {
+      "name": "getRoleCountFor",
+      "selector": "0x8fa9b4fe"
+    },
+    {
+      "name": "getRoleMemberCount",
+      "selector": "0xca15c873"
+    },
+    {
+      "name": "getRoleMembers",
+      "selector": "0x2a861f57"
+    },
+    {
+      "name": "getRolesFor",
+      "selector": "0xa28cf9a9"
+    },
+    {
+      "name": "getSelectorsBlacklist",
+      "selector": "0xbf3af9ea"
+    },
+    {
+      "name": "getVersionStatus",
+      "selector": "0x65b24dfc"
+    },
+    {
+      "name": "grantRole",
+      "selector": "0x2f2ff15d"
+    },
+    {
+      "name": "hasRole",
+      "selector": "0x91d14854"
+    },
+    {
+      "name": "initialize_BusinessLogicResolver",
+      "selector": "0xb86ffa1a"
+    },
+    {
+      "name": "isPaused",
+      "selector": "0xb187bd26"
+    },
+    {
+      "name": "isResolverProxyConfigurationRegistered",
+      "selector": "0x2b85c192"
+    },
+    {
+      "name": "pause",
+      "selector": "0x8456cb59"
+    },
+    {
+      "name": "registerBusinessLogics",
+      "selector": "0xb0f57ddb"
+    },
+    {
+      "name": "removeSelectorsFromBlacklist",
+      "selector": "0xcccae751"
+    },
+    {
+      "name": "renounceRole",
+      "selector": "0x8bb9c5bf"
+    },
+    {
+      "name": "resolveBusinessLogicByVersion",
+      "selector": "0x9f77ad81"
+    },
+    {
+      "name": "resolveLatestBusinessLogic",
+      "selector": "0xbbced3bb"
+    },
+    {
+      "name": "resolveResolverProxyCall",
+      "selector": "0xb9ec2620"
+    },
+    {
+      "name": "resolveSupportsInterface",
+      "selector": "0x99ecdbd0"
+    },
+    {
+      "name": "revokeRole",
+      "selector": "0xd547741f"
+    },
+    {
+      "name": "unpause",
+      "selector": "0x3f4ba83a"
+    }
+  ],
+  "DiamondCutManager": [
+    {
+      "name": "applyRoles",
+      "selector": "0xfcfffeec"
+    },
+    {
+      "name": "cancelBatchConfiguration",
+      "selector": "0xc5977c1f"
+    },
+    {
+      "name": "checkResolverProxyConfigurationRegistered",
+      "selector": "0xc595992a"
+    },
+    {
+      "name": "createBatchConfiguration",
+      "selector": "0xf4ec1fe4"
+    },
+    {
+      "name": "createConfiguration",
+      "selector": "0xf4d2a095"
+    },
+    {
+      "name": "getConfigurations",
+      "selector": "0xd826514c"
+    },
+    {
+      "name": "getConfigurationsLength",
+      "selector": "0x55ff30e3"
+    },
+    {
+      "name": "getFacetAddressByConfigurationIdVersionAndFacetId",
+      "selector": "0xcb17c131"
+    },
+    {
+      "name": "getFacetAddressesByConfigurationIdAndVersion",
+      "selector": "0x10933836"
+    },
+    {
+      "name": "getFacetByConfigurationIdVersionAndFacetId",
+      "selector": "0x9e6030d1"
+    },
+    {
+      "name": "getFacetIdByConfigurationIdVersionAndSelector",
+      "selector": "0x6204479f"
+    },
+    {
+      "name": "getFacetIdsByConfigurationIdAndVersion",
+      "selector": "0xe5ccd17c"
+    },
+    {
+      "name": "getFacetSelectorsByConfigurationIdVersionAndFacetId",
+      "selector": "0x45613a52"
+    },
+    {
+      "name": "getFacetSelectorsLengthByConfigurationIdVersionAndFacetId",
+      "selector": "0xf1d3d2f9"
+    },
+    {
+      "name": "getFacetsByConfigurationIdAndVersion",
+      "selector": "0x6118ce2b"
+    },
+    {
+      "name": "getFacetsLengthByConfigurationIdAndVersion",
+      "selector": "0x45348bd8"
+    },
+    {
+      "name": "getLatestVersionByConfiguration",
+      "selector": "0x5bf316cf"
+    },
+    {
+      "name": "getRoleCountFor",
+      "selector": "0x8fa9b4fe"
+    },
+    {
+      "name": "getRoleMemberCount",
+      "selector": "0xca15c873"
+    },
+    {
+      "name": "getRoleMembers",
+      "selector": "0x2a861f57"
+    },
+    {
+      "name": "getRolesFor",
+      "selector": "0xa28cf9a9"
+    },
+    {
+      "name": "grantRole",
+      "selector": "0x2f2ff15d"
+    },
+    {
+      "name": "hasRole",
+      "selector": "0x91d14854"
+    },
+    {
+      "name": "isPaused",
+      "selector": "0xb187bd26"
+    },
+    {
+      "name": "isResolverProxyConfigurationRegistered",
+      "selector": "0x2b85c192"
+    },
+    {
+      "name": "pause",
+      "selector": "0x8456cb59"
+    },
+    {
+      "name": "renounceRole",
+      "selector": "0x8bb9c5bf"
+    },
+    {
+      "name": "resolveResolverProxyCall",
+      "selector": "0xb9ec2620"
+    },
+    {
+      "name": "resolveSupportsInterface",
+      "selector": "0x99ecdbd0"
+    },
+    {
+      "name": "revokeRole",
+      "selector": "0xd547741f"
+    },
+    {
+      "name": "unpause",
+      "selector": "0x3f4ba83a"
+    }
+  ],
+  "DiamondCutManagerWrapper": [
+    {
+      "name": "cancelBatchConfiguration",
+      "selector": "0xc5977c1f"
+    },
+    {
+      "name": "checkResolverProxyConfigurationRegistered",
+      "selector": "0xc595992a"
+    },
+    {
+      "name": "createBatchConfiguration",
+      "selector": "0xf4ec1fe4"
+    },
+    {
+      "name": "createConfiguration",
+      "selector": "0xf4d2a095"
+    },
+    {
+      "name": "getConfigurations",
+      "selector": "0xd826514c"
+    },
+    {
+      "name": "getConfigurationsLength",
+      "selector": "0x55ff30e3"
+    },
+    {
+      "name": "getFacetAddressByConfigurationIdVersionAndFacetId",
+      "selector": "0xcb17c131"
+    },
+    {
+      "name": "getFacetAddressesByConfigurationIdAndVersion",
+      "selector": "0x10933836"
+    },
+    {
+      "name": "getFacetByConfigurationIdVersionAndFacetId",
+      "selector": "0x9e6030d1"
+    },
+    {
+      "name": "getFacetIdByConfigurationIdVersionAndSelector",
+      "selector": "0x6204479f"
+    },
+    {
+      "name": "getFacetIdsByConfigurationIdAndVersion",
+      "selector": "0xe5ccd17c"
+    },
+    {
+      "name": "getFacetSelectorsByConfigurationIdVersionAndFacetId",
+      "selector": "0x45613a52"
+    },
+    {
+      "name": "getFacetSelectorsLengthByConfigurationIdVersionAndFacetId",
+      "selector": "0xf1d3d2f9"
+    },
+    {
+      "name": "getFacetsByConfigurationIdAndVersion",
+      "selector": "0x6118ce2b"
+    },
+    {
+      "name": "getFacetsLengthByConfigurationIdAndVersion",
+      "selector": "0x45348bd8"
+    },
+    {
+      "name": "getLatestVersionByConfiguration",
+      "selector": "0x5bf316cf"
+    },
+    {
+      "name": "isResolverProxyConfigurationRegistered",
+      "selector": "0x2b85c192"
+    },
+    {
+      "name": "resolveResolverProxyCall",
+      "selector": "0xb9ec2620"
+    },
+    {
+      "name": "resolveSupportsInterface",
+      "selector": "0x99ecdbd0"
+    }
+  ],
+  "DiamondCutFacet": [
+    {
+      "name": "getConfigInfo",
+      "selector": "0x78a1bf05"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "updateConfig",
+      "selector": "0x0b3bad61"
+    },
+    {
+      "name": "updateConfigVersion",
+      "selector": "0x002eeb22"
+    },
+    {
+      "name": "updateResolver",
+      "selector": "0xe5d3a872"
+    }
+  ],
+  "DiamondFacet": [
+    {
+      "name": "getConfigInfo",
+      "selector": "0x78a1bf05"
+    },
+    {
+      "name": "getFacet",
+      "selector": "0xe317d12f"
+    },
+    {
+      "name": "getFacetAddress",
+      "selector": "0x7a070c2d"
+    },
+    {
+      "name": "getFacetAddresses",
+      "selector": "0x3bed2f49"
+    },
+    {
+      "name": "getFacetAddressesByPage",
+      "selector": "0x9fea53e7"
+    },
+    {
+      "name": "getFacetIdBySelector",
+      "selector": "0xb3fd6894"
+    },
+    {
+      "name": "getFacetIds",
+      "selector": "0xcd25d535"
+    },
+    {
+      "name": "getFacetIdsByPage",
+      "selector": "0x20202e6d"
+    },
+    {
+      "name": "getFacetSelectors",
+      "selector": "0x8214de3e"
+    },
+    {
+      "name": "getFacetSelectorsByPage",
+      "selector": "0x39a9e956"
+    },
+    {
+      "name": "getFacetSelectorsLength",
+      "selector": "0xca1f70ec"
+    },
+    {
+      "name": "getFacets",
+      "selector": "0x662ea47d"
+    },
+    {
+      "name": "getFacetsByPage",
+      "selector": "0xbf02c5b9"
+    },
+    {
+      "name": "getFacetsLength",
+      "selector": "0x430720f9"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "supportsInterface",
+      "selector": "0x01ffc9a7"
+    },
+    {
+      "name": "updateConfig",
+      "selector": "0x0b3bad61"
+    },
+    {
+      "name": "updateConfigVersion",
+      "selector": "0x002eeb22"
+    },
+    {
+      "name": "updateResolver",
+      "selector": "0xe5d3a872"
+    }
+  ],
+  "DiamondLoupeFacet": [
+    {
+      "name": "getFacet",
+      "selector": "0xe317d12f"
+    },
+    {
+      "name": "getFacetAddress",
+      "selector": "0x7a070c2d"
+    },
+    {
+      "name": "getFacetAddresses",
+      "selector": "0x3bed2f49"
+    },
+    {
+      "name": "getFacetAddressesByPage",
+      "selector": "0x9fea53e7"
+    },
+    {
+      "name": "getFacetIdBySelector",
+      "selector": "0xb3fd6894"
+    },
+    {
+      "name": "getFacetIds",
+      "selector": "0xcd25d535"
+    },
+    {
+      "name": "getFacetIdsByPage",
+      "selector": "0x20202e6d"
+    },
+    {
+      "name": "getFacetSelectors",
+      "selector": "0x8214de3e"
+    },
+    {
+      "name": "getFacetSelectorsByPage",
+      "selector": "0x39a9e956"
+    },
+    {
+      "name": "getFacetSelectorsLength",
+      "selector": "0xca1f70ec"
+    },
+    {
+      "name": "getFacets",
+      "selector": "0x662ea47d"
+    },
+    {
+      "name": "getFacetsByPage",
+      "selector": "0xbf02c5b9"
+    },
+    {
+      "name": "getFacetsLength",
+      "selector": "0x430720f9"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "supportsInterface",
+      "selector": "0x01ffc9a7"
+    }
+  ],
+  "ComplianceMock": [
+    {
+      "name": "canTransfer",
+      "selector": "0xe46638e6"
+    },
+    {
+      "name": "created",
+      "selector": "0x5f8dead3"
+    },
+    {
+      "name": "createdHit",
+      "selector": "0x29abd82e"
+    },
+    {
+      "name": "destroyed",
+      "selector": "0x8d2ea772"
+    },
+    {
+      "name": "destroyedHit",
+      "selector": "0xf3ff9252"
+    },
+    {
+      "name": "setFlags",
+      "selector": "0xc1194e7e"
+    },
+    {
+      "name": "transferred",
+      "selector": "0x8baf29b4"
+    },
+    {
+      "name": "transferredHit",
+      "selector": "0x5a61e0a5"
+    }
+  ],
+  "AccessControlFacetTimeTravel": [
+    {
+      "name": "applyRoles",
+      "selector": "0xfcfffeec"
+    },
+    {
+      "name": "getRoleCountFor",
+      "selector": "0x8fa9b4fe"
+    },
+    {
+      "name": "getRoleMemberCount",
+      "selector": "0xca15c873"
+    },
+    {
+      "name": "getRoleMembers",
+      "selector": "0x2a861f57"
+    },
+    {
+      "name": "getRolesFor",
+      "selector": "0xa28cf9a9"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "grantRole",
+      "selector": "0x2f2ff15d"
+    },
+    {
+      "name": "hasRole",
+      "selector": "0x91d14854"
+    },
+    {
+      "name": "renounceRole",
+      "selector": "0x8bb9c5bf"
+    },
+    {
+      "name": "revokeRole",
+      "selector": "0xd547741f"
+    }
+  ],
+  "AdjustBalancesTimeTravel": [
+    {
+      "name": "adjustBalances",
+      "selector": "0xe2d77e44"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "BondUSATimeTravel": [
+    {
+      "name": "_initialize_bondUSA",
+      "selector": "0xfe8d48bf"
+    },
+    {
+      "name": "getBondDetails",
+      "selector": "0x4ce02414"
+    },
+    {
+      "name": "getCoupon",
+      "selector": "0x936e3169"
+    },
+    {
+      "name": "getCouponCount",
+      "selector": "0x468bb240"
+    },
+    {
+      "name": "getCouponDetails",
+      "selector": "0x82c5582a"
+    },
+    {
+      "name": "getCouponFor",
+      "selector": "0xbba7b56d"
+    },
+    {
+      "name": "getSecurityRegulationData",
+      "selector": "0x8fda5afe"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "setCoupon",
+      "selector": "0xb3a6617d"
+    },
+    {
+      "name": "updateMaturityDate",
+      "selector": "0xc7a6ca35"
+    }
+  ],
+  "CapTimeTravel": [
+    {
+      "name": "getMaxSupply",
+      "selector": "0x4c0f38c2"
+    },
+    {
+      "name": "getMaxSupplyByPartition",
+      "selector": "0x79f3653f"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_Cap",
+      "selector": "0x56210c4e"
+    },
+    {
+      "name": "setMaxSupply",
+      "selector": "0x6f8b44b0"
+    },
+    {
+      "name": "setMaxSupplyByPartition",
+      "selector": "0x99b69647"
+    }
+  ],
+  "ClearingActionsFacetTimeTravel": [
+    {
+      "name": "activateClearing",
+      "selector": "0xab2d18a9"
+    },
+    {
+      "name": "approveClearingOperationByPartition",
+      "selector": "0xd849cea2"
+    },
+    {
+      "name": "cancelClearingOperationByPartition",
+      "selector": "0x679141fb"
+    },
+    {
+      "name": "deactivateClearing",
+      "selector": "0x65c21860"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initializeClearing",
+      "selector": "0x86a0b46a"
+    },
+    {
+      "name": "isClearingActivated",
+      "selector": "0x4b4d8990"
+    },
+    {
+      "name": "reclaimClearingOperationByPartition",
+      "selector": "0x67e57fe2"
+    }
+  ],
+  "ClearingHoldCreationFacetTimeTravel": [
+    {
+      "name": "clearingCreateHoldByPartition",
+      "selector": "0x6ceae590"
+    },
+    {
+      "name": "clearingCreateHoldFromByPartition",
+      "selector": "0x5f1cf8c9"
+    },
+    {
+      "name": "getClearingCreateHoldForByPartition",
+      "selector": "0x190eb09b"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "operatorClearingCreateHoldByPartition",
+      "selector": "0x7ab0c73f"
+    },
+    {
+      "name": "protectedClearingCreateHoldByPartition",
+      "selector": "0x9b646ab9"
+    }
+  ],
+  "ClearingReadFacetTimeTravel": [
+    {
+      "name": "getClearedAmountFor",
+      "selector": "0x46f8bc94"
+    },
+    {
+      "name": "getClearedAmountForByPartition",
+      "selector": "0xfed5a7d4"
+    },
+    {
+      "name": "getClearingCountForByPartition",
+      "selector": "0xcab70f17"
+    },
+    {
+      "name": "getClearingThirdParty",
+      "selector": "0x2714916d"
+    },
+    {
+      "name": "getClearingsIdForByPartition",
+      "selector": "0xcf38dab5"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "ClearingRedeemFacetTimeTravel": [
+    {
+      "name": "clearingRedeemByPartition",
+      "selector": "0x39921b12"
+    },
+    {
+      "name": "clearingRedeemFromByPartition",
+      "selector": "0x35114a78"
+    },
+    {
+      "name": "getClearingRedeemForByPartition",
+      "selector": "0x4ac3d940"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "operatorClearingRedeemByPartition",
+      "selector": "0xc1d6d5a0"
+    },
+    {
+      "name": "protectedClearingRedeemByPartition",
+      "selector": "0x498f1f65"
+    }
+  ],
+  "ClearingTransferFacetTimeTravel": [
+    {
+      "name": "clearingTransferByPartition",
+      "selector": "0xde32aaa8"
+    },
+    {
+      "name": "clearingTransferFromByPartition",
+      "selector": "0x5c829d67"
+    },
+    {
+      "name": "getClearingTransferForByPartition",
+      "selector": "0x6f438552"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "operatorClearingTransferByPartition",
+      "selector": "0x2ba8508d"
+    },
+    {
+      "name": "protectedClearingTransferByPartition",
+      "selector": "0x1f4eef27"
+    }
+  ],
+  "ControlListTimeTravel": [
+    {
+      "name": "addToControlList",
+      "selector": "0xe8204966"
+    },
+    {
+      "name": "getControlListCount",
+      "selector": "0x6b5d2ea5"
+    },
+    {
+      "name": "getControlListMembers",
+      "selector": "0xcad7e56b"
+    },
+    {
+      "name": "getControlListType",
+      "selector": "0x1d46c292"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ControlList",
+      "selector": "0xf88bd9f2"
+    },
+    {
+      "name": "isInControlList",
+      "selector": "0xfd5b071b"
+    },
+    {
+      "name": "removeFromControlList",
+      "selector": "0x47b52d3b"
+    }
+  ],
+  "CorporateActionsTimeTravel": [
+    {
+      "name": "addCorporateAction",
+      "selector": "0xd9e4d92c"
+    },
+    {
+      "name": "getCorporateAction",
+      "selector": "0x911181da"
+    },
+    {
+      "name": "getCorporateActionCount",
+      "selector": "0x8859794c"
+    },
+    {
+      "name": "getCorporateActionCountByType",
+      "selector": "0x539b4e0b"
+    },
+    {
+      "name": "getCorporateActionIds",
+      "selector": "0x1b56ea1e"
+    },
+    {
+      "name": "getCorporateActionIdsByType",
+      "selector": "0xe73bbddb"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "ERC1410ManagementTimeTravel": [
+    {
+      "name": "controllerRedeemByPartition",
+      "selector": "0xb84777cc"
+    },
+    {
+      "name": "controllerTransferByPartition",
+      "selector": "0xfb78befa"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ERC1410",
+      "selector": "0x7b1df196"
+    },
+    {
+      "name": "issueByPartition",
+      "selector": "0x18180262"
+    },
+    {
+      "name": "operatorRedeemByPartition",
+      "selector": "0x13d557bc"
+    },
+    {
+      "name": "operatorTransferByPartition",
+      "selector": "0x6b9894fe"
+    },
+    {
+      "name": "protectedRedeemFromByPartition",
+      "selector": "0xc98d9723"
+    },
+    {
+      "name": "protectedTransferFromByPartition",
+      "selector": "0x12e41c0a"
+    }
+  ],
+  "ERC1410ReadTimeTravel": [
+    {
+      "name": "balanceOf",
+      "selector": "0x70a08231"
+    },
+    {
+      "name": "balanceOfAt",
+      "selector": "0x4ee2cd7e"
+    },
+    {
+      "name": "balanceOfByPartition",
+      "selector": "0x30e82803"
+    },
+    {
+      "name": "canRedeemByPartition",
+      "selector": "0x7b7322c4"
+    },
+    {
+      "name": "canTransferByPartition",
+      "selector": "0xa7b518b1"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "isMultiPartition",
+      "selector": "0xbd09cc54"
+    },
+    {
+      "name": "isOperator",
+      "selector": "0xb6363cf2"
+    },
+    {
+      "name": "isOperatorForPartition",
+      "selector": "0x6d77cad6"
+    },
+    {
+      "name": "partitionsOf",
+      "selector": "0x740ab8f4"
+    },
+    {
+      "name": "totalSupply",
+      "selector": "0x18160ddd"
+    },
+    {
+      "name": "totalSupplyByPartition",
+      "selector": "0xa26734dc"
+    }
+  ],
+  "ERC1410TokenHolderTimeTravel": [
+    {
+      "name": "authorizeOperator",
+      "selector": "0x959b8c3f"
+    },
+    {
+      "name": "authorizeOperatorByPartition",
+      "selector": "0x103ef9e1"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "redeemByPartition",
+      "selector": "0x62eb0068"
+    },
+    {
+      "name": "revokeOperator",
+      "selector": "0xfad8b32a"
+    },
+    {
+      "name": "revokeOperatorByPartition",
+      "selector": "0x168ecec5"
+    },
+    {
+      "name": "transferByPartition",
+      "selector": "0x3bc9bcd8"
+    },
+    {
+      "name": "triggerAndSyncAll",
+      "selector": "0x6afb79db"
+    }
+  ],
+  "ERC1594TimeTravel": [
+    {
+      "name": "canTransfer",
+      "selector": "0x1badb25c"
+    },
+    {
+      "name": "canTransferFrom",
+      "selector": "0x122eb575"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ERC1594",
+      "selector": "0x9be12cea"
+    },
+    {
+      "name": "isIssuable",
+      "selector": "0x2f1cae85"
+    },
+    {
+      "name": "issue",
+      "selector": "0xbb3acde9"
+    },
+    {
+      "name": "redeem",
+      "selector": "0xe77c646d"
+    },
+    {
+      "name": "redeemFrom",
+      "selector": "0x9675193c"
+    },
+    {
+      "name": "transferFromWithData",
+      "selector": "0xee532f31"
+    },
+    {
+      "name": "transferWithData",
+      "selector": "0x2535f762"
+    }
+  ],
+  "ERC1643TimeTravel": [
+    {
+      "name": "getAllDocuments",
+      "selector": "0x9fa5f50b"
+    },
+    {
+      "name": "getDocument",
+      "selector": "0xb10d6b41"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "removeDocument",
+      "selector": "0xc3501848"
+    },
+    {
+      "name": "setDocument",
+      "selector": "0x010648ca"
+    }
+  ],
+  "ERC1644TimeTravel": [
+    {
+      "name": "controllerRedeem",
+      "selector": "0x2bc6acc3"
+    },
+    {
+      "name": "controllerTransfer",
+      "selector": "0xf282527a"
+    },
+    {
+      "name": "finalizeControllable",
+      "selector": "0xa213934f"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ERC1644",
+      "selector": "0xaa4ea38e"
+    },
+    {
+      "name": "isControllable",
+      "selector": "0x4c783bf5"
+    }
+  ],
+  "ERC20TimeTravel": [
+    {
+      "name": "allowance",
+      "selector": "0xdd62ed3e"
+    },
+    {
+      "name": "approve",
+      "selector": "0x095ea7b3"
+    },
+    {
+      "name": "decimals",
+      "selector": "0x313ce567"
+    },
+    {
+      "name": "decimalsAdjusted",
+      "selector": "0xc67f05aa"
+    },
+    {
+      "name": "decimalsAdjustedAt",
+      "selector": "0x065dd252"
+    },
+    {
+      "name": "decimalsAt",
+      "selector": "0x771918ca"
+    },
+    {
+      "name": "decreaseAllowance",
+      "selector": "0xa457c2d7"
+    },
+    {
+      "name": "getERC20Metadata",
+      "selector": "0x8e649195"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "increaseAllowance",
+      "selector": "0x39509351"
+    },
+    {
+      "name": "initialize_ERC20",
+      "selector": "0xe04fb235"
+    },
+    {
+      "name": "name",
+      "selector": "0x06fdde03"
+    },
+    {
+      "name": "symbol",
+      "selector": "0x95d89b41"
+    },
+    {
+      "name": "transfer",
+      "selector": "0xa9059cbb"
+    },
+    {
+      "name": "transferFrom",
+      "selector": "0x23b872dd"
+    }
+  ],
+  "ERC3643BatchTimeTravel": [
+    {
+      "name": "batchBurn",
+      "selector": "0x4a6cc677"
+    },
+    {
+      "name": "batchForcedTransfer",
+      "selector": "0x42a47abc"
+    },
+    {
+      "name": "batchMint",
+      "selector": "0x68573107"
+    },
+    {
+      "name": "batchTransfer",
+      "selector": "0x88d695b2"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "ERC3643TimeTravel": [
+    {
+      "name": "addAgent",
+      "selector": "0x84e79842"
+    },
+    {
+      "name": "burn",
+      "selector": "0x9dc29fac"
+    },
+    {
+      "name": "compliance",
+      "selector": "0x6290865d"
+    },
+    {
+      "name": "forcedTransfer",
+      "selector": "0x9fc1d0e7"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "identityRegistry",
+      "selector": "0x134e18f4"
+    },
+    {
+      "name": "initialize_ERC3643",
+      "selector": "0x888d9119"
+    },
+    {
+      "name": "isAddressRecovered",
+      "selector": "0x1b997ec2"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "mint",
+      "selector": "0x40c10f19"
+    },
+    {
+      "name": "onchainID",
+      "selector": "0xaba63705"
+    },
+    {
+      "name": "recoveryAddress",
+      "selector": "0x9285948a"
+    },
+    {
+      "name": "removeAgent",
+      "selector": "0x97a6278e"
+    },
+    {
+      "name": "setCompliance",
+      "selector": "0xf8981789"
+    },
+    {
+      "name": "setIdentityRegistry",
+      "selector": "0xcbf3f861"
+    },
+    {
+      "name": "setName",
+      "selector": "0xc47f0027"
+    },
+    {
+      "name": "setOnchainID",
+      "selector": "0x3d1ddc5b"
+    },
+    {
+      "name": "setSymbol",
+      "selector": "0xb84c8246"
+    },
+    {
+      "name": "version",
+      "selector": "0x54fd4d50"
+    }
+  ],
+  "EquityUSATimeTravel": [
+    {
+      "name": "_initialize_equityUSA",
+      "selector": "0xd34090aa"
+    },
+    {
+      "name": "getDividends",
+      "selector": "0x3837ac88"
+    },
+    {
+      "name": "getDividendsCount",
+      "selector": "0x9e676952"
+    },
+    {
+      "name": "getDividendsFor",
+      "selector": "0x323e22da"
+    },
+    {
+      "name": "getEquityDetails",
+      "selector": "0xefcdcad8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustment",
+      "selector": "0x3d5338e8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustmentCount",
+      "selector": "0x7c62c7fc"
+    },
+    {
+      "name": "getSecurityRegulationData",
+      "selector": "0x8fda5afe"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "getVoting",
+      "selector": "0x3afc7282"
+    },
+    {
+      "name": "getVotingCount",
+      "selector": "0x9c2aab5e"
+    },
+    {
+      "name": "getVotingFor",
+      "selector": "0x7633eccf"
+    },
+    {
+      "name": "setDividends",
+      "selector": "0x054d2b88"
+    },
+    {
+      "name": "setScheduledBalanceAdjustment",
+      "selector": "0xd1661084"
+    },
+    {
+      "name": "setVoting",
+      "selector": "0x5adaa49e"
+    }
+  ],
+  "ExternalControlListManagementTimeTravel": [
+    {
+      "name": "addExternalControlList",
+      "selector": "0x995e4649"
+    },
+    {
+      "name": "getExternalControlListsCount",
+      "selector": "0x9bec4167"
+    },
+    {
+      "name": "getExternalControlListsMembers",
+      "selector": "0xc4aa9df3"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ExternalControlLists",
+      "selector": "0x0a0a114f"
+    },
+    {
+      "name": "isExternalControlList",
+      "selector": "0x07c44711"
+    },
+    {
+      "name": "removeExternalControlList",
+      "selector": "0xb8913387"
+    },
+    {
+      "name": "updateExternalControlLists",
+      "selector": "0x0ba2b922"
+    }
+  ],
+  "ExternalKycListManagementTimeTravel": [
+    {
+      "name": "addExternalKycList",
+      "selector": "0x7570e044"
+    },
+    {
+      "name": "getExternalKycListsCount",
+      "selector": "0xd17e889e"
+    },
+    {
+      "name": "getExternalKycListsMembers",
+      "selector": "0x999a2459"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ExternalKycLists",
+      "selector": "0x3ac7fadc"
+    },
+    {
+      "name": "isExternalKycList",
+      "selector": "0x20991e17"
+    },
+    {
+      "name": "isExternallyGranted",
+      "selector": "0x1d7d5749"
+    },
+    {
+      "name": "removeExternalKycList",
+      "selector": "0x16c94d54"
+    },
+    {
+      "name": "updateExternalKycLists",
+      "selector": "0xc391576d"
+    }
+  ],
+  "ExternalPauseManagementTimeTravel": [
+    {
+      "name": "addExternalPause",
+      "selector": "0xd438cff1"
+    },
+    {
+      "name": "getExternalPausesCount",
+      "selector": "0x1e2bc3a6"
+    },
+    {
+      "name": "getExternalPausesMembers",
+      "selector": "0x5b175a35"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ExternalPauses",
+      "selector": "0x8f88d0d5"
+    },
+    {
+      "name": "isExternalPause",
+      "selector": "0xe26e35be"
+    },
+    {
+      "name": "removeExternalPause",
+      "selector": "0x9648d912"
+    },
+    {
+      "name": "updateExternalPauses",
+      "selector": "0x361d714a"
+    }
+  ],
+  "FreezeFacetTimeTravel": [
+    {
+      "name": "batchFreezePartialTokens",
+      "selector": "0xfc7e5fa8"
+    },
+    {
+      "name": "batchSetAddressFrozen",
+      "selector": "0x1a7af379"
+    },
+    {
+      "name": "batchUnfreezePartialTokens",
+      "selector": "0x4710362d"
+    },
+    {
+      "name": "freezePartialTokens",
+      "selector": "0x125c4a33"
+    },
+    {
+      "name": "getFrozenTokens",
+      "selector": "0x158b1a57"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "setAddressFrozen",
+      "selector": "0xc69c09cf"
+    },
+    {
+      "name": "unfreezePartialTokens",
+      "selector": "0x1fe56f7d"
+    }
+  ],
+  "HoldManagementTimeTravel": [
+    {
+      "name": "controllerCreateHoldByPartition",
+      "selector": "0x5f3d8171"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "operatorCreateHoldByPartition",
+      "selector": "0xc6062c3c"
+    },
+    {
+      "name": "protectedCreateHoldByPartition",
+      "selector": "0xc17f3554"
+    }
+  ],
+  "HoldReadTimeTravel": [
+    {
+      "name": "getHeldAmountFor",
+      "selector": "0x8493aabb"
+    },
+    {
+      "name": "getHeldAmountForByPartition",
+      "selector": "0x4d60fdc5"
+    },
+    {
+      "name": "getHoldCountForByPartition",
+      "selector": "0xcecb3899"
+    },
+    {
+      "name": "getHoldForByPartition",
+      "selector": "0x8d41523d"
+    },
+    {
+      "name": "getHoldThirdParty",
+      "selector": "0x3c36a695"
+    },
+    {
+      "name": "getHoldsIdForByPartition",
+      "selector": "0xeb89899d"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "HoldTimeTravel": [
+    {
+      "name": "controllerCreateHoldByPartition",
+      "selector": "0x5f3d8171"
+    },
+    {
+      "name": "createHoldByPartition",
+      "selector": "0x5d23449e"
+    },
+    {
+      "name": "createHoldFromByPartition",
+      "selector": "0x2361f007"
+    },
+    {
+      "name": "executeHoldByPartition",
+      "selector": "0x25fe8720"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "operatorCreateHoldByPartition",
+      "selector": "0xc6062c3c"
+    },
+    {
+      "name": "protectedCreateHoldByPartition",
+      "selector": "0xc17f3554"
+    },
+    {
+      "name": "reclaimHoldByPartition",
+      "selector": "0xb437969e"
+    },
+    {
+      "name": "releaseHoldByPartition",
+      "selector": "0xf8bafc1c"
+    }
+  ],
+  "HoldTokenHolderTimeTravel": [
+    {
+      "name": "createHoldByPartition",
+      "selector": "0x5d23449e"
+    },
+    {
+      "name": "createHoldFromByPartition",
+      "selector": "0x2361f007"
+    },
+    {
+      "name": "executeHoldByPartition",
+      "selector": "0x25fe8720"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "reclaimHoldByPartition",
+      "selector": "0xb437969e"
+    },
+    {
+      "name": "releaseHoldByPartition",
+      "selector": "0xf8bafc1c"
+    }
+  ],
+  "KycTimeTravel": [
+    {
+      "name": "activateInternalKyc",
+      "selector": "0xfbb08f50"
+    },
+    {
+      "name": "deactivateInternalKyc",
+      "selector": "0x4a5df31d"
+    },
+    {
+      "name": "getKycAccountsCount",
+      "selector": "0x5b712c4b"
+    },
+    {
+      "name": "getKycAccountsData",
+      "selector": "0x00497afb"
+    },
+    {
+      "name": "getKycFor",
+      "selector": "0x41322840"
+    },
+    {
+      "name": "getKycStatusFor",
+      "selector": "0xe788a736"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "grantKyc",
+      "selector": "0x81bea54d"
+    },
+    {
+      "name": "initializeInternalKyc",
+      "selector": "0xdf353624"
+    },
+    {
+      "name": "isInternalKycActivated",
+      "selector": "0x90b6c798"
+    },
+    {
+      "name": "revokeKyc",
+      "selector": "0x12283191"
+    }
+  ],
+  "LockTimeTravel": [
+    {
+      "name": "getLockCountFor",
+      "selector": "0x4f131ba4"
+    },
+    {
+      "name": "getLockCountForByPartition",
+      "selector": "0x3b193d92"
+    },
+    {
+      "name": "getLockFor",
+      "selector": "0x6f14b024"
+    },
+    {
+      "name": "getLockForByPartition",
+      "selector": "0xa9acfccb"
+    },
+    {
+      "name": "getLockedAmountFor",
+      "selector": "0x36e74467"
+    },
+    {
+      "name": "getLockedAmountForByPartition",
+      "selector": "0x6e1c55ba"
+    },
+    {
+      "name": "getLocksIdFor",
+      "selector": "0xd2d2b9fc"
+    },
+    {
+      "name": "getLocksIdForByPartition",
+      "selector": "0x3ea8b59d"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "lock",
+      "selector": "0xcf27cfc4"
+    },
+    {
+      "name": "lockByPartition",
+      "selector": "0x7a87884e"
+    },
+    {
+      "name": "release",
+      "selector": "0x8124fea6"
+    },
+    {
+      "name": "releaseByPartition",
+      "selector": "0xdc6a3e75"
+    }
+  ],
+  "PauseFacetTimeTravel": [
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "isPaused",
+      "selector": "0xb187bd26"
+    },
+    {
+      "name": "pause",
+      "selector": "0x8456cb59"
+    },
+    {
+      "name": "unpause",
+      "selector": "0x3f4ba83a"
+    }
+  ],
+  "ProtectedPartitionsTimeTravel": [
+    {
+      "name": "arePartitionsProtected",
+      "selector": "0xa151c19f"
+    },
+    {
+      "name": "calculateRoleForPartition",
+      "selector": "0xcb4da6fc"
+    },
+    {
+      "name": "getNounceFor",
+      "selector": "0x9f6b67c2"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ProtectedPartitions",
+      "selector": "0x90c032cc"
+    },
+    {
+      "name": "protectPartitions",
+      "selector": "0x6c5fde55"
+    },
+    {
+      "name": "unprotectPartitions",
+      "selector": "0x1277b323"
+    }
+  ],
+  "ScheduledBalanceAdjustmentsTimeTravel": [
+    {
+      "name": "getScheduledBalanceAdjustments",
+      "selector": "0xcb884d41"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "onScheduledBalanceAdjustmentTriggered",
+      "selector": "0xd300de7a"
+    },
+    {
+      "name": "scheduledBalanceAdjustmentCount",
+      "selector": "0x2de241e3"
+    }
+  ],
+  "ScheduledSnapshotsTimeTravel": [
+    {
+      "name": "getScheduledSnapshots",
+      "selector": "0xca21c53a"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "onScheduledSnapshotTriggered",
+      "selector": "0x8e51d755"
+    },
+    {
+      "name": "scheduledSnapshotCount",
+      "selector": "0xa19e91fe"
+    }
+  ],
+  "ScheduledTasksTimeTravel": [
+    {
+      "name": "getScheduledTasks",
+      "selector": "0xdcff09ba"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "onScheduledTaskTriggered",
+      "selector": "0xdf1eb071"
+    },
+    {
+      "name": "scheduledTaskCount",
+      "selector": "0x6dfe790e"
+    },
+    {
+      "name": "triggerPendingScheduledTasks",
+      "selector": "0x1507f2a4"
+    },
+    {
+      "name": "triggerScheduledTasks",
+      "selector": "0x28a5d769"
+    }
+  ],
+  "SnapshotsTimeTravel": [
+    {
+      "name": "balanceOfAtSnapshot",
+      "selector": "0x8e00ae2e"
+    },
+    {
+      "name": "balanceOfAtSnapshotByPartition",
+      "selector": "0xe002bcdf"
+    },
+    {
+      "name": "clearedBalanceOfAtSnapshot",
+      "selector": "0x2bc16e9b"
+    },
+    {
+      "name": "clearedBalanceOfAtSnapshotByPartition",
+      "selector": "0x386e1405"
+    },
+    {
+      "name": "decimalsAtSnapshot",
+      "selector": "0x69ed346f"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "heldBalanceOfAtSnapshot",
+      "selector": "0xb52e39aa"
+    },
+    {
+      "name": "heldBalanceOfAtSnapshotByPartition",
+      "selector": "0x977a3a71"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshot",
+      "selector": "0xd9e6f164"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshotByPartition",
+      "selector": "0x4a13f5d0"
+    },
+    {
+      "name": "partitionsOfAtSnapshot",
+      "selector": "0x09e84301"
+    },
+    {
+      "name": "takeSnapshot",
+      "selector": "0xb3d3d37e"
+    },
+    {
+      "name": "totalSupplyAtSnapshot",
+      "selector": "0xda35f8f6"
+    },
+    {
+      "name": "totalSupplyAtSnapshotByPartition",
+      "selector": "0x9657ddb9"
+    }
+  ],
+  "SsiManagementTimeTravel": [
+    {
+      "name": "addIssuer",
+      "selector": "0x20694db0"
+    },
+    {
+      "name": "getIssuerListCount",
+      "selector": "0x600b2940"
+    },
+    {
+      "name": "getIssuerListMembers",
+      "selector": "0x25ab0545"
+    },
+    {
+      "name": "getRevocationRegistryAddress",
+      "selector": "0x12023976"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "isIssuer",
+      "selector": "0x877b9a67"
+    },
+    {
+      "name": "removeIssuer",
+      "selector": "0x47bc7093"
+    },
+    {
+      "name": "setRevocationRegistryAddress",
+      "selector": "0xbb3daeaf"
+    }
+  ],
+  "TransferAndLockTimeTravel": [
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "protectedTransferAndLock",
+      "selector": "0xe2e20e05"
+    },
+    {
+      "name": "protectedTransferAndLockByPartition",
+      "selector": "0x8a1d3a47"
+    },
+    {
+      "name": "transferAndLock",
+      "selector": "0x0e92b90b"
+    },
+    {
+      "name": "transferAndLockByPartition",
+      "selector": "0x3bd407b9"
+    }
+  ],
+  "ITimeTravel": [
+    {
+      "name": "blockTimestamp",
+      "selector": "0xadb61832"
+    },
+    {
+      "name": "changeSystemTimestamp",
+      "selector": "0xc0f0f67e"
+    },
+    {
+      "name": "resetSystemTimestamp",
+      "selector": "0x8f145250"
+    }
+  ],
+  "TimeTravel": [
+    {
+      "name": "blockTimestamp",
+      "selector": "0xadb61832"
+    },
+    {
+      "name": "changeSystemTimestamp",
+      "selector": "0xc0f0f67e"
+    },
+    {
+      "name": "checkBlockChainid",
+      "selector": "0xd939398c"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "resetSystemTimestamp",
+      "selector": "0x8f145250"
+    }
+  ]
+}

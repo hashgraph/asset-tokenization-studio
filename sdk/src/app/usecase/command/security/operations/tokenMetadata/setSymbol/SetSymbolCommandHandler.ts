@@ -242,7 +242,7 @@ export class SetSymbolCommandHandler
       await this.validationService.checkPause(securityId);
 
       await this.validationService.checkRole(
-        SecurityRole._DEFAULT_ADMIN_ROLE,
+        SecurityRole._TREX_OWNER_ROLE,
         account.id.toString(),
         securityId,
       );

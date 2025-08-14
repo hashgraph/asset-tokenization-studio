@@ -1,9 +1,9 @@
 import { Stack } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
 import { HoldList } from "./HoldList";
 import { HoldCreate } from "./HoldCreate";
 import { useTranslation } from "react-i18next";
 import { HoldManage } from "./HoldManage";
+import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 
 export const Hold = () => {
   const { t: tTabs } = useTranslation("security", {
@@ -12,8 +12,7 @@ export const Hold = () => {
 
   return (
     <Stack w="full" h="full" layerStyle="container">
-      <Tabs
-        variant="secondary"
+      <PanelTabs
         tabs={[
           {
             content: <HoldList />,

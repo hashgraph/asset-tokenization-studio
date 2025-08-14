@@ -209,19 +209,16 @@ import {_DEFAULT_PARTITION} from '../constants/values.sol';
 import {
     SnapshotsStorageWrapper2
 } from '../snapshots/SnapshotsStorageWrapper2.sol';
-import {IERC3643} from '../../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {
-    IERC3643StorageWrapper
-} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
+    IERC3643Basic
+} from '../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract ERC3643StorageWrapper2 is
-    IERC3643StorageWrapper,
-    SnapshotsStorageWrapper2
-{
+abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
     modifier onlyEmptyWallet(address _tokenHolder) {
-        if (!_canRecover(_tokenHolder)) revert IERC3643.CannotRecoverWallet();
+        if (!_canRecover(_tokenHolder))
+            revert IERC3643Basic.CannotRecoverWallet();
         _;
     }
 
@@ -258,7 +255,7 @@ abstract contract ERC3643StorageWrapper2 is
         _updateTotalFreeze(_partition, _account);
 
         _beforeFreeze(_partition, _account);
-        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        IERC3643Basic.ERC3643Storage storage st = _erc3643Storage();
         st.frozenTokens[_account] += _amount;
         st.frozenTokensByPartition[_account][_partition] += _amount;
 
@@ -275,7 +272,7 @@ abstract contract ERC3643StorageWrapper2 is
         _updateTotalFreeze(_partition, _account);
 
         _beforeFreeze(_partition, _account);
-        IERC3643.ERC3643Storage storage st = _erc3643Storage();
+        IERC3643Basic.ERC3643Storage storage st = _erc3643Storage();
         st.frozenTokens[_account] -= _amount;
         st.frozenTokensByPartition[_account][_partition] -= _amount;
         _transferFrozenBalance(_partition, _account, _amount);

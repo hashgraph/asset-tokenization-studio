@@ -203,22 +203,77 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {Hold} from '../../../layer_1/hold/Hold.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+import {Hold, HoldIdentifier} from './IHold.sol';
 
-contract HoldTimeTravel is Hold, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
+interface IHoldTokenHolder {
+    event HeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event HeldFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event HoldByPartitionExecuted(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount,
+        address to
+    );
+
+    event HoldByPartitionReleased(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    event HoldByPartitionReclaimed(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    function createHoldByPartition(
+        bytes32 _partition,
+        Hold calldata _hold
+    ) external returns (bool success_, uint256 holdId_);
+
+    function createHoldFromByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external returns (bool success_, uint256 holdId_);
+
+    function executeHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier,
+        address _to,
+        uint256 _amount
+    ) external returns (bool success_);
+
+    function releaseHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier,
+        uint256 _amount
+    ) external returns (bool success_);
+
+    function reclaimHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier
+    ) external returns (bool success_);
 }

@@ -268,7 +268,9 @@ task(
             ssiManagement,
             pause,
             erc20,
-            erc1410ScheduledTasks,
+            erc1410ReadFacet,
+            erc1410ManagementFacet,
+            erc1410TokenHolderFacet,
             erc1594,
             erc1643,
             erc1644,
@@ -281,7 +283,9 @@ task(
             scheduledTasks,
             corporateActions,
             lock,
-            hold,
+            holdReadFacet,
+            holdManagementFacet,
+            holdTokenHolderFacet,
             transferAndLock,
             adjustBalances,
             clearingActionsFacet,
@@ -293,7 +297,8 @@ task(
             externalControlListManagement,
             externalKycListManagement,
             protectedPartitions,
-            erc3643,
+            erc3643Facet,
+            erc3643BatchFacet,
             freeze,
             erc20Permit,
         } = await deployAtsFullInfrastructure(
@@ -321,7 +326,9 @@ task(
             SsiManagement: ssiManagement.address,
             Pause: pause.address,
             ERC20: erc20.address,
-            ERC1410: erc1410ScheduledTasks.address,
+            ERC1410Read: erc1410ReadFacet.address,
+            ERC1410Management: erc1410ManagementFacet.address,
+            ERC1410TokenHolder: erc1410TokenHolderFacet.address,
             ERC1594: erc1594.address,
             ERC1643: erc1643.address,
             ERC1644: erc1644.address,
@@ -335,7 +342,9 @@ task(
             'Scheduled Tasks': scheduledTasks.address,
             'Corporate Actions': corporateActions.address,
             Lock: lock.address,
-            Hold: hold.address,
+            'Hold Read Facet': holdReadFacet.address,
+            'Hold Management Facet': holdManagementFacet.address,
+            'Hold TokenHolder Facet': holdTokenHolderFacet.address,
             'Transfer and Lock': transferAndLock.address,
             'Adjust Balances': adjustBalances.address,
             'Clearing Action Facet': clearingActionsFacet.address,
@@ -349,7 +358,8 @@ task(
             'External Kyc List Management Facet':
                 externalKycListManagement.address,
             'Protected Partitions': protectedPartitions.address,
-            ERC3643: erc3643.address,
+            'ERC3643 Facet': erc3643Facet.address,
+            'ERC3643 Batch Facet': erc3643BatchFacet.address,
             Freeze: freeze.address,
             ERC20Permit: erc20Permit.address,
         }
@@ -367,15 +377,7 @@ task(
                     address,
                     network,
                 })
-                if (
-                    ['Business Logic Resolver Proxy', 'Factory Proxy'].includes(
-                        key
-                    )
-                ) {
-                    console.log(`   --> *** ${key}: ${address} (${contractId})`)
-                } else {
-                    console.log(`   --> ${key}: ${address} (${contractId})`)
-                }
+                console.log(`   --> ${key}: ${address} (${contractId})`)
             } catch (e: unknown) {
                 console.log((e as Error).message)
             } finally {
