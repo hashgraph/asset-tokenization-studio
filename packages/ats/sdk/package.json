@@ -36,7 +36,7 @@
     "test:local": "npx --yes jest --forceExit",
     "test": "NODE_OPTIONS=--max-old-space-size=16384 npx jest --ci --runInBand --detectOpenHandles --forceExit",
     "test:demo": "npx --yes jest demo.test.ts",
-    "test:clear:cache": "npx --yes jest --clearCache",
+    "test:clear:cache": "npx --yes jest --clearCache"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.6.0",
