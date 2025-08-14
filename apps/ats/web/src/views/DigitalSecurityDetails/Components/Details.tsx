@@ -212,7 +212,6 @@ import {
 import { useUserStore } from '../../../store/userStore';
 import { User } from '../../../utils/constants';
 import { SecurityDetailsExtended } from './SecurityDetailsExtended';
-import _capitalize from 'lodash/capitalize';
 import { HolderActionsButtons } from './HolderActionsButtons';
 import { DetailsRegulations } from './Details/components/DetailsRegulations';
 import { DetailsPermissions } from './Details/components/DetailsPermissions';

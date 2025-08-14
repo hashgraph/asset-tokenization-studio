@@ -264,7 +264,7 @@ import {
 export { SecurityViewModel, SecurityControlListType };
 
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-interface SecurityInPort
+interface _ISecurityInPort
   extends ISecurityInPortAgent,
     ISecurityInPortBalance,
     ISecurityInPortClearing,

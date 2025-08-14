@@ -367,8 +367,14 @@ export default class MetamaskService extends Service {
   }
 
   public registerMetamaskEvents(): void {
-    if (typeof window === 'undefined' || !(window as any)?.ethereum) return;
+    if (
+      typeof globalThis === 'undefined' ||
+      typeof (globalThis as any).window === 'undefined' ||
+      !((globalThis as any).window as any)?.ethereum
+    )
+      return;
     try {
+      const ethereum = ((globalThis as any).window as any).ethereum;
       ethereum.on('accountsChanged', async (acct: unknown) => {
         const accounts = acct as string[];
         if (accounts.length === 0) {

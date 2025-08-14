@@ -203,11 +203,11 @@
 
 */
 
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { RoutePath } from '../RoutePath';
 import { useWalletStore } from '../../store/walletStore';
 import { WalletStatus } from '../../utils/constants';
-import { useEffect } from 'react';
 import { useLocationStore } from '../../store/locationStore';
 
 export const PrivateRoute = ({

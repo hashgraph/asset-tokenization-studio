@@ -207,7 +207,6 @@ import { Header } from '../Header';
 import { useWalletStore } from '../../../store/walletStore';
 import { render } from '../../../test-utils';
 import { WalletStatus } from '../../../utils/constants';
-import _capitalize from 'lodash/capitalize';
 
 const initialStoreState = useWalletStore.getState();
 

@@ -203,6 +203,7 @@
 
 */
 
+import React from 'react';
 import { GenericRoute } from './GenericRoute';
 
 export const OnboardingRoute = ({

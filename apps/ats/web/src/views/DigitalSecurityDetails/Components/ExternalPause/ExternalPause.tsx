@@ -1,3 +1,4 @@
+import React from 'react';
 import { Checkbox, HStack, Stack, useDisclosure } from '@chakra-ui/react';
 import { createColumnHelper } from '@tanstack/table-core';
 import {
@@ -26,7 +27,7 @@ import { useRolesStore } from '../../../../store/rolesStore';
 import { hasRole } from '../../../../utils/helpers';
 import { SecurityRole } from '../../../../utils/SecurityRole';
 
-type ExternalPause = {
+type ExternalPauseType = {
   id: string;
   isPaused: boolean;
 };
@@ -95,7 +96,7 @@ export const ExternalPause = () => {
     setSelectedRows(newSelectedRows);
   };
 
-  const columnsHelper = createColumnHelper<ExternalPause>();
+  const columnsHelper = createColumnHelper<ExternalPauseType>();
 
   const columns = [
     ...(hasPauseManagerRole

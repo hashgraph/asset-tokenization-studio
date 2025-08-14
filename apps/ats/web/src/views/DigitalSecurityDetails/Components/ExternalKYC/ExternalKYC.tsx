@@ -1,3 +1,4 @@
+import React from 'react';
 import { Checkbox, HStack, Stack, useDisclosure } from '@chakra-ui/react';
 import { createColumnHelper } from '@tanstack/table-core';
 import {
@@ -26,7 +27,7 @@ import {
   UpdateExternalKycListsRequest,
 } from '@hashgraph/asset-tokenization-sdk';
 
-type ExternalKYC = {
+type ExternalKYCType = {
   address: string;
 };
 
@@ -94,7 +95,7 @@ export const ExternalKYC = () => {
     setSelectedRows(newSelectedRows);
   };
 
-  const columnsHelper = createColumnHelper<ExternalKYC>();
+  const columnsHelper = createColumnHelper<ExternalKYCType>();
 
   const columns = [
     ...(hasKYCManagerRole

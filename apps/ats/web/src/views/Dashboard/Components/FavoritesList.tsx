@@ -214,12 +214,12 @@ import { useAccountStore } from '../../../store/accountStore';
 import { useWalletStore } from '../../../store/walletStore';
 import { SecurityStore, useSecurityStore } from '../../../store/securityStore';
 
-export interface FavoritesList
+export interface FavoritesListProps
   extends Omit<AccordionProps, 'children' | 'title'> {
   type: User;
 }
 
-export const FavoritesList = (props: FavoritesList) => {
+export const FavoritesList = (props: FavoritesListProps) => {
   const { type = User.admin } = props;
   const isAdmin = type === User.admin;
   const [isExpanded, setIsExpanded] = useState<boolean>(true);

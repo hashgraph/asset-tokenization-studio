@@ -71,7 +71,7 @@ export const PanelTabs: ComponentWithAs<'div', PanelTabsProps> = forwardRef<
     return (
       <ChakraTabs isFitted={isFitted} ref={ref} sx={styles.root} {...props}>
         <ChakraTabList sx={styles.tablist} {...listProps}>
-          {tabs.map(({ content, header, ...tab }, i) => (
+          {tabs.map(({ content: _content, header, ...tab }, i) => (
             <ChakraTab key={`tab_title_${i}`} sx={styles.tab} {...tab}>
               {header}
             </ChakraTab>

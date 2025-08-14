@@ -206,9 +206,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export default class Mapper {
-  public static renamePrivateProps(keys: string[]): string[];
-  public static renamePrivateProps(keys: string): string;
-  public static renamePrivateProps(keys: string | string[]): any {
+  public static renamePrivateProps(keys: string | string[]): string | string[] {
     if (typeof keys === 'string') {
       return keys.startsWith('_') || keys.startsWith('#')
         ? keys.substring(1)

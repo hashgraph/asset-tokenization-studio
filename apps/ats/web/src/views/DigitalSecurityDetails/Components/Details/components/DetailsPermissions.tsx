@@ -4,7 +4,6 @@ import {
   EquityDetailsViewModel,
   SecurityViewModel,
 } from '@hashgraph/asset-tokenization-sdk';
-import _capitalize from 'lodash/capitalize';
 import { useMemo } from 'react';
 
 interface DetailsPermissionsProps {

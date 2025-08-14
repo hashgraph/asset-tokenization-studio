@@ -269,8 +269,7 @@ export default class LogService {
     });
   }
 
-  public static logError(error: unknown, ...params: any[]): void;
-  public static logError(error: BaseError, ...params: any[]): void {
+  public static logError(error: unknown | BaseError, ...params: any[]): void {
     if (error instanceof BaseError) {
       this.log(
         LogLevel.ERROR,

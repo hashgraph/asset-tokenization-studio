@@ -1,3 +1,4 @@
+import React from 'react';
 import { Checkbox, HStack, Stack, useDisclosure } from '@chakra-ui/react';
 import { createColumnHelper } from '@tanstack/table-core';
 import {
@@ -26,7 +27,7 @@ import {
   UpdateExternalControlListsRequest,
 } from '@hashgraph/asset-tokenization-sdk';
 
-type ExternalControl = {
+type ExternalControlType = {
   address: string;
 };
 
@@ -99,7 +100,7 @@ export const ExternalControl = () => {
     setSelectedRows(newSelectedRows);
   };
 
-  const columnsHelper = createColumnHelper<ExternalControl>();
+  const columnsHelper = createColumnHelper<ExternalControlType>();
 
   const columns = [
     ...(hasControlManagerRole

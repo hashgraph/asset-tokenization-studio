@@ -303,5 +303,6 @@ export default class ConnectRequest
     this.custodialWalletSettings = custodialWalletSettings;
   }
 
-  [n: string]: any;
+  // eslint-disable-next-line no-undef, @typescript-eslint/no-explicit-any
+  [key: string]: any;
 }

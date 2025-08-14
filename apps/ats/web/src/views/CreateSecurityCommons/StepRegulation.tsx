@@ -354,7 +354,7 @@ export const StepRegulation = () => {
       },
       rule:
         regulationDetails?.dealSize !== '0'
-          ? `${regulationDetails?.dealSize} $` || ''
+          ? `${regulationDetails?.dealSize} $`
           : t('dealSizePlaceHolder'),
     },
     {

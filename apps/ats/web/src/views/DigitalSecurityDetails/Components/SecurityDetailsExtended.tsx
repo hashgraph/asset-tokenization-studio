@@ -228,7 +228,8 @@ import { MaturityDateItem } from './MadurityDateItem';
 import { DATE_TIME_FORMAT } from '../../../utils/constants';
 import { useGetCompliance } from '../../../hooks/queries/useCompliance';
 
-interface SecurityDetailsExtended extends Omit<DefinitionListProps, 'items'> {
+interface SecurityDetailsExtendedProps
+  extends Omit<DefinitionListProps, 'items'> {
   bondDetailsResponse?: BondDetailsViewModel;
   equityDetailsResponse?: EquityDetailsViewModel;
   isLoadingSecurityDetails: boolean;
@@ -241,7 +242,7 @@ export const SecurityDetailsExtended = ({
   isLoadingSecurityDetails,
   isFetchingSecurityDetails,
   ...props
-}: SecurityDetailsExtended) => {
+}: SecurityDetailsExtendedProps) => {
   const { t: tProperties } = useTranslation('properties');
   const { details } = useSecurityStore();
   const { id } = useParams();
