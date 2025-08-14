@@ -26,23 +26,23 @@ Version 1.15.0 introduces partial compatibility with the ERC-3643 (TREX) standar
 
 | **function**                                                                                                           | **status** |
 | ---------------------------------------------------------------------------------------------------------------------- | ---------- |
-| onchainID() external view returns (address)                                                                            | Pending    |
+| onchainID() external view returns (address)                                                                            | Done       |
 | version() external view returns (string memory)                                                                        | Done       |
-| identityRegistry() external view returns (IIdentityRegistry)                                                           | Pending    |
-| compliance() external view returns (ICompliance)                                                                       | Pending    |
+| identityRegistry() external view returns (IIdentityRegistry)                                                           | Done       |
+| compliance() external view returns (ICompliance)                                                                       | Done       |
 | paused() external view returns (bool)                                                                                  | Done       |
 | isFrozen(address \_userAddress) external view returns (bool)                                                           | Done       |
 | getFrozenTokens(address \_userAddress) external view returns (uint256)                                                 | Done       |
 | setName(string calldata \_name) external                                                                               | Done       |
 | setSymbol(string calldata \_symbol) external                                                                           | Done       |
-| setOnchainID(address \_onchainID) external                                                                             | Pending    |
+| setOnchainID(address \_onchainID) external                                                                             | Done       |
 | pause() external                                                                                                       | Done       |
 | unpause() external                                                                                                     | Done       |
 | setAddressFrozen(address \_userAddress, bool \_freeze) external                                                        | Done       |
 | freezePartialTokens(address \_userAddress, uint256 \_amount) external                                                  | Done       |
 | unfreezePartialTokens(address \_userAddress, uint256 \_amount) external                                                | Done       |
-| setIdentityRegistry(address \_identityRegistry) external                                                               | Pending    |
-| setCompliance(address \_compliance) external                                                                           | Pending    |
+| setIdentityRegistry(address \_identityRegistry) external                                                               | Done       |
+| setCompliance(address \_compliance) external                                                                           | Done       |
 | forcedTransfer(address \_from, address \_to, uint256 \_amount) external returns (bool)                                 | Done       |
 | mint(address \_to, uint256 \_amount) external                                                                          | Done       |
 | burn(address \_userAddress, uint256 \_amount) external                                                                 | Done       |
@@ -279,52 +279,52 @@ When introducing a new facet to the project, make sure to follow these steps:
 
 | **Contract**                           | **Address**                                | **ID**      |
 | -------------------------------------- | ------------------------------------------ | ----------- |
-| Access Control                         | 0x2b1a41557be3cE6c2BF0cC9bdb79D679c284A066 | 0.0.6564711 |
-| Adjust Balances                        | 0x15a41FD0920D4809a0d3652c25A0fA7C27D33e85 | 0.0.6564806 |
-| Bond                                   | 0x5EC294008180F26078212De6048Bbc8a8c4D7091 | 0.0.6564785 |
-| Business Logic Resolver                | 0x60b925b01Fe2F9251Dc443Faf1F4D904c940B92a | 0.0.6564702 |
-| Business Logic Resolver Proxy          | 0x366B51F4777Dc76adaca95da33131E4fFe52a8Ca | 0.0.6564708 |
-| Business Logic Resolver Proxy Admin    | 0xb9D45F198A89e69ce289Bc5C09d08780ce214301 | 0.0.6564705 |
-| Cap                                    | 0x3f773ea1D5BdB40D17607077c784B3652b660bb2 | 0.0.6564715 |
-| Clearing Action Facet                  | 0xd6fcc94480876C66278b88Ed837F7d89c0dB7CD2 | 0.0.6564818 |
-| Clearing Hold Creation Facet           | 0xF7d82cB3B972fEBD304dca47eE7F733C4AbdeEe4 | 0.0.6564815 |
-| Clearing Read Facet                    | 0xb8dE359d83d6D38a9a32e88Bfb7Eda52a44444a5 | 0.0.6564816 |
-| Clearing Redeem Facet                  | 0x06625545940041c1eebf05ebA50DbB9a6F2905ce | 0.0.6564814 |
-| Clearing Transfer Facet                | 0x1f15bbD600EbCdeFD47E21639cDc1cF4471e410e | 0.0.6564812 |
-| Control List                           | 0x012E2dF93f7d8F466c5a984663B09a6005E5a457 | 0.0.6564718 |
-| Corporate Actions                      | 0x3eCcf3b02FDd6EEeb7B090327430A02527372149 | 0.0.6564797 |
-| Diamond Facet                          | 0x9E6D4CbE7e0C2684162dfFC65ae673caF42d1212 | 0.0.6564778 |
-| ERC1410Management                      | 0xe0FE051f11db7054dED3E790Ff382466dAb0741D | 0.0.6564752 |
-| ERC1410Read                            | 0x51D7eb4c469631655696a7FDB9027c5872D4C9C5 | 0.0.6564749 |
-| ERC1410TokenHolder                     | 0x0A59e2fdf041044d822897e8F016ab03e68A3748 | 0.0.6564755 |
-| ERC1594                                | 0xc14dBFeC4C076EA236184575f59933a395046340 | 0.0.6564762 |
-| ERC1643                                | 0xff3Cec6c49533B6F251de847047F478e1dF5a617 | 0.0.6564764 |
-| ERC1644                                | 0x5200d0A0e760cc99f038F992241d9F47bfADb91d | 0.0.6564768 |
-| ERC20                                  | 0xb12D30D23445d2Ea68CFab29222942fd74AEcd2F | 0.0.6564746 |
-| ERC20Permit                            | 0x67ec288867fbC75D39A4237901DAbDBA23F15FB8 | 0.0.6564758 |
-| ERC3643 Batch Facet                    | 0x28855f55968f6E992ECbe7A91BC388E4206B9795 | 0.0.6564825 |
-| ERC3643 Facet                          | 0x7f0f934ED9165CFd56DB07f93B0e221D28792232 | 0.0.6564823 |
-| Equity                                 | 0xd0DD719E8af485C72612a3Ac6379390AeB35C99d | 0.0.6564781 |
-| External Control List Management Facet | 0x1568F9F7F51eAe0e34eD58e2932dE05D92fcb148 | 0.0.6564820 |
-| External Kyc List Management Facet     | 0xa59fbF510E501FFbeFB973C090a7739c8b9994D6 | 0.0.6564821 |
-| External Pause Management Facet        | 0x8Df8A97AbD36e79733657a46bE3f214776f97862 | 0.0.6564819 |
-| Factory                                | 0x0D0ce02F631670bBF87Ef09A166144C3B944aD4d | 0.0.6564831 |
-| Factory Proxy                          | 0x7c66Fb8881c82aBDE34A2cE6C0b986c03D47a1dB | 0.0.6564834 |
-| Factory Proxy Admin                    | 0xca25dB6bff19529e8f10150E3810df219B5785e2 | 0.0.6564833 |
-| Freeze                                 | 0xe5A9f9FC1C45c082798B31924097c18175ed664c | 0.0.6564827 |
-| Hold Management Facet                  | 0x5c05Cd3B0F229e695b430837422AF3a7c88e955d | 0.0.6564738 |
-| Hold Read Facet                        | 0xd63D2522Cb7287A282A63A9e075c6D41e636AC44 | 0.0.6564735 |
-| Hold TokenHolder Facet                 | 0xE319753DF30d3924653C07DB5375F4F5F5df0EF0 | 0.0.6564743 |
-| Kyc                                    | 0x8f6F8B9f86780B3493Dee3B7b634EDc6fc02c48b | 0.0.6564722 |
-| Lock                                   | 0x0006447AC6e3d6091A8E9C977f592A69C0e2Ec5e | 0.0.6564731 |
-| Pause                                  | 0x8Bad74681dE8c70b3d13daebe8523997e2628D47 | 0.0.6564728 |
-| Protected Partitions                   | 0x4DD9e4b461E8AC45149A51Bad1Cf15055B032D00 | 0.0.6564809 |
-| Scheduled Balance Adjustments          | 0x88c86faB69747c30Dc161385E21132c3ffcb867d | 0.0.6564792 |
-| Scheduled Snapshots                    | 0x33E4c2816AF460A8223a6F3849691FA577C04078 | 0.0.6564788 |
-| Scheduled Tasks                        | 0xd1DeDBD6043d1AF6663471CF7b98e1c6f589Df0d | 0.0.6564794 |
-| Snapshots                              | 0xeEdA55E1447fA5967655Fe8899B4Dba738a527F0 | 0.0.6564775 |
-| SsiManagement                          | 0xD72dbf497e3917d3Ef64FB7C668731D4CFd3466E | 0.0.6564725 |
-| Transfer and Lock                      | 0xa50647E96C08f2C4c164d2050A1F00BDE4F6B725 | 0.0.6564801 |
+| Business Logic Resolver Proxy          | 0x6E70DC7E1E9C96355076bd85258F65f9DDa54b20 | 0.0.6574176 |
+| Business Logic Resolver Proxy Admin    | 0xFaff76f576abfCc48F239FDD438E626E1DD4310F | 0.0.6574175 |
+| Business Logic Resolver                | 0x3806Bf042D6f0f431B709F6a43254F9128E067c7 | 0.0.6574174 |
+| Factory Proxy                          | 0x72EE20a9E9571c3940bE41C6aad5fE9A28e01a85 | 0.0.6574245 |
+| Factory Proxy Admin                    | 0xf9488F063AFEc34dc44CC94C99DCFE6b435B5768 | 0.0.6574243 |
+| Factory                                | 0x1693C2bBC0b58E47638065059e7e5e163a6ff913 | 0.0.6574242 |
+| Access Control                         | 0x02625B1cecc491d476629876ec9Cd88Ba0c682B1 | 0.0.6574178 |
+| Cap                                    | 0x30745dd65C27Fc196738dB8f937a9265FBdb56CC | 0.0.6574179 |
+| Control List                           | 0xC6C39235773Af61CDE02b6E466061f6BC254CB0c | 0.0.6574181 |
+| Kyc                                    | 0xaca020408aD7110a2A04606457F8B4f4990a27AC | 0.0.6574182 |
+| SsiManagement                          | 0x40cfF59FFe6248DDcfA8d2237443c3969fB3029B | 0.0.6574183 |
+| Pause                                  | 0x6E5413c4E1442ab91BbD2e22c95C618323d29E59 | 0.0.6574184 |
+| ERC20                                  | 0xfa7C3442423D02966cc0eaEF37B2B337cbBa26df | 0.0.6574190 |
+| ERC1410Read                            | 0xCD530Eff64aa3cfF36996978f63dDd3f365ba783 | 0.0.6574193 |
+| ERC1410Management                      | 0xc4d83a9B197ef79E83d36e9a96BBcF47F91D2a33 | 0.0.6574194 |
+| ERC1410TokenHolder                     | 0xB385Be34DD8F59dBB51d865Ce6D5355b9faA21ae | 0.0.6574195 |
+| ERC1594                                | 0xB74FFC76fd989c7BfdC5e85Ed22D1d1Ad74490a8 | 0.0.6574198 |
+| ERC1643                                | 0x2E3Ae9875c86b80661c894dBB0e730BdeE816bF3 | 0.0.6574200 |
+| ERC1644                                | 0xAAA44b82B62148771A7826a31fF6254476a36B74 | 0.0.6574201 |
+| Snapshots                              | 0xA6787f85faff989edfB0D3F9aBc9e36e2130c94B | 0.0.6574203 |
+| Diamond Facet                          | 0xE808213fc51A8AE8F810F7c5aAAd2888597a2Aa4 | 0.0.6574206 |
+| Equity                                 | 0x65717323114dfD290Cac05d9B98E4b57e26fcC7b | 0.0.6574207 |
+| Bond                                   | 0xae2003B0BeE6887342F074ab08e7a85a4417fcDe | 0.0.6574209 |
+| Scheduled Snapshots                    | 0x7843C4576798F12aa8357B8ed72c89B7e2038CE5 | 0.0.6574210 |
+| Scheduled Balance Adjustments          | 0x23DfA40D1623C798D2026Da225C9753dcB57400c | 0.0.6574211 |
+| Scheduled Tasks                        | 0xb34c65CF033570B946c77E877288ab27Ab0F9f6E | 0.0.6574214 |
+| Corporate Actions                      | 0x35d39582f3b14e9B742916d554563c8e54f01406 | 0.0.6574215 |
+| Lock                                   | 0x245B3C1D1AD59e1449af0a57370559fD15Db7329 | 0.0.6574185 |
+| Hold Read Facet                        | 0x15edFd54B5E76664B60Af47eF691d94608fc57CD | 0.0.6574186 |
+| Hold Management Facet                  | 0x9c53C72f7e6DAd515B35959F770e82313193032b | 0.0.6574187 |
+| Hold TokenHolder Facet                 | 0x11Aa9898371b18Ef2FfA19E062f8f6395AcD9BA1 | 0.0.6574189 |
+| Transfer and Lock                      | 0xea1Df18b3AaFB37D44C024Db32ffBe80F3b666fc | 0.0.6574216 |
+| Adjust Balances                        | 0x027698e5d8950146aC2792423ac5404a2A3B3f28 | 0.0.6574217 |
+| Clearing Action Facet                  | 0x341e459241d860e91e45E8466b41c6BdcFd90399 | 0.0.6574227 |
+| Clearing Transfer Facet                | 0x77D22229E5B70b81c5F8d00355F808C088945f91 | 0.0.6574219 |
+| Clearing Redeem Facet                  | 0x402d0f49B745247aa91dF94BE9e475AA2E7116f4 | 0.0.6574222 |
+| Clearing Hold Creation Facet           | 0x23AdC4348139aC936632605b11CFbBd26F9C726D | 0.0.6574225 |
+| Clearing Read Facet                    | 0xbf5481Ca849dbDcbEC2857da4FaAf86782Bcf239 | 0.0.6574226 |
+| External Pause Management Facet        | 0x888766208e2Fe9f3dc49EA580d7dEc7bd803eA52 | 0.0.6574229 |
+| External Control List Management Facet | 0xA4d54d17d5cA23C7d59CFcEC0c68151df6Bdf6e2 | 0.0.6574230 |
+| External Kyc List Management Facet     | 0xb4F2f8dD3D039014A7Fb640235CDfE2635D208f9 | 0.0.6574231 |
+| Protected Partitions                   | 0xA52cEd9F146c608Df8330B8566aA02BB883Cd67e | 0.0.6574218 |
+| ERC3643 Facet                          | 0x4d1307bCdDef88EA32988BB9e545b9e9f00787a1 | 0.0.6574233 |
+| ERC3643 Batch Facet                    | 0x747D1309c11cC9ED8D56D6E5cef592824eEF8d1D | 0.0.6574235 |
+| Freeze                                 | 0x7de236dFC57E70A001553De9D884b29603d7DEc8 | 0.0.6574236 |
+| ERC20Permit                            | 0x7718c915A8988B9FB07d284D16Ec7eF8Fc3D8918 | 0.0.6574197 |
 
 # 🔐 Role Definitions by Layer
 
