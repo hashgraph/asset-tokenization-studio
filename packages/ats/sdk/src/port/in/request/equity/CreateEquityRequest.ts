@@ -242,10 +242,10 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   diamondOwnerAccount?: string;
 
   @OptionalField()
-  compliance?: string;
+  complianceId?: string;
 
   @OptionalField()
-  identityRegistry?: string;
+  identityRegistryId?: string;
 
   votingRight: boolean;
   informationRight: boolean;
@@ -299,8 +299,8 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     info,
     configId,
     configVersion,
-    compliance,
-    identityRegistry,
+    complianceId,
+    identityRegistryId,
   }: {
     name: string;
     symbol: string;
@@ -334,8 +334,8 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     info: string;
     configId: string;
     configVersion: number;
-    compliance?: string;
-    identityRegistry?: string;
+    complianceId?: string;
+    identityRegistryId?: string;
   }) {
     super({
       name: (val) => {
@@ -386,8 +386,9 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
           true,
         );
       },
-      compliance: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
-      identityRegistry: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      complianceId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      identityRegistryId:
+        FormatValidation.checkHederaIdFormatOrEvmAddress(true),
     });
     this.name = name;
     this.symbol = symbol;
@@ -422,7 +423,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.info = info;
     this.configId = configId;
     this.configVersion = configVersion;
-    this.compliance = compliance;
-    this.identityRegistry = identityRegistry;
+    this.complianceId = complianceId;
+    this.identityRegistryId = identityRegistryId;
   }
 }
