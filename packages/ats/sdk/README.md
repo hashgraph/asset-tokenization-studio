@@ -30,22 +30,53 @@
 
 # Description
 
-The SDK enables the web (or any other client facing application) to interact with the smart contracts deployed on Hedera.
+The SDK enables web applications (or any other client-facing application) to interact with the smart contracts deployed on Hedera. This package is part of the Asset Tokenization Studio monorepo.
+
+## Workspace Context
+
+This SDK is located at `packages/ats/sdk` within the monorepo and depends on the contracts package (`packages/ats/contracts`). The build process automatically handles these dependencies when using workspace commands.
 
 # Installation
 
-Run the command :
+From the monorepo root:
 
+```bash
+npm ci                    # Install all workspace dependencies
+npm run ats:sdk:build     # Build the SDK
 ```
-npm ci
+
+For local development of the SDK only:
+
+```bash
+cd packages/ats/sdk
+npm run build
 ```
 
 # Build
 
-Run the command :
+Build the SDK using workspace commands from the root:
 
+```bash
+npm run ats:sdk:build
 ```
-npm run build
+
+Or build all ATS components:
+
+```bash
+npm run ats:build
+```
+
+# Test
+
+Run SDK tests:
+
+```bash
+# From root
+npm run ats:sdk:test
+
+# Or locally
+cd packages/ats/sdk
+npm test
 ```
 
 # Test

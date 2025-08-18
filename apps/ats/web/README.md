@@ -9,7 +9,6 @@
 ### Table of Contents
 
 - **[Description](#description)**<br>
-- **[Yarn Version Compatibility](#yarn-version-compatibility)**<br>
 - **[Installation](#installation)**<br>
 - **[Environment Variables](#environment-variables)**<br>
   - **[General](#general)**<br>
@@ -21,32 +20,38 @@
 # Description
 
 Front End for the Asset Tokenization Studio.
-This Dapp interacts directly with the Hedera Testnet through the SDK.
+This dApp interacts directly with the Hedera Testnet through the SDK. This package is part of the Asset Tokenization Studio monorepo located at `apps/ats/web`.
 
-# Yarn Version Compatibility
+## Workspace Context
 
-This project is compatible with Yarn version 1.22.22. Please ensure you have this version installed before running any yarn commands. If you need to install this version, you can run:
-
-```
-npm install -g yarn@1.22.22
-```
+This web application depends on the SDK (`packages/ats/sdk`) and indirectly on the contracts (`packages/ats/contracts`). The monorepo build process handles these dependencies automatically.
 
 # Installation
 
-First, verify that you have the correct version of Yarn installed by running `yarn --version`. You should see `1.22.22` as the output.
+## Prerequisites
 
-Then, install the project dependencies with:
+From the monorepo root, ensure all dependencies are installed:
 
+```bash
+npm ci                    # Install all workspace dependencies
+npm run ats:build         # Build contracts and SDK
 ```
-yarn install
+
+## Local Development
+
+For local development of just the web application:
+
+```bash
+cd apps/ats/web
+npm install
 ```
 
 # Environment Variables
 
-Environment varibales should be included in a ".env" file located in "./web".
-Please refer to ".env.sample" to see the list of varibales that must be defined alongside some default values that you could use to start up the application.
+Environment variables should be included in a ".env" file located in `apps/ats/web/`.
+Please refer to ".env.sample" to see the list of variables that must be defined alongside some default values that you could use to start up the application.
 
-Below is a description of which each variable represents.
+Below is a description of what each variable represents.
 
 ## General
 
@@ -69,13 +74,26 @@ Below is a description of which each variable represents.
 
 # Run
 
-Run the command :
+## From monorepo root (recommended):
 
-```
-yarn dev
+```bash
+# Start full development environment (builds contracts & SDK, then starts web)
+npm start
+# or
+npm run ats:start
+
+# Start just the web development server (assumes contracts & SDK are built)
+npm run ats:web:dev
 ```
 
-Open a browser and type in the URL displayed in the terminal (by default it will be : _http://localhost:5173_)
+## From web directory:
+
+```bash
+cd apps/ats/web
+npm run dev
+```
+
+Open a browser and navigate to the URL displayed in the terminal (by default: _http://localhost:5173_)
 
 # Test
 
@@ -85,8 +103,30 @@ The following _src_ folders contain _**tests**_ subfolders within them with thei
 - layouts
 - views
 
-In order to execute all the tests run this command from the _web_ folder:
+## Running tests
 
+### From monorepo root (recommended):
+
+```bash
+npm run ats:web:test
 ```
-npm run test
+
+### From web directory:
+
+```bash
+cd apps/ats/web
+npm test
+```
+
+### Available test commands:
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Update test snapshots
+npm run test:update
 ```

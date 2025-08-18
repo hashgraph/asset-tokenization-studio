@@ -16,11 +16,46 @@
 
 # Description
 
-The contracts module contains the code of all the solidity smart contracts deployed on Hedera.
+The contracts module contains the code of all Solidity smart contracts deployed on Hedera. This package is part of the Asset Tokenization Studio monorepo.
 
-The standard used for security token is ERC-1400.
+The standard used for security tokens is ERC-1400.
 
 Version 1.15.0 introduces partial compatibility with the ERC-3643 (TREX) standard; full identity and compliance support will be added in future releases.
+
+## Workspace Context
+
+This package is located at `packages/ats/contracts` within the monorepo. Other packages (like the SDK) depend on the compiled artifacts from this package.
+
+# Installation
+
+From the monorepo root:
+
+```bash
+npm ci                        # Install all workspace dependencies
+npm run ats:contracts:build   # Build the contracts
+```
+
+For local development:
+
+```bash
+cd packages/ats/contracts
+npm install
+npm run compile
+```
+
+# Build
+
+Build contracts using workspace commands from the root:
+
+```bash
+npm run ats:contracts:build
+```
+
+Or build all ATS components:
+
+```bash
+npm run ats:build
+```
 
 ## ERC-3643 compatibility
 
@@ -197,10 +232,32 @@ npx hardhat getProxyAdminConfig <proxyAdminAddress> <proxyAddress> --network <ne
 
 The contracts tests are located in the _test_ folder at the root of the contracts module.
 
-In order to execute all the tests run this command from the _contracts_ folder:
+## Running tests
 
+### From monorepo root (recommended):
+
+```bash
+npm run ats:contracts:test
 ```
+
+### From contracts directory:
+
+```bash
+cd packages/ats/contracts
+npm test
+```
+
+### Available test commands:
+
+```bash
+# Run all tests
 npm run test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run specific test file
+npm run test -- test/diamond/diamond.test.ts
 ```
 
 ### Architecture

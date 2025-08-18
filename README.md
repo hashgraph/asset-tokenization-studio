@@ -11,6 +11,7 @@
 - **[Development manifesto](#development-manifesto)**<br>
 - **[Prerequisites](#prerequisites)**<br>
 - **[Installation](#installation)**<br>
+- **[Workspace Overview](#workspace-overview)**<br>
 - **[Build](#build)**<br>
 - **[Setting Up the Environment](#setting-up-the-environment)**<br>
   - **[Required Environment Variables](#required-environment-variables)**<br>
@@ -33,11 +34,28 @@ The ATS facilitates the tokenization of traditional financial assets (equities a
 - Implementing compliance and regulatory requirements
 - Enabling secure token transfers and operations
 
+## Monorepo Structure
+
+The project is organized as a monorepo using npm workspaces:
+
+```
+├── packages/                    # Core packages
+│   ├── ats/
+│   │   ├── contracts/          # Smart contracts deployed on Hedera
+│   │   └── sdk/                # TypeScript SDK for contract interaction
+│   └── mass-payout/            # Mass payout functionality
+├── apps/                       # Applications
+│   ├── ats/
+│   │   └── web/                # React web application
+│   └── mass-payout/            # Mass payout app
+└── package.json               # Root workspace configuration
+```
+
 The ATS consists of three primary components that work together to provide a complete tokenization solution:
 
-- Smart Contracts - The on-chain components deployed on the Hedera network
-- SDK - A software development kit that provides programmatic access to the contracts
-- Web Application - A user interface for interacting with the tokenized assets
+- **Smart Contracts** (`packages/ats/contracts`) - The on-chain components deployed on the Hedera network
+- **SDK** (`packages/ats/sdk`) - A software development kit that provides programmatic access to the contracts
+- **Web Application** (`apps/ats/web`) - A user interface for interacting with the tokenized assets
 
 The standard ERC for security tokens used in the smart contracts is ERC1400.
 
@@ -64,31 +82,92 @@ Ensure the following tools are installed:
 
 - **Node:** v20.19.4 (LTS: Iron) or newer
 - **NPM :** v10.8.2 or newer
-- **Yarn:** v1.22.22
 
 # Installation
 
-In a terminal:
+This project uses npm workspaces for dependency management. In a terminal at the root directory:
+
+```bash
+npm ci
+```
+
+This will install all dependencies for all workspaces and automatically set up the links between packages.
+
+You can now start developing in any of the workspace modules.
+
+# Workspace Overview
+
+This monorepo uses npm workspaces to manage dependencies and build processes across multiple packages and applications.
+
+## Available Workspace Commands
+
+### ATS (Asset Tokenization Studio)
+
+```bash
+# Build commands
+npm run ats:build                # Build all ATS components
+npm run ats:contracts:build      # Build smart contracts only
+npm run ats:sdk:build           # Build SDK only
+npm run ats:web:build           # Build web app only
+
+# Test commands
+npm run ats:test                # Test all ATS components
+npm run ats:contracts:test      # Test contracts only
+npm run ats:sdk:test           # Test SDK only
+npm run ats:web:test           # Test web app only
+npm run ats:test:ci            # Run CI tests
+
+# Development commands
+npm run ats:start              # Build contracts/SDK and start web dev server
+npm run ats:web:dev           # Start web dev server only
+
+# Publishing (for maintainers)
+npm run ats:publish           # Publish contracts and SDK to npm
+```
+
+### Mass Payout (Placeholder)
+
+```bash
+npm run mass-payout:build     # Build mass payout components
+npm run mass-payout:test      # Test mass payout components
+npm run mass-payout:dev       # Start mass payout development
+```
+
+### Utility Commands
+
+```bash
+npm run clean:deps            # Remove all node_modules and lock files
+npm run lint                  # Lint JavaScript and Solidity code
+npm run format                # Format code with Prettier
+```
+
+## Workspace Dependencies
+
+The workspaces have the following dependency relationships:
 
 ```
-npm run install:all
+packages/ats/contracts  →  (standalone)
+packages/ats/sdk       →  depends on contracts
+apps/ats/web          →  depends on SDK (and transitively contracts)
 ```
 
-This will install the dependencies in all projects and sets up the links between them.
-
-You can now start developing in any of the modules.
+When you run workspace commands, npm automatically handles building dependencies in the correct order.
 
 # Build
 
-When making modifications to any of the modules, you have to re-compile the dependencies, in this order, depending on which ones the modifications where made:
+The project uses workspace-aware build commands. When making modifications to any module, rebuild the dependencies in the following order:
 
 ```bash
-  // 1st
-  $ npm run build:contracts
-  // 2nd
-  $ npm run build:sdk
-  // or
-  $ npm run build:web
+# Build all ATS components (recommended)
+npm run ats:build
+
+# Or build individual components:
+npm run ats:contracts:build  # 1st - Smart contracts
+npm run ats:sdk:build        # 2nd - SDK (depends on contracts)
+npm run ats:web:build        # 3rd - Web app (depends on SDK)
+
+# Mass Payout (when available)
+npm run mass-payout:build
 ```
 
 # Setting Up the Environment
@@ -124,7 +203,7 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 
 ## Steps to set up the `.env` file:
 
-1. Navigate to the `web` module folder.
+1. Navigate to the `apps/ats/web` directory.
 2. Copy the `.env.sample` file to create a new `.env` file:
 
    ```bash
@@ -199,14 +278,70 @@ For further details or assistance regarding the custodian integration, please co
 
 # Run
 
-In order to run the application locally:
+To run the application locally:
 
 - Clone the repository
-- Install the application as described in the _Installation_ section
-- Create a ".env" file in the _web_ module (using the ".env.sample" file as a template)
-- Open a terminal and go to the _web_ folder
-- Run the command : **yarn dev**
-- Open a browser and type in the URL displayed in the terminal (by default it will be : _http://localhost:5173_)
+- Install dependencies as described in the _Installation_ section: `npm ci`
+- Create a ".env" file in the `apps/ats/web` directory (using the ".env.sample" file as a template)
+- Run the application using one of these commands:
+
+  ```bash
+  # Start the full ATS application (builds contracts & SDK, then starts web dev server)
+  npm start
+  # or
+  npm run ats:start
+
+  # For development of the web app only (assumes contracts & SDK are already built)
+  npm run ats:web:dev
+  ```
+
+- Open a browser and navigate to the URL displayed in the terminal (by default: _http://localhost:5173_)
+
+## Development Workflows
+
+### Full Development Setup
+
+```bash
+npm ci                 # Install all dependencies
+npm run ats:build      # Build contracts and SDK
+npm run ats:web:dev    # Start web development server
+```
+
+### Running Tests
+
+```bash
+# Test all ATS components
+npm run ats:test
+
+# Test individual components
+npm run ats:contracts:test
+npm run ats:sdk:test
+npm run ats:web:test
+
+# CI testing
+npm run ats:test:ci
+```
+
+### Clean and Rebuild
+
+```bash
+# Clean all build artifacts
+npm run ats:clean
+
+# Clean dependencies (nuclear option)
+npm run clean:deps
+npm ci
+```
+
+## Continuous Integration
+
+The project uses separate GitHub Actions workflows for different components:
+
+- **ATS Tests** (`.github/workflows/test-ats.yml`): Runs when ATS-related files change
+- **Mass Payout Tests** (`.github/workflows/test-mp.yml`): Runs when Mass Payout files change
+- **Publishing** (`.github/workflows/publish.yml`): Handles publishing to npm with conditional logic based on release tags
+
+Tests are automatically triggered only when relevant files are modified, improving CI efficiency.
 
 # Support
 
