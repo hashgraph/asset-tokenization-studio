@@ -292,8 +292,8 @@ class BondInPort implements IBondInPort {
       externalPauses,
       externalControlLists,
       externalKycLists,
-      compliance,
-      identityRegistry,
+      complianceId,
+      identityRegistryId,
     } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
@@ -338,8 +338,8 @@ class BondInPort implements IBondInPort {
         externalPauses,
         externalControlLists,
         externalKycLists,
-        compliance,
-        identityRegistry,
+        complianceId,
+        identityRegistryId,
       ),
     );
 
