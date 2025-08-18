@@ -310,11 +310,17 @@ bytes32 constant _CONTROL_LIST_MANAGEMENT_RESOLVER_KEY = 0xb28d59e89fa116cebe06d
 // keccak256("security.token.standard.kyc.management.resolverKey")
 bytes32 constant _KYC_MANAGEMENT_RESOLVER_KEY = 0x8676785f4d841823214e8ee8c497b3336a210be7559f5571c590249f6203e821;
 
-// keccak256('security.token.standard.erc3643.resolverKey');
-bytes32 constant _ERC3643_RESOLVER_KEY = 0x9670cee833e6302b5aeea3ae5875f87bd0af95a1fc660ca37cf38b1aa887fecb;
+// keccak256('security.token.standard.erc3643.management.resolverKey');
+bytes32 constant _ERC3643_MANAGEMENT_RESOLVER_KEY = 0x06d7f1ffc912a9e44e5d742aa1c1eff596d0fabf91a1d0fb1c3ac0fba01f1773;
 
 // keccak256('security.token.standard.erc3643.batch.resolverKey');
 bytes32 constant _ERC3643_BATCH_RESOLVER_KEY = 0x9e671b494908a7523ee4e531ae7b7076b84f1c675d31346a9697f0ff4695f249;
+
+// keccak256('security.token.standard.erc3643.read.resolverKey');
+bytes32 constant _ERC3643_READ_RESOLVER_KEY = 0xf1a7f92f11da0b048b6417201459d4e1eaef0e112e0d58d5bd6ee4481e5394c7;
+
+// keccak256('security.token.standard.erc3643.operations.resolverKey');
+bytes32 constant _ERC3643_OPERATIONS_RESOLVER_KEY = 0x39de33e56c92afe3cd7ece00d0ff8a0df512878690719e48c17d5b54604d2de2;
 
 // keccak256('security.token.standard.freeze.resolverKey');
 bytes32 constant _FREEZE_RESOLVER_KEY = 0x49f765e7155d979a148049c2a0ebed5e028b11799061897a255f99314f0bd3f1;

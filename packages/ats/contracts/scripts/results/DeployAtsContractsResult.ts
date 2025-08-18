@@ -244,7 +244,9 @@ import {
     HoldManagementFacet,
     HoldTokenHolderFacet,
     ERC1410TokenHolderFacet,
-    ERC3643Facet,
+    ERC3643MgmtFacet,
+    ERC3643OperationsFacet,
+    ERC3643ReadFacet,
     ERC3643BatchFacet,
     ERC20Permit,
     ERC20Votes,
@@ -291,7 +293,9 @@ export interface DeployAtsContractsResultParams {
     externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    erc3643Facet: DeployContractWithFactoryResult<ERC3643Facet>
+    erc3643MgmtFacet: DeployContractWithFactoryResult<ERC3643MgmtFacet>
+    erc3643OperationsFacet: DeployContractWithFactoryResult<ERC3643OperationsFacet>
+    erc3643ReadFacet: DeployContractWithFactoryResult<ERC3643ReadFacet>
     erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>
     freeze: DeployContractWithFactoryResult<FreezeFacet>
     timeTravel?: DeployContractWithFactoryResult<TimeTravel>
@@ -338,7 +342,9 @@ export default class DeployAtsContractsResult {
     public readonly externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     public readonly externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     public readonly externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    public readonly erc3643Facet: DeployContractWithFactoryResult<ERC3643Facet>
+    public readonly erc3643MgmtFacet: DeployContractWithFactoryResult<ERC3643MgmtFacet>
+    public readonly erc3643OperationsFacet: DeployContractWithFactoryResult<ERC3643OperationsFacet>
+    public readonly erc3643ReadFacet: DeployContractWithFactoryResult<ERC3643ReadFacet>
     public readonly erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>
     public readonly freeze: DeployContractWithFactoryResult<FreezeFacet>
     public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
@@ -384,7 +390,9 @@ export default class DeployAtsContractsResult {
         freeze,
         timeTravel,
         deployer,
-        erc3643Facet,
+        erc3643MgmtFacet,
+        erc3643OperationsFacet,
+        erc3643ReadFacet,
         erc3643BatchFacet,
         holdReadFacet,
         holdManagementFacet,
@@ -429,7 +437,9 @@ export default class DeployAtsContractsResult {
         this.externalPauseManagement = externalPauseManagement
         this.externalControlListManagement = externalControlListManagement
         this.externalKycListManagement = externalKycListManagement
-        this.erc3643Facet = erc3643Facet
+        this.erc3643MgmtFacet = erc3643MgmtFacet
+        this.erc3643OperationsFacet = erc3643OperationsFacet
+        this.erc3643ReadFacet = erc3643ReadFacet
         this.erc3643BatchFacet = erc3643BatchFacet
         this.freeze = freeze
         this.timeTravel = timeTravel
