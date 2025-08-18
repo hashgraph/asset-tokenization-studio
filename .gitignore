@@ -133,5 +133,9 @@ asset-tokenization-studio.iml
 # IntelliJ Idea
 /.idea/
 
+# AI files
+.kiro/
+CLAUDE.md
+
 # Extracted methods from contracts
 contracts/extracted-methods.txt

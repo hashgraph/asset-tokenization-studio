@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdminActionsButtons Admin has controller role should render correctly: controllerRole 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-1xa9bwv"
+  >
+    <a
+      class="chakra-button css-vueqt9"
+      data-testid="force-transfer-button"
+      href="/"
+    >
+      Force transfer
+    </a>
+    <a
+      class="chakra-button css-vueqt9"
+      data-testid="force-redeem-button"
+      href="/"
+    >
+      Force redeem
+    </a>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`AdminActionsButtons Admin has minter role should render correctly: minterRole 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-1xa9bwv"
+  >
+    <a
+      class="chakra-button css-vueqt9"
+      data-testid="mint-button"
+      href="/"
+    >
+      Mint
+    </a>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`AdminActionsButtons should render correctly: defaultAdminRole 1`] = `
+<DocumentFragment>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

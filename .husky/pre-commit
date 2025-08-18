@@ -1,2 +1,1 @@
-npm run pre-commit:contracts
-npm run pre-commit:sdk
+npm run pre-commit
