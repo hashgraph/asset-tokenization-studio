@@ -283,7 +283,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     ) internal virtual override {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
 
-        if (erc20VotesStorage.activated) {
+        if (_isActivated()) {
             _takeAbafCheckpoint();
             if (from == address(0)) {
                 _writeCheckpoint(
@@ -526,6 +526,10 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         if (abafAtBlockFrom == 0 || abafAtBlockTo == 0) return 1;
 
         return abafAtBlockTo / abafAtBlockFrom;
+    }
+
+    function _isActivated() internal view returns (bool) {
+        return _erc20VotesStorage().activated;
     }
 
     function _add(uint256 a, uint256 b) internal pure returns (uint256) {

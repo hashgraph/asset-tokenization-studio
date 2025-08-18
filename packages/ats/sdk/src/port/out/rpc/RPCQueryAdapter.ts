@@ -239,6 +239,7 @@ import {
   ERC1643__factory,
   ERC1644__factory,
   ERC20__factory,
+  ERC20Votes__factory,
   ExternalControlListManagement__factory,
   ExternalKycListManagement__factory,
   ExternalPauseManagement__factory,
@@ -549,6 +550,10 @@ export class RPCQueryAdapter {
       ControlList__factory,
       address.toString(),
     ).getControlListType();
+    const erc20VotesActivated = await this.connect(
+      ERC20Votes__factory,
+      address.toString(),
+    ).isActivated();
     const isControllable = await this.connect(
       ERC1644__factory,
       address.toString(),
@@ -615,6 +620,7 @@ export class RPCQueryAdapter {
       type: CastSecurityType.fromNumber(erc20Metadata.securityType),
       decimals: erc20Metadata.info.decimals,
       isWhiteList: isWhiteList,
+      erc20VotesActivated: erc20VotesActivated,
       isControllable: isControllable,
       arePartitionsProtected: arePartitionsProtected,
       clearingActive: clearingActive,

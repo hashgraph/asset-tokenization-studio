@@ -469,6 +469,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         maxSupply: securityInfo.maxSupply
           ? securityInfo.maxSupply.toString()
           : '0',
+        erc20VotesActivated: securityInfo.erc20VotesActivated,
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
         internalKycActivated: securityInfo.internalKycActivated,
@@ -586,6 +587,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         maxSupply: securityInfo.maxSupply
           ? securityInfo.maxSupply.toString()
           : '0',
+        erc20VotesActivated: securityInfo.erc20VotesActivated,
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
         internalKycActivated: securityInfo.internalKycActivated,

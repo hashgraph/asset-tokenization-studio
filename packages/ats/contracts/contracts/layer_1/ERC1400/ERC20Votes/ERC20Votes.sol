@@ -284,6 +284,11 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         return _numCheckpoints(_account);
     }
 
+    function isActivated() external view returns (bool){
+        return _isActivated();
+    }
+
+
     function getStaticResolverKey()
         external
         pure
@@ -299,7 +304,7 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](10);
+        staticFunctionSelectors_ = new bytes4[](11);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this
             .initialize_ERC20Votes
@@ -317,6 +322,8 @@ contract ERC20Votes is IERC20Votes, IStaticFunctionSelectors, Common {
         staticFunctionSelectors_[selectorsIndex++] = this
             .numCheckpoints
             .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.isActivated.selector;
+
     }
 
     function getStaticInterfaceIds()
