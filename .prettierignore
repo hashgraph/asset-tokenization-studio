@@ -15,6 +15,22 @@ coverage
 typechain-types
 artifacts
 cache
+*.snap
+
+# Asset files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.svg
+*.webp
+
+# Configuration files that don't need formatting
+*.toml
+_redirects
+.editorconfig
+.gitignore
 
 # Hardhat
 *.sol-coverage
