@@ -209,90 +209,73 @@ pragma solidity ^0.8.17;
 // solhint-disable no-empty-blocks
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
-import {
-    IFactory_,
-    FactoryRegulationData,
-    IBusinessLogicResolver_
-} from './interfaces/IFactory.sol';
-import {TrexBondDeploymentLib} from './libraries/TrexBondDeploymentLib.sol';
-import {TrexEquityDeploymentLib} from './libraries/TrexEquityDeploymentLib.sol';
+import {IFactory_, FactoryRegulationData} from './interfaces/IFactory.sol';
+import {TREXBondDeploymentLib} from './libraries/TREXBondDeploymentLib.sol';
+import {TREXEquityDeploymentLib} from './libraries/TREXEquityDeploymentLib.sol';
 
 /// @author Tokeny Solutions
 /// @notice Adapted from the T-REX official repository to deploy an ERC-3643-compatible ATS security token
-/// @dev Ues tree-like structure with libraries as leaves instead of resolver proxy pattern for simplicity
+/// @dev Uses tree-like structure with libraries as leaves instead of resolver proxy pattern for simplicity
 // solhint-disable custom-errors
 contract TREXFactoryAts is ITREXFactory, Ownable {
     /// @notice TokenDetails with the ATS factory overlapping fields removed
+    /// @param owner Address of the owner of all contracts
+    /// @param irs Identity registry storage address. Set it to ZERO address if you want to deploy a new storage.
+    /// If an address is provided, please ensure that the factory is set as owner of the contract
+    /// @param ONCHAINID ONCHAINID of the token
+    /// @param irAgents List of agents of the identity registry (can be set to an AgentManager contract)
+    /// @param tokenAgents List of agents of the token
+    /// @param complianceModules Modules to bind to the compliance, indexes are corresponding to the settings
+    /// callData indexes
+    /// If a module doesn't require settings, it can be added at the end of the array, at index > settings.length
+    /// @param complianceSettings Settings calls for compliance modules
     struct TokenDetailsAts {
-        // address of the owner of all contracts
         address owner;
-        // identity registry storage address
-        // set it to ZERO address if you want to deploy a new storage
-        // if an address is provided, please ensure that the factory is set as owner of the contract
         address irs;
-        // ONCHAINID of the token
         // solhint-disable-next-line var-name-mixedcase
         address ONCHAINID;
-        // list of agents of the identity registry (can be set to an AgentManager contract)
         address[] irAgents;
-        // list of agents of the token
         address[] tokenAgents;
-        // modules to bind to the compliance, indexes are corresponding to the settings callData indexes
-        // if a module doesn't require settings, it can be added at the end of the array, at index > settings.length
         address[] complianceModules;
-        // settings calls for compliance modules
         bytes[] complianceSettings;
     }
 
-    /// the address of the implementation authority contract used in the tokens deployed by the factory
+    /// @dev The address of the implementation authority contract used in the tokens deployed by the factory
     address private _implementationAuthority;
 
-    /// the address of the Identity Factory used to deploy token OIDs
+    /// @dev The address of the Identity Factory used to deploy token OIDs
     address private _idFactory;
 
-    /// mapping containing info about the token contracts corresponding to salt already used for CREATE2 deployments
+    /// @dev Mapping containing info about the token contracts corresponding to salt already used for
+    /// CREATE2 deployments
     mapping(string => address) public tokenDeployed;
 
-    /// the address of the ATS suite factory
+    /// @dev The address of the ATS suite factory
     address private _atsFactory;
 
-    /// the address of the resolver for default deployment
-    IBusinessLogicResolver_ private _resolver;
-
-    /// constructor is setting the implementation authority and the Identity Factory of the TREX factory
-    /// @dev the constructor has been adjusted to allow null addresses later set by the owner
+    /**
+     * @dev Constructor is setting the implementation authority and the Identity Factory of the TREX factory
+     * @dev The constructor has been adjusted to allow null addresses later set by the owner
+     */
     constructor(
-        address implementationAuthority_,
-        address idFactory_,
-        address atsFactory_,
-        address resolver_
+        address _implementationAuthority,
+        address _idFactory,
+        address _atsFactory
     ) {
-        _implementationAuthority = implementationAuthority_;
-        _idFactory = idFactory_;
-        _atsFactory = atsFactory_;
-        _resolver = IBusinessLogicResolver_(resolver_);
+        _implementationAuthority = _implementationAuthority;
+        _idFactory = _idFactory;
+        _atsFactory = _atsFactory;
     }
 
     /**
      *  @dev See {ITREXFactory-deployTREXSuite}.
-     *  @dev Original method adapted to deploy an equity populated with default values
+     *  @dev Disabled
      */
     function deployTREXSuite(
         string memory _salt,
         TokenDetails calldata _tokenDetails,
         ClaimDetails calldata _claimDetails
-    ) external {
-        TrexEquityDeploymentLib.deployTREXSuite(
-            tokenDeployed,
-            _implementationAuthority,
-            _idFactory,
-            _atsFactory,
-            _resolver,
-            _salt,
-            _tokenDetails,
-            _claimDetails
-        );
-    }
+    ) external {}
 
     /**
      *  @dev See {ITREXFactory-deployTREXSuite}.
@@ -305,7 +288,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         IFactory_.EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external onlyOwner {
-        TrexEquityDeploymentLib.deployTREXSuiteAtsEquity(
+        TREXEquityDeploymentLib.deployTREXSuiteAtsEquity(
             tokenDeployed,
             _implementationAuthority,
             _idFactory,
@@ -329,7 +312,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         IFactory_.BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external onlyOwner {
-        TrexBondDeploymentLib.deployTREXSuiteAtsBond(
+        TREXBondDeploymentLib.deployTREXSuiteAtsBond(
             tokenDeployed,
             _implementationAuthority,
             _idFactory,
@@ -343,7 +326,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
     }
 
     /**
-     *  @dev See {ITREXFactory-recoverContractOwnership}.
+     *  @inheritdoc ITREXFactory
      */
     function recoverContractOwnership(
         address _contract,
@@ -353,7 +336,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
     }
 
     /**
-     *  @dev See {ITREXFactory-setImplementationAuthority}.
+     *  @inheritdoc ITREXFactory
      */
     function setImplementationAuthority(
         address implementationAuthority_
@@ -386,28 +369,24 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
     }
 
     /**
-     *  @dev See {ITREXFactory-setIdFactory}.
+     *  @inheritdoc ITREXFactory
      */
-    function setIdFactory(address idFactory_) external override onlyOwner {
-        require(idFactory_ != address(0), 'invalid argument - zero address');
-        _idFactory = idFactory_;
-        emit IdFactorySet(idFactory_);
-    }
-
-    /// @dev Sets the address of the ATS factory
-    function setAtsFactory(address atsFactory_) external onlyOwner {
-        require(atsFactory_ != address(0), 'invalid argument - zero address');
-        _atsFactory = atsFactory_;
-    }
-
-    /// @dev Sets the resolver used for default equities
-    function setResolver(address resolver_) external onlyOwner {
-        require(resolver_ != address(0), 'invalid argument - zero address');
-        _resolver = IBusinessLogicResolver_(resolver_);
+    function setIdFactory(address _idFactory) external override onlyOwner {
+        require(_idFactory != address(0), 'invalid argument - zero address');
+        _idFactory = _idFactory;
+        emit IdFactorySet(_idFactory);
     }
 
     /**
-     *  @dev See {ITREXFactory-getImplementationAuthority}.
+     *  @dev Sets the address of the ATS factory
+     */
+    function setAtsFactory(address _atsFactory) external onlyOwner {
+        require(_atsFactory != address(0), 'invalid argument - zero address');
+        _atsFactory = _atsFactory;
+    }
+
+    /**
+     *  @inheritdoc ITREXFactory
      */
     function getImplementationAuthority()
         external
@@ -419,14 +398,14 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
     }
 
     /**
-     *  @dev See {ITREXFactory-getIdFactory}.
+     *  @inheritdoc ITREXFactory
      */
     function getIdFactory() external view override returns (address) {
         return _idFactory;
     }
 
     /**
-     *  @dev See {ITREXFactory-getToken}.
+     *  @inheritdoc ITREXFactory
      */
     function getToken(
         string calldata _salt

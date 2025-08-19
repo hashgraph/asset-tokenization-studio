@@ -206,63 +206,15 @@
 pragma solidity ^0.8.17;
 
 // solhint-disable no-global-import
-// solhint-disable no-empty-blocks
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import {
-    IFactory_,
-    FactoryRegulationData,
-    IBusinessLogicResolver_
-} from '../interfaces/IFactory.sol';
+import {IFactory_, FactoryRegulationData} from '../interfaces/IFactory.sol';
 import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
 import {TREXFactoryAts} from '../TREXFactory.sol';
-import {SecurityDeploymentLib} from './SecurityDeploymentLib.sol';
-import {TrexBaseDeploymentLib} from './TrexBaseDeploymentLib.sol';
+import {SecurityDeploymentLib} from './core/SecurityDeploymentLib.sol';
+import {TREXBaseDeploymentLib} from './core/TREXBaseDeploymentLib.sol';
 
-library TrexEquityDeploymentLib {
-    function deployTREXSuite(
-        mapping(string => address) storage _tokenDeployed,
-        address _implementationAuthority,
-        address _idFactory,
-        address _atsFactory,
-        IBusinessLogicResolver_ _resolver,
-        string memory _salt,
-        ITREXFactory.TokenDetails calldata _tokenDetails,
-        ITREXFactory.ClaimDetails calldata _claimDetails
-    ) external {
-        IFactory_.EquityData memory _equityData = SecurityDeploymentLib
-            .buildDefaultEquityData(_resolver, _tokenDetails);
-        FactoryRegulationData
-            memory _factoryRegulationData = SecurityDeploymentLib
-                .buildDefaultFactoryRegulationData();
-        IToken token = SecurityDeploymentLib.deployEquity(
-            _atsFactory,
-            _tokenDetails.owner,
-            _equityData,
-            _factoryRegulationData
-        );
-        TREXFactoryAts.TokenDetailsAts memory _tokenDetailsAts = TREXFactoryAts
-            .TokenDetailsAts({
-                owner: _tokenDetails.owner,
-                irs: _tokenDetails.irs,
-                ONCHAINID: _tokenDetails.ONCHAINID,
-                irAgents: _tokenDetails.irAgents,
-                tokenAgents: _tokenDetails.tokenAgents,
-                complianceModules: _tokenDetails.complianceModules,
-                complianceSettings: _tokenDetails.complianceSettings
-            });
-        TrexBaseDeploymentLib.deployTREXSuite(
-            _tokenDeployed,
-            _implementationAuthority,
-            _idFactory,
-            _salt,
-            _tokenDetailsAts,
-            _claimDetails,
-            token
-        );
-    }
-
-    function deployTREXSuiteAtsEquity(
+library TREXBondDeploymentLib {
+    function deployTREXSuiteAtsBond(
         mapping(string => address) storage _tokenDeployed,
         address _implementationAuthority,
         address _idFactory,
@@ -270,16 +222,16 @@ library TrexEquityDeploymentLib {
         string memory _salt,
         TREXFactoryAts.TokenDetailsAts calldata _tokenDetails,
         ITREXFactory.ClaimDetails calldata _claimDetails,
-        IFactory_.EquityData calldata _equityData,
+        IFactory_.BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external {
-        IToken token = SecurityDeploymentLib.deployEquity(
+        IToken token = SecurityDeploymentLib.deployBond(
             _atsFactory,
             _tokenDetails.owner,
-            _equityData,
+            _bondData,
             _factoryRegulationData
         );
-        TrexBaseDeploymentLib.deployTREXSuite(
+        TREXBaseDeploymentLib.deployTREXSuite(
             _tokenDeployed,
             _implementationAuthority,
             _idFactory,

@@ -211,15 +211,10 @@ import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import {
     IFactory_,
     FactoryRegulationData,
-    IResolverProxy_,
-    IBusinessLogicResolver_,
-    RegulationType,
-    RegulationSubType
-} from '../interfaces/IFactory.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../interfaces/IAccessControl.sol';
+    IResolverProxy_
+} from '../../interfaces/IFactory.sol';
+import {_DEFAULT_ADMIN_ROLE} from '../../interfaces/IAccessControl.sol';
 
-// solhint-disable custom-errors
-// solhint-disable no-inline-assembly
 library SecurityDeploymentLib {
     function deployEquity(
         address _atsFactory,
@@ -256,26 +251,10 @@ library SecurityDeploymentLib {
         );
     }
 
-    function buildDefaultEquityData(
-        IBusinessLogicResolver_ _resolver,
-        ITREXFactory.TokenDetails memory _tokenDetails
-    ) internal pure returns (IFactory_.EquityData memory equityData_) {
-        equityData_.security = _buildDefaultSecurityData(
-            _resolver,
-            _tokenDetails
-        );
-    }
-
-    function buildDefaultFactoryRegulationData()
-        internal
-        pure
-        returns (FactoryRegulationData memory factoryRegulationData_)
-    {
-        factoryRegulationData_.regulationType = RegulationType.REG_S;
-        factoryRegulationData_.regulationSubType = RegulationSubType.NONE;
-    }
-
-    /// @dev Prepares RBAC array by adding T_REX_OWNER_ROLE to address(this)
+    /**
+     * @dev Prepares RBAC array by adding T_REX_OWNER_ROLE to address(this)
+     * @dev Checks if tRexOwner was already provided in the RBACs, if not, it is added
+     */
     function _prepareRbacs(
         IResolverProxy_.Rbac[] memory _rbacs,
         address _tRexOwner
@@ -305,6 +284,7 @@ library SecurityDeploymentLib {
             }
         }
 
+        // Resize array
         IResolverProxy_.Rbac[] memory newRbacs = new IResolverProxy_.Rbac[](
             length + 1
         );
@@ -332,41 +312,5 @@ library SecurityDeploymentLib {
         });
 
         return newRbacs;
-    }
-
-    function _buildDefaultSecurityData(
-        IBusinessLogicResolver_ _resolver,
-        ITREXFactory.TokenDetails memory _tokenDetails
-    ) private pure returns (IFactory_.SecurityData memory) {
-        address[] memory roleMembers = new address[](1);
-        roleMembers[0] = _tokenDetails.owner;
-        IResolverProxy_.Rbac[] memory rbacs = new IResolverProxy_.Rbac[](1);
-        rbacs[0] = IResolverProxy_.Rbac({
-            role: _DEFAULT_ADMIN_ROLE,
-            members: roleMembers
-        });
-        return
-            IFactory_.SecurityData({
-                arePartitionsProtected: false,
-                isMultiPartition: false,
-                resolver: _resolver,
-                resolverProxyConfiguration: IFactory_
-                    .ResolverProxyConfiguration({key: '0x01', version: 1}),
-                rbacs: rbacs,
-                isControllable: true,
-                isWhiteList: false,
-                maxSupply: type(uint256).max,
-                erc20MetadataInfo: IFactory_.ERC20MetadataInfo({
-                    name: _tokenDetails.name,
-                    symbol: _tokenDetails.symbol,
-                    isin: 'US0378331005',
-                    decimals: _tokenDetails.decimals
-                }),
-                clearingActive: false,
-                internalKycActivated: false,
-                externalPauses: new address[](0),
-                externalControlLists: new address[](0),
-                externalKycLists: new address[](0)
-            });
     }
 }

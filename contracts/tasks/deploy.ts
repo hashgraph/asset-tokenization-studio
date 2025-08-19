@@ -486,12 +486,6 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
         types.string
     )
     .addOptionalParam(
-        'resolver',
-        'Address of the BLR proxy',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
         'privateKey',
         'The private key of the account in raw hexadecimal format',
         undefined,
@@ -530,9 +524,8 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
                     ADDRESS_ZERO, // implementationAuthority
                     ADDRESS_ZERO, // idFactory
                     args.atsFactory ?? ADDRESS_ZERO,
-                    args.resolver ?? ADDRESS_ZERO,
                 ],
-                libraries: ['TrexBondDeploymentLib', 'TrexEquityDeploymentLib'],
+                libraries: ['TREXBondDeploymentLib', 'TREXEquityDeploymentLib'],
             })
         )
 

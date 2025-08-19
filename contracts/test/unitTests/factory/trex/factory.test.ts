@@ -323,11 +323,10 @@ describe('TREX Factory Tests', () => {
                             .address,
                         trexDeployment.factories.identityFactory.address,
                         deployedContracts.factory.proxyAddress,
-                        deployedContracts.businessLogicResolver.proxyAddress,
                     ],
                     libraries: [
-                        'TrexBondDeploymentLib',
-                        'TrexEquityDeploymentLib',
+                        'TREXBondDeploymentLib',
+                        'TREXEquityDeploymentLib',
                     ],
                 })
             )
