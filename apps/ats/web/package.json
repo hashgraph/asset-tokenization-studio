@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-dapp",
-  "version": "1.15.2",
+  "version": "1.16.0",
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc && vite build",
