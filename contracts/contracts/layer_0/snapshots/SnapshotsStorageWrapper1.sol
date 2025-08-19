@@ -207,18 +207,18 @@
 pragma solidity 0.8.18;
 
 import {
-    CorporateActionsStorageWrapper1
-} from '../corporateActions/CorporateActionsStorageWrapper1.sol';
-import {
     ArraysUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
 import {
     CountersUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
+import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     ISnapshotsStorageWrapper
-} from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
-import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
+} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
+import {
+    CorporateActionsStorageWrapper1
+} from '../corporateActions/CorporateActionsStorageWrapper1.sol';
 
 abstract contract SnapshotsStorageWrapper1 is
     ISnapshotsStorageWrapper,
@@ -276,8 +276,6 @@ abstract contract SnapshotsStorageWrapper1 is
         mapping(uint256 => SnapshotsAddress) tokenHoldersSnapshots;
         Snapshots totalTokenHoldersSnapshots;
     }
-
-    event SnapshotTriggered(address indexed operator, uint256 snapshotId);
 
     function _takeSnapshot() internal returns (uint256 snapshotID_) {
         snapshotID_ = _snapshot();

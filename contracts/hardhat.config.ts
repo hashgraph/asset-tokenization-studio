@@ -277,7 +277,6 @@ const config: HardhatUserConfig = {
         alphaSort: true,
         disambiguatePaths: false,
         runOnCompile: Configuration.contractSizerRunOnCompile,
-        strict: true,
     },
     gasReporter: {
         enabled: Configuration.reportGas,

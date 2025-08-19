@@ -214,6 +214,8 @@ import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import ContractService from '@service/contract/ContractService';
 import { IdentityRegistryQueryError } from './error/IdentityRegistryQueryError';
+import { EVM_ZERO_ADDRESS, HEDERA_ZERO_ADDRESS } from '@core/Constants';
+import AccountService from '@service/account/AccountService';
 
 @QueryHandler(IdentityRegistryQuery)
 export class IdentityRegistryQueryHandler
@@ -224,6 +226,8 @@ export class IdentityRegistryQueryHandler
     private readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(ContractService)
     private readonly contractService: ContractService,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -235,7 +239,12 @@ export class IdentityRegistryQueryHandler
       const securityEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(securityId);
 
-      const res = await this.queryAdapter.identityRegistry(securityEvmAddress);
+      let res = await this.queryAdapter.identityRegistry(securityEvmAddress);
+
+      res =
+        res === EVM_ZERO_ADDRESS
+          ? HEDERA_ZERO_ADDRESS
+          : (await this.accountService.getAccountInfo(res)).id.toString();
 
       return new IdentityRegistryQueryResponse(res);
     } catch (error) {

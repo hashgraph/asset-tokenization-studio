@@ -206,29 +206,32 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {IERC3643} from '../interfaces/ERC3643/IERC3643.sol';
-import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
-import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    _DEFAULT_ADMIN_ROLE,
     _CONTROLLER_ROLE,
     _ISSUER_ROLE,
-    _AGENT_ROLE
+    _AGENT_ROLE,
+    _TREX_OWNER_ROLE
 } from '../constants/roles.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
+import {IERC3643Basic} from '../interfaces/ERC3643/IERC3643Basic.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
+import {Common} from '../common/Common.sol';
 
-contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
+abstract contract ERC3643 is IERC3643Basic, Common {
     address private constant _ONCHAIN_ID = address(0);
 
     // ====== External functions (state-changing) ======
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC3643(
+        address _compliance,
+        address _identityRegistry
+    ) external onlyUninitialized(_erc3643Storage().initialized) {
+        _initialize_ERC3643(_compliance, _identityRegistry);
+    }
+
     function setName(
         string calldata _name
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _setName(_name);
 
         emit UpdatedTokenInformation(
@@ -242,7 +245,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
 
     function setSymbol(
         string calldata _symbol
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _setSymbol(_symbol);
 
         emit UpdatedTokenInformation(
@@ -256,7 +259,7 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
 
     function setOnchainID(
         address _onchainID
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _erc20Storage();
         _erc3643Storage().onchainID = _onchainID;
 
@@ -271,16 +274,15 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
 
     function setIdentityRegistry(
         address _identityRegistry
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         _setIdentityRegistry(_identityRegistry);
         emit IdentityRegistryAdded(_identityRegistry);
     }
 
     function setCompliance(
         address _compliance
-    ) external override onlyUnpaused onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         _setCompliance(_compliance);
-        emit ComplianceAdded(_compliance);
     }
 
     function addAgent(
@@ -332,12 +334,11 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
     )
         external
         onlyUnpaused
-        onlyUnrecoveredAddress(_to)
-        onlyWithinMaxSupply(_amount)
-        onlyListedAllowed(_to)
         onlyWithoutMultiPartition
+        onlyWithinMaxSupply(_amount)
+        onlyIdentified(address(0), _to)
+        onlyCompliant(address(0), _to, false)
         onlyIssuable
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
     {
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -369,102 +370,6 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
         return true;
     }
 
-    function batchTransfer(
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-        onlyClearingDisabled
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyListedAllowed(_msgSender())
-    {
-        for (uint256 i = 0; i < _toList.length; i++) {
-            _checkRecoveredAddress(_toList[i]);
-            _checkControlList(_toList[i]);
-            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _toList[i]);
-        }
-        for (uint256 i = 0; i < _toList.length; i++) {
-            _transfer(_msgSender(), _toList[i], _amounts[i]);
-        }
-    }
-
-    function batchForcedTransfer(
-        address[] calldata _fromList,
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyWithoutMultiPartition
-        onlyControllable
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_fromList, _amounts)
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _fromList.length; i++) {
-            _controllerTransfer(_fromList[i], _toList[i], _amounts[i], '', '');
-        }
-    }
-
-    function batchMint(
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-        onlyWithoutMultiPartition
-        onlyIssuable
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _ISSUER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _toList.length; i++) {
-            _checkRecoveredAddress(_toList[i]);
-            _checkControlList(_toList[i]);
-            _checkWithinMaxSupply(_amounts[i]);
-            _checkControlList(_toList[i]);
-            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _toList[i]);
-        }
-        for (uint256 i = 0; i < _toList.length; i++) {
-            _issue(_toList[i], _amounts[i], '');
-        }
-    }
-
-    function batchBurn(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-        onlyControllable
-        onlyWithoutMultiPartition
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-        }
-        for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _controllerRedeem(_userAddresses[i], _amounts[i], '', '');
-        }
-    }
-
     // ====== External functions (view/pure) ======
 
     function isAgent(address _agent) external view returns (bool) {
@@ -494,74 +399,5 @@ contract ERC3643 is IERC3643, IStaticFunctionSelectors, Common {
 
     function version() external view returns (string memory) {
         return _version();
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC3643_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](23);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .forcedTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .identityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setCompliance
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setIdentityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .recoveryAddress
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .isAddressRecovered
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .batchForcedTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.batchMint.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.batchBurn.selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC3643).interfaceId;
     }
 }

@@ -203,11 +203,12 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {IAccessControlStorageWrapper} from './IAccessControlStorageWrapper.sol';
 
-interface IAccessControl {
+interface IAccessControl is IAccessControlStorageWrapper {
     /**
      * @dev Emitted when a role is granted to an account
      *

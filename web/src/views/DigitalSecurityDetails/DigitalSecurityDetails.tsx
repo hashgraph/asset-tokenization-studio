@@ -375,6 +375,8 @@ export const DigitalSecurityDetails = () => {
       showClearingOperations:
         !isSecurityPaused &&
         hasRole(roles, SecurityRole._CLEARING_VALIDATOR_ROLE),
+      showFreeze:
+        !isSecurityPaused && hasRole(roles, SecurityRole._FREEZE_MANAGER_ROLE),
     };
 
     const corporateActionsConfig = {

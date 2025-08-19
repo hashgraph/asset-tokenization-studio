@@ -210,14 +210,13 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Cap,
+    type IERC1410,
     AccessControl,
     Pause,
-    ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
     Cap__factory,
     AccessControlFacet__factory,
-    ERC1410ScheduledTasks__factory,
     PauseFacet__factory,
     Kyc,
     SsiManagement,
@@ -279,7 +278,7 @@ describe('Cap Tests', () => {
     let capFacet: Cap
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let equityFacet: Equity
@@ -309,10 +308,7 @@ describe('Cap Tests', () => {
             signer_A
         )
         pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',

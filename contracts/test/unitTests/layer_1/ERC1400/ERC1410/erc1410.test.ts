@@ -211,10 +211,10 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Pause,
-    type ERC1410ScheduledTasks,
     type AccessControl,
     type Equity,
     type ControlList,
+    type IERC1410,
     Kyc,
     SsiManagement,
     TimeTravel,
@@ -225,6 +225,8 @@ import {
     Cap,
     IFactory,
     BusinessLogicResolver,
+    IClearing,
+    ISnapshots,
 } from '@typechain'
 import { IERC20 } from '@typechain/contracts/layer_1/interfaces/ERC1400/IERC20'
 import {
@@ -233,20 +235,11 @@ import {
     CONTROLLER_ROLE,
     CONTROL_LIST_ROLE,
     CORPORATE_ACTION_ROLE,
-    FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    FROM_ACCOUNT_NULL_ERROR_ID,
     ISSUER_ROLE,
-    IS_NOT_OPERATOR_ERROR_ID,
-    IS_PAUSED_ERROR_ID,
     LOCKER_ROLE,
     KYC_ROLE,
     SSI_MANAGER_ROLE,
-    NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
     PAUSER_ROLE,
-    SUCCESS,
-    TO_ACCOUNT_BLOCKED_ERROR_ID,
-    WRONG_PARTITION_ERROR_ID,
     ADDRESS_ZERO,
     deployEquityFromFactory,
     Rbac,
@@ -255,13 +248,11 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
     MAX_UINT256,
-    FROM_ACCOUNT_KYC_ERROR_ID,
-    TO_ACCOUNT_KYC_ERROR_ID,
     ZERO,
     EMPTY_STRING,
-    CLEARING_ACTIVE_ERROR_ID,
     CLEARING_ROLE,
     dateToUnixTimestamp,
+    EIP1066_CODES,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -334,7 +325,7 @@ describe('ERC1410 Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: IERC1410
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let equityFacet: Equity
@@ -348,6 +339,7 @@ describe('ERC1410 Tests', () => {
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let clearingActionsFacet: ClearingActionsFacet
+    let snapshotsFacet: ISnapshots
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
         await grantRolesToAccounts()
@@ -714,10 +706,7 @@ describe('ERC1410 Tests', () => {
             diamond.address
         )
 
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasksTimeTravel',
-            diamond.address
-        )
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         timeTravelFacet = await ethers.getContractAt(
             'TimeTravel',
             diamond.address
@@ -747,7 +736,10 @@ describe('ERC1410 Tests', () => {
             diamond.address,
             signer_A
         )
-
+        snapshotsFacet = await ethers.getContractAt(
+            'ISnapshots',
+            diamond.address
+        )
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         await ssiManagementFacet.addIssuer(account_E)
 
@@ -819,6 +811,7 @@ describe('ERC1410 Tests', () => {
     }
 
     describe('Multi partition ', () => {
+        let clearingInterface: IClearing
         before(async () => {
             // mute | mock console.log
             console.log = () => {}
@@ -860,6 +853,13 @@ describe('ERC1410 Tests', () => {
                 data: data,
                 operatorData: operatorData,
             }
+            await erc1410Facet
+                .connect(signer_E)
+                .authorizeOperatorByPartition(_PARTITION_ID_1, account_C)
+            clearingInterface = await ethers.getContractAt(
+                'IClearing',
+                diamond.address
+            )
         })
 
         afterEach(async () => {
@@ -874,13 +874,11 @@ describe('ERC1410 Tests', () => {
                 data: '0x',
             })
 
-            // authorize
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            await erc1410Facet.authorizeOperator(account_D)
-            await erc1410Facet.authorizeOperatorByPartition(
-                _PARTITION_ID,
-                account_E
-            )
+            // authorize - no need to reassign, just use the appropriate facets with connect
+            await erc1410Facet.connect(signer_C).authorizeOperator(account_D)
+            await erc1410Facet
+                .connect(signer_C)
+                .authorizeOperatorByPartition(_PARTITION_ID, account_E)
 
             // check
             let isOperator_D = await erc1410Facet.isOperator(
@@ -977,14 +975,14 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(IS_PAUSED_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(EIP1066_CODES.PAUSED)
 
             // transfer from with data fails
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer_2[1]).to.be.equal(IS_PAUSED_ERROR_ID)
+            expect(canTransfer_2[1]).to.be.equal(EIP1066_CODES.PAUSED)
         })
 
         it('GIVEN a token with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
@@ -1008,7 +1006,6 @@ describe('ERC1410 Tests', () => {
                 data,
                 operatorData
             )
-
             // transfer with data fails
             await expect(
                 erc1410Facet.transferByPartition(
@@ -1016,26 +1013,29 @@ describe('ERC1410 Tests', () => {
                     basicTransferInfo,
                     data
                 )
-            ).to.be.rejectedWith('ClearingIsActivated')
+            ).to.be.revertedWithCustomError(
+                clearingInterface,
+                'ClearingIsActivated'
+            )
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(CLEARING_ACTIVE_ERROR_ID)
-
+            expect(canTransfer[1]).to.be.equal(EIP1066_CODES.UNAVAILABLE)
             // transfer from with data fails
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
-            ).to.be.rejectedWith('ClearingIsActivated')
+            ).to.be.revertedWithCustomError(
+                clearingInterface,
+                'ClearingIsActivated'
+            )
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer_2[1]).to.be.equal(CLEARING_ACTIVE_ERROR_ID)
+            expect(canTransfer_2[1]).to.be.equal(EIP1066_CODES.UNAVAILABLE)
         })
 
         it('GIVEN a paused Token WHEN issue THEN transaction fails with TokenIsPaused', async () => {
             // Pausing the token
             pauseFacet = pauseFacet.connect(signer_B)
             await pauseFacet.pause()
-
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
-
             // issue fails
             await expect(
                 erc1410Facet.issueByPartition({
@@ -1044,7 +1044,7 @@ describe('ERC1410 Tests', () => {
                     value: amount,
                     data: '0x',
                 })
-            ).to.be.revertedWithCustomError(erc1410Facet, 'TokenIsPaused')
+            ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
         })
 
         it('GIVEN Token WHEN issue to partition 0 THEN transaction fails with ZeroPartition', async () => {
@@ -1103,7 +1103,7 @@ describe('ERC1410 Tests', () => {
                 erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(IS_PAUSED_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(EIP1066_CODES.PAUSED)
 
             // transfer from with data fails
             await expect(
@@ -1116,7 +1116,7 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canRedeem_2[0]).to.be.equal(false)
-            expect(canRedeem_2[1]).to.be.equal(IS_PAUSED_ERROR_ID)
+            expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.PAUSED)
         })
 
         it('GIVEN a token with clearing active WHEN redeem THEN transaction fails with ClearingIsActivated', async () => {
@@ -1141,9 +1141,12 @@ describe('ERC1410 Tests', () => {
 
             await expect(
                 erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
-            ).to.be.rejectedWith('ClearingIsActivated')
+            ).to.be.revertedWithCustomError(
+                clearingInterface,
+                'ClearingIsActivated'
+            )
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(CLEARING_ACTIVE_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(EIP1066_CODES.UNAVAILABLE)
 
             await expect(
                 erc1410Facet.operatorRedeemByPartition(
@@ -1153,9 +1156,12 @@ describe('ERC1410 Tests', () => {
                     data,
                     operatorData
                 )
-            ).to.be.rejectedWith('ClearingIsActivated')
+            ).to.be.revertedWithCustomError(
+                clearingInterface,
+                'ClearingIsActivated'
+            )
             expect(canRedeem_2[0]).to.be.equal(false)
-            expect(canRedeem_2[1]).to.be.equal(CLEARING_ACTIVE_ERROR_ID)
+            expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.UNAVAILABLE)
         })
 
         it('GIVEN blocked accounts (sender, to, from) WHEN transfer THEN transaction fails with AccountIsBlocked', async () => {
@@ -1193,9 +1199,7 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(
-                OPERATOR_ACCOUNT_BLOCKED_ERROR_ID
-            )
+            expect(canTransfer[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
 
             // transfer from with data fails
             await expect(
@@ -1203,7 +1207,7 @@ describe('ERC1410 Tests', () => {
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
-                OPERATOR_ACCOUNT_BLOCKED_ERROR_ID
+                EIP1066_CODES.DISALLOWED_OR_STOP
             )
 
             // Update blacklist
@@ -1235,14 +1239,16 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(TO_ACCOUNT_BLOCKED_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
 
             // transfer from with data fails
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
-            expect(canTransfer_2[1]).to.be.equal(TO_ACCOUNT_BLOCKED_ERROR_ID)
+            expect(canTransfer_2[1]).to.be.equal(
+                EIP1066_CODES.DISALLOWED_OR_STOP
+            )
 
             // Update blacklist
             await controlList.removeFromControlList(account_D)
@@ -1261,7 +1267,9 @@ describe('ERC1410 Tests', () => {
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
-            expect(canTransfer_2[1]).to.be.equal(FROM_ACCOUNT_BLOCKED_ERROR_ID)
+            expect(canTransfer_2[1]).to.be.equal(
+                EIP1066_CODES.DISALLOWED_OR_STOP
+            )
         })
 
         it('GIVEN non Kyc accounts (to, from) WHEN transfer THEN transaction fails with InvalidKycStatus', async () => {
@@ -1286,12 +1294,12 @@ describe('ERC1410 Tests', () => {
                     basicTransferInfo,
                     data
                 )
-            ).to.be.rejectedWith('InvalidKycStatus')
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
-            ).to.be.rejectedWith('InvalidKycStatus')
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(TO_ACCOUNT_KYC_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
 
             await kycFacet.grantKyc(
                 account_D,
@@ -1319,12 +1327,12 @@ describe('ERC1410 Tests', () => {
                         basicTransferInfo,
                         data
                     )
-            ).to.be.rejectedWith('InvalidKycStatus')
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
-            ).to.be.rejectedWith('InvalidKycStatus')
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(FROM_ACCOUNT_KYC_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
         })
 
         it('GIVEN blocked accounts (to) USING WHITELIST WHEN issue THEN transaction fails with AccountIsBlocked', async () => {
@@ -1362,46 +1370,44 @@ describe('ERC1410 Tests', () => {
                 businessLogicResolver: businessLogicResolver.address,
                 factory,
             })
-            accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
-                newDiamond.address
-            )
 
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasksTimeTravel',
-                newDiamond.address
-            )
+            await accessControlFacet
+                .attach(newDiamond.address)
+                .grantRole(SSI_MANAGER_ROLE, account_A)
+            await accessControlFacet
+                .attach(newDiamond.address)
+                .grantRole(KYC_ROLE, account_A)
+            await ssiManagementFacet
+                .attach(newDiamond.address)
+                .connect(signer_A)
+                .addIssuer(account_E)
+            await kycFacet
+                .attach(newDiamond.address)
+                .connect(signer_A)
+                .grantKyc(account_E, EMPTY_STRING, ZERO, MAX_UINT256, account_E)
 
             // accounts are blacklisted by default (white list)
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-
-            // Using account A (with role)
-            erc1410Facet = erc1410Facet.connect(signer_A)
+            await accessControlFacet
+                .attach(newDiamond.address)
+                .connect(signer_A)
+                .grantRole(ISSUER_ROLE, account_A)
 
             // issue fails
             await expect(
-                erc1410Facet.issueByPartition({
-                    partition: _PARTITION_ID_1,
-                    tokenHolder: account_E,
-                    value: amount,
-                    data: data,
-                })
+                erc1410Facet
+                    .attach(newDiamond.address)
+                    .connect(signer_A)
+                    .issueByPartition({
+                        partition: _PARTITION_ID_1,
+                        tokenHolder: account_E,
+                        value: amount,
+                        data: data,
+                    })
             ).to.be.rejectedWith('AccountIsBlocked')
-
-            // Restore facets
-            accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
-                diamond.address
-            )
-
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasksTimeTravel',
-                diamond.address
-            )
         })
 
         it('GIVEN non Kyc account WHEN issue or redeem THEN transaction fails with InvalidKycStatus', async () => {
+            erc1410Facet = erc1410Facet.connect(signer_A)
             await erc1410Facet.issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_D,
@@ -1417,7 +1423,7 @@ describe('ERC1410 Tests', () => {
                     value: amount,
                     data: data,
                 })
-            ).to.be.rejectedWith('InvalidKycStatus')
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             const canRedeem = await erc1410Facet.canRedeemByPartition(
                 account_D,
                 _PARTITION_ID_1,
@@ -1429,7 +1435,7 @@ describe('ERC1410 Tests', () => {
                 erc1410Facet
                     .connect(signer_D)
                     .redeemByPartition(_PARTITION_ID_1, amount, data)
-            ).to.be.rejectedWith('InvalidKycStatus')
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             await expect(
                 erc1410Facet.operatorRedeemByPartition(
                     _PARTITION_ID_1,
@@ -1438,9 +1444,9 @@ describe('ERC1410 Tests', () => {
                     data,
                     operatorData
                 )
-            ).to.be.rejectedWith('InvalidKycStatus')
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(FROM_ACCOUNT_KYC_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
         })
 
         it('GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked', async () => {
@@ -1472,7 +1478,7 @@ describe('ERC1410 Tests', () => {
                 erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(OPERATOR_ACCOUNT_BLOCKED_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
 
             // redeem from with data fails
             await expect(
@@ -1485,9 +1491,7 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canRedeem_2[0]).to.be.equal(false)
-            expect(canRedeem_2[1]).to.be.equal(
-                OPERATOR_ACCOUNT_BLOCKED_ERROR_ID
-            )
+            expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
 
             // Update blacklist
             await controlList.removeFromControlList(account_C)
@@ -1511,7 +1515,7 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canRedeem_2[0]).to.be.equal(false)
-            expect(canRedeem_2[1]).to.be.equal(FROM_ACCOUNT_BLOCKED_ERROR_ID)
+            expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
         })
 
         it('GIVEN wrong partition WHEN transfer THEN transaction fails with InValidPartition', async () => {
@@ -1525,7 +1529,6 @@ describe('ERC1410 Tests', () => {
                 data,
                 operatorData
             )
-
             // transfer with data fails
             await expect(
                 erc1410Facet.transferByPartition(
@@ -1535,7 +1538,7 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejectedWith('InvalidPartition')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(WRONG_PARTITION_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
         })
 
         it('GIVEN wrong partition WHEN redeem THEN transaction fails with InValidPartition', async () => {
@@ -1554,7 +1557,7 @@ describe('ERC1410 Tests', () => {
                 erc1410Facet.redeemByPartition(_PARTITION_ID, amount, data)
             ).to.be.rejectedWith('InvalidPartition')
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(WRONG_PARTITION_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
         })
 
         it('GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole', async () => {
@@ -1594,9 +1597,7 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejected
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(
-                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
-            )
+            expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
 
             // transfer from with data fails
             erc1410Facet = erc1410Facet.connect(signer_E)
@@ -1617,7 +1618,7 @@ describe('ERC1410 Tests', () => {
             ).to.be.rejected
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
-                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
+                EIP1066_CODES.INSUFFICIENT_FUNDS
             )
         })
 
@@ -1642,9 +1643,7 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejected
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(
-                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
-            )
+            expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
 
             // transfer from with data fails
             await erc1410Facet.authorizeOperatorByPartition(
@@ -1669,9 +1668,7 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejected
             expect(canRedeem_2[0]).to.be.equal(false)
-            expect(canRedeem_2[1]).to.be.equal(
-                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
-            )
+            expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
         })
 
         it('GIVEN an account WHEN transfer from address 0 THEN transaction fails', async () => {
@@ -1701,7 +1698,9 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejected
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(FROM_ACCOUNT_NULL_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(
+                EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE
+            )
         })
 
         it('GIVEN an account WHEN redeem from address 0 THEN transaction fails', async () => {
@@ -1725,7 +1724,9 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejected
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(FROM_ACCOUNT_NULL_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(
+                EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE
+            )
         })
 
         it('GIVEN an account WHEN transfer THEN transaction succeeds', async () => {
@@ -1882,7 +1883,7 @@ describe('ERC1410 Tests', () => {
                     data
                 )
             )
-                .to.emit(erc1410Facet, 'SnapshotTriggered')
+                .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 1)
             // check that scheduled snapshots was triggered
             dividend_1 = await equityFacet.getDividends(1)
@@ -1918,7 +1919,7 @@ describe('ERC1410 Tests', () => {
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
             )
-                .to.emit(erc1410Facet, 'SnapshotTriggered')
+                .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 2)
 
             // check that scheduled snapshots was triggered
@@ -2061,7 +2062,7 @@ describe('ERC1410 Tests', () => {
                     data: data,
                 })
             )
-                .to.emit(erc1410Facet, 'SnapshotTriggered')
+                .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_A, 1)
 
             // check that scheduled snapshots was triggered
@@ -2205,7 +2206,7 @@ describe('ERC1410 Tests', () => {
             await expect(
                 erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
             )
-                .to.emit(erc1410Facet, 'SnapshotTriggered')
+                .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 1)
 
             // check that scheduled snapshots was triggered
@@ -2229,7 +2230,7 @@ describe('ERC1410 Tests', () => {
                     operatorData
                 )
             )
-                .to.emit(erc1410Facet, 'SnapshotTriggered')
+                .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 2)
 
             // check that scheduled snapshots was triggered
@@ -2274,81 +2275,54 @@ describe('ERC1410 Tests', () => {
                 businessLogicResolver: businessLogicResolver.address,
                 factory,
             })
-            accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
-                newDiamond.address
-            )
-
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasksTimeTravel',
-                newDiamond.address
-            )
-
-            controlList = await ethers.getContractAt(
-                'ControlList',
-                newDiamond.address
-            )
-            kycFacet = await ethers.getContractAt(
-                'Kyc',
-                newDiamond.address,
-                signer_B
-            )
-            ssiManagementFacet = await ethers.getContractAt(
-                'SsiManagement',
-                newDiamond.address,
-                signer_A
-            )
-
             // accounts are blacklisted by default (white list)
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-            await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-            await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
-            await accessControlFacet.grantRole(KYC_ROLE, account_B)
 
-            await ssiManagementFacet.addIssuer(account_E)
-            await kycFacet.grantKyc(
-                account_E,
-                EMPTY_STRING,
-                ZERO,
-                MAX_UINT256,
-                account_E
-            )
+            await accessControlFacet
+                .attach(newDiamond.address)
+                .connect(signer_A)
+                .grantRole(ISSUER_ROLE, account_A)
+            await accessControlFacet
+                .attach(newDiamond.address)
+                .connect(signer_A)
+                .grantRole(CONTROL_LIST_ROLE, account_A)
+            await accessControlFacet
+                .attach(newDiamond.address)
+                .connect(signer_A)
+                .grantRole(SSI_MANAGER_ROLE, account_A)
+            await accessControlFacet
+                .attach(newDiamond.address)
+                .connect(signer_A)
+                .grantRole(KYC_ROLE, account_B)
+
+            await ssiManagementFacet
+                .attach(newDiamond.address)
+                .connect(signer_A)
+                .addIssuer(account_E)
+            await kycFacet
+                .attach(newDiamond.address)
+                .connect(signer_B)
+                .grantKyc(account_E, EMPTY_STRING, ZERO, MAX_UINT256, account_E)
 
             // Using account A (with role)
-            erc1410Facet = erc1410Facet.connect(signer_A)
-            controlList = controlList.connect(signer_A)
-
-            await controlList.addToControlList(account_E)
+            await controlList
+                .attach(newDiamond.address)
+                .connect(signer_A)
+                .addToControlList(account_A)
+            await controlList
+                .attach(newDiamond.address)
+                .connect(signer_A)
+                .addToControlList(account_E)
 
             // issue succeds
-            await erc1410Facet.issueByPartition({
-                partition: _PARTITION_ID_1,
-                tokenHolder: account_E,
-                value: amount,
-                data: data,
-            })
-
-            // Restore facets
-            accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
-                diamond.address
-            )
-
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasksTimeTravel',
-                diamond.address
-            )
-
-            controlList = await ethers.getContractAt(
-                'ControlList',
-                diamond.address
-            )
-            kycFacet = await ethers.getContractAt('Kyc', diamond.address)
-            ssiManagementFacet = await ethers.getContractAt(
-                'SsiManagement',
-                diamond.address
-            )
+            await erc1410Facet
+                .attach(newDiamond.address)
+                .connect(signer_A)
+                .issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: data,
+                })
         })
 
         it('GIVEN an account without controller role WHEN controllerTransfer THEN transaction fails with AccountHasNoRole', async () => {
@@ -2384,7 +2358,7 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountHasNoRole')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(IS_NOT_OPERATOR_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
         })
 
         it('GIVEN an account without controller role WHEN controllerRedeem THEN transaction fails with AccountHasNoRole', async () => {
@@ -2419,7 +2393,7 @@ describe('ERC1410 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountHasNoRole')
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(IS_NOT_OPERATOR_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
         })
 
         it('GIVEN a paused Token WHEN controllerTransfer THEN transaction fails with TokenIsPaused', async () => {
@@ -2595,7 +2569,7 @@ describe('ERC1410 Tests', () => {
                     operatorData
                 )
             )
-                .to.emit(erc1410Facet, 'SnapshotTriggered')
+                .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 1)
 
             // check that scheduled snapshots was triggered
@@ -2619,7 +2593,7 @@ describe('ERC1410 Tests', () => {
                     operatorData
                 )
             )
-                .to.emit(erc1410Facet, 'SnapshotTriggered')
+                .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 2)
 
             // check that scheduled snapshots was triggered
@@ -3450,7 +3424,11 @@ describe('ERC1410 Tests', () => {
                         adjustFactor * amount,
                         '0x'
                     )
-                ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero])
+                ).to.be.deep.equal([
+                    true,
+                    EIP1066_CODES.SUCCESS,
+                    ethers.constants.HashZero,
+                ])
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferByPartition succeeds', async () => {
@@ -3471,7 +3449,11 @@ describe('ERC1410 Tests', () => {
                         '0x',
                         '0x'
                     )
-                ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero])
+                ).to.be.deep.equal([
+                    true,
+                    EIP1066_CODES.SUCCESS,
+                    ethers.constants.HashZero,
+                ])
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferFrom succeeds', async () => {
@@ -3495,7 +3477,11 @@ describe('ERC1410 Tests', () => {
                         adjustFactor * amount,
                         '0x'
                     )
-                ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero])
+                ).to.be.deep.equal([
+                    true,
+                    EIP1066_CODES.SUCCESS,
+                    ethers.constants.HashZero,
+                ])
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 transfer succeeds', async () => {

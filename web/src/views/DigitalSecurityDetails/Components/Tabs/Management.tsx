@@ -1,11 +1,11 @@
 import { Box } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
 import { RoleManagement } from "../RoleManagement/RoleManagement";
 import { useTranslation } from "react-i18next";
 import { Management } from "../Management/Management";
 import { useParams } from "react-router-dom";
 import { useMemo } from "react";
 import { DangerZone } from "../DangerZone";
+import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 
 interface ManagementTabProps {
   config: {
@@ -46,7 +46,7 @@ export const ManagementTab = ({ config }: ManagementTabProps) => {
 
   return (
     <Box w={"full"} h={"full"}>
-      <Tabs tabs={tabs} variant="secondary" />
+      <PanelTabs tabs={tabs} />
     </Box>
   );
 };

@@ -225,6 +225,7 @@ import { Response } from '@domain/context/transaction/Response';
 import { CreateEquityCommandError } from './error/CreateEquityCommandError';
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
+import { EVM_ZERO_ADDRESS } from '@core/Constants';
 
 @CommandHandler(CreateEquityCommand)
 export class CreateEquityCommandHandler
@@ -268,6 +269,8 @@ export class CreateEquityCommandHandler
         externalPauses,
         externalControlLists,
         externalKycLists,
+        compliance,
+        identityRegistry,
       } = command;
 
       if (!factory) {
@@ -311,6 +314,14 @@ export class CreateEquityCommandHandler
         this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
       ]);
 
+      const complianceEvmAddress = compliance
+        ? await this.contractService.getContractEvmAddress(compliance)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
+      const identityRegistryEvmAddress = identityRegistry
+        ? await this.contractService.getContractEvmAddress(identityRegistry)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
       const handler = this.transactionService.getHandler();
 
       const equityInfo = new EquityDetails(
@@ -333,6 +344,8 @@ export class CreateEquityCommandHandler
         resolverEvmAddress,
         configId,
         configVersion,
+        complianceEvmAddress,
+        identityRegistryEvmAddress,
         externalPausesEvmAddresses,
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,

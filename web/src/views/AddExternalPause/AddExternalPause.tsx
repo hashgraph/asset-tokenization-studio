@@ -4,7 +4,7 @@ import { RouteName } from "../../router/RouteName";
 import { useTranslation } from "react-i18next";
 import { RoutePath } from "../../router/RoutePath";
 import { Button, InputController, Text, useToast } from "io-bricks-ui";
-import { isHederaValidAddress, required } from "../../utils/rules";
+import { isValidHederaId, required } from "../../utils/rules";
 import { useForm } from "react-hook-form";
 import { RouterManager } from "../../router/RouterManager";
 import { useIsPauseMock } from "../../hooks/queries/useExternalPause";
@@ -121,7 +121,7 @@ export const AddExternalPause = () => {
               size="md"
               rules={{
                 required,
-                validate: { isHederaValidAddress },
+                validate: { isValidHederaId: isValidHederaId },
               }}
             />
           </VStack>

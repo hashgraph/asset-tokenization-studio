@@ -203,40 +203,65 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-interface IERC1410Standard {
-    struct IssueData {
-        bytes32 partition;
-        address tokenHolder;
-        uint256 value;
-        bytes data;
+/// @notice Custom implementation of the OpenZeppelin Address library
+library LowLevelCall {
+    function functionCall(
+        address _target,
+        bytes memory _data,
+        bytes4 _errorSelector
+    ) internal returns (bytes memory result) {
+        // Check for zero address first to fail fast
+        if (_target == address(0)) {
+            return result; // Return empty bytes when target is zero address
+        }
+
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, bytes memory returndata) = _target.call(_data);
+        return _verifyCallResultFromTarget(success, returndata, _errorSelector);
     }
 
-    function redeemByPartition(
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function functionStaticCall(
+        address _target,
+        bytes memory _data,
+        bytes4 _errorSelector
+    ) internal view returns (bytes memory result) {
+        if (_target == address(0)) {
+            return result; // Return empty bytes when target is zero address
+        }
 
-    function operatorRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external;
+        // solhint-disable-next-line avoid-low-level-calls
+        (bool success, bytes memory returndata) = _target.staticcall(_data);
+        return _verifyCallResultFromTarget(success, returndata, _errorSelector);
+    }
 
-    function issueByPartition(
-        IERC1410Standard.IssueData calldata _issueData
-    ) external;
+    function revertWithData(
+        bytes4 _reasonCode,
+        bytes memory _details
+    ) internal pure {
+        bytes memory revertData = abi.encodePacked(
+            bytes4(_reasonCode),
+            _details
+        );
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            let len := mload(revertData)
+            let dataPtr := add(revertData, 0x20)
+            revert(dataPtr, len)
+        }
+    }
 
-    function canRedeemByPartition(
-        address _from,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external view returns (bool, bytes1, bytes32);
+    // solhint-disable-next-line private-vars-leading-underscore
+    function _verifyCallResultFromTarget(
+        bool _success,
+        bytes memory _returndata,
+        bytes4 _errorSelector
+    ) private pure returns (bytes memory) {
+        if (_success) {
+            return _returndata;
+        }
+        revertWithData(_errorSelector, _returndata);
+    }
 }

@@ -204,122 +204,25 @@
 */
 
 // SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
-import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
-import {Common} from '../../common/Common.sol';
+import {
+    ERC1410ReadFacet
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410ReadFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
-
-abstract contract ERC1410Standard is IERC1410Standard, Common {
-    function issueByPartition(
-        IERC1410Standard.IssueData calldata _issueData
-    )
-        external
-        override
-        onlyUnrecoveredAddress(_issueData.tokenHolder)
-        onlyWithinMaxSupply(_issueData.value)
-        onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
-        validateAddress(_issueData.tokenHolder)
-        onlyListedAllowed(_issueData.tokenHolder)
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_issueData.partition)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _issueData.tokenHolder)
+contract ERC1410ReadTimeTravel is ERC1410ReadFacet, TimeTravelStorageWrapper {
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
     {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _ISSUER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-            _checkRecoveredAddress(_msgSender());
-        }
-        _issueByPartition(_issueData);
-    }
-
-    /// @notice Decreases totalSupply and the corresponding amount of the specified partition of _msgSender()
-    /// @param _partition The partition to allocate the decrease in balance
-    /// @param _value The amount by which to decrease the balance
-    /// @param _data Additional data attached to the burning of tokens
-    function redeemByPartition(
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyListedAllowed(_msgSender())
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-    {
-        // Add the function to validate the `_data` parameter
-        _redeemByPartition(
-            _partition,
-            _msgSender(),
-            address(0),
-            _value,
-            _data,
-            ''
-        );
-    }
-
-    /// @notice Decreases totalSupply and the corresponding amount of the specified partition of tokenHolder
-    /// @dev This function can only be called by the authorised operator.
-    /// @param _partition The partition to allocate the decrease in balance.
-    /// @param _tokenHolder The token holder whose balance should be decreased
-    /// @param _value The amount by which to decrease the balance
-    /// @param _data Additional data attached to the burning of tokens
-    /// @param _operatorData Additional data attached to the transfer of tokens by the operator
-    function operatorRedeemByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyListedAllowed(_tokenHolder)
-        onlyListedAllowed(_msgSender())
-        onlyOperator(_partition, _tokenHolder)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
-    {
-        {
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_tokenHolder);
-        }
-        _redeemByPartition(
-            _partition,
-            _tokenHolder,
-            _msgSender(),
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    function canRedeemByPartition(
-        address _from,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) external view override returns (bool, bytes1, bytes32) {
-        return
-            _canRedeemByPartition(
-                _from,
-                _partition,
-                _value,
-                _data,
-                _operatorData
-            );
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

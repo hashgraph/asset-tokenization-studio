@@ -205,9 +205,9 @@
 
 import { TOKENS } from '../Tokens';
 // eslint-disable-next-line jest/no-mocks-import
-import { ConcreteCommandHandler } from '../../../../__tests__/integration/__mocks__/ConcreteCommandHandler';
+import { ConcreteCommandHandler } from '@test/integration/__mocks__/ConcreteCommandHandler';
 // eslint-disable-next-line jest/no-mocks-import
-import { ConcreteQueryHandler } from '../../../../__tests__/integration/__mocks__/ConcreteQueryHandler';
+import { ConcreteQueryHandler } from '@test/integration/__mocks__/ConcreteQueryHandler';
 
 export const COMMAND_HANDLERS_MOCK = [
   {

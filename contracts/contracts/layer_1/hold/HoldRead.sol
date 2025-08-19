@@ -203,83 +203,72 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
-import {Common} from '../../common/Common.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {HoldIdentifier} from '../interfaces/hold/IHold.sol';
+import {IHoldRead} from '../interfaces/hold/IHoldRead.sol';
+import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import {Common} from '../common/Common.sol';
 
-abstract contract ERC1410Basic is IERC1410Basic, Common {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410_Basic(
-        bool _multiPartition
-    ) external override onlyUninitialized(_erc1410BasicStorage().initialized) {
-        _erc1410BasicStorage().multiPartition = _multiPartition;
-        _erc1410BasicStorage().initialized = true;
+abstract contract HoldRead is IHoldRead, Common {
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view override returns (uint256 amount_) {
+        return _getHeldAmountForAdjusted(_tokenHolder);
     }
 
-    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
-    /// @param _partition The partition from which to transfer tokens
-    /// @param _basicTransferInfo The address to which to transfer tokens to and the amountn`
-    /// @param _data Additional data attached to the transfer of tokens
-    /// @return The partition to which the transferred tokens were allocated for the _to address
-    function transferByPartition(
+    function getHeldAmountForByPartition(
         bytes32 _partition,
-        BasicTransferInfo calldata _basicTransferInfo,
-        bytes calldata _data
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_basicTransferInfo.to)
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_basicTransferInfo.to)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _basicTransferInfo.to)
-        returns (bytes32)
-    {
-        {
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_basicTransferInfo.to);
-        }
-        // Add a function to verify the `_data` parameter
-        // TODO: Need to create the bytes division of the `_partition` so it can be easily findout in which receiver's
-        // partition token will transfered. For current implementation we are assuming that the receiver's partition
-        // will be same as sender's as well as it also pass the `_validPartition()` check. In this particular case we
-        // are also assuming that reciever has the some tokens of the same partition as well (To avoid the array index
-        // out of bound error).
-        // Note- There is no operator used for the execution of this call so `_operator` value in
-        // in event is address(0) same for the `_operatorData`
+        address _tokenHolder
+    ) external view override returns (uint256 amount_) {
+        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view override returns (uint256 holdCount_) {
+        return _getHoldCountForByPartition(_partition, _tokenHolder);
+    }
+
+    function getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (uint256[] memory holdsId_) {
         return
-            _transferByPartition(
-                msg.sender,
-                _basicTransferInfo,
+            _getHoldsIdForByPartition(
                 _partition,
-                _data,
-                address(0),
-                ''
+                _tokenHolder,
+                _pageIndex,
+                _pageLength
             );
     }
 
-    /**
-     * @return
-     *  true : the token allows multiple partitions to be set and managed
-     *  false : the token contains only one partition, the default one
-     */
-    function isMultiPartition() external view returns (bool) {
-        return _isMultiPartition();
+    function getHoldForByPartition(
+        HoldIdentifier calldata _holdIdentifier
+    )
+        external
+        view
+        override
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_,
+            ThirdPartyType thirdPartyType_
+        )
+    {
+        return _getHoldForByPartitionAdjusted(_holdIdentifier);
     }
 
-    /// @notice Use to get the list of partitions `_tokenHolder` is associated with
-    /// @param _tokenHolder An address corresponds whom partition list is queried
-    /// @return List of partitions
-    function partitionsOf(
-        address _tokenHolder
-    ) external view override returns (bytes32[] memory) {
-        return _partitionsOf(_tokenHolder);
+    function getHoldThirdParty(
+        HoldIdentifier calldata _holdIdentifier
+    ) external view override returns (address) {
+        return _getHoldThirdParty(_holdIdentifier);
     }
 }

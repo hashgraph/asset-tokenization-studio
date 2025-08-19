@@ -214,16 +214,15 @@ import {
     type AccessControl,
     TimeTravel,
     Lock,
-    Hold,
-    ERC1410ScheduledTasks,
+    IHold,
+    type IERC1410,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
     EquityUSATimeTravel__factory,
     Pause__factory,
     Lock__factory,
-    Hold__factory,
-    ERC1410ScheduledTasks__factory,
+    IHold__factory,
     TimeTravel__factory,
     Kyc,
     SsiManagement,
@@ -299,8 +298,8 @@ describe('Equity Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock
-    let holdFacet: Hold
-    let erc1410Facet: ERC1410ScheduledTasks
+    let holdFacet: IHold
+    let erc1410Facet: IERC1410
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
@@ -324,11 +323,8 @@ describe('Equity Tests', () => {
     async function setFacets({ diamond }: { diamond: ResolverProxy }) {
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
         lockFacet = Lock__factory.connect(diamond.address, signer_A)
-        holdFacet = Hold__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        holdFacet = IHold__factory.connect(diamond.address, signer_A)
+        erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,

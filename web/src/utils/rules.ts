@@ -317,7 +317,7 @@ export const isISINValid = (val: string) => {
   return true;
 };
 
-export const isHederaValidAddress = (val: string) => {
+export const isValidHederaId = (val: string) => {
   const maskRegex = /^[0-9]\.[0-9]\.[0-9]{1,7}$/;
-  return maskRegex.test(val) || t("isHederaValidAddress");
+  return maskRegex.test(val) || t("isValidHederaId");
 };

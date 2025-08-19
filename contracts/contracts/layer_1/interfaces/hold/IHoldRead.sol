@@ -206,76 +206,47 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IERC1410ProtectedPartitions
-} from '../../interfaces/ERC1400/IERC1410ProtectedPartitions.sol';
-import {Common} from '../../common/Common.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
+import {HoldIdentifier} from './IHold.sol';
 
-abstract contract ERC1410ProtectedPartitions is
-    IERC1410ProtectedPartitions,
-    Common
-{
-    function protectedTransferFromByPartition(
+interface IHoldRead {
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view returns (uint256 amount_);
+
+    function getHeldAmountForByPartition(
         bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        address _tokenHolder
+    ) external view returns (uint256 amount_);
+
+    function getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 holdCount_);
+
+    function getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (uint256[] memory holdsId_);
+
+    function getHoldForByPartition(
+        HoldIdentifier calldata _holdIdentifier
     )
         external
-        override
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyListedAllowed(_from)
-        onlyListedAllowed(_to)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-        onlyProtectedPartitions
-    {
-        {
-            _checkRecoveredAddress(_from);
-            _checkRecoveredAddress(_to);
-        }
-        _protectedTransferFromByPartition(
-            _partition,
-            _from,
-            _to,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_,
+            ThirdPartyType thirdPartyType_
         );
-    }
 
-    function protectedRedeemFromByPartition(
-        bytes32 _partition,
-        address _from,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    )
-        external
-        override
-        onlyUnpaused
-        onlyUnrecoveredAddress(_from)
-        onlyClearingDisabled
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyListedAllowed(_from)
-        onlyProtectedPartitions
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
-    {
-        _protectedRedeemFromByPartition(
-            _partition,
-            _from,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
-    }
+    function getHoldThirdParty(
+        HoldIdentifier calldata _holdIdentifier
+    ) external view returns (address thirdParty_);
 }
