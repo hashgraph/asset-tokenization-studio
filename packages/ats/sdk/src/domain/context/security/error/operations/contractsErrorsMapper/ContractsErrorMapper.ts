@@ -204,57 +204,117 @@
 */
 
 import BaseError, { ErrorCode } from '@core/error/BaseError';
-import { AccountNotKycd } from '../AccountNotKycd';
 import { ClearingActivated } from '../ClearingActivated';
 import { InsufficientAllowance } from '../InsufficientAllowance';
 import { InvalidPartition } from '../InvalidPartition';
-import { AccountIsNotOperator } from '../AccountIsNotOperator';
 import { InsufficientBalance } from '../InsufficientBalance';
-import { InvalidFromAccount } from '../InvalidFromAccount';
-import { InvalidDestinationAccount } from '../InvalidDestinationAccount';
-import { AccountNotInControlList } from '../AccountNotInControlList';
 import { SecurityPaused } from '../SecurityPaused';
-import { KycStatus } from '@domain/context/kyc/Kyc';
-import { AddressRecovered } from '../AddressRecovered';
+import { EIP1066_CODES } from '../codes';
+
+import { ethers } from 'ethers'; // For selector computation
+import { ZeroAddressNotAllowed } from '../ZeroAddressNotAllowed';
+import { AccountBlocked } from '../AccountBlocked';
+import { ComplianceNotAllowed } from '../ComplianceNotAllowed';
+import { InvalidKycStatus } from '../InvalidKycStatus';
+import { WalletRecovered } from '../WalletRecovered';
+import { AddressNotVerified } from '../AddressNotVerified';
 
 export class ContractsErrorMapper {
-  static mapError(
-    errorCode: string,
-    operatorId: string,
-    sourceId?: string,
-    targetId?: string,
-  ): BaseError {
-    const errorMappings: {
-      [key: string]: (
-        sourceId?: string,
-        targetId?: string,
-        operatorId?: string,
-      ) => BaseError;
-    } = {
-      '0x40': () => new SecurityPaused(),
-      '0x41': (_1, _2, operatorId) => new AccountNotInControlList(operatorId!),
-      '0x42': (sourceId, _2, _3) => new AccountNotInControlList(sourceId!),
-      '0x43': (_1, targetId, _3) => new AccountNotInControlList(targetId!),
-      '0x44': () => new InvalidFromAccount(),
-      '0x45': () => new InvalidDestinationAccount(),
-      '0x46': () => new InsufficientBalance(),
-      '0x47': (sourceId, _2, operatorId) =>
-        new AccountIsNotOperator(sourceId!, operatorId!),
-      '0x48': () => new InvalidPartition(),
-      '0x49': (sourceId, _2, operatorId) =>
-        new InsufficientAllowance(sourceId!, operatorId!),
-      '0x50': (sourceId) => new AccountNotKycd(sourceId!, KycStatus.GRANTED),
-      '0x51': (_1, targetId) =>
-        new AccountNotKycd(targetId!, KycStatus.GRANTED),
-      '0x52': () => new ClearingActivated(),
-      '0x53': (_1, _2, operatorId) => new AddressRecovered(operatorId!),
-      '0x54': (sourceId, _2, _3) => new AddressRecovered(sourceId!),
-      '0x55': (_1, targetId, _3) => new AddressRecovered(targetId!),
-    };
+  static mapError(errorCode: string, reason: string): BaseError {
+    errorCode = errorCode.toLowerCase();
+    reason = reason.toLowerCase().slice(0, 10);
+    console.log('Mapping error:', errorCode, reason);
 
+    const selectors = {
+      zeroAddressNotAllowed: ethers.utils
+        .keccak256(ethers.utils.toUtf8Bytes('ZeroAddressNotAllowed()'))
+        .slice(0, 10),
+      accountIsBlocked: ethers.utils
+        .keccak256(ethers.utils.toUtf8Bytes('AccountIsBlocked(address)'))
+        .slice(0, 10),
+      tokenIsPaused: ethers.utils
+        .keccak256(ethers.utils.toUtf8Bytes('TokenIsPaused()'))
+        .slice(0, 10),
+      clearingIsActivated: ethers.utils
+        .keccak256(ethers.utils.toUtf8Bytes('ClearingIsActivated()'))
+        .slice(0, 10),
+      complianceNotAllowed: ethers.utils
+        .keccak256(ethers.utils.toUtf8Bytes('ComplianceNotAllowed()'))
+        .slice(0, 10),
+      invalidKycStatus: ethers.utils
+        .keccak256(ethers.utils.toUtf8Bytes('InvalidKycStatus()'))
+        .slice(0, 10),
+      addressNotVerified: ethers.utils
+        .keccak256(ethers.utils.toUtf8Bytes('AddressNotVerified()'))
+        .slice(0, 10),
+      walletRecovered: ethers.utils
+        .keccak256(ethers.utils.toUtf8Bytes('WalletRecovered()'))
+        .slice(0, 10),
+      insufficientAllowance: ethers.utils
+        .keccak256(
+          ethers.utils.toUtf8Bytes('InsufficientAllowance(address,address)'),
+        )
+        .slice(0, 10),
+      invalidPartition: ethers.utils
+        .keccak256(
+          ethers.utils.toUtf8Bytes('InvalidPartition(address,bytes32)'),
+        )
+        .slice(0, 10),
+      insufficientBalance: ethers.utils
+        .keccak256(
+          ethers.utils.toUtf8Bytes(
+            'InsufficientBalance(address,uint256,uint256,bytes32)',
+          ),
+        )
+        .slice(0, 10),
+    };
+    console.log('Selectors:', selectors);
+
+    const errorMappings: { [key: string]: () => BaseError } = {
+      [`${EIP1066_CODES.PAUSED}:${selectors.tokenIsPaused}`]: () =>
+        new SecurityPaused(),
+      [`${EIP1066_CODES.PAUSED}`]: () => new SecurityPaused(),
+      [`${EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE}:${selectors.zeroAddressNotAllowed}`]:
+        () => new ZeroAddressNotAllowed(),
+      [`${EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE}:${selectors.accountIsBlocked}`]:
+        () => new AccountBlocked(),
+      [`${EIP1066_CODES.UNAVAILABLE}:${selectors.clearingIsActivated}`]: () =>
+        new ClearingActivated(),
+      [`${EIP1066_CODES.DISALLOWED_OR_STOP}:${selectors.accountIsBlocked}`]:
+        () => new AccountBlocked(),
+      [`${EIP1066_CODES.DISALLOWED_OR_STOP}:${selectors.complianceNotAllowed}`]:
+        () => new ComplianceNotAllowed(),
+      [`${EIP1066_CODES.DISALLOWED_OR_STOP}:${selectors.invalidKycStatus}`]:
+        () => new InvalidKycStatus(),
+      [`${EIP1066_CODES.DISALLOWED_OR_STOP}:${selectors.addressNotVerified}`]:
+        () => new AddressNotVerified(),
+      [`${EIP1066_CODES.REVOKED_OR_BANNED}:${selectors.walletRecovered}`]: () =>
+        new WalletRecovered(),
+      [`${EIP1066_CODES.INSUFFICIENT_FUNDS}:${selectors.insufficientAllowance}`]:
+        () => new InsufficientAllowance(),
+      [`${EIP1066_CODES.INSUFFICIENT_FUNDS}:${selectors.invalidPartition}`]:
+        () => new InvalidPartition(),
+      [`${EIP1066_CODES.INSUFFICIENT_FUNDS}:${selectors.insufficientBalance}`]:
+        () => new InsufficientBalance(),
+      [`${EIP1066_CODES.SUCCESS}`]: () =>
+        new BaseError(
+          ErrorCode.Unexpected,
+          'Unexpected success code in error context',
+        ),
+    };
+    console.log('Error mappings:', errorMappings);
+
+    const key = errorMappings[`${errorCode}:${reason}`]
+      ? `${errorCode}:${reason}`
+      : errorCode;
+
+    console.log('Error key:', key);
     return (
-      errorMappings[errorCode]?.(sourceId, targetId, operatorId) ||
-      new BaseError(ErrorCode.Unexpected, 'An unexpected error occurred.')
+      errorMappings[key]?.() ||
+      new BaseError(
+        ErrorCode.Unexpected,
+        `Unexpected error code: ${errorCode} with reason: ${reason}`,
+      )
     );
   }
 }

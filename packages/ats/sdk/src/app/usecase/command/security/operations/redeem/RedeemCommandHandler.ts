@@ -246,7 +246,6 @@ export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
         account.id.toString(),
         amount,
         _PARTITION_ID_1,
-        account.id.toString(),
       );
 
       const security = await this.securityService.get(securityId);
