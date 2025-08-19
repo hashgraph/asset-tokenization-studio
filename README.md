@@ -121,8 +121,11 @@ npm run ats:test:ci            # Run CI tests
 npm run ats:start              # Build contracts/SDK and start web dev server
 npm run ats:web:dev           # Start web dev server only
 
-# Publishing (for maintainers)
-npm run ats:publish           # Publish contracts and SDK to npm
+# Version management and publishing
+npm run changeset             # Create changeset for new changes
+npm run changeset:version     # Update versions based on changesets
+npm run changeset:publish     # Publish updated packages to npm
+npm run release              # Build all components and publish
 ```
 
 ### Mass Payout (Placeholder)
@@ -338,13 +341,70 @@ npm run clean:deps
 npm ci
 ```
 
+## Version Management
+
+The project uses **Changesets** for semantic versioning and automated release management.
+
+### Version Strategy
+
+- **ATS packages** (contracts, SDK, web): Use **fixed versioning** - all packages share the same version and are released together
+- **Mass-payout packages**: Use **independent versioning** - versioned separately from ATS
+
+### Changeset Workflow
+
+For developers making changes:
+
+1. **Make your changes** to any package
+2. **Create a changeset** describing your changes:
+
+   ```bash
+   npm run changeset
+   ```
+
+   This creates a changeset file describing what changed and the type of change (patch/minor/major)
+
+3. **Commit both** your code changes and the changeset file:
+   ```bash
+   git add .
+   git commit -m "feat: add new functionality"
+   ```
+
+For maintainers releasing versions:
+
+1. **Review pending changes**:
+
+   ```bash
+   npm run changeset:status
+   ```
+
+2. **Update versions** (consumes changesets and updates package versions):
+
+   ```bash
+   npm run changeset:version
+   git commit -m "chore: release version x.x.x"
+   ```
+
+3. **Build and publish** packages:
+   ```bash
+   npm run release
+   ```
+
+### Automated Releases
+
+The GitHub Actions workflow automatically:
+
+- Creates "Release PRs" when changesets are pending
+- Publishes packages when Release PRs are merged
+- Generates changelogs from changeset descriptions
+- Creates GitHub releases with proper release notes
+
 ## Continuous Integration
 
 The project uses separate GitHub Actions workflows for different components:
 
-- **ATS Tests** (`.github/workflows/test-ats.yml`): Runs when ATS-related files change
-- **Mass Payout Tests** (`.github/workflows/test-mp.yml`): Runs when Mass Payout files change
-- **Publishing** (`.github/workflows/publish.yml`): Handles publishing to npm with conditional logic based on release tags
+- **ATS Tests** (`.github/workflows/ats.test.yml`): Runs when ATS-related files change
+- **Mass Payout Tests** (`.github/workflows/mp.test.yml`): Runs when Mass Payout files change
+- **Publishing** (`.github/workflows/all.publish.yml`): Automated releases using Changesets
 
 Tests are automatically triggered only when relevant files are modified, improving CI efficiency.
 

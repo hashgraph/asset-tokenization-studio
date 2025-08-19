@@ -1,17 +1,66 @@
 name: Publishing
 
 on:
-  release:
+  push:
+    branches:
+      - main
+  pull_request:
     types:
-      - published
+      - closed
+    branches:
+      - main
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
+  id-token: write
 
 jobs:
-  publish:
-    name: Publish NPM Packages
+  release:
+    name: Release with Changesets
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20.x
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: npm run ats:build
+
+      - name: Create Release Pull Request or Publish
+        uses: changesets/action@v1
+        with:
+          version: npm run changeset:version
+          publish: npm run changeset:publish
+          title: 'chore: release packages'
+          commit: 'chore: release packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # Legacy release workflow (fallback for manual releases)
+  manual-publish:
+    name: Manual Publish (Legacy)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
 
     steps:
       - name: Harden Runner
@@ -26,36 +75,12 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20.x
-
-      - name: Create file .npmrc
-        run: |
-          touch .npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
-          cp .npmrc ./packages/ats/contracts/.npmrc
-          cp .npmrc ./packages/ats/sdk/.npmrc
-
-      - name: Change references
-        run: ./changeProjectsReferencesToRepo.sh
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: npm ci
 
-      # --- ATS publishing ---
-      - name: Publish ats/contracts
-        if: contains(github.ref_name, 'ats')
-        run: npm run publish:ats:contracts --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish ats/sdk
-        if: contains(github.ref_name, 'ats')
-        run: npm run publish:ats:sdk --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # --- Mass Payout publishing ---
-      - name: Publish mass-payout
-        if: contains(github.ref_name, 'mp')
-        run: npm run publish:mass-payout --access=public
+      - name: Build and Release
+        run: npm run release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
