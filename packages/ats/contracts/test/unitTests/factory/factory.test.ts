@@ -1039,7 +1039,10 @@ describe('Factory Tests', () => {
             const maxSupply = await capFacet.getMaxSupply()
             expect(maxSupply).to.equal(numberOfUnits)
 
-            const bondFacet = await ethers.getContractAt('BondRead', bondAddress)
+            const bondFacet = await ethers.getContractAt(
+                'BondRead',
+                bondAddress
+            )
             const bondDetails = await bondFacet.getBondDetails()
             expect(bondDetails.currency).to.be.deep.equal(
                 bondData.bondDetails.currency
@@ -1237,7 +1240,10 @@ describe('Factory Tests', () => {
             const maxSupply = await capFacet.getMaxSupply()
             expect(maxSupply).to.equal(numberOfUnits)
 
-            const bondFacet = await ethers.getContractAt('BondRead', bondAddress)
+            const bondFacet = await ethers.getContractAt(
+                'BondRead',
+                bondAddress
+            )
             const bondDetails = await bondFacet.getBondDetails()
             expect(bondDetails.currency).to.be.deep.equal(
                 bondData.bondDetails.currency

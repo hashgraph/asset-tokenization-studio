@@ -225,6 +225,7 @@ import { HederaId } from '@domain/context/shared/HederaId';
 import {
   AccessControl__factory,
   Bond__factory,
+  BondRead__factory,
   Cap__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
@@ -258,7 +259,7 @@ import {
   Security__factory,
   Snapshots__factory,
   SsiManagement__factory,
-  ERC3643__factory,
+  ERC3643Read__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -676,7 +677,7 @@ export class RPCQueryAdapter {
     );
 
     const res = await this.connect(
-      Bond__factory,
+      BondRead__factory,
       address.toString(),
     ).getBondDetails();
 
@@ -694,7 +695,7 @@ export class RPCQueryAdapter {
     );
 
     const res = await this.connect(
-      Bond__factory,
+      BondRead__factory,
       address.toString(),
     ).getCouponDetails();
 
@@ -849,7 +850,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Coupon for`);
 
     const couponFor = await this.connect(
-      Bond__factory,
+      BondRead__factory,
       address.toString(),
     ).getCouponFor(coupon, target.toString());
 
@@ -860,7 +861,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Coupon`);
 
     const couponInfo = await this.connect(
-      Bond__factory,
+      BondRead__factory,
       address.toString(),
     ).getCoupon(coupon);
 
@@ -876,7 +877,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Coupon count`);
 
     const couponCount = await this.connect(
-      Bond__factory,
+      BondRead__factory,
       address.toString(),
     ).getCouponCount();
 
@@ -1833,7 +1834,7 @@ export class RPCQueryAdapter {
   async onchainID(address: EvmAddress): Promise<string> {
     LogService.logTrace(`Getting OnchainID for security ${address.toString()}`);
 
-    return await this.connect(ERC3643__factory, address.toString()).onchainID();
+    return await this.connect(ERC3643Read__factory, address.toString()).onchainID();
   }
 
   async identityRegistry(address: EvmAddress): Promise<string> {
@@ -1842,7 +1843,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC3643__factory,
+      ERC3643Read__factory,
       address.toString(),
     ).identityRegistry();
   }
@@ -1853,7 +1854,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC3643__factory,
+      ERC3643Read__factory,
       address.toString(),
     ).compliance();
   }
@@ -1881,7 +1882,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting recovery status of ${targetId}`);
 
     const isAddressRecovered = await this.connect(
-      ERC3643__factory,
+      ERC3643Read__factory,
       address.toString(),
     ).isAddressRecovered(targetId.toString());
 
@@ -1929,7 +1930,7 @@ export class RPCQueryAdapter {
       `Getting coupon holders for coupon ${couponId} for security ${address.toString()}`,
     );
     return await this.connect(
-      Bond__factory,
+      BondRead__factory,
       address.toString(),
     ).getCouponHolders(couponId, start, end);
   }
@@ -1943,7 +1944,7 @@ export class RPCQueryAdapter {
     );
 
     const total = await this.connect(
-      Bond__factory,
+      BondRead__factory,
       address.toString(),
     ).getTotalCouponHolders(couponId);
 

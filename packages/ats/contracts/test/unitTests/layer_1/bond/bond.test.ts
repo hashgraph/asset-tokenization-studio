@@ -733,13 +733,17 @@ describe('Bond Tests', () => {
                 )
 
                 const listCount = await bondReadFacet.getCouponCount()
-                const coupon = await bondReadFacet.getCoupon(numberOfCoupons + 1)
+                const coupon = await bondReadFacet.getCoupon(
+                    numberOfCoupons + 1
+                )
                 const couponFor = await bondReadFacet.getCouponFor(
                     numberOfCoupons + 1,
                     account_A
                 )
                 const couponTotalHolders =
-                    await bondReadFacet.getTotalCouponHolders(numberOfCoupons + 1)
+                    await bondReadFacet.getTotalCouponHolders(
+                        numberOfCoupons + 1
+                    )
                 const couponHolders = await bondReadFacet.getCouponHolders(
                     numberOfCoupons + 1,
                     0,
@@ -816,7 +820,9 @@ describe('Bond Tests', () => {
                     account_A
                 )
                 const couponTotalHolders =
-                    await bondReadFacet.getTotalCouponHolders(numberOfCoupons + 1)
+                    await bondReadFacet.getTotalCouponHolders(
+                        numberOfCoupons + 1
+                    )
                 const couponHolders = await bondReadFacet.getCouponHolders(
                     numberOfCoupons + 1,
                     0,
@@ -886,7 +892,9 @@ describe('Bond Tests', () => {
                     account_A
                 )
                 const couponTotalHolders =
-                    await bondReadFacet.getTotalCouponHolders(numberOfCoupons + 1)
+                    await bondReadFacet.getTotalCouponHolders(
+                        numberOfCoupons + 1
+                    )
                 const couponHolders = await bondReadFacet.getCouponHolders(
                     numberOfCoupons + 1,
                     0,
@@ -908,8 +916,9 @@ describe('Bond Tests', () => {
                 // Using account C (with role)
                 bondFacet = bondFacet.connect(signer_C)
                 // Get maturity date
-                const maturityDateBefore = (await bondReadFacet.getBondDetails())
-                    .maturityDate
+                const maturityDateBefore = (
+                    await bondReadFacet.getBondDetails()
+                ).maturityDate
                 // New maturity date
                 const newMaturityDate = maturityDateBefore.add(
                     BigNumber.from(86400)
@@ -943,8 +952,9 @@ describe('Bond Tests', () => {
                 // Using account C (with role)
                 bondFacet = bondFacet.connect(signer_C)
                 // Get maturity date
-                const maturityDateBefore = (await bondReadFacet.getBondDetails())
-                    .maturityDate
+                const maturityDateBefore = (
+                    await bondReadFacet.getBondDetails()
+                ).maturityDate
                 // New maturity date (earlier than current)
                 // New maturity date (earlier than current)
                 const dayBeforeCurrentMaturity = maturityDateBefore.sub(
@@ -970,8 +980,9 @@ describe('Bond Tests', () => {
                 // Using account C (without role)
                 bondFacet = bondFacet.connect(signer_C)
                 // Get maturity date
-                const maturityDateBefore = (await bondReadFacet.getBondDetails())
-                    .maturityDate
+                const maturityDateBefore = (
+                    await bondReadFacet.getBondDetails()
+                ).maturityDate
                 // New maturity date
                 const newMaturityDate = maturityDateBefore.add(
                     BigNumber.from(86400)
@@ -1002,8 +1013,9 @@ describe('Bond Tests', () => {
                 // Using account C (with role)
                 bondFacet = bondFacet.connect(signer_C)
                 // Get maturity date
-                const maturityDateBefore = (await bondReadFacet.getBondDetails())
-                    .maturityDate
+                const maturityDateBefore = (
+                    await bondReadFacet.getBondDetails()
+                ).maturityDate
                 // New maturity date
                 const newMaturityDate = maturityDateBefore.add(
                     BigNumber.from(86400)
@@ -1033,7 +1045,10 @@ describe('Bond Tests', () => {
 
                 for (let i = 1; i <= numberOfCoupons; i++) {
                     const coupon = await bondReadFacet.getCoupon(i)
-                    const couponFor = await bondReadFacet.getCouponFor(i, account_A)
+                    const couponFor = await bondReadFacet.getCouponFor(
+                        i,
+                        account_A
+                    )
                     const couponTotalHolders =
                         await bondReadFacet.getTotalCouponHolders(i)
                     const couponHolders = await bondReadFacet.getCouponHolders(
