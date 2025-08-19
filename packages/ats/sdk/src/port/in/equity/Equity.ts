@@ -331,8 +331,6 @@ class EquityInPort implements IEquityInPort {
       externalPauses,
       externalControlLists,
       externalKycLists,
-      complianceId,
-      identityRegistryId,
     } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
@@ -380,8 +378,8 @@ class EquityInPort implements IEquityInPort {
         externalPauses,
         externalControlLists,
         externalKycLists,
-        complianceId,
-        identityRegistryId,
+        req.complianceId,
+        req.identityRegistryId,
       ),
     );
 
