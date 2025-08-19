@@ -203,62 +203,86 @@
 
 */
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {IClearing} from '../interfaces/clearing/IClearing.sol';
+import {IBondRead} from '../interfaces/bond/IBondRead.sol';
+import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
 import {
-    TransferAndLockStorageWrapper
-} from '../../layer_0/transferAndLock/TransferAndLockStorageWrapper.sol';
+    _CORPORATE_ACTION_ROLE,
+    _BOND_MANAGER_ROLE,
+    _MATURITY_REDEEMER_ROLE
+} from '../../layer_1/constants/roles.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-abstract contract Common is TransferAndLockStorageWrapper {
-    error AlreadyInitialized();
-    error OnlyDelegateAllowed();
-
-    modifier onlyUninitialized(bool _initialized) {
-        _checkUninitialized(_initialized);
-        _;
+abstract contract BondRead is IBondRead, IStaticFunctionSelectors, Common {
+    function getBondDetails()
+        external
+        view
+        override
+        returns (BondDetailsData memory bondDetailsData_)
+    {
+        return _getBondDetails();
     }
 
-    modifier onlyDelegate() {
-        _checkDelegate();
-        _;
+    function getCouponDetails()
+        external
+        view
+        override
+        returns (CouponDetailsData memory couponDetails_)
+    {
+        return _getCouponDetails();
     }
 
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
-        _checkUnProtectedPartitionsOrWildCardRole();
-        _;
+    function getCoupon(
+        uint256 _couponID
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        returns (RegisteredCoupon memory registeredCoupon_)
+    {
+        return _getCoupon(_couponID);
     }
 
-    modifier onlyClearingDisabled() {
-        _checkClearingDisabled();
-        _;
+    function getCouponFor(
+        uint256 _couponID,
+        address _account
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        returns (CouponFor memory couponFor_)
+    {
+        return _getCouponFor(_couponID, _account);
     }
 
-    function _checkUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
-        }
+    function getCouponCount()
+        external
+        view
+        override
+        returns (uint256 couponCount_)
+    {
+        return _getCouponCount();
     }
 
-    function _checkDelegate() private view {
-        if (_msgSender() != address(this)) revert OnlyDelegateAllowed();
+    function getCouponHolders(
+        uint256 _couponID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_) {
+        return _getCouponHolders(_couponID, _pageIndex, _pageLength);
     }
 
-    function _checkClearingDisabled() private view {
-        if (_isClearingActivated()) {
-            revert IClearing.ClearingIsActivated();
-        }
-    }
-
-    function _checkUninitialized(bool _initialized) private pure {
-        if (_initialized) revert AlreadyInitialized();
+    function getTotalCouponHolders(
+        uint256 _couponID
+    ) external view returns (uint256) {
+        return _getTotalCouponHolders(_couponID);
     }
 }

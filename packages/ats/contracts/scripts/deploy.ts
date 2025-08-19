@@ -217,6 +217,8 @@ import {
     AdjustBalancesTimeTravel__factory,
     BondUSA__factory,
     BondUSATimeTravel__factory,
+    BondUSARead__factory,
+    BondUSAReadTimeTravel__factory,
     BusinessLogicResolver__factory,
     Cap__factory,
     CapTimeTravel__factory,
@@ -718,6 +720,17 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        bondUsaRead: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new BondUSARead__factory(),
+                new BondUSAReadTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.BondUSARead.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
         scheduledSnapshots: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ScheduledSnapshots__factory(),
@@ -1213,6 +1226,17 @@ export async function deployAtsContracts({
                     return result
                 }
             ),
+            bondUsaRead: await deployContractWithFactory(
+                commands.bondUsaRead
+            ).then((result) => {
+                console.log(
+                    `BondUSARead has been deployed successfully at ${result.address}`
+                )
+                console.log(
+                    `BondUSARead has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
             scheduledSnapshots: await deployContractWithFactory(
                 commands.scheduledSnapshots
             ).then((result) => {

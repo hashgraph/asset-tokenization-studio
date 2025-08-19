@@ -278,6 +278,7 @@ task(
             diamondFacet,
             equityUsa,
             bondUsa,
+            bondUsaRead,
             scheduledSnapshots,
             scheduledBalanceAdjustments,
             scheduledTasks,
@@ -338,6 +339,7 @@ task(
             'Diamond Facet': diamondFacet.address,
             Equity: equityUsa.address,
             Bond: bondUsa.address,
+            BondRead: bondUsaRead.address,
             'Scheduled Snapshots': scheduledSnapshots.address,
             'Scheduled Balance Adjustments':
                 scheduledBalanceAdjustments.address,

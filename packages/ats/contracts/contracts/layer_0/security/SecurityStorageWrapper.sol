@@ -203,62 +203,55 @@
 
 */
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {IClearing} from '../interfaces/clearing/IClearing.sol';
 import {
-    TransferAndLockStorageWrapper
-} from '../../layer_0/transferAndLock/TransferAndLockStorageWrapper.sol';
+    RegulationData,
+    AdditionalSecurityData
+} from '../../layer_3/constants/regulation.sol';
+import {
+    _SECURITY_STORAGE_POSITION
+} from '../../layer_3/constants/storagePositions.sol';
+import {ISecurity} from '../../layer_3/interfaces/ISecurity.sol';
+import {EquityStorageWrapper} from '../equity/EquityStorageWrapper.sol';
 
-abstract contract Common is TransferAndLockStorageWrapper {
-    error AlreadyInitialized();
-    error OnlyDelegateAllowed();
-
-    modifier onlyUninitialized(bool _initialized) {
-        _checkUninitialized(_initialized);
-        _;
+contract SecurityStorageWrapper is EquityStorageWrapper {
+    function _initializeSecurity(
+        RegulationData memory _regulationData,
+        AdditionalSecurityData calldata _additionalSecurityData
+    ) internal {
+        _storeRegulationData(_regulationData, _additionalSecurityData);
     }
 
-    modifier onlyDelegate() {
-        _checkDelegate();
-        _;
+    function _storeRegulationData(
+        RegulationData memory _regulationData,
+        AdditionalSecurityData calldata _additionalSecurityData
+    ) internal {
+        ISecurity.SecurityRegulationData storage data = _securityStorage();
+        data.regulationData = _regulationData;
+        data.additionalSecurityData = _additionalSecurityData;
     }
 
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
-        _checkUnProtectedPartitionsOrWildCardRole();
-        _;
+    function _getSecurityRegulationData()
+        internal
+        pure
+        returns (
+            ISecurity.SecurityRegulationData memory securityRegulationData_
+        )
+    {
+        securityRegulationData_ = _securityStorage();
     }
 
-    modifier onlyClearingDisabled() {
-        _checkClearingDisabled();
-        _;
-    }
-
-    function _checkUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
+    function _securityStorage()
+        internal
+        pure
+        returns (ISecurity.SecurityRegulationData storage securityStorage_)
+    {
+        bytes32 position = _SECURITY_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            securityStorage_.slot := position
         }
-    }
-
-    function _checkDelegate() private view {
-        if (_msgSender() != address(this)) revert OnlyDelegateAllowed();
-    }
-
-    function _checkClearingDisabled() private view {
-        if (_isClearingActivated()) {
-            revert IClearing.ClearingIsActivated();
-        }
-    }
-
-    function _checkUninitialized(bool _initialized) private pure {
-        if (_initialized) revert AlreadyInitialized();
     }
 }

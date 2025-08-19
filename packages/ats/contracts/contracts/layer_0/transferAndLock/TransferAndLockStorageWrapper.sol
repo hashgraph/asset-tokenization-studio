@@ -205,25 +205,31 @@
 
 pragma solidity 0.8.18;
 
-import {Common} from '../../layer_1/common/Common.sol';
 import {
     checkNounceAndDeadline,
     verify
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
+import {ITransferAndLock} from '../../layer_3/interfaces/ITransferAndLock.sol';
+import {
+    ITransferAndLockStorageWrapper
+} from '../../layer_3/interfaces/ITransferAndLockStorageWrapper.sol';
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {
     getMessageHashTransferAndLockByPartition,
     getMessageHashTransferAndLock
-} from './signatureVerification.sol';
+} from '../../layer_3/transferAndLock/signatureVerification.sol';
 import {BasicTransferInfo} from '../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import {SecurityStorageWrapper} from '../security/SecurityStorageWrapper.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
+abstract contract TransferAndLockStorageWrapper is
+    ITransferAndLockStorageWrapper,
+    SecurityStorageWrapper
+{
     function _protectedTransferAndLockByPartition(
         bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLock,
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
@@ -260,6 +266,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
             _transferAndLock.to,
             _transferAndLock.expirationTimestamp
         );
+
         emit PartitionTransferredAndLocked(
             _partition,
             _msgSender(),
@@ -272,7 +279,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
     }
 
     function _protectedTransferAndLock(
-        TransferAndLockStruct calldata _transferAndLock,
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
@@ -308,6 +315,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
             _transferAndLock.to,
             _transferAndLock.expirationTimestamp
         );
+
         emit PartitionTransferredAndLocked(
             _DEFAULT_PARTITION,
             _msgSender(),
@@ -321,7 +329,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
 
     function _checkTransferAndLockByPartitionSignature(
         bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLock,
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
@@ -339,7 +347,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
 
     function _isTransferAndLockByPartitionSignatureValid(
         bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLock,
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
@@ -367,7 +375,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
     }
 
     function _checkTransferAndLockSignature(
-        TransferAndLockStruct calldata _transferAndLock,
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
@@ -383,7 +391,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
     }
 
     function _isTransferAndLockSignatureValid(
-        TransferAndLockStruct calldata _transferAndLock,
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature

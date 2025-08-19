@@ -203,62 +203,17 @@
 
 */
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {IClearing} from '../interfaces/clearing/IClearing.sol';
-import {
-    TransferAndLockStorageWrapper
-} from '../../layer_0/transferAndLock/TransferAndLockStorageWrapper.sol';
-
-abstract contract Common is TransferAndLockStorageWrapper {
-    error AlreadyInitialized();
-    error OnlyDelegateAllowed();
-
-    modifier onlyUninitialized(bool _initialized) {
-        _checkUninitialized(_initialized);
-        _;
-    }
-
-    modifier onlyDelegate() {
-        _checkDelegate();
-        _;
-    }
-
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
-        _checkUnProtectedPartitionsOrWildCardRole();
-        _;
-    }
-
-    modifier onlyClearingDisabled() {
-        _checkClearingDisabled();
-        _;
-    }
-
-    function _checkUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
-        }
-    }
-
-    function _checkDelegate() private view {
-        if (_msgSender() != address(this)) revert OnlyDelegateAllowed();
-    }
-
-    function _checkClearingDisabled() private view {
-        if (_isClearingActivated()) {
-            revert IClearing.ClearingIsActivated();
-        }
-    }
-
-    function _checkUninitialized(bool _initialized) private pure {
-        if (_initialized) revert AlreadyInitialized();
-    }
+interface ITransferAndLockStorageWrapper {
+    event PartitionTransferredAndLocked(
+        bytes32 indexed partition,
+        address indexed from,
+        address to,
+        uint256 value,
+        bytes data,
+        uint256 expirationTimestamp,
+        uint256 lockId
+    );
 }

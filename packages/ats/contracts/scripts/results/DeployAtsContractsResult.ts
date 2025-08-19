@@ -209,6 +209,7 @@ import {
     AccessControlFacet,
     AdjustBalances,
     BondUSA,
+    BondUSARead,
     Cap,
     ControlList,
     CorporateActions,
@@ -273,6 +274,7 @@ export interface DeployAtsContractsResultParams {
     diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
     equityUsa: DeployContractWithFactoryResult<EquityUSA>
     bondUsa: DeployContractWithFactoryResult<BondUSA>
+    bondUsaRead: DeployContractWithFactoryResult<BondUSARead>
     scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
     scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
@@ -322,6 +324,7 @@ export default class DeployAtsContractsResult {
     public readonly diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
     public readonly equityUsa: DeployContractWithFactoryResult<EquityUSA>
     public readonly bondUsa: DeployContractWithFactoryResult<BondUSA>
+    public readonly bondUsaRead: DeployContractWithFactoryResult<BondUSARead>
     public readonly scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
     public readonly scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     public readonly scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
@@ -370,6 +373,7 @@ export default class DeployAtsContractsResult {
         diamondFacet,
         equityUsa,
         bondUsa,
+        bondUsaRead,
         scheduledSnapshots,
         scheduledBalanceAdjustments,
         scheduledTasks,
@@ -417,6 +421,7 @@ export default class DeployAtsContractsResult {
         this.diamondFacet = diamondFacet
         this.equityUsa = equityUsa
         this.bondUsa = bondUsa
+        this.bondUsaRead = bondUsaRead
         this.scheduledSnapshots = scheduledSnapshots
         this.scheduledBalanceAdjustments = scheduledBalanceAdjustments
         this.scheduledTasks = scheduledTasks

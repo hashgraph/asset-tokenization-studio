@@ -242,6 +242,7 @@ export const CONTRACT_NAMES = [
     'DiamondFacet',
     'EquityUSA',
     'BondUSA',
+    'BondUSARead',
     'ScheduledSnapshots',
     'ScheduledBalanceAdjustments',
     'ScheduledTasks',

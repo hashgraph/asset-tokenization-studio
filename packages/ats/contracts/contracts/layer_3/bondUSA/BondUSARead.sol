@@ -203,62 +203,76 @@
 
 */
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {IClearing} from '../interfaces/clearing/IClearing.sol';
+import {BondRead} from '../../layer_2/bond/BondRead.sol';
+import {Security} from '../security/Security.sol';
 import {
-    TransferAndLockStorageWrapper
-} from '../../layer_0/transferAndLock/TransferAndLockStorageWrapper.sol';
+    RegulationData,
+    AdditionalSecurityData
+} from '../constants/regulation.sol';
+import {
+    _BOND_READ_RESOLVER_KEY
+} from '../../layer_2/constants/resolverKeys.sol';
+import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
+import {ISecurity} from '../interfaces/ISecurity.sol';
 
-abstract contract Common is TransferAndLockStorageWrapper {
-    error AlreadyInitialized();
-    error OnlyDelegateAllowed();
-
-    modifier onlyUninitialized(bool _initialized) {
-        _checkUninitialized(_initialized);
-        _;
+contract BondUSARead is BondRead, Security {
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _BOND_READ_RESOLVER_KEY;
     }
 
-    modifier onlyDelegate() {
-        _checkDelegate();
-        _;
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](10);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getBondDetails
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getCouponDetails
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getCouponCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getCouponHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalCouponHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getSecurityRegulationData
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getSecurityHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalSecurityHolders
+            .selector;
     }
 
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
-        _checkUnProtectedPartitionsOrWildCardRole();
-        _;
-    }
-
-    modifier onlyClearingDisabled() {
-        _checkClearingDisabled();
-        _;
-    }
-
-    function _checkUnProtectedPartitionsOrWildCardRole() internal view {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
-        }
-    }
-
-    function _checkDelegate() private view {
-        if (_msgSender() != address(this)) revert OnlyDelegateAllowed();
-    }
-
-    function _checkClearingDisabled() private view {
-        if (_isClearingActivated()) {
-            revert IClearing.ClearingIsActivated();
-        }
-    }
-
-    function _checkUninitialized(bool _initialized) private pure {
-        if (_initialized) revert AlreadyInitialized();
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](3);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IBondRead).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
     }
 }

@@ -258,6 +258,7 @@ export interface DeployedBusinessLogics {
     ERC1643: IStaticFunctionSelectors
     equityUSA: IStaticFunctionSelectors
     bondUSA: IStaticFunctionSelectors
+    bondUSARead: IStaticFunctionSelectors
     Snapshots: IStaticFunctionSelectors
     scheduledSnapshots: IStaticFunctionSelectors
     scheduledBalanceAdjustments: IStaticFunctionSelectors
