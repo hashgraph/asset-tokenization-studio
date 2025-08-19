@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {

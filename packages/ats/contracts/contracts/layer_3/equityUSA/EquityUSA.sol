@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {Security} from '../security/Security.sol';
 import {IEquityUSA} from '../interfaces/IEquityUSA.sol';

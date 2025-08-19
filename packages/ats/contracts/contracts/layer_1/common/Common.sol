@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
