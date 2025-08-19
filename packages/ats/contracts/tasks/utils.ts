@@ -216,6 +216,8 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { createEcdsaCredential, EthrDID } from '@terminal3/ecdsa_vc'
 import { DID, type VerificationOptions } from '@terminal3/vc_core'
+import * as path from 'node:path'
+import * as fs from 'node:fs'
 
 subtask(
     'getSigner',
@@ -277,7 +279,7 @@ task('keccak256', 'Prints the keccak256 hash of a string')
         console.log(`The keccak256 hash of the input "${input}" is: ${hash}`)
     })
 
-task('createVC', 'Prints the VC for a given issuer and holder')
+task('createVC', 'Generates a .vc file for a given issuer and holder')
     .addOptionalParam(
         'holder',
         'The address to which the VC is granted',
@@ -319,8 +321,16 @@ task('createVC', 'Prints the VC for a given issuer and holder')
             options
         )
 
-        const vcString = JSON.stringify(vc)
-        console.log(`The VC for the holder is: '${vcString}'`)
+        const vcString = JSON.stringify(vc, null, 2)
+
+        const safeHolder = (args.holder ?? 'unknown')
+            .toLowerCase()
+            .replace(/^0x/, '')
+        const fileName = `vc_${safeHolder}_${Date.now()}.vc`
+        const filePath = path.resolve(process.cwd(), fileName)
+        fs.writeFileSync(filePath, vcString, 'utf8')
+
+        console.log(`VC generated in: ${filePath}`)
     })
 
 task(
