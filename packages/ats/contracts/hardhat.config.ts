@@ -215,13 +215,13 @@ import '@tasks'
 
 const config: HardhatUserConfig = {
     solidity: {
-        version: '0.8.18',
+        version: '0.8.30',
         settings: {
             optimizer: {
                 enabled: true,
                 runs: 100,
             },
-            evmVersion: 'london',
+            evmVersion: 'cancun',
         },
     },
     paths: {
@@ -235,7 +235,7 @@ const config: HardhatUserConfig = {
         hardhat: {
             chainId: 1337,
             blockGasLimit: 30_000_000,
-            hardfork: 'london',
+            hardfork: 'cancun',
         },
         local: {
             url: Configuration.endpoints.local.jsonRpc,
