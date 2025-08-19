@@ -206,170 +206,193 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {Common} from '../../layer_1/common/Common.sol';
-import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
-    DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-} from '../constants/values.sol';
-import {IEquity} from '../interfaces/equity/IEquity.sol';
+    _BOND_STORAGE_POSITION
+} from '../../layer_2/constants/storagePositions.sol';
+import {COUPON_CORPORATE_ACTION_TYPE} from '../../layer_2/constants/values.sol';
+import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
+import {
+    IBondStorageWrapper
+} from '../../layer_2/interfaces/bond/IBondStorageWrapper.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    IEquityStorageWrapper
-} from '../interfaces/equity/IEquityStorageWrapper.sol';
+    ERC20PermitStorageWrapper
+} from '../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol';
 
-abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
+abstract contract BondStorageWrapper is
+    IBondStorageWrapper,
+    ERC20PermitStorageWrapper
+{
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    struct EquityDataStorage {
-        IEquity.EquityDetailsData equityDetailsData;
+    struct BondDataStorage {
+        IBondRead.BondDetailsData bondDetail;
+        IBondRead.CouponDetailsData couponDetail;
         bool initialized;
     }
 
-    function _storeEquityDetails(
-        IEquity.EquityDetailsData memory _equityDetailsData
+    /**
+     * @dev Modifier to ensure that the function is called only after the current maturity date.
+     * @param _maturityDate The maturity date to be checked against the current maturity date.
+     * Reverts with `BondMaturityDateWrong` if the provided maturity date is less than or equal
+     * to the current maturity date.
+     */
+    modifier onlyAfterCurrentMaturityDate(uint256 _maturityDate) {
+        _checkMaturityDate(_maturityDate);
+        _;
+    }
+
+    function _storeBondDetails(
+        IBondRead.BondDetailsData memory _bondDetails
     ) internal {
-        _equityStorage().equityDetailsData = _equityDetailsData;
+        _bondStorage().bondDetail = _bondDetails;
     }
 
-    function _setDividends(
-        IEquity.Dividend calldata _newDividend
-    )
-        internal
-        returns (bool success_, bytes32 corporateActionId_, uint256 dividendId_)
-    {
-        (success_, corporateActionId_, dividendId_) = _addCorporateAction(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
-            abi.encode(_newDividend)
+    function _storeCouponDetails(
+        IBondRead.CouponDetailsData memory _couponDetails,
+        uint256 _startingDate,
+        uint256 _maturityDate
+    ) internal {
+        _bondStorage().couponDetail = _couponDetails;
+        if (_couponDetails.firstCouponDate == 0) return;
+        if (
+            _couponDetails.firstCouponDate < _startingDate ||
+            _couponDetails.firstCouponDate > _maturityDate
+        ) revert CouponFirstDateWrong();
+        if (_couponDetails.couponFrequency == 0) revert CouponFrequencyWrong();
+
+        _setFixedCoupons(
+            _couponDetails.firstCouponDate,
+            _couponDetails.couponFrequency,
+            _maturityDate,
+            _couponDetails.couponRate
         );
     }
 
-    function _setVoting(
-        IEquity.Voting calldata _newVoting
+    function _setCoupon(
+        IBondRead.Coupon memory _newCoupon
     )
         internal
-        returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
+        returns (bool success_, bytes32 corporateActionId_, uint256 couponID_)
     {
-        (success_, corporateActionId_, voteID_) = _addCorporateAction(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            abi.encode(_newVoting)
+        (success_, corporateActionId_, couponID_) = _addCorporateAction(
+            COUPON_CORPORATE_ACTION_TYPE,
+            abi.encode(_newCoupon)
         );
-    }
-
-    function _setScheduledBalanceAdjustment(
-        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    )
-        internal
-        returns (
-            bool success_,
-            bytes32 corporateActionId_,
-            uint256 balanceAdjustmentID_
-        )
-    {
-        (
-            success_,
-            corporateActionId_,
-            balanceAdjustmentID_
-        ) = _addCorporateAction(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-            abi.encode(_newBalanceAdjustment)
-        );
-    }
-
-    function _getEquityDetails()
-        internal
-        view
-        returns (IEquity.EquityDetailsData memory equityDetails_)
-    {
-        equityDetails_ = _equityStorage().equityDetailsData;
     }
 
     /**
-     * @dev returns the properties and related snapshots (if any) of a dividend.
-     *
-     * @param _dividendID The dividend Id
-     * @param _dividendID The dividend Id
+     * @dev Internal function to set the maturity date of the bond.
+     * @param _maturityDate The new maturity date to be set.
+     * @return success_ True if the maturity date was set successfully.
      */
-    function _getDividends(
-        uint256 _dividendID
+    function _setMaturityDate(
+        uint256 _maturityDate
+    ) internal returns (bool success_) {
+        _bondStorage().bondDetail.maturityDate = _maturityDate;
+        return true;
+    }
+
+    function _getBondDetails()
+        internal
+        view
+        returns (IBondRead.BondDetailsData memory bondDetails_)
+    {
+        bondDetails_ = _bondStorage().bondDetail;
+    }
+
+    function _getCouponDetails()
+        internal
+        view
+        returns (IBondRead.CouponDetailsData memory couponDetails_)
+    {
+        couponDetails_ = _bondStorage().couponDetail;
+    }
+
+    function _getMaturityDate() internal view returns (uint256 maturityDate_) {
+        return _bondStorage().bondDetail.maturityDate;
+    }
+
+    function _getCoupon(
+        uint256 _couponID
     )
         internal
         view
-        returns (IEquity.RegisteredDividend memory registeredDividend_)
+        returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
     {
         bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[DIVIDEND_CORPORATE_ACTION_TYPE]
-            .at(_dividendID - 1);
+            .actionsByType[COUPON_CORPORATE_ACTION_TYPE]
+            .at(_couponID - 1);
 
         (, bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
-            (registeredDividend_.dividend) = abi.decode(
-                data,
-                (IEquity.Dividend)
-            );
+            (registeredCoupon_.coupon) = abi.decode(data, (IBondRead.Coupon));
         }
 
-        registeredDividend_.snapshotId = _getSnapshotID(actionId);
+        registeredCoupon_.snapshotId = _getSnapshotID(actionId);
     }
 
-    /**
-     * @dev returns the properties and related snapshots (if any) of a dividend.
-     *
-     * @param _dividendID The dividend Id
-     * @param _account The account
-
-     */
-    function _getDividendsFor(
-        uint256 _dividendID,
+    function _getCouponFor(
+        uint256 _couponID,
         address _account
-    ) internal view returns (IEquity.DividendFor memory dividendFor_) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
-            _dividendID
+    ) internal view returns (IBondRead.CouponFor memory couponFor_) {
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(
+            _couponID
         );
 
-        dividendFor_.amount = registeredDividend.dividend.amount;
-        dividendFor_.recordDate = registeredDividend.dividend.recordDate;
-        dividendFor_.executionDate = registeredDividend.dividend.executionDate;
+        couponFor_.rate = registeredCoupon.coupon.rate;
+        couponFor_.recordDate = registeredCoupon.coupon.recordDate;
+        couponFor_.executionDate = registeredCoupon.coupon.executionDate;
 
-        (
-            dividendFor_.tokenBalance,
-            dividendFor_.decimals,
-            dividendFor_.recordDateReached
-        ) = _getSnapshotBalanceForIfDateReached(
-            registeredDividend.dividend.recordDate,
-            registeredDividend.snapshotId,
-            _account
-        );
+        if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
+            couponFor_.recordDateReached = true;
+
+            couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
+                ? (_balanceOfAtSnapshot(registeredCoupon.snapshotId, _account) +
+                    _lockedBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    ) +
+                    _heldBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    )) +
+                    _clearedBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    )
+                : (_balanceOf(_account) +
+                    _getLockedAmountFor(_account) +
+                    _getHeldAmountFor(_account)) +
+                    _getClearedAmountFor(_account);
+
+            couponFor_.decimals = _decimalsAdjusted();
+        }
     }
 
-    function _getDividendsCount()
-        internal
-        view
-        returns (uint256 dividendCount_)
-    {
-        return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
+    function _getCouponCount() internal view returns (uint256 couponCount_) {
+        return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }
 
-    function _getDividendHolders(
-        uint256 _dividendID,
+    function _getCouponHolders(
+        uint256 _couponID,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory holders_) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
-            _dividendID
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(
+            _couponID
         );
 
-        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
+        if (registeredCoupon.coupon.recordDate >= _blockTimestamp())
             return new address[](0);
 
-        if (registeredDividend.snapshotId != 0)
+        if (registeredCoupon.snapshotId != 0)
             return
                 _tokenHoldersAt(
-                    registeredDividend.snapshotId,
+                    registeredCoupon.snapshotId,
                     _pageIndex,
                     _pageLength
                 );
@@ -377,177 +400,61 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
         return _getTokenHolders(_pageIndex, _pageLength);
     }
 
-    function _getTotalDividendHolders(
-        uint256 _dividendID
+    function _getTotalCouponHolders(
+        uint256 _couponID
     ) internal view returns (uint256) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
-            _dividendID
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(
+            _couponID
         );
 
-        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
-            return 0;
+        if (registeredCoupon.coupon.recordDate >= _blockTimestamp()) return 0;
 
-        if (registeredDividend.snapshotId != 0)
-            return _totalTokenHoldersAt(registeredDividend.snapshotId);
+        if (registeredCoupon.snapshotId != 0)
+            return _totalTokenHoldersAt(registeredCoupon.snapshotId);
 
         return _getTotalTokenHolders();
     }
 
-    function _getVoting(
-        uint256 _voteID
-    )
-        internal
-        view
-        returns (IEquity.RegisteredVoting memory registeredVoting_)
-    {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[VOTING_RIGHTS_CORPORATE_ACTION_TYPE]
-            .at(_voteID - 1);
-
-        (, bytes memory data) = _getCorporateAction(actionId);
-
-        if (data.length > 0) {
-            (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
-        }
-
-        registeredVoting_.snapshotId = _getSnapshotID(actionId);
-    }
-
-    /**
-     * @dev returns the properties and related snapshots (if any) of a voting.
-     *
-     * @param _voteID The dividend Id
-     * @param _account The account
-
-     */
-    function _getVotingFor(
-        uint256 _voteID,
-        address _account
-    ) internal view returns (IEquity.VotingFor memory votingFor_) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
-
-        votingFor_.recordDate = registeredVoting.voting.recordDate;
-        votingFor_.data = registeredVoting.voting.data;
-
-        (
-            votingFor_.tokenBalance,
-            votingFor_.decimals,
-            votingFor_.recordDateReached
-        ) = _getSnapshotBalanceForIfDateReached(
-            registeredVoting.voting.recordDate,
-            registeredVoting.snapshotId,
-            _account
-        );
-    }
-
-    function _getVotingCount() internal view returns (uint256 votingCount_) {
-        return
-            _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
-    }
-
-    function _getVotingHolders(
-        uint256 _voteID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory holders_) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
-
-        if (registeredVoting.voting.recordDate >= _blockTimestamp())
-            return new address[](0);
-
-        if (registeredVoting.snapshotId != 0)
-            return
-                _tokenHoldersAt(
-                    registeredVoting.snapshotId,
-                    _pageIndex,
-                    _pageLength
-                );
-
-        return _getTokenHolders(_pageIndex, _pageLength);
-    }
-
-    function _getTotalVotingHolders(
-        uint256 _voteID
-    ) internal view returns (uint256) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
-
-        if (registeredVoting.voting.recordDate >= _blockTimestamp()) return 0;
-
-        if (registeredVoting.snapshotId != 0)
-            return _totalTokenHoldersAt(registeredVoting.snapshotId);
-
-        return _getTotalTokenHolders();
-    }
-
-    function _getScheduledBalanceAdjusment(
-        uint256 _balanceAdjustmentID
-    )
-        internal
-        view
-        returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
-    {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE]
-            .at(_balanceAdjustmentID - 1);
-
-        (, bytes memory data) = _getCorporateAction(actionId);
-
-        if (data.length > 0) {
-            (balanceAdjustment_) = abi.decode(
-                data,
-                (IEquity.ScheduledBalanceAdjustment)
-            );
-        }
-    }
-
-    function _getScheduledBalanceAdjustmentsCount()
-        internal
-        view
-        returns (uint256 balanceAdjustmentCount_)
-    {
-        return
-            _getCorporateActionCountByType(
-                BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-            );
-    }
-
-    function _getSnapshotBalanceForIfDateReached(
-        uint256 _date,
-        uint256 _snapshotId,
-        address _account
-    )
-        internal
-        view
-        returns (uint256 balance_, uint8 decimals_, bool dateReached_)
-    {
-        if (_date < _blockTimestamp()) {
-            dateReached_ = true;
-
-            balance_ = (_snapshotId != 0)
-                ? (_balanceOfAtSnapshot(_snapshotId, _account) +
-                    _lockedBalanceOfAtSnapshot(_snapshotId, _account) +
-                    _heldBalanceOfAtSnapshot(_snapshotId, _account) +
-                    _clearedBalanceOfAtSnapshot(_snapshotId, _account))
-                : (_balanceOfAdjustedAt(_account, _date) +
-                    _getLockedAmountForAdjustedAt(_account, _blockTimestamp()) +
-                    _getHeldAmountForAdjusted(_account) +
-                    _getClearedAmountForAdjusted(_account));
-
-            decimals_ = (_snapshotId != 0)
-                ? _decimalsAtSnapshot(_snapshotId)
-                : _decimalsAdjustedAt(_date);
-        }
-    }
-
-    function _equityStorage()
+    function _bondStorage()
         internal
         pure
-        returns (EquityDataStorage storage equityData_)
+        returns (BondDataStorage storage bondData_)
     {
-        bytes32 position = _EQUITY_STORAGE_POSITION;
+        bytes32 position = _BOND_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            equityData_.slot := position
+            bondData_.slot := position
         }
+    }
+
+    function _setFixedCoupons(
+        uint256 _firstCouponDate,
+        uint256 _couponFrequency,
+        uint256 _maturityDate,
+        uint256 _rate
+    ) private returns (bool) {
+        uint256 numberOfSubsequentCoupons = (_maturityDate - _firstCouponDate) /
+            _couponFrequency;
+        bool success;
+        for (uint256 i = 0; i <= numberOfSubsequentCoupons; i++) {
+            uint256 runDate = _firstCouponDate + i * _couponFrequency;
+
+            IBondRead.Coupon memory _newCoupon;
+            _newCoupon.recordDate = runDate;
+            _newCoupon.executionDate = runDate;
+            _newCoupon.rate = _rate;
+
+            (success, , ) = _setCoupon(_newCoupon);
+
+            if (!success) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function _checkMaturityDate(uint256 _maturityDate) private view {
+        if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();
     }
 }

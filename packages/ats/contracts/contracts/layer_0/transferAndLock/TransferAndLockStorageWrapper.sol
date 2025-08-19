@@ -203,81 +203,217 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
 import {
-    ITimeTravelStorageWrapper
-} from '../interfaces/ITimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+    checkNounceAndDeadline,
+    verify
+} from '../../layer_1/protectedPartitions/signatureVerification.sol';
+import {ITransferAndLock} from '../../layer_3/interfaces/ITransferAndLock.sol';
+import {
+    ITransferAndLockStorageWrapper
+} from '../../layer_3/interfaces/ITransferAndLockStorageWrapper.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {
+    getMessageHashTransferAndLockByPartition,
+    getMessageHashTransferAndLock
+} from '../../layer_3/transferAndLock/signatureVerification.sol';
+import {BasicTransferInfo} from '../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import {SecurityStorageWrapper} from '../security/SecurityStorageWrapper.sol';
 
-abstract contract TimeTravelStorageWrapper is
-    ITimeTravelStorageWrapper,
-    LocalContext
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+abstract contract TransferAndLockStorageWrapper is
+    ITransferAndLockStorageWrapper,
+    SecurityStorageWrapper
 {
-    // keccak256("security.token.standard.timeTravel.resolverKey")
-    bytes32 internal constant _TIME_TRAVEL_RESOLVER_KEY =
-        0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8;
-    uint256 internal _timestamp;
-    uint256 internal _blocknumber;
+    function _protectedTransferAndLockByPartition(
+        bytes32 _partition,
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal returns (bool success_, uint256 lockId_) {
+        checkNounceAndDeadline(
+            _nounce,
+            _transferAndLock.from,
+            _getNounceFor(_transferAndLock.from),
+            _deadline,
+            _blockTimestamp()
+        );
 
-    constructor() {
-        _checkBlockChainid(_blockChainid());
+        _checkTransferAndLockByPartitionSignature(
+            _partition,
+            _transferAndLock,
+            _deadline,
+            _nounce,
+            _signature
+        );
+
+        _setNounce(_nounce, _transferAndLock.from);
+
+        _transferByPartition(
+            _msgSender(),
+            BasicTransferInfo(_transferAndLock.to, _transferAndLock.amount),
+            _partition,
+            _transferAndLock.data,
+            _msgSender(),
+            ''
+        );
+        (success_, lockId_) = _lockByPartition(
+            _partition,
+            _transferAndLock.amount,
+            _transferAndLock.to,
+            _transferAndLock.expirationTimestamp
+        );
+
+        emit PartitionTransferredAndLocked(
+            _partition,
+            _msgSender(),
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            lockId_
+        );
     }
 
-    function _changeSystemTimestamp(uint256 _newSystemTime) internal {
-        if (_newSystemTime == 0) {
-            revert InvalidTimestamp(_newSystemTime);
-        }
+    function _protectedTransferAndLock(
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal returns (bool success_, uint256 lockId_) {
+        checkNounceAndDeadline(
+            _nounce,
+            _transferAndLock.from,
+            _getNounceFor(_transferAndLock.from),
+            _deadline,
+            _blockTimestamp()
+        );
 
-        uint256 _oldSystemTime = _timestamp;
-        _timestamp = _newSystemTime;
+        _checkTransferAndLockSignature(
+            _transferAndLock,
+            _deadline,
+            _nounce,
+            _signature
+        );
 
-        emit SystemTimestampChanged(_oldSystemTime, _newSystemTime);
+        _setNounce(_nounce, _transferAndLock.from);
+
+        _transferByPartition(
+            _msgSender(),
+            BasicTransferInfo(_transferAndLock.to, _transferAndLock.amount),
+            _DEFAULT_PARTITION,
+            _transferAndLock.data,
+            _msgSender(),
+            ''
+        );
+        (success_, lockId_) = _lockByPartition(
+            _DEFAULT_PARTITION,
+            _transferAndLock.amount,
+            _transferAndLock.to,
+            _transferAndLock.expirationTimestamp
+        );
+
+        emit PartitionTransferredAndLocked(
+            _DEFAULT_PARTITION,
+            _msgSender(),
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            lockId_
+        );
     }
 
-    function _resetSystemTimestamp() internal {
-        _timestamp = 0;
-        emit SystemTimestampReset();
+    function _checkTransferAndLockByPartitionSignature(
+        bytes32 _partition,
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view {
+        if (
+            !_isTransferAndLockByPartitionSignatureValid(
+                _partition,
+                _transferAndLock,
+                _deadline,
+                _nounce,
+                _signature
+            )
+        ) revert WrongSignature();
     }
 
-    function _changeSystemBlocknumber(uint256 _newSystemNumber) internal {
-        if (_newSystemNumber == 0) {
-            revert InvalidBlocknumber(_newSystemNumber);
-        }
-
-        uint256 _oldSystemNumber = _blocknumber;
-        _blocknumber = _newSystemNumber;
-
-        emit SystemBlocknumberChanged(_oldSystemNumber, _newSystemNumber);
+    function _isTransferAndLockByPartitionSignatureValid(
+        bytes32 _partition,
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view returns (bool) {
+        bytes32 functionHash = getMessageHashTransferAndLockByPartition(
+            _partition,
+            _transferAndLock.from,
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            _deadline,
+            _nounce
+        );
+        return
+            verify(
+                _transferAndLock.from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
+            );
     }
 
-    function _resetSystemBlocknumber() internal {
-        _blocknumber = 0;
-        emit SystemBlocknumberReset();
+    function _checkTransferAndLockSignature(
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view {
+        if (
+            !_isTransferAndLockSignatureValid(
+                _transferAndLock,
+                _deadline,
+                _nounce,
+                _signature
+            )
+        ) revert WrongSignature();
     }
 
-    function _blockTimestamp()
-        internal
-        view
-        virtual
-        override
-        returns (uint256)
-    {
-        return _timestamp == 0 ? block.timestamp : _timestamp;
-    }
-
-    function _blockNumber()
-        internal
-        view
-        virtual
-        override
-        returns (uint256 blockNumber_)
-    {
-        return _blocknumber == 0 ? block.number : _blocknumber;
-    }
-
-    function _checkBlockChainid(uint256 chainId) internal pure {
-        if (chainId != 1337) revert WrongChainId();
+    function _isTransferAndLockSignatureValid(
+        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view returns (bool) {
+        bytes32 functionHash = getMessageHashTransferAndLock(
+            _transferAndLock.from,
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            _deadline,
+            _nounce
+        );
+        return
+            verify(
+                _transferAndLock.from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
+            );
     }
 }

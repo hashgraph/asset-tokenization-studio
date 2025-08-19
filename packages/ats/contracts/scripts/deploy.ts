@@ -217,6 +217,8 @@ import {
     AdjustBalancesTimeTravel__factory,
     BondUSA__factory,
     BondUSATimeTravel__factory,
+    BondUSARead__factory,
+    BondUSAReadTimeTravel__factory,
     BusinessLogicResolver__factory,
     Cap__factory,
     CapTimeTravel__factory,
@@ -291,10 +293,14 @@ import {
     ExternalKycListManagementTimeTravel__factory,
     ERC1410TokenHolderFacet__factory,
     ERC1410TokenHolderTimeTravel__factory,
-    ERC3643Facet__factory,
+    ERC3643ManagementFacet__factory,
+    ERC3643ManagementTimeTravel__factory,
+    ERC3643ReadFacet__factory,
+    ERC3643ReadTimeTravel__factory,
+    ERC3643OperationsFacet__factory,
+    ERC3643OperationsTimeTravel__factory,
     ERC3643BatchFacet__factory,
     ERC3643BatchTimeTravel__factory,
-    ERC3643TimeTravel__factory,
     FreezeFacet__factory,
     FreezeFacetTimeTravel__factory,
 } from '@typechain'
@@ -714,6 +720,17 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        bondUsaRead: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new BondUSARead__factory(),
+                new BondUSAReadTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.BondUSARead.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
         scheduledSnapshots: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ScheduledSnapshots__factory(),
@@ -897,14 +914,40 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        erc3643Facet: new DeployContractWithFactoryCommand({
+        erc3643ManagementFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new ERC3643Facet__factory(),
-                new ERC3643TimeTravel__factory()
+                new ERC3643ManagementFacet__factory(),
+                new ERC3643ManagementTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ERC3643Facet.addresses?.[network]
+                ? Configuration.contracts.ERC3643ManagementFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        erc3643OperationsFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC3643OperationsFacet__factory(),
+                new ERC3643OperationsTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC3643OperationsFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        erc3643ReadFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC3643ReadFacet__factory(),
+                new ERC3643ReadTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC3643ReadFacet.addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -1183,6 +1226,17 @@ export async function deployAtsContracts({
                     return result
                 }
             ),
+            bondUsaRead: await deployContractWithFactory(
+                commands.bondUsaRead
+            ).then((result) => {
+                console.log(
+                    `BondUSARead has been deployed successfully at ${result.address}`
+                )
+                console.log(
+                    `BondUSARead has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
             scheduledSnapshots: await deployContractWithFactory(
                 commands.scheduledSnapshots
             ).then((result) => {
@@ -1348,11 +1402,27 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
-            erc3643Facet: await deployContractWithFactory(
-                commands.erc3643Facet
+            erc3643ManagementFacet: await deployContractWithFactory(
+                commands.erc3643ManagementFacet
             ).then((result) => {
                 console.log(
-                    `ERC3643Basic has been deployed successfully at ${result.address}`
+                    `ERC3643Management has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
+            erc3643OperationsFacet: await deployContractWithFactory(
+                commands.erc3643OperationsFacet
+            ).then((result) => {
+                console.log(
+                    `ERC3643Operations has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
+            erc3643ReadFacet: await deployContractWithFactory(
+                commands.erc3643ReadFacet
+            ).then((result) => {
+                console.log(
+                    `ERC3643Read has been deployed successfully at ${result.address}`
                 )
                 return result
             }),

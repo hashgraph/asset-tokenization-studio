@@ -206,78 +206,47 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {_ERC3643_OPERATIONS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {IERC3643Operations} from '../interfaces/ERC3643/IERC3643Operations.sol';
 import {
-    ITimeTravelStorageWrapper
-} from '../interfaces/ITimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {ERC3643Operations} from './ERC3643Operations.sol';
 
-abstract contract TimeTravelStorageWrapper is
-    ITimeTravelStorageWrapper,
-    LocalContext
-{
-    // keccak256("security.token.standard.timeTravel.resolverKey")
-    bytes32 internal constant _TIME_TRAVEL_RESOLVER_KEY =
-        0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8;
-    uint256 internal _timestamp;
-    uint256 internal _blocknumber;
-
-    constructor() {
-        _checkBlockChainid(_blockChainid());
-    }
-
-    function _changeSystemTimestamp(uint256 _newSystemTime) internal {
-        if (_newSystemTime == 0) {
-            revert InvalidTimestamp(_newSystemTime);
-        }
-
-        uint256 _oldSystemTime = _timestamp;
-        _timestamp = _newSystemTime;
-
-        emit SystemTimestampChanged(_oldSystemTime, _newSystemTime);
-    }
-
-    function _resetSystemTimestamp() internal {
-        _timestamp = 0;
-        emit SystemTimestampReset();
-    }
-
-    function _changeSystemBlocknumber(uint256 _newSystemNumber) internal {
-        if (_newSystemNumber == 0) {
-            revert InvalidBlocknumber(_newSystemNumber);
-        }
-
-        uint256 _oldSystemNumber = _blocknumber;
-        _blocknumber = _newSystemNumber;
-
-        emit SystemBlocknumberChanged(_oldSystemNumber, _newSystemNumber);
-    }
-
-    function _resetSystemBlocknumber() internal {
-        _blocknumber = 0;
-        emit SystemBlocknumberReset();
-    }
-
-    function _blockTimestamp()
-        internal
-        view
-        virtual
+contract ERC3643OperationsFacet is IStaticFunctionSelectors, ERC3643Operations {
+    function getStaticResolverKey()
+        external
+        pure
         override
-        returns (uint256)
+        returns (bytes32 staticResolverKey_)
     {
-        return _timestamp == 0 ? block.timestamp : _timestamp;
+        staticResolverKey_ = _ERC3643_OPERATIONS_RESOLVER_KEY;
     }
 
-    function _blockNumber()
-        internal
-        view
-        virtual
+    function getStaticFunctionSelectors()
+        external
+        pure
         override
-        returns (uint256 blockNumber_)
+        returns (bytes4[] memory staticFunctionSelectors_)
     {
-        return _blocknumber == 0 ? block.number : _blocknumber;
+        staticFunctionSelectors_ = new bytes4[](3);
+        uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .forcedTransfer
+            .selector;
     }
 
-    function _checkBlockChainid(uint256 chainId) internal pure {
-        if (chainId != 1337) revert WrongChainId();
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Operations)
+            .interfaceId;
     }
 }

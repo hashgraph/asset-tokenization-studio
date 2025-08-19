@@ -3,7 +3,7 @@ export const createLogger = () => ({
   log: (level, message, meta) => {
     // Mock logger should delegate to console for debugging
     const consoleMethod =
-      level === "ERROR" ? "error" : level === "TRACE" ? "debug" : "info";
+      level === 'ERROR' ? 'error' : level === 'TRACE' ? 'debug' : 'info';
     console[consoleMethod](`[${level}] ${message}`, meta);
   },
   error: () => {},

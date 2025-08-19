@@ -206,78 +206,73 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {BondRead} from '../../layer_2/bond/BondRead.sol';
+import {Security} from '../security/Security.sol';
 import {
-    ITimeTravelStorageWrapper
-} from '../interfaces/ITimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+    RegulationData,
+    AdditionalSecurityData
+} from '../constants/regulation.sol';
+import {
+    _BOND_READ_RESOLVER_KEY
+} from '../../layer_2/constants/resolverKeys.sol';
+import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
+import {ISecurity} from '../interfaces/ISecurity.sol';
 
-abstract contract TimeTravelStorageWrapper is
-    ITimeTravelStorageWrapper,
-    LocalContext
-{
-    // keccak256("security.token.standard.timeTravel.resolverKey")
-    bytes32 internal constant _TIME_TRAVEL_RESOLVER_KEY =
-        0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8;
-    uint256 internal _timestamp;
-    uint256 internal _blocknumber;
-
-    constructor() {
-        _checkBlockChainid(_blockChainid());
-    }
-
-    function _changeSystemTimestamp(uint256 _newSystemTime) internal {
-        if (_newSystemTime == 0) {
-            revert InvalidTimestamp(_newSystemTime);
-        }
-
-        uint256 _oldSystemTime = _timestamp;
-        _timestamp = _newSystemTime;
-
-        emit SystemTimestampChanged(_oldSystemTime, _newSystemTime);
-    }
-
-    function _resetSystemTimestamp() internal {
-        _timestamp = 0;
-        emit SystemTimestampReset();
-    }
-
-    function _changeSystemBlocknumber(uint256 _newSystemNumber) internal {
-        if (_newSystemNumber == 0) {
-            revert InvalidBlocknumber(_newSystemNumber);
-        }
-
-        uint256 _oldSystemNumber = _blocknumber;
-        _blocknumber = _newSystemNumber;
-
-        emit SystemBlocknumberChanged(_oldSystemNumber, _newSystemNumber);
-    }
-
-    function _resetSystemBlocknumber() internal {
-        _blocknumber = 0;
-        emit SystemBlocknumberReset();
-    }
-
-    function _blockTimestamp()
-        internal
-        view
-        virtual
+contract BondUSARead is BondRead, Security {
+    function getStaticResolverKey()
+        external
+        pure
         override
-        returns (uint256)
+        returns (bytes32 staticResolverKey_)
     {
-        return _timestamp == 0 ? block.timestamp : _timestamp;
+        staticResolverKey_ = _BOND_READ_RESOLVER_KEY;
     }
 
-    function _blockNumber()
-        internal
-        view
-        virtual
+    function getStaticFunctionSelectors()
+        external
+        pure
         override
-        returns (uint256 blockNumber_)
+        returns (bytes4[] memory staticFunctionSelectors_)
     {
-        return _blocknumber == 0 ? block.number : _blocknumber;
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](10);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getBondDetails
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getCouponDetails
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getCouponCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getCouponHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalCouponHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getSecurityRegulationData
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getSecurityHolders
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalSecurityHolders
+            .selector;
     }
 
-    function _checkBlockChainid(uint256 chainId) internal pure {
-        if (chainId != 1337) revert WrongChainId();
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](3);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IBondRead).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
     }
 }

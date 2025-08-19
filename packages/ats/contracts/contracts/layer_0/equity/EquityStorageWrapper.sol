@@ -203,81 +203,356 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
 import {
-    ITimeTravelStorageWrapper
-} from '../interfaces/ITimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+    _EQUITY_STORAGE_POSITION
+} from '../../layer_2/constants/storagePositions.sol';
+import {
+    DIVIDEND_CORPORATE_ACTION_TYPE,
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
+} from '../../layer_2/constants/values.sol';
+import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    IEquityStorageWrapper
+} from '../../layer_2/interfaces/equity/IEquityStorageWrapper.sol';
+import {BondStorageWrapper} from '../bond/BondStorageWrapper.sol';
 
-abstract contract TimeTravelStorageWrapper is
-    ITimeTravelStorageWrapper,
-    LocalContext
+abstract contract EquityStorageWrapper is
+    IEquityStorageWrapper,
+    BondStorageWrapper
 {
-    // keccak256("security.token.standard.timeTravel.resolverKey")
-    bytes32 internal constant _TIME_TRAVEL_RESOLVER_KEY =
-        0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8;
-    uint256 internal _timestamp;
-    uint256 internal _blocknumber;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    constructor() {
-        _checkBlockChainid(_blockChainid());
+    struct EquityDataStorage {
+        IEquity.EquityDetailsData equityDetailsData;
+        bool initialized;
     }
 
-    function _changeSystemTimestamp(uint256 _newSystemTime) internal {
-        if (_newSystemTime == 0) {
-            revert InvalidTimestamp(_newSystemTime);
-        }
-
-        uint256 _oldSystemTime = _timestamp;
-        _timestamp = _newSystemTime;
-
-        emit SystemTimestampChanged(_oldSystemTime, _newSystemTime);
+    function _storeEquityDetails(
+        IEquity.EquityDetailsData memory _equityDetailsData
+    ) internal {
+        _equityStorage().equityDetailsData = _equityDetailsData;
     }
 
-    function _resetSystemTimestamp() internal {
-        _timestamp = 0;
-        emit SystemTimestampReset();
+    function _setDividends(
+        IEquity.Dividend calldata _newDividend
+    )
+        internal
+        returns (bool success_, bytes32 corporateActionId_, uint256 dividendId_)
+    {
+        (success_, corporateActionId_, dividendId_) = _addCorporateAction(
+            DIVIDEND_CORPORATE_ACTION_TYPE,
+            abi.encode(_newDividend)
+        );
     }
 
-    function _changeSystemBlocknumber(uint256 _newSystemNumber) internal {
-        if (_newSystemNumber == 0) {
-            revert InvalidBlocknumber(_newSystemNumber);
-        }
-
-        uint256 _oldSystemNumber = _blocknumber;
-        _blocknumber = _newSystemNumber;
-
-        emit SystemBlocknumberChanged(_oldSystemNumber, _newSystemNumber);
+    function _setVoting(
+        IEquity.Voting calldata _newVoting
+    )
+        internal
+        returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
+    {
+        (success_, corporateActionId_, voteID_) = _addCorporateAction(
+            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+            abi.encode(_newVoting)
+        );
     }
 
-    function _resetSystemBlocknumber() internal {
-        _blocknumber = 0;
-        emit SystemBlocknumberReset();
+    function _setScheduledBalanceAdjustment(
+        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    )
+        internal
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 balanceAdjustmentID_
+        )
+    {
+        (
+            success_,
+            corporateActionId_,
+            balanceAdjustmentID_
+        ) = _addCorporateAction(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            abi.encode(_newBalanceAdjustment)
+        );
     }
 
-    function _blockTimestamp()
+    function _getEquityDetails()
         internal
         view
-        virtual
-        override
-        returns (uint256)
+        returns (IEquity.EquityDetailsData memory equityDetails_)
     {
-        return _timestamp == 0 ? block.timestamp : _timestamp;
+        equityDetails_ = _equityStorage().equityDetailsData;
     }
 
-    function _blockNumber()
+    /**
+     * @dev returns the properties and related snapshots (if any) of a dividend.
+     *
+     * @param _dividendID The dividend Id
+     * @param _dividendID The dividend Id
+     */
+    function _getDividends(
+        uint256 _dividendID
+    )
         internal
         view
-        virtual
-        override
-        returns (uint256 blockNumber_)
+        returns (IEquity.RegisteredDividend memory registeredDividend_)
     {
-        return _blocknumber == 0 ? block.number : _blocknumber;
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[DIVIDEND_CORPORATE_ACTION_TYPE]
+            .at(_dividendID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (registeredDividend_.dividend) = abi.decode(
+                data,
+                (IEquity.Dividend)
+            );
+        }
+
+        registeredDividend_.snapshotId = _getSnapshotID(actionId);
     }
 
-    function _checkBlockChainid(uint256 chainId) internal pure {
-        if (chainId != 1337) revert WrongChainId();
+    /**
+     * @dev returns the properties and related snapshots (if any) of a dividend.
+     *
+     * @param _dividendID The dividend Id
+     * @param _account The account
+
+     */
+    function _getDividendsFor(
+        uint256 _dividendID,
+        address _account
+    ) internal view returns (IEquity.DividendFor memory dividendFor_) {
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
+            _dividendID
+        );
+
+        dividendFor_.amount = registeredDividend.dividend.amount;
+        dividendFor_.recordDate = registeredDividend.dividend.recordDate;
+        dividendFor_.executionDate = registeredDividend.dividend.executionDate;
+
+        (
+            dividendFor_.tokenBalance,
+            dividendFor_.decimals,
+            dividendFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredDividend.dividend.recordDate,
+            registeredDividend.snapshotId,
+            _account
+        );
+    }
+
+    function _getDividendsCount()
+        internal
+        view
+        returns (uint256 dividendCount_)
+    {
+        return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
+    }
+
+    function _getDividendHolders(
+        uint256 _dividendID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory holders_) {
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
+            _dividendID
+        );
+
+        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
+            return new address[](0);
+
+        if (registeredDividend.snapshotId != 0)
+            return
+                _tokenHoldersAt(
+                    registeredDividend.snapshotId,
+                    _pageIndex,
+                    _pageLength
+                );
+
+        return _getTokenHolders(_pageIndex, _pageLength);
+    }
+
+    function _getTotalDividendHolders(
+        uint256 _dividendID
+    ) internal view returns (uint256) {
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
+            _dividendID
+        );
+
+        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
+            return 0;
+
+        if (registeredDividend.snapshotId != 0)
+            return _totalTokenHoldersAt(registeredDividend.snapshotId);
+
+        return _getTotalTokenHolders();
+    }
+
+    function _getVoting(
+        uint256 _voteID
+    )
+        internal
+        view
+        returns (IEquity.RegisteredVoting memory registeredVoting_)
+    {
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[VOTING_RIGHTS_CORPORATE_ACTION_TYPE]
+            .at(_voteID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
+        }
+
+        registeredVoting_.snapshotId = _getSnapshotID(actionId);
+    }
+
+    /**
+     * @dev returns the properties and related snapshots (if any) of a voting.
+     *
+     * @param _voteID The dividend Id
+     * @param _account The account
+
+     */
+    function _getVotingFor(
+        uint256 _voteID,
+        address _account
+    ) internal view returns (IEquity.VotingFor memory votingFor_) {
+        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+
+        votingFor_.recordDate = registeredVoting.voting.recordDate;
+        votingFor_.data = registeredVoting.voting.data;
+
+        (
+            votingFor_.tokenBalance,
+            votingFor_.decimals,
+            votingFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredVoting.voting.recordDate,
+            registeredVoting.snapshotId,
+            _account
+        );
+    }
+
+    function _getVotingCount() internal view returns (uint256 votingCount_) {
+        return
+            _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+    }
+
+    function _getVotingHolders(
+        uint256 _voteID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory holders_) {
+        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+
+        if (registeredVoting.voting.recordDate >= _blockTimestamp())
+            return new address[](0);
+
+        if (registeredVoting.snapshotId != 0)
+            return
+                _tokenHoldersAt(
+                    registeredVoting.snapshotId,
+                    _pageIndex,
+                    _pageLength
+                );
+
+        return _getTokenHolders(_pageIndex, _pageLength);
+    }
+
+    function _getTotalVotingHolders(
+        uint256 _voteID
+    ) internal view returns (uint256) {
+        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+
+        if (registeredVoting.voting.recordDate >= _blockTimestamp()) return 0;
+
+        if (registeredVoting.snapshotId != 0)
+            return _totalTokenHoldersAt(registeredVoting.snapshotId);
+
+        return _getTotalTokenHolders();
+    }
+
+    function _getScheduledBalanceAdjusment(
+        uint256 _balanceAdjustmentID
+    )
+        internal
+        view
+        returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
+    {
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE]
+            .at(_balanceAdjustmentID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (balanceAdjustment_) = abi.decode(
+                data,
+                (IEquity.ScheduledBalanceAdjustment)
+            );
+        }
+    }
+
+    function _getScheduledBalanceAdjustmentsCount()
+        internal
+        view
+        returns (uint256 balanceAdjustmentCount_)
+    {
+        return
+            _getCorporateActionCountByType(
+                BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
+            );
+    }
+
+    function _getSnapshotBalanceForIfDateReached(
+        uint256 _date,
+        uint256 _snapshotId,
+        address _account
+    )
+        internal
+        view
+        returns (uint256 balance_, uint8 decimals_, bool dateReached_)
+    {
+        if (_date < _blockTimestamp()) {
+            dateReached_ = true;
+
+            balance_ = (_snapshotId != 0)
+                ? (_balanceOfAtSnapshot(_snapshotId, _account) +
+                    _lockedBalanceOfAtSnapshot(_snapshotId, _account) +
+                    _heldBalanceOfAtSnapshot(_snapshotId, _account) +
+                    _clearedBalanceOfAtSnapshot(_snapshotId, _account))
+                : (_balanceOfAdjustedAt(_account, _date) +
+                    _getLockedAmountForAdjustedAt(_account, _blockTimestamp()) +
+                    _getHeldAmountForAdjusted(_account) +
+                    _getClearedAmountForAdjusted(_account));
+
+            decimals_ = (_snapshotId != 0)
+                ? _decimalsAtSnapshot(_snapshotId)
+                : _decimalsAdjustedAt(_date);
+        }
+    }
+
+    function _equityStorage()
+        internal
+        pure
+        returns (EquityDataStorage storage equityData_)
+    {
+        bytes32 position = _EQUITY_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            equityData_.slot := position
+        }
     }
 }

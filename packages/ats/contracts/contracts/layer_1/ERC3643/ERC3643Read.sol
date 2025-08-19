@@ -206,73 +206,44 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IERC3643Basic} from '../interfaces/ERC3643/IERC3643Basic.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ERC3643} from './ERC3643.sol';
+    _CONTROLLER_ROLE,
+    _ISSUER_ROLE,
+    _AGENT_ROLE,
+    _TREX_OWNER_ROLE
+} from '../constants/roles.sol';
+import {IERC3643Read} from '../interfaces/ERC3643/IERC3643Read.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
+import {Common} from '../common/Common.sol';
 
-contract ERC3643Facet is IStaticFunctionSelectors, ERC3643 {
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC3643_RESOLVER_KEY;
+abstract contract ERC3643Read is IERC3643Read, Common {
+    function isAgent(address _agent) external view returns (bool) {
+        return _hasRole(_AGENT_ROLE, _agent);
     }
 
-    function getStaticFunctionSelectors()
+    function identityRegistry()
         external
-        pure
+        view
         override
-        returns (bytes4[] memory staticFunctionSelectors_)
+        returns (IIdentityRegistry)
     {
-        staticFunctionSelectors_ = new bytes4[](18);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC3643
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setIdentityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setCompliance
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .recoveryAddress
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .forcedTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .identityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .isAddressRecovered
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
+        return _getIdentityRegistry();
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Basic).interfaceId;
+    function onchainID() external view override returns (address) {
+        return _getOnchainID();
+    }
+
+    function compliance() external view override returns (ICompliance) {
+        return _getCompliance();
+    }
+
+    function isAddressRecovered(address _wallet) external view returns (bool) {
+        return _isRecovered(_wallet);
+    }
+
+    function version() external view returns (string memory) {
+        return _version();
     }
 }

@@ -203,81 +203,86 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+import {IBondRead} from '../interfaces/bond/IBondRead.sol';
+import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
 import {
-    ITimeTravelStorageWrapper
-} from '../interfaces/ITimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+    _CORPORATE_ACTION_ROLE,
+    _BOND_MANAGER_ROLE,
+    _MATURITY_REDEEMER_ROLE
+} from '../../layer_1/constants/roles.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-abstract contract TimeTravelStorageWrapper is
-    ITimeTravelStorageWrapper,
-    LocalContext
-{
-    // keccak256("security.token.standard.timeTravel.resolverKey")
-    bytes32 internal constant _TIME_TRAVEL_RESOLVER_KEY =
-        0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8;
-    uint256 internal _timestamp;
-    uint256 internal _blocknumber;
-
-    constructor() {
-        _checkBlockChainid(_blockChainid());
-    }
-
-    function _changeSystemTimestamp(uint256 _newSystemTime) internal {
-        if (_newSystemTime == 0) {
-            revert InvalidTimestamp(_newSystemTime);
-        }
-
-        uint256 _oldSystemTime = _timestamp;
-        _timestamp = _newSystemTime;
-
-        emit SystemTimestampChanged(_oldSystemTime, _newSystemTime);
-    }
-
-    function _resetSystemTimestamp() internal {
-        _timestamp = 0;
-        emit SystemTimestampReset();
-    }
-
-    function _changeSystemBlocknumber(uint256 _newSystemNumber) internal {
-        if (_newSystemNumber == 0) {
-            revert InvalidBlocknumber(_newSystemNumber);
-        }
-
-        uint256 _oldSystemNumber = _blocknumber;
-        _blocknumber = _newSystemNumber;
-
-        emit SystemBlocknumberChanged(_oldSystemNumber, _newSystemNumber);
-    }
-
-    function _resetSystemBlocknumber() internal {
-        _blocknumber = 0;
-        emit SystemBlocknumberReset();
-    }
-
-    function _blockTimestamp()
-        internal
+abstract contract BondRead is IBondRead, IStaticFunctionSelectors, Common {
+    function getBondDetails()
+        external
         view
-        virtual
         override
-        returns (uint256)
+        returns (BondDetailsData memory bondDetailsData_)
     {
-        return _timestamp == 0 ? block.timestamp : _timestamp;
+        return _getBondDetails();
     }
 
-    function _blockNumber()
-        internal
+    function getCouponDetails()
+        external
         view
-        virtual
         override
-        returns (uint256 blockNumber_)
+        returns (CouponDetailsData memory couponDetails_)
     {
-        return _blocknumber == 0 ? block.number : _blocknumber;
+        return _getCouponDetails();
     }
 
-    function _checkBlockChainid(uint256 chainId) internal pure {
-        if (chainId != 1337) revert WrongChainId();
+    function getCoupon(
+        uint256 _couponID
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        returns (RegisteredCoupon memory registeredCoupon_)
+    {
+        return _getCoupon(_couponID);
+    }
+
+    function getCouponFor(
+        uint256 _couponID,
+        address _account
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        returns (CouponFor memory couponFor_)
+    {
+        return _getCouponFor(_couponID, _account);
+    }
+
+    function getCouponCount()
+        external
+        view
+        override
+        returns (uint256 couponCount_)
+    {
+        return _getCouponCount();
+    }
+
+    function getCouponHolders(
+        uint256 _couponID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_) {
+        return _getCouponHolders(_couponID, _pageIndex, _pageLength);
+    }
+
+    function getTotalCouponHolders(
+        uint256 _couponID
+    ) external view returns (uint256) {
+        return _getTotalCouponHolders(_couponID);
     }
 }

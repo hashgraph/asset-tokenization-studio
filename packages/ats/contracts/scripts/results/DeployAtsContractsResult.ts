@@ -209,6 +209,7 @@ import {
     AccessControlFacet,
     AdjustBalances,
     BondUSA,
+    BondUSARead,
     Cap,
     ControlList,
     CorporateActions,
@@ -244,7 +245,9 @@ import {
     HoldManagementFacet,
     HoldTokenHolderFacet,
     ERC1410TokenHolderFacet,
-    ERC3643Facet,
+    ERC3643ManagementFacet,
+    ERC3643OperationsFacet,
+    ERC3643ReadFacet,
     ERC3643BatchFacet,
     ERC20Permit,
     ERC20Votes,
@@ -271,6 +274,7 @@ export interface DeployAtsContractsResultParams {
     diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
     equityUsa: DeployContractWithFactoryResult<EquityUSA>
     bondUsa: DeployContractWithFactoryResult<BondUSA>
+    bondUsaRead: DeployContractWithFactoryResult<BondUSARead>
     scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
     scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
@@ -291,7 +295,9 @@ export interface DeployAtsContractsResultParams {
     externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    erc3643Facet: DeployContractWithFactoryResult<ERC3643Facet>
+    erc3643ManagementFacet: DeployContractWithFactoryResult<ERC3643ManagementFacet>
+    erc3643OperationsFacet: DeployContractWithFactoryResult<ERC3643OperationsFacet>
+    erc3643ReadFacet: DeployContractWithFactoryResult<ERC3643ReadFacet>
     erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>
     freeze: DeployContractWithFactoryResult<FreezeFacet>
     timeTravel?: DeployContractWithFactoryResult<TimeTravel>
@@ -318,6 +324,7 @@ export default class DeployAtsContractsResult {
     public readonly diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
     public readonly equityUsa: DeployContractWithFactoryResult<EquityUSA>
     public readonly bondUsa: DeployContractWithFactoryResult<BondUSA>
+    public readonly bondUsaRead: DeployContractWithFactoryResult<BondUSARead>
     public readonly scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
     public readonly scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     public readonly scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
@@ -338,7 +345,9 @@ export default class DeployAtsContractsResult {
     public readonly externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     public readonly externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     public readonly externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    public readonly erc3643Facet: DeployContractWithFactoryResult<ERC3643Facet>
+    public readonly erc3643ManagementFacet: DeployContractWithFactoryResult<ERC3643ManagementFacet>
+    public readonly erc3643OperationsFacet: DeployContractWithFactoryResult<ERC3643OperationsFacet>
+    public readonly erc3643ReadFacet: DeployContractWithFactoryResult<ERC3643ReadFacet>
     public readonly erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>
     public readonly freeze: DeployContractWithFactoryResult<FreezeFacet>
     public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
@@ -364,6 +373,7 @@ export default class DeployAtsContractsResult {
         diamondFacet,
         equityUsa,
         bondUsa,
+        bondUsaRead,
         scheduledSnapshots,
         scheduledBalanceAdjustments,
         scheduledTasks,
@@ -384,7 +394,9 @@ export default class DeployAtsContractsResult {
         freeze,
         timeTravel,
         deployer,
-        erc3643Facet,
+        erc3643ManagementFacet,
+        erc3643OperationsFacet,
+        erc3643ReadFacet,
         erc3643BatchFacet,
         holdReadFacet,
         holdManagementFacet,
@@ -409,6 +421,7 @@ export default class DeployAtsContractsResult {
         this.diamondFacet = diamondFacet
         this.equityUsa = equityUsa
         this.bondUsa = bondUsa
+        this.bondUsaRead = bondUsaRead
         this.scheduledSnapshots = scheduledSnapshots
         this.scheduledBalanceAdjustments = scheduledBalanceAdjustments
         this.scheduledTasks = scheduledTasks
@@ -429,7 +442,9 @@ export default class DeployAtsContractsResult {
         this.externalPauseManagement = externalPauseManagement
         this.externalControlListManagement = externalControlListManagement
         this.externalKycListManagement = externalKycListManagement
-        this.erc3643Facet = erc3643Facet
+        this.erc3643ManagementFacet = erc3643ManagementFacet
+        this.erc3643OperationsFacet = erc3643OperationsFacet
+        this.erc3643ReadFacet = erc3643ReadFacet
         this.erc3643BatchFacet = erc3643BatchFacet
         this.freeze = freeze
         this.timeTravel = timeTravel

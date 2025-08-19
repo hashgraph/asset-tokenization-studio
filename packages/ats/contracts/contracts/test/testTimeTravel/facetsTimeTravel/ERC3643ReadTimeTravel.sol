@@ -203,239 +203,33 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
-import {_BOND_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
-import {IBond} from '../interfaces/bond/IBond.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {IBondStorageWrapper} from '../interfaces/bond/IBondStorageWrapper.sol';
+import {ERC3643ReadFacet} from '../../../layer_1/ERC3643/ERC3643ReadFacet.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    struct BondDataStorage {
-        IBond.BondDetailsData bondDetail;
-        IBond.CouponDetailsData couponDetail;
-        bool initialized;
-    }
-
-    /**
-     * @dev Modifier to ensure that the function is called only after the current maturity date.
-     * @param _maturityDate The maturity date to be checked against the current maturity date.
-     * Reverts with `BondMaturityDateWrong` if the provided maturity date is less than or equal
-     * to the current maturity date.
-     */
-    modifier onlyAfterCurrentMaturityDate(uint256 _maturityDate) {
-        _checkMaturityDate(_maturityDate);
-        _;
-    }
-
-    function _storeBondDetails(
-        IBond.BondDetailsData memory _bondDetails
-    ) internal {
-        _bondStorage().bondDetail = _bondDetails;
-    }
-
-    function _storeCouponDetails(
-        IBond.CouponDetailsData memory _couponDetails,
-        uint256 _startingDate,
-        uint256 _maturityDate
-    ) internal {
-        _bondStorage().couponDetail = _couponDetails;
-        if (_couponDetails.firstCouponDate == 0) return;
-        if (
-            _couponDetails.firstCouponDate < _startingDate ||
-            _couponDetails.firstCouponDate > _maturityDate
-        ) revert CouponFirstDateWrong();
-        if (_couponDetails.couponFrequency == 0) revert CouponFrequencyWrong();
-
-        _setFixedCoupons(
-            _couponDetails.firstCouponDate,
-            _couponDetails.couponFrequency,
-            _maturityDate,
-            _couponDetails.couponRate
-        );
-    }
-
-    function _setCoupon(
-        IBond.Coupon memory _newCoupon
-    )
-        internal
-        returns (bool success_, bytes32 corporateActionId_, uint256 couponID_)
-    {
-        (success_, corporateActionId_, couponID_) = _addCorporateAction(
-            COUPON_CORPORATE_ACTION_TYPE,
-            abi.encode(_newCoupon)
-        );
-    }
-
-    /**
-     * @dev Internal function to set the maturity date of the bond.
-     * @param _maturityDate The new maturity date to be set.
-     * @return success_ True if the maturity date was set successfully.
-     */
-    function _setMaturityDate(
-        uint256 _maturityDate
-    ) internal returns (bool success_) {
-        _bondStorage().bondDetail.maturityDate = _maturityDate;
-        return true;
-    }
-
-    function _getBondDetails()
+contract ERC3643ReadTimeTravel is ERC3643ReadFacet, TimeTravelStorageWrapper {
+    function _blockTimestamp()
         internal
         view
-        returns (IBond.BondDetailsData memory bondDetails_)
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
     {
-        bondDetails_ = _bondStorage().bondDetail;
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 
-    function _getCouponDetails()
+    function _blockNumber()
         internal
         view
-        returns (IBond.CouponDetailsData memory couponDetails_)
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
     {
-        couponDetails_ = _bondStorage().couponDetail;
-    }
-
-    function _getMaturityDate() internal view returns (uint256 maturityDate_) {
-        return _bondStorage().bondDetail.maturityDate;
-    }
-
-    function _getCoupon(
-        uint256 _couponID
-    ) internal view returns (IBond.RegisteredCoupon memory registeredCoupon_) {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[COUPON_CORPORATE_ACTION_TYPE]
-            .at(_couponID - 1);
-
-        (, bytes memory data) = _getCorporateAction(actionId);
-
-        if (data.length > 0) {
-            (registeredCoupon_.coupon) = abi.decode(data, (IBond.Coupon));
-        }
-
-        registeredCoupon_.snapshotId = _getSnapshotID(actionId);
-    }
-
-    function _getCouponFor(
-        uint256 _couponID,
-        address _account
-    ) internal view returns (IBond.CouponFor memory couponFor_) {
-        IBond.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
-
-        couponFor_.rate = registeredCoupon.coupon.rate;
-        couponFor_.recordDate = registeredCoupon.coupon.recordDate;
-        couponFor_.executionDate = registeredCoupon.coupon.executionDate;
-
-        if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
-            couponFor_.recordDateReached = true;
-
-            couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? (_balanceOfAtSnapshot(registeredCoupon.snapshotId, _account) +
-                    _lockedBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    ) +
-                    _heldBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    )) +
-                    _clearedBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    )
-                : (_balanceOf(_account) +
-                    _getLockedAmountFor(_account) +
-                    _getHeldAmountFor(_account)) +
-                    _getClearedAmountFor(_account);
-
-            couponFor_.decimals = _decimalsAdjusted();
-        }
-    }
-
-    function _getCouponCount() internal view returns (uint256 couponCount_) {
-        return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
-    }
-
-    function _getCouponHolders(
-        uint256 _couponID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory holders_) {
-        IBond.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
-
-        if (registeredCoupon.coupon.recordDate >= _blockTimestamp())
-            return new address[](0);
-
-        if (registeredCoupon.snapshotId != 0)
-            return
-                _tokenHoldersAt(
-                    registeredCoupon.snapshotId,
-                    _pageIndex,
-                    _pageLength
-                );
-
-        return _getTokenHolders(_pageIndex, _pageLength);
-    }
-
-    function _getTotalCouponHolders(
-        uint256 _couponID
-    ) internal view returns (uint256) {
-        IBond.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
-
-        if (registeredCoupon.coupon.recordDate >= _blockTimestamp()) return 0;
-
-        if (registeredCoupon.snapshotId != 0)
-            return _totalTokenHoldersAt(registeredCoupon.snapshotId);
-
-        return _getTotalTokenHolders();
-    }
-
-    function _bondStorage()
-        internal
-        pure
-        returns (BondDataStorage storage bondData_)
-    {
-        bytes32 position = _BOND_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            bondData_.slot := position
-        }
-    }
-
-    function _setFixedCoupons(
-        uint256 _firstCouponDate,
-        uint256 _couponFrequency,
-        uint256 _maturityDate,
-        uint256 _rate
-    ) private returns (bool) {
-        uint256 numberOfSubsequentCoupons = (_maturityDate - _firstCouponDate) /
-            _couponFrequency;
-        bool success;
-        for (uint256 i = 0; i <= numberOfSubsequentCoupons; i++) {
-            uint256 runDate = _firstCouponDate + i * _couponFrequency;
-
-            IBond.Coupon memory _newCoupon;
-            _newCoupon.recordDate = runDate;
-            _newCoupon.executionDate = runDate;
-            _newCoupon.rate = _rate;
-
-            (success, , ) = _setCoupon(_newCoupon);
-
-            if (!success) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    function _checkMaturityDate(uint256 _maturityDate) private view {
-        if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();
+        return TimeTravelStorageWrapper._blockNumber();
     }
 }

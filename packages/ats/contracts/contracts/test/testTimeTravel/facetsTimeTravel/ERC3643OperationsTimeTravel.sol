@@ -204,45 +204,37 @@
 */
 
 // SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
 import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
-import {_SECURITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {ISecurity} from '../interfaces/ISecurity.sol';
-import {Common} from '../../layer_1/common/Common.sol';
+    ERC3643OperationsFacet
+} from '../../../layer_1/ERC3643/ERC3643OperationsFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract SecurityStorageWrapper is Common {
-    function _storeRegulationData(
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) internal {
-        ISecurity.SecurityRegulationData storage data = _securityStorage();
-        data.regulationData = _regulationData;
-        data.additionalSecurityData = _additionalSecurityData;
+contract ERC3643OperationsTimeTravel is
+    ERC3643OperationsFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 
-    function _getSecurityRegulationData()
+    function _blockNumber()
         internal
-        pure
-        returns (
-            ISecurity.SecurityRegulationData memory securityRegulationData_
-        )
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
     {
-        securityRegulationData_ = _securityStorage();
-    }
-
-    function _securityStorage()
-        internal
-        pure
-        returns (ISecurity.SecurityRegulationData storage securityStorage_)
-    {
-        bytes32 position = _SECURITY_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            securityStorage_.slot := position
-        }
+        return TimeTravelStorageWrapper._blockNumber();
     }
 }
