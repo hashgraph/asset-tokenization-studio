@@ -203,7 +203,7 @@
 
 */
 
-//import '../environmentMock';
+import '../environmentMock';
 import {
   SDK,
   LoggerTransports,
@@ -212,11 +212,6 @@ import {
   Network,
   Bond,
   InitializationRequest,
-  Security,
-  ForceTransferRequest,
-  Role,
-  RoleRequest,
-  MintRequest,
 } from '@port/in';
 import { DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from '@test/config';
 import ConnectRequest from '@port/in/request/network/ConnectRequest';
@@ -230,14 +225,13 @@ import {
   RegulationSubType,
   RegulationType,
 } from '@domain/context/factory/RegulationType';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
 const decimals = 0;
 const name = 'TEST_SECURITY_TOKEN';
 const symbol = 'TEST';
-const isin = 'US0378331005';
+const isin = 'ABCDE123456Z';
 const currency = '0x455552';
 const TIME = 30;
 const numberOfUnits = '1000';
@@ -254,7 +248,7 @@ const regulationSubType = RegulationSubType.NONE;
 const countries = 'AF,HG,BN';
 const info = 'Anything';
 const configId =
-  '0x0000000000000000000000000000000000000000000000000000000000000002';
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
 const configVersion = 0;
 
 const mirrorNode: MirrorNode = {
@@ -292,65 +286,47 @@ describe('DFNS Transaction Adapter test', () => {
       }),
     );
 
-    // Injectable.resolveTransactionHandler();
+    Injectable.resolveTransactionHandler();
 
-    // //Create a security for example a bond
-    // const requestST = new CreateBondRequest({
-    //   name: name,
-    //   symbol: symbol,
-    //   isin: isin,
-    //   decimals: decimals,
-    //   isWhiteList: false,
-    //   isControllable: true,
-    //   arePartitionsProtected: false,
-    //   clearingActive: true,
-    //   internalKycActivated: false,
-    //   isMultiPartition: false,
-    //   diamondOwnerAccount: DFNS_SETTINGS.hederaAccountId,
-    //   currency: currency,
-    //   numberOfUnits: numberOfUnits.toString(),
-    //   nominalValue: nominalValue,
-    //   startingDate: startingDate.toString(),
-    //   maturityDate: maturityDate.toString(),
-    //   couponFrequency: couponFrequency.toString(),
-    //   couponRate: couponRate,
-    //   firstCouponDate: firstCouponDate.toString(),
-    //   regulationType: CastRegulationType.toNumber(regulationType),
-    //   regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
-    //   isCountryControlListWhiteList: true,
-    //   countries: countries,
-    //   info: info,
-    //   configId: configId,
-    //   configVersion: configVersion,
-    // });
+    //Create a security for example a bond
+    const requestST = new CreateBondRequest({
+      name: name,
+      symbol: symbol,
+      isin: isin,
+      decimals: decimals,
+      isWhiteList: false,
+      isControllable: true,
+      arePartitionsProtected: false,
+      clearingActive: false,
+      internalKycActivated: true,
+      isMultiPartition: false,
+      diamondOwnerAccount: DFNS_SETTINGS.hederaAccountId,
+      currency: currency,
+      numberOfUnits: numberOfUnits.toString(),
+      nominalValue: nominalValue,
+      startingDate: startingDate.toString(),
+      maturityDate: maturityDate.toString(),
+      couponFrequency: couponFrequency.toString(),
+      couponRate: couponRate,
+      firstCouponDate: firstCouponDate.toString(),
+      regulationType: CastRegulationType.toNumber(regulationType),
+      regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
+      isCountryControlListWhiteList: true,
+      countries: countries,
+      info: info,
+      configId: configId,
+      configVersion: configVersion,
+    });
 
-    // bond = (await Bond.create(requestST)).security;
+    bond = (await Bond.create(requestST)).security;
 
-    // console.log(bond.diamondAddress);
-    // console.log(bond.evmDiamondAddress);
+    console.log(bond.diamondAddress);
+    console.log(bond.evmDiamondAddress);
 
-    // console.log('bond: ' + JSON.stringify(bond));
+    console.log('bond: ' + JSON.stringify(bond));
   }, 600_000);
 
-  it.only('DFNS should create a Bond', async () => {
-
-    // await Role.grantRole(new RoleRequest({
-    //   securityId: '0.0.6604886',
-    //   role: SecurityRole._ISSUER_ROLE ,
-    //   targetId: DFNS_SETTINGS.hederaAccountId,
-    // }));
-
-    // await Security.mint(new MintRequest({
-    //   securityId:  '0.0.6604886',
-    //   amount: '10' ,
-    //   targetId: DFNS_SETTINGS.hederaAccountId,
-    // }));
-
-    await Security.controllerTransfer(new ForceTransferRequest({
-      securityId:  '0.0.6604886',
-      sourceId: DFNS_SETTINGS.hederaAccountId,
-      targetId: DFNS_SETTINGS.hederaAccountId,
-      amount: '1',
-    }));
+  it('DFNS should create a Bond', async () => {
+    expect(bond).not.toBeNull();
   }, 60_000);
 });
