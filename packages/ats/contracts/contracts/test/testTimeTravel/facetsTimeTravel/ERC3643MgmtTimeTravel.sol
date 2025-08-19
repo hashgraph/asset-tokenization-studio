@@ -208,13 +208,18 @@
 
 pragma solidity 0.8.18;
 
-import {ERC3643MgmtFacet} from '../../../layer_1/ERC3643/ERC3643MgmtFacet.sol';
+import {
+    ERC3643ManagementFacet
+} from '../../../layer_1/ERC3643/ERC3643ManagementFacet.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract ERC3643MgmtTimeTravel is ERC3643MgmtFacet, TimeTravelStorageWrapper {
+contract ERC3643ManagementTimeTravel is
+    ERC3643ManagementFacet,
+    TimeTravelStorageWrapper
+{
     function _blockTimestamp()
         internal
         view

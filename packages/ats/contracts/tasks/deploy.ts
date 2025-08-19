@@ -297,7 +297,7 @@ task(
             externalControlListManagement,
             externalKycListManagement,
             protectedPartitions,
-            erc3643MgmtFacet,
+            erc3643ManagementFacet,
             erc3643OperationsFacet,
             erc3643ReadFacet,
             erc3643BatchFacet,
@@ -360,7 +360,7 @@ task(
             'External Kyc List Management Facet':
                 externalKycListManagement.address,
             'Protected Partitions': protectedPartitions.address,
-            'ERC3643 Mgmt Facet': erc3643MgmtFacet.address,
+            'ERC3643 Management Facet': erc3643ManagementFacet.address,
             'ERC3643 Operations Facet': erc3643OperationsFacet.address,
             'ERC3643 Read Facet': erc3643ReadFacet.address,
             'ERC3643 Batch Facet': erc3643BatchFacet.address,

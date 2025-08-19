@@ -274,7 +274,7 @@ export interface DeployedBusinessLogics {
     externalControlListManagement: IStaticFunctionSelectors
     externalKycListManagement: IStaticFunctionSelectors
     freeze: IStaticFunctionSelectors
-    ERC3643Mgmt: IStaticFunctionSelectors
+    ERC3643Management: IStaticFunctionSelectors
     ERC3643Operations: IStaticFunctionSelectors
     ERC3643Read: IStaticFunctionSelectors
     ERC3643Batch: IStaticFunctionSelectors

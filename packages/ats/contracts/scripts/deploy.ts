@@ -291,8 +291,8 @@ import {
     ExternalKycListManagementTimeTravel__factory,
     ERC1410TokenHolderFacet__factory,
     ERC1410TokenHolderTimeTravel__factory,
-    ERC3643MgmtFacet__factory,
-    ERC3643MgmtTimeTravel__factory,
+    ERC3643ManagementFacet__factory,
+    ERC3643ManagementTimeTravel__factory,
     ERC3643ReadFacet__factory,
     ERC3643ReadTimeTravel__factory,
     ERC3643OperationsFacet__factory,
@@ -901,14 +901,16 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        erc3643MgmtFacet: new DeployContractWithFactoryCommand({
+        erc3643ManagementFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new ERC3643MgmtFacet__factory(),
-                new ERC3643MgmtTimeTravel__factory()
+                new ERC3643ManagementFacet__factory(),
+                new ERC3643ManagementTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ERC3643MgmtFacet.addresses?.[network]
+                ? Configuration.contracts.ERC3643ManagementFacet.addresses?.[
+                      network
+                  ]
                 : undefined,
             overrides,
         }),
@@ -1376,11 +1378,11 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
-            erc3643MgmtFacet: await deployContractWithFactory(
-                commands.erc3643MgmtFacet
+            erc3643ManagementFacet: await deployContractWithFactory(
+                commands.erc3643ManagementFacet
             ).then((result) => {
                 console.log(
-                    `ERC3643Mgmt has been deployed successfully at ${result.address}`
+                    `ERC3643Management has been deployed successfully at ${result.address}`
                 )
                 return result
             }),

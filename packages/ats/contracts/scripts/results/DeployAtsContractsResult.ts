@@ -244,7 +244,7 @@ import {
     HoldManagementFacet,
     HoldTokenHolderFacet,
     ERC1410TokenHolderFacet,
-    ERC3643MgmtFacet,
+    ERC3643ManagementFacet,
     ERC3643OperationsFacet,
     ERC3643ReadFacet,
     ERC3643BatchFacet,
@@ -293,7 +293,7 @@ export interface DeployAtsContractsResultParams {
     externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    erc3643MgmtFacet: DeployContractWithFactoryResult<ERC3643MgmtFacet>
+    erc3643ManagementFacet: DeployContractWithFactoryResult<ERC3643ManagementFacet>
     erc3643OperationsFacet: DeployContractWithFactoryResult<ERC3643OperationsFacet>
     erc3643ReadFacet: DeployContractWithFactoryResult<ERC3643ReadFacet>
     erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>
@@ -342,7 +342,7 @@ export default class DeployAtsContractsResult {
     public readonly externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     public readonly externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     public readonly externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
-    public readonly erc3643MgmtFacet: DeployContractWithFactoryResult<ERC3643MgmtFacet>
+    public readonly erc3643ManagementFacet: DeployContractWithFactoryResult<ERC3643ManagementFacet>
     public readonly erc3643OperationsFacet: DeployContractWithFactoryResult<ERC3643OperationsFacet>
     public readonly erc3643ReadFacet: DeployContractWithFactoryResult<ERC3643ReadFacet>
     public readonly erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>
@@ -390,7 +390,7 @@ export default class DeployAtsContractsResult {
         freeze,
         timeTravel,
         deployer,
-        erc3643MgmtFacet,
+        erc3643ManagementFacet,
         erc3643OperationsFacet,
         erc3643ReadFacet,
         erc3643BatchFacet,
@@ -437,7 +437,7 @@ export default class DeployAtsContractsResult {
         this.externalPauseManagement = externalPauseManagement
         this.externalControlListManagement = externalControlListManagement
         this.externalKycListManagement = externalKycListManagement
-        this.erc3643MgmtFacet = erc3643MgmtFacet
+        this.erc3643ManagementFacet = erc3643ManagementFacet
         this.erc3643OperationsFacet = erc3643OperationsFacet
         this.erc3643ReadFacet = erc3643ReadFacet
         this.erc3643BatchFacet = erc3643BatchFacet

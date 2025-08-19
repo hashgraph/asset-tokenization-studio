@@ -211,7 +211,9 @@ import {
     _RESOLVER_PROXY_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {_AGENT_ROLE} from '../constants/roles.sol';
-import {IERC3643Mgmt} from '../../layer_1/interfaces/ERC3643/IERC3643Mgmt.sol';
+import {
+    IERC3643Management
+} from '../../layer_1/interfaces/ERC3643/IERC3643Management.sol';
 import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
 import {
     IAccessControl
@@ -267,8 +269,9 @@ abstract contract ERC3643StorageWrapper1 is
         address _compliance,
         address _identityRegistry
     ) internal {
-        IERC3643Mgmt.ERC3643Storage storage clearingStorage = _erc3643Storage();
-        clearingStorage.initialized = true;
+        IERC3643Management.ERC3643Storage
+            storage eRC3643Storage = _erc3643Storage();
+        eRC3643Storage.initialized = true;
         _setCompliance(_compliance);
         _setIdentityRegistry(_identityRegistry);
     }
@@ -312,7 +315,7 @@ abstract contract ERC3643StorageWrapper1 is
     function _getFrozenAmountFor(
         address _userAddress
     ) internal view returns (uint256) {
-        IERC3643Mgmt.ERC3643Storage storage st = _erc3643Storage();
+        IERC3643Management.ERC3643Storage storage st = _erc3643Storage();
         return st.frozenTokens[_userAddress];
     }
 
@@ -320,12 +323,12 @@ abstract contract ERC3643StorageWrapper1 is
         bytes32 _partition,
         address _userAddress
     ) internal view returns (uint256) {
-        IERC3643Mgmt.ERC3643Storage storage st = _erc3643Storage();
+        IERC3643Management.ERC3643Storage storage st = _erc3643Storage();
         return st.frozenTokensByPartition[_userAddress][_partition];
     }
 
     function _checkRecoveredAddress(address _sender) internal view {
-        if (_isRecovered(_sender)) revert IERC3643Mgmt.WalletRecovered();
+        if (_isRecovered(_sender)) revert IERC3643Management.WalletRecovered();
     }
 
     function _isRecovered(address _sender) internal view returns (bool) {
@@ -376,7 +379,7 @@ abstract contract ERC3643StorageWrapper1 is
         uint256[] memory _amounts
     ) internal pure {
         if (_addresses.length != _amounts.length) {
-            revert IERC3643Mgmt.InputAmountsArrayLengthMismatch();
+            revert IERC3643Management.InputAmountsArrayLengthMismatch();
         }
     }
 
@@ -385,14 +388,14 @@ abstract contract ERC3643StorageWrapper1 is
         bool[] memory _status
     ) internal pure {
         if (_addresses.length != _status.length) {
-            revert IERC3643Mgmt.InputBoolArrayLengthMismatch();
+            revert IERC3643Management.InputBoolArrayLengthMismatch();
         }
     }
 
     function _erc3643Storage()
         internal
         pure
-        returns (IERC3643Mgmt.ERC3643Storage storage erc3643Storage_)
+        returns (IERC3643Management.ERC3643Storage storage erc3643Storage_)
     {
         bytes32 position = _ERC3643_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly

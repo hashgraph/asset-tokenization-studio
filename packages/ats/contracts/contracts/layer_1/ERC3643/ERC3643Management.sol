@@ -206,58 +206,112 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC3643_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IERC3643Mgmt} from '../interfaces/ERC3643/IERC3643Mgmt.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ERC3643Mgmt} from './ERC3643Mgmt.sol';
+    _CONTROLLER_ROLE,
+    _ISSUER_ROLE,
+    _AGENT_ROLE,
+    _TREX_OWNER_ROLE
+} from '../constants/roles.sol';
+import {IERC3643Management} from '../interfaces/ERC3643/IERC3643Management.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
+import {Common} from '../common/Common.sol';
 
-contract ERC3643MgmtFacet is IStaticFunctionSelectors, ERC3643Mgmt {
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC3643_MANAGEMENT_RESOLVER_KEY;
+abstract contract ERC3643Management is IERC3643Management, Common {
+    address private constant _ONCHAIN_ID = address(0);
+
+    // ====== External functions (state-changing) ======
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC3643(
+        address _compliance,
+        address _identityRegistry
+    ) external onlyUninitialized(_erc3643Storage().initialized) {
+        _initialize_ERC3643(_compliance, _identityRegistry);
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](9);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC3643
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setIdentityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setCompliance
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .recoveryAddress
-            .selector;
+    function setName(
+        string calldata _name
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+        ERC20Storage storage erc20Storage = _setName(_name);
+
+        emit UpdatedTokenInformation(
+            erc20Storage.name,
+            erc20Storage.symbol,
+            erc20Storage.decimals,
+            _version(),
+            _erc3643Storage().onchainID
+        );
     }
 
-    function getStaticInterfaceIds()
+    function setSymbol(
+        string calldata _symbol
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+        ERC20Storage storage erc20Storage = _setSymbol(_symbol);
+
+        emit UpdatedTokenInformation(
+            erc20Storage.name,
+            erc20Storage.symbol,
+            erc20Storage.decimals,
+            _version(),
+            _erc3643Storage().onchainID
+        );
+    }
+
+    function setOnchainID(
+        address _onchainID
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+        ERC20Storage storage erc20Storage = _erc20Storage();
+        _erc3643Storage().onchainID = _onchainID;
+
+        emit UpdatedTokenInformation(
+            erc20Storage.name,
+            erc20Storage.symbol,
+            erc20Storage.decimals,
+            _version(),
+            _onchainID
+        );
+    }
+
+    function setIdentityRegistry(
+        address _identityRegistry
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+        _setIdentityRegistry(_identityRegistry);
+        emit IdentityRegistryAdded(_identityRegistry);
+    }
+
+    function setCompliance(
+        address _compliance
+    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+        _setCompliance(_compliance);
+    }
+
+    function addAgent(
+        address _agent
+    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+        _addAgent(_agent);
+        emit AgentAdded(_agent);
+    }
+
+    function removeAgent(
+        address _agent
+    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+        _removeAgent(_agent);
+        emit AgentRemoved(_agent);
+    }
+
+    function recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    )
         external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
+        onlyUnrecoveredAddress(_lostWallet)
+        onlyRole(_AGENT_ROLE)
+        onlyEmptyWallet(_lostWallet)
+        onlyWithoutMultiPartition
+        returns (bool success_)
     {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Mgmt).interfaceId;
+        success_ = _recoveryAddress(_lostWallet, _newWallet);
+        emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
     }
 }

@@ -267,7 +267,7 @@ export const CONTRACT_NAMES = [
     'ExternalKycListManagement',
     'ERC3643',
     'FreezeFacet',
-    'ERC3643MgmtFacet',
+    'ERC3643ManagementFacet',
     'ERC3643ReadFacet',
     'ERC3643OperationsFacet',
     'ERC3643BatchFacet',

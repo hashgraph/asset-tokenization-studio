@@ -308,7 +308,7 @@ function buildEmptyEnvironment(): Environment {
             externalControlListManagement: {} as IStaticFunctionSelectors,
             externalKycListManagement: {} as IStaticFunctionSelectors,
             freeze: {} as IStaticFunctionSelectors,
-            ERC3643Mgmt: {} as IStaticFunctionSelectors,
+            ERC3643Management: {} as IStaticFunctionSelectors,
             ERC3643Operations: {} as IStaticFunctionSelectors,
             ERC3643Read: {} as IStaticFunctionSelectors,
             ERC3643Batch: {} as IStaticFunctionSelectors,

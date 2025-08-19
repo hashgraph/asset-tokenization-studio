@@ -207,7 +207,7 @@
 pragma solidity 0.8.18;
 import {IERC3643StorageWrapper} from './IERC3643StorageWrapper.sol';
 import {IERC3643Operations} from './IERC3643Operations.sol';
-import {IERC3643Mgmt} from './IERC3643Mgmt.sol';
+import {IERC3643Management} from './IERC3643Management.sol';
 import {IERC3643Read} from './IERC3643Read.sol';
 import {IERC3643Batch} from './IERC3643Batch.sol';
 
@@ -222,7 +222,7 @@ import {IERC3643Batch} from './IERC3643Batch.sol';
 interface IERC3643 is
     IERC3643StorageWrapper,
     IERC3643Operations,
-    IERC3643Mgmt,
+    IERC3643Management,
     IERC3643Read,
     IERC3643Batch
 {
