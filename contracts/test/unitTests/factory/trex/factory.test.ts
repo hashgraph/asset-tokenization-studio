@@ -298,7 +298,7 @@ describe('TREX Factory Tests', () => {
 
     before(async () => {
         // mute | mock console.log
-        console.log = () => {}
+        // console.log = () => {}
 
         const trexDeployment = await loadFixture(deployFullSuiteFixture)
 
@@ -312,7 +312,6 @@ describe('TREX Factory Tests', () => {
                 timeTravelEnabled: true,
             })
         )
-
         factoryAts = (
             await deployContractWithLibraries(
                 new DeployContractWithLibraryCommand({
@@ -322,7 +321,7 @@ describe('TREX Factory Tests', () => {
                         trexDeployment.authorities.trexImplementationAuthority
                             .address,
                         trexDeployment.factories.identityFactory.address,
-                        deployedContracts.factory.proxyAddress,
+                        deployedContracts.factory.address,
                     ],
                     libraries: [
                         'TREXBondDeploymentLib',

@@ -213,7 +213,8 @@ import {
     FactoryRegulationData,
     IResolverProxy_
 } from '../../interfaces/IFactory.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../../interfaces/IAccessControl.sol';
+import {_TREX_OWNER_ROLE} from '../../interfaces/roles.sol';
+import "hardhat/console.sol";
 
 library SecurityDeploymentLib {
     function deployEquity(
@@ -225,8 +226,7 @@ library SecurityDeploymentLib {
         _equityData.security.rbacs = _prepareRbacs(
             _equityData.security.rbacs,
             _tRexOwner
-        );
-
+        );        
         token_ = IToken(
             IFactory_(_atsFactory).deployEquity(
                 _equityData,
@@ -265,7 +265,7 @@ library SecurityDeploymentLib {
         // Check if owner was already assigned the role
         for (uint256 i = 0; i < length; ) {
             if (
-                _rbacs[i].role == _DEFAULT_ADMIN_ROLE &&
+                _rbacs[i].role == _TREX_OWNER_ROLE &&
                 _rbacs[i].members.length > 0
             ) {
                 for (uint256 j = 0; j < _rbacs[i].members.length; ) {
@@ -307,7 +307,7 @@ library SecurityDeploymentLib {
         }
 
         newRbacs[length] = IResolverProxy_.Rbac({
-            role: _DEFAULT_ADMIN_ROLE,
+            role: _TREX_OWNER_ROLE,
             members: membersArr
         });
 

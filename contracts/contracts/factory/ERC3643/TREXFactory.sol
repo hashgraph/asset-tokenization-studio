@@ -241,17 +241,17 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
     }
 
     /// @dev The address of the implementation authority contract used in the tokens deployed by the factory
-    address private _implementationAuthority;
+    address private implementationAuthority;
 
     /// @dev The address of the Identity Factory used to deploy token OIDs
-    address private _idFactory;
+    address private idFactory;
 
     /// @dev Mapping containing info about the token contracts corresponding to salt already used for
     /// CREATE2 deployments
     mapping(string => address) public tokenDeployed;
 
     /// @dev The address of the ATS suite factory
-    address private _atsFactory;
+    address private atsFactory;
 
     /**
      * @dev Constructor is setting the implementation authority and the Identity Factory of the TREX factory
@@ -262,9 +262,9 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         address _idFactory,
         address _atsFactory
     ) {
-        _implementationAuthority = _implementationAuthority;
-        _idFactory = _idFactory;
-        _atsFactory = _atsFactory;
+        implementationAuthority = _implementationAuthority;
+        idFactory = _idFactory;
+        atsFactory = _atsFactory;
     }
 
     /**
@@ -290,9 +290,9 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
     ) external onlyOwner {
         TREXEquityDeploymentLib.deployTREXSuiteAtsEquity(
             tokenDeployed,
-            _implementationAuthority,
-            _idFactory,
-            _atsFactory,
+            implementationAuthority,
+            idFactory,
+            atsFactory,
             _salt,
             _tokenDetails,
             _claimDetails,
@@ -314,9 +314,9 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
     ) external onlyOwner {
         TREXBondDeploymentLib.deployTREXSuiteAtsBond(
             tokenDeployed,
-            _implementationAuthority,
-            _idFactory,
-            _atsFactory,
+            implementationAuthority,
+            idFactory,
+            atsFactory,
             _salt,
             _tokenDetails,
             _claimDetails,
@@ -339,33 +339,33 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
      *  @inheritdoc ITREXFactory
      */
     function setImplementationAuthority(
-        address implementationAuthority_
+        address _implementationAuthority
     ) external override onlyOwner {
         require(
-            implementationAuthority_ != address(0),
+            _implementationAuthority != address(0),
             'invalid argument - zero address'
         );
         // should not be possible to set an implementation authority that is not complete
         require(
-            (ITREXImplementationAuthority(implementationAuthority_))
+            (ITREXImplementationAuthority(_implementationAuthority))
                 .getCTRImplementation() !=
                 address(0) &&
-                (ITREXImplementationAuthority(implementationAuthority_))
+                (ITREXImplementationAuthority(_implementationAuthority))
                     .getIRImplementation() !=
                 address(0) &&
-                (ITREXImplementationAuthority(implementationAuthority_))
+                (ITREXImplementationAuthority(_implementationAuthority))
                     .getIRSImplementation() !=
                 address(0) &&
-                (ITREXImplementationAuthority(implementationAuthority_))
+                (ITREXImplementationAuthority(_implementationAuthority))
                     .getMCImplementation() !=
                 address(0) &&
-                (ITREXImplementationAuthority(implementationAuthority_))
+                (ITREXImplementationAuthority(_implementationAuthority))
                     .getTIRImplementation() !=
                 address(0),
             'invalid Implementation Authority'
         );
-        _implementationAuthority = implementationAuthority_;
-        emit ImplementationAuthoritySet(implementationAuthority_);
+        implementationAuthority = _implementationAuthority;
+        emit ImplementationAuthoritySet(_implementationAuthority);
     }
 
     /**
@@ -373,7 +373,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
      */
     function setIdFactory(address _idFactory) external override onlyOwner {
         require(_idFactory != address(0), 'invalid argument - zero address');
-        _idFactory = _idFactory;
+        idFactory = _idFactory;
         emit IdFactorySet(_idFactory);
     }
 
@@ -382,7 +382,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
      */
     function setAtsFactory(address _atsFactory) external onlyOwner {
         require(_atsFactory != address(0), 'invalid argument - zero address');
-        _atsFactory = _atsFactory;
+        atsFactory = _atsFactory;
     }
 
     /**
@@ -394,14 +394,14 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         override
         returns (address)
     {
-        return _implementationAuthority;
+        return implementationAuthority;
     }
 
     /**
      *  @inheritdoc ITREXFactory
      */
     function getIdFactory() external view override returns (address) {
-        return _idFactory;
+        return idFactory;
     }
 
     /**
