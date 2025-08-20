@@ -288,7 +288,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         ClaimDetails calldata _claimDetails,
         IFactory_.EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
-    ) external onlyOwner {
+    ) external {
         TREXEquityDeploymentLib.deployTREXSuiteAtsEquity(
             tokenDeployed,
             implementationAuthority,
@@ -312,7 +312,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         ClaimDetails calldata _claimDetails,
         IFactory_.BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
-    ) external onlyOwner {
+    ) external {
         TREXBondDeploymentLib.deployTREXSuiteAtsBond(
             tokenDeployed,
             implementationAuthority,
