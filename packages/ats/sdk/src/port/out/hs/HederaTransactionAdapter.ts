@@ -1575,19 +1575,19 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async createHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(
-      `Holding ${amount} tokens from account ${targetId.toString()} until ${expirationDate} with escrow ${escrow}`,
+      `Holding ${amount} tokens from account ${targetId.toString()} until ${expirationDate} with escrow ${escrowId}`,
     );
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: expirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -1603,7 +1603,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async createHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1611,13 +1611,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+      `Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrowId}`,
     );
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: expirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -1633,7 +1633,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async controllerCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1641,13 +1641,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Controller Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+      `Controller Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrowId}`,
     );
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: expirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -1665,7 +1665,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
@@ -1675,13 +1675,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Protected Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+      `Protected Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrowId}`,
     );
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: expirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -2186,7 +2186,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async clearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -2206,7 +2206,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: holdExpirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -2223,7 +2223,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async clearingCreateHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -2248,7 +2248,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: holdExpirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -2266,7 +2266,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -2294,7 +2294,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: holdExpirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -2311,7 +2311,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async operatorClearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -2336,7 +2336,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: holdExpirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };

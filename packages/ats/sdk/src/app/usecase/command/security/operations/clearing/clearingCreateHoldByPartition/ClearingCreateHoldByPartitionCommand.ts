@@ -219,7 +219,7 @@ export class ClearingCreateHoldByPartitionCommand extends Command<ClearingCreate
   constructor(
     public readonly securityId: string,
     public readonly partitionId: string,
-    public readonly escrow: string,
+    public readonly escrowId: string,
     public readonly amount: string,
     public readonly targetId: string,
     public readonly clearingExpirationDate: string,

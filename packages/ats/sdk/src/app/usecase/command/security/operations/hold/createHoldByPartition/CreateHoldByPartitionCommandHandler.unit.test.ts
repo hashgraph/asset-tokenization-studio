@@ -323,7 +323,7 @@ describe('CreateHoldByPartitionCommandHandler', () => {
         );
         expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
           1,
-          command.escrow,
+          command.escrowId,
         );
         expect(
           accountServiceMock.getAccountEvmAddressOrNull,
