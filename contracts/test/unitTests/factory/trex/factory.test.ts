@@ -230,6 +230,7 @@ import {
     DEFAULT_ADMIN_ROLE,
     deployContractWithLibraries,
     DeployContractWithLibraryCommand,
+    TREX_OWNER_ROLE,
 } from '@scripts'
 import { deployFullSuiteFixture } from './fixtures/deploy-full-suite.fixture'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -923,10 +924,22 @@ describe('TREX Factory Tests', () => {
 
             expect(
                 await accessControlFacet.hasRole(
-                    DEFAULT_ADMIN_ROLE,
+                    TREX_OWNER_ROLE,
                     tokenDetails.owner
                 )
             ).to.be.true
+            expect(
+                await accessControlFacet.hasRole(
+                    TREX_OWNER_ROLE,
+                    factoryAts.address
+                )
+            ).to.be.false
+            expect(
+                await accessControlFacet.hasRole(
+                    DEFAULT_ADMIN_ROLE,
+                    factoryAts.address
+                )
+            ).to.be.false
 
             expect(_token).to.equal(
                 await factoryAts.tokenDeployed('salt-equity')
@@ -1566,10 +1579,22 @@ describe('TREX Factory Tests', () => {
 
             expect(
                 await accessControlFacet.hasRole(
-                    DEFAULT_ADMIN_ROLE,
+                    TREX_OWNER_ROLE,
                     tokenDetails.owner
                 )
             ).to.be.true
+            expect(
+                await accessControlFacet.hasRole(
+                    TREX_OWNER_ROLE,
+                    factoryAts.address
+                )
+            ).to.be.false
+            expect(
+                await accessControlFacet.hasRole(
+                    DEFAULT_ADMIN_ROLE,
+                    factoryAts.address
+                )
+            ).to.be.false
 
             expect(_token).to.equal(await factoryAts.tokenDeployed('salt-bond'))
             expect(_salt.hash).to.equal(
