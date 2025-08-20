@@ -203,25 +203,19 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity >=0.8.0 <0.9.0;
 
+import {MAX_UINT256} from '../constants/values.sol';
+import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {ICap} from '../../layer_1/interfaces/cap/ICap.sol';
 import {
     AdjustBalancesStorageWrapper1
 } from '../adjustBalances/AdjustBalancesStorageWrapper1.sol';
-import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {MAX_UINT256} from '../constants/values.sol';
-
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
-    struct CapDataStorage {
-        uint256 maxSupply;
-        mapping(bytes32 => uint256) maxSupplyByPartition;
-        bool initialized;
-    }
-
     function _adjustMaxSupply(uint256 factor) internal {
-        CapDataStorage storage capStorage = _capStorage();
+        ICap.Storage storage capStorage = _capStorage();
         if (capStorage.maxSupply == MAX_UINT256) return;
         capStorage.maxSupply *= factor;
     }
@@ -230,7 +224,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         bytes32 partition,
         uint256 factor
     ) internal {
-        CapDataStorage storage capStorage = _capStorage();
+        ICap.Storage storage capStorage = _capStorage();
         if (capStorage.maxSupplyByPartition[partition] == MAX_UINT256) return;
         capStorage.maxSupplyByPartition[partition] *= factor;
     }
@@ -256,7 +250,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
     function _getMaxSupplyAdjustedAt(
         uint256 timestamp
     ) internal view returns (uint256) {
-        CapDataStorage storage capStorage = _capStorage();
+        ICap.Storage storage capStorage = _capStorage();
         if (capStorage.maxSupply == MAX_UINT256) return MAX_UINT256;
         (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(
             timestamp
@@ -289,7 +283,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         return (_maxSupply == 0) || (_amount <= _maxSupply);
     }
 
-    function _capStorage() internal pure returns (CapDataStorage storage cap_) {
+    function _capStorage() internal pure returns (ICap.Storage storage cap_) {
         bytes32 position = _CAP_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
