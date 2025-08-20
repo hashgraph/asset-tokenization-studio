@@ -203,15 +203,15 @@
 
 */
 
-pragma solidity >=0.8.0 <0.9.0;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity >=0.8.0 <0.9.0;
 
-import {ICap} from '../interfaces/cap/ICap.sol';
 import {_CAP_ROLE} from '../constants/roles.sol';
+import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ICap} from '../interfaces/cap/ICap.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {Common} from '../common/Common.sol';
 
 contract Cap is ICap, IStaticFunctionSelectors, Common {
@@ -225,7 +225,7 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         onlyUninitialized(_capStorage().initialized)
         onlyValidNewMaxSupply(maxSupply)
     {
-        CapDataStorage storage capStorage = _capStorage();
+        Storage storage capStorage = _capStorage();
 
         capStorage.maxSupply = maxSupply;
 
