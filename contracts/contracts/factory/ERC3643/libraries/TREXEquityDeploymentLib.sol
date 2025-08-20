@@ -240,7 +240,9 @@ library TREXEquityDeploymentLib {
             _salt,
             _tokenDetails,
             _claimDetails,
-            token
+            token,
+            _equityData.security.identityRegistry,
+            _equityData.security.compliance
         );
     }
 }

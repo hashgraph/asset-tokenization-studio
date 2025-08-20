@@ -208,7 +208,8 @@ pragma solidity ^0.8.17;
 // solhint-disable no-global-import
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import {
-    IAccessControl_
+    IAccessControl_,
+    _DEFAULT_ADMIN_ROLE
 } from '../../interfaces/IAccessControl.sol';
 import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
 import {TREXFactoryAts} from '../../TREXFactory.sol';
@@ -236,7 +237,9 @@ library TREXBaseDeploymentLib {
         string memory _salt,
         TREXFactoryAts.TokenDetailsAts memory _tokenDetails,
         ITREXFactory.ClaimDetails memory _claimDetails,
-        IToken _token
+        IToken _token,
+        address _identityRegistry,
+        address _compliance
     ) internal {
         require(_tokenDeployed[_salt] == address(0), 'token already deployed');
         require(
@@ -273,9 +276,12 @@ library TREXBaseDeploymentLib {
         IClaimTopicsRegistry ctr = IClaimTopicsRegistry(
             _deployCTR(_salt, _implementationAuthority)
         );
-        IModularCompliance mc = IModularCompliance(
-            _deployMC(_salt, _implementationAuthority)
-        );
+        IModularCompliance mc;
+        if (_compliance == address(0)) {
+            mc = IModularCompliance(_deployMC(_salt, _implementationAuthority));
+        } else {
+            mc = IModularCompliance(_compliance);
+        }
         IIdentityRegistryStorage irs;
         if (_tokenDetails.irs == address(0)) {
             irs = IIdentityRegistryStorage(
@@ -284,13 +290,15 @@ library TREXBaseDeploymentLib {
         } else {
             irs = IIdentityRegistryStorage(_tokenDetails.irs);
         }
-        address ir = _deployIR(
-            _salt,
-            _implementationAuthority,
-            address(tir),
-            address(ctr),
-            address(irs)
-        );
+        if (_identityRegistry == address(0)) {
+            _identityRegistry = _deployIR(
+                _salt,
+                _implementationAuthority,
+                address(tir),
+                address(ctr),
+                address(irs)
+            );
+        }
         address _tokenID = _tokenDetails.ONCHAINID;
         if (_tokenDetails.ONCHAINID == address(0)) {
             _tokenID = IIdFactory(_idFactory).createTokenIdentity(
@@ -300,7 +308,7 @@ library TREXBaseDeploymentLib {
             );
         }
         _token.setOnchainID(_tokenID);
-        _token.setIdentityRegistry(address(ir));
+        _token.setIdentityRegistry(_identityRegistry);
         _token.setCompliance(address(mc));
         mc.bindToken(address(_token));
         for (uint256 i = 0; i < (_claimDetails.claimTopics).length; i++) {
@@ -312,10 +320,10 @@ library TREXBaseDeploymentLib {
                 _claimDetails.issuerClaims[i]
             );
         }
-        irs.bindIdentityRegistry(address(ir));
-        AgentRole(address(ir)).addAgent(address(_token));
+        irs.bindIdentityRegistry(_identityRegistry);
+        AgentRole(_identityRegistry).addAgent(address(_token));
         for (uint256 i = 0; i < (_tokenDetails.irAgents).length; i++) {
-            AgentRole(address(ir)).addAgent(_tokenDetails.irAgents[i]);
+            AgentRole(_identityRegistry).addAgent(_tokenDetails.irAgents[i]);
         }
         for (uint256 i = 0; i < (_tokenDetails.tokenAgents).length; i++) {
             AgentRole(address(_token)).addAgent(_tokenDetails.tokenAgents[i]);
@@ -334,13 +342,14 @@ library TREXBaseDeploymentLib {
         _tokenDeployed[_salt] = address(_token);
         // Equivalent to transfer ownership of the token to the new owner
         IAccessControl_(address(_token)).renounceRole(_TREX_OWNER_ROLE);
-        (Ownable(ir)).transferOwnership(_tokenDetails.owner);
+        IAccessControl_(address(_token)).renounceRole(_DEFAULT_ADMIN_ROLE);
+        (Ownable(_identityRegistry)).transferOwnership(_tokenDetails.owner);
         (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
         (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);
         (Ownable(address(mc))).transferOwnership(_tokenDetails.owner);
         emit TREXSuiteDeployed(
             address(_token),
-            address(ir),
+            _identityRegistry,
             address(irs),
             address(tir),
             address(ctr),

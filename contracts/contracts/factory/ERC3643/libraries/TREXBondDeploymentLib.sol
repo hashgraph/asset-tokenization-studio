@@ -238,7 +238,9 @@ library TREXBondDeploymentLib {
             _salt,
             _tokenDetails,
             _claimDetails,
-            token
+            token,
+            _bondData.security.identityRegistry,
+            _bondData.security.compliance
         );
     }
 }
