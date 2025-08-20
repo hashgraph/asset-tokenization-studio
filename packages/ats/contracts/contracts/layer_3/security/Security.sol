@@ -207,13 +207,13 @@
 pragma solidity 0.8.18;
 
 import {ISecurity} from '../interfaces/ISecurity.sol';
-import {SecurityStorageWrapper} from './SecurityStorageWrapper.sol';
+import {Common} from '../../layer_1/common/Common.sol';
 import {
     RegulationData,
     AdditionalSecurityData
 } from '../constants/regulation.sol';
 
-abstract contract Security is ISecurity, SecurityStorageWrapper {
+abstract contract Security is ISecurity, Common {
     function getSecurityHolders(
         uint256 _pageIndex,
         uint256 _pageLength
@@ -232,12 +232,5 @@ abstract contract Security is ISecurity, SecurityStorageWrapper {
         returns (SecurityRegulationData memory securityRegulationData_)
     {
         securityRegulationData_ = _getSecurityRegulationData();
-    }
-
-    function _initializeSecurity(
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) internal {
-        _storeRegulationData(_regulationData, _additionalSecurityData);
     }
 }

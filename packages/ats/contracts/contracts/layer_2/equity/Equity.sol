@@ -216,16 +216,12 @@ import {
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from '../constants/values.sol';
 import {IEquity} from '../interfaces/equity/IEquity.sol';
-import {EquityStorageWrapper} from './EquityStorageWrapper.sol';
+import {Common} from '../../layer_1/common/Common.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-abstract contract Equity is
-    IEquity,
-    IStaticFunctionSelectors,
-    EquityStorageWrapper
-{
+abstract contract Equity is IEquity, IStaticFunctionSelectors, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     function setDividends(

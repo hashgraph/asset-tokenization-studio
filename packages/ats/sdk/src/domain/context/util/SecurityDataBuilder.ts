@@ -247,6 +247,7 @@ export class SecurityDataBuilder {
       rbacs: [rbacAdmin],
       isControllable: securityInfo.isControllable,
       isWhiteList: securityInfo.isWhiteList,
+      erc20VotesActivated: securityInfo.erc20VotesActivated,
       maxSupply: securityInfo.maxSupply?.toString() || '0',
       erc20MetadataInfo: {
         name: securityInfo.name,

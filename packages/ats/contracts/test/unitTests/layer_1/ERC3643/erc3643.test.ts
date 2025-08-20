@@ -1373,7 +1373,7 @@ describe('ERC3643 Tests', () => {
                 })
 
                 const erc3643NoCompliance = await ethers.getContractAt(
-                    'ERC3643',
+                    'IERC3643',
                     diamond.address
                 )
                 const kycNoCompliance = await ethers.getContractAt(
@@ -1497,7 +1497,7 @@ describe('ERC3643 Tests', () => {
                 })
 
                 const erc3643NoCompliance = await ethers.getContractAt(
-                    'ERC3643',
+                    'IERC3643',
                     diamond.address
                 )
                 const kycNoCompliance = await ethers.getContractAt(

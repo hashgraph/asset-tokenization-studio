@@ -341,6 +341,7 @@ describe('🧪 Role test', () => {
       isin: isin,
       decimals: decimals,
       isWhiteList: false,
+      erc20VotesActivated: false,
       isControllable: true,
       arePartitionsProtected: false,
       clearingActive: false,

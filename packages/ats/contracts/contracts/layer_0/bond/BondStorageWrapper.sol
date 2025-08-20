@@ -203,76 +203,258 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IERC3643Basic} from '../interfaces/ERC3643/IERC3643Basic.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ERC3643} from './ERC3643.sol';
+    _BOND_STORAGE_POSITION
+} from '../../layer_2/constants/storagePositions.sol';
+import {COUPON_CORPORATE_ACTION_TYPE} from '../../layer_2/constants/values.sol';
+import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
+import {
+    IBondStorageWrapper
+} from '../../layer_2/interfaces/bond/IBondStorageWrapper.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    ERC20PermitStorageWrapper
+} from '../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol';
 
-contract ERC3643Facet is IStaticFunctionSelectors, ERC3643 {
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC3643_RESOLVER_KEY;
+abstract contract BondStorageWrapper is
+    IBondStorageWrapper,
+    ERC20PermitStorageWrapper
+{
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    struct BondDataStorage {
+        IBondRead.BondDetailsData bondDetail;
+        IBondRead.CouponDetailsData couponDetail;
+        bool initialized;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](18);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC3643
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setIdentityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .setCompliance
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .recoveryAddress
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .forcedTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .identityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .isAddressRecovered
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
+    /**
+     * @dev Modifier to ensure that the function is called only after the current maturity date.
+     * @param _maturityDate The maturity date to be checked against the current maturity date.
+     * Reverts with `BondMaturityDateWrong` if the provided maturity date is less than or equal
+     * to the current maturity date.
+     */
+    modifier onlyAfterCurrentMaturityDate(uint256 _maturityDate) {
+        _checkMaturityDate(_maturityDate);
+        _;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
+    function _storeBondDetails(
+        IBondRead.BondDetailsData memory _bondDetails
+    ) internal {
+        _bondStorage().bondDetail = _bondDetails;
+    }
+
+    function _storeCouponDetails(
+        IBondRead.CouponDetailsData memory _couponDetails,
+        uint256 _startingDate,
+        uint256 _maturityDate
+    ) internal {
+        _bondStorage().couponDetail = _couponDetails;
+        if (_couponDetails.firstCouponDate == 0) return;
+        if (
+            _couponDetails.firstCouponDate < _startingDate ||
+            _couponDetails.firstCouponDate > _maturityDate
+        ) revert CouponFirstDateWrong();
+        if (_couponDetails.couponFrequency == 0) revert CouponFrequencyWrong();
+
+        _setFixedCoupons(
+            _couponDetails.firstCouponDate,
+            _couponDetails.couponFrequency,
+            _maturityDate,
+            _couponDetails.couponRate
+        );
+    }
+
+    function _setCoupon(
+        IBondRead.Coupon memory _newCoupon
+    )
+        internal
+        returns (bool success_, bytes32 corporateActionId_, uint256 couponID_)
     {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Basic).interfaceId;
+        (success_, corporateActionId_, couponID_) = _addCorporateAction(
+            COUPON_CORPORATE_ACTION_TYPE,
+            abi.encode(_newCoupon)
+        );
+    }
+
+    /**
+     * @dev Internal function to set the maturity date of the bond.
+     * @param _maturityDate The new maturity date to be set.
+     * @return success_ True if the maturity date was set successfully.
+     */
+    function _setMaturityDate(
+        uint256 _maturityDate
+    ) internal returns (bool success_) {
+        _bondStorage().bondDetail.maturityDate = _maturityDate;
+        return true;
+    }
+
+    function _getBondDetails()
+        internal
+        view
+        returns (IBondRead.BondDetailsData memory bondDetails_)
+    {
+        bondDetails_ = _bondStorage().bondDetail;
+    }
+
+    function _getCouponDetails()
+        internal
+        view
+        returns (IBondRead.CouponDetailsData memory couponDetails_)
+    {
+        couponDetails_ = _bondStorage().couponDetail;
+    }
+
+    function _getMaturityDate() internal view returns (uint256 maturityDate_) {
+        return _bondStorage().bondDetail.maturityDate;
+    }
+
+    function _getCoupon(
+        uint256 _couponID
+    )
+        internal
+        view
+        returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
+    {
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[COUPON_CORPORATE_ACTION_TYPE]
+            .at(_couponID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (registeredCoupon_.coupon) = abi.decode(data, (IBondRead.Coupon));
+        }
+
+        registeredCoupon_.snapshotId = _getSnapshotID(actionId);
+    }
+
+    function _getCouponFor(
+        uint256 _couponID,
+        address _account
+    ) internal view returns (IBondRead.CouponFor memory couponFor_) {
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(
+            _couponID
+        );
+
+        couponFor_.rate = registeredCoupon.coupon.rate;
+        couponFor_.recordDate = registeredCoupon.coupon.recordDate;
+        couponFor_.executionDate = registeredCoupon.coupon.executionDate;
+
+        if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
+            couponFor_.recordDateReached = true;
+
+            couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
+                ? (_balanceOfAtSnapshot(registeredCoupon.snapshotId, _account) +
+                    _lockedBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    ) +
+                    _heldBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    )) +
+                    _clearedBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    )
+                : (_balanceOf(_account) +
+                    _getLockedAmountFor(_account) +
+                    _getHeldAmountFor(_account)) +
+                    _getClearedAmountFor(_account);
+
+            couponFor_.decimals = _decimalsAdjusted();
+        }
+    }
+
+    function _getCouponCount() internal view returns (uint256 couponCount_) {
+        return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
+    }
+
+    function _getCouponHolders(
+        uint256 _couponID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory holders_) {
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(
+            _couponID
+        );
+
+        if (registeredCoupon.coupon.recordDate >= _blockTimestamp())
+            return new address[](0);
+
+        if (registeredCoupon.snapshotId != 0)
+            return
+                _tokenHoldersAt(
+                    registeredCoupon.snapshotId,
+                    _pageIndex,
+                    _pageLength
+                );
+
+        return _getTokenHolders(_pageIndex, _pageLength);
+    }
+
+    function _getTotalCouponHolders(
+        uint256 _couponID
+    ) internal view returns (uint256) {
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(
+            _couponID
+        );
+
+        if (registeredCoupon.coupon.recordDate >= _blockTimestamp()) return 0;
+
+        if (registeredCoupon.snapshotId != 0)
+            return _totalTokenHoldersAt(registeredCoupon.snapshotId);
+
+        return _getTotalTokenHolders();
+    }
+
+    function _bondStorage()
+        internal
+        pure
+        returns (BondDataStorage storage bondData_)
+    {
+        bytes32 position = _BOND_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            bondData_.slot := position
+        }
+    }
+
+    function _setFixedCoupons(
+        uint256 _firstCouponDate,
+        uint256 _couponFrequency,
+        uint256 _maturityDate,
+        uint256 _rate
+    ) private returns (bool) {
+        uint256 numberOfSubsequentCoupons = (_maturityDate - _firstCouponDate) /
+            _couponFrequency;
+        bool success;
+        for (uint256 i = 0; i <= numberOfSubsequentCoupons; i++) {
+            uint256 runDate = _firstCouponDate + i * _couponFrequency;
+
+            IBondRead.Coupon memory _newCoupon;
+            _newCoupon.recordDate = runDate;
+            _newCoupon.executionDate = runDate;
+            _newCoupon.rate = _rate;
+
+            (success, , ) = _setCoupon(_newCoupon);
+
+            if (!success) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function _checkMaturityDate(uint256 _maturityDate) private view {
+        if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();
     }
 }

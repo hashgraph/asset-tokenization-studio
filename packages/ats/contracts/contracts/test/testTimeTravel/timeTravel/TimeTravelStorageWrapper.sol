@@ -219,6 +219,7 @@ abstract contract TimeTravelStorageWrapper is
     bytes32 internal constant _TIME_TRAVEL_RESOLVER_KEY =
         0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8;
     uint256 internal _timestamp;
+    uint256 internal _blocknumber;
 
     constructor() {
         _checkBlockChainid(_blockChainid());
@@ -240,6 +241,22 @@ abstract contract TimeTravelStorageWrapper is
         emit SystemTimestampReset();
     }
 
+    function _changeSystemBlocknumber(uint256 _newSystemNumber) internal {
+        if (_newSystemNumber == 0) {
+            revert InvalidBlocknumber(_newSystemNumber);
+        }
+
+        uint256 _oldSystemNumber = _blocknumber;
+        _blocknumber = _newSystemNumber;
+
+        emit SystemBlocknumberChanged(_oldSystemNumber, _newSystemNumber);
+    }
+
+    function _resetSystemBlocknumber() internal {
+        _blocknumber = 0;
+        emit SystemBlocknumberReset();
+    }
+
     function _blockTimestamp()
         internal
         view
@@ -248,6 +265,16 @@ abstract contract TimeTravelStorageWrapper is
         returns (uint256)
     {
         return _timestamp == 0 ? block.timestamp : _timestamp;
+    }
+
+    function _blockNumber()
+        internal
+        view
+        virtual
+        override
+        returns (uint256 blockNumber_)
+    {
+        return _blocknumber == 0 ? block.number : _blocknumber;
     }
 
     function _checkBlockChainid(uint256 chainId) internal pure {

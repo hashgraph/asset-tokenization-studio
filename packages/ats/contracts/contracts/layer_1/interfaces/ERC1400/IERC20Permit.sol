@@ -212,6 +212,8 @@ interface IERC20Permit {
     error ERC2612ExpiredSignature(uint256 deadline);
     error ERC2612InvalidSigner(address signer, address owner);
 
+    function initialize_ERC20Permit() external;
+
     function permit(
         address owner,
         address spender,

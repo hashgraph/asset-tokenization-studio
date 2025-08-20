@@ -216,6 +216,7 @@ export class SecurityData {
   public isControllable: boolean;
   public isWhiteList: boolean;
   public maxSupply: string;
+  public erc20VotesActivated: boolean;
   public erc20MetadataInfo: ERC20MetadataInfo;
   public clearingActive: boolean;
   public internalKycActivated: boolean;

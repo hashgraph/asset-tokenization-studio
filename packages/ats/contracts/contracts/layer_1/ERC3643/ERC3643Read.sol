@@ -204,23 +204,46 @@
 */
 
 // SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
 
-import {ERC3643Facet} from '../../../layer_1/ERC3643/ERC3643Facet.sol';
 import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+    _CONTROLLER_ROLE,
+    _ISSUER_ROLE,
+    _AGENT_ROLE,
+    _TREX_OWNER_ROLE
+} from '../constants/roles.sol';
+import {IERC3643Read} from '../interfaces/ERC3643/IERC3643Read.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
+import {Common} from '../common/Common.sol';
 
-contract ERC3643TimeTravel is ERC3643Facet, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
+abstract contract ERC3643Read is IERC3643Read, Common {
+    function isAgent(address _agent) external view returns (bool) {
+        return _hasRole(_AGENT_ROLE, _agent);
+    }
+
+    function identityRegistry()
+        external
         view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
+        override
+        returns (IIdentityRegistry)
     {
-        return TimeTravelStorageWrapper._blockTimestamp();
+        return _getIdentityRegistry();
+    }
+
+    function onchainID() external view override returns (address) {
+        return _getOnchainID();
+    }
+
+    function compliance() external view override returns (ICompliance) {
+        return _getCompliance();
+    }
+
+    function isAddressRecovered(address _wallet) external view returns (bool) {
+        return _isRecovered(_wallet);
+    }
+
+    function version() external view returns (string memory) {
+        return _version();
     }
 }

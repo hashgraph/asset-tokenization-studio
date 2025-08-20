@@ -206,43 +206,59 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {_ERC3643_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {IERC3643Management} from '../interfaces/ERC3643/IERC3643Management.sol';
 import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
-import {_SECURITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {ISecurity} from '../interfaces/ISecurity.sol';
-import {Common} from '../../layer_1/common/Common.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {ERC3643Management} from './ERC3643Management.sol';
 
-contract SecurityStorageWrapper is Common {
-    function _storeRegulationData(
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) internal {
-        ISecurity.SecurityRegulationData storage data = _securityStorage();
-        data.regulationData = _regulationData;
-        data.additionalSecurityData = _additionalSecurityData;
+contract ERC3643ManagementFacet is IStaticFunctionSelectors, ERC3643Management {
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _ERC3643_MANAGEMENT_RESOLVER_KEY;
     }
 
-    function _getSecurityRegulationData()
-        internal
+    function getStaticFunctionSelectors()
+        external
         pure
-        returns (
-            ISecurity.SecurityRegulationData memory securityRegulationData_
-        )
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
     {
-        securityRegulationData_ = _securityStorage();
+        staticFunctionSelectors_ = new bytes4[](9);
+        uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .initialize_ERC3643
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setIdentityRegistry
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setCompliance
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .recoveryAddress
+            .selector;
     }
 
-    function _securityStorage()
-        internal
+    function getStaticInterfaceIds()
+        external
         pure
-        returns (ISecurity.SecurityRegulationData storage securityStorage_)
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
     {
-        bytes32 position = _SECURITY_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            securityStorage_.slot := position
-        }
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Management)
+            .interfaceId;
     }
 }
