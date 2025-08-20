@@ -243,7 +243,6 @@ export class ControllerRedeemCommandHandler
     try {
       const { securityId, amount, sourceId } = command;
       const handler = this.transactionService.getHandler();
-      const account = this.accountService.getCurrentAccount();
       const security = await this.securityService.get(securityId);
 
       const securityEvmAddress: EvmAddress =
@@ -258,7 +257,6 @@ export class ControllerRedeemCommandHandler
         sourceId,
         amount,
         _PARTITION_ID_1,
-        account.id.toString(),
       );
 
       await this.validationService.checkDecimals(security, amount);

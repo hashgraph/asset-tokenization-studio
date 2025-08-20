@@ -438,13 +438,8 @@ export default class ValidationService extends Service {
       ),
     );
 
-    if (res.payload != '0x01') {
-      throw ContractsErrorMapper.mapError(
-        res.payload,
-        operatorId,
-        sourceId,
-        targetId,
-      );
+    if (res.payload[0] != '0x01') {
+      throw ContractsErrorMapper.mapError(res.payload[0], res.payload[1]);
     }
   }
 
@@ -453,20 +448,14 @@ export default class ValidationService extends Service {
     sourceId: string,
     amount: string,
     partitionId: string,
-    operatorId: string,
   ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
       new CanRedeemByPartitionQuery(securityId, sourceId, partitionId, amount),
     );
 
-    if (res.payload != '0x01') {
-      throw ContractsErrorMapper.mapError(
-        res.payload,
-        operatorId,
-        sourceId,
-        undefined,
-      );
+    if (res.payload[0] != '0x01') {
+      throw ContractsErrorMapper.mapError(res.payload[0], res.payload[1]);
     }
   }
 
