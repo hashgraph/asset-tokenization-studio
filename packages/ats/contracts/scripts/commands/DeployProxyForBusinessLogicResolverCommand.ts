@@ -203,27 +203,27 @@
 
 */
 
-import { BaseBlockchainCommand, BaseBlockchainCommandParams } from '../index'
+import { BaseBlockchainCommand, BaseBlockchainCommandParams } from '../index';
 
 interface DeployProxyForBusinessLogicResolverCommandParams
-    extends BaseBlockchainCommandParams {
-    businessLogicResolverImplementationAddress: string
-    proxyAdminAddress?: string
+  extends BaseBlockchainCommandParams {
+  businessLogicResolverImplementationAddress: string;
+  proxyAdminAddress?: string;
 }
 
 export default class DeployProxyForBusinessLogicResolverCommand extends BaseBlockchainCommand {
-    businessLogicResolverImplementationAddress: string
-    proxyAdminAddress?: string
+  businessLogicResolverImplementationAddress: string;
+  proxyAdminAddress?: string;
 
-    constructor({
-        businessLogicResolverImplementationAddress,
-        proxyAdminAddress,
-        signer,
-        overrides,
-    }: DeployProxyForBusinessLogicResolverCommandParams) {
-        super({ signer, overrides })
-        this.businessLogicResolverImplementationAddress =
-            businessLogicResolverImplementationAddress
-        this.proxyAdminAddress = proxyAdminAddress
-    }
+  constructor({
+    businessLogicResolverImplementationAddress,
+    proxyAdminAddress,
+    signer,
+    overrides,
+  }: DeployProxyForBusinessLogicResolverCommandParams) {
+    super({ signer, overrides });
+    this.businessLogicResolverImplementationAddress =
+      businessLogicResolverImplementationAddress;
+    this.proxyAdminAddress = proxyAdminAddress;
+  }
 }

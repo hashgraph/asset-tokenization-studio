@@ -206,12 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
-import {ISecurity} from './ISecurity.sol';
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
+import { IBond } from '../../layer_2/interfaces/bond/IBond.sol';
+import { ISecurity } from './ISecurity.sol';
+import { RegulationData, AdditionalSecurityData } from '../constants/regulation.sol';
 
 interface IBondUSA is IBond, ISecurity {
     // solhint-disable func-name-mixedcase

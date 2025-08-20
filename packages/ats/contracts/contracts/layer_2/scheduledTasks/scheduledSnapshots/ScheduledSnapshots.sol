@@ -206,37 +206,21 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {Common} from '../../../layer_1/common/Common.sol';
-import {
-    _SCHEDULED_SNAPSHOTS_RESOLVER_KEY
-} from '../../constants/resolverKeys.sol';
-import {
-    IScheduledSnapshots
-} from '../../interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { IStaticFunctionSelectors } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { Common } from '../../../layer_1/common/Common.sol';
+import { _SCHEDULED_SNAPSHOTS_RESOLVER_KEY } from '../../constants/resolverKeys.sol';
+import { IScheduledSnapshots } from '../../interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol';
+import { ScheduledTasksLib } from '../ScheduledTasksLib.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-contract ScheduledSnapshots is
-    IStaticFunctionSelectors,
-    IScheduledSnapshots,
-    Common
-{
+contract ScheduledSnapshots is IStaticFunctionSelectors, IScheduledSnapshots, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     function onScheduledSnapshotTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    )
-        external
-        override
-        onlyAutoCalling(_scheduledSnapshotStorage().autoCalling)
-    {
+    ) external override onlyAutoCalling(_scheduledSnapshotStorage().autoCalling) {
         uint256 newSnapShotID;
         if (_pos == _scheduledTasksLength - 1) {
             newSnapShotID = _snapshot();
@@ -252,52 +236,25 @@ contract ScheduledSnapshots is
     function getScheduledSnapshots(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        override
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
-    {
+    ) external view override returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_) {
         scheduledSnapshot_ = _getScheduledSnapshots(_pageIndex, _pageLength);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _SCHEDULED_SNAPSHOTS_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .scheduledSnapshotCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getScheduledSnapshots
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .onScheduledSnapshotTriggered
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.scheduledSnapshotCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getScheduledSnapshots.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.onScheduledSnapshotTriggered.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IScheduledSnapshots)
-            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IScheduledSnapshots).interfaceId;
     }
 }

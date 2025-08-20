@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {ScheduledTasksLib} from '../../../scheduledTasks/ScheduledTasksLib.sol';
+import { ScheduledTasksLib } from '../../../scheduledTasks/ScheduledTasksLib.sol';
 
 interface IScheduledBalanceAdjustments {
     function onScheduledBalanceAdjustmentTriggered(
@@ -220,10 +220,5 @@ interface IScheduledBalanceAdjustments {
     function getScheduledBalanceAdjustments(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        returns (
-            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
-        );
+    ) external view returns (ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_);
 }

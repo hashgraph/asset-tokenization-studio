@@ -18,11 +18,7 @@ contract ComplianceMock {
         setFlags(_canTransferFlag, _revertFlag);
     }
 
-    function transferred(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external virtual {
+    function transferred(address _from, address _to, uint256 _amount) external virtual {
         if (_revert[keccak256('transferred')]) {
             revert MockErrorTransfer(_from, _to, _amount);
         }
@@ -41,11 +37,7 @@ contract ComplianceMock {
         ++destroyedHit;
     }
 
-    function canTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external view virtual returns (bool) {
+    function canTransfer(address _from, address _to, uint256 _amount) external view virtual returns (bool) {
         if (_revert[keccak256('canTransfer')]) {
             revert MockErrorCanTransfer(_from, _to, _amount);
         }

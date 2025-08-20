@@ -209,21 +209,11 @@ pragma solidity 0.8.18;
 import {
     ScheduledBalanceAdjustments
 } from '../../../layer_2/scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustments.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+import { TimeTravelStorageWrapper } from '../timeTravel/TimeTravelStorageWrapper.sol';
+import { LocalContext } from '../../../layer_0/context/LocalContext.sol';
 
-contract ScheduledBalanceAdjustmentsTimeTravel is
-    ScheduledBalanceAdjustments,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+contract ScheduledBalanceAdjustmentsTimeTravel is ScheduledBalanceAdjustments, TimeTravelStorageWrapper {
+    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

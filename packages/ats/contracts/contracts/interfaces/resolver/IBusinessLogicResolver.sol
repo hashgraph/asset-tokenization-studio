@@ -204,7 +204,7 @@
 */
 
 pragma solidity 0.8.18;
-import {IDiamondCutManager} from './diamondCutManager/IDiamondCutManager.sol';
+import { IDiamondCutManager } from './diamondCutManager/IDiamondCutManager.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -246,44 +246,29 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     /// @notice Event emitted when Business Logic(s) are registered (updated or added).
     /// @param businessLogics list of registered Business Logics.
     /// @param newLatestVersion new latest version = previous latest version + 1.
-    event BusinessLogicsRegistered(
-        BusinessLogicRegistryData[] businessLogics,
-        uint256 newLatestVersion
-    );
+    event BusinessLogicsRegistered(BusinessLogicRegistryData[] businessLogics, uint256 newLatestVersion);
 
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_BusinessLogicResolver()
-        external
-        returns (bool success_);
+    function initialize_BusinessLogicResolver() external returns (bool success_);
 
     /// @notice Update existing business logics addresses or add new business logics to the register.
     ///         the BusinessLogicsRegistered event must be emitted.
     ///         The latest "version" for all business logics is increased by 1.
     /// @param _businessLogics list of business logics to be registered.
-    function registerBusinessLogics(
-        BusinessLogicRegistryData[] calldata _businessLogics
-    ) external;
+    function registerBusinessLogics(BusinessLogicRegistryData[] calldata _businessLogics) external;
 
     /// @notice Adds a list of selectors to the blacklist
     /// @param _configurationId the configuration key to be checked.
     /// @param _selectors list of selectors to be added to the blacklist
-    function addSelectorsToBlacklist(
-        bytes32 _configurationId,
-        bytes4[] calldata _selectors
-    ) external;
+    function addSelectorsToBlacklist(bytes32 _configurationId, bytes4[] calldata _selectors) external;
 
     /// @notice Removes a list of selectors from the blacklist
     /// @param _configurationId the configuration key to be checked.
     /// @param _selectors list of selectors to be removed from the blacklist
-    function removeSelectorsFromBlacklist(
-        bytes32 _configurationId,
-        bytes4[] calldata _selectors
-    ) external;
+    function removeSelectorsFromBlacklist(bytes32 _configurationId, bytes4[] calldata _selectors) external;
 
     /// @notice Returns the current status of a given version
-    function getVersionStatus(
-        uint256 _version
-    ) external view returns (VersionStatus status_);
+    function getVersionStatus(uint256 _version) external view returns (VersionStatus status_);
 
     /// @notice Returns the current latest version for all business logics
     function getLatestVersion() external view returns (uint256 latestVersion_);
@@ -303,10 +288,7 @@ interface IBusinessLogicResolver is IDiamondCutManager {
     ) external view returns (address businessLogicAddress_);
 
     /// @notice Returns the count of currently active business logics
-    function getBusinessLogicCount()
-        external
-        view
-        returns (uint256 businessLogicCount_);
+    function getBusinessLogicCount() external view returns (uint256 businessLogicCount_);
 
     /// @notice Returns a list of business logic keys
     /// @param _pageIndex members to skip : _pageIndex * _pageLength

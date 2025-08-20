@@ -206,21 +206,15 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LibCommon} from '../../common/libraries/LibCommon.sol';
-import {ArrayLib} from '../../common/libraries/ArrayLib.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { LibCommon } from '../../common/libraries/LibCommon.sol';
+import { ArrayLib } from '../../common/libraries/ArrayLib.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
     IAccessControlStorageWrapper
 } from '../../../layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol';
-import {LocalContext} from '../../context/LocalContext.sol';
-import {
-    BusinessLogicResolverWrapper
-} from '../../../resolver/BusinessLogicResolverWrapper.sol';
-import {
-    _ACCESS_CONTROL_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
+import { LocalContext } from '../../context/LocalContext.sol';
+import { BusinessLogicResolverWrapper } from '../../../resolver/BusinessLogicResolverWrapper.sol';
+import { _ACCESS_CONTROL_STORAGE_POSITION } from '../../constants/storagePositions.sol';
 
 abstract contract AccessControlStorageWrapper is
     IAccessControlStorageWrapper,
@@ -253,34 +247,22 @@ abstract contract AccessControlStorageWrapper is
         _;
     }
 
-    modifier onlySameRolesAndActivesLength(
-        uint256 _rolesLength,
-        uint256 _activesLength
-    ) {
+    modifier onlySameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) {
         _checkSameRolesAndActivesLength(_rolesLength, _activesLength);
         _;
     }
 
-    modifier onlyConsistentRoles(
-        bytes32[] calldata _roles,
-        bool[] calldata _actives
-    ) {
+    modifier onlyConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) {
         ArrayLib.checkUniqueValues(_roles, _actives);
         _;
     }
 
     // Internal
-    function _grantRole(
-        bytes32 _role,
-        address _account
-    ) internal returns (bool success_) {
+    function _grantRole(bytes32 _role, address _account) internal returns (bool success_) {
         success_ = _grant(_rolesStorage(), _role, _account);
     }
 
-    function _revokeRole(
-        bytes32 _role,
-        address _account
-    ) internal returns (bool success_) {
+    function _revokeRole(bytes32 _role, address _account) internal returns (bool success_) {
         success_ = _remove(_rolesStorage(), _role, _account);
     }
 
@@ -295,15 +277,13 @@ abstract contract AccessControlStorageWrapper is
         for (uint256 index; index < length; ) {
             _checkRole(_getRoleAdmin(_roles[index]), sender);
             if (_actives[index]) {
-                if (!_has(roleDataStorage, _roles[index], _account))
-                    _grant(roleDataStorage, _roles[index], _account);
+                if (!_has(roleDataStorage, _roles[index], _account)) _grant(roleDataStorage, _roles[index], _account);
                 unchecked {
                     ++index;
                 }
                 continue;
             }
-            if (_has(roleDataStorage, _roles[index], _account))
-                _remove(roleDataStorage, _roles[index], _account);
+            if (_has(roleDataStorage, _roles[index], _account)) _remove(roleDataStorage, _roles[index], _account);
             unchecked {
                 ++index;
             }
@@ -315,17 +295,11 @@ abstract contract AccessControlStorageWrapper is
         return _rolesStorage().roles[_role].roleAdmin;
     }
 
-    function _hasRole(
-        bytes32 _role,
-        address _account
-    ) internal view returns (bool) {
+    function _hasRole(bytes32 _role, address _account) internal view returns (bool) {
         return _has(_rolesStorage(), _role, _account);
     }
 
-    function _hasAnyRole(
-        bytes32[] memory _roles,
-        address _account
-    ) internal view returns (bool) {
+    function _hasAnyRole(bytes32[] memory _roles, address _account) internal view returns (bool) {
         for (uint256 i; i < _roles.length; i++) {
             if (_has(_rolesStorage(), _roles[i], _account)) {
                 return true;
@@ -334,9 +308,7 @@ abstract contract AccessControlStorageWrapper is
         return false;
     }
 
-    function _getRoleCountFor(
-        address _account
-    ) internal view returns (uint256 roleCount_) {
+    function _getRoleCountFor(address _account) internal view returns (uint256 roleCount_) {
         roleCount_ = _rolesStorage().memberRoles[_account].length();
     }
 
@@ -345,15 +317,10 @@ abstract contract AccessControlStorageWrapper is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory roles_) {
-        roles_ = _rolesStorage().memberRoles[_account].getFromSet(
-            _pageIndex,
-            _pageLength
-        );
+        roles_ = _rolesStorage().memberRoles[_account].getFromSet(_pageIndex, _pageLength);
     }
 
-    function _getRoleMemberCount(
-        bytes32 _role
-    ) internal view returns (uint256 memberCount_) {
+    function _getRoleMemberCount(bytes32 _role) internal view returns (uint256 memberCount_) {
         memberCount_ = _rolesStorage().roles[_role].roleMembers.length();
     }
 
@@ -362,10 +329,7 @@ abstract contract AccessControlStorageWrapper is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
-        members_ = _rolesStorage().roles[_role].roleMembers.getFromSet(
-            _pageIndex,
-            _pageLength
-        );
+        members_ = _rolesStorage().roles[_role].roleMembers.getFromSet(_pageIndex, _pageLength);
     }
 
     function _checkRole(bytes32 _role, address _account) internal view {
@@ -374,10 +338,7 @@ abstract contract AccessControlStorageWrapper is
         }
     }
 
-    function _checkAnyRole(
-        bytes32[] memory _roles,
-        address _account
-    ) internal view {
+    function _checkAnyRole(bytes32[] memory _roles, address _account) internal view {
         if (!_hasAnyRole(_roles, _account)) {
             revert AccountHasNoRoles(_account, _roles);
         }
@@ -391,11 +352,7 @@ abstract contract AccessControlStorageWrapper is
         hasRole_ = _rolesStorageData.memberRoles[_account].contains(_role);
     }
 
-    function _rolesStorage()
-        internal
-        pure
-        returns (RoleDataStorage storage roles_)
-    {
+    function _rolesStorage() internal pure returns (RoleDataStorage storage roles_) {
         bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -423,10 +380,7 @@ abstract contract AccessControlStorageWrapper is
             _roleDataStorage.memberRoles[_account].remove(_role);
     }
 
-    function _checkSameRolesAndActivesLength(
-        uint256 _rolesLength,
-        uint256 _activesLength
-    ) private pure {
+    function _checkSameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) private pure {
         if (_rolesLength != _activesLength) {
             revert RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
         }

@@ -206,16 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    _CONTROLLER_ROLE,
-    _ISSUER_ROLE,
-    _AGENT_ROLE,
-    _TREX_OWNER_ROLE
-} from '../constants/roles.sol';
-import {IERC3643Basic} from '../interfaces/ERC3643/IERC3643Basic.sol';
-import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
-import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
-import {Common} from '../common/Common.sol';
+import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE, _TREX_OWNER_ROLE } from '../constants/roles.sol';
+import { IERC3643Basic } from '../interfaces/ERC3643/IERC3643Basic.sol';
+import { ICompliance } from '../interfaces/ERC3643/ICompliance.sol';
+import { IIdentityRegistry } from '../interfaces/ERC3643/IIdentityRegistry.sol';
+import { Common } from '../common/Common.sol';
 
 abstract contract ERC3643 is IERC3643Basic, Common {
     address private constant _ONCHAIN_ID = address(0);
@@ -229,9 +224,7 @@ abstract contract ERC3643 is IERC3643Basic, Common {
         _initialize_ERC3643(_compliance, _identityRegistry);
     }
 
-    function setName(
-        string calldata _name
-    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setName(string calldata _name) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _setName(_name);
 
         emit UpdatedTokenInformation(
@@ -243,9 +236,7 @@ abstract contract ERC3643 is IERC3643Basic, Common {
         );
     }
 
-    function setSymbol(
-        string calldata _symbol
-    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setSymbol(string calldata _symbol) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _setSymbol(_symbol);
 
         emit UpdatedTokenInformation(
@@ -257,9 +248,7 @@ abstract contract ERC3643 is IERC3643Basic, Common {
         );
     }
 
-    function setOnchainID(
-        address _onchainID
-    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setOnchainID(address _onchainID) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _erc20Storage();
         _erc3643Storage().onchainID = _onchainID;
 
@@ -272,29 +261,21 @@ abstract contract ERC3643 is IERC3643Basic, Common {
         );
     }
 
-    function setIdentityRegistry(
-        address _identityRegistry
-    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setIdentityRegistry(address _identityRegistry) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         _setIdentityRegistry(_identityRegistry);
         emit IdentityRegistryAdded(_identityRegistry);
     }
 
-    function setCompliance(
-        address _compliance
-    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setCompliance(address _compliance) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         _setCompliance(_compliance);
     }
 
-    function addAgent(
-        address _agent
-    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+    function addAgent(address _agent) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
         _addAgent(_agent);
         emit AgentAdded(_agent);
     }
 
-    function removeAgent(
-        address _agent
-    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+    function removeAgent(address _agent) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
         _removeAgent(_agent);
         emit AgentRemoved(_agent);
     }
@@ -353,13 +334,7 @@ abstract contract ERC3643 is IERC3643Basic, Common {
         address _from,
         address _to,
         uint256 _amount
-    )
-        external
-        onlyWithoutMultiPartition
-        onlyControllable
-        onlyUnpaused
-        returns (bool)
-    {
+    ) external onlyWithoutMultiPartition onlyControllable onlyUnpaused returns (bool) {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -376,12 +351,7 @@ abstract contract ERC3643 is IERC3643Basic, Common {
         return _hasRole(_AGENT_ROLE, _agent);
     }
 
-    function identityRegistry()
-        external
-        view
-        override
-        returns (IIdentityRegistry)
-    {
+    function identityRegistry() external view override returns (IIdentityRegistry) {
         return _getIdentityRegistry();
     }
 

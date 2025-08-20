@@ -203,12 +203,12 @@
 
 */
 
-import { Result } from 'ethers/lib/utils'
-import { CallContractCommand } from '@scripts'
+import { Result } from 'ethers/lib/utils';
+import { CallContractCommand } from '@scripts';
 import {
-    TransactionReceipt,
-    TransactionResponse,
-} from '@ethersproject/providers'
+  TransactionReceipt,
+  TransactionResponse,
+} from '@ethersproject/providers';
 
 // * External functions
 /**
@@ -221,15 +221,15 @@ import {
  * @returns {Promise<Result>} The result of the contract call.
  */
 export async function callReadContract({
-    contract,
-    method,
-    args,
-    overrides,
+  contract,
+  method,
+  args,
+  overrides,
 }: CallContractCommand): Promise<Result> {
-    const result: Result = await contract.callStatic[method](...args, {
-        ...overrides,
-    })
-    return result
+  const result: Result = await contract.callStatic[method](...args, {
+    ...overrides,
+  });
+  return result;
 }
 
 /**
@@ -243,21 +243,21 @@ export async function callReadContract({
  * @throws {Error} If the transaction fails or is reverted
  */
 export async function callWriteContract({
+  contract,
+  method,
+  args,
+  overrides,
+}: CallContractCommand): Promise<TransactionReceipt> {
+  const command = new CallContractCommand({
     contract,
     method,
     args,
     overrides,
-}: CallContractCommand): Promise<TransactionReceipt> {
-    const command = new CallContractCommand({
-        contract,
-        method,
-        args,
-        overrides,
-    })
-    const response: TransactionResponse = (await callContract(
-        command
-    )) as TransactionResponse
-    return await response.wait()
+  });
+  const response: TransactionResponse = (await callContract(
+    command,
+  )) as TransactionResponse;
+  return await response.wait();
 }
 
 // * Internal functions
@@ -271,10 +271,10 @@ export async function callWriteContract({
  * @returns {Promise<TransactionResponse | Result>} A promise that resolves to either a TransactionResponse (for write operations) or Result (for read operations)
  */
 function callContract({
-    contract,
-    method,
-    args,
-    overrides,
+  contract,
+  method,
+  args,
+  overrides,
 }: CallContractCommand): Promise<TransactionResponse | Result> {
-    return contract[method](...args, { ...overrides })
+  return contract[method](...args, { ...overrides });
 }

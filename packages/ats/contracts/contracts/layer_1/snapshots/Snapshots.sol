@@ -206,31 +206,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    _SNAPSHOTS_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
+import { _SNAPSHOTS_RESOLVER_KEY } from '../../layer_1/constants/resolverKeys.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { ISnapshots } from '../interfaces/snapshots/ISnapshots.sol';
+import { Common } from '../common/Common.sol';
+import { _SNAPSHOT_ROLE } from '../constants/roles.sol';
 
 contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
-    function takeSnapshot()
-        external
-        override
-        onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID_)
-    {
+    function takeSnapshot() external override onlyUnpaused onlyRole(_SNAPSHOT_ROLE) returns (uint256 snapshotID_) {
         _triggerScheduledTasks(0);
         snapshotID_ = _takeSnapshot();
     }
 
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint8 decimals_) {
+    function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_) {
         decimals_ = _decimalsAtSnapshot(_snapshotID);
     }
 
@@ -249,9 +237,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         return _tokenHoldersAt(_snapshotID, _pageIndex, _pageLength);
     }
 
-    function getTotalTokenHoldersAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256) {
+    function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view returns (uint256) {
         return _totalTokenHoldersAt(_snapshotID);
     }
 
@@ -260,11 +246,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view override returns (uint256 balance_) {
-        balance_ = _balanceOfAtSnapshotByPartition(
-            _partition,
-            _snapshotID,
-            _tokenHolder
-        );
+        balance_ = _balanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
     function partitionsOfAtSnapshot(
@@ -274,9 +256,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view override returns (uint256 totalSupply_) {
+    function totalSupplyAtSnapshot(uint256 _snapshotID) external view override returns (uint256 totalSupply_) {
         totalSupply_ = _totalSupplyAtSnapshot(_snapshotID);
     }
 
@@ -284,10 +264,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         bytes32 _partition,
         uint256 _snapshotID
     ) external view override returns (uint256 totalSupply_) {
-        totalSupply_ = _totalSupplyAtSnapshotByPartition(
-            _partition,
-            _snapshotID
-        );
+        totalSupply_ = _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
     }
 
     function lockedBalanceOfAtSnapshot(
@@ -302,11 +279,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view override returns (uint256 balance_) {
-        balance_ = _lockedBalanceOfAtSnapshotByPartition(
-            _partition,
-            _snapshotID,
-            _tokenHolder
-        );
+        balance_ = _lockedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
     function heldBalanceOfAtSnapshot(
@@ -321,11 +294,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_) {
-        balance_ = _heldBalanceOfAtSnapshotByPartition(
-            _partition,
-            _snapshotID,
-            _tokenHolder
-        );
+        balance_ = _heldBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
     function clearedBalanceOfAtSnapshot(
@@ -340,81 +309,34 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_) {
-        balance_ = _clearedBalanceOfAtSnapshotByPartition(
-            _partition,
-            _snapshotID,
-            _tokenHolder
-        );
+        balance_ = _clearedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](15);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearedBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .decimalsAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTokenHoldersAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalTokenHoldersAtSnapshot
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.balanceOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.totalSupplyAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.balanceOfAtSnapshotByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.partitionsOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.totalSupplyAtSnapshotByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.lockedBalanceOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.lockedBalanceOfAtSnapshotByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.heldBalanceOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.heldBalanceOfAtSnapshotByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearedBalanceOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearedBalanceOfAtSnapshotByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.decimalsAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getTokenHoldersAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getTotalTokenHoldersAtSnapshot.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;

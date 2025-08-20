@@ -206,33 +206,24 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {ICap} from '../interfaces/cap/ICap.sol';
-import {_CAP_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {Common} from '../common/Common.sol';
+import { ICap } from '../interfaces/cap/ICap.sol';
+import { _CAP_ROLE } from '../constants/roles.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _CAP_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { Common } from '../common/Common.sol';
 
 contract Cap is ICap, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
         uint256 maxSupply,
         PartitionCap[] calldata partitionCap
-    )
-        external
-        override
-        onlyUninitialized(_capStorage().initialized)
-        onlyValidNewMaxSupply(maxSupply)
-    {
+    ) external override onlyUninitialized(_capStorage().initialized) onlyValidNewMaxSupply(maxSupply) {
         CapDataStorage storage capStorage = _capStorage();
 
         capStorage.maxSupply = maxSupply;
 
         for (uint256 i = 0; i < partitionCap.length; i++) {
-            capStorage.maxSupplyByPartition[
-                partitionCap[i].partition
-            ] = partitionCap[i].maxSupply;
+            capStorage.maxSupplyByPartition[partitionCap[i].partition] = partitionCap[i].maxSupply;
         }
 
         capStorage.initialized = true;
@@ -240,14 +231,7 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
 
     function setMaxSupply(
         uint256 _maxSupply
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_CAP_ROLE)
-        onlyValidNewMaxSupply(_maxSupply)
-        returns (bool success_)
-    {
+    ) external override onlyUnpaused onlyRole(_CAP_ROLE) onlyValidNewMaxSupply(_maxSupply) returns (bool success_) {
         _setMaxSupply(_maxSupply);
         success_ = true;
     }
@@ -267,57 +251,29 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         success_ = true;
     }
 
-    function getMaxSupply()
-        external
-        view
-        override
-        returns (uint256 maxSupply_)
-    {
+    function getMaxSupply() external view override returns (uint256 maxSupply_) {
         return _getMaxSupplyAdjusted();
     }
 
-    function getMaxSupplyByPartition(
-        bytes32 _partition
-    ) external view override returns (uint256 maxSupply_) {
+    function getMaxSupplyByPartition(bytes32 _partition) external view override returns (uint256 maxSupply_) {
         return _getMaxSupplyByPartitionAdjusted(_partition);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _CAP_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_Cap
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initialize_Cap.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setMaxSupply.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setMaxSupplyByPartition
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setMaxSupplyByPartition.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getMaxSupply.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getMaxSupplyByPartition
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getMaxSupplyByPartition.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(ICap).interfaceId;

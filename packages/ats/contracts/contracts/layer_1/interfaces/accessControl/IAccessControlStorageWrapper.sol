@@ -215,11 +215,7 @@ interface IAccessControlStorageWrapper {
      * @param previousAdminRole The legacy administrative role.
      * @param newAdminRole The new administrative role.
      */
-    event RoleAdminChanged(
-        bytes32 indexed role,
-        bytes32 indexed previousAdminRole,
-        bytes32 indexed newAdminRole
-    );
+    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);
 
     /**
      * @dev Emitted when the provided account is not granted the role
@@ -245,8 +241,5 @@ interface IAccessControlStorageWrapper {
      * @param rolesLength The length of roles array
      * @param activesLength The length of actives array
      */
-    error RolesAndActivesLengthMismatch(
-        uint256 rolesLength,
-        uint256 activesLength
-    );
+    error RolesAndActivesLengthMismatch(uint256 rolesLength, uint256 activesLength);
 }

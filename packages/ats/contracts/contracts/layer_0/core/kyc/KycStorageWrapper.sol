@@ -206,21 +206,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import { IKyc } from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
     ExternalKycListManagementStorageWrapper
 } from '../externalKycLists/ExternalKycListManagementStorageWrapper.sol';
 import {
     ExternalKycListManagementStorageWrapper
 } from '../externalKycLists/ExternalKycListManagementStorageWrapper.sol';
-import {_KYC_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {LibCommon} from '../../common/libraries/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    IRevocationList
-} from '../../../layer_1/interfaces/kyc/IRevocationList.sol';
+import { _KYC_STORAGE_POSITION } from '../../constants/storagePositions.sol';
+import { LibCommon } from '../../common/libraries/LibCommon.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { IRevocationList } from '../../../layer_1/interfaces/kyc/IRevocationList.sol';
 
 abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
     using LibCommon for EnumerableSet.AddressSet;
@@ -255,88 +251,53 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         uint256 _validTo,
         address _issuer
     ) internal returns (bool success_) {
-        _kycStorage().kyc[_account] = IKyc.KycData(
-            _validFrom,
-            _validTo,
-            _vcId,
-            _issuer,
-            IKyc.KycStatus.GRANTED
-        );
-        _kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(
-            _account
-        );
+        _kycStorage().kyc[_account] = IKyc.KycData(_validFrom, _validTo, _vcId, _issuer, IKyc.KycStatus.GRANTED);
+        _kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(_account);
         success_ = true;
     }
 
     function _revokeKyc(address _account) internal returns (bool success_) {
         delete _kycStorage().kyc[_account];
 
-        _kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].remove(
-            _account
-        );
+        _kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].remove(_account);
         success_ = true;
     }
 
-    function _getKycStatusFor(
-        address _account
-    ) internal view virtual returns (IKyc.KycStatus kycStatus_) {
+    function _getKycStatusFor(address _account) internal view virtual returns (IKyc.KycStatus kycStatus_) {
         IKyc.KycData memory kycFor = _getKycFor(_account);
 
-        if (kycFor.validTo < _blockTimestamp())
-            return IKyc.KycStatus.NOT_GRANTED;
-        if (kycFor.validFrom > _blockTimestamp())
-            return IKyc.KycStatus.NOT_GRANTED;
+        if (kycFor.validTo < _blockTimestamp()) return IKyc.KycStatus.NOT_GRANTED;
+        if (kycFor.validFrom > _blockTimestamp()) return IKyc.KycStatus.NOT_GRANTED;
         if (!_isIssuer(kycFor.issuer)) return IKyc.KycStatus.NOT_GRANTED;
 
         address revocationListAddress = _getRevocationRegistryAddress();
 
         if (
             revocationListAddress != address(0) &&
-            IRevocationList(revocationListAddress).revoked(
-                kycFor.issuer,
-                kycFor.vcId
-            )
+            IRevocationList(revocationListAddress).revoked(kycFor.issuer, kycFor.vcId)
         ) return IKyc.KycStatus.NOT_GRANTED;
 
         if (revocationListAddress != address(0)) {
-            if (
-                IRevocationList(revocationListAddress).revoked(
-                    kycFor.issuer,
-                    kycFor.vcId
-                )
-            ) return IKyc.KycStatus.NOT_GRANTED;
+            if (IRevocationList(revocationListAddress).revoked(kycFor.issuer, kycFor.vcId))
+                return IKyc.KycStatus.NOT_GRANTED;
         }
         return kycFor.status;
     }
 
-    function _getKycFor(
-        address _account
-    ) internal view virtual returns (IKyc.KycData memory) {
+    function _getKycFor(address _account) internal view virtual returns (IKyc.KycData memory) {
         return _kycStorage().kyc[_account];
     }
 
-    function _getKycAccountsCount(
-        IKyc.KycStatus _kycStatus
-    ) internal view virtual returns (uint256 kycAccountsCount_) {
-        kycAccountsCount_ = _kycStorage()
-            .kycAddressesByStatus[_kycStatus]
-            .length();
+    function _getKycAccountsCount(IKyc.KycStatus _kycStatus) internal view virtual returns (uint256 kycAccountsCount_) {
+        kycAccountsCount_ = _kycStorage().kycAddressesByStatus[_kycStatus].length();
     }
 
     function _getKycAccountsData(
         IKyc.KycStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        internal
-        view
-        virtual
-        returns (address[] memory accounts_, IKyc.KycData[] memory kycData_)
-    {
-        accounts_ = _kycStorage().kycAddressesByStatus[_kycStatus].getFromSet(
-            _pageIndex,
-            _pageLength
-        );
+    ) internal view virtual returns (address[] memory accounts_, IKyc.KycData[] memory kycData_) {
+        accounts_ = _kycStorage().kycAddressesByStatus[_kycStatus].getFromSet(_pageIndex, _pageLength);
 
         uint256 totalAccounts = accounts_.length;
 
@@ -350,23 +311,15 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         }
     }
 
-    function _verifyKycStatus(
-        IKyc.KycStatus _kycStatus,
-        address _account
-    ) internal view virtual returns (bool) {
+    function _verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view virtual returns (bool) {
         KycStorage storage kycStorage = _kycStorage();
 
-        bool internalKycValid = !kycStorage.internalKycActivated ||
-            _getKycStatusFor(_account) == _kycStatus;
+        bool internalKycValid = !kycStorage.internalKycActivated || _getKycStatusFor(_account) == _kycStatus;
         return internalKycValid && _isExternallyGranted(_account, _kycStatus);
     }
 
-    function _checkValidKycStatus(
-        IKyc.KycStatus _kycStatus,
-        address _account
-    ) internal view {
-        if (!_verifyKycStatus(_kycStatus, _account))
-            revert IKyc.InvalidKycStatus();
+    function _checkValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view {
+        if (!_verifyKycStatus(_kycStatus, _account)) revert IKyc.InvalidKycStatus();
     }
 
     function _isInternalKycActivated() internal view returns (bool) {
@@ -381,11 +334,7 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         }
     }
 
-    function _checkValidDates(
-        uint256 _validFrom,
-        uint256 _validTo
-    ) private view {
-        if (_validFrom > _validTo || _validTo < _blockTimestamp())
-            revert IKyc.InvalidDates();
+    function _checkValidDates(uint256 _validFrom, uint256 _validTo) private view {
+        if (_validFrom > _validTo || _validTo < _blockTimestamp()) revert IKyc.InvalidDates();
     }
 }

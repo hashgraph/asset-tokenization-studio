@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Hold} from '../hold/IHold.sol';
+import { Hold } from '../hold/IHold.sol';
 
 interface IClearingStorageWrapper {
     event ClearedRedeemByPartition(

@@ -206,11 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {IFreeze} from '../interfaces/freeze/IFreeze.sol';
+import { Common } from '../common/Common.sol';
+import { IFreeze } from '../interfaces/freeze/IFreeze.sol';
 
-import {_FREEZE_MANAGER_ROLE, _AGENT_ROLE} from '../constants/roles.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from '../constants/roles.sol';
+import { _DEFAULT_PARTITION } from '../../layer_0/constants/values.sol';
 
 abstract contract Freeze is IFreeze, Common {
     // ====== External functions (state-changing) ======
@@ -253,13 +253,7 @@ abstract contract Freeze is IFreeze, Common {
     function unfreezePartialTokens(
         address _userAddress,
         uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_userAddress)
-        onlyWithoutMultiPartition
-    {
+    ) external override onlyUnpaused validateAddress(_userAddress) onlyWithoutMultiPartition {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _FREEZE_MANAGER_ROLE;
@@ -289,12 +283,7 @@ abstract contract Freeze is IFreeze, Common {
     function batchFreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
+    ) external onlyUnpaused onlyWithoutMultiPartition onlyValidInputAmountsArrayLength(_userAddresses, _amounts) {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _FREEZE_MANAGER_ROLE;
@@ -306,23 +295,14 @@ abstract contract Freeze is IFreeze, Common {
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
             _freezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensFrozen(
-                _userAddresses[i],
-                _amounts[i],
-                _DEFAULT_PARTITION
-            );
+            emit TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
         }
     }
 
     function batchUnfreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-    {
+    ) external onlyUnpaused onlyWithoutMultiPartition onlyValidInputAmountsArrayLength(_userAddresses, _amounts) {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _FREEZE_MANAGER_ROLE;
@@ -331,19 +311,13 @@ abstract contract Freeze is IFreeze, Common {
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
             _unfreezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensUnfrozen(
-                _userAddresses[i],
-                _amounts[i],
-                _DEFAULT_PARTITION
-            );
+            emit TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
         }
     }
 
     // ====== External functions (view/pure) ======
 
-    function getFrozenTokens(
-        address _userAddress
-    ) external view override returns (uint256) {
+    function getFrozenTokens(address _userAddress) external view override returns (uint256) {
         return _getFrozenAmountForAdjusted(_userAddress);
     }
 }

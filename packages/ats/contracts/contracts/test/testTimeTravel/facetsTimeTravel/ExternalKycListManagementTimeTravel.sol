@@ -206,24 +206,12 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {
-    ExternalKycListManagement
-} from '../../../layer_1/externalKycLists/ExternalKycListManagement.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+import { ExternalKycListManagement } from '../../../layer_1/externalKycLists/ExternalKycListManagement.sol';
+import { TimeTravelStorageWrapper } from '../timeTravel/TimeTravelStorageWrapper.sol';
+import { LocalContext } from '../../../layer_0/context/LocalContext.sol';
 
-contract ExternalKycListManagementTimeTravel is
-    ExternalKycListManagement,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+contract ExternalKycListManagementTimeTravel is ExternalKycListManagement, TimeTravelStorageWrapper {
+    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

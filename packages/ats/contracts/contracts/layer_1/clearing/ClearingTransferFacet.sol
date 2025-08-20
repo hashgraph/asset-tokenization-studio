@@ -206,19 +206,13 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from '../common/Common.sol';
-import {IClearingTransfer} from '../interfaces/clearing/IClearingTransfer.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CLEARING_TRANSFER_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import { Common } from '../common/Common.sol';
+import { IClearingTransfer } from '../interfaces/clearing/IClearingTransfer.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _CLEARING_TRANSFER_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { ThirdPartyType } from '../../layer_0/common/types/ThirdPartyType.sol';
 
-contract ClearingTransferFacet is
-    IStaticFunctionSelectors,
-    IClearingTransfer,
-    Common
-{
+contract ClearingTransferFacet is IStaticFunctionSelectors, IClearingTransfer, Common {
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,
@@ -254,13 +248,9 @@ contract ClearingTransferFacet is
         external
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -296,23 +286,16 @@ contract ClearingTransferFacet is
         external
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
             _checkValidAddress(_clearingOperationFrom.from);
             _checkValidAddress(_to);
-            _checkOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
+            _checkOperator(_clearingOperationFrom.clearingOperation.partition, _clearingOperationFrom.from);
             _checkRecoveredAddress(_msgSender());
             _checkRecoveredAddress(_to);
             _checkRecoveredAddress(_clearingOperationFrom.from);
@@ -342,14 +325,8 @@ contract ClearingTransferFacet is
         validateAddress(_to)
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
         onlyUnrecoveredAddress(_to)
-        onlyWithValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        )
-        onlyRole(
-            _protectedPartitionsRole(
-                _protectedClearingOperation.clearingOperation.partition
-            )
-        )
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
+        onlyRole(_protectedPartitionsRole(_protectedClearingOperation.clearingOperation.partition))
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -365,63 +342,27 @@ contract ClearingTransferFacet is
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    )
-        external
-        view
-        override
-        returns (ClearingTransferData memory clearingTransferData_)
-    {
-        return
-            _getClearingTransferForByPartitionAdjusted(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
+    ) external view override returns (ClearingTransferData memory clearingTransferData_) {
+        return _getClearingTransferForByPartitionAdjusted(_partition, _tokenHolder, _clearingId);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _CLEARING_TRANSFER_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingTransferFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorClearingTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedClearingTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingTransferForByPartition
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearingTransferByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearingTransferFromByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.operatorClearingTransferByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.protectedClearingTransferByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getClearingTransferForByPartition.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IClearingTransfer)
-            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IClearingTransfer).interfaceId;
     }
 }

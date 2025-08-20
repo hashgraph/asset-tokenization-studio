@@ -206,105 +206,53 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {Common} from '../../../layer_1/common/Common.sol';
-import {
-    _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY
-} from '../../constants/resolverKeys.sol';
-import {Common} from '../../../layer_1/common/Common.sol';
+import { IStaticFunctionSelectors } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { Common } from '../../../layer_1/common/Common.sol';
+import { _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY } from '../../constants/resolverKeys.sol';
+import { Common } from '../../../layer_1/common/Common.sol';
 import {
     IScheduledBalanceAdjustments
 } from '../../interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { ScheduledTasksLib } from '../ScheduledTasksLib.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-contract ScheduledBalanceAdjustments is
-    IStaticFunctionSelectors,
-    IScheduledBalanceAdjustments,
-    Common
-{
+contract ScheduledBalanceAdjustments is IStaticFunctionSelectors, IScheduledBalanceAdjustments, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     function onScheduledBalanceAdjustmentTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         bytes memory _data
-    )
-        external
-        override
-        onlyAutoCalling(_scheduledBalanceAdjustmentStorage().autoCalling)
-    {
+    ) external override onlyAutoCalling(_scheduledBalanceAdjustmentStorage().autoCalling) {
         _onScheduledBalanceAdjustmentTriggered(_data);
     }
 
-    function scheduledBalanceAdjustmentCount()
-        external
-        view
-        override
-        returns (uint256)
-    {
+    function scheduledBalanceAdjustmentCount() external view override returns (uint256) {
         return _getScheduledBalanceAdjustmentCount();
     }
 
     function getScheduledBalanceAdjustments(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        override
-        returns (
-            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
-        )
-    {
-        scheduledBalanceAdjustment_ = _getScheduledBalanceAdjustments(
-            _pageIndex,
-            _pageLength
-        );
+    ) external view override returns (ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_) {
+        scheduledBalanceAdjustment_ = _getScheduledBalanceAdjustments(_pageIndex, _pageLength);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .scheduledBalanceAdjustmentCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getScheduledBalanceAdjustments
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .onScheduledBalanceAdjustmentTriggered
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.scheduledBalanceAdjustmentCount.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getScheduledBalanceAdjustments.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.onScheduledBalanceAdjustmentTriggered.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(
-            IScheduledBalanceAdjustments
-        ).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IScheduledBalanceAdjustments).interfaceId;
     }
 }

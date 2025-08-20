@@ -206,21 +206,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ERC1594StorageWrapper
-} from '../../ERC1400/ERC1594/ERC1594StorageWrapper.sol';
-import {
-    IERC20Permit
-} from '../../../layer_1/interfaces/ERC1400/IERC20Permit.sol';
-import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
-import {ERC20PERMIT_TYPEHASH} from '../../constants/values.sol';
-import {
-    _CONTRACT_NAME,
-    _CONTRACT_VERSION
-} from '../../../layer_1/constants/values.sol';
-import {
-    getDomainHash
-} from '../../../layer_1/protectedPartitions/signatureVerification.sol';
+import { ERC1594StorageWrapper } from '../../ERC1400/ERC1594/ERC1594StorageWrapper.sol';
+import { IERC20Permit } from '../../../layer_1/interfaces/ERC1400/IERC20Permit.sol';
+import { ECDSA } from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
+import { ERC20PERMIT_TYPEHASH } from '../../constants/values.sol';
+import { _CONTRACT_NAME, _CONTRACT_VERSION } from '../../../layer_1/constants/values.sol';
+import { getDomainHash } from '../../../layer_1/protectedPartitions/signatureVerification.sol';
 
 abstract contract ERC20PermitStorageWrapper is ERC1594StorageWrapper {
     function _permit(
@@ -246,12 +237,7 @@ abstract contract ERC20PermitStorageWrapper is ERC1594StorageWrapper {
                 deadline
             )
         );
-        address signer = ECDSA.recover(
-            ECDSA.toTypedDataHash(_DOMAIN_SEPARATOR(), structHash),
-            v,
-            r,
-            s
-        );
+        address signer = ECDSA.recover(ECDSA.toTypedDataHash(_DOMAIN_SEPARATOR(), structHash), v, r, s);
 
         if (signer != owner) {
             revert IERC20Permit.ERC2612InvalidSigner(signer, owner);
@@ -261,12 +247,6 @@ abstract contract ERC20PermitStorageWrapper is ERC1594StorageWrapper {
 
     // solhint-disable-next-line func-name-mixedcase
     function _DOMAIN_SEPARATOR() internal view returns (bytes32) {
-        return
-            getDomainHash(
-                _CONTRACT_NAME,
-                _CONTRACT_VERSION,
-                _blockChainid(),
-                address(this)
-            );
+        return getDomainHash(_CONTRACT_NAME, _CONTRACT_VERSION, _blockChainid(), address(this));
     }
 }

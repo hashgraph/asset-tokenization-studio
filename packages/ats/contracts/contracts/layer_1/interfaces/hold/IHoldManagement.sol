@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Hold, ProtectedHold} from './IHold.sol';
+import { Hold, ProtectedHold } from './IHold.sol';
 
 interface IHoldManagement {
     event OperatorHeldByPartition(

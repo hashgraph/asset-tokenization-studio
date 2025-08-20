@@ -203,210 +203,204 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
-    type ResolverProxy,
-    type CorporateActions,
-    type Pause,
-    type AccessControl,
-    IFactory,
-    BusinessLogicResolver,
-    AccessControlFacet__factory,
-    CorporateActions__factory,
-    PauseFacet__factory,
-} from '@typechain'
+  type ResolverProxy,
+  type CorporateActions,
+  type Pause,
+  type AccessControl,
+  IFactory,
+  BusinessLogicResolver,
+  AccessControlFacet__factory,
+  CorporateActions__factory,
+  PauseFacet__factory,
+} from '@typechain';
 import {
-    CORPORATE_ACTION_ROLE,
-    PAUSER_ROLE,
-    deployEquityFromFactory,
-    Rbac,
-    RegulationSubType,
-    RegulationType,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    MAX_UINT256,
-} from '@scripts'
-import { grantRoleAndPauseToken } from '../../../common'
-import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
+  CORPORATE_ACTION_ROLE,
+  PAUSER_ROLE,
+  deployEquityFromFactory,
+  Rbac,
+  RegulationSubType,
+  RegulationType,
+  deployAtsFullInfrastructure,
+  DeployAtsFullInfrastructureCommand,
+  MAX_UINT256,
+} from '@scripts';
+import { grantRoleAndPauseToken } from '../../../common';
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 
 const actionType =
-    '0x000000000000000000000000000000000000000000000000000000000000aa23'
-const actionData = '0x1234'
+  '0x000000000000000000000000000000000000000000000000000000000000aa23';
+const actionData = '0x1234';
 const corporateActionId_1 =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
+  '0x0000000000000000000000000000000000000000000000000000000000000001';
 
 describe('Corporate Actions Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
+  let diamond: ResolverProxy;
+  let signer_A: SignerWithAddress;
+  let signer_B: SignerWithAddress;
+  let signer_C: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
+  let account_A: string;
+  let account_B: string;
+  let account_C: string;
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let corporateActionsFacet: CorporateActions
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
+  let factory: IFactory;
+  let businessLogicResolver: BusinessLogicResolver;
+  let corporateActionsFacet: CorporateActions;
+  let accessControlFacet: AccessControl;
+  let pauseFacet: Pause;
 
-    async function deploySecurityFixtureSinglePartition() {
-        const init_rbacs: Rbac[] = set_initRbacs()
+  async function deploySecurityFixtureSinglePartition() {
+    const init_rbacs: Rbac[] = set_initRbacs();
 
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: true,
-            isMultiPartition: false,
-            name: 'TEST_AccessControl',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_S,
-            regulationSubType: RegulationSubType.NONE,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            businessLogicResolver: businessLogicResolver.address,
-            factory,
-        })
+    diamond = await deployEquityFromFactory({
+      adminAccount: account_A,
+      isWhiteList: false,
+      isControllable: true,
+      arePartitionsProtected: false,
+      clearingActive: false,
+      internalKycActivated: true,
+      isMultiPartition: false,
+      name: 'TEST_AccessControl',
+      symbol: 'TAC',
+      decimals: 6,
+      isin: isinGenerator(),
+      votingRight: false,
+      informationRight: false,
+      liquidationRight: false,
+      subscriptionRight: true,
+      conversionRight: true,
+      redemptionRight: true,
+      putRight: false,
+      dividendRight: 1,
+      currency: '0x345678',
+      numberOfShares: MAX_UINT256,
+      nominalValue: 100,
+      regulationType: RegulationType.REG_S,
+      regulationSubType: RegulationSubType.NONE,
+      countriesControlListType: true,
+      listOfCountries: 'ES,FR,CH',
+      info: 'nothing',
+      init_rbacs,
+      businessLogicResolver: businessLogicResolver.address,
+      factory,
+    });
 
-        await setFacets(diamond)
-    }
+    await setFacets(diamond);
+  }
 
-    async function setFacets(diamond: ResolverProxy) {
-        accessControlFacet = AccessControlFacet__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        corporateActionsFacet = CorporateActions__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
-    }
+  async function setFacets(diamond: ResolverProxy) {
+    accessControlFacet = AccessControlFacet__factory.connect(
+      diamond.address,
+      signer_A,
+    );
+    corporateActionsFacet = CorporateActions__factory.connect(
+      diamond.address,
+      signer_A,
+    );
+    pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A);
+  }
 
-    function set_initRbacs(): Rbac[] {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        return [rbacPause]
-    }
+  function set_initRbacs(): Rbac[] {
+    const rbacPause: Rbac = {
+      role: PAUSER_ROLE,
+      members: [account_B],
+    };
+    return [rbacPause];
+  }
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+  before(async () => {
+    // mute | mock console.log
+    console.log = () => {};
+    [signer_A, signer_B, signer_C] = await ethers.getSigners();
+    account_A = signer_A.address;
+    account_B = signer_B.address;
+    account_C = signer_C.address;
 
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: true,
-            })
-        )
+    const { ...deployedContracts } = await deployAtsFullInfrastructure(
+      await DeployAtsFullInfrastructureCommand.newInstance({
+        signer: signer_A,
+        useDeployed: false,
+        useEnvironment: true,
+      }),
+    );
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
+    factory = deployedContracts.factory.contract;
+    businessLogicResolver = deployedContracts.businessLogicResolver.contract;
+  });
 
-    beforeEach(async () => {
-        await loadFixture(deploySecurityFixtureSinglePartition)
-    })
+  beforeEach(async () => {
+    await loadFixture(deploySecurityFixtureSinglePartition);
+  });
 
-    it('GIVEN an account without corporateActions role WHEN addCorporateAction THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non role)
-        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
+  it('GIVEN an account without corporateActions role WHEN addCorporateAction THEN transaction fails with AccountHasNoRole', async () => {
+    // Using account C (non role)
+    corporateActionsFacet = corporateActionsFacet.connect(signer_C);
 
-        // add to list fails
-        await expect(
-            corporateActionsFacet.addCorporateAction(actionType, actionData)
-        ).to.be.rejectedWith('AccountHasNoRole')
-    })
+    // add to list fails
+    await expect(
+      corporateActionsFacet.addCorporateAction(actionType, actionData),
+    ).to.be.rejectedWith('AccountHasNoRole');
+  });
 
-    it('GIVEN a paused Token WHEN addCorporateAction THEN transaction fails with TokenIsPaused', async () => {
-        // Granting Role to account C and Pause
-        await grantRoleAndPauseToken(
-            accessControlFacet,
-            pauseFacet,
-            CORPORATE_ACTION_ROLE,
-            signer_A,
-            signer_B,
-            account_C
-        )
+  it('GIVEN a paused Token WHEN addCorporateAction THEN transaction fails with TokenIsPaused', async () => {
+    // Granting Role to account C and Pause
+    await grantRoleAndPauseToken(
+      accessControlFacet,
+      pauseFacet,
+      CORPORATE_ACTION_ROLE,
+      signer_A,
+      signer_B,
+      account_C,
+    );
 
-        // Using account C (with role)
-        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
+    // Using account C (with role)
+    corporateActionsFacet = corporateActionsFacet.connect(signer_C);
 
-        // add to list fails
-        await expect(
-            corporateActionsFacet.addCorporateAction(actionType, actionData)
-        ).to.be.rejectedWith('TokenIsPaused')
-    })
+    // add to list fails
+    await expect(
+      corporateActionsFacet.addCorporateAction(actionType, actionData),
+    ).to.be.rejectedWith('TokenIsPaused');
+  });
 
-    it('GIVEN an account with corporateActions role WHEN addCorporateAction THEN transaction succeeds', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-        // Using account C (with role)
-        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
+  it('GIVEN an account with corporateActions role WHEN addCorporateAction THEN transaction succeeds', async () => {
+    // Granting Role to account C
+    accessControlFacet = accessControlFacet.connect(signer_A);
+    await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C);
+    // Using account C (with role)
+    corporateActionsFacet = corporateActionsFacet.connect(signer_C);
 
-        // add to list
-        await corporateActionsFacet.addCorporateAction(actionType, actionData)
+    // add to list
+    await corporateActionsFacet.addCorporateAction(actionType, actionData);
 
-        // check list members
-        const listCount = await corporateActionsFacet.getCorporateActionCount()
-        const listMembers = await corporateActionsFacet.getCorporateActionIds(
-            0,
-            listCount
-        )
-        const listCountByType =
-            await corporateActionsFacet.getCorporateActionCountByType(
-                actionType
-            )
-        const listMembersByType =
-            await corporateActionsFacet.getCorporateActionIdsByType(
-                actionType,
-                0,
-                listCount
-            )
-        const corporateAction =
-            await corporateActionsFacet.getCorporateAction(corporateActionId_1)
+    // check list members
+    const listCount = await corporateActionsFacet.getCorporateActionCount();
+    const listMembers = await corporateActionsFacet.getCorporateActionIds(
+      0,
+      listCount,
+    );
+    const listCountByType =
+      await corporateActionsFacet.getCorporateActionCountByType(actionType);
+    const listMembersByType =
+      await corporateActionsFacet.getCorporateActionIdsByType(
+        actionType,
+        0,
+        listCount,
+      );
+    const corporateAction =
+      await corporateActionsFacet.getCorporateAction(corporateActionId_1);
 
-        expect(listCount).to.equal(1)
-        expect(listMembers.length).to.equal(listCount)
-        expect(listMembers[0]).to.equal(corporateActionId_1)
-        expect(listCountByType).to.equal(1)
-        expect(listMembersByType.length).to.equal(listCountByType)
-        expect(listMembersByType[0]).to.equal(corporateActionId_1)
-        expect(corporateAction[0].toUpperCase()).to.equal(
-            actionType.toUpperCase()
-        )
-        expect(corporateAction[1].toUpperCase()).to.equal(
-            actionData.toUpperCase()
-        )
-    })
-})
+    expect(listCount).to.equal(1);
+    expect(listMembers.length).to.equal(listCount);
+    expect(listMembers[0]).to.equal(corporateActionId_1);
+    expect(listCountByType).to.equal(1);
+    expect(listMembersByType.length).to.equal(listCountByType);
+    expect(listMembersByType[0]).to.equal(corporateActionId_1);
+    expect(corporateAction[0].toUpperCase()).to.equal(actionType.toUpperCase());
+    expect(corporateAction[1].toUpperCase()).to.equal(actionData.toUpperCase());
+  });
+});

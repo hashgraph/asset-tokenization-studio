@@ -207,13 +207,11 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity 0.8.18;
 
-import {Common} from '../../common/Common.sol';
-import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC20_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
+import { Common } from '../../common/Common.sol';
+import { IERC20 } from '../../interfaces/ERC1400/IERC20.sol';
+import { IStaticFunctionSelectors } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _ERC20_RESOLVER_KEY } from '../../constants/resolverKeys.sol';
+import { _DEFAULT_PARTITION } from '../../../layer_0/constants/values.sol';
 
 contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -253,14 +251,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(
-            _msgSender(),
-            to,
-            _DEFAULT_PARTITION,
-            amount,
-            '',
-            ''
-        )
+        onlyCanTransferFromByPartition(_msgSender(), to, _DEFAULT_PARTITION, amount, '', '')
         returns (bool)
     {
         return _transfer(_msgSender(), to, amount);
@@ -275,14 +266,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(
-            from,
-            to,
-            _DEFAULT_PARTITION,
-            amount,
-            '',
-            ''
-        )
+        onlyCanTransferFromByPartition(from, to, _DEFAULT_PARTITION, amount, '', '')
         returns (bool)
     {
         return _transferFrom(_msgSender(), from, to, amount);
@@ -291,33 +275,18 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     function increaseAllowance(
         address spender,
         uint256 addedValue
-    )
-        external
-        onlyUnpaused
-        onlyCompliant(_msgSender(), spender, false)
-        onlyWithoutMultiPartition
-        returns (bool)
-    {
+    ) external onlyUnpaused onlyCompliant(_msgSender(), spender, false) onlyWithoutMultiPartition returns (bool) {
         return _increaseAllowance(spender, addedValue);
     }
 
     function decreaseAllowance(
         address spender,
         uint256 subtractedValue
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyCompliant(_msgSender(), spender, false)
-        returns (bool)
-    {
+    ) external onlyUnpaused onlyWithoutMultiPartition onlyCompliant(_msgSender(), spender, false) returns (bool) {
         return _decreaseAllowance(spender, subtractedValue);
     }
 
-    function allowance(
-        address owner,
-        address spender
-    ) external view override returns (uint256) {
+    function allowance(address owner, address spender) external view override returns (uint256) {
         return _allowanceAdjusted(owner, spender);
     }
 
@@ -325,9 +294,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         return _decimalsAdjusted();
     }
 
-    function decimalsAdjustedAt(
-        uint256 _timestamp
-    ) external view returns (uint8) {
+    function decimalsAdjustedAt(uint256 _timestamp) external view returns (uint8) {
         return _decimalsAdjustedAt(_timestamp);
     }
 
@@ -351,51 +318,28 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         return _getERC20MetadataAdjusted();
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _ERC20_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](12);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC20
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.initialize_ERC20.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.approve.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.transfer.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.transferFrom.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .increaseAllowance
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .decreaseAllowance
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.increaseAllowance.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.decreaseAllowance.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.allowance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getERC20Metadata
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.getERC20Metadata.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.name.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.symbol.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.decimals.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.decimalsAt.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC20).interfaceId;

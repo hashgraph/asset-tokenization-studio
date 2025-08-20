@@ -206,8 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ICompliance} from './ICompliance.sol';
-import {IIdentityRegistry} from './IIdentityRegistry.sol';
+import { ICompliance } from './ICompliance.sol';
+import { IIdentityRegistry } from './IIdentityRegistry.sol';
 
 interface IERC3643Basic {
     struct ERC3643Storage {
@@ -257,11 +257,7 @@ interface IERC3643Basic {
      * @param _newWallet Address of the new wallet
      * @param _investorOnchainID OnchainID
      */
-    event RecoverySuccess(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID
-    );
+    event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID);
 
     /**
      * @notice Thrown when calling from a recovered wallet
@@ -309,10 +305,7 @@ interface IERC3643Basic {
      * Sets the compliance contract address
      */
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC3643(
-        address _compliance,
-        address _identityRegistry
-    ) external;
+    function initialize_ERC3643(address _compliance, address _identityRegistry) external;
 
     /**
      * @dev Sets the name of the token to `_name`.
@@ -411,11 +404,7 @@ interface IERC3643Basic {
      *
      * Emits a ControllerTransfer event.
      */
-    function forcedTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external returns (bool);
+    function forcedTransfer(address _from, address _to, uint256 _amount) external returns (bool);
 
     /**
      * @dev Checks if an account has the agent role

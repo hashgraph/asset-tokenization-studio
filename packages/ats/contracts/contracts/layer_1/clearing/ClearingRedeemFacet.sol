@@ -206,19 +206,13 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from '../common/Common.sol';
-import {IClearingRedeem} from '../interfaces/clearing/IClearingRedeem.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CLEARING_REDEEM_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import { Common } from '../common/Common.sol';
+import { IClearingRedeem } from '../interfaces/clearing/IClearingRedeem.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _CLEARING_REDEEM_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { ThirdPartyType } from '../../layer_0/common/types/ThirdPartyType.sol';
 
-contract ClearingRedeemFacet is
-    IStaticFunctionSelectors,
-    IClearingRedeem,
-    Common
-{
+contract ClearingRedeemFacet is IStaticFunctionSelectors, IClearingRedeem, Common {
     function clearingRedeemByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount
@@ -250,13 +244,9 @@ contract ClearingRedeemFacet is
         override
         onlyUnpaused
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyUnrecoveredAddress(_msgSender())
         validateAddress(_clearingOperationFrom.from)
         onlyClearingActivated
@@ -286,23 +276,16 @@ contract ClearingRedeemFacet is
         override
         onlyUnpaused
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         validateAddress(_clearingOperationFrom.from)
         onlyUnrecoveredAddress(_msgSender())
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
-            _checkOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
+            _checkOperator(_clearingOperationFrom.clearingOperation.partition, _clearingOperationFrom.from);
         }
 
         (success_, clearingId_) = _clearingRedeemCreation(
@@ -324,86 +307,40 @@ contract ClearingRedeemFacet is
         onlyUnpaused
         onlyProtectedPartitions
         validateAddress(_protectedClearingOperation.from)
-        onlyWithValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        )
-        onlyRole(
-            _protectedPartitionsRole(
-                _protectedClearingOperation.clearingOperation.partition
-            )
-        )
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
+        onlyRole(_protectedPartitionsRole(_protectedClearingOperation.clearingOperation.partition))
         onlyClearingActivated
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
         returns (bool success_, uint256 clearingId_)
     {
-        (success_, clearingId_) = _protectedClearingRedeemByPartition(
-            _protectedClearingOperation,
-            _amount,
-            _signature
-        );
+        (success_, clearingId_) = _protectedClearingRedeemByPartition(_protectedClearingOperation, _amount, _signature);
     }
 
     function getClearingRedeemForByPartition(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    )
-        external
-        view
-        override
-        returns (ClearingRedeemData memory clearingRedeemData_)
-    {
-        return
-            _getClearingRedeemForByPartitionAdjusted(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
+    ) external view override returns (ClearingRedeemData memory clearingRedeemData_) {
+        return _getClearingRedeemForByPartitionAdjusted(_partition, _tokenHolder, _clearingId);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _CLEARING_REDEEM_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingRedeemFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorClearingRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedClearingRedeemByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingRedeemForByPartition
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearingRedeemByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearingRedeemFromByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.operatorClearingRedeemByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.protectedClearingRedeemByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getClearingRedeemForByPartition.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IClearingRedeem)
-            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IClearingRedeem).interfaceId;
     }
 }

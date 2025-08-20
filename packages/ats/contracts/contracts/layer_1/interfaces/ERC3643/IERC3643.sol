@@ -205,9 +205,9 @@
 
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.18;
-import {IERC3643StorageWrapper} from './IERC3643StorageWrapper.sol';
-import {IERC3643Basic} from './IERC3643Basic.sol';
-import {IERC3643Batch} from './IERC3643Batch.sol';
+import { IERC3643StorageWrapper } from './IERC3643StorageWrapper.sol';
+import { IERC3643Basic } from './IERC3643Basic.sol';
+import { IERC3643Batch } from './IERC3643Batch.sol';
 
 // solhint-disable no-empty-blocks
 /**

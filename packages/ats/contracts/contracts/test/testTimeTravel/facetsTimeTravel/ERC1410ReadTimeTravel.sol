@@ -208,21 +208,12 @@
 
 pragma solidity 0.8.18;
 
-import {
-    ERC1410ReadFacet
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410ReadFacet.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+import { ERC1410ReadFacet } from '../../../layer_1/ERC1400/ERC1410/ERC1410ReadFacet.sol';
+import { TimeTravelStorageWrapper } from '../timeTravel/TimeTravelStorageWrapper.sol';
+import { LocalContext } from '../../../layer_0/context/LocalContext.sol';
 
 contract ERC1410ReadTimeTravel is ERC1410ReadFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

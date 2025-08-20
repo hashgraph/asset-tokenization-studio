@@ -206,22 +206,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
-import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
-import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
-import {BasicTransferInfo} from '../../layer_1/interfaces/ERC1400/IERC1410.sol';
-import {
-    TransferAndLockStorageWrapper
-} from './TransferAndLockStorageWrapper.sol';
+import { _DEFAULT_PARTITION } from '../../layer_0/constants/values.sol';
+import { _LOCKER_ROLE } from '../../layer_1/constants/roles.sol';
+import { _TRANSFER_AND_LOCK_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { ITransferAndLock } from '../interfaces/ITransferAndLock.sol';
+import { BasicTransferInfo } from '../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import { TransferAndLockStorageWrapper } from './TransferAndLockStorageWrapper.sol';
 
-contract TransferAndLock is
-    IStaticFunctionSelectors,
-    TransferAndLockStorageWrapper
-{
+contract TransferAndLock is IStaticFunctionSelectors, TransferAndLockStorageWrapper {
     function transferAndLockByPartition(
         bytes32 _partition,
         address _to,
@@ -238,20 +231,8 @@ contract TransferAndLock is
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 lockId_)
     {
-        _transferByPartition(
-            _msgSender(),
-            BasicTransferInfo(_to, _amount),
-            _partition,
-            _data,
-            _msgSender(),
-            ''
-        );
-        (success_, lockId_) = _lockByPartition(
-            _partition,
-            _amount,
-            _to,
-            _expirationTimestamp
-        );
+        _transferByPartition(_msgSender(), BasicTransferInfo(_to, _amount), _partition, _data, _msgSender(), '');
+        (success_, lockId_) = _lockByPartition(_partition, _amount, _to, _expirationTimestamp);
         emit PartitionTransferredAndLocked(
             _partition,
             _msgSender(),
@@ -286,12 +267,7 @@ contract TransferAndLock is
             _msgSender(),
             ''
         );
-        (success_, lockId_) = _lockByPartition(
-            _DEFAULT_PARTITION,
-            _amount,
-            _to,
-            _expirationTimestamp
-        );
+        (success_, lockId_) = _lockByPartition(_DEFAULT_PARTITION, _amount, _to, _expirationTimestamp);
         emit PartitionTransferredAndLocked(
             _DEFAULT_PARTITION,
             _msgSender(),
@@ -316,20 +292,11 @@ contract TransferAndLock is
         onlyRole(_protectedPartitionsRole(_partition))
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(
-            _transferAndLockData.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_transferAndLockData.expirationTimestamp)
         onlyProtectedPartitions
         returns (bool success_, uint256 lockId_)
     {
-        return
-            _protectedTransferAndLockByPartition(
-                _partition,
-                _transferAndLockData,
-                _deadline,
-                _nounce,
-                _signature
-            );
+        return _protectedTransferAndLockByPartition(_partition, _transferAndLockData, _deadline, _nounce, _signature);
     }
 
     function protectedTransferAndLock(
@@ -344,55 +311,27 @@ contract TransferAndLock is
         onlyRole(_protectedPartitionsRole(_DEFAULT_PARTITION))
         onlyUnpaused
         onlyWithoutMultiPartition
-        onlyWithValidExpirationTimestamp(
-            _transferAndLockData.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_transferAndLockData.expirationTimestamp)
         onlyProtectedPartitions
         returns (bool success_, uint256 lockId_)
     {
-        return
-            _protectedTransferAndLock(
-                _transferAndLockData,
-                _deadline,
-                _nounce,
-                _signature
-            );
+        return _protectedTransferAndLock(_transferAndLockData, _deadline, _nounce, _signature);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _TRANSFER_AND_LOCK_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](2);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .transferAndLockByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .transferAndLock
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.transferAndLockByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.transferAndLock.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ITransferAndLock)
-            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(ITransferAndLock).interfaceId;
     }
 }

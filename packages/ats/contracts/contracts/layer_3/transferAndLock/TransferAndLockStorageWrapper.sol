@@ -205,18 +205,12 @@
 
 pragma solidity 0.8.18;
 
-import {Common} from '../../layer_1/common/Common.sol';
-import {
-    checkNounceAndDeadline,
-    verify
-} from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
-import {
-    getMessageHashTransferAndLockByPartition,
-    getMessageHashTransferAndLock
-} from './signatureVerification.sol';
-import {BasicTransferInfo} from '../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import { Common } from '../../layer_1/common/Common.sol';
+import { checkNounceAndDeadline, verify } from '../../layer_1/protectedPartitions/signatureVerification.sol';
+import { ITransferAndLock } from '../interfaces/ITransferAndLock.sol';
+import { _DEFAULT_PARTITION } from '../../layer_0/constants/values.sol';
+import { getMessageHashTransferAndLockByPartition, getMessageHashTransferAndLock } from './signatureVerification.sol';
+import { BasicTransferInfo } from '../../layer_1/interfaces/ERC1400/IERC1410.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -236,13 +230,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
             _blockTimestamp()
         );
 
-        _checkTransferAndLockByPartitionSignature(
-            _partition,
-            _transferAndLock,
-            _deadline,
-            _nounce,
-            _signature
-        );
+        _checkTransferAndLockByPartitionSignature(_partition, _transferAndLock, _deadline, _nounce, _signature);
 
         _setNounce(_nounce, _transferAndLock.from);
 
@@ -285,12 +273,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
             _blockTimestamp()
         );
 
-        _checkTransferAndLockSignature(
-            _transferAndLock,
-            _deadline,
-            _nounce,
-            _signature
-        );
+        _checkTransferAndLockSignature(_transferAndLock, _deadline, _nounce, _signature);
 
         _setNounce(_nounce, _transferAndLock.from);
 
@@ -326,15 +309,8 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
         uint256 _nounce,
         bytes calldata _signature
     ) internal view {
-        if (
-            !_isTransferAndLockByPartitionSignatureValid(
-                _partition,
-                _transferAndLock,
-                _deadline,
-                _nounce,
-                _signature
-            )
-        ) revert WrongSignature();
+        if (!_isTransferAndLockByPartitionSignatureValid(_partition, _transferAndLock, _deadline, _nounce, _signature))
+            revert WrongSignature();
     }
 
     function _isTransferAndLockByPartitionSignatureValid(
@@ -372,14 +348,8 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
         uint256 _nounce,
         bytes calldata _signature
     ) internal view {
-        if (
-            !_isTransferAndLockSignatureValid(
-                _transferAndLock,
-                _deadline,
-                _nounce,
-                _signature
-            )
-        ) revert WrongSignature();
+        if (!_isTransferAndLockSignatureValid(_transferAndLock, _deadline, _nounce, _signature))
+            revert WrongSignature();
     }
 
     function _isTransferAndLockSignatureValid(

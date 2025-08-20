@@ -206,12 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
-import {ISecurity} from './ISecurity.sol';
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
+import { IEquity } from '../../layer_2/interfaces/equity/IEquity.sol';
+import { ISecurity } from './ISecurity.sol';
+import { RegulationData, AdditionalSecurityData } from '../constants/regulation.sol';
 
 interface IEquityUSA is IEquity, ISecurity {
     // solhint-disable func-name-mixedcase

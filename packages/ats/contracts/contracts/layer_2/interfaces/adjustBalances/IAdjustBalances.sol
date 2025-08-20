@@ -208,8 +208,5 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 interface IAdjustBalances {
-    function adjustBalances(
-        uint256 factor,
-        uint8 decimals
-    ) external returns (bool success_);
+    function adjustBalances(uint256 factor, uint8 decimals) external returns (bool success_);
 }

@@ -206,23 +206,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1644} from '../../interfaces/ERC1400/IERC1644.sol';
-import {
-    _DEFAULT_ADMIN_ROLE,
-    _CONTROLLER_ROLE,
-    _AGENT_ROLE
-} from '../../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC1644_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {Common} from '../../common/Common.sol';
+import { IERC1644 } from '../../interfaces/ERC1400/IERC1644.sol';
+import { _DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _AGENT_ROLE } from '../../constants/roles.sol';
+import { IStaticFunctionSelectors } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _ERC1644_RESOLVER_KEY } from '../../constants/resolverKeys.sol';
+import { Common } from '../../common/Common.sol';
 
 contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1644(
-        bool _controllable
-    ) external override onlyUninitialized(_erc1644Storage().initialized) {
+    function initialize_ERC1644(bool _controllable) external override onlyUninitialized(_erc1644Storage().initialized) {
         _erc1644Storage().isControllable = _controllable;
         _erc1644Storage().initialized = true;
     }
@@ -246,13 +238,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyControllable
-    {
+    ) external override onlyUnpaused onlyWithoutMultiPartition onlyControllable {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -279,13 +265,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyControllable
-    {
+    ) external override onlyUnpaused onlyWithoutMultiPartition onlyControllable {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
@@ -299,12 +279,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
      * @notice It is used to end the controller feature from the token
      * @dev It only be called by the `owner/issuer` of the token
      */
-    function finalizeControllable()
-        external
-        override
-        onlyRole(_DEFAULT_ADMIN_ROLE)
-        onlyControllable
-    {
+    function finalizeControllable() external override onlyRole(_DEFAULT_ADMIN_ROLE) onlyControllable {
         _finalizeControllable();
     }
 
@@ -319,46 +294,21 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
         return _isControllable();
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _ERC1644_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](5);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC1644
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .isControllable
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .controllerTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .controllerRedeem
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .finalizeControllable
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.initialize_ERC1644.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.isControllable.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.controllerTransfer.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.controllerRedeem.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.finalizeControllable.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC1644).interfaceId;

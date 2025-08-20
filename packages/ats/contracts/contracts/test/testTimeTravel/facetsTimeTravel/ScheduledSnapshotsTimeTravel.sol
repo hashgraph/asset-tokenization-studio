@@ -206,24 +206,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    ScheduledSnapshots
-} from '../../../layer_2/scheduledTasks/scheduledSnapshots/ScheduledSnapshots.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+import { ScheduledSnapshots } from '../../../layer_2/scheduledTasks/scheduledSnapshots/ScheduledSnapshots.sol';
+import { TimeTravelStorageWrapper } from '../timeTravel/TimeTravelStorageWrapper.sol';
+import { LocalContext } from '../../../layer_0/context/LocalContext.sol';
 
-contract ScheduledSnapshotsTimeTravel is
-    ScheduledSnapshots,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+contract ScheduledSnapshotsTimeTravel is ScheduledSnapshots, TimeTravelStorageWrapper {
+    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

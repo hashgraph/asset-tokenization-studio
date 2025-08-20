@@ -206,57 +206,29 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {_HOLD_TOKEN_HOLDER_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {IHoldTokenHolder} from '../interfaces/hold/IHoldTokenHolder.sol';
-import {HoldTokenHolder} from './HoldTokenHolder.sol';
+import { _HOLD_TOKEN_HOLDER_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { IHoldTokenHolder } from '../interfaces/hold/IHoldTokenHolder.sol';
+import { HoldTokenHolder } from './HoldTokenHolder.sol';
 
 contract HoldTokenHolderFacet is IStaticFunctionSelectors, HoldTokenHolder {
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _HOLD_TOKEN_HOLDER_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .createHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .createHoldFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .executeHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .releaseHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .reclaimHoldByPartition
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.createHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.createHoldFromByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.executeHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.releaseHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.reclaimHoldByPartition.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IHoldTokenHolder)
-            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IHoldTokenHolder).interfaceId;
     }
 }

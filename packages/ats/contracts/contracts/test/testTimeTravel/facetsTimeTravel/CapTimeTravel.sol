@@ -205,20 +205,13 @@
 
 pragma solidity 0.8.18;
 
-import {Cap} from '../../../layer_1/cap/Cap.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+import { Cap } from '../../../layer_1/cap/Cap.sol';
+import { TimeTravelStorageWrapper } from '../timeTravel/TimeTravelStorageWrapper.sol';
+import { LocalContext } from '../../../layer_0/context/LocalContext.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 contract CapTimeTravel is Cap, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

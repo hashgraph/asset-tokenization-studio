@@ -206,23 +206,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
-import {Common} from '../../common/Common.sol';
-import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
-import {Common} from '../../common/Common.sol';
+import { IStaticFunctionSelectors } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _ERC1594_RESOLVER_KEY } from '../../constants/resolverKeys.sol';
+import { _ISSUER_ROLE, _AGENT_ROLE } from '../../constants/roles.sol';
+import { IERC1594 } from '../../interfaces/ERC1400/IERC1594.sol';
+import { Common } from '../../common/Common.sol';
+import { _DEFAULT_PARTITION } from '../../../layer_0/constants/values.sol';
+import { Common } from '../../common/Common.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594()
-        external
-        override
-        onlyUninitialized(_erc1594Storage().initialized)
-    {
+    function initialize_ERC1594() external override onlyUninitialized(_erc1594Storage().initialized) {
         super._initialize_ERC1594();
     }
 
@@ -235,14 +229,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(
-            _msgSender(),
-            _to,
-            _DEFAULT_PARTITION,
-            _value,
-            '',
-            ''
-        )
+        onlyCanTransferFromByPartition(_msgSender(), _to, _DEFAULT_PARTITION, _value, '', '')
     {
         // Add a function to validate the `_data` parameter
         _transfer(_msgSender(), _to, _value);
@@ -258,14 +245,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(
-            _from,
-            _to,
-            _DEFAULT_PARTITION,
-            _value,
-            '',
-            ''
-        )
+        onlyCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value, '', '')
     {
         {
             _checkRecoveredAddress(_msgSender());
@@ -323,13 +303,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(
-            _msgSender(),
-            _DEFAULT_PARTITION,
-            _value,
-            _data,
-            ''
-        )
+        onlyCanRedeemFromByPartition(_msgSender(), _DEFAULT_PARTITION, _value, _data, '')
     {
         _redeem(_value, _data);
     }
@@ -352,13 +326,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(
-            _tokenHolder,
-            _DEFAULT_PARTITION,
-            _value,
-            _data,
-            ''
-        )
+        onlyCanRedeemFromByPartition(_tokenHolder, _DEFAULT_PARTITION, _value, _data, '')
         onlyUnrecoveredAddress(_msgSender())
         onlyUnrecoveredAddress(_tokenHolder)
     {
@@ -391,26 +359,15 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         address _to,
         uint256 _value,
         bytes memory _data
-    )
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        returns (bool, bytes1, bytes32)
-    {
-        (
-            bool status,
-            bytes1 statusCode,
-            bytes32 reason,
-
-        ) = _isAbleToTransferFromByPartition(
-                _msgSender(),
-                _to,
-                _DEFAULT_PARTITION,
-                _value,
-                _data,
-                ''
-            );
+    ) external view override onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
+        (bool status, bytes1 statusCode, bytes32 reason, ) = _isAbleToTransferFromByPartition(
+            _msgSender(),
+            _to,
+            _DEFAULT_PARTITION,
+            _value,
+            _data,
+            ''
+        );
         return (status, statusCode, reason);
     }
 
@@ -432,64 +389,36 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         uint256 _value,
         bytes memory _data
     ) external view onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
-        (
-            bool status,
-            bytes1 statusCode,
-            bytes32 reason,
-
-        ) = _isAbleToTransferFromByPartition(
-                _from,
-                _to,
-                _DEFAULT_PARTITION,
-                _value,
-                _data,
-                ''
-            );
+        (bool status, bytes1 statusCode, bytes32 reason, ) = _isAbleToTransferFromByPartition(
+            _from,
+            _to,
+            _DEFAULT_PARTITION,
+            _value,
+            _data,
+            ''
+        );
         return (status, statusCode, reason);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _ERC1594_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](9);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC1594
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .transferWithData
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .transferFromWithData
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.initialize_ERC1594.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.transferWithData.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.transferFromWithData.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.isIssuable.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.issue.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.redeem.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.redeemFrom.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.canTransfer.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .canTransferFrom
-            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.canTransferFrom.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC1594).interfaceId;
