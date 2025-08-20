@@ -1,6 +1,18 @@
 {
-  // Force Prettier as default formatter for all, and specifically Solidity
+  // Force Prettier as default formatter for all, and specifically for file types
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
   "[solidity]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
@@ -16,6 +28,14 @@
   },
   // Respect EditorConfig but Prettier should take precedence on format run
   "editor.useEditorConfig": true,
+  // Configure Prettier settings to match prettier.config.mjs
+  "prettier.tabWidth": 2,
+  "prettier.useTabs": false,
+  "prettier.semi": true,
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "all",
+  "prettier.bracketSpacing": true,
+  "prettier.printWidth": 80,
   // Disable any ESLint format on save to avoid double-format passes; rely on Prettier only
   "editor.codeActionsOnSave": {
     // Keep ESLint fix separate; if you want ESLint fixes too, set to "explicit" or true, but avoid formatting flip-flop

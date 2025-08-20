@@ -504,6 +504,7 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
     ]);
     request.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
     request.complianceId?.as(() => HederaIdPropsFixture.create().value);
+    request.identityRegistryId?.as(() => HederaIdPropsFixture.create().value);
   },
 );
 
