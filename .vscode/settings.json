@@ -1,0 +1,6 @@
+{
+  // Force Prettier as default formatter for all
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "solidity.formatter": "prettier", // for JuanBlanco.solidity extension
+}

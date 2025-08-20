@@ -1,0 +1,47 @@
+# Dependencies
+node_modules
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+build
+dist
+out
+coverage
+.turbo
+
+# Generated files
+typechain-types
+artifacts
+cache
+*.snap
+
+# Asset files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.svg
+*.webp
+
+# Configuration files that don't need formatting
+*.toml
+_redirects
+.editorconfig
+.gitignore
+
+# Hardhat
+*.sol-coverage
+gas-report.txt
+
+# IDE
+.vscode
+.idea
+
+# Environment files
+.env*
+
+# Documentation
+Smart Contracts Audit Report.pdf
