@@ -213,11 +213,8 @@ import {
     RegulationData,
     AdditionalSecurityData
 } from '../constants/regulation.sol';
-import {_BOND_RESOLVER_KEY} from '../../layer_2/constants/resolverKeys.sol';
-import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
-import {ISecurity} from '../interfaces/ISecurity.sol';
 
-contract BondUSA is IBondUSA, Bond, Security {
+abstract contract BondUSA is IBondUSA, Bond, Security {
     // solhint-disable func-name-mixedcase
     // solhint-disable-next-line private-vars-leading-underscore
     function _initialize_bondUSA(
@@ -228,73 +225,5 @@ contract BondUSA is IBondUSA, Bond, Security {
     ) external override onlyUninitialized(_bondStorage().initialized) {
         _initialize_bond(_bondDetailsData, _couponDetailsData);
         _initializeSecurity(_regulationData, _additionalSecurityData);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _BOND_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](14);
-        staticFunctionSelectors_[selectorIndex++] = this
-            ._initialize_bondUSA
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .updateMaturityDate
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getBondDetails
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponDetails
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalCouponHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getSecurityRegulationData
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .redeemAtMaturityByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getSecurityHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalSecurityHolders
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](3);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IBond).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
     }
 }

@@ -208,20 +208,13 @@ pragma solidity 0.8.18;
 
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
-import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
 import {BasicTransferInfo} from '../../layer_1/interfaces/ERC1400/IERC1410.sol';
 import {
     TransferAndLockStorageWrapper
 } from './TransferAndLockStorageWrapper.sol';
 
-contract TransferAndLock is
-    IStaticFunctionSelectors,
-    TransferAndLockStorageWrapper
-{
+abstract contract TransferAndLock is TransferAndLockStorageWrapper {
     function transferAndLockByPartition(
         bytes32 _partition,
         address _to,
@@ -357,42 +350,5 @@ contract TransferAndLock is
                 _nounce,
                 _signature
             );
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _TRANSFER_AND_LOCK_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](2);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .transferAndLockByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .transferAndLock
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ITransferAndLock)
-            .interfaceId;
     }
 }

@@ -223,41 +223,41 @@ import { Dividend } from '@domain/context/equity/Dividend';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import { HederaId } from '@domain/context/shared/HederaId';
 import {
-  AccessControl__factory,
+  AccessControlFacet__factory,
   Bond__factory,
-  Cap__factory,
+  CapFacet__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
   ClearingReadFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
-  ControlList__factory,
+  ControlListFacet__factory,
   DiamondFacet__factory,
   Equity__factory,
   ERC1410ReadFacet__factory,
-  ERC1594__factory,
-  ERC1643__factory,
-  ERC1644__factory,
-  ERC20__factory,
-  ExternalControlListManagement__factory,
-  ExternalKycListManagement__factory,
-  ExternalPauseManagement__factory,
+  ERC1594Facet__factory,
+  ERC1643Facet__factory,
+  ERC1644Facet__factory,
+  ERC20Facet__factory,
+  ExternalControlListManagementFacet__factory,
+  ExternalKycListManagementFacet__factory,
+  ExternalPauseManagementFacet__factory,
   Factory__factory,
   FreezeFacet__factory,
   HoldReadFacet__factory,
-  Kyc__factory,
-  Lock__factory,
+  KycFacet__factory,
+  LockFacet__factory,
   MockedBlacklist__factory,
   MockedExternalKycList__factory,
   MockedExternalPause__factory,
   MockedWhitelist__factory,
-  Pause__factory,
-  ProtectedPartitions__factory,
-  ScheduledSnapshots__factory,
+  PauseFacet__factory,
+  ProtectedPartitionsFacet__factory,
+  ScheduledSnapshotsFacet__factory,
   Security__factory,
-  Snapshots__factory,
-  SsiManagement__factory,
-  ERC3643__factory,
+  SnapshotsFacet__factory,
+  SsiManagementFacet__factory,
+  ERC3643Facet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -365,7 +365,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      Snapshots__factory,
+      SnapshotsFacet__factory,
       address.toString(),
     ).balanceOfAtSnapshot(snapshotId, target.toString());
   }
@@ -381,7 +381,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      Snapshots__factory,
+      SnapshotsFacet__factory,
       address.toString(),
     ).balanceOfAtSnapshotByPartition(
       partitionId,
@@ -397,7 +397,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Nounce`);
 
     return await this.connect(
-      ProtectedPartitions__factory,
+      ProtectedPartitionsFacet__factory,
       address.toString(),
     ).getNounceFor(target.toString());
   }
@@ -426,7 +426,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      Snapshots__factory,
+      SnapshotsFacet__factory,
       address.toString(),
     ).partitionsOfAtSnapshot(snapshotId, targetId.toString());
   }
@@ -451,7 +451,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      Snapshots__factory,
+      SnapshotsFacet__factory,
       address.toString(),
     ).totalSupplyAtSnapshot(snapshotId);
   }
@@ -467,7 +467,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      AccessControl__factory,
+      AccessControlFacet__factory,
       address.toString(),
     ).getRolesFor(target.toString(), start, end);
   }
@@ -483,7 +483,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      AccessControl__factory,
+      AccessControlFacet__factory,
       address.toString(),
     ).getRoleMembers(role, start, end);
   }
@@ -495,7 +495,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting role count for ${target.toString()}`);
 
     const roleCount = await this.connect(
-      AccessControl__factory,
+      AccessControlFacet__factory,
       address.toString(),
     ).getRoleCountFor(target.toString());
 
@@ -506,7 +506,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting role member count for ${role}`);
 
     const membersCount = await this.connect(
-      AccessControl__factory,
+      AccessControlFacet__factory,
       address.toString(),
     ).getRoleMemberCount(role);
 
@@ -523,7 +523,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      AccessControl__factory,
+      AccessControlFacet__factory,
       address.toString(),
     ).hasRole(role, target.toString());
   }
@@ -534,7 +534,7 @@ export class RPCQueryAdapter {
     );
 
     const erc20Metadata = await this.connect(
-      ERC20__factory,
+      ERC20Facet__factory,
       address.toString(),
     ).getERC20Metadata();
     const totalSupply = await this.connect(
@@ -542,19 +542,19 @@ export class RPCQueryAdapter {
       address.toString(),
     ).totalSupply();
     const maxSupply = await this.connect(
-      Cap__factory,
+      CapFacet__factory,
       address.toString(),
     ).getMaxSupply();
     const isWhiteList = await this.connect(
-      ControlList__factory,
+      ControlListFacet__factory,
       address.toString(),
     ).getControlListType();
     const isControllable = await this.connect(
-      ERC1644__factory,
+      ERC1644Facet__factory,
       address.toString(),
     ).isControllable();
     const arePartitionsProtected = await this.connect(
-      ProtectedPartitions__factory,
+      ProtectedPartitionsFacet__factory,
       address.toString(),
     ).arePartitionsProtected();
     const clearingActive = await this.connect(
@@ -562,7 +562,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).isClearingActivated();
     const internalKycActivated = await this.connect(
-      Kyc__factory,
+      KycFacet__factory,
       address.toString(),
     ).isInternalKycActivated();
     const isMultiPartition = await this.connect(
@@ -570,11 +570,11 @@ export class RPCQueryAdapter {
       address.toString(),
     ).isMultiPartition();
     const isIssuable = await this.connect(
-      ERC1594__factory,
+      ERC1594Facet__factory,
       address.toString(),
     ).isIssuable();
     const isPaused = await this.connect(
-      Pause__factory,
+      PauseFacet__factory,
       address.toString(),
     ).isPaused();
     const regulationInfo = await this.connect(
@@ -707,7 +707,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting control list members from ${start} to ${end}`);
 
     return await this.connect(
-      ControlList__factory,
+      ControlListFacet__factory,
       address.toString(),
     ).getControlListMembers(start, end);
   }
@@ -716,7 +716,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting control list count`);
 
     const controlListCount = await this.connect(
-      ControlList__factory,
+      ControlListFacet__factory,
       address.toString(),
     ).getControlListCount();
 
@@ -727,7 +727,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting control list type`);
 
     return await this.connect(
-      ControlList__factory,
+      ControlListFacet__factory,
       address.toString(),
     ).getControlListType();
   }
@@ -741,7 +741,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ControlList__factory,
+      ControlListFacet__factory,
       address.toString(),
     ).isInControlList(target.toString());
   }
@@ -882,7 +882,7 @@ export class RPCQueryAdapter {
       `Checking if the security: ${address.toString()} is paused`,
     );
 
-    return await this.connect(Pause__factory, address.toString()).isPaused();
+    return await this.connect(PauseFacet__factory, address.toString()).isPaused();
   }
 
   async arePartitionsProtected(address: EvmAddress): Promise<boolean> {
@@ -891,7 +891,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ProtectedPartitions__factory,
+      ProtectedPartitionsFacet__factory,
       address.toString(),
     ).arePartitionsProtected();
   }
@@ -933,7 +933,7 @@ export class RPCQueryAdapter {
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can transfer`);
 
-    return await this.connect(ERC1594__factory, address.toString()).canTransfer(
+    return await this.connect(ERC1594Facet__factory, address.toString()).canTransfer(
       targetId.toString(),
       amount.toBigNumber(),
       data,
@@ -975,7 +975,7 @@ export class RPCQueryAdapter {
   ): Promise<[string, string, BigNumber]> {
     LogService.logTrace(`Getting document: ${name}`);
 
-    return await this.connect(ERC1643__factory, address.toString()).getDocument(
+    return await this.connect(ERC1643Facet__factory, address.toString()).getDocument(
       name,
     );
   }
@@ -984,7 +984,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting all documents`);
 
     return await this.connect(
-      ERC1643__factory,
+      ERC1643Facet__factory,
       address.toString(),
     ).getAllDocuments();
   }
@@ -1032,7 +1032,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting scheduled snapshots from ${start} to ${end}`);
 
     const snapshots = await this.connect(
-      ScheduledSnapshots__factory,
+      ScheduledSnapshotsFacet__factory,
       address.toString(),
     ).getScheduledSnapshots(start, end);
 
@@ -1046,7 +1046,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting scheduled snapshots count`);
 
     const scheduledSnapshotsCount = await this.connect(
-      ScheduledSnapshots__factory,
+      ScheduledSnapshotsFacet__factory,
       address.toString(),
     ).scheduledSnapshotCount();
 
@@ -1058,7 +1058,7 @@ export class RPCQueryAdapter {
       `Getting max supply for ${address.toString()} security`,
     );
 
-    return await this.connect(Cap__factory, address.toString()).getMaxSupply();
+    return await this.connect(CapFacet__factory, address.toString()).getMaxSupply();
   }
 
   async getMaxSupplyByPartition(
@@ -1070,7 +1070,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      Cap__factory,
+      CapFacet__factory,
       address.toString(),
     ).getMaxSupplyByPartition(partitionId);
   }
@@ -1133,7 +1133,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      Lock__factory,
+      LockFacet__factory,
       address.toString(),
     ).getLockedAmountForByPartition(_PARTITION_ID_1, target.toString());
   }
@@ -1144,7 +1144,7 @@ export class RPCQueryAdapter {
     );
 
     const count = await this.connect(
-      Lock__factory,
+      LockFacet__factory,
       address.toString(),
     ).getLockCountForByPartition(_PARTITION_ID_1, target.toString());
 
@@ -1162,7 +1162,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      Lock__factory,
+      LockFacet__factory,
       address.toString(),
     ).getLocksIdForByPartition(_PARTITION_ID_1, target.toString(), start, end);
   }
@@ -1176,7 +1176,7 @@ export class RPCQueryAdapter {
       `Getting lock ${lockId.toString()} of ${address.toString()} security for the account ${target.toString()}`,
     );
     return await this.connect(
-      Lock__factory,
+      LockFacet__factory,
       address.toString(),
     ).getLockForByPartition(_PARTITION_ID_1, target.toString(), lockId);
   }
@@ -1329,7 +1329,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      SsiManagement__factory,
+      SsiManagementFacet__factory,
       address.toString(),
     ).getRevocationRegistryAddress();
   }
@@ -1338,7 +1338,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Issuer List Count of ${address.toString()}`);
 
     const count = await this.connect(
-      SsiManagement__factory,
+      SsiManagementFacet__factory,
       address.toString(),
     ).getIssuerListCount();
 
@@ -1355,7 +1355,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      SsiManagement__factory,
+      SsiManagementFacet__factory,
       address.toString(),
     ).getIssuerListMembers(start, end);
   }
@@ -1364,7 +1364,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting if ${issuer.toString()} is an Issuer`);
 
     return await this.connect(
-      SsiManagement__factory,
+      SsiManagementFacet__factory,
       address.toString(),
     ).isIssuer(issuer.toString());
   }
@@ -1373,7 +1373,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting KYC details for ${targetId}}`);
 
     const kycData = await this.connect(
-      Kyc__factory,
+      KycFacet__factory,
       address.toString(),
     ).getKycFor(targetId.toString());
 
@@ -1393,7 +1393,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting KYC status for ${targetId}}`);
 
     const kycData = await this.connect(
-      Kyc__factory,
+      KycFacet__factory,
       address.toString(),
     ).getKycStatusFor(targetId.toString());
 
@@ -1409,7 +1409,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting accounts data with KYC status ${kycStatus}`);
 
     const [accounts, kycAccountsData] = await this.connect(
-      Kyc__factory,
+      KycFacet__factory,
       address.toString(),
     ).getKycAccountsData(kycStatus, start, end);
 
@@ -1434,7 +1434,7 @@ export class RPCQueryAdapter {
       `Getting count of accounts with KYC status ${kycStatus}}`,
     );
     const kycAccountsCount = await this.connect(
-      Kyc__factory,
+      KycFacet__factory,
       address.toString(),
     ).getKycAccountsCount(kycStatus);
 
@@ -1626,7 +1626,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ExternalPauseManagement__factory,
+      ExternalPauseManagementFacet__factory,
       address.toString(),
     ).isExternalPause(externalPauseAddress.toString());
   }
@@ -1637,7 +1637,7 @@ export class RPCQueryAdapter {
     );
 
     const getExternalPausesCount = await this.connect(
-      ExternalPauseManagement__factory,
+      ExternalPauseManagementFacet__factory,
       address.toString(),
     ).getExternalPausesCount();
 
@@ -1654,7 +1654,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ExternalPauseManagement__factory,
+      ExternalPauseManagementFacet__factory,
       address.toString(),
     ).getExternalPausesMembers(start, end);
   }
@@ -1679,7 +1679,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ExternalControlListManagement__factory,
+      ExternalControlListManagementFacet__factory,
       address.toString(),
     ).isExternalControlList(externalControlListAddress.toString());
   }
@@ -1690,7 +1690,7 @@ export class RPCQueryAdapter {
     );
 
     const getExternalPausesCount = await this.connect(
-      ExternalControlListManagement__factory,
+      ExternalControlListManagementFacet__factory,
       address.toString(),
     ).getExternalControlListsCount();
 
@@ -1707,7 +1707,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ExternalControlListManagement__factory,
+      ExternalControlListManagementFacet__factory,
       address.toString(),
     ).getExternalControlListsMembers(start, end);
   }
@@ -1749,7 +1749,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ExternalKycListManagement__factory,
+      ExternalKycListManagementFacet__factory,
       address.toString(),
     ).isExternalKycList(externalKycListAddress.toString());
   }
@@ -1760,7 +1760,7 @@ export class RPCQueryAdapter {
     );
 
     const getExternalKycListsCount = await this.connect(
-      ExternalKycListManagement__factory,
+      ExternalKycListManagementFacet__factory,
       address.toString(),
     ).getExternalKycListsCount();
 
@@ -1777,7 +1777,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ExternalKycListManagement__factory,
+      ExternalKycListManagementFacet__factory,
       address.toString(),
     ).getExternalKycListsMembers(start, end);
   }
@@ -1792,7 +1792,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ExternalKycListManagement__factory,
+      ExternalKycListManagementFacet__factory,
       address.toString(),
     ).isExternallyGranted(targetId.toString(), kycStatus);
   }
@@ -1803,7 +1803,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      Kyc__factory,
+      KycFacet__factory,
       address.toString(),
     ).isInternalKycActivated();
   }
@@ -1827,7 +1827,7 @@ export class RPCQueryAdapter {
   async onchainID(address: EvmAddress): Promise<string> {
     LogService.logTrace(`Getting OnchainID for security ${address.toString()}`);
 
-    return await this.connect(ERC3643__factory, address.toString()).onchainID();
+    return await this.connect(ERC3643Facet__factory, address.toString()).onchainID();
   }
 
   async identityRegistry(address: EvmAddress): Promise<string> {
@@ -1836,7 +1836,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC3643__factory,
+      ERC3643Facet__factory,
       address.toString(),
     ).identityRegistry();
   }
@@ -1847,7 +1847,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC3643__factory,
+      ERC3643Facet__factory,
       address.toString(),
     ).compliance();
   }
@@ -1875,7 +1875,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting recovery status of ${targetId}`);
 
     const isAddressRecovered = await this.connect(
-      ERC3643__factory,
+      ERC3643Facet__factory,
       address.toString(),
     ).isAddressRecovered(targetId.toString());
 
@@ -1892,7 +1892,7 @@ export class RPCQueryAdapter {
       `Getting token holders at snapshot ${snapshotId} for security ${address.toString()}`,
     );
     return await this.connect(
-      Snapshots__factory,
+      SnapshotsFacet__factory,
       address.toString(),
     ).getTokenHoldersAtSnapshot(snapshotId, start, end);
   }
@@ -1906,7 +1906,7 @@ export class RPCQueryAdapter {
     );
 
     const total = await this.connect(
-      Snapshots__factory,
+      SnapshotsFacet__factory,
       address.toString(),
     ).getTotalTokenHoldersAtSnapshot(snapshotId);
 

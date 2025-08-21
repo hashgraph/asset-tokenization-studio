@@ -241,40 +241,40 @@ export interface DeployedBusinessLogics {
     businessLogicResolver: IStaticFunctionSelectors
     factory: IStaticFunctionSelectors
     diamondFacet: IStaticFunctionSelectors
-    accessControl: IStaticFunctionSelectors
-    controlList: IStaticFunctionSelectors
-    kyc: IStaticFunctionSelectors
-    ssiManagement: IStaticFunctionSelectors
-    corporateActions: IStaticFunctionSelectors
-    pause: IStaticFunctionSelectors
-    ERC20: IStaticFunctionSelectors
-    ERC20Permit: IStaticFunctionSelectors
-    ERC1644: IStaticFunctionSelectors
+    accessControlFacet: IStaticFunctionSelectors
+    controlListFacet: IStaticFunctionSelectors
+    kycFacet: IStaticFunctionSelectors
+    ssiManagementFacet: IStaticFunctionSelectors
+    corporateActionsFacet: IStaticFunctionSelectors
+    pauseFacet: IStaticFunctionSelectors
+    ERC20Facet: IStaticFunctionSelectors
+    ERC20PermitFacet: IStaticFunctionSelectors
+    ERC1644Facet: IStaticFunctionSelectors
     erc1410ReadFacet: IStaticFunctionSelectors
     erc1410ManagementFacet: IStaticFunctionSelectors
     erc1410TokenHolderFacet: IStaticFunctionSelectors
-    ERC1594: IStaticFunctionSelectors
-    ERC1643: IStaticFunctionSelectors
-    equityUSA: IStaticFunctionSelectors
-    bondUSA: IStaticFunctionSelectors
-    Snapshots: IStaticFunctionSelectors
-    scheduledSnapshots: IStaticFunctionSelectors
-    scheduledBalanceAdjustments: IStaticFunctionSelectors
-    scheduledTasks: IStaticFunctionSelectors
-    Cap: IStaticFunctionSelectors
-    Lock: IStaticFunctionSelectors
-    transferAndLock: IStaticFunctionSelectors
-    adjustBalances: IStaticFunctionSelectors
-    protectedPartitions: IStaticFunctionSelectors
+    ERC1594Facet: IStaticFunctionSelectors
+    ERC1643Facet: IStaticFunctionSelectors
+    equityUSAFacet: IStaticFunctionSelectors
+    bondUSAFacet: IStaticFunctionSelectors
+    SnapshotsFacet: IStaticFunctionSelectors
+    scheduledSnapshotsFacet: IStaticFunctionSelectors
+    scheduledBalanceAdjustmentsFacet: IStaticFunctionSelectors
+    scheduledTasksFacet: IStaticFunctionSelectors
+    CapFacet: IStaticFunctionSelectors
+    LockFacet: IStaticFunctionSelectors
+    transferAndLockFacet: IStaticFunctionSelectors
+    adjustBalancesFacet: IStaticFunctionSelectors
+    protectedPartitionsFacet: IStaticFunctionSelectors
     holdReadFacet: IStaticFunctionSelectors
     holdManagementFacet: IStaticFunctionSelectors
     holdTokenHolderFacet: IStaticFunctionSelectors
-    externalPauseManagement: IStaticFunctionSelectors
-    externalControlListManagement: IStaticFunctionSelectors
-    externalKycListManagement: IStaticFunctionSelectors
-    freeze: IStaticFunctionSelectors
-    ERC3643: IStaticFunctionSelectors
-    ERC3643Batch: IStaticFunctionSelectors
+    externalPauseManagementFacet: IStaticFunctionSelectors
+    externalControlListManagementFacet: IStaticFunctionSelectors
+    externalKycListManagementFacet: IStaticFunctionSelectors
+    freezeFacet: IStaticFunctionSelectors
+    ERC3643Facet: IStaticFunctionSelectors
+    ERC3643BatchFacet: IStaticFunctionSelectors
 }
 
 export let businessLogicResolver: IBusinessLogicResolver

@@ -221,7 +221,7 @@ import {
     Lock__factory,
     Pause__factory,
     AccessControl__factory,
-    BondUSATimeTravel__factory,
+    BondUSAFacetTimeTravel__factory,
     TimeTravel__factory,
     Kyc,
     SsiManagement,
@@ -353,7 +353,7 @@ describe('Bond Tests', () => {
     }
 
     async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-        bondFacet = BondUSATimeTravel__factory.connect(
+        bondFacet = BondUSAFacetTimeTravel__factory.connect(
             diamond.address,
             signer_A
         )
