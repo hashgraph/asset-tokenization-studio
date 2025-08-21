@@ -275,6 +275,7 @@ library TREXBaseDeploymentLib {
         if (_compliance == address(0)) {
             mc = IModularCompliance(_deployMC(_salt, _implementationAuthority));
             _token.setCompliance(address(mc));
+            mc.bindToken(address(_token));
             transferOwnership = 1;
         } else {
             mc = IModularCompliance(_compliance);
@@ -327,7 +328,6 @@ library TREXBaseDeploymentLib {
             );
         }
         _token.setOnchainID(_tokenID);
-        mc.bindToken(address(_token));
         for (uint256 i = 0; i < (_claimDetails.claimTopics).length; i++) {
             ctr.addClaimTopic(_claimDetails.claimTopics[i]);
         }
