@@ -231,6 +231,7 @@ import {
     deployContractWithLibraries,
     DeployContractWithLibraryCommand,
     TREX_OWNER_ROLE,
+    dateToUnixTimestamp,
 } from '@scripts'
 import { deployFullSuiteFixture } from './fixtures/deploy-full-suite.fixture'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -264,11 +265,11 @@ describe('TREX Factory Tests', () => {
     const currency = '0x455552'
     const numberOfUnits = BigInt(1000)
     const nominalValue = 100
-    let startingDate = 999
-    let maturityDate = 999
-    const couponFrequency = 1
-    const couponRate = 1
-    let firstCouponDate = 999
+    const startingDate = dateToUnixTimestamp(`2030-01-01T00:00:00Z`)
+    const maturityDate = dateToUnixTimestamp(`2031-01-01T00:00:00Z`)
+    const couponFrequency = 0
+    const couponRate = 0
+    const firstCouponDate = 0
 
     const regulationType = RegulationType.REG_D
     const regulationSubType = RegulationSubType.REG_D_506_B
@@ -1203,12 +1204,6 @@ describe('TREX Factory Tests', () => {
 
     describe('Bond tests', () => {
         it('GIVEN a consumed salt WHEN reusing it THEN transaction reverts with token already deployed', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
             const bondData = await setBondData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
@@ -1262,12 +1257,6 @@ describe('TREX Factory Tests', () => {
         })
 
         it('GIVEN an invalid claim pattern THEN transaction reverts with claim pattern not valid', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
             const bondData = await setBondData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
@@ -1315,12 +1304,6 @@ describe('TREX Factory Tests', () => {
         })
 
         it('GIVEN max claim issuers exceeded THEN transaction reverts with max 5 claim issuers at deployment', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
             const bondData = await setBondData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
@@ -1374,12 +1357,6 @@ describe('TREX Factory Tests', () => {
         })
 
         it('GIVEN max claim topics exceeded THEN transaction reverts with max 5 claim topics at deployment', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
             const bondData = await setBondData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
@@ -1429,12 +1406,6 @@ describe('TREX Factory Tests', () => {
         })
 
         it('GIVEN max ir agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
             const bondData = await setBondData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
@@ -1485,12 +1456,6 @@ describe('TREX Factory Tests', () => {
         })
 
         it('GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
             const bondData = await setBondData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
@@ -1541,12 +1506,6 @@ describe('TREX Factory Tests', () => {
         })
 
         it('GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
             const bondData = await setBondData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
@@ -1597,12 +1556,6 @@ describe('TREX Factory Tests', () => {
         })
 
         it('GIVEN max modules actions exceeded THEN transaction reverts with max 30 module actions at deployment', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
             const bondData = await setBondData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
@@ -1653,12 +1606,6 @@ describe('TREX Factory Tests', () => {
         })
 
         it('GIVEN an invalid compliance pattern exceeded THEN transaction reverts with invalid compliance pattern', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
             const bondData = await setBondData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
@@ -1708,12 +1655,6 @@ describe('TREX Factory Tests', () => {
         })
 
         it('GIVEN a bond without IR and MC THEN security is deployed successfully', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
             const bondData = await setBondData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
@@ -1854,12 +1795,6 @@ describe('TREX Factory Tests', () => {
         })
 
         it('GIVEN a bond with IR and MC THEN security is deployed successfully', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = 0
-
             const bondData = await setBondData({
                 adminAccount: deployer.address,
                 isWhiteList: isWhitelist,
