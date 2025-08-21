@@ -205,7 +205,7 @@
 
 pragma solidity ^0.8.17;
 
-import {IDiamondLoupe_ as IDiamondLoupe} from './IDiamondLoupe.sol';
+import {TRexIDiamondLoupe as IDiamondLoupe} from './IDiamondLoupe.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -223,7 +223,7 @@ import {IDiamondLoupe_ as IDiamondLoupe} from './IDiamondLoupe.sol';
 ///          * facetId
 ///          * list of selectors
 ///          * list of interfaceIds
-interface IDiamondCutManager_ {
+interface TRexIDiamondCutManager {
     struct FacetConfiguration {
         bytes32 id;
         uint256 version;

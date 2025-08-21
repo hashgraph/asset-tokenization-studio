@@ -207,7 +207,7 @@ pragma solidity ^0.8.17;
 
 // solhint-disable no-global-import
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import {IFactory_, FactoryRegulationData} from '../interfaces/IFactory.sol';
+import {TRexIFactory, FactoryRegulationData} from '../interfaces/IFactory.sol';
 import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
 import {TREXFactoryAts} from '../TREXFactory.sol';
 import {SecurityDeploymentLib} from './core/SecurityDeploymentLib.sol';
@@ -222,7 +222,7 @@ library TREXBondDeploymentLib {
         string memory _salt,
         TREXFactoryAts.TokenDetailsAts calldata _tokenDetails,
         ITREXFactory.ClaimDetails calldata _claimDetails,
-        IFactory_.BondData calldata _bondData,
+        TRexIFactory.BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external {
         IToken token = SecurityDeploymentLib.deployBond(

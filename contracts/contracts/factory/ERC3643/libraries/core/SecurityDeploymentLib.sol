@@ -209,7 +209,7 @@ pragma solidity ^0.8.17;
 // solhint-disable no-global-import
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import {
-    IFactory_,
+    TRexIFactory,
     FactoryRegulationData,
     IResolverProxy
 } from '../../interfaces/IFactory.sol';
@@ -222,7 +222,7 @@ library SecurityDeploymentLib {
     function deployEquity(
         address _atsFactory,
         address _tRexOwner,
-        IFactory_.EquityData memory _equityData,
+        TRexIFactory.EquityData memory _equityData,
         FactoryRegulationData memory _factoryRegulationData
     ) internal returns (IToken token_) {
         _equityData.security.rbacs = _prepareRbacs(
@@ -230,7 +230,7 @@ library SecurityDeploymentLib {
             _tRexOwner
         );
         token_ = IToken(
-            IFactory_(_atsFactory).deployEquity(
+            TRexIFactory(_atsFactory).deployEquity(
                 _equityData,
                 _factoryRegulationData
             )
@@ -240,7 +240,7 @@ library SecurityDeploymentLib {
     function deployBond(
         address _atsFactory,
         address _tRexOwner,
-        IFactory_.BondData memory _bondData,
+        TRexIFactory.BondData memory _bondData,
         FactoryRegulationData memory _factoryRegulationData
     ) internal returns (IToken token_) {
         _bondData.security.rbacs = _prepareRbacs(
@@ -249,7 +249,10 @@ library SecurityDeploymentLib {
         );
 
         token_ = IToken(
-            IFactory_(_atsFactory).deployBond(_bondData, _factoryRegulationData)
+            TRexIFactory(_atsFactory).deployBond(
+                _bondData,
+                _factoryRegulationData
+            )
         );
     }
 

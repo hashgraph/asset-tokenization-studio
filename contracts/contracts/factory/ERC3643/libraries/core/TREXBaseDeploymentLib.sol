@@ -207,7 +207,7 @@ pragma solidity ^0.8.17;
 
 // solhint-disable no-global-import
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import {IAccessControl_} from '../../interfaces/IAccessControl.sol';
+import {TRexIAccessControl} from '../../interfaces/IAccessControl.sol';
 import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
 import {TREXFactoryAts} from '../../TREXFactory.sol';
 import {
@@ -357,8 +357,8 @@ library TREXBaseDeploymentLib {
         }
         _tokenDeployed[_salt] = address(_token);
         // Equivalent to transfer ownership of the token to the new owner
-        IAccessControl_(address(_token)).renounceRole(_TREX_OWNER_ROLE);
-        IAccessControl_(address(_token)).renounceRole(_DEFAULT_ADMIN_ROLE);
+        TRexIAccessControl(address(_token)).renounceRole(_TREX_OWNER_ROLE);
+        TRexIAccessControl(address(_token)).renounceRole(_DEFAULT_ADMIN_ROLE);
         (Ownable(_identityRegistry)).transferOwnership(_tokenDetails.owner);
         (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
         (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);

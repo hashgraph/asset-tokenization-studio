@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-interface IBond_ {
+interface TRexIBond {
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;

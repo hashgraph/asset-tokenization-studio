@@ -207,7 +207,7 @@ pragma solidity ^0.8.17;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-interface IResolverProxy_ {
+interface TRexIResolverProxy {
     struct Rbac {
         bytes32 role;
         address[] members;

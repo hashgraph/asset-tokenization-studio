@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
 
-interface IAccessControl_ {
+interface TRexIAccessControl {
     /**
      * @dev Emitted when a role is granted to an account
      *

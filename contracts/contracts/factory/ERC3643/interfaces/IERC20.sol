@@ -208,9 +208,9 @@
 
 pragma solidity ^0.8.17;
 
-import {IFactory_ as IFactory} from './IFactory.sol';
+import {TRexIFactory as IFactory} from './IFactory.sol';
 
-interface IERC20_ {
+interface TRexIERC20 {
     struct ERC20MetadataInfo {
         string name;
         string symbol;

@@ -207,7 +207,7 @@ pragma solidity ^0.8.17;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-interface IStaticFunctionSelectors_ {
+interface TRexIStaticFunctionSelectors {
     /// @notice Gets the static resolver key.
     /// @return staticResolverKey_ Static resolver key
     function getStaticResolverKey()

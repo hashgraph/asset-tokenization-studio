@@ -210,7 +210,7 @@ pragma solidity ^0.8.17;
 // solhint-disable private-vars-leading-underscore
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
-import {IFactory_, FactoryRegulationData} from './interfaces/IFactory.sol';
+import {TRexIFactory, FactoryRegulationData} from './interfaces/IFactory.sol';
 import {TREXBondDeploymentLib} from './libraries/TREXBondDeploymentLib.sol';
 import {TREXEquityDeploymentLib} from './libraries/TREXEquityDeploymentLib.sol';
 
@@ -287,7 +287,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         string memory _salt,
         TokenDetailsAts calldata _tokenDetails,
         ClaimDetails calldata _claimDetails,
-        IFactory_.EquityData calldata _equityData,
+        TRexIFactory.EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external {
         TREXEquityDeploymentLib.deployTREXSuiteAtsEquity(
@@ -311,7 +311,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         string memory _salt,
         TokenDetailsAts calldata _tokenDetails,
         ClaimDetails calldata _claimDetails,
-        IFactory_.BondData calldata _bondData,
+        TRexIFactory.BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external {
         TREXBondDeploymentLib.deployTREXSuiteAtsBond(

@@ -206,13 +206,13 @@
 pragma solidity ^0.8.17;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IResolverProxy_ as IResolverProxy} from './IResolverProxy.sol';
+import {TRexIResolverProxy as IResolverProxy} from './IResolverProxy.sol';
 import {
-    IBusinessLogicResolver_ as IBusinessLogicResolver
+    TRexIBusinessLogicResolver as IBusinessLogicResolver
 } from './IBusinessLogicResolver.sol';
-import {IERC20_ as IERC20} from './IERC20.sol';
-import {IBond_ as IBond} from './IBond.sol';
-import {IEquity_ as IEquity} from './IEquity.sol';
+import {TRexIERC20 as IERC20} from './IERC20.sol';
+import {TRexIBond as IBond} from './IBond.sol';
+import {TRexIEquity as IEquity} from './IEquity.sol';
 import {
     FactoryRegulationData,
     RegulationData,
@@ -220,7 +220,7 @@ import {
     RegulationSubType
 } from './regulation.sol';
 
-interface IFactory_ {
+interface TRexIFactory {
     enum SecurityType {
         Bond,
         Equity
