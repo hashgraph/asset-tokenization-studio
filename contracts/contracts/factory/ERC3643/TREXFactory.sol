@@ -220,7 +220,8 @@ import {TREXEquityDeploymentLib} from './libraries/TREXEquityDeploymentLib.sol';
 // solhint-disable custom-errors
 contract TREXFactoryAts is ITREXFactory, Ownable {
     /// @notice TokenDetails with the ATS factory overlapping fields removed
-    /// @param owner Address of the owner of all contracts
+    /// @param owner Address of the owner of all contracts. The factory will append it to the provided RBACs if
+    /// the T_REX_OWNER_ROLE is not found. For a cheaper deployment, add the owner at the first position in the array
     /// @param irs Identity registry storage address. Set it to ZERO address if you want to deploy a new storage.
     /// If an address is provided, please ensure that the factory is set as owner of the contract
     /// @param ONCHAINID ONCHAINID of the token

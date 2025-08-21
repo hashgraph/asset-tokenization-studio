@@ -217,7 +217,7 @@ import {_TREX_OWNER_ROLE} from '../../interfaces/roles.sol';
 
 // solhint-disable custom-errors
 library TREXBaseDeploymentLib {
-    /// @notice Copied from ITREXFactory
+    /// @dev Copied from ITREXFactory
     event TREXSuiteDeployed(
         address indexed _token,
         address _ir,
@@ -227,7 +227,7 @@ library TREXBaseDeploymentLib {
         address _mc,
         string indexed _salt
     );
-    /// @notice Copied from ITREXFactory
+    /// @dev Copied from ITREXFactory
     event Deployed(address indexed _addr);
 
     function deployTREXSuite(

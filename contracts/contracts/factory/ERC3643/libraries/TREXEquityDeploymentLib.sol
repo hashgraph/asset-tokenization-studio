@@ -206,7 +206,6 @@
 pragma solidity ^0.8.17;
 
 // solhint-disable no-global-import
-// solhint-disable no-empty-blocks
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import {IFactory_, FactoryRegulationData} from '../interfaces/IFactory.sol';
