@@ -1,7 +1,0 @@
-export type { ICompliance } from "./ICompliance";
-export type { IERC3643 } from "./IERC3643";
-export type { IERC3643Basic } from "./IERC3643Basic";
-export type { IERC3643Batch } from "./IERC3643Batch";
-export type { IERC3643StorageWrapper } from "./IERC3643StorageWrapper";
-export type { IFreeze } from "./IFreeze";
-export type { IIdentityRegistry } from "./IIdentityRegistry";

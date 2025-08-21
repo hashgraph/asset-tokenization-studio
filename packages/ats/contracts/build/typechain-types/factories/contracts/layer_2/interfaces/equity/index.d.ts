@@ -1,2 +1,0 @@
-export { IEquity__factory } from "./IEquity__factory";
-export { IEquityStorageWrapper__factory } from "./IEquityStorageWrapper__factory";

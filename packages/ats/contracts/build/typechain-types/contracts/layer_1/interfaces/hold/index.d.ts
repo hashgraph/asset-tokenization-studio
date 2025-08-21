@@ -1,4 +1,0 @@
-export type { IHold } from "./IHold";
-export type { IHoldManagement } from "./IHoldManagement";
-export type { IHoldRead } from "./IHoldRead";
-export type { IHoldTokenHolder } from "./IHoldTokenHolder";

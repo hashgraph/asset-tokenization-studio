@@ -141,5 +141,9 @@ CLAUDE.md
 extracted-methods.txt
 functions.txt
 
-# artifacts
+# Hardhat files
 artifacts
+cache
+
+# Transpiled files
+build

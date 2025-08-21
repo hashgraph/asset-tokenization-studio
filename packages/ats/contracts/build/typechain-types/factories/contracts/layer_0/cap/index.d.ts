@@ -1,2 +1,0 @@
-export { CapStorageWrapper1__factory } from "./CapStorageWrapper1__factory";
-export { CapStorageWrapper2__factory } from "./CapStorageWrapper2__factory";
