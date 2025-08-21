@@ -213,11 +213,36 @@ import {
 import {Common} from '../../layer_1/common/Common.sol';
 import {_BENEFICIARIES_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {_BENEFICIARY_MANAGER_ROLE} from '../constants/roles.sol';
+import {
+    _BENEFICIARIES_STORAGE_POSITION
+} from '../../layer_0/constants/storagePositions.sol';
 
 contract Beneficiaries is IBeneficiaries, IStaticFunctionSelectors, Common {
     function initialize_Beneficiaries(
-        address[] calldata _beneficiaries
-    ) external override {}
+        address[] calldata _beneficiaries,
+        bytes[] calldata _data
+    )
+        external
+        override
+        onlyUninitialized(
+            _externalListStorage(_BENEFICIARIES_STORAGE_POSITION).initialized
+        )
+    {
+        uint256 length = _beneficiaries.length;
+        for (uint256 index; index < length; ) {
+            _addExternalList(
+                _BENEFICIARIES_STORAGE_POSITION,
+                _beneficiaries[index]
+            );
+            _setBeneficiaryData(_beneficiaries[index], _data[index]);
+            unchecked {
+                ++index;
+            }
+        }
+
+        _externalListStorage(_BENEFICIARIES_STORAGE_POSITION)
+            .initialized = true;
+    }
 
     function addBeneficiary(
         address _beneficiary,
@@ -231,14 +256,13 @@ contract Beneficiaries is IBeneficiaries, IStaticFunctionSelectors, Common {
         address _beneficiary
     ) external override onlyUnpaused onlyRole(_BENEFICIARY_MANAGER_ROLE) {
         _removeBeneficiary(_beneficiary);
-
         emit BeneficiaryRemoved(_msgSender(), _beneficiary);
     }
 
     function isBeneficiary(
         address _beneficiary
     ) external view override returns (bool) {
-        return _isBeneficiary(_beneficiary);
+        return _isExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary);
     }
 
     function getBeneficiaryData(
@@ -247,15 +271,20 @@ contract Beneficiaries is IBeneficiaries, IStaticFunctionSelectors, Common {
         return _getBeneficiaryData(_beneficiary);
     }
 
-    function getTotalBeneficiaries() external view override returns (uint256) {
-        return _getTotalBeneficiaries();
+    function getBeneficiariesCount() external view override returns (uint256) {
+        return _getExternalListsCount(_BENEFICIARIES_STORAGE_POSITION);
     }
 
     function getBeneficiaries(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory beneficiaries_) {
-        return _getBeneficiaries(_pageIndex, _pageLength);
+        return
+            _getExternalListsMembers(
+                _BENEFICIARIES_STORAGE_POSITION,
+                _pageIndex,
+                _pageLength
+            );
     }
 
     function getStaticResolverKey()
@@ -289,7 +318,7 @@ contract Beneficiaries is IBeneficiaries, IStaticFunctionSelectors, Common {
             .getBeneficiaryData
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalBeneficiaries
+            .getBeneficiariesCount
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getBeneficiaries
