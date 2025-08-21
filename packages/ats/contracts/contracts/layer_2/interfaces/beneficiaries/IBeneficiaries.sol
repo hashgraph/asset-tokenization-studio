@@ -228,7 +228,8 @@ interface IBeneficiaries {
      */
 
     function initialize_Beneficiaries(
-        address[] calldata _beneficiaries
+        address[] calldata _beneficiaries,
+        bytes[] calldata _data
     ) external;
 
     function addBeneficiary(
@@ -244,7 +245,7 @@ interface IBeneficiaries {
         address _beneficiary
     ) external view returns (bytes memory);
 
-    function getTotalBeneficiaries() external view returns (uint256);
+    function getBeneficiariesCount() external view returns (uint256);
 
     function getBeneficiaries(
         uint256 _pageIndex,

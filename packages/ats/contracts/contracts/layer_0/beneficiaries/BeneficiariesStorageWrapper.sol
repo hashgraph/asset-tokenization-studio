@@ -208,22 +208,15 @@ pragma solidity 0.8.18;
 
 import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
 import {
-    _BENEFICIARIES_STORAGE_POSITION
+    _BENEFICIARIES_STORAGE_POSITION,
+    _BENEFICIARIES_DATA_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
     IBeneficiaries
 } from '../../layer_2/interfaces/beneficiaries/IBeneficiaries.sol';
-import {LibCommon} from '../common/libraries/LibCommon.sol';
 
 abstract contract BeneficiariesStorageWrapper is PauseStorageWrapper {
-    using EnumerableSet for EnumerableSet.AddressSet;
-    using LibCommon for EnumerableSet.AddressSet;
-
-    struct BeneficiariesStorage {
-        EnumerableSet.AddressSet beneficiaries;
+    struct BeneficiariesDataStorage {
         mapping(address => bytes) beneficiaryData;
     }
 
@@ -231,60 +224,48 @@ abstract contract BeneficiariesStorageWrapper is PauseStorageWrapper {
         address _beneficiary,
         bytes calldata _data
     ) internal {
-        BeneficiariesStorage
-            storage beneficiariesStorage = _beneficiariesStorage();
-
-        if (!beneficiariesStorage.beneficiaries.add(_beneficiary)) {
+        if (!_addExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary)) {
             revert IBeneficiaries.BeneficiaryAlreadyExists(_beneficiary);
         }
-
-        beneficiariesStorage.beneficiaryData[_beneficiary] = _data;
+        _setBeneficiaryData(_beneficiary, _data);
     }
 
     function _removeBeneficiary(address _beneficiary) internal {
-        BeneficiariesStorage
-            storage beneficiariesStorage = _beneficiariesStorage();
-
-        if (!beneficiariesStorage.beneficiaries.remove(_beneficiary)) {
+        if (
+            !_removeExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary)
+        ) {
             revert IBeneficiaries.BeneficiaryNotFound(_beneficiary);
         }
 
-        delete beneficiariesStorage.beneficiaryData[_beneficiary];
+        _removeBeneficiaryData(_beneficiary);
     }
 
-    function _isBeneficiary(address _beneficiary) internal view returns (bool) {
-        return _beneficiariesStorage().beneficiaries.contains(_beneficiary);
+    function _setBeneficiaryData(
+        address _beneficiary,
+        bytes calldata _data
+    ) internal {
+        _beneficiariesDataStorage().beneficiaryData[_beneficiary] = _data;
+    }
+
+    function _removeBeneficiaryData(address _beneficiary) internal {
+        delete _beneficiariesDataStorage().beneficiaryData[_beneficiary];
     }
 
     function _getBeneficiaryData(
         address _beneficiary
     ) internal view returns (bytes memory) {
-        return _beneficiariesStorage().beneficiaryData[_beneficiary];
+        return _beneficiariesDataStorage().beneficiaryData[_beneficiary];
     }
 
-    function _getTotalBeneficiaries() internal view returns (uint256) {
-        return _beneficiariesStorage().beneficiaries.length();
-    }
-
-    function _getBeneficiaries(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory beneficiaries_) {
-        beneficiaries_ = _beneficiariesStorage().beneficiaries.getFromSet(
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function _beneficiariesStorage()
+    function _beneficiariesDataStorage()
         internal
         pure
-        returns (BeneficiariesStorage storage beneficiariesStorage_)
+        returns (BeneficiariesDataStorage storage beneficiariesDataStorage_)
     {
-        bytes32 position = _BENEFICIARIES_STORAGE_POSITION;
+        bytes32 position = _BENEFICIARIES_DATA_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            beneficiariesStorage_.slot := position
+            beneficiariesDataStorage_.slot := position
         }
     }
 }
