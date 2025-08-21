@@ -348,11 +348,9 @@ describe('Scheduled Snapshots Tests', () => {
     })
 
     it('GIVEN a token WHEN triggerSnapshots THEN transaction succeeds', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-        // Using account C (with role)
-        equityFacet = equityFacet.connect(signer_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(CORPORATE_ACTION_ROLE, account_C)
 
         // set dividend
         const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
@@ -383,9 +381,9 @@ describe('Scheduled Snapshots Tests', () => {
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
         }
-        await equityFacet.setDividends(dividendData_2)
-        await equityFacet.setDividends(dividendData_3)
-        await equityFacet.setDividends(dividendData_1)
+        await equityFacet.connect(signer_C).setDividends(dividendData_2)
+        await equityFacet.connect(signer_C).setDividends(dividendData_3)
+        await equityFacet.connect(signer_C).setDividends(dividendData_1)
 
         const dividend_2_Id =
             '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -395,8 +393,6 @@ describe('Scheduled Snapshots Tests', () => {
             '0x0000000000000000000000000000000000000000000000000000000000000003'
 
         // check schedled snapshots
-        scheduledSnapshotsFacet = scheduledSnapshotsFacet.connect(signer_A)
-
         let scheduledSnapshotCount =
             await scheduledSnapshotsFacet.scheduledSnapshotCount()
         let scheduledSnapshots =
@@ -418,12 +414,12 @@ describe('Scheduled Snapshots Tests', () => {
         expect(scheduledSnapshots[2].data).to.equal(dividend_1_Id)
 
         // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
-
         await timeTravelFacet.changeSystemTimestamp(
             dividendsRecordDateInSeconds_1 + 1
         )
-        await expect(scheduledTasksFacet.triggerPendingScheduledTasks())
+        await expect(
+            scheduledTasksFacet.connect(signer_A).triggerPendingScheduledTasks()
+        )
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 1)
 
@@ -447,7 +443,9 @@ describe('Scheduled Snapshots Tests', () => {
         await timeTravelFacet.changeSystemTimestamp(
             dividendsRecordDateInSeconds_2 + 1
         )
-        await expect(scheduledTasksFacet.triggerScheduledTasks(100))
+        await expect(
+            scheduledTasksFacet.connect(signer_A).triggerScheduledTasks(100)
+        )
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 2)
 
@@ -467,7 +465,9 @@ describe('Scheduled Snapshots Tests', () => {
         await timeTravelFacet.changeSystemTimestamp(
             dividendsRecordDateInSeconds_3 + 1
         )
-        await expect(scheduledTasksFacet.triggerScheduledTasks(0))
+        await expect(
+            scheduledTasksFacet.connect(signer_A).triggerScheduledTasks(0)
+        )
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 3)
 

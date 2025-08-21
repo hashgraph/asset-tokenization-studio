@@ -635,8 +635,7 @@ describe('ERC3643 Tests', () => {
         })
 
         it('GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error', async () => {
-            pauseFacet = pauseFacet.connect(signer_B)
-            await pauseFacet.pause()
+            await pauseFacet.connect(signer_B).pause()
 
             await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
                 'TokenIsPaused'
@@ -680,30 +679,25 @@ describe('ERC3643 Tests', () => {
                     account_A
                 )
 
-                pauseFacet = pauseFacet.connect(signer_B)
-                await pauseFacet.pause()
+                await pauseFacet.connect(signer_B).pause()
 
                 await expect(
                     erc3643Facet.mint(account_A, AMOUNT)
                 ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
             it('GIVEN a max supply WHEN mint more than the max supply THEN transaction fails with MaxSupplyReached', async () => {
-                // Using account A (with role)
-                erc3643Facet = erc3643Facet.connect(signer_A)
-
                 await expect(
-                    erc3643Facet.mint(account_E, MAX_SUPPLY + 1)
+                    erc3643Facet
+                        .connect(signer_A)
+                        .mint(account_E, MAX_SUPPLY + 1)
                 ).to.be.rejectedWith('MaxSupplyReached')
             })
             it('GIVEN blocked account USING WHITELIST WHEN mint THEN transaction fails with AccountIsBlocked', async () => {
                 // Blacklisting accounts
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-                controlList = controlList.connect(signer_A)
-                await controlList.addToControlList(account_C)
-
-                // Using account C (with role)
-                erc3643Facet = erc3643Facet.connect(signer_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CONTROL_LIST_ROLE, account_A)
+                await controlList.connect(signer_A).addToControlList(account_C)
 
                 await ssiManagementFacet.addIssuer(account_C)
                 await kycFacet.grantKyc(
@@ -716,7 +710,7 @@ describe('ERC3643 Tests', () => {
 
                 // mint fails
                 await expect(
-                    erc3643Facet.mint(account_C, AMOUNT)
+                    erc3643Facet.connect(signer_C).mint(account_C, AMOUNT)
                 ).to.be.revertedWithCustomError(controlList, 'AccountIsBlocked')
             })
             it('GIVEN non kyc account WHEN mint THEN transaction reverts with InvalidKycStatus', async () => {
@@ -758,8 +752,7 @@ describe('ERC3643 Tests', () => {
                 ).to.be.equal(AMOUNT / 2)
             })
             it('GIVEN a paused token WHEN attempting to burn TokenIsPaused error', async () => {
-                pauseFacet = pauseFacet.connect(signer_B)
-                await pauseFacet.pause()
+                await pauseFacet.connect(signer_B).pause()
 
                 await expect(
                     erc3643Facet.burn(account_A, AMOUNT)
@@ -818,8 +811,7 @@ describe('ERC3643 Tests', () => {
                 ).to.be.equal(AMOUNT)
             })
             it('GIVEN a paused token WHEN attempting to forcedTransfer TokenIsPaused error', async () => {
-                pauseFacet = pauseFacet.connect(signer_B)
-                await pauseFacet.pause()
+                await pauseFacet.connect(signer_B).pause()
 
                 await expect(
                     erc3643Facet.forcedTransfer(
@@ -830,10 +822,10 @@ describe('ERC3643 Tests', () => {
                 ).to.be.rejectedWith('TokenIsPaused')
             })
             it('GIVEN an account without CONTROLLER_ROLE WHEN forcedTransfer is called THEN transaction fails with AccountHasNoRole', async () => {
-                erc3643Facet = erc3643Facet.connect(signer_B)
-
                 await expect(
-                    erc3643Facet.forcedTransfer(account_D, account_E, AMOUNT)
+                    erc3643Facet
+                        .connect(signer_B)
+                        .forcedTransfer(account_D, account_E, AMOUNT)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
         })
@@ -1102,9 +1094,10 @@ describe('ERC3643 Tests', () => {
 
             it('GIVEN non verified account with balance WHEN transfer THEN reverts with AddressNotVerified', async () => {
                 // Setup
-                const erc20FacetE = erc20Facet.connect(signer_E)
                 await erc3643Facet.mint(account_E, 2 * AMOUNT)
-                await erc20FacetE.approve(account_D, MAX_UINT256)
+                await erc20Facet
+                    .connect(signer_E)
+                    .approve(account_D, MAX_UINT256)
                 await erc1410Facet
                     .connect(signer_E)
                     .authorizeOperator(account_D)
@@ -1113,7 +1106,7 @@ describe('ERC3643 Tests', () => {
 
                 // Transfers
                 await expect(
-                    erc20FacetE.transfer(account_D, AMOUNT)
+                    erc20Facet.connect(signer_E).transfer(account_D, AMOUNT)
                 ).to.be.revertedWithCustomError(
                     erc3643Facet,
                     'AddressNotVerified'
@@ -1305,10 +1298,8 @@ describe('ERC3643 Tests', () => {
                 await erc3643Facet.mint(account_E, AMOUNT)
                 await complianceMock.setFlags(false, false) // canTransfer = false
 
-                const erc20FacetE = erc20Facet.connect(signer_E)
-
                 await expect(
-                    erc20FacetE.transfer(account_D, AMOUNT / 2)
+                    erc20Facet.connect(signer_E).transfer(account_D, AMOUNT / 2)
                 ).to.be.revertedWithCustomError(
                     erc3643Facet,
                     'ComplianceNotAllowed'
@@ -1320,10 +1311,9 @@ describe('ERC3643 Tests', () => {
                 await erc3643Facet.mint(account_E, AMOUNT)
                 await complianceMock.setFlags(true, false) // canTransfer = true
 
-                const erc20FacetE = erc20Facet.connect(signer_E)
-
-                await expect(erc20FacetE.transfer(account_D, AMOUNT / 2)).to.not
-                    .be.reverted
+                await expect(
+                    erc20Facet.connect(signer_E).transfer(account_D, AMOUNT / 2)
+                ).to.not.be.reverted
 
                 expect(
                     await erc1410SnapshotFacet.balanceOf(account_E)
@@ -1429,10 +1419,8 @@ describe('ERC3643 Tests', () => {
                 await erc3643Facet.mint(account_E, AMOUNT)
                 await complianceMock.setFlags(false, false) // canTransfer = false
 
-                const erc20FacetE = erc20Facet.connect(signer_E)
-
                 await expect(
-                    erc20FacetE.transfer(account_D, AMOUNT / 2)
+                    erc20Facet.connect(signer_E).transfer(account_D, AMOUNT / 2)
                 ).to.be.revertedWithCustomError(
                     erc3643Facet,
                     'ComplianceNotAllowed'
@@ -1444,10 +1432,9 @@ describe('ERC3643 Tests', () => {
                 await erc3643Facet.mint(account_E, AMOUNT)
                 await complianceMock.setFlags(true, false) // canTransfer = true
 
-                const erc20FacetE = erc20Facet.connect(signer_E)
-
-                await expect(erc20FacetE.transfer(account_D, AMOUNT / 2)).to.not
-                    .be.reverted
+                await expect(
+                    erc20Facet.connect(signer_E).transfer(account_D, AMOUNT / 2)
+                ).to.not.be.reverted
 
                 expect(
                     await erc1410SnapshotFacet.balanceOf(account_E)
@@ -1945,9 +1932,13 @@ describe('ERC3643 Tests', () => {
             //TODO: we should test when canTransfer returns false for the FROM, TO and SENDER separately
             it('GIVEN ComplianceMock::canTransfer returns false THEN operations fail with ComplianceNotAllowed', async () => {
                 // Setup: mint tokens and set compliance to return false for canTransfer
-                const erc20FacetE = erc20Facet.connect(signer_E)
-                await erc3643Facet.mint(account_E, 2 * AMOUNT)
-                await erc20FacetE.approve(account_D, MAX_UINT256)
+                const erc20FacetE = await erc3643Facet.mint(
+                    account_E,
+                    2 * AMOUNT
+                )
+                await erc20Facet
+                    .connect(signer_E)
+                    .approve(account_D, MAX_UINT256)
                 await erc1410Facet
                     .connect(signer_E)
                     .authorizeOperator(account_D)
@@ -1956,7 +1947,7 @@ describe('ERC3643 Tests', () => {
 
                 // Transfers
                 await expect(
-                    erc20FacetE.transfer(account_D, AMOUNT)
+                    erc20Facet.connect(signer_E).transfer(account_D, AMOUNT)
                 ).to.be.revertedWithCustomError(
                     erc3643Facet,
                     'ComplianceNotAllowed'
@@ -2092,7 +2083,7 @@ describe('ERC3643 Tests', () => {
 
                 // Approves
                 await expect(
-                    erc20FacetE.approve(account_D, AMOUNT)
+                    erc20Facet.connect(signer_E).approve(account_D, AMOUNT)
                 ).to.be.revertedWithCustomError(
                     erc3643Facet,
                     'ComplianceNotAllowed'
@@ -2115,7 +2106,9 @@ describe('ERC3643 Tests', () => {
                     'ComplianceNotAllowed'
                 )
                 await expect(
-                    erc20FacetE.increaseAllowance(account_D, AMOUNT)
+                    erc20Facet
+                        .connect(signer_E)
+                        .increaseAllowance(account_D, AMOUNT)
                 ).to.be.revertedWithCustomError(
                     erc3643Facet,
                     'ComplianceNotAllowed'
@@ -2242,10 +2235,10 @@ describe('ERC3643 Tests', () => {
                     const amounts = [mintAmount, mintAmount]
 
                     // signer_B does not have ISSUER_ROLE
-                    erc3643Facet = erc3643Facet.connect(signer_B)
-
                     await expect(
-                        erc3643Facet.batchMint(toList, amounts)
+                        erc3643Facet
+                            .connect(signer_B)
+                            .batchMint(toList, amounts)
                     ).to.be.rejectedWith('AccountHasNoRole')
                 })
 
@@ -2280,9 +2273,10 @@ describe('ERC3643 Tests', () => {
                     const initialBalanceD =
                         await erc1410SnapshotFacet.balanceOf(account_D)
 
-                    erc3643Transferor = erc3643Facet.connect(signer_E)
                     await expect(
-                        erc3643Transferor.batchTransfer(toList, amounts)
+                        erc3643Facet
+                            .connect(signer_E)
+                            .batchTransfer(toList, amounts)
                     ).to.not.be.reverted
 
                     const finalBalanceSender =
@@ -2307,10 +2301,11 @@ describe('ERC3643 Tests', () => {
                     const toList = [account_F, account_D]
                     // Total amount > balance
                     const amounts = [initialMintAmount, transferAmount]
-                    erc3643Transferor = erc3643Facet.connect(signer_E)
 
                     await expect(
-                        erc3643Transferor.batchTransfer(toList, amounts)
+                        erc3643Facet
+                            .connect(signer_E)
+                            .batchTransfer(toList, amounts)
                     ).to.be.revertedWithCustomError(
                         erc1410Facet,
                         'InvalidPartition'
@@ -2352,13 +2347,10 @@ describe('ERC3643 Tests', () => {
                     const initialBalanceE =
                         await erc1410SnapshotFacet.balanceOf(account_E)
 
-                    erc3643Facet = erc3643Facet.connect(signer_A)
                     await expect(
-                        erc3643Facet.batchForcedTransfer(
-                            fromList,
-                            toList,
-                            amounts
-                        )
+                        erc3643Facet
+                            .connect(signer_A)
+                            .batchForcedTransfer(fromList, toList, amounts)
                     ).to.not.be.reverted
 
                     const finalBalanceF =
@@ -2385,13 +2377,10 @@ describe('ERC3643 Tests', () => {
                     const amounts = [transferAmount]
 
                     // signer_B does not have CONTROLLER_ROLE
-                    erc3643Facet = erc3643Facet.connect(signer_B)
                     await expect(
-                        erc3643Facet.batchForcedTransfer(
-                            fromList,
-                            toList,
-                            amounts
-                        )
+                        erc3643Facet
+                            .connect(signer_B)
+                            .batchForcedTransfer(fromList, toList, amounts)
                     ).to.be.rejectedWith('AccountHasNoRole')
                 })
 
@@ -2418,12 +2407,13 @@ describe('ERC3643 Tests', () => {
                     await erc3643Issuer.mint(account_D, burnAmount)
                     await erc3643Issuer.mint(account_E, burnAmount)
 
-                    const erc20FacetD = erc20Facet.connect(signer_D)
-                    const erc20FacetE = erc20Facet.connect(signer_E)
-
                     // The burner (signer_A) needs approval from the token holders
-                    await erc20FacetD.approve(account_A, burnAmount)
-                    await erc20FacetE.approve(account_A, burnAmount)
+                    await erc20Facet
+                        .connect(signer_D)
+                        .approve(account_A, burnAmount)
+                    await erc20Facet
+                        .connect(signer_E)
+                        .approve(account_A, burnAmount)
                 })
 
                 it('GIVEN approved operator WHEN batchBurn THEN transaction succeeds', async () => {
@@ -2437,9 +2427,11 @@ describe('ERC3643 Tests', () => {
                     const initialBalanceE =
                         await erc1410SnapshotFacet.balanceOf(account_E)
 
-                    erc3643Facet = erc3643Facet.connect(signer_A)
-                    await expect(erc3643Facet.batchBurn(userAddresses, amounts))
-                        .to.not.be.reverted
+                    await expect(
+                        erc3643Facet
+                            .connect(signer_A)
+                            .batchBurn(userAddresses, amounts)
+                    ).to.not.be.reverted
 
                     const finalTotalSupply =
                         await erc1410SnapshotFacet.totalSupply()
@@ -2485,7 +2477,6 @@ describe('ERC3643 Tests', () => {
                     const freezeFlags = [true, true]
 
                     // Freeze accounts
-                    erc3643Facet = erc3643Facet.connect(signer_A)
                     await expect(
                         freezeFacet.batchSetAddressFrozen(
                             userAddresses,
@@ -2494,17 +2485,19 @@ describe('ERC3643 Tests', () => {
                     ).to.not.be.reverted
 
                     // Attempting transfers from frozen accounts should fail
-                    const erc20FacetD = erc20Facet.connect(signer_D)
                     await expect(
-                        erc20FacetD.transfer(account_A, transferAmount)
+                        erc20Facet
+                            .connect(signer_D)
+                            .transfer(account_A, transferAmount)
                     ).to.be.revertedWithCustomError(
                         controlList,
                         'AccountIsBlocked'
                     )
 
-                    const erc20FacetE = erc20Facet.connect(signer_E)
                     await expect(
-                        erc20FacetE.transfer(account_A, transferAmount)
+                        erc20Facet
+                            .connect(signer_E)
+                            .transfer(account_A, transferAmount)
                     ).to.be.revertedWithCustomError(
                         controlList,
                         'AccountIsBlocked'
@@ -2513,7 +2506,6 @@ describe('ERC3643 Tests', () => {
 
                 it('GIVEN frozen addresses WHEN batchSetAddressFrozen with false THEN transfers from those addresses succeed', async () => {
                     const userAddresses = [account_D, account_E]
-                    erc3643Facet = erc3643Facet.connect(signer_A)
                     // grant KYC to account_A
                     await kycFacet.grantKyc(
                         account_A,
@@ -2537,14 +2529,16 @@ describe('ERC3643 Tests', () => {
                         ])
                     ).to.not.be.reverted
 
-                    const erc20FacetD = erc20Facet.connect(signer_D)
                     await expect(
-                        erc20FacetD.transfer(account_A, transferAmount)
+                        erc20Facet
+                            .connect(signer_D)
+                            .transfer(account_A, transferAmount)
                     ).to.not.be.reverted
 
-                    const erc20FacetE = erc20Facet.connect(signer_E)
                     await expect(
-                        erc20FacetE.transfer(account_A, transferAmount)
+                        erc20Facet
+                            .connect(signer_E)
+                            .transfer(account_A, transferAmount)
                     ).to.not.be.reverted
 
                     // Check final balances to be sure
@@ -2560,13 +2554,10 @@ describe('ERC3643 Tests', () => {
                     const userAddresses = [account_D, account_E]
                     const freezeFlags = [true, true]
 
-                    freezeFacet = freezeFacet.connect(signer_F)
-
                     await expect(
-                        freezeFacet.batchSetAddressFrozen(
-                            userAddresses,
-                            freezeFlags
-                        )
+                        freezeFacet
+                            .connect(signer_F)
+                            .batchSetAddressFrozen(userAddresses, freezeFlags)
                     ).to.be.revertedWithCustomError(
                         accessControlFacet,
                         'AccountHasNoRoles'
@@ -2599,7 +2590,6 @@ describe('ERC3643 Tests', () => {
                     const initialFrozenE =
                         await freezeFacet.getFrozenTokens(account_E)
 
-                    erc3643Facet = erc3643Facet.connect(signer_A) // signer_A has FREEZE_MANAGER_ROLE
                     await expect(
                         freezeFacet.batchFreezePartialTokens(
                             userAddresses,
@@ -2639,7 +2629,6 @@ describe('ERC3643 Tests', () => {
                     await erc3643Issuer.mint(account_D, totalAmount)
                     await erc3643Issuer.mint(account_E, totalAmount)
 
-                    erc3643Facet = erc3643Facet.connect(signer_A) // signer_A has FREEZE_MANAGER_ROLE
                     await freezeFacet.freezePartialTokens(
                         account_D,
                         totalAmount
@@ -2724,11 +2713,9 @@ describe('ERC3643 Tests', () => {
 
             it('GIVEN a user with the agent role WHEN performing actions using ERC-1400 methods succeeds', async () => {
                 await accessControlFacet.grantRole(AGENT_ROLE, account_B)
-                erc1410Facet = erc1410Facet.connect(signer_B)
-                erc1644Facet = erc1644Facet.connect(signer_B)
                 const amount = 1000
                 await expect(
-                    erc1410Facet.issueByPartition({
+                    erc1410Facet.connect(signer_B).issueByPartition({
                         partition: DEFAULT_PARTITION,
                         tokenHolder: account_E,
                         value: 4 * amount,
@@ -2737,42 +2724,48 @@ describe('ERC3643 Tests', () => {
                 ).to.emit(erc1410Facet, 'IssuedByPartition')
 
                 await expect(
-                    erc1644Facet.controllerRedeem(account_E, amount, '0x', '0x')
+                    erc1644Facet
+                        .connect(signer_B)
+                        .controllerRedeem(account_E, amount, '0x', '0x')
                 ).to.emit(erc1644Facet, 'ControllerRedemption')
                 await expect(
-                    erc1410Facet.controllerRedeemByPartition(
-                        DEFAULT_PARTITION,
-                        account_E,
-                        amount,
-                        '0x',
-                        '0x'
-                    )
+                    erc1410Facet
+                        .connect(signer_B)
+                        .controllerRedeemByPartition(
+                            DEFAULT_PARTITION,
+                            account_E,
+                            amount,
+                            '0x',
+                            '0x'
+                        )
                 ).to.emit(erc1410Facet, 'RedeemedByPartition')
                 await expect(
-                    erc1644Facet.controllerTransfer(
-                        account_E,
-                        account_D,
-                        amount,
-                        '0x',
-                        '0x'
-                    )
+                    erc1644Facet
+                        .connect(signer_B)
+                        .controllerTransfer(
+                            account_E,
+                            account_D,
+                            amount,
+                            '0x',
+                            '0x'
+                        )
                 ).to.emit(erc1644Facet, 'TransferByPartition')
                 await expect(
-                    erc1410Facet.controllerTransferByPartition(
-                        DEFAULT_PARTITION,
-                        account_E,
-                        account_D,
-                        amount,
-                        '0x',
-                        '0x'
-                    )
+                    erc1410Facet
+                        .connect(signer_B)
+                        .controllerTransferByPartition(
+                            DEFAULT_PARTITION,
+                            account_E,
+                            account_D,
+                            amount,
+                            '0x',
+                            '0x'
+                        )
                 ).to.emit(erc1410Facet, 'TransferByPartition')
             })
 
             it('GIVEN a user with the agent role WHEN performing actions using ERC-3643 methods succeeds', async () => {
                 await accessControlFacet.grantRole(AGENT_ROLE, account_B)
-                freezeFacet = freezeFacet.connect(signer_B)
-                erc3643Facet = erc3643Facet.connect(signer_B)
                 const amount = 1000
                 await erc1410Facet.issueByPartition({
                     partition: DEFAULT_PARTITION,
@@ -2780,16 +2773,24 @@ describe('ERC3643 Tests', () => {
                     value: amount,
                     data: '0x',
                 })
-                await expect(freezeFacet.freezePartialTokens(account_E, amount))
+                await expect(
+                    freezeFacet
+                        .connect(signer_B)
+                        .freezePartialTokens(account_E, amount)
+                )
                     .to.emit(freezeFacet, 'TokensFrozen')
                     .withArgs(account_E, amount, DEFAULT_PARTITION)
                 await expect(
-                    freezeFacet.unfreezePartialTokens(account_E, amount)
+                    freezeFacet
+                        .connect(signer_B)
+                        .unfreezePartialTokens(account_E, amount)
                 )
                     .to.emit(freezeFacet, 'TokensUnfrozen')
                     .withArgs(account_E, amount, DEFAULT_PARTITION)
                 await expect(
-                    erc3643Facet.forcedTransfer(account_E, account_D, amount)
+                    erc3643Facet
+                        .connect(signer_B)
+                        .forcedTransfer(account_E, account_D, amount)
                 )
                     .to.emit(erc1410Facet, 'TransferByPartition')
                     .withArgs(
@@ -2801,13 +2802,21 @@ describe('ERC3643 Tests', () => {
                         '0x',
                         '0x'
                     )
-                await expect(erc3643Facet.mint(account_E, amount))
+                await expect(
+                    erc3643Facet.connect(signer_B).mint(account_E, amount)
+                )
                     .to.emit(erc1594Facet, 'Issued')
                     .withArgs(account_B, account_E, amount, '0x')
-                await expect(erc3643Facet.burn(account_E, amount))
+                await expect(
+                    erc3643Facet.connect(signer_B).burn(account_E, amount)
+                )
                     .to.emit(erc1594Facet, 'Transfer')
                     .withArgs(account_E, ADDRESS_ZERO, amount)
-                await expect(freezeFacet.setAddressFrozen(account_E, true))
+                await expect(
+                    freezeFacet
+                        .connect(signer_B)
+                        .setAddressFrozen(account_E, true)
+                )
                     .to.emit(freezeFacet, 'AddressFrozen')
                     .withArgs(account_E, true, account_B)
             })
@@ -2815,82 +2824,68 @@ describe('ERC3643 Tests', () => {
 
         describe('AccessControl', () => {
             it('GIVEN an account without TREX_OWNER role WHEN setName THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc3643Facet = erc3643Facet.connect(signer_C)
-
                 // set name fails
-                await expect(erc3643Facet.setName(newName)).to.be.rejectedWith(
-                    'AccountHasNoRole'
-                )
+                await expect(
+                    erc3643Facet.connect(signer_C).setName(newName)
+                ).to.be.rejectedWith('AccountHasNoRole')
             })
             it('GIVEN an account without TREX_OWNER role WHEN setSymbol THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc3643Facet = erc3643Facet.connect(signer_C)
-
                 // set symbol fails
                 await expect(
-                    erc3643Facet.setSymbol(newSymbol)
+                    erc3643Facet.connect(signer_C).setSymbol(newSymbol)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
             it('GIVEN an account without TREX_OWNER role WHEN setOnchainID THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc3643Facet = erc3643Facet.connect(signer_C)
-
                 // set onchainID fails
                 await expect(
-                    erc3643Facet.setOnchainID(onchainId)
+                    erc3643Facet.connect(signer_C).setOnchainID(onchainId)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
             it('GIVEN an account without TREX_OWNER role WHEN setIdentityRegistry THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc3643Facet = erc3643Facet.connect(signer_C)
-
                 // set IdentityRegistry fails
                 await expect(
-                    erc3643Facet.setIdentityRegistry(identityRegistryAddress)
+                    erc3643Facet
+                        .connect(signer_C)
+                        .setIdentityRegistry(identityRegistryAddress)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
             it('GIVEN an account without TREX_OWNER role WHEN setCompliance THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc3643Facet = erc3643Facet.connect(signer_C)
-
                 // set compliance fails
                 await expect(
-                    erc3643Facet.setCompliance(complianceMockAddress)
+                    erc3643Facet
+                        .connect(signer_C)
+                        .setCompliance(complianceMockAddress)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
             it('GIVEN an account without FREEZE MANAGER role WHEN freezePartialTokens THEN transaction fails with AccountHasNoRole', async () => {
-                freezeFacet = freezeFacet.connect(signer_C)
-
                 await expect(
-                    freezeFacet.freezePartialTokens(account_A, 10)
+                    freezeFacet
+                        .connect(signer_C)
+                        .freezePartialTokens(account_A, 10)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
             it('GIVEN an account without FREEZE MANAGER role WHEN unfreezePartialTokens THEN transaction fails with AccountHasNoRole', async () => {
-                freezeFacet = freezeFacet.connect(signer_C)
-
                 await expect(
-                    freezeFacet.unfreezePartialTokens(account_A, 10)
+                    freezeFacet
+                        .connect(signer_C)
+                        .unfreezePartialTokens(account_A, 10)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
             it('GIVEN an account without FREEZE MANAGER role WHEN setAddressFrozen THEN transaction fails with AccountHasNoRole', async () => {
-                freezeFacet = freezeFacet.connect(signer_C)
-
                 await expect(
-                    freezeFacet.setAddressFrozen(account_A, true)
+                    freezeFacet
+                        .connect(signer_C)
+                        .setAddressFrozen(account_A, true)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
             it('GIVEN an account without admin role WHEN addAgent THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc3643Facet = erc3643Facet.connect(signer_C)
-
                 // add agent fails
                 await expect(
-                    erc3643Facet.addAgent(account_A)
+                    erc3643Facet.connect(signer_C).addAgent(account_A)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
         })
@@ -2955,20 +2950,19 @@ describe('ERC3643 Tests', () => {
             const adjustDecimals = 2
 
             async function setPreBalanceAdjustment() {
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
 
-                await accessControlFacet.grantRole(
-                    ADJUSTMENT_BALANCE_ROLE,
-                    account_C
-                )
-
-                await accessControlFacet.grantRole(CAP_ROLE, account_A)
-                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
-                await accessControlFacet.grantRole(
-                    CORPORATE_ACTION_ROLE,
-                    account_B
-                )
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CAP_ROLE, account_A)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CONTROLLER_ROLE, account_A)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CORPORATE_ACTION_ROLE, account_B)
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
                 erc1410Facet = erc1410Facet.connect(signer_A)
@@ -2999,8 +2993,6 @@ describe('ERC3643 Tests', () => {
                     )
 
                 // HOLD
-                erc3643Facet = erc3643Facet.connect(signer_A)
-
                 await freezeFacet.freezePartialTokens(account_E, _AMOUNT)
 
                 const frozen_TotalAmount_Before =
@@ -3015,8 +3007,6 @@ describe('ERC3643 Tests', () => {
                 )
 
                 // scheduled two balance updates
-                equityFacet = equityFacet.connect(signer_B)
-
                 const balanceAdjustmentData = {
                     executionDate: dateToUnixTimestamp(
                         '2030-01-01T00:00:02Z'
@@ -3032,12 +3022,12 @@ describe('ERC3643 Tests', () => {
                     factor: adjustFactor,
                     decimals: adjustDecimals,
                 }
-                await equityFacet.setScheduledBalanceAdjustment(
-                    balanceAdjustmentData
-                )
-                await equityFacet.setScheduledBalanceAdjustment(
-                    balanceAdjustmentData_2
-                )
+                await equityFacet
+                    .connect(signer_B)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData)
+                await equityFacet
+                    .connect(signer_B)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData_2)
 
                 // wait for first scheduled balance adjustment only
                 await timeTravelFacet.changeSystemTimestamp(
@@ -4076,17 +4066,20 @@ describe('ERC3643 Tests', () => {
                 diamond.address
             )
 
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CONTROLLER_ROLE, account_A)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(ISSUER_ROLE, account_C)
         })
 
         it('GIVEN an account with issuer role WHEN mint THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
-            erc3643Facet = erc3643Facet.connect(signer_C)
-
             // transfer with data fails
             await expect(
-                erc3643Facet.mint(account_D, 2 * BALANCE_OF_C_ORIGINAL)
+                erc3643Facet
+                    .connect(signer_C)
+                    .mint(account_D, 2 * BALANCE_OF_C_ORIGINAL)
             ).to.be.revertedWithCustomError(
                 erc1410Facet,
                 'NotAllowedInMultiPartitionMode'
@@ -4094,11 +4087,11 @@ describe('ERC3643 Tests', () => {
         })
 
         it('GIVEN an initialized token WHEN burning THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
-            erc3643Facet = erc3643Facet.connect(signer_C)
-
             // burn with data fails
             await expect(
-                erc3643Facet.burn(account_C, 2 * BALANCE_OF_C_ORIGINAL)
+                erc3643Facet
+                    .connect(signer_C)
+                    .burn(account_C, 2 * BALANCE_OF_C_ORIGINAL)
             ).to.be.revertedWithCustomError(
                 erc1410Facet,
                 'NotAllowedInMultiPartitionMode'
@@ -4106,16 +4099,15 @@ describe('ERC3643 Tests', () => {
         })
 
         it('GIVEN an account with balance WHEN forcedTransfer THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
-            // Using account A (with role)
-            erc3643Facet = erc3643Facet.connect(signer_A)
-
             // transfer with data fails
             await expect(
-                erc3643Facet.forcedTransfer(
-                    account_A,
-                    account_D,
-                    2 * BALANCE_OF_C_ORIGINAL
-                )
+                erc3643Facet
+                    .connect(signer_A)
+                    .forcedTransfer(
+                        account_A,
+                        account_D,
+                        2 * BALANCE_OF_C_ORIGINAL
+                    )
             ).to.be.revertedWithCustomError(
                 erc1410Facet,
                 'NotAllowedInMultiPartitionMode'
