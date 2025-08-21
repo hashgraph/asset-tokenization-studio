@@ -309,6 +309,8 @@ export interface BondData {
     security: SecurityData
     bondDetails: BondDetailsData
     couponDetails: CouponDetailsData
+    beneficiaries: string[]
+    beneficiariesData: string[]
 }
 
 export interface AdditionalSecurityData {
@@ -518,6 +520,8 @@ export async function setBondData({
     externalKycLists,
     compliance,
     identityRegistry,
+    beneficiariesList,
+    beneficiariesListData,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -547,6 +551,8 @@ export async function setBondData({
     externalKycLists?: string[]
     compliance?: string
     identityRegistry?: string
+    beneficiariesList?: string[]
+    beneficiariesListData?: string[]
 }) {
     let rbacs: Rbac[] = []
 
@@ -607,10 +613,15 @@ export async function setBondData({
         firstCouponDate: firstCouponDate,
     }
 
+    const beneficiaries = beneficiariesList ?? []
+    const beneficiariesData = beneficiariesListData ?? []
+
     const bondData: BondData = {
         security,
         bondDetails,
         couponDetails,
+        beneficiaries,
+        beneficiariesData,
     }
 
     return bondData
