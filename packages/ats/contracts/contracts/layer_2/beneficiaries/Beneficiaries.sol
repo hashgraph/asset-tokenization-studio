@@ -206,28 +206,105 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable max-line-length
+import {IBeneficiaries} from '../interfaces/beneficiaries/IBeneficiaries.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {_BENEFICIARIES_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_BENEFICIARY_MANAGER_ROLE} from '../constants/roles.sol';
 
-// keccak256('security.token.standard.equity.resolverKey');
-bytes32 constant _EQUITY_RESOLVER_KEY = 0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810;
+contract Beneficiaries is IBeneficiaries, IStaticFunctionSelectors, Common {
+    function initialize_Beneficiaries(
+        address[] calldata _beneficiaries
+    ) external override {}
 
-// keccak256('security.token.standard.bond.resolverKey');
-bytes32 constant _BOND_RESOLVER_KEY = 0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef;
+    function addBeneficiary(
+        address _beneficiary,
+        bytes calldata _data
+    ) external override onlyUnpaused onlyRole(_BENEFICIARY_MANAGER_ROLE) {
+        _addBeneficiary(_beneficiary, _data);
+        emit BeneficiaryAdded(_msgSender(), _beneficiary, _data);
+    }
 
-// keccak256('security.token.standard.bond.read.resolverKey');
-bytes32 constant _BOND_READ_RESOLVER_KEY = 0xe7ca0b805514da05524faf33d2d9d9432bf1dfa53096073a7267041cfdfb6d68;
+    function removeBeneficiary(
+        address _beneficiary
+    ) external override onlyUnpaused onlyRole(_BENEFICIARY_MANAGER_ROLE) {
+        _removeBeneficiary(_beneficiary);
 
-// keccak256('security.token.standard.scheduled.snapshots.resolverKey');
-bytes32 constant _SCHEDULED_SNAPSHOTS_RESOLVER_KEY = 0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793;
+        emit BeneficiaryRemoved(_msgSender(), _beneficiary);
+    }
 
-// keccak256('security.token.standard.scheduled.balanceAdjustments.resolverKey');
-bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0;
+    function isBeneficiary(
+        address _beneficiary
+    ) external view override returns (bool) {
+        return _isBeneficiary(_beneficiary);
+    }
 
-// keccak256('security.token.standard.scheduled.tasks.resolverKey');
-bytes32 constant _SCHEDULED_TASKS_RESOLVER_KEY = 0xa4934195ab83f1497ce5fc99b68d0f41694716bcfba5f232aa6c8e0d4d504f08;
+    function getBeneficiaryData(
+        address _beneficiary
+    ) external view override returns (bytes memory) {
+        return _getBeneficiaryData(_beneficiary);
+    }
 
-// keccak256('security.token.standard.balanceAdjustments.resolverKey');
-bytes32 constant _BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8;
+    function getTotalBeneficiaries() external view override returns (uint256) {
+        return _getTotalBeneficiaries();
+    }
 
-// keccak256('security.token.standard.beneficiaries.resolverKey');
-bytes32 constant _BENEFICIARIES_RESOLVER_KEY = 0x87f4b676bf89cd24a01a78fd8e7fb2102c2f6d034be73d16402f7297e0ae625b;
+    function getBeneficiaries(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (address[] memory beneficiaries_) {
+        return _getBeneficiaries(_pageIndex, _pageLength);
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _BENEFICIARIES_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .initialize_Beneficiaries
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .addBeneficiary
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .removeBeneficiary
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isBeneficiary.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getBeneficiaryData
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalBeneficiaries
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getBeneficiaries
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IBeneficiaries)
+            .interfaceId;
+    }
+}

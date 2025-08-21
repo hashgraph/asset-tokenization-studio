@@ -204,30 +204,50 @@
 */
 
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable max-line-length
+// SPDX-License-Identifier: MIT
 
-// keccak256('security.token.standard.equity.resolverKey');
-bytes32 constant _EQUITY_RESOLVER_KEY = 0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810;
+interface IBeneficiaries {
+    event BeneficiaryAdded(
+        address indexed operator,
+        address indexed beneficiary,
+        bytes data
+    );
 
-// keccak256('security.token.standard.bond.resolverKey');
-bytes32 constant _BOND_RESOLVER_KEY = 0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef;
+    event BeneficiaryRemoved(
+        address indexed operator,
+        address indexed beneficiary
+    );
 
-// keccak256('security.token.standard.bond.read.resolverKey');
-bytes32 constant _BOND_READ_RESOLVER_KEY = 0xe7ca0b805514da05524faf33d2d9d9432bf1dfa53096073a7267041cfdfb6d68;
+    error BeneficiaryAlreadyExists(address beneficiary);
+    error BeneficiaryNotFound(address beneficiary);
 
-// keccak256('security.token.standard.scheduled.snapshots.resolverKey');
-bytes32 constant _SCHEDULED_SNAPSHOTS_RESOLVER_KEY = 0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793;
+    /**
+     * @notice Initializes the beneficiaries contract with a list of initial beneficiaries.
+     * @param _beneficiaries An array of addresses representing the initial beneficiaries.
+     */
 
-// keccak256('security.token.standard.scheduled.balanceAdjustments.resolverKey');
-bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0;
+    function initialize_Beneficiaries(
+        address[] calldata _beneficiaries
+    ) external;
 
-// keccak256('security.token.standard.scheduled.tasks.resolverKey');
-bytes32 constant _SCHEDULED_TASKS_RESOLVER_KEY = 0xa4934195ab83f1497ce5fc99b68d0f41694716bcfba5f232aa6c8e0d4d504f08;
+    function addBeneficiary(
+        address _beneficiary,
+        bytes calldata _data
+    ) external;
 
-// keccak256('security.token.standard.balanceAdjustments.resolverKey');
-bytes32 constant _BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8;
+    function removeBeneficiary(address _beneficiary) external;
 
-// keccak256('security.token.standard.beneficiaries.resolverKey');
-bytes32 constant _BENEFICIARIES_RESOLVER_KEY = 0x87f4b676bf89cd24a01a78fd8e7fb2102c2f6d034be73d16402f7297e0ae625b;
+    function isBeneficiary(address _beneficiary) external view returns (bool);
+
+    function getBeneficiaryData(
+        address _beneficiary
+    ) external view returns (bytes memory);
+
+    function getTotalBeneficiaries() external view returns (uint256);
+
+    function getBeneficiaries(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory beneficiaries_);
+}
