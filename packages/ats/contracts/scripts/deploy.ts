@@ -303,6 +303,8 @@ import {
     ERC3643BatchTimeTravel__factory,
     FreezeFacet__factory,
     FreezeFacetTimeTravel__factory,
+    Beneficiaries__factory,
+    BeneficiariesTimeTravel__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {
@@ -876,6 +878,17 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        beneficiaries: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new Beneficiaries__factory(),
+                new BeneficiariesTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.Beneficiaries.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
         externalPauseManagement: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ExternalPauseManagement__factory(),
@@ -1366,6 +1379,17 @@ export async function deployAtsContracts({
                 )
                 console.log(
                     `ClearingActionsFacet has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
+            beneficiaries: await deployContractWithFactory(
+                commands.beneficiaries
+            ).then((result) => {
+                console.log(
+                    `Beneficiaries has been deployed successfully at ${result.address}`
+                )
+                console.log(
+                    `Beneficiaries has been deployed successfully at ${result.address}`
                 )
                 return result
             }),
