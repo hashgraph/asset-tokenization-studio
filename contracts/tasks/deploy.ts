@@ -518,7 +518,7 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
             signerPosition: args.signerPosition,
         })
 
-        const trexFactoryDeployResult = await deployContractWithLibraries(
+        await deployContractWithLibraries(
             new DeployContractWithLibraryCommand({
                 name: `TREXFactoryAts`,
                 signer,
@@ -529,9 +529,5 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
                 ],
                 libraries: ['TREXBondDeploymentLib', 'TREXEquityDeploymentLib'],
             })
-        )
-
-        console.log(
-            `TREX factory deployed at ${trexFactoryDeployResult.address}`
         )
     })
