@@ -270,27 +270,33 @@ library TREXBaseDeploymentLib {
             'invalid compliance pattern'
         );
 
-        ITrustedIssuersRegistry tir = ITrustedIssuersRegistry(
-            _deployTIR(_salt, _implementationAuthority)
-        );
-        IClaimTopicsRegistry ctr = IClaimTopicsRegistry(
-            _deployCTR(_salt, _implementationAuthority)
-        );
         IModularCompliance mc;
+        uint256 transferOwnership; // Bit 0 tracks MC and bit 1 IR
         if (_compliance == address(0)) {
             mc = IModularCompliance(_deployMC(_salt, _implementationAuthority));
+            _token.setCompliance(address(mc));
+            transferOwnership = 1;
         } else {
             mc = IModularCompliance(_compliance);
         }
         IIdentityRegistryStorage irs;
-        if (_tokenDetails.irs == address(0)) {
-            irs = IIdentityRegistryStorage(
-                _deployIRS(_salt, _implementationAuthority)
-            );
-        } else {
-            irs = IIdentityRegistryStorage(_tokenDetails.irs);
-        }
+        ITrustedIssuersRegistry tir;
+        IClaimTopicsRegistry ctr;
         if (_identityRegistry == address(0)) {
+            tir = ITrustedIssuersRegistry(
+                _deployTIR(_salt, _implementationAuthority)
+            );
+            ctr = IClaimTopicsRegistry(
+                _deployCTR(_salt, _implementationAuthority)
+            );
+            if (_tokenDetails.irs == address(0)) {
+                irs = IIdentityRegistryStorage(
+                    _deployIRS(_salt, _implementationAuthority)
+                );
+            } else {
+                irs = IIdentityRegistryStorage(_tokenDetails.irs);
+            }
+
             _identityRegistry = _deployIR(
                 _salt,
                 _implementationAuthority,
@@ -298,9 +304,22 @@ library TREXBaseDeploymentLib {
                 address(ctr),
                 address(irs)
             );
+            irs.bindIdentityRegistry(_identityRegistry);
+            _token.setIdentityRegistry(_identityRegistry);
+            transferOwnership |= 1 << 1;
+        } else {
+            tir = ITrustedIssuersRegistry(
+                IIdentityRegistry(_identityRegistry).issuersRegistry()
+            );
+            ctr = IClaimTopicsRegistry(
+                IIdentityRegistry(_identityRegistry).topicsRegistry()
+            );
+            irs = IIdentityRegistryStorage(
+                IIdentityRegistry(_identityRegistry).identityStorage()
+            );
         }
         address _tokenID = _tokenDetails.ONCHAINID;
-        if (_tokenDetails.ONCHAINID == address(0)) {
+        if (_tokenID == address(0)) {
             _tokenID = IIdFactory(_idFactory).createTokenIdentity(
                 address(_token),
                 _tokenDetails.owner,
@@ -308,8 +327,6 @@ library TREXBaseDeploymentLib {
             );
         }
         _token.setOnchainID(_tokenID);
-        _token.setIdentityRegistry(_identityRegistry);
-        _token.setCompliance(address(mc));
         mc.bindToken(address(_token));
         for (uint256 i = 0; i < (_claimDetails.claimTopics).length; i++) {
             ctr.addClaimTopic(_claimDetails.claimTopics[i]);
@@ -320,7 +337,6 @@ library TREXBaseDeploymentLib {
                 _claimDetails.issuerClaims[i]
             );
         }
-        irs.bindIdentityRegistry(_identityRegistry);
         AgentRole(_identityRegistry).addAgent(address(_token));
         for (uint256 i = 0; i < (_tokenDetails.irAgents).length; i++) {
             AgentRole(_identityRegistry).addAgent(_tokenDetails.irAgents[i]);
@@ -347,6 +363,8 @@ library TREXBaseDeploymentLib {
         (Ownable(address(tir))).transferOwnership(_tokenDetails.owner);
         (Ownable(address(ctr))).transferOwnership(_tokenDetails.owner);
         (Ownable(address(mc))).transferOwnership(_tokenDetails.owner);
+        (Ownable(address(irs))).transferOwnership(_tokenDetails.owner);
+
         emit TREXSuiteDeployed(
             address(_token),
             _identityRegistry,

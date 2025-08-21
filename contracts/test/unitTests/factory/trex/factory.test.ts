@@ -282,6 +282,7 @@ describe('TREX Factory Tests', () => {
         {} as ITREXFactory.TokenDetailsStruct
     const claimDetails: ITREXFactory.ClaimDetailsStruct =
         {} as ITREXFactory.ClaimDetailsStruct
+    let trexDeployment: any
 
     let erc3643Facet: ERC3643
     let accessControlFacet: AccessControl
@@ -322,7 +323,7 @@ describe('TREX Factory Tests', () => {
     })
 
     beforeEach(async () => {
-        const trexDeployment = await loadFixture(deployFullSuiteFixture)
+        trexDeployment = await loadFixture(deployFullSuiteFixture)
 
         factoryAts = (
             await deployContractWithLibraries(
@@ -1007,6 +1008,196 @@ describe('TREX Factory Tests', () => {
                 claimDetails.claimTopics
             )
         })
+
+        it('GIVEN an equity with IR and MC THEN security is deployed successfully', async () => {
+            const equityData = await setEquityData({
+                adminAccount: deployer.address,
+                isWhiteList: isWhitelist,
+                isControllable,
+                arePartitionsProtected,
+                clearingActive,
+                internalKycActivated,
+                isMultiPartition,
+                name,
+                symbol,
+                decimals,
+                isin,
+                votingRight,
+                informationRight,
+                liquidationRight,
+                subscriptionRight,
+                conversionRight,
+                redemptionRight,
+                putRight,
+                dividendRight,
+                currency,
+                numberOfShares,
+                nominalValue,
+                init_rbacs,
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+                compliance: trexDeployment.suite.defaultCompliance.address,
+                identityRegistry: trexDeployment.suite.identityRegistry.address,
+            })
+
+            const factoryRegulationData = await setFactoryRegulationData(
+                regulationType,
+                regulationSubType,
+                countriesControlListType,
+                listOfCountries,
+                info
+            )
+
+            // Transfer ownership before deploying
+            await trexDeployment.suite.defaultCompliance.transferOwnership(
+                factoryAts.address
+            )
+            await trexDeployment.suite.identityRegistry.transferOwnership(
+                factoryAts.address
+            )
+            await trexDeployment.suite.identityRegistryStorage.transferOwnership(
+                factoryAts.address
+            )
+            await trexDeployment.suite.claimTopicsRegistry.transferOwnership(
+                factoryAts.address
+            )
+            await trexDeployment.suite.trustedIssuersRegistry.transferOwnership(
+                factoryAts.address
+            )
+
+            const tirContract = await ethers.getContractAt(
+                'TrustedIssuersRegistry',
+                trexDeployment.suite.trustedIssuersRegistry.address
+            )
+            const trustedIssuers = await tirContract.getTrustedIssuers()
+            const ctrContract = await ethers.getContractAt(
+                'ClaimTopicsRegistry',
+                trexDeployment.suite.claimTopicsRegistry.address
+            )
+            const claimTopics = await ctrContract.getClaimTopics()
+
+            const tx = await factoryAts
+                .connect(deployer)
+                .deployTREXSuiteAtsEquity(
+                    'salt-equity',
+                    tokenDetails,
+                    claimDetails,
+                    equityData,
+                    factoryRegulationData
+                )
+
+            const receipt = await tx.wait()
+            const event = receipt.events?.find(
+                (e) => e.event === 'TREXSuiteDeployed'
+            )
+
+            expect(event).to.exist
+            const [_token, _ir, _irs, _tir, _ctr, _mc, _salt] = event!.args!
+
+            await setFacets(_token)
+
+            expect(await erc20Facet.name()).to.equal(name)
+            expect(await erc20Facet.symbol()).to.equal(symbol)
+            expect(await erc20Facet.decimals()).to.equal(decimals)
+            expect(await erc3643Facet.identityRegistry()).to.equal(
+                trexDeployment.suite.identityRegistry.address
+            )
+            expect(await erc3643Facet.compliance()).to.equal(
+                trexDeployment.suite.defaultCompliance.address
+            )
+
+            expect(
+                await accessControlFacet.hasRole(
+                    TREX_OWNER_ROLE,
+                    tokenDetails.owner
+                )
+            ).to.be.true
+            expect(
+                await accessControlFacet.hasRole(
+                    TREX_OWNER_ROLE,
+                    factoryAts.address
+                )
+            ).to.be.false
+            expect(
+                await accessControlFacet.hasRole(
+                    DEFAULT_ADMIN_ROLE,
+                    factoryAts.address
+                )
+            ).to.be.false
+
+            expect(_token).to.equal(
+                await factoryAts.tokenDeployed('salt-equity')
+            )
+            expect(_salt.hash).to.equal(
+                ethers.utils.keccak256(ethers.utils.toUtf8Bytes('salt-equity'))
+            )
+
+            expect(ethers.utils.isAddress(_ir)).to.be.true
+            expect(_ir).to.equal(trexDeployment.suite.identityRegistry.address)
+            expect(ethers.utils.isAddress(_irs)).to.be.true
+            expect(_irs).to.equal(
+                trexDeployment.suite.identityRegistryStorage.address
+            )
+            expect(ethers.utils.isAddress(_tir)).to.be.true
+            expect(_tir).to.equal(
+                trexDeployment.suite.trustedIssuersRegistry.address
+            )
+            expect(ethers.utils.isAddress(_ctr)).to.be.true
+            expect(_ctr).to.equal(
+                trexDeployment.suite.claimTopicsRegistry.address
+            )
+            expect(ethers.utils.isAddress(_mc)).to.be.true
+            expect(_mc).to.equal(trexDeployment.suite.defaultCompliance.address)
+
+            expect(await erc3643Facet.onchainID()).to.not.equal(ADDRESS_ZERO)
+            expect(await erc3643Facet.identityRegistry()).to.equal(_ir)
+            expect(await erc3643Facet.compliance()).to.equal(_mc)
+            for (const agent of tokenDetails.tokenAgents) {
+                expect(await erc3643Facet.isAgent(agent)).to.be.true
+            }
+
+            const irContract = await ethers.getContractAt(
+                'IdentityRegistry',
+                _ir
+            )
+            expect(await irContract.owner()).to.equal(tokenDetails.owner)
+            for (const agent of tokenDetails.irAgents) {
+                expect(await irContract.isAgent(agent)).to.be.true
+            }
+
+            const complianceContract = await ethers.getContractAt(
+                'ModularCompliance',
+                _mc
+            )
+            expect(await complianceContract.owner()).to.equal(
+                tokenDetails.owner
+            )
+            // // Default compliance does not include getModules and getTokenBound
+            // expect(await complianceContract.getModules()).to.deep.equal(
+            //     tokenDetails.complianceModules
+            // )
+            // expect(await complianceContract.getTokenBound()).to.deep.equal(
+            //     _token
+            // )
+
+            expect(await tirContract.owner()).to.equal(tokenDetails.owner)
+            expect(await tirContract.getTrustedIssuers()).to.deep.equal([
+                ...trustedIssuers,
+                ...claimDetails.issuers,
+            ])
+
+            expect(await ctrContract.owner()).to.equal(tokenDetails.owner)
+            expect(await ctrContract.getClaimTopics()).to.deep.equal([
+                ...claimTopics,
+                ...claimDetails.claimTopics,
+            ])
+
+            const irsContract = await ethers.getContractAt(
+                'IdentityRegistryStorage',
+                _irs
+            )
+            expect(await irsContract.owner()).to.equal(tokenDetails.owner)
+        })
     })
 
     describe('Bond tests', () => {
@@ -1515,7 +1706,7 @@ describe('TREX Factory Tests', () => {
             ).to.revertedWith('invalid compliance pattern')
         })
 
-        it('GIVEN a bond with custom values THEN security is deployed successfully', async () => {
+        it('GIVEN a bond without IR and MC THEN security is deployed successfully', async () => {
             const currentTimeInSeconds =
                 Math.floor(new Date().getTime() / 1000) + 1
             startingDate = currentTimeInSeconds + 10000
@@ -1659,6 +1850,195 @@ describe('TREX Factory Tests', () => {
             expect(await ctrContract.getClaimTopics()).to.deep.equal(
                 claimDetails.claimTopics
             )
+        })
+
+        it('GIVEN a bond with IR and MC THEN security is deployed successfully', async () => {
+            const currentTimeInSeconds =
+                Math.floor(new Date().getTime() / 1000) + 1
+            startingDate = currentTimeInSeconds + 10000
+            maturityDate = startingDate + 30
+            firstCouponDate = 0
+
+            const bondData = await setBondData({
+                adminAccount: deployer.address,
+                isWhiteList: isWhitelist,
+                isControllable,
+                arePartitionsProtected,
+                clearingActive,
+                internalKycActivated,
+                isMultiPartition,
+                name,
+                symbol,
+                decimals,
+                isin,
+                currency,
+                numberOfUnits,
+                nominalValue,
+                startingDate,
+                maturityDate,
+                couponFrequency,
+                couponRate,
+                firstCouponDate,
+                init_rbacs,
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+                compliance: trexDeployment.suite.defaultCompliance.address,
+                identityRegistry: trexDeployment.suite.identityRegistry.address,
+            })
+
+            const factoryRegulationData = await setFactoryRegulationData(
+                RegulationType.REG_S,
+                RegulationSubType.NONE,
+                countriesControlListType,
+                listOfCountries,
+                info
+            )
+
+            // Transfer ownership before deploying
+            await trexDeployment.suite.defaultCompliance.transferOwnership(
+                factoryAts.address
+            )
+            await trexDeployment.suite.identityRegistry.transferOwnership(
+                factoryAts.address
+            )
+            await trexDeployment.suite.identityRegistryStorage.transferOwnership(
+                factoryAts.address
+            )
+            await trexDeployment.suite.claimTopicsRegistry.transferOwnership(
+                factoryAts.address
+            )
+            await trexDeployment.suite.trustedIssuersRegistry.transferOwnership(
+                factoryAts.address
+            )
+
+            const tirContract = await ethers.getContractAt(
+                'TrustedIssuersRegistry',
+                trexDeployment.suite.trustedIssuersRegistry.address
+            )
+            const trustedIssuers = await tirContract.getTrustedIssuers()
+            const ctrContract = await ethers.getContractAt(
+                'ClaimTopicsRegistry',
+                trexDeployment.suite.claimTopicsRegistry.address
+            )
+            const claimTopics = await ctrContract.getClaimTopics()
+
+            const tx = await factoryAts.deployTREXSuiteAtsBond(
+                'salt-bond',
+                tokenDetails,
+                claimDetails,
+                bondData,
+                factoryRegulationData
+            )
+
+            const receipt = await tx.wait()
+            const event = receipt.events?.find(
+                (e) => e.event === 'TREXSuiteDeployed'
+            )
+
+            expect(event).to.exist
+            const [_token, _ir, _irs, _tir, _ctr, _mc, _salt] = event!.args!
+
+            await setFacets(_token)
+
+            expect(await erc20Facet.name()).to.equal(name)
+            expect(await erc20Facet.symbol()).to.equal(symbol)
+            expect(await erc20Facet.decimals()).to.equal(decimals)
+            expect(await erc3643Facet.identityRegistry()).to.equal(
+                trexDeployment.suite.identityRegistry.address
+            )
+            expect(await erc3643Facet.compliance()).to.equal(
+                trexDeployment.suite.defaultCompliance.address
+            )
+
+            expect(
+                await accessControlFacet.hasRole(
+                    TREX_OWNER_ROLE,
+                    tokenDetails.owner
+                )
+            ).to.be.true
+            expect(
+                await accessControlFacet.hasRole(
+                    TREX_OWNER_ROLE,
+                    factoryAts.address
+                )
+            ).to.be.false
+            expect(
+                await accessControlFacet.hasRole(
+                    DEFAULT_ADMIN_ROLE,
+                    factoryAts.address
+                )
+            ).to.be.false
+
+            expect(_token).to.equal(await factoryAts.tokenDeployed('salt-bond'))
+            expect(_salt.hash).to.equal(
+                ethers.utils.keccak256(ethers.utils.toUtf8Bytes('salt-bond'))
+            )
+
+            expect(ethers.utils.isAddress(_ir)).to.be.true
+            expect(_ir).to.equal(trexDeployment.suite.identityRegistry.address)
+            expect(ethers.utils.isAddress(_irs)).to.be.true
+            expect(_irs).to.equal(
+                trexDeployment.suite.identityRegistryStorage.address
+            )
+            expect(ethers.utils.isAddress(_tir)).to.be.true
+            expect(_tir).to.equal(
+                trexDeployment.suite.trustedIssuersRegistry.address
+            )
+            expect(ethers.utils.isAddress(_ctr)).to.be.true
+            expect(_ctr).to.equal(
+                trexDeployment.suite.claimTopicsRegistry.address
+            )
+            expect(ethers.utils.isAddress(_mc)).to.be.true
+            expect(_mc).to.equal(trexDeployment.suite.defaultCompliance.address)
+
+            expect(await erc3643Facet.onchainID()).to.not.equal(ADDRESS_ZERO)
+            expect(await erc3643Facet.identityRegistry()).to.equal(_ir)
+            expect(await erc3643Facet.compliance()).to.equal(_mc)
+            for (const agent of tokenDetails.tokenAgents) {
+                expect(await erc3643Facet.isAgent(agent)).to.be.true
+            }
+
+            const irContract = await ethers.getContractAt(
+                'IdentityRegistry',
+                _ir
+            )
+            expect(await irContract.owner()).to.equal(tokenDetails.owner)
+            for (const agent of tokenDetails.irAgents) {
+                expect(await irContract.isAgent(agent)).to.be.true
+            }
+
+            const complianceContract = await ethers.getContractAt(
+                'ModularCompliance',
+                _mc
+            )
+            expect(await complianceContract.owner()).to.equal(
+                tokenDetails.owner
+            )
+            // // Default compliance does not include getModules and getTokenBound
+            // expect(await complianceContract.getModules()).to.deep.equal(
+            //     tokenDetails.complianceModules
+            // )
+            // expect(await complianceContract.getTokenBound()).to.deep.equal(
+            //     _token
+            // )
+
+            expect(await tirContract.owner()).to.equal(tokenDetails.owner)
+            expect(await tirContract.getTrustedIssuers()).to.deep.equal([
+                ...trustedIssuers,
+                ...claimDetails.issuers,
+            ])
+
+            expect(await ctrContract.owner()).to.equal(tokenDetails.owner)
+            expect(await ctrContract.getClaimTopics()).to.deep.equal([
+                ...claimTopics,
+                ...claimDetails.claimTopics,
+            ])
+
+            const irsContract = await ethers.getContractAt(
+                'IdentityRegistryStorage',
+                _irs
+            )
+            expect(await irsContract.owner()).to.equal(tokenDetails.owner)
         })
     })
 })
