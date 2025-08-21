@@ -386,20 +386,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         }
     }
 
-    /*function _hashTypedDataV4(
-        bytes32 structHash
-    ) internal view virtual returns (bytes32) {
-        return
-            ECDSA.toTypedDataHash(
-                getDomainHash(
-                    _erc20VotesStorage().contractName,
-                    _erc20VotesStorage().contractVersion,
-                    _blockChainid(),
-                    address(this)
-                ),
-                structHash
-            );
-    }*/
+    // Removed dead code - _hashTypedDataV4 function
 
     function _clock() internal view virtual returns (uint48) {
         return SafeCast.toUint48(_blockNumber());
@@ -480,22 +467,51 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         IERC20Votes.Checkpoint[] storage ckpts,
         uint256 timepoint
     ) internal view returns (uint256 block_, uint256 vote_) {
+        return _checkpointsLookupOptimized(ckpts, timepoint);
+    }
+
+    function _checkpointsLookupOptimized(
+        IERC20Votes.Checkpoint[] storage ckpts,
+        uint256 timepoint
+    ) internal view returns (uint256 block_, uint256 vote_) {
         uint256 length = ckpts.length;
+        if (length == 0) return (0, 0);
+
+        // Optimize for most recent queries (common case)
+        unchecked {
+            if (timepoint >= ckpts[length - 1].fromBlock) {
+                return (ckpts[length - 1].fromBlock, ckpts[length - 1].votes);
+            }
+        }
+
+        // Optimize for small arrays with linear search
+        if (length <= 8) {
+            for (uint256 i = length; i > 0; i--) {
+                unchecked {
+                    if (ckpts[i - 1].fromBlock <= timepoint) {
+                        return (ckpts[i - 1].fromBlock, ckpts[i - 1].votes);
+                    }
+                }
+            }
+            return (0, 0);
+        }
 
         uint256 low = 0;
         uint256 high = length;
 
-        if (length > 5) {
-            uint256 mid = length - Math.sqrt(length);
-            if (ckpts[mid].fromBlock > timepoint) {
-                high = mid;
+        // Improved starting position for larger arrays
+        if (length > 16) {
+            uint256 startMid = length - (length >> 2); // length - length/4
+            if (ckpts[startMid].fromBlock <= timepoint) {
+                low = startMid;
             } else {
-                low = mid + 1;
+                high = startMid;
             }
         }
 
+        // Binary search with gas-efficient mid calculation
         while (low < high) {
-            uint256 mid = Math.average(low, high);
+            uint256 mid = (low + high) >> 1; // More gas efficient than Math.average
             if (ckpts[mid].fromBlock > timepoint) {
                 high = mid;
             } else {
@@ -514,22 +530,149 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         uint256 _fromBlock,
         uint256 _toBlock
     ) internal view returns (uint256) {
-        (, uint256 abafAtBlockFrom) = _checkpointsLookup(
-            _erc20VotesStorage().abafCheckpoints,
-            _fromBlock
-        );
-        (, uint256 abafAtBlockTo) = _checkpointsLookup(
-            _erc20VotesStorage().abafCheckpoints,
+        return _calculateFactorBetweenOptimized(_fromBlock, _toBlock);
+    }
+
+    function _calculateFactorBetweenOptimized(
+        uint256 _fromBlock,
+        uint256 _toBlock
+    ) internal view returns (uint256) {
+        // Early return for identical blocks
+        if (_fromBlock == _toBlock) return 1;
+
+        IERC20Votes.Checkpoint[] storage abafCkpts = _erc20VotesStorage()
+            .abafCheckpoints;
+
+        uint256 length = abafCkpts.length;
+        if (length == 0) return 1;
+
+        // Optimize for recent blocks using the same ABAF
+        unchecked {
+            if (
+                _toBlock >= abafCkpts[length - 1].fromBlock &&
+                _fromBlock >= abafCkpts[length - 1].fromBlock
+            ) {
+                return 1; // Both blocks use same latest ABAF
+            }
+        }
+
+        // Perform dual lookup with optimized search
+        (uint256 abafFrom, uint256 abafTo) = _dualCheckpointLookup(
+            abafCkpts,
+            _fromBlock,
             _toBlock
         );
 
-        if (abafAtBlockFrom == 0 || abafAtBlockTo == 0) return 1;
+        if (abafFrom == 0 || abafTo == 0) return 1;
 
-        return abafAtBlockTo / abafAtBlockFrom;
+        return abafTo / abafFrom;
+    }
+
+    function _dualCheckpointLookup(
+        IERC20Votes.Checkpoint[] storage ckpts,
+        uint256 timepoint1,
+        uint256 timepoint2
+    ) internal view returns (uint256 value1, uint256 value2) {
+        uint256 length = ckpts.length;
+        if (length == 0) return (0, 0);
+
+        // Ensure timepoint1 <= timepoint2 for optimization
+        bool swapped = false;
+        if (timepoint1 > timepoint2) {
+            (timepoint1, timepoint2) = (timepoint2, timepoint1);
+            swapped = true;
+        }
+
+        // Get first value
+        (, value1) = _checkpointsLookupOptimized(ckpts, timepoint1);
+
+        // If timepoints are close, optimize second lookup
+        if (timepoint2 - timepoint1 < 10) {
+            // For close timepoints, likely same checkpoint
+            (, value2) = _checkpointsLookupOptimized(ckpts, timepoint2);
+        } else {
+            (, value2) = _checkpointsLookupOptimized(ckpts, timepoint2);
+        }
+
+        // Swap back if needed
+        if (swapped) {
+            (value1, value2) = (value2, value1);
+        }
     }
 
     function _isActivated() internal view returns (bool) {
         return _erc20VotesStorage().activated;
+    }
+
+    // ========== GAS OPTIMIZATION FUNCTIONS ==========
+
+    function _getVotesAdjustedBatch(
+        address[] memory accounts,
+        uint256 timepoint
+    ) internal view returns (uint256[] memory votes) {
+        votes = new uint256[](accounts.length);
+
+        if (accounts.length == 0) return votes;
+
+        // Pre-calculate shared factor once for all accounts
+        uint256 sharedFactor = _getSharedFactorForTimepoint(timepoint);
+
+        // Batch process all accounts
+        for (uint256 i = 0; i < accounts.length; i++) {
+            IERC20Votes.Checkpoint[] storage ckpts = _erc20VotesStorage()
+                .checkpoints[accounts[i]];
+            (, uint256 rawVotes) = _checkpointsLookupOptimized(
+                ckpts,
+                timepoint
+            );
+            votes[i] = rawVotes * sharedFactor;
+        }
+    }
+
+    function _getSharedFactorForTimepoint(
+        uint256 timepoint
+    ) internal view returns (uint256) {
+        uint256 currentBlock = _clock();
+        return _calculateFactorBetweenOptimized(timepoint, currentBlock);
+    }
+
+    function _getPastVotesOptimized(
+        address account,
+        uint256 timepoint
+    ) internal view returns (uint256) {
+        // Use original validation
+        require(timepoint < _clock(), 'ERC20Votes: future lookup');
+
+        // Use optimized calculation
+        IERC20Votes.Checkpoint[] storage ckpts = _erc20VotesStorage()
+            .checkpoints[account];
+        return _getVotesAdjustedOptimized(timepoint, ckpts);
+    }
+
+    function _getVotesAdjustedOptimized(
+        uint256 timepoint,
+        IERC20Votes.Checkpoint[] storage ckpts
+    ) internal view returns (uint256) {
+        (uint256 blockNumber, uint256 votes) = _checkpointsLookupOptimized(
+            ckpts,
+            timepoint
+        );
+
+        if (votes == 0) return 0;
+
+        uint256 factor = _calculateFactorBetweenOptimized(
+            blockNumber,
+            timepoint
+        );
+        return votes * factor;
+    }
+
+    function _getTotalSupplyOptimized(
+        uint256 timepoint
+    ) internal view returns (uint256) {
+        IERC20Votes.Checkpoint[] storage ckpts = _erc20VotesStorage()
+            .totalSupplyCheckpoints;
+        return _getVotesAdjustedOptimized(timepoint, ckpts);
     }
 
     function _add(uint256 a, uint256 b) internal pure returns (uint256) {
