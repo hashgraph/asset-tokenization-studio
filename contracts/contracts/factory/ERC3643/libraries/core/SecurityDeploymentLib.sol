@@ -211,10 +211,12 @@ import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
 import {
     IFactory_,
     FactoryRegulationData,
-    IResolverProxy_
+    IResolverProxy
 } from '../../interfaces/IFactory.sol';
-import {_TREX_OWNER_ROLE} from '../../interfaces/roles.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../../interfaces/IAccessControl.sol';
+import {
+    _TREX_OWNER_ROLE,
+    _DEFAULT_ADMIN_ROLE
+} from '../../interfaces/roles.sol';
 
 library SecurityDeploymentLib {
     function deployEquity(
@@ -256,9 +258,9 @@ library SecurityDeploymentLib {
      * @dev Checks if tRexOwner was already provided in the RBACs, if not, it is added
      */
     function _prepareRbacs(
-        IResolverProxy_.Rbac[] memory _rbacs,
+        IResolverProxy.Rbac[] memory _rbacs,
         address _tRexOwner
-    ) private view returns (IResolverProxy_.Rbac[] memory) {
+    ) private view returns (IResolverProxy.Rbac[] memory) {
         bool ownerMatch;
         uint256 length = _rbacs.length;
 
@@ -285,7 +287,7 @@ library SecurityDeploymentLib {
         }
 
         // Resize array
-        IResolverProxy_.Rbac[] memory newRbacs = new IResolverProxy_.Rbac[](
+        IResolverProxy.Rbac[] memory newRbacs = new IResolverProxy.Rbac[](
             length + 2
         );
 
@@ -306,7 +308,7 @@ library SecurityDeploymentLib {
             membersArr[0] = address(this);
         }
 
-        newRbacs[length] = IResolverProxy_.Rbac({
+        newRbacs[length] = IResolverProxy.Rbac({
             role: _TREX_OWNER_ROLE,
             members: membersArr
         });
@@ -314,7 +316,7 @@ library SecurityDeploymentLib {
         membersArr = new address[](1);
         membersArr[0] = address(this);
 
-        newRbacs[length + 1] = IResolverProxy_.Rbac({
+        newRbacs[length + 1] = IResolverProxy.Rbac({
             role: _DEFAULT_ADMIN_ROLE,
             members: membersArr
         });

@@ -203,13 +203,16 @@
 
 */
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IResolverProxy_} from './IResolverProxy.sol';
-import {IBusinessLogicResolver_} from './IBusinessLogicResolver.sol';
-import {IBond_} from './IBond.sol';
-import {IEquity_} from './IEquity.sol';
+import {IResolverProxy_ as IResolverProxy} from './IResolverProxy.sol';
+import {
+    IBusinessLogicResolver_ as IBusinessLogicResolver
+} from './IBusinessLogicResolver.sol';
+import {IERC20_ as IERC20} from './IERC20.sol';
+import {IBond_ as IBond} from './IBond.sol';
+import {IEquity_ as IEquity} from './IEquity.sol';
 import {
     FactoryRegulationData,
     RegulationData,
@@ -217,18 +220,7 @@ import {
     RegulationSubType
 } from './regulation.sol';
 
-/// @dev IFactory with ERC20MetadataInfo struct
-/// @dev Avoids overriding the whole common inhertance chain to a floating pragma
-
-// solhint-disable contract-name-camelcase
 interface IFactory_ {
-    struct ERC20MetadataInfo {
-        string name;
-        string symbol;
-        string isin;
-        uint8 decimals;
-    }
-
     enum SecurityType {
         Bond,
         Equity
@@ -243,13 +235,13 @@ interface IFactory_ {
     struct SecurityData {
         bool arePartitionsProtected;
         bool isMultiPartition;
-        IBusinessLogicResolver_ resolver;
+        IBusinessLogicResolver resolver;
         ResolverProxyConfiguration resolverProxyConfiguration;
-        IResolverProxy_.Rbac[] rbacs;
+        IResolverProxy.Rbac[] rbacs;
         bool isControllable;
         bool isWhiteList;
         uint256 maxSupply;
-        ERC20MetadataInfo erc20MetadataInfo;
+        IERC20.ERC20MetadataInfo erc20MetadataInfo;
         bool clearingActive;
         bool internalKycActivated;
         address[] externalPauses;
@@ -261,13 +253,13 @@ interface IFactory_ {
 
     struct EquityData {
         SecurityData security;
-        IEquity_.EquityDetailsData equityDetails;
+        IEquity.EquityDetailsData equityDetails;
     }
 
     struct BondData {
         SecurityData security;
-        IBond_.BondDetailsData bondDetails;
-        IBond_.CouponDetailsData couponDetails;
+        IBond.BondDetailsData bondDetails;
+        IBond.CouponDetailsData couponDetails;
     }
 
     event EquityDeployed(
@@ -284,7 +276,7 @@ interface IFactory_ {
         FactoryRegulationData regulationData
     );
 
-    error EmptyResolver(IBusinessLogicResolver_ resolver);
+    error EmptyResolver(IBusinessLogicResolver resolver);
     error NoInitialAdmins();
 
     function deployEquity(

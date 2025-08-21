@@ -203,10 +203,10 @@
 
 */
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
 
-// solhint-disable contract-name-camelcase
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
 interface IResolverProxy_ {
     struct Rbac {
         bytes32 role;

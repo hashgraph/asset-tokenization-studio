@@ -203,10 +203,9 @@
 
 */
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-// solhint-disable contract-name-camelcase
 interface IEquity_ {
     enum DividendType {
         NONE,
@@ -226,4 +225,119 @@ interface IEquity_ {
         bytes3 currency;
         uint256 nominalValue;
     }
+
+    struct Voting {
+        uint256 recordDate;
+        bytes data;
+    }
+
+    struct RegisteredVoting {
+        Voting voting;
+        uint256 snapshotId;
+    }
+
+    struct Dividend {
+        uint256 recordDate;
+        uint256 executionDate;
+        uint256 amount;
+    }
+
+    struct RegisteredDividend {
+        Dividend dividend;
+        uint256 snapshotId;
+    }
+
+    struct DividendFor {
+        uint256 tokenBalance;
+        uint256 amount;
+        uint256 recordDate;
+        uint256 executionDate;
+        uint8 decimals;
+        bool recordDateReached;
+    }
+
+    struct VotingFor {
+        uint256 tokenBalance;
+        uint256 recordDate;
+        bytes data;
+        uint8 decimals;
+        bool recordDateReached;
+    }
+
+    struct ScheduledBalanceAdjustment {
+        uint256 executionDate;
+        uint256 factor;
+        uint8 decimals;
+    }
+
+    function setDividends(
+        Dividend calldata _newDividend
+    ) external returns (bool success_, uint256 dividendID_);
+
+    function setVoting(
+        Voting calldata _newVoting
+    ) external returns (bool success_, uint256 voteID_);
+
+    function setScheduledBalanceAdjustment(
+        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    ) external returns (bool success_, uint256 balanceAdjustmentID_);
+
+    function getEquityDetails()
+        external
+        view
+        returns (EquityDetailsData memory equityDetailsData_);
+
+    function getDividends(
+        uint256 _dividendID
+    ) external view returns (RegisteredDividend memory registeredDividend_);
+
+    function getDividendsFor(
+        uint256 _dividendID,
+        address _account
+    ) external view returns (DividendFor memory dividendFor_);
+
+    function getDividendsCount() external view returns (uint256 dividendCount_);
+
+    function getDividendHolders(
+        uint256 _dividendID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalDividendHolders(
+        uint256 _dividendID
+    ) external view returns (uint256);
+
+    function getVoting(
+        uint256 _voteID
+    ) external view returns (RegisteredVoting memory registeredVoting_);
+
+    function getVotingFor(
+        uint256 _voteID,
+        address _account
+    ) external view returns (VotingFor memory votingFor_);
+
+    function getVotingCount() external view returns (uint256 votingCount_);
+
+    function getVotingHolders(
+        uint256 _voteID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalVotingHolders(
+        uint256 _voteID
+    ) external view returns (uint256);
+
+    function getScheduledBalanceAdjustment(
+        uint256 _balanceAdjustmentID
+    )
+        external
+        view
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
+
+    function getScheduledBalanceAdjustmentCount()
+        external
+        view
+        returns (uint256 balanceAdjustmentCount_);
 }

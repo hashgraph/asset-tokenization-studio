@@ -203,10 +203,9 @@
 
 */
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-// solhint-disable contract-name-camelcase
 interface IBond_ {
     struct BondDetailsData {
         bytes3 currency;

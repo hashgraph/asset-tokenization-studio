@@ -204,246 +204,130 @@
 */
 
 // SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity ^0.8.17;
 
-uint256 constant _REGS_DEAL_SIZE = 0;
-AccreditedInvestors constant _REGS_ACCREDITED_INVESTORS = AccreditedInvestors
-    .ACCREDITATION_REQUIRED;
-uint256 constant _REGS_MAX_NON_ACCREDITED_INVESTORS = 0;
-ManualInvestorVerification constant _REGS_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
-    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
-InternationalInvestors constant _REGS_INTERNATIONAL_INVESTORS = InternationalInvestors
-    .ALLOWED;
-ResaleHoldPeriod constant _REGS_RESALE_HOLD_PERIOD = ResaleHoldPeriod
-    .NOT_APPLICABLE;
+import {IFactory_ as IFactory} from './IFactory.sol';
 
-uint256 constant _REGD_506_B_DEAL_SIZE = 0;
-AccreditedInvestors constant _REGD_506_B_ACCREDITED_INVESTORS = AccreditedInvestors
-    .ACCREDITATION_REQUIRED;
-uint256 constant _REGD_506_B_MAX_NON_ACCREDITED_INVESTORS = 35;
-ManualInvestorVerification constant _REGD_506_B_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
-    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
-InternationalInvestors constant _REGD_506_B_INTERNATIONAL_INVESTORS = InternationalInvestors
-    .NOT_ALLOWED;
-ResaleHoldPeriod constant _REGD_506_B_RESALE_HOLD_PERIOD = ResaleHoldPeriod
-    .APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
-
-uint256 constant _REGD_506_C_DEAL_SIZE = 0;
-AccreditedInvestors constant _REGD_506_C_ACCREDITED_INVESTORS = AccreditedInvestors
-    .ACCREDITATION_REQUIRED;
-uint256 constant _REGD_506_C_MAX_NON_ACCREDITED_INVESTORS = 0;
-ManualInvestorVerification constant _REGD_506_C_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
-    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
-InternationalInvestors constant _REGD_506_C_INTERNATIONAL_INVESTORS = InternationalInvestors
-    .NOT_ALLOWED;
-ResaleHoldPeriod constant _REGD_506_C_RESALE_HOLD_PERIOD = ResaleHoldPeriod
-    .APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
-
-enum RegulationType {
-    NONE,
-    REG_S,
-    REG_D
-}
-
-enum RegulationSubType {
-    NONE,
-    REG_D_506_B,
-    REG_D_506_C
-}
-
-enum AccreditedInvestors {
-    NONE,
-    ACCREDITATION_REQUIRED
-}
-
-enum ManualInvestorVerification {
-    NOTHING_TO_VERIFY,
-    VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
-}
-
-enum InternationalInvestors {
-    NOT_ALLOWED,
-    ALLOWED
-}
-
-enum ResaleHoldPeriod {
-    NOT_APPLICABLE,
-    APPLICABLE_FROM_6_MOTHS_TO_1_YEAR
-}
-
-struct AdditionalSecurityData {
-    bool countriesControlListType;
-    string listOfCountries;
-    string info;
-}
-
-struct FactoryRegulationData {
-    RegulationType regulationType;
-    RegulationSubType regulationSubType;
-    AdditionalSecurityData additionalSecurityData;
-}
-
-struct RegulationData {
-    RegulationType regulationType;
-    RegulationSubType regulationSubType;
-    uint256 dealSize;
-    AccreditedInvestors accreditedInvestors;
-    uint256 maxNonAccreditedInvestors;
-    ManualInvestorVerification manualInvestorVerification;
-    InternationalInvestors internationalInvestors;
-    ResaleHoldPeriod resaleHoldPeriod;
-}
-
-error RegulationTypeAndSubTypeForbidden(
-    RegulationType regulationType,
-    RegulationSubType regulationSubType
-);
-
-function buildRegulationData(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure returns (RegulationData memory regulationData_) {
-    regulationData_ = RegulationData({
-        regulationType: _regulationType,
-        regulationSubType: _regulationSubType,
-        dealSize: buildDealSize(_regulationType, _regulationSubType),
-        accreditedInvestors: buildAccreditedInvestors(
-            _regulationType,
-            _regulationSubType
-        ),
-        maxNonAccreditedInvestors: buildMaxNonAccreditedInvestors(
-            _regulationType,
-            _regulationSubType
-        ),
-        manualInvestorVerification: buildManualInvestorVerification(
-            _regulationType,
-            _regulationSubType
-        ),
-        internationalInvestors: buildInternationalInvestors(
-            _regulationType,
-            _regulationSubType
-        ),
-        resaleHoldPeriod: buildResaleHoldPeriod(
-            _regulationType,
-            _regulationSubType
-        )
-    });
-}
-
-function buildDealSize(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure returns (uint256 dealSize_) {
-    if (_regulationType == RegulationType.REG_S) {
-        return _REGS_DEAL_SIZE;
+interface IERC20_ {
+    struct ERC20MetadataInfo {
+        string name;
+        string symbol;
+        string isin;
+        uint8 decimals;
     }
-    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
-        return _REGD_506_B_DEAL_SIZE;
-    }
-    dealSize_ = _REGD_506_C_DEAL_SIZE;
-}
 
-function buildAccreditedInvestors(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure returns (AccreditedInvestors accreditedInvestors_) {
-    if (_regulationType == RegulationType.REG_S) {
-        return _REGS_ACCREDITED_INVESTORS;
+    struct ERC20Metadata {
+        ERC20MetadataInfo info;
+        IFactory.SecurityType securityType;
     }
-    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
-        return _REGD_506_B_ACCREDITED_INVESTORS;
-    }
-    accreditedInvestors_ = _REGD_506_C_ACCREDITED_INVESTORS;
-}
 
-function buildMaxNonAccreditedInvestors(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure returns (uint256 maxNonAccreditedInvestors_) {
-    if (_regulationType == RegulationType.REG_S) {
-        return _REGS_MAX_NON_ACCREDITED_INVESTORS;
-    }
-    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
-        return _REGD_506_B_MAX_NON_ACCREDITED_INVESTORS;
-    }
-    maxNonAccreditedInvestors_ = _REGD_506_C_MAX_NON_ACCREDITED_INVESTORS;
-}
+    // Initialization function
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC20(ERC20Metadata calldata erc1594Metadata) external;
 
-function buildManualInvestorVerification(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure returns (ManualInvestorVerification manualInvestorVerification_) {
-    if (_regulationType == RegulationType.REG_S) {
-        return _REGS_MANUAL_INVESTOR_VERIFICATION;
-    }
-    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
-        return _REGD_506_B_MANUAL_INVESTOR_VERIFICATION;
-    }
-    manualInvestorVerification_ = _REGD_506_C_MANUAL_INVESTOR_VERIFICATION;
-}
+    /**
+     * @dev Moves `amount` tokens from the caller's account to `to`.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transfer(address to, uint256 amount) external returns (bool);
 
-function buildInternationalInvestors(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure returns (InternationalInvestors internationalInvestors_) {
-    if (_regulationType == RegulationType.REG_S) {
-        return _REGS_INTERNATIONAL_INVESTORS;
-    }
-    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
-        return _REGD_506_B_INTERNATIONAL_INVESTORS;
-    }
-    internationalInvestors_ = _REGD_506_C_INTERNATIONAL_INVESTORS;
-}
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+     * that someone may use both the old and the new allowance by unfortunate
+     * transaction ordering. One possible solution to mitigate this race
+     * condition is to first reduce the spender's allowance to 0 and set the
+     * desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     *
+     * Emits an {Approval} event.
+     */
+    function approve(address spender, uint256 amount) external returns (bool);
 
-function buildResaleHoldPeriod(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure returns (ResaleHoldPeriod resaleHoldPeriod_) {
-    if (_regulationType == RegulationType.REG_S) {
-        return _REGS_RESALE_HOLD_PERIOD;
-    }
-    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
-        return _REGD_506_B_RESALE_HOLD_PERIOD;
-    }
-    resaleHoldPeriod_ = _REGD_506_C_RESALE_HOLD_PERIOD;
-}
+    /**
+     * @dev Moves `amount` tokens from `from` to `to` using the
+     * allowance mechanism. `amount` is then deducted from the caller's
+     * allowance.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool);
 
-function checkRegulationTypeAndSubType(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure {
-    if (isValidTypeAndSubType(_regulationType, _regulationSubType)) {
-        return;
-    }
-    revert RegulationTypeAndSubTypeForbidden(
-        _regulationType,
-        _regulationSubType
-    );
-}
+    /**
+     * @dev Atomically increases the allowance granted to `spender` by the caller.
+     *
+     * This is an alternative to {approve} that can be used as a mitigation for
+     * problems described in {IERC20-approve}.
+     *
+     * Emits an {Approval} event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     */
+    function increaseAllowance(
+        address spender,
+        uint256 addedValue
+    ) external returns (bool);
 
-function isValidTypeAndSubType(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure returns (bool isValid_) {
-    isValid_ =
-        isValidTypeAndSubTypeForRegS(_regulationType, _regulationSubType) ||
-        isValidTypeAndSubTypeForRegD(_regulationType, _regulationSubType);
-}
+    /**
+     * @dev Atomically decreases the allowance granted to `spender` by the caller.
+     *
+     * This is an alternative to {approve} that can be used as a mitigation for
+     * problems described in {IERC20-approve}.
+     *
+     * Emits an {Approval} event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     * - `spender` must have allowance for the caller of at least
+     * `subtractedValue`.
+     */
+    function decreaseAllowance(
+        address spender,
+        uint256 subtractedValue
+    ) external returns (bool);
 
-function isValidTypeAndSubTypeForRegS(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure returns (bool isValid_) {
-    isValid_ =
-        _regulationType == RegulationType.REG_S &&
-        _regulationSubType == RegulationSubType.NONE;
-}
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
+    function allowance(
+        address owner,
+        address spender
+    ) external view returns (uint256);
 
-function isValidTypeAndSubTypeForRegD(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure returns (bool isValid_) {
-    isValid_ =
-        _regulationType == RegulationType.REG_D &&
-        _regulationSubType != RegulationSubType.NONE;
+    function decimalsAdjusted() external view returns (uint8);
+
+    function decimalsAdjustedAt(
+        uint256 _timestamp
+    ) external view returns (uint8);
+
+    function name() external view returns (string memory);
+
+    function symbol() external view returns (string memory);
+
+    function decimals() external view returns (uint8);
+
+    function decimalsAt(uint256 _timestamp) external view returns (uint8);
+
+    function getERC20Metadata() external view returns (ERC20Metadata memory);
 }

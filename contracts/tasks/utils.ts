@@ -216,9 +216,6 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { createEcdsaCredential, EthrDID } from '@terminal3/ecdsa_vc'
 import { DID, type VerificationOptions } from '@terminal3/vc_core'
-import fs from 'fs'
-import { sync as globSync } from 'glob'
-import { TASK_COMPILE } from 'hardhat/builtin-tasks/task-names'
 
 subtask(
     'getSigner',
@@ -345,33 +342,3 @@ task(
         console.error(error)
     }
 })
-
-task(
-    TASK_COMPILE,
-    "Replace 'interface' with 'interfaces' in TypeChain generated files to avoid compilation errors",
-    async function (taskArguments, hre, runSuper) {
-        await runSuper(taskArguments)
-        const PATTERN = `${hre.config.typechain.outDir}/**/*.ts`
-        const files = globSync(PATTERN, { nodir: true })
-        files.forEach((file) => {
-            let text = fs.readFileSync(file, 'utf8')
-            const orig = text
-            text = text.replace(
-                /\b(import\s+type\s+\*\s+as\s+)interface(\s+from\s+['"]\.\/interface['"])/g,
-                '$1interfaces$2'
-            )
-            text = text.replace(
-                /\b(export\s+type\s+\{\s*)interface(\s*\})/g,
-                '$1interfaces$2'
-            )
-            text = text.replace(
-                /\b(export\s+\*\s+as\s+)interface(\s+from\s+['"]\.\/interface['"])/g,
-                '$1interfaces$2'
-            )
-            if (text !== orig) {
-                fs.writeFileSync(file, text, 'utf8')
-                console.log(`Patched ${file}`)
-            }
-        })
-    }
-)

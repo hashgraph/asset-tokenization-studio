@@ -203,8 +203,8 @@
 
 */
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 // solhint-disable max-line-length
 

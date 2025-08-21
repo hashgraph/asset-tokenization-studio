@@ -207,13 +207,13 @@ pragma solidity ^0.8.17;
 
 // solhint-disable no-global-import
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import {
-    IAccessControl_,
-    _DEFAULT_ADMIN_ROLE
-} from '../../interfaces/IAccessControl.sol';
+import {IAccessControl_} from '../../interfaces/IAccessControl.sol';
 import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
 import {TREXFactoryAts} from '../../TREXFactory.sol';
-import {_TREX_OWNER_ROLE} from '../../interfaces/roles.sol';
+import {
+    _TREX_OWNER_ROLE,
+    _DEFAULT_ADMIN_ROLE
+} from '../../interfaces/roles.sol';
 
 // solhint-disable custom-errors
 library TREXBaseDeploymentLib {

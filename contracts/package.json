@@ -20,7 +20,7 @@
     "scripts": {
         "compile": "npx hardhat compile",
         "compile:traces": "npx hardhat --show-stack-traces compile",
-        "compile:force": "npx hardhat compile --force && npm run build",
+        "compile:force": "npx hardhat compile --force",
         "typechain": "npx hardhat typechain",
         "clean": "npm run clean:build && npm run clean:node_modules",
         "clean:cache": "npx hardhat clean",

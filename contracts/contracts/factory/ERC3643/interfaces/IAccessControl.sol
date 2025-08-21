@@ -206,9 +206,6 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
 
-bytes32 constant _DEFAULT_ADMIN_ROLE = 0x00;
-
-// solhint-disable contract-name-camelcase
 interface IAccessControl_ {
     /**
      * @dev Emitted when a role is granted to an account
