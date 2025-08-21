@@ -282,6 +282,7 @@ describe('TREX Factory Tests', () => {
         {} as ITREXFactory.TokenDetailsStruct
     const claimDetails: ITREXFactory.ClaimDetailsStruct =
         {} as ITREXFactory.ClaimDetailsStruct
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let trexDeployment: any
 
     let erc3643Facet: ERC3643
