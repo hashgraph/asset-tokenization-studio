@@ -203,31 +203,88 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable max-line-length
+import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {
+    _BENEFICIARIES_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    IBeneficiaries
+} from '../../layer_2/interfaces/beneficiaries/IBeneficiaries.sol';
+import {LibCommon} from '../common/libraries/LibCommon.sol';
 
-// keccak256('security.token.standard.equity.resolverKey');
-bytes32 constant _EQUITY_RESOLVER_KEY = 0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810;
+abstract contract BeneficiariesStorageWrapper is PauseStorageWrapper {
+    using EnumerableSet for EnumerableSet.AddressSet;
+    using LibCommon for EnumerableSet.AddressSet;
 
-// keccak256('security.token.standard.bond.resolverKey');
-bytes32 constant _BOND_RESOLVER_KEY = 0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef;
+    struct BeneficiariesStorage {
+        EnumerableSet.AddressSet beneficiaries;
+        mapping(address => bytes) beneficiaryData;
+    }
 
-// keccak256('security.token.standard.bond.read.resolverKey');
-bytes32 constant _BOND_READ_RESOLVER_KEY = 0xe7ca0b805514da05524faf33d2d9d9432bf1dfa53096073a7267041cfdfb6d68;
+    function _addBeneficiary(
+        address _beneficiary,
+        bytes calldata _data
+    ) internal {
+        BeneficiariesStorage
+            storage beneficiariesStorage = _beneficiariesStorage();
 
-// keccak256('security.token.standard.scheduled.snapshots.resolverKey');
-bytes32 constant _SCHEDULED_SNAPSHOTS_RESOLVER_KEY = 0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793;
+        if (!beneficiariesStorage.beneficiaries.add(_beneficiary)) {
+            revert IBeneficiaries.BeneficiaryAlreadyExists(_beneficiary);
+        }
 
-// keccak256('security.token.standard.scheduled.balanceAdjustments.resolverKey');
-bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0;
+        beneficiariesStorage.beneficiaryData[_beneficiary] = _data;
+    }
 
-// keccak256('security.token.standard.scheduled.tasks.resolverKey');
-bytes32 constant _SCHEDULED_TASKS_RESOLVER_KEY = 0xa4934195ab83f1497ce5fc99b68d0f41694716bcfba5f232aa6c8e0d4d504f08;
+    function _removeBeneficiary(address _beneficiary) internal {
+        BeneficiariesStorage
+            storage beneficiariesStorage = _beneficiariesStorage();
 
-// keccak256('security.token.standard.balanceAdjustments.resolverKey');
-bytes32 constant _BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8;
+        if (!beneficiariesStorage.beneficiaries.remove(_beneficiary)) {
+            revert IBeneficiaries.BeneficiaryNotFound(_beneficiary);
+        }
 
-// keccak256('security.token.standard.beneficiaries.resolverKey');
-bytes32 constant _BENEFICIARIES_RESOLVER_KEY = 0x87f4b676bf89cd24a01a78fd8e7fb2102c2f6d034be73d16402f7297e0ae625b;
+        delete beneficiariesStorage.beneficiaryData[_beneficiary];
+    }
+
+    function _isBeneficiary(address _beneficiary) internal view returns (bool) {
+        return _beneficiariesStorage().beneficiaries.contains(_beneficiary);
+    }
+
+    function _getBeneficiaryData(
+        address _beneficiary
+    ) internal view returns (bytes memory) {
+        return _beneficiariesStorage().beneficiaryData[_beneficiary];
+    }
+
+    function _getTotalBeneficiaries() internal view returns (uint256) {
+        return _beneficiariesStorage().beneficiaries.length();
+    }
+
+    function _getBeneficiaries(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory beneficiaries_) {
+        beneficiaries_ = _beneficiariesStorage().beneficiaries.getFromSet(
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function _beneficiariesStorage()
+        internal
+        pure
+        returns (BeneficiariesStorage storage beneficiariesStorage_)
+    {
+        bytes32 position = _BENEFICIARIES_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            beneficiariesStorage_.slot := position
+        }
+    }
+}
