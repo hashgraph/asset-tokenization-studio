@@ -144,6 +144,7 @@ functions.txt
 # Hardhat files
 artifacts
 cache
+typechain-types
 
 # Transpiled files
 build
