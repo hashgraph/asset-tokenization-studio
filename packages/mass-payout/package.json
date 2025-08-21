@@ -1,0 +1,14 @@
+{
+  "name": "@hashgraph/mass-payout",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mass payout functionality - placeholder workspace",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Mass payout build - placeholder'",
+    "test": "echo 'Mass payout tests - placeholder'",
+    "dev": "echo 'Mass payout dev - placeholder'"
+  },
+  "keywords": ["hedera", "mass-payout", "placeholder"],
+  "license": "Apache-2.0"
+}

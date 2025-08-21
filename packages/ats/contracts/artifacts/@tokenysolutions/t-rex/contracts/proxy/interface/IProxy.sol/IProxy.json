@@ -1,0 +1,50 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IProxy",
+  "sourceName": "@tokenysolutions/t-rex/contracts/proxy/interface/IProxy.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_implementationAuthority",
+          "type": "address"
+        }
+      ],
+      "name": "ImplementationAuthoritySet",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "getImplementationAuthority",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_newImplementationAuthority",
+          "type": "address"
+        }
+      ],
+      "name": "setImplementationAuthority",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

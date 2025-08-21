@@ -1,0 +1,11 @@
+import type * as authority from "./authority";
+export type { authority };
+import type * as interfaces from "./interface";
+export type { interfaces };
+export type { AbstractProxy } from "./AbstractProxy";
+export type { ClaimTopicsRegistryProxy } from "./ClaimTopicsRegistryProxy";
+export type { IdentityRegistryProxy } from "./IdentityRegistryProxy";
+export type { IdentityRegistryStorageProxy } from "./IdentityRegistryStorageProxy";
+export type { ModularComplianceProxy } from "./ModularComplianceProxy";
+export type { TokenProxy } from "./TokenProxy";
+export type { TrustedIssuersRegistryProxy } from "./TrustedIssuersRegistryProxy";

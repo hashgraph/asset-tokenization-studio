@@ -1,0 +1,181 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IClearingRead",
+  "sourceName": "contracts/layer_1/interfaces/clearing/IClearingRead.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "ClearingIsActivated",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ClearingIsDisabled",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ExpirationDateNotReached",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ExpirationDateReached",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WrongClearingId",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_tokenHolder",
+          "type": "address"
+        }
+      ],
+      "name": "getClearedAmountFor",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount_",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_partition",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_tokenHolder",
+          "type": "address"
+        }
+      ],
+      "name": "getClearedAmountForByPartition",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount_",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_partition",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_tokenHolder",
+          "type": "address"
+        },
+        {
+          "internalType": "enum IClearing.ClearingOperationType",
+          "name": "_clearingOperationType",
+          "type": "uint8"
+        }
+      ],
+      "name": "getClearingCountForByPartition",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "clearingCount_",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_partition",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_tokenHolder",
+          "type": "address"
+        },
+        {
+          "internalType": "enum IClearing.ClearingOperationType",
+          "name": "_clearingOperationType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "clearingId_",
+          "type": "uint256"
+        }
+      ],
+      "name": "getClearingThirdParty",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "thirdParty_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_partition",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_tokenHolder",
+          "type": "address"
+        },
+        {
+          "internalType": "enum IClearing.ClearingOperationType",
+          "name": "_clearingOperationType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_pageIndex",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_pageLength",
+          "type": "uint256"
+        }
+      ],
+      "name": "getClearingsIdForByPartition",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "clearingsId_",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

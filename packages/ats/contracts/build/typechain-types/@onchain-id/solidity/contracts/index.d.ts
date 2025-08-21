@@ -1,0 +1,8 @@
+import type * as factory from "./factory";
+export type { factory };
+import type * as interfaces from "./interface";
+export type { interfaces };
+import type * as version from "./version";
+export type { version };
+export type { ClaimIssuer } from "./ClaimIssuer";
+export type { Identity } from "./Identity";

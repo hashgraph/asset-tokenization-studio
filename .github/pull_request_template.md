@@ -15,11 +15,11 @@ Fixes #(issue)
 
 ## Type of change
 
--   [ ] Bug fix 🐞
--   [ ] New feature ✨
--   [ ] Breaking change 💥
--   [ ] Documentation update 📖
--   [ ] Refactor 🔧
+- [ ] Bug fix 🐞
+- [ ] New feature ✨
+- [ ] Breaking change 💥
+- [ ] Documentation update 📖
+- [ ] Refactor 🔧
 
 ## Testing
 
@@ -42,15 +42,15 @@ For example:
 
 **Node version**:
 
--   [ ] 20
--   [ ] 22
--   [ ] 24
+- [ ] 20
+- [ ] 22
+- [ ] 24
 
 ## Checklist
 
--   [ ] Style Guidelines followed ✅
--   [ ] Documentation Updated 📚
--   [ ] **Linters** - No New Warnings ⚠️
--   [ ] Local Tests Pass ✅
--   [ ] Effective Tests Added ✔️
--   [ ] No reduction of **Coverage** ✅
+- [ ] Style Guidelines followed ✅
+- [ ] Documentation Updated 📚
+- [ ] **Linters** - No New Warnings ⚠️
+- [ ] Local Tests Pass ✅
+- [ ] Effective Tests Added ✔️
+- [ ] No reduction of **Coverage** ✅

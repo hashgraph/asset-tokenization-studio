@@ -1,0 +1,230 @@
+import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
+import type { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "../../../../../common";
+export interface IIdentityRegistryStorageInterface extends utils.Interface {
+    functions: {
+        "addIdentityToStorage(address,address,uint16)": FunctionFragment;
+        "bindIdentityRegistry(address)": FunctionFragment;
+        "linkedIdentityRegistries()": FunctionFragment;
+        "modifyStoredIdentity(address,address)": FunctionFragment;
+        "modifyStoredInvestorCountry(address,uint16)": FunctionFragment;
+        "removeIdentityFromStorage(address)": FunctionFragment;
+        "storedIdentity(address)": FunctionFragment;
+        "storedInvestorCountry(address)": FunctionFragment;
+        "unbindIdentityRegistry(address)": FunctionFragment;
+    };
+    getFunction(nameOrSignatureOrTopic: "addIdentityToStorage" | "bindIdentityRegistry" | "linkedIdentityRegistries" | "modifyStoredIdentity" | "modifyStoredInvestorCountry" | "removeIdentityFromStorage" | "storedIdentity" | "storedInvestorCountry" | "unbindIdentityRegistry"): FunctionFragment;
+    encodeFunctionData(functionFragment: "addIdentityToStorage", values: [string, string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: "bindIdentityRegistry", values: [string]): string;
+    encodeFunctionData(functionFragment: "linkedIdentityRegistries", values?: undefined): string;
+    encodeFunctionData(functionFragment: "modifyStoredIdentity", values: [string, string]): string;
+    encodeFunctionData(functionFragment: "modifyStoredInvestorCountry", values: [string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: "removeIdentityFromStorage", values: [string]): string;
+    encodeFunctionData(functionFragment: "storedIdentity", values: [string]): string;
+    encodeFunctionData(functionFragment: "storedInvestorCountry", values: [string]): string;
+    encodeFunctionData(functionFragment: "unbindIdentityRegistry", values: [string]): string;
+    decodeFunctionResult(functionFragment: "addIdentityToStorage", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "bindIdentityRegistry", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "linkedIdentityRegistries", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "modifyStoredIdentity", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "modifyStoredInvestorCountry", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "removeIdentityFromStorage", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "storedIdentity", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "storedInvestorCountry", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "unbindIdentityRegistry", data: BytesLike): Result;
+    events: {
+        "CountryModified(address,uint16)": EventFragment;
+        "IdentityModified(address,address)": EventFragment;
+        "IdentityRegistryBound(address)": EventFragment;
+        "IdentityRegistryUnbound(address)": EventFragment;
+        "IdentityStored(address,address)": EventFragment;
+        "IdentityUnstored(address,address)": EventFragment;
+    };
+    getEvent(nameOrSignatureOrTopic: "CountryModified"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "IdentityModified"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "IdentityRegistryBound"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "IdentityRegistryUnbound"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "IdentityStored"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "IdentityUnstored"): EventFragment;
+}
+export interface CountryModifiedEventObject {
+    investorAddress: string;
+    country: number;
+}
+export type CountryModifiedEvent = TypedEvent<[
+    string,
+    number
+], CountryModifiedEventObject>;
+export type CountryModifiedEventFilter = TypedEventFilter<CountryModifiedEvent>;
+export interface IdentityModifiedEventObject {
+    oldIdentity: string;
+    newIdentity: string;
+}
+export type IdentityModifiedEvent = TypedEvent<[
+    string,
+    string
+], IdentityModifiedEventObject>;
+export type IdentityModifiedEventFilter = TypedEventFilter<IdentityModifiedEvent>;
+export interface IdentityRegistryBoundEventObject {
+    identityRegistry: string;
+}
+export type IdentityRegistryBoundEvent = TypedEvent<[
+    string
+], IdentityRegistryBoundEventObject>;
+export type IdentityRegistryBoundEventFilter = TypedEventFilter<IdentityRegistryBoundEvent>;
+export interface IdentityRegistryUnboundEventObject {
+    identityRegistry: string;
+}
+export type IdentityRegistryUnboundEvent = TypedEvent<[
+    string
+], IdentityRegistryUnboundEventObject>;
+export type IdentityRegistryUnboundEventFilter = TypedEventFilter<IdentityRegistryUnboundEvent>;
+export interface IdentityStoredEventObject {
+    investorAddress: string;
+    identity: string;
+}
+export type IdentityStoredEvent = TypedEvent<[
+    string,
+    string
+], IdentityStoredEventObject>;
+export type IdentityStoredEventFilter = TypedEventFilter<IdentityStoredEvent>;
+export interface IdentityUnstoredEventObject {
+    investorAddress: string;
+    identity: string;
+}
+export type IdentityUnstoredEvent = TypedEvent<[
+    string,
+    string
+], IdentityUnstoredEventObject>;
+export type IdentityUnstoredEventFilter = TypedEventFilter<IdentityUnstoredEvent>;
+export interface IIdentityRegistryStorage extends BaseContract {
+    connect(signerOrProvider: Signer | Provider | string): this;
+    attach(addressOrName: string): this;
+    deployed(): Promise<this>;
+    interface: IIdentityRegistryStorageInterface;
+    queryFilter<TEvent extends TypedEvent>(event: TypedEventFilter<TEvent>, fromBlockOrBlockhash?: string | number | undefined, toBlock?: string | number | undefined): Promise<Array<TEvent>>;
+    listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
+    listeners(eventName?: string): Array<Listener>;
+    removeAllListeners<TEvent extends TypedEvent>(eventFilter: TypedEventFilter<TEvent>): this;
+    removeAllListeners(eventName?: string): this;
+    off: OnEvent<this>;
+    on: OnEvent<this>;
+    once: OnEvent<this>;
+    removeListener: OnEvent<this>;
+    functions: {
+        addIdentityToStorage(_userAddress: string, _identity: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        bindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        linkedIdentityRegistries(overrides?: CallOverrides): Promise<[string[]]>;
+        modifyStoredIdentity(_userAddress: string, _identity: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        modifyStoredInvestorCountry(_userAddress: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        removeIdentityFromStorage(_userAddress: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        storedIdentity(_userAddress: string, overrides?: CallOverrides): Promise<[string]>;
+        storedInvestorCountry(_userAddress: string, overrides?: CallOverrides): Promise<[number]>;
+        unbindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+    };
+    addIdentityToStorage(_userAddress: string, _identity: string, _country: BigNumberish, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    bindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    linkedIdentityRegistries(overrides?: CallOverrides): Promise<string[]>;
+    modifyStoredIdentity(_userAddress: string, _identity: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    modifyStoredInvestorCountry(_userAddress: string, _country: BigNumberish, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    removeIdentityFromStorage(_userAddress: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    storedIdentity(_userAddress: string, overrides?: CallOverrides): Promise<string>;
+    storedInvestorCountry(_userAddress: string, overrides?: CallOverrides): Promise<number>;
+    unbindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    callStatic: {
+        addIdentityToStorage(_userAddress: string, _identity: string, _country: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        bindIdentityRegistry(_identityRegistry: string, overrides?: CallOverrides): Promise<void>;
+        linkedIdentityRegistries(overrides?: CallOverrides): Promise<string[]>;
+        modifyStoredIdentity(_userAddress: string, _identity: string, overrides?: CallOverrides): Promise<void>;
+        modifyStoredInvestorCountry(_userAddress: string, _country: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        removeIdentityFromStorage(_userAddress: string, overrides?: CallOverrides): Promise<void>;
+        storedIdentity(_userAddress: string, overrides?: CallOverrides): Promise<string>;
+        storedInvestorCountry(_userAddress: string, overrides?: CallOverrides): Promise<number>;
+        unbindIdentityRegistry(_identityRegistry: string, overrides?: CallOverrides): Promise<void>;
+    };
+    filters: {
+        "CountryModified(address,uint16)"(investorAddress?: string | null, country?: BigNumberish | null): CountryModifiedEventFilter;
+        CountryModified(investorAddress?: string | null, country?: BigNumberish | null): CountryModifiedEventFilter;
+        "IdentityModified(address,address)"(oldIdentity?: string | null, newIdentity?: string | null): IdentityModifiedEventFilter;
+        IdentityModified(oldIdentity?: string | null, newIdentity?: string | null): IdentityModifiedEventFilter;
+        "IdentityRegistryBound(address)"(identityRegistry?: string | null): IdentityRegistryBoundEventFilter;
+        IdentityRegistryBound(identityRegistry?: string | null): IdentityRegistryBoundEventFilter;
+        "IdentityRegistryUnbound(address)"(identityRegistry?: string | null): IdentityRegistryUnboundEventFilter;
+        IdentityRegistryUnbound(identityRegistry?: string | null): IdentityRegistryUnboundEventFilter;
+        "IdentityStored(address,address)"(investorAddress?: string | null, identity?: string | null): IdentityStoredEventFilter;
+        IdentityStored(investorAddress?: string | null, identity?: string | null): IdentityStoredEventFilter;
+        "IdentityUnstored(address,address)"(investorAddress?: string | null, identity?: string | null): IdentityUnstoredEventFilter;
+        IdentityUnstored(investorAddress?: string | null, identity?: string | null): IdentityUnstoredEventFilter;
+    };
+    estimateGas: {
+        addIdentityToStorage(_userAddress: string, _identity: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        bindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        linkedIdentityRegistries(overrides?: CallOverrides): Promise<BigNumber>;
+        modifyStoredIdentity(_userAddress: string, _identity: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        modifyStoredInvestorCountry(_userAddress: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        removeIdentityFromStorage(_userAddress: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        storedIdentity(_userAddress: string, overrides?: CallOverrides): Promise<BigNumber>;
+        storedInvestorCountry(_userAddress: string, overrides?: CallOverrides): Promise<BigNumber>;
+        unbindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+    };
+    populateTransaction: {
+        addIdentityToStorage(_userAddress: string, _identity: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        bindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        linkedIdentityRegistries(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        modifyStoredIdentity(_userAddress: string, _identity: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        modifyStoredInvestorCountry(_userAddress: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        removeIdentityFromStorage(_userAddress: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        storedIdentity(_userAddress: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        storedInvestorCountry(_userAddress: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        unbindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+    };
+}

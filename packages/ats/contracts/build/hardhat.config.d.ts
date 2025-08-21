@@ -1,0 +1,11 @@
+import { HardhatUserConfig } from 'hardhat/config';
+import 'tsconfig-paths/register';
+import '@nomicfoundation/hardhat-toolbox';
+import '@nomicfoundation/hardhat-chai-matchers';
+import '@typechain/hardhat';
+import 'hardhat-contract-sizer';
+import 'hardhat-gas-reporter';
+import '@tasks';
+import 'hardhat-dependency-compiler';
+declare const config: HardhatUserConfig;
+export default config;

@@ -1,0 +1,6 @@
+export { IDiamond__factory } from "./IDiamond__factory";
+export { IDiamondCut__factory } from "./IDiamondCut__factory";
+export { IDiamondLoupe__factory } from "./IDiamondLoupe__factory";
+export { IERC173__factory } from "./IERC173__factory";
+export { IResolverProxy__factory } from "./IResolverProxy__factory";
+export { IStaticFunctionSelectors__factory } from "./IStaticFunctionSelectors__factory";

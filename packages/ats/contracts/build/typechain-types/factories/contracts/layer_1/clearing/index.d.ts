@@ -1,0 +1,5 @@
+export { ClearingActionsFacet__factory } from "./ClearingActionsFacet__factory";
+export { ClearingHoldCreationFacet__factory } from "./ClearingHoldCreationFacet__factory";
+export { ClearingReadFacet__factory } from "./ClearingReadFacet__factory";
+export { ClearingRedeemFacet__factory } from "./ClearingRedeemFacet__factory";
+export { ClearingTransferFacet__factory } from "./ClearingTransferFacet__factory";

@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IRSStorage",
+  "sourceName": "@tokenysolutions/t-rex/contracts/registry/storage/IRSStorage.sol",
+  "abi": [],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220eb0c23299ab8fb5730a6c3a25e5730749fc63474d67d4f7d81bd1aed5993aa5964736f6c63430008110033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220eb0c23299ab8fb5730a6c3a25e5730749fc63474d67d4f7d81bd1aed5993aa5964736f6c63430008110033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

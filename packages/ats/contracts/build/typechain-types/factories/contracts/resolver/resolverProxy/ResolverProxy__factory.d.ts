@@ -1,0 +1,316 @@
+import { Signer, ContractFactory, PayableOverrides, BytesLike, BigNumberish } from "ethers";
+import type { Provider, TransactionRequest } from "@ethersproject/providers";
+import type { ResolverProxy, ResolverProxyInterface, IResolverProxy } from "../../../../contracts/resolver/resolverProxy/ResolverProxy";
+type ResolverProxyConstructorParams = [signer?: Signer] | ConstructorParameters<typeof ContractFactory>;
+export declare class ResolverProxy__factory extends ContractFactory {
+    constructor(...args: ResolverProxyConstructorParams);
+    deploy(_resolver: string, _resolverProxyConfigurationId: BytesLike, _version: BigNumberish, _rbac: IResolverProxy.RbacStruct[], overrides?: PayableOverrides & {
+        from?: string;
+    }): Promise<ResolverProxy>;
+    getDeployTransaction(_resolver: string, _resolverProxyConfigurationId: BytesLike, _version: BigNumberish, _rbac: IResolverProxy.RbacStruct[], overrides?: PayableOverrides & {
+        from?: string;
+    }): TransactionRequest;
+    attach(address: string): ResolverProxy;
+    connect(signer: Signer): ResolverProxy__factory;
+    static readonly bytecode = "0x60806040526040516107703803806107708339810160408190526100229161037c565b61002e84848484610037565b50505050610557565b6040516362cacc9560e11b815260048101849052602481018390526001600160a01b0385169063c595992a90604401600060405180830381600087803b15801561008057600080fd5b505af1158015610094573d6000803e3d6000fd5b5050505060006100a86100e160201b60201c565b80546001600160a01b0319166001600160a01b038716178155905060018101849055600281018390556100da82610105565b5050505050565b7f4833864335c8f29dd85e3f7a36869cb90d5dc7167ae5000f7e1ce4d7c15d14ad90565b60005b81518110156101c35760005b8282815181106101265761012661051a565b602002602001015160200151518110156101b05761019d83838151811061014f5761014f61051a565b60200260200101516000015184848151811061016d5761016d61051a565b602002602001015160200151838151811061018a5761018a61051a565b60200260200101516101c760201b60201c565b50806101a881610530565b915050610114565b50806101bb81610530565b915050610108565b5050565b60006101f47f4765bbd856d800638d39a79262ebc6fdfb5833d0e59f32c5d482fe4c4a3554c184846101fb565b9392505050565b6000828152602084815260408220610222916001909101908490610138610261821b17901c565b801561025957506001600160a01b0382166000908152600185016020908152604090912061025991859061014d61027c821b17901c565b949350505050565b60006101f4836001600160a01b038416610284565b92915050565b60006101f483835b60008181526001830160205260408120546102cb57508154600181810184556000848152602080822090930184905584548482528286019093526040902091909155610276565b506000610276565b6001600160a01b03811681146102e857600080fd5b50565b634e487b7160e01b600052604160045260246000fd5b604080519081016001600160401b0381118282101715610323576103236102eb565b60405290565b604051601f8201601f191681016001600160401b0381118282101715610351576103516102eb565b604052919050565b60006001600160401b03821115610372576103726102eb565b5060051b60200190565b6000806000806080858703121561039257600080fd5b845161039d816102d3565b60208601516040870151606088015192965090945092506001600160401b038111156103c857600080fd5b8501601f810187136103d957600080fd5b80516103ec6103e782610359565b610329565b808282526020820191508960208460051b860101111561040b57600080fd5b602084015b60208460051b86010181101561050b5780516001600160401b0381111561043657600080fd5b60408682018d03601f1901121561044c57600080fd5b610454610301565b86820160208101518252604001516001600160401b0381111561047657600080fd5b80838901019250508c603f83011261048d57600080fd5b602082015161049e6103e782610359565b808282526020820191508f60408460051b87010111156104bd57600080fd5b604085015b60408460051b8701018110156104eb5780516104dd816102d3565b8352602092830192016104c2565b508060208501525050508085525050602083019250602081019050610410565b50969995985093965050505050565b634e487b7160e01b600052603260045260246000fd5b60006001820161055057634e487b7160e01b600052601160045260246000fd5b5060010190565b61020a806105666000396000f3fe60806040523661000b57005b60006100437f4833864335c8f29dd85e3f7a36869cb90d5dc7167ae5000f7e1ce4d7c15d14ad6000356001600160e01b0319166100a2565b90506001600160a01b03811661007e57604051630a82dd7360e31b81526001600160e01b031960003516600482015260240160405180910390fd5b3660008037600080366000845af43d6000803e80801561009d573d6000f35b3d6000fd5b8154600183015460028401546040516305cf613160e51b8152600481019290925260248201526001600160e01b0319831660448201526000916001600160a01b03169063b9ec262090606401602060405180830381865afa15801561010b573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061012f91906101a4565b90505b92915050565b600061012f836001600160a01b038416610155565b600061012f83835b600081815260018301602052604081205461019c57508154600181810184556000848152602080822090930184905584548482528286019093526040902091909155610132565b506000610132565b6000602082840312156101b657600080fd5b81516001600160a01b03811681146101cd57600080fd5b939250505056fea2646970667358221220aae540b9d89d27668d9d8e0ad75ce7e735e87328baac9700ca0c65cffdde08d564736f6c63430008120033";
+    static readonly abi: readonly [{
+        readonly inputs: readonly [{
+            readonly internalType: "contract IBusinessLogicResolver";
+            readonly name: "_resolver";
+            readonly type: "address";
+        }, {
+            readonly internalType: "bytes32";
+            readonly name: "_resolverProxyConfigurationId";
+            readonly type: "bytes32";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "_version";
+            readonly type: "uint256";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "bytes32";
+                readonly name: "role";
+                readonly type: "bytes32";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "members";
+                readonly type: "address[]";
+            }];
+            readonly internalType: "struct IResolverProxy.Rbac[]";
+            readonly name: "_rbac";
+            readonly type: "tuple[]";
+        }];
+        readonly stateMutability: "payable";
+        readonly type: "constructor";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "account";
+            readonly type: "address";
+        }, {
+            readonly internalType: "bytes32";
+            readonly name: "role";
+            readonly type: "bytes32";
+        }];
+        readonly name: "AccountHasNoRole";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "account";
+            readonly type: "address";
+        }, {
+            readonly internalType: "bytes32[]";
+            readonly name: "roles";
+            readonly type: "bytes32[]";
+        }];
+        readonly name: "AccountHasNoRoles";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "account";
+            readonly type: "address";
+        }];
+        readonly name: "AccountIsBlocked";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "AllBusinessLogicKeysMustBeenInformed";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "businessLogicKey";
+            readonly type: "bytes32";
+        }];
+        readonly name: "BusinessLogicKeyDuplicated";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "businessLogicKey";
+            readonly type: "bytes32";
+        }];
+        readonly name: "BusinessLogicNotActive";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "version";
+            readonly type: "uint256";
+        }];
+        readonly name: "BusinessLogicVersionDoesNotExist";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "ExpirationNotReached";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes4";
+            readonly name: "_functionSelector";
+            readonly type: "bytes4";
+        }];
+        readonly name: "FunctionNotFound";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "account";
+            readonly type: "address";
+        }, {
+            readonly internalType: "bytes32";
+            readonly name: "role";
+            readonly type: "bytes32";
+        }];
+        readonly name: "PartitionsAreProtectedAndNoRole";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "PartitionsAreUnProtected";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "rolesLength";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "activesLength";
+            readonly type: "uint256";
+        }];
+        readonly name: "RolesAndActivesLengthMismatch";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "TokenIsPaused";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "TokenIsUnpaused";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "WrongSignature";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "ZeroKeyNotValidForBusinessLogic";
+        readonly type: "error";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }];
+        readonly name: "PartitionsProtected";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }];
+        readonly name: "PartitionsUnProtected";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "from";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "value";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "deadline";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "nounce";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "signature";
+            readonly type: "bytes";
+        }];
+        readonly name: "ProtectedRedeemFrom";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "from";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "to";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "value";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "deadline";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "nounce";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "signature";
+            readonly type: "bytes";
+        }];
+        readonly name: "ProtectedTransferFrom";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "role";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "previousAdminRole";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "newAdminRole";
+            readonly type: "bytes32";
+        }];
+        readonly name: "RoleAdminChanged";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }];
+        readonly name: "TokenPaused";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }];
+        readonly name: "TokenUnpaused";
+        readonly type: "event";
+    }, {
+        readonly stateMutability: "payable";
+        readonly type: "fallback";
+    }, {
+        readonly stateMutability: "payable";
+        readonly type: "receive";
+    }];
+    static createInterface(): ResolverProxyInterface;
+    static connect(address: string, signerOrProvider: Signer | Provider): ResolverProxy;
+}
+export {};

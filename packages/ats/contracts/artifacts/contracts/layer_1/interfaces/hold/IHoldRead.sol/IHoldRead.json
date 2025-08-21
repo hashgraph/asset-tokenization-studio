@@ -1,0 +1,214 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IHoldRead",
+  "sourceName": "contracts/layer_1/interfaces/hold/IHoldRead.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_tokenHolder",
+          "type": "address"
+        }
+      ],
+      "name": "getHeldAmountFor",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount_",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_partition",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_tokenHolder",
+          "type": "address"
+        }
+      ],
+      "name": "getHeldAmountForByPartition",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount_",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_partition",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_tokenHolder",
+          "type": "address"
+        }
+      ],
+      "name": "getHoldCountForByPartition",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "holdCount_",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "partition",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "tokenHolder",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "holdId",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct HoldIdentifier",
+          "name": "_holdIdentifier",
+          "type": "tuple"
+        }
+      ],
+      "name": "getHoldForByPartition",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount_",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "expirationTimestamp_",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "escrow_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "destination_",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data_",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "operatorData_",
+          "type": "bytes"
+        },
+        {
+          "internalType": "enum ThirdPartyType",
+          "name": "thirdPartyType_",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "partition",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "tokenHolder",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "holdId",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct HoldIdentifier",
+          "name": "_holdIdentifier",
+          "type": "tuple"
+        }
+      ],
+      "name": "getHoldThirdParty",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "thirdParty_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_partition",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_tokenHolder",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_pageIndex",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_pageLength",
+          "type": "uint256"
+        }
+      ],
+      "name": "getHoldsIdForByPartition",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "holdsId_",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

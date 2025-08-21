@@ -1,0 +1,1898 @@
+import { Signer, ContractFactory, Overrides } from "ethers";
+import type { Provider, TransactionRequest } from "@ethersproject/providers";
+import type { Snapshots, SnapshotsInterface } from "../../../../contracts/layer_1/snapshots/Snapshots";
+type SnapshotsConstructorParams = [signer?: Signer] | ConstructorParameters<typeof ContractFactory>;
+export declare class Snapshots__factory extends ContractFactory {
+    constructor(...args: SnapshotsConstructorParams);
+    deploy(overrides?: Overrides & {
+        from?: string;
+    }): Promise<Snapshots>;
+    getDeployTransaction(overrides?: Overrides & {
+        from?: string;
+    }): TransactionRequest;
+    attach(address: string): Snapshots;
+    connect(signer: Signer): Snapshots__factory;
+    static readonly bytecode = "0x608060405234801561001057600080fd5b50612697806100206000396000f3fe608060405234801561001057600080fd5b50600436106100f65760003560e01c8063977a3a7111610092578063977a3a71146101eb578063b378cf37146101fe578063b3d3d37e14610213578063b52e39aa1461021b578063c1f0d7421461022e578063d22a73df14610236578063d9e6f16414610256578063da35f8f614610269578063e002bcdf1461027c57600080fd5b806309e84301146100fb5780631ef2fdc8146101245780632bc16e9b14610154578063386e1405146101675780634a13f5d01461017a57806369ed346f1461018d578063867126e1146101b25780638e00ae2e146101c55780639657ddb9146101d8575b600080fd5b61010e61010936600461226f565b61028f565b60405161011b9190612292565b60405180910390f35b7f9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf5b60405190815260200161011b565b61014661016236600461226f565b6102a4565b6101466101753660046122d6565b6102b0565b6101466101883660046122d6565b6102c5565b6101a061019b36600461230b565b6102d2565b60405160ff909116815260200161011b565b6101466101c036600461230b565b6102dd565b6101466101d336600461226f565b6102e8565b6101466101e6366004612324565b6102f4565b6101466101f93660046122d6565b610300565b61020661030d565b60405161011b9190612346565b610146610373565b61014661022936600461226f565b6103c1565b6102066103cd565b610249610244366004612388565b61076d565b60405161011b91906123b4565b61014661026436600461226f565b610781565b61014661027736600461230b565b61078d565b61014661028a3660046122d6565b610798565b606061029b83836107a5565b90505b92915050565b600061029b838361086a565b60006102bd8484846108a2565b949350505050565b60006102bd8484846108e1565b600061029e82610920565b600061029e8261094f565b600061029b8383610979565b600061029b8383610985565b60006102bd8484846109ae565b604080516001808252818301909252606091602080830190803683370190505090506000630d86308960e21b828261034481612421565b9350815181106103565761035661243a565b6001600160e01b0319909216602092830291909101909101525090565b600061037d6109ed565b7f3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da6103a88133610a15565b6103b26000610a57565b506103bb610a8c565b91505090565b600061029b8383610ac9565b60408051600f808252610200820190925260609160009190602082016101e0803683370190505091506359e9e9bf60e11b828261040981612421565b93508151811061041b5761041b61243a565b6001600160e01b031990921660209283029190910190910152634700571760e11b828261044781612421565b9350815181106104595761045961243a565b6001600160e01b031990921660209283029190910190910152636d1afc7b60e11b828261048581612421565b9350815181106104975761049761243a565b6001600160e01b03199092166020928302919091019091015263e002bcdf60e01b82826104c381612421565b9350815181106104d5576104d561243a565b6001600160e01b0319909216602092830291909101909101526309e8430160e01b828261050181612421565b9350815181106105135761051361243a565b6001600160e01b031990921660209283029190910190910152639657ddb960e01b828261053f81612421565b9350815181106105515761055161243a565b6001600160e01b031990921660209283029190910190910152633679bc5960e21b828261057d81612421565b93508151811061058f5761058f61243a565b6001600160e01b0319909216602092830291909101909101526304a13f5d60e41b82826105bb81612421565b9350815181106105cd576105cd61243a565b6001600160e01b031990921660209283029190910190910152635a971cd560e11b82826105f981612421565b93508151811061060b5761060b61243a565b6001600160e01b03199092166020928302919091019091015263977a3a7160e01b828261063781612421565b9350815181106106495761064961243a565b6001600160e01b031990921660209283029190910190910152632bc16e9b60e01b828261067581612421565b9350815181106106875761068761243a565b6001600160e01b03199092166020928302919091019091015263386e140560e01b82826106b381612421565b9350815181106106c5576106c561243a565b6001600160e01b0319909216602092830291909101909101526369ed346f60e01b82826106f181612421565b9350815181106107035761070361243a565b6001600160e01b03199092166020928302919091019091015263d22a73df60e01b828261072f81612421565b9350815181106107415761074161243a565b6001600160e01b03199092166020928302919091019091015263867126e160e01b828261034481612421565b60606102bd848484610afc565b9392505050565b600061029b8383610c15565b600061029e82610c49565b60006102bd848484610c54565b606060006107b1610c61565b6001600160a01b0384166000908152600291909101602052604081209150806107da8684610c85565b91509150816107f6576107ec85610d06565b935050505061029e565b82600101818154811061080b5761080b61243a565b600091825260209182902001805460408051828502810185019091528181529283018282801561085a57602002820191906000526020600020905b815481526020019060010190808311610846575b5050505050935050505092915050565b600061029b83610878610c61565b6001600160a01b0385166000908152600b919091016020526040902061089d85610e0f565b610e76565b60006102bd836108b0610c61565b6001600160a01b0385166000908152600c9190910160209081526040808320898452909152902061089d8786610ef6565b60006102bd836108ef610c61565b6001600160a01b038516600090815260079190910160209081526040808320898452909152902061089d8786610f64565b600080600061093984610931610c61565b600f01610f89565b915091508161077a5761094a610fd7565b6102bd565b600080600061096884610960610c61565b601401610f89565b915091508161077a5761094a610fe7565b600061029b8284610ffa565b600061029b82610993610c61565b60008681526008919091016020526040902061089d8661102a565b60006102bd836109bc610c61565b6001600160a01b0385166000908152600a9190910160209081526040808320898452909152902061089d878661104d565b6109f5611072565b15610a135760405163649815a560e01b815260040160405180910390fd5b565b610a1f82826110a7565b610a535760405163a1180aad60e01b81526001600160a01b0382166004820152602481018390526044015b60405180910390fd5b5050565b600061029e7f2352c39c61abb4e922588a7d46fb5c925b9a205577be135537479031648c86fe63df1eb07160e01b84426110d4565b6000610a966112b3565b604051909150819033907fd252178ed4aae4bc61be5bc8161b97bca1aae7b7fbde4523d5f4498cfca4276390600090a390565b600061029b83610ad7610c61565b6001600160a01b03851660009081526009919091016020526040902061089d85611313565b6060600080610b0b8585611336565b915091506000610b248383610b1f8a61094f565b611358565b67ffffffffffffffff811115610b3c57610b3c6123f5565b604051908082528060200260200182016040528015610b65578160200160208202803683370190505b50905060005b8151811015610c0a576000610b81826001612450565b9050600080610ba98b610b92610c61565b60008681526013919091016020526040902061138e565b9150915081610bc057610bbb836113e5565b610bc2565b805b858581518110610bd457610bd461243a565b60200260200101906001600160a01b031690816001600160a01b0316815250505050508080610c0290612421565b915050610b6b565b509695505050505050565b600061029b83610c23610c61565b6001600160a01b03851660009081526006919091016020526040902061089d854261140c565b600061029e82611425565b60006102bd84838561144f565b7f450898ebb84982a28d8787f0138cfce477c6d811ae3b1db5fdb7ed17e8bda89890565b60008083600003610ca95760405163f128004d60e01b815260040160405180910390fd5b610cb161148e565b841115610cd457604051638e81eb8360e01b815260048101859052602401610a4a565b6000610ce084866114a2565b84549091508103610cf8576000809250925050610cff565b6001925090505b9250929050565b60606000610d12611543565b6001600160a01b03841660009081526003820160205260408120549192509067ffffffffffffffff811115610d4957610d496123f5565b604051908082528060200260200182016040528015610d72578160200160208202803683370190505b50905060005b6001600160a01b0385166000908152600384016020526040902054811015610e07576001600160a01b03851660009081526003840160205260409020805482908110610dc657610dc661243a565b906000526020600020906002020160010154828281518110610dea57610dea61243a565b602090810291909101015280610dff81612421565b915050610d78565b509392505050565b600080610e2b610e1d611567565b610e2685611572565b61159e565b905080610e6c846001600160a01b031660009081527ff5d5af29c37f2085b9f37cfb2259d4e3b957777d47ffc1949a7596cb1d37ba91602052604090205490565b61077a9190612463565b6000806000610e858686610f89565b915091508115610e9857915061077a9050565b6000610ea3876115c9565b90506000610eaf6115ef565b9050808203610ec4578594505050505061077a565b81600003610ed157600191505b6000610edd838361247a565b9050610ee9818861247a565b9998505050505050505050565b600080610f0e610f04611567565b610e268686611602565b905080610f5a85856001600160a01b031660009081527ff5d5af29c37f2085b9f37cfb2259d4e3b957777d47ffc1949a7596cb1d37ba9260209081526040808320938352929052205490565b6102bd9190612463565b600080610f7c610f72611567565b610e268686611638565b905080610f5a858561166e565b6000808080610f988686610c85565b915091508182610fa9576000610fca565b856001018281548110610fbe57610fbe61243a565b90600052602060002001545b9350935050509250929050565b6000610fe2426116be565b905090565b6000610ff1611543565b60080154905090565b600061029b82611008610c61565b6001600160a01b03861660009081526020919091526040902061089d866116d4565b600080611041611038611567565b610e26856116e0565b905080610e6c846116fe565b60008061106561105b611567565b610e26868661171c565b905080610f5a8585611752565b60007f5a5b295532a8b6e97bc9d45d68fc49b85a099545bac8f91f77706d392a1cea715460ff1680610fe25750610fe261177a565b600061029b7f4765bbd856d800638d39a79262ebc6fdfb5833d0e59f32c5d482fe4c4a3554c1848461184e565b6000806110e2866001015490565b9050806000036110f65760009150506102bd565b83600082821180611105575081155b1561110e578291505b60015b8281116112a7576000611124828661249c565b905060006111328b83611872565b9050878160000151101561128b576111498b611941565b60028b01805460ff191660011790556020810151604051600091829130918e9161117a9188918d91906024016124d3565b60408051601f198184030181529181526020820180516001600160e01b03166001600160e01b03199094169390931790925290516111b89190612514565b600060405180830381855af49150503d80600081146111f3576040519150601f19603f3d011682016040523d82523d6000602084013e6111f8565b606091505b509150915081611278578051156112125780518082602001fd5b60405162461bcd60e51b815260206004820152603560248201527f6f6e5363686564756c65645461736b547269676765726564206d6574686f64206044820152743330b4b632b2103bb4ba3437baba103932b0b9b7b760591b6064820152608401610a4a565b505060028b01805460ff19169055611292565b50506112a7565b5050808061129f90612421565b915050611111565b50979650505050505050565b60006112cc6112c0610c61565b60050180546001019055565b60006112d661148e565b60405181815290915033907fa25b876b2f3947e9c6cc9e952e8f278d53aeaddffe3aec1c86bc75c491d60a199060200160405180910390a2919050565b60008061132a611321611567565b610e26856119aa565b905080610e6c846119d6565b6000806113438385612463565b915061134f8383612450565b90509250929050565b60008284106113695750600061077a565b8184106113785750600061077a565b81831115611384578192505b6102bd848461249c565b600080808061139d8686610c85565b9150915081826113ae576000610fca565b8560010182815481106113c3576113c361243a565b6000918252602090912001546001600160a01b03169350935050509250929050565b60006113ef611543565b60009283526007016020525060409020546001600160a01b031690565b6000806114198484611a19565b905080610f5a85611a51565b600080600061143e84611436610c61565b600301610f89565b915091508161077a5761094a611a79565b60006102bd8261145d610c61565b6001600160a01b038616600090815260019190910160209081526040808320898452909152902061089d8787611a89565b6000610fe261149b610c61565b6005015490565b815460009081036114b55750600061029e565b82546000905b808210156114ff5760006114cf8383611a96565b9050846114dc8783611ab1565b5411156114eb578091506114f9565b6114f6816001612450565b92505b506114bb565b60008211801561152257508361151f8661151a60018661249c565b611ab1565b54145b1561153b5761153260018361249c565b9250505061029e565b50905061029e565b7f67661db80d37d3b9810c430f78991b4b5377bdebd3b71b39fbd3427092c1822a90565b6000610fe242611ac2565b600061157c611af3565b6001600160a01b039092166000908152600b9290920160205250604090205490565b6000826000036115b05750600161029e565b816000036115bf57508161029e565b61029b828461247a565b60008060006115e2846115da610c61565b600d01610f89565b915091508161077a5761094a5b60006115f9611af3565b60010154905090565b600061160c611af3565b6001600160a01b03929092166000908152600c9092016020908152604080842094845293905250205490565b6000611642611af3565b6001600160a01b0392909216600090815260069092016020908152604080842094845293905250205490565b60007fd15962e60f276260fba4c9b4de7fd05f475afe18b48c917ec6f6fcc71c00bf715b6001600160a01b0392909216600090815260019092016020908152604080842094845293905250205490565b60006116c982611b17565b516060015192915050565b600061029e8242611b5a565b60006116ea611af3565b600092835260030160205250604090205490565b6000611708611543565b600092835260010160205250604090205490565b6000611726611af3565b6001600160a01b0392909216600090815260099092016020908152604080842094845293905250205490565b60007f80346b80475a6f26abb9f460d81c6dbe6a8dd5d1acfb0827cfe37c4263a562ca611692565b60007f80cd138137fb7aaf8068b75b39b6681af39401f81721b6420d44eb588baaeeb9816117a782611b7e565b905060005b81811015611844576117c16001840182611b8c565b6001600160a01b031663b187bd266040518163ffffffff1660e01b8152600401602060405180830381865afa1580156117fe573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906118229190612530565b15611831576001935050505090565b60010161183d81612421565b90506117ac565b5060009250505090565b6001600160a01b038116600090815260018401602052604081206102bd9084611b98565b6040805180820190915260008152606060208201526000828152602084815260409182902082518084019093528054835260018101805491928401916118b790612552565b80601f01602080910402602001604051908101604052809291908181526020018280546118e390612552565b80156119305780601f1061190557610100808354040283529160200191611930565b820191906000526020600020905b81548152906001019060200180831161191357829003601f168201915b505050505081525050905092915050565b600061194e826001015490565b90508060000361195c575050565b81600061196a60018461249c565b8152602081019190915260400160009081208181559061198d60018301826121c7565b50506001820180549060006119a18361258c565b91905055505050565b60006119b4611af3565b6001600160a01b03909216600090815260089290920160205250604090205490565b60007f80346b80475a6f26abb9f460d81c6dbe6a8dd5d1acfb0827cfe37c4263a562ca5b6001600160a01b03909216600090815260209290925250604090205490565b600061029b611a2783611ac2565b611a2f611af3565b6001600160a01b0386166000908152600591909101602052604090205461159e565b60007fd15962e60f276260fba4c9b4de7fd05f475afe18b48c917ec6f6fcc71c00bf716119fa565b6000611a83611543565b54919050565b600061029b838342611bb0565b6000611aa5600284841861247a565b61029b90848416612450565b6000828152602081208201806102bd565b600080611acd6115ef565b905080600003611adb575060015b6000611ae684611be9565b5090506102bd8183612463565b7f20765daced38554542b3c858f10e7fb957696c4dbd38d7faabc51dd4de7ad54190565b611b1f612204565b6000611b2a83611be9565b915050611b35611cf6565b9150808260000151606001818151611b4d91906125a3565b60ff169052509092915050565b600080611b72611b6984611ac2565b610e2686611f29565b905080610f5a85611f55565b600061029e82600101611f5f565b600061029b8383611f69565b6000818152600183016020526040812054151561029b565b600080611bc9611bbf84611ac2565b610e268787611f93565b905080611bd68686612029565b611be09190612463565b95945050505050565b7faf4aaa3de473ec9b58645d40f5a2fe4e176157e247b2d875db61f1a70935ac69546001906000907faf4aaa3de473ec9b58645d40f5a2fe4e176157e247b2d875db61f1a70935ac689060015b818111611cee576000611c49828461249c565b90506000611c578583611872565b90508781600001511015611cd25760008160200151806020019051810190611c7f91906125bc565b90506000611c8c826120b6565b9050600081806020019051810190611ca491906125d5565b905080602001518a611cb69190612463565b9950806040015189611cc891906125a3565b9850505050611cd9565b5050611cee565b50508080611ce690612421565b915050611c36565b505050915091565b611cfe612204565b60007fd5228ac65cba3eaaef0669de6709c44cfdf33c0f1cce2989d4a133e0214cce57905060006040518060800160405280836000018054611d3f90612552565b80601f0160208091040260200160405190810160405280929190818152602001828054611d6b90612552565b8015611db85780601f10611d8d57610100808354040283529160200191611db8565b820191906000526020600020905b815481529060010190602001808311611d9b57829003601f168201915b50505050508152602001836001018054611dd190612552565b80601f0160208091040260200160405190810160405280929190818152602001828054611dfd90612552565b8015611e4a5780601f10611e1f57610100808354040283529160200191611e4a565b820191906000526020600020905b815481529060010190602001808311611e2d57829003601f168201915b50505050508152602001836002018054611e6390612552565b80601f0160208091040260200160405190810160405280929190818152602001828054611e8f90612552565b8015611edc5780601f10611eb157610100808354040283529160200191611edc565b820191906000526020600020905b815481529060010190602001808311611ebf57829003601f168201915b5050509183525050600384015460ff9081166020928301526040805180820190915283815260058601549394509291830191166001811115611f2057611f2061264b565b90529392505050565b6000611f33611af3565b6001600160a01b03909216600090815260029290920160205250604090205490565b6000611f33611543565b600061029e825490565b6000826000018281548110611f8057611f8061243a565b9060005260206000200154905092915050565b600080611f9e611543565b6001600160a01b0384166000908152600491909101602090815260408083208784529091528120549150819003611fd957600091505061029e565b611fe1611af3565b6001600160a01b03841660009081526020919091526040902061200560018361249c565b815481106120155761201561243a565b906000526020600020015491505092915050565b6000612035838361217a565b156120ae576000612044611543565b6001600160a01b0384166000908152600382016020908152604080832060048501835281842089855290925290912054919250906120849060019061249c565b815481106120945761209461243a565b90600052602060002090600202016000015491505061029e565b50600061029e565b60008181527f9db84024bbea48a7580380e27785cf3e0d08fada233c84760c8a5aff47f86e14602052604090206001018054606091906120f590612552565b80601f016020809104026020016040519081016040528092919081815260200182805461212190612552565b801561216e5780601f106121435761010080835404028352916020019161216e565b820191906000526020600020905b81548152906001019060200180831161215157829003601f168201915b50505050509050919050565b600080612185611543565b6001600160a01b03841660009081526004820160209081526040808320888452909152812054919250036121bd57600091505061029e565b600191505061029e565b5080546121d390612552565b6000825580601f106121e3575050565b601f016020900490600052602060002090810190612201919061223a565b50565b6040805160c08101825260609181018281528282018390526080820192909252600060a082015290819081526020016000905290565b5b8082111561224f576000815560010161223b565b5090565b80356001600160a01b038116811461226a57600080fd5b919050565b6000806040838503121561228257600080fd5b8235915061134f60208401612253565b6020808252825182820181905260009190848201906040850190845b818110156122ca578351835292840192918401916001016122ae565b50909695505050505050565b6000806000606084860312156122eb57600080fd5b833592506020840135915061230260408501612253565b90509250925092565b60006020828403121561231d57600080fd5b5035919050565b6000806040838503121561233757600080fd5b50508035926020909101359150565b6020808252825182820181905260009190848201906040850190845b818110156122ca5783516001600160e01b03191683529284019291840191600101612362565b60008060006060848603121561239d57600080fd5b505081359360208301359350604090920135919050565b6020808252825182820181905260009190848201906040850190845b818110156122ca5783516001600160a01b0316835292840192918401916001016123d0565b634e487b7160e01b600052604160045260246000fd5b634e487b7160e01b600052601160045260246000fd5b6000600182016124335761243361240b565b5060010190565b634e487b7160e01b600052603260045260246000fd5b8082018082111561029e5761029e61240b565b808202811582820484141761029e5761029e61240b565b60008261249757634e487b7160e01b600052601260045260246000fd5b500490565b8181038181111561029e5761029e61240b565b60005b838110156124ca5781810151838201526020016124b2565b50506000910152565b83815282602082015260606040820152600082518060608401526124fe8160808501602087016124af565b601f01601f191691909101608001949350505050565b600082516125268184602087016124af565b9190910192915050565b60006020828403121561254257600080fd5b8151801515811461077a57600080fd5b600181811c9082168061256657607f821691505b60208210810361258657634e487b7160e01b600052602260045260246000fd5b50919050565b60008161259b5761259b61240b565b506000190190565b60ff818116838216019081111561029e5761029e61240b565b6000602082840312156125ce57600080fd5b5051919050565b6000606082840312156125e757600080fd5b6040516060810181811067ffffffffffffffff8211171561261857634e487b7160e01b600052604160045260246000fd5b80604052508251815260208301516020820152604083015160ff8116811461263f57600080fd5b60408201529392505050565b634e487b7160e01b600052602160045260246000fdfea2646970667358221220e8bbf806d2f101d774c4d5cca48fe8562ab450146c6751779ef0e2219eeb973964736f6c63430008120033";
+    static readonly abi: readonly [{
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "account";
+            readonly type: "address";
+        }, {
+            readonly internalType: "bytes32";
+            readonly name: "role";
+            readonly type: "bytes32";
+        }];
+        readonly name: "AccountHasNoRole";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "account";
+            readonly type: "address";
+        }, {
+            readonly internalType: "bytes32[]";
+            readonly name: "roles";
+            readonly type: "bytes32[]";
+        }];
+        readonly name: "AccountHasNoRoles";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "account";
+            readonly type: "address";
+        }];
+        readonly name: "AccountIsBlocked";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "AllBusinessLogicKeysMustBeenInformed";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "AlreadyInitialized";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "businessLogicKey";
+            readonly type: "bytes32";
+        }];
+        readonly name: "BusinessLogicKeyDuplicated";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "businessLogicKey";
+            readonly type: "bytes32";
+        }];
+        readonly name: "BusinessLogicNotActive";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "version";
+            readonly type: "uint256";
+        }];
+        readonly name: "BusinessLogicVersionDoesNotExist";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "ExpirationNotReached";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "FactorIsZero";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "spender";
+            readonly type: "address";
+        }, {
+            readonly internalType: "address";
+            readonly name: "from";
+            readonly type: "address";
+        }];
+        readonly name: "InsufficientAllowance";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "account";
+            readonly type: "address";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "balance";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "value";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }];
+        readonly name: "InsufficientBalance";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "user";
+            readonly type: "address";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "requestedUnfreeze";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "availableFrozen";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }];
+        readonly name: "InsufficientFrozenBalance";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "account";
+            readonly type: "address";
+        }, {
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }];
+        readonly name: "InvalidPartition";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "IssuanceIsClosed";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "LockExpirationNotReached";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "maxSupply";
+            readonly type: "uint256";
+        }];
+        readonly name: "MaxSupplyReached";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "maxSupply";
+            readonly type: "uint256";
+        }];
+        readonly name: "MaxSupplyReachedForPartition";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "newMaxSupplyByPartition";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "maxSupply";
+            readonly type: "uint256";
+        }];
+        readonly name: "NewMaxSupplyByPartitionTooHigh";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "NewMaxSupplyCannotBeZero";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "maxSupply";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "totalSupply";
+            readonly type: "uint256";
+        }];
+        readonly name: "NewMaxSupplyForPartitionTooLow";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "maxSupply";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "totalSupply";
+            readonly type: "uint256";
+        }];
+        readonly name: "NewMaxSupplyTooLow";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "NotAllowedInMultiPartitionMode";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "NotAutocalling";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "OnlyDelegateAllowed";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }];
+        readonly name: "PartitionNotAllowedInSinglePartitionMode";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "account";
+            readonly type: "address";
+        }, {
+            readonly internalType: "bytes32";
+            readonly name: "role";
+            readonly type: "bytes32";
+        }];
+        readonly name: "PartitionsAreProtectedAndNoRole";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "PartitionsAreUnProtected";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "rolesLength";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "activesLength";
+            readonly type: "uint256";
+        }];
+        readonly name: "RolesAndActivesLengthMismatch";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "snapshotId";
+            readonly type: "uint256";
+        }];
+        readonly name: "SnapshotIdDoesNotExists";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "SnapshotIdNull";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "SpenderWithZeroAddress";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "TokenIsNotControllable";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "TokenIsPaused";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "TokenIsUnpaused";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }];
+        readonly name: "Unauthorized";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "WrongExpirationTimestamp";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "WrongLockId";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "WrongSignature";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "timeStamp";
+            readonly type: "uint256";
+        }];
+        readonly name: "WrongTimestamp";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "ZeroAddressNotAllowed";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "ZeroKeyNotValidForBusinessLogic";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "ZeroOwnerAddress";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "ZeroPartition";
+        readonly type: "error";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "ZeroValue";
+        readonly type: "error";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "factor";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint8";
+            readonly name: "decimals";
+            readonly type: "uint8";
+        }];
+        readonly name: "AdjustmentBalanceSet";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "owner";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "spender";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "value";
+            readonly type: "uint256";
+        }];
+        readonly name: "Approval";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "AuthorizedOperator";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "AuthorizedOperatorByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "uint256";
+                readonly name: "amount";
+                readonly type: "uint256";
+            }, {
+                readonly internalType: "uint256";
+                readonly name: "expirationTimestamp";
+                readonly type: "uint256";
+            }, {
+                readonly internalType: "address";
+                readonly name: "escrow";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address";
+                readonly name: "to";
+                readonly type: "address";
+            }, {
+                readonly internalType: "bytes";
+                readonly name: "data";
+                readonly type: "bytes";
+            }];
+            readonly indexed: false;
+            readonly internalType: "struct Hold";
+            readonly name: "hold";
+            readonly type: "tuple";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ClearedHoldByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "uint256";
+                readonly name: "amount";
+                readonly type: "uint256";
+            }, {
+                readonly internalType: "uint256";
+                readonly name: "expirationTimestamp";
+                readonly type: "uint256";
+            }, {
+                readonly internalType: "address";
+                readonly name: "escrow";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address";
+                readonly name: "to";
+                readonly type: "address";
+            }, {
+                readonly internalType: "bytes";
+                readonly name: "data";
+                readonly type: "bytes";
+            }];
+            readonly indexed: false;
+            readonly internalType: "struct Hold";
+            readonly name: "hold";
+            readonly type: "tuple";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ClearedHoldFromByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "uint256";
+                readonly name: "amount";
+                readonly type: "uint256";
+            }, {
+                readonly internalType: "uint256";
+                readonly name: "expirationTimestamp";
+                readonly type: "uint256";
+            }, {
+                readonly internalType: "address";
+                readonly name: "escrow";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address";
+                readonly name: "to";
+                readonly type: "address";
+            }, {
+                readonly internalType: "bytes";
+                readonly name: "data";
+                readonly type: "bytes";
+            }];
+            readonly indexed: false;
+            readonly internalType: "struct Hold";
+            readonly name: "hold";
+            readonly type: "tuple";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ClearedOperatorHoldByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "amount";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ClearedOperatorRedeemByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "to";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "amount";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ClearedOperatorTransferByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "amount";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ClearedRedeemByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "amount";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ClearedRedeemFromByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "to";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "amount";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ClearedTransferByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "to";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "amount";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ClearedTransferFromByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "compliance";
+            readonly type: "address";
+        }];
+        readonly name: "ComplianceAdded";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "_controller";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "_tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "_value";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "_data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "_operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ControllerRedemption";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "_controller";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "_from";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "_to";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "_value";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "_data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "_operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ControllerTransfer";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }];
+        readonly name: "FinalizedControllerFeature";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "_operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "_to";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "_value";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "_data";
+            readonly type: "bytes";
+        }];
+        readonly name: "Issued";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "to";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "value";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }];
+        readonly name: "IssuedByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "newMaxSupply";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "previousMaxSupply";
+            readonly type: "uint256";
+        }];
+        readonly name: "MaxSupplyByPartitionSet";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "newMaxSupply";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "previousMaxSupply";
+            readonly type: "uint256";
+        }];
+        readonly name: "MaxSupplySet";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }];
+        readonly name: "PartitionsProtected";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }];
+        readonly name: "PartitionsUnProtected";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "uint256";
+                readonly name: "amount";
+                readonly type: "uint256";
+            }, {
+                readonly internalType: "uint256";
+                readonly name: "expirationTimestamp";
+                readonly type: "uint256";
+            }, {
+                readonly internalType: "address";
+                readonly name: "escrow";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address";
+                readonly name: "to";
+                readonly type: "address";
+            }, {
+                readonly internalType: "bytes";
+                readonly name: "data";
+                readonly type: "bytes";
+            }];
+            readonly indexed: false;
+            readonly internalType: "struct Hold";
+            readonly name: "hold";
+            readonly type: "tuple";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ProtectedClearedHoldByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "amount";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ProtectedClearedRedeemByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "to";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "clearingId";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "amount";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "expirationDate";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "ProtectedClearedTransferByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "from";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "value";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "deadline";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "nounce";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "signature";
+            readonly type: "bytes";
+        }];
+        readonly name: "ProtectedRedeemFrom";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "from";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "to";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "value";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "deadline";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "nounce";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "signature";
+            readonly type: "bytes";
+        }];
+        readonly name: "ProtectedTransferFrom";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "_operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "_from";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "_value";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "_data";
+            readonly type: "bytes";
+        }];
+        readonly name: "Redeemed";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "from";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "value";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "RedeemedByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "RevokedOperator";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "partition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "RevokedOperatorByPartition";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "role";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "previousAdminRole";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "newAdminRole";
+            readonly type: "bytes32";
+        }];
+        readonly name: "RoleAdminChanged";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "uint256";
+            readonly name: "snapshotID";
+            readonly type: "uint256";
+        }];
+        readonly name: "SnapshotTaken";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "snapshotId";
+            readonly type: "uint256";
+        }];
+        readonly name: "SnapshotTriggered";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }];
+        readonly name: "TokenPaused";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "operator";
+            readonly type: "address";
+        }];
+        readonly name: "TokenUnpaused";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "from";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "to";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "value";
+            readonly type: "uint256";
+        }];
+        readonly name: "Transfer";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "bytes32";
+            readonly name: "_fromPartition";
+            readonly type: "bytes32";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "_operator";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "_from";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "_to";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "uint256";
+            readonly name: "_value";
+            readonly type: "uint256";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "_data";
+            readonly type: "bytes";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "bytes";
+            readonly name: "_operatorData";
+            readonly type: "bytes";
+        }];
+        readonly name: "TransferByPartition";
+        readonly type: "event";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "balanceOfAtSnapshot";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "balance_";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "_partition";
+            readonly type: "bytes32";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "balanceOfAtSnapshotByPartition";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "balance_";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "clearedBalanceOfAtSnapshot";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "balance_";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "_partition";
+            readonly type: "bytes32";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "clearedBalanceOfAtSnapshotByPartition";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "balance_";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }];
+        readonly name: "decimalsAtSnapshot";
+        readonly outputs: readonly [{
+            readonly internalType: "uint8";
+            readonly name: "decimals_";
+            readonly type: "uint8";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "getStaticFunctionSelectors";
+        readonly outputs: readonly [{
+            readonly internalType: "bytes4[]";
+            readonly name: "staticFunctionSelectors_";
+            readonly type: "bytes4[]";
+        }];
+        readonly stateMutability: "pure";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "getStaticInterfaceIds";
+        readonly outputs: readonly [{
+            readonly internalType: "bytes4[]";
+            readonly name: "staticInterfaceIds_";
+            readonly type: "bytes4[]";
+        }];
+        readonly stateMutability: "pure";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "getStaticResolverKey";
+        readonly outputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "staticResolverKey_";
+            readonly type: "bytes32";
+        }];
+        readonly stateMutability: "pure";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "_pageIndex";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "_pageLength";
+            readonly type: "uint256";
+        }];
+        readonly name: "getTokenHoldersAtSnapshot";
+        readonly outputs: readonly [{
+            readonly internalType: "address[]";
+            readonly name: "holders_";
+            readonly type: "address[]";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }];
+        readonly name: "getTotalTokenHoldersAtSnapshot";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "heldBalanceOfAtSnapshot";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "balance_";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "_partition";
+            readonly type: "bytes32";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "heldBalanceOfAtSnapshotByPartition";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "balance_";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "lockedBalanceOfAtSnapshot";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "balance_";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "_partition";
+            readonly type: "bytes32";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "lockedBalanceOfAtSnapshotByPartition";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "balance_";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_tokenHolder";
+            readonly type: "address";
+        }];
+        readonly name: "partitionsOfAtSnapshot";
+        readonly outputs: readonly [{
+            readonly internalType: "bytes32[]";
+            readonly name: "";
+            readonly type: "bytes32[]";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "takeSnapshot";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "snapshotID_";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "nonpayable";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }];
+        readonly name: "totalSupplyAtSnapshot";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "totalSupply_";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "bytes32";
+            readonly name: "_partition";
+            readonly type: "bytes32";
+        }, {
+            readonly internalType: "uint256";
+            readonly name: "_snapshotID";
+            readonly type: "uint256";
+        }];
+        readonly name: "totalSupplyAtSnapshotByPartition";
+        readonly outputs: readonly [{
+            readonly internalType: "uint256";
+            readonly name: "totalSupply_";
+            readonly type: "uint256";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }];
+    static createInterface(): SnapshotsInterface;
+    static connect(address: string, signerOrProvider: Signer | Provider): Snapshots;
+}
+export {};

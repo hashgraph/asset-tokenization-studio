@@ -1,0 +1,4 @@
+export type { IClaimIssuer } from "./IClaimIssuer";
+export type { IERC734 } from "./IERC734";
+export type { IERC735 } from "./IERC735";
+export type { IIdentity } from "./IIdentity";

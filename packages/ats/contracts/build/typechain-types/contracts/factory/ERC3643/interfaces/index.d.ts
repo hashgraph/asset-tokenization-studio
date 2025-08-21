@@ -1,0 +1,16 @@
+import type * as iAccessControlSol from "./IAccessControl.sol";
+export type { iAccessControlSol };
+import type * as iBondSol from "./IBond.sol";
+export type { iBondSol };
+import type * as iBusinessLogicResolverSol from "./IBusinessLogicResolver.sol";
+export type { iBusinessLogicResolverSol };
+import type * as iDiamondCutManagerSol from "./IDiamondCutManager.sol";
+export type { iDiamondCutManagerSol };
+import type * as iDiamondLoupeSol from "./IDiamondLoupe.sol";
+export type { iDiamondLoupeSol };
+import type * as iFactorySol from "./IFactory.sol";
+export type { iFactorySol };
+import type * as iResolverProxySol from "./IResolverProxy.sol";
+export type { iResolverProxySol };
+import type * as iStaticFunctionSelectorsSol from "./IStaticFunctionSelectors.sol";
+export type { iStaticFunctionSelectorsSol };

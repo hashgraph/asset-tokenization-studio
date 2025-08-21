@@ -1,0 +1,5 @@
+export { ERC1410BasicStorageWrapper__factory } from "./ERC1410BasicStorageWrapper__factory";
+export { ERC1410BasicStorageWrapperRead__factory } from "./ERC1410BasicStorageWrapperRead__factory";
+export { ERC1410OperatorStorageWrapper__factory } from "./ERC1410OperatorStorageWrapper__factory";
+export { ERC1410ProtectedPartitionsStorageWrapper__factory } from "./ERC1410ProtectedPartitionsStorageWrapper__factory";
+export { ERC1410StandardStorageWrapper__factory } from "./ERC1410StandardStorageWrapper__factory";

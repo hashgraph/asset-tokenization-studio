@@ -1,0 +1,127 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IDiamondCut",
+  "sourceName": "contracts/interfaces/resolver/resolverProxy/IDiamondCut.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "getConfigInfo",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "resolver_",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "configurationId_",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "version_",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getStaticFunctionSelectors",
+      "outputs": [
+        {
+          "internalType": "bytes4[]",
+          "name": "staticFunctionSelectors_",
+          "type": "bytes4[]"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getStaticInterfaceIds",
+      "outputs": [
+        {
+          "internalType": "bytes4[]",
+          "name": "staticInterfaceIds_",
+          "type": "bytes4[]"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getStaticResolverKey",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "staticResolverKey_",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_newConfigurationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_newVersion",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateConfig",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_newVersion",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateConfigVersion",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IBusinessLogicResolver",
+          "name": "_newResolver",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_newConfigurationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_newVersion",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateResolver",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

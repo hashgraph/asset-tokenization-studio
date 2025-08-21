@@ -1,0 +1,154 @@
+import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "../../../../common";
+export interface IERC1594Interface extends utils.Interface {
+    functions: {
+        "canTransfer(address,uint256,bytes)": FunctionFragment;
+        "canTransferFrom(address,address,uint256,bytes)": FunctionFragment;
+        "initialize_ERC1594()": FunctionFragment;
+        "isIssuable()": FunctionFragment;
+        "issue(address,uint256,bytes)": FunctionFragment;
+        "redeem(uint256,bytes)": FunctionFragment;
+        "redeemFrom(address,uint256,bytes)": FunctionFragment;
+        "transferFromWithData(address,address,uint256,bytes)": FunctionFragment;
+        "transferWithData(address,uint256,bytes)": FunctionFragment;
+    };
+    getFunction(nameOrSignatureOrTopic: "canTransfer" | "canTransferFrom" | "initialize_ERC1594" | "isIssuable" | "issue" | "redeem" | "redeemFrom" | "transferFromWithData" | "transferWithData"): FunctionFragment;
+    encodeFunctionData(functionFragment: "canTransfer", values: [string, BigNumberish, BytesLike]): string;
+    encodeFunctionData(functionFragment: "canTransferFrom", values: [string, string, BigNumberish, BytesLike]): string;
+    encodeFunctionData(functionFragment: "initialize_ERC1594", values?: undefined): string;
+    encodeFunctionData(functionFragment: "isIssuable", values?: undefined): string;
+    encodeFunctionData(functionFragment: "issue", values: [string, BigNumberish, BytesLike]): string;
+    encodeFunctionData(functionFragment: "redeem", values: [BigNumberish, BytesLike]): string;
+    encodeFunctionData(functionFragment: "redeemFrom", values: [string, BigNumberish, BytesLike]): string;
+    encodeFunctionData(functionFragment: "transferFromWithData", values: [string, string, BigNumberish, BytesLike]): string;
+    encodeFunctionData(functionFragment: "transferWithData", values: [string, BigNumberish, BytesLike]): string;
+    decodeFunctionResult(functionFragment: "canTransfer", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "canTransferFrom", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "initialize_ERC1594", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "isIssuable", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "issue", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "redeem", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "redeemFrom", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "transferFromWithData", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "transferWithData", data: BytesLike): Result;
+    events: {};
+}
+export interface IERC1594 extends BaseContract {
+    connect(signerOrProvider: Signer | Provider | string): this;
+    attach(addressOrName: string): this;
+    deployed(): Promise<this>;
+    interface: IERC1594Interface;
+    queryFilter<TEvent extends TypedEvent>(event: TypedEventFilter<TEvent>, fromBlockOrBlockhash?: string | number | undefined, toBlock?: string | number | undefined): Promise<Array<TEvent>>;
+    listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
+    listeners(eventName?: string): Array<Listener>;
+    removeAllListeners<TEvent extends TypedEvent>(eventFilter: TypedEventFilter<TEvent>): this;
+    removeAllListeners(eventName?: string): this;
+    off: OnEvent<this>;
+    on: OnEvent<this>;
+    once: OnEvent<this>;
+    removeListener: OnEvent<this>;
+    functions: {
+        canTransfer(_to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<[boolean, string, string]>;
+        canTransferFrom(_from: string, _to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<[boolean, string, string]>;
+        initialize_ERC1594(overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        isIssuable(overrides?: CallOverrides): Promise<[boolean]>;
+        issue(_tokenHolder: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        redeem(_value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        redeemFrom(_tokenHolder: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        transferFromWithData(_from: string, _to: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        transferWithData(_to: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+    };
+    canTransfer(_to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<[boolean, string, string]>;
+    canTransferFrom(_from: string, _to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<[boolean, string, string]>;
+    initialize_ERC1594(overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    isIssuable(overrides?: CallOverrides): Promise<boolean>;
+    issue(_tokenHolder: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    redeem(_value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    redeemFrom(_tokenHolder: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    transferFromWithData(_from: string, _to: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    transferWithData(_to: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    callStatic: {
+        canTransfer(_to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<[boolean, string, string]>;
+        canTransferFrom(_from: string, _to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<[boolean, string, string]>;
+        initialize_ERC1594(overrides?: CallOverrides): Promise<void>;
+        isIssuable(overrides?: CallOverrides): Promise<boolean>;
+        issue(_tokenHolder: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<void>;
+        redeem(_value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<void>;
+        redeemFrom(_tokenHolder: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<void>;
+        transferFromWithData(_from: string, _to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<void>;
+        transferWithData(_to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<void>;
+    };
+    filters: {};
+    estimateGas: {
+        canTransfer(_to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+        canTransferFrom(_from: string, _to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+        initialize_ERC1594(overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        isIssuable(overrides?: CallOverrides): Promise<BigNumber>;
+        issue(_tokenHolder: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        redeem(_value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        redeemFrom(_tokenHolder: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        transferFromWithData(_from: string, _to: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        transferWithData(_to: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+    };
+    populateTransaction: {
+        canTransfer(_to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        canTransferFrom(_from: string, _to: string, _value: BigNumberish, _data: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        initialize_ERC1594(overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        isIssuable(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        issue(_tokenHolder: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        redeem(_value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        redeemFrom(_tokenHolder: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        transferFromWithData(_from: string, _to: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        transferWithData(_to: string, _value: BigNumberish, _data: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+    };
+}

@@ -1,0 +1,212 @@
+import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "../../../../common";
+export type IssueDataStruct = {
+    partition: BytesLike;
+    tokenHolder: string;
+    value: BigNumberish;
+    data: BytesLike;
+};
+export type IssueDataStructOutput = [string, string, BigNumber, string] & {
+    partition: string;
+    tokenHolder: string;
+    value: BigNumber;
+    data: string;
+};
+export type OperatorTransferDataStruct = {
+    partition: BytesLike;
+    from: string;
+    to: string;
+    value: BigNumberish;
+    data: BytesLike;
+    operatorData: BytesLike;
+};
+export type OperatorTransferDataStructOutput = [
+    string,
+    string,
+    string,
+    BigNumber,
+    string,
+    string
+] & {
+    partition: string;
+    from: string;
+    to: string;
+    value: BigNumber;
+    data: string;
+    operatorData: string;
+};
+export interface IERC1410ManagementInterface extends utils.Interface {
+    functions: {
+        "controllerRedeemByPartition(bytes32,address,uint256,bytes,bytes)": FunctionFragment;
+        "controllerTransferByPartition(bytes32,address,address,uint256,bytes,bytes)": FunctionFragment;
+        "initialize_ERC1410(bool)": FunctionFragment;
+        "issueByPartition((bytes32,address,uint256,bytes))": FunctionFragment;
+        "operatorRedeemByPartition(bytes32,address,uint256,bytes,bytes)": FunctionFragment;
+        "operatorTransferByPartition((bytes32,address,address,uint256,bytes,bytes))": FunctionFragment;
+        "protectedRedeemFromByPartition(bytes32,address,uint256,uint256,uint256,bytes)": FunctionFragment;
+        "protectedTransferFromByPartition(bytes32,address,address,uint256,uint256,uint256,bytes)": FunctionFragment;
+    };
+    getFunction(nameOrSignatureOrTopic: "controllerRedeemByPartition" | "controllerTransferByPartition" | "initialize_ERC1410" | "issueByPartition" | "operatorRedeemByPartition" | "operatorTransferByPartition" | "protectedRedeemFromByPartition" | "protectedTransferFromByPartition"): FunctionFragment;
+    encodeFunctionData(functionFragment: "controllerRedeemByPartition", values: [BytesLike, string, BigNumberish, BytesLike, BytesLike]): string;
+    encodeFunctionData(functionFragment: "controllerTransferByPartition", values: [BytesLike, string, string, BigNumberish, BytesLike, BytesLike]): string;
+    encodeFunctionData(functionFragment: "initialize_ERC1410", values: [boolean]): string;
+    encodeFunctionData(functionFragment: "issueByPartition", values: [IssueDataStruct]): string;
+    encodeFunctionData(functionFragment: "operatorRedeemByPartition", values: [BytesLike, string, BigNumberish, BytesLike, BytesLike]): string;
+    encodeFunctionData(functionFragment: "operatorTransferByPartition", values: [OperatorTransferDataStruct]): string;
+    encodeFunctionData(functionFragment: "protectedRedeemFromByPartition", values: [
+        BytesLike,
+        string,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BytesLike
+    ]): string;
+    encodeFunctionData(functionFragment: "protectedTransferFromByPartition", values: [
+        BytesLike,
+        string,
+        string,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BytesLike
+    ]): string;
+    decodeFunctionResult(functionFragment: "controllerRedeemByPartition", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "controllerTransferByPartition", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "initialize_ERC1410", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "issueByPartition", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "operatorRedeemByPartition", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "operatorTransferByPartition", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "protectedRedeemFromByPartition", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "protectedTransferFromByPartition", data: BytesLike): Result;
+    events: {};
+}
+export interface IERC1410Management extends BaseContract {
+    connect(signerOrProvider: Signer | Provider | string): this;
+    attach(addressOrName: string): this;
+    deployed(): Promise<this>;
+    interface: IERC1410ManagementInterface;
+    queryFilter<TEvent extends TypedEvent>(event: TypedEventFilter<TEvent>, fromBlockOrBlockhash?: string | number | undefined, toBlock?: string | number | undefined): Promise<Array<TEvent>>;
+    listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
+    listeners(eventName?: string): Array<Listener>;
+    removeAllListeners<TEvent extends TypedEvent>(eventFilter: TypedEventFilter<TEvent>): this;
+    removeAllListeners(eventName?: string): this;
+    off: OnEvent<this>;
+    on: OnEvent<this>;
+    once: OnEvent<this>;
+    removeListener: OnEvent<this>;
+    functions: {
+        controllerRedeemByPartition(_partition: BytesLike, _tokenHolder: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        controllerTransferByPartition(_partition: BytesLike, _from: string, _to: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        initialize_ERC1410(_multiPartition: boolean, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        issueByPartition(_issueData: IssueDataStruct, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        operatorRedeemByPartition(_partition: BytesLike, _tokenHolder: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        operatorTransferByPartition(_operatorTransferData: OperatorTransferDataStruct, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        protectedRedeemFromByPartition(_partition: BytesLike, _from: string, _amount: BigNumberish, _deadline: BigNumberish, _nounce: BigNumberish, _signature: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        protectedTransferFromByPartition(_partition: BytesLike, _from: string, _to: string, _amount: BigNumberish, _deadline: BigNumberish, _nounce: BigNumberish, _signature: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+    };
+    controllerRedeemByPartition(_partition: BytesLike, _tokenHolder: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    controllerTransferByPartition(_partition: BytesLike, _from: string, _to: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    initialize_ERC1410(_multiPartition: boolean, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    issueByPartition(_issueData: IssueDataStruct, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    operatorRedeemByPartition(_partition: BytesLike, _tokenHolder: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    operatorTransferByPartition(_operatorTransferData: OperatorTransferDataStruct, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    protectedRedeemFromByPartition(_partition: BytesLike, _from: string, _amount: BigNumberish, _deadline: BigNumberish, _nounce: BigNumberish, _signature: BytesLike, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    protectedTransferFromByPartition(_partition: BytesLike, _from: string, _to: string, _amount: BigNumberish, _deadline: BigNumberish, _nounce: BigNumberish, _signature: BytesLike, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    callStatic: {
+        controllerRedeemByPartition(_partition: BytesLike, _tokenHolder: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: CallOverrides): Promise<void>;
+        controllerTransferByPartition(_partition: BytesLike, _from: string, _to: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: CallOverrides): Promise<void>;
+        initialize_ERC1410(_multiPartition: boolean, overrides?: CallOverrides): Promise<void>;
+        issueByPartition(_issueData: IssueDataStruct, overrides?: CallOverrides): Promise<void>;
+        operatorRedeemByPartition(_partition: BytesLike, _tokenHolder: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: CallOverrides): Promise<void>;
+        operatorTransferByPartition(_operatorTransferData: OperatorTransferDataStruct, overrides?: CallOverrides): Promise<string>;
+        protectedRedeemFromByPartition(_partition: BytesLike, _from: string, _amount: BigNumberish, _deadline: BigNumberish, _nounce: BigNumberish, _signature: BytesLike, overrides?: CallOverrides): Promise<void>;
+        protectedTransferFromByPartition(_partition: BytesLike, _from: string, _to: string, _amount: BigNumberish, _deadline: BigNumberish, _nounce: BigNumberish, _signature: BytesLike, overrides?: CallOverrides): Promise<void>;
+    };
+    filters: {};
+    estimateGas: {
+        controllerRedeemByPartition(_partition: BytesLike, _tokenHolder: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        controllerTransferByPartition(_partition: BytesLike, _from: string, _to: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        initialize_ERC1410(_multiPartition: boolean, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        issueByPartition(_issueData: IssueDataStruct, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        operatorRedeemByPartition(_partition: BytesLike, _tokenHolder: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        operatorTransferByPartition(_operatorTransferData: OperatorTransferDataStruct, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        protectedRedeemFromByPartition(_partition: BytesLike, _from: string, _amount: BigNumberish, _deadline: BigNumberish, _nounce: BigNumberish, _signature: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        protectedTransferFromByPartition(_partition: BytesLike, _from: string, _to: string, _amount: BigNumberish, _deadline: BigNumberish, _nounce: BigNumberish, _signature: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+    };
+    populateTransaction: {
+        controllerRedeemByPartition(_partition: BytesLike, _tokenHolder: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        controllerTransferByPartition(_partition: BytesLike, _from: string, _to: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        initialize_ERC1410(_multiPartition: boolean, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        issueByPartition(_issueData: IssueDataStruct, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        operatorRedeemByPartition(_partition: BytesLike, _tokenHolder: string, _value: BigNumberish, _data: BytesLike, _operatorData: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        operatorTransferByPartition(_operatorTransferData: OperatorTransferDataStruct, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        protectedRedeemFromByPartition(_partition: BytesLike, _from: string, _amount: BigNumberish, _deadline: BigNumberish, _nounce: BigNumberish, _signature: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        protectedTransferFromByPartition(_partition: BytesLike, _from: string, _to: string, _amount: BigNumberish, _deadline: BigNumberish, _nounce: BigNumberish, _signature: BytesLike, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+    };
+}

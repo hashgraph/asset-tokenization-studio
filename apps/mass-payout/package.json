@@ -1,0 +1,15 @@
+{
+  "name": "@hashgraph/mass-payout-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mass payout application - placeholder workspace",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Mass payout app build - placeholder'",
+    "test": "echo 'Mass payout app tests - placeholder'",
+    "dev": "echo 'Mass payout app dev - placeholder'",
+    "start": "echo 'Mass payout app start - placeholder'"
+  },
+  "keywords": ["hedera", "mass-payout", "app", "placeholder"],
+  "license": "Apache-2.0"
+}

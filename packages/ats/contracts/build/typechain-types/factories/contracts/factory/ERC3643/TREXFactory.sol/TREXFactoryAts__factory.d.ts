@@ -1,0 +1,797 @@
+import { Signer, ContractFactory, Overrides } from "ethers";
+import type { Provider, TransactionRequest } from "@ethersproject/providers";
+import type { TREXFactoryAts, TREXFactoryAtsInterface } from "../../../../../contracts/factory/ERC3643/TREXFactory.sol/TREXFactoryAts";
+type TREXFactoryAtsConstructorParams = [linkLibraryAddresses: TREXFactoryAtsLibraryAddresses, signer?: Signer] | ConstructorParameters<typeof ContractFactory>;
+export declare class TREXFactoryAts__factory extends ContractFactory {
+    constructor(...args: TREXFactoryAtsConstructorParams);
+    static linkBytecode(linkLibraryAddresses: TREXFactoryAtsLibraryAddresses): string;
+    deploy(_implementationAuthority: string, _idFactory: string, _atsFactory: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<TREXFactoryAts>;
+    getDeployTransaction(_implementationAuthority: string, _idFactory: string, _atsFactory: string, overrides?: Overrides & {
+        from?: string;
+    }): TransactionRequest;
+    attach(address: string): TREXFactoryAts;
+    connect(signer: Signer): TREXFactoryAts__factory;
+    static readonly bytecode = "0x60806040523480156200001157600080fd5b50604051620018e1380380620018e18339810160408190526200003491620000ef565b6200003f3362000082565b600180546001600160a01b039485166001600160a01b03199182161790915560028054938516938216939093179092556004805491909316911617905562000139565b600080546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b80516001600160a01b0381168114620000ea57600080fd5b919050565b6000806000606084860312156200010557600080fd5b6200011084620000d2565b92506200012060208501620000d2565b91506200013060408501620000d2565b90509250925092565b61179880620001496000396000f3fe608060405234801561001057600080fd5b50600436106100ca5760003560e01c80638da5cb5b1161007c5780638da5cb5b1461015957806392dd9d651461016a578063c1733f681461017d578063ccd41cce14610190578063cf753d37146101a3578063f2fde38b146101b6578063fb88d79c146101c957600080fd5b80632c85e7c3146100cf5780632d5f1187146100e457806350b0183814610107578063521bb1511461011a5780635f2773a51461012d578063715018a61461013e57806385eb890614610146575b600080fd5b6100e26100dd3660046109bb565b6101fd565b005b6001546001600160a01b03165b6040516100fe9190610a8c565b60405180910390f35b6100e2610115366004610ac5565b610290565b6100e2610128366004610b11565b6102fa565b6002546001600160a01b03166100f1565b6100e2610356565b6100e2610154366004610bb2565b61036a565b6000546001600160a01b03166100f1565b6100e2610178366004610bb2565b6103c3565b6100f161018b366004610bd6565b61070b565b6100e261019e366004610bb2565b610740565b6100e26101b1366004610c47565b505050565b6100e26101c4366004610bb2565b6107b9565b6100f16101d7366004610cd7565b80516020818301810180516003825292820191909301209152546001600160a01b031681565b6001546002546004805460405163236a038760e11b815273__$d5076b7b673f9fc291e68ef6dddff65248$__946346d4070e94610259946003946001600160a01b03938416949284169316918d918d918d918d918d9101611488565b60006040518083038186803b15801561027157600080fd5b505af4158015610285573d6000803e3d6000fd5b505050505050505050565b610298610832565b60405163f2fde38b60e01b81526001600160a01b0383169063f2fde38b906102c4908490600401610a8c565b600060405180830381600087803b1580156102de57600080fd5b505af11580156102f2573d6000803e3d6000fd5b505050505050565b6001546002546004805460405163cf0e48f960e01b815273__$5285726528c74b582395a4c0c99fa9f25a$__9463cf0e48f994610259946003946001600160a01b03938416949284169316918d918d918d918d918d910161159a565b61035e610832565b610368600061088c565b565b610372610832565b6001600160a01b0381166103a15760405162461bcd60e51b8152600401610398906116fe565b60405180910390fd5b600480546001600160a01b0319166001600160a01b0392909216919091179055565b6103cb610832565b6001600160a01b0381166103f15760405162461bcd60e51b8152600401610398906116fe565b60006001600160a01b0316816001600160a01b0316636ff6e83f6040518163ffffffff1660e01b8152600401602060405180830381865afa15801561043a573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061045e9190611735565b6001600160a01b0316141580156104e9575060006001600160a01b0316816001600160a01b0316631ee9ce8b6040518163ffffffff1660e01b8152600401602060405180830381865afa1580156104b9573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906104dd9190611735565b6001600160a01b031614155b8015610569575060006001600160a01b0316816001600160a01b0316639e3e7bb96040518163ffffffff1660e01b8152600401602060405180830381865afa158015610539573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061055d9190611735565b6001600160a01b031614155b80156105e9575060006001600160a01b0316816001600160a01b03166361f898256040518163ffffffff1660e01b8152600401602060405180830381865afa1580156105b9573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906105dd9190611735565b6001600160a01b031614155b8015610669575060006001600160a01b0316816001600160a01b031663fedcc0526040518163ffffffff1660e01b8152600401602060405180830381865afa158015610639573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061065d9190611735565b6001600160a01b031614155b6106b55760405162461bcd60e51b815260206004820181905260248201527f696e76616c696420496d706c656d656e746174696f6e20417574686f726974796044820152606401610398565b600180546001600160a01b0319166001600160a01b0383161790556040517f3b1074392ed8e8424715d0dda2197eede67080b377fc8370e26f3e882207f6b890610700908390610a8c565b60405180910390a150565b60006003838360405161071f929190611752565b908152604051908190036020019020546001600160a01b0316905092915050565b610748610832565b6001600160a01b03811661076e5760405162461bcd60e51b8152600401610398906116fe565b600280546001600160a01b0319166001600160a01b0383161790556040517fae81f4fee1b2d830e39ae449967642aaa0e5a1771aa200d0a50853010992242c90610700908390610a8c565b6107c1610832565b6001600160a01b0381166108265760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152608401610398565b61082f8161088c565b50565b6000546001600160a01b031633146103685760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610398565b600080546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b634e487b7160e01b600052604160045260246000fd5b600082601f83011261090357600080fd5b81356001600160401b038082111561091d5761091d6108dc565b604051601f8301601f19908116603f01168101908282118183101715610945576109456108dc565b8160405283815286602085880101111561095e57600080fd5b836020870160208301376000602085830101528094505050505092915050565b600060e0828403121561099057600080fd5b50919050565b60006060828403121561099057600080fd5b6000610100828403121561099057600080fd5b600080600080600060a086880312156109d357600080fd5b85356001600160401b03808211156109ea57600080fd5b6109f689838a016108f2565b96506020880135915080821115610a0c57600080fd5b610a1889838a0161097e565b95506040880135915080821115610a2e57600080fd5b610a3a89838a01610996565b94506060880135915080821115610a5057600080fd5b610a5c89838a016109a8565b93506080880135915080821115610a7257600080fd5b50610a7f88828901610996565b9150509295509295909350565b6001600160a01b0391909116815260200190565b6001600160a01b038116811461082f57600080fd5b8035610ac081610aa0565b919050565b60008060408385031215610ad857600080fd5b8235610ae381610aa0565b91506020830135610af381610aa0565b809150509250929050565b6000610160828403121561099057600080fd5b600080600080600060a08688031215610b2957600080fd5b85356001600160401b0380821115610b4057600080fd5b610b4c89838a016108f2565b96506020880135915080821115610b6257600080fd5b610b6e89838a0161097e565b95506040880135915080821115610b8457600080fd5b610b9089838a01610996565b94506060880135915080821115610ba657600080fd5b610a5c89838a01610afe565b600060208284031215610bc457600080fd5b8135610bcf81610aa0565b9392505050565b60008060208385031215610be957600080fd5b82356001600160401b0380821115610c0057600080fd5b818501915085601f830112610c1457600080fd5b813581811115610c2357600080fd5b866020828501011115610c3557600080fd5b60209290920196919550909350505050565b600080600060608486031215610c5c57600080fd5b83356001600160401b0380821115610c7357600080fd5b610c7f878388016108f2565b94506020860135915080821115610c9557600080fd5b908501906101408288031215610caa57600080fd5b90925060408501359080821115610cc057600080fd5b50610ccd86828701610996565b9150509250925092565b600060208284031215610ce957600080fd5b81356001600160401b03811115610cff57600080fd5b610d0b848285016108f2565b949350505050565b6000815180845260005b81811015610d3957602081850181015186830182015201610d1d565b506000602082860101526020601f19601f83011685010191505092915050565b6000808335601e19843603018112610d7057600080fd5b83016020810192503590506001600160401b03811115610d8f57600080fd5b8060051b3603821315610da157600080fd5b9250929050565b8183526000602080850194508260005b85811015610de6578135610dcb81610aa0565b6001600160a01b031687529582019590820190600101610db8565b509495945050505050565b81835281816020850137506000828201602090810191909152601f909101601f19169091010190565b6000808335601e19843603018112610e3157600080fd5b83016020810192503590506001600160401b03811115610e5057600080fd5b803603821315610da157600080fd5b81835260006020808501808196508560051b810191508460005b87811015610eaf578284038952610e908288610e1a565b610e9b868284610df1565b9a87019a9550505090840190600101610e79565b5091979650505050505050565b60008135610ec981610aa0565b6001600160a01b039081168452602083013590610ee582610aa0565b166020840152610ef760408301610ab5565b6001600160a01b03166040840152610f126060830183610d59565b60e06060860152610f2760e086018284610da8565b915050610f376080840184610d59565b8583036080870152610f4a838284610da8565b92505050610f5b60a0840184610d59565b85830360a0870152610f6e838284610da8565b92505050610f7f60c0840184610d59565b85830360c0870152610f92838284610e5f565b9695505050505050565b81835260006001600160fb1b03831115610fb557600080fd5b8260051b80836020870137939093016020019392505050565b6000610fda8283610d59565b60608552610fec606086018284610f9c565b9150506020610ffd81850185610d59565b8684038388015261100f848284610da8565b935050506110206040850185610d59565b8684036040880152808452828401600582901b850184018360005b8481101561107557878303601f190184526110568287610d59565b611061858284610f9c565b95890195945050509086019060010161103b565b50909998505050505050505050565b6000823561021e1983360301811261109b57600080fd5b90910192915050565b80358015158114610ac057600080fd5b81835260006020808501808196508560051b81019150846000805b8881101561112c578385038a528235603e198936030181126110ef578283fd5b880180358652604061110388830183610d59565b925081898901526111178289018483610da8565b9c89019c9750505092860192506001016110cf565b509298975050505050505050565b60008235607e1983360301811261109b57600080fd5b600061115c8283610e1a565b6080855261116e608086018284610df1565b91505061117e6020840184610e1a565b8583036020870152611191838284610df1565b925050506111a26040840184610e1a565b85830360408701526111b5838284610df1565b92505050606083013560ff81168082146111ce57600080fd5b606095909501949094529392505050565b60006102206111f7846111f1856110a4565b15159052565b611203602084016110a4565b1515602085015261121660408401610ab5565b6001600160a01b03166040850152606083810135908501526080808401359085015261124560a0840184610d59565b8260a087015261125883870182846110b4565b9250505061126860c084016110a4565b151560c085015261127b60e084016110a4565b151560e0850152610100838101359085015261012061129c8185018561113a565b858303828701526112ad8382611150565b925050506101406112bf8185016110a4565b1515908501526101606112d38482016110a4565b1515908501526101806112e884820185610d59565b868403838801526112fa848284610da8565b93505050506101a061130e81850185610d59565b86840383880152611320848284610da8565b93505050506101c061133481850185610d59565b86840383880152611346848284610da8565b93505050506101e0611359818501610ab5565b6001600160a01b031690850152610200611374848201610ab5565b6001600160a01b03169401939093525090919050565b80356001600160e81b031981168114610ac057600080fd5b6003811061082f57600080fd5b8035610ac0816113a2565b6003811061082f57634e487b7160e01b600052602160045260246000fd5b600081356113e5816113a2565b6113ee816113ba565b835260208201356113fe816113a2565b611407816113ba565b6020840152604082013536839003605e1901811261142457600080fd5b606060408501528201611436816110a4565b1515606085015261144a6020820182610e1a565b6060608087015261145f60c087018284610df1565b91505061146f6040830183610e1a565b868303605f190160a08801529250610f92828483610df1565b8981526001600160a01b038981166020830152888116604083015287166060820152610120608082018190526000906114c383820189610d13565b905082810360a08401526114d78188610ebc565b905082810360c08401526114eb8187610fce565b905082810360e08401526101006115028687611084565b818352611511828401826111df565b90506001600160e81b03196115286020890161138a565b16602084015260408701356040840152606087013560608401526080870135608084015260a087013560a084015260c087013560c084015260e087013560e08401528481038286015261157b81876113d8565b9e9d5050505050505050505050505050565b611596816113ba565b9052565b8981526001600160a01b038981166020830152888116604083015287166060820152610120608082018190526000906115d583820189610d13565b83810360a08501526115e78189610ebc565b905083810360c08501526115fb8188610fce565b905083810360e08501526101606116128788611084565b818352611621828401826111df565b915050611637602083016111f160208a016110a4565b611643604088016110a4565b15156040830152611656606088016110a4565b15156060830152611669608088016110a4565b1515608083015261167c60a088016110a4565b151560a083015261168f60c088016110a4565b151560c08301526116a260e088016110a4565b151560e08301526101006116b78882016113af565b6116c38285018261158d565b506116cf84890161138a565b6001600160e81b03198116848601525061014093508388013584840152858203818701525061157b81876113d8565b6020808252601f908201527f696e76616c696420617267756d656e74202d207a65726f206164647265737300604082015260600190565b60006020828403121561174757600080fd5b8151610bcf81610aa0565b818382376000910190815291905056fea264697066735822122072025bfb1802dfac8cd8375c67371e714b14c9b43124e91d49452664c102b96164736f6c63430008110033";
+    static readonly abi: readonly [{
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "_implementationAuthority";
+            readonly type: "address";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_idFactory";
+            readonly type: "address";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_atsFactory";
+            readonly type: "address";
+        }];
+        readonly stateMutability: "nonpayable";
+        readonly type: "constructor";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "_addr";
+            readonly type: "address";
+        }];
+        readonly name: "Deployed";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "_idFactory";
+            readonly type: "address";
+        }];
+        readonly name: "IdFactorySet";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "_implementationAuthority";
+            readonly type: "address";
+        }];
+        readonly name: "ImplementationAuthoritySet";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "previousOwner";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "newOwner";
+            readonly type: "address";
+        }];
+        readonly name: "OwnershipTransferred";
+        readonly type: "event";
+    }, {
+        readonly anonymous: false;
+        readonly inputs: readonly [{
+            readonly indexed: true;
+            readonly internalType: "address";
+            readonly name: "_token";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "_ir";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "_irs";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "_tir";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "_ctr";
+            readonly type: "address";
+        }, {
+            readonly indexed: false;
+            readonly internalType: "address";
+            readonly name: "_mc";
+            readonly type: "address";
+        }, {
+            readonly indexed: true;
+            readonly internalType: "string";
+            readonly name: "_salt";
+            readonly type: "string";
+        }];
+        readonly name: "TREXSuiteDeployed";
+        readonly type: "event";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "string";
+            readonly name: "_salt";
+            readonly type: "string";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "address";
+                readonly name: "owner";
+                readonly type: "address";
+            }, {
+                readonly internalType: "string";
+                readonly name: "name";
+                readonly type: "string";
+            }, {
+                readonly internalType: "string";
+                readonly name: "symbol";
+                readonly type: "string";
+            }, {
+                readonly internalType: "uint8";
+                readonly name: "decimals";
+                readonly type: "uint8";
+            }, {
+                readonly internalType: "address";
+                readonly name: "irs";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address";
+                readonly name: "ONCHAINID";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "irAgents";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "tokenAgents";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "complianceModules";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "bytes[]";
+                readonly name: "complianceSettings";
+                readonly type: "bytes[]";
+            }];
+            readonly internalType: "struct ITREXFactory.TokenDetails";
+            readonly name: "_tokenDetails";
+            readonly type: "tuple";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "uint256[]";
+                readonly name: "claimTopics";
+                readonly type: "uint256[]";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "issuers";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "uint256[][]";
+                readonly name: "issuerClaims";
+                readonly type: "uint256[][]";
+            }];
+            readonly internalType: "struct ITREXFactory.ClaimDetails";
+            readonly name: "_claimDetails";
+            readonly type: "tuple";
+        }];
+        readonly name: "deployTREXSuite";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "string";
+            readonly name: "_salt";
+            readonly type: "string";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "address";
+                readonly name: "owner";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address";
+                readonly name: "irs";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address";
+                readonly name: "ONCHAINID";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "irAgents";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "tokenAgents";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "complianceModules";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "bytes[]";
+                readonly name: "complianceSettings";
+                readonly type: "bytes[]";
+            }];
+            readonly internalType: "struct TREXFactoryAts.TokenDetailsAts";
+            readonly name: "_tokenDetails";
+            readonly type: "tuple";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "uint256[]";
+                readonly name: "claimTopics";
+                readonly type: "uint256[]";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "issuers";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "uint256[][]";
+                readonly name: "issuerClaims";
+                readonly type: "uint256[][]";
+            }];
+            readonly internalType: "struct ITREXFactory.ClaimDetails";
+            readonly name: "_claimDetails";
+            readonly type: "tuple";
+        }, {
+            readonly components: readonly [{
+                readonly components: readonly [{
+                    readonly internalType: "bool";
+                    readonly name: "arePartitionsProtected";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "isMultiPartition";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "contract IBusinessLogicResolver_";
+                    readonly name: "resolver";
+                    readonly type: "address";
+                }, {
+                    readonly components: readonly [{
+                        readonly internalType: "bytes32";
+                        readonly name: "key";
+                        readonly type: "bytes32";
+                    }, {
+                        readonly internalType: "uint256";
+                        readonly name: "version";
+                        readonly type: "uint256";
+                    }];
+                    readonly internalType: "struct IFactory_.ResolverProxyConfiguration";
+                    readonly name: "resolverProxyConfiguration";
+                    readonly type: "tuple";
+                }, {
+                    readonly components: readonly [{
+                        readonly internalType: "bytes32";
+                        readonly name: "role";
+                        readonly type: "bytes32";
+                    }, {
+                        readonly internalType: "address[]";
+                        readonly name: "members";
+                        readonly type: "address[]";
+                    }];
+                    readonly internalType: "struct IResolverProxy_.Rbac[]";
+                    readonly name: "rbacs";
+                    readonly type: "tuple[]";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "isControllable";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "isWhiteList";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "uint256";
+                    readonly name: "maxSupply";
+                    readonly type: "uint256";
+                }, {
+                    readonly components: readonly [{
+                        readonly internalType: "string";
+                        readonly name: "name";
+                        readonly type: "string";
+                    }, {
+                        readonly internalType: "string";
+                        readonly name: "symbol";
+                        readonly type: "string";
+                    }, {
+                        readonly internalType: "string";
+                        readonly name: "isin";
+                        readonly type: "string";
+                    }, {
+                        readonly internalType: "uint8";
+                        readonly name: "decimals";
+                        readonly type: "uint8";
+                    }];
+                    readonly internalType: "struct IFactory_.ERC20MetadataInfo";
+                    readonly name: "erc20MetadataInfo";
+                    readonly type: "tuple";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "clearingActive";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "internalKycActivated";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "address[]";
+                    readonly name: "externalPauses";
+                    readonly type: "address[]";
+                }, {
+                    readonly internalType: "address[]";
+                    readonly name: "externalControlLists";
+                    readonly type: "address[]";
+                }, {
+                    readonly internalType: "address[]";
+                    readonly name: "externalKycLists";
+                    readonly type: "address[]";
+                }, {
+                    readonly internalType: "address";
+                    readonly name: "compliance";
+                    readonly type: "address";
+                }, {
+                    readonly internalType: "address";
+                    readonly name: "identityRegistry";
+                    readonly type: "address";
+                }];
+                readonly internalType: "struct IFactory_.SecurityData";
+                readonly name: "security";
+                readonly type: "tuple";
+            }, {
+                readonly components: readonly [{
+                    readonly internalType: "bytes3";
+                    readonly name: "currency";
+                    readonly type: "bytes3";
+                }, {
+                    readonly internalType: "uint256";
+                    readonly name: "nominalValue";
+                    readonly type: "uint256";
+                }, {
+                    readonly internalType: "uint256";
+                    readonly name: "startingDate";
+                    readonly type: "uint256";
+                }, {
+                    readonly internalType: "uint256";
+                    readonly name: "maturityDate";
+                    readonly type: "uint256";
+                }];
+                readonly internalType: "struct IBond_.BondDetailsData";
+                readonly name: "bondDetails";
+                readonly type: "tuple";
+            }, {
+                readonly components: readonly [{
+                    readonly internalType: "uint256";
+                    readonly name: "couponFrequency";
+                    readonly type: "uint256";
+                }, {
+                    readonly internalType: "uint256";
+                    readonly name: "couponRate";
+                    readonly type: "uint256";
+                }, {
+                    readonly internalType: "uint256";
+                    readonly name: "firstCouponDate";
+                    readonly type: "uint256";
+                }];
+                readonly internalType: "struct IBond_.CouponDetailsData";
+                readonly name: "couponDetails";
+                readonly type: "tuple";
+            }];
+            readonly internalType: "struct IFactory_.BondData";
+            readonly name: "_bondData";
+            readonly type: "tuple";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "enum RegulationType";
+                readonly name: "regulationType";
+                readonly type: "uint8";
+            }, {
+                readonly internalType: "enum RegulationSubType";
+                readonly name: "regulationSubType";
+                readonly type: "uint8";
+            }, {
+                readonly components: readonly [{
+                    readonly internalType: "bool";
+                    readonly name: "countriesControlListType";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "string";
+                    readonly name: "listOfCountries";
+                    readonly type: "string";
+                }, {
+                    readonly internalType: "string";
+                    readonly name: "info";
+                    readonly type: "string";
+                }];
+                readonly internalType: "struct AdditionalSecurityData";
+                readonly name: "additionalSecurityData";
+                readonly type: "tuple";
+            }];
+            readonly internalType: "struct FactoryRegulationData";
+            readonly name: "_factoryRegulationData";
+            readonly type: "tuple";
+        }];
+        readonly name: "deployTREXSuiteAtsBond";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "string";
+            readonly name: "_salt";
+            readonly type: "string";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "address";
+                readonly name: "owner";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address";
+                readonly name: "irs";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address";
+                readonly name: "ONCHAINID";
+                readonly type: "address";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "irAgents";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "tokenAgents";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "complianceModules";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "bytes[]";
+                readonly name: "complianceSettings";
+                readonly type: "bytes[]";
+            }];
+            readonly internalType: "struct TREXFactoryAts.TokenDetailsAts";
+            readonly name: "_tokenDetails";
+            readonly type: "tuple";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "uint256[]";
+                readonly name: "claimTopics";
+                readonly type: "uint256[]";
+            }, {
+                readonly internalType: "address[]";
+                readonly name: "issuers";
+                readonly type: "address[]";
+            }, {
+                readonly internalType: "uint256[][]";
+                readonly name: "issuerClaims";
+                readonly type: "uint256[][]";
+            }];
+            readonly internalType: "struct ITREXFactory.ClaimDetails";
+            readonly name: "_claimDetails";
+            readonly type: "tuple";
+        }, {
+            readonly components: readonly [{
+                readonly components: readonly [{
+                    readonly internalType: "bool";
+                    readonly name: "arePartitionsProtected";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "isMultiPartition";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "contract IBusinessLogicResolver_";
+                    readonly name: "resolver";
+                    readonly type: "address";
+                }, {
+                    readonly components: readonly [{
+                        readonly internalType: "bytes32";
+                        readonly name: "key";
+                        readonly type: "bytes32";
+                    }, {
+                        readonly internalType: "uint256";
+                        readonly name: "version";
+                        readonly type: "uint256";
+                    }];
+                    readonly internalType: "struct IFactory_.ResolverProxyConfiguration";
+                    readonly name: "resolverProxyConfiguration";
+                    readonly type: "tuple";
+                }, {
+                    readonly components: readonly [{
+                        readonly internalType: "bytes32";
+                        readonly name: "role";
+                        readonly type: "bytes32";
+                    }, {
+                        readonly internalType: "address[]";
+                        readonly name: "members";
+                        readonly type: "address[]";
+                    }];
+                    readonly internalType: "struct IResolverProxy_.Rbac[]";
+                    readonly name: "rbacs";
+                    readonly type: "tuple[]";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "isControllable";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "isWhiteList";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "uint256";
+                    readonly name: "maxSupply";
+                    readonly type: "uint256";
+                }, {
+                    readonly components: readonly [{
+                        readonly internalType: "string";
+                        readonly name: "name";
+                        readonly type: "string";
+                    }, {
+                        readonly internalType: "string";
+                        readonly name: "symbol";
+                        readonly type: "string";
+                    }, {
+                        readonly internalType: "string";
+                        readonly name: "isin";
+                        readonly type: "string";
+                    }, {
+                        readonly internalType: "uint8";
+                        readonly name: "decimals";
+                        readonly type: "uint8";
+                    }];
+                    readonly internalType: "struct IFactory_.ERC20MetadataInfo";
+                    readonly name: "erc20MetadataInfo";
+                    readonly type: "tuple";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "clearingActive";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "internalKycActivated";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "address[]";
+                    readonly name: "externalPauses";
+                    readonly type: "address[]";
+                }, {
+                    readonly internalType: "address[]";
+                    readonly name: "externalControlLists";
+                    readonly type: "address[]";
+                }, {
+                    readonly internalType: "address[]";
+                    readonly name: "externalKycLists";
+                    readonly type: "address[]";
+                }, {
+                    readonly internalType: "address";
+                    readonly name: "compliance";
+                    readonly type: "address";
+                }, {
+                    readonly internalType: "address";
+                    readonly name: "identityRegistry";
+                    readonly type: "address";
+                }];
+                readonly internalType: "struct IFactory_.SecurityData";
+                readonly name: "security";
+                readonly type: "tuple";
+            }, {
+                readonly components: readonly [{
+                    readonly internalType: "bool";
+                    readonly name: "votingRight";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "informationRight";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "liquidationRight";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "subscriptionRight";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "conversionRight";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "redemptionRight";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "bool";
+                    readonly name: "putRight";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "enum IEquity_.DividendType";
+                    readonly name: "dividendRight";
+                    readonly type: "uint8";
+                }, {
+                    readonly internalType: "bytes3";
+                    readonly name: "currency";
+                    readonly type: "bytes3";
+                }, {
+                    readonly internalType: "uint256";
+                    readonly name: "nominalValue";
+                    readonly type: "uint256";
+                }];
+                readonly internalType: "struct IEquity_.EquityDetailsData";
+                readonly name: "equityDetails";
+                readonly type: "tuple";
+            }];
+            readonly internalType: "struct IFactory_.EquityData";
+            readonly name: "_equityData";
+            readonly type: "tuple";
+        }, {
+            readonly components: readonly [{
+                readonly internalType: "enum RegulationType";
+                readonly name: "regulationType";
+                readonly type: "uint8";
+            }, {
+                readonly internalType: "enum RegulationSubType";
+                readonly name: "regulationSubType";
+                readonly type: "uint8";
+            }, {
+                readonly components: readonly [{
+                    readonly internalType: "bool";
+                    readonly name: "countriesControlListType";
+                    readonly type: "bool";
+                }, {
+                    readonly internalType: "string";
+                    readonly name: "listOfCountries";
+                    readonly type: "string";
+                }, {
+                    readonly internalType: "string";
+                    readonly name: "info";
+                    readonly type: "string";
+                }];
+                readonly internalType: "struct AdditionalSecurityData";
+                readonly name: "additionalSecurityData";
+                readonly type: "tuple";
+            }];
+            readonly internalType: "struct FactoryRegulationData";
+            readonly name: "_factoryRegulationData";
+            readonly type: "tuple";
+        }];
+        readonly name: "deployTREXSuiteAtsEquity";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "getIdFactory";
+        readonly outputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "";
+            readonly type: "address";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "getImplementationAuthority";
+        readonly outputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "";
+            readonly type: "address";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "string";
+            readonly name: "_salt";
+            readonly type: "string";
+        }];
+        readonly name: "getToken";
+        readonly outputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "";
+            readonly type: "address";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "owner";
+        readonly outputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "";
+            readonly type: "address";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "_contract";
+            readonly type: "address";
+        }, {
+            readonly internalType: "address";
+            readonly name: "_newOwner";
+            readonly type: "address";
+        }];
+        readonly name: "recoverContractOwnership";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [];
+        readonly name: "renounceOwnership";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "_atsFactory";
+            readonly type: "address";
+        }];
+        readonly name: "setAtsFactory";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "_idFactory";
+            readonly type: "address";
+        }];
+        readonly name: "setIdFactory";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "_implementationAuthority";
+            readonly type: "address";
+        }];
+        readonly name: "setImplementationAuthority";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "string";
+            readonly name: "";
+            readonly type: "string";
+        }];
+        readonly name: "tokenDeployed";
+        readonly outputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "";
+            readonly type: "address";
+        }];
+        readonly stateMutability: "view";
+        readonly type: "function";
+    }, {
+        readonly inputs: readonly [{
+            readonly internalType: "address";
+            readonly name: "newOwner";
+            readonly type: "address";
+        }];
+        readonly name: "transferOwnership";
+        readonly outputs: readonly [];
+        readonly stateMutability: "nonpayable";
+        readonly type: "function";
+    }];
+    static createInterface(): TREXFactoryAtsInterface;
+    static connect(address: string, signerOrProvider: Signer | Provider): TREXFactoryAts;
+}
+export interface TREXFactoryAtsLibraryAddresses {
+    ["contracts/factory/ERC3643/libraries/TREXBondDeploymentLib.sol:TREXBondDeploymentLib"]: string;
+    ["contracts/factory/ERC3643/libraries/TREXEquityDeploymentLib.sol:TREXEquityDeploymentLib"]: string;
+}
+export {};

@@ -1,0 +1,6 @@
+import type * as trexFactorySol from "./TREXFactory.sol";
+export type { trexFactorySol };
+import type * as interfaces from "./interfaces";
+export type { interfaces };
+import type * as libraries from "./libraries";
+export type { libraries };

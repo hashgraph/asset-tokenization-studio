@@ -1,0 +1,6 @@
+export { HoldManagement__factory } from "./HoldManagement__factory";
+export { HoldManagementFacet__factory } from "./HoldManagementFacet__factory";
+export { HoldRead__factory } from "./HoldRead__factory";
+export { HoldReadFacet__factory } from "./HoldReadFacet__factory";
+export { HoldTokenHolder__factory } from "./HoldTokenHolder__factory";
+export { HoldTokenHolderFacet__factory } from "./HoldTokenHolderFacet__factory";

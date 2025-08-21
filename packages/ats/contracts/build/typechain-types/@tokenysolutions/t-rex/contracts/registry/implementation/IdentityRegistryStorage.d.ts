@@ -1,0 +1,366 @@
+import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
+import type { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "../../../../../common";
+export interface IdentityRegistryStorageInterface extends utils.Interface {
+    functions: {
+        "addAgent(address)": FunctionFragment;
+        "addIdentityToStorage(address,address,uint16)": FunctionFragment;
+        "bindIdentityRegistry(address)": FunctionFragment;
+        "init()": FunctionFragment;
+        "isAgent(address)": FunctionFragment;
+        "linkedIdentityRegistries()": FunctionFragment;
+        "modifyStoredIdentity(address,address)": FunctionFragment;
+        "modifyStoredInvestorCountry(address,uint16)": FunctionFragment;
+        "owner()": FunctionFragment;
+        "removeAgent(address)": FunctionFragment;
+        "removeIdentityFromStorage(address)": FunctionFragment;
+        "renounceOwnership()": FunctionFragment;
+        "storedIdentity(address)": FunctionFragment;
+        "storedInvestorCountry(address)": FunctionFragment;
+        "transferOwnership(address)": FunctionFragment;
+        "unbindIdentityRegistry(address)": FunctionFragment;
+    };
+    getFunction(nameOrSignatureOrTopic: "addAgent" | "addIdentityToStorage" | "bindIdentityRegistry" | "init" | "isAgent" | "linkedIdentityRegistries" | "modifyStoredIdentity" | "modifyStoredInvestorCountry" | "owner" | "removeAgent" | "removeIdentityFromStorage" | "renounceOwnership" | "storedIdentity" | "storedInvestorCountry" | "transferOwnership" | "unbindIdentityRegistry"): FunctionFragment;
+    encodeFunctionData(functionFragment: "addAgent", values: [string]): string;
+    encodeFunctionData(functionFragment: "addIdentityToStorage", values: [string, string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: "bindIdentityRegistry", values: [string]): string;
+    encodeFunctionData(functionFragment: "init", values?: undefined): string;
+    encodeFunctionData(functionFragment: "isAgent", values: [string]): string;
+    encodeFunctionData(functionFragment: "linkedIdentityRegistries", values?: undefined): string;
+    encodeFunctionData(functionFragment: "modifyStoredIdentity", values: [string, string]): string;
+    encodeFunctionData(functionFragment: "modifyStoredInvestorCountry", values: [string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+    encodeFunctionData(functionFragment: "removeAgent", values: [string]): string;
+    encodeFunctionData(functionFragment: "removeIdentityFromStorage", values: [string]): string;
+    encodeFunctionData(functionFragment: "renounceOwnership", values?: undefined): string;
+    encodeFunctionData(functionFragment: "storedIdentity", values: [string]): string;
+    encodeFunctionData(functionFragment: "storedInvestorCountry", values: [string]): string;
+    encodeFunctionData(functionFragment: "transferOwnership", values: [string]): string;
+    encodeFunctionData(functionFragment: "unbindIdentityRegistry", values: [string]): string;
+    decodeFunctionResult(functionFragment: "addAgent", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "addIdentityToStorage", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "bindIdentityRegistry", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "init", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "isAgent", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "linkedIdentityRegistries", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "modifyStoredIdentity", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "modifyStoredInvestorCountry", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "removeAgent", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "removeIdentityFromStorage", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "renounceOwnership", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "storedIdentity", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "storedInvestorCountry", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "transferOwnership", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "unbindIdentityRegistry", data: BytesLike): Result;
+    events: {
+        "AgentAdded(address)": EventFragment;
+        "AgentRemoved(address)": EventFragment;
+        "CountryModified(address,uint16)": EventFragment;
+        "IdentityModified(address,address)": EventFragment;
+        "IdentityRegistryBound(address)": EventFragment;
+        "IdentityRegistryUnbound(address)": EventFragment;
+        "IdentityStored(address,address)": EventFragment;
+        "IdentityUnstored(address,address)": EventFragment;
+        "Initialized(uint8)": EventFragment;
+        "OwnershipTransferred(address,address)": EventFragment;
+    };
+    getEvent(nameOrSignatureOrTopic: "AgentAdded"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "AgentRemoved"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "CountryModified"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "IdentityModified"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "IdentityRegistryBound"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "IdentityRegistryUnbound"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "IdentityStored"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "IdentityUnstored"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+}
+export interface AgentAddedEventObject {
+    _agent: string;
+}
+export type AgentAddedEvent = TypedEvent<[string], AgentAddedEventObject>;
+export type AgentAddedEventFilter = TypedEventFilter<AgentAddedEvent>;
+export interface AgentRemovedEventObject {
+    _agent: string;
+}
+export type AgentRemovedEvent = TypedEvent<[string], AgentRemovedEventObject>;
+export type AgentRemovedEventFilter = TypedEventFilter<AgentRemovedEvent>;
+export interface CountryModifiedEventObject {
+    investorAddress: string;
+    country: number;
+}
+export type CountryModifiedEvent = TypedEvent<[
+    string,
+    number
+], CountryModifiedEventObject>;
+export type CountryModifiedEventFilter = TypedEventFilter<CountryModifiedEvent>;
+export interface IdentityModifiedEventObject {
+    oldIdentity: string;
+    newIdentity: string;
+}
+export type IdentityModifiedEvent = TypedEvent<[
+    string,
+    string
+], IdentityModifiedEventObject>;
+export type IdentityModifiedEventFilter = TypedEventFilter<IdentityModifiedEvent>;
+export interface IdentityRegistryBoundEventObject {
+    identityRegistry: string;
+}
+export type IdentityRegistryBoundEvent = TypedEvent<[
+    string
+], IdentityRegistryBoundEventObject>;
+export type IdentityRegistryBoundEventFilter = TypedEventFilter<IdentityRegistryBoundEvent>;
+export interface IdentityRegistryUnboundEventObject {
+    identityRegistry: string;
+}
+export type IdentityRegistryUnboundEvent = TypedEvent<[
+    string
+], IdentityRegistryUnboundEventObject>;
+export type IdentityRegistryUnboundEventFilter = TypedEventFilter<IdentityRegistryUnboundEvent>;
+export interface IdentityStoredEventObject {
+    investorAddress: string;
+    identity: string;
+}
+export type IdentityStoredEvent = TypedEvent<[
+    string,
+    string
+], IdentityStoredEventObject>;
+export type IdentityStoredEventFilter = TypedEventFilter<IdentityStoredEvent>;
+export interface IdentityUnstoredEventObject {
+    investorAddress: string;
+    identity: string;
+}
+export type IdentityUnstoredEvent = TypedEvent<[
+    string,
+    string
+], IdentityUnstoredEventObject>;
+export type IdentityUnstoredEventFilter = TypedEventFilter<IdentityUnstoredEvent>;
+export interface InitializedEventObject {
+    version: number;
+}
+export type InitializedEvent = TypedEvent<[number], InitializedEventObject>;
+export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
+export interface OwnershipTransferredEventObject {
+    previousOwner: string;
+    newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<[
+    string,
+    string
+], OwnershipTransferredEventObject>;
+export type OwnershipTransferredEventFilter = TypedEventFilter<OwnershipTransferredEvent>;
+export interface IdentityRegistryStorage extends BaseContract {
+    connect(signerOrProvider: Signer | Provider | string): this;
+    attach(addressOrName: string): this;
+    deployed(): Promise<this>;
+    interface: IdentityRegistryStorageInterface;
+    queryFilter<TEvent extends TypedEvent>(event: TypedEventFilter<TEvent>, fromBlockOrBlockhash?: string | number | undefined, toBlock?: string | number | undefined): Promise<Array<TEvent>>;
+    listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
+    listeners(eventName?: string): Array<Listener>;
+    removeAllListeners<TEvent extends TypedEvent>(eventFilter: TypedEventFilter<TEvent>): this;
+    removeAllListeners(eventName?: string): this;
+    off: OnEvent<this>;
+    on: OnEvent<this>;
+    once: OnEvent<this>;
+    removeListener: OnEvent<this>;
+    functions: {
+        addAgent(_agent: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        addIdentityToStorage(_userAddress: string, _identity: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        bindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        init(overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        isAgent(_agent: string, overrides?: CallOverrides): Promise<[boolean]>;
+        linkedIdentityRegistries(overrides?: CallOverrides): Promise<[string[]]>;
+        modifyStoredIdentity(_userAddress: string, _identity: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        modifyStoredInvestorCountry(_userAddress: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        owner(overrides?: CallOverrides): Promise<[string]>;
+        removeAgent(_agent: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        removeIdentityFromStorage(_userAddress: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        renounceOwnership(overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        storedIdentity(_userAddress: string, overrides?: CallOverrides): Promise<[string]>;
+        storedInvestorCountry(_userAddress: string, overrides?: CallOverrides): Promise<[number]>;
+        transferOwnership(newOwner: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        unbindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+    };
+    addAgent(_agent: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    addIdentityToStorage(_userAddress: string, _identity: string, _country: BigNumberish, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    bindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    init(overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    isAgent(_agent: string, overrides?: CallOverrides): Promise<boolean>;
+    linkedIdentityRegistries(overrides?: CallOverrides): Promise<string[]>;
+    modifyStoredIdentity(_userAddress: string, _identity: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    modifyStoredInvestorCountry(_userAddress: string, _country: BigNumberish, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    owner(overrides?: CallOverrides): Promise<string>;
+    removeAgent(_agent: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    removeIdentityFromStorage(_userAddress: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    renounceOwnership(overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    storedIdentity(_userAddress: string, overrides?: CallOverrides): Promise<string>;
+    storedInvestorCountry(_userAddress: string, overrides?: CallOverrides): Promise<number>;
+    transferOwnership(newOwner: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    unbindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    callStatic: {
+        addAgent(_agent: string, overrides?: CallOverrides): Promise<void>;
+        addIdentityToStorage(_userAddress: string, _identity: string, _country: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        bindIdentityRegistry(_identityRegistry: string, overrides?: CallOverrides): Promise<void>;
+        init(overrides?: CallOverrides): Promise<void>;
+        isAgent(_agent: string, overrides?: CallOverrides): Promise<boolean>;
+        linkedIdentityRegistries(overrides?: CallOverrides): Promise<string[]>;
+        modifyStoredIdentity(_userAddress: string, _identity: string, overrides?: CallOverrides): Promise<void>;
+        modifyStoredInvestorCountry(_userAddress: string, _country: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        owner(overrides?: CallOverrides): Promise<string>;
+        removeAgent(_agent: string, overrides?: CallOverrides): Promise<void>;
+        removeIdentityFromStorage(_userAddress: string, overrides?: CallOverrides): Promise<void>;
+        renounceOwnership(overrides?: CallOverrides): Promise<void>;
+        storedIdentity(_userAddress: string, overrides?: CallOverrides): Promise<string>;
+        storedInvestorCountry(_userAddress: string, overrides?: CallOverrides): Promise<number>;
+        transferOwnership(newOwner: string, overrides?: CallOverrides): Promise<void>;
+        unbindIdentityRegistry(_identityRegistry: string, overrides?: CallOverrides): Promise<void>;
+    };
+    filters: {
+        "AgentAdded(address)"(_agent?: string | null): AgentAddedEventFilter;
+        AgentAdded(_agent?: string | null): AgentAddedEventFilter;
+        "AgentRemoved(address)"(_agent?: string | null): AgentRemovedEventFilter;
+        AgentRemoved(_agent?: string | null): AgentRemovedEventFilter;
+        "CountryModified(address,uint16)"(investorAddress?: string | null, country?: BigNumberish | null): CountryModifiedEventFilter;
+        CountryModified(investorAddress?: string | null, country?: BigNumberish | null): CountryModifiedEventFilter;
+        "IdentityModified(address,address)"(oldIdentity?: string | null, newIdentity?: string | null): IdentityModifiedEventFilter;
+        IdentityModified(oldIdentity?: string | null, newIdentity?: string | null): IdentityModifiedEventFilter;
+        "IdentityRegistryBound(address)"(identityRegistry?: string | null): IdentityRegistryBoundEventFilter;
+        IdentityRegistryBound(identityRegistry?: string | null): IdentityRegistryBoundEventFilter;
+        "IdentityRegistryUnbound(address)"(identityRegistry?: string | null): IdentityRegistryUnboundEventFilter;
+        IdentityRegistryUnbound(identityRegistry?: string | null): IdentityRegistryUnboundEventFilter;
+        "IdentityStored(address,address)"(investorAddress?: string | null, identity?: string | null): IdentityStoredEventFilter;
+        IdentityStored(investorAddress?: string | null, identity?: string | null): IdentityStoredEventFilter;
+        "IdentityUnstored(address,address)"(investorAddress?: string | null, identity?: string | null): IdentityUnstoredEventFilter;
+        IdentityUnstored(investorAddress?: string | null, identity?: string | null): IdentityUnstoredEventFilter;
+        "Initialized(uint8)"(version?: null): InitializedEventFilter;
+        Initialized(version?: null): InitializedEventFilter;
+        "OwnershipTransferred(address,address)"(previousOwner?: string | null, newOwner?: string | null): OwnershipTransferredEventFilter;
+        OwnershipTransferred(previousOwner?: string | null, newOwner?: string | null): OwnershipTransferredEventFilter;
+    };
+    estimateGas: {
+        addAgent(_agent: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        addIdentityToStorage(_userAddress: string, _identity: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        bindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        init(overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        isAgent(_agent: string, overrides?: CallOverrides): Promise<BigNumber>;
+        linkedIdentityRegistries(overrides?: CallOverrides): Promise<BigNumber>;
+        modifyStoredIdentity(_userAddress: string, _identity: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        modifyStoredInvestorCountry(_userAddress: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        owner(overrides?: CallOverrides): Promise<BigNumber>;
+        removeAgent(_agent: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        removeIdentityFromStorage(_userAddress: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        renounceOwnership(overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        storedIdentity(_userAddress: string, overrides?: CallOverrides): Promise<BigNumber>;
+        storedInvestorCountry(_userAddress: string, overrides?: CallOverrides): Promise<BigNumber>;
+        transferOwnership(newOwner: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        unbindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+    };
+    populateTransaction: {
+        addAgent(_agent: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        addIdentityToStorage(_userAddress: string, _identity: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        bindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        init(overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        isAgent(_agent: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        linkedIdentityRegistries(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        modifyStoredIdentity(_userAddress: string, _identity: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        modifyStoredInvestorCountry(_userAddress: string, _country: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        removeAgent(_agent: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        removeIdentityFromStorage(_userAddress: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        renounceOwnership(overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        storedIdentity(_userAddress: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        storedInvestorCountry(_userAddress: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        transferOwnership(newOwner: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        unbindIdentityRegistry(_identityRegistry: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+    };
+}

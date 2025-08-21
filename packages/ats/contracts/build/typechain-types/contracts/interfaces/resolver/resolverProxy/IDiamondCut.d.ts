@@ -1,0 +1,144 @@
+import type { BaseContract, BigNumber, BigNumberish, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "../../../../common";
+export interface IDiamondCutInterface extends utils.Interface {
+    functions: {
+        "getConfigInfo()": FunctionFragment;
+        "getStaticFunctionSelectors()": FunctionFragment;
+        "getStaticInterfaceIds()": FunctionFragment;
+        "getStaticResolverKey()": FunctionFragment;
+        "updateConfig(bytes32,uint256)": FunctionFragment;
+        "updateConfigVersion(uint256)": FunctionFragment;
+        "updateResolver(address,bytes32,uint256)": FunctionFragment;
+    };
+    getFunction(nameOrSignatureOrTopic: "getConfigInfo" | "getStaticFunctionSelectors" | "getStaticInterfaceIds" | "getStaticResolverKey" | "updateConfig" | "updateConfigVersion" | "updateResolver"): FunctionFragment;
+    encodeFunctionData(functionFragment: "getConfigInfo", values?: undefined): string;
+    encodeFunctionData(functionFragment: "getStaticFunctionSelectors", values?: undefined): string;
+    encodeFunctionData(functionFragment: "getStaticInterfaceIds", values?: undefined): string;
+    encodeFunctionData(functionFragment: "getStaticResolverKey", values?: undefined): string;
+    encodeFunctionData(functionFragment: "updateConfig", values: [BytesLike, BigNumberish]): string;
+    encodeFunctionData(functionFragment: "updateConfigVersion", values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: "updateResolver", values: [string, BytesLike, BigNumberish]): string;
+    decodeFunctionResult(functionFragment: "getConfigInfo", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "getStaticFunctionSelectors", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "getStaticInterfaceIds", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "getStaticResolverKey", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "updateConfig", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "updateConfigVersion", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "updateResolver", data: BytesLike): Result;
+    events: {};
+}
+export interface IDiamondCut extends BaseContract {
+    connect(signerOrProvider: Signer | Provider | string): this;
+    attach(addressOrName: string): this;
+    deployed(): Promise<this>;
+    interface: IDiamondCutInterface;
+    queryFilter<TEvent extends TypedEvent>(event: TypedEventFilter<TEvent>, fromBlockOrBlockhash?: string | number | undefined, toBlock?: string | number | undefined): Promise<Array<TEvent>>;
+    listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
+    listeners(eventName?: string): Array<Listener>;
+    removeAllListeners<TEvent extends TypedEvent>(eventFilter: TypedEventFilter<TEvent>): this;
+    removeAllListeners(eventName?: string): this;
+    off: OnEvent<this>;
+    on: OnEvent<this>;
+    once: OnEvent<this>;
+    removeListener: OnEvent<this>;
+    functions: {
+        getConfigInfo(overrides?: CallOverrides): Promise<[
+            string,
+            string,
+            BigNumber
+        ] & {
+            resolver_: string;
+            configurationId_: string;
+            version_: BigNumber;
+        }>;
+        getStaticFunctionSelectors(overrides?: CallOverrides): Promise<[string[]] & {
+            staticFunctionSelectors_: string[];
+        }>;
+        getStaticInterfaceIds(overrides?: CallOverrides): Promise<[string[]] & {
+            staticInterfaceIds_: string[];
+        }>;
+        getStaticResolverKey(overrides?: CallOverrides): Promise<[string] & {
+            staticResolverKey_: string;
+        }>;
+        updateConfig(_newConfigurationId: BytesLike, _newVersion: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        updateConfigVersion(_newVersion: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        updateResolver(_newResolver: string, _newConfigurationId: BytesLike, _newVersion: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+    };
+    getConfigInfo(overrides?: CallOverrides): Promise<[
+        string,
+        string,
+        BigNumber
+    ] & {
+        resolver_: string;
+        configurationId_: string;
+        version_: BigNumber;
+    }>;
+    getStaticFunctionSelectors(overrides?: CallOverrides): Promise<string[]>;
+    getStaticInterfaceIds(overrides?: CallOverrides): Promise<string[]>;
+    getStaticResolverKey(overrides?: CallOverrides): Promise<string>;
+    updateConfig(_newConfigurationId: BytesLike, _newVersion: BigNumberish, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    updateConfigVersion(_newVersion: BigNumberish, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    updateResolver(_newResolver: string, _newConfigurationId: BytesLike, _newVersion: BigNumberish, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    callStatic: {
+        getConfigInfo(overrides?: CallOverrides): Promise<[
+            string,
+            string,
+            BigNumber
+        ] & {
+            resolver_: string;
+            configurationId_: string;
+            version_: BigNumber;
+        }>;
+        getStaticFunctionSelectors(overrides?: CallOverrides): Promise<string[]>;
+        getStaticInterfaceIds(overrides?: CallOverrides): Promise<string[]>;
+        getStaticResolverKey(overrides?: CallOverrides): Promise<string>;
+        updateConfig(_newConfigurationId: BytesLike, _newVersion: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        updateConfigVersion(_newVersion: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        updateResolver(_newResolver: string, _newConfigurationId: BytesLike, _newVersion: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    };
+    filters: {};
+    estimateGas: {
+        getConfigInfo(overrides?: CallOverrides): Promise<BigNumber>;
+        getStaticFunctionSelectors(overrides?: CallOverrides): Promise<BigNumber>;
+        getStaticInterfaceIds(overrides?: CallOverrides): Promise<BigNumber>;
+        getStaticResolverKey(overrides?: CallOverrides): Promise<BigNumber>;
+        updateConfig(_newConfigurationId: BytesLike, _newVersion: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        updateConfigVersion(_newVersion: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        updateResolver(_newResolver: string, _newConfigurationId: BytesLike, _newVersion: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+    };
+    populateTransaction: {
+        getConfigInfo(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        getStaticFunctionSelectors(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        getStaticInterfaceIds(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        getStaticResolverKey(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        updateConfig(_newConfigurationId: BytesLike, _newVersion: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        updateConfigVersion(_newVersion: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        updateResolver(_newResolver: string, _newConfigurationId: BytesLike, _newVersion: BigNumberish, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+    };
+}

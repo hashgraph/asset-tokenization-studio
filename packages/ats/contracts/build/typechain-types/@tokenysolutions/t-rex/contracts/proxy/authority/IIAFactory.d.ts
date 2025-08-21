@@ -1,0 +1,71 @@
+import type { BaseContract, BigNumber, BytesLike, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction, Signer, utils } from "ethers";
+import type { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "../../../../../common";
+export interface IIAFactoryInterface extends utils.Interface {
+    functions: {
+        "deployIA(address)": FunctionFragment;
+        "deployedByFactory(address)": FunctionFragment;
+    };
+    getFunction(nameOrSignatureOrTopic: "deployIA" | "deployedByFactory"): FunctionFragment;
+    encodeFunctionData(functionFragment: "deployIA", values: [string]): string;
+    encodeFunctionData(functionFragment: "deployedByFactory", values: [string]): string;
+    decodeFunctionResult(functionFragment: "deployIA", data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: "deployedByFactory", data: BytesLike): Result;
+    events: {
+        "ImplementationAuthorityDeployed(address)": EventFragment;
+    };
+    getEvent(nameOrSignatureOrTopic: "ImplementationAuthorityDeployed"): EventFragment;
+}
+export interface ImplementationAuthorityDeployedEventObject {
+    _ia: string;
+}
+export type ImplementationAuthorityDeployedEvent = TypedEvent<[
+    string
+], ImplementationAuthorityDeployedEventObject>;
+export type ImplementationAuthorityDeployedEventFilter = TypedEventFilter<ImplementationAuthorityDeployedEvent>;
+export interface IIAFactory extends BaseContract {
+    connect(signerOrProvider: Signer | Provider | string): this;
+    attach(addressOrName: string): this;
+    deployed(): Promise<this>;
+    interface: IIAFactoryInterface;
+    queryFilter<TEvent extends TypedEvent>(event: TypedEventFilter<TEvent>, fromBlockOrBlockhash?: string | number | undefined, toBlock?: string | number | undefined): Promise<Array<TEvent>>;
+    listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
+    listeners(eventName?: string): Array<Listener>;
+    removeAllListeners<TEvent extends TypedEvent>(eventFilter: TypedEventFilter<TEvent>): this;
+    removeAllListeners(eventName?: string): this;
+    off: OnEvent<this>;
+    on: OnEvent<this>;
+    once: OnEvent<this>;
+    removeListener: OnEvent<this>;
+    functions: {
+        deployIA(_token: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<ContractTransaction>;
+        deployedByFactory(_ia: string, overrides?: CallOverrides): Promise<[boolean]>;
+    };
+    deployIA(_token: string, overrides?: Overrides & {
+        from?: string;
+    }): Promise<ContractTransaction>;
+    deployedByFactory(_ia: string, overrides?: CallOverrides): Promise<boolean>;
+    callStatic: {
+        deployIA(_token: string, overrides?: CallOverrides): Promise<string>;
+        deployedByFactory(_ia: string, overrides?: CallOverrides): Promise<boolean>;
+    };
+    filters: {
+        "ImplementationAuthorityDeployed(address)"(_ia?: string | null): ImplementationAuthorityDeployedEventFilter;
+        ImplementationAuthorityDeployed(_ia?: string | null): ImplementationAuthorityDeployedEventFilter;
+    };
+    estimateGas: {
+        deployIA(_token: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<BigNumber>;
+        deployedByFactory(_ia: string, overrides?: CallOverrides): Promise<BigNumber>;
+    };
+    populateTransaction: {
+        deployIA(_token: string, overrides?: Overrides & {
+            from?: string;
+        }): Promise<PopulatedTransaction>;
+        deployedByFactory(_ia: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    };
+}
