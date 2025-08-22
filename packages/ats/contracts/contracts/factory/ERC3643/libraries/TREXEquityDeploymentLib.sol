@@ -203,71 +203,45 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+pragma solidity ^0.8.17;
 
-export interface GetSignerResult {
-    signer: SignerWithAddress
-    address: string
-    privateKey: string
-}
+// solhint-disable no-global-import
+import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
+import {TRexIFactory, FactoryRegulationData} from '../interfaces/IFactory.sol';
+import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
+import {TREXFactoryAts} from '../TREXFactory.sol';
+import {SecurityDeploymentLib} from './core/SecurityDeploymentLib.sol';
+import {TREXBaseDeploymentLib} from './core/TREXBaseDeploymentLib.sol';
 
-interface WithSigner {
-    privateKey?: string
-    signerAddress?: string
-    signerPosition?: number
-}
-
-export type GetSignerArgs = WithSigner
-
-// * Utils
-
-export interface Keccak256Args {
-    input: string
-}
-
-export interface CreateVcArgs {
-    holder: string
-    privatekey: string
-}
-
-// * Deploy
-export interface DeployArgs extends WithSigner {
-    contractName: string
-}
-
-export interface DeployAllArgs extends WithSigner {
-    useDeployed: boolean
-    fileName: string
-}
-
-export interface DeployTrexFactoryArgs extends WithSigner {
-    atsFactory?: string
-    resolver?: string
-}
-
-// * Transparent Upgradeable Proxy
-export interface GetProxyAdminConfigArgs {
-    proxyAdmin: string
-    proxy: string
-}
-
-export interface UpdateFactoryVersionArgs extends WithSigner {
-    proxyAdminAddress: string
-    transparentProxyAddress: string
-    newImplementationAddress: string
-}
-
-// * Business Logic Resolver
-export interface GetConfigurationInfoArgs {
-    resolver: string
-    configurationId: string
-}
-
-export interface GetResolverBusinessLogicsArgs {
-    resolver: string
-}
-
-export interface UpdateBusinessLogicKeysArgs extends WithSigner {
-    resolverAddress: string
-    implementationAddressList: string // * Comma separated list
+library TREXEquityDeploymentLib {
+    function deployTREXSuiteAtsEquity(
+        mapping(string => address) storage _tokenDeployed,
+        address _implementationAuthority,
+        address _idFactory,
+        address _atsFactory,
+        string memory _salt,
+        TREXFactoryAts.TokenDetailsAts calldata _tokenDetails,
+        ITREXFactory.ClaimDetails calldata _claimDetails,
+        TRexIFactory.EquityData calldata _equityData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external {
+        IToken token = SecurityDeploymentLib.deployEquity(
+            _atsFactory,
+            _tokenDetails.owner,
+            _equityData,
+            _factoryRegulationData
+        );
+        TREXBaseDeploymentLib.deployTREXSuite(
+            _tokenDeployed,
+            _implementationAuthority,
+            _idFactory,
+            _salt,
+            _tokenDetails,
+            _claimDetails,
+            token,
+            _equityData.security.identityRegistry,
+            _equityData.security.compliance
+        );
+    }
 }

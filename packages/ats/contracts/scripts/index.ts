@@ -217,6 +217,7 @@ export {
 } from './commands/base/BaseAtsContractListCommand'
 export { default as ErrorMessageCommand } from './commands/ErrorMessageCommand'
 export { default as DeployContractCommand } from './commands/DeployContractCommand'
+export { default as DeployContractWithLibraryCommand } from './commands/DeployContractWithLibraryCommand'
 export { default as DeployAtsContractsCommand } from './commands/DeployAtsContractsCommand'
 export { default as DeployAtsFullInfrastructureCommand } from './commands/DeployAtsFullInfrastructureCommand'
 export { default as DeployContractWithFactoryCommand } from './commands/DeployContractWithFactoryCommand'

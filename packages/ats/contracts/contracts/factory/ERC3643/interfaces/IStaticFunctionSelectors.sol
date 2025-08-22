@@ -203,71 +203,29 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+pragma solidity ^0.8.17;
 
-export interface GetSignerResult {
-    signer: SignerWithAddress
-    address: string
-    privateKey: string
-}
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-interface WithSigner {
-    privateKey?: string
-    signerAddress?: string
-    signerPosition?: number
-}
+interface TRexIStaticFunctionSelectors {
+    /// @notice Gets the static resolver key.
+    /// @return staticResolverKey_ Static resolver key
+    function getStaticResolverKey()
+        external
+        pure
+        returns (bytes32 staticResolverKey_);
 
-export type GetSignerArgs = WithSigner
+    /// @notice Gets all function selectors of a facet.
+    /// @return staticFunctionSelectors_ Face functions selectors
+    function getStaticFunctionSelectors()
+        external
+        pure
+        returns (bytes4[] memory staticFunctionSelectors_);
 
-// * Utils
-
-export interface Keccak256Args {
-    input: string
-}
-
-export interface CreateVcArgs {
-    holder: string
-    privatekey: string
-}
-
-// * Deploy
-export interface DeployArgs extends WithSigner {
-    contractName: string
-}
-
-export interface DeployAllArgs extends WithSigner {
-    useDeployed: boolean
-    fileName: string
-}
-
-export interface DeployTrexFactoryArgs extends WithSigner {
-    atsFactory?: string
-    resolver?: string
-}
-
-// * Transparent Upgradeable Proxy
-export interface GetProxyAdminConfigArgs {
-    proxyAdmin: string
-    proxy: string
-}
-
-export interface UpdateFactoryVersionArgs extends WithSigner {
-    proxyAdminAddress: string
-    transparentProxyAddress: string
-    newImplementationAddress: string
-}
-
-// * Business Logic Resolver
-export interface GetConfigurationInfoArgs {
-    resolver: string
-    configurationId: string
-}
-
-export interface GetResolverBusinessLogicsArgs {
-    resolver: string
-}
-
-export interface UpdateBusinessLogicKeysArgs extends WithSigner {
-    resolverAddress: string
-    implementationAddressList: string // * Comma separated list
+    /// @notice Gets all interfaces ids of a facet.
+    /// @return staticInterfaceIds_ Face interface ids
+    function getStaticInterfaceIds()
+        external
+        pure
+        returns (bytes4[] memory staticInterfaceIds_);
 }

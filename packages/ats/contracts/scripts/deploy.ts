@@ -319,6 +319,7 @@ import {
     CreateConfigurationsForDeployedContractsResult,
 } from '@scripts'
 import Environment from './Environment'
+import DeployContractWithLibraryCommand from './commands/DeployContractWithLibraryCommand'
 
 export let environment = Environment.empty()
 
@@ -1394,6 +1395,100 @@ export async function deployContract({
     console.log(`${name} deployed at ${contract.address}`)
 
     // if no proxy, return the contract (BREAK)
+    if (Configuration.contracts[name].deployType !== 'proxy') {
+        return new DeployContractResult({
+            name,
+            contract,
+            address: contract.address,
+            receipt: await receipt,
+        })
+    }
+
+    console.log(`Deploying ${name} Proxy Admin. please wait...`)
+
+    const { address: proxyAdminAddress } = await deployContract(
+        new DeployContractCommand({
+            name: 'ProxyAdmin',
+            signer,
+            args: [],
+        })
+    )
+
+    console.log(`${name} Proxy Admin deployed at ${proxyAdminAddress}`)
+
+    console.log(`Deploying ${name} Proxy. please wait...`)
+
+    const { address: proxyAddress } = await deployContract(
+        new DeployContractCommand({
+            name: 'TransparentUpgradeableProxy',
+            signer,
+            args: [contract.address, proxyAdminAddress, '0x'],
+        })
+    )
+
+    console.log(`${name} Proxy deployed at ${proxyAddress}`)
+
+    return new DeployContractResult({
+        name,
+        address: contract.address,
+        contract,
+        proxyAddress,
+        proxyAdminAddress,
+        receipt: await receipt,
+    })
+}
+
+/**
+ * Deploys a smart contract with its required libraries and optionally its proxy and proxy admin.
+ *
+ * @param {DeployContractWithLibrariesCommand} params - The deployment parameters.
+ * @param {ContractName} params.name - The name of the contract to deploy.
+ * @param {Signer} params.signer - The signer to use for the deployment.
+ * @param {Array<any>} params.args - The arguments to pass to the contract constructor.
+ * @param {LibraryName[]} params.libraries - Array of library names to deploy and link.
+ * @returns {Promise<DeployContractResult>} A promise that resolves to the deployment result.
+ *
+ * @example
+ * const result = await deployContractWithLibraries({
+ *   name: 'TREXFactoryAts',
+ *   signer: mySigner,
+ *   args: [arg1, arg2, arg3],
+ *   libraries: ['SecurityDeployment']
+ * });
+ */
+export async function deployContractWithLibraries({
+    name,
+    signer,
+    args,
+    libraries,
+}: DeployContractWithLibraryCommand): Promise<DeployContractResult> {
+    console.log(`Deploying ${name} with libraries. please wait...`)
+
+    const libraryAddresses: Record<string, string> = {}
+
+    for (const libraryName of libraries) {
+        console.log(`Deploying library ${libraryName}. please wait...`)
+
+        const libraryFactory = await ethers.getContractFactory(
+            libraryName,
+            signer
+        )
+        const library = await libraryFactory.deploy()
+        await library.deployTransaction.wait()
+
+        libraryAddresses[libraryName] = library.address
+        console.log(`Library ${libraryName} deployed at ${library.address}`)
+    }
+
+    const contractFactory = await ethers.getContractFactory(name, {
+        signer,
+        libraries: libraryAddresses,
+    })
+    const contract = await contractFactory.deploy(...args)
+    const receipt = contract.deployTransaction.wait()
+
+    console.log(`${name} deployed at ${contract.address}`)
+
     if (Configuration.contracts[name].deployType !== 'proxy') {
         return new DeployContractResult({
             name,

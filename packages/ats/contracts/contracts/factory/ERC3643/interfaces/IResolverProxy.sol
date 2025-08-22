@@ -203,71 +203,16 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+pragma solidity ^0.8.17;
 
-export interface GetSignerResult {
-    signer: SignerWithAddress
-    address: string
-    privateKey: string
-}
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-interface WithSigner {
-    privateKey?: string
-    signerAddress?: string
-    signerPosition?: number
-}
+interface TRexIResolverProxy {
+    struct Rbac {
+        bytes32 role;
+        address[] members;
+    }
 
-export type GetSignerArgs = WithSigner
-
-// * Utils
-
-export interface Keccak256Args {
-    input: string
-}
-
-export interface CreateVcArgs {
-    holder: string
-    privatekey: string
-}
-
-// * Deploy
-export interface DeployArgs extends WithSigner {
-    contractName: string
-}
-
-export interface DeployAllArgs extends WithSigner {
-    useDeployed: boolean
-    fileName: string
-}
-
-export interface DeployTrexFactoryArgs extends WithSigner {
-    atsFactory?: string
-    resolver?: string
-}
-
-// * Transparent Upgradeable Proxy
-export interface GetProxyAdminConfigArgs {
-    proxyAdmin: string
-    proxy: string
-}
-
-export interface UpdateFactoryVersionArgs extends WithSigner {
-    proxyAdminAddress: string
-    transparentProxyAddress: string
-    newImplementationAddress: string
-}
-
-// * Business Logic Resolver
-export interface GetConfigurationInfoArgs {
-    resolver: string
-    configurationId: string
-}
-
-export interface GetResolverBusinessLogicsArgs {
-    resolver: string
-}
-
-export interface UpdateBusinessLogicKeysArgs extends WithSigner {
-    resolverAddress: string
-    implementationAddressList: string // * Comma separated list
+    // When no function exists for function called
+    error FunctionNotFound(bytes4 _functionSelector);
 }

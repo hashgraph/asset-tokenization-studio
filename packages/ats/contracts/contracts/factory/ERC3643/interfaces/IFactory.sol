@@ -203,71 +203,94 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+pragma solidity ^0.8.17;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-export interface GetSignerResult {
-    signer: SignerWithAddress
-    address: string
-    privateKey: string
-}
+import {TRexIResolverProxy as IResolverProxy} from './IResolverProxy.sol';
+import {
+    TRexIBusinessLogicResolver as IBusinessLogicResolver
+} from './IBusinessLogicResolver.sol';
+import {TRexIERC20 as IERC20} from './IERC20.sol';
+import {TRexIBond as IBond} from './IBond.sol';
+import {TRexIEquity as IEquity} from './IEquity.sol';
+import {
+    FactoryRegulationData,
+    RegulationData,
+    RegulationType,
+    RegulationSubType
+} from './regulation.sol';
 
-interface WithSigner {
-    privateKey?: string
-    signerAddress?: string
-    signerPosition?: number
-}
+interface TRexIFactory {
+    enum SecurityType {
+        Bond,
+        Equity
+    }
 
-export type GetSignerArgs = WithSigner
+    struct ResolverProxyConfiguration {
+        bytes32 key;
+        uint256 version;
+    }
 
-// * Utils
+    // TODO: Separete common data in new struct
+    struct SecurityData {
+        bool arePartitionsProtected;
+        bool isMultiPartition;
+        IBusinessLogicResolver resolver;
+        ResolverProxyConfiguration resolverProxyConfiguration;
+        IResolverProxy.Rbac[] rbacs;
+        bool isControllable;
+        bool isWhiteList;
+        uint256 maxSupply;
+        IERC20.ERC20MetadataInfo erc20MetadataInfo;
+        bool clearingActive;
+        bool internalKycActivated;
+        address[] externalPauses;
+        address[] externalControlLists;
+        address[] externalKycLists;
+        address compliance;
+        address identityRegistry;
+    }
 
-export interface Keccak256Args {
-    input: string
-}
+    struct EquityData {
+        SecurityData security;
+        IEquity.EquityDetailsData equityDetails;
+    }
 
-export interface CreateVcArgs {
-    holder: string
-    privatekey: string
-}
+    struct BondData {
+        SecurityData security;
+        IBond.BondDetailsData bondDetails;
+        IBond.CouponDetailsData couponDetails;
+    }
 
-// * Deploy
-export interface DeployArgs extends WithSigner {
-    contractName: string
-}
+    event EquityDeployed(
+        address indexed deployer,
+        address equityAddress,
+        EquityData equityData,
+        FactoryRegulationData regulationData
+    );
 
-export interface DeployAllArgs extends WithSigner {
-    useDeployed: boolean
-    fileName: string
-}
+    event BondDeployed(
+        address indexed deployer,
+        address bondAddress,
+        BondData bondData,
+        FactoryRegulationData regulationData
+    );
 
-export interface DeployTrexFactoryArgs extends WithSigner {
-    atsFactory?: string
-    resolver?: string
-}
+    error EmptyResolver(IBusinessLogicResolver resolver);
+    error NoInitialAdmins();
 
-// * Transparent Upgradeable Proxy
-export interface GetProxyAdminConfigArgs {
-    proxyAdmin: string
-    proxy: string
-}
+    function deployEquity(
+        EquityData calldata _equityData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address equityAddress_);
 
-export interface UpdateFactoryVersionArgs extends WithSigner {
-    proxyAdminAddress: string
-    transparentProxyAddress: string
-    newImplementationAddress: string
-}
+    function deployBond(
+        BondData calldata _bondData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address bondAddress_);
 
-// * Business Logic Resolver
-export interface GetConfigurationInfoArgs {
-    resolver: string
-    configurationId: string
-}
-
-export interface GetResolverBusinessLogicsArgs {
-    resolver: string
-}
-
-export interface UpdateBusinessLogicKeysArgs extends WithSigner {
-    resolverAddress: string
-    implementationAddressList: string // * Comma separated list
+    function getAppliedRegulationData(
+        RegulationType _regulationType,
+        RegulationSubType _regulationSubType
+    ) external pure returns (RegulationData memory regulationData_);
 }

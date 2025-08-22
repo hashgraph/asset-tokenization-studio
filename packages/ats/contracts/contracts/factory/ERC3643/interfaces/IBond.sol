@@ -203,71 +203,85 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.17;
 
-export interface GetSignerResult {
-    signer: SignerWithAddress
-    address: string
-    privateKey: string
-}
+interface TRexIBond {
+    struct BondDetailsData {
+        bytes3 currency;
+        uint256 nominalValue;
+        uint256 startingDate;
+        uint256 maturityDate;
+    }
 
-interface WithSigner {
-    privateKey?: string
-    signerAddress?: string
-    signerPosition?: number
-}
+    struct CouponDetailsData {
+        uint256 couponFrequency;
+        uint256 couponRate;
+        uint256 firstCouponDate;
+    }
 
-export type GetSignerArgs = WithSigner
+    struct Coupon {
+        uint256 recordDate;
+        uint256 executionDate;
+        uint256 rate;
+    }
 
-// * Utils
+    struct RegisteredCoupon {
+        Coupon coupon;
+        uint256 snapshotId;
+    }
 
-export interface Keccak256Args {
-    input: string
-}
+    struct CouponFor {
+        uint256 tokenBalance;
+        uint256 rate;
+        uint256 recordDate;
+        uint256 executionDate;
+        uint8 decimals;
+        bool recordDateReached;
+    }
 
-export interface CreateVcArgs {
-    holder: string
-    privatekey: string
-}
+    function redeemAtMaturityByPartition(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _amount
+    ) external;
 
-// * Deploy
-export interface DeployArgs extends WithSigner {
-    contractName: string
-}
+    function setCoupon(
+        Coupon calldata _newCoupon
+    ) external returns (bool success_, uint256 couponID_);
 
-export interface DeployAllArgs extends WithSigner {
-    useDeployed: boolean
-    fileName: string
-}
+    function updateMaturityDate(
+        uint256 _maturityDate
+    ) external returns (bool success_);
 
-export interface DeployTrexFactoryArgs extends WithSigner {
-    atsFactory?: string
-    resolver?: string
-}
+    function getBondDetails()
+        external
+        view
+        returns (BondDetailsData memory bondDetailsData_);
 
-// * Transparent Upgradeable Proxy
-export interface GetProxyAdminConfigArgs {
-    proxyAdmin: string
-    proxy: string
-}
+    function getCouponDetails()
+        external
+        view
+        returns (CouponDetailsData memory couponDetails_);
 
-export interface UpdateFactoryVersionArgs extends WithSigner {
-    proxyAdminAddress: string
-    transparentProxyAddress: string
-    newImplementationAddress: string
-}
+    function getCoupon(
+        uint256 _couponID
+    ) external view returns (RegisteredCoupon memory registeredCoupon_);
 
-// * Business Logic Resolver
-export interface GetConfigurationInfoArgs {
-    resolver: string
-    configurationId: string
-}
+    function getCouponFor(
+        uint256 _couponID,
+        address _account
+    ) external view returns (CouponFor memory couponFor_);
 
-export interface GetResolverBusinessLogicsArgs {
-    resolver: string
-}
+    function getCouponCount() external view returns (uint256 couponCount_);
 
-export interface UpdateBusinessLogicKeysArgs extends WithSigner {
-    resolverAddress: string
-    implementationAddressList: string // * Comma separated list
+    function getCouponHolders(
+        uint256 _couponID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalCouponHolders(
+        uint256 _couponID
+    ) external view returns (uint256);
 }

@@ -29,6 +29,7 @@ coverage
 coverage.json
 gas-report.txt
 extracted-methods.txt
+deployedContracts.json
 
 #Hardhat files
 cache
