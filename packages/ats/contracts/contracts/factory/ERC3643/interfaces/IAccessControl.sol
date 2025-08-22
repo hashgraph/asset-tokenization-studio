@@ -203,294 +203,160 @@
 
 */
 
-import dotenv from 'dotenv'
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity ^0.8.17;
 
-// Load the `.env` file
-dotenv.config()
-
-const EMPTY_STRING = ''
-export const NETWORKS = [
-    'hardhat',
-    'local',
-    'previewnet',
-    'testnet',
-    'mainnet',
-] as const
-export type Network = (typeof NETWORKS)[number]
-
-export const DEPLOY_TYPES = ['proxy', 'direct'] as const
-export type DeployType = (typeof DEPLOY_TYPES)[number]
-
-export const CONTRACT_NAMES = [
-    'TransparentUpgradeableProxy',
-    'ProxyAdmin',
-    'Factory',
-    'BusinessLogicResolver',
-    'AccessControlFacet',
-    'Cap',
-    'ControlList',
-    'PauseFacet',
-    'ERC20',
-    'ERC20Permit',
-    'ERC1410ScheduledTasks',
-    'ERC1410ReadFacet',
-    'ERC1410ManagementFacet',
-    'ERC1410TokenHolderFacet',
-    'ERC1594',
-    'ERC1643',
-    'ERC1644',
-    'DiamondFacet',
-    'EquityUSA',
-    'BondUSA',
-    'ScheduledSnapshots',
-    'ScheduledBalanceAdjustments',
-    'ScheduledTasks',
-    'Snapshots',
-    'CorporateActions',
-    'TransferAndLock',
-    'Lock',
-    'AdjustBalances',
-    'ProtectedPartitions',
-    'HoldReadFacet',
-    'HoldTokenHolderFacet',
-    'HoldManagementFacet',
-    'TimeTravel',
-    'Kyc',
-    'SsiManagement',
-    'ClearingHoldCreationFacet',
-    'ClearingRedeemFacet',
-    'ClearingTransferFacet',
-    'ClearingReadFacet',
-    'ClearingActionsFacet',
-    'ExternalPauseManagement',
-    'ExternalControlListManagement',
-    'ExternalKycListManagement',
-    'ERC3643',
-    'FreezeFacet',
-    'ERC3643Facet',
-    'ERC3643BatchFacet',
-    'FreezeFacet',
-    'TREXFactoryAts',
-    'ComplianceMock',
-    'IdentityRegistryMock',
-] as const
-export type ContractName = (typeof CONTRACT_NAMES)[number]
-
-export const LIBRARY_NAMES = [
-    'SecurityDeploymentLib',
-    'TREXBaseDeploymentLib',
-    'TREXBondDeploymentLib',
-    'TREXEquityDeploymentLib',
-] as const
-export type LibraryName = (typeof LIBRARY_NAMES)[number]
-
-export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
-
-export const CONTRACT_FACTORY_NAMES = CONTRACT_NAMES.map(
-    (name) => `${name}__factory`
-)
-export type ContractFactoryName = (typeof CONTRACT_FACTORY_NAMES)[number]
-
-export interface Endpoints {
-    jsonRpc: string
-    mirror: string
-}
-
-export interface DeployedContract {
-    address: string
-    proxyAddress?: string
-    proxyAdminAddress?: string
-}
-
-export interface ContractConfig {
-    name: ContractName
-    factoryName: ContractFactoryName
-    deployType: DeployType
-    addresses?: Record<Network, DeployedContract>
-}
-
-export default class Configuration {
-    // private _privateKeys: Record<Network, string[]>;
-    // private _endpoints: Record<Network, Endpoints>;
-    // private _contracts: Record<ContractName, ContractConfig>;
+interface TRexIAccessControl {
     /**
-     * Determines whether the contract sizer should run on compile.
+     * @dev Emitted when a role is granted to an account
      *
-     * @returns {boolean} True if the contract sizer should run on compile, false otherwise.
+     * @param role The role to be granted
+     * @param account The account for which the role is to be granted
+     * @param operator The caller of the function that emitted the event
      */
-    public static get contractSizerRunOnCompile(): boolean {
-        return (
-            Configuration._getEnvironmentVariable({
-                name: 'CONTRACT_SIZER_RUN_ON_COMPILE',
-                defaultValue: 'true',
-            }).toLowerCase() === 'true'
-        )
-    }
+    event RoleGranted(
+        address indexed operator,
+        address indexed account,
+        bytes32 indexed role
+    );
 
     /**
-     * Determines whether gas reporting is enabled.
+     * @dev Emitted when a role is revoked from an account
      *
-     * @returns {boolean} True if gas reporting is enabled, false otherwise.
+     * @param role The role to be revoked
+     * @param account The account for which the role is to be revoked
+     * @param operator The caller of the function that emitted the event
      */
-    public static get reportGas(): boolean {
-        return (
-            Configuration._getEnvironmentVariable({
-                name: 'REPORT_GAS',
-                defaultValue: 'true',
-            }).toLowerCase() === 'true'
-        )
-    }
-
-    public static get privateKeys(): Record<Network, string[]> {
-        return NETWORKS.reduce(
-            (result, network) => {
-                result[network] = Configuration._getEnvironmentVariableList({
-                    name: `${network.toUpperCase()}_PRIVATE_KEY_#`,
-                })
-                return result
-            },
-            {} as Record<Network, string[]>
-        )
-    }
-
-    public static get endpoints(): Record<Network, Endpoints> {
-        return NETWORKS.reduce(
-            (result, network) => {
-                result[network] = {
-                    jsonRpc: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_JSON_RPC_ENDPOINT`,
-                        defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:7546'
-                                : `https://${network}.hash.io/api`,
-                    }),
-                    mirror: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_MIRROR_NODE_ENDPOINT`,
-                        defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:5551'
-                                : `https://${network}.mirrornode.hedera.com`,
-                    }),
-                }
-                return result
-            },
-            {} as Record<Network, Endpoints>
-        )
-    }
-
-    public static get contracts(): Record<ContractName, ContractConfig> {
-        const contracts: Record<ContractName, ContractConfig> = {} as Record<
-            ContractName,
-            ContractConfig
-        >
-        CONTRACT_NAMES.forEach((contractName) => {
-            contracts[contractName] = {
-                name: contractName,
-                factoryName: `${contractName}__factory`,
-                deployType: CONTRACT_NAMES_WITH_PROXY.includes(contractName)
-                    ? 'proxy'
-                    : 'direct',
-                addresses: Configuration._getDeployedAddresses({
-                    contractName,
-                }),
-            }
-        })
-        return contracts
-    }
-
-    // * Private methods
+    event RoleRevoked(
+        address indexed operator,
+        address indexed account,
+        bytes32 indexed role
+    );
 
     /**
-     * Retrieves the deployed contract addresses for a given contract name across different networks.
+     * @dev Emitted when a role is renounced by an account
      *
-     * @param {Object} params - The parameters object.
-     * @param {ContractName} params.contractName - The name of the contract to get deployed addresses for.
-     * @returns {Record<Network, DeployedContract>} An object mapping each network to its deployed contract details.
-     *
-     * The function iterates over all available networks and fetches the contract address, proxy address,
-     * and proxy admin address from environment variables. If the contract address is found, it adds the
-     * details to the returned object.
+     * @param role The role that was renounced
+     * @param account The account that renouced to the role
      */
-    private static _getDeployedAddresses({
-        contractName,
-    }: {
-        contractName: ContractName
-    }): Record<Network, DeployedContract> {
-        const deployedAddresses: Record<Network, DeployedContract> =
-            {} as Record<Network, DeployedContract>
+    event RoleRenounced(address indexed account, bytes32 indexed role);
 
-        NETWORKS.forEach((network) => {
-            const address = Configuration._getEnvironmentVariable({
-                name: `${network.toUpperCase()}_${contractName.toUpperCase()}`,
-                defaultValue: EMPTY_STRING,
-            })
+    /**
+     * @dev Emitted when a set of roles are applied to an account
+     *
+     * @param roles The roles that was applied
+     * @param actives By each role, true if the role is granted, false if revoked
+     * @param account The account that renouced to the role
+     */
+    event RolesApplied(bytes32[] roles, bool[] actives, address account);
 
-            if (address !== EMPTY_STRING) {
-                const proxyAddress = Configuration._getEnvironmentVariable({
-                    name: `${network.toUpperCase()}_${contractName}_PROXY`,
-                    defaultValue: EMPTY_STRING,
-                })
-                const proxyAdminAddress = Configuration._getEnvironmentVariable(
-                    {
-                        name: `${network.toUpperCase()}_${contractName}_PROXY_ADMIN`,
-                        defaultValue: EMPTY_STRING,
-                    }
-                )
+    error AccountAssignedToRole(bytes32 role, address account);
+    error AccountNotAssignedToRole(bytes32 role, address account);
+    error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
 
-                deployedAddresses[network] = {
-                    address,
-                    ...(proxyAddress !== EMPTY_STRING && { proxyAddress }),
-                    ...(proxyAdminAddress !== EMPTY_STRING && {
-                        proxyAdminAddress,
-                    }),
-                }
-            }
-        })
+    /**
+     * @dev Grants a role
+     *
+     * @param _role The role id
+     * @param _account The account address
+     * @return success_ true or false
+     */
+    function grantRole(
+        bytes32 _role,
+        address _account
+    ) external returns (bool success_);
 
-        return deployedAddresses
-    }
+    /**
+     * @dev Revokes a role
+     *
+     * @param _role The role id
+     * @param _account The account address
+     * @return success_ true or false
+     */
+    function revokeRole(
+        bytes32 _role,
+        address _account
+    ) external returns (bool success_);
 
-    private static _getEnvironmentVariableList({
-        name,
-        indexChar = '#',
-    }: {
-        name: string
-        indexChar?: string
-    }): string[] {
-        const resultList: string[] = []
-        let index = 0
-        do {
-            const env = Configuration._getEnvironmentVariable({
-                name: name.replace(indexChar, `${index}`),
-                defaultValue: EMPTY_STRING,
-            })
-            if (env !== EMPTY_STRING) {
-                resultList.push(env)
-            }
-            index++
-        } while (resultList.length === index)
-        return resultList
-    }
+    /**
+     * @dev Renounces a role
+     *
+     * @param _role The role id
+     * @return success_ true or false
+     */
+    function renounceRole(bytes32 _role) external returns (bool success_);
 
-    private static _getEnvironmentVariable({
-        name,
-        defaultValue,
-    }: {
-        name: string
-        defaultValue?: string
-    }): string {
-        const value = process.env?.[name]
-        if (value) {
-            return value
-        }
-        if (defaultValue !== undefined) {
-            // console.warn(
-            //     `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
-            // )
-            return defaultValue
-        }
-        throw new Error(
-            `Environment variable "${name}" is not defined. Please set the "${name}" environment variable.`
-        )
-    }
+    /**
+     * @dev Apply roles to an account
+     *
+     * @param _roles The role id array
+     * @param _actives By each role, true if the role is granted, false if revoked
+     * @param _account The account address
+     * @return success_ true or false
+     */
+    function applyRoles(
+        bytes32[] calldata _roles,
+        bool[] calldata _actives,
+        address _account
+    ) external returns (bool success_);
+
+    /**
+     * @dev Returns the number of roles the account currently has
+     *
+     * @param _account The account address
+     * @return roleCount_ The number of roles
+     */
+    function getRoleCountFor(
+        address _account
+    ) external view returns (uint256 roleCount_);
+
+    /**
+     * @dev Returns an array of roles the account currently has
+     *
+     * @param _account The account address
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return roles_ The array containing the roles
+     */
+    function getRolesFor(
+        address _account,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (bytes32[] memory roles_);
+
+    /**
+     * @dev Returns the number of members the role currently has
+     *
+     * @param _role The role id
+     * @return memberCount_ The number of members
+     */
+    function getRoleMemberCount(
+        bytes32 _role
+    ) external view returns (uint256 memberCount_);
+
+    /**
+     * @dev Returns an array of members the role currently has
+     *
+     * @param _role The role id
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return members_ The array containing the members addresses
+     */
+    function getRoleMembers(
+        bytes32 _role,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory members_);
+
+    /**
+     * @dev Checks if an account has a role
+     *
+     * @param _role The role id
+     * @param _account the account address
+     * @return bool true or false
+     */
+    function hasRole(
+        bytes32 _role,
+        address _account
+    ) external view returns (bool);
 }
