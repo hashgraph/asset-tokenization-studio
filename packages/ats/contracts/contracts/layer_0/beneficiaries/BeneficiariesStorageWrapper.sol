@@ -220,23 +220,30 @@ abstract contract BeneficiariesStorageWrapper is PauseStorageWrapper {
         mapping(address => bytes) beneficiaryData;
     }
 
+    modifier onlyIfBeneficiary(address _beneficiary) {
+        if (!_isExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary)) {
+            revert IBeneficiaries.BeneficiaryNotFound(_beneficiary);
+        }
+        _;
+    }
+
+    modifier onlyIfNotBeneficiary(address _beneficiary) {
+        if (_isExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary)) {
+            revert IBeneficiaries.BeneficiaryAlreadyExists(_beneficiary);
+        }
+        _;
+    }
+
     function _addBeneficiary(
         address _beneficiary,
         bytes calldata _data
     ) internal {
-        if (!_addExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary)) {
-            revert IBeneficiaries.BeneficiaryAlreadyExists(_beneficiary);
-        }
+        _addExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary);
         _setBeneficiaryData(_beneficiary, _data);
     }
 
     function _removeBeneficiary(address _beneficiary) internal {
-        if (
-            !_removeExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary)
-        ) {
-            revert IBeneficiaries.BeneficiaryNotFound(_beneficiary);
-        }
-
+        _removeExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary);
         _removeBeneficiaryData(_beneficiary);
     }
 

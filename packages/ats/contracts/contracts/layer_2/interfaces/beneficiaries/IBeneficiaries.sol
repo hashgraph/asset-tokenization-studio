@@ -219,6 +219,13 @@ interface IBeneficiaries {
         address indexed beneficiary
     );
 
+    event BeneficiaryDataUpdated(
+        address indexed operator,
+        address indexed beneficiary,
+        bytes previousData,
+        bytes newData
+    );
+
     error BeneficiaryAlreadyExists(address beneficiary);
     error BeneficiaryNotFound(address beneficiary);
 
@@ -238,6 +245,11 @@ interface IBeneficiaries {
     ) external;
 
     function removeBeneficiary(address _beneficiary) external;
+
+    function updateBeneficiaryData(
+        address _beneficiary,
+        bytes calldata _data
+    ) external;
 
     function isBeneficiary(address _beneficiary) external view returns (bool);
 
