@@ -11,6 +11,7 @@ task(
     "Replace 'interface' with 'interfaces' in TypeChain generated files to avoid compilation errors",
     async function (taskArguments, hre, runSuper) {
         await runSuper(taskArguments)
+
         await hre.run('erc3643-clone-interfaces')
         const PATTERN = `${hre.config.typechain.outDir}/**/*.ts`
         patchTypeChainFiles(PATTERN)
