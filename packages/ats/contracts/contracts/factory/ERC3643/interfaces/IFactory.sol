@@ -210,8 +210,8 @@ import {TRexIResolverProxy as IResolverProxy} from './IResolverProxy.sol';
 import {
     TRexIBusinessLogicResolver as IBusinessLogicResolver
 } from './IBusinessLogicResolver.sol';
-import {TRexIERC20 as IERC20} from './IERC20.sol';
 import {TRexIBond as IBond} from './IBond.sol';
+import {TRexIERC20 as IERC20} from './IERC20.sol';
 import {TRexIEquity as IEquity} from './IEquity.sol';
 import {
     FactoryRegulationData,
