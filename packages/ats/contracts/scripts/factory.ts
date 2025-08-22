@@ -778,6 +778,8 @@ export async function deployBondFromFactory({
     businessLogicResolver,
     compliance,
     identityRegistry,
+    beneficiariesList,
+    beneficiariesListData,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -810,6 +812,8 @@ export async function deployBondFromFactory({
     businessLogicResolver: string
     compliance?: string
     identityRegistry?: string
+    beneficiariesList?: string[]
+    beneficiariesListData?: string[]
 }) {
     const bondData = await setBondData({
         adminAccount,
@@ -837,6 +841,8 @@ export async function deployBondFromFactory({
         businessLogicResolver,
         compliance,
         identityRegistry,
+        beneficiariesList,
+        beneficiariesListData,
     })
 
     const factoryRegulationData = await setFactoryRegulationData(
