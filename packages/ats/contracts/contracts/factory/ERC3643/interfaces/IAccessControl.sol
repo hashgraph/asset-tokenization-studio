@@ -206,7 +206,11 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.17;
 
+<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IAccessControl.sol
 interface TRexIAccessControl {
+=======
+interface IAccessControl_ {
+>>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IAccessControl.sol
     /**
      * @dev Emitted when a role is granted to an account
      *

@@ -206,7 +206,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
+<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IEquity.sol
 interface TRexIEquity {
+=======
+interface IEquity_ {
+>>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IEquity.sol
     enum DividendType {
         NONE,
         PREFERRED,
