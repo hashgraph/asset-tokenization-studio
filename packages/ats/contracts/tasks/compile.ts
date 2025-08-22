@@ -199,13 +199,12 @@ task('erc3643-clone-interfaces', async (_, hre) => {
     await new Promise<void>((resolve, reject) => {
         exec(
             'npx prettier --write ./contracts/factory/ERC3643/interfaces',
-            (error, stdout, stderr) => {
+            (error, _stdout, stderr) => {
                 if (error) {
                     console.error(`Error ejecutando prettier: ${error.message}`)
                     return reject(error)
                 }
                 if (stderr) console.error(stderr)
-                // console.log(stdout)
                 resolve()
             }
         )
