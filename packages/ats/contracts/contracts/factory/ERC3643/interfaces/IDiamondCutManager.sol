@@ -205,11 +205,7 @@
 
 pragma solidity ^0.8.17;
 
-<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol
 import {TRexIDiamondLoupe as IDiamondLoupe} from './IDiamondLoupe.sol';
-=======
-import {IDiamondLoupe_ as IDiamondLoupe} from './IDiamondLoupe.sol';
->>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -227,11 +223,7 @@ import {IDiamondLoupe_ as IDiamondLoupe} from './IDiamondLoupe.sol';
 ///          * facetId
 ///          * list of selectors
 ///          * list of interfaceIds
-<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol
 interface TRexIDiamondCutManager {
-=======
-interface IDiamondCutManager_ {
->>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IDiamondCutManager.sol
     struct FacetConfiguration {
         bytes32 id;
         uint256 version;

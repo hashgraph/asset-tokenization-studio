@@ -109,7 +109,7 @@ task('erc3643-clone-interfaces', async (_, hre) => {
                         const isConstant = constants.some((c) =>
                             filePath.includes(c.src.split('/').pop() || c)
                         )
-                        return isConstant ? n : `${n}_ as ${n}`
+                        return isConstant ? n : `TRex${n} as ${n}`
                     })
                     .join(', ')
 
@@ -127,7 +127,7 @@ task('erc3643-clone-interfaces', async (_, hre) => {
             try {
                 const parts = i.original.split(':')
                 erc3643Artifact = await hre.artifacts.readArtifact(
-                    parts[parts.length - 1] + '_'
+                    'TRex' + parts[parts.length - 1]
                 )
             } catch {
                 console.log(
@@ -168,7 +168,7 @@ task('erc3643-clone-interfaces', async (_, hre) => {
                     `(contract|interface)\\s+${originalArtifact.contractName}\\b(\\s+is[^\\{]+)?`,
                     'm'
                 ),
-                `$1 ${originalArtifact.contractName}_ `
+                `$1 TRex${originalArtifact.contractName}`
             )
 
             const targetPath = `${targetDir}/${originalArtifact.contractName}.sol`

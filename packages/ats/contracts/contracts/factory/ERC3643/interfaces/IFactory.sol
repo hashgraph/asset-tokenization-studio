@@ -206,7 +206,6 @@
 pragma solidity ^0.8.17;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IFactory.sol
 import {TRexIResolverProxy as IResolverProxy} from './IResolverProxy.sol';
 import {
     TRexIBusinessLogicResolver as IBusinessLogicResolver
@@ -214,15 +213,6 @@ import {
 import {TRexIERC20 as IERC20} from './IERC20.sol';
 import {TRexIBond as IBond} from './IBond.sol';
 import {TRexIEquity as IEquity} from './IEquity.sol';
-=======
-import {IResolverProxy_ as IResolverProxy} from './IResolverProxy.sol';
-import {
-    IBusinessLogicResolver_ as IBusinessLogicResolver
-} from './IBusinessLogicResolver.sol';
-import {IERC20_ as IERC20} from './IERC20.sol';
-import {IBond_ as IBond} from './IBond.sol';
-import {IEquity_ as IEquity} from './IEquity.sol';
->>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IFactory.sol
 import {
     FactoryRegulationData,
     RegulationData,
@@ -230,11 +220,7 @@ import {
     RegulationSubType
 } from './regulation.sol';
 
-<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IFactory.sol
 interface TRexIFactory {
-=======
-interface IFactory_ {
->>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IFactory.sol
     enum SecurityType {
         Bond,
         Equity

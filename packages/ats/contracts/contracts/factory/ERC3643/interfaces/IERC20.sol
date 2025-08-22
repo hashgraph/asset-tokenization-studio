@@ -208,15 +208,9 @@
 
 pragma solidity ^0.8.17;
 
-<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IERC20.sol
 import {TRexIFactory as IFactory} from './IFactory.sol';
 
 interface TRexIERC20 {
-=======
-import {IFactory_ as IFactory} from './IFactory.sol';
-
-interface IERC20_ {
->>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IERC20.sol
     struct ERC20MetadataInfo {
         string name;
         string symbol;

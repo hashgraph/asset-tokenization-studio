@@ -205,13 +205,6 @@
 
 pragma solidity ^0.8.17;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IDiamondLoupe.sol
-=======
-
-import {
-    IStaticFunctionSelectors_ as IStaticFunctionSelectors
-} from './IStaticFunctionSelectors.sol';
->>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IDiamondLoupe.sol
 
 // A loupe is a small magnifying glass used to look at resolverProxys.
 // These functions look at resolverProxys
@@ -224,11 +217,7 @@ import {
 ///    }
 ///```
 // HACK: I think that Loupe and Cut should be only one contract.
-<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IDiamondLoupe.sol
 interface TRexIDiamondLoupe {
-=======
-interface IDiamondLoupe_ {
->>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IDiamondLoupe.sol
     struct Facet {
         bytes32 id;
         address addr;

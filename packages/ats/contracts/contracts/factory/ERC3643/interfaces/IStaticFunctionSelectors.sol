@@ -207,11 +207,7 @@ pragma solidity ^0.8.17;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IStaticFunctionSelectors.sol
 interface TRexIStaticFunctionSelectors {
-=======
-interface IStaticFunctionSelectors_ {
->>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IStaticFunctionSelectors.sol
     /// @notice Gets the static resolver key.
     /// @return staticResolverKey_ Static resolver key
     function getStaticResolverKey()

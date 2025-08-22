@@ -206,11 +206,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IBond.sol
 interface TRexIBond {
-=======
-interface IBond_ {
->>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IBond.sol
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;

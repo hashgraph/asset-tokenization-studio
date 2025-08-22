@@ -207,11 +207,7 @@ pragma solidity ^0.8.17;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IResolverProxy.sol
 interface TRexIResolverProxy {
-=======
-interface IResolverProxy_ {
->>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IResolverProxy.sol
     struct Rbac {
         bytes32 role;
         address[] members;

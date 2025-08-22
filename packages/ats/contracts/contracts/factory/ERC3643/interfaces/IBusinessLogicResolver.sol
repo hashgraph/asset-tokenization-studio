@@ -204,9 +204,6 @@
 */
 
 pragma solidity ^0.8.17;
-import {
-    IDiamondCutManager_ as IDiamondCutManager
-} from './IDiamondCutManager.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -221,11 +218,7 @@ import {
 /// 		considered fully compatible.
 ///			Registering a business logic (register = update its latest version or add it to the registry) will increase the
 ///			latest version for all Business Logics by 1.
-<<<<<<< HEAD:packages/ats/contracts/contracts/factory/ERC3643/interfaces/IBusinessLogicResolver.sol
 interface TRexIBusinessLogicResolver {
-=======
-interface IBusinessLogicResolver_ {
->>>>>>> a6398c4e (feat: generate modified interfaces erc3643 when compile):contracts/contracts/factory/ERC3643/interfaces/IBusinessLogicResolver.sol
     enum VersionStatus {
         NONE,
         ACTIVATED,
