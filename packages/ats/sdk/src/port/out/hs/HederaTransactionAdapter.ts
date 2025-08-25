@@ -549,6 +549,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
+    beneficiaries: EvmAddress[] = [],
+    beneficiariesData?: string[],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
     try {
@@ -619,6 +621,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         security,
         bondDetails,
         couponDetails,
+        beneficiaries.map((addr) => addr.toString()),
+        beneficiariesData ?? [],
       );
 
       const additionalSecurityData: AdditionalSecurityData = {

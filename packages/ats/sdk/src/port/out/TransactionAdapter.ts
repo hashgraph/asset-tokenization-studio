@@ -282,6 +282,8 @@ interface ITransactionAdapter {
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
+    beneficiaries?: EvmAddress[],
+    beneficiariesData?: string[],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
@@ -1141,6 +1143,8 @@ export default abstract class TransactionAdapter
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
+    beneficiaries?: EvmAddress[],
+    beneficiariesData?: string[],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
   abstract grantRole(
