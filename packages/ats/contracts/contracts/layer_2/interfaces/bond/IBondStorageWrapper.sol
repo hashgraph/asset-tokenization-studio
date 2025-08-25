@@ -227,5 +227,4 @@ interface IBondStorageWrapper {
     error CouponFrequencyWrong();
     error BondMaturityDateWrong();
     error CallToIrCalculatorFailed();
-    error InvalidIr();
 }
