@@ -212,6 +212,7 @@ interface IBond {
         uint256 nominalValue;
         uint256 startingDate;
         uint256 maturityDate;
+        address irCalculator;
     }
 
     struct CouponDetailsData {
