@@ -247,6 +247,9 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   @OptionalField()
   identityRegistryId?: string;
 
+  @OptionalField()
+  irCalculatorId?: string;
+
   currency: string;
   numberOfUnits: string;
   nominalValue: string;
@@ -295,6 +298,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion,
     complianceId,
     identityRegistryId,
+    irCalculatorId,
   }: {
     name: string;
     symbol: string;
@@ -327,6 +331,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion: number;
     complianceId?: string;
     identityRegistryId?: string;
+    irCalculatorId?: string;
   }) {
     super({
       name: (val) => {
@@ -402,6 +407,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
       complianceId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       identityRegistryId:
         FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      irCalculatorId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
     });
     this.name = name;
     this.symbol = symbol;
@@ -435,5 +441,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.configVersion = configVersion;
     this.complianceId = complianceId;
     this.identityRegistryId = identityRegistryId;
+    this.irCalculatorId = irCalculatorId;
   }
 }

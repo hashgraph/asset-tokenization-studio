@@ -212,12 +212,14 @@ export class BondDetails extends ValidatedDomain<BondDetails> {
   nominalValue: BigDecimal;
   startingDate: number;
   maturityDate: number;
+  irCalculatorEvmAddress: string;
 
   constructor(
     currency: string,
     nominalValue: BigDecimal,
     startingDate: number,
     maturityDate: number,
+    irCalculatorEvmAddress: string,
   ) {
     super({
       maturityDate: (val) => {
@@ -229,6 +231,7 @@ export class BondDetails extends ValidatedDomain<BondDetails> {
     this.nominalValue = nominalValue;
     this.startingDate = startingDate;
     this.maturityDate = maturityDate;
+    this.irCalculatorEvmAddress = irCalculatorEvmAddress;
 
     ValidatedDomain.handleValidation(BondDetails.name, this);
   }

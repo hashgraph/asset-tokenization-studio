@@ -214,13 +214,17 @@ import {IBondStorageWrapper} from '../interfaces/bond/IBondStorageWrapper.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {LowLevelCall} from '../../layer_0/common/libraries/LowLevelCall.sol';
+import {IIRCalculator} from '../interfaces/bond/IIRCalculator.sol';
 
 abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
+    using LowLevelCall for address;
 
     struct BondDataStorage {
         IBond.BondDetailsData bondDetail;
         IBond.CouponDetailsData couponDetail;
+        address irCalculator;
         bool initialized;
     }
 
@@ -328,7 +332,22 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     ) internal view returns (IBond.CouponFor memory couponFor_) {
         IBond.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
 
-        couponFor_.rate = registeredCoupon.coupon.rate;
+        if (_bondStorage().irCalculator == address(0)) {
+            couponFor_.rate = registeredCoupon.coupon.rate;
+        } else {
+            couponFor_.rate = abi.decode(
+                _bondStorage().irCalculator.functionStaticCall(
+                    abi.encodeWithSelector(
+                        IIRCalculator.calculateIr.selector,
+                        registeredCoupon.coupon.recordDate,
+                        registeredCoupon.coupon.rate
+                    ),
+                    CallToIrCalculatorFailed.selector
+                ),
+                (uint256)
+            );
+        }
+
         couponFor_.recordDate = registeredCoupon.coupon.recordDate;
         couponFor_.executionDate = registeredCoupon.coupon.executionDate;
 

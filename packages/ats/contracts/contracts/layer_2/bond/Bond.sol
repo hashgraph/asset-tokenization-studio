@@ -373,6 +373,7 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         onlyValidTimestamp(_bondDetailsData.startingDate)
     {
         BondDataStorage storage bondStorage = _bondStorage();
+        bondStorage.irCalculator = _bondDetailsData.irCalculator;
         bondStorage.initialized = true;
         _storeBondDetails(_bondDetailsData);
         _storeCouponDetails(
