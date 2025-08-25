@@ -223,15 +223,21 @@ export class FactoryBondToken {
   public security: SecurityData;
   public bondDetails: BondDetailsData;
   public couponDetails: CouponDetailsData;
+  public beneficiaries: string[];
+  public beneficiariesData: string[];
 
   constructor(
     security: SecurityData,
     bondDetails: BondDetailsData,
     couponDetails: CouponDetailsData,
+    beneficiaries: string[],
+    beneficiariesData: string[],
   ) {
     this.security = security;
     this.bondDetails = bondDetails;
     this.couponDetails = couponDetails;
+    this.beneficiaries = beneficiaries;
+    this.beneficiariesData = beneficiariesData;
   }
 }
 

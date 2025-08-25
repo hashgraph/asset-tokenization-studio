@@ -233,13 +233,15 @@ import {
 } from '../constants/storagePositions.sol';
 import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {
+    BeneficiariesStorageWrapper
+} from '../beneficiaries/BeneficiariesStorageWrapper.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import {_AGENT_ROLE} from '../constants/roles.sol';
 
 abstract contract ERC3643StorageWrapper1 is
     IERC3643StorageWrapper,
-    PauseStorageWrapper
+    BeneficiariesStorageWrapper
 {
     using LowLevelCall for address;
 

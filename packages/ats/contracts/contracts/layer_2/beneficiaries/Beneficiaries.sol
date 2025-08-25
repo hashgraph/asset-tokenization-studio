@@ -203,183 +203,172 @@
 
 */
 
+pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+import {IBeneficiaries} from '../interfaces/beneficiaries/IBeneficiaries.sol';
 import {
-  CreateBondCommand,
-  CreateBondCommandResponse,
-} from './CreateBondCommand';
-import { InvalidRequest } from '@command/error/InvalidRequest';
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import ContractId from '@domain/context/contract/ContractId';
-import { Security } from '@domain/context/security/Security';
-import AccountService from '@service/account/AccountService';
-import TransactionService from '@service/transaction/TransactionService';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { BondDetails } from '@domain/context/bond/BondDetails';
-import { CouponDetails } from '@domain/context/bond/CouponDetails';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import ContractService from '@service/contract/ContractService';
-import { CreateBondCommandError } from './error/CreateBondCommandError';
-import { Response } from '@domain/context/transaction/Response';
-import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
-import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
-import { EVM_ZERO_ADDRESS } from '@core/Constants';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {_BENEFICIARIES_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_BENEFICIARY_MANAGER_ROLE} from '../constants/roles.sol';
+import {
+    _BENEFICIARIES_STORAGE_POSITION
+} from '../../layer_0/constants/storagePositions.sol';
 
-@CommandHandler(CreateBondCommand)
-export class CreateBondCommandHandler
-  implements ICommandHandler<CreateBondCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
+contract Beneficiaries is IBeneficiaries, IStaticFunctionSelectors, Common {
+    function initialize_Beneficiaries(
+        address[] calldata _beneficiaries,
+        bytes[] calldata _data
+    )
+        external
+        override
+        onlyUninitialized(
+            _externalListStorage(_BENEFICIARIES_STORAGE_POSITION).initialized
+        )
+    {
+        uint256 length = _beneficiaries.length;
+        for (uint256 index; index < length; ) {
+            _addExternalList(
+                _BENEFICIARIES_STORAGE_POSITION,
+                _beneficiaries[index]
+            );
+            _setBeneficiaryData(_beneficiaries[index], _data[index]);
+            unchecked {
+                ++index;
+            }
+        }
 
-  async execute(
-    command: CreateBondCommand,
-  ): Promise<CreateBondCommandResponse> {
-    let res: Response;
-    try {
-      const {
-        security,
-        currency,
-        nominalValue,
-        startingDate,
-        maturityDate,
-        couponFrequency,
-        couponRate,
-        firstCouponDate,
-        factory,
-        resolver,
-        configId,
-        configVersion,
-        diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-        compliance,
-        identityRegistry,
-        beneficiaries,
-        beneficiariesData,
-      } = command;
-
-      //TODO: Boy scout: remove request validations and adjust test
-      if (!factory) {
-        throw new InvalidRequest('Factory not found in request');
-      }
-
-      if (!resolver) {
-        throw new InvalidRequest('Resolver not found in request');
-      }
-
-      if (!configId) {
-        throw new InvalidRequest('Config Id not found in request');
-      }
-
-      if (configVersion === undefined) {
-        throw new InvalidRequest('Config Version not found in request');
-      }
-      if (!security.regulationType) {
-        throw new MissingRegulationType();
-      }
-      if (!security.regulationsubType) {
-        throw new MissingRegulationSubType();
-      }
-
-      const diamondOwnerAccountEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
-
-      const factoryEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(factory.toString());
-
-      const resolverEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(resolver.toString());
-
-      const [
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-        beneficiariesEvmAddresses,
-      ] = await Promise.all([
-        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
-        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
-        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
-        this.contractService.getEvmAddressesFromHederaIds(beneficiaries),
-      ]);
-
-      const complianceEvmAddress = compliance
-        ? await this.contractService.getContractEvmAddress(compliance)
-        : new EvmAddress(EVM_ZERO_ADDRESS);
-
-      const identityRegistryAddress = identityRegistry
-        ? await this.contractService.getContractEvmAddress(identityRegistry)
-        : new EvmAddress(EVM_ZERO_ADDRESS);
-
-      const handler = this.transactionService.getHandler();
-
-      const bondInfo = new BondDetails(
-        currency,
-        BigDecimal.fromString(nominalValue),
-        parseInt(startingDate),
-        parseInt(maturityDate),
-      );
-
-      const couponInfo = new CouponDetails(
-        parseInt(couponFrequency),
-        BigDecimal.fromString(couponRate),
-        parseInt(firstCouponDate),
-      );
-
-      res = await handler.createBond(
-        new Security(security),
-        bondInfo,
-        couponInfo,
-        factoryEvmAddress,
-        resolverEvmAddress,
-        configId,
-        configVersion,
-        complianceEvmAddress,
-        identityRegistryAddress,
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-        diamondOwnerAccountEvmAddress,
-        beneficiariesEvmAddresses,
-        beneficiariesData,
-        factory.toString(),
-      );
-
-      const contractAddress =
-        await this.transactionService.getTransactionResult({
-          res,
-          result: res.response?.bondAddress,
-          className: CreateBondCommandHandler.name,
-          position: 0,
-          numberOfResultsItems: 1,
-        });
-
-      const contractId =
-        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
-          contractAddress,
-        );
-
-      return Promise.resolve(
-        new CreateBondCommandResponse(new ContractId(contractId), res.id!),
-      );
-    } catch (error) {
-      if (res?.response == 1) {
-        return Promise.resolve(
-          new CreateBondCommandResponse(new ContractId('0.0.0'), res.id!),
-        );
-      }
-      throw new CreateBondCommandError(error as Error);
+        _externalListStorage(_BENEFICIARIES_STORAGE_POSITION)
+            .initialized = true;
     }
-  }
+
+    function addBeneficiary(
+        address _beneficiary,
+        bytes calldata _data
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_BENEFICIARY_MANAGER_ROLE)
+        onlyIfNotBeneficiary(_beneficiary)
+    {
+        _addBeneficiary(_beneficiary, _data);
+        emit BeneficiaryAdded(_msgSender(), _beneficiary, _data);
+    }
+
+    function removeBeneficiary(
+        address _beneficiary
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_BENEFICIARY_MANAGER_ROLE)
+        onlyIfBeneficiary(_beneficiary)
+    {
+        _removeBeneficiary(_beneficiary);
+        emit BeneficiaryRemoved(_msgSender(), _beneficiary);
+    }
+
+    function updateBeneficiaryData(
+        address _beneficiary,
+        bytes calldata _data
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_BENEFICIARY_MANAGER_ROLE)
+        onlyIfBeneficiary(_beneficiary)
+    {
+        bytes memory previousData = _getBeneficiaryData(_beneficiary);
+        _setBeneficiaryData(_beneficiary, _data);
+        emit BeneficiaryDataUpdated(
+            _msgSender(),
+            _beneficiary,
+            previousData,
+            _data
+        );
+    }
+
+    function isBeneficiary(
+        address _beneficiary
+    ) external view override returns (bool) {
+        return _isExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary);
+    }
+
+    function getBeneficiaryData(
+        address _beneficiary
+    ) external view override returns (bytes memory) {
+        return _getBeneficiaryData(_beneficiary);
+    }
+
+    function getBeneficiariesCount() external view override returns (uint256) {
+        return _getExternalListsCount(_BENEFICIARIES_STORAGE_POSITION);
+    }
+
+    function getBeneficiaries(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (address[] memory beneficiaries_) {
+        return
+            _getExternalListsMembers(
+                _BENEFICIARIES_STORAGE_POSITION,
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _BENEFICIARIES_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](8);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .initialize_Beneficiaries
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .addBeneficiary
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .removeBeneficiary
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .updateBeneficiaryData
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isBeneficiary.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getBeneficiaryData
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getBeneficiariesCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getBeneficiaries
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IBeneficiaries)
+            .interfaceId;
+    }
 }
