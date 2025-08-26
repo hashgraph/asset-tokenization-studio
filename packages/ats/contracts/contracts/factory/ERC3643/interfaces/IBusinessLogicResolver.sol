@@ -204,6 +204,9 @@
 */
 
 pragma solidity ^0.8.17;
+import {
+    TRexIDiamondCutManager as IDiamondCutManager
+} from './IDiamondCutManager.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 

@@ -4,7 +4,6 @@ import fs from 'fs'
 import { sync as globSync } from 'glob'
 import { Artifact } from 'hardhat/types'
 import path from 'path'
-import { exec } from 'child_process'
 
 task(
     TASK_COMPILE,
@@ -196,17 +195,16 @@ task('erc3643-clone-interfaces', async (_, hre) => {
             console.warn(`Not found: ${src}`)
         }
     }
-    await new Promise<void>((resolve, reject) => {
-        exec(
+    const { execWithErrorHandling } = await import('./utils/errorHandling')
+
+    try {
+        await execWithErrorHandling(
             'npx prettier --write ./contracts/factory/ERC3643/interfaces',
-            (error, _stdout, stderr) => {
-                if (error) {
-                    console.error(`Error ejecutando prettier: ${error.message}`)
-                    return reject(error)
-                }
-                if (stderr) console.error(stderr)
-                resolve()
-            }
+            'Prettier code formatting'
         )
-    })
+        console.log('✅ Successfully formatted ERC3643 interface files')
+    } catch (error) {
+        console.error('Failed to format ERC3643 interface files')
+        throw error
+    }
 })

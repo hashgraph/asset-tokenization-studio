@@ -488,6 +488,18 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
         types.string
     )
     .addOptionalParam(
+        'implementationAuthority',
+        'Address of the implementation authority (defaults to zero address)',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'idFactory',
+        'Address of the identity factory (defaults to zero address)',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
         'privateKey',
         'The private key of the account in raw hexadecimal format',
         undefined,
@@ -518,15 +530,39 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
             signerPosition: args.signerPosition,
         })
 
+        // Import validation utilities
+        const { validateDeploymentParams } = await import(
+            './utils/errorHandling'
+        )
+
+        // Validate and prepare deployment parameters
+        const implementationAuthority =
+            args.implementationAuthority ?? ADDRESS_ZERO
+        const idFactory = args.idFactory ?? ADDRESS_ZERO
+        const atsFactory = args.atsFactory ?? ADDRESS_ZERO
+
+        // Comprehensive parameter validation with warnings
+        validateDeploymentParams(
+            {
+                implementationAuthority,
+                idFactory,
+                atsFactory,
+            },
+            hre,
+            {
+                allowZeroAddress: true,
+                warnOnZeroAddress: true,
+                strict: false, // Set to true for production deployments
+            }
+        )
+
+        console.log(`   Signer: ${signer.address}`)
+
         await deployContractWithLibraries(
             new DeployContractWithLibraryCommand({
                 name: `TREXFactoryAts`,
                 signer,
-                args: [
-                    ADDRESS_ZERO, // implementationAuthority
-                    ADDRESS_ZERO, // idFactory
-                    args.atsFactory ?? ADDRESS_ZERO,
-                ],
+                args: [implementationAuthority, idFactory, atsFactory],
                 libraries: ['TREXBondDeploymentLib', 'TREXEquityDeploymentLib'],
             })
         )
