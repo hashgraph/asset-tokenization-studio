@@ -209,6 +209,6 @@ pragma solidity 0.8.18;
 interface IInterestRateCalculator {
     function calculateInterestRate(
         uint256 _recordDate,
-        uint256 _averageRate
-    ) external view returns (uint256);
+        uint256 _baseRate
+    ) external view returns (uint256 adjustedRate_);
 }

@@ -256,6 +256,9 @@ import {
     CONTROL_LIST_ROLE,
     CLEARING_ROLE,
     PROTECTED_PARTITIONS_ROLE,
+    _IR_CALCULATOR_MANAGER_ROLE,
+    deployContract,
+    DeployContractCommand,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -311,6 +314,7 @@ describe('Bond Tests', () => {
     let controlListFacet: ControlList
     let clearingActionsFacet: ClearingActionsFacet
     let protectedPartitionsFacet: ProtectedPartitions
+    let interestRateCalculatorMockAddress: string
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
@@ -450,6 +454,16 @@ describe('Bond Tests', () => {
                 timeTravelEnabled: true,
             })
         )
+
+        interestRateCalculatorMockAddress = (
+            await deployContract(
+                new DeployContractCommand({
+                    name: 'InterestRateCalculatorMock',
+                    signer: signer_A,
+                    args: [],
+                })
+            )
+        ).address
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
@@ -1055,6 +1069,28 @@ describe('Bond Tests', () => {
                     expect(couponTotalHolders).to.equal(0)
                     expect(couponHolders.length).to.equal(couponTotalHolders)
                 }
+            })
+
+            describe('Interest rate calculator', () => {
+                it('GIVEN a user with the _IR_CALCULATOR_MANAGER_ROLE role WHEN setting a new interest rate calculator THEN the transaction succeeds', async () => {
+                    await accessControlFacet.grantRole(
+                        _IR_CALCULATOR_MANAGER_ROLE,
+                        account_C
+                    )
+                    await expect(
+                        bondFacet
+                            .connect(signer_C)
+                            .setInterestRateCalculator(
+                                interestRateCalculatorMockAddress
+                            )
+                    )
+                        .to.emit(bondFacet, 'InterestRateCalculatorSet')
+                        .withArgs(
+                            bondFacet.address,
+                            account_C,
+                            interestRateCalculatorMockAddress
+                        )
+                })
             })
         })
     })

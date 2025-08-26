@@ -223,8 +223,8 @@ interface IBondStorageWrapper {
     );
     event InterestRateCalculatorSet(
         address indexed bondId,
-        address indexed interestRateCalculator,
-        address indexed previousInterestRateCalculator
+        address indexed operator,
+        address indexed newInterestRateCalculator
     );
 
     error CouponCreationFailed();
