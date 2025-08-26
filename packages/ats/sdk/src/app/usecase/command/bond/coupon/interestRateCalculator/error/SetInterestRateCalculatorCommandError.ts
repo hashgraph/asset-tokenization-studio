@@ -203,12 +203,12 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
+import { CommandError } from '@command/error/CommandError';
+import BaseError from '@core/error/BaseError';
 
-interface IIRCalculator {
-    function calculateIr(
-        uint256 _recordDate,
-        uint256 _averageRate
-    ) external view returns (uint256);
+export class SetInterestRateCalculatorCommandError extends CommandError {
+  constructor(error: Error) {
+    const msg = `An error occurred while setting the interest rate calculator: ${error.message}`;
+    super(msg, error instanceof BaseError ? error.errorCode : undefined);
+  }
 }

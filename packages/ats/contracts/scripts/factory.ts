@@ -265,6 +265,7 @@ export interface BondDetailsData {
     nominalValue: number
     startingDate: number
     maturityDate: number
+    interestRateCalculator: string
 }
 
 export interface CouponDetailsData {
@@ -506,6 +507,7 @@ export async function setBondData({
     externalKycLists,
     compliance,
     identityRegistry,
+    interestRateCalculator,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -534,6 +536,7 @@ export async function setBondData({
     externalKycLists?: string[]
     compliance?: string
     identityRegistry?: string
+    interestRateCalculator?: string
 }) {
     let rbacs: Rbac[] = []
 
@@ -585,6 +588,7 @@ export async function setBondData({
         nominalValue: nominalValue,
         startingDate: startingDate,
         maturityDate: maturityDate,
+        interestRateCalculator: interestRateCalculator ?? ADDRESS_ZERO,
     }
 
     const couponDetails: CouponDetailsData = {

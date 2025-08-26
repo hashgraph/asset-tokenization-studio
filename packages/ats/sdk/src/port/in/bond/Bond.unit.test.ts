@@ -243,6 +243,7 @@ import {
   GetTotalCouponHoldersRequestFixture,
   SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,
+  SetInterestRateCalculatorRequestFixture,
 } from '@test/fixtures/bond/BondFixture';
 import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import { Security } from '@domain/context/security/Security';
@@ -266,6 +267,8 @@ import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/Upda
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
+import SetInterestRateCalculatorRequest from '../request/bond/SetInterestRateCalculatorRequest';
+import { SetInterestRateCalculatorCommand } from '@command/bond/coupon/interestRateCalculator/SetInterestRateCalculatorCommand';
 
 describe('Bond', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -281,6 +284,7 @@ describe('Bond', () => {
   let getAllCouponsRequest: GetAllCouponsRequest;
   let updateMaturityDateRequest: UpdateMaturityDateRequest;
   let redeemAtMaturityByPartitionRequest: RedeemAtMaturityByPartitionRequest;
+  let setInterestRateCalculatorRequest: SetInterestRateCalculatorRequest;
   let getCouponHoldersRequest: GetCouponHoldersRequest;
   let getTotalCouponHoldersRequest: GetTotalCouponHoldersRequest;
 
@@ -1369,6 +1373,83 @@ describe('Bond', () => {
         BondToken.redeemAtMaturityByPartition(
           redeemAtMaturityByPartitionRequest,
         ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('setInterestRateCalculator', () => {
+    setInterestRateCalculatorRequest = new SetInterestRateCalculatorRequest(
+      SetInterestRateCalculatorRequestFixture.create(),
+    );
+    it('should set interest rate calculator successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.setInterestRateCalculator(
+        setInterestRateCalculatorRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        SetInterestRateCalculatorRequest.name,
+        setInterestRateCalculatorRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetInterestRateCalculatorCommand(
+          setInterestRateCalculatorRequest.securityId,
+          setInterestRateCalculatorRequest.interestRateCalculatorId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.setInterestRateCalculator(setInterestRateCalculatorRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        SetInterestRateCalculatorRequest.name,
+        setInterestRateCalculatorRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new SetInterestRateCalculatorCommand(
+          setInterestRateCalculatorRequest.securityId,
+          setInterestRateCalculatorRequest.interestRateCalculatorId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      setInterestRateCalculatorRequest = new SetInterestRateCalculatorRequest({
+        ...SetInterestRateCalculatorRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.setInterestRateCalculator(setInterestRateCalculatorRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if interestRateCalculatorId is invalid', async () => {
+      setInterestRateCalculatorRequest = new SetInterestRateCalculatorRequest({
+        ...SetInterestRateCalculatorRequestFixture.create(),
+        interestRateCalculatorId: 'invalid',
+      });
+
+      await expect(
+        BondToken.setInterestRateCalculator(setInterestRateCalculatorRequest),
       ).rejects.toThrow(ValidationError);
     });
   });

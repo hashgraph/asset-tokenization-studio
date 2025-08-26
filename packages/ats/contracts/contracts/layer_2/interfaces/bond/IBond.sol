@@ -212,7 +212,7 @@ interface IBond {
         uint256 nominalValue;
         uint256 startingDate;
         uint256 maturityDate;
-        address irCalculator;
+        address interestRateCalculator;
     }
 
     struct CouponDetailsData {
@@ -253,6 +253,10 @@ interface IBond {
 
     function updateMaturityDate(
         uint256 _maturityDate
+    ) external returns (bool success_);
+
+    function setInterestRateCalculator(
+        address _interestRateCalculator
     ) external returns (bool success_);
 
     function getBondDetails()

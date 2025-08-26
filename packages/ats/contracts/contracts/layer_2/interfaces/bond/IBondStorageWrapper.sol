@@ -221,6 +221,11 @@ interface IBondStorageWrapper {
         uint256 indexed maturityDate,
         uint256 indexed previousMaturityDate
     );
+    event InterestRateCalculatorSet(
+        address indexed bondId,
+        address indexed interestRateCalculator,
+        address indexed previousInterestRateCalculator
+    );
 
     error CouponCreationFailed();
     error CouponFirstDateWrong();

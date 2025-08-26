@@ -2241,6 +2241,7 @@ jest.mock('@port/out/rpc/RPCTransactionAdapter', () => {
       bondInfo.nominalValue,
       bondInfo.startingDate,
       _maturityDate,
+      bondInfo.interestRateCalculator,
     );
 
     return { status: 'success', data: [] } as TransactionResponse<

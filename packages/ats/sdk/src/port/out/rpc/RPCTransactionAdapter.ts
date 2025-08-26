@@ -3000,6 +3000,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async setInterestRateCalculator(
+    securityId: EvmAddress,
+    interestRateCalculatorId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting interest rate calculator address to ${interestRateCalculatorId.toString()}`,
+    );
+
+    return this.executeTransaction(
+      Bond__factory.connect(securityId.toString(), this.getSignerOrProvider()),
+      'setInterestRateCalculator',
+      [securityId.toString(), interestRateCalculatorId.toString()],
+      GAS.REDEEM_AT_MATURITY_BY_PARTITION_GAS,
+    );
+  }
+
   private async executeTransaction<T>(
     factory: any,
     method: string,

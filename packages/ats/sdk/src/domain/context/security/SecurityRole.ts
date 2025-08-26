@@ -234,6 +234,7 @@ export enum SecurityRole {
   _AGENT_ROLE = '0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6',
   _TREX_OWNER_ROLE = '0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f910aa17b627f801a6aafab7',
   _MATURITY_REDEEMER_ROLE = '0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c',
+  _IR_CALCULATOR_MANAGER_ROLE = '0xd24534fb8cd19dfb6a428826fa37cc6e73ee8e15a4610140722ad20fa3f0980d',
 }
 
 export function getProtectedPartitionRole(partitionId: string): string {

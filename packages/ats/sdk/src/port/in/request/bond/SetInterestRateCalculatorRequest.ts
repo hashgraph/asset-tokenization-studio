@@ -203,101 +203,27 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../FormatValidation';
 
-import {Bond} from '../../layer_2/bond/Bond.sol';
-import {Security} from '../security/Security.sol';
-import {IBondUSA} from '../interfaces/IBondUSA.sol';
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
-import {_BOND_RESOLVER_KEY} from '../../layer_2/constants/resolverKeys.sol';
-import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
-import {ISecurity} from '../interfaces/ISecurity.sol';
+export default class SetInterestRateCalculatorRequest extends ValidatedRequest<SetInterestRateCalculatorRequest> {
+  securityId: string;
+  interestRateCalculatorId: string;
 
-contract BondUSA is IBondUSA, Bond, Security {
-    // solhint-disable func-name-mixedcase
-    // solhint-disable-next-line private-vars-leading-underscore
-    function _initialize_bondUSA(
-        BondDetailsData calldata _bondDetailsData,
-        CouponDetailsData calldata _couponDetailsData,
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) external override onlyUninitialized(_bondStorage().initialized) {
-        _initialize_bond(_bondDetailsData, _couponDetailsData);
-        _initializeSecurity(_regulationData, _additionalSecurityData);
-    }
+  constructor({
+    securityId,
+    interestRateCalculatorId,
+  }: {
+    securityId: string;
+    interestRateCalculatorId: string;
+  }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      interestRateCalculatorId:
+        FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+    });
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _BOND_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](15);
-        staticFunctionSelectors_[selectorIndex++] = this
-            ._initialize_bondUSA
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .updateMaturityDate
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getBondDetails
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponDetails
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalCouponHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getSecurityRegulationData
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .redeemAtMaturityByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getSecurityHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalSecurityHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setInterestRateCalculator
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](3);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IBond).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
-    }
+    this.securityId = securityId;
+    this.interestRateCalculatorId = interestRateCalculatorId;
+  }
 }
