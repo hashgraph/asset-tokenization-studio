@@ -338,5 +338,34 @@ export default {
         updateMaturityDateFailed: 'Update maturity date failed',
       },
     },
+    updateCompliance: {
+      toast: {
+        title: 'Confirmation',
+        subtitle: 'Are you sure you want to change the compliance?',
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Confirm',
+      },
+      messages: {
+        success: 'Success: ',
+        updateComplianceSuccessful: 'Compliance has been updated successfully',
+        error: 'Error: ',
+        updateComplianceFailed: 'Update compliance failed',
+      },
+    },
+    updateIdentityRegistry: {
+      toast: {
+        title: 'Confirmation',
+        subtitle: 'Are you sure you want to change the identity registry?',
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Confirm',
+      },
+      messages: {
+        success: 'Success: ',
+        updateIdentityRegistrySuccessful:
+          'Identity registry has been updated successfully',
+        error: 'Error: ',
+        updateIdentityRegistryFailed: 'Update identity registry failed',
+      },
+    },
   },
 };

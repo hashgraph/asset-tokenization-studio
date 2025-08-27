@@ -365,12 +365,15 @@ import {
   UnfreezePartialTokensRequest,
   GetFrozenPartialTokensRequest,
   ComplianceRequest,
+  IdentityRegistryRequest,
   GetCouponHoldersRequest,
   GetTotalCouponHoldersRequest,
   GetTotalDividendHoldersRequest,
   GetDividendHoldersRequest,
   GetTotalVotingHoldersRequest,
   GetVotingHoldersRequest,
+  SetComplianceRequest,
+  SetIdentityRegistryRequest,
 } from '@hashgraph/asset-tokenization-sdk';
 
 export class SDKService {
@@ -548,6 +551,26 @@ export class SDKService {
 
   public static async getCompliance(req: ComplianceRequest): Promise<string> {
     return await Security.compliance(req);
+  }
+
+  public static async updateCompliance(req: SetComplianceRequest): Promise<{
+    payload: boolean;
+  }> {
+    return await Security.setCompliance(req);
+  }
+
+  public static async getIdentityRegistry(
+    req: IdentityRegistryRequest,
+  ): Promise<string> {
+    return await Security.identityRegistry(req);
+  }
+
+  public static async updateIdentityRegistry(
+    req: SetIdentityRegistryRequest,
+  ): Promise<{
+    payload: boolean;
+  }> {
+    return await Security.setIdentityRegistry(req);
   }
 
   // COUPONS ////////////////////////////////////////////
