@@ -213,7 +213,8 @@ interface IBondStorageWrapper {
         address indexed operator,
         uint256 indexed recordDate,
         uint256 indexed executionDate,
-        uint256 rate
+        uint256 rate,
+        uint256 period
     );
 
     event MaturityDateUpdated(
