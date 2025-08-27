@@ -203,292 +203,219 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { RequestAccount, RequestPublicKey } from './BaseRequest';
-import { EmptyValue } from '@core/error/EmptyValue';
-import { InvalidLength } from './error/InvalidLength';
-import { InvalidRange } from './error/InvalidRange';
-import { InvalidFormatHedera as InvalidIdFormatHedera } from '@domain/context/shared/error/InvalidFormatHedera';
-import { InvalidType } from './error/InvalidType';
-import BaseError from '@core/error/BaseError';
-import PublicKey from '@domain/context/account/PublicKey';
-import CheckStrings from '@core/checks/strings/CheckStrings';
-import CheckNums from '@core/checks/numbers/CheckNums';
-import { AccountIdNotValid } from '@domain/context/account/error/AccountIdNotValid';
+import TransactionService from '@service/transaction/TransactionService';
+import { CreateTrexSuiteBondCommandHandler } from './CreateTrexSuiteBondCommandHandler';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '@service/account/AccountService';
+import { CreateTrexSuiteBondCommandFixture } from '@test/fixtures/bond/BondFixture';
+import {
+  CreateTrexSuiteBondCommand,
+  CreateTrexSuiteBondCommandResponse,
+} from './CreateTrexSuiteBondCommand';
 import BigDecimal from '@domain/context/shared/BigDecimal';
-import Account from '@domain/context/account/Account';
-import ContractId from '@domain/context/contract/ContractId';
-import InvalidDecimalRange from '@domain/context/security/error/values/InvalidDecimalRange';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import { InvalidRole } from '@domain/context/security/error/values/InvalidRole';
-import { EVM_ZERO_ADDRESS } from '@core/Constants';
-import { InvalidEvmAddress } from '@domain/context/contract/error/InvalidEvmAddress';
-import { InvalidFormatHederaIdOrEvmAddress } from '@domain/context/shared/error/InvalidFormatHederaIdOrEvmAddress';
-import { InvalidBytes32 } from './error/InvalidBytes32';
-import { InvalidBytes3 } from './error/InvalidBytes3';
-import { HEDERA_FORMAT_ID_REGEX } from '@domain/context/shared/HederaId';
-import { InvalidBytes } from './error/InvalidBytes';
-import { InvalidBase64 } from './error/InvalidBase64';
-import { InvalidValue } from './error/InvalidValue';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  HederaIdZeroAddressFixture,
+  TransactionIdFixture,
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { ErrorCode } from '@core/error/BaseError';
+import { CreateTrexSuiteBondCommandError } from './error/CreateTrexSuiteBondError';
+import ValidationService from '@service/validation/ValidationService';
 
-export default class FormatValidation {
-  public static checkPublicKey = () => {
-    return (val: any): BaseError[] => {
-      const key = val as RequestPublicKey;
-      return PublicKey.validate(key);
-    };
-  };
+describe('CreateTrexSuiteBondCommandHandler', () => {
+  let handler: CreateTrexSuiteBondCommandHandler;
+  let command: CreateTrexSuiteBondCommand;
 
-  public static checkContractId = () => {
-    return (val: any): BaseError[] => {
-      return ContractId.validate(val as string);
-    };
-  };
+  const transactionServiceMock = createMock<TransactionService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
+  const validationServiceMock = createMock<ValidationService>();
 
-  public static checkString = ({
-    max = Number.MAX_VALUE,
-    min = 0,
-    emptyCheck = true,
-  }) => {
-    return (val: any): BaseError[] => {
-      const err: BaseError[] = [];
-      if (typeof val !== 'string') {
-        err.push(new InvalidType(val));
-      } else {
-        if (emptyCheck && !CheckStrings.isNotEmpty(val)) {
-          err.push(new EmptyValue(val));
-        } else if (!CheckStrings.isLengthBetween(val, min, max)) {
-          err.push(new InvalidLength(val, min, max));
-        }
-      }
-      return err;
-    };
-  };
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const externalPauseEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalControlEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalKycEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const transactionId = TransactionIdFixture.create().id;
+  const hederaId = HederaIdPropsFixture.create();
+  const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
-  public static checkNumber = <T extends string | number | bigint>({
-    max,
-    min,
-  }: { max?: T; min?: T } = {}) => {
-    return (val: any): BaseError[] => {
-      const err: BaseError[] = [];
-      const iMax = max || max === 0;
-      const iMin = min || min === 0;
-      const isBigDecimal: boolean = CheckNums.isBigDecimal(val);
-      if (typeof val !== 'number' && !isBigDecimal) {
-        err.push(new InvalidType(val));
-      } else {
-        let v = val;
-        if (typeof v !== 'number' && !(v instanceof BigDecimal))
-          v = BigDecimal.fromString(v);
-        if (iMin && !iMax) {
-          if (CheckNums.isLessThan(v, min)) {
-            err.push(new InvalidRange(v, min));
-          }
-        } else if (!iMin && iMax) {
-          if (CheckNums.isGreaterThan(v, max)) {
-            err.push(new InvalidRange(v, undefined, max));
-          }
-        } else if (iMin && iMax) {
-          if (!CheckNums.isWithinRange(v, min, max)) {
-            err.push(new InvalidRange(v, min, max));
-          }
-        }
-      }
-      return err;
-    };
-  };
+  beforeEach(() => {
+    handler = new CreateTrexSuiteBondCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      mirrorNodeAdapterMock,
+      contractServiceMock,
+      validationServiceMock,
+    );
+    command = CreateTrexSuiteBondCommandFixture.create();
+  });
 
-  public static checkArrayNumber = <T extends string | number | bigint>({
-    max,
-    min,
-  }: { max?: T; min?: T } = {}) => {
-    return (val: T[]): BaseError[] => {
-      const err: BaseError[] = [];
-      const check = this.checkNumber({ max, min });
-      for (const v of val) {
-        const e = check(v);
-        if (e.length > 0) {
-          err.push(...e);
-        }
-      }
-      return err;
-    };
-  };
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-  public static checkRole = () => {
-    return (val: any): BaseError[] => {
-      const err: BaseError[] = [];
-      const roles: string[] = Object.values(SecurityRole);
-      if (!roles.includes(val)) {
-        err.push(new InvalidRole(val));
-      }
-      return err;
-    };
-  };
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws CreateTrexSuiteBondCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
 
-  public static checkAccount = () => {
-    return (val: any): void => {
-      const { accountId, publicKey, evmAddress } = val as RequestAccount;
-      if (publicKey) {
-        new Account({
-          id: accountId,
-          publicKey: new PublicKey(publicKey),
-          evmAddress,
+        accountServiceMock.getAccountEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          CreateTrexSuiteBondCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the trex suite bond: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
         });
-      } else {
-        new Account({
-          id: accountId,
-          evmAddress,
-        });
-      }
-    };
-  };
-
-  public static checkHederaIdFormat = (zeroIsValid = false) => {
-    return (val: any): BaseError[] => {
-      // Account Id defined in hip-15 : https://hips.hedera.com/hip/hip-15
-      const err: BaseError[] = [];
-      if (!HEDERA_FORMAT_ID_REGEX.exec(val)) {
-        err.push(new InvalidIdFormatHedera(val));
-      } else if (!zeroIsValid && val === '0.0.0') {
-        err.push(new AccountIdNotValid(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkEvmAddressFormat = (zeroIsValid = false) => {
-    return (val: any): BaseError[] => {
-      const evmAddressRegEx = /^0x[a-fA-F0-9]{40}$/;
-      const err: BaseError[] = [];
-      if (!evmAddressRegEx.exec(val)) {
-        err.push(new InvalidEvmAddress(val));
-      } else if (!zeroIsValid && val === EVM_ZERO_ADDRESS) {
-        err.push(new AccountIdNotValid(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkHederaIdFormatOrEvmAddress = (zeroIsValid = false) => {
-    return (val: any): BaseError[] => {
-      // Account Id defined in hip-15 : https://hips.hedera.com/hip/hip-15
-      const evmAddressRegEx = /^0x[a-fA-F0-9]{40}$/;
-      const err: BaseError[] = [];
-      if (!HEDERA_FORMAT_ID_REGEX.exec(val) && !evmAddressRegEx.exec(val)) {
-        err.push(new InvalidFormatHederaIdOrEvmAddress(val));
-      } else if (
-        !zeroIsValid &&
-        (val === '0.0.0' || val === EVM_ZERO_ADDRESS)
-      ) {
-        err.push(new AccountIdNotValid(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkAmount = (zeroIsValid = false, decimals = 18) => {
-    return (val: any): BaseError[] => {
-      const err: BaseError[] = [];
-      const isBigDecimal: boolean = CheckNums.isBigDecimal(val);
-      if (!isBigDecimal) {
-        err.push(new InvalidType(val));
-        return err;
-      }
-      const valueDecimals = BigDecimal.getDecimalsFromString(val);
-      const zero = BigDecimal.fromString('0', valueDecimals);
-      const value = BigDecimal.fromString(val);
-
-      if (zeroIsValid && value.isLowerThan(zero))
-        err.push(new InvalidRange(val, '0', undefined));
-      else if (!zeroIsValid && value.isLowerOrEqualThan(zero))
-        err.push(new InvalidRange(val, '0', undefined));
-
-      if (valueDecimals > decimals) {
-        err.push(new InvalidDecimalRange(val, 0, decimals));
-      }
-      return err;
-    };
-  };
-
-  public static checkBytes32Format = () => {
-    return (val: any): BaseError[] => {
-      const bytes32RegEx = /^0x[a-fA-F0-9]{64}$/;
-      const err: BaseError[] = [];
-      if (!bytes32RegEx.exec(val)) {
-        err.push(new InvalidBytes32(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkBytes3Format = () => {
-    return (val: any): BaseError[] => {
-      const bytes3RegEx = /^0x[a-fA-F0-9]{6}$/;
-      const err: BaseError[] = [];
-      if (!bytes3RegEx.exec(val)) {
-        err.push(new InvalidBytes3(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkBytesFormat = () => {
-    return (val: any): BaseError[] => {
-      const bytesRegEx = /^0x([a-fA-F0-9][a-fA-F0-9])*$/;
-      const err: BaseError[] = [];
-      if (!bytesRegEx.exec(val)) {
-        err.push(new InvalidBytes(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkBase64Format = () => {
-    return (val: any): BaseError[] => {
-      const base64RegEx = /^[a-zA-Z0-9+/]*={0,2}$/;
-      const err: BaseError[] = [];
-      if (!base64RegEx.exec(val)) {
-        err.push(new InvalidBase64(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkHederaIdOrEvmAddressArray(
-    values: string[],
-    fieldName: string,
-    allowEmpty: boolean = false,
-  ): BaseError[] {
-    if (values.length === 0) {
-      return allowEmpty
-        ? []
-        : [new InvalidValue(`The list of ${fieldName} cannot be empty`)];
-    }
-
-    const errors: InvalidValue[] = [];
-    const seenValues = new Set<string>();
-
-    values.forEach((value) => {
-      const formatErrors =
-        FormatValidation.checkHederaIdFormatOrEvmAddress()(value);
-      errors.push(...formatErrors);
-
-      if (seenValues.has(value)) {
-        errors.push(new InvalidValue(`${fieldName} ${value} is duplicated`));
-      }
-      seenValues.add(value);
+      });
     });
 
-    return errors;
-  }
-  public static checkBoolean = () => {
-    return (val: any): BaseError[] => {
-      const err: BaseError[] = [];
-      if (typeof val !== 'boolean') {
-        err.push(new InvalidType(val));
-      }
-      return err;
-    };
-  };
-}
+    describe('success cases', () => {
+      it('should successfully create a bond with bondAddress in response', async () => {
+        contractServiceMock.getContractEvmAddress
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress);
+        contractServiceMock.getEvmAddressesFromHederaIds
+          .mockResolvedValueOnce([externalPauseEvmAddress])
+          .mockResolvedValueOnce([externalControlEvmAddress])
+          .mockResolvedValueOnce([externalKycEvmAddress]);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+
+        transactionServiceMock
+          .getHandler()
+          .createTrexSuiteBond.mockResolvedValue({
+            id: transactionId,
+            response: { _token: evmAddress.value },
+          });
+
+        validationServiceMock.checkTrexTokenSaltExists.mockResolvedValue();
+        mirrorNodeAdapterMock.getHederaIdfromContractAddress.mockResolvedValue(
+          transactionId,
+        );
+
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          evmAddress.value,
+        );
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateTrexSuiteBondCommandResponse);
+        expect(result.securityId.value).toBe(transactionId);
+        expect(result.transactionId).toBe(transactionId);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          4,
+        );
+        expect(
+          contractServiceMock.getEvmAddressesFromHederaIds,
+        ).toHaveBeenCalledTimes(3);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(
+          transactionServiceMock.getHandler().createTrexSuiteBond,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mirrorNodeAdapterMock.getHederaIdfromContractAddress,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createTrexSuiteBond,
+        ).toHaveBeenCalledWith(
+          command.salt,
+          command.owner,
+          command.irs,
+          command.onchainId,
+          command.irAgents,
+          command.tokenAgents,
+          command.compliancesModules,
+          command.complianceSettings,
+          command.claimTopics,
+          command.issuers,
+          command.issuerClaims,
+          expect.objectContaining(command.security),
+          expect.objectContaining({
+            currency: command.currency,
+            nominalValue: BigDecimal.fromString(command.nominalValue),
+            startingDate: parseInt(command.startingDate),
+            maturityDate: parseInt(command.maturityDate),
+          }),
+          {
+            couponFrequency: parseInt(command.couponFrequency),
+            couponRate: BigDecimal.fromString(command.couponRate),
+            firstCouponDate: parseInt(command.firstCouponDate),
+          },
+          evmAddress,
+          evmAddress,
+          command.configId,
+          command.configVersion,
+          evmAddress,
+          evmAddress,
+          evmAddress,
+          [externalPauseEvmAddress],
+          [externalControlEvmAddress],
+          [externalKycEvmAddress],
+          command.factory?.toString(),
+        );
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            res: {
+              id: transactionId,
+              response: { _token: evmAddress.value },
+            },
+            result: evmAddress.value,
+            className: CreateTrexSuiteBondCommandHandler.name,
+            position: 0,
+            numberOfResultsItems: 1,
+          }),
+        );
+      });
+
+      it('should handle error and return fallback response if response code is 1', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+
+        mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
+          id: hederaId.value,
+          evmAddress: evmAddress.value,
+        });
+
+        transactionServiceMock
+          .getHandler()
+          .createTrexSuiteBond.mockResolvedValue({
+            id: transactionId,
+            response: 1,
+          });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateTrexSuiteBondCommandResponse);
+        expect(result.securityId.toString()).toBe(hederaIdZeroAddress);
+        expect(result.transactionId.toString()).toBe(transactionId);
+      });
+    });
+  });
+});

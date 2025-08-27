@@ -203,292 +203,221 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { RequestAccount, RequestPublicKey } from './BaseRequest';
-import { EmptyValue } from '@core/error/EmptyValue';
-import { InvalidLength } from './error/InvalidLength';
-import { InvalidRange } from './error/InvalidRange';
-import { InvalidFormatHedera as InvalidIdFormatHedera } from '@domain/context/shared/error/InvalidFormatHedera';
-import { InvalidType } from './error/InvalidType';
-import BaseError from '@core/error/BaseError';
-import PublicKey from '@domain/context/account/PublicKey';
-import CheckStrings from '@core/checks/strings/CheckStrings';
-import CheckNums from '@core/checks/numbers/CheckNums';
-import { AccountIdNotValid } from '@domain/context/account/error/AccountIdNotValid';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import Account from '@domain/context/account/Account';
+import { InvalidRequest } from '@command/error/InvalidRequest';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import ContractId from '@domain/context/contract/ContractId';
-import InvalidDecimalRange from '@domain/context/security/error/values/InvalidDecimalRange';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import { InvalidRole } from '@domain/context/security/error/values/InvalidRole';
+import { Security } from '@domain/context/security/Security';
+import AccountService from '@service/account/AccountService';
+import TransactionService from '@service/transaction/TransactionService';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import ContractService from '@service/contract/ContractService';
+
+import { Response } from '@domain/context/transaction/Response';
+import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
+import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
 import { EVM_ZERO_ADDRESS } from '@core/Constants';
-import { InvalidEvmAddress } from '@domain/context/contract/error/InvalidEvmAddress';
-import { InvalidFormatHederaIdOrEvmAddress } from '@domain/context/shared/error/InvalidFormatHederaIdOrEvmAddress';
-import { InvalidBytes32 } from './error/InvalidBytes32';
-import { InvalidBytes3 } from './error/InvalidBytes3';
-import { HEDERA_FORMAT_ID_REGEX } from '@domain/context/shared/HederaId';
-import { InvalidBytes } from './error/InvalidBytes';
-import { InvalidBase64 } from './error/InvalidBase64';
-import { InvalidValue } from './error/InvalidValue';
+import {
+  CreateTrexSuiteBondCommand,
+  CreateTrexSuiteBondCommandResponse,
+} from './CreateTrexSuiteBondCommand';
+import { CreateTrexSuiteBondCommandError } from './error/CreateTrexSuiteBondError';
+import {
+  TrexClaimDetails,
+  TrexTokenDetailsAts,
+} from '@domain/context/factory/TRexFactory';
+import ValidationService from '@service/validation/ValidationService';
 
-export default class FormatValidation {
-  public static checkPublicKey = () => {
-    return (val: any): BaseError[] => {
-      const key = val as RequestPublicKey;
-      return PublicKey.validate(key);
-    };
-  };
+@CommandHandler(CreateTrexSuiteBondCommand)
+export class CreateTrexSuiteBondCommandHandler
+  implements ICommandHandler<CreateTrexSuiteBondCommand>
+{
+  constructor(
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    private readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
+  ) {}
 
-  public static checkContractId = () => {
-    return (val: any): BaseError[] => {
-      return ContractId.validate(val as string);
-    };
-  };
+  async execute(
+    command: CreateTrexSuiteBondCommand,
+  ): Promise<CreateTrexSuiteBondCommandResponse> {
+    let res: Response;
+    try {
+      const {
+        salt,
+        owner,
+        irs,
+        onchainId,
+        irAgents,
+        tokenAgents,
+        compliancesModules,
+        complianceSettings,
+        claimTopics,
+        issuers,
+        issuerClaims,
 
-  public static checkString = ({
-    max = Number.MAX_VALUE,
-    min = 0,
-    emptyCheck = true,
-  }) => {
-    return (val: any): BaseError[] => {
-      const err: BaseError[] = [];
-      if (typeof val !== 'string') {
-        err.push(new InvalidType(val));
-      } else {
-        if (emptyCheck && !CheckStrings.isNotEmpty(val)) {
-          err.push(new EmptyValue(val));
-        } else if (!CheckStrings.isLengthBetween(val, min, max)) {
-          err.push(new InvalidLength(val, min, max));
-        }
+        security,
+        currency,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+
+        factory,
+        resolver,
+        configId,
+        configVersion,
+        diamondOwnerAccount,
+
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+
+        compliance,
+        identityRegistry,
+      } = command;
+
+      if (!security.regulationType) {
+        throw new MissingRegulationType();
       }
-      return err;
-    };
-  };
-
-  public static checkNumber = <T extends string | number | bigint>({
-    max,
-    min,
-  }: { max?: T; min?: T } = {}) => {
-    return (val: any): BaseError[] => {
-      const err: BaseError[] = [];
-      const iMax = max || max === 0;
-      const iMin = min || min === 0;
-      const isBigDecimal: boolean = CheckNums.isBigDecimal(val);
-      if (typeof val !== 'number' && !isBigDecimal) {
-        err.push(new InvalidType(val));
-      } else {
-        let v = val;
-        if (typeof v !== 'number' && !(v instanceof BigDecimal))
-          v = BigDecimal.fromString(v);
-        if (iMin && !iMax) {
-          if (CheckNums.isLessThan(v, min)) {
-            err.push(new InvalidRange(v, min));
-          }
-        } else if (!iMin && iMax) {
-          if (CheckNums.isGreaterThan(v, max)) {
-            err.push(new InvalidRange(v, undefined, max));
-          }
-        } else if (iMin && iMax) {
-          if (!CheckNums.isWithinRange(v, min, max)) {
-            err.push(new InvalidRange(v, min, max));
-          }
-        }
+      if (!security.regulationsubType) {
+        throw new MissingRegulationSubType();
       }
-      return err;
-    };
-  };
 
-  public static checkArrayNumber = <T extends string | number | bigint>({
-    max,
-    min,
-  }: { max?: T; min?: T } = {}) => {
-    return (val: T[]): BaseError[] => {
-      const err: BaseError[] = [];
-      const check = this.checkNumber({ max, min });
-      for (const v of val) {
-        const e = check(v);
-        if (e.length > 0) {
-          err.push(...e);
-        }
+      if (!salt || salt.length === 0) {
+        throw new InvalidRequest('Salt not found in request');
       }
-      return err;
-    };
-  };
 
-  public static checkRole = () => {
-    return (val: any): BaseError[] => {
-      const err: BaseError[] = [];
-      const roles: string[] = Object.values(SecurityRole);
-      if (!roles.includes(val)) {
-        err.push(new InvalidRole(val));
-      }
-      return err;
-    };
-  };
+      this.validationService.checkTrexTokenSaltExists(factory.toString(), salt);
 
-  public static checkAccount = () => {
-    return (val: any): void => {
-      const { accountId, publicKey, evmAddress } = val as RequestAccount;
-      if (publicKey) {
-        new Account({
-          id: accountId,
-          publicKey: new PublicKey(publicKey),
-          evmAddress,
+      const trexTokenDetails = new TrexTokenDetailsAts({
+        owner,
+        irs,
+        onchainId,
+        irAgents,
+        tokenAgents,
+        compliancesModules,
+        complianceSettings,
+      });
+      const claimDetails = new TrexClaimDetails({
+        claimTopics,
+        issuers,
+        issuerClaims,
+      });
+
+      const factoryEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(factory.toString());
+
+      const [
+        externalPausesEvmAddresses,
+        externalControlListsEvmAddresses,
+        externalKycListsEvmAddresses,
+      ] = await Promise.all([
+        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
+        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
+        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
+      ]);
+      const diamondOwnerAccountEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
+      const resolverEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(resolver.toString());
+
+      const complianceEvmAddress = compliance
+        ? await this.contractService.getContractEvmAddress(compliance)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
+      const identityRegistryAddress = identityRegistry
+        ? await this.contractService.getContractEvmAddress(identityRegistry)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
+      const handler = this.transactionService.getHandler();
+
+      const bondInfo = new BondDetails(
+        currency,
+        BigDecimal.fromString(nominalValue),
+        parseInt(startingDate),
+        parseInt(maturityDate),
+      );
+
+      const couponInfo = new CouponDetails(
+        parseInt(couponFrequency),
+        BigDecimal.fromString(couponRate),
+        parseInt(firstCouponDate),
+      );
+
+      res = await handler.createTrexSuiteBond(
+        salt,
+        trexTokenDetails.owner,
+        trexTokenDetails.irs,
+        trexTokenDetails.onchainId,
+        trexTokenDetails.irAgents,
+        trexTokenDetails.tokenAgents,
+        trexTokenDetails.compliancesModules,
+        trexTokenDetails.complianceSettings,
+        claimDetails.claimTopics,
+        claimDetails.issuers,
+        claimDetails.issuerClaims,
+
+        new Security(security),
+        bondInfo,
+        couponInfo,
+        factoryEvmAddress,
+        resolverEvmAddress,
+        configId,
+        configVersion,
+        complianceEvmAddress,
+        identityRegistryAddress,
+        diamondOwnerAccountEvmAddress,
+        externalPausesEvmAddresses,
+        externalControlListsEvmAddresses,
+        externalKycListsEvmAddresses,
+        factory.toString(),
+      );
+
+      const contractAddress =
+        await this.transactionService.getTransactionResult({
+          res,
+          result: res.response?._token,
+          className: CreateTrexSuiteBondCommandHandler.name,
+          position: 0,
+          numberOfResultsItems: 1,
         });
-      } else {
-        new Account({
-          id: accountId,
-          evmAddress,
-        });
+
+      const contractId =
+        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
+          contractAddress,
+        );
+
+      return Promise.resolve(
+        new CreateTrexSuiteBondCommandResponse(
+          new ContractId(contractId),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      if (res?.response == 1) {
+        return Promise.resolve(
+          new CreateTrexSuiteBondCommandResponse(
+            new ContractId('0.0.0'),
+            res.id!,
+          ),
+        );
       }
-    };
-  };
-
-  public static checkHederaIdFormat = (zeroIsValid = false) => {
-    return (val: any): BaseError[] => {
-      // Account Id defined in hip-15 : https://hips.hedera.com/hip/hip-15
-      const err: BaseError[] = [];
-      if (!HEDERA_FORMAT_ID_REGEX.exec(val)) {
-        err.push(new InvalidIdFormatHedera(val));
-      } else if (!zeroIsValid && val === '0.0.0') {
-        err.push(new AccountIdNotValid(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkEvmAddressFormat = (zeroIsValid = false) => {
-    return (val: any): BaseError[] => {
-      const evmAddressRegEx = /^0x[a-fA-F0-9]{40}$/;
-      const err: BaseError[] = [];
-      if (!evmAddressRegEx.exec(val)) {
-        err.push(new InvalidEvmAddress(val));
-      } else if (!zeroIsValid && val === EVM_ZERO_ADDRESS) {
-        err.push(new AccountIdNotValid(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkHederaIdFormatOrEvmAddress = (zeroIsValid = false) => {
-    return (val: any): BaseError[] => {
-      // Account Id defined in hip-15 : https://hips.hedera.com/hip/hip-15
-      const evmAddressRegEx = /^0x[a-fA-F0-9]{40}$/;
-      const err: BaseError[] = [];
-      if (!HEDERA_FORMAT_ID_REGEX.exec(val) && !evmAddressRegEx.exec(val)) {
-        err.push(new InvalidFormatHederaIdOrEvmAddress(val));
-      } else if (
-        !zeroIsValid &&
-        (val === '0.0.0' || val === EVM_ZERO_ADDRESS)
-      ) {
-        err.push(new AccountIdNotValid(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkAmount = (zeroIsValid = false, decimals = 18) => {
-    return (val: any): BaseError[] => {
-      const err: BaseError[] = [];
-      const isBigDecimal: boolean = CheckNums.isBigDecimal(val);
-      if (!isBigDecimal) {
-        err.push(new InvalidType(val));
-        return err;
-      }
-      const valueDecimals = BigDecimal.getDecimalsFromString(val);
-      const zero = BigDecimal.fromString('0', valueDecimals);
-      const value = BigDecimal.fromString(val);
-
-      if (zeroIsValid && value.isLowerThan(zero))
-        err.push(new InvalidRange(val, '0', undefined));
-      else if (!zeroIsValid && value.isLowerOrEqualThan(zero))
-        err.push(new InvalidRange(val, '0', undefined));
-
-      if (valueDecimals > decimals) {
-        err.push(new InvalidDecimalRange(val, 0, decimals));
-      }
-      return err;
-    };
-  };
-
-  public static checkBytes32Format = () => {
-    return (val: any): BaseError[] => {
-      const bytes32RegEx = /^0x[a-fA-F0-9]{64}$/;
-      const err: BaseError[] = [];
-      if (!bytes32RegEx.exec(val)) {
-        err.push(new InvalidBytes32(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkBytes3Format = () => {
-    return (val: any): BaseError[] => {
-      const bytes3RegEx = /^0x[a-fA-F0-9]{6}$/;
-      const err: BaseError[] = [];
-      if (!bytes3RegEx.exec(val)) {
-        err.push(new InvalidBytes3(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkBytesFormat = () => {
-    return (val: any): BaseError[] => {
-      const bytesRegEx = /^0x([a-fA-F0-9][a-fA-F0-9])*$/;
-      const err: BaseError[] = [];
-      if (!bytesRegEx.exec(val)) {
-        err.push(new InvalidBytes(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkBase64Format = () => {
-    return (val: any): BaseError[] => {
-      const base64RegEx = /^[a-zA-Z0-9+/]*={0,2}$/;
-      const err: BaseError[] = [];
-      if (!base64RegEx.exec(val)) {
-        err.push(new InvalidBase64(val));
-      }
-      return err;
-    };
-  };
-
-  public static checkHederaIdOrEvmAddressArray(
-    values: string[],
-    fieldName: string,
-    allowEmpty: boolean = false,
-  ): BaseError[] {
-    if (values.length === 0) {
-      return allowEmpty
-        ? []
-        : [new InvalidValue(`The list of ${fieldName} cannot be empty`)];
+      throw new CreateTrexSuiteBondCommandError(error as Error);
     }
-
-    const errors: InvalidValue[] = [];
-    const seenValues = new Set<string>();
-
-    values.forEach((value) => {
-      const formatErrors =
-        FormatValidation.checkHederaIdFormatOrEvmAddress()(value);
-      errors.push(...formatErrors);
-
-      if (seenValues.has(value)) {
-        errors.push(new InvalidValue(`${fieldName} ${value} is duplicated`));
-      }
-      seenValues.add(value);
-    });
-
-    return errors;
   }
-  public static checkBoolean = () => {
-    return (val: any): BaseError[] => {
-      const err: BaseError[] = [];
-      if (typeof val !== 'boolean') {
-        err.push(new InvalidType(val));
-      }
-      return err;
-    };
-  };
 }
