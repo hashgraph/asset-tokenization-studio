@@ -223,7 +223,6 @@ import {
     ERC1644,
     AdjustBalances,
     Cap,
-    IERC20,
     IFactory,
     BusinessLogicResolver,
     IClearing,
@@ -306,7 +305,7 @@ interface BalanceAdjustedValues {
     balanceOf_B_Partition_1: BigNumber
     balanceOf_B_Partition: BigNumber
     decimals: number
-    metadata?: IERC20.ERC20MetadataStructOutput
+    metadata?: any
 }
 
 describe('ERC1410 Tests', () => {

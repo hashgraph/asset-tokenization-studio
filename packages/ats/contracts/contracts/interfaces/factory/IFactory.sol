@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 
 import {IResolverProxy} from '../resolver/resolverProxy/IResolverProxy.sol';
 import {IBusinessLogicResolver} from '../resolver/IBusinessLogicResolver.sol';
-import {ERC20} from '../../layer_1/ERC1400/ERC20/ERC20.sol';
+import {IERC20} from '../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
 import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
 import {
@@ -239,7 +239,7 @@ interface IFactory {
         bool isControllable;
         bool isWhiteList;
         uint256 maxSupply;
-        ERC20.ERC20MetadataInfo erc20MetadataInfo;
+        IERC20.ERC20MetadataInfo erc20MetadataInfo;
         bool clearingActive;
         bool internalKycActivated;
         address[] externalPauses;
