@@ -231,7 +231,6 @@ import { useGetCompliance } from '../../../hooks/queries/useCompliance';
 import { useGetIdentityRegistry } from '../../../hooks/queries/useIdentityRegistry';
 import { ComplianceItem } from './ComplianceItem';
 import { IdentityRegistryItem } from './IdentityRegistryItem';
-import React from 'react';
 
 interface SecurityDetailsExtendedProps
   extends Omit<DefinitionListProps, 'items'> {

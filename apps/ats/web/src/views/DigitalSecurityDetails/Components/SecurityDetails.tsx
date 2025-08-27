@@ -214,7 +214,6 @@ import {
   IdentityRegistryRequest,
 } from '@hashgraph/asset-tokenization-sdk';
 import { useGetIdentityRegistry } from '../../../hooks/queries/useIdentityRegistry';
-import React from 'react';
 
 interface SecurityDetailsProps extends Omit<DefinitionListProps, 'items'> {}
 

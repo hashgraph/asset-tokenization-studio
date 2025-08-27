@@ -224,7 +224,6 @@ import { SecurityRole } from '../../../utils/SecurityRole';
 import { useParams } from 'react-router-dom';
 import { useUpdateCompliance } from '../../../hooks/mutations/useUpdateCompliance';
 import { useGetCompliance } from '../../../hooks/queries/useCompliance';
-import React from 'react';
 
 export const ComplianceItem = ({ securityId }: { securityId: string }) => {
   const { id = '' } = useParams();

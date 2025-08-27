@@ -224,7 +224,6 @@ import { SecurityRole } from '../../../utils/SecurityRole';
 import { useParams } from 'react-router-dom';
 import { useGetIdentityRegistry } from '../../../hooks/queries/useIdentityRegistry';
 import { useUpdateIdentityRegistry } from '../../../hooks/mutations/useUpdateIdentityRegistry';
-import React from 'react';
 
 export const IdentityRegistryItem = ({
   securityId,
