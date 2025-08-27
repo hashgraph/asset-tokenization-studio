@@ -203,183 +203,76 @@
 
 */
 
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
+
+import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
 import {
-  CreateBondCommand,
-  CreateBondCommandResponse,
-} from './CreateBondCommand';
-import { InvalidRequest } from '@command/error/InvalidRequest';
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import ContractId from '@domain/context/contract/ContractId';
-import { Security } from '@domain/context/security/Security';
-import AccountService from '@service/account/AccountService';
-import TransactionService from '@service/transaction/TransactionService';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { BondDetails } from '@domain/context/bond/BondDetails';
-import { CouponDetails } from '@domain/context/bond/CouponDetails';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import ContractService from '@service/contract/ContractService';
-import { CreateBondCommandError } from './error/CreateBondCommandError';
-import { Response } from '@domain/context/transaction/Response';
-import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
-import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
-import { EVM_ZERO_ADDRESS } from '@core/Constants';
+    _BENEFICIARIES_STORAGE_POSITION,
+    _BENEFICIARIES_DATA_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {
+    IBeneficiaries
+} from '../../layer_2/interfaces/beneficiaries/IBeneficiaries.sol';
 
-@CommandHandler(CreateBondCommand)
-export class CreateBondCommandHandler
-  implements ICommandHandler<CreateBondCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    private readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    private readonly transactionService: TransactionService,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(ContractService)
-    private readonly contractService: ContractService,
-  ) {}
-
-  async execute(
-    command: CreateBondCommand,
-  ): Promise<CreateBondCommandResponse> {
-    let res: Response;
-    try {
-      const {
-        security,
-        currency,
-        nominalValue,
-        startingDate,
-        maturityDate,
-        couponFrequency,
-        couponRate,
-        firstCouponDate,
-        factory,
-        resolver,
-        configId,
-        configVersion,
-        diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-        compliance,
-        identityRegistry,
-        beneficiaries,
-        beneficiariesData,
-      } = command;
-
-      //TODO: Boy scout: remove request validations and adjust test
-      if (!factory) {
-        throw new InvalidRequest('Factory not found in request');
-      }
-
-      if (!resolver) {
-        throw new InvalidRequest('Resolver not found in request');
-      }
-
-      if (!configId) {
-        throw new InvalidRequest('Config Id not found in request');
-      }
-
-      if (configVersion === undefined) {
-        throw new InvalidRequest('Config Version not found in request');
-      }
-      if (!security.regulationType) {
-        throw new MissingRegulationType();
-      }
-      if (!security.regulationsubType) {
-        throw new MissingRegulationSubType();
-      }
-
-      const diamondOwnerAccountEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
-
-      const factoryEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(factory.toString());
-
-      const resolverEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(resolver.toString());
-
-      const [
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-        beneficiariesEvmAddresses,
-      ] = await Promise.all([
-        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
-        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
-        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
-        this.contractService.getEvmAddressesFromHederaIds(beneficiaries),
-      ]);
-
-      const complianceEvmAddress = compliance
-        ? await this.contractService.getContractEvmAddress(compliance)
-        : new EvmAddress(EVM_ZERO_ADDRESS);
-
-      const identityRegistryAddress = identityRegistry
-        ? await this.contractService.getContractEvmAddress(identityRegistry)
-        : new EvmAddress(EVM_ZERO_ADDRESS);
-
-      const handler = this.transactionService.getHandler();
-
-      const bondInfo = new BondDetails(
-        currency,
-        BigDecimal.fromString(nominalValue),
-        parseInt(startingDate),
-        parseInt(maturityDate),
-      );
-
-      const couponInfo = new CouponDetails(
-        parseInt(couponFrequency),
-        BigDecimal.fromString(couponRate),
-        parseInt(firstCouponDate),
-      );
-
-      res = await handler.createBond(
-        new Security(security),
-        bondInfo,
-        couponInfo,
-        factoryEvmAddress,
-        resolverEvmAddress,
-        configId,
-        configVersion,
-        complianceEvmAddress,
-        identityRegistryAddress,
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-        diamondOwnerAccountEvmAddress,
-        beneficiariesEvmAddresses,
-        beneficiariesData,
-        factory.toString(),
-      );
-
-      const contractAddress =
-        await this.transactionService.getTransactionResult({
-          res,
-          result: res.response?.bondAddress,
-          className: CreateBondCommandHandler.name,
-          position: 0,
-          numberOfResultsItems: 1,
-        });
-
-      const contractId =
-        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
-          contractAddress,
-        );
-
-      return Promise.resolve(
-        new CreateBondCommandResponse(new ContractId(contractId), res.id!),
-      );
-    } catch (error) {
-      if (res?.response == 1) {
-        return Promise.resolve(
-          new CreateBondCommandResponse(new ContractId('0.0.0'), res.id!),
-        );
-      }
-      throw new CreateBondCommandError(error as Error);
+abstract contract BeneficiariesStorageWrapper is PauseStorageWrapper {
+    struct BeneficiariesDataStorage {
+        mapping(address => bytes) beneficiaryData;
     }
-  }
+
+    modifier onlyIfBeneficiary(address _beneficiary) {
+        if (!_isExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary)) {
+            revert IBeneficiaries.BeneficiaryNotFound(_beneficiary);
+        }
+        _;
+    }
+
+    modifier onlyIfNotBeneficiary(address _beneficiary) {
+        if (_isExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary)) {
+            revert IBeneficiaries.BeneficiaryAlreadyExists(_beneficiary);
+        }
+        _;
+    }
+
+    function _addBeneficiary(
+        address _beneficiary,
+        bytes calldata _data
+    ) internal {
+        _addExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary);
+        _setBeneficiaryData(_beneficiary, _data);
+    }
+
+    function _removeBeneficiary(address _beneficiary) internal {
+        _removeExternalList(_BENEFICIARIES_STORAGE_POSITION, _beneficiary);
+        _removeBeneficiaryData(_beneficiary);
+    }
+
+    function _setBeneficiaryData(
+        address _beneficiary,
+        bytes calldata _data
+    ) internal {
+        _beneficiariesDataStorage().beneficiaryData[_beneficiary] = _data;
+    }
+
+    function _removeBeneficiaryData(address _beneficiary) internal {
+        delete _beneficiariesDataStorage().beneficiaryData[_beneficiary];
+    }
+
+    function _getBeneficiaryData(
+        address _beneficiary
+    ) internal view returns (bytes memory) {
+        return _beneficiariesDataStorage().beneficiaryData[_beneficiary];
+    }
+
+    function _beneficiariesDataStorage()
+        internal
+        pure
+        returns (BeneficiariesDataStorage storage beneficiariesDataStorage_)
+    {
+        bytes32 position = _BENEFICIARIES_DATA_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            beneficiariesDataStorage_.slot := position
+        }
+    }
 }

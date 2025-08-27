@@ -294,6 +294,7 @@ task(
             clearingRedeemFacet,
             clearingHoldCreationFacet,
             clearingReadFacet,
+            beneficiaries,
             externalPauseManagement,
             externalControlListManagement,
             externalKycListManagement,
@@ -356,6 +357,7 @@ task(
             'Clearing Redeem Facet': clearingRedeemFacet.address,
             'Clearing Hold Creation Facet': clearingHoldCreationFacet.address,
             'Clearing Read Facet': clearingReadFacet.address,
+            'Beneficiaries Facet': beneficiaries.address,
             'External Pause Management Facet': externalPauseManagement.address,
             'External Control List Management Facet':
                 externalControlListManagement.address,

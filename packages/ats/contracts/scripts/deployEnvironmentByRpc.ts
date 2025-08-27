@@ -305,6 +305,7 @@ function buildEmptyEnvironment(): Environment {
             holdReadFacet: {} as IStaticFunctionSelectors,
             holdManagementFacet: {} as IStaticFunctionSelectors,
             holdTokenHolderFacet: {} as IStaticFunctionSelectors,
+            beneficiaries: {} as IStaticFunctionSelectors,
             externalPauseManagement: {} as IStaticFunctionSelectors,
             externalControlListManagement: {} as IStaticFunctionSelectors,
             externalKycListManagement: {} as IStaticFunctionSelectors,

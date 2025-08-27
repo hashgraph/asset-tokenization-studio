@@ -259,6 +259,8 @@ interface IFactory {
         SecurityData security;
         IBondRead.BondDetailsData bondDetails;
         IBondRead.CouponDetailsData couponDetails;
+        address[] beneficiaries;
+        bytes[] beneficiariesData;
     }
 
     event EquityDeployed(

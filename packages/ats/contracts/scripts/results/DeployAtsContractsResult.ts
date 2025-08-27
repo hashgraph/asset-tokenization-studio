@@ -251,6 +251,7 @@ import {
     ERC3643BatchFacet,
     ERC20Permit,
     ERC20Votes,
+    Beneficiaries,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -292,6 +293,7 @@ export interface DeployAtsContractsResultParams {
     clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
     clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
     clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
+    beneficiaries: DeployContractWithFactoryResult<Beneficiaries>
     externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
@@ -342,6 +344,7 @@ export default class DeployAtsContractsResult {
     public readonly clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
     public readonly clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
     public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
+    public readonly beneficiaries: DeployContractWithFactoryResult<Beneficiaries>
     public readonly externalPauseManagement: DeployContractWithFactoryResult<ExternalPauseManagement>
     public readonly externalControlListManagement: DeployContractWithFactoryResult<ExternalControlListManagement>
     public readonly externalKycListManagement: DeployContractWithFactoryResult<ExternalKycListManagement>
@@ -388,6 +391,7 @@ export default class DeployAtsContractsResult {
         clearingHoldCreationFacet,
         clearingReadFacet,
         clearingActionsFacet,
+        beneficiaries,
         externalPauseManagement,
         externalControlListManagement,
         externalKycListManagement,
@@ -439,6 +443,7 @@ export default class DeployAtsContractsResult {
         this.clearingHoldCreationFacet = clearingHoldCreationFacet
         this.clearingReadFacet = clearingReadFacet
         this.clearingActionsFacet = clearingActionsFacet
+        this.beneficiaries = beneficiaries
         this.externalPauseManagement = externalPauseManagement
         this.externalControlListManagement = externalControlListManagement
         this.externalKycListManagement = externalKycListManagement
