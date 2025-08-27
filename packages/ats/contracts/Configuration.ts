@@ -272,6 +272,7 @@ export const CONTRACT_NAMES = [
     'FreezeFacet',
     'ComplianceMock',
     'IdentityRegistryMock',
+    'InterestRateCalculatorMock',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]
 export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']

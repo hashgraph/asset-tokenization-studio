@@ -231,6 +231,7 @@ import {
     ControlList,
     ClearingActionsFacet,
     ProtectedPartitions,
+    Snapshots,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -256,6 +257,10 @@ import {
     CONTROL_LIST_ROLE,
     CLEARING_ROLE,
     PROTECTED_PARTITIONS_ROLE,
+    deployContract,
+    DeployContractCommand,
+    IR_CALCULATOR_MANAGER_ROLE,
+    SNAPSHOT_ROLE,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -311,6 +316,8 @@ describe('Bond Tests', () => {
     let controlListFacet: ControlList
     let clearingActionsFacet: ClearingActionsFacet
     let protectedPartitionsFacet: ProtectedPartitions
+    let interestRateCalculatorMockAddress: string
+    let snapshotsFacet: Snapshots
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
@@ -341,6 +348,10 @@ describe('Bond Tests', () => {
             role: PROTECTED_PARTITIONS_ROLE,
             members: [account_A],
         }
+        const rbacSnapshots: Rbac = {
+            role: SNAPSHOT_ROLE,
+            members: [account_A],
+        }
         return [
             rbacPause,
             rbacKYC,
@@ -349,6 +360,7 @@ describe('Bond Tests', () => {
             rbacSSI,
             rbacClearing,
             rbacProtectedPartitions,
+            rbacSnapshots,
         ]
     }
 
@@ -368,6 +380,11 @@ describe('Bond Tests', () => {
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = SsiManagement__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        snapshotsFacet = await ethers.getContractAt(
+            'Snapshots',
             diamond.address,
             signer_A
         )
@@ -450,6 +467,16 @@ describe('Bond Tests', () => {
                 timeTravelEnabled: true,
             })
         )
+
+        interestRateCalculatorMockAddress = (
+            await deployContract(
+                new DeployContractCommand({
+                    name: 'InterestRateCalculatorMock',
+                    signer: signer_A,
+                    args: [],
+                })
+            )
+        ).address
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
@@ -1055,6 +1082,160 @@ describe('Bond Tests', () => {
                     expect(couponTotalHolders).to.equal(0)
                     expect(couponHolders.length).to.equal(couponTotalHolders)
                 }
+            })
+
+            describe('Interest rate calculator', () => {
+                it('GIVEN interest rate calculator set during deployment THEN the address is correctly set', async () => {
+                    const init_rbacs: Rbac[] = set_initRbacs()
+
+                    const newDiamond = await deployBondFromFactory({
+                        adminAccount: account_A,
+                        isWhiteList: false,
+                        isControllable: true,
+                        arePartitionsProtected: false,
+                        clearingActive: false,
+                        internalKycActivated: true,
+                        isMultiPartition: false,
+                        name: 'TEST_AccessControl',
+                        symbol: 'TAC',
+                        decimals: 6,
+                        isin: isinGenerator(),
+                        currency: '0x455552',
+                        numberOfUnits,
+                        nominalValue: 100,
+                        startingDate,
+                        maturityDate,
+                        couponFrequency: frequency,
+                        couponRate: rate,
+                        firstCouponDate,
+                        regulationType: RegulationType.REG_D,
+                        regulationSubType: RegulationSubType.REG_D_506_C,
+                        countriesControlListType,
+                        listOfCountries,
+                        info,
+                        init_rbacs,
+                        factory,
+                        businessLogicResolver: businessLogicResolver.address,
+                        interestRateCalculator:
+                            interestRateCalculatorMockAddress,
+                    })
+
+                    const bondDetails = await bondFacet
+                        .attach(newDiamond.address)
+                        .getBondDetails()
+                    expect(bondDetails.interestRateCalculator).to.equal(
+                        interestRateCalculatorMockAddress
+                    )
+                })
+                it('GIVEN a user without the IR_CALCULATOR_MANAGER_ROLE role WHEN setting a new interest rate calculator THEN the transaction reverts with AccountHasNoRole', async () => {
+                    await expect(
+                        bondFacet
+                            .connect(signer_C)
+                            .setInterestRateCalculator(
+                                interestRateCalculatorMockAddress
+                            )
+                    ).to.revertedWithCustomError(bondFacet, 'AccountHasNoRole')
+                })
+
+                it('GIVEN a user with the IR_CALCULATOR_MANAGER_ROLE role WHEN setting a new interest rate calculator THEN the transaction succeeds', async () => {
+                    await accessControlFacet.grantRole(
+                        IR_CALCULATOR_MANAGER_ROLE,
+                        account_C
+                    )
+                    await expect(
+                        bondFacet
+                            .connect(signer_C)
+                            .setInterestRateCalculator(
+                                interestRateCalculatorMockAddress
+                            )
+                    )
+                        .to.emit(bondFacet, 'InterestRateCalculatorSet')
+                        .withArgs(
+                            bondFacet.address,
+                            account_C,
+                            interestRateCalculatorMockAddress
+                        )
+
+                    const bondDetails = await bondFacet.getBondDetails()
+                    expect(bondDetails.interestRateCalculator).to.equal(
+                        interestRateCalculatorMockAddress
+                    )
+                })
+
+                it('GIVEN a coupon set when retrieving its interest rate THEN the adjusted value is returned', async () => {
+                    await accessControlFacet.grantRole(
+                        IR_CALCULATOR_MANAGER_ROLE,
+                        account_C
+                    )
+                    await accessControlFacet.grantRole(
+                        CORPORATE_ACTION_ROLE,
+                        account_C
+                    )
+                    await bondFacet
+                        .connect(signer_C)
+                        .setInterestRateCalculator(
+                            interestRateCalculatorMockAddress
+                        )
+                    await timeTravelFacet.changeSystemTimestamp(
+                        firstCouponDate + 1
+                    )
+                    await snapshotsFacet.takeSnapshot()
+                    const couponFor = await bondFacet.getCouponFor(1, account_A)
+                    expect(couponFor.rate).to.equal(rate + 1) // (+1) hardcoded in the mock
+                })
+
+                it('GIVEN a failed called to the calculator THEN transaction reverts with ', async () => {
+                    const interestRateCalculatorMock =
+                        await ethers.getContractAt(
+                            'InterestRateCalculatorMock',
+                            interestRateCalculatorMockAddress
+                        )
+                    interestRateCalculatorMock.setRevertFlag(true)
+
+                    await accessControlFacet.grantRole(
+                        IR_CALCULATOR_MANAGER_ROLE,
+                        account_C
+                    )
+                    await accessControlFacet.grantRole(
+                        CORPORATE_ACTION_ROLE,
+                        account_C
+                    )
+                    await bondFacet
+                        .connect(signer_C)
+                        .setInterestRateCalculator(
+                            interestRateCalculatorMockAddress
+                        )
+                    await timeTravelFacet.changeSystemTimestamp(
+                        firstCouponDate + 1
+                    )
+                    await snapshotsFacet.takeSnapshot()
+
+                    let caught
+                    try {
+                        await bondFacet.getCouponFor(1, account_A)
+                    } catch (err: any) {
+                        caught = err
+                    }
+                    const returnedSelector = (caught.data as string).slice(
+                        0,
+                        10
+                    )
+                    const outerSelector = bondFacet.interface.getSighash(
+                        'CallToIrCalculatorFailed()'
+                    )
+                    expect(returnedSelector).to.equal(outerSelector)
+                    const targetErrorSelector =
+                        interestRateCalculatorMock.interface.getSighash(
+                            'InterestRateCalculatorMock_Error()'
+                        )
+                    const targetErrorArgs: any = [] // No args in target contract custom error
+                    const args = ethers.utils.solidityPack(
+                        ['bytes4', 'bytes'],
+                        [targetErrorSelector, targetErrorArgs]
+                    )
+                    const returnedArgs = (caught.data as string).slice(10) // Skip custom error selector
+                    expect(returnedArgs).to.equal(args.slice(2))
+                })
             })
         })
     })

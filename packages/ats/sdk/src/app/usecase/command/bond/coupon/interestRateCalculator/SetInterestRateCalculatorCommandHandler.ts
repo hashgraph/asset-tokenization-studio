@@ -203,101 +203,72 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
-
-import {Bond} from '../../layer_2/bond/Bond.sol';
-import {Security} from '../security/Security.sol';
-import {IBondUSA} from '../interfaces/IBondUSA.sol';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
-import {_BOND_RESOLVER_KEY} from '../../layer_2/constants/resolverKeys.sol';
-import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
-import {ISecurity} from '../interfaces/ISecurity.sol';
+  SetInterestRateCalculatorCommand,
+  SetInterestRateCalculatorCommandResponse,
+} from './SetInterestRateCalculatorCommand';
+import TransactionService from '@service/transaction/TransactionService';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import ContractService from '@service/contract/ContractService';
+import { SetInterestRateCalculatorCommandError } from './error/SetInterestRateCalculatorCommandError';
+import ValidationService from '@service/validation/ValidationService';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import AccountService from '@service/account/AccountService';
 
-contract BondUSA is IBondUSA, Bond, Security {
-    // solhint-disable func-name-mixedcase
-    // solhint-disable-next-line private-vars-leading-underscore
-    function _initialize_bondUSA(
-        BondDetailsData calldata _bondDetailsData,
-        CouponDetailsData calldata _couponDetailsData,
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) external override onlyUninitialized(_bondStorage().initialized) {
-        _initialize_bond(_bondDetailsData, _couponDetailsData);
-        _initializeSecurity(_regulationData, _additionalSecurityData);
-    }
+@CommandHandler(SetInterestRateCalculatorCommand)
+export class SetInterestRateCalculatorCommandHandler
+  implements ICommandHandler<SetInterestRateCalculatorCommand>
+{
+  constructor(
+    @lazyInject(TransactionService)
+    private readonly transactionService: TransactionService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+  ) {}
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _BOND_RESOLVER_KEY;
-    }
+  async execute(
+    command: SetInterestRateCalculatorCommand,
+  ): Promise<SetInterestRateCalculatorCommandResponse> {
+    try {
+      const { securityId, interestRateCalculatorId } = command;
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](15);
-        staticFunctionSelectors_[selectorIndex++] = this
-            ._initialize_bondUSA
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .updateMaturityDate
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getBondDetails
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponDetails
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalCouponHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getSecurityRegulationData
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .redeemAtMaturityByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getSecurityHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalSecurityHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setInterestRateCalculator
-            .selector;
-    }
+      const handler = this.transactionService.getHandler();
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](3);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IBond).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
+      const account = this.accountService.getCurrentAccount();
+
+      const securityEvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const interestRateCalculatorEvmAddress =
+        await this.contractService.getContractEvmAddress(
+          interestRateCalculatorId,
+        );
+
+      await this.validationService.checkRole(
+        SecurityRole._IR_CALCULATOR_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
+
+      const res = await handler.setInterestRateCalculator(
+        securityEvmAddress,
+        interestRateCalculatorEvmAddress,
+        securityId,
+      );
+
+      return Promise.resolve(
+        new SetInterestRateCalculatorCommandResponse(
+          res.error == undefined,
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      throw new SetInterestRateCalculatorCommandError(error as Error);
     }
+  }
 }
