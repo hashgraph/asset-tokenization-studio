@@ -222,7 +222,6 @@ interface IBeneficiaries {
     event BeneficiaryDataUpdated(
         address indexed operator,
         address indexed beneficiary,
-        bytes previousData,
         bytes newData
     );
 
