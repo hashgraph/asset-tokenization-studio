@@ -218,6 +218,7 @@ import {
 } from '../../layer_0/constants/storagePositions.sol';
 
 contract Beneficiaries is IBeneficiaries, IStaticFunctionSelectors, Common {
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_Beneficiaries(
         address[] calldata _beneficiaries,
         bytes[] calldata _data
@@ -281,14 +282,8 @@ contract Beneficiaries is IBeneficiaries, IStaticFunctionSelectors, Common {
         onlyRole(_BENEFICIARY_MANAGER_ROLE)
         onlyIfBeneficiary(_beneficiary)
     {
-        bytes memory previousData = _getBeneficiaryData(_beneficiary);
         _setBeneficiaryData(_beneficiary, _data);
-        emit BeneficiaryDataUpdated(
-            _msgSender(),
-            _beneficiary,
-            previousData,
-            _data
-        );
+        emit BeneficiaryDataUpdated(_msgSender(), _beneficiary, _data);
     }
 
     function isBeneficiary(

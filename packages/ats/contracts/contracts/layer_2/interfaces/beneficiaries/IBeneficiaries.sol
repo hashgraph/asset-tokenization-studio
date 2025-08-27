@@ -222,7 +222,6 @@ interface IBeneficiaries {
     event BeneficiaryDataUpdated(
         address indexed operator,
         address indexed beneficiary,
-        bytes previousData,
         bytes newData
     );
 
@@ -234,6 +233,7 @@ interface IBeneficiaries {
      * @param _beneficiaries An array of addresses representing the initial beneficiaries.
      */
 
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_Beneficiaries(
         address[] calldata _beneficiaries,
         bytes[] calldata _data

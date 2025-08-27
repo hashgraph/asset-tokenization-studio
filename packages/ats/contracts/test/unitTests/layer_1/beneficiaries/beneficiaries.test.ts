@@ -18,7 +18,6 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployBondFromFactory,
     GAS_LIMIT,
-    MAX_UINT256,
     BENEFICIARY_MANAGER_ROLE,
     RegulationSubType,
     RegulationType,
@@ -28,9 +27,7 @@ import {
 const BENEFICIARY_1 = '0x1234567890123456789012345678901234567890'
 const BENEFICIARY_1_DATA = '0xabcdef'
 const BENEFICIARY_2 = '0x2345678901234567890123456789012345678901'
-const BENEFICIARY_2_DATA = ''
-const BENEFICIARY_3 = '0x3456789012345678901234567890123456789012'
-const BENEFICIARY_3_DATA = '0x88888888'
+const BENEFICIARY_2_DATA = '0x88888888'
 const numberOfUnits = 1000
 let startingDate = 999999999999990
 const couponFrequency = 0
@@ -101,8 +98,8 @@ describe('Beneficiaries Tests', () => {
             info,
             factory,
             businessLogicResolver: businessLogicResolver.address,
-            beneficiariesList: [BENEFICIARY_3],
-            beneficiariesListData: [BENEFICIARY_3_DATA],
+            beneficiariesList: [BENEFICIARY_2],
+            beneficiariesListData: [BENEFICIARY_2_DATA],
         })
 
         beneficiariesFacet = Beneficiaries__factory.connect(
@@ -168,7 +165,7 @@ describe('Beneficiaries Tests', () => {
         it('GIVEN a listed beneficiary WHEN adding it again THEN it reverts with BeneficiaryAlreadyExists', async () => {
             await expect(
                 beneficiariesFacet.addBeneficiary(
-                    BENEFICIARY_3,
+                    BENEFICIARY_2,
                     BENEFICIARY_1_DATA,
                     { gasLimit: GAS_LIMIT.default }
                 )
@@ -200,7 +197,7 @@ describe('Beneficiaries Tests', () => {
 
             expect(
                 await beneficiariesFacet.getBeneficiaries(0, 100)
-            ).to.have.same.members([BENEFICIARY_3, BENEFICIARY_1])
+            ).to.have.same.members([BENEFICIARY_2, BENEFICIARY_1])
         })
     })
 
@@ -209,7 +206,7 @@ describe('Beneficiaries Tests', () => {
             beneficiariesFacet = beneficiariesFacet.connect(signer_B)
 
             await expect(
-                beneficiariesFacet.removeBeneficiary(BENEFICIARY_3, {
+                beneficiariesFacet.removeBeneficiary(BENEFICIARY_2, {
                     gasLimit: GAS_LIMIT.default,
                 })
             ).to.be.revertedWithCustomError(
@@ -222,7 +219,7 @@ describe('Beneficiaries Tests', () => {
             await pauseFacet.pause({ gasLimit: GAS_LIMIT.default })
 
             await expect(
-                beneficiariesFacet.removeBeneficiary(BENEFICIARY_3, {
+                beneficiariesFacet.removeBeneficiary(BENEFICIARY_2, {
                     gasLimit: GAS_LIMIT.default,
                 })
             ).to.be.revertedWithCustomError(beneficiariesFacet, 'TokenIsPaused')
@@ -241,14 +238,14 @@ describe('Beneficiaries Tests', () => {
 
         it('GIVEN a listed beneficiary WHEN authorized user removes it THEN it is removed and event is emitted', async () => {
             await expect(
-                beneficiariesFacet.removeBeneficiary(BENEFICIARY_3, {
+                beneficiariesFacet.removeBeneficiary(BENEFICIARY_2, {
                     gasLimit: GAS_LIMIT.default,
                 })
             )
                 .to.emit(beneficiariesFacet, 'BeneficiaryRemoved')
-                .withArgs(signer_A.address, BENEFICIARY_3)
+                .withArgs(signer_A.address, BENEFICIARY_2)
 
-            expect(await beneficiariesFacet.isBeneficiary(BENEFICIARY_3)).to.be
+            expect(await beneficiariesFacet.isBeneficiary(BENEFICIARY_2)).to.be
                 .false
 
             expect(await beneficiariesFacet.getBeneficiariesCount()).to.equal(0)
@@ -265,7 +262,7 @@ describe('Beneficiaries Tests', () => {
 
             await expect(
                 beneficiariesFacet.updateBeneficiaryData(
-                    BENEFICIARY_3,
+                    BENEFICIARY_2,
                     BENEFICIARY_1_DATA,
                     { gasLimit: GAS_LIMIT.default }
                 )
@@ -280,7 +277,7 @@ describe('Beneficiaries Tests', () => {
 
             await expect(
                 beneficiariesFacet.updateBeneficiaryData(
-                    BENEFICIARY_3,
+                    BENEFICIARY_2,
                     BENEFICIARY_1_DATA,
                     { gasLimit: GAS_LIMIT.default }
                 )
@@ -302,26 +299,21 @@ describe('Beneficiaries Tests', () => {
 
         it('GIVEN a listed beneficiary WHEN authorized user updates its data THEN it is updated and event is emitted', async () => {
             expect(
-                await beneficiariesFacet.getBeneficiaryData(BENEFICIARY_3)
-            ).to.equal(BENEFICIARY_3_DATA)
+                await beneficiariesFacet.getBeneficiaryData(BENEFICIARY_2)
+            ).to.equal(BENEFICIARY_2_DATA)
 
             await expect(
                 beneficiariesFacet.updateBeneficiaryData(
-                    BENEFICIARY_3,
+                    BENEFICIARY_2,
                     BENEFICIARY_1_DATA,
                     { gasLimit: GAS_LIMIT.default }
                 )
             )
                 .to.emit(beneficiariesFacet, 'BeneficiaryDataUpdated')
-                .withArgs(
-                    signer_A.address,
-                    BENEFICIARY_3,
-                    BENEFICIARY_3_DATA,
-                    BENEFICIARY_1_DATA
-                )
+                .withArgs(signer_A.address, BENEFICIARY_2, BENEFICIARY_1_DATA)
 
             expect(
-                await beneficiariesFacet.getBeneficiaryData(BENEFICIARY_3)
+                await beneficiariesFacet.getBeneficiaryData(BENEFICIARY_2)
             ).to.equal(BENEFICIARY_1_DATA)
         })
     })
