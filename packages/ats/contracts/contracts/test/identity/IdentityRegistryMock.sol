@@ -4,7 +4,6 @@ pragma solidity 0.8.18;
 contract IdentityRegistryMock {
     bool private _isVerified;
     bool private _revert;
-    mapping(address => bool) private _verifiedUsers;
 
     error MockErrorVerified(address _userAddress);
 
