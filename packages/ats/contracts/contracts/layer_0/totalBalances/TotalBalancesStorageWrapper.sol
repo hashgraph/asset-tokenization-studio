@@ -254,6 +254,30 @@ abstract contract TotalBalancesStorageWrapper is SnapshotsStorageWrapper2 {
     /**
      * @dev Returns the total balance for a token holder by summing all adjusted balance types by partition
      * @param partition The partition identifier
+     * @param tokenHolder The address of the token holder
+     * @return totalBalance The sum of all adjusted balance types for the token holder by partition
+     */
+    function _getTotalBalanceForByPartitionAdjusted(
+        bytes32 partition,
+        address tokenHolder
+    ) internal view returns (uint256 totalBalance) {
+        // Use unchecked block since we're dealing with token balances that shouldn't overflow
+        unchecked {
+            totalBalance =
+                _balanceOfByPartitionAdjusted(partition, tokenHolder) +
+                _getClearedAmountForByPartitionAdjusted(
+                    partition,
+                    tokenHolder
+                ) +
+                _getHeldAmountForByPartitionAdjusted(partition, tokenHolder) +
+                _getLockedAmountForByPartitionAdjusted(partition, tokenHolder) +
+                _getFrozenAmountForByPartitionAdjusted(partition, tokenHolder);
+        }
+    }
+
+    /**
+     * @dev Returns the total balance for a token holder by summing all adjusted balance types by partition
+     * @param partition The partition identifier
      * @param snapshotId The snapshot ID
      * @param tokenHolder The address of the token holder
      * @return totalBalance The sum of all adjusted balance types for the token holder by partition
