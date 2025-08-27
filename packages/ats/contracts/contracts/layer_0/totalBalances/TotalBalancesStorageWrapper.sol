@@ -203,231 +203,94 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IERC3643Basic
-} from '../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
-import {
-    IERC3643StorageWrapper
-} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
-import {ERC20StorageWrapper1} from '../ERC1400/ERC20/ERC20StorageWrapper1.sol';
-import {_DEFAULT_PARTITION} from '../constants/values.sol';
-import {
-    TotalBalancesStorageWrapper
-} from '../totalBalances/TotalBalancesStorageWrapper.sol';
+import '../snapshots/SnapshotsStorageWrapper2.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+abstract contract TotalBalancesStorageWrapper is SnapshotsStorageWrapper2 {
+    /**
+     * @dev Returns the total balance for a token holder by summing all adjusted balance types
+     * @param tokenHolder The address of the token holder
+     * @return totalBalance The sum of all adjusted balance types for the token holder
+     */
+    function _getTotalBalance(
+        address tokenHolder
+    ) internal view returns (uint256 totalBalance) {
+        uint256 timestamp = _blockTimestamp();
 
-abstract contract ERC3643StorageWrapper2 is TotalBalancesStorageWrapper {
-    modifier onlyEmptyWallet(address _tokenHolder) {
-        if (!_canRecover(_tokenHolder))
-            revert IERC3643Basic.CannotRecoverWallet();
-        _;
-    }
-
-    function _setName(
-        string calldata _name
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.name = _name;
-    }
-
-    function _setSymbol(
-        string calldata _symbol
-    ) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
-        erc20Storage_.symbol = _symbol;
-    }
-
-    function _freezeTokens(address _account, uint256 _amount) internal {
-        _freezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
-    }
-
-    function _unfreezeTokens(address _account, uint256 _amount) internal {
-        _checkUnfreezeAmount(_DEFAULT_PARTITION, _account, _amount);
-        _unfreezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
-    }
-
-    function _freezeTokensByPartition(
-        bytes32 _partition,
-        address _account,
-        uint256 _amount
-    ) internal {
-        _triggerAndSyncAll(_partition, _account, address(0));
-
-        _updateTotalFreeze(_partition, _account);
-
-        _beforeFreeze(_partition, _account);
-        IERC3643Basic.ERC3643Storage storage st = _erc3643Storage();
-        st.frozenTokens[_account] += _amount;
-        st.frozenTokensByPartition[_account][_partition] += _amount;
-
-        _reduceBalanceByPartition(_account, _amount, _partition);
-    }
-
-    function _unfreezeTokensByPartition(
-        bytes32 _partition,
-        address _account,
-        uint256 _amount
-    ) internal {
-        _triggerAndSyncAll(_partition, _account, address(0));
-
-        _updateTotalFreeze(_partition, _account);
-
-        _beforeFreeze(_partition, _account);
-        IERC3643Basic.ERC3643Storage storage st = _erc3643Storage();
-        st.frozenTokens[_account] -= _amount;
-        st.frozenTokensByPartition[_account][_partition] -= _amount;
-        _transferFrozenBalance(_partition, _account, _amount);
-    }
-
-    function _updateTotalFreeze(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal returns (uint256 abaf_) {
-        abaf_ = _getAbaf();
-        uint256 labaf = _getTotalFrozenLabaf(_tokenHolder);
-        uint256 labafByPartition = _getTotalFrozenLabafByPartition(
-            _partition,
-            _tokenHolder
-        );
-
-        if (abaf_ != labaf) {
-            uint256 factor = _calculateFactor(abaf_, labaf);
-
-            _updateTotalFreezeAmountAndLabaf(_tokenHolder, factor, abaf_);
-        }
-
-        if (abaf_ != labafByPartition) {
-            uint256 factorByPartition = _calculateFactor(
-                abaf_,
-                labafByPartition
-            );
-
-            _updateTotalFreezeAmountAndLabafByPartition(
-                _partition,
-                _tokenHolder,
-                factorByPartition,
-                abaf_
-            );
+        // Use unchecked block since we're dealing with token balances that shouldn't overflow
+        unchecked {
+            totalBalance =
+                _balanceOf(tokenHolder) +
+                _getClearedAmountForAdjusted(tokenHolder) +
+                _getHeldAmountForAdjusted(tokenHolder) +
+                _getLockedAmountForAdjustedAt(tokenHolder, timestamp) +
+                _getFrozenAmountFor(tokenHolder);
         }
     }
 
-    function _beforeFreeze(bytes32 _partition, address _tokenHolder) internal {
-        _updateAccountSnapshot(_tokenHolder, _partition);
-        _updateAccountFrozenBalancesSnapshot(_tokenHolder, _partition);
-    }
-
-    function _updateTotalFreezeAmountAndLabaf(
-        address _tokenHolder,
-        uint256 _factor,
-        uint256 _abaf
-    ) internal {
-        if (_factor == 1) return;
-
-        _erc3643Storage().frozenTokens[_tokenHolder] *= _factor;
-        _setTotalFreezeLabaf(_tokenHolder, _abaf);
-    }
-
-    function _updateTotalFreezeAmountAndLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _factor,
-        uint256 _abaf
-    ) internal {
-        if (_factor == 1) return;
-
-        _erc3643Storage().frozenTokensByPartition[_tokenHolder][
-            _partition
-        ] *= _factor;
-        _setTotalFreezeLabafByPartition(_partition, _tokenHolder, _abaf);
-    }
-
-    function _transferFrozenBalance(
-        bytes32 _partition,
-        address _to,
-        uint256 _amount
-    ) internal {
-        if (_validPartitionForReceiver(_partition, _to)) {
-            _increaseBalanceByPartition(_to, _amount, _partition);
-            return;
+    /**
+     * @dev Returns the total balance for a token holder by summing all adjusted balance types at a specific snapshot
+     * @param snapshotId The snapshot ID
+     * @param tokenHolder The address of the token holder
+     * @return totalBalance The sum of all adjusted balance types for the token holder at the specified snapshot
+     */
+    function _getTotalBalanceOfAtSnapshot(
+        uint256 snapshotId,
+        address tokenHolder
+    ) internal view returns (uint256 totalBalance) {
+        // Use unchecked block since we're dealing with token balances that shouldn't overflow
+        unchecked {
+            totalBalance =
+                _balanceOfAtSnapshot(snapshotId, tokenHolder) +
+                _clearedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
+                _heldBalanceOfAtSnapshot(snapshotId, tokenHolder) +
+                _lockedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
+                _frozenBalanceOfAtSnapshot(snapshotId, tokenHolder);
         }
-        _addPartitionTo(_amount, _to, _partition);
     }
 
-    function _recoveryAddress(
-        address _lostWallet,
-        address _newWallet
-    ) internal returns (bool) {
-        uint256 frozenBalance = _getFrozenAmountForAdjusted(_lostWallet);
-        if (frozenBalance > 0) {
-            _unfreezeTokens(_lostWallet, frozenBalance);
-        }
-        uint256 balance = _balanceOfAdjusted(_lostWallet);
-        if (balance + frozenBalance > 0) {
-            _transfer(_lostWallet, _newWallet, balance);
-        }
-        if (frozenBalance > 0) {
-            _freezeTokens(_newWallet, frozenBalance);
-        }
-        if (_isInControlList(_lostWallet)) {
-            _addToControlList(_newWallet);
-        }
-        _erc3643Storage().addressRecovered[_lostWallet] = true;
-        _erc3643Storage().addressRecovered[_newWallet] = false;
-        return true;
-    }
-
-    function _getFrozenAmountForAdjusted(
-        address _tokenHolder
-    ) internal view virtual override returns (uint256 amount_) {
-        uint256 factor = _calculateFactor(
-            _getAbafAdjusted(),
-            _getTotalFrozenLabaf(_tokenHolder)
-        );
-
-        return _getFrozenAmountFor(_tokenHolder) * factor;
-    }
-
-    function _getFrozenAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual override returns (uint256 amount_) {
-        uint256 factor = _calculateFactor(
-            _getAbafAdjusted(),
-            _getTotalFrozenLabafByPartition(_partition, _tokenHolder)
-        );
-        return
-            _getFrozenAmountForByPartition(_partition, _tokenHolder) * factor;
-    }
-
-    function _canRecover(
-        address _tokenHolder
-    ) internal view returns (bool isEmpty_) {
-        isEmpty_ =
-            _getLockedAmountFor(_tokenHolder) +
-                _getHeldAmountFor(_tokenHolder) +
-                _getClearedAmountFor(_tokenHolder) ==
-            0;
-    }
-
-    function _checkUnfreezeAmount(
-        bytes32 _partition,
-        address _userAddress,
-        uint256 _amount
-    ) private view {
-        uint256 frozenAmount = _getFrozenAmountForByPartitionAdjusted(
-            _partition,
-            _userAddress
-        );
-        if (frozenAmount < _amount) {
-            revert InsufficientFrozenBalance(
-                _userAddress,
-                _amount,
-                frozenAmount,
-                _partition
-            );
+    /**
+     * @dev Returns the total balance for a token holder by summing all adjusted balance types by partition
+     * @param partition The partition identifier
+     * @param snapshotId The snapshot ID
+     * @param tokenHolder The address of the token holder
+     * @return totalBalance The sum of all adjusted balance types for the token holder by partition
+     */
+    function _getTotalBalanceOfAtSnapshotByPartition(
+        bytes32 partition,
+        uint256 snapshotId,
+        address tokenHolder
+    ) internal view returns (uint256 totalBalance) {
+        // Use unchecked block since we're dealing with token balances that shouldn't overflow
+        unchecked {
+            totalBalance =
+                _balanceOfAtSnapshotByPartition(
+                    partition,
+                    snapshotId,
+                    tokenHolder
+                ) +
+                _clearedBalanceOfAtSnapshotByPartition(
+                    partition,
+                    snapshotId,
+                    tokenHolder
+                ) +
+                _heldBalanceOfAtSnapshotByPartition(
+                    partition,
+                    snapshotId,
+                    tokenHolder
+                ) +
+                _lockedBalanceOfAtSnapshotByPartition(
+                    partition,
+                    snapshotId,
+                    tokenHolder
+                ) +
+                _frozenBalanceOfAtSnapshotByPartition(
+                    partition,
+                    snapshotId,
+                    tokenHolder
+                );
         }
     }
 }
