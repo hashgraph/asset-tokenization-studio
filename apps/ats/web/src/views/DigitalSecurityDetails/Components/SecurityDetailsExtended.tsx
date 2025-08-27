@@ -222,11 +222,16 @@ import {
   BondDetailsViewModel,
   ComplianceRequest,
   EquityDetailsViewModel,
+  IdentityRegistryRequest,
 } from '@hashgraph/asset-tokenization-sdk';
 import { useMemo } from 'react';
 import { MaturityDateItem } from './MadurityDateItem';
 import { DATE_TIME_FORMAT } from '../../../utils/constants';
 import { useGetCompliance } from '../../../hooks/queries/useCompliance';
+import { useGetIdentityRegistry } from '../../../hooks/queries/useIdentityRegistry';
+import { ComplianceItem } from './ComplianceItem';
+import { IdentityRegistryItem } from './IdentityRegistryItem';
+import React from 'react';
 
 interface SecurityDetailsExtendedProps
   extends Omit<DefinitionListProps, 'items'> {
@@ -249,6 +254,15 @@ export const SecurityDetailsExtended = ({
 
   const { data: compliance } = useGetCompliance(
     new ComplianceRequest({
+      securityId: id!,
+    }),
+    {
+      enabled: !!id,
+    },
+  );
+
+  const { data: identityRegistry } = useGetIdentityRegistry(
+    new IdentityRegistryRequest({
       securityId: id!,
     }),
     {
@@ -322,10 +336,17 @@ export const SecurityDetailsExtended = ({
       },
     ];
 
-    if (compliance !== undefined) {
+    if (compliance !== undefined && id) {
       items.push({
         title: tProperties('compliance'),
-        description: `${compliance}`,
+        description: <ComplianceItem securityId={id} />,
+      });
+    }
+
+    if (identityRegistry !== undefined && id) {
+      items.push({
+        title: tProperties('identityRegistry'),
+        description: <IdentityRegistryItem securityId={id} />,
       });
     }
 
@@ -349,7 +370,15 @@ export const SecurityDetailsExtended = ({
     }
 
     return items;
-  }, [details, id, nominalValue, tProperties, bondDetailsResponse, compliance]);
+  }, [
+    details,
+    id,
+    nominalValue,
+    tProperties,
+    bondDetailsResponse,
+    compliance,
+    identityRegistry,
+  ]);
 
   return (
     <DefinitionList

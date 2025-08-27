@@ -203,34 +203,48 @@
 
 */
 
-import { DefinitionList, DefinitionListProps } from 'io-bricks-ui';
-import { useTranslation } from 'react-i18next';
-import { useSecurityStore } from '../../../store/securityStore';
-import { useParams } from 'react-router-dom';
-import { toNumber } from '../../../utils/format';
-import { useGetCompliance } from '../../../hooks/queries/useCompliance';
 import {
-  ComplianceRequest,
   IdentityRegistryRequest,
+  SetIdentityRegistryRequest,
 } from '@hashgraph/asset-tokenization-sdk';
+import { useEffect, useState } from 'react';
+import { FieldValues, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { Flex } from '@chakra-ui/react';
+import {
+  IconButton,
+  InputController,
+  PhosphorIcon,
+  PopUp,
+  Text,
+} from 'io-bricks-ui';
+import { Pencil, X, Info, Check } from '@phosphor-icons/react';
+import { useRolesStore } from '../../../store/rolesStore';
+import { SecurityRole } from '../../../utils/SecurityRole';
+import { useParams } from 'react-router-dom';
 import { useGetIdentityRegistry } from '../../../hooks/queries/useIdentityRegistry';
+import { useUpdateIdentityRegistry } from '../../../hooks/mutations/useUpdateIdentityRegistry';
 import React from 'react';
 
-interface SecurityDetailsProps extends Omit<DefinitionListProps, 'items'> {}
+export const IdentityRegistryItem = ({
+  securityId,
+}: {
+  securityId: string;
+}) => {
+  const { id = '' } = useParams();
+  const { roles: accountRoles } = useRolesStore();
 
-export const SecurityDetails = (props: SecurityDetailsProps) => {
-  const { t: tProperties } = useTranslation('properties');
-  const { details } = useSecurityStore();
-  const { id } = useParams();
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.bond.updateIdentityRegistry.toast',
+  });
 
-  const { data: compliance } = useGetCompliance(
-    new ComplianceRequest({
-      securityId: id!,
-    }),
-    {
-      enabled: !!id,
-    },
-  );
+  const { control, reset, handleSubmit } = useForm({
+    mode: 'onChange',
+  });
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [showConfirmPopUp, setShowConfirmPopUp] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { data: identityRegistry } = useGetIdentityRegistry(
     new IdentityRegistryRequest({
@@ -241,68 +255,105 @@ export const SecurityDetails = (props: SecurityDetailsProps) => {
     },
   );
 
+  const { mutate: updateIdentityRegistryMutation } =
+    useUpdateIdentityRegistry();
+
+  useEffect(() => {
+    reset();
+  }, [isEditMode, reset]);
+
+  const onSubmit = (data: FieldValues) => {
+    setIsLoading(true);
+
+    const request = new SetIdentityRegistryRequest({
+      securityId,
+      identityRegistry: data.identityRegistry,
+    });
+
+    updateIdentityRegistryMutation(request, {
+      onSettled() {
+        setShowConfirmPopUp(false);
+        setIsLoading(false);
+        setIsEditMode(false);
+      },
+    });
+  };
+
   return (
-    <DefinitionList
-      data-testid="security-details"
-      isLoading={details === null}
-      items={[
-        /*  {
-          title: tProperties("type"),
-          description: details?.securityType ?? "",
-        },*/
-        {
-          title: tProperties('name'),
-          description: details?.name ?? '',
-        },
-        {
-          title: tProperties('symbol'),
-          description: details?.symbol ?? '',
-        },
-        {
-          title: tProperties('decimal'),
-          description: details?.decimals ?? '',
-        },
-        {
-          title: tProperties('isin'),
-          description: details?.isin ?? '',
-        },
-        {
-          title: tProperties('id'),
-          description: id ?? '',
-        },
-        {
-          title: tProperties('maxSupply'),
-          description: `${details?.maxSupply} ${details?.symbol}`,
-        },
-        {
-          title: tProperties('totalSupply'),
-          description: `${details?.totalSupply} ${details?.symbol}`,
-        },
-        {
-          title: tProperties('pendingToBeMinted'),
-          description: `${
-            toNumber(details?.maxSupply) - toNumber(details?.totalSupply)
-          } ${details?.symbol}`,
-        },
-        ...(compliance
-          ? [
-              {
-                title: tProperties('compliance'),
-                description: compliance ?? '',
-              },
-            ]
-          : []),
-        ...(identityRegistry
-          ? [
-              {
-                title: tProperties('identityRegistry'),
-                description: identityRegistry ?? '',
-              },
-            ]
-          : []),
-      ]}
-      title="Details"
-      {...props}
-    />
+    <Flex
+      alignItems={'center'}
+      justifyContent={'space-between'}
+      w={'full'}
+      flex={1}
+    >
+      <Flex alignItems={'center'} gap={4}>
+        {isEditMode && (
+          <>
+            <InputController
+              control={control}
+              id="identityRegistry"
+              placeholder={identityRegistry}
+              backgroundColor="neutral.600"
+              size="sm"
+              defaultValue={identityRegistry}
+            />
+            <Flex alignItems={'center'} gap={2}>
+              <IconButton
+                icon={<PhosphorIcon as={Check} />}
+                aria-label="save button"
+                size={'sm'}
+                onClick={() => {
+                  setShowConfirmPopUp(true);
+                }}
+              />
+              <IconButton
+                icon={<PhosphorIcon as={X} />}
+                aria-label="cancel button"
+                size={'sm'}
+                onClick={() => setIsEditMode(false)}
+              />
+            </Flex>
+          </>
+        )}
+        {!isEditMode && (
+          <>
+            <Text>{identityRegistry}</Text>
+            {accountRoles.includes(SecurityRole._TREX_OWNER_ROLE) &&
+              identityRegistry !== '0.0.0' && (
+                <IconButton
+                  size={'sm'}
+                  icon={<PhosphorIcon as={Pencil} />}
+                  aria-label="edit button"
+                  variant="secondary"
+                  onClick={() => setIsEditMode(true)}
+                />
+              )}
+          </>
+        )}
+      </Flex>
+
+      <PopUp
+        id="confirmMaturityDate"
+        isOpen={showConfirmPopUp}
+        onClose={() => {
+          !isLoading && setShowConfirmPopUp(false);
+        }}
+        closeOnOverlayClick={!isLoading}
+        icon={<PhosphorIcon as={Info} size="md" />}
+        title={t('title')}
+        description={t('subtitle')}
+        cancelText={t('cancelButtonText')}
+        confirmText={t('confirmButtonText')}
+        confirmButtonProps={{
+          isLoading: isLoading,
+        }}
+        onConfirm={() => {
+          handleSubmit(onSubmit)();
+        }}
+        onCancel={() => {
+          !isLoading && setShowConfirmPopUp(false);
+        }}
+      />
+    </Flex>
   );
 };
