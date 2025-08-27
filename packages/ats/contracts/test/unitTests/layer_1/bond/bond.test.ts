@@ -277,12 +277,14 @@ const _PARTITION_ID =
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
+const couponPeriod = 7 * 24 * 60 * 60 // 7 days in seconds
 const EMPTY_VC_ID = EMPTY_STRING
 
 let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
     executionDate: couponExecutionDateInSeconds.toString(),
     rate: couponRate,
+    period: couponPeriod,
 }
 
 describe('Bond Tests', () => {
@@ -679,6 +681,7 @@ describe('Bond Tests', () => {
                     recordDate: couponExecutionDateInSeconds.toString(),
                     executionDate: couponRecordDateInSeconds.toString(),
                     rate: couponRate,
+                    period: couponPeriod,
                 }
 
                 await expect(
@@ -691,11 +694,58 @@ describe('Bond Tests', () => {
                     ).toString(),
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
+                    period: couponPeriod,
                 }
 
                 await expect(
                     bondFacet.setCoupon(wrongcouponData_2)
                 ).to.be.revertedWithCustomError(bondFacet, 'WrongTimestamp')
+            })
+
+            it('GIVEN an account with corporateActions role WHEN setCoupon with period THEN period is stored correctly', async () => {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    CORPORATE_ACTION_ROLE,
+                    account_C
+                )
+                // Using account C (with role)
+                bondFacet = bondFacet.connect(signer_C)
+
+                // Create coupon with specific period
+                const customPeriod = 3 * 24 * 60 * 60 // 3 days in seconds
+                const customCouponData = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    period: customPeriod,
+                }
+
+                // Set coupon and verify event includes period
+                await expect(bondFacet.setCoupon(customCouponData))
+                    .to.emit(bondFacet, 'CouponSet')
+                    .withArgs(
+                        '0x0000000000000000000000000000000000000000000000000000000000000033',
+                        numberOfCoupons + 1,
+                        account_C,
+                        couponRecordDateInSeconds,
+                        couponExecutionDateInSeconds,
+                        couponRate,
+                        customPeriod
+                    )
+
+                // Verify coupon data includes period
+                const registeredCoupon = await bondFacet.getCoupon(
+                    numberOfCoupons + 1
+                )
+                expect(registeredCoupon.coupon.period).to.equal(customPeriod)
+
+                // Verify couponFor data includes period
+                const couponFor = await bondFacet.getCouponFor(
+                    numberOfCoupons + 1,
+                    account_A
+                )
+                expect(couponFor.period).to.equal(customPeriod)
             })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds', async () => {
@@ -717,7 +767,8 @@ describe('Bond Tests', () => {
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
-                        couponRate
+                        couponRate,
+                        couponPeriod
                     )
 
                 // check list members
@@ -795,7 +846,8 @@ describe('Bond Tests', () => {
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
-                        couponRate
+                        couponRate,
+                        couponPeriod
                     )
 
                 // check list members
@@ -865,7 +917,8 @@ describe('Bond Tests', () => {
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
-                        couponRate
+                        couponRate,
+                        couponPeriod
                     )
 
                 // check list members
