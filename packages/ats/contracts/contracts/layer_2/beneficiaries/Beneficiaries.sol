@@ -278,14 +278,8 @@ contract Beneficiaries is IBeneficiaries, Common {
         onlyRole(_BENEFICIARY_MANAGER_ROLE)
         onlyIfBeneficiary(_beneficiary)
     {
-        bytes memory previousData = _getBeneficiaryData(_beneficiary);
         _setBeneficiaryData(_beneficiary, _data);
-        emit BeneficiaryDataUpdated(
-            _msgSender(),
-            _beneficiary,
-            previousData,
-            _data
-        );
+        emit BeneficiaryDataUpdated(_msgSender(), _beneficiary, _data);
     }
 
     function isBeneficiary(
