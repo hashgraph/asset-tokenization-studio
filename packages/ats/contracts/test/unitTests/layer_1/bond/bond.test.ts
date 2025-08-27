@@ -743,6 +743,149 @@ describe('Bond Tests', () => {
                 expect(couponFor.period).to.equal(customPeriod)
             })
 
+            it('GIVEN an account with corporateActions role WHEN setCoupon with zero period THEN transaction fails with CouponPeriodTooSmall', async () => {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    CORPORATE_ACTION_ROLE,
+                    account_C
+                )
+                // Using account C (with role)
+                bondFacet = bondFacet.connect(signer_C)
+
+                // Create coupon with zero period
+                const zeroPeriodCouponData = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    period: 0,
+                }
+
+                await expect(
+                    bondFacet.setCoupon(zeroPeriodCouponData)
+                ).to.be.revertedWithCustomError(
+                    bondFacet,
+                    'CouponPeriodTooSmall'
+                )
+            })
+
+            it('GIVEN an account with corporateActions role WHEN setCoupon with period below minimum THEN transaction fails with CouponPeriodTooSmall', async () => {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    CORPORATE_ACTION_ROLE,
+                    account_C
+                )
+                // Using account C (with role)
+                bondFacet = bondFacet.connect(signer_C)
+
+                // Create coupon with period below minimum (less than 1 day)
+                const tooSmallPeriodCouponData = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    period: 23 * 60 * 60, // 23 hours, below 1 day minimum
+                }
+
+                await expect(
+                    bondFacet.setCoupon(tooSmallPeriodCouponData)
+                ).to.be.revertedWithCustomError(
+                    bondFacet,
+                    'CouponPeriodTooSmall'
+                )
+            })
+
+            it('GIVEN an account with corporateActions role WHEN setCoupon with period above maximum THEN transaction fails with CouponPeriodTooLarge', async () => {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    CORPORATE_ACTION_ROLE,
+                    account_C
+                )
+                // Using account C (with role)
+                bondFacet = bondFacet.connect(signer_C)
+
+                // Create coupon with period above maximum (more than 10 years)
+                const tooLargePeriodCouponData = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    period: 11 * 365 * 24 * 60 * 60, // 11 years, above 10 year maximum
+                }
+
+                await expect(
+                    bondFacet.setCoupon(tooLargePeriodCouponData)
+                ).to.be.revertedWithCustomError(
+                    bondFacet,
+                    'CouponPeriodTooLarge'
+                )
+            })
+
+            it('GIVEN an account with corporateActions role WHEN setCoupon with period exceeding maturity THEN transaction fails with CouponPeriodExceedsMaturity', async () => {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    CORPORATE_ACTION_ROLE,
+                    account_C
+                )
+                // Using account C (with role)
+                bondFacet = bondFacet.connect(signer_C)
+
+                // Calculate period longer than remaining bond life
+                // maturityDate is set during bond creation, we need a period that exceeds it
+                const bondDetails = await bondFacet.getBondDetails()
+                const currentTime = (await ethers.provider.getBlock('latest'))
+                    .timestamp
+                const timeToMaturity =
+                    bondDetails.maturityDate.toNumber() - currentTime
+                const excessivePeriod = timeToMaturity + 30 * 24 * 60 * 60 // Add 30 days beyond maturity
+
+                const excessivePeriodCouponData = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    period: excessivePeriod,
+                }
+
+                await expect(
+                    bondFacet.setCoupon(excessivePeriodCouponData)
+                ).to.be.revertedWithCustomError(
+                    bondFacet,
+                    'CouponPeriodExceedsMaturity'
+                )
+            })
+
+            it('GIVEN an account with corporateActions role WHEN setCoupon with valid period boundaries THEN transaction succeeds', async () => {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    CORPORATE_ACTION_ROLE,
+                    account_C
+                )
+                // Using account C (with role)
+                bondFacet = bondFacet.connect(signer_C)
+
+                // Test minimum valid period (exactly 1 day)
+                const minValidPeriodCouponData = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    period: 1 * 24 * 60 * 60, // Exactly 1 day
+                }
+
+                await expect(bondFacet.setCoupon(minValidPeriodCouponData))
+                    .to.emit(bondFacet, 'CouponSet')
+                    .withArgs(
+                        '0x0000000000000000000000000000000000000000000000000000000000000033',
+                        numberOfCoupons + 1,
+                        account_C,
+                        couponRecordDateInSeconds,
+                        couponExecutionDateInSeconds,
+                        couponRate,
+                        1 * 24 * 60 * 60
+                    )
+            })
+
             it('GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds', async () => {
                 await accessControlFacet
                     .connect(signer_A)
@@ -1174,6 +1317,77 @@ describe('Bond Tests', () => {
                     '0x',
                     '0x'
                 )
+        })
+    })
+
+    describe('Bond Initialization Period Validation', () => {
+        it('GIVEN bond deployment with zero couponFrequency WHEN deployBondFromFactory THEN deployment fails with CouponFrequencyWrong', async () => {
+            const init_rbacs: Rbac[] = set_initRbacs()
+
+            await expect(
+                deployBondFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList: false,
+                    isControllable: true,
+                    isMultiPartition: false,
+                    nominalValue: numberOfUnits,
+                    startingDate: startingDate,
+                    maturityDate: maturityDate,
+                    couponFrequency: 0, // Invalid: zero frequency
+                    couponRate: rate,
+                    firstCouponDate: firstCouponDate,
+                    regulationType: RegulationType.REG_S,
+                    regulationSubType: RegulationSubType.MINIMAL,
+                    init_rbacs: init_rbacs,
+                    addAdmin: false,
+                })
+            ).to.be.revertedWithCustomError(diamond, 'CouponFrequencyWrong')
+        })
+
+        it('GIVEN bond deployment with couponFrequency below minimum WHEN deployBondFromFactory THEN deployment fails with CouponPeriodTooSmall', async () => {
+            const init_rbacs: Rbac[] = set_initRbacs()
+
+            await expect(
+                deployBondFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList: false,
+                    isControllable: true,
+                    isMultiPartition: false,
+                    nominalValue: numberOfUnits,
+                    startingDate: startingDate,
+                    maturityDate: maturityDate,
+                    couponFrequency: 12 * 60 * 60, // Invalid: 12 hours, below 1 day minimum
+                    couponRate: rate,
+                    firstCouponDate: firstCouponDate,
+                    regulationType: RegulationType.REG_S,
+                    regulationSubType: RegulationSubType.MINIMAL,
+                    init_rbacs: init_rbacs,
+                    addAdmin: false,
+                })
+            ).to.be.revertedWithCustomError(diamond, 'CouponPeriodTooSmall')
+        })
+
+        it('GIVEN bond deployment with couponFrequency above maximum WHEN deployBondFromFactory THEN deployment fails with CouponPeriodTooLarge', async () => {
+            const init_rbacs: Rbac[] = set_initRbacs()
+
+            await expect(
+                deployBondFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList: false,
+                    isControllable: true,
+                    isMultiPartition: false,
+                    nominalValue: numberOfUnits,
+                    startingDate: startingDate,
+                    maturityDate: maturityDate,
+                    couponFrequency: 15 * 365 * 24 * 60 * 60, // Invalid: 15 years, above 10 year maximum
+                    couponRate: rate,
+                    firstCouponDate: firstCouponDate,
+                    regulationType: RegulationType.REG_S,
+                    regulationSubType: RegulationSubType.MINIMAL,
+                    init_rbacs: init_rbacs,
+                    addAdmin: false,
+                })
+            ).to.be.revertedWithCustomError(diamond, 'CouponPeriodTooLarge')
         })
     })
 })
