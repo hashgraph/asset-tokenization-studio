@@ -391,6 +391,8 @@ import GetTotalVotingHoldersRequest from './equity/GetTotalVotingHoldersRequest'
 import GetVotingHoldersRequest from './equity/GetVotingHoldersRequest';
 import GetSecurityHoldersRequest from './security/GetSecurityHoldersRequest';
 import GetTotalSecurityHoldersRequest from './security/GetTotalSecurityHoldersRequest';
+import CreateTrexSuiteEquityRequest from './equity/CreateTrexSuiteEquityRequest';
+import CreateTrexSuiteBondRequest from './bond/CreateTrexSuiteBondRequest';
 
 export {
   CreateEquityRequest,
@@ -580,4 +582,6 @@ export {
   GetTotalVotingHoldersRequest,
   GetSecurityHoldersRequest,
   GetTotalSecurityHoldersRequest,
+  CreateTrexSuiteBondRequest,
+  CreateTrexSuiteEquityRequest,
 };

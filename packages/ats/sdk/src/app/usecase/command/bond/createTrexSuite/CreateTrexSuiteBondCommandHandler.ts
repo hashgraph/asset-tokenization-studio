@@ -203,167 +203,216 @@
 
 */
 
-export const COMMAND_METADATA = '__command__';
-export const COMMAND_HANDLER_METADATA = '__commandHandler__';
-export const QUERY_METADATA = '__query__';
-export const QUERY_HANDLER_METADATA = '__queryHandler__';
-export const TOKEN_CREATION_COST_HBAR = 80;
-export const EVM_ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-export const HEDERA_ZERO_ADDRESS = '0.0.0';
-export const HBAR_DECIMALS = 8;
-export const GAS = {
-  CREATE_EQUITY_ST: 15000000,
-  CREATE_BOND_ST: 15000000,
-  CASHIN: 1200000,
-  BURN: 700000,
-  WIPE: 700000,
-  RESCUE: 700000,
-  RESCUE_HBAR: 700000,
-  FREEZE: 650000,
-  UNFREEZE: 650000,
-  GRANT_KYC: 650000,
-  REVOKE_KYC: 650000,
-  REDEEM: 650000,
-  PROTECTED_REDEEM: 7000000,
-  PAUSE: 15000000,
-  UNPAUSE: 650000,
-  TAKE_SNAPSHOT: 2000000,
-  DELETE: 650000,
-  GRANT_ROLES: 2000000,
-  REVOKE_ROLES: 2000000,
-  RENOUNCE_ROLES: 2000000,
-  MAX_ROLES: 15000000,
-  INCREASE_SUPPLY: 500000,
-  DECREASE_SUPPLY: 500000,
-  RESET_SUPPLY: 450000,
-  UPDATE_RESERVE_ADDRESS: 450000,
-  UPDATE_TOKEN: 1400000,
-  UPDATE_RESERVE_AMOUNT: 400000,
-  CHANGE_PROXY_OWNER: 500000,
-  ACCEPT_PROXY_OWNER: 400000,
-  UPDATE_PROXY_IMPLEMENTATION: 400000,
-  ISSUE: 7000000,
-  MINT: 7000000,
-  CONTROLLER_TRANSFER: 7000000,
-  FORCED_TRANSFER: 7000000,
-  CONTROLLER_REDEEM: 7000000,
-  SET_DIVIDENDS: 7000000,
-  SET_VOTING_RIGHTS: 7000000,
-  SET_COUPON: 7000000,
-  SET_DOCUMENT: 7000000,
-  REMOVE_DOCUMENT: 7000000,
-  AUTHORIZE_OPERATOR: 7000000,
-  REVOKE_OPERATOR: 7000000,
-  TRANSFER_OPERATOR: 7000000,
-  TRIGGER_PENDING_SCHEDULED_SNAPSHOTS: 7000000,
-  SET_MAX_SUPPLY: 7000000,
-  PROTECT_PARTITION: 15000000,
-  UNPROTECT_PARTITION: 650000,
-  BALANCE_OF: 1200000,
-  GET_RESERVE_ADDRESS: 1200000,
-  GET_RESERVE_AMOUNT: 1200000,
-  GET_ROLES: 1200000,
-  HAS_ROLE: 1200000,
-  GET_SUPPLY_ALLOWANCE: 1200000,
-  IS_UNLIMITED_ALLOWANCE: 1200000,
-  TRANSFER: 1200000,
-  PROTECTED_TRANSFER: 7000000,
-  TRANSFER_AND_LOCK: 1200000,
-  PROTECTED_TRANSFER_AND_LOCK: 7000000,
-  ADD_TO_CONTROL_LIST: 1200000,
-  REMOVE_FROM_CONTROL_LIST: 1200000,
-  LOCK: 7000000,
-  RELEASE: 7000000,
-  EXECUTE_HOLD_BY_PARTITION: 7000000,
-  UPDATE_CONFIG_VERSION: 9000000,
-  UPDATE_CONFIG: 9000000,
-  UPDATE_RESOLVER: 9000000,
-  UPDATE_MATURITY_DATE: 7000000,
-  SET_SCHEDULED_BALANCE_ADJUSTMENT: 7000000,
-  CREATE_HOLD: 7000000,
-  CREATE_HOLD_FROM: 7000000,
-  CONTROLLER_CREATE_HOLD: 7000000,
-  PROTECTED_CREATE_HOLD: 7000000,
-  RELEASE_HOLD: 7000000,
-  RECLAIM_HOLD: 7000000,
-  ADD_ISSUER: 7000000,
-  SET_REVOCATION_REGISTRY: 7000000,
-  REMOVE_ISSUER: 7000000,
-  ACTIVATE_CLEARING: 7000000,
-  DEACTIVATE_CLEARING: 7000000,
-  CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CLEARING_TRANSFER_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  APPROVE_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CANCEL_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  RECLAIM_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CLEARING_REDEEM_BY_PARTITION: 7000000,
-  CLEARING_REDEEM_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_REDEEM_BY_PARTITION: 7000000,
-  CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  CLEARING_CREATE_HOLD_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_REDEEM_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  UPDATE_EXTERNAL_PAUSES: 7000000,
-  ADD_EXTERNAL_PAUSE: 7000000,
-  REMOVE_EXTERNAL_PAUSE: 7000000,
-  SET_PAUSED_MOCK: 7000000,
-  CREATE_EXTERNAL_PAUSE_MOCK: 7000000,
-  UPDATE_EXTERNAL_CONTROL_LISTS: 7000000,
-  ADD_EXTERNAL_CONTROL_LIST: 7000000,
-  REMOVE_EXTERNAL_CONTROL_LIST: 7000000,
-  ACTIVATE_INTERNAL_KYC: 7000000,
-  DEACTIVATE_INTERNAL_KYC: 7000000,
-  ADD_TO_BLACK_LIST_MOCK: 7000000,
-  ADD_TO_WHITE_LIST_MOCK: 7000000,
-  REMOVE_FROM_BLACK_LIST_MOCK: 7000000,
-  REMOVE_FROM_WHITE_LIST_MOCK: 7000000,
-  CREATE_EXTERNAL_BLACK_LIST_MOCK: 7000000,
-  CREATE_EXTERNAL_WHITE_LIST_MOCK: 7000000,
-  UPDATE_EXTERNAL_KYC_LISTS: 7000000,
-  ADD_EXTERNAL_KYC_LIST: 7000000,
-  REMOVE_EXTERNAL_KYC_LIST: 7000000,
-  GRANT_KYC_MOCK: 7000000,
-  REVOKE_KYC_MOCK: 7000000,
-  CREATE_EXTERNAL_KYC_LIST_MOCK: 7000000,
-  SET_NAME: 7000000,
-  SET_SYMBOL: 7000000,
-  FREEZE_PARTIAL_TOKENS: 7000000,
-  UNFREEZE_PARTIAL_TOKENS: 7000000,
-  SET_ADDRESS_FROZEN: 700000,
-  SET_ONCHAIN_ID: 700000,
-  SET_IDENTITY_REGISTRY: 700000,
-  SET_COMPLIANCE: 700000,
-  BATCH_TRANSFER: 700000,
-  BATCH_FORCED_TRANSFER: 700000,
-  BATCH_MINT: 700000,
-  BATCH_BURN: 700000,
-  BATCH_SET_ADDRESS_FROZEN: 700000,
-  BATCH_FREEZE_PARTIAL_TOKENS: 700000,
-  BATCH_UNFREEZE_PARTIAL_TOKENS: 700000,
-  RECOVERY_ADDRESS: 7000000,
-  ADD_AGENT: 7000000,
-  REMOVE_AGENT: 7000000,
-  REDEEM_AT_MATURITY_BY_PARTITION_GAS: 700000,
-  TREX_CREATE_SUITE_BOND: 700000,
-  TREX_CREATE_SUITE_EQUITY: 700000,
-} as const;
+import { InvalidRequest } from '@command/error/InvalidRequest';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import ContractId from '@domain/context/contract/ContractId';
+import { Security } from '@domain/context/security/Security';
+import AccountService from '@service/account/AccountService';
+import TransactionService from '@service/transaction/TransactionService';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import ContractService from '@service/contract/ContractService';
 
-export const _PARTITION_ID_1 =
-  '0x0000000000000000000000000000000000000000000000000000000000000001';
-export const EMPTY_BYTES = '0x';
+import { Response } from '@domain/context/transaction/Response';
+import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
+import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
+import { EVM_ZERO_ADDRESS } from '@core/Constants';
+import {
+  CreateTrexSuiteBondCommand,
+  CreateTrexSuiteBondCommandResponse,
+} from './CreateTrexSuiteBondCommand';
+import { CreateTrexSuiteBondCommandError } from './error/CreateTrexSuiteBondError';
+import {
+  TrexClaimDetails,
+  TrexTokenDetailsAts,
+} from '@domain/context/factory/TRexFactory';
 
-export const SET_DIVIDEND_EVENT = 'DividendSet';
-export const SET_VOTING_RIGHTS_EVENT = 'VotingSet';
-export const SET_COUPON_EVENT = 'CouponSet';
-export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT =
-  'ScheduledBalanceAdjustmentSet';
+@CommandHandler(CreateTrexSuiteBondCommand)
+export class CreateTrexSuiteBondCommandHandler
+  implements ICommandHandler<CreateTrexSuiteBondCommand>
+{
+  constructor(
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    private readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+  ) {}
 
-// * Generic
-export const BYTES_32_LENGTH = 32 * 2;
-export const ADDRESS_LENGTH = 40;
+  async execute(
+    command: CreateTrexSuiteBondCommand,
+  ): Promise<CreateTrexSuiteBondCommandResponse> {
+    let res: Response;
+    try {
+      const {
+        salt,
+        owner,
+        irs,
+        onchainId,
+        irAgents,
+        tokenAgents,
+        compliancesModules,
+        complianceSettings,
+        claimTopics,
+        issuers,
+        issuerClaims,
 
-// * Events from creation
-export const TOPICS_IN_FACTORY_RESULT = 6;
+        security,
+        currency,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+
+        factory,
+        resolver,
+        configId,
+        configVersion,
+        diamondOwnerAccount,
+
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+
+        compliance,
+        identityRegistry,
+      } = command;
+
+      if (!security.regulationType) {
+        throw new MissingRegulationType();
+      }
+      if (!security.regulationsubType) {
+        throw new MissingRegulationSubType();
+      }
+
+      if (!salt || salt.length === 0) {
+        throw new InvalidRequest('Salt not found in request');
+      }
+
+      const trexTokenDetails = new TrexTokenDetailsAts({
+        owner,
+        irs,
+        onchainId,
+        irAgents,
+        tokenAgents,
+        compliancesModules,
+        complianceSettings,
+      });
+      const claimDetails = new TrexClaimDetails({
+        claimTopics,
+        issuers,
+        issuerClaims,
+      });
+
+      const factoryEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(factory.toString());
+
+      const [
+        externalPausesEvmAddresses,
+        externalControlListsEvmAddresses,
+        externalKycListsEvmAddresses,
+      ] = await Promise.all([
+        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
+        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
+        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
+      ]);
+      const diamondOwnerAccountEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
+      const resolverEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(resolver.toString());
+
+      const complianceEvmAddress = compliance
+        ? await this.contractService.getContractEvmAddress(compliance)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
+      const identityRegistryAddress = identityRegistry
+        ? await this.contractService.getContractEvmAddress(identityRegistry)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
+      const handler = this.transactionService.getHandler();
+
+      const bondInfo = new BondDetails(
+        currency,
+        BigDecimal.fromString(nominalValue),
+        parseInt(startingDate),
+        parseInt(maturityDate),
+      );
+
+      const couponInfo = new CouponDetails(
+        parseInt(couponFrequency),
+        BigDecimal.fromString(couponRate),
+        parseInt(firstCouponDate),
+      );
+
+      res = await handler.createTrexSuiteBond(
+        salt,
+        trexTokenDetails.owner,
+        trexTokenDetails.irs,
+        trexTokenDetails.onchainId,
+        trexTokenDetails.irAgents,
+        trexTokenDetails.tokenAgents,
+        trexTokenDetails.compliancesModules,
+        trexTokenDetails.complianceSettings,
+        claimDetails.claimTopics,
+        claimDetails.issuers,
+        claimDetails.issuerClaims,
+
+        new Security(security),
+        bondInfo,
+        couponInfo,
+        factoryEvmAddress,
+        resolverEvmAddress,
+        configId,
+        configVersion,
+        complianceEvmAddress,
+        identityRegistryAddress,
+        diamondOwnerAccountEvmAddress,
+        externalPausesEvmAddresses,
+        externalControlListsEvmAddresses,
+        externalKycListsEvmAddresses,
+        factory.toString(),
+      );
+
+      const contractAddress =
+        await this.transactionService.getTransactionResult({
+          res,
+          result: res.response?._token,
+          className: CreateTrexSuiteBondCommandHandler.name,
+          position: 0,
+          numberOfResultsItems: 1,
+        });
+
+      const contractId =
+        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
+          contractAddress,
+        );
+
+      return Promise.resolve(
+        new CreateTrexSuiteBondCommandResponse(
+          new ContractId(contractId),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      if (res?.response == 1) {
+        return Promise.resolve(
+          new CreateTrexSuiteBondCommandResponse(
+            new ContractId('0.0.0'),
+            res.id!,
+          ),
+        );
+      }
+      throw new CreateTrexSuiteBondCommandError(error as Error);
+    }
+  }
+}

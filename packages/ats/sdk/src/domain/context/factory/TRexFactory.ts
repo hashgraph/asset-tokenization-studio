@@ -203,167 +203,161 @@
 
 */
 
-export const COMMAND_METADATA = '__command__';
-export const COMMAND_HANDLER_METADATA = '__commandHandler__';
-export const QUERY_METADATA = '__query__';
-export const QUERY_HANDLER_METADATA = '__queryHandler__';
-export const TOKEN_CREATION_COST_HBAR = 80;
-export const EVM_ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-export const HEDERA_ZERO_ADDRESS = '0.0.0';
-export const HBAR_DECIMALS = 8;
-export const GAS = {
-  CREATE_EQUITY_ST: 15000000,
-  CREATE_BOND_ST: 15000000,
-  CASHIN: 1200000,
-  BURN: 700000,
-  WIPE: 700000,
-  RESCUE: 700000,
-  RESCUE_HBAR: 700000,
-  FREEZE: 650000,
-  UNFREEZE: 650000,
-  GRANT_KYC: 650000,
-  REVOKE_KYC: 650000,
-  REDEEM: 650000,
-  PROTECTED_REDEEM: 7000000,
-  PAUSE: 15000000,
-  UNPAUSE: 650000,
-  TAKE_SNAPSHOT: 2000000,
-  DELETE: 650000,
-  GRANT_ROLES: 2000000,
-  REVOKE_ROLES: 2000000,
-  RENOUNCE_ROLES: 2000000,
-  MAX_ROLES: 15000000,
-  INCREASE_SUPPLY: 500000,
-  DECREASE_SUPPLY: 500000,
-  RESET_SUPPLY: 450000,
-  UPDATE_RESERVE_ADDRESS: 450000,
-  UPDATE_TOKEN: 1400000,
-  UPDATE_RESERVE_AMOUNT: 400000,
-  CHANGE_PROXY_OWNER: 500000,
-  ACCEPT_PROXY_OWNER: 400000,
-  UPDATE_PROXY_IMPLEMENTATION: 400000,
-  ISSUE: 7000000,
-  MINT: 7000000,
-  CONTROLLER_TRANSFER: 7000000,
-  FORCED_TRANSFER: 7000000,
-  CONTROLLER_REDEEM: 7000000,
-  SET_DIVIDENDS: 7000000,
-  SET_VOTING_RIGHTS: 7000000,
-  SET_COUPON: 7000000,
-  SET_DOCUMENT: 7000000,
-  REMOVE_DOCUMENT: 7000000,
-  AUTHORIZE_OPERATOR: 7000000,
-  REVOKE_OPERATOR: 7000000,
-  TRANSFER_OPERATOR: 7000000,
-  TRIGGER_PENDING_SCHEDULED_SNAPSHOTS: 7000000,
-  SET_MAX_SUPPLY: 7000000,
-  PROTECT_PARTITION: 15000000,
-  UNPROTECT_PARTITION: 650000,
-  BALANCE_OF: 1200000,
-  GET_RESERVE_ADDRESS: 1200000,
-  GET_RESERVE_AMOUNT: 1200000,
-  GET_ROLES: 1200000,
-  HAS_ROLE: 1200000,
-  GET_SUPPLY_ALLOWANCE: 1200000,
-  IS_UNLIMITED_ALLOWANCE: 1200000,
-  TRANSFER: 1200000,
-  PROTECTED_TRANSFER: 7000000,
-  TRANSFER_AND_LOCK: 1200000,
-  PROTECTED_TRANSFER_AND_LOCK: 7000000,
-  ADD_TO_CONTROL_LIST: 1200000,
-  REMOVE_FROM_CONTROL_LIST: 1200000,
-  LOCK: 7000000,
-  RELEASE: 7000000,
-  EXECUTE_HOLD_BY_PARTITION: 7000000,
-  UPDATE_CONFIG_VERSION: 9000000,
-  UPDATE_CONFIG: 9000000,
-  UPDATE_RESOLVER: 9000000,
-  UPDATE_MATURITY_DATE: 7000000,
-  SET_SCHEDULED_BALANCE_ADJUSTMENT: 7000000,
-  CREATE_HOLD: 7000000,
-  CREATE_HOLD_FROM: 7000000,
-  CONTROLLER_CREATE_HOLD: 7000000,
-  PROTECTED_CREATE_HOLD: 7000000,
-  RELEASE_HOLD: 7000000,
-  RECLAIM_HOLD: 7000000,
-  ADD_ISSUER: 7000000,
-  SET_REVOCATION_REGISTRY: 7000000,
-  REMOVE_ISSUER: 7000000,
-  ACTIVATE_CLEARING: 7000000,
-  DEACTIVATE_CLEARING: 7000000,
-  CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CLEARING_TRANSFER_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  APPROVE_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CANCEL_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  RECLAIM_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CLEARING_REDEEM_BY_PARTITION: 7000000,
-  CLEARING_REDEEM_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_REDEEM_BY_PARTITION: 7000000,
-  CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  CLEARING_CREATE_HOLD_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_REDEEM_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  UPDATE_EXTERNAL_PAUSES: 7000000,
-  ADD_EXTERNAL_PAUSE: 7000000,
-  REMOVE_EXTERNAL_PAUSE: 7000000,
-  SET_PAUSED_MOCK: 7000000,
-  CREATE_EXTERNAL_PAUSE_MOCK: 7000000,
-  UPDATE_EXTERNAL_CONTROL_LISTS: 7000000,
-  ADD_EXTERNAL_CONTROL_LIST: 7000000,
-  REMOVE_EXTERNAL_CONTROL_LIST: 7000000,
-  ACTIVATE_INTERNAL_KYC: 7000000,
-  DEACTIVATE_INTERNAL_KYC: 7000000,
-  ADD_TO_BLACK_LIST_MOCK: 7000000,
-  ADD_TO_WHITE_LIST_MOCK: 7000000,
-  REMOVE_FROM_BLACK_LIST_MOCK: 7000000,
-  REMOVE_FROM_WHITE_LIST_MOCK: 7000000,
-  CREATE_EXTERNAL_BLACK_LIST_MOCK: 7000000,
-  CREATE_EXTERNAL_WHITE_LIST_MOCK: 7000000,
-  UPDATE_EXTERNAL_KYC_LISTS: 7000000,
-  ADD_EXTERNAL_KYC_LIST: 7000000,
-  REMOVE_EXTERNAL_KYC_LIST: 7000000,
-  GRANT_KYC_MOCK: 7000000,
-  REVOKE_KYC_MOCK: 7000000,
-  CREATE_EXTERNAL_KYC_LIST_MOCK: 7000000,
-  SET_NAME: 7000000,
-  SET_SYMBOL: 7000000,
-  FREEZE_PARTIAL_TOKENS: 7000000,
-  UNFREEZE_PARTIAL_TOKENS: 7000000,
-  SET_ADDRESS_FROZEN: 700000,
-  SET_ONCHAIN_ID: 700000,
-  SET_IDENTITY_REGISTRY: 700000,
-  SET_COMPLIANCE: 700000,
-  BATCH_TRANSFER: 700000,
-  BATCH_FORCED_TRANSFER: 700000,
-  BATCH_MINT: 700000,
-  BATCH_BURN: 700000,
-  BATCH_SET_ADDRESS_FROZEN: 700000,
-  BATCH_FREEZE_PARTIAL_TOKENS: 700000,
-  BATCH_UNFREEZE_PARTIAL_TOKENS: 700000,
-  RECOVERY_ADDRESS: 7000000,
-  ADD_AGENT: 7000000,
-  REMOVE_AGENT: 7000000,
-  REDEEM_AT_MATURITY_BY_PARTITION_GAS: 700000,
-  TREX_CREATE_SUITE_BOND: 700000,
-  TREX_CREATE_SUITE_EQUITY: 700000,
-} as const;
+import { InvalidRequest } from '@command/error/InvalidRequest';
+import BaseError from '@core/error/BaseError';
+import ValidatedDomain from '@core/validation/ValidatedArgs';
 
-export const _PARTITION_ID_1 =
-  '0x0000000000000000000000000000000000000000000000000000000000000001';
-export const EMPTY_BYTES = '0x';
+interface TrexTokenDetailsAtsProps {
+  owner: string;
+  irs: string;
+  onchainId: string;
+  irAgents: string[];
+  tokenAgents: string[];
+  compliancesModules: string[];
+  complianceSettings: string[];
+}
 
-export const SET_DIVIDEND_EVENT = 'DividendSet';
-export const SET_VOTING_RIGHTS_EVENT = 'VotingSet';
-export const SET_COUPON_EVENT = 'CouponSet';
-export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT =
-  'ScheduledBalanceAdjustmentSet';
+interface TrexClaimDetailsProps {
+  claimTopics?: number[];
+  issuers: string[];
+  issuerClaims: number[][];
+}
 
-// * Generic
-export const BYTES_32_LENGTH = 32 * 2;
-export const ADDRESS_LENGTH = 40;
+export class TrexTokenDetailsAts
+  extends ValidatedDomain<TrexTokenDetailsAts>
+  implements TrexTokenDetailsAtsProps
+{
+  public owner: string;
+  public irs: string;
+  public onchainId: string;
+  public irAgents: string[];
+  public tokenAgents: string[];
+  public compliancesModules: string[];
+  public complianceSettings: string[];
 
-// * Events from creation
-export const TOPICS_IN_FACTORY_RESULT = 6;
+  constructor(params: TrexTokenDetailsAtsProps) {
+    super({
+      irAgents: (val) => {
+        return TrexTokenDetailsAts.checkMaxAgents(val, params.tokenAgents);
+      },
+      tokenAgents: (val) => {
+        return TrexTokenDetailsAts.checkMaxAgents(params.irAgents, val);
+      },
+      compliancesModules: (val) => {
+        return TrexTokenDetailsAts.checkComplianceModules(
+          val,
+          params.complianceSettings,
+        );
+      },
+      complianceSettings: (val) => {
+        return TrexTokenDetailsAts.checkComplianceModules(
+          params.compliancesModules,
+          val,
+        );
+      },
+    });
+
+    const {
+      owner,
+      irs,
+      onchainId,
+      irAgents = [],
+      tokenAgents = [],
+      compliancesModules = [],
+      complianceSettings = [],
+    } = params;
+
+    this.owner = owner;
+    this.irs = irs;
+    this.onchainId = onchainId;
+    this.irAgents = irAgents;
+    this.tokenAgents = tokenAgents;
+    this.compliancesModules = compliancesModules;
+    this.complianceSettings = complianceSettings;
+
+    ValidatedDomain.handleValidation(TrexTokenDetailsAts.name, this);
+  }
+
+  public static checkMaxAgents(
+    irAgents: string[],
+    tokenAgents: string[],
+  ): BaseError[] {
+    const errorList: BaseError[] = [];
+
+    if (irAgents.length > 5 || tokenAgents.length > 5) {
+      errorList.push(new InvalidRequest('max 5 agents at deployment'));
+    }
+
+    return errorList;
+  }
+
+  public static checkComplianceModules(
+    compliancesModules: string[],
+    complianceSettings: string[],
+  ): BaseError[] {
+    const errorList: BaseError[] = [];
+
+    if (compliancesModules.length > 30) {
+      errorList.push(new InvalidRequest('max 30 module actions at deployment'));
+    }
+
+    if (compliancesModules.length < complianceSettings.length) {
+      errorList.push(new InvalidRequest('invalid compliance pattern'));
+    }
+
+    return errorList;
+  }
+}
+
+export class TrexClaimDetails
+  extends ValidatedDomain<TrexClaimDetails>
+  implements TrexClaimDetailsProps
+{
+  claimTopics: number[];
+  issuers: string[];
+  issuerClaims: number[][];
+
+  constructor(params: TrexClaimDetailsProps) {
+    super({
+      claimTopics: (val) => {
+        return TrexClaimDetails.checkClaimTopics(val);
+      },
+      issuers: (val) => {
+        return TrexClaimDetails.checkIssuers(val, params.issuerClaims);
+      },
+    });
+
+    const { claimTopics = [], issuers = [], issuerClaims = [] } = params;
+
+    this.claimTopics = claimTopics;
+    this.issuers = issuers;
+    this.issuerClaims = issuerClaims;
+
+    ValidatedDomain.handleValidation(TrexClaimDetails.name, this);
+  }
+
+  public static checkClaimTopics(value: number[]): BaseError[] {
+    const errorList: BaseError[] = [];
+
+    if (value.length > 5) {
+      errorList.push(new InvalidRequest('max 5 claim topics at deployment'));
+    }
+    return errorList;
+  }
+
+  public static checkIssuers(
+    issuers: string[],
+    issuerClaims: number[][],
+  ): BaseError[] {
+    const errorList: BaseError[] = [];
+
+    if (issuers.length > 5) {
+      errorList.push(new InvalidRequest('max 5 claim issuers at deployment'));
+    }
+
+    if (issuers.length !== issuerClaims.length) {
+      errorList.push(new InvalidRequest('claim pattern not valid'));
+    }
+    return errorList;
+  }
+}
