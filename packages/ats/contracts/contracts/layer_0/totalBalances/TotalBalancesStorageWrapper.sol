@@ -231,27 +231,6 @@ abstract contract TotalBalancesStorageWrapper is SnapshotsStorageWrapper2 {
     }
 
     /**
-     * @dev Returns the total balance for a token holder by summing all adjusted balance types at a specific snapshot
-     * @param snapshotId The snapshot ID
-     * @param tokenHolder The address of the token holder
-     * @return totalBalance The sum of all adjusted balance types for the token holder at the specified snapshot
-     */
-    function _getTotalBalanceOfAtSnapshot(
-        uint256 snapshotId,
-        address tokenHolder
-    ) internal view returns (uint256 totalBalance) {
-        // Use unchecked block since we're dealing with token balances that shouldn't overflow
-        unchecked {
-            totalBalance =
-                _balanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _clearedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _heldBalanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _lockedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _frozenBalanceOfAtSnapshot(snapshotId, tokenHolder);
-        }
-    }
-
-    /**
      * @dev Returns the total balance for a token holder by summing all adjusted balance types by partition
      * @param partition The partition identifier
      * @param tokenHolder The address of the token holder
@@ -276,11 +255,32 @@ abstract contract TotalBalancesStorageWrapper is SnapshotsStorageWrapper2 {
     }
 
     /**
-     * @dev Returns the total balance for a token holder by summing all adjusted balance types by partition
-     * @param partition The partition identifier
-     * @param snapshotId The snapshot ID
-     * @param tokenHolder The address of the token holder
-     * @return totalBalance The sum of all adjusted balance types for the token holder by partition
+     * @dev Returns the sum of all balance types for a holder at a snapshot
+     * @param snapshotId Snapshot ID
+     * @param tokenHolder Token holder address
+     * @return totalBalance Total balance at the snapshot
+     */
+    function _getTotalBalanceOfAtSnapshot(
+        uint256 snapshotId,
+        address tokenHolder
+    ) internal view returns (uint256 totalBalance) {
+        // Use unchecked block since we're dealing with token balances that shouldn't overflow
+        unchecked {
+            totalBalance =
+                _balanceOfAtSnapshot(snapshotId, tokenHolder) +
+                _clearedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
+                _heldBalanceOfAtSnapshot(snapshotId, tokenHolder) +
+                _lockedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
+                _frozenBalanceOfAtSnapshot(snapshotId, tokenHolder);
+        }
+    }
+
+    /**
+     * @dev Returns the sum of all balance types for a holder in a partition at a snapshot
+     * @param partition Partition ID
+     * @param snapshotId Snapshot ID
+     * @param tokenHolder Token holder address
+     * @return totalBalance Total balance in the partition at the snapshot
      */
     function _getTotalBalanceOfAtSnapshotByPartition(
         bytes32 partition,
