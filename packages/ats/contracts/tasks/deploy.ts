@@ -405,6 +405,12 @@ task('deploy', 'Deploy new contract')
         undefined,
         types.string
     )
+    .addOptionalVariadicPositionalParam(
+        'constructorArgs',
+        'Arguments for the contract constructor',
+        undefined,
+        types.string
+    )
     .addOptionalParam(
         'privateKey',
         'The private key of the account in raw hexadecimal format',
@@ -450,6 +456,7 @@ task('deploy', 'Deploy new contract')
                 new DeployContractCommand({
                     name: contractName,
                     signer,
+                    args: args.constructorArgs,
                 })
             )
 
