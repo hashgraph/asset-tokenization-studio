@@ -203,167 +203,286 @@
 
 */
 
-export const COMMAND_METADATA = '__command__';
-export const COMMAND_HANDLER_METADATA = '__commandHandler__';
-export const QUERY_METADATA = '__query__';
-export const QUERY_HANDLER_METADATA = '__queryHandler__';
-export const TOKEN_CREATION_COST_HBAR = 80;
-export const EVM_ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-export const HEDERA_ZERO_ADDRESS = '0.0.0';
-export const HBAR_DECIMALS = 8;
-export const GAS = {
-  CREATE_EQUITY_ST: 15000000,
-  CREATE_BOND_ST: 15000000,
-  CASHIN: 1200000,
-  BURN: 700000,
-  WIPE: 700000,
-  RESCUE: 700000,
-  RESCUE_HBAR: 700000,
-  FREEZE: 650000,
-  UNFREEZE: 650000,
-  GRANT_KYC: 650000,
-  REVOKE_KYC: 650000,
-  REDEEM: 650000,
-  PROTECTED_REDEEM: 7000000,
-  PAUSE: 15000000,
-  UNPAUSE: 650000,
-  TAKE_SNAPSHOT: 2000000,
-  DELETE: 650000,
-  GRANT_ROLES: 2000000,
-  REVOKE_ROLES: 2000000,
-  RENOUNCE_ROLES: 2000000,
-  MAX_ROLES: 15000000,
-  INCREASE_SUPPLY: 500000,
-  DECREASE_SUPPLY: 500000,
-  RESET_SUPPLY: 450000,
-  UPDATE_RESERVE_ADDRESS: 450000,
-  UPDATE_TOKEN: 1400000,
-  UPDATE_RESERVE_AMOUNT: 400000,
-  CHANGE_PROXY_OWNER: 500000,
-  ACCEPT_PROXY_OWNER: 400000,
-  UPDATE_PROXY_IMPLEMENTATION: 400000,
-  ISSUE: 7000000,
-  MINT: 7000000,
-  CONTROLLER_TRANSFER: 7000000,
-  FORCED_TRANSFER: 7000000,
-  CONTROLLER_REDEEM: 7000000,
-  SET_DIVIDENDS: 7000000,
-  SET_VOTING_RIGHTS: 7000000,
-  SET_COUPON: 7000000,
-  SET_DOCUMENT: 7000000,
-  REMOVE_DOCUMENT: 7000000,
-  AUTHORIZE_OPERATOR: 7000000,
-  REVOKE_OPERATOR: 7000000,
-  TRANSFER_OPERATOR: 7000000,
-  TRIGGER_PENDING_SCHEDULED_SNAPSHOTS: 7000000,
-  SET_MAX_SUPPLY: 7000000,
-  PROTECT_PARTITION: 15000000,
-  UNPROTECT_PARTITION: 650000,
-  BALANCE_OF: 1200000,
-  GET_RESERVE_ADDRESS: 1200000,
-  GET_RESERVE_AMOUNT: 1200000,
-  GET_ROLES: 1200000,
-  HAS_ROLE: 1200000,
-  GET_SUPPLY_ALLOWANCE: 1200000,
-  IS_UNLIMITED_ALLOWANCE: 1200000,
-  TRANSFER: 1200000,
-  PROTECTED_TRANSFER: 7000000,
-  TRANSFER_AND_LOCK: 1200000,
-  PROTECTED_TRANSFER_AND_LOCK: 7000000,
-  ADD_TO_CONTROL_LIST: 1200000,
-  REMOVE_FROM_CONTROL_LIST: 1200000,
-  LOCK: 7000000,
-  RELEASE: 7000000,
-  EXECUTE_HOLD_BY_PARTITION: 7000000,
-  UPDATE_CONFIG_VERSION: 9000000,
-  UPDATE_CONFIG: 9000000,
-  UPDATE_RESOLVER: 9000000,
-  UPDATE_MATURITY_DATE: 7000000,
-  SET_SCHEDULED_BALANCE_ADJUSTMENT: 7000000,
-  CREATE_HOLD: 7000000,
-  CREATE_HOLD_FROM: 7000000,
-  CONTROLLER_CREATE_HOLD: 7000000,
-  PROTECTED_CREATE_HOLD: 7000000,
-  RELEASE_HOLD: 7000000,
-  RECLAIM_HOLD: 7000000,
-  ADD_ISSUER: 7000000,
-  SET_REVOCATION_REGISTRY: 7000000,
-  REMOVE_ISSUER: 7000000,
-  ACTIVATE_CLEARING: 7000000,
-  DEACTIVATE_CLEARING: 7000000,
-  CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CLEARING_TRANSFER_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  APPROVE_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CANCEL_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  RECLAIM_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CLEARING_REDEEM_BY_PARTITION: 7000000,
-  CLEARING_REDEEM_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_REDEEM_BY_PARTITION: 7000000,
-  CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  CLEARING_CREATE_HOLD_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_REDEEM_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  UPDATE_EXTERNAL_PAUSES: 7000000,
-  ADD_EXTERNAL_PAUSE: 7000000,
-  REMOVE_EXTERNAL_PAUSE: 7000000,
-  SET_PAUSED_MOCK: 7000000,
-  CREATE_EXTERNAL_PAUSE_MOCK: 7000000,
-  UPDATE_EXTERNAL_CONTROL_LISTS: 7000000,
-  ADD_EXTERNAL_CONTROL_LIST: 7000000,
-  REMOVE_EXTERNAL_CONTROL_LIST: 7000000,
-  ACTIVATE_INTERNAL_KYC: 7000000,
-  DEACTIVATE_INTERNAL_KYC: 7000000,
-  ADD_TO_BLACK_LIST_MOCK: 7000000,
-  ADD_TO_WHITE_LIST_MOCK: 7000000,
-  REMOVE_FROM_BLACK_LIST_MOCK: 7000000,
-  REMOVE_FROM_WHITE_LIST_MOCK: 7000000,
-  CREATE_EXTERNAL_BLACK_LIST_MOCK: 7000000,
-  CREATE_EXTERNAL_WHITE_LIST_MOCK: 7000000,
-  UPDATE_EXTERNAL_KYC_LISTS: 7000000,
-  ADD_EXTERNAL_KYC_LIST: 7000000,
-  REMOVE_EXTERNAL_KYC_LIST: 7000000,
-  GRANT_KYC_MOCK: 7000000,
-  REVOKE_KYC_MOCK: 7000000,
-  CREATE_EXTERNAL_KYC_LIST_MOCK: 7000000,
-  SET_NAME: 7000000,
-  SET_SYMBOL: 7000000,
-  FREEZE_PARTIAL_TOKENS: 7000000,
-  UNFREEZE_PARTIAL_TOKENS: 7000000,
-  SET_ADDRESS_FROZEN: 700000,
-  SET_ONCHAIN_ID: 700000,
-  SET_IDENTITY_REGISTRY: 700000,
-  SET_COMPLIANCE: 700000,
-  BATCH_TRANSFER: 700000,
-  BATCH_FORCED_TRANSFER: 700000,
-  BATCH_MINT: 700000,
-  BATCH_BURN: 700000,
-  BATCH_SET_ADDRESS_FROZEN: 700000,
-  BATCH_FREEZE_PARTIAL_TOKENS: 700000,
-  BATCH_UNFREEZE_PARTIAL_TOKENS: 700000,
-  RECOVERY_ADDRESS: 7000000,
-  ADD_AGENT: 7000000,
-  REMOVE_AGENT: 7000000,
-  REDEEM_AT_MATURITY_BY_PARTITION_GAS: 700000,
-  TREX_CREATE_SUITE_BOND: 700000,
-  TREX_CREATE_SUITE_EQUITY: 700000,
-} as const;
+import { OptionalField } from '@core/decorator/OptionalDecorator';
+import { Security } from '@domain/context/security/Security';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../FormatValidation';
 
-export const _PARTITION_ID_1 =
-  '0x0000000000000000000000000000000000000000000000000000000000000001';
-export const EMPTY_BYTES = '0x';
+import { SecurityDate } from '@domain/context/shared/SecurityDate';
+import { Factory } from '@domain/context/factory/Factories';
 
-export const SET_DIVIDEND_EVENT = 'DividendSet';
-export const SET_VOTING_RIGHTS_EVENT = 'VotingSet';
-export const SET_COUPON_EVENT = 'CouponSet';
-export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT =
-  'ScheduledBalanceAdjustmentSet';
+export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateTrexSuiteBondRequest> {
+  salt: string;
+  owner: string;
+  irs: string;
+  onchainId: string;
+  irAgents: string[];
+  tokenAgents: string[];
+  compliancesModules: string[];
+  complianceSettings: string[];
+  claimTopics: number[];
+  issuers: string[];
+  issuerClaims: number[][];
 
-// * Generic
-export const BYTES_32_LENGTH = 32 * 2;
-export const ADDRESS_LENGTH = 40;
+  name: string;
+  symbol: string;
+  isin: string;
+  private _decimals: number;
+  public get decimals(): number {
+    return this._decimals;
+  }
+  public set decimals(value: number | string) {
+    this._decimals = typeof value === 'number' ? value : parseFloat(value);
+  }
+  isWhiteList: boolean;
+  isControllable: boolean;
+  arePartitionsProtected: boolean;
+  isMultiPartition: boolean;
+  clearingActive: boolean;
+  internalKycActivated: boolean;
 
-// * Events from creation
-export const TOPICS_IN_FACTORY_RESULT = 6;
+  @OptionalField()
+  externalPauses?: string[];
+
+  @OptionalField()
+  externalControlLists?: string[];
+
+  @OptionalField()
+  externalKycLists?: string[];
+
+  diamondOwnerAccount: string;
+
+  @OptionalField()
+  complianceId?: string;
+
+  @OptionalField()
+  identityRegistryId?: string;
+
+  currency: string;
+  numberOfUnits: string;
+  nominalValue: string;
+  startingDate: string;
+  maturityDate: string;
+  couponFrequency: string;
+  couponRate: string;
+  firstCouponDate: string;
+  regulationType: number;
+  regulationSubType: number;
+  isCountryControlListWhiteList: boolean;
+  countries: string;
+  info: string;
+  configId: string;
+  configVersion: number;
+
+  constructor({
+    salt,
+    owner,
+    irs,
+    onchainId,
+    irAgents,
+    tokenAgents,
+    compliancesModules,
+    complianceSettings,
+    claimTopics,
+    issuers,
+    issuerClaims,
+
+    name,
+    symbol,
+    isin,
+    decimals,
+    isWhiteList,
+    isControllable,
+    arePartitionsProtected,
+    isMultiPartition,
+    clearingActive,
+    internalKycActivated,
+    externalPauses,
+    externalControlLists,
+    externalKycLists,
+    diamondOwnerAccount,
+    currency,
+    numberOfUnits,
+    nominalValue,
+    startingDate,
+    maturityDate,
+    couponFrequency,
+    couponRate,
+    firstCouponDate,
+    regulationType,
+    regulationSubType,
+    isCountryControlListWhiteList,
+    countries,
+    info,
+    configId,
+    configVersion,
+    complianceId,
+    identityRegistryId,
+  }: {
+    salt: string;
+    owner: string;
+    irs: string;
+    onchainId: string;
+    irAgents: string[];
+    tokenAgents: string[];
+    compliancesModules: string[];
+    complianceSettings: string[];
+    claimTopics: number[];
+    issuers: string[];
+    issuerClaims: number[][];
+
+    name: string;
+    symbol: string;
+    isin: string;
+    decimals: number | string;
+    isWhiteList: boolean;
+    isControllable: boolean;
+    arePartitionsProtected: boolean;
+    isMultiPartition: boolean;
+    clearingActive: boolean;
+    internalKycActivated: boolean;
+    externalPauses?: string[];
+    externalControlLists?: string[];
+    externalKycLists?: string[];
+    diamondOwnerAccount: string;
+    currency: string;
+    numberOfUnits: string;
+    nominalValue: string;
+    startingDate: string;
+    maturityDate: string;
+    couponFrequency: string;
+    couponRate: string;
+    firstCouponDate: string;
+    regulationType: number;
+    regulationSubType: number;
+    isCountryControlListWhiteList: boolean;
+    countries: string;
+    info: string;
+    configId: string;
+    configVersion: number;
+    complianceId?: string;
+    identityRegistryId?: string;
+  }) {
+    super({
+      name: (val) => {
+        return Security.checkName(val);
+      },
+      symbol: (val) => {
+        return Security.checkSymbol(val);
+      },
+      isin: (val) => {
+        return Security.checkISIN(val);
+      },
+      decimals: (val) => {
+        return Security.checkInteger(val);
+      },
+      diamondOwnerAccount:
+        FormatValidation.checkHederaIdFormatOrEvmAddress(false),
+      currency: FormatValidation.checkBytes3Format(),
+      numberOfUnits: FormatValidation.checkNumber(),
+      nominalValue: FormatValidation.checkNumber(),
+      startingDate: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          Math.ceil(new Date().getTime() / 1000),
+          parseInt(this.maturityDate),
+        );
+      },
+      maturityDate: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          parseInt(this.startingDate),
+          undefined,
+        );
+      },
+      couponFrequency: FormatValidation.checkNumber(),
+      couponRate: FormatValidation.checkNumber(),
+      firstCouponDate: (val) => {
+        if (parseInt(val) != 0) {
+          return SecurityDate.checkDateTimestamp(
+            parseInt(val),
+            parseInt(this.startingDate),
+            parseInt(this.maturityDate),
+          );
+        }
+      },
+      regulationType: (val) => {
+        return Factory.checkRegulationType(val);
+      },
+      regulationSubType: (val) => {
+        return Factory.checkRegulationSubType(val, this.regulationType);
+      },
+      configId: FormatValidation.checkBytes32Format(),
+      externalPauses: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalPauses',
+          true,
+        );
+      },
+      externalControlLists: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalControlLists',
+          true,
+        );
+      },
+      externalKycLists: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalKycLists',
+          true,
+        );
+      },
+      complianceId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      identityRegistryId:
+        FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      claimTopics: FormatValidation.checkArrayNumber(),
+    });
+
+    this.salt = salt;
+    this.owner = owner;
+    this.irs = irs;
+    this.onchainId = onchainId;
+    this.irAgents = irAgents;
+    this.tokenAgents = tokenAgents;
+    this.compliancesModules = compliancesModules;
+    this.complianceSettings = complianceSettings;
+    this.claimTopics = claimTopics;
+    this.issuers = issuers;
+    this.issuerClaims = issuerClaims;
+
+    this.name = name;
+    this.symbol = symbol;
+    this.isin = isin;
+    this.decimals =
+      typeof decimals === 'number' ? decimals : parseInt(decimals);
+    this.isWhiteList = isWhiteList;
+    this.isControllable = isControllable;
+    this.arePartitionsProtected = arePartitionsProtected;
+    this.isMultiPartition = isMultiPartition;
+    this.clearingActive = clearingActive;
+    this.internalKycActivated = internalKycActivated;
+    this.diamondOwnerAccount = diamondOwnerAccount;
+    this.externalPauses = externalPauses;
+    this.externalControlLists = externalControlLists;
+    this.externalKycLists = externalKycLists;
+    this.currency = currency;
+    this.numberOfUnits = numberOfUnits;
+    this.nominalValue = nominalValue;
+    this.startingDate = startingDate;
+    this.maturityDate = maturityDate;
+    this.couponFrequency = couponFrequency;
+    this.couponRate = couponRate;
+    this.firstCouponDate = firstCouponDate;
+    this.regulationType = regulationType;
+    this.regulationSubType = regulationSubType;
+    this.isCountryControlListWhiteList = isCountryControlListWhiteList;
+    this.countries = countries;
+    this.info = info;
+    this.configId = configId;
+    this.configVersion = configVersion;
+    this.complianceId = complianceId;
+    this.identityRegistryId = identityRegistryId;
+  }
+}

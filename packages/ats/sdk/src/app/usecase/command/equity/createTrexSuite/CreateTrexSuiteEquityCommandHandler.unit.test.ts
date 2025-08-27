@@ -203,167 +203,213 @@
 
 */
 
-export const COMMAND_METADATA = '__command__';
-export const COMMAND_HANDLER_METADATA = '__commandHandler__';
-export const QUERY_METADATA = '__query__';
-export const QUERY_HANDLER_METADATA = '__queryHandler__';
-export const TOKEN_CREATION_COST_HBAR = 80;
-export const EVM_ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-export const HEDERA_ZERO_ADDRESS = '0.0.0';
-export const HBAR_DECIMALS = 8;
-export const GAS = {
-  CREATE_EQUITY_ST: 15000000,
-  CREATE_BOND_ST: 15000000,
-  CASHIN: 1200000,
-  BURN: 700000,
-  WIPE: 700000,
-  RESCUE: 700000,
-  RESCUE_HBAR: 700000,
-  FREEZE: 650000,
-  UNFREEZE: 650000,
-  GRANT_KYC: 650000,
-  REVOKE_KYC: 650000,
-  REDEEM: 650000,
-  PROTECTED_REDEEM: 7000000,
-  PAUSE: 15000000,
-  UNPAUSE: 650000,
-  TAKE_SNAPSHOT: 2000000,
-  DELETE: 650000,
-  GRANT_ROLES: 2000000,
-  REVOKE_ROLES: 2000000,
-  RENOUNCE_ROLES: 2000000,
-  MAX_ROLES: 15000000,
-  INCREASE_SUPPLY: 500000,
-  DECREASE_SUPPLY: 500000,
-  RESET_SUPPLY: 450000,
-  UPDATE_RESERVE_ADDRESS: 450000,
-  UPDATE_TOKEN: 1400000,
-  UPDATE_RESERVE_AMOUNT: 400000,
-  CHANGE_PROXY_OWNER: 500000,
-  ACCEPT_PROXY_OWNER: 400000,
-  UPDATE_PROXY_IMPLEMENTATION: 400000,
-  ISSUE: 7000000,
-  MINT: 7000000,
-  CONTROLLER_TRANSFER: 7000000,
-  FORCED_TRANSFER: 7000000,
-  CONTROLLER_REDEEM: 7000000,
-  SET_DIVIDENDS: 7000000,
-  SET_VOTING_RIGHTS: 7000000,
-  SET_COUPON: 7000000,
-  SET_DOCUMENT: 7000000,
-  REMOVE_DOCUMENT: 7000000,
-  AUTHORIZE_OPERATOR: 7000000,
-  REVOKE_OPERATOR: 7000000,
-  TRANSFER_OPERATOR: 7000000,
-  TRIGGER_PENDING_SCHEDULED_SNAPSHOTS: 7000000,
-  SET_MAX_SUPPLY: 7000000,
-  PROTECT_PARTITION: 15000000,
-  UNPROTECT_PARTITION: 650000,
-  BALANCE_OF: 1200000,
-  GET_RESERVE_ADDRESS: 1200000,
-  GET_RESERVE_AMOUNT: 1200000,
-  GET_ROLES: 1200000,
-  HAS_ROLE: 1200000,
-  GET_SUPPLY_ALLOWANCE: 1200000,
-  IS_UNLIMITED_ALLOWANCE: 1200000,
-  TRANSFER: 1200000,
-  PROTECTED_TRANSFER: 7000000,
-  TRANSFER_AND_LOCK: 1200000,
-  PROTECTED_TRANSFER_AND_LOCK: 7000000,
-  ADD_TO_CONTROL_LIST: 1200000,
-  REMOVE_FROM_CONTROL_LIST: 1200000,
-  LOCK: 7000000,
-  RELEASE: 7000000,
-  EXECUTE_HOLD_BY_PARTITION: 7000000,
-  UPDATE_CONFIG_VERSION: 9000000,
-  UPDATE_CONFIG: 9000000,
-  UPDATE_RESOLVER: 9000000,
-  UPDATE_MATURITY_DATE: 7000000,
-  SET_SCHEDULED_BALANCE_ADJUSTMENT: 7000000,
-  CREATE_HOLD: 7000000,
-  CREATE_HOLD_FROM: 7000000,
-  CONTROLLER_CREATE_HOLD: 7000000,
-  PROTECTED_CREATE_HOLD: 7000000,
-  RELEASE_HOLD: 7000000,
-  RECLAIM_HOLD: 7000000,
-  ADD_ISSUER: 7000000,
-  SET_REVOCATION_REGISTRY: 7000000,
-  REMOVE_ISSUER: 7000000,
-  ACTIVATE_CLEARING: 7000000,
-  DEACTIVATE_CLEARING: 7000000,
-  CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CLEARING_TRANSFER_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  APPROVE_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CANCEL_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  RECLAIM_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  CLEARING_REDEEM_BY_PARTITION: 7000000,
-  CLEARING_REDEEM_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_REDEEM_BY_PARTITION: 7000000,
-  CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  CLEARING_CREATE_HOLD_FROM_BY_PARTITION: 7000000,
-  PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_REDEEM_BY_PARTITION: 7000000,
-  OPERATOR_CLEARING_TRANSFER_BY_PARTITION: 7000000,
-  UPDATE_EXTERNAL_PAUSES: 7000000,
-  ADD_EXTERNAL_PAUSE: 7000000,
-  REMOVE_EXTERNAL_PAUSE: 7000000,
-  SET_PAUSED_MOCK: 7000000,
-  CREATE_EXTERNAL_PAUSE_MOCK: 7000000,
-  UPDATE_EXTERNAL_CONTROL_LISTS: 7000000,
-  ADD_EXTERNAL_CONTROL_LIST: 7000000,
-  REMOVE_EXTERNAL_CONTROL_LIST: 7000000,
-  ACTIVATE_INTERNAL_KYC: 7000000,
-  DEACTIVATE_INTERNAL_KYC: 7000000,
-  ADD_TO_BLACK_LIST_MOCK: 7000000,
-  ADD_TO_WHITE_LIST_MOCK: 7000000,
-  REMOVE_FROM_BLACK_LIST_MOCK: 7000000,
-  REMOVE_FROM_WHITE_LIST_MOCK: 7000000,
-  CREATE_EXTERNAL_BLACK_LIST_MOCK: 7000000,
-  CREATE_EXTERNAL_WHITE_LIST_MOCK: 7000000,
-  UPDATE_EXTERNAL_KYC_LISTS: 7000000,
-  ADD_EXTERNAL_KYC_LIST: 7000000,
-  REMOVE_EXTERNAL_KYC_LIST: 7000000,
-  GRANT_KYC_MOCK: 7000000,
-  REVOKE_KYC_MOCK: 7000000,
-  CREATE_EXTERNAL_KYC_LIST_MOCK: 7000000,
-  SET_NAME: 7000000,
-  SET_SYMBOL: 7000000,
-  FREEZE_PARTIAL_TOKENS: 7000000,
-  UNFREEZE_PARTIAL_TOKENS: 7000000,
-  SET_ADDRESS_FROZEN: 700000,
-  SET_ONCHAIN_ID: 700000,
-  SET_IDENTITY_REGISTRY: 700000,
-  SET_COMPLIANCE: 700000,
-  BATCH_TRANSFER: 700000,
-  BATCH_FORCED_TRANSFER: 700000,
-  BATCH_MINT: 700000,
-  BATCH_BURN: 700000,
-  BATCH_SET_ADDRESS_FROZEN: 700000,
-  BATCH_FREEZE_PARTIAL_TOKENS: 700000,
-  BATCH_UNFREEZE_PARTIAL_TOKENS: 700000,
-  RECOVERY_ADDRESS: 7000000,
-  ADD_AGENT: 7000000,
-  REMOVE_AGENT: 7000000,
-  REDEEM_AT_MATURITY_BY_PARTITION_GAS: 700000,
-  TREX_CREATE_SUITE_BOND: 700000,
-  TREX_CREATE_SUITE_EQUITY: 700000,
-} as const;
+import { createMock } from '@golevelup/ts-jest';
+import { CreateTrexSuiteEquityCommandHandler } from './CreateTrexSuiteEquityCommandHandler';
+import {
+  CreateTrexSuiteEquityCommand,
+  CreateTrexSuiteEquityCommandResponse,
+} from './CreateTrexSuiteEquityCommand';
+import TransactionService from '@service/transaction/TransactionService';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  HederaIdZeroAddressFixture,
+  TransactionIdFixture,
+} from '@test/fixtures/shared/DataFixture';
+import AccountService from '@service/account/AccountService';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { CreateTrexSuiteEquityCommandFixture } from '@test/fixtures/equity/EquityFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { CreateTrexSuiteEquityCommandError } from './error/CreateTrexSuiteEquityError';
 
-export const _PARTITION_ID_1 =
-  '0x0000000000000000000000000000000000000000000000000000000000000001';
-export const EMPTY_BYTES = '0x';
+describe('CreateTrexSuiteEquityCommandHandler', () => {
+  let handler: CreateTrexSuiteEquityCommandHandler;
+  let command: CreateTrexSuiteEquityCommand;
 
-export const SET_DIVIDEND_EVENT = 'DividendSet';
-export const SET_VOTING_RIGHTS_EVENT = 'VotingSet';
-export const SET_COUPON_EVENT = 'CouponSet';
-export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT =
-  'ScheduledBalanceAdjustmentSet';
+  const transactionServiceMock = createMock<TransactionService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
 
-// * Generic
-export const BYTES_32_LENGTH = 32 * 2;
-export const ADDRESS_LENGTH = 40;
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const externalPauseEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalControlEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalKycEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const transactionId = TransactionIdFixture.create().id;
+  const hederaId = HederaIdPropsFixture.create().value;
+  const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
+  const errorMsg = ErrorMsgFixture.create().msg;
 
-// * Events from creation
-export const TOPICS_IN_FACTORY_RESULT = 6;
+  beforeEach(() => {
+    handler = new CreateTrexSuiteEquityCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      mirrorNodeAdapterMock,
+      contractServiceMock,
+    );
+    command = CreateTrexSuiteEquityCommandFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws CreateTrexSuiteEquityCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          CreateTrexSuiteEquityCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the trex suite equity: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+
+    describe('success cases', () => {
+      it('should successfully create an equity with equityAddress in response', async () => {
+        contractServiceMock.getContractEvmAddress
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress);
+        contractServiceMock.getEvmAddressesFromHederaIds
+          .mockResolvedValueOnce([externalPauseEvmAddress])
+          .mockResolvedValueOnce([externalControlEvmAddress])
+          .mockResolvedValueOnce([externalKycEvmAddress]);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+
+        transactionServiceMock
+          .getHandler()
+          .createTrexSuiteEquity.mockResolvedValue({
+            id: transactionId,
+            response: { _token: evmAddress.value },
+          });
+
+        mirrorNodeAdapterMock.getHederaIdfromContractAddress.mockResolvedValue(
+          hederaId,
+        );
+
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          evmAddress.value,
+        );
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateTrexSuiteEquityCommandResponse);
+        expect(result.securityId.value).toBe(hederaId);
+        expect(result.transactionId).toBe(transactionId);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          4,
+        );
+        expect(
+          contractServiceMock.getEvmAddressesFromHederaIds,
+        ).toHaveBeenCalledTimes(3);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(
+          transactionServiceMock.getHandler().createTrexSuiteEquity,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mirrorNodeAdapterMock.getHederaIdfromContractAddress,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createTrexSuiteEquity,
+        ).toHaveBeenCalledWith(
+          command.salt,
+          command.owner,
+          command.irs,
+          command.onchainId,
+          command.irAgents,
+          command.tokenAgents,
+          command.compliancesModules,
+          command.complianceSettings,
+          command.claimTopics,
+          command.issuers,
+          command.issuerClaims,
+          expect.objectContaining(command.security),
+          expect.objectContaining({
+            votingRight: command.votingRight,
+            informationRight: command.informationRight,
+            liquidationRight: command.liquidationRight,
+            subscriptionRight: command.subscriptionRight,
+            conversionRight: command.conversionRight,
+            redemptionRight: command.redemptionRight,
+            putRight: command.putRight,
+            dividendRight: command.dividendRight,
+            currency: command.currency,
+            nominalValue: BigDecimal.fromString(command.nominalValue),
+          }),
+          evmAddress,
+          evmAddress,
+          command.configId,
+          command.configVersion,
+          evmAddress,
+          evmAddress,
+          evmAddress,
+          [externalPauseEvmAddress],
+          [externalControlEvmAddress],
+          [externalKycEvmAddress],
+          command.factory?.toString(),
+        );
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            res: {
+              id: transactionId,
+              response: { _token: evmAddress.value },
+            },
+            result: evmAddress.value,
+            className: CreateTrexSuiteEquityCommandHandler.name,
+            position: 0,
+            numberOfResultsItems: 1,
+          }),
+        );
+      });
+
+      it('should handle error and return fallback response if response code is 1', async () => {
+        mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
+          id: hederaId,
+          evmAddress: evmAddress.value,
+        });
+
+        transactionServiceMock
+          .getHandler()
+          .createTrexSuiteEquity.mockResolvedValue({
+            id: transactionId,
+            response: 1,
+          });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateTrexSuiteEquityCommandResponse);
+        expect(result.securityId.toString()).toBe(hederaIdZeroAddress);
+        expect(result.transactionId.toString()).toBe(transactionId);
+      });
+    });
+  });
+});
