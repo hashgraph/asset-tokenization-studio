@@ -318,7 +318,7 @@ export class CreateBondCommandHandler
       const identityRegistryAddress = identityRegistry
         ? await this.contractService.getContractEvmAddress(identityRegistry)
         : new EvmAddress(EVM_ZERO_ADDRESS);
-      const irCalculatorEvmAddress = interestRateCalculatorId
+      const interestRateCalculatorEvmAddress = interestRateCalculatorId
         ? await this.contractService.getContractEvmAddress(
             interestRateCalculatorId,
           )
@@ -331,7 +331,7 @@ export class CreateBondCommandHandler
         BigDecimal.fromString(nominalValue),
         parseInt(startingDate),
         parseInt(maturityDate),
-        irCalculatorEvmAddress.toString(),
+        interestRateCalculatorEvmAddress.toString(),
       );
 
       const couponInfo = new CouponDetails(

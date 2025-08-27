@@ -3012,7 +3012,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       Bond__factory.connect(securityId.toString(), this.getSignerOrProvider()),
       'setInterestRateCalculator',
       [securityId.toString(), interestRateCalculatorId.toString()],
-      GAS.REDEEM_AT_MATURITY_BY_PARTITION_GAS,
+      GAS.SET_INTEREST_RATE_CALCULATOR_GAS,
     );
   }
 
