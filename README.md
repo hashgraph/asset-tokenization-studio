@@ -302,6 +302,11 @@ To run the application locally:
 ### Full Development Setup
 
 ```bash
+# Option 1: Quick setup (install dependencies and build all ATS components)
+npm run ats:setup      # Install dependencies and build all ATS components
+npm run ats:web:dev    # Start web development server
+
+# Option 2: Step by step
 npm ci                 # Install all dependencies
 npm run ats:build      # Build contracts and SDK
 npm run ats:web:dev    # Start web development server

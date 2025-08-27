@@ -377,8 +377,8 @@ describe('Bond', () => {
           createBondRequest.externalPauses,
           createBondRequest.externalControlLists,
           createBondRequest.externalKycLists,
-          createBondRequest.compliance,
-          createBondRequest.identityRegistry,
+          createBondRequest.complianceId,
+          createBondRequest.identityRegistryId,
         ),
       );
 
@@ -443,8 +443,8 @@ describe('Bond', () => {
           createBondRequest.externalPauses,
           createBondRequest.externalControlLists,
           createBondRequest.externalKycLists,
-          createBondRequest.compliance,
-          createBondRequest.identityRegistry,
+          createBondRequest.complianceId,
+          createBondRequest.identityRegistryId,
         ),
       );
     });

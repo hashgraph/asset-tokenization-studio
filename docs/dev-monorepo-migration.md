@@ -84,6 +84,10 @@ The Asset Tokenization Studio has been restructured into a proper npm workspaces
 # Clean existing installations
 npm run clean:deps  # or manually delete node_modules directories
 
+# Quick setup: install dependencies and build all ATS components
+npm run ats:setup
+
+# Or step by step:
 # Fresh install with new structure
 npm ci
 
