@@ -230,6 +230,7 @@ import { Tooltip } from 'io-bricks-ui';
 import { Info } from '@phosphor-icons/react';
 import { Trans } from 'react-i18next';
 import { FormStepContainer } from '../../../components/FormStepContainer';
+import { TIME_PERIODS_S } from '../../../utils/constants';
 
 export const StepCoupon = () => {
   const { t } = useTranslation('security', { keyPrefix: 'createBond' });
@@ -309,6 +310,51 @@ export const StepCoupon = () => {
           options={CouponTypeOptions}
         />
       </Stack>
+
+      {/* Period field - Required for ALL coupon types */}
+      <Stack w="full">
+        <HStack justifySelf="flex-start">
+          <Text textStyle="BodyTextRegularSM">
+            {t('stepCoupon.couponPeriod')}*
+          </Text>
+          <Tooltip
+            label={t('stepCoupon.couponPeriodTooltip')}
+            placement="right"
+          >
+            <PhosphorIcon as={Info} />
+          </Tooltip>
+        </HStack>
+        <SelectController
+          control={control}
+          id="couponPeriod"
+          rules={{ required }}
+          placeholder={t('stepCoupon.couponPeriodPlaceHolder')}
+          size="md"
+          options={[
+            {
+              label: t('stepCoupon.couponPeriodOptions.day'),
+              value: TIME_PERIODS_S.DAY.toString(),
+            },
+            {
+              label: t('stepCoupon.couponPeriodOptions.week'),
+              value: TIME_PERIODS_S.WEEK.toString(),
+            },
+            {
+              label: t('stepCoupon.couponPeriodOptions.month'),
+              value: TIME_PERIODS_S.MONTH.toString(),
+            },
+            {
+              label: t('stepCoupon.couponPeriodOptions.quarter'),
+              value: TIME_PERIODS_S.QUARTER.toString(),
+            },
+            {
+              label: t('stepCoupon.couponPeriodOptions.year'),
+              value: TIME_PERIODS_S.YEAR.toString(),
+            },
+          ]}
+        />
+      </Stack>
+
       {couponType === 1 && (
         <>
           <Stack w="full">

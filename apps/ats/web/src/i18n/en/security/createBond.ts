@@ -291,6 +291,17 @@ export default {
     firstCouponDatePlaceHolder: 'Choose first coupon date',
     lastCouponDate: 'Last coupon date',
     totalCoupons: 'Total coupons',
+    couponPeriod: 'Coupon period',
+    couponPeriodTooltip:
+      'The period between coupon payments. Required for all coupon types.',
+    couponPeriodPlaceHolder: 'Select period',
+    couponPeriodOptions: {
+      day: '1 Day',
+      week: '1 Week',
+      month: '1 Month',
+      quarter: '3 Months',
+      year: '1 Year',
+    },
   },
 
   stepERC3643: {
