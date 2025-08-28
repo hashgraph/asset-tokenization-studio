@@ -262,6 +262,8 @@ import GetDividendHoldersRequest from '../request/equity/GetDividendHoldersReque
 import GetTotalDividendHoldersRequest from '../request/equity/GetTotalDividendHoldersRequest';
 import GetVotingHoldersRequest from '../request/equity/GetVotingHoldersRequest';
 import GetTotalVotingHoldersRequest from '../request/equity/GetTotalVotingHoldersRequest';
+import CreateTrexSuiteEquityRequest from '../request/equity/CreateTrexSuiteEquityRequest';
+import { CreateTrexSuiteEquityCommand } from '@command/equity/createTrexSuite/CreateTrexSuiteEquityCommand';
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{
     security: SecurityViewModel;
@@ -310,6 +312,11 @@ interface IEquityInPort {
   ): Promise<number>;
   getVotingHolders(request: GetVotingHoldersRequest): Promise<string[]>;
   getTotalVotingHolders(request: GetTotalVotingHoldersRequest): Promise<number>;
+
+  createTrexSuite(request: CreateTrexSuiteEquityRequest): Promise<{
+    security: SecurityViewModel;
+    transactionId: string;
+  }>;
 }
 
 class EquityInPort implements IEquityInPort {
@@ -320,6 +327,100 @@ class EquityInPort implements IEquityInPort {
       NetworkService,
     ),
   ) {}
+  @LogError
+  async createTrexSuite(req: CreateTrexSuiteEquityRequest): Promise<{
+    security: SecurityViewModel;
+    transactionId: string;
+  }> {
+    ValidatedRequest.handleValidation('CreateTrexSuiteEquityRequest', req);
+    const {
+      diamondOwnerAccount,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+    } = req;
+
+    const securityFactory = this.networkService.configuration.factoryAddress;
+    const resolver = this.networkService.configuration.resolverAddress;
+
+    const newSecurity: SecurityProps = {
+      name: req.name,
+      symbol: req.symbol,
+      isin: req.isin,
+      decimals: req.decimals,
+      isWhiteList: req.isWhiteList,
+      isControllable: req.isControllable,
+      arePartitionsProtected: req.arePartitionsProtected,
+      clearingActive: req.clearingActive,
+      internalKycActivated: req.internalKycActivated,
+      isMultiPartition: req.isMultiPartition,
+      maxSupply: BigDecimal.fromString(req.numberOfShares),
+      regulationType: CastRegulationType.fromNumber(req.regulationType),
+      regulationsubType: CastRegulationSubType.fromNumber(
+        req.regulationSubType,
+      ),
+      isCountryControlListWhiteList: req.isCountryControlListWhiteList,
+      countries: req.countries,
+      info: req.info,
+    };
+
+    const createResponse = await this.commandBus.execute(
+      new CreateTrexSuiteEquityCommand(
+        req.salt,
+        req.owner,
+        req.irs,
+        req.onchainId,
+        req.irAgents,
+        req.tokenAgents,
+        req.compliancesModules,
+        req.complianceSettings,
+        req.claimTopics,
+        req.issuers,
+        req.issuerClaims,
+        newSecurity,
+        req.votingRight,
+        req.informationRight,
+        req.liquidationRight,
+        req.subscriptionRight,
+        req.conversionRight,
+        req.redemptionRight,
+        req.putRight,
+        CastDividendType.fromNumber(req.dividendRight),
+        req.currency,
+        req.nominalValue,
+        new ContractId(securityFactory),
+        new ContractId(resolver),
+        req.configId,
+        req.configVersion,
+        diamondOwnerAccount,
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+        req.complianceId,
+        req.identityRegistryId,
+      ),
+    );
+
+    const securityCreated =
+      createResponse.securityId.toString() !== ContractId.NULL.toString();
+
+    const res = securityCreated
+      ? (
+          await this.queryBus.execute(
+            new GetSecurityQuery(createResponse.securityId.toString()),
+          )
+        ).security
+      : {};
+
+    return {
+      security: securityCreated
+        ? {
+            ...res,
+          }
+        : {},
+      transactionId: createResponse.transactionId,
+    };
+  }
 
   @LogError
   async create(
