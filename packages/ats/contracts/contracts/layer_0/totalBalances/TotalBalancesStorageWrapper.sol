@@ -222,11 +222,11 @@ abstract contract TotalBalancesStorageWrapper is SnapshotsStorageWrapper2 {
         // Use unchecked block since we're dealing with token balances that shouldn't overflow
         unchecked {
             totalBalance =
-                _balanceOf(tokenHolder) +
+                _balanceOfAdjustedAt(tokenHolder, timestamp) +
                 _getClearedAmountForAdjusted(tokenHolder) +
                 _getHeldAmountForAdjusted(tokenHolder) +
                 _getLockedAmountForAdjustedAt(tokenHolder, timestamp) +
-                _getFrozenAmountFor(tokenHolder);
+                _getFrozenAmountForAdjusted(tokenHolder);
         }
     }
 
