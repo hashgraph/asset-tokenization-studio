@@ -231,6 +231,8 @@ import {
     ControlList,
     ClearingActionsFacet,
     ProtectedPartitions,
+    FreezeFacet,
+    ClearingTransferFacet,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -256,6 +258,8 @@ import {
     CONTROL_LIST_ROLE,
     CLEARING_ROLE,
     PROTECTED_PARTITIONS_ROLE,
+    FREEZE_MANAGER_ROLE,
+    EMPTY_HEX_BYTES,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -311,6 +315,8 @@ describe('Bond Tests', () => {
     let controlListFacet: ControlList
     let clearingActionsFacet: ClearingActionsFacet
     let protectedPartitionsFacet: ProtectedPartitions
+    let freezeFacet: FreezeFacet
+    let clearingTransferFacet: ClearingTransferFacet
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
@@ -388,6 +394,16 @@ describe('Bond Tests', () => {
             diamond.address,
             signer_A
         )
+        freezeFacet = await ethers.getContractAt(
+            'FreezeFacet',
+            diamond.address,
+            signer_A
+        )
+        clearingTransferFacet = await ethers.getContractAt(
+            'ClearingTransferFacet',
+            diamond.address,
+            signer_A
+        )
         await kycFacet.grantKyc(
             account_A,
             EMPTY_VC_ID,
@@ -395,6 +411,7 @@ describe('Bond Tests', () => {
             MAX_UINT256,
             account_A
         )
+        await accessControlFacet.grantRole(FREEZE_MANAGER_ROLE, account_A)
     }
 
     async function deploySecurityFixtureSinglePartition() {
@@ -1055,6 +1072,96 @@ describe('Bond Tests', () => {
                     expect(couponTotalHolders).to.equal(0)
                     expect(couponHolders.length).to.equal(couponTotalHolders)
                 }
+            })
+
+            it.only('Given a coupon and account with normal, cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct', async () => {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    CORPORATE_ACTION_ROLE,
+                    account_C
+                )
+                await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+
+                // Using account C (with role)
+                bondFacet = bondFacet.connect(signer_C)
+                lockFacet = lockFacet.connect(signer_C)
+                erc1410Facet = erc1410Facet.connect(signer_C)
+
+                const totalAmount = numberOfUnits
+                const lockedAmount = totalAmount / 5
+                const heldAmount = totalAmount / 5
+                const frozenAmount = totalAmount / 5
+                const clearedAmount = totalAmount / 5
+
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: totalAmount,
+                    data: '0x',
+                })
+
+                const hold = {
+                    amount: heldAmount,
+                    expirationTimestamp: MAX_UINT256,
+                    escrow: account_B,
+                    to: ADDRESS_ZERO,
+                    data: '0x',
+                }
+
+                await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)
+                await lockFacet.lock(lockedAmount, account_A, MAX_UINT256)
+                await freezeFacet.freezePartialTokens(account_A, frozenAmount)
+                await clearingActionsFacet.activateClearing()
+
+                const clearingOperation = {
+                    partition: DEFAULT_PARTITION,
+                    expirationTimestamp: dateToUnixTimestamp(
+                        '2030-01-01T00:00:09Z'
+                    ),
+                    data: EMPTY_HEX_BYTES,
+                }
+
+                await clearingTransferFacet.clearingTransferByPartition(
+                    clearingOperation,
+                    clearedAmount,
+                    account_D
+                )
+
+                // set coupon
+                await expect(bondFacet.setCoupon(couponData))
+                    .to.emit(bondFacet, 'CouponSet')
+                    .withArgs(
+                        '0x0000000000000000000000000000000000000000000000000000000000000033',
+                        numberOfCoupons + 1,
+                        account_C,
+                        couponRecordDateInSeconds,
+                        couponExecutionDateInSeconds,
+                        couponRate
+                    )
+
+                // --- Pre: before record date -> tokenBalance should be 0 and not reached
+                const before = await bondFacet.getCouponFor(
+                    numberOfCoupons + 1,
+                    account_A
+                )
+                expect(before.recordDateReached).to.equal(false)
+                expect(before.tokenBalance).to.equal(0)
+
+                // Forward time to record date
+                await timeTravelFacet.changeSystemTimestamp(
+                    couponRecordDateInSeconds + 1
+                )
+                await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
+
+                // --- Post: after record date -> tokenBalance should be sum of balances
+                const couponFor = await bondFacet.getCouponFor(
+                    numberOfCoupons + 1,
+                    account_A
+                )
+                expect(couponFor.recordDateReached).to.equal(true)
+                expect(couponFor.tokenBalance).to.equal(totalAmount) // normal+cleared+held+locked+frozen
             })
         })
     })

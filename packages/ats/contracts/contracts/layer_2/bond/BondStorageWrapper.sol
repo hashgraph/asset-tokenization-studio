@@ -336,23 +336,11 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
             couponFor_.recordDateReached = true;
 
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? (_balanceOfAtSnapshot(registeredCoupon.snapshotId, _account) +
-                    _lockedBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    ) +
-                    _heldBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    )) +
-                    _clearedBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    )
-                : (_balanceOf(_account) +
-                    _getLockedAmountFor(_account) +
-                    _getHeldAmountFor(_account)) +
-                    _getClearedAmountFor(_account);
+                ? _getTotalBalanceOfAtSnapshot(
+                    registeredCoupon.snapshotId,
+                    _account
+                )
+                : _getTotalBalance(_account);
 
             couponFor_.decimals = _decimalsAdjusted();
         }

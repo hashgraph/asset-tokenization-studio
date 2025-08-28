@@ -205,17 +205,21 @@
 
 pragma solidity 0.8.18;
 
-import {_DEFAULT_PARTITION} from '../constants/values.sol';
-import {
-    SnapshotsStorageWrapper2
-} from '../snapshots/SnapshotsStorageWrapper2.sol';
 import {
     IERC3643Basic
 } from '../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
+import {
+    IERC3643StorageWrapper
+} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
+import {ERC20StorageWrapper1} from '../ERC1400/ERC20/ERC20StorageWrapper1.sol';
+import {_DEFAULT_PARTITION} from '../constants/values.sol';
+import {
+    TotalBalancesStorageWrapper
+} from '../totalBalances/TotalBalancesStorageWrapper.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
+abstract contract ERC3643StorageWrapper2 is TotalBalancesStorageWrapper {
     modifier onlyEmptyWallet(address _tokenHolder) {
         if (!_canRecover(_tokenHolder))
             revert IERC3643Basic.CannotRecoverWallet();
