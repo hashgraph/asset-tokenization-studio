@@ -279,6 +279,9 @@ export enum ErrorCode {
   InvalidKycStatus = '20041',
   WalletRecovered = '20042',
   AddressNotVerified = '20043',
+  CouponPeriodTooSmall = '20044',
+  CouponPeriodTooLarge = '20045',
+  CouponPeriodExceedsMaturity = '20046',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',
