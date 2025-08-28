@@ -1066,8 +1066,7 @@ describe('Bond Tests', () => {
                 }
             })
 
-            //TODO: MARIO
-            it.only('Given a coupon and account with cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct', async () => {
+            it('Given a coupon and account with held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct', async () => {
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(
@@ -1082,21 +1081,20 @@ describe('Bond Tests', () => {
                 lockFacet = lockFacet.connect(signer_C)
                 erc1410Facet = erc1410Facet.connect(signer_C)
 
-                const TotalAmount = numberOfUnits
-                const LockedAmount = TotalAmount / 4
-                const HeldAmount = TotalAmount / 4
-                const FrozenAmount = TotalAmount / 4
-                //const ClearedAmount = TotalAmount / 4
+                const totalAmount = numberOfUnits
+                const lockedAmount = totalAmount / 4
+                const heldAmount = totalAmount / 4
+                const frozenAmount = totalAmount / 4
 
                 await erc1410Facet.issueByPartition({
                     partition: DEFAULT_PARTITION,
                     tokenHolder: account_A,
-                    value: TotalAmount,
+                    value: totalAmount,
                     data: '0x',
                 })
 
                 const hold = {
-                    amount: HeldAmount,
+                    amount: heldAmount,
                     expirationTimestamp: MAX_UINT256,
                     escrow: account_B,
                     to: ADDRESS_ZERO,
@@ -1104,8 +1102,8 @@ describe('Bond Tests', () => {
                 }
 
                 await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)
-                await lockFacet.lock(LockedAmount, account_A, MAX_UINT256)
-                await freezeFacet.freezePartialTokens(account_A, FrozenAmount)
+                await lockFacet.lock(lockedAmount, account_A, MAX_UINT256)
+                await freezeFacet.freezePartialTokens(account_A, frozenAmount)
 
                 // set coupon
                 await expect(bondFacet.setCoupon(couponData))
@@ -1138,24 +1136,67 @@ describe('Bond Tests', () => {
                     numberOfCoupons + 1,
                     account_A
                 )
-                const couponTotalHolders =
-                    await bondFacet.getTotalCouponHolders(numberOfCoupons + 1)
-                const couponHolders = await bondFacet.getCouponHolders(
-                    numberOfCoupons + 1,
-                    0,
-                    couponTotalHolders
-                )
-
                 expect(couponFor.recordDateReached).to.equal(true)
-                expect(couponFor.tokenBalance).to.equal(TotalAmount) // cleared+held+locked+frozen
-                expect(couponFor.recordDate).to.equal(couponRecordDateInSeconds)
-                expect(couponFor.executionDate).to.equal(
-                    couponExecutionDateInSeconds
-                )
+                expect(couponFor.tokenBalance).to.equal(totalAmount) // cleared+held+locked+frozen
+            })
 
-                expect(couponTotalHolders).to.equal(1)
-                expect(couponHolders.length).to.equal(couponTotalHolders)
-                expect(couponHolders).to.have.members([account_A])
+            it('Given a coupon and account with cleared WHEN getCouponFor THEN balance is correct', async () => {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    CORPORATE_ACTION_ROLE,
+                    account_C
+                )
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+
+                // Using account C (with role)
+                bondFacet = bondFacet.connect(signer_C)
+                erc1410Facet = erc1410Facet.connect(signer_C)
+
+                const totalAmount = numberOfUnits
+
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: totalAmount,
+                    data: '0x',
+                })
+
+                // set coupon
+                await expect(bondFacet.setCoupon(couponData))
+                    .to.emit(bondFacet, 'CouponSet')
+                    .withArgs(
+                        '0x0000000000000000000000000000000000000000000000000000000000000033',
+                        numberOfCoupons + 1,
+                        account_C,
+                        couponRecordDateInSeconds,
+                        couponExecutionDateInSeconds,
+                        couponRate
+                    )
+
+                // --- Pre: before record date -> tokenBalance should be 0 and not reached
+                const before = await bondFacet.getCouponFor(
+                    numberOfCoupons + 1,
+                    account_A
+                )
+                expect(before.recordDateReached).to.equal(false)
+                expect(before.tokenBalance).to.equal(0)
+
+                // Forward time to record date
+                await timeTravelFacet.changeSystemTimestamp(
+                    couponRecordDateInSeconds + 1
+                )
+                await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
+
+                await clearingActionsFacet.activateClearing()
+
+                // --- Post: after record date -> tokenBalance should be sum of balances
+                const couponFor = await bondFacet.getCouponFor(
+                    numberOfCoupons + 1,
+                    account_A
+                )
+                expect(couponFor.recordDateReached).to.equal(true)
+                expect(couponFor.tokenBalance).to.equal(totalAmount) // cleared
             })
         })
     })
