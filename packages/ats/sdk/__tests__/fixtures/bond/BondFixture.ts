@@ -260,6 +260,9 @@ export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
     command.rate.faker((faker) =>
       faker.number.int({ min: 100, max: 999 }).toString(),
     );
+    command.period.faker((faker) =>
+      faker.number.int({ min: 86400, max: 31536000 }).toString(),
+    );
   },
 );
 
