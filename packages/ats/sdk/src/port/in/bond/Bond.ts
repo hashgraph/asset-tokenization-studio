@@ -386,7 +386,8 @@ class BondInPort implements IBondInPort {
   async setCoupon(
     request: SetCouponRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    const { rate, recordTimestamp, executionTimestamp, securityId } = request;
+    const { rate, recordTimestamp, executionTimestamp, securityId, period } =
+      request;
     ValidatedRequest.handleValidation('SetCouponRequest', request);
 
     return await this.commandBus.execute(
@@ -395,6 +396,7 @@ class BondInPort implements IBondInPort {
         recordTimestamp,
         executionTimestamp,
         rate,
+        period,
       ),
     );
   }
@@ -451,6 +453,7 @@ class BondInPort implements IBondInPort {
       recordDate: new Date(res.coupon.recordTimeStamp * ONE_THOUSAND),
       executionDate: new Date(res.coupon.executionTimeStamp * ONE_THOUSAND),
       rate: res.coupon.rate.toString(),
+      period: res.coupon.period,
     };
 
     return coupon;
