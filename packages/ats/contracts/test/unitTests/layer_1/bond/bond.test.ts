@@ -233,6 +233,8 @@ import {
     ClearingActionsFacet,
     ProtectedPartitions,
     BondUSAFacetTimeTravel__factory,
+    IBondStorageWrapper__factory,
+    IBondStorageWrapper,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -258,6 +260,7 @@ import {
     CONTROL_LIST_ROLE,
     CLEARING_ROLE,
     PROTECTED_PARTITIONS_ROLE,
+    TIME_PERIODS_S,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -265,7 +268,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 const numberOfUnits = 1000
 let startingDate = 0
 const numberOfCoupons = 50
-const frequency = 7
+const frequency = TIME_PERIODS_S.DAY
 const rate = 1
 let maturityDate = 0
 let firstCouponDate = 0
@@ -279,7 +282,7 @@ const _PARTITION_ID =
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
-const couponPeriod = 7 * 24 * 60 * 60 // 7 days in seconds
+const couponPeriod = TIME_PERIODS_S.WEEK
 const EMPTY_VC_ID = EMPTY_STRING
 
 let couponData = {
@@ -307,6 +310,7 @@ describe('Bond Tests', () => {
     let bondReadFacet: BondUSARead
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
+    let bondStorageWrapper: IBondStorageWrapper
     let lockFacet: Lock
     let holdFacet: IHold
     let erc1410Facet: IERC1410
@@ -371,6 +375,10 @@ describe('Bond Tests', () => {
             signer_A
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        bondStorageWrapper = IBondStorageWrapper__factory.connect(
+            diamond.address,
+            signer_A
+        )
         lockFacet = Lock__factory.connect(diamond.address, signer_A)
         holdFacet = IHold__factory.connect(diamond.address, signer_A)
         erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
@@ -475,6 +483,7 @@ describe('Bond Tests', () => {
             recordDate: couponRecordDateInSeconds.toString(),
             executionDate: couponExecutionDateInSeconds.toString(),
             rate: couponRate,
+            period: couponPeriod,
         }
         await loadFixture(deploySecurityFixtureSinglePartition)
     })
@@ -1329,19 +1338,35 @@ describe('Bond Tests', () => {
                     adminAccount: account_A,
                     isWhiteList: false,
                     isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
                     isMultiPartition: false,
-                    nominalValue: numberOfUnits,
+                    name: 'TEST_ZeroFreq',
+                    symbol: 'TZF',
+                    decimals: 6,
+                    isin: isinGenerator(),
+                    currency: '0x455552',
+                    numberOfUnits: numberOfUnits,
+                    nominalValue: 100,
                     startingDate: startingDate,
                     maturityDate: maturityDate,
                     couponFrequency: 0, // Invalid: zero frequency
                     couponRate: rate,
                     firstCouponDate: firstCouponDate,
-                    regulationType: RegulationType.REG_S,
-                    regulationSubType: RegulationSubType.MINIMAL,
+                    regulationType: RegulationType.REG_D,
+                    regulationSubType: RegulationSubType.REG_D_506_B,
+                    countriesControlListType: countriesControlListType,
+                    listOfCountries: listOfCountries,
+                    info: info,
                     init_rbacs: init_rbacs,
-                    addAdmin: false,
+                    factory: factory,
+                    businessLogicResolver: businessLogicResolver.address,
                 })
-            ).to.be.revertedWithCustomError(diamond, 'CouponFrequencyWrong')
+            ).to.be.revertedWithCustomError(
+                bondStorageWrapper,
+                'CouponFrequencyWrong'
+            )
         })
 
         it('GIVEN bond deployment with couponFrequency below minimum WHEN deployBondFromFactory THEN deployment fails with CouponPeriodTooSmall', async () => {
@@ -1352,19 +1377,35 @@ describe('Bond Tests', () => {
                     adminAccount: account_A,
                     isWhiteList: false,
                     isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
                     isMultiPartition: false,
-                    nominalValue: numberOfUnits,
+                    name: 'TEST_TooSmall',
+                    symbol: 'TTS',
+                    decimals: 6,
+                    isin: isinGenerator(),
+                    currency: '0x455552',
+                    numberOfUnits: numberOfUnits,
+                    nominalValue: 100,
                     startingDate: startingDate,
                     maturityDate: maturityDate,
-                    couponFrequency: 12 * 60 * 60, // Invalid: 12 hours, below 1 day minimum
+                    couponFrequency: 12 * TIME_PERIODS_S.HOUR, // Invalid: 12 hours, below 1 day minimum
                     couponRate: rate,
                     firstCouponDate: firstCouponDate,
-                    regulationType: RegulationType.REG_S,
-                    regulationSubType: RegulationSubType.MINIMAL,
+                    regulationType: RegulationType.REG_D,
+                    regulationSubType: RegulationSubType.REG_D_506_B,
+                    countriesControlListType: countriesControlListType,
+                    listOfCountries: listOfCountries,
+                    info: info,
                     init_rbacs: init_rbacs,
-                    addAdmin: false,
+                    factory: factory,
+                    businessLogicResolver: businessLogicResolver.address,
                 })
-            ).to.be.revertedWithCustomError(diamond, 'CouponPeriodTooSmall')
+            ).to.be.revertedWithCustomError(
+                bondStorageWrapper,
+                'CouponPeriodTooSmall'
+            )
         })
 
         it('GIVEN bond deployment with couponFrequency above maximum WHEN deployBondFromFactory THEN deployment fails with CouponPeriodTooLarge', async () => {
@@ -1375,19 +1416,35 @@ describe('Bond Tests', () => {
                     adminAccount: account_A,
                     isWhiteList: false,
                     isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
                     isMultiPartition: false,
-                    nominalValue: numberOfUnits,
+                    name: 'TEST_TooLarge',
+                    symbol: 'TTL',
+                    decimals: 6,
+                    isin: isinGenerator(),
+                    currency: '0x455552',
+                    numberOfUnits: numberOfUnits,
+                    nominalValue: 100,
                     startingDate: startingDate,
                     maturityDate: maturityDate,
-                    couponFrequency: 15 * 365 * 24 * 60 * 60, // Invalid: 15 years, above 10 year maximum
+                    couponFrequency: 15 * TIME_PERIODS_S.YEAR, // Invalid: 15 years, above 10 year maximum
                     couponRate: rate,
                     firstCouponDate: firstCouponDate,
-                    regulationType: RegulationType.REG_S,
-                    regulationSubType: RegulationSubType.MINIMAL,
+                    regulationType: RegulationType.REG_D,
+                    regulationSubType: RegulationSubType.REG_D_506_B,
+                    countriesControlListType: countriesControlListType,
+                    listOfCountries: listOfCountries,
+                    info: info,
                     init_rbacs: init_rbacs,
-                    addAdmin: false,
+                    factory: factory,
+                    businessLogicResolver: businessLogicResolver.address,
                 })
-            ).to.be.revertedWithCustomError(diamond, 'CouponPeriodTooLarge')
+            ).to.be.revertedWithCustomError(
+                bondStorageWrapper,
+                'CouponPeriodTooLarge'
+            )
         })
     })
 })
