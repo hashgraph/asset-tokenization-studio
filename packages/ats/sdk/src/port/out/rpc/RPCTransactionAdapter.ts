@@ -221,6 +221,7 @@ import { MirrorNodes } from '@domain/context/network/MirrorNode';
 import { JsonRpcRelays } from '@domain/context/network/JsonRpcRelay';
 import { Factories } from '@domain/context/factory/Factories';
 import BigDecimal from '@domain/context/shared/BigDecimal';
+import { ContractId } from '@hashgraph/sdk';
 import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter';
 import {
   _PARTITION_ID_1,
@@ -845,17 +846,21 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    period: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `bond: ${security} ,
       recordDate :${recordDate} , 
       executionDate: ${executionDate},
-      rate : ${rate}  `,
+      rate : ${rate},
+      period: ${period}`,
     );
     const couponStruct: IBondRead.CouponStruct = {
       recordDate: recordDate.toBigNumber(),
       executionDate: executionDate.toBigNumber(),
       rate: rate.toBigNumber(),
+      period: period.toBigNumber(),
     };
 
     return this.executeTransaction(
