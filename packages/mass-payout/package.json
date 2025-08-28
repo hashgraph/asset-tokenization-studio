@@ -10,5 +10,9 @@
     "dev": "echo 'Mass payout dev - placeholder'"
   },
   "keywords": ["hedera", "mass-payout", "placeholder"],
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
 }
