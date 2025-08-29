@@ -1,32 +1,8 @@
-# Logs
-logs
-*.log
-npm-debug.log*
+# TypeScript Build Output
+build/
 
-# Dependencies
-node_modules/
-
-# Coverage
-coverage
-
-# Transpiled files
-build
-
-# VS Code
-.vscode
-!.vscode/tasks.js
-
-# JetBrains IDEs
-.idea/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Misc
-.DS_Store
-
+# SDK-Specific Reports
 report.json
-.env
+
+# SDK-Specific VSCode Tasks
+!.vscode/tasks.js

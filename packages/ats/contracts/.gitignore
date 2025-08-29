@@ -1,47 +1,26 @@
-# Transpiled files
-build
-
-# VS Code
-.vscode
-!.vscode/tasks.js
-
-# JetBrains IDEs
-.idea/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Misc
-.DS_Store
-
-# Old files
-.old
-
-# history
-.history
-
-node_modules
-.env
-coverage
-coverage.json
+# Hardhat/Solidity Specific
+artifacts/
+cache/
+typechain/
+typechain-types/
 gas-report.txt
+coverage.json
 extracted-methods.txt
 
-#Hardhat files
-cache
-artifacts
+# Slither Analysis
+Slither/
 
+# Build Artifacts
+build/
 .deps/
 ./docs/*
 ./cache/*
 ./typechain-types/*
-typechain
-typechain-types
 
-#Slither
-Slither/*
+# Legacy/Old Files
+.old
+
+# Contract-Specific VSCode Tasks
+!.vscode/tasks.js
 
 
