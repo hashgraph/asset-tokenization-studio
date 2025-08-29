@@ -814,12 +814,12 @@ describe('Bond Tests', () => {
                 // Using account C (with role)
                 bondFacet = bondFacet.connect(signer_C)
 
-                // Create coupon with period above maximum (more than 10 years)
+                // Create coupon with period above maximum (more than 100 years)
                 const tooLargePeriodCouponData = {
                     recordDate: couponRecordDateInSeconds.toString(),
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
-                    period: 11 * 365 * 24 * 60 * 60, // 11 years, above 10 year maximum
+                    period: 101 * 365 * 24 * 60 * 60, // 101 years, above 100 year maximum
                 }
 
                 await expect(
@@ -1429,7 +1429,7 @@ describe('Bond Tests', () => {
                     nominalValue: 100,
                     startingDate: startingDate,
                     maturityDate: maturityDate,
-                    couponFrequency: 15 * TIME_PERIODS_S.YEAR, // Invalid: 15 years, above 10 year maximum
+                    couponFrequency: 101 * TIME_PERIODS_S.YEAR, // Invalid: 101 years, above 100 year maximum
                     couponRate: rate,
                     firstCouponDate: firstCouponDate,
                     regulationType: RegulationType.REG_D,

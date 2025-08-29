@@ -343,7 +343,7 @@ export const validateCouponPeriod = (
     return 'Period must be at least 1 day';
   }
   if (periodInSeconds > MAX_COUPON_PERIOD_SECONDS) {
-    return 'Period cannot exceed 10 years';
+    return 'Period cannot exceed 100 years';
   }
   if (maturityDate) {
     const timeToMaturity = Math.floor(
