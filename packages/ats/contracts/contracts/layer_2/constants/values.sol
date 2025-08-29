@@ -211,7 +211,7 @@ uint256 constant MAX_UINT256 = 0xfffffffffffffffffffffffffffffffffffffffffffffff
 uint256 constant SNAPSHOT_RESULT_ID = 0;
 
 uint256 constant MIN_COUPON_PERIOD = 1 days;
-uint256 constant MAX_COUPON_PERIOD = 10 * 365 days; // 10 years
+uint256 constant MAX_COUPON_PERIOD = 100 * 365 days; // 100 years
 
 // solhint-disable max-line-length
 // keccak256('security.token.standard.dividend.corporateAction');
