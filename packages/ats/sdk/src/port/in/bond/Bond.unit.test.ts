@@ -771,6 +771,7 @@ describe('Bond', () => {
           setCouponRequest.recordTimestamp,
           setCouponRequest.executionTimestamp,
           setCouponRequest.rate,
+          setCouponRequest.period,
         ),
       );
 
@@ -796,6 +797,7 @@ describe('Bond', () => {
           setCouponRequest.recordTimestamp,
           setCouponRequest.executionTimestamp,
           setCouponRequest.rate,
+          setCouponRequest.period,
         ),
       );
     });

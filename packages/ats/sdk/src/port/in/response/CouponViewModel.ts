@@ -210,5 +210,6 @@ export default interface CouponViewModel extends QueryResponse {
   recordDate: Date;
   executionDate: Date;
   rate: string;
+  period: number;
   snapshotId?: number;
 }

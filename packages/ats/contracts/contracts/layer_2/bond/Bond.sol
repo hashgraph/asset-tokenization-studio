@@ -257,6 +257,7 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         onlyRole(_CORPORATE_ACTION_ROLE)
         validateDates(_newCoupon.recordDate, _newCoupon.executionDate)
         onlyValidTimestamp(_newCoupon.recordDate)
+        onlyValidPeriod(_newCoupon.period)
         returns (bool success_, uint256 couponID_)
     {
         bytes32 corporateActionID;
@@ -267,7 +268,8 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
             _msgSender(),
             _newCoupon.recordDate,
             _newCoupon.executionDate,
-            _newCoupon.rate
+            _newCoupon.rate,
+            _newCoupon.period
         );
     }
 

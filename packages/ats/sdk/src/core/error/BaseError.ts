@@ -273,6 +273,9 @@ export enum ErrorCode {
   NotIssuable = '20035',
   InvalidSupply = '20036',
   AddressRecovered = '20037',
+  CouponPeriodTooSmall = '20038',
+  CouponPeriodTooLarge = '20039',
+  CouponPeriodExceedsMaturity = '20040',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',

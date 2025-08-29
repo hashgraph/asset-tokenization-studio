@@ -223,6 +223,7 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    TIME_PERIODS_S,
 } from '@scripts'
 
 const countriesControlListType = true
@@ -235,7 +236,7 @@ const numberOfUnits = 1000
 let currentTimeInSeconds = 0
 let startingDate = 0
 const numberOfCoupons = 50
-const frequency = 7
+const frequency = TIME_PERIODS_S.DAY
 const rate = 1
 let maturityDate = startingDate + numberOfCoupons * frequency
 let firstCouponDate = startingDate + 1

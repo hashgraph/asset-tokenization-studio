@@ -207,7 +207,11 @@
 pragma solidity 0.8.18;
 
 import {_BOND_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
+import {
+    COUPON_CORPORATE_ACTION_TYPE,
+    MIN_COUPON_PERIOD,
+    MAX_COUPON_PERIOD
+} from '../constants/values.sol';
 import {IBond} from '../interfaces/bond/IBond.sol';
 import {Common} from '../../layer_1/common/Common.sol';
 import {IBondStorageWrapper} from '../interfaces/bond/IBondStorageWrapper.sol';
@@ -235,6 +239,19 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         _;
     }
 
+    /**
+     * @dev Modifier to validate that coupon period is within acceptable bounds.
+     * @param _period The period to validate.
+     * Reverts with specific errors if period is too small, too large, or exceeds bond maturity.
+     */
+    modifier onlyValidPeriod(uint256 _period) {
+        if (_period < MIN_COUPON_PERIOD) revert CouponPeriodTooSmall();
+        if (_period > MAX_COUPON_PERIOD) revert CouponPeriodTooLarge();
+        if (_period > (_getMaturityDate() - _blockTimestamp()))
+            revert CouponPeriodExceedsMaturity();
+        _;
+    }
+
     function _storeBondDetails(
         IBond.BondDetailsData memory _bondDetails
     ) internal {
@@ -253,6 +270,10 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
             _couponDetails.firstCouponDate > _maturityDate
         ) revert CouponFirstDateWrong();
         if (_couponDetails.couponFrequency == 0) revert CouponFrequencyWrong();
+        if (_couponDetails.couponFrequency < MIN_COUPON_PERIOD)
+            revert CouponPeriodTooSmall();
+        if (_couponDetails.couponFrequency > MAX_COUPON_PERIOD)
+            revert CouponPeriodTooLarge();
 
         _setFixedCoupons(
             _couponDetails.firstCouponDate,
@@ -331,6 +352,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         couponFor_.rate = registeredCoupon.coupon.rate;
         couponFor_.recordDate = registeredCoupon.coupon.recordDate;
         couponFor_.executionDate = registeredCoupon.coupon.executionDate;
+        couponFor_.period = registeredCoupon.coupon.period;
 
         if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
             couponFor_.recordDateReached = true;
@@ -424,6 +446,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
             _newCoupon.recordDate = runDate;
             _newCoupon.executionDate = runDate;
             _newCoupon.rate = _rate;
+            _newCoupon.period = _couponFrequency;
 
             (success, , ) = _setCoupon(_newCoupon);
 
