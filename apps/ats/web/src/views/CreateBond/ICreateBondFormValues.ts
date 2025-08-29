@@ -224,7 +224,6 @@ export interface ICreateBondFormValues {
   firstCouponDate: string;
   lastCouponDate: string;
   totalCoupons: number;
-  couponPeriod: string;
   regulationType: number;
   regulationSubType: number;
   countriesListType: number;
