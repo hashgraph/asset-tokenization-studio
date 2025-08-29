@@ -14,7 +14,11 @@
     "clean:lock": "npx --yes rimraf package-lock.json yarn.lock",
     "test:update": "NODE_ENV=test jest --updateSnapshot",
     "test:clear:cache": "npx jest --clearCache",
-    "theme": "chakra-cli tokens src/theme/index.ts"
+    "theme": "chakra-cli tokens src/theme/index.ts",
+    "lint": "eslint '**/*.{js,jsx,mjs,cjs,ts,tsx,mts}' --cache",
+    "lint:fix": "eslint '**/*.{js,jsx,mjs,cjs,ts,tsx,mts}' --fix --cache && npm run format",
+    "format": "prettier --write '**/*.{js,jsx,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
+    "format:check": "prettier --check '**/*.{js,jsx,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.21.4",

@@ -7,7 +7,11 @@
   "scripts": {
     "build": "echo 'Mass payout build - placeholder'",
     "test": "echo 'Mass payout tests - placeholder'",
-    "dev": "echo 'Mass payout dev - placeholder'"
+    "dev": "echo 'Mass payout dev - placeholder'",
+    "lint": "eslint '**/*.{js,mjs,cjs,ts,tsx,mts}' --cache",
+    "lint:fix": "eslint '**/*.{js,mjs,cjs,ts,tsx,mts}' --fix --cache && npm run format",
+    "format": "prettier --write '**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
+    "format:check": "prettier --check '**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache"
   },
   "keywords": ["hedera", "mass-payout", "placeholder"],
   "license": "Apache-2.0"
