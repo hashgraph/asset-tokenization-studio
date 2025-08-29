@@ -230,20 +230,18 @@ export default {
       },
     },
     tsconfigPaths(),
-    {
-      name: 'fix-node-globals-polyfill',
-      setup(build) {
-        build.onResolve({ filter: /util\.js/ }, ({ path }) => ({ path }));
-      },
-    },
   ],
+  define: {
+    global: 'globalThis',
+  },
   resolve: {
     alias: {
-      // This Rollup aliases are extracted from @esbuild-plugins/node-modules-polyfill,
-      // see https://github.com/remorses/esbuild-plugins/blob/master/node-modules-polyfill/src/polyfills.ts
-      // process and buffer are excluded because already managed
-      // by node-globals-polyfill
-      util: 'util',
+      // Winston and logging related modules - provide mock implementations for browser
+      winston: './src/winston-mock.js',
+      'winston-daily-rotate-file': './src/winston-daily-rotate-file-mock.js',
+      'winston-transport': './src/winston-mock.js',
+      // Node.js modules
+      util: 'rollup-plugin-node-polyfills/polyfills/util',
       sys: 'util',
       events: 'rollup-plugin-node-polyfills/polyfills/events',
       stream: 'rollup-plugin-node-polyfills/polyfills/stream',
@@ -251,8 +249,7 @@ export default {
       querystring: 'rollup-plugin-node-polyfills/polyfills/qs',
       punycode: 'rollup-plugin-node-polyfills/polyfills/punycode',
       url: 'rollup-plugin-node-polyfills/polyfills/url',
-      string_decoder:
-        'rollup-plugin-node-polyfills/polyfills/string-decoder.js',
+      string_decoder: 'rollup-plugin-node-polyfills/polyfills/string-decoder',
       http: 'rollup-plugin-node-polyfills/polyfills/http',
       https: 'rollup-plugin-node-polyfills/polyfills/http',
       os: 'rollup-plugin-node-polyfills/polyfills/os',
@@ -276,11 +273,6 @@ export default {
       domain: 'rollup-plugin-node-polyfills/polyfills/domain',
       buffer: 'rollup-plugin-node-polyfills/polyfills/buffer-es6',
       process: 'rollup-plugin-node-polyfills/polyfills/process-es6',
-      // Winston and logging related modules - provide mock implementations for browser
-      winston: '/src/winston-mock.js',
-      'winston-daily-rotate-file':
-        'rollup-plugin-node-polyfills/polyfills/empty.js',
-      'winston-transport': 'rollup-plugin-node-polyfills/polyfills/empty.js',
     },
     dedupe: ['@emotion/react'],
   },
@@ -289,10 +281,8 @@ export default {
       '@hashgraph/asset-tokenization-contracts',
       '@hashgraph/asset-tokenization-sdk',
     ],
-    exclude: ['winston', 'winston-daily-rotate-file', 'winston-transport'],
+    exclude: [],
     esbuildOptions: {
-      /********* New line inserted ***********/
-      // inject: ['./vite-polyfills/setImmediate.js'],
       // Node.js global to browser globalThis
       define: {
         global: 'globalThis',
@@ -309,14 +299,15 @@ export default {
   },
   build: {
     rollupOptions: {
-      external: ['winston', 'winston-daily-rotate-file', 'winston-transport'],
       plugins: [
-        // Enable rollup polyfills plugin
-        // used during production bundling
-        rollupNodePolyFill(),
-        // Handle CommonJS modules
+        // Handle CommonJS modules FIRST
         commonjs({
           include: ['**/node_modules/**', '**/packages/ats/contracts/**'],
+          transformMixedEsModules: true,
+        }),
+        // Enable rollup polyfills plugin AFTER commonjs
+        rollupNodePolyFill({
+          include: ['events', 'stream', 'util', 'path', 'buffer', 'process'],
         }),
       ],
     },

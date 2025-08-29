@@ -28,10 +28,7 @@ export const transports = {
   File: class {
     constructor() {}
   },
-};
-
-export default {
-  createLogger,
-  format,
-  transports,
+  DailyRotateFile: class {
+    constructor() {}
+  },
 };
