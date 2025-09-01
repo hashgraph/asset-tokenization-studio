@@ -330,6 +330,7 @@ describe('🧪 SSI Management tests', () => {
         isin,
         decimals,
         isWhiteList: false,
+        erc20VotesActivated: false,
         isControllable: true,
         arePartitionsProtected: false,
         clearingActive: false,

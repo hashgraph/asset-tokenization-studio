@@ -210,7 +210,7 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type EquityUSA,
-    type BondUSA,
+    type BondUSARead,
     BusinessLogicResolver,
     IFactory,
 } from '@typechain'
@@ -250,7 +250,7 @@ describe('Security USA Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let equityUSAFacet: EquityUSA
-    let bondUSAFacet: BondUSA
+    let bondUSAFacet: BondUSARead
 
     before(async () => {
         // mute | mock console.log
@@ -543,7 +543,7 @@ describe('Security USA Tests', () => {
             })
 
             bondUSAFacet = await ethers.getContractAt(
-                'BondUSA',
+                'BondUSARead',
                 diamond.address
             )
             // Using account C (non role)
@@ -616,7 +616,7 @@ describe('Security USA Tests', () => {
             })
 
             bondUSAFacet = await ethers.getContractAt(
-                'BondUSA',
+                'BondUSARead',
                 diamond.address
             )
             // Using account C (non role)
@@ -689,7 +689,7 @@ describe('Security USA Tests', () => {
             })
 
             bondUSAFacet = await ethers.getContractAt(
-                'BondUSA',
+                'BondUSARead',
                 diamond.address
             )
             // Using account C (non role)
