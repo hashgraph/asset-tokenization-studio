@@ -32,7 +32,7 @@
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.3",
-    "babel-jest": "^29.5.0",
+    "babel-jest": "^30.1.2",
     "babel-plugin-transform-vite-meta-env": "^1.0.3",
     "date-fns-tz": "^2.0.0",
     "dotenv": "^16.0.3",
