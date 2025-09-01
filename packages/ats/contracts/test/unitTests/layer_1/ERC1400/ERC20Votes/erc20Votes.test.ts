@@ -209,23 +209,16 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type ERC20,
     type IERC1410,
     type Pause,
-    type ControlList,
-    type ERC1594,
     BusinessLogicResolver,
     IFactory,
-    Kyc,
-    SsiManagement,
-    ClearingActionsFacet,
     AdjustBalances,
     TimeTravel,
     ERC20Votes,
     EquityUSA,
 } from '@typechain'
 import {
-    CONTROL_LIST_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
     DEFAULT_PARTITION,
@@ -234,18 +227,11 @@ import {
     Rbac,
     RegulationSubType,
     RegulationType,
-    SecurityType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-    KYC_ROLE,
-    SSI_MANAGER_ROLE,
-    ZERO,
-    EMPTY_STRING,
-    CLEARING_ROLE,
     ADJUSTMENT_BALANCE_ROLE,
     CORPORATE_ACTION_ROLE,
 } from '@scripts'
-import { assertObject } from '../../../../common'
 
 const amount = 1000
 
@@ -255,13 +241,11 @@ describe('ERC20Votes Tests', () => {
     let signer_B: SignerWithAddress
     let signer_C: SignerWithAddress
     let signer_D: SignerWithAddress
-    let signer_E: SignerWithAddress
 
     let account_A: string
     let account_B: string
     let account_C: string
     let account_D: string
-    let account_E: string
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
@@ -276,7 +260,6 @@ describe('ERC20Votes Tests', () => {
     const symbol = 'TAC'
     const decimals = 6
     const isin = isinGenerator()
-    const EMPTY_VC_ID = EMPTY_STRING
     const ABAF = 200
     const DECIMALS = 2
     const block = 100
@@ -304,13 +287,11 @@ describe('ERC20Votes Tests', () => {
     before(async () => {
         // mute | mock console.log
         console.log = () => {}
-        ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
-            await ethers.getSigners()
+        ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
         account_D = signer_D.address
-        account_E = signer_E.address
 
         const { ...deployedContracts } = await deployAtsFullInfrastructure(
             await DeployAtsFullInfrastructureCommand.newInstance({
@@ -595,9 +576,6 @@ describe('ERC20Votes Tests', () => {
         })
 
         it('GIVEN current time WHEN getPastVotes with future timepoint THEN reverts', async () => {
-            const currentBlock = await erc20VotesFacet.clock()
-            const futureTimepoint = currentBlock + 100
-
             await expect(
                 erc20VotesFacet.getPastVotes(account_A, 100)
             ).to.be.revertedWith('ERC20Votes: future lookup')

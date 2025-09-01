@@ -410,8 +410,8 @@ describe('Equity', () => {
           createEquityRequest.externalPauses,
           createEquityRequest.externalControlLists,
           createEquityRequest.externalKycLists,
-          createEquityRequest.compliance,
-          createEquityRequest.identityRegistry,
+          createEquityRequest.complianceId,
+          createEquityRequest.identityRegistryId,
         ),
       );
 
@@ -481,8 +481,8 @@ describe('Equity', () => {
           createEquityRequest.externalPauses,
           createEquityRequest.externalControlLists,
           createEquityRequest.externalKycLists,
-          createEquityRequest.compliance,
-          createEquityRequest.identityRegistry,
+          createEquityRequest.complianceId,
+          createEquityRequest.identityRegistryId,
         ),
       );
     });

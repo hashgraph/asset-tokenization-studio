@@ -203,75 +203,62 @@
 
 */
 
-import { LogError } from '@core/decorator/LogErrorDecorator';
-import { GetNounceRequest, PartitionsProtectedRequest } from '../../request';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import { PartitionsProtectedQuery } from '@query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQuery';
-import { ProtectPartitionsCommand } from '@command/security/operations/protectPartitions/ProtectPartitionsCommand';
-import { UnprotectPartitionsCommand } from '@command/security/operations/unprotectPartitions/UnprotectPartitionsCommand';
-import { BaseSecurityInPort } from '../BaseSecurityInPort';
-import { GetNounceQuery } from '@query/security/protectedPartitions/getNounce/GetNounceQuery';
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
 
-export interface ISecurityInPortProtectedPartitions {
-  arePartitionsProtected(request: PartitionsProtectedRequest): Promise<boolean>;
-  protectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  unprotectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  getNounce(request: GetNounceRequest): Promise<number>;
-}
+import {_ERC3643_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {IERC3643Management} from '../interfaces/ERC3643/IERC3643Management.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {ERC3643Management} from './ERC3643Management.sol';
 
-export class SecurityInPortProtectedPartitions
-  extends BaseSecurityInPort
-  implements ISecurityInPortProtectedPartitions
-{
-  @LogError
-  async arePartitionsProtected(
-    request: PartitionsProtectedRequest,
-  ): Promise<boolean> {
-    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
+contract ERC3643ManagementFacet is IStaticFunctionSelectors, ERC3643Management {
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _ERC3643_MANAGEMENT_RESOLVER_KEY;
+    }
 
-    return (
-      await this.queryBus.execute(
-        new PartitionsProtectedQuery(request.securityId),
-      )
-    ).payload;
-  }
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](9);
+        uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .initialize_ERC3643
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setName.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setSymbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.setOnchainID.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setIdentityRegistry
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .setCompliance
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.addAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.removeAgent.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .recoveryAddress
+            .selector;
+    }
 
-  @LogError
-  async protectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
-
-    return await this.commandBus.execute(
-      new ProtectPartitionsCommand(securityId),
-    );
-  }
-
-  @LogError
-  async unprotectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
-
-    return await this.commandBus.execute(
-      new UnprotectPartitionsCommand(securityId),
-    );
-  }
-
-  @LogError
-  async getNounce(request: GetNounceRequest): Promise<number> {
-    ValidatedRequest.handleValidation('GetNounceRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetNounceQuery(request.securityId, request.targetId),
-      )
-    ).payload;
-  }
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Management)
+            .interfaceId;
+    }
 }

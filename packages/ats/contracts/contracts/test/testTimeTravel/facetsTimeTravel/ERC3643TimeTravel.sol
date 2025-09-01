@@ -203,75 +203,31 @@
 
 */
 
-import { LogError } from '@core/decorator/LogErrorDecorator';
-import { GetNounceRequest, PartitionsProtectedRequest } from '../../request';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import { PartitionsProtectedQuery } from '@query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQuery';
-import { ProtectPartitionsCommand } from '@command/security/operations/protectPartitions/ProtectPartitionsCommand';
-import { UnprotectPartitionsCommand } from '@command/security/operations/unprotectPartitions/UnprotectPartitionsCommand';
-import { BaseSecurityInPort } from '../BaseSecurityInPort';
-import { GetNounceQuery } from '@query/security/protectedPartitions/getNounce/GetNounceQuery';
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
 
-export interface ISecurityInPortProtectedPartitions {
-  arePartitionsProtected(request: PartitionsProtectedRequest): Promise<boolean>;
-  protectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  unprotectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  getNounce(request: GetNounceRequest): Promise<number>;
-}
+import {BondUSARead} from '../../../layer_3/bondUSA/BondUSARead.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-export class SecurityInPortProtectedPartitions
-  extends BaseSecurityInPort
-  implements ISecurityInPortProtectedPartitions
-{
-  @LogError
-  async arePartitionsProtected(
-    request: PartitionsProtectedRequest,
-  ): Promise<boolean> {
-    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
+contract BondUSAReadTimeTravel is BondUSARead, TimeTravelStorageWrapper {
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
+    }
 
-    return (
-      await this.queryBus.execute(
-        new PartitionsProtectedQuery(request.securityId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async protectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
-
-    return await this.commandBus.execute(
-      new ProtectPartitionsCommand(securityId),
-    );
-  }
-
-  @LogError
-  async unprotectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
-
-    return await this.commandBus.execute(
-      new UnprotectPartitionsCommand(securityId),
-    );
-  }
-
-  @LogError
-  async getNounce(request: GetNounceRequest): Promise<number> {
-    ValidatedRequest.handleValidation('GetNounceRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetNounceQuery(request.securityId, request.targetId),
-      )
-    ).payload;
-  }
+    function _blockNumber()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockNumber();
+    }
 }

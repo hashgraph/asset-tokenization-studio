@@ -203,75 +203,181 @@
 
 */
 
-import { LogError } from '@core/decorator/LogErrorDecorator';
-import { GetNounceRequest, PartitionsProtectedRequest } from '../../request';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import { PartitionsProtectedQuery } from '@query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQuery';
-import { ProtectPartitionsCommand } from '@command/security/operations/protectPartitions/ProtectPartitionsCommand';
-import { UnprotectPartitionsCommand } from '@command/security/operations/unprotectPartitions/UnprotectPartitionsCommand';
-import { BaseSecurityInPort } from '../BaseSecurityInPort';
-import { GetNounceQuery } from '@query/security/protectedPartitions/getNounce/GetNounceQuery';
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
 
-export interface ISecurityInPortProtectedPartitions {
-  arePartitionsProtected(request: PartitionsProtectedRequest): Promise<boolean>;
-  protectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  unprotectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  getNounce(request: GetNounceRequest): Promise<number>;
-}
+import {ICompliance} from './ICompliance.sol';
+import {IIdentityRegistry} from './IIdentityRegistry.sol';
 
-export class SecurityInPortProtectedPartitions
-  extends BaseSecurityInPort
-  implements ISecurityInPortProtectedPartitions
-{
-  @LogError
-  async arePartitionsProtected(
-    request: PartitionsProtectedRequest,
-  ): Promise<boolean> {
-    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
+interface IERC3643Management {
+    struct ERC3643Storage {
+        address onchainID;
+        address identityRegistry;
+        address compliance;
+        mapping(address => uint256) frozenTokens;
+        mapping(address => mapping(bytes32 => uint256)) frozenTokensByPartition;
+        mapping(address => bool) addressRecovered;
+        bool initialized;
+    }
 
-    return (
-      await this.queryBus.execute(
-        new PartitionsProtectedQuery(request.securityId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async protectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
-
-    return await this.commandBus.execute(
-      new ProtectPartitionsCommand(securityId),
+    /**
+     *  @notice This event is emitted when the token information is updated.
+     */
+    event UpdatedTokenInformation(
+        string indexed newName,
+        string indexed newSymbol,
+        uint8 newDecimals,
+        string newVersion,
+        address indexed newOnchainID
     );
-  }
 
-  @LogError
-  async unprotectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId } = request;
-    ValidatedRequest.handleValidation('PartitionsProtectedRequest', request);
+    /**
+     *  @notice This event is emitted when the IdentityRegistry has been set for the token
+     */
+    event IdentityRegistryAdded(address indexed identityRegistry);
 
-    return await this.commandBus.execute(
-      new UnprotectPartitionsCommand(securityId),
+    /**
+     * @dev Emitted when the agent role is granted
+     *
+     * @param _agent Address of the agent that has been added
+     */
+    event AgentAdded(address indexed _agent);
+
+    /**
+     * @dev Emitted when the agent role is revoked
+     *
+     * @param _agent Address of the agent that has been removed
+     */
+    event AgentRemoved(address indexed _agent);
+
+    /**
+     * @dev Emitted when a wallet is recovered
+     *
+     * @param _lostWallet Address of the lost wallet
+     * @param _newWallet Address of the new wallet
+     * @param _investorOnchainID OnchainID
+     */
+    event RecoverySuccess(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
     );
-  }
 
-  @LogError
-  async getNounce(request: GetNounceRequest): Promise<number> {
-    ValidatedRequest.handleValidation('GetNounceRequest', request);
+    /**
+     * @notice Thrown when calling from a recovered wallet
+     */
+    error WalletRecovered();
 
-    return (
-      await this.queryBus.execute(
-        new GetNounceQuery(request.securityId, request.targetId),
-      )
-    ).payload;
-  }
+    /**
+     * @notice Thrown when attempting to recover a wallet with pending locks, holds or clearings
+     */
+    error CannotRecoverWallet();
+
+    /**
+     * @notice Thrown in batch operations when input amount arrays length is different
+     */
+    error InputAmountsArrayLengthMismatch();
+
+    /**
+     * @notice Thrown in batch operations when input boolean arrays length is different
+     */
+    error InputBoolArrayLengthMismatch();
+
+    /**
+     * @notice Thrown when the calls to the methods in the compliance contract fail
+     */
+    error ComplianceCallFailed();
+
+    /**
+     * @notice Thrown when the compliance contract returns false
+     */
+    error ComplianceNotAllowed();
+
+    /**
+     * @notice Thrown when the calls to the methods in the identity contract fail
+     */
+    error IdentityRegistryCallFailed();
+
+    /**
+     * @notice Thrown when the identity contract returns false
+     */
+    error AddressNotVerified();
+
+    /**
+     * @dev Facet initializer
+     *
+     * Sets the compliance contract address
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC3643(
+        address _compliance,
+        address _identityRegistry
+    ) external;
+
+    /**
+     * @dev Sets the name of the token to `_name`.
+     *
+     * Emits an UpdatedTokenInformation event.
+     */
+    function setName(string calldata _name) external;
+
+    /**
+     * @dev Sets the symbol of the token to `_symbol`.
+     *
+     * Emits an UpdatedTokenInformation event.
+     */
+    function setSymbol(string calldata _symbol) external;
+
+    /**
+     * @dev Sets the onchainID of the token to `_onchainID`.
+     * @dev Performs a forced transfer of `_amount` tokens from `_from` to `_to`.
+     *
+     * This function should only be callable by an authorized entities
+     *
+     * Returns `true` if the transfer was successful.
+     *
+     * Emits an UpdatedTokenInformation event.
+     */
+    function setOnchainID(address _onchainID) external;
+
+    /**
+     * @dev Sets the identity registry contract address.
+     * @dev Mints `_amount` tokens to the address `_to`.
+     *
+     * Emits an IdentityRegistryAdded event.
+     */
+    function setIdentityRegistry(address _identityRegistry) external;
+
+    /**
+     * @dev Sets the compliance contract address.
+     * @dev Burns `_amount` tokens from the address `_userAddress`.
+     *
+     * Reduces total supply.
+     *
+     * Emits a ComplianceAdded event.
+     */
+    function setCompliance(address _compliance) external;
+
+    /**
+     * @notice Gives an account the agent role
+     * @notice Granting an agent role allows the account to perform multiple ERC-1400 actions
+     * @dev Can only be called by the role admin
+     */
+    function addAgent(address _agent) external;
+
+    /**
+     * @notice Revokes an account the agent role
+     * @dev Can only be called by the role admin
+     */
+    function removeAgent(address _agent) external;
+
+    /**
+     * @notice Transfers the status of a lost wallet to a new wallet
+     * @dev Can only be called by the agent
+     */
+    function recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    ) external returns (bool);
 }
