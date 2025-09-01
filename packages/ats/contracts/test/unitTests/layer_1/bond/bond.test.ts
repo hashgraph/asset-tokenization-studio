@@ -1074,7 +1074,7 @@ describe('Bond Tests', () => {
                 }
             })
 
-            it.only('Given a coupon and account with normal, cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct', async () => {
+            it('Given a coupon and account with normal, cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct', async () => {
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(

@@ -226,6 +226,9 @@ import {
     TimeTravel__factory,
     Kyc,
     SsiManagement,
+    ClearingActionsFacet,
+    ClearingTransferFacet,
+    FreezeFacet,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -246,6 +249,9 @@ import {
     EMPTY_STRING,
     MAX_UINT256,
     ZERO,
+    CLEARING_ROLE,
+    EMPTY_HEX_BYTES,
+    FREEZE_MANAGER_ROLE,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -303,6 +309,9 @@ describe('Equity Tests', () => {
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
+    let clearingActionsFacet: ClearingActionsFacet
+    let clearingTransferFacet: ClearingTransferFacet
+    let freezeFacet: FreezeFacet
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
@@ -337,6 +346,21 @@ describe('Equity Tests', () => {
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+        clearingTransferFacet = await ethers.getContractAt(
+            'ClearingTransferFacet',
+            diamond.address,
+            signer_A
+        )
+        clearingActionsFacet = await ethers.getContractAt(
+            'ClearingActionsFacet',
+            diamond.address,
+            signer_A
+        )
+        freezeFacet = await ethers.getContractAt(
+            'FreezeFacet',
             diamond.address,
             signer_A
         )
@@ -684,6 +708,76 @@ describe('Equity Tests', () => {
             expect(dividendTotalHolder).to.equal(1)
             expect(dividendHolders.length).to.equal(dividendTotalHolder)
             expect(dividendHolders).to.have.members([account_A])
+        })
+
+        it('GIVEN scheduled dividends WHEN record date is reached AND scheduled balance adjustments is set after record date THEN dividends are paid without adjusted balance', async () => {
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
+            await accessControlFacet.grantRole(CLEARING_ROLE, account_C)
+            await accessControlFacet.grantRole(FREEZE_MANAGER_ROLE, account_C)
+
+            const TotalAmount = number_Of_Shares
+            const amounts = TotalAmount / 5n
+
+            await erc1410Facet.connect(signer_C).issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
+
+            const hold = {
+                amount: amounts,
+                expirationTimestamp: 999999999999999,
+                escrow: account_B,
+                to: ADDRESS_ZERO,
+                data: '0x',
+            }
+
+            await lockFacet
+                .connect(signer_C)
+                .lock(amounts, account_A, 99999999999)
+
+            await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)
+
+            await freezeFacet
+                .connect(signer_C)
+                .freezePartialTokens(account_A, amounts)
+
+            await clearingActionsFacet.connect(signer_C).activateClearing()
+
+            const clearingOperation = {
+                partition: DEFAULT_PARTITION,
+                expirationTimestamp: 99999999999,
+                data: EMPTY_HEX_BYTES,
+            }
+
+            await clearingTransferFacet.clearingTransferByPartition(
+                clearingOperation,
+                amounts,
+                account_B
+            )
+
+            balanceAdjustmentData.executionDate = dateToUnixTimestamp(
+                '2030-01-01T00:00:15Z'
+            ).toString() // 5 seconds after dividend record date
+
+            await equityFacet.connect(signer_C).setDividends(dividendData)
+            await equityFacet
+                .connect(signer_C)
+                .setScheduledBalanceAdjustment(balanceAdjustmentData)
+
+            // Travel to 5 seconds after balance adjustment execution date
+            await timeTravelFacet.changeSystemTimestamp(
+                dateToUnixTimestamp('2030-01-01T00:20Z').toString()
+            )
+
+            // Check user dividend balance does not include balance adjustment
+            const dividendFor = await equityFacet.getDividendsFor(1, account_A)
+            expect(dividendFor.tokenBalance).to.equal(TotalAmount)
+            expect(dividendFor.recordDateReached).to.equal(true)
+            expect(dividendFor.amount).to.equal(dividendsAmountPerEquity)
         })
     })
 
