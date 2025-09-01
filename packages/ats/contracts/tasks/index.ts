@@ -220,3 +220,5 @@ export * from './transparentUpgradeableProxy'
 export * from './businessLogicResolver'
 
 export * from './compile'
+
+export * from './selector'
