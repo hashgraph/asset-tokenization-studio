@@ -221,4 +221,13 @@ contract HoldReadTimeTravel is HoldReadFacet, TimeTravelStorageWrapper {
     {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
+
+    function _blockNumber()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockNumber();
+    }
 }

@@ -206,21 +206,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC3643_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IERC3643Basic} from '../interfaces/ERC3643/IERC3643Basic.sol';
+import {_ERC3643_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {IERC3643Management} from '../interfaces/ERC3643/IERC3643Management.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ERC3643} from './ERC3643.sol';
+import {ERC3643Management} from './ERC3643Management.sol';
 
-contract ERC3643Facet is IStaticFunctionSelectors, ERC3643 {
+contract ERC3643ManagementFacet is IStaticFunctionSelectors, ERC3643Management {
     function getStaticResolverKey()
         external
         pure
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _ERC3643_RESOLVER_KEY;
+        staticResolverKey_ = _ERC3643_MANAGEMENT_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
@@ -229,7 +229,7 @@ contract ERC3643Facet is IStaticFunctionSelectors, ERC3643 {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](18);
+        staticFunctionSelectors_ = new bytes4[](9);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this
             .initialize_ERC3643
@@ -248,21 +248,6 @@ contract ERC3643Facet is IStaticFunctionSelectors, ERC3643 {
         staticFunctionSelectors_[selectorsIndex++] = this
             .recoveryAddress
             .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.burn.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.mint.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .forcedTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.isAgent.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .identityRegistry
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.onchainID.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.compliance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .isAddressRecovered
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.version.selector;
     }
 
     function getStaticInterfaceIds()
@@ -273,6 +258,7 @@ contract ERC3643Facet is IStaticFunctionSelectors, ERC3643 {
     {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Basic).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC3643Management)
+            .interfaceId;
     }
 }

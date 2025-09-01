@@ -203,46 +203,71 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
-import {_SECURITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {ISecurity} from '../interfaces/ISecurity.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-
-contract SecurityStorageWrapper is Common {
-    function _storeRegulationData(
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) internal {
-        ISecurity.SecurityRegulationData storage data = _securityStorage();
-        data.regulationData = _regulationData;
-        data.additionalSecurityData = _additionalSecurityData;
+interface IBondRead {
+    struct BondDetailsData {
+        bytes3 currency;
+        uint256 nominalValue;
+        uint256 startingDate;
+        uint256 maturityDate;
     }
 
-    function _getSecurityRegulationData()
-        internal
-        pure
-        returns (
-            ISecurity.SecurityRegulationData memory securityRegulationData_
-        )
-    {
-        securityRegulationData_ = _securityStorage();
+    struct CouponDetailsData {
+        uint256 couponFrequency;
+        uint256 couponRate;
+        uint256 firstCouponDate;
     }
 
-    function _securityStorage()
-        internal
-        pure
-        returns (ISecurity.SecurityRegulationData storage securityStorage_)
-    {
-        bytes32 position = _SECURITY_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            securityStorage_.slot := position
-        }
+    struct Coupon {
+        uint256 recordDate;
+        uint256 executionDate;
+        uint256 rate;
     }
+
+    struct RegisteredCoupon {
+        Coupon coupon;
+        uint256 snapshotId;
+    }
+
+    struct CouponFor {
+        uint256 tokenBalance;
+        uint256 rate;
+        uint256 recordDate;
+        uint256 executionDate;
+        uint8 decimals;
+        bool recordDateReached;
+    }
+
+    function getBondDetails()
+        external
+        view
+        returns (BondDetailsData memory bondDetailsData_);
+
+    function getCouponDetails()
+        external
+        view
+        returns (CouponDetailsData memory couponDetails_);
+
+    function getCoupon(
+        uint256 _couponID
+    ) external view returns (RegisteredCoupon memory registeredCoupon_);
+
+    function getCouponFor(
+        uint256 _couponID,
+        address _account
+    ) external view returns (CouponFor memory couponFor_);
+
+    function getCouponCount() external view returns (uint256 couponCount_);
+
+    function getCouponHolders(
+        uint256 _couponID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalCouponHolders(
+        uint256 _couponID
+    ) external view returns (uint256);
 }
