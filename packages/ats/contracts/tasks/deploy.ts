@@ -205,7 +205,12 @@
 
 import { task, types } from 'hardhat/config'
 import { CONTRACT_NAMES, ContractName, Network } from '@configuration'
-import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments'
+import {
+    DeployAllArgs,
+    DeployArgs,
+    DeployTrexFactoryArgs,
+    GetSignerResult,
+} from './Arguments'
 import * as fs from 'fs'
 
 task(
@@ -472,5 +477,93 @@ task('deploy', 'Deploy new contract')
         }
         console.log(
             `Implementation: ${address} (${contractId}) for ${contractName}`
+        )
+    })
+
+task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
+    .addOptionalParam(
+        'atsFactory',
+        'Address of the ATS factory',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'implementationAuthority',
+        'Address of the implementation authority (defaults to zero address)',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'idFactory',
+        'Address of the identity factory (defaults to zero address)',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'privateKey',
+        'The private key of the account in raw hexadecimal format',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
+    )
+    .setAction(async (args: DeployTrexFactoryArgs, hre) => {
+        const {
+            deployContractWithLibraries,
+            DeployContractWithLibraryCommand,
+            ADDRESS_ZERO,
+        } = await import('@scripts')
+
+        const { signer }: GetSignerResult = await hre.run('getSigner', {
+            privateKey: args.privateKey,
+            signerAddress: args.signerAddress,
+            signerPosition: args.signerPosition,
+        })
+
+        // Import validation utilities
+        const { validateDeploymentParams } = await import(
+            './utils/errorHandling'
+        )
+
+        // Validate and prepare deployment parameters
+        const implementationAuthority =
+            args.implementationAuthority ?? ADDRESS_ZERO
+        const idFactory = args.idFactory ?? ADDRESS_ZERO
+        const atsFactory = args.atsFactory ?? ADDRESS_ZERO
+
+        // Comprehensive parameter validation with warnings
+        validateDeploymentParams(
+            {
+                implementationAuthority,
+                idFactory,
+                atsFactory,
+            },
+            hre,
+            {
+                allowZeroAddress: true,
+                warnOnZeroAddress: true,
+                strict: false, // Set to true for production deployments
+            }
+        )
+
+        console.log(`   Signer: ${signer.address}`)
+
+        await deployContractWithLibraries(
+            new DeployContractWithLibraryCommand({
+                name: `TREXFactoryAts`,
+                signer,
+                args: [implementationAuthority, idFactory, atsFactory],
+                libraries: ['TREXBondDeploymentLib', 'TREXEquityDeploymentLib'],
+            })
         )
     })

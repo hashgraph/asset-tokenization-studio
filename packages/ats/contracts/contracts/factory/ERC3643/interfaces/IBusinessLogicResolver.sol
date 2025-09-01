@@ -203,294 +203,130 @@
 
 */
 
-import dotenv from 'dotenv'
+pragma solidity ^0.8.17;
+import {
+    TRexIDiamondCutManager as IDiamondCutManager
+} from './IDiamondCutManager.sol';
 
-// Load the `.env` file
-dotenv.config()
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-const EMPTY_STRING = ''
-export const NETWORKS = [
-    'hardhat',
-    'local',
-    'previewnet',
-    'testnet',
-    'mainnet',
-] as const
-export type Network = (typeof NETWORKS)[number]
-
-export const DEPLOY_TYPES = ['proxy', 'direct'] as const
-export type DeployType = (typeof DEPLOY_TYPES)[number]
-
-export const CONTRACT_NAMES = [
-    'TransparentUpgradeableProxy',
-    'ProxyAdmin',
-    'Factory',
-    'BusinessLogicResolver',
-    'AccessControlFacet',
-    'Cap',
-    'ControlList',
-    'PauseFacet',
-    'ERC20',
-    'ERC20Permit',
-    'ERC1410ScheduledTasks',
-    'ERC1410ReadFacet',
-    'ERC1410ManagementFacet',
-    'ERC1410TokenHolderFacet',
-    'ERC1594',
-    'ERC1643',
-    'ERC1644',
-    'DiamondFacet',
-    'EquityUSA',
-    'BondUSA',
-    'ScheduledSnapshots',
-    'ScheduledBalanceAdjustments',
-    'ScheduledTasks',
-    'Snapshots',
-    'CorporateActions',
-    'TransferAndLock',
-    'Lock',
-    'AdjustBalances',
-    'ProtectedPartitions',
-    'HoldReadFacet',
-    'HoldTokenHolderFacet',
-    'HoldManagementFacet',
-    'TimeTravel',
-    'Kyc',
-    'SsiManagement',
-    'ClearingHoldCreationFacet',
-    'ClearingRedeemFacet',
-    'ClearingTransferFacet',
-    'ClearingReadFacet',
-    'ClearingActionsFacet',
-    'ExternalPauseManagement',
-    'ExternalControlListManagement',
-    'ExternalKycListManagement',
-    'ERC3643',
-    'FreezeFacet',
-    'ERC3643Facet',
-    'ERC3643BatchFacet',
-    'FreezeFacet',
-    'TREXFactoryAts',
-    'ComplianceMock',
-    'IdentityRegistryMock',
-] as const
-export type ContractName = (typeof CONTRACT_NAMES)[number]
-
-export const LIBRARY_NAMES = [
-    'SecurityDeploymentLib',
-    'TREXBaseDeploymentLib',
-    'TREXBondDeploymentLib',
-    'TREXEquityDeploymentLib',
-] as const
-export type LibraryName = (typeof LIBRARY_NAMES)[number]
-
-export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
-
-export const CONTRACT_FACTORY_NAMES = CONTRACT_NAMES.map(
-    (name) => `${name}__factory`
-)
-export type ContractFactoryName = (typeof CONTRACT_FACTORY_NAMES)[number]
-
-export interface Endpoints {
-    jsonRpc: string
-    mirror: string
-}
-
-export interface DeployedContract {
-    address: string
-    proxyAddress?: string
-    proxyAdminAddress?: string
-}
-
-export interface ContractConfig {
-    name: ContractName
-    factoryName: ContractFactoryName
-    deployType: DeployType
-    addresses?: Record<Network, DeployedContract>
-}
-
-export default class Configuration {
-    // private _privateKeys: Record<Network, string[]>;
-    // private _endpoints: Record<Network, Endpoints>;
-    // private _contracts: Record<ContractName, ContractConfig>;
-    /**
-     * Determines whether the contract sizer should run on compile.
-     *
-     * @returns {boolean} True if the contract sizer should run on compile, false otherwise.
-     */
-    public static get contractSizerRunOnCompile(): boolean {
-        return (
-            Configuration._getEnvironmentVariable({
-                name: 'CONTRACT_SIZER_RUN_ON_COMPILE',
-                defaultValue: 'true',
-            }).toLowerCase() === 'true'
-        )
+/// @title Contracts Repository
+/// @notice This contract is used to register and resolve Business Logics (aka contracts) addresses using
+///          a bytes32 as key.
+///
+///			All registered Business Logics must have the same number of versions, so that they have a common "latest"
+///			version and any previous version can be resolved for any existing Business Logic no matter when it was
+///			added to the register.
+///         The idea is that consumers should use Business Logics belonging to the same version since those are
+/// 		considered fully compatible.
+///			Registering a business logic (register = update its latest version or add it to the registry) will increase the
+///			latest version for all Business Logics by 1.
+interface TRexIBusinessLogicResolver {
+    enum VersionStatus {
+        NONE,
+        ACTIVATED,
+        DEACTIVATED
     }
 
-    /**
-     * Determines whether gas reporting is enabled.
-     *
-     * @returns {boolean} True if gas reporting is enabled, false otherwise.
-     */
-    public static get reportGas(): boolean {
-        return (
-            Configuration._getEnvironmentVariable({
-                name: 'REPORT_GAS',
-                defaultValue: 'true',
-            }).toLowerCase() === 'true'
-        )
+    /// @notice structure defining the input data type when registering or updating business logics
+    struct BusinessLogicRegistryData {
+        bytes32 businessLogicKey;
+        address businessLogicAddress;
     }
 
-    public static get privateKeys(): Record<Network, string[]> {
-        return NETWORKS.reduce(
-            (result, network) => {
-                result[network] = Configuration._getEnvironmentVariableList({
-                    name: `${network.toUpperCase()}_PRIVATE_KEY_#`,
-                })
-                return result
-            },
-            {} as Record<Network, string[]>
-        )
+    /// @notice structure defining the a given Version status
+    struct VersionData {
+        uint256 version;
+        VersionStatus status;
     }
 
-    public static get endpoints(): Record<Network, Endpoints> {
-        return NETWORKS.reduce(
-            (result, network) => {
-                result[network] = {
-                    jsonRpc: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_JSON_RPC_ENDPOINT`,
-                        defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:7546'
-                                : `https://${network}.hash.io/api`,
-                    }),
-                    mirror: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_MIRROR_NODE_ENDPOINT`,
-                        defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:5551'
-                                : `https://${network}.mirrornode.hedera.com`,
-                    }),
-                }
-                return result
-            },
-            {} as Record<Network, Endpoints>
-        )
+    struct BusinessLogicVersion {
+        VersionData versionData;
+        address businessLogicAddress;
     }
 
-    public static get contracts(): Record<ContractName, ContractConfig> {
-        const contracts: Record<ContractName, ContractConfig> = {} as Record<
-            ContractName,
-            ContractConfig
-        >
-        CONTRACT_NAMES.forEach((contractName) => {
-            contracts[contractName] = {
-                name: contractName,
-                factoryName: `${contractName}__factory`,
-                deployType: CONTRACT_NAMES_WITH_PROXY.includes(contractName)
-                    ? 'proxy'
-                    : 'direct',
-                addresses: Configuration._getDeployedAddresses({
-                    contractName,
-                }),
-            }
-        })
-        return contracts
-    }
+    /// @notice Event emitted when Business Logic(s) are registered (updated or added).
+    /// @param businessLogics list of registered Business Logics.
+    /// @param newLatestVersion new latest version = previous latest version + 1.
+    event BusinessLogicsRegistered(
+        BusinessLogicRegistryData[] businessLogics,
+        uint256 newLatestVersion
+    );
 
-    // * Private methods
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_BusinessLogicResolver()
+        external
+        returns (bool success_);
 
-    /**
-     * Retrieves the deployed contract addresses for a given contract name across different networks.
-     *
-     * @param {Object} params - The parameters object.
-     * @param {ContractName} params.contractName - The name of the contract to get deployed addresses for.
-     * @returns {Record<Network, DeployedContract>} An object mapping each network to its deployed contract details.
-     *
-     * The function iterates over all available networks and fetches the contract address, proxy address,
-     * and proxy admin address from environment variables. If the contract address is found, it adds the
-     * details to the returned object.
-     */
-    private static _getDeployedAddresses({
-        contractName,
-    }: {
-        contractName: ContractName
-    }): Record<Network, DeployedContract> {
-        const deployedAddresses: Record<Network, DeployedContract> =
-            {} as Record<Network, DeployedContract>
+    /// @notice Update existing business logics addresses or add new business logics to the register.
+    ///         the BusinessLogicsRegistered event must be emitted.
+    ///         The latest "version" for all business logics is increased by 1.
+    /// @param _businessLogics list of business logics to be registered.
+    function registerBusinessLogics(
+        BusinessLogicRegistryData[] calldata _businessLogics
+    ) external;
 
-        NETWORKS.forEach((network) => {
-            const address = Configuration._getEnvironmentVariable({
-                name: `${network.toUpperCase()}_${contractName.toUpperCase()}`,
-                defaultValue: EMPTY_STRING,
-            })
+    /// @notice Adds a list of selectors to the blacklist
+    /// @param _configurationId the configuration key to be checked.
+    /// @param _selectors list of selectors to be added to the blacklist
+    function addSelectorsToBlacklist(
+        bytes32 _configurationId,
+        bytes4[] calldata _selectors
+    ) external;
 
-            if (address !== EMPTY_STRING) {
-                const proxyAddress = Configuration._getEnvironmentVariable({
-                    name: `${network.toUpperCase()}_${contractName}_PROXY`,
-                    defaultValue: EMPTY_STRING,
-                })
-                const proxyAdminAddress = Configuration._getEnvironmentVariable(
-                    {
-                        name: `${network.toUpperCase()}_${contractName}_PROXY_ADMIN`,
-                        defaultValue: EMPTY_STRING,
-                    }
-                )
+    /// @notice Removes a list of selectors from the blacklist
+    /// @param _configurationId the configuration key to be checked.
+    /// @param _selectors list of selectors to be removed from the blacklist
+    function removeSelectorsFromBlacklist(
+        bytes32 _configurationId,
+        bytes4[] calldata _selectors
+    ) external;
 
-                deployedAddresses[network] = {
-                    address,
-                    ...(proxyAddress !== EMPTY_STRING && { proxyAddress }),
-                    ...(proxyAdminAddress !== EMPTY_STRING && {
-                        proxyAdminAddress,
-                    }),
-                }
-            }
-        })
+    /// @notice Returns the current status of a given version
+    function getVersionStatus(
+        uint256 _version
+    ) external view returns (VersionStatus status_);
 
-        return deployedAddresses
-    }
+    /// @notice Returns the current latest version for all business logics
+    function getLatestVersion() external view returns (uint256 latestVersion_);
 
-    private static _getEnvironmentVariableList({
-        name,
-        indexChar = '#',
-    }: {
-        name: string
-        indexChar?: string
-    }): string[] {
-        const resultList: string[] = []
-        let index = 0
-        do {
-            const env = Configuration._getEnvironmentVariable({
-                name: name.replace(indexChar, `${index}`),
-                defaultValue: EMPTY_STRING,
-            })
-            if (env !== EMPTY_STRING) {
-                resultList.push(env)
-            }
-            index++
-        } while (resultList.length === index)
-        return resultList
-    }
+    /// @notice Returns the business logic address for the latest version
+    /// @param _businessLogicKey key of the business logic. Business Logic must be active.
+    function resolveLatestBusinessLogic(
+        bytes32 _businessLogicKey
+    ) external view returns (address businessLogicAddress_);
 
-    private static _getEnvironmentVariable({
-        name,
-        defaultValue,
-    }: {
-        name: string
-        defaultValue?: string
-    }): string {
-        const value = process.env?.[name]
-        if (value) {
-            return value
-        }
-        if (defaultValue !== undefined) {
-            // console.warn(
-            //     `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
-            // )
-            return defaultValue
-        }
-        throw new Error(
-            `Environment variable "${name}" is not defined. Please set the "${name}" environment variable.`
-        )
-    }
+    /// @notice Returns a specific business logic version address
+    /// @param _businessLogicKey key of the business logic. Business Logic must be active.
+    /// @param _version the version
+    function resolveBusinessLogicByVersion(
+        bytes32 _businessLogicKey,
+        uint256 _version
+    ) external view returns (address businessLogicAddress_);
+
+    /// @notice Returns the count of currently active business logics
+    function getBusinessLogicCount()
+        external
+        view
+        returns (uint256 businessLogicCount_);
+
+    /// @notice Returns a list of business logic keys
+    /// @param _pageIndex members to skip : _pageIndex * _pageLength
+    /// @param _pageLength number of members to return
+    /// @return businessLogicKeys_ list of business logic keys
+    function getBusinessLogicKeys(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (bytes32[] memory businessLogicKeys_);
+
+    /// @notice Returns the list of selectors in the blacklist
+    /// @param _configurationId the configuration key to be checked.
+    /// @param _pageIndex members to skip : _pageIndex * _pageLength
+    /// @param _pageLength number of members to return
+    /// @return selectors_ List of the selectors in the blacklist
+    function getSelectorsBlacklist(
+        bytes32 _configurationId,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (bytes4[] memory selectors_);
 }

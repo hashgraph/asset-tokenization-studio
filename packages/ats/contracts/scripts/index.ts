@@ -220,6 +220,7 @@ export { default as DeployContractCommand } from './commands/DeployContractComma
 export { default as DeployAtsContractsCommand } from './commands/DeployAtsContractsCommand'
 export { default as DeployAtsFullInfrastructureCommand } from './commands/DeployAtsFullInfrastructureCommand'
 export { default as DeployContractWithFactoryCommand } from './commands/DeployContractWithFactoryCommand'
+export { default as DeployContractWithLibraryCommand } from './commands/DeployContractWithLibraryCommand'
 export { default as DeployProxyAdminCommand } from './commands/DeployProxyAdminCommand'
 export { default as DeployUpgradeableProxyCommand } from './commands/DeployTransparentProxyCommand'
 export { default as DeployProxyForBusinessLogicResolverCommand } from './commands/DeployProxyForBusinessLogicResolverCommand'

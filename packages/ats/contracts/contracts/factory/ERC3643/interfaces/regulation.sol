@@ -203,294 +203,247 @@
 
 */
 
-import dotenv from 'dotenv'
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
 
-// Load the `.env` file
-dotenv.config()
+uint256 constant _REGS_DEAL_SIZE = 0;
+AccreditedInvestors constant _REGS_ACCREDITED_INVESTORS = AccreditedInvestors
+    .ACCREDITATION_REQUIRED;
+uint256 constant _REGS_MAX_NON_ACCREDITED_INVESTORS = 0;
+ManualInvestorVerification constant _REGS_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
+    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
+InternationalInvestors constant _REGS_INTERNATIONAL_INVESTORS = InternationalInvestors
+    .ALLOWED;
+ResaleHoldPeriod constant _REGS_RESALE_HOLD_PERIOD = ResaleHoldPeriod
+    .NOT_APPLICABLE;
 
-const EMPTY_STRING = ''
-export const NETWORKS = [
-    'hardhat',
-    'local',
-    'previewnet',
-    'testnet',
-    'mainnet',
-] as const
-export type Network = (typeof NETWORKS)[number]
+uint256 constant _REGD_506_B_DEAL_SIZE = 0;
+AccreditedInvestors constant _REGD_506_B_ACCREDITED_INVESTORS = AccreditedInvestors
+    .ACCREDITATION_REQUIRED;
+uint256 constant _REGD_506_B_MAX_NON_ACCREDITED_INVESTORS = 35;
+ManualInvestorVerification constant _REGD_506_B_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
+    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
+InternationalInvestors constant _REGD_506_B_INTERNATIONAL_INVESTORS = InternationalInvestors
+    .NOT_ALLOWED;
+ResaleHoldPeriod constant _REGD_506_B_RESALE_HOLD_PERIOD = ResaleHoldPeriod
+    .APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
 
-export const DEPLOY_TYPES = ['proxy', 'direct'] as const
-export type DeployType = (typeof DEPLOY_TYPES)[number]
+uint256 constant _REGD_506_C_DEAL_SIZE = 0;
+AccreditedInvestors constant _REGD_506_C_ACCREDITED_INVESTORS = AccreditedInvestors
+    .ACCREDITATION_REQUIRED;
+uint256 constant _REGD_506_C_MAX_NON_ACCREDITED_INVESTORS = 0;
+ManualInvestorVerification constant _REGD_506_C_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
+    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
+InternationalInvestors constant _REGD_506_C_INTERNATIONAL_INVESTORS = InternationalInvestors
+    .NOT_ALLOWED;
+ResaleHoldPeriod constant _REGD_506_C_RESALE_HOLD_PERIOD = ResaleHoldPeriod
+    .APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
 
-export const CONTRACT_NAMES = [
-    'TransparentUpgradeableProxy',
-    'ProxyAdmin',
-    'Factory',
-    'BusinessLogicResolver',
-    'AccessControlFacet',
-    'Cap',
-    'ControlList',
-    'PauseFacet',
-    'ERC20',
-    'ERC20Permit',
-    'ERC1410ScheduledTasks',
-    'ERC1410ReadFacet',
-    'ERC1410ManagementFacet',
-    'ERC1410TokenHolderFacet',
-    'ERC1594',
-    'ERC1643',
-    'ERC1644',
-    'DiamondFacet',
-    'EquityUSA',
-    'BondUSA',
-    'ScheduledSnapshots',
-    'ScheduledBalanceAdjustments',
-    'ScheduledTasks',
-    'Snapshots',
-    'CorporateActions',
-    'TransferAndLock',
-    'Lock',
-    'AdjustBalances',
-    'ProtectedPartitions',
-    'HoldReadFacet',
-    'HoldTokenHolderFacet',
-    'HoldManagementFacet',
-    'TimeTravel',
-    'Kyc',
-    'SsiManagement',
-    'ClearingHoldCreationFacet',
-    'ClearingRedeemFacet',
-    'ClearingTransferFacet',
-    'ClearingReadFacet',
-    'ClearingActionsFacet',
-    'ExternalPauseManagement',
-    'ExternalControlListManagement',
-    'ExternalKycListManagement',
-    'ERC3643',
-    'FreezeFacet',
-    'ERC3643Facet',
-    'ERC3643BatchFacet',
-    'FreezeFacet',
-    'TREXFactoryAts',
-    'ComplianceMock',
-    'IdentityRegistryMock',
-] as const
-export type ContractName = (typeof CONTRACT_NAMES)[number]
-
-export const LIBRARY_NAMES = [
-    'SecurityDeploymentLib',
-    'TREXBaseDeploymentLib',
-    'TREXBondDeploymentLib',
-    'TREXEquityDeploymentLib',
-] as const
-export type LibraryName = (typeof LIBRARY_NAMES)[number]
-
-export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
-
-export const CONTRACT_FACTORY_NAMES = CONTRACT_NAMES.map(
-    (name) => `${name}__factory`
-)
-export type ContractFactoryName = (typeof CONTRACT_FACTORY_NAMES)[number]
-
-export interface Endpoints {
-    jsonRpc: string
-    mirror: string
+enum RegulationType {
+    NONE,
+    REG_S,
+    REG_D
 }
 
-export interface DeployedContract {
-    address: string
-    proxyAddress?: string
-    proxyAdminAddress?: string
+enum RegulationSubType {
+    NONE,
+    REG_D_506_B,
+    REG_D_506_C
 }
 
-export interface ContractConfig {
-    name: ContractName
-    factoryName: ContractFactoryName
-    deployType: DeployType
-    addresses?: Record<Network, DeployedContract>
+enum AccreditedInvestors {
+    NONE,
+    ACCREDITATION_REQUIRED
 }
 
-export default class Configuration {
-    // private _privateKeys: Record<Network, string[]>;
-    // private _endpoints: Record<Network, Endpoints>;
-    // private _contracts: Record<ContractName, ContractConfig>;
-    /**
-     * Determines whether the contract sizer should run on compile.
-     *
-     * @returns {boolean} True if the contract sizer should run on compile, false otherwise.
-     */
-    public static get contractSizerRunOnCompile(): boolean {
-        return (
-            Configuration._getEnvironmentVariable({
-                name: 'CONTRACT_SIZER_RUN_ON_COMPILE',
-                defaultValue: 'true',
-            }).toLowerCase() === 'true'
+enum ManualInvestorVerification {
+    NOTHING_TO_VERIFY,
+    VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
+}
+
+enum InternationalInvestors {
+    NOT_ALLOWED,
+    ALLOWED
+}
+
+enum ResaleHoldPeriod {
+    NOT_APPLICABLE,
+    APPLICABLE_FROM_6_MOTHS_TO_1_YEAR
+}
+
+struct AdditionalSecurityData {
+    bool countriesControlListType;
+    string listOfCountries;
+    string info;
+}
+
+struct FactoryRegulationData {
+    RegulationType regulationType;
+    RegulationSubType regulationSubType;
+    AdditionalSecurityData additionalSecurityData;
+}
+
+struct RegulationData {
+    RegulationType regulationType;
+    RegulationSubType regulationSubType;
+    uint256 dealSize;
+    AccreditedInvestors accreditedInvestors;
+    uint256 maxNonAccreditedInvestors;
+    ManualInvestorVerification manualInvestorVerification;
+    InternationalInvestors internationalInvestors;
+    ResaleHoldPeriod resaleHoldPeriod;
+}
+
+error RegulationTypeAndSubTypeForbidden(
+    RegulationType regulationType,
+    RegulationSubType regulationSubType
+);
+
+function buildRegulationData(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (RegulationData memory regulationData_) {
+    regulationData_ = RegulationData({
+        regulationType: _regulationType,
+        regulationSubType: _regulationSubType,
+        dealSize: buildDealSize(_regulationType, _regulationSubType),
+        accreditedInvestors: buildAccreditedInvestors(
+            _regulationType,
+            _regulationSubType
+        ),
+        maxNonAccreditedInvestors: buildMaxNonAccreditedInvestors(
+            _regulationType,
+            _regulationSubType
+        ),
+        manualInvestorVerification: buildManualInvestorVerification(
+            _regulationType,
+            _regulationSubType
+        ),
+        internationalInvestors: buildInternationalInvestors(
+            _regulationType,
+            _regulationSubType
+        ),
+        resaleHoldPeriod: buildResaleHoldPeriod(
+            _regulationType,
+            _regulationSubType
         )
+    });
+}
+
+function buildDealSize(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (uint256 dealSize_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_DEAL_SIZE;
     }
-
-    /**
-     * Determines whether gas reporting is enabled.
-     *
-     * @returns {boolean} True if gas reporting is enabled, false otherwise.
-     */
-    public static get reportGas(): boolean {
-        return (
-            Configuration._getEnvironmentVariable({
-                name: 'REPORT_GAS',
-                defaultValue: 'true',
-            }).toLowerCase() === 'true'
-        )
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_DEAL_SIZE;
     }
+    dealSize_ = _REGD_506_C_DEAL_SIZE;
+}
 
-    public static get privateKeys(): Record<Network, string[]> {
-        return NETWORKS.reduce(
-            (result, network) => {
-                result[network] = Configuration._getEnvironmentVariableList({
-                    name: `${network.toUpperCase()}_PRIVATE_KEY_#`,
-                })
-                return result
-            },
-            {} as Record<Network, string[]>
-        )
+function buildAccreditedInvestors(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (AccreditedInvestors accreditedInvestors_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_ACCREDITED_INVESTORS;
     }
-
-    public static get endpoints(): Record<Network, Endpoints> {
-        return NETWORKS.reduce(
-            (result, network) => {
-                result[network] = {
-                    jsonRpc: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_JSON_RPC_ENDPOINT`,
-                        defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:7546'
-                                : `https://${network}.hash.io/api`,
-                    }),
-                    mirror: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_MIRROR_NODE_ENDPOINT`,
-                        defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:5551'
-                                : `https://${network}.mirrornode.hedera.com`,
-                    }),
-                }
-                return result
-            },
-            {} as Record<Network, Endpoints>
-        )
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_ACCREDITED_INVESTORS;
     }
+    accreditedInvestors_ = _REGD_506_C_ACCREDITED_INVESTORS;
+}
 
-    public static get contracts(): Record<ContractName, ContractConfig> {
-        const contracts: Record<ContractName, ContractConfig> = {} as Record<
-            ContractName,
-            ContractConfig
-        >
-        CONTRACT_NAMES.forEach((contractName) => {
-            contracts[contractName] = {
-                name: contractName,
-                factoryName: `${contractName}__factory`,
-                deployType: CONTRACT_NAMES_WITH_PROXY.includes(contractName)
-                    ? 'proxy'
-                    : 'direct',
-                addresses: Configuration._getDeployedAddresses({
-                    contractName,
-                }),
-            }
-        })
-        return contracts
+function buildMaxNonAccreditedInvestors(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (uint256 maxNonAccreditedInvestors_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_MAX_NON_ACCREDITED_INVESTORS;
     }
-
-    // * Private methods
-
-    /**
-     * Retrieves the deployed contract addresses for a given contract name across different networks.
-     *
-     * @param {Object} params - The parameters object.
-     * @param {ContractName} params.contractName - The name of the contract to get deployed addresses for.
-     * @returns {Record<Network, DeployedContract>} An object mapping each network to its deployed contract details.
-     *
-     * The function iterates over all available networks and fetches the contract address, proxy address,
-     * and proxy admin address from environment variables. If the contract address is found, it adds the
-     * details to the returned object.
-     */
-    private static _getDeployedAddresses({
-        contractName,
-    }: {
-        contractName: ContractName
-    }): Record<Network, DeployedContract> {
-        const deployedAddresses: Record<Network, DeployedContract> =
-            {} as Record<Network, DeployedContract>
-
-        NETWORKS.forEach((network) => {
-            const address = Configuration._getEnvironmentVariable({
-                name: `${network.toUpperCase()}_${contractName.toUpperCase()}`,
-                defaultValue: EMPTY_STRING,
-            })
-
-            if (address !== EMPTY_STRING) {
-                const proxyAddress = Configuration._getEnvironmentVariable({
-                    name: `${network.toUpperCase()}_${contractName}_PROXY`,
-                    defaultValue: EMPTY_STRING,
-                })
-                const proxyAdminAddress = Configuration._getEnvironmentVariable(
-                    {
-                        name: `${network.toUpperCase()}_${contractName}_PROXY_ADMIN`,
-                        defaultValue: EMPTY_STRING,
-                    }
-                )
-
-                deployedAddresses[network] = {
-                    address,
-                    ...(proxyAddress !== EMPTY_STRING && { proxyAddress }),
-                    ...(proxyAdminAddress !== EMPTY_STRING && {
-                        proxyAdminAddress,
-                    }),
-                }
-            }
-        })
-
-        return deployedAddresses
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_MAX_NON_ACCREDITED_INVESTORS;
     }
+    maxNonAccreditedInvestors_ = _REGD_506_C_MAX_NON_ACCREDITED_INVESTORS;
+}
 
-    private static _getEnvironmentVariableList({
-        name,
-        indexChar = '#',
-    }: {
-        name: string
-        indexChar?: string
-    }): string[] {
-        const resultList: string[] = []
-        let index = 0
-        do {
-            const env = Configuration._getEnvironmentVariable({
-                name: name.replace(indexChar, `${index}`),
-                defaultValue: EMPTY_STRING,
-            })
-            if (env !== EMPTY_STRING) {
-                resultList.push(env)
-            }
-            index++
-        } while (resultList.length === index)
-        return resultList
+function buildManualInvestorVerification(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (ManualInvestorVerification manualInvestorVerification_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_MANUAL_INVESTOR_VERIFICATION;
     }
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_MANUAL_INVESTOR_VERIFICATION;
+    }
+    manualInvestorVerification_ = _REGD_506_C_MANUAL_INVESTOR_VERIFICATION;
+}
 
-    private static _getEnvironmentVariable({
-        name,
-        defaultValue,
-    }: {
-        name: string
-        defaultValue?: string
-    }): string {
-        const value = process.env?.[name]
-        if (value) {
-            return value
-        }
-        if (defaultValue !== undefined) {
-            // console.warn(
-            //     `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
-            // )
-            return defaultValue
-        }
-        throw new Error(
-            `Environment variable "${name}" is not defined. Please set the "${name}" environment variable.`
-        )
+function buildInternationalInvestors(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (InternationalInvestors internationalInvestors_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_INTERNATIONAL_INVESTORS;
     }
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_INTERNATIONAL_INVESTORS;
+    }
+    internationalInvestors_ = _REGD_506_C_INTERNATIONAL_INVESTORS;
+}
+
+function buildResaleHoldPeriod(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (ResaleHoldPeriod resaleHoldPeriod_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_RESALE_HOLD_PERIOD;
+    }
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_RESALE_HOLD_PERIOD;
+    }
+    resaleHoldPeriod_ = _REGD_506_C_RESALE_HOLD_PERIOD;
+}
+
+function checkRegulationTypeAndSubType(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure {
+    if (isValidTypeAndSubType(_regulationType, _regulationSubType)) {
+        return;
+    }
+    revert RegulationTypeAndSubTypeForbidden(
+        _regulationType,
+        _regulationSubType
+    );
+}
+
+function isValidTypeAndSubType(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (bool isValid_) {
+    isValid_ =
+        isValidTypeAndSubTypeForRegS(_regulationType, _regulationSubType) ||
+        isValidTypeAndSubTypeForRegD(_regulationType, _regulationSubType);
+}
+
+function isValidTypeAndSubTypeForRegS(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (bool isValid_) {
+    isValid_ =
+        _regulationType == RegulationType.REG_S &&
+        _regulationSubType == RegulationSubType.NONE;
+}
+
+function isValidTypeAndSubTypeForRegD(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (bool isValid_) {
+    isValid_ =
+        _regulationType == RegulationType.REG_D &&
+        _regulationSubType != RegulationSubType.NONE;
 }
