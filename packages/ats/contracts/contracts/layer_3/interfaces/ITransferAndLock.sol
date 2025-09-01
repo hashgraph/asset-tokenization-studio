@@ -215,16 +215,6 @@ interface ITransferAndLock {
         uint256 expirationTimestamp;
     }
 
-    event PartitionTransferredAndLocked(
-        bytes32 indexed partition,
-        address indexed from,
-        address to,
-        uint256 value,
-        bytes data,
-        uint256 expirationTimestamp,
-        uint256 lockId
-    );
-
     function transferAndLockByPartition(
         bytes32 _partition,
         address _to,

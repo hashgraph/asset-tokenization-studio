@@ -214,14 +214,10 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
 import {BasicTransferInfo} from '../../layer_1/interfaces/ERC1400/IERC1410.sol';
-import {
-    TransferAndLockStorageWrapper
-} from './TransferAndLockStorageWrapper.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
 
-contract TransferAndLock is
-    IStaticFunctionSelectors,
-    TransferAndLockStorageWrapper
-{
+contract TransferAndLock is ITransferAndLock, IStaticFunctionSelectors, Common {
     function transferAndLockByPartition(
         bytes32 _partition,
         address _to,

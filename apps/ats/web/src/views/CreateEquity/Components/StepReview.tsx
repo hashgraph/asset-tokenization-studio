@@ -304,6 +304,7 @@ export const StepReview = () => {
       isin: isin,
       decimals: decimals,
       isWhiteList: !isBlocklist,
+      erc20VotesActivated: false,
       isControllable: isControllable,
       clearingActive: isClearing,
       arePartitionsProtected: false,

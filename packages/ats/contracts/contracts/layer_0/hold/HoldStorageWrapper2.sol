@@ -212,8 +212,8 @@ import {
 import {_DEFAULT_PARTITION} from '../constants/values.sol';
 import {ThirdPartyType} from '../common/types/ThirdPartyType.sol';
 import {
-    IERC3643Basic
-} from '../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
+    IERC3643Management
+} from '../../layer_1/interfaces/ERC3643/IERC3643Management.sol';
 import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {
     IHold,
@@ -470,7 +470,7 @@ abstract contract HoldStorageWrapper2 is
                         _to,
                         _amount
                     ),
-                    IERC3643Basic.ComplianceCallFailed.selector
+                    IERC3643Management.ComplianceCallFailed.selector
                 );
             }
             return;
@@ -487,7 +487,7 @@ abstract contract HoldStorageWrapper2 is
                     _to,
                     _amount
                 ),
-                IERC3643Basic.ComplianceCallFailed.selector
+                IERC3643Management.ComplianceCallFailed.selector
             );
         }
     }

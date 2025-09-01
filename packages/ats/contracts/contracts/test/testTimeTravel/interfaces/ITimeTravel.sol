@@ -224,6 +224,10 @@ interface ITimeTravel {
      */
     function resetSystemTimestamp() external;
 
+    function changeSystemBlocknumber(uint256 _newSystemBlocknumber) external;
+
+    function resetSystemBlocknumber() external;
+
     /**
      * @notice Retrieves the current system timestamp
      */

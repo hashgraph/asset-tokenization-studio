@@ -221,4 +221,13 @@ contract ERC1643TimeTravel is ERC1643, TimeTravelStorageWrapper {
     {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
+
+    function _blockNumber()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockNumber();
+    }
 }
