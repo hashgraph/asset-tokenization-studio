@@ -210,7 +210,6 @@ import {IBond} from '../interfaces/bond/IBond.sol';
 import {IBondRead} from '../interfaces/bond/IBondRead.sol';
 import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 import {Common} from '../../layer_1/common/Common.sol';
-import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
 import {
     _CORPORATE_ACTION_ROLE,
     _BOND_MANAGER_ROLE,
@@ -221,28 +220,6 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
 abstract contract Bond is IBond, IStaticFunctionSelectors, Common {
-    // solhint-disable-next-line func-name-mixedcase
-    function _initialize_bond(
-        IBondRead.BondDetailsData calldata _bondDetailsData,
-        IBondRead.CouponDetailsData calldata _couponDetailsData
-    )
-        internal
-        validateDates(
-            _bondDetailsData.startingDate,
-            _bondDetailsData.maturityDate
-        )
-        onlyValidTimestamp(_bondDetailsData.startingDate)
-    {
-        BondDataStorage storage bondStorage = _bondStorage();
-        bondStorage.initialized = true;
-        _storeBondDetails(_bondDetailsData);
-        _storeCouponDetails(
-            _couponDetailsData,
-            _bondDetailsData.startingDate,
-            _bondDetailsData.maturityDate
-        );
-    }
-
     function redeemAtMaturityByPartition(
         address _tokenHolder,
         bytes32 _partition,
@@ -315,5 +292,27 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, Common {
         );
         success_ = _setMaturityDate(_newMaturityDate);
         return success_;
+    }
+
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_bond(
+        IBondRead.BondDetailsData calldata _bondDetailsData,
+        IBondRead.CouponDetailsData calldata _couponDetailsData
+    )
+        internal
+        validateDates(
+            _bondDetailsData.startingDate,
+            _bondDetailsData.maturityDate
+        )
+        onlyValidTimestamp(_bondDetailsData.startingDate)
+    {
+        BondDataStorage storage bondStorage = _bondStorage();
+        bondStorage.initialized = true;
+        _storeBondDetails(_bondDetailsData);
+        _storeCouponDetails(
+            _couponDetailsData,
+            _bondDetailsData.startingDate,
+            _bondDetailsData.maturityDate
+        );
     }
 }

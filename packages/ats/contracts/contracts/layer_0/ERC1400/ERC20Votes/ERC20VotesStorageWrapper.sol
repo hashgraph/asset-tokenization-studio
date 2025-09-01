@@ -211,16 +211,10 @@ import {
 } from '../../constants/storagePositions.sol';
 import {ERC1594StorageWrapper} from '../ERC1594/ERC1594StorageWrapper.sol';
 import {IERC20Votes} from '../../../layer_1/interfaces/ERC1400/IERC20Votes.sol';
-import '@openzeppelin/contracts/utils/math/Math.sol';
-import '@openzeppelin/contracts/utils/math/SafeCast.sol';
-import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
-import {_DELEGATION_ERC20VOTES_TYPEHASH} from '../../constants/values.sol';
-import {
-    checkNounceAndDeadline,
-    getDomainHash
-} from '../../../layer_1/protectedPartitions/signatureVerification.sol';
-import {IVotes} from '@openzeppelin/contracts/governance/utils/IVotes.sol';
+import {Math} from '@openzeppelin/contracts/utils/math/Math.sol';
+import {SafeCast} from '@openzeppelin/contracts/utils/math/SafeCast.sol';
 
+// solhint-disable custom-errors
 abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     struct ERC20VotesStorage {
         bool activated;

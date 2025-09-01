@@ -207,14 +207,8 @@
 pragma solidity 0.8.18;
 
 import {IBondRead} from '../interfaces/bond/IBondRead.sol';
-import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 import {Common} from '../../layer_1/common/Common.sol';
 import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
-import {
-    _CORPORATE_ACTION_ROLE,
-    _BOND_MANAGER_ROLE,
-    _MATURITY_REDEEMER_ROLE
-} from '../../layer_1/constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';

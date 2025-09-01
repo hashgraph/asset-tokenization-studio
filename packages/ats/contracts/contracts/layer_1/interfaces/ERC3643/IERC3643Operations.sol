@@ -206,9 +206,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ICompliance} from './ICompliance.sol';
-import {IIdentityRegistry} from './IIdentityRegistry.sol';
-
 interface IERC3643Operations {
     /**
      * @dev Burns `_amount` tokens from the address `_userAddress`.

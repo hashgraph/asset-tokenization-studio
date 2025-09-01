@@ -211,7 +211,7 @@ import {
     TRexIBusinessLogicResolver as IBusinessLogicResolver
 } from './IBusinessLogicResolver.sol';
 import {TRexIERC20 as IERC20} from './IERC20.sol';
-import {TRexIBond as IBond} from './IBond.sol';
+import {TRexIBondRead as IBondRead} from './IBondRead.sol';
 import {TRexIEquity as IEquity} from './IEquity.sol';
 import {
     FactoryRegulationData,
@@ -247,6 +247,7 @@ interface TRexIFactory {
         address[] externalPauses;
         address[] externalControlLists;
         address[] externalKycLists;
+        bool erc20VotesActivated;
         address compliance;
         address identityRegistry;
     }
@@ -258,8 +259,8 @@ interface TRexIFactory {
 
     struct BondData {
         SecurityData security;
-        IBond.BondDetailsData bondDetails;
-        IBond.CouponDetailsData couponDetails;
+        IBondRead.BondDetailsData bondDetails;
+        IBondRead.CouponDetailsData couponDetails;
     }
 
     event EquityDeployed(

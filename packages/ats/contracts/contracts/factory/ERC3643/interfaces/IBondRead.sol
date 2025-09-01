@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-interface TRexIBond {
+interface TRexIBondRead {
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;
@@ -239,20 +239,6 @@ interface TRexIBond {
         uint8 decimals;
         bool recordDateReached;
     }
-
-    function redeemAtMaturityByPartition(
-        address _tokenHolder,
-        bytes32 _partition,
-        uint256 _amount
-    ) external;
-
-    function setCoupon(
-        Coupon calldata _newCoupon
-    ) external returns (bool success_, uint256 couponID_);
-
-    function updateMaturityDate(
-        uint256 _maturityDate
-    ) external returns (bool success_);
 
     function getBondDetails()
         external

@@ -209,10 +209,6 @@ pragma solidity 0.8.18;
 import {BondRead} from '../../layer_2/bond/BondRead.sol';
 import {Security} from '../security/Security.sol';
 import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
-import {
     _BOND_READ_RESOLVER_KEY
 } from '../../layer_2/constants/resolverKeys.sol';
 import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';

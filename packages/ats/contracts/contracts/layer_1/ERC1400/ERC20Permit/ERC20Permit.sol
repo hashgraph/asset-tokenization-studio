@@ -219,6 +219,7 @@ import {
 } from '../../constants/values.sol';
 
 contract ERC20Permit is IERC20Permit, IStaticFunctionSelectors, Common {
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20Permit()
         external
         override

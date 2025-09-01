@@ -207,7 +207,7 @@
 
 pragma solidity 0.8.18;
 
-import '@openzeppelin/contracts/interfaces/IERC6372.sol';
+import {IERC6372} from '@openzeppelin/contracts/interfaces/IERC6372.sol';
 import {IVotes} from './IVotes.sol';
 
 // solhint-disable no-empty-blocks

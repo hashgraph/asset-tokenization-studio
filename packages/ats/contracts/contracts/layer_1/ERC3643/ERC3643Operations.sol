@@ -209,12 +209,9 @@ pragma solidity 0.8.18;
 import {
     _CONTROLLER_ROLE,
     _ISSUER_ROLE,
-    _AGENT_ROLE,
-    _TREX_OWNER_ROLE
+    _AGENT_ROLE
 } from '../constants/roles.sol';
 import {IERC3643Operations} from '../interfaces/ERC3643/IERC3643Operations.sol';
-import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
-import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
 import {Common} from '../common/Common.sol';
 
 abstract contract ERC3643Operations is IERC3643Operations, Common {

@@ -208,10 +208,6 @@ pragma solidity 0.8.18;
 
 import {ISecurity} from '../interfaces/ISecurity.sol';
 import {Common} from '../../layer_1/common/Common.sol';
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
 
 abstract contract Security is ISecurity, Common {
     function getSecurityHolders(
