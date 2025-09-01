@@ -213,7 +213,8 @@ import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
 import {
     _CORPORATE_ACTION_ROLE,
     _BOND_MANAGER_ROLE,
-    _MATURITY_REDEEMER_ROLE
+    _MATURITY_REDEEMER_ROLE,
+    _IR_CALCULATOR_MANAGER_ROLE
 } from '../../layer_1/constants/roles.sol';
 import {
     IStaticFunctionSelectors
@@ -292,6 +293,23 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         );
         success_ = _setMaturityDate(_newMaturityDate);
         return success_;
+    }
+
+    function setInterestRateCalculator(
+        address _newInterestRateCalculator
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_IR_CALCULATOR_MANAGER_ROLE)
+        returns (bool success_)
+    {
+        success_ = _setInterestRateCalculator(_newInterestRateCalculator);
+        emit InterestRateCalculatorSet(
+            address(this),
+            _msgSender(),
+            _newInterestRateCalculator
+        );
     }
 
     function getBondDetails()

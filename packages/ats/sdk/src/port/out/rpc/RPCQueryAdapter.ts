@@ -679,6 +679,7 @@ export class RPCQueryAdapter {
       new BigDecimal(res.nominalValue.toString()),
       res.startingDate.toNumber(),
       res.maturityDate.toNumber(),
+      res.interestRateCalculator
     );
   }
 

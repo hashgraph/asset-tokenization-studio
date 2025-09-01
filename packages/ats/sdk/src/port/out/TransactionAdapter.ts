@@ -513,6 +513,11 @@ interface ITransactionAdapter {
     amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  setInterestRateCalculator(
+    security: EvmAddress,
+    interestRateCalculatorId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 interface RoleTransactionAdapter {
@@ -1835,6 +1840,11 @@ export default abstract class TransactionAdapter
     partitionId: string,
     sourceId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract setInterestRateCalculator(
+    security: EvmAddress,
+    interestRateCalculatorId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }

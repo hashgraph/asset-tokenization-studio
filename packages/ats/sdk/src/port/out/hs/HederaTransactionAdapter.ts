@@ -604,6 +604,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         bondInfo.nominalValue.toString(),
         bondInfo.startingDate.toString(),
         bondInfo.maturityDate.toString(),
+        bondInfo.interestRateCalculator
       );
 
       const couponDetails: CouponDetailsData = {
@@ -3153,6 +3154,24 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       securityId,
       GAS.REDEEM_AT_MATURITY_BY_PARTITION_GAS,
       [sourceId.toString(), partitionId, amount.toBigNumber()],
+    );
+  }
+
+  async setInterestRateCalculator(
+    security: EvmAddress,
+    interestRateCalculatorId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting interest rate calculator to ${interestRateCalculatorId.toString()}`,
+    );
+    const contract = new Contract(security.toString(), Bond__factory.abi);
+    return this.executeWithArgs(
+      contract,
+      'setInterestRateCalculator',
+      securityId,
+      GAS.SET_INTEREST_RATE_CALCULATOR_GAS,
+      [security.toString(), interestRateCalculatorId.toString()],
     );
   }
 

@@ -233,6 +233,7 @@ export interface CreateVcArgs {
 // * Deploy
 export interface DeployArgs extends WithSigner {
     contractName: string
+    constructorArgs: string[]
 }
 
 export interface DeployAllArgs extends WithSigner {

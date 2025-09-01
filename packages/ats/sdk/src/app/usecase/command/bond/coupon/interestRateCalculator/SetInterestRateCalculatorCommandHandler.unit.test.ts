@@ -203,101 +203,119 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
-
-import {Bond} from '../../layer_2/bond/Bond.sol';
-import {Security} from '../security/Security.sol';
-import {IBondUSA} from '../interfaces/IBondUSA.sol';
 import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
-import {_BOND_RESOLVER_KEY} from '../../layer_2/constants/resolverKeys.sol';
-import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
-import {ISecurity} from '../interfaces/ISecurity.sol';
+  SetInterestRateCalculatorCommand,
+  SetInterestRateCalculatorCommandResponse,
+} from './SetInterestRateCalculatorCommand';
+import { SetInterestRateCalculatorCommandHandler } from './SetInterestRateCalculatorCommandHandler';
+import { SetInterestRateCalculatorCommandFixture } from '@test/fixtures/bond/BondFixture';
+import { createMock } from '@golevelup/ts-jest';
+import TransactionService from '@service/transaction/TransactionService';
+import {
+  AccountPropsFixture,
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { ErrorCode } from '@core/error/BaseError';
+import { SetInterestRateCalculatorCommandError } from './error/SetInterestRateCalculatorCommandError';
+import ValidationService from '@service/validation/ValidationService';
+import AccountService from '@service/account/AccountService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 
-contract BondUSA is IBondUSA, Bond, Security {
-    // solhint-disable func-name-mixedcase
-    // solhint-disable-next-line private-vars-leading-underscore
-    function _initialize_bondUSA(
-        BondDetailsData calldata _bondDetailsData,
-        CouponDetailsData calldata _couponDetailsData,
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) external override onlyUninitialized(_bondStorage().initialized) {
-        _initialize_bond(_bondDetailsData, _couponDetailsData);
-        _initializeSecurity(_regulationData, _additionalSecurityData);
-    }
+describe('SetInterestRateCalculatorCommandHandler', () => {
+  let handler: SetInterestRateCalculatorCommandHandler;
+  let command: SetInterestRateCalculatorCommand;
+  const transactionServiceMock = createMock<TransactionService>();
+  const contractServiceMock = createMock<ContractService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
 
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _BOND_RESOLVER_KEY;
-    }
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const account = new Account(AccountPropsFixture.create());
+  const errorMsg = ErrorMsgFixture.create().msg;
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](15);
-        staticFunctionSelectors_[selectorIndex++] = this
-            ._initialize_bondUSA
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .updateMaturityDate
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getBondDetails
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponDetails
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalCouponHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getSecurityRegulationData
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .redeemAtMaturityByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getSecurityHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalSecurityHolders
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setInterestRateCalculator
-            .selector;
-    }
+  beforeEach(() => {
+    handler = new SetInterestRateCalculatorCommandHandler(
+      transactionServiceMock,
+      contractServiceMock,
+      validationServiceMock,
+      accountServiceMock,
+    );
+    command = SetInterestRateCalculatorCommandFixture.create();
+  });
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](3);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IBond).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
-    }
-}
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws SetInterestRateCalculatorCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          SetInterestRateCalculatorCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while setting the interest rate calculator: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully set interest rate calculator', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+
+        transactionServiceMock
+          .getHandler()
+          .setInterestRateCalculator.mockResolvedValue({
+            id: transactionId,
+          });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(SetInterestRateCalculatorCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.interestRateCalculatorId,
+        );
+
+        expect(
+          transactionServiceMock.getHandler().setInterestRateCalculator,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._IR_CALCULATOR_MANAGER_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+
+        expect(
+          transactionServiceMock.getHandler().setInterestRateCalculator,
+        ).toHaveBeenCalledWith(evmAddress, evmAddress, command.securityId);
+      });
+    });
+  });
+});

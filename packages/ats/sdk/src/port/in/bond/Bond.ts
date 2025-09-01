@@ -248,6 +248,8 @@ import {
 } from '../request';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
+import SetInterestRateCalculatorRequest from '../request/bond/SetInterestRateCalculatorRequest';
+import { SetInterestRateCalculatorCommand } from '@command/bond/coupon/interestRateCalculator/SetInterestRateCalculatorCommand';
 
 interface IBondInPort {
   create(
@@ -271,6 +273,9 @@ interface IBondInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]>;
   getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
+  setInterestRateCalculator(
+    request: SetInterestRateCalculatorRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class BondInPort implements IBondInPort {
@@ -512,6 +517,24 @@ class BondInPort implements IBondInPort {
         partitionId,
         sourceId,
         amount,
+      ),
+    );
+  }
+
+  @LogError
+  async setInterestRateCalculator(
+    request: SetInterestRateCalculatorRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, interestRateCalculatorId } = request;
+    ValidatedRequest.handleValidation(
+      SetInterestRateCalculatorRequest.name,
+      request,
+    );
+
+    return await this.commandBus.execute(
+      new SetInterestRateCalculatorCommand(
+        securityId,
+        interestRateCalculatorId,
       ),
     );
   }

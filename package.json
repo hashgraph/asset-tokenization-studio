@@ -22,7 +22,7 @@
     "clean:deps": "rimraf packages/*/node_modules packages/*/*/node_modules apps/*/node_modules apps/*/*/node_modules node_modules && echo '\n✅ Dependency files cleaned (package-lock.json preserved)'",
     "clean:deps:full": "npm run clean:deps && rimraf package-lock.json && echo '\n✅ All dependency files have been cleaned (including package-lock.json)'",
     "lint:staged:js": "eslint --cache",
-    "lint:staged:sol": "solhint --config packages/ats/contracts/.solhint.json",
+    "lint:staged:sol": "solhint --config packages/ats/contracts/.solhint.json --ignore-path packages/ats/contracts/.solhintignore",
     "format:staged": "prettier --check",
     "pre-commit": "lint-staged",
     "commitlint": "commitlint --edit",
