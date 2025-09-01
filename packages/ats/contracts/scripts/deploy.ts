@@ -217,6 +217,8 @@ import {
     AdjustBalancesTimeTravel__factory,
     BondUSA__factory,
     BondUSATimeTravel__factory,
+    BondUSARead__factory,
+    BondUSAReadTimeTravel__factory,
     BusinessLogicResolver__factory,
     Cap__factory,
     CapTimeTravel__factory,
@@ -241,6 +243,8 @@ import {
     ERC20Permit__factory,
     ERC20PermitTimeTravel__factory,
     ERC20TimeTravel__factory,
+    ERC20Votes__factory,
+    ERC20VotesTimeTravel__factory,
     Factory__factory,
     Kyc__factory,
     KycTimeTravel__factory,
@@ -289,10 +293,14 @@ import {
     ExternalKycListManagementTimeTravel__factory,
     ERC1410TokenHolderFacet__factory,
     ERC1410TokenHolderTimeTravel__factory,
-    ERC3643Facet__factory,
+    ERC3643ManagementFacet__factory,
+    ERC3643ManagementTimeTravel__factory,
+    ERC3643ReadFacet__factory,
+    ERC3643ReadTimeTravel__factory,
+    ERC3643OperationsFacet__factory,
+    ERC3643OperationsTimeTravel__factory,
     ERC3643BatchFacet__factory,
     ERC3643BatchTimeTravel__factory,
-    ERC3643TimeTravel__factory,
     FreezeFacet__factory,
     FreezeFacetTimeTravel__factory,
 } from '@typechain'
@@ -591,6 +599,17 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        erc20Votes: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC20Votes__factory(),
+                new ERC20VotesTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC20Votes.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
         erc1410ReadFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ERC1410ReadFacet__factory(),
@@ -699,6 +718,17 @@ export async function deployAtsContracts({
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.BondUSA.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        bondUsaRead: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new BondUSARead__factory(),
+                new BondUSAReadTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.BondUSARead.addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -885,14 +915,40 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        erc3643Facet: new DeployContractWithFactoryCommand({
+        erc3643ManagementFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new ERC3643Facet__factory(),
-                new ERC3643TimeTravel__factory()
+                new ERC3643ManagementFacet__factory(),
+                new ERC3643ManagementTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ERC3643Facet.addresses?.[network]
+                ? Configuration.contracts.ERC3643ManagementFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        erc3643OperationsFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC3643OperationsFacet__factory(),
+                new ERC3643OperationsTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC3643OperationsFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        erc3643ReadFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC3643ReadFacet__factory(),
+                new ERC3643ReadTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC3643ReadFacet.addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -940,6 +996,9 @@ export async function deployAtsContracts({
                 console.log(
                     `BusinessLogicResolver has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `BusinessLogicResolver has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
             accessControl: await deployContractWithFactory(
@@ -955,6 +1014,9 @@ export async function deployAtsContracts({
                     console.log(
                         `Cap has been deployed successfully at ${result.address}`
                     )
+                    console.log(
+                        `Cap has been deployed successfully at ${result.address}`
+                    )
                     return result
                 }
             ),
@@ -964,10 +1026,16 @@ export async function deployAtsContracts({
                 console.log(
                     `ControlList has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `ControlList has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
             kyc: await deployContractWithFactory(commands.kyc).then(
                 (result) => {
+                    console.log(
+                        `KYC has been deployed successfully at ${result.address}`
+                    )
                     console.log(
                         `KYC has been deployed successfully at ${result.address}`
                     )
@@ -980,10 +1048,16 @@ export async function deployAtsContracts({
                 console.log(
                     `SSIManagement has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `SSIManagement has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
             pause: await deployContractWithFactory(commands.pause).then(
                 (result) => {
+                    console.log(
+                        `Pause has been deployed successfully at ${result.address}`
+                    )
                     console.log(
                         `Pause has been deployed successfully at ${result.address}`
                     )
@@ -992,6 +1066,9 @@ export async function deployAtsContracts({
             ),
             lock: await deployContractWithFactory(commands.lock).then(
                 (result) => {
+                    console.log(
+                        `Lock has been deployed successfully at ${result.address}`
+                    )
                     console.log(
                         `Lock has been deployed successfully at ${result.address}`
                     )
@@ -1024,6 +1101,9 @@ export async function deployAtsContracts({
             }),
             erc20: await deployContractWithFactory(commands.erc20).then(
                 (result) => {
+                    console.log(
+                        `ERC20 has been deployed successfully at ${result.address}`
+                    )
                     console.log(
                         `ERC20 has been deployed successfully at ${result.address}`
                     )
@@ -1062,8 +1142,19 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
+            erc20Votes: await deployContractWithFactory(
+                commands.erc20Votes
+            ).then((result) => {
+                console.log(
+                    `ERC20Votes has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
             erc1594: await deployContractWithFactory(commands.erc1594).then(
                 (result) => {
+                    console.log(
+                        `ERC1594 has been deployed successfully at ${result.address}`
+                    )
                     console.log(
                         `ERC1594 has been deployed successfully at ${result.address}`
                     )
@@ -1075,6 +1166,9 @@ export async function deployAtsContracts({
                     console.log(
                         `ERC1643 has been deployed successfully at ${result.address}`
                     )
+                    console.log(
+                        `ERC1643 has been deployed successfully at ${result.address}`
+                    )
                     return result
                 }
             ),
@@ -1083,11 +1177,17 @@ export async function deployAtsContracts({
                     console.log(
                         `ERC1644 has been deployed successfully at ${result.address}`
                     )
+                    console.log(
+                        `ERC1644 has been deployed successfully at ${result.address}`
+                    )
                     return result
                 }
             ),
             snapshots: await deployContractWithFactory(commands.snapshots).then(
                 (result) => {
+                    console.log(
+                        `Snapshots has been deployed successfully at ${result.address}`
+                    )
                     console.log(
                         `Snapshots has been deployed successfully at ${result.address}`
                     )
@@ -1100,10 +1200,16 @@ export async function deployAtsContracts({
                 console.log(
                     `DiamondFacet has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `DiamondFacet has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
             equityUsa: await deployContractWithFactory(commands.equityUsa).then(
                 (result) => {
+                    console.log(
+                        `EquityUSA has been deployed successfully at ${result.address}`
+                    )
                     console.log(
                         `EquityUSA has been deployed successfully at ${result.address}`
                     )
@@ -1115,12 +1221,29 @@ export async function deployAtsContracts({
                     console.log(
                         `BondUSA has been deployed successfully at ${result.address}`
                     )
+                    console.log(
+                        `BondUSA has been deployed successfully at ${result.address}`
+                    )
                     return result
                 }
             ),
+            bondUsaRead: await deployContractWithFactory(
+                commands.bondUsaRead
+            ).then((result) => {
+                console.log(
+                    `BondUSARead has been deployed successfully at ${result.address}`
+                )
+                console.log(
+                    `BondUSARead has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
             scheduledSnapshots: await deployContractWithFactory(
                 commands.scheduledSnapshots
             ).then((result) => {
+                console.log(
+                    `ScheduledSnapshots has been deployed successfully at ${result.address}`
+                )
                 console.log(
                     `ScheduledSnapshots has been deployed successfully at ${result.address}`
                 )
@@ -1132,11 +1255,17 @@ export async function deployAtsContracts({
                 console.log(
                     `ScheduledBalanceAdjustments has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `ScheduledBalanceAdjustments has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
             scheduledTasks: await deployContractWithFactory(
                 commands.scheduledTasks
             ).then((result) => {
+                console.log(
+                    `ScheduledTasks has been deployed successfully at ${result.address}`
+                )
                 console.log(
                     `ScheduledTasks has been deployed successfully at ${result.address}`
                 )
@@ -1148,11 +1277,17 @@ export async function deployAtsContracts({
                 console.log(
                     `CorporateActions has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `CorporateActions has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
             transferAndLock: await deployContractWithFactory(
                 commands.transferAndLock
             ).then((result) => {
+                console.log(
+                    `TransferAndLock has been deployed successfully at ${result.address}`
+                )
                 console.log(
                     `TransferAndLock has been deployed successfully at ${result.address}`
                 )
@@ -1164,11 +1299,17 @@ export async function deployAtsContracts({
                 console.log(
                     `AdjustBalances has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `AdjustBalances has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
             protectedPartitions: await deployContractWithFactory(
                 commands.protectedPartitions
             ).then((result) => {
+                console.log(
+                    `ProtectedPartitions has been deployed successfully at ${result.address}`
+                )
                 console.log(
                     `ProtectedPartitions has been deployed successfully at ${result.address}`
                 )
@@ -1180,11 +1321,17 @@ export async function deployAtsContracts({
                 console.log(
                     `ClearingTransferFacet has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `ClearingTransferFacet has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
             clearingRedeemFacet: await deployContractWithFactory(
                 commands.clearingRedeemFacet
             ).then((result) => {
+                console.log(
+                    `ClearingRedeemFacet has been deployed successfully at ${result.address}`
+                )
                 console.log(
                     `ClearingRedeemFacet has been deployed successfully at ${result.address}`
                 )
@@ -1196,11 +1343,17 @@ export async function deployAtsContracts({
                 console.log(
                     `ClearingHoldCreationFacet has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `ClearingHoldCreationFacet has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
             clearingReadFacet: await deployContractWithFactory(
                 commands.clearingReadFacet
             ).then((result) => {
+                console.log(
+                    `ClearingReadFacet has been deployed successfully at ${result.address}`
+                )
                 console.log(
                     `ClearingReadFacet has been deployed successfully at ${result.address}`
                 )
@@ -1212,11 +1365,17 @@ export async function deployAtsContracts({
                 console.log(
                     `ClearingActionsFacet has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `ClearingActionsFacet has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
             externalPauseManagement: await deployContractWithFactory(
                 commands.externalPauseManagement
             ).then((result) => {
+                console.log(
+                    `ExternalPauseManagement has been deployed successfully at ${result.address}`
+                )
                 console.log(
                     `ExternalPauseManagement has been deployed successfully at ${result.address}`
                 )
@@ -1228,6 +1387,9 @@ export async function deployAtsContracts({
                 console.log(
                     `ExternalControlListManagement has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `ExternalControlListManagement has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
             externalKycListManagement: await deployContractWithFactory(
@@ -1236,13 +1398,32 @@ export async function deployAtsContracts({
                 console.log(
                     `ExternalKycListManagement has been deployed successfully at ${result.address}`
                 )
+                console.log(
+                    `ExternalKycListManagement has been deployed successfully at ${result.address}`
+                )
                 return result
             }),
-            erc3643Facet: await deployContractWithFactory(
-                commands.erc3643Facet
+            erc3643ManagementFacet: await deployContractWithFactory(
+                commands.erc3643ManagementFacet
             ).then((result) => {
                 console.log(
-                    `ERC3643Basic has been deployed successfully at ${result.address}`
+                    `ERC3643Management has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
+            erc3643OperationsFacet: await deployContractWithFactory(
+                commands.erc3643OperationsFacet
+            ).then((result) => {
+                console.log(
+                    `ERC3643Operations has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
+            erc3643ReadFacet: await deployContractWithFactory(
+                commands.erc3643ReadFacet
+            ).then((result) => {
+                console.log(
+                    `ERC3643Read has been deployed successfully at ${result.address}`
                 )
                 return result
             }),
@@ -1259,12 +1440,18 @@ export async function deployAtsContracts({
                     console.log(
                         `Freeze has been deployed successfully at ${result.address}`
                     )
+                    console.log(
+                        `Freeze has been deployed successfully at ${result.address}`
+                    )
                     return result
                 }
             ),
             timeTravel: commands.timeTravel
                 ? await deployContractWithFactory(commands.timeTravel).then(
                       (result) => {
+                          console.log(
+                              `TimeTravel has been deployed successfully at ${result.address}`
+                          )
                           console.log(
                               `TimeTravel has been deployed successfully at ${result.address}`
                           )

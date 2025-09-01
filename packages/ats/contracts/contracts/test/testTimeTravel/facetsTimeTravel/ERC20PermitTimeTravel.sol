@@ -192,4 +192,13 @@ contract ERC20PermitTimeTravel is ERC20Permit, TimeTravelStorageWrapper {
     {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
+
+    function _blockNumber()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockNumber();
+    }
 }

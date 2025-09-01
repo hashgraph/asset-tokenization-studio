@@ -242,6 +242,7 @@ export interface SecurityProps {
   type?: SecurityType;
   decimals: number;
   isWhiteList: boolean;
+  erc20VotesActivated: boolean;
   isControllable: boolean;
   arePartitionsProtected: boolean;
   clearingActive: boolean;
@@ -271,6 +272,7 @@ export class Security
   type?: SecurityType;
   decimals: number;
   isWhiteList: boolean;
+  erc20VotesActivated: boolean;
   isControllable: boolean;
   isMultiPartition: boolean;
   arePartitionsProtected: boolean;
@@ -315,6 +317,7 @@ export class Security
       type,
       decimals,
       isWhiteList,
+      erc20VotesActivated,
       isControllable,
       arePartitionsProtected,
       clearingActive,
@@ -339,6 +342,7 @@ export class Security
     this.type = type;
     this.decimals = decimals;
     this.isWhiteList = isWhiteList;
+    this.erc20VotesActivated = erc20VotesActivated;
     this.isControllable = isControllable;
     this.arePartitionsProtected = arePartitionsProtected;
     this.clearingActive = clearingActive;

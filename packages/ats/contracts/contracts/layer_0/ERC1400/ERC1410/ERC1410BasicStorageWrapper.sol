@@ -209,8 +209,8 @@ pragma solidity 0.8.18;
 import {_DEFAULT_PARTITION} from '../../constants/values.sol';
 import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {
-    IERC3643Basic
-} from '../../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
+    IERC3643Management
+} from '../../../layer_1/interfaces/ERC3643/IERC3643Management.sol';
 import {
     BasicTransferInfo
 } from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
@@ -260,28 +260,14 @@ abstract contract ERC1410BasicStorageWrapper is
                 _basicTransferInfo.to,
                 _partition
             );
-
-            if (
-                _from != _basicTransferInfo.to &&
-                _partition == _DEFAULT_PARTITION
-            ) {
-                (_erc3643Storage().compliance).functionCall(
-                    abi.encodeWithSelector(
-                        ICompliance.transferred.selector,
-                        _from,
-                        _basicTransferInfo.to,
-                        _basicTransferInfo.value
-                    ),
-                    IERC3643Basic.ComplianceCallFailed.selector
-                );
-            }
-            return bytes32(0);
+        } else {
+            _increaseBalanceByPartition(
+                _basicTransferInfo.to,
+                _basicTransferInfo.value,
+                _partition
+            );
         }
-        _increaseBalanceByPartition(
-            _basicTransferInfo.to,
-            _basicTransferInfo.value,
-            _partition
-        );
+
         if (
             _from != _basicTransferInfo.to && _partition == _DEFAULT_PARTITION
         ) {
@@ -292,14 +278,28 @@ abstract contract ERC1410BasicStorageWrapper is
                     _basicTransferInfo.to,
                     _basicTransferInfo.value
                 ),
-                IERC3643Basic.ComplianceCallFailed.selector
+                IERC3643Management.ComplianceCallFailed.selector
             );
         }
+
+        _afterTokenTransfer(
+            _partition,
+            _from,
+            _basicTransferInfo.to,
+            _basicTransferInfo.value
+        );
 
         return bytes32(0);
     }
 
     function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual;
+
+    function _afterTokenTransfer(
         bytes32 partition,
         address from,
         address to,
