@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -203,294 +205,215 @@
 
 */
 
-import dotenv from 'dotenv'
+pragma solidity ^0.8.17;
 
-// Load the `.env` file
-dotenv.config()
+// solhint-disable no-global-import
+// solhint-disable no-empty-blocks
+// solhint-disable private-vars-leading-underscore
+import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
+import {TRexIFactory, FactoryRegulationData} from './interfaces/IFactory.sol';
+import {TREXBondDeploymentLib} from './libraries/TREXBondDeploymentLib.sol';
+import {TREXEquityDeploymentLib} from './libraries/TREXEquityDeploymentLib.sol';
 
-const EMPTY_STRING = ''
-export const NETWORKS = [
-    'hardhat',
-    'local',
-    'previewnet',
-    'testnet',
-    'mainnet',
-] as const
-export type Network = (typeof NETWORKS)[number]
+/// @author Tokeny Solutions
+/// @notice Adapted from the T-REX official repository to deploy an ERC-3643-compatible ATS security token
+/// @dev Uses tree-like structure with libraries as leaves instead of resolver proxy pattern for simplicity
+// solhint-disable custom-errors
+contract TREXFactoryAts is ITREXFactory, Ownable {
+    /// @notice TokenDetails with the ATS factory overlapping fields removed
+    /// @param owner Address of the owner of all contracts. The factory will append it to the provided RBACs if
+    /// the T_REX_OWNER_ROLE is not found. For a cheaper deployment, add the owner at the first position in the array
+    /// @param irs Identity registry storage address. Set it to ZERO address if you want to deploy a new storage.
+    /// If an address is provided, please ensure that the factory is set as owner of the contract
+    /// @param ONCHAINID ONCHAINID of the token
+    /// @param irAgents List of agents of the identity registry (can be set to an AgentManager contract)
+    /// @param tokenAgents List of agents of the token
+    /// @param complianceModules Modules to bind to the compliance, indexes are corresponding to the settings
+    /// callData indexes
+    /// If a module doesn't require settings, it can be added at the end of the array, at index > settings.length
+    /// @param complianceSettings Settings calls for compliance modules
+    struct TokenDetailsAts {
+        address owner;
+        address irs;
+        // solhint-disable-next-line var-name-mixedcase
+        address ONCHAINID;
+        address[] irAgents;
+        address[] tokenAgents;
+        address[] complianceModules;
+        bytes[] complianceSettings;
+    }
 
-export const DEPLOY_TYPES = ['proxy', 'direct'] as const
-export type DeployType = (typeof DEPLOY_TYPES)[number]
+    /// @dev The address of the implementation authority contract used in the tokens deployed by the factory
+    address private implementationAuthority;
 
-export const CONTRACT_NAMES = [
-    'TransparentUpgradeableProxy',
-    'ProxyAdmin',
-    'Factory',
-    'BusinessLogicResolver',
-    'AccessControlFacet',
-    'Cap',
-    'ControlList',
-    'PauseFacet',
-    'ERC20',
-    'ERC20Permit',
-    'ERC1410ScheduledTasks',
-    'ERC1410ReadFacet',
-    'ERC1410ManagementFacet',
-    'ERC1410TokenHolderFacet',
-    'ERC1594',
-    'ERC1643',
-    'ERC1644',
-    'DiamondFacet',
-    'EquityUSA',
-    'BondUSA',
-    'ScheduledSnapshots',
-    'ScheduledBalanceAdjustments',
-    'ScheduledTasks',
-    'Snapshots',
-    'CorporateActions',
-    'TransferAndLock',
-    'Lock',
-    'AdjustBalances',
-    'ProtectedPartitions',
-    'HoldReadFacet',
-    'HoldTokenHolderFacet',
-    'HoldManagementFacet',
-    'TimeTravel',
-    'Kyc',
-    'SsiManagement',
-    'ClearingHoldCreationFacet',
-    'ClearingRedeemFacet',
-    'ClearingTransferFacet',
-    'ClearingReadFacet',
-    'ClearingActionsFacet',
-    'ExternalPauseManagement',
-    'ExternalControlListManagement',
-    'ExternalKycListManagement',
-    'ERC3643',
-    'FreezeFacet',
-    'ERC3643Facet',
-    'ERC3643BatchFacet',
-    'FreezeFacet',
-    'TREXFactoryAts',
-    'ComplianceMock',
-    'IdentityRegistryMock',
-] as const
-export type ContractName = (typeof CONTRACT_NAMES)[number]
+    /// @dev The address of the Identity Factory used to deploy token OIDs
+    address private idFactory;
 
-export const LIBRARY_NAMES = [
-    'SecurityDeploymentLib',
-    'TREXBaseDeploymentLib',
-    'TREXBondDeploymentLib',
-    'TREXEquityDeploymentLib',
-] as const
-export type LibraryName = (typeof LIBRARY_NAMES)[number]
+    /// @dev Mapping containing info about the token contracts corresponding to salt already used for
+    /// CREATE2 deployments
+    mapping(string => address) public tokenDeployed;
 
-export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
+    /// @dev The address of the ATS suite factory
+    address private atsFactory;
 
-export const CONTRACT_FACTORY_NAMES = CONTRACT_NAMES.map(
-    (name) => `${name}__factory`
-)
-export type ContractFactoryName = (typeof CONTRACT_FACTORY_NAMES)[number]
-
-export interface Endpoints {
-    jsonRpc: string
-    mirror: string
-}
-
-export interface DeployedContract {
-    address: string
-    proxyAddress?: string
-    proxyAdminAddress?: string
-}
-
-export interface ContractConfig {
-    name: ContractName
-    factoryName: ContractFactoryName
-    deployType: DeployType
-    addresses?: Record<Network, DeployedContract>
-}
-
-export default class Configuration {
-    // private _privateKeys: Record<Network, string[]>;
-    // private _endpoints: Record<Network, Endpoints>;
-    // private _contracts: Record<ContractName, ContractConfig>;
     /**
-     * Determines whether the contract sizer should run on compile.
-     *
-     * @returns {boolean} True if the contract sizer should run on compile, false otherwise.
+     * @dev Constructor is setting the implementation authority and the Identity Factory of the TREX factory
+     * @dev The constructor has been adjusted to allow null addresses later set by the owner
      */
-    public static get contractSizerRunOnCompile(): boolean {
-        return (
-            Configuration._getEnvironmentVariable({
-                name: 'CONTRACT_SIZER_RUN_ON_COMPILE',
-                defaultValue: 'true',
-            }).toLowerCase() === 'true'
-        )
+    constructor(
+        address _implementationAuthority,
+        address _idFactory,
+        address _atsFactory
+    ) {
+        implementationAuthority = _implementationAuthority;
+        idFactory = _idFactory;
+        atsFactory = _atsFactory;
     }
 
     /**
-     * Determines whether gas reporting is enabled.
-     *
-     * @returns {boolean} True if gas reporting is enabled, false otherwise.
+     *  @dev See {ITREXFactory-deployTREXSuite}.
+     *  @dev Disabled
      */
-    public static get reportGas(): boolean {
-        return (
-            Configuration._getEnvironmentVariable({
-                name: 'REPORT_GAS',
-                defaultValue: 'true',
-            }).toLowerCase() === 'true'
-        )
-    }
-
-    public static get privateKeys(): Record<Network, string[]> {
-        return NETWORKS.reduce(
-            (result, network) => {
-                result[network] = Configuration._getEnvironmentVariableList({
-                    name: `${network.toUpperCase()}_PRIVATE_KEY_#`,
-                })
-                return result
-            },
-            {} as Record<Network, string[]>
-        )
-    }
-
-    public static get endpoints(): Record<Network, Endpoints> {
-        return NETWORKS.reduce(
-            (result, network) => {
-                result[network] = {
-                    jsonRpc: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_JSON_RPC_ENDPOINT`,
-                        defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:7546'
-                                : `https://${network}.hash.io/api`,
-                    }),
-                    mirror: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_MIRROR_NODE_ENDPOINT`,
-                        defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:5551'
-                                : `https://${network}.mirrornode.hedera.com`,
-                    }),
-                }
-                return result
-            },
-            {} as Record<Network, Endpoints>
-        )
-    }
-
-    public static get contracts(): Record<ContractName, ContractConfig> {
-        const contracts: Record<ContractName, ContractConfig> = {} as Record<
-            ContractName,
-            ContractConfig
-        >
-        CONTRACT_NAMES.forEach((contractName) => {
-            contracts[contractName] = {
-                name: contractName,
-                factoryName: `${contractName}__factory`,
-                deployType: CONTRACT_NAMES_WITH_PROXY.includes(contractName)
-                    ? 'proxy'
-                    : 'direct',
-                addresses: Configuration._getDeployedAddresses({
-                    contractName,
-                }),
-            }
-        })
-        return contracts
-    }
-
-    // * Private methods
+    function deployTREXSuite(
+        string memory _salt,
+        TokenDetails calldata _tokenDetails,
+        ClaimDetails calldata _claimDetails
+    ) external {}
 
     /**
-     * Retrieves the deployed contract addresses for a given contract name across different networks.
-     *
-     * @param {Object} params - The parameters object.
-     * @param {ContractName} params.contractName - The name of the contract to get deployed addresses for.
-     * @returns {Record<Network, DeployedContract>} An object mapping each network to its deployed contract details.
-     *
-     * The function iterates over all available networks and fetches the contract address, proxy address,
-     * and proxy admin address from environment variables. If the contract address is found, it adds the
-     * details to the returned object.
+     *  @dev See {ITREXFactory-deployTREXSuite}.
+     *  @dev Original method adapted to deploy an ATS equity
      */
-    private static _getDeployedAddresses({
-        contractName,
-    }: {
-        contractName: ContractName
-    }): Record<Network, DeployedContract> {
-        const deployedAddresses: Record<Network, DeployedContract> =
-            {} as Record<Network, DeployedContract>
-
-        NETWORKS.forEach((network) => {
-            const address = Configuration._getEnvironmentVariable({
-                name: `${network.toUpperCase()}_${contractName.toUpperCase()}`,
-                defaultValue: EMPTY_STRING,
-            })
-
-            if (address !== EMPTY_STRING) {
-                const proxyAddress = Configuration._getEnvironmentVariable({
-                    name: `${network.toUpperCase()}_${contractName}_PROXY`,
-                    defaultValue: EMPTY_STRING,
-                })
-                const proxyAdminAddress = Configuration._getEnvironmentVariable(
-                    {
-                        name: `${network.toUpperCase()}_${contractName}_PROXY_ADMIN`,
-                        defaultValue: EMPTY_STRING,
-                    }
-                )
-
-                deployedAddresses[network] = {
-                    address,
-                    ...(proxyAddress !== EMPTY_STRING && { proxyAddress }),
-                    ...(proxyAdminAddress !== EMPTY_STRING && {
-                        proxyAdminAddress,
-                    }),
-                }
-            }
-        })
-
-        return deployedAddresses
+    function deployTREXSuiteAtsEquity(
+        string memory _salt,
+        TokenDetailsAts calldata _tokenDetails,
+        ClaimDetails calldata _claimDetails,
+        TRexIFactory.EquityData calldata _equityData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external {
+        TREXEquityDeploymentLib.deployTREXSuiteAtsEquity(
+            tokenDeployed,
+            implementationAuthority,
+            idFactory,
+            atsFactory,
+            _salt,
+            _tokenDetails,
+            _claimDetails,
+            _equityData,
+            _factoryRegulationData
+        );
     }
 
-    private static _getEnvironmentVariableList({
-        name,
-        indexChar = '#',
-    }: {
-        name: string
-        indexChar?: string
-    }): string[] {
-        const resultList: string[] = []
-        let index = 0
-        do {
-            const env = Configuration._getEnvironmentVariable({
-                name: name.replace(indexChar, `${index}`),
-                defaultValue: EMPTY_STRING,
-            })
-            if (env !== EMPTY_STRING) {
-                resultList.push(env)
-            }
-            index++
-        } while (resultList.length === index)
-        return resultList
+    /**
+     *  @dev See {ITREXFactory-deployTREXSuite}.
+     *  @dev Original method adapted to deploy an ATS bond
+     */
+    function deployTREXSuiteAtsBond(
+        string memory _salt,
+        TokenDetailsAts calldata _tokenDetails,
+        ClaimDetails calldata _claimDetails,
+        TRexIFactory.BondData calldata _bondData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external {
+        TREXBondDeploymentLib.deployTREXSuiteAtsBond(
+            tokenDeployed,
+            implementationAuthority,
+            idFactory,
+            atsFactory,
+            _salt,
+            _tokenDetails,
+            _claimDetails,
+            _bondData,
+            _factoryRegulationData
+        );
     }
 
-    private static _getEnvironmentVariable({
-        name,
-        defaultValue,
-    }: {
-        name: string
-        defaultValue?: string
-    }): string {
-        const value = process.env?.[name]
-        if (value) {
-            return value
-        }
-        if (defaultValue !== undefined) {
-            // console.warn(
-            //     `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
-            // )
-            return defaultValue
-        }
-        throw new Error(
-            `Environment variable "${name}" is not defined. Please set the "${name}" environment variable.`
-        )
+    /**
+     *  @inheritdoc ITREXFactory
+     */
+    function recoverContractOwnership(
+        address _contract,
+        address _newOwner
+    ) external override onlyOwner {
+        (Ownable(_contract)).transferOwnership(_newOwner);
+    }
+
+    /**
+     *  @inheritdoc ITREXFactory
+     */
+    function setImplementationAuthority(
+        address _implementationAuthority
+    ) external override onlyOwner {
+        require(
+            _implementationAuthority != address(0),
+            'invalid argument - zero address'
+        );
+        // should not be possible to set an implementation authority that is not complete
+        require(
+            (ITREXImplementationAuthority(_implementationAuthority))
+                .getCTRImplementation() !=
+                address(0) &&
+                (ITREXImplementationAuthority(_implementationAuthority))
+                    .getIRImplementation() !=
+                address(0) &&
+                (ITREXImplementationAuthority(_implementationAuthority))
+                    .getIRSImplementation() !=
+                address(0) &&
+                (ITREXImplementationAuthority(_implementationAuthority))
+                    .getMCImplementation() !=
+                address(0) &&
+                (ITREXImplementationAuthority(_implementationAuthority))
+                    .getTIRImplementation() !=
+                address(0),
+            'invalid Implementation Authority'
+        );
+        implementationAuthority = _implementationAuthority;
+        emit ImplementationAuthoritySet(_implementationAuthority);
+    }
+
+    /**
+     *  @inheritdoc ITREXFactory
+     */
+    function setIdFactory(address _idFactory) external override onlyOwner {
+        require(_idFactory != address(0), 'invalid argument - zero address');
+        idFactory = _idFactory;
+        emit IdFactorySet(_idFactory);
+    }
+
+    /**
+     *  @dev Sets the address of the ATS factory
+     */
+    function setAtsFactory(address _atsFactory) external onlyOwner {
+        require(_atsFactory != address(0), 'invalid argument - zero address');
+        atsFactory = _atsFactory;
+    }
+
+    /**
+     *  @inheritdoc ITREXFactory
+     */
+    function getImplementationAuthority()
+        external
+        view
+        override
+        returns (address)
+    {
+        return implementationAuthority;
+    }
+
+    /**
+     *  @inheritdoc ITREXFactory
+     */
+    function getIdFactory() external view override returns (address) {
+        return idFactory;
+    }
+
+    /**
+     *  @inheritdoc ITREXFactory
+     */
+    function getToken(
+        string calldata _salt
+    ) external view override returns (address) {
+        return tokenDeployed[_salt];
     }
 }
