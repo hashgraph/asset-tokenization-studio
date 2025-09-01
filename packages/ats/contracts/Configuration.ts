@@ -273,6 +273,15 @@ export const CONTRACT_NAMES = [
     'TREXFactoryAts',
     'ComplianceMock',
     'IdentityRegistryMock',
+    'IdFactory',
+    'ClaimTopicsRegistry',
+    'IdentityRegistryStorage',
+    'IdentityRegistry',
+    'ModularCompliance',
+    'TrustedIssuersRegistry',
+    'TREXImplementationAuthority',
+    'ImplementationAuthority',
+    'Identity',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]
 

@@ -212,6 +212,7 @@ import {
     GetSignerResult,
 } from './Arguments'
 import * as fs from 'fs'
+import { TREXImplementationAuthority } from '@typechain'
 
 task(
     'deployAll',
@@ -521,6 +522,9 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
         const {
             deployContractWithLibraries,
             DeployContractWithLibraryCommand,
+            deployContract,
+            DeployContractCommand,
+            addressListToHederaIdList,
             ADDRESS_ZERO,
         } = await import('@scripts')
 
@@ -535,11 +539,123 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
             './utils/errorHandling'
         )
 
-        // Validate and prepare deployment parameters
-        const implementationAuthority =
+        let implementationAuthority =
             args.implementationAuthority ?? ADDRESS_ZERO
-        const idFactory = args.idFactory ?? ADDRESS_ZERO
-        const atsFactory = args.atsFactory ?? ADDRESS_ZERO
+        let idFactory = args.idFactory ?? ADDRESS_ZERO
+        const atsFactory =
+            args.atsFactory ??
+            (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'Factory',
+                        signer,
+                    })
+                )
+            ).address
+
+        if (idFactory == ADDRESS_ZERO) {
+            const identityImplementation = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'Identity',
+                        signer,
+                        args: [signer.address, false],
+                    })
+                )
+            ).address
+            const identityIa = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'ImplementationAuthority',
+                        signer,
+                        args: [identityImplementation],
+                    })
+                )
+            ).address
+            idFactory = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'IdFactory',
+                        signer,
+                        args: [identityIa],
+                    })
+                )
+            ).address
+        }
+
+        if (implementationAuthority == ADDRESS_ZERO) {
+            const ctrImplementation = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'ClaimTopicsRegistry',
+                        signer,
+                    })
+                )
+            ).address
+
+            const tirImplementation = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'TrustedIssuersRegistry',
+                        signer,
+                    })
+                )
+            ).address
+            const irsImplementation = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'IdentityRegistryStorage',
+                        signer,
+                    })
+                )
+            ).address
+            const irImplementation = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'IdentityRegistry',
+                        signer,
+                    })
+                )
+            ).address
+            const mcImplementation = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'ModularCompliance',
+                        signer,
+                    })
+                )
+            ).address
+
+            const implementationAuthorityContract = (
+                await deployContract(
+                    new DeployContractCommand({
+                        name: 'TREXImplementationAuthority',
+                        signer,
+                        args: [true, ADDRESS_ZERO, ADDRESS_ZERO],
+                    })
+                )
+            ).contract as TREXImplementationAuthority
+            implementationAuthority = implementationAuthorityContract.address
+            const versionStruct = {
+                major: 4,
+                minor: 0,
+                patch: 0,
+            }
+            const contractsStruct = {
+                tokenImplementation:
+                    '0x0000000000000000000000000000000000000001', // Any non-zero address will do
+                ctrImplementation,
+                irImplementation,
+                irsImplementation,
+                tirImplementation,
+                mcImplementation,
+            }
+
+            await implementationAuthorityContract.addAndUseTREXVersion(
+                versionStruct,
+                contractsStruct
+            )
+        }
 
         // Comprehensive parameter validation with warnings
         validateDeploymentParams(
@@ -550,15 +666,15 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
             },
             hre,
             {
-                allowZeroAddress: true,
+                allowZeroAddress: false,
                 warnOnZeroAddress: true,
                 strict: false, // Set to true for production deployments
             }
         )
 
-        console.log(`   Signer: ${signer.address}`)
+        console.log(`Signer: ${signer.address}`)
 
-        await deployContractWithLibraries(
+        const result = await deployContractWithLibraries(
             new DeployContractWithLibraryCommand({
                 name: `TREXFactoryAts`,
                 signer,
@@ -566,4 +682,13 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
                 libraries: ['TREXBondDeploymentLib', 'TREXEquityDeploymentLib'],
             })
         )
+
+        const [trexFactoryId] = await addressListToHederaIdList({
+            addressList: [result.address].filter(
+                (addr): addr is string => !!addr
+            ),
+            network: hre.network.name as Network,
+        })
+
+        console.log(`TREXFactoryAts deployed at ${trexFactoryId}`)
     })
