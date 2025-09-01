@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -203,119 +205,31 @@
 
 */
 
-import { HardhatUserConfig } from 'hardhat/config'
-import 'tsconfig-paths/register'
-import '@nomicfoundation/hardhat-toolbox'
-import '@nomicfoundation/hardhat-chai-matchers'
-import '@typechain/hardhat'
-import 'hardhat-contract-sizer'
-import 'hardhat-gas-reporter'
-import Configuration from '@configuration'
-import '@tasks'
-import 'hardhat-dependency-compiler'
+import { Signer } from 'ethers'
+import { ContractName, LibraryName } from '@configuration'
 
-const config: HardhatUserConfig = {
-    solidity: {
-        compilers: [
-            {
-                version: '0.8.18',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-            {
-                version: '0.8.17',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-        ],
-        settings: {
-            optimizer: {
-                enabled: true,
-                runs: 1,
-            },
-            evmVersion: 'london',
-        },
-    },
-    paths: {
-        sources: './contracts',
-        tests: './test/unitTests',
-        cache: './cache',
-        artifacts: './artifacts',
-    },
-    defaultNetwork: 'hardhat',
-    networks: {
-        hardhat: {
-            chainId: 1337,
-            blockGasLimit: 30_000_000,
-            hardfork: 'london',
-        },
-        local: {
-            url: Configuration.endpoints.local.jsonRpc,
-            accounts: Configuration.privateKeys.local,
-            timeout: 60_000,
-        },
-        previewnet: {
-            url: Configuration.endpoints.previewnet.jsonRpc,
-            accounts: Configuration.privateKeys.previewnet,
-            timeout: 120_000,
-        },
-        testnet: {
-            url: Configuration.endpoints.testnet.jsonRpc,
-            accounts: Configuration.privateKeys.testnet,
-            timeout: 120_000,
-        },
-        mainnet: {
-            url: Configuration.endpoints.mainnet.jsonRpc,
-            accounts: Configuration.privateKeys.mainnet,
-            timeout: 120_000,
-        },
-    },
-    contractSizer: {
-        alphaSort: true,
-        disambiguatePaths: false,
-        runOnCompile: Configuration.contractSizerRunOnCompile,
-    },
-    gasReporter: {
-        enabled: Configuration.reportGas,
-        showTimeSpent: true,
-        outputFile: 'gas-report.txt', // Force output to a file
-        noColors: true, // Recommended for file output
-    },
-    typechain: {
-        outDir: './typechain-types',
-        target: 'ethers-v5',
-    },
-    mocha: {
-        timeout: 3_000_000,
-    },
-    dependencyCompiler: {
-        paths: [
-            '@tokenysolutions/t-rex/contracts/registry/implementation/ClaimTopicsRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/TrustedIssuersRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistryStorage.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/compliance/modular/ModularCompliance.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/authority/TREXImplementationAuthority.sol',
-            '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/ClaimTopicsRegistryProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryStorageProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/ModularComplianceProxy.sol',
-            '@tokenysolutions/t-rex/contracts/compliance/legacy/DefaultCompliance.sol',
-            '@onchain-id/solidity/contracts/Identity.sol',
-            '@onchain-id/solidity/contracts/ClaimIssuer.sol',
-        ],
-    },
+interface DeployContractWithLibraryCommandParams {
+    name: ContractName
+    signer: Signer
+    libraries: LibraryName[]
+    args?: Array<unknown>
 }
 
-export default config
+export default class DeployContractWithLibraryCommand {
+    public readonly name: ContractName
+    public readonly signer: Signer
+    public readonly libraries: LibraryName[]
+    public readonly args: Array<unknown> = []
+
+    constructor({
+        name,
+        signer,
+        args = [],
+        libraries,
+    }: DeployContractWithLibraryCommandParams) {
+        this.name = name
+        this.signer = signer
+        this.args = args
+        this.libraries = libraries
+    }
+}

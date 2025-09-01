@@ -203,119 +203,141 @@
 
 */
 
-import { HardhatUserConfig } from 'hardhat/config'
-import 'tsconfig-paths/register'
-import '@nomicfoundation/hardhat-toolbox'
-import '@nomicfoundation/hardhat-chai-matchers'
-import '@typechain/hardhat'
-import 'hardhat-contract-sizer'
-import 'hardhat-gas-reporter'
-import Configuration from '@configuration'
-import '@tasks'
-import 'hardhat-dependency-compiler'
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.17;
 
-const config: HardhatUserConfig = {
-    solidity: {
-        compilers: [
-            {
-                version: '0.8.18',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-            {
-                version: '0.8.17',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-        ],
-        settings: {
-            optimizer: {
-                enabled: true,
-                runs: 1,
-            },
-            evmVersion: 'london',
-        },
-    },
-    paths: {
-        sources: './contracts',
-        tests: './test/unitTests',
-        cache: './cache',
-        artifacts: './artifacts',
-    },
-    defaultNetwork: 'hardhat',
-    networks: {
-        hardhat: {
-            chainId: 1337,
-            blockGasLimit: 30_000_000,
-            hardfork: 'london',
-        },
-        local: {
-            url: Configuration.endpoints.local.jsonRpc,
-            accounts: Configuration.privateKeys.local,
-            timeout: 60_000,
-        },
-        previewnet: {
-            url: Configuration.endpoints.previewnet.jsonRpc,
-            accounts: Configuration.privateKeys.previewnet,
-            timeout: 120_000,
-        },
-        testnet: {
-            url: Configuration.endpoints.testnet.jsonRpc,
-            accounts: Configuration.privateKeys.testnet,
-            timeout: 120_000,
-        },
-        mainnet: {
-            url: Configuration.endpoints.mainnet.jsonRpc,
-            accounts: Configuration.privateKeys.mainnet,
-            timeout: 120_000,
-        },
-    },
-    contractSizer: {
-        alphaSort: true,
-        disambiguatePaths: false,
-        runOnCompile: Configuration.contractSizerRunOnCompile,
-    },
-    gasReporter: {
-        enabled: Configuration.reportGas,
-        showTimeSpent: true,
-        outputFile: 'gas-report.txt', // Force output to a file
-        noColors: true, // Recommended for file output
-    },
-    typechain: {
-        outDir: './typechain-types',
-        target: 'ethers-v5',
-    },
-    mocha: {
-        timeout: 3_000_000,
-    },
-    dependencyCompiler: {
-        paths: [
-            '@tokenysolutions/t-rex/contracts/registry/implementation/ClaimTopicsRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/TrustedIssuersRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistryStorage.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/compliance/modular/ModularCompliance.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/authority/TREXImplementationAuthority.sol',
-            '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/ClaimTopicsRegistryProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryStorageProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/ModularComplianceProxy.sol',
-            '@tokenysolutions/t-rex/contracts/compliance/legacy/DefaultCompliance.sol',
-            '@onchain-id/solidity/contracts/Identity.sol',
-            '@onchain-id/solidity/contracts/ClaimIssuer.sol',
-        ],
-    },
+interface TRexIEquity {
+    enum DividendType {
+        NONE,
+        PREFERRED,
+        COMMON
+    }
+
+    struct EquityDetailsData {
+        bool votingRight;
+        bool informationRight;
+        bool liquidationRight;
+        bool subscriptionRight;
+        bool conversionRight;
+        bool redemptionRight;
+        bool putRight;
+        DividendType dividendRight;
+        bytes3 currency;
+        uint256 nominalValue;
+    }
+
+    struct Voting {
+        uint256 recordDate;
+        bytes data;
+    }
+
+    struct RegisteredVoting {
+        Voting voting;
+        uint256 snapshotId;
+    }
+
+    struct Dividend {
+        uint256 recordDate;
+        uint256 executionDate;
+        uint256 amount;
+    }
+
+    struct RegisteredDividend {
+        Dividend dividend;
+        uint256 snapshotId;
+    }
+
+    struct DividendFor {
+        uint256 tokenBalance;
+        uint256 amount;
+        uint256 recordDate;
+        uint256 executionDate;
+        uint8 decimals;
+        bool recordDateReached;
+    }
+
+    struct VotingFor {
+        uint256 tokenBalance;
+        uint256 recordDate;
+        bytes data;
+        uint8 decimals;
+        bool recordDateReached;
+    }
+
+    struct ScheduledBalanceAdjustment {
+        uint256 executionDate;
+        uint256 factor;
+        uint8 decimals;
+    }
+
+    function setDividends(
+        Dividend calldata _newDividend
+    ) external returns (bool success_, uint256 dividendID_);
+
+    function setVoting(
+        Voting calldata _newVoting
+    ) external returns (bool success_, uint256 voteID_);
+
+    function setScheduledBalanceAdjustment(
+        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    ) external returns (bool success_, uint256 balanceAdjustmentID_);
+
+    function getEquityDetails()
+        external
+        view
+        returns (EquityDetailsData memory equityDetailsData_);
+
+    function getDividends(
+        uint256 _dividendID
+    ) external view returns (RegisteredDividend memory registeredDividend_);
+
+    function getDividendsFor(
+        uint256 _dividendID,
+        address _account
+    ) external view returns (DividendFor memory dividendFor_);
+
+    function getDividendsCount() external view returns (uint256 dividendCount_);
+
+    function getDividendHolders(
+        uint256 _dividendID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalDividendHolders(
+        uint256 _dividendID
+    ) external view returns (uint256);
+
+    function getVoting(
+        uint256 _voteID
+    ) external view returns (RegisteredVoting memory registeredVoting_);
+
+    function getVotingFor(
+        uint256 _voteID,
+        address _account
+    ) external view returns (VotingFor memory votingFor_);
+
+    function getVotingCount() external view returns (uint256 votingCount_);
+
+    function getVotingHolders(
+        uint256 _voteID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalVotingHolders(
+        uint256 _voteID
+    ) external view returns (uint256);
+
+    function getScheduledBalanceAdjustment(
+        uint256 _balanceAdjustmentID
+    )
+        external
+        view
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
+
+    function getScheduledBalanceAdjustmentCount()
+        external
+        view
+        returns (uint256 balanceAdjustmentCount_);
 }
-
-export default config

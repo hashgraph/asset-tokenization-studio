@@ -203,119 +203,127 @@
 
 */
 
-import { HardhatUserConfig } from 'hardhat/config'
-import 'tsconfig-paths/register'
-import '@nomicfoundation/hardhat-toolbox'
-import '@nomicfoundation/hardhat-chai-matchers'
-import '@typechain/hardhat'
-import 'hardhat-contract-sizer'
-import 'hardhat-gas-reporter'
-import Configuration from '@configuration'
-import '@tasks'
-import 'hardhat-dependency-compiler'
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.17;
 
-const config: HardhatUserConfig = {
-    solidity: {
-        compilers: [
-            {
-                version: '0.8.18',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-            {
-                version: '0.8.17',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-        ],
-        settings: {
-            optimizer: {
-                enabled: true,
-                runs: 1,
-            },
-            evmVersion: 'london',
-        },
-    },
-    paths: {
-        sources: './contracts',
-        tests: './test/unitTests',
-        cache: './cache',
-        artifacts: './artifacts',
-    },
-    defaultNetwork: 'hardhat',
-    networks: {
-        hardhat: {
-            chainId: 1337,
-            blockGasLimit: 30_000_000,
-            hardfork: 'london',
-        },
-        local: {
-            url: Configuration.endpoints.local.jsonRpc,
-            accounts: Configuration.privateKeys.local,
-            timeout: 60_000,
-        },
-        previewnet: {
-            url: Configuration.endpoints.previewnet.jsonRpc,
-            accounts: Configuration.privateKeys.previewnet,
-            timeout: 120_000,
-        },
-        testnet: {
-            url: Configuration.endpoints.testnet.jsonRpc,
-            accounts: Configuration.privateKeys.testnet,
-            timeout: 120_000,
-        },
-        mainnet: {
-            url: Configuration.endpoints.mainnet.jsonRpc,
-            accounts: Configuration.privateKeys.mainnet,
-            timeout: 120_000,
-        },
-    },
-    contractSizer: {
-        alphaSort: true,
-        disambiguatePaths: false,
-        runOnCompile: Configuration.contractSizerRunOnCompile,
-    },
-    gasReporter: {
-        enabled: Configuration.reportGas,
-        showTimeSpent: true,
-        outputFile: 'gas-report.txt', // Force output to a file
-        noColors: true, // Recommended for file output
-    },
-    typechain: {
-        outDir: './typechain-types',
-        target: 'ethers-v5',
-    },
-    mocha: {
-        timeout: 3_000_000,
-    },
-    dependencyCompiler: {
-        paths: [
-            '@tokenysolutions/t-rex/contracts/registry/implementation/ClaimTopicsRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/TrustedIssuersRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistryStorage.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/compliance/modular/ModularCompliance.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/authority/TREXImplementationAuthority.sol',
-            '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/ClaimTopicsRegistryProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryStorageProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/ModularComplianceProxy.sol',
-            '@tokenysolutions/t-rex/contracts/compliance/legacy/DefaultCompliance.sol',
-            '@onchain-id/solidity/contracts/Identity.sol',
-            '@onchain-id/solidity/contracts/ClaimIssuer.sol',
-        ],
-    },
+// solhint-disable no-global-import
+import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
+import {
+    TRexIFactory,
+    FactoryRegulationData,
+    IResolverProxy
+} from '../../interfaces/IFactory.sol';
+import {
+    _TREX_OWNER_ROLE,
+    _DEFAULT_ADMIN_ROLE
+} from '../../interfaces/roles.sol';
+
+library SecurityDeploymentLib {
+    function deployEquity(
+        address _atsFactory,
+        address _tRexOwner,
+        TRexIFactory.EquityData memory _equityData,
+        FactoryRegulationData memory _factoryRegulationData
+    ) internal returns (IToken token_) {
+        _equityData.security.rbacs = _prepareRbacs(
+            _equityData.security.rbacs,
+            _tRexOwner
+        );
+        token_ = IToken(
+            TRexIFactory(_atsFactory).deployEquity(
+                _equityData,
+                _factoryRegulationData
+            )
+        );
+    }
+
+    function deployBond(
+        address _atsFactory,
+        address _tRexOwner,
+        TRexIFactory.BondData memory _bondData,
+        FactoryRegulationData memory _factoryRegulationData
+    ) internal returns (IToken token_) {
+        _bondData.security.rbacs = _prepareRbacs(
+            _bondData.security.rbacs,
+            _tRexOwner
+        );
+
+        token_ = IToken(
+            TRexIFactory(_atsFactory).deployBond(
+                _bondData,
+                _factoryRegulationData
+            )
+        );
+    }
+
+    /**
+     * @dev Prepares RBAC array by adding T_REX_OWNER_ROLE to address(this)
+     * @dev Checks if tRexOwner was already provided in the RBACs, if not, it is added
+     */
+    function _prepareRbacs(
+        IResolverProxy.Rbac[] memory _rbacs,
+        address _tRexOwner
+    ) private view returns (IResolverProxy.Rbac[] memory) {
+        bool ownerMatch;
+        uint256 length = _rbacs.length;
+
+        // Check if owner was already assigned the role
+        for (uint256 i = 0; i < length; ) {
+            if (
+                _rbacs[i].role == _TREX_OWNER_ROLE &&
+                _rbacs[i].members.length > 0
+            ) {
+                for (uint256 j = 0; j < _rbacs[i].members.length; ) {
+                    if (_tRexOwner == _rbacs[i].members[j]) {
+                        ownerMatch = true;
+                        break;
+                    }
+                    unchecked {
+                        ++j;
+                    }
+                }
+            }
+            if (ownerMatch) break;
+            unchecked {
+                ++i;
+            }
+        }
+
+        // Resize array
+        IResolverProxy.Rbac[] memory newRbacs = new IResolverProxy.Rbac[](
+            length + 2
+        );
+
+        for (uint256 i = 0; i < length; ) {
+            newRbacs[i] = _rbacs[i];
+            unchecked {
+                ++i;
+            }
+        }
+
+        address[] memory membersArr;
+        if (!ownerMatch) {
+            membersArr = new address[](2);
+            membersArr[0] = address(this);
+            membersArr[1] = _tRexOwner;
+        } else {
+            membersArr = new address[](1);
+            membersArr[0] = address(this);
+        }
+
+        newRbacs[length] = IResolverProxy.Rbac({
+            role: _TREX_OWNER_ROLE,
+            members: membersArr
+        });
+
+        membersArr = new address[](1);
+        membersArr[0] = address(this);
+
+        newRbacs[length + 1] = IResolverProxy.Rbac({
+            role: _DEFAULT_ADMIN_ROLE,
+            members: membersArr
+        });
+
+        return newRbacs;
+    }
 }
-
-export default config

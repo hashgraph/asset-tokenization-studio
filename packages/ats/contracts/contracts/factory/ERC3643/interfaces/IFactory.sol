@@ -203,119 +203,95 @@
 
 */
 
-import { HardhatUserConfig } from 'hardhat/config'
-import 'tsconfig-paths/register'
-import '@nomicfoundation/hardhat-toolbox'
-import '@nomicfoundation/hardhat-chai-matchers'
-import '@typechain/hardhat'
-import 'hardhat-contract-sizer'
-import 'hardhat-gas-reporter'
-import Configuration from '@configuration'
-import '@tasks'
-import 'hardhat-dependency-compiler'
+pragma solidity ^0.8.17;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-const config: HardhatUserConfig = {
-    solidity: {
-        compilers: [
-            {
-                version: '0.8.18',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-            {
-                version: '0.8.17',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100,
-                    },
-                    evmVersion: 'london',
-                },
-            },
-        ],
-        settings: {
-            optimizer: {
-                enabled: true,
-                runs: 1,
-            },
-            evmVersion: 'london',
-        },
-    },
-    paths: {
-        sources: './contracts',
-        tests: './test/unitTests',
-        cache: './cache',
-        artifacts: './artifacts',
-    },
-    defaultNetwork: 'hardhat',
-    networks: {
-        hardhat: {
-            chainId: 1337,
-            blockGasLimit: 30_000_000,
-            hardfork: 'london',
-        },
-        local: {
-            url: Configuration.endpoints.local.jsonRpc,
-            accounts: Configuration.privateKeys.local,
-            timeout: 60_000,
-        },
-        previewnet: {
-            url: Configuration.endpoints.previewnet.jsonRpc,
-            accounts: Configuration.privateKeys.previewnet,
-            timeout: 120_000,
-        },
-        testnet: {
-            url: Configuration.endpoints.testnet.jsonRpc,
-            accounts: Configuration.privateKeys.testnet,
-            timeout: 120_000,
-        },
-        mainnet: {
-            url: Configuration.endpoints.mainnet.jsonRpc,
-            accounts: Configuration.privateKeys.mainnet,
-            timeout: 120_000,
-        },
-    },
-    contractSizer: {
-        alphaSort: true,
-        disambiguatePaths: false,
-        runOnCompile: Configuration.contractSizerRunOnCompile,
-    },
-    gasReporter: {
-        enabled: Configuration.reportGas,
-        showTimeSpent: true,
-        outputFile: 'gas-report.txt', // Force output to a file
-        noColors: true, // Recommended for file output
-    },
-    typechain: {
-        outDir: './typechain-types',
-        target: 'ethers-v5',
-    },
-    mocha: {
-        timeout: 3_000_000,
-    },
-    dependencyCompiler: {
-        paths: [
-            '@tokenysolutions/t-rex/contracts/registry/implementation/ClaimTopicsRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/TrustedIssuersRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistryStorage.sol',
-            '@tokenysolutions/t-rex/contracts/registry/implementation/IdentityRegistry.sol',
-            '@tokenysolutions/t-rex/contracts/compliance/modular/ModularCompliance.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/authority/TREXImplementationAuthority.sol',
-            '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/ClaimTopicsRegistryProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/IdentityRegistryStorageProxy.sol',
-            '@tokenysolutions/t-rex/contracts/proxy/ModularComplianceProxy.sol',
-            '@tokenysolutions/t-rex/contracts/compliance/legacy/DefaultCompliance.sol',
-            '@onchain-id/solidity/contracts/Identity.sol',
-            '@onchain-id/solidity/contracts/ClaimIssuer.sol',
-        ],
-    },
+import {TRexIResolverProxy as IResolverProxy} from './IResolverProxy.sol';
+import {
+    TRexIBusinessLogicResolver as IBusinessLogicResolver
+} from './IBusinessLogicResolver.sol';
+import {TRexIERC20 as IERC20} from './IERC20.sol';
+import {TRexIBondRead as IBondRead} from './IBondRead.sol';
+import {TRexIEquity as IEquity} from './IEquity.sol';
+import {
+    FactoryRegulationData,
+    RegulationData,
+    RegulationType,
+    RegulationSubType
+} from './regulation.sol';
+
+interface TRexIFactory {
+    enum SecurityType {
+        Bond,
+        Equity
+    }
+
+    struct ResolverProxyConfiguration {
+        bytes32 key;
+        uint256 version;
+    }
+
+    // TODO: Separete common data in new struct
+    struct SecurityData {
+        bool arePartitionsProtected;
+        bool isMultiPartition;
+        IBusinessLogicResolver resolver;
+        ResolverProxyConfiguration resolverProxyConfiguration;
+        IResolverProxy.Rbac[] rbacs;
+        bool isControllable;
+        bool isWhiteList;
+        uint256 maxSupply;
+        IERC20.ERC20MetadataInfo erc20MetadataInfo;
+        bool clearingActive;
+        bool internalKycActivated;
+        address[] externalPauses;
+        address[] externalControlLists;
+        address[] externalKycLists;
+        bool erc20VotesActivated;
+        address compliance;
+        address identityRegistry;
+    }
+
+    struct EquityData {
+        SecurityData security;
+        IEquity.EquityDetailsData equityDetails;
+    }
+
+    struct BondData {
+        SecurityData security;
+        IBondRead.BondDetailsData bondDetails;
+        IBondRead.CouponDetailsData couponDetails;
+    }
+
+    event EquityDeployed(
+        address indexed deployer,
+        address equityAddress,
+        EquityData equityData,
+        FactoryRegulationData regulationData
+    );
+
+    event BondDeployed(
+        address indexed deployer,
+        address bondAddress,
+        BondData bondData,
+        FactoryRegulationData regulationData
+    );
+
+    error EmptyResolver(IBusinessLogicResolver resolver);
+    error NoInitialAdmins();
+
+    function deployEquity(
+        EquityData calldata _equityData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address equityAddress_);
+
+    function deployBond(
+        BondData calldata _bondData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address bondAddress_);
+
+    function getAppliedRegulationData(
+        RegulationType _regulationType,
+        RegulationSubType _regulationSubType
+    ) external pure returns (RegulationData memory regulationData_);
 }
-
-export default config
