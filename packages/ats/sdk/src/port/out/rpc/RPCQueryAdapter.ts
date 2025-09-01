@@ -224,9 +224,7 @@ import BigDecimal from '@domain/context/shared/BigDecimal';
 import { HederaId } from '@domain/context/shared/HederaId';
 import {
   AccessControlFacet__factory,
-  Bond__factory,
   BondRead__factory,
-  Cap__factory,
   CapFacet__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
@@ -237,14 +235,7 @@ import {
   DiamondFacet__factory,
   Equity__factory,
   ERC1410ReadFacet__factory,
-  ERC1594__factory,
-  ERC1643__factory,
-  ERC1644__factory,
-  ERC20__factory,
   ERC20Votes__factory,
-  ExternalControlListManagement__factory,
-  ExternalKycListManagement__factory,
-  ExternalPauseManagement__factory,
   ERC1594Facet__factory,
   ERC1643Facet__factory,
   ERC1644Facet__factory,
@@ -265,12 +256,9 @@ import {
   ProtectedPartitionsFacet__factory,
   ScheduledSnapshotsFacet__factory,
   Security__factory,
-  Snapshots__factory,
-  SsiManagement__factory,
-  ERC3643Read__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
-  ERC3643Facet__factory,
+	ERC3643ReadFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -1845,7 +1833,7 @@ export class RPCQueryAdapter {
   async onchainID(address: EvmAddress): Promise<string> {
     LogService.logTrace(`Getting OnchainID for security ${address.toString()}`);
 
-    return await this.connect(ERC3643Facet__factory, address.toString()).onchainID();
+    return await this.connect(ERC3643ReadFacet__factory, address.toString()).onchainID();
   }
 
   async identityRegistry(address: EvmAddress): Promise<string> {
@@ -1854,7 +1842,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC3643Facet__factory,
+      ERC3643ReadFacet__factory,
       address.toString(),
     ).identityRegistry();
   }
@@ -1865,7 +1853,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC3643Facet__factory,
+      ERC3643ReadFacet__factory,
       address.toString(),
     ).compliance();
   }
@@ -1893,7 +1881,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting recovery status of ${targetId}`);
 
     const isAddressRecovered = await this.connect(
-      ERC3643Facet__factory,
+      ERC3643ReadFacet__factory,
       address.toString(),
     ).isAddressRecovered(targetId.toString());
 
