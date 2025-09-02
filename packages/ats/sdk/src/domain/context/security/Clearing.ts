@@ -274,7 +274,7 @@ export class ClearingHoldCreation {
   expirationTimestamp: number;
   data: string;
   operatorData: string;
-  holdEscrow: string;
+  holdEscrowId: string;
   holdExpirationTimestamp: number;
   holdTo: string;
   holdData: string;
@@ -283,7 +283,7 @@ export class ClearingHoldCreation {
     expirationTimestamp: number,
     data: string,
     operatorData: string,
-    holdEscrow: string,
+    holdEscrowId: string,
     holdExpirationTimestamp: number,
     holdTo: string,
     holdData: string,
@@ -292,7 +292,7 @@ export class ClearingHoldCreation {
     this.expirationTimestamp = expirationTimestamp;
     this.data = data;
     this.operatorData = operatorData;
-    this.holdEscrow = holdEscrow;
+    this.holdEscrowId = holdEscrowId;
     this.holdExpirationTimestamp = holdExpirationTimestamp;
     this.holdTo = holdTo;
     this.holdData = holdData;

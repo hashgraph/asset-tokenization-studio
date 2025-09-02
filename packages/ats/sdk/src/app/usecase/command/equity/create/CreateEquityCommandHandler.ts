@@ -214,7 +214,6 @@ import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import ContractId from '@domain/context/contract/ContractId';
 import { Security } from '@domain/context/security/Security';
 import TransactionService from '@service/transaction/TransactionService';
-import NetworkService from '@service/network/NetworkService';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { EquityDetails } from '@domain/context/equity/EquityDetails';
@@ -234,8 +233,6 @@ export class CreateEquityCommandHandler
   constructor(
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,
-    @lazyInject(NetworkService)
-    private readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(ContractService)
@@ -266,11 +263,11 @@ export class CreateEquityCommandHandler
         dividendRight,
         currency,
         nominalValue,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-        compliance,
-        identityRegistry,
+        externalPausesIds,
+        externalControlListsIds,
+        externalKycListsIds,
+        complianceId,
+        identityRegistryId,
       } = command;
 
       if (!factory) {
@@ -309,17 +306,19 @@ export class CreateEquityCommandHandler
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,
       ] = await Promise.all([
-        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
-        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
-        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
+        this.contractService.getEvmAddressesFromHederaIds(externalPausesIds),
+        this.contractService.getEvmAddressesFromHederaIds(
+          externalControlListsIds,
+        ),
+        this.contractService.getEvmAddressesFromHederaIds(externalKycListsIds),
       ]);
 
-      const complianceEvmAddress = compliance
-        ? await this.contractService.getContractEvmAddress(compliance)
+      const complianceEvmAddress = complianceId
+        ? await this.contractService.getContractEvmAddress(complianceId)
         : new EvmAddress(EVM_ZERO_ADDRESS);
 
-      const identityRegistryEvmAddress = identityRegistry
-        ? await this.contractService.getContractEvmAddress(identityRegistry)
+      const identityRegistryEvmAddress = identityRegistryId
+        ? await this.contractService.getContractEvmAddress(identityRegistryId)
         : new EvmAddress(EVM_ZERO_ADDRESS);
 
       const handler = this.transactionService.getHandler();
