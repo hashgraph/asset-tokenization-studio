@@ -206,16 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {
-    IERC1644StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol';
-import {ERC3643StorageWrapper2} from '../../ERC3643/ERC3643StorageWrapper2.sol';
+import { _ERC1644_STORAGE_POSITION } from '../../constants/storagePositions.sol';
+import { IERC1644StorageWrapper } from '../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol';
+import { ERC3643StorageWrapper2 } from '../../ERC3643/ERC3643StorageWrapper2.sol';
 
-abstract contract ERC1644StorageWrapper is
-    IERC1644StorageWrapper,
-    ERC3643StorageWrapper2
-{
+abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643StorageWrapper2 {
     struct ERC1644Storage {
         bool isControllable;
         bool initialized;
@@ -234,14 +229,7 @@ abstract contract ERC1644StorageWrapper is
         bytes memory _operatorData
     ) internal {
         _transfer(_from, _to, _value);
-        emit ControllerTransfer(
-            msg.sender,
-            _from,
-            _to,
-            _value,
-            _data,
-            _operatorData
-        );
+        emit ControllerTransfer(msg.sender, _from, _to, _value, _data, _operatorData);
     }
 
     function _controllerRedeem(
@@ -251,13 +239,7 @@ abstract contract ERC1644StorageWrapper is
         bytes memory _operatorData
     ) internal {
         _burn(_tokenHolder, _value);
-        emit ControllerRedemption(
-            msg.sender,
-            _tokenHolder,
-            _value,
-            _data,
-            _operatorData
-        );
+        emit ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
     }
 
     /**
@@ -280,11 +262,7 @@ abstract contract ERC1644StorageWrapper is
         return _erc1644Storage().isControllable;
     }
 
-    function _erc1644Storage()
-        internal
-        pure
-        returns (ERC1644Storage storage erc1644Storage_)
-    {
+    function _erc1644Storage() internal pure returns (ERC1644Storage storage erc1644Storage_) {
         bytes32 position = _ERC1644_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

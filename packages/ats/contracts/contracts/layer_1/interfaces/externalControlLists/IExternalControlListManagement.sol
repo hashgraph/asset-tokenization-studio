@@ -207,55 +207,31 @@
 pragma solidity 0.8.18;
 
 interface IExternalControlListManagement {
-    event ExternalControlListsUpdated(
-        address indexed operator,
-        address[] controlLists,
-        bool[] actives
-    );
-    event AddedToExternalControlLists(
-        address indexed operator,
-        address controlList
-    );
-    event RemovedFromExternalControlLists(
-        address indexed operator,
-        address controlList
-    );
+    event ExternalControlListsUpdated(address indexed operator, address[] controlLists, bool[] actives);
+    event AddedToExternalControlLists(address indexed operator, address controlList);
+    event RemovedFromExternalControlLists(address indexed operator, address controlList);
 
     error ListedControlList(address controlList);
 
     error UnlistedControlList(address controlList);
 
-    error ExternalControlListsNotUpdated(
-        address[] controlLista,
-        bool[] actives
-    );
+    error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives);
 
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalControlLists(
-        address[] calldata _controlLists
-    ) external;
+    function initialize_ExternalControlLists(address[] calldata _controlLists) external;
 
     function updateExternalControlLists(
         address[] calldata _controlLists,
         bool[] calldata _actives
     ) external returns (bool success_);
 
-    function addExternalControlList(
-        address _controlList
-    ) external returns (bool success_);
+    function addExternalControlList(address _controlList) external returns (bool success_);
 
-    function removeExternalControlList(
-        address _controlList
-    ) external returns (bool success_);
+    function removeExternalControlList(address _controlList) external returns (bool success_);
 
-    function isExternalControlList(
-        address _controlList
-    ) external view returns (bool);
+    function isExternalControlList(address _controlList) external view returns (bool);
 
-    function getExternalControlListsCount()
-        external
-        view
-        returns (uint256 externalControlListsCount_);
+    function getExternalControlListsCount() external view returns (uint256 externalControlListsCount_);
 
     function getExternalControlListsMembers(
         uint256 _pageIndex,

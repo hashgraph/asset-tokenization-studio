@@ -206,9 +206,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    SnapshotsStorageWrapper1
-} from '../snapshots/SnapshotsStorageWrapper1.sol';
+import { SnapshotsStorageWrapper1 } from '../snapshots/SnapshotsStorageWrapper1.sol';
 
 abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     error WrongTimestamp(uint256 timeStamp);

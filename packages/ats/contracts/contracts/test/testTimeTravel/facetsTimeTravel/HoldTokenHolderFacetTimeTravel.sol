@@ -206,33 +206,16 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {
-    HoldTokenHolderFacet
-} from '../../../layer_1/hold/HoldTokenHolderFacet.sol';
+import { LocalContext } from '../../../layer_0/context/LocalContext.sol';
+import { TimeTravelStorageWrapper } from '../timeTravel/TimeTravelStorageWrapper.sol';
+import { HoldTokenHolderFacet } from '../../../layer_1/hold/HoldTokenHolderFacet.sol';
 
-contract HoldTokenHolderFacetTimeTravel is
-    HoldTokenHolderFacet,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+contract HoldTokenHolderFacetTimeTravel is HoldTokenHolderFacet, TimeTravelStorageWrapper {
+    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 
-    function _blockNumber()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockNumber();
     }
 }

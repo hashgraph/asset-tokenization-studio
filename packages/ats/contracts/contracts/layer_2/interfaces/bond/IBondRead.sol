@@ -240,24 +240,13 @@ interface IBondRead {
         bool recordDateReached;
     }
 
-    function getBondDetails()
-        external
-        view
-        returns (BondDetailsData memory bondDetailsData_);
+    function getBondDetails() external view returns (BondDetailsData memory bondDetailsData_);
 
-    function getCouponDetails()
-        external
-        view
-        returns (CouponDetailsData memory couponDetails_);
+    function getCouponDetails() external view returns (CouponDetailsData memory couponDetails_);
 
-    function getCoupon(
-        uint256 _couponID
-    ) external view returns (RegisteredCoupon memory registeredCoupon_);
+    function getCoupon(uint256 _couponID) external view returns (RegisteredCoupon memory registeredCoupon_);
 
-    function getCouponFor(
-        uint256 _couponID,
-        address _account
-    ) external view returns (CouponFor memory couponFor_);
+    function getCouponFor(uint256 _couponID, address _account) external view returns (CouponFor memory couponFor_);
 
     function getCouponCount() external view returns (uint256 couponCount_);
 
@@ -267,7 +256,5 @@ interface IBondRead {
         uint256 _pageLength
     ) external view returns (address[] memory holders_);
 
-    function getTotalCouponHolders(
-        uint256 _couponID
-    ) external view returns (uint256);
+    function getTotalCouponHolders(uint256 _couponID) external view returns (uint256);
 }

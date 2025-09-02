@@ -206,15 +206,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {IBond} from '../interfaces/bond/IBond.sol';
-import {IBondRead} from '../interfaces/bond/IBondRead.sol';
-import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {
-    _CORPORATE_ACTION_ROLE,
-    _BOND_MANAGER_ROLE,
-    _MATURITY_REDEEMER_ROLE
-} from '../../layer_1/constants/roles.sol';
+import { IBond } from '../interfaces/bond/IBond.sol';
+import { IBondRead } from '../interfaces/bond/IBondRead.sol';
+import { IKyc } from '../../layer_1/interfaces/kyc/IKyc.sol';
+import { Common } from '../../layer_1/common/Common.sol';
+import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from '../../layer_1/constants/roles.sol';
 
 abstract contract Bond is IBond, Common {
     function redeemAtMaturityByPartition(
@@ -235,14 +231,7 @@ abstract contract Bond is IBond, Common {
         onlyUnrecoveredAddress(_tokenHolder)
         onlyAfterCurrentMaturityDate(_blockTimestamp())
     {
-        _redeemByPartition(
-            _partition,
-            _tokenHolder,
-            _msgSender(),
-            _amount,
-            '',
-            ''
-        );
+        _redeemByPartition(_partition, _tokenHolder, _msgSender(), _amount, '', '');
     }
 
     function setCoupon(
@@ -282,11 +271,7 @@ abstract contract Bond is IBond, Common {
         onlyAfterCurrentMaturityDate(_newMaturityDate)
         returns (bool success_)
     {
-        emit MaturityDateUpdated(
-            address(this),
-            _newMaturityDate,
-            _getMaturityDate()
-        );
+        emit MaturityDateUpdated(address(this), _newMaturityDate, _getMaturityDate());
         success_ = _setMaturityDate(_newMaturityDate);
         return success_;
     }
@@ -297,19 +282,12 @@ abstract contract Bond is IBond, Common {
         IBondRead.CouponDetailsData calldata _couponDetailsData
     )
         internal
-        validateDates(
-            _bondDetailsData.startingDate,
-            _bondDetailsData.maturityDate
-        )
+        validateDates(_bondDetailsData.startingDate, _bondDetailsData.maturityDate)
         onlyValidTimestamp(_bondDetailsData.startingDate)
     {
         BondDataStorage storage bondStorage = _bondStorage();
         bondStorage.initialized = true;
         _storeBondDetails(_bondDetailsData);
-        _storeCouponDetails(
-            _couponDetailsData,
-            _bondDetailsData.startingDate,
-            _bondDetailsData.maturityDate
-        );
+        _storeCouponDetails(_couponDetailsData, _bondDetailsData.startingDate, _bondDetailsData.maturityDate);
     }
 }

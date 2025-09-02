@@ -203,123 +203,123 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import {
-    IBusinessLogicResolver,
-    IBusinessLogicResolver__factory,
-    IFactory,
-    IFactory__factory,
-    IStaticFunctionSelectors,
-    ProxyAdmin,
-    ProxyAdmin__factory,
-} from '@typechain'
+  IBusinessLogicResolver,
+  IBusinessLogicResolver__factory,
+  IFactory,
+  IFactory__factory,
+  IStaticFunctionSelectors,
+  ProxyAdmin,
+  ProxyAdmin__factory,
+} from '@typechain';
 import {
-    DeployedBusinessLogics,
-    DeployAtsFullInfrastructureCommand,
-    deployAtsFullInfrastructure,
-} from '@scripts'
-import { Network } from '@configuration'
-import { network } from 'hardhat'
+  DeployedBusinessLogics,
+  DeployAtsFullInfrastructureCommand,
+  deployAtsFullInfrastructure,
+} from '@scripts';
+import { Network } from '@configuration';
+import { network } from 'hardhat';
 
 export interface Environment {
-    deployedBusinessLogics: DeployedBusinessLogics
-    facetIdsEquities: string[]
-    facetVersionsEquities: number[]
-    facetIdsBonds: string[]
-    facetVersionsBonds: number[]
-    proxyAdmin: ProxyAdmin
-    resolver: IBusinessLogicResolver
-    factory: IFactory
+  deployedBusinessLogics: DeployedBusinessLogics;
+  facetIdsEquities: string[];
+  facetVersionsEquities: number[];
+  facetIdsBonds: string[];
+  facetVersionsBonds: number[];
+  proxyAdmin: ProxyAdmin;
+  resolver: IBusinessLogicResolver;
+  factory: IFactory;
 }
 
-export const environment: Environment = buildEmptyEnvironment()
-let environmentInitialized = false
+export const environment: Environment = buildEmptyEnvironment();
+let environmentInitialized = false;
 
 export async function deployEnvironment({
-    signer,
-    timeTravelEnabled = false,
+  signer,
+  timeTravelEnabled = false,
 }: {
-    signer: SignerWithAddress
-    timeTravelEnabled?: boolean
+  signer: SignerWithAddress;
+  timeTravelEnabled?: boolean;
 }) {
-    if (!environmentInitialized) {
-        const { deployer, factory, businessLogicResolver } =
-            await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
-                    signer: signer,
-                    network: network.name as Network,
-                    useDeployed: false,
-                    timeTravelEnabled: timeTravelEnabled,
-                })
-            )
+  if (!environmentInitialized) {
+    const { deployer, factory, businessLogicResolver } =
+      await deployAtsFullInfrastructure(
+        new DeployAtsFullInfrastructureCommand({
+          signer: signer,
+          network: network.name as Network,
+          useDeployed: false,
+          timeTravelEnabled: timeTravelEnabled,
+        }),
+      );
 
-        environment.proxyAdmin = ProxyAdmin__factory.connect(
-            businessLogicResolver.proxyAdminAddress!,
-            deployer!
-        )
-        environment.resolver = IBusinessLogicResolver__factory.connect(
-            businessLogicResolver.proxyAddress!,
-            deployer!
-        )
-        environment.factory = IFactory__factory.connect(
-            factory.proxyAddress!,
-            deployer!
-        )
-        environmentInitialized = true
-    }
+    environment.proxyAdmin = ProxyAdmin__factory.connect(
+      businessLogicResolver.proxyAdminAddress!,
+      deployer!,
+    );
+    environment.resolver = IBusinessLogicResolver__factory.connect(
+      businessLogicResolver.proxyAddress!,
+      deployer!,
+    );
+    environment.factory = IFactory__factory.connect(
+      factory.proxyAddress!,
+      deployer!,
+    );
+    environmentInitialized = true;
+  }
 }
 
 function buildEmptyEnvironment(): Environment {
-    return {
-        deployedBusinessLogics: {
-            businessLogicResolver: {} as IStaticFunctionSelectors,
-            factory: {} as IStaticFunctionSelectors,
-            diamondFacet: {} as IStaticFunctionSelectors,
-            accessControlFacet: {} as IStaticFunctionSelectors,
-            controlListFacet: {} as IStaticFunctionSelectors,
-            kycFacet: {} as IStaticFunctionSelectors,
-            ssiManagementFacet: {} as IStaticFunctionSelectors,
-            corporateActionsFacet: {} as IStaticFunctionSelectors,
-            pauseFacet: {} as IStaticFunctionSelectors,
-            ERC20Facet: {} as IStaticFunctionSelectors,
-            ERC20PermitFacet: {} as IStaticFunctionSelectors,
-            ERC20Votes: {} as IStaticFunctionSelectors,
-            ERC1644Facet: {} as IStaticFunctionSelectors,
-            erc1410ReadFacet: {} as IStaticFunctionSelectors,
-            erc1410ManagementFacet: {} as IStaticFunctionSelectors,
-            erc1410TokenHolderFacet: {} as IStaticFunctionSelectors,
-            ERC1594Facet: {} as IStaticFunctionSelectors,
-            ERC1643Facet: {} as IStaticFunctionSelectors,
-            equityUSAFacet: {} as IStaticFunctionSelectors,
-            bondUSAFacet: {} as IStaticFunctionSelectors,
-            bondUSARead: {} as IStaticFunctionSelectors,
-            SnapshotsFacet: {} as IStaticFunctionSelectors,
-            scheduledSnapshotsFacet: {} as IStaticFunctionSelectors,
-            scheduledBalanceAdjustmentsFacet: {} as IStaticFunctionSelectors,
-            scheduledTasksFacet: {} as IStaticFunctionSelectors,
-            CapFacet: {} as IStaticFunctionSelectors,
-            LockFacet: {} as IStaticFunctionSelectors,
-            transferAndLockFacet: {} as IStaticFunctionSelectors,
-            adjustBalancesFacet: {} as IStaticFunctionSelectors,
-            protectedPartitionsFacet: {} as IStaticFunctionSelectors,
-            holdReadFacet: {} as IStaticFunctionSelectors,
-            holdManagementFacet: {} as IStaticFunctionSelectors,
-            holdTokenHolderFacet: {} as IStaticFunctionSelectors,
-            externalPauseManagementFacet: {} as IStaticFunctionSelectors,
-            externalControlListManagementFacet: {} as IStaticFunctionSelectors,
-            externalKycListManagementFacet: {} as IStaticFunctionSelectors,
-            freezeFacet: {} as IStaticFunctionSelectors,
-            ERC3643Management: {} as IStaticFunctionSelectors,
-            ERC3643Operations: {} as IStaticFunctionSelectors,
-            ERC3643Read: {} as IStaticFunctionSelectors,
-            ERC3643BatchFacet: {} as IStaticFunctionSelectors,
-        },
-        facetIdsEquities: [],
-        facetVersionsEquities: [],
-        facetIdsBonds: [],
-        facetVersionsBonds: [],
-        proxyAdmin: {} as ProxyAdmin,
-        resolver: {} as IBusinessLogicResolver,
-        factory: {} as IFactory,
-    }
+  return {
+    deployedBusinessLogics: {
+      businessLogicResolver: {} as IStaticFunctionSelectors,
+      factory: {} as IStaticFunctionSelectors,
+      diamondFacet: {} as IStaticFunctionSelectors,
+      accessControlFacet: {} as IStaticFunctionSelectors,
+      controlListFacet: {} as IStaticFunctionSelectors,
+      kycFacet: {} as IStaticFunctionSelectors,
+      ssiManagementFacet: {} as IStaticFunctionSelectors,
+      corporateActionsFacet: {} as IStaticFunctionSelectors,
+      pauseFacet: {} as IStaticFunctionSelectors,
+      ERC20Facet: {} as IStaticFunctionSelectors,
+      ERC20PermitFacet: {} as IStaticFunctionSelectors,
+      ERC20Votes: {} as IStaticFunctionSelectors,
+      ERC1644Facet: {} as IStaticFunctionSelectors,
+      erc1410ReadFacet: {} as IStaticFunctionSelectors,
+      erc1410ManagementFacet: {} as IStaticFunctionSelectors,
+      erc1410TokenHolderFacet: {} as IStaticFunctionSelectors,
+      ERC1594Facet: {} as IStaticFunctionSelectors,
+      ERC1643Facet: {} as IStaticFunctionSelectors,
+      equityUSAFacet: {} as IStaticFunctionSelectors,
+      bondUSAFacet: {} as IStaticFunctionSelectors,
+      bondUSARead: {} as IStaticFunctionSelectors,
+      SnapshotsFacet: {} as IStaticFunctionSelectors,
+      scheduledSnapshotsFacet: {} as IStaticFunctionSelectors,
+      scheduledBalanceAdjustmentsFacet: {} as IStaticFunctionSelectors,
+      scheduledTasksFacet: {} as IStaticFunctionSelectors,
+      CapFacet: {} as IStaticFunctionSelectors,
+      LockFacet: {} as IStaticFunctionSelectors,
+      transferAndLockFacet: {} as IStaticFunctionSelectors,
+      adjustBalancesFacet: {} as IStaticFunctionSelectors,
+      protectedPartitionsFacet: {} as IStaticFunctionSelectors,
+      holdReadFacet: {} as IStaticFunctionSelectors,
+      holdManagementFacet: {} as IStaticFunctionSelectors,
+      holdTokenHolderFacet: {} as IStaticFunctionSelectors,
+      externalPauseManagementFacet: {} as IStaticFunctionSelectors,
+      externalControlListManagementFacet: {} as IStaticFunctionSelectors,
+      externalKycListManagementFacet: {} as IStaticFunctionSelectors,
+      freezeFacet: {} as IStaticFunctionSelectors,
+      ERC3643Management: {} as IStaticFunctionSelectors,
+      ERC3643Operations: {} as IStaticFunctionSelectors,
+      ERC3643Read: {} as IStaticFunctionSelectors,
+      ERC3643BatchFacet: {} as IStaticFunctionSelectors,
+    },
+    facetIdsEquities: [],
+    facetVersionsEquities: [],
+    facetIdsBonds: [],
+    facetVersionsBonds: [],
+    proxyAdmin: {} as ProxyAdmin,
+    resolver: {} as IBusinessLogicResolver,
+    factory: {} as IFactory,
+  };
 }

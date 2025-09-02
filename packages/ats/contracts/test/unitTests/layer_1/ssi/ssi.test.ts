@@ -203,281 +203,261 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { takeSnapshot } from '@nomicfoundation/hardhat-network-helpers'
-import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { takeSnapshot } from '@nomicfoundation/hardhat-network-helpers';
+import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
-    type ResolverProxy,
-    Pause,
-    IFactory,
-    BusinessLogicResolver,
-    SsiManagement,
-    MockedT3RevocationRegistry,
-    MockedT3RevocationRegistry__factory,
-} from '@typechain'
+  type ResolverProxy,
+  Pause,
+  IFactory,
+  BusinessLogicResolver,
+  SsiManagement,
+  MockedT3RevocationRegistry,
+  MockedT3RevocationRegistry__factory,
+} from '@typechain';
 import {
-    PAUSER_ROLE,
-    SSI_MANAGER_ROLE,
-    MAX_UINT256,
-    deployEquityFromFactory,
-    Rbac,
-    RegulationSubType,
-    RegulationType,
-    DeployAtsFullInfrastructureCommand,
-    deployAtsFullInfrastructure,
-    deployContractWithFactory,
-    DeployContractWithFactoryCommand,
-} from '@scripts'
+  PAUSER_ROLE,
+  SSI_MANAGER_ROLE,
+  MAX_UINT256,
+  deployEquityFromFactory,
+  Rbac,
+  RegulationSubType,
+  RegulationType,
+  DeployAtsFullInfrastructureCommand,
+  deployAtsFullInfrastructure,
+  deployContractWithFactory,
+  DeployContractWithFactoryCommand,
+} from '@scripts';
 
 describe('SSI Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
+  let diamond: ResolverProxy;
+  let signer_A: SignerWithAddress;
+  let signer_B: SignerWithAddress;
+  let signer_C: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
+  let account_A: string;
+  let account_B: string;
+  let account_C: string;
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let pauseFacet: Pause
-    let ssiManagementFacet: SsiManagement
-    let revocationList: MockedT3RevocationRegistry
+  let factory: IFactory;
+  let businessLogicResolver: BusinessLogicResolver;
+  let pauseFacet: Pause;
+  let ssiManagementFacet: SsiManagement;
+  let revocationList: MockedT3RevocationRegistry;
 
-    let snapshot: SnapshotRestorer
+  let snapshot: SnapshotRestorer;
 
-    before(async () => {
-        snapshot = await takeSnapshot()
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+  before(async () => {
+    snapshot = await takeSnapshot();
+    // mute | mock console.log
+    console.log = () => {};
+    [signer_A, signer_B, signer_C] = await ethers.getSigners();
+    account_A = signer_A.address;
+    account_B = signer_B.address;
+    account_C = signer_C.address;
 
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: true,
-            })
-        )
+    const { ...deployedContracts } = await deployAtsFullInfrastructure(
+      await DeployAtsFullInfrastructureCommand.newInstance({
+        signer: signer_A,
+        useDeployed: false,
+        useEnvironment: true,
+      }),
+    );
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    factory = deployedContracts.factory.contract;
+    businessLogicResolver = deployedContracts.businessLogicResolver.contract;
 
-        const reovationListDeployed = await deployContractWithFactory(
-            new DeployContractWithFactoryCommand({
-                factory: new MockedT3RevocationRegistry__factory(),
-                signer: signer_A,
-            })
-        )
+    const reovationListDeployed = await deployContractWithFactory(
+      new DeployContractWithFactoryCommand({
+        factory: new MockedT3RevocationRegistry__factory(),
+        signer: signer_A,
+      }),
+    );
 
-        revocationList = await ethers.getContractAt(
-            'MockedT3RevocationRegistry',
-            reovationListDeployed.address,
-            signer_C
-        )
-    })
+    revocationList = await ethers.getContractAt(
+      'MockedT3RevocationRegistry',
+      reovationListDeployed.address,
+      signer_C,
+    );
+  });
 
-    after(async () => {
-        await snapshot.restore()
-    })
+  after(async () => {
+    await snapshot.restore();
+  });
 
+  beforeEach(async () => {
+    const rbacPausable: Rbac = {
+      role: PAUSER_ROLE,
+      members: [account_A],
+    };
+    const rbacSSIManager: Rbac = {
+      role: SSI_MANAGER_ROLE,
+      members: [account_C],
+    };
+    const init_rbacs: Rbac[] = [rbacPausable, rbacSSIManager];
+
+    diamond = await deployEquityFromFactory({
+      adminAccount: account_A,
+      isWhiteList: false,
+      isControllable: true,
+      arePartitionsProtected: false,
+      clearingActive: false,
+      internalKycActivated: true,
+      isMultiPartition: false,
+      name: 'TEST_KYC',
+      symbol: 'TAC',
+      decimals: 6,
+      isin: isinGenerator(),
+      votingRight: false,
+      informationRight: false,
+      liquidationRight: false,
+      subscriptionRight: true,
+      conversionRight: true,
+      redemptionRight: true,
+      putRight: false,
+      dividendRight: 1,
+      currency: '0x345678',
+      numberOfShares: MAX_UINT256,
+      nominalValue: 100,
+      regulationType: RegulationType.REG_D,
+      regulationSubType: RegulationSubType.REG_D_506_B,
+      countriesControlListType: true,
+      listOfCountries: 'ES,FR,CH',
+      info: 'nothing',
+      init_rbacs,
+      factory,
+      businessLogicResolver: businessLogicResolver.address,
+    });
+
+    pauseFacet = await ethers.getContractAt('Pause', diamond.address, signer_A);
+    ssiManagementFacet = await ethers.getContractAt(
+      'SsiManagement',
+      diamond.address,
+      signer_C,
+    );
+  });
+
+  describe('Paused', () => {
     beforeEach(async () => {
-        const rbacPausable: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_A],
-        }
-        const rbacSSIManager: Rbac = {
-            role: SSI_MANAGER_ROLE,
-            members: [account_C],
-        }
-        const init_rbacs: Rbac[] = [rbacPausable, rbacSSIManager]
+      // Pausing the token
+      await pauseFacet.pause();
+    });
 
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: true,
-            isMultiPartition: false,
-            name: 'TEST_KYC',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_B,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-        })
+    it('GIVEN a paused Token WHEN setRevocationRegistryAddress THEN transaction fails with TokenIsPaused', async () => {
+      await expect(
+        ssiManagementFacet.setRevocationRegistryAddress(revocationList.address),
+      ).to.be.revertedWithCustomError(ssiManagementFacet, 'TokenIsPaused');
+    });
 
-        pauseFacet = await ethers.getContractAt(
-            'Pause',
-            diamond.address,
-            signer_A
-        )
-        ssiManagementFacet = await ethers.getContractAt(
-            'SsiManagement',
-            diamond.address,
-            signer_C
-        )
-    })
+    it('GIVEN a paused Token WHEN addIssuer THEN transaction fails with TokenIsPaused', async () => {
+      await expect(
+        ssiManagementFacet.addIssuer(account_B),
+      ).to.be.revertedWithCustomError(ssiManagementFacet, 'TokenIsPaused');
+    });
 
-    describe('Paused', () => {
-        beforeEach(async () => {
-            // Pausing the token
-            await pauseFacet.pause()
-        })
+    it('GIVEN a paused Token WHEN removeIssuer THEN transaction fails with TokenIsPaused', async () => {
+      await expect(
+        ssiManagementFacet.removeIssuer(account_B),
+      ).to.be.revertedWithCustomError(ssiManagementFacet, 'TokenIsPaused');
+    });
+  });
 
-        it('GIVEN a paused Token WHEN setRevocationRegistryAddress THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                ssiManagementFacet.setRevocationRegistryAddress(
-                    revocationList.address
-                )
-            ).to.be.revertedWithCustomError(ssiManagementFacet, 'TokenIsPaused')
-        })
+  describe('Access Control', () => {
+    it('GIVEN a non SSIManager account WHEN setRevocationRegistryAddress THEN transaction fails with AccountHasNoRole', async () => {
+      await expect(
+        ssiManagementFacet
+          .connect(signer_B)
+          .setRevocationRegistryAddress(revocationList.address),
+      ).to.be.revertedWithCustomError(ssiManagementFacet, 'AccountHasNoRole');
+    });
 
-        it('GIVEN a paused Token WHEN addIssuer THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                ssiManagementFacet.addIssuer(account_B)
-            ).to.be.revertedWithCustomError(ssiManagementFacet, 'TokenIsPaused')
-        })
+    it('GIVEN a non SSIManager account WHEN addIssuer THEN transaction fails with AccountHasNoRole', async () => {
+      await expect(
+        ssiManagementFacet.connect(signer_B).addIssuer(account_B),
+      ).to.be.revertedWithCustomError(ssiManagementFacet, 'AccountHasNoRole');
+    });
 
-        it('GIVEN a paused Token WHEN removeIssuer THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                ssiManagementFacet.removeIssuer(account_B)
-            ).to.be.revertedWithCustomError(ssiManagementFacet, 'TokenIsPaused')
-        })
-    })
+    it('GIVEN a non SSIManager account WHEN removeIssuer THEN transaction fails with AccountHasNoRole', async () => {
+      await expect(
+        ssiManagementFacet.connect(signer_B).removeIssuer(account_B),
+      ).to.be.revertedWithCustomError(ssiManagementFacet, 'AccountHasNoRole');
+    });
+  });
 
-    describe('Access Control', () => {
-        it('GIVEN a non SSIManager account WHEN setRevocationRegistryAddress THEN transaction fails with AccountHasNoRole', async () => {
-            await expect(
-                ssiManagementFacet
-                    .connect(signer_B)
-                    .setRevocationRegistryAddress(revocationList.address)
-            ).to.be.revertedWithCustomError(
-                ssiManagementFacet,
-                'AccountHasNoRole'
-            )
-        })
+  describe('SsiManagement Wrong input data', () => {
+    it('GIVEN listed issuer WHEN adding issuer THEN fails with ListedIssuer', async () => {
+      await ssiManagementFacet.addIssuer(account_B);
 
-        it('GIVEN a non SSIManager account WHEN addIssuer THEN transaction fails with AccountHasNoRole', async () => {
-            await expect(
-                ssiManagementFacet.connect(signer_B).addIssuer(account_B)
-            ).to.be.revertedWithCustomError(
-                ssiManagementFacet,
-                'AccountHasNoRole'
-            )
-        })
+      await expect(
+        ssiManagementFacet.addIssuer(account_B),
+      ).to.be.revertedWithCustomError(ssiManagementFacet, 'ListedIssuer');
+    });
 
-        it('GIVEN a non SSIManager account WHEN removeIssuer THEN transaction fails with AccountHasNoRole', async () => {
-            await expect(
-                ssiManagementFacet.connect(signer_B).removeIssuer(account_B)
-            ).to.be.revertedWithCustomError(
-                ssiManagementFacet,
-                'AccountHasNoRole'
-            )
-        })
-    })
+    it('GIVEN unlisted issuer WHEN removing issuer THEN fails with UnlistedIssuer', async () => {
+      await expect(
+        ssiManagementFacet.removeIssuer(account_B),
+      ).to.be.revertedWithCustomError(ssiManagementFacet, 'UnlistedIssuer');
+    });
+  });
 
-    describe('SsiManagement Wrong input data', () => {
-        it('GIVEN listed issuer WHEN adding issuer THEN fails with ListedIssuer', async () => {
-            await ssiManagementFacet.addIssuer(account_B)
+  describe('SsiManagement OK', () => {
+    it('GIVEN a revocationList WHEN setRevocationRegistryAddress THEN transaction succeed', async () => {
+      expect(
+        await ssiManagementFacet.setRevocationRegistryAddress(
+          revocationList.address,
+        ),
+      )
+        .to.emit(ssiManagementFacet, 'RevocationRegistryAddressSet')
+        .withArgs(ethers.constants.AddressZero, revocationList.address);
 
-            await expect(
-                ssiManagementFacet.addIssuer(account_B)
-            ).to.be.revertedWithCustomError(ssiManagementFacet, 'ListedIssuer')
-        })
+      const revocationListAddress =
+        await ssiManagementFacet.getRevocationRegistryAddress();
 
-        it('GIVEN unlisted issuer WHEN removing issuer THEN fails with UnlistedIssuer', async () => {
-            await expect(
-                ssiManagementFacet.removeIssuer(account_B)
-            ).to.be.revertedWithCustomError(
-                ssiManagementFacet,
-                'UnlistedIssuer'
-            )
-        })
-    })
+      expect(revocationListAddress).to.equal(revocationList.address);
+    });
 
-    describe('SsiManagement OK', () => {
-        it('GIVEN a revocationList WHEN setRevocationRegistryAddress THEN transaction succeed', async () => {
-            expect(
-                await ssiManagementFacet.setRevocationRegistryAddress(
-                    revocationList.address
-                )
-            )
-                .to.emit(ssiManagementFacet, 'RevocationRegistryAddressSet')
-                .withArgs(ethers.constants.AddressZero, revocationList.address)
+    it('GIVEN an unlisted issuer WHEN addIssuer THEN transaction succeed', async () => {
+      expect(await ssiManagementFacet.addIssuer(account_B)).to.emit(
+        ssiManagementFacet,
+        'AddedToIssuerList',
+      );
 
-            const revocationListAddress =
-                await ssiManagementFacet.getRevocationRegistryAddress()
+      expect(await ssiManagementFacet.isIssuer(account_B)).to.equal(true);
+      expect(await ssiManagementFacet.getIssuerListCount()).to.equal(1);
 
-            expect(revocationListAddress).to.equal(revocationList.address)
-        })
+      const issuerList = await ssiManagementFacet.getIssuerListMembers(0, 1);
 
-        it('GIVEN an unlisted issuer WHEN addIssuer THEN transaction succeed', async () => {
-            expect(await ssiManagementFacet.addIssuer(account_B)).to.emit(
-                ssiManagementFacet,
-                'AddedToIssuerList'
-            )
+      expect(issuerList).to.deep.equal([account_B]);
+      expect(issuerList.length).to.equal(1);
+    });
 
-            expect(await ssiManagementFacet.isIssuer(account_B)).to.equal(true)
-            expect(await ssiManagementFacet.getIssuerListCount()).to.equal(1)
+    it('GIVEN a listed issuer WHEN removeIssuer THEN transaction succeed', async () => {
+      await ssiManagementFacet.addIssuer(account_B);
+      const issuerStatusBefore = await ssiManagementFacet.isIssuer(account_B);
+      const issuerListBefore = await ssiManagementFacet.getIssuerListMembers(
+        0,
+        1,
+      );
+      const issuerListCountBefore =
+        await ssiManagementFacet.getIssuerListCount();
 
-            const issuerList = await ssiManagementFacet.getIssuerListMembers(
-                0,
-                1
-            )
+      expect(await ssiManagementFacet.removeIssuer(account_B)).to.emit(
+        ssiManagementFacet,
+        'RemovedFromIssuerList',
+      );
 
-            expect(issuerList).to.deep.equal([account_B])
-            expect(issuerList.length).to.equal(1)
-        })
-
-        it('GIVEN a listed issuer WHEN removeIssuer THEN transaction succeed', async () => {
-            await ssiManagementFacet.addIssuer(account_B)
-            const issuerStatusBefore =
-                await ssiManagementFacet.isIssuer(account_B)
-            const issuerListBefore =
-                await ssiManagementFacet.getIssuerListMembers(0, 1)
-            const issuerListCountBefore =
-                await ssiManagementFacet.getIssuerListCount()
-
-            expect(await ssiManagementFacet.removeIssuer(account_B)).to.emit(
-                ssiManagementFacet,
-                'RemovedFromIssuerList'
-            )
-
-            expect(issuerStatusBefore).to.equal(true)
-            expect(await ssiManagementFacet.isIssuer(account_B)).to.equal(false)
-            expect(issuerListCountBefore).to.equal(1)
-            expect(await ssiManagementFacet.getIssuerListCount()).to.equal(0)
-            expect(issuerListBefore.length).to.equal(1)
-            expect(issuerListBefore).to.deep.equal([account_B])
-            expect(
-                await ssiManagementFacet.getIssuerListMembers(0, 1)
-            ).to.deep.equal([])
-        })
-    })
-})
+      expect(issuerStatusBefore).to.equal(true);
+      expect(await ssiManagementFacet.isIssuer(account_B)).to.equal(false);
+      expect(issuerListCountBefore).to.equal(1);
+      expect(await ssiManagementFacet.getIssuerListCount()).to.equal(0);
+      expect(issuerListBefore.length).to.equal(1);
+      expect(issuerListBefore).to.deep.equal([account_B]);
+      expect(await ssiManagementFacet.getIssuerListMembers(0, 1)).to.deep.equal(
+        [],
+      );
+    });
+  });
+});

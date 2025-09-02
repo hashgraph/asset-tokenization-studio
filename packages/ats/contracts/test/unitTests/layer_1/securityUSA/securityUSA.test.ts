@@ -203,531 +203,512 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
-    type ResolverProxy,
-    type EquityUSA,
-    type BondUSARead,
-    BusinessLogicResolver,
-    IFactory,
-} from '@typechain'
+  type ResolverProxy,
+  type EquityUSA,
+  type BondUSARead,
+  BusinessLogicResolver,
+  IFactory,
+} from '@typechain';
 import {
-    Rbac,
-    deployBondFromFactory,
-    deployEquityFromFactory,
-    RegulationType,
-    RegulationSubType,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    MAX_UINT256,
-} from '@scripts'
+  Rbac,
+  deployBondFromFactory,
+  deployEquityFromFactory,
+  RegulationType,
+  RegulationSubType,
+  deployAtsFullInfrastructure,
+  DeployAtsFullInfrastructureCommand,
+  MAX_UINT256,
+} from '@scripts';
 
-const countriesControlListType = true
-const listOfCountries = 'ES,FR,CH'
-const info = 'info'
-const init_rbacs: Rbac[] = []
+const countriesControlListType = true;
+const listOfCountries = 'ES,FR,CH';
+const info = 'info';
+const init_rbacs: Rbac[] = [];
 
-const TIME = 1000
-const numberOfUnits = 1000
-let currentTimeInSeconds = 0
-let startingDate = 0
-const numberOfCoupons = 50
-const frequency = 7
-const rate = 1
-let maturityDate = startingDate + numberOfCoupons * frequency
-let firstCouponDate = startingDate + 1
+const TIME = 1000;
+const numberOfUnits = 1000;
+let currentTimeInSeconds = 0;
+let startingDate = 0;
+const numberOfCoupons = 50;
+const frequency = 7;
+const rate = 1;
+let maturityDate = startingDate + numberOfCoupons * frequency;
+let firstCouponDate = startingDate + 1;
 
 describe('Security USA Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
+  let diamond: ResolverProxy;
+  let signer_A: SignerWithAddress;
+  let signer_B: SignerWithAddress;
 
-    let account_A: string
+  let account_A: string;
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let equityUSAFacet: EquityUSA
-    let bondUSAFacet: BondUSARead
+  let factory: IFactory;
+  let businessLogicResolver: BusinessLogicResolver;
+  let equityUSAFacet: EquityUSA;
+  let bondUSAFacet: BondUSARead;
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B] = await ethers.getSigners()
-        account_A = signer_A.address
+  before(async () => {
+    // mute | mock console.log
+    console.log = () => {};
+    [signer_A, signer_B] = await ethers.getSigners();
+    account_A = signer_A.address;
 
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                timeTravelEnabled: true,
-            })
-        )
+    const { ...deployedContracts } = await deployAtsFullInfrastructure(
+      await DeployAtsFullInfrastructureCommand.newInstance({
+        signer: signer_A,
+        useDeployed: false,
+        timeTravelEnabled: true,
+      }),
+    );
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    factory = deployedContracts.factory.contract;
+    businessLogicResolver = deployedContracts.businessLogicResolver.contract;
 
-        currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
-        startingDate = currentTimeInSeconds + TIME
-        maturityDate = startingDate + numberOfCoupons * frequency
-        firstCouponDate = startingDate + 1
+    currentTimeInSeconds = (await ethers.provider.getBlock('latest')).timestamp;
+    startingDate = currentTimeInSeconds + TIME;
+    maturityDate = startingDate + numberOfCoupons * frequency;
+    firstCouponDate = startingDate + 1;
 
-        expect(startingDate).to.be.gt(currentTimeInSeconds)
-        expect(maturityDate).to.be.gt(startingDate)
-        expect(firstCouponDate).to.be.gt(startingDate)
-    })
+    expect(startingDate).to.be.gt(currentTimeInSeconds);
+    expect(maturityDate).to.be.gt(startingDate);
+    expect(firstCouponDate).to.be.gt(startingDate);
+  });
 
-    describe('equity USA', () => {
-        it('Given regulation type REG_S and subtype NONE WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                internalKycActivated: true,
-                isMultiPartition: false,
-                name: 'TEST_AccessControl',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_S,
-                regulationSubType: RegulationSubType.NONE,
-                countriesControlListType,
-                listOfCountries,
-                info,
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
+  describe('equity USA', () => {
+    it('Given regulation type REG_S and subtype NONE WHEN Read regulation data from Equity USA THEN all ok', async () => {
+      diamond = await deployEquityFromFactory({
+        adminAccount: account_A,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        clearingActive: false,
+        internalKycActivated: true,
+        isMultiPartition: false,
+        name: 'TEST_AccessControl',
+        symbol: 'TAC',
+        decimals: 6,
+        isin: isinGenerator(),
+        votingRight: false,
+        informationRight: false,
+        liquidationRight: false,
+        subscriptionRight: true,
+        conversionRight: true,
+        redemptionRight: true,
+        putRight: false,
+        dividendRight: 1,
+        currency: '0x345678',
+        numberOfShares: MAX_UINT256,
+        nominalValue: 100,
+        regulationType: RegulationType.REG_S,
+        regulationSubType: RegulationSubType.NONE,
+        countriesControlListType,
+        listOfCountries,
+        info,
+        init_rbacs,
+        businessLogicResolver: businessLogicResolver.address,
+        factory,
+      });
 
-            equityUSAFacet = await ethers.getContractAt(
-                'EquityUSA',
-                diamond.address
-            )
-            // Using account C (non role)
-            equityUSAFacet = equityUSAFacet.connect(signer_B)
+      equityUSAFacet = await ethers.getContractAt('EquityUSA', diamond.address);
+      // Using account C (non role)
+      equityUSAFacet = equityUSAFacet.connect(signer_B);
 
-            // retrieve security regulation data
-            const regulation = await equityUSAFacet.getSecurityRegulationData()
+      // retrieve security regulation data
+      const regulation = await equityUSAFacet.getSecurityRegulationData();
 
-            expect(regulation.regulationData.regulationType).to.equal(
-                RegulationType.REG_S
-            )
-            expect(regulation.regulationData.regulationSubType).to.equal(
-                RegulationSubType.NONE
-            )
-            expect(regulation.regulationData.dealSize.toString()).to.equal('0')
-            expect(
-                regulation.regulationData.accreditedInvestors.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.maxNonAccreditedInvestors.toString()
-            ).to.equal('0')
-            expect(
-                regulation.regulationData.manualInvestorVerification.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.internationalInvestors.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.resaleHoldPeriod.toString()
-            ).to.equal('0')
+      expect(regulation.regulationData.regulationType).to.equal(
+        RegulationType.REG_S,
+      );
+      expect(regulation.regulationData.regulationSubType).to.equal(
+        RegulationSubType.NONE,
+      );
+      expect(regulation.regulationData.dealSize.toString()).to.equal('0');
+      expect(regulation.regulationData.accreditedInvestors.toString()).to.equal(
+        '1',
+      );
+      expect(
+        regulation.regulationData.maxNonAccreditedInvestors.toString(),
+      ).to.equal('0');
+      expect(
+        regulation.regulationData.manualInvestorVerification.toString(),
+      ).to.equal('1');
+      expect(
+        regulation.regulationData.internationalInvestors.toString(),
+      ).to.equal('1');
+      expect(regulation.regulationData.resaleHoldPeriod.toString()).to.equal(
+        '0',
+      );
 
-            expect(
-                regulation.additionalSecurityData.countriesControlListType
-            ).to.equal(countriesControlListType)
-            expect(regulation.additionalSecurityData.listOfCountries).to.equal(
-                listOfCountries
-            )
-            expect(regulation.additionalSecurityData.info).to.equal(info)
-        })
+      expect(
+        regulation.additionalSecurityData.countriesControlListType,
+      ).to.equal(countriesControlListType);
+      expect(regulation.additionalSecurityData.listOfCountries).to.equal(
+        listOfCountries,
+      );
+      expect(regulation.additionalSecurityData.info).to.equal(info);
+    });
 
-        it('Given regulation type REG_D and subtype REG_D_506_B WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                internalKycActivated: true,
-                isMultiPartition: false,
-                name: 'TEST_AccessControl',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_B,
-                countriesControlListType,
-                listOfCountries,
-                info,
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
+    it('Given regulation type REG_D and subtype REG_D_506_B WHEN Read regulation data from Equity USA THEN all ok', async () => {
+      diamond = await deployEquityFromFactory({
+        adminAccount: account_A,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        clearingActive: false,
+        internalKycActivated: true,
+        isMultiPartition: false,
+        name: 'TEST_AccessControl',
+        symbol: 'TAC',
+        decimals: 6,
+        isin: isinGenerator(),
+        votingRight: false,
+        informationRight: false,
+        liquidationRight: false,
+        subscriptionRight: true,
+        conversionRight: true,
+        redemptionRight: true,
+        putRight: false,
+        dividendRight: 1,
+        currency: '0x345678',
+        numberOfShares: MAX_UINT256,
+        nominalValue: 100,
+        regulationType: RegulationType.REG_D,
+        regulationSubType: RegulationSubType.REG_D_506_B,
+        countriesControlListType,
+        listOfCountries,
+        info,
+        init_rbacs,
+        businessLogicResolver: businessLogicResolver.address,
+        factory,
+      });
 
-            equityUSAFacet = await ethers.getContractAt(
-                'EquityUSA',
-                diamond.address
-            )
-            // Using account C (non role)
-            equityUSAFacet = equityUSAFacet.connect(signer_B)
+      equityUSAFacet = await ethers.getContractAt('EquityUSA', diamond.address);
+      // Using account C (non role)
+      equityUSAFacet = equityUSAFacet.connect(signer_B);
 
-            // retrieve security regulation data
-            const regulation = await equityUSAFacet.getSecurityRegulationData()
+      // retrieve security regulation data
+      const regulation = await equityUSAFacet.getSecurityRegulationData();
 
-            expect(regulation.regulationData.regulationType).to.equal(
-                RegulationType.REG_D
-            )
-            expect(regulation.regulationData.regulationSubType).to.equal(
-                RegulationSubType.REG_D_506_B
-            )
-            expect(regulation.regulationData.dealSize.toString()).to.equal('0')
-            expect(
-                regulation.regulationData.accreditedInvestors.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.maxNonAccreditedInvestors.toString()
-            ).to.equal('35')
-            expect(
-                regulation.regulationData.manualInvestorVerification.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.internationalInvestors.toString()
-            ).to.equal('0')
-            expect(
-                regulation.regulationData.resaleHoldPeriod.toString()
-            ).to.equal('1')
+      expect(regulation.regulationData.regulationType).to.equal(
+        RegulationType.REG_D,
+      );
+      expect(regulation.regulationData.regulationSubType).to.equal(
+        RegulationSubType.REG_D_506_B,
+      );
+      expect(regulation.regulationData.dealSize.toString()).to.equal('0');
+      expect(regulation.regulationData.accreditedInvestors.toString()).to.equal(
+        '1',
+      );
+      expect(
+        regulation.regulationData.maxNonAccreditedInvestors.toString(),
+      ).to.equal('35');
+      expect(
+        regulation.regulationData.manualInvestorVerification.toString(),
+      ).to.equal('1');
+      expect(
+        regulation.regulationData.internationalInvestors.toString(),
+      ).to.equal('0');
+      expect(regulation.regulationData.resaleHoldPeriod.toString()).to.equal(
+        '1',
+      );
 
-            expect(
-                regulation.additionalSecurityData.countriesControlListType
-            ).to.equal(countriesControlListType)
-            expect(regulation.additionalSecurityData.listOfCountries).to.equal(
-                listOfCountries
-            )
-            expect(regulation.additionalSecurityData.info).to.equal(info)
-        })
+      expect(
+        regulation.additionalSecurityData.countriesControlListType,
+      ).to.equal(countriesControlListType);
+      expect(regulation.additionalSecurityData.listOfCountries).to.equal(
+        listOfCountries,
+      );
+      expect(regulation.additionalSecurityData.info).to.equal(info);
+    });
 
-        it('Given regulation type REG_D and subtype REG_D_506_C WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                internalKycActivated: true,
-                isMultiPartition: false,
-                name: 'TEST_AccessControl',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_C,
-                countriesControlListType,
-                listOfCountries,
-                info,
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
+    it('Given regulation type REG_D and subtype REG_D_506_C WHEN Read regulation data from Equity USA THEN all ok', async () => {
+      diamond = await deployEquityFromFactory({
+        adminAccount: account_A,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        clearingActive: false,
+        internalKycActivated: true,
+        isMultiPartition: false,
+        name: 'TEST_AccessControl',
+        symbol: 'TAC',
+        decimals: 6,
+        isin: isinGenerator(),
+        votingRight: false,
+        informationRight: false,
+        liquidationRight: false,
+        subscriptionRight: true,
+        conversionRight: true,
+        redemptionRight: true,
+        putRight: false,
+        dividendRight: 1,
+        currency: '0x345678',
+        numberOfShares: MAX_UINT256,
+        nominalValue: 100,
+        regulationType: RegulationType.REG_D,
+        regulationSubType: RegulationSubType.REG_D_506_C,
+        countriesControlListType,
+        listOfCountries,
+        info,
+        init_rbacs,
+        businessLogicResolver: businessLogicResolver.address,
+        factory,
+      });
 
-            equityUSAFacet = await ethers.getContractAt(
-                'EquityUSA',
-                diamond.address
-            )
-            // Using account C (non role)
-            equityUSAFacet = equityUSAFacet.connect(signer_B)
+      equityUSAFacet = await ethers.getContractAt('EquityUSA', diamond.address);
+      // Using account C (non role)
+      equityUSAFacet = equityUSAFacet.connect(signer_B);
 
-            // retrieve security regulation data
-            const regulation = await equityUSAFacet.getSecurityRegulationData()
+      // retrieve security regulation data
+      const regulation = await equityUSAFacet.getSecurityRegulationData();
 
-            expect(regulation.regulationData.regulationType).to.equal(
-                RegulationType.REG_D
-            )
-            expect(regulation.regulationData.regulationSubType).to.equal(
-                RegulationSubType.REG_D_506_C
-            )
-            expect(regulation.regulationData.dealSize.toString()).to.equal('0')
-            expect(
-                regulation.regulationData.accreditedInvestors.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.maxNonAccreditedInvestors.toString()
-            ).to.equal('0')
-            expect(
-                regulation.regulationData.manualInvestorVerification.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.internationalInvestors.toString()
-            ).to.equal('0')
-            expect(
-                regulation.regulationData.resaleHoldPeriod.toString()
-            ).to.equal('1')
+      expect(regulation.regulationData.regulationType).to.equal(
+        RegulationType.REG_D,
+      );
+      expect(regulation.regulationData.regulationSubType).to.equal(
+        RegulationSubType.REG_D_506_C,
+      );
+      expect(regulation.regulationData.dealSize.toString()).to.equal('0');
+      expect(regulation.regulationData.accreditedInvestors.toString()).to.equal(
+        '1',
+      );
+      expect(
+        regulation.regulationData.maxNonAccreditedInvestors.toString(),
+      ).to.equal('0');
+      expect(
+        regulation.regulationData.manualInvestorVerification.toString(),
+      ).to.equal('1');
+      expect(
+        regulation.regulationData.internationalInvestors.toString(),
+      ).to.equal('0');
+      expect(regulation.regulationData.resaleHoldPeriod.toString()).to.equal(
+        '1',
+      );
 
-            expect(
-                regulation.additionalSecurityData.countriesControlListType
-            ).to.equal(countriesControlListType)
-            expect(regulation.additionalSecurityData.listOfCountries).to.equal(
-                listOfCountries
-            )
-            expect(regulation.additionalSecurityData.info).to.equal(info)
-        })
-    })
+      expect(
+        regulation.additionalSecurityData.countriesControlListType,
+      ).to.equal(countriesControlListType);
+      expect(regulation.additionalSecurityData.listOfCountries).to.equal(
+        listOfCountries,
+      );
+      expect(regulation.additionalSecurityData.info).to.equal(info);
+    });
+  });
 
-    describe('bond USA', () => {
-        it('Given regulation type REG_S and subtype NONE WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            diamond = await deployBondFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                internalKycActivated: true,
-                isMultiPartition: false,
-                name: 'TEST_AccessControl',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                currency: '0x455552',
-                numberOfUnits,
-                nominalValue: 100,
-                startingDate,
-                maturityDate,
-                couponFrequency: frequency,
-                couponRate: rate,
-                firstCouponDate,
-                regulationType: RegulationType.REG_S,
-                regulationSubType: RegulationSubType.NONE,
-                countriesControlListType,
-                listOfCountries,
-                info,
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
+  describe('bond USA', () => {
+    it('Given regulation type REG_S and subtype NONE WHEN Read regulation data from Bond USA THEN all ok', async () => {
+      diamond = await deployBondFromFactory({
+        adminAccount: account_A,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        clearingActive: false,
+        internalKycActivated: true,
+        isMultiPartition: false,
+        name: 'TEST_AccessControl',
+        symbol: 'TAC',
+        decimals: 6,
+        isin: isinGenerator(),
+        currency: '0x455552',
+        numberOfUnits,
+        nominalValue: 100,
+        startingDate,
+        maturityDate,
+        couponFrequency: frequency,
+        couponRate: rate,
+        firstCouponDate,
+        regulationType: RegulationType.REG_S,
+        regulationSubType: RegulationSubType.NONE,
+        countriesControlListType,
+        listOfCountries,
+        info,
+        init_rbacs,
+        businessLogicResolver: businessLogicResolver.address,
+        factory,
+      });
 
-            bondUSAFacet = await ethers.getContractAt(
-                'BondUSARead',
-                diamond.address
-            )
-            // Using account C (non role)
-            bondUSAFacet = bondUSAFacet.connect(signer_B)
+      bondUSAFacet = await ethers.getContractAt('BondUSARead', diamond.address);
+      // Using account C (non role)
+      bondUSAFacet = bondUSAFacet.connect(signer_B);
 
-            // retrieve security regulation data
-            const regulation = await bondUSAFacet.getSecurityRegulationData()
+      // retrieve security regulation data
+      const regulation = await bondUSAFacet.getSecurityRegulationData();
 
-            expect(regulation.regulationData.regulationType).to.equal(
-                RegulationType.REG_S
-            )
-            expect(regulation.regulationData.regulationSubType).to.equal(
-                RegulationSubType.NONE
-            )
-            expect(regulation.regulationData.dealSize.toString()).to.equal('0')
-            expect(
-                regulation.regulationData.accreditedInvestors.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.maxNonAccreditedInvestors.toString()
-            ).to.equal('0')
-            expect(
-                regulation.regulationData.manualInvestorVerification.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.internationalInvestors.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.resaleHoldPeriod.toString()
-            ).to.equal('0')
+      expect(regulation.regulationData.regulationType).to.equal(
+        RegulationType.REG_S,
+      );
+      expect(regulation.regulationData.regulationSubType).to.equal(
+        RegulationSubType.NONE,
+      );
+      expect(regulation.regulationData.dealSize.toString()).to.equal('0');
+      expect(regulation.regulationData.accreditedInvestors.toString()).to.equal(
+        '1',
+      );
+      expect(
+        regulation.regulationData.maxNonAccreditedInvestors.toString(),
+      ).to.equal('0');
+      expect(
+        regulation.regulationData.manualInvestorVerification.toString(),
+      ).to.equal('1');
+      expect(
+        regulation.regulationData.internationalInvestors.toString(),
+      ).to.equal('1');
+      expect(regulation.regulationData.resaleHoldPeriod.toString()).to.equal(
+        '0',
+      );
 
-            expect(
-                regulation.additionalSecurityData.countriesControlListType
-            ).to.equal(countriesControlListType)
-            expect(regulation.additionalSecurityData.listOfCountries).to.equal(
-                listOfCountries
-            )
-            expect(regulation.additionalSecurityData.info).to.equal(info)
-        })
+      expect(
+        regulation.additionalSecurityData.countriesControlListType,
+      ).to.equal(countriesControlListType);
+      expect(regulation.additionalSecurityData.listOfCountries).to.equal(
+        listOfCountries,
+      );
+      expect(regulation.additionalSecurityData.info).to.equal(info);
+    });
 
-        it('Given regulation type REG_D and subtype REG_D_506_B WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            diamond = await deployBondFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                internalKycActivated: true,
-                isMultiPartition: false,
-                name: 'TEST_AccessControl',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                currency: '0x455552',
-                numberOfUnits,
-                nominalValue: 100,
-                startingDate,
-                maturityDate,
-                couponFrequency: frequency,
-                couponRate: rate,
-                firstCouponDate,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_B,
-                countriesControlListType,
-                listOfCountries,
-                info,
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
+    it('Given regulation type REG_D and subtype REG_D_506_B WHEN Read regulation data from Bond USA THEN all ok', async () => {
+      diamond = await deployBondFromFactory({
+        adminAccount: account_A,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        clearingActive: false,
+        internalKycActivated: true,
+        isMultiPartition: false,
+        name: 'TEST_AccessControl',
+        symbol: 'TAC',
+        decimals: 6,
+        isin: isinGenerator(),
+        currency: '0x455552',
+        numberOfUnits,
+        nominalValue: 100,
+        startingDate,
+        maturityDate,
+        couponFrequency: frequency,
+        couponRate: rate,
+        firstCouponDate,
+        regulationType: RegulationType.REG_D,
+        regulationSubType: RegulationSubType.REG_D_506_B,
+        countriesControlListType,
+        listOfCountries,
+        info,
+        init_rbacs,
+        businessLogicResolver: businessLogicResolver.address,
+        factory,
+      });
 
-            bondUSAFacet = await ethers.getContractAt(
-                'BondUSARead',
-                diamond.address
-            )
-            // Using account C (non role)
-            bondUSAFacet = bondUSAFacet.connect(signer_B)
+      bondUSAFacet = await ethers.getContractAt('BondUSARead', diamond.address);
+      // Using account C (non role)
+      bondUSAFacet = bondUSAFacet.connect(signer_B);
 
-            // retrieve security regulation data
-            const regulation = await bondUSAFacet.getSecurityRegulationData()
+      // retrieve security regulation data
+      const regulation = await bondUSAFacet.getSecurityRegulationData();
 
-            expect(regulation.regulationData.regulationType).to.equal(
-                RegulationType.REG_D
-            )
-            expect(regulation.regulationData.regulationSubType).to.equal(
-                RegulationSubType.REG_D_506_B
-            )
-            expect(regulation.regulationData.dealSize.toString()).to.equal('0')
-            expect(
-                regulation.regulationData.accreditedInvestors.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.maxNonAccreditedInvestors.toString()
-            ).to.equal('35')
-            expect(
-                regulation.regulationData.manualInvestorVerification.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.internationalInvestors.toString()
-            ).to.equal('0')
-            expect(
-                regulation.regulationData.resaleHoldPeriod.toString()
-            ).to.equal('1')
+      expect(regulation.regulationData.regulationType).to.equal(
+        RegulationType.REG_D,
+      );
+      expect(regulation.regulationData.regulationSubType).to.equal(
+        RegulationSubType.REG_D_506_B,
+      );
+      expect(regulation.regulationData.dealSize.toString()).to.equal('0');
+      expect(regulation.regulationData.accreditedInvestors.toString()).to.equal(
+        '1',
+      );
+      expect(
+        regulation.regulationData.maxNonAccreditedInvestors.toString(),
+      ).to.equal('35');
+      expect(
+        regulation.regulationData.manualInvestorVerification.toString(),
+      ).to.equal('1');
+      expect(
+        regulation.regulationData.internationalInvestors.toString(),
+      ).to.equal('0');
+      expect(regulation.regulationData.resaleHoldPeriod.toString()).to.equal(
+        '1',
+      );
 
-            expect(
-                regulation.additionalSecurityData.countriesControlListType
-            ).to.equal(countriesControlListType)
-            expect(regulation.additionalSecurityData.listOfCountries).to.equal(
-                listOfCountries
-            )
-            expect(regulation.additionalSecurityData.info).to.equal(info)
-        })
+      expect(
+        regulation.additionalSecurityData.countriesControlListType,
+      ).to.equal(countriesControlListType);
+      expect(regulation.additionalSecurityData.listOfCountries).to.equal(
+        listOfCountries,
+      );
+      expect(regulation.additionalSecurityData.info).to.equal(info);
+    });
 
-        it('Given regulation type REG_D and subtype REG_D_506_C WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            diamond = await deployBondFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                internalKycActivated: true,
-                isMultiPartition: false,
-                name: 'TEST_AccessControl',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                currency: '0x455552',
-                numberOfUnits,
-                nominalValue: 100,
-                startingDate,
-                maturityDate,
-                couponFrequency: frequency,
-                couponRate: rate,
-                firstCouponDate,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_C,
-                countriesControlListType,
-                listOfCountries,
-                info,
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
+    it('Given regulation type REG_D and subtype REG_D_506_C WHEN Read regulation data from Bond USA THEN all ok', async () => {
+      diamond = await deployBondFromFactory({
+        adminAccount: account_A,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        clearingActive: false,
+        internalKycActivated: true,
+        isMultiPartition: false,
+        name: 'TEST_AccessControl',
+        symbol: 'TAC',
+        decimals: 6,
+        isin: isinGenerator(),
+        currency: '0x455552',
+        numberOfUnits,
+        nominalValue: 100,
+        startingDate,
+        maturityDate,
+        couponFrequency: frequency,
+        couponRate: rate,
+        firstCouponDate,
+        regulationType: RegulationType.REG_D,
+        regulationSubType: RegulationSubType.REG_D_506_C,
+        countriesControlListType,
+        listOfCountries,
+        info,
+        init_rbacs,
+        businessLogicResolver: businessLogicResolver.address,
+        factory,
+      });
 
-            bondUSAFacet = await ethers.getContractAt(
-                'BondUSARead',
-                diamond.address
-            )
-            // Using account C (non role)
-            bondUSAFacet = bondUSAFacet.connect(signer_B)
+      bondUSAFacet = await ethers.getContractAt('BondUSARead', diamond.address);
+      // Using account C (non role)
+      bondUSAFacet = bondUSAFacet.connect(signer_B);
 
-            // retrieve security regulation data
-            const regulation = await bondUSAFacet.getSecurityRegulationData()
+      // retrieve security regulation data
+      const regulation = await bondUSAFacet.getSecurityRegulationData();
 
-            expect(regulation.regulationData.regulationType).to.equal(
-                RegulationType.REG_D
-            )
-            expect(regulation.regulationData.regulationSubType).to.equal(
-                RegulationSubType.REG_D_506_C
-            )
-            expect(regulation.regulationData.dealSize.toString()).to.equal('0')
-            expect(
-                regulation.regulationData.accreditedInvestors.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.maxNonAccreditedInvestors.toString()
-            ).to.equal('0')
-            expect(
-                regulation.regulationData.manualInvestorVerification.toString()
-            ).to.equal('1')
-            expect(
-                regulation.regulationData.internationalInvestors.toString()
-            ).to.equal('0')
-            expect(
-                regulation.regulationData.resaleHoldPeriod.toString()
-            ).to.equal('1')
+      expect(regulation.regulationData.regulationType).to.equal(
+        RegulationType.REG_D,
+      );
+      expect(regulation.regulationData.regulationSubType).to.equal(
+        RegulationSubType.REG_D_506_C,
+      );
+      expect(regulation.regulationData.dealSize.toString()).to.equal('0');
+      expect(regulation.regulationData.accreditedInvestors.toString()).to.equal(
+        '1',
+      );
+      expect(
+        regulation.regulationData.maxNonAccreditedInvestors.toString(),
+      ).to.equal('0');
+      expect(
+        regulation.regulationData.manualInvestorVerification.toString(),
+      ).to.equal('1');
+      expect(
+        regulation.regulationData.internationalInvestors.toString(),
+      ).to.equal('0');
+      expect(regulation.regulationData.resaleHoldPeriod.toString()).to.equal(
+        '1',
+      );
 
-            expect(
-                regulation.additionalSecurityData.countriesControlListType
-            ).to.equal(countriesControlListType)
-            expect(regulation.additionalSecurityData.listOfCountries).to.equal(
-                listOfCountries
-            )
-            expect(regulation.additionalSecurityData.info).to.equal(info)
-        })
-    })
-})
+      expect(
+        regulation.additionalSecurityData.countriesControlListType,
+      ).to.equal(countriesControlListType);
+      expect(regulation.additionalSecurityData.listOfCountries).to.equal(
+        listOfCountries,
+      );
+      expect(regulation.additionalSecurityData.info).to.equal(info);
+    });
+  });
+});

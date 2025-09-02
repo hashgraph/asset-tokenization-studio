@@ -207,9 +207,9 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity 0.8.18;
 
-import {Common} from '../../common/Common.sol';
-import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
-import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
+import { Common } from '../../common/Common.sol';
+import { IERC20 } from '../../interfaces/ERC1400/IERC20.sol';
+import { _DEFAULT_PARTITION } from '../../../layer_0/constants/values.sol';
 
 abstract contract ERC20 is IERC20, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -249,14 +249,7 @@ abstract contract ERC20 is IERC20, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(
-            _msgSender(),
-            to,
-            _DEFAULT_PARTITION,
-            amount,
-            '',
-            ''
-        )
+        onlyCanTransferFromByPartition(_msgSender(), to, _DEFAULT_PARTITION, amount, '', '')
         returns (bool)
     {
         return _transfer(_msgSender(), to, amount);
@@ -271,14 +264,7 @@ abstract contract ERC20 is IERC20, Common {
         override
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(
-            from,
-            to,
-            _DEFAULT_PARTITION,
-            amount,
-            '',
-            ''
-        )
+        onlyCanTransferFromByPartition(from, to, _DEFAULT_PARTITION, amount, '', '')
         returns (bool)
     {
         return _transferFrom(_msgSender(), from, to, amount);
@@ -287,33 +273,18 @@ abstract contract ERC20 is IERC20, Common {
     function increaseAllowance(
         address spender,
         uint256 addedValue
-    )
-        external
-        onlyUnpaused
-        onlyCompliant(_msgSender(), spender, false)
-        onlyWithoutMultiPartition
-        returns (bool)
-    {
+    ) external onlyUnpaused onlyCompliant(_msgSender(), spender, false) onlyWithoutMultiPartition returns (bool) {
         return _increaseAllowance(spender, addedValue);
     }
 
     function decreaseAllowance(
         address spender,
         uint256 subtractedValue
-    )
-        external
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyCompliant(_msgSender(), spender, false)
-        returns (bool)
-    {
+    ) external onlyUnpaused onlyWithoutMultiPartition onlyCompliant(_msgSender(), spender, false) returns (bool) {
         return _decreaseAllowance(spender, subtractedValue);
     }
 
-    function allowance(
-        address owner,
-        address spender
-    ) external view override returns (uint256) {
+    function allowance(address owner, address spender) external view override returns (uint256) {
         return _allowanceAdjusted(owner, spender);
     }
 
@@ -321,9 +292,7 @@ abstract contract ERC20 is IERC20, Common {
         return _decimalsAdjusted();
     }
 
-    function decimalsAdjustedAt(
-        uint256 _timestamp
-    ) external view returns (uint8) {
+    function decimalsAdjustedAt(uint256 _timestamp) external view returns (uint8) {
         return _decimalsAdjustedAt(_timestamp);
     }
 

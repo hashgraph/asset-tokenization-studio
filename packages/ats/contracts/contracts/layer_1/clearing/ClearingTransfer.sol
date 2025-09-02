@@ -206,9 +206,9 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from '../common/Common.sol';
-import {IClearingTransfer} from '../interfaces/clearing/IClearingTransfer.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import { Common } from '../common/Common.sol';
+import { IClearingTransfer } from '../interfaces/clearing/IClearingTransfer.sol';
+import { ThirdPartyType } from '../../layer_0/common/types/ThirdPartyType.sol';
 
 abstract contract ClearingTransfer is IClearingTransfer, Common {
     function clearingTransferByPartition(
@@ -246,13 +246,9 @@ abstract contract ClearingTransfer is IClearingTransfer, Common {
         external
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -288,23 +284,16 @@ abstract contract ClearingTransfer is IClearingTransfer, Common {
         external
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
             _checkValidAddress(_clearingOperationFrom.from);
             _checkValidAddress(_to);
-            _checkOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
+            _checkOperator(_clearingOperationFrom.clearingOperation.partition, _clearingOperationFrom.from);
             _checkRecoveredAddress(_msgSender());
             _checkRecoveredAddress(_to);
             _checkRecoveredAddress(_clearingOperationFrom.from);
@@ -334,14 +323,8 @@ abstract contract ClearingTransfer is IClearingTransfer, Common {
         validateAddress(_to)
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
         onlyUnrecoveredAddress(_to)
-        onlyWithValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        )
-        onlyRole(
-            _protectedPartitionsRole(
-                _protectedClearingOperation.clearingOperation.partition
-            )
-        )
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
+        onlyRole(_protectedPartitionsRole(_protectedClearingOperation.clearingOperation.partition))
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -357,17 +340,7 @@ abstract contract ClearingTransfer is IClearingTransfer, Common {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    )
-        external
-        view
-        override
-        returns (ClearingTransferData memory clearingTransferData_)
-    {
-        return
-            _getClearingTransferForByPartitionAdjusted(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
+    ) external view override returns (ClearingTransferData memory clearingTransferData_) {
+        return _getClearingTransferForByPartitionAdjusted(_partition, _tokenHolder, _clearingId);
     }
 }

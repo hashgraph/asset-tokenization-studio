@@ -203,51 +203,48 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { type Pause, type AccessControl } from '@typechain'
-import { expect } from 'chai'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { type Pause, type AccessControl } from '@typechain';
+import { expect } from 'chai';
 
 export async function grantRoleAndPauseToken(
-    accessControlFacet: AccessControl,
-    pauseFacet: Pause,
-    role: string,
-    signerAccessControl: SignerWithAddress,
-    signerPause: SignerWithAddress,
-    accountToAssignRole: string
+  accessControlFacet: AccessControl,
+  pauseFacet: Pause,
+  role: string,
+  signerAccessControl: SignerWithAddress,
+  signerPause: SignerWithAddress,
+  accountToAssignRole: string,
 ) {
-    // Granting Role to account
-    await accessControlFacet
-        .connect(signerAccessControl)
-        .grantRole(role, accountToAssignRole)
-    // Pausing the token
-    await pauseFacet.connect(signerPause).pause()
+  // Granting Role to account
+  await accessControlFacet
+    .connect(signerAccessControl)
+    .grantRole(role, accountToAssignRole);
+  // Pausing the token
+  await pauseFacet.connect(signerPause).pause();
 }
 
 // Add to CHAI API
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function assertObject(actual: any, expected: any, path = ''): void {
-    Object.keys(expected).forEach((key) => {
-        const actualValue = actual[key]
-        const expectedValue = expected[key]
+  Object.keys(expected).forEach((key) => {
+    const actualValue = actual[key];
+    const expectedValue = expected[key];
 
-        if (
-            typeof actualValue === 'object' &&
-            typeof expectedValue === 'object'
-        ) {
-            if (Array.isArray(actualValue) && Array.isArray(expectedValue)) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                actualValue.forEach((item: any, index: number) => {
-                    assertObject(item, expectedValue[index], key)
-                })
-            } else {
-                assertObject(actualValue, expectedValue, key)
-            }
-        } else {
-            const pathError = path === '' ? key : `${path}.${key}`
-            expect(actualValue).to.equal(
-                expectedValue,
-                `Found error on ${pathError}`
-            )
-        }
-    })
+    if (typeof actualValue === 'object' && typeof expectedValue === 'object') {
+      if (Array.isArray(actualValue) && Array.isArray(expectedValue)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        actualValue.forEach((item: any, index: number) => {
+          assertObject(item, expectedValue[index], key);
+        });
+      } else {
+        assertObject(actualValue, expectedValue, key);
+      }
+    } else {
+      const pathError = path === '' ? key : `${path}.${key}`;
+      expect(actualValue).to.equal(
+        expectedValue,
+        `Found error on ${pathError}`,
+      );
+    }
+  });
 }

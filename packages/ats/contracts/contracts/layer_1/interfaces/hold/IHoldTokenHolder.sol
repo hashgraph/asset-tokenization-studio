@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Hold, HoldIdentifier} from './IHold.sol';
+import { Hold, HoldIdentifier } from './IHold.sol';
 
 interface IHoldTokenHolder {
     event HeldByPartition(
@@ -273,7 +273,5 @@ interface IHoldTokenHolder {
         uint256 _amount
     ) external returns (bool success_);
 
-    function reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier
-    ) external returns (bool success_);
+    function reclaimHoldByPartition(HoldIdentifier calldata _holdIdentifier) external returns (bool success_);
 }

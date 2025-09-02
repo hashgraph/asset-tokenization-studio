@@ -206,13 +206,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Bond} from '../../layer_2/bond/Bond.sol';
-import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
-import {IBondUSA} from '../interfaces/IBondUSA.sol';
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
+import { Bond } from '../../layer_2/bond/Bond.sol';
+import { IBondRead } from '../../layer_2/interfaces/bond/IBondRead.sol';
+import { IBondUSA } from '../interfaces/IBondUSA.sol';
+import { RegulationData, AdditionalSecurityData } from '../constants/regulation.sol';
 
 abstract contract BondUSA is IBondUSA, Bond {
     // solhint-disable func-name-mixedcase

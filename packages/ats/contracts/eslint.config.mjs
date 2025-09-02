@@ -1,24 +1,49 @@
-// @ts-check
+/**
+ * ESLint configuration for ATS Contracts package
+ * Extends root monorepo configuration with contract-specific rules
+ */
+import baseConfig from '../../../eslint.config.mjs';
+import globals from 'globals';
 
-import eslint from '@eslint/js'
-import { globalIgnores } from 'eslint/config'
-import tseslint from 'typescript-eslint'
-
-export default tseslint.config(
-    eslint.configs.recommended,
-    tseslint.configs.recommended,
-    globalIgnores([
-        'typechain-types/**/**',
-        'test/demo/**/**',
-        'build/**/**',
-        'coverage/**/**',
-        '.solcover.js',
-    ]),
+// Filter base config to get general rules and adapt paths for contracts
+const contractsConfig = baseConfig
+  .filter(
+    (config) =>
+      // Include base ignores, default config, but exclude package-specific rules
+      !config.files || config.files.includes('**/*.{js,mjs,cjs,ts,tsx,mts}'),
+  )
+  .concat([
+    // Contract-specific TypeScript files (non-test) - adapted paths
     {
-        // * Overrides: Remove no-unused-expressions rule for test files
-        files: ['**/*.test.ts', '**/*.spec.ts', 'test/**/*', 'tests/**/*'], // File patterns for test files
-        rules: {
-            '@typescript-eslint/no-unused-expressions': 'off', // Disable the rule for test files
+      files: ['**/*.ts'],
+      ignores: ['**/*.test.ts', '**/*.spec.ts', 'test/**/*'],
+      rules: {
+        '@typescript-eslint/no-unused-expressions': 'error',
+      },
+    },
+
+    // Contract test files - adapted paths
+    {
+      files: [
+        '**/*.test.ts',
+        '**/*.spec.ts',
+        'test/**/*.ts',
+        '**/*.test.js',
+        '**/*.spec.js',
+        'test/**/*.js',
+      ],
+      languageOptions: {
+        // Include mocha globals used by Hardhat tests (describe, it, before, after, etc.)
+        globals: {
+          ...globals.node,
+          ...globals.es2020,
+          ...globals.mocha,
         },
-    }
-)
+      },
+      rules: {
+        '@typescript-eslint/no-unused-expressions': 'off',
+      },
+    },
+  ]);
+
+export default contractsConfig;

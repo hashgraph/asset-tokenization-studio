@@ -270,26 +270,17 @@ interface TRexIEquity {
         uint8 decimals;
     }
 
-    function setDividends(
-        Dividend calldata _newDividend
-    ) external returns (bool success_, uint256 dividendID_);
+    function setDividends(Dividend calldata _newDividend) external returns (bool success_, uint256 dividendID_);
 
-    function setVoting(
-        Voting calldata _newVoting
-    ) external returns (bool success_, uint256 voteID_);
+    function setVoting(Voting calldata _newVoting) external returns (bool success_, uint256 voteID_);
 
     function setScheduledBalanceAdjustment(
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) external returns (bool success_, uint256 balanceAdjustmentID_);
 
-    function getEquityDetails()
-        external
-        view
-        returns (EquityDetailsData memory equityDetailsData_);
+    function getEquityDetails() external view returns (EquityDetailsData memory equityDetailsData_);
 
-    function getDividends(
-        uint256 _dividendID
-    ) external view returns (RegisteredDividend memory registeredDividend_);
+    function getDividends(uint256 _dividendID) external view returns (RegisteredDividend memory registeredDividend_);
 
     function getDividendsFor(
         uint256 _dividendID,
@@ -304,18 +295,11 @@ interface TRexIEquity {
         uint256 _pageLength
     ) external view returns (address[] memory holders_);
 
-    function getTotalDividendHolders(
-        uint256 _dividendID
-    ) external view returns (uint256);
+    function getTotalDividendHolders(uint256 _dividendID) external view returns (uint256);
 
-    function getVoting(
-        uint256 _voteID
-    ) external view returns (RegisteredVoting memory registeredVoting_);
+    function getVoting(uint256 _voteID) external view returns (RegisteredVoting memory registeredVoting_);
 
-    function getVotingFor(
-        uint256 _voteID,
-        address _account
-    ) external view returns (VotingFor memory votingFor_);
+    function getVotingFor(uint256 _voteID, address _account) external view returns (VotingFor memory votingFor_);
 
     function getVotingCount() external view returns (uint256 votingCount_);
 
@@ -325,19 +309,11 @@ interface TRexIEquity {
         uint256 _pageLength
     ) external view returns (address[] memory holders_);
 
-    function getTotalVotingHolders(
-        uint256 _voteID
-    ) external view returns (uint256);
+    function getTotalVotingHolders(uint256 _voteID) external view returns (uint256);
 
     function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    )
-        external
-        view
-        returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
+    ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
 
-    function getScheduledBalanceAdjustmentCount()
-        external
-        view
-        returns (uint256 balanceAdjustmentCount_);
+    function getScheduledBalanceAdjustmentCount() external view returns (uint256 balanceAdjustmentCount_);
 }

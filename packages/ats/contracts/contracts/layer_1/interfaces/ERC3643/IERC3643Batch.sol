@@ -206,10 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 interface IERC3643Batch {
-    function batchTransfer(
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    ) external;
+    function batchTransfer(address[] calldata _toList, uint256[] calldata _amounts) external;
 
     function batchForcedTransfer(
         address[] calldata _fromList,
@@ -217,13 +214,7 @@ interface IERC3643Batch {
         uint256[] calldata _amounts
     ) external;
 
-    function batchMint(
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    ) external;
+    function batchMint(address[] calldata _toList, uint256[] calldata _amounts) external;
 
-    function batchBurn(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    ) external;
+    function batchBurn(address[] calldata _userAddresses, uint256[] calldata _amounts) external;
 }

@@ -206,11 +206,11 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {_CONTROLLER_ROLE} from '../constants/roles.sol';
-import {Hold, ProtectedHold} from '../interfaces/hold/IHold.sol';
-import {IHoldManagement} from '../interfaces/hold/IHoldManagement.sol';
-import {Common} from '../common/Common.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import { _CONTROLLER_ROLE } from '../constants/roles.sol';
+import { Hold, ProtectedHold } from '../interfaces/hold/IHold.sol';
+import { IHoldManagement } from '../interfaces/hold/IHoldManagement.sol';
+import { Common } from '../common/Common.sol';
+import { ThirdPartyType } from '../../layer_0/common/types/ThirdPartyType.sol';
 
 abstract contract HoldManagement is IHoldManagement, Common {
     function operatorCreateHoldByPartition(
@@ -236,22 +236,9 @@ abstract contract HoldManagement is IHoldManagement, Common {
             _checkRecoveredAddress(_hold.to);
             _checkRecoveredAddress(_from);
         }
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _from,
-            _hold,
-            _operatorData,
-            ThirdPartyType.OPERATOR
-        );
+        (success_, holdId_) = _createHoldByPartition(_partition, _from, _hold, _operatorData, ThirdPartyType.OPERATOR);
 
-        emit OperatorHeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
+        emit OperatorHeldByPartition(_msgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
     function controllerCreateHoldByPartition(
@@ -279,14 +266,7 @@ abstract contract HoldManagement is IHoldManagement, Common {
             ThirdPartyType.CONTROLLER
         );
 
-        emit ControllerHeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
+        emit ControllerHeldByPartition(_msgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
     function protectedCreateHoldByPartition(
@@ -304,26 +284,12 @@ abstract contract HoldManagement is IHoldManagement, Common {
         onlyUnrecoveredAddress(_from)
         onlyUnrecoveredAddress(_protectedHold.hold.to)
         onlyRole(_protectedPartitionsRole(_partition))
-        onlyWithValidExpirationTimestamp(
-            _protectedHold.hold.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_protectedHold.hold.expirationTimestamp)
         onlyProtectedPartitions
         returns (bool success_, uint256 holdId_)
     {
-        (success_, holdId_) = _protectedCreateHoldByPartition(
-            _partition,
-            _from,
-            _protectedHold,
-            _signature
-        );
+        (success_, holdId_) = _protectedCreateHoldByPartition(_partition, _from, _protectedHold, _signature);
 
-        emit ProtectedHeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _protectedHold.hold,
-            ''
-        );
+        emit ProtectedHeldByPartition(_msgSender(), _from, _partition, holdId_, _protectedHold.hold, '');
     }
 }

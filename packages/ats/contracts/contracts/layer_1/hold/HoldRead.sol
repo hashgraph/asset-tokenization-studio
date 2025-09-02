@@ -206,15 +206,13 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {HoldIdentifier} from '../interfaces/hold/IHold.sol';
-import {IHoldRead} from '../interfaces/hold/IHoldRead.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
-import {Common} from '../common/Common.sol';
+import { HoldIdentifier } from '../interfaces/hold/IHold.sol';
+import { IHoldRead } from '../interfaces/hold/IHoldRead.sol';
+import { ThirdPartyType } from '../../layer_0/common/types/ThirdPartyType.sol';
+import { Common } from '../common/Common.sol';
 
 abstract contract HoldRead is IHoldRead, Common {
-    function getHeldAmountFor(
-        address _tokenHolder
-    ) external view override returns (uint256 amount_) {
+    function getHeldAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
         return _getHeldAmountForAdjusted(_tokenHolder);
     }
 
@@ -238,13 +236,7 @@ abstract contract HoldRead is IHoldRead, Common {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory holdsId_) {
-        return
-            _getHoldsIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _pageIndex,
-                _pageLength
-            );
+        return _getHoldsIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
     }
 
     function getHoldForByPartition(
@@ -266,9 +258,7 @@ abstract contract HoldRead is IHoldRead, Common {
         return _getHoldForByPartitionAdjusted(_holdIdentifier);
     }
 
-    function getHoldThirdParty(
-        HoldIdentifier calldata _holdIdentifier
-    ) external view override returns (address) {
+    function getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) external view override returns (address) {
         return _getHoldThirdParty(_holdIdentifier);
     }
 }

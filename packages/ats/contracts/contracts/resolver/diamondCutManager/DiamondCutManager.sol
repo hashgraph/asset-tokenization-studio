@@ -205,21 +205,15 @@
 
 pragma solidity 0.8.18;
 
-import {_DEFAULT_ADMIN_ROLE} from '../../layer_1/constants/roles.sol';
-import {Pause} from '../../layer_1/pause/Pause.sol';
-import {AccessControl} from '../../layer_1/accessControl/AccessControl.sol';
-import {DiamondCutManagerWrapper} from './DiamondCutManagerWrapper.sol';
-import {
-    IDiamondLoupe
-} from '../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
+import { _DEFAULT_ADMIN_ROLE } from '../../layer_1/constants/roles.sol';
+import { Pause } from '../../layer_1/pause/Pause.sol';
+import { AccessControl } from '../../layer_1/accessControl/AccessControl.sol';
+import { DiamondCutManagerWrapper } from './DiamondCutManagerWrapper.sol';
+import { IDiamondLoupe } from '../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract DiamondCutManager is
-    AccessControl,
-    Pause,
-    DiamondCutManagerWrapper
-{
+abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWrapper {
     modifier validateConfigurationId(bytes32 _configurationId) {
         _checkConfigurationId(_configurationId);
         _;
@@ -228,13 +222,7 @@ abstract contract DiamondCutManager is
     function createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
-    )
-        external
-        override
-        validateConfigurationId(_configurationId)
-        onlyRole(_DEFAULT_ADMIN_ROLE)
-        onlyUnpaused
-    {
+    ) external override validateConfigurationId(_configurationId) onlyRole(_DEFAULT_ADMIN_ROLE) onlyUnpaused {
         emit DiamondConfigurationCreated(
             _configurationId,
             _facetConfigurations,
@@ -246,34 +234,18 @@ abstract contract DiamondCutManager is
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations,
         bool _isLastBatch
-    )
-        external
-        override
-        validateConfigurationId(_configurationId)
-        onlyRole(_DEFAULT_ADMIN_ROLE)
-        onlyUnpaused
-    {
+    ) external override validateConfigurationId(_configurationId) onlyRole(_DEFAULT_ADMIN_ROLE) onlyUnpaused {
         emit DiamondBatchConfigurationCreated(
             _configurationId,
             _facetConfigurations,
             _isLastBatch,
-            _createBatchConfiguration(
-                _configurationId,
-                _facetConfigurations,
-                _isLastBatch
-            )
+            _createBatchConfiguration(_configurationId, _facetConfigurations, _isLastBatch)
         );
     }
 
     function cancelBatchConfiguration(
         bytes32 _configurationId
-    )
-        external
-        override
-        validateConfigurationId(_configurationId)
-        onlyRole(_DEFAULT_ADMIN_ROLE)
-        onlyUnpaused
-    {
+    ) external override validateConfigurationId(_configurationId) onlyRole(_DEFAULT_ADMIN_ROLE) onlyUnpaused {
         _cancelBatchConfiguration(_configurationId);
         emit DiamondBatchConfigurationCanceled(_configurationId);
     }
@@ -283,12 +255,7 @@ abstract contract DiamondCutManager is
         uint256 _version,
         bytes4 _selector
     ) external view override returns (address facetAddress_) {
-        facetAddress_ = _resolveResolverProxyCall(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _selector
-        );
+        facetAddress_ = _resolveResolverProxyCall(_diamondCutManagerStorage(), _configurationId, _version, _selector);
     }
 
     function resolveSupportsInterface(
@@ -296,12 +263,7 @@ abstract contract DiamondCutManager is
         uint256 _version,
         bytes4 _interfaceId
     ) external view override returns (bool exists_) {
-        exists_ = _resolveSupportsInterface(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version,
-            _interfaceId
-        );
+        exists_ = _resolveSupportsInterface(_diamondCutManagerStorage(), _configurationId, _version, _interfaceId);
     }
 
     function isResolverProxyConfigurationRegistered(
@@ -319,41 +281,24 @@ abstract contract DiamondCutManager is
         bytes32 _configurationId,
         uint256 _version
     ) external view override {
-        _checkResolverProxyConfigurationRegistered(
-            _diamondCutManagerStorage(),
-            _configurationId,
-            _version
-        );
+        _checkResolverProxyConfigurationRegistered(_diamondCutManagerStorage(), _configurationId, _version);
     }
 
-    function getConfigurationsLength()
-        external
-        view
-        override
-        returns (uint256 configurationsLength_)
-    {
-        configurationsLength_ = _diamondCutManagerStorage()
-            .configurations
-            .length;
+    function getConfigurationsLength() external view override returns (uint256 configurationsLength_) {
+        configurationsLength_ = _diamondCutManagerStorage().configurations.length;
     }
 
     function getConfigurations(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (bytes32[] memory configurationIds_) {
-        configurationIds_ = _getConfigurations(
-            _diamondCutManagerStorage(),
-            _pageIndex,
-            _pageLength
-        );
+        configurationIds_ = _getConfigurations(_diamondCutManagerStorage(), _pageIndex, _pageLength);
     }
 
     function getLatestVersionByConfiguration(
         bytes32 _configurationId
     ) external view override returns (uint256 latestVersion_) {
-        latestVersion_ = _diamondCutManagerStorage().latestVersion[
-            _configurationId
-        ];
+        latestVersion_ = _diamondCutManagerStorage().latestVersion[_configurationId];
     }
 
     function getFacetsLengthByConfigurationIdAndVersion(

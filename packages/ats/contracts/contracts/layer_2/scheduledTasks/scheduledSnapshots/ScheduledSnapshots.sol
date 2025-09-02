@@ -206,14 +206,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {Common} from '../../../layer_1/common/Common.sol';
-import {
-    IScheduledSnapshots
-} from '../../interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { Common } from '../../../layer_1/common/Common.sol';
+import { IScheduledSnapshots } from '../../interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol';
+import { ScheduledTasksLib } from '../ScheduledTasksLib.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 abstract contract ScheduledSnapshots is IScheduledSnapshots, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -222,11 +218,7 @@ abstract contract ScheduledSnapshots is IScheduledSnapshots, Common {
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    )
-        external
-        override
-        onlyAutoCalling(_scheduledSnapshotStorage().autoCalling)
-    {
+    ) external override onlyAutoCalling(_scheduledSnapshotStorage().autoCalling) {
         uint256 newSnapShotID;
         if (_pos == _scheduledTasksLength - 1) {
             newSnapShotID = _snapshot();
@@ -242,12 +234,7 @@ abstract contract ScheduledSnapshots is IScheduledSnapshots, Common {
     function getScheduledSnapshots(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        override
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
-    {
+    ) external view override returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_) {
         scheduledSnapshot_ = _getScheduledSnapshots(_pageIndex, _pageLength);
     }
 }

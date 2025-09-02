@@ -121,7 +121,7 @@ If you have custom scripts or CI/CD configurations, update them to use the new w
 2. **Faster Development**: Automatic dependency linking between packages
 3. **Better CI/CD**: Path-based test triggers and conditional publishing
 4. **Scalability**: Ready for additional packages (e.g., mass-payout)
-5. **Consistent Tooling**: Unified linting, formatting, and testing across all packages
+5. **Consistent Tooling**: Centralized linting and formatting configurations ensure code quality consistency across all packages
 
 ## Troubleshooting
 

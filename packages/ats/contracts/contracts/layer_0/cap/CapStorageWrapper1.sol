@@ -205,11 +205,9 @@
 
 pragma solidity 0.8.18;
 
-import {
-    AdjustBalancesStorageWrapper1
-} from '../adjustBalances/AdjustBalancesStorageWrapper1.sol';
-import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {MAX_UINT256} from '../constants/values.sol';
+import { AdjustBalancesStorageWrapper1 } from '../adjustBalances/AdjustBalancesStorageWrapper1.sol';
+import { _CAP_STORAGE_POSITION } from '../constants/storagePositions.sol';
+import { MAX_UINT256 } from '../constants/values.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -226,10 +224,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         capStorage.maxSupply *= factor;
     }
 
-    function _adjustMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 factor
-    ) internal {
+    function _adjustMaxSupplyByPartition(bytes32 partition, uint256 factor) internal {
         CapDataStorage storage capStorage = _capStorage();
         if (capStorage.maxSupplyByPartition[partition] == MAX_UINT256) return;
         capStorage.maxSupplyByPartition[partition] *= factor;
@@ -239,53 +234,31 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         return _capStorage().maxSupply;
     }
 
-    function _getMaxSupplyByPartition(
-        bytes32 partition
-    ) internal view returns (uint256) {
+    function _getMaxSupplyByPartition(bytes32 partition) internal view returns (uint256) {
         return _capStorage().maxSupplyByPartition[partition];
     }
 
-    function _getMaxSupplyAdjusted()
-        internal
-        view
-        returns (uint256 maxSupply_)
-    {
+    function _getMaxSupplyAdjusted() internal view returns (uint256 maxSupply_) {
         return _getMaxSupplyAdjustedAt(_blockTimestamp());
     }
 
-    function _getMaxSupplyAdjustedAt(
-        uint256 timestamp
-    ) internal view returns (uint256) {
+    function _getMaxSupplyAdjustedAt(uint256 timestamp) internal view returns (uint256) {
         CapDataStorage storage capStorage = _capStorage();
         if (capStorage.maxSupply == MAX_UINT256) return MAX_UINT256;
-        (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(
-            timestamp
-        );
+        (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(timestamp);
         return capStorage.maxSupply * pendingAbaf;
     }
 
-    function _getMaxSupplyByPartitionAdjusted(
-        bytes32 _partition
-    ) internal view returns (uint256 maxSupply_) {
-        return
-            _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
+    function _getMaxSupplyByPartitionAdjusted(bytes32 _partition) internal view returns (uint256 maxSupply_) {
+        return _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
     }
 
-    function _getMaxSupplyByPartitionAdjustedAt(
-        bytes32 partition,
-        uint256 timestamp
-    ) internal view returns (uint256) {
-        uint256 factor = _calculateFactor(
-            _getAbafAdjustedAt(timestamp),
-            _getLabafByPartition(partition)
-        );
+    function _getMaxSupplyByPartitionAdjustedAt(bytes32 partition, uint256 timestamp) internal view returns (uint256) {
+        uint256 factor = _calculateFactor(_getAbafAdjustedAt(timestamp), _getLabafByPartition(partition));
         return _getMaxSupplyByPartition(partition) * factor;
     }
 
-    function _isCorrectMaxSupply(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
+    function _isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure returns (bool) {
         return (_maxSupply == 0) || (_amount <= _maxSupply);
     }
 

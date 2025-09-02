@@ -208,8 +208,8 @@
 
 pragma solidity 0.8.18;
 
-import {IERC20StorageWrapper} from './IERC20StorageWrapper.sol';
-import {IFactory} from '../../../interfaces/factory/IFactory.sol';
+import { IERC20StorageWrapper } from './IERC20StorageWrapper.sol';
+import { IFactory } from '../../../interfaces/factory/IFactory.sol';
 
 interface IERC20 is IERC20StorageWrapper {
     struct ERC20MetadataInfo {
@@ -262,11 +262,7 @@ interface IERC20 is IERC20StorageWrapper {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
 
     /**
      * @dev Atomically increases the allowance granted to `spender` by the caller.
@@ -280,10 +276,7 @@ interface IERC20 is IERC20StorageWrapper {
      *
      * - `spender` cannot be the zero address.
      */
-    function increaseAllowance(
-        address spender,
-        uint256 addedValue
-    ) external returns (bool);
+    function increaseAllowance(address spender, uint256 addedValue) external returns (bool);
 
     /**
      * @dev Atomically decreases the allowance granted to `spender` by the caller.
@@ -299,10 +292,7 @@ interface IERC20 is IERC20StorageWrapper {
      * - `spender` must have allowance for the caller of at least
      * `subtractedValue`.
      */
-    function decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    ) external returns (bool);
+    function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool);
 
     /**
      * @dev Returns the remaining number of tokens that `spender` will be
@@ -311,16 +301,11 @@ interface IERC20 is IERC20StorageWrapper {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(
-        address owner,
-        address spender
-    ) external view returns (uint256);
+    function allowance(address owner, address spender) external view returns (uint256);
 
     function decimalsAdjusted() external view returns (uint8);
 
-    function decimalsAdjustedAt(
-        uint256 _timestamp
-    ) external view returns (uint8);
+    function decimalsAdjustedAt(uint256 _timestamp) external view returns (uint8);
 
     function name() external view returns (string memory);
 

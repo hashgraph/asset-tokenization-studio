@@ -206,20 +206,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_DEFAULT_PARTITION} from '../../constants/values.sol';
-import {
-    _ERC1410_BASIC_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {
-    IERC1410StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {LockStorageWrapper1} from '../../lock/LockStorageWrapper1.sol';
-import {LibCommon} from '../../../layer_0/common/libraries/LibCommon.sol';
+import { _DEFAULT_PARTITION } from '../../constants/values.sol';
+import { _ERC1410_BASIC_STORAGE_POSITION } from '../../constants/storagePositions.sol';
+import { IERC1410StorageWrapper } from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
+import { LockStorageWrapper1 } from '../../lock/LockStorageWrapper1.sol';
+import { LibCommon } from '../../../layer_0/common/libraries/LibCommon.sol';
 
-abstract contract ERC1410BasicStorageWrapperRead is
-    IERC1410StorageWrapper,
-    LockStorageWrapper1
-{
+abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, LockStorageWrapper1 {
     // Represents a fungible set of tokens.
     struct Partition {
         uint256 amount;
@@ -258,11 +251,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
         _;
     }
 
-    function _reduceBalanceByPartition(
-        address _from,
-        uint256 _value,
-        bytes32 _partition
-    ) internal {
+    function _reduceBalanceByPartition(address _from, uint256 _value, bytes32 _partition) internal {
         if (!_validPartition(_partition, _from)) {
             revert IERC1410StorageWrapper.InvalidPartition(_from, _partition);
         }
@@ -270,12 +259,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
         uint256 fromBalance = _balanceOfByPartition(_partition, _from);
 
         if (fromBalance < _value) {
-            revert IERC1410StorageWrapper.InsufficientBalance(
-                _from,
-                fromBalance,
-                _value,
-                _partition
-            );
+            revert IERC1410StorageWrapper.InsufficientBalance(_from, fromBalance, _value, _partition);
         }
 
         ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
@@ -291,30 +275,19 @@ abstract contract ERC1410BasicStorageWrapperRead is
         erc1410Storage.balances[_from] -= _value;
     }
 
-    function _deletePartitionForHolder(
-        address _holder,
-        bytes32 _partition,
-        uint256 index
-    ) internal {
+    function _deletePartitionForHolder(address _holder, bytes32 _partition, uint256 index) internal {
         ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
         if (index != erc1410Storage.partitions[_holder].length - 1) {
-            erc1410Storage.partitions[_holder][index] = erc1410Storage
-                .partitions[_holder][
-                    erc1410Storage.partitions[_holder].length - 1
-                ];
-            erc1410Storage.partitionToIndex[_holder][
-                erc1410Storage.partitions[_holder][index].partition
-            ] = index + 1;
+            erc1410Storage.partitions[_holder][index] = erc1410Storage.partitions[_holder][
+                erc1410Storage.partitions[_holder].length - 1
+            ];
+            erc1410Storage.partitionToIndex[_holder][erc1410Storage.partitions[_holder][index].partition] = index + 1;
         }
         delete erc1410Storage.partitionToIndex[_holder][_partition];
         erc1410Storage.partitions[_holder].pop();
     }
 
-    function _increaseBalanceByPartition(
-        address _from,
-        uint256 _value,
-        bytes32 _partition
-    ) internal {
+    function _increaseBalanceByPartition(address _from, uint256 _value, bytes32 _partition) internal {
         if (!_validPartition(_partition, _from)) {
             revert IERC1410StorageWrapper.InvalidPartition(_from, _partition);
         }
@@ -327,10 +300,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
         erc1410Storage.balances[_from] += _value;
     }
 
-    function _adjustTotalSupplyByPartition(
-        bytes32 _partition,
-        uint256 _factor
-    ) internal {
+    function _adjustTotalSupplyByPartition(bytes32 _partition, uint256 _factor) internal {
         _erc1410BasicStorage().totalSupplyByPartition[_partition] *= _factor;
     }
 
@@ -338,20 +308,14 @@ abstract contract ERC1410BasicStorageWrapperRead is
         _erc1410BasicStorage().totalSupply *= factor;
     }
 
-    function _adjustTotalBalanceAndPartitionBalanceFor(
-        bytes32 partition,
-        address account
-    ) internal {
+    function _adjustTotalBalanceAndPartitionBalanceFor(bytes32 partition, address account) internal {
         uint256 abaf = _getAbaf();
         ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
         _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
         _adjustTotalBalanceFor(basicStorage, abaf, account);
     }
 
-    function _replaceTokenHolder(
-        address newTokenHolder,
-        address oldTokenHolder
-    ) internal {
+    function _replaceTokenHolder(address newTokenHolder, address oldTokenHolder) internal {
         ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
 
         uint256 index = basicStorage.tokenHolderIndex[oldTokenHolder];
@@ -373,15 +337,11 @@ abstract contract ERC1410BasicStorageWrapperRead is
 
         uint256 lastIndex = basicStorage.totalTokenHolders;
         if (lastIndex > 1) {
-            uint256 tokenHolderIndex = basicStorage.tokenHolderIndex[
-                tokenHolder
-            ];
+            uint256 tokenHolderIndex = basicStorage.tokenHolderIndex[tokenHolder];
             if (tokenHolderIndex < lastIndex) {
                 address lastTokenHolder = basicStorage.tokenHolders[lastIndex];
 
-                basicStorage.tokenHolderIndex[
-                    lastTokenHolder
-                ] = tokenHolderIndex;
+                basicStorage.tokenHolderIndex[lastTokenHolder] = tokenHolderIndex;
                 basicStorage.tokenHolders[tokenHolderIndex] = lastTokenHolder;
             }
         }
@@ -394,14 +354,9 @@ abstract contract ERC1410BasicStorageWrapperRead is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory holders_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
-            _pageIndex,
-            _pageLength
-        );
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
 
-        holders_ = new address[](
-            LibCommon.getSize(start, end, _getTotalTokenHolders())
-        );
+        holders_ = new address[](LibCommon.getSize(start, end, _getTotalTokenHolders()));
 
         start++; // because tokenHolders starts from 1
 
@@ -420,9 +375,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
         return _erc1410BasicStorage().totalTokenHolders;
     }
 
-    function _getTokenHolderIndex(
-        address _tokenHolder
-    ) internal view returns (uint256) {
+    function _getTokenHolderIndex(address _tokenHolder) internal view returns (uint256) {
         return _erc1410BasicStorage().tokenHolderIndex[_tokenHolder];
     }
 
@@ -434,9 +387,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
         return _erc1410BasicStorage().multiPartition;
     }
 
-    function _totalSupplyByPartition(
-        bytes32 _partition
-    ) internal view returns (uint256) {
+    function _totalSupplyByPartition(bytes32 _partition) internal view returns (uint256) {
         return _erc1410BasicStorage().totalSupplyByPartition[_partition];
     }
 
@@ -444,45 +395,27 @@ abstract contract ERC1410BasicStorageWrapperRead is
         return _erc1410BasicStorage().balances[_tokenHolder];
     }
 
-    function _balanceOfByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256) {
+    function _balanceOfByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
         if (_validPartition(_partition, _tokenHolder)) {
             ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
             return
                 erc1410Storage
-                .partitions[_tokenHolder][
-                    erc1410Storage.partitionToIndex[_tokenHolder][_partition] -
-                        1
-                ].amount;
+                .partitions[_tokenHolder][erc1410Storage.partitionToIndex[_tokenHolder][_partition] - 1].amount;
         } else {
             return 0;
         }
     }
 
-    function _partitionsOf(
-        address _tokenHolder
-    ) internal view returns (bytes32[] memory) {
+    function _partitionsOf(address _tokenHolder) internal view returns (bytes32[] memory) {
         ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
-        bytes32[] memory partitionsList = new bytes32[](
-            erc1410Storage.partitions[_tokenHolder].length
-        );
-        for (
-            uint256 i = 0;
-            i < erc1410Storage.partitions[_tokenHolder].length;
-            i++
-        ) {
-            partitionsList[i] = erc1410Storage
-            .partitions[_tokenHolder][i].partition;
+        bytes32[] memory partitionsList = new bytes32[](erc1410Storage.partitions[_tokenHolder].length);
+        for (uint256 i = 0; i < erc1410Storage.partitions[_tokenHolder].length; i++) {
+            partitionsList[i] = erc1410Storage.partitions[_tokenHolder][i].partition;
         }
         return partitionsList;
     }
 
-    function _validPartition(
-        bytes32 _partition,
-        address _holder
-    ) internal view returns (bool) {
+    function _validPartition(bytes32 _partition, address _holder) internal view returns (bool) {
         ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
         if (erc1410Storage.partitionToIndex[_holder][_partition] == 0) {
             return false;
@@ -491,10 +424,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
         }
     }
 
-    function _validPartitionForReceiver(
-        bytes32 _partition,
-        address _to
-    ) internal view returns (bool) {
+    function _validPartitionForReceiver(bytes32 _partition, address _to) internal view returns (bool) {
         ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
 
         uint256 index = erc1410Storage.partitionToIndex[_to][_partition];
@@ -502,18 +432,12 @@ abstract contract ERC1410BasicStorageWrapperRead is
         return index != 0;
     }
 
-    function _checkDefaultPartitionWithSinglePartition(
-        bytes32 partition
-    ) internal view {
+    function _checkDefaultPartitionWithSinglePartition(bytes32 partition) internal view {
         if (!_isMultiPartition() && partition != _DEFAULT_PARTITION)
             revert PartitionNotAllowedInSinglePartitionMode(partition);
     }
 
-    function _erc1410BasicStorage()
-        internal
-        pure
-        returns (ERC1410BasicStorage storage erc1410BasicStorage_)
-    {
+    function _erc1410BasicStorage() internal pure returns (ERC1410BasicStorage storage erc1410BasicStorage_) {
         bytes32 position = _ERC1410_BASIC_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -525,11 +449,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
         if (account == address(0)) revert ZeroAddressNotAllowed();
     }
 
-    function _adjustTotalBalanceFor(
-        ERC1410BasicStorage storage basicStorage,
-        uint256 abaf,
-        address account
-    ) private {
+    function _adjustTotalBalanceFor(ERC1410BasicStorage storage basicStorage, uint256 abaf, address account) private {
         uint256 factor = _calculateFactorByAbafAndTokenHolder(abaf, account);
         basicStorage.balances[account] *= factor;
         _updateLabafByTokenHolder(abaf, account);
@@ -541,21 +461,11 @@ abstract contract ERC1410BasicStorageWrapperRead is
         bytes32 partition,
         address account
     ) private {
-        uint256 partitionsIndex = basicStorage.partitionToIndex[account][
-            partition
-        ];
+        uint256 partitionsIndex = basicStorage.partitionToIndex[account][partition];
         if (partitionsIndex == 0) return;
-        uint256 factor = _calculateFactorByTokenHolderAndPartitionIndex(
-            abaf,
-            account,
-            partitionsIndex
-        );
+        uint256 factor = _calculateFactorByTokenHolderAndPartitionIndex(abaf, account, partitionsIndex);
         basicStorage.partitions[account][partitionsIndex - 1].amount *= factor;
-        _updateLabafByTokenHolderAndPartitionIndex(
-            abaf,
-            account,
-            partitionsIndex
-        );
+        _updateLabafByTokenHolderAndPartitionIndex(abaf, account, partitionsIndex);
     }
 
     function _checkWithoutMultiPartition() private view {

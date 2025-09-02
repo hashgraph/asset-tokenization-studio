@@ -204,85 +204,84 @@
 */
 
 import {
-    DeployAtsContractsResult,
-    BusinessLogicResolverProxyNotFound,
-    BaseAtsContractListCommand,
-    BaseBlockchainCommandParams,
-} from '../index'
+  DeployAtsContractsResult,
+  BusinessLogicResolverProxyNotFound,
+  BaseAtsContractListCommand,
+  BaseBlockchainCommandParams,
+} from '../index';
 
 interface CreateConfigurationsForDeployedContractsCommandParams
-    extends BaseBlockchainCommandParams {
-    readonly deployedContractList: DeployAtsContractsResult
+  extends BaseBlockchainCommandParams {
+  readonly deployedContractList: DeployAtsContractsResult;
 }
 
 export default class CreateConfigurationsForDeployedContractsCommand extends BaseAtsContractListCommand {
-    private readonly equityUsaAddress: string
-    private readonly bondUsaAddress: string
-    private readonly excludeEquityAddresses: string[] = []
-    private readonly excludeBondAddresses: string[] = []
+  private readonly equityUsaAddress: string;
+  private readonly bondUsaAddress: string;
+  private readonly excludeEquityAddresses: string[] = [];
+  private readonly excludeBondAddresses: string[] = [];
 
-    constructor({
-        deployedContractList,
-        signer,
-        overrides,
-    }: CreateConfigurationsForDeployedContractsCommandParams) {
-        const {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            deployer: _,
-            businessLogicResolver,
-            equityUsaFacet,
-            bondUsaFacet,
-            ...contractListToRegister
-        } = deployedContractList
+  constructor({
+    deployedContractList,
+    signer,
+    overrides,
+  }: CreateConfigurationsForDeployedContractsCommandParams) {
+    const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      deployer: _,
+      businessLogicResolver,
+      equityUsaFacet,
+      bondUsaFacet,
+      ...contractListToRegister
+    } = deployedContractList;
 
-        if (!businessLogicResolver.proxyAddress) {
-            throw new BusinessLogicResolverProxyNotFound()
-        }
-
-        const contractAddressList = Object.values(contractListToRegister).map(
-            (contract) => contract.address
-        )
-
-        super({
-            contractAddressList,
-            businessLogicResolverProxyAddress:
-                businessLogicResolver.proxyAddress,
-            signer,
-            overrides,
-        })
-        this.equityUsaAddress = equityUsaFacet.address
-        this.excludeEquityAddresses = [deployedContractList.bondUsaRead.address]
-        this.bondUsaAddress = bondUsaFacet.address
-        this.excludeBondAddresses = [
-            deployedContractList.adjustBalancesFacet.address,
-            deployedContractList.scheduledBalanceAdjustmentsFacet.address,
-        ]
+    if (!businessLogicResolver.proxyAddress) {
+      throw new BusinessLogicResolverProxyNotFound();
     }
 
-    get commonFacetAddressList(): string[] {
-        const bondFacetSet = new Set(this.bondFacetAddressList)
-        return this.equityFacetAddressList.filter((address) =>
-            bondFacetSet.has(address)
-        )
-    }
+    const contractAddressList = Object.values(contractListToRegister).map(
+      (contract) => contract.address,
+    );
 
-    get equityFacetAddressList(): string[] {
-        return [
-            ...this.getFilteredFacetAddresses(this.excludeEquityAddresses),
-            this.equityUsaAddress,
-        ]
-    }
+    super({
+      contractAddressList,
+      businessLogicResolverProxyAddress: businessLogicResolver.proxyAddress,
+      signer,
+      overrides,
+    });
+    this.equityUsaAddress = equityUsaFacet.address;
+    this.excludeEquityAddresses = [deployedContractList.bondUsaRead.address];
+    this.bondUsaAddress = bondUsaFacet.address;
+    this.excludeBondAddresses = [
+      deployedContractList.adjustBalancesFacet.address,
+      deployedContractList.scheduledBalanceAdjustmentsFacet.address,
+    ];
+  }
 
-    get bondFacetAddressList(): string[] {
-        return [
-            ...this.getFilteredFacetAddresses(this.excludeBondAddresses),
-            this.bondUsaAddress,
-        ]
-    }
+  get commonFacetAddressList(): string[] {
+    const bondFacetSet = new Set(this.bondFacetAddressList);
+    return this.equityFacetAddressList.filter((address) =>
+      bondFacetSet.has(address),
+    );
+  }
 
-    private getFilteredFacetAddresses(excludeList: string[]): string[] {
-        return this.contractAddressList.filter(
-            (address) => !excludeList.includes(address)
-        )
-    }
+  get equityFacetAddressList(): string[] {
+    return [
+      ...this.getFilteredFacetAddresses(this.excludeEquityAddresses),
+      this.equityUsaAddress,
+    ];
+  }
+
+  get bondFacetAddressList(): string[] {
+    return [
+      ...this.getFilteredFacetAddresses(this.excludeBondAddresses),
+      this.bondUsaAddress,
+    ];
+  }
+
+  private getFilteredFacetAddresses(excludeList: string[]): string[] {
+    return this.contractAddressList.filter(
+      (address) => !excludeList.includes(address),
+    );
+  }
 }

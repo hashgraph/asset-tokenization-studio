@@ -208,28 +208,16 @@
 
 pragma solidity 0.8.18;
 
-import {ERC1644Facet} from '../../../layer_1/ERC1400/ERC1644/ERC1644Facet.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+import { ERC1644Facet } from '../../../layer_1/ERC1400/ERC1644/ERC1644Facet.sol';
+import { TimeTravelStorageWrapper } from '../timeTravel/TimeTravelStorageWrapper.sol';
+import { LocalContext } from '../../../layer_0/context/LocalContext.sol';
 
 contract ERC1644FacetTimeTravel is ERC1644Facet, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 
-    function _blockNumber()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockNumber();
     }
 }

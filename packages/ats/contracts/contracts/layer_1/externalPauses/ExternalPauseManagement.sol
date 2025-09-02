@@ -206,36 +206,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IExternalPauseManagement
-} from '../interfaces/externalPauses/IExternalPauseManagement.sol';
-import {Common} from '../common/Common.sol';
-import {_PAUSE_MANAGER_ROLE} from '../constants/roles.sol';
-import {
-    _PAUSE_MANAGEMENT_STORAGE_POSITION
-} from '../../layer_0/constants/storagePositions.sol';
+import { IExternalPauseManagement } from '../interfaces/externalPauses/IExternalPauseManagement.sol';
+import { Common } from '../common/Common.sol';
+import { _PAUSE_MANAGER_ROLE } from '../constants/roles.sol';
+import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from '../../layer_0/constants/storagePositions.sol';
 
 abstract contract ExternalPauseManagement is IExternalPauseManagement, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalPauses(
         address[] calldata _pauses
-    )
-        external
-        override
-        onlyUninitialized(
-            _externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized
-        )
-    {
-        ExternalListDataStorage
-            storage externalPauseDataStorage = _externalListStorage(
-                _PAUSE_MANAGEMENT_STORAGE_POSITION
-            );
+    ) external override onlyUninitialized(_externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized) {
+        ExternalListDataStorage storage externalPauseDataStorage = _externalListStorage(
+            _PAUSE_MANAGEMENT_STORAGE_POSITION
+        );
         uint256 length = _pauses.length;
         for (uint256 index; index < length; ) {
-            _addExternalList(
-                _PAUSE_MANAGEMENT_STORAGE_POSITION,
-                _pauses[index]
-            );
+            _addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pauses[index]);
             unchecked {
                 ++index;
             }
@@ -254,11 +240,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Common {
         onlyConsistentActivations(_pauses, _actives)
         returns (bool success_)
     {
-        success_ = _updateExternalLists(
-            _PAUSE_MANAGEMENT_STORAGE_POSITION,
-            _pauses,
-            _actives
-        );
+        success_ = _updateExternalLists(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pauses, _actives);
         if (!success_) {
             revert ExternalPausesNotUpdated(_pauses, _actives);
         }
@@ -267,13 +249,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Common {
 
     function addExternalPause(
         address _pause
-    )
-        external
-        override
-        onlyRole(_PAUSE_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_PAUSE_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert ListedPause(_pause);
@@ -283,35 +259,19 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Common {
 
     function removeExternalPause(
         address _pause
-    )
-        external
-        override
-        onlyRole(_PAUSE_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
-        success_ = _removeExternalList(
-            _PAUSE_MANAGEMENT_STORAGE_POSITION,
-            _pause
-        );
+    ) external override onlyRole(_PAUSE_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
+        success_ = _removeExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert UnlistedPause(_pause);
         }
         emit RemovedFromExternalPauses(_msgSender(), _pause);
     }
 
-    function isExternalPause(
-        address _pause
-    ) external view override returns (bool) {
+    function isExternalPause(address _pause) external view override returns (bool) {
         return _isExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
     }
 
-    function getExternalPausesCount()
-        external
-        view
-        override
-        returns (uint256 externalPausesCount_)
-    {
+    function getExternalPausesCount() external view override returns (uint256 externalPausesCount_) {
         return _getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
     }
 
@@ -319,11 +279,6 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Common {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        return
-            _getExternalListsMembers(
-                _PAUSE_MANAGEMENT_STORAGE_POSITION,
-                _pageIndex,
-                _pageLength
-            );
+        return _getExternalListsMembers(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pageIndex, _pageLength);
     }
 }

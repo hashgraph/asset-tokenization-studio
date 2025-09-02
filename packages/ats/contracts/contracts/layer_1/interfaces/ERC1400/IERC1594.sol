@@ -221,11 +221,7 @@ interface IERC1594 {
      * for the token contract to interpret or record. This could be signed data authorising the transfer
      * (e.g. a dynamic whitelist) but is flexible enough to accomadate other use-cases.
      */
-    function transferWithData(
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function transferWithData(address _to, uint256 _value, bytes calldata _data) external;
 
     /**
      * @notice Transfer restrictions can take many forms and typically involve on-chain rules or whitelists.
@@ -240,28 +236,15 @@ interface IERC1594 {
      * for the token contract to interpret or record. This could be signed data authorising the transfer
      * (e.g. a dynamic whitelist) but is flexible enough to accomadate other use-cases.
      */
-    function transferFromWithData(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function transferFromWithData(address _from, address _to, uint256 _value, bytes calldata _data) external;
 
     // Token Issuance
-    function issue(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function issue(address _tokenHolder, uint256 _value, bytes calldata _data) external;
 
     // Token Redemption
     function redeem(uint256 _value, bytes calldata _data) external;
 
-    function redeemFrom(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function redeemFrom(address _tokenHolder, uint256 _value, bytes calldata _data) external;
 
     function isIssuable() external view returns (bool);
 

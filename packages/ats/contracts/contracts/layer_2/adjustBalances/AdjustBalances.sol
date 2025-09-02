@@ -205,24 +205,15 @@
 
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {
-    IAdjustBalances
-} from '../interfaces/adjustBalances/IAdjustBalances.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
+import { IAdjustBalances } from '../interfaces/adjustBalances/IAdjustBalances.sol';
+import { Common } from '../../layer_1/common/Common.sol';
+import { _ADJUSTMENT_BALANCE_ROLE } from '../constants/roles.sol';
 
 abstract contract AdjustBalances is IAdjustBalances, Common {
     function adjustBalances(
         uint256 factor,
         uint8 decimals
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_ADJUSTMENT_BALANCE_ROLE)
-        validateFactor(factor)
-        returns (bool success_)
-    {
+    ) external override onlyUnpaused onlyRole(_ADJUSTMENT_BALANCE_ROLE) validateFactor(factor) returns (bool success_) {
         _triggerScheduledTasks(0);
         _adjustBalances(factor, decimals);
         success_ = true;

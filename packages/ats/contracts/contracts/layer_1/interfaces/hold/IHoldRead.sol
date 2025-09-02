@@ -206,13 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
-import {HoldIdentifier} from './IHold.sol';
+import { ThirdPartyType } from '../../../layer_0/common/types/ThirdPartyType.sol';
+import { HoldIdentifier } from './IHold.sol';
 
 interface IHoldRead {
-    function getHeldAmountFor(
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
+    function getHeldAmountFor(address _tokenHolder) external view returns (uint256 amount_);
 
     function getHeldAmountForByPartition(
         bytes32 _partition,
@@ -246,7 +244,5 @@ interface IHoldRead {
             ThirdPartyType thirdPartyType_
         );
 
-    function getHoldThirdParty(
-        HoldIdentifier calldata _holdIdentifier
-    ) external view returns (address thirdParty_);
+    function getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) external view returns (address thirdParty_);
 }

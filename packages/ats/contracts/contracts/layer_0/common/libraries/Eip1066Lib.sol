@@ -207,14 +207,8 @@
 pragma solidity 0.8.18;
 
 library Eip1066Lib {
-    function revertWithData(
-        bytes32 _reasonCode,
-        bytes memory _details
-    ) internal pure {
-        bytes memory revertData = abi.encodePacked(
-            bytes4(_reasonCode),
-            _details
-        );
+    function revertWithData(bytes32 _reasonCode, bytes memory _details) internal pure {
+        bytes memory revertData = abi.encodePacked(bytes4(_reasonCode), _details);
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let len := mload(revertData)

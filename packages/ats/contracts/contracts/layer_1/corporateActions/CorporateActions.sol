@@ -206,11 +206,9 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ICorporateActions
-} from '../interfaces/corporateActions/ICorporateActions.sol';
-import {Common} from '../common/Common.sol';
-import {_CORPORATE_ACTION_ROLE} from '../constants/roles.sol';
+import { ICorporateActions } from '../interfaces/corporateActions/ICorporateActions.sol';
+import { Common } from '../common/Common.sol';
+import { _CORPORATE_ACTION_ROLE } from '../constants/roles.sol';
 
 abstract contract CorporateActions is ICorporateActions, Common {
     function addCorporateAction(
@@ -221,28 +219,14 @@ abstract contract CorporateActions is ICorporateActions, Common {
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        returns (
-            bool success_,
-            bytes32 corporateActionId_,
-            uint256 corporateActionIndexByType_
-        )
+        returns (bool success_, bytes32 corporateActionId_, uint256 corporateActionIndexByType_)
     {
-        (
-            success_,
-            corporateActionId_,
-            corporateActionIndexByType_
-        ) = _addCorporateAction(_actionType, _data);
+        (success_, corporateActionId_, corporateActionIndexByType_) = _addCorporateAction(_actionType, _data);
 
         if (!success_) {
             revert DuplicatedCorporateAction(_actionType, _data);
         }
-        emit CorporateActionAdded(
-            _msgSender(),
-            _actionType,
-            corporateActionId_,
-            corporateActionIndexByType_,
-            _data
-        );
+        emit CorporateActionAdded(_msgSender(), _actionType, corporateActionId_, corporateActionIndexByType_, _data);
     }
 
     function getCorporateAction(
@@ -251,12 +235,7 @@ abstract contract CorporateActions is ICorporateActions, Common {
         (actionType_, data_) = _getCorporateAction(_corporateActionId);
     }
 
-    function getCorporateActionCount()
-        external
-        view
-        override
-        returns (uint256 corporateActionCount_)
-    {
+    function getCorporateActionCount() external view override returns (uint256 corporateActionCount_) {
         corporateActionCount_ = _getCorporateActionCount();
     }
 
@@ -278,10 +257,6 @@ abstract contract CorporateActions is ICorporateActions, Common {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _getCorporateActionIdsByType(
-            _actionType,
-            _pageIndex,
-            _pageLength
-        );
+        corporateActionIds_ = _getCorporateActionIdsByType(_actionType, _pageIndex, _pageLength);
     }
 }

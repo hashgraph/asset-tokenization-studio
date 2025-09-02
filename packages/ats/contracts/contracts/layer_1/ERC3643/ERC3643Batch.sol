@@ -206,13 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    _CONTROLLER_ROLE,
-    _ISSUER_ROLE,
-    _AGENT_ROLE
-} from '../constants/roles.sol';
-import {Common} from '../common/Common.sol';
-import {IERC3643Batch} from '../interfaces/ERC3643/IERC3643Batch.sol';
+import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from '../constants/roles.sol';
+import { Common } from '../common/Common.sol';
+import { IERC3643Batch } from '../interfaces/ERC3643/IERC3643Batch.sol';
 
 abstract contract ERC3643Batch is IERC3643Batch, Common {
     function batchTransfer(
@@ -263,13 +259,7 @@ abstract contract ERC3643Batch is IERC3643Batch, Common {
     function batchMint(
         address[] calldata _toList,
         uint256[] calldata _amounts
-    )
-        external
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyIssuable
-    {
+    ) external onlyValidInputAmountsArrayLength(_toList, _amounts) onlyUnpaused onlyWithoutMultiPartition onlyIssuable {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;

@@ -219,24 +219,14 @@ interface IERC1410StorageWrapper {
     );
 
     // Operator Events
-    event AuthorizedOperator(
-        address indexed operator,
-        address indexed tokenHolder
-    );
-    event RevokedOperator(
-        address indexed operator,
-        address indexed tokenHolder
-    );
+    event AuthorizedOperator(address indexed operator, address indexed tokenHolder);
+    event RevokedOperator(address indexed operator, address indexed tokenHolder);
     event AuthorizedOperatorByPartition(
         bytes32 indexed partition,
         address indexed operator,
         address indexed tokenHolder
     );
-    event RevokedOperatorByPartition(
-        bytes32 indexed partition,
-        address indexed operator,
-        address indexed tokenHolder
-    );
+    event RevokedOperatorByPartition(bytes32 indexed partition, address indexed operator, address indexed tokenHolder);
 
     // Issuance / Redemption Events
     event IssuedByPartition(
@@ -261,15 +251,6 @@ interface IERC1410StorageWrapper {
     error ZeroPartition();
     error ZeroValue();
     error InvalidPartition(address account, bytes32 partition);
-    error InsufficientBalance(
-        address account,
-        uint256 balance,
-        uint256 value,
-        bytes32 partition
-    );
-    error Unauthorized(
-        address operator,
-        address tokenHolder,
-        bytes32 partition
-    );
+    error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+    error Unauthorized(address operator, address tokenHolder, bytes32 partition);
 }

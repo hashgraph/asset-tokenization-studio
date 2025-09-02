@@ -206,13 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    _CONTROLLER_ROLE,
-    _ISSUER_ROLE,
-    _AGENT_ROLE
-} from '../constants/roles.sol';
-import {IERC3643Operations} from '../interfaces/ERC3643/IERC3643Operations.sol';
-import {Common} from '../common/Common.sol';
+import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from '../constants/roles.sol';
+import { IERC3643Operations } from '../interfaces/ERC3643/IERC3643Operations.sol';
+import { Common } from '../common/Common.sol';
 
 abstract contract ERC3643Operations is IERC3643Operations, Common {
     function burn(
@@ -253,13 +249,7 @@ abstract contract ERC3643Operations is IERC3643Operations, Common {
         address _from,
         address _to,
         uint256 _amount
-    )
-        external
-        onlyWithoutMultiPartition
-        onlyControllable
-        onlyUnpaused
-        returns (bool)
-    {
+    ) external onlyWithoutMultiPartition onlyControllable onlyUnpaused returns (bool) {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
