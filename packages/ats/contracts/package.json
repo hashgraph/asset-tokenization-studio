@@ -1,6 +1,6 @@
 {
     "name": "@hashgraph/asset-tokenization-contracts",
-    "version": "1.16.0",
+    "version": "1.16.1",
     "type": "commonjs",
     "main": "./build/typechain-types/index.js",
     "files": [
@@ -88,7 +88,10 @@
         "typescript": "^5.8.2"
     },
     "overrides": {
-        "@typechain/ethers-v5": "^11.1.2",
         "ws": "^8.15.0"
+    },
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org"
     }
 }
