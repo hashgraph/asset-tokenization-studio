@@ -216,9 +216,11 @@ import {TRexIFactory, FactoryRegulationData} from './interfaces/IFactory.sol';
 import {TREXBondDeploymentLib} from './libraries/TREXBondDeploymentLib.sol';
 import {TREXEquityDeploymentLib} from './libraries/TREXEquityDeploymentLib.sol';
 
-/// @author Tokeny Solutions
-/// @notice Adapted from the T-REX official repository to deploy an ERC-3643-compatible ATS security token
-/// @dev Uses tree-like structure with libraries as leaves instead of resolver proxy pattern for simplicity
+/**
+ * @author Tokeny Solutions
+ * @notice Adapted from the T-REX official repository to deploy an ERC-3643-compatible ATS security token
+ * @dev Uses tree-like structure with libraries as leaves instead of resolver proxy pattern for simplicity
+ */
 // solhint-disable custom-errors
 contract TREXFactoryAts is ITREXFactory, Ownable {
     /// @notice TokenDetails with the ATS factory overlapping fields removed

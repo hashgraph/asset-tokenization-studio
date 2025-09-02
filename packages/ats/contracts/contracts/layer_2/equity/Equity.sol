@@ -310,11 +310,6 @@ abstract contract Equity is
         return _getEquityDetails();
     }
 
-    /**
-     * @dev returns the properties and related snapshots (if any) of a dividend.
-     *
-     * @param _dividendID The dividend Id
-     */
     function getDividends(
         uint256 _dividendID
     )
@@ -327,12 +322,6 @@ abstract contract Equity is
         return _getDividends(_dividendID);
     }
 
-    /**
-     * @dev returns the dividends for an account.
-     *
-     * @param _dividendID The dividend Id
-     * @param _account The account
-     */
     function getDividendsFor(
         uint256 _dividendID,
         address _account
@@ -346,10 +335,6 @@ abstract contract Equity is
         return _getDividendsFor(_dividendID, _account);
     }
 
-    /**
-     * @dev returns the dividends count.
-     *
-     */
     function getDividendsCount()
         external
         view

@@ -226,6 +226,9 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         super._initialize_ERC1594();
     }
 
+    /**
+     * @inheritdoc IERC1594
+     */
     function transferWithData(
         address _to,
         uint256 _value,
@@ -248,6 +251,9 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
         _transfer(_msgSender(), _to, _value);
     }
 
+    /**
+     * @inheritdoc IERC1594
+     */
     function transferFromWithData(
         address _from,
         address _to,
@@ -277,13 +283,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     }
 
     /**
-     * @notice This function must be called to increase the total supply (Corresponds to mint function of ERC20).
-     * @dev It only be called by the token issuer or the operator defined by the issuer. ERC1594 doesn't have
-     * have the any logic related to operator but its superset ERC1400 have the operator logic and this function
-     * is allowed to call by the operator.
-     * @param _tokenHolder The account that will receive the created tokens (account should be whitelisted or KYCed).
-     * @param _value The amount of tokens need to be issued
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
+     * @inheritdoc IERC1594
      */
     function issue(
         address _tokenHolder,
@@ -309,11 +309,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     }
 
     /**
-     * @notice This function redeem an amount of the token of a msg.sender. For doing so msg.sender may incentivize
-     * using different ways that could be implemented with in the `redeem` function definition. But those
-     * implementations are out of the scope of the ERC1594.
-     * @param _value The amount of tokens need to be redeemed
-     * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
+     * @inheritdoc IERC1594
      */
     function redeem(
         uint256 _value,
@@ -335,13 +331,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     }
 
     /**
-     * @notice This function redeem an amount of the token of a msg.sender. For doing so msg.sender may incentivize
-     * using different ways that could be implemented with in the `redeem` function definition. But those
-     * implementations are out of the scope of the ERC1594.
-     * @dev It is analogy to `transferFrom`
-     * @param _tokenHolder The account whose tokens gets redeemed.
-     * @param _value The amount of tokens need to be redeemed
-     * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
+     * @inheritdoc IERC1594
      */
     function redeemFrom(
         address _tokenHolder,
@@ -366,26 +356,14 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     }
 
     /**
-     * @notice A security token issuer can specify that issuance has finished for the token
-     * (i.e. no new tokens can be minted or issued).
-     * @dev If a token returns FALSE for `isIssuable()` then it MUST always return FALSE in the future.
-     * If a token returns FALSE for `isIssuable()` then it MUST never allow additional tokens to be issued.
-     * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
+     * @inheritdoc IERC1594
      */
     function isIssuable() external view override returns (bool) {
         return _isIssuable();
     }
 
     /**
-     * @notice Transfers of securities may fail for a number of reasons. So this function will used to understand the
-     * cause of failure by getting the byte value. Which will be the ESC that follows the EIP 1066. ESC can be mapped
-     * with a reson string to understand the failure cause, table of Ethereum status code will always reside off-chain
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     * @return bool It signifies whether the transaction will be executed or not.
-     * @return byte Ethereum status code (ESC)
-     * @return bytes32 Application specific reason code
+     * @inheritdoc IERC1594
      */
     function canTransfer(
         address _to,
@@ -415,16 +393,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
     }
 
     /**
-     * @notice Transfers of securities may fail for a number of reasons. So this function will used to understand the
-     * cause of failure by getting the byte value. Which will be the ESC that follows the EIP 1066. ESC can be mapped
-     * with a reson string to understand the failure cause, table of Ethereum status code will always reside off-chain
-     * @param _from address The address which you want to send tokens from
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     * @return bool It signifies whether the transaction will be executed or not.
-     * @return byte Ethereum status code (ESC)
-     * @return bytes32 Application specific reason code
+     * @inheritdoc IERC1594
      */
     function canTransferFrom(
         address _from,

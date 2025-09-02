@@ -228,17 +228,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     }
 
     /**
-     * @notice This function allows an authorised address to transfer tokens between any two token holders.
-     * The transfer must still respect the balances of the token holders (so the transfer must be for at most
-     * `balanceOf(_from)` tokens) and potentially also need to respect other transfer restrictions.
-     * @dev This function can only be executed by the `controller` address.
-     * @param _from Address The address which you want to send tokens from
-     * @param _to Address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data data to validate the transfer. (It is not used in this reference implementation
-     * because use of `_data` parameter is implementation specific).
-     * @param _operatorData data attached to the transfer by controller to emit in event. (It is more like a reason
-     * string for calling this function (aka force transfer) which provides the transparency on-chain).
+     * @inheritdoc IERC1644
      */
     function controllerTransfer(
         address _from,
@@ -263,16 +253,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     }
 
     /**
-     * @notice This function allows an authorised address to redeem tokens for any token holder.
-     * The redemption must still respect the balances of the token holder (so the redemption must be for at most
-     * `balanceOf(_tokenHolder)` tokens) and potentially also need to respect other transfer restrictions.
-     * @dev This function can only be executed by the `controller` address.
-     * @param _tokenHolder The account whose tokens will be redeemed.
-     * @param _value uint256 the amount of tokens need to be redeemed.
-     * @param _data data to validate the transfer. (It is not used in this reference implementation
-     * because use of `_data` parameter is implementation specific).
-     * @param _operatorData data attached to the transfer by controller to emit in event. (It is more like a reason
-     * string for calling this function (aka force transfer) which provides the transparency on-chain).
+     * @inheritdoc IERC1644
      */
     function controllerRedeem(
         address _tokenHolder,
@@ -296,8 +277,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     }
 
     /**
-     * @notice It is used to end the controller feature from the token
-     * @dev It only be called by the `owner/issuer` of the token
+     * @inheritdoc IERC1644
      */
     function finalizeControllable()
         external
@@ -309,11 +289,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     }
 
     /**
-     * @notice In order to provide transparency over whether `controllerTransfer` / `controllerRedeem` are useable
-     * or not `isControllable` function will be used.
-     * @dev If `isControllable` returns `false` then it always return `false` and
-     * `controllerTransfer` / `controllerRedeem` will always revert.
-     * @return bool `true` when controller address is non-zero otherwise return `false`.
+     * @inheritdoc IERC1644
      */
     function isControllable() external view override returns (bool) {
         return _isControllable();

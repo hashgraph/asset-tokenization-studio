@@ -297,15 +297,6 @@ abstract contract ERC1594StorageWrapper is
         ds.initialized = true;
     }
 
-    /**
-     * @notice This function must be called to increase the total supply (Corresponds to mint function of ERC20).
-     * @dev It only be called by the token issuer or the operator defined by the issuer. ERC1594 doesn't have
-     * have the any logic related to operator but its superset ERC1400 have the operator logic and this function
-     * is allowed to call by the operator.
-     * @param _tokenHolder The account that will receive the created tokens (account should be whitelisted or KYCed).
-     * @param _value The amount of tokens need to be issued
-     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
-     */
     // TODO: In this case are able to perform that operation another role?
     function _issue(
         address _tokenHolder,
@@ -317,28 +308,12 @@ abstract contract ERC1594StorageWrapper is
         emit Issued(_msgSender(), _tokenHolder, _value, _data);
     }
 
-    /**
-     * @notice This function redeem an amount of the token of a msg.sender. For doing so msg.sender may incentivize
-     * using different ways that could be implemented with in the `redeem` function definition. But those
-     * implementations are out of the scope of the ERC1594.
-     * @param _value The amount of tokens need to be redeemed
-     * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
-     */
     function _redeem(uint256 _value, bytes memory _data) internal {
         // Add a function to validate the `_data` parameter
         _burn(_msgSender(), _value);
         emit Redeemed(address(0), _msgSender(), _value, _data);
     }
 
-    /**
-     * @notice This function redeem an amount of the token of a msg.sender. For doing so msg.sender may incentivize
-     * using different ways that could be implemented with in the `redeem` function definition. But those
-     * implementations are out of the scope of the ERC1594.
-     * @dev It is analogy to `transferFrom`
-     * @param _tokenHolder The account whose tokens gets redeemed.
-     * @param _value The amount of tokens need to be redeemed
-     * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
-     */
     function _redeemFrom(
         address _tokenHolder,
         uint256 _value,
@@ -349,13 +324,6 @@ abstract contract ERC1594StorageWrapper is
         emit Redeemed(_msgSender(), _tokenHolder, _value, _data);
     }
 
-    /**
-     * @notice A security token issuer can specify that issuance has finished for the token
-     * (i.e. no new tokens can be minted or issued).
-     * @dev If a token returns FALSE for `isIssuable()` then it MUST always return FALSE in the future.
-     * If a token returns FALSE for `isIssuable()` then it MUST never allow additional tokens to be issued.
-     * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
-     */
     function _isIssuable() internal view returns (bool) {
         return _erc1594Storage().issuance;
     }

@@ -207,5 +207,8 @@
 pragma solidity 0.8.18;
 
 interface IRevocationList {
+    /**
+     * @notice Checks if the VC granted by an issuer to a subject has been revoked
+     */
     function revoked(address, string calldata) external view returns (bool);
 }

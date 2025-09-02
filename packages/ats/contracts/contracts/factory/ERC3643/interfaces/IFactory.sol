@@ -279,11 +279,17 @@ interface TRexIFactory {
     error EmptyResolver(IBusinessLogicResolver resolver);
     error NoInitialAdmins();
 
+    /**
+     * @notice Deploys a new equity given the input equity data
+     */
     function deployEquity(
         EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
     ) external returns (address equityAddress_);
 
+    /**
+     * @notice Deploys a new equity given the input equity data
+     */
     function deployBond(
         BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData

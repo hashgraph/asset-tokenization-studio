@@ -321,16 +321,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         return _allowanceAdjusted(owner, spender);
     }
 
-    function decimalsAdjusted() external view returns (uint8) {
-        return _decimalsAdjusted();
-    }
-
-    function decimalsAdjustedAt(
-        uint256 _timestamp
-    ) external view returns (uint8) {
-        return _decimalsAdjustedAt(_timestamp);
-    }
-
     function name() external view returns (string memory) {
         return _getERC20Metadata().info.name;
     }
