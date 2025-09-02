@@ -206,43 +206,39 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
-import {_SECURITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {ISecurity} from '../interfaces/ISecurity.sol';
-import {Common} from '../../layer_1/common/Common.sol';
+import {_AGENT_ROLE} from '../constants/roles.sol';
+import {IERC3643Read} from '../interfaces/ERC3643/IERC3643Read.sol';
+import {ICompliance} from '../interfaces/ERC3643/ICompliance.sol';
+import {IIdentityRegistry} from '../interfaces/ERC3643/IIdentityRegistry.sol';
+import {Common} from '../common/Common.sol';
 
-contract SecurityStorageWrapper is Common {
-    function _storeRegulationData(
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) internal {
-        ISecurity.SecurityRegulationData storage data = _securityStorage();
-        data.regulationData = _regulationData;
-        data.additionalSecurityData = _additionalSecurityData;
+abstract contract ERC3643Read is IERC3643Read, Common {
+    function isAgent(address _agent) external view returns (bool) {
+        return _hasRole(_AGENT_ROLE, _agent);
     }
 
-    function _getSecurityRegulationData()
-        internal
-        pure
-        returns (
-            ISecurity.SecurityRegulationData memory securityRegulationData_
-        )
+    function identityRegistry()
+        external
+        view
+        override
+        returns (IIdentityRegistry)
     {
-        securityRegulationData_ = _securityStorage();
+        return _getIdentityRegistry();
     }
 
-    function _securityStorage()
-        internal
-        pure
-        returns (ISecurity.SecurityRegulationData storage securityStorage_)
-    {
-        bytes32 position = _SECURITY_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            securityStorage_.slot := position
-        }
+    function onchainID() external view override returns (address) {
+        return _getOnchainID();
+    }
+
+    function compliance() external view override returns (ICompliance) {
+        return _getCompliance();
+    }
+
+    function isAddressRecovered(address _wallet) external view returns (bool) {
+        return _isRecovered(_wallet);
+    }
+
+    function version() external view returns (string memory) {
+        return _version();
     }
 }

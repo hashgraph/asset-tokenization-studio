@@ -207,22 +207,31 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1594StorageWrapper
-} from '../../ERC1400/ERC1594/ERC1594StorageWrapper.sol';
+    ERC20VotesStorageWrapper
+} from '../../ERC1400/ERC20Votes/ERC20VotesStorageWrapper.sol';
 import {
     IERC20Permit
 } from '../../../layer_1/interfaces/ERC1400/IERC20Permit.sol';
 import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import {ERC20PERMIT_TYPEHASH} from '../../constants/values.sol';
 import {
-    _CONTRACT_NAME,
-    _CONTRACT_VERSION
+    _CONTRACT_NAME_ERC20PERMIT,
+    _CONTRACT_VERSION_ERC20PERMIT
 } from '../../../layer_1/constants/values.sol';
 import {
     getDomainHash
 } from '../../../layer_1/protectedPartitions/signatureVerification.sol';
+import {
+    _ERC20PERMIT_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
 
-abstract contract ERC20PermitStorageWrapper is ERC1594StorageWrapper {
+abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
+    struct ERC20PermitStorage {
+        string contractName;
+        string contractVersion;
+        bool initialized;
+    }
+
     function _permit(
         address owner,
         address spender,
@@ -263,10 +272,22 @@ abstract contract ERC20PermitStorageWrapper is ERC1594StorageWrapper {
     function _DOMAIN_SEPARATOR() internal view returns (bytes32) {
         return
             getDomainHash(
-                _CONTRACT_NAME,
-                _CONTRACT_VERSION,
+                _CONTRACT_NAME_ERC20PERMIT,
+                _CONTRACT_VERSION_ERC20PERMIT,
                 _blockChainid(),
                 address(this)
             );
+    }
+
+    function _erc20PermitStorage()
+        internal
+        pure
+        returns (ERC20PermitStorage storage erc20permitStorage_)
+    {
+        bytes32 position = _ERC20PERMIT_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc20permitStorage_.slot := position
+        }
     }
 }

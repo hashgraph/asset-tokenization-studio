@@ -208,8 +208,8 @@ pragma solidity 0.8.18;
 
 import {IResolverProxy} from '../resolver/resolverProxy/IResolverProxy.sol';
 import {IBusinessLogicResolver} from '../resolver/IBusinessLogicResolver.sol';
-import {ERC20} from '../../layer_1/ERC1400/ERC20/ERC20.sol';
-import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
+import {IERC20} from '../../layer_1/interfaces/ERC1400/IERC20.sol';
+import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
 import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
 import {
     FactoryRegulationData,
@@ -239,12 +239,13 @@ interface IFactory {
         bool isControllable;
         bool isWhiteList;
         uint256 maxSupply;
-        ERC20.ERC20MetadataInfo erc20MetadataInfo;
+        IERC20.ERC20MetadataInfo erc20MetadataInfo;
         bool clearingActive;
         bool internalKycActivated;
         address[] externalPauses;
         address[] externalControlLists;
         address[] externalKycLists;
+        bool erc20VotesActivated;
         address compliance;
         address identityRegistry;
     }
@@ -256,8 +257,8 @@ interface IFactory {
 
     struct BondData {
         SecurityData security;
-        IBond.BondDetailsData bondDetails;
-        IBond.CouponDetailsData couponDetails;
+        IBondRead.BondDetailsData bondDetails;
+        IBondRead.CouponDetailsData couponDetails;
     }
 
     event EquityDeployed(

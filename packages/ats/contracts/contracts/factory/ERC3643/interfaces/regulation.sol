@@ -203,351 +203,247 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
 
-import {Common} from '../../layer_1/common/Common.sol';
-import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {
-    DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-} from '../constants/values.sol';
-import {IEquity} from '../interfaces/equity/IEquity.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    IEquityStorageWrapper
-} from '../interfaces/equity/IEquityStorageWrapper.sol';
+uint256 constant _REGS_DEAL_SIZE = 0;
+AccreditedInvestors constant _REGS_ACCREDITED_INVESTORS = AccreditedInvestors
+    .ACCREDITATION_REQUIRED;
+uint256 constant _REGS_MAX_NON_ACCREDITED_INVESTORS = 0;
+ManualInvestorVerification constant _REGS_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
+    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
+InternationalInvestors constant _REGS_INTERNATIONAL_INVESTORS = InternationalInvestors
+    .ALLOWED;
+ResaleHoldPeriod constant _REGS_RESALE_HOLD_PERIOD = ResaleHoldPeriod
+    .NOT_APPLICABLE;
 
-abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
-    using EnumerableSet for EnumerableSet.Bytes32Set;
+uint256 constant _REGD_506_B_DEAL_SIZE = 0;
+AccreditedInvestors constant _REGD_506_B_ACCREDITED_INVESTORS = AccreditedInvestors
+    .ACCREDITATION_REQUIRED;
+uint256 constant _REGD_506_B_MAX_NON_ACCREDITED_INVESTORS = 35;
+ManualInvestorVerification constant _REGD_506_B_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
+    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
+InternationalInvestors constant _REGD_506_B_INTERNATIONAL_INVESTORS = InternationalInvestors
+    .NOT_ALLOWED;
+ResaleHoldPeriod constant _REGD_506_B_RESALE_HOLD_PERIOD = ResaleHoldPeriod
+    .APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
 
-    struct EquityDataStorage {
-        IEquity.EquityDetailsData equityDetailsData;
-        bool initialized;
-    }
+uint256 constant _REGD_506_C_DEAL_SIZE = 0;
+AccreditedInvestors constant _REGD_506_C_ACCREDITED_INVESTORS = AccreditedInvestors
+    .ACCREDITATION_REQUIRED;
+uint256 constant _REGD_506_C_MAX_NON_ACCREDITED_INVESTORS = 0;
+ManualInvestorVerification constant _REGD_506_C_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
+    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
+InternationalInvestors constant _REGD_506_C_INTERNATIONAL_INVESTORS = InternationalInvestors
+    .NOT_ALLOWED;
+ResaleHoldPeriod constant _REGD_506_C_RESALE_HOLD_PERIOD = ResaleHoldPeriod
+    .APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
 
-    function _storeEquityDetails(
-        IEquity.EquityDetailsData memory _equityDetailsData
-    ) internal {
-        _equityStorage().equityDetailsData = _equityDetailsData;
-    }
+enum RegulationType {
+    NONE,
+    REG_S,
+    REG_D
+}
 
-    function _setDividends(
-        IEquity.Dividend calldata _newDividend
-    )
-        internal
-        returns (bool success_, bytes32 corporateActionId_, uint256 dividendId_)
-    {
-        (success_, corporateActionId_, dividendId_) = _addCorporateAction(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
-            abi.encode(_newDividend)
-        );
-    }
+enum RegulationSubType {
+    NONE,
+    REG_D_506_B,
+    REG_D_506_C
+}
 
-    function _setVoting(
-        IEquity.Voting calldata _newVoting
-    )
-        internal
-        returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
-    {
-        (success_, corporateActionId_, voteID_) = _addCorporateAction(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            abi.encode(_newVoting)
-        );
-    }
+enum AccreditedInvestors {
+    NONE,
+    ACCREDITATION_REQUIRED
+}
 
-    function _setScheduledBalanceAdjustment(
-        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    )
-        internal
-        returns (
-            bool success_,
-            bytes32 corporateActionId_,
-            uint256 balanceAdjustmentID_
+enum ManualInvestorVerification {
+    NOTHING_TO_VERIFY,
+    VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
+}
+
+enum InternationalInvestors {
+    NOT_ALLOWED,
+    ALLOWED
+}
+
+enum ResaleHoldPeriod {
+    NOT_APPLICABLE,
+    APPLICABLE_FROM_6_MOTHS_TO_1_YEAR
+}
+
+struct AdditionalSecurityData {
+    bool countriesControlListType;
+    string listOfCountries;
+    string info;
+}
+
+struct FactoryRegulationData {
+    RegulationType regulationType;
+    RegulationSubType regulationSubType;
+    AdditionalSecurityData additionalSecurityData;
+}
+
+struct RegulationData {
+    RegulationType regulationType;
+    RegulationSubType regulationSubType;
+    uint256 dealSize;
+    AccreditedInvestors accreditedInvestors;
+    uint256 maxNonAccreditedInvestors;
+    ManualInvestorVerification manualInvestorVerification;
+    InternationalInvestors internationalInvestors;
+    ResaleHoldPeriod resaleHoldPeriod;
+}
+
+error RegulationTypeAndSubTypeForbidden(
+    RegulationType regulationType,
+    RegulationSubType regulationSubType
+);
+
+function buildRegulationData(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (RegulationData memory regulationData_) {
+    regulationData_ = RegulationData({
+        regulationType: _regulationType,
+        regulationSubType: _regulationSubType,
+        dealSize: buildDealSize(_regulationType, _regulationSubType),
+        accreditedInvestors: buildAccreditedInvestors(
+            _regulationType,
+            _regulationSubType
+        ),
+        maxNonAccreditedInvestors: buildMaxNonAccreditedInvestors(
+            _regulationType,
+            _regulationSubType
+        ),
+        manualInvestorVerification: buildManualInvestorVerification(
+            _regulationType,
+            _regulationSubType
+        ),
+        internationalInvestors: buildInternationalInvestors(
+            _regulationType,
+            _regulationSubType
+        ),
+        resaleHoldPeriod: buildResaleHoldPeriod(
+            _regulationType,
+            _regulationSubType
         )
-    {
-        (
-            success_,
-            corporateActionId_,
-            balanceAdjustmentID_
-        ) = _addCorporateAction(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-            abi.encode(_newBalanceAdjustment)
-        );
+    });
+}
+
+function buildDealSize(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (uint256 dealSize_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_DEAL_SIZE;
     }
-
-    function _getEquityDetails()
-        internal
-        view
-        returns (IEquity.EquityDetailsData memory equityDetails_)
-    {
-        equityDetails_ = _equityStorage().equityDetailsData;
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_DEAL_SIZE;
     }
+    dealSize_ = _REGD_506_C_DEAL_SIZE;
+}
 
-    /**
-     * @dev returns the properties and related snapshots (if any) of a dividend.
-     *
-     * @param _dividendID The dividend Id
-     * @param _dividendID The dividend Id
-     */
-    function _getDividends(
-        uint256 _dividendID
-    )
-        internal
-        view
-        returns (IEquity.RegisteredDividend memory registeredDividend_)
-    {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[DIVIDEND_CORPORATE_ACTION_TYPE]
-            .at(_dividendID - 1);
-
-        (, bytes memory data) = _getCorporateAction(actionId);
-
-        if (data.length > 0) {
-            (registeredDividend_.dividend) = abi.decode(
-                data,
-                (IEquity.Dividend)
-            );
-        }
-
-        registeredDividend_.snapshotId = _getSnapshotID(actionId);
+function buildAccreditedInvestors(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (AccreditedInvestors accreditedInvestors_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_ACCREDITED_INVESTORS;
     }
-
-    /**
-     * @dev returns the properties and related snapshots (if any) of a dividend.
-     *
-     * @param _dividendID The dividend Id
-     * @param _account The account
-
-     */
-    function _getDividendsFor(
-        uint256 _dividendID,
-        address _account
-    ) internal view returns (IEquity.DividendFor memory dividendFor_) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
-            _dividendID
-        );
-
-        dividendFor_.amount = registeredDividend.dividend.amount;
-        dividendFor_.recordDate = registeredDividend.dividend.recordDate;
-        dividendFor_.executionDate = registeredDividend.dividend.executionDate;
-
-        (
-            dividendFor_.tokenBalance,
-            dividendFor_.decimals,
-            dividendFor_.recordDateReached
-        ) = _getSnapshotBalanceForIfDateReached(
-            registeredDividend.dividend.recordDate,
-            registeredDividend.snapshotId,
-            _account
-        );
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_ACCREDITED_INVESTORS;
     }
+    accreditedInvestors_ = _REGD_506_C_ACCREDITED_INVESTORS;
+}
 
-    function _getDividendsCount()
-        internal
-        view
-        returns (uint256 dividendCount_)
-    {
-        return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
+function buildMaxNonAccreditedInvestors(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (uint256 maxNonAccreditedInvestors_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_MAX_NON_ACCREDITED_INVESTORS;
     }
-
-    function _getDividendHolders(
-        uint256 _dividendID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory holders_) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
-            _dividendID
-        );
-
-        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
-            return new address[](0);
-
-        if (registeredDividend.snapshotId != 0)
-            return
-                _tokenHoldersAt(
-                    registeredDividend.snapshotId,
-                    _pageIndex,
-                    _pageLength
-                );
-
-        return _getTokenHolders(_pageIndex, _pageLength);
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_MAX_NON_ACCREDITED_INVESTORS;
     }
+    maxNonAccreditedInvestors_ = _REGD_506_C_MAX_NON_ACCREDITED_INVESTORS;
+}
 
-    function _getTotalDividendHolders(
-        uint256 _dividendID
-    ) internal view returns (uint256) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
-            _dividendID
-        );
-
-        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
-            return 0;
-
-        if (registeredDividend.snapshotId != 0)
-            return _totalTokenHoldersAt(registeredDividend.snapshotId);
-
-        return _getTotalTokenHolders();
+function buildManualInvestorVerification(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (ManualInvestorVerification manualInvestorVerification_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_MANUAL_INVESTOR_VERIFICATION;
     }
-
-    function _getVoting(
-        uint256 _voteID
-    )
-        internal
-        view
-        returns (IEquity.RegisteredVoting memory registeredVoting_)
-    {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[VOTING_RIGHTS_CORPORATE_ACTION_TYPE]
-            .at(_voteID - 1);
-
-        (, bytes memory data) = _getCorporateAction(actionId);
-
-        if (data.length > 0) {
-            (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
-        }
-
-        registeredVoting_.snapshotId = _getSnapshotID(actionId);
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_MANUAL_INVESTOR_VERIFICATION;
     }
+    manualInvestorVerification_ = _REGD_506_C_MANUAL_INVESTOR_VERIFICATION;
+}
 
-    /**
-     * @dev returns the properties and related snapshots (if any) of a voting.
-     *
-     * @param _voteID The dividend Id
-     * @param _account The account
-
-     */
-    function _getVotingFor(
-        uint256 _voteID,
-        address _account
-    ) internal view returns (IEquity.VotingFor memory votingFor_) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
-
-        votingFor_.recordDate = registeredVoting.voting.recordDate;
-        votingFor_.data = registeredVoting.voting.data;
-
-        (
-            votingFor_.tokenBalance,
-            votingFor_.decimals,
-            votingFor_.recordDateReached
-        ) = _getSnapshotBalanceForIfDateReached(
-            registeredVoting.voting.recordDate,
-            registeredVoting.snapshotId,
-            _account
-        );
+function buildInternationalInvestors(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (InternationalInvestors internationalInvestors_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_INTERNATIONAL_INVESTORS;
     }
-
-    function _getVotingCount() internal view returns (uint256 votingCount_) {
-        return
-            _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_INTERNATIONAL_INVESTORS;
     }
+    internationalInvestors_ = _REGD_506_C_INTERNATIONAL_INVESTORS;
+}
 
-    function _getVotingHolders(
-        uint256 _voteID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory holders_) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
-
-        if (registeredVoting.voting.recordDate >= _blockTimestamp())
-            return new address[](0);
-
-        if (registeredVoting.snapshotId != 0)
-            return
-                _tokenHoldersAt(
-                    registeredVoting.snapshotId,
-                    _pageIndex,
-                    _pageLength
-                );
-
-        return _getTokenHolders(_pageIndex, _pageLength);
+function buildResaleHoldPeriod(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (ResaleHoldPeriod resaleHoldPeriod_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_RESALE_HOLD_PERIOD;
     }
-
-    function _getTotalVotingHolders(
-        uint256 _voteID
-    ) internal view returns (uint256) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
-
-        if (registeredVoting.voting.recordDate >= _blockTimestamp()) return 0;
-
-        if (registeredVoting.snapshotId != 0)
-            return _totalTokenHoldersAt(registeredVoting.snapshotId);
-
-        return _getTotalTokenHolders();
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_RESALE_HOLD_PERIOD;
     }
+    resaleHoldPeriod_ = _REGD_506_C_RESALE_HOLD_PERIOD;
+}
 
-    function _getScheduledBalanceAdjusment(
-        uint256 _balanceAdjustmentID
-    )
-        internal
-        view
-        returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
-    {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE]
-            .at(_balanceAdjustmentID - 1);
-
-        (, bytes memory data) = _getCorporateAction(actionId);
-
-        if (data.length > 0) {
-            (balanceAdjustment_) = abi.decode(
-                data,
-                (IEquity.ScheduledBalanceAdjustment)
-            );
-        }
+function checkRegulationTypeAndSubType(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure {
+    if (isValidTypeAndSubType(_regulationType, _regulationSubType)) {
+        return;
     }
+    revert RegulationTypeAndSubTypeForbidden(
+        _regulationType,
+        _regulationSubType
+    );
+}
 
-    function _getScheduledBalanceAdjustmentsCount()
-        internal
-        view
-        returns (uint256 balanceAdjustmentCount_)
-    {
-        return
-            _getCorporateActionCountByType(
-                BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-            );
-    }
+function isValidTypeAndSubType(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (bool isValid_) {
+    isValid_ =
+        isValidTypeAndSubTypeForRegS(_regulationType, _regulationSubType) ||
+        isValidTypeAndSubTypeForRegD(_regulationType, _regulationSubType);
+}
 
-    function _getSnapshotBalanceForIfDateReached(
-        uint256 _date,
-        uint256 _snapshotId,
-        address _account
-    )
-        internal
-        view
-        returns (uint256 balance_, uint8 decimals_, bool dateReached_)
-    {
-        if (_date < _blockTimestamp()) {
-            dateReached_ = true;
+function isValidTypeAndSubTypeForRegS(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (bool isValid_) {
+    isValid_ =
+        _regulationType == RegulationType.REG_S &&
+        _regulationSubType == RegulationSubType.NONE;
+}
 
-            balance_ = (_snapshotId != 0)
-                ? (_balanceOfAtSnapshot(_snapshotId, _account) +
-                    _lockedBalanceOfAtSnapshot(_snapshotId, _account) +
-                    _heldBalanceOfAtSnapshot(_snapshotId, _account) +
-                    _clearedBalanceOfAtSnapshot(_snapshotId, _account))
-                : (_balanceOfAdjustedAt(_account, _date) +
-                    _getLockedAmountForAdjustedAt(_account, _blockTimestamp()) +
-                    _getHeldAmountForAdjusted(_account) +
-                    _getClearedAmountForAdjusted(_account));
-
-            decimals_ = (_snapshotId != 0)
-                ? _decimalsAtSnapshot(_snapshotId)
-                : _decimalsAdjustedAt(_date);
-        }
-    }
-
-    function _equityStorage()
-        internal
-        pure
-        returns (EquityDataStorage storage equityData_)
-    {
-        bytes32 position = _EQUITY_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            equityData_.slot := position
-        }
-    }
+function isValidTypeAndSubTypeForRegD(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (bool isValid_) {
+    isValid_ =
+        _regulationType == RegulationType.REG_D &&
+        _regulationSubType != RegulationSubType.NONE;
 }

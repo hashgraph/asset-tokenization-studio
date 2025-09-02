@@ -11,7 +11,10 @@ import {
 import {
     _PROTECTED_PARTITIONS_RESOLVER_KEY
 } from '../constants/resolverKeys.sol';
-import {_CONTRACT_NAME, _CONTRACT_VERSION} from '../constants/values.sol';
+import {
+    _CONTRACT_NAME_PROTECTEDPARTITIONS,
+    _CONTRACT_VERSION_PROTECTEDPARTITIONS
+} from '../constants/values.sol';
 import {_PROTECTED_PARTITIONS_ROLE} from '../constants/roles.sol';
 
 contract ProtectedPartitions is
@@ -31,8 +34,10 @@ contract ProtectedPartitions is
         ProtectedPartitionsDataStorage
             storage protectedPartitionsStorage = _protectedPartitionsStorage();
         protectedPartitionsStorage.arePartitionsProtected = _protectPartitions;
-        protectedPartitionsStorage.contractName = _CONTRACT_NAME;
-        protectedPartitionsStorage.contractVersion = _CONTRACT_VERSION;
+        protectedPartitionsStorage
+            .contractName = _CONTRACT_NAME_PROTECTEDPARTITIONS;
+        protectedPartitionsStorage
+            .contractVersion = _CONTRACT_VERSION_PROTECTEDPARTITIONS;
         protectedPartitionsStorage.initialized = true;
         success_ = true;
     }
