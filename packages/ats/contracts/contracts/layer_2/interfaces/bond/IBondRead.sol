@@ -203,209 +203,71 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {Common} from '../../layer_1/common/Common.sol';
-import {
-    checkNounceAndDeadline,
-    verify
-} from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
-import {
-    getMessageHashTransferAndLockByPartition,
-    getMessageHashTransferAndLock
-} from './signatureVerification.sol';
-import {BasicTransferInfo} from '../../layer_1/interfaces/ERC1400/IERC1410.sol';
-
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
-    function _protectedTransferAndLockByPartition(
-        bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal returns (bool success_, uint256 lockId_) {
-        checkNounceAndDeadline(
-            _nounce,
-            _transferAndLock.from,
-            _getNounceFor(_transferAndLock.from),
-            _deadline,
-            _blockTimestamp()
-        );
-
-        _checkTransferAndLockByPartitionSignature(
-            _partition,
-            _transferAndLock,
-            _deadline,
-            _nounce,
-            _signature
-        );
-
-        _setNounce(_nounce, _transferAndLock.from);
-
-        _transferByPartition(
-            _msgSender(),
-            BasicTransferInfo(_transferAndLock.to, _transferAndLock.amount),
-            _partition,
-            _transferAndLock.data,
-            _msgSender(),
-            ''
-        );
-        (success_, lockId_) = _lockByPartition(
-            _partition,
-            _transferAndLock.amount,
-            _transferAndLock.to,
-            _transferAndLock.expirationTimestamp
-        );
-        emit PartitionTransferredAndLocked(
-            _partition,
-            _msgSender(),
-            _transferAndLock.to,
-            _transferAndLock.amount,
-            _transferAndLock.data,
-            _transferAndLock.expirationTimestamp,
-            lockId_
-        );
+interface IBondRead {
+    struct BondDetailsData {
+        bytes3 currency;
+        uint256 nominalValue;
+        uint256 startingDate;
+        uint256 maturityDate;
     }
 
-    function _protectedTransferAndLock(
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal returns (bool success_, uint256 lockId_) {
-        checkNounceAndDeadline(
-            _nounce,
-            _transferAndLock.from,
-            _getNounceFor(_transferAndLock.from),
-            _deadline,
-            _blockTimestamp()
-        );
-
-        _checkTransferAndLockSignature(
-            _transferAndLock,
-            _deadline,
-            _nounce,
-            _signature
-        );
-
-        _setNounce(_nounce, _transferAndLock.from);
-
-        _transferByPartition(
-            _msgSender(),
-            BasicTransferInfo(_transferAndLock.to, _transferAndLock.amount),
-            _DEFAULT_PARTITION,
-            _transferAndLock.data,
-            _msgSender(),
-            ''
-        );
-        (success_, lockId_) = _lockByPartition(
-            _DEFAULT_PARTITION,
-            _transferAndLock.amount,
-            _transferAndLock.to,
-            _transferAndLock.expirationTimestamp
-        );
-        emit PartitionTransferredAndLocked(
-            _DEFAULT_PARTITION,
-            _msgSender(),
-            _transferAndLock.to,
-            _transferAndLock.amount,
-            _transferAndLock.data,
-            _transferAndLock.expirationTimestamp,
-            lockId_
-        );
+    struct CouponDetailsData {
+        uint256 couponFrequency;
+        uint256 couponRate;
+        uint256 firstCouponDate;
     }
 
-    function _checkTransferAndLockByPartitionSignature(
-        bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view {
-        if (
-            !_isTransferAndLockByPartitionSignatureValid(
-                _partition,
-                _transferAndLock,
-                _deadline,
-                _nounce,
-                _signature
-            )
-        ) revert WrongSignature();
+    struct Coupon {
+        uint256 recordDate;
+        uint256 executionDate;
+        uint256 rate;
     }
 
-    function _isTransferAndLockByPartitionSignatureValid(
-        bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashTransferAndLockByPartition(
-            _partition,
-            _transferAndLock.from,
-            _transferAndLock.to,
-            _transferAndLock.amount,
-            _transferAndLock.data,
-            _transferAndLock.expirationTimestamp,
-            _deadline,
-            _nounce
-        );
-        return
-            verify(
-                _transferAndLock.from,
-                functionHash,
-                _signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
-                _blockChainid(),
-                address(this)
-            );
+    struct RegisteredCoupon {
+        Coupon coupon;
+        uint256 snapshotId;
     }
 
-    function _checkTransferAndLockSignature(
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view {
-        if (
-            !_isTransferAndLockSignatureValid(
-                _transferAndLock,
-                _deadline,
-                _nounce,
-                _signature
-            )
-        ) revert WrongSignature();
+    struct CouponFor {
+        uint256 tokenBalance;
+        uint256 rate;
+        uint256 recordDate;
+        uint256 executionDate;
+        uint8 decimals;
+        bool recordDateReached;
     }
 
-    function _isTransferAndLockSignatureValid(
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashTransferAndLock(
-            _transferAndLock.from,
-            _transferAndLock.to,
-            _transferAndLock.amount,
-            _transferAndLock.data,
-            _transferAndLock.expirationTimestamp,
-            _deadline,
-            _nounce
-        );
-        return
-            verify(
-                _transferAndLock.from,
-                functionHash,
-                _signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
-                _blockChainid(),
-                address(this)
-            );
-    }
+    function getBondDetails()
+        external
+        view
+        returns (BondDetailsData memory bondDetailsData_);
+
+    function getCouponDetails()
+        external
+        view
+        returns (CouponDetailsData memory couponDetails_);
+
+    function getCoupon(
+        uint256 _couponID
+    ) external view returns (RegisteredCoupon memory registeredCoupon_);
+
+    function getCouponFor(
+        uint256 _couponID,
+        address _account
+    ) external view returns (CouponFor memory couponFor_);
+
+    function getCouponCount() external view returns (uint256 couponCount_);
+
+    function getCouponHolders(
+        uint256 _couponID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory holders_);
+
+    function getTotalCouponHolders(
+        uint256 _couponID
+    ) external view returns (uint256);
 }

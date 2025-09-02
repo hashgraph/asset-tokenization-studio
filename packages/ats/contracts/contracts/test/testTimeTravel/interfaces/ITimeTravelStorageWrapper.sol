@@ -227,12 +227,23 @@ interface ITimeTravelStorageWrapper {
      */
     event SystemTimestampReset();
 
-    // * Errors
+    event SystemBlocknumberChanged(
+        uint256 legacySystemNumber,
+        uint256 newSystemNumber
+    );
+
+    event SystemBlocknumberReset();
     /**
      * @notice Error thrown when attempting to set an invalid new system timestamp
      * @param newSystemTime The new system timestamp that caused the error
      */
     error InvalidTimestamp(uint256 newSystemTime);
+
+    /**
+     * @notice Error thrown when attempting to set an invalid new system block number
+     * @param newSystemNumber The new system timestamp that caused the error
+     */
+    error InvalidBlocknumber(uint256 newSystemNumber);
 
     /**
      * @notice Emitted when using time travel out of test environment

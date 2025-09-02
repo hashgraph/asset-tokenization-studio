@@ -223,4 +223,13 @@ contract ERC20TimeTravel is ERC20, TimeTravelStorageWrapper {
     {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
+
+    function _blockNumber()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockNumber();
+    }
 }
