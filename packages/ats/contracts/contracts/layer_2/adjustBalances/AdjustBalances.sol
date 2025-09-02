@@ -209,13 +209,9 @@ import {
     IAdjustBalances
 } from '../interfaces/adjustBalances/IAdjustBalances.sol';
 import {Common} from '../../layer_1/common/Common.sol';
-import {_BALANCE_ADJUSTMENTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
+abstract contract AdjustBalances is IAdjustBalances, Common {
     function adjustBalances(
         uint256 factor,
         uint8 decimals
@@ -230,39 +226,5 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         _triggerScheduledTasks(0);
         _adjustBalances(factor, decimals);
         success_ = true;
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _BALANCE_ADJUSTMENTS_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](1);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .adjustBalances
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IAdjustBalances)
-            .interfaceId;
     }
 }
