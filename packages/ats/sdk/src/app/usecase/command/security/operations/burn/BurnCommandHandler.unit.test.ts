@@ -305,7 +305,6 @@ describe('BurnCommandHandler', () => {
         command.sourceId,
         command.amount,
         _PARTITION_ID_1,
-        account.id.toString(),
       );
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
         command.sourceId,

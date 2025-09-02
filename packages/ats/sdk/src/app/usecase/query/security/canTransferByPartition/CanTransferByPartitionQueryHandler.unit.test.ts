@@ -300,7 +300,7 @@ describe('CanTransferByPartitionQueryHandler', () => {
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(CanTransferByPartitionQueryResponse);
-      expect(result.payload).toBe('test');
+      expect(result.payload).toStrictEqual(['test', 'test']);
       expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
         1,
