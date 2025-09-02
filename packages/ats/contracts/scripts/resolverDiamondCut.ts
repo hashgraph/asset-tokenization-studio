@@ -203,30 +203,27 @@
 
 */
 
-import { Environment } from './deployEnvironmentByRpc'
+import { Environment } from './deployEnvironmentByRpc';
 
 export interface FacetConfiguration {
-    id: string
-    version: number
+  id: string;
+  version: number;
 }
 
 export async function createResolverConfig(
-    environment: Environment,
-    configId: string,
-    facetIds: string[],
-    facetVersions: number[]
+  environment: Environment,
+  configId: string,
+  facetIds: string[],
+  facetVersions: number[],
 ): Promise<number> {
-    const facetConfigurations: FacetConfiguration[] = []
-    facetIds.forEach((id, index) =>
-        facetConfigurations.push({ id, version: facetVersions[index] })
-    )
+  const facetConfigurations: FacetConfiguration[] = [];
+  facetIds.forEach((id, index) =>
+    facetConfigurations.push({ id, version: facetVersions[index] }),
+  );
 
-    await environment.resolver.createConfiguration(
-        configId,
-        facetConfigurations
-    )
+  await environment.resolver.createConfiguration(configId, facetConfigurations);
 
-    return (
-        await environment.resolver.getLatestVersionByConfiguration(configId)
-    ).toNumber()
+  return (
+    await environment.resolver.getLatestVersionByConfiguration(configId)
+  ).toNumber();
 }

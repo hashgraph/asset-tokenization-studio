@@ -203,312 +203,284 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
-    type ResolverProxy,
-    type Security,
-    BusinessLogicResolver,
-    ERC1410ManagementFacet,
-    ERC1410TokenHolderFacet,
-    IFactory,
-} from '@typechain'
+  type ResolverProxy,
+  type Security,
+  BusinessLogicResolver,
+  ERC1410ManagementFacet,
+  ERC1410TokenHolderFacet,
+  IFactory,
+} from '@typechain';
 import {
-    Rbac,
-    deployEquityFromFactory,
-    RegulationType,
-    RegulationSubType,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    MAX_UINT256,
-    ISSUER_ROLE,
-} from '@scripts'
+  Rbac,
+  deployEquityFromFactory,
+  RegulationType,
+  RegulationSubType,
+  deployAtsFullInfrastructure,
+  DeployAtsFullInfrastructureCommand,
+  MAX_UINT256,
+  ISSUER_ROLE,
+} from '@scripts';
 
-const countriesControlListType = true
-const listOfCountries = 'ES,FR,CH'
-const info = 'info'
-const init_rbacs: Rbac[] = []
+const countriesControlListType = true;
+const listOfCountries = 'ES,FR,CH';
+const info = 'info';
+const init_rbacs: Rbac[] = [];
 
 const _PARTITION_ID_1 =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
+  '0x0000000000000000000000000000000000000000000000000000000000000001';
 const _PARTITION_ID_2 =
-    '0x0000000000000000000000000000000000000000000000000000000000000002'
+  '0x0000000000000000000000000000000000000000000000000000000000000002';
 
 describe('Security Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
+  let diamond: ResolverProxy;
+  let signer_A: SignerWithAddress;
+  let signer_B: SignerWithAddress;
+  let signer_C: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
+  let account_A: string;
+  let account_B: string;
+  let account_C: string;
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let securityFacet: Security
-    let erc1410TokenHolderFacet: ERC1410TokenHolderFacet
-    let erc1410ManagementFacet: ERC1410ManagementFacet
+  let factory: IFactory;
+  let businessLogicResolver: BusinessLogicResolver;
+  let securityFacet: Security;
+  let erc1410TokenHolderFacet: ERC1410TokenHolderFacet;
+  let erc1410ManagementFacet: ERC1410ManagementFacet;
 
-    beforeEach(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+  beforeEach(async () => {
+    // mute | mock console.log
+    console.log = () => {};
+    [signer_A, signer_B, signer_C] = await ethers.getSigners();
+    account_A = signer_A.address;
+    account_B = signer_B.address;
+    account_C = signer_C.address;
 
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                timeTravelEnabled: true,
-            })
-        )
+    const { ...deployedContracts } = await deployAtsFullInfrastructure(
+      await DeployAtsFullInfrastructureCommand.newInstance({
+        signer: signer_A,
+        useDeployed: false,
+        timeTravelEnabled: true,
+      }),
+    );
 
-        const rbacIssuer: Rbac = {
-            role: ISSUER_ROLE,
-            members: [account_A],
-        }
+    const rbacIssuer: Rbac = {
+      role: ISSUER_ROLE,
+      members: [account_A],
+    };
 
-        init_rbacs.push(rbacIssuer)
+    init_rbacs.push(rbacIssuer);
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: false,
-            isMultiPartition: true,
-            name: 'Test',
-            symbol: 'TEST',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_S,
-            regulationSubType: RegulationSubType.NONE,
-            countriesControlListType,
-            listOfCountries,
-            info,
-            init_rbacs,
-            businessLogicResolver: businessLogicResolver.address,
-            factory,
-        })
+    factory = deployedContracts.factory.contract;
+    businessLogicResolver = deployedContracts.businessLogicResolver.contract;
+    diamond = await deployEquityFromFactory({
+      adminAccount: account_A,
+      isWhiteList: false,
+      isControllable: true,
+      arePartitionsProtected: false,
+      clearingActive: false,
+      internalKycActivated: false,
+      isMultiPartition: true,
+      name: 'Test',
+      symbol: 'TEST',
+      decimals: 6,
+      isin: isinGenerator(),
+      votingRight: false,
+      informationRight: false,
+      liquidationRight: false,
+      subscriptionRight: true,
+      conversionRight: true,
+      redemptionRight: true,
+      putRight: false,
+      dividendRight: 1,
+      currency: '0x345678',
+      numberOfShares: MAX_UINT256,
+      nominalValue: 100,
+      regulationType: RegulationType.REG_S,
+      regulationSubType: RegulationSubType.NONE,
+      countriesControlListType,
+      listOfCountries,
+      info,
+      init_rbacs,
+      businessLogicResolver: businessLogicResolver.address,
+      factory,
+    });
 
-        securityFacet = await ethers.getContractAt('Security', diamond.address)
+    securityFacet = await ethers.getContractAt('Security', diamond.address);
 
-        erc1410TokenHolderFacet = await ethers.getContractAt(
-            'ERC1410TokenHolderFacet',
-            diamond.address
-        )
-        erc1410ManagementFacet = await ethers.getContractAt(
-            'ERC1410ManagementFacet',
-            diamond.address
-        )
-    })
+    erc1410TokenHolderFacet = await ethers.getContractAt(
+      'ERC1410TokenHolderFacet',
+      diamond.address,
+    );
+    erc1410ManagementFacet = await ethers.getContractAt(
+      'ERC1410ManagementFacet',
+      diamond.address,
+    );
+  });
 
-    describe('security', () => {
-        it('Check Security Total Holders and Holders when adding', async () => {
-            const TotalTokenHolders_1 =
-                await securityFacet.getTotalSecurityHolders()
-            const TokenHolders_1 = await securityFacet.getSecurityHolders(
-                0,
-                TotalTokenHolders_1
-            )
+  describe('security', () => {
+    it('Check Security Total Holders and Holders when adding', async () => {
+      const TotalTokenHolders_1 = await securityFacet.getTotalSecurityHolders();
+      const TokenHolders_1 = await securityFacet.getSecurityHolders(
+        0,
+        TotalTokenHolders_1,
+      );
 
-            erc1410ManagementFacet = erc1410ManagementFacet.connect(signer_A)
+      erc1410ManagementFacet = erc1410ManagementFacet.connect(signer_A);
 
-            await erc1410ManagementFacet.issueByPartition({
-                partition: _PARTITION_ID_1,
-                tokenHolder: account_A,
-                value: 1,
-                data: '0x',
-            })
+      await erc1410ManagementFacet.issueByPartition({
+        partition: _PARTITION_ID_1,
+        tokenHolder: account_A,
+        value: 1,
+        data: '0x',
+      });
 
-            await erc1410ManagementFacet.issueByPartition({
-                partition: _PARTITION_ID_1,
-                tokenHolder: account_B,
-                value: 1,
-                data: '0x',
-            })
+      await erc1410ManagementFacet.issueByPartition({
+        partition: _PARTITION_ID_1,
+        tokenHolder: account_B,
+        value: 1,
+        data: '0x',
+      });
 
-            await erc1410ManagementFacet.issueByPartition({
-                partition: _PARTITION_ID_2,
-                tokenHolder: account_C,
-                value: 1,
-                data: '0x',
-            })
+      await erc1410ManagementFacet.issueByPartition({
+        partition: _PARTITION_ID_2,
+        tokenHolder: account_C,
+        value: 1,
+        data: '0x',
+      });
 
-            const TotalTokenHolders_2 =
-                await securityFacet.getTotalSecurityHolders()
-            const TokenHolders_2 = await securityFacet.getSecurityHolders(
-                0,
-                TotalTokenHolders_2
-            )
+      const TotalTokenHolders_2 = await securityFacet.getTotalSecurityHolders();
+      const TokenHolders_2 = await securityFacet.getSecurityHolders(
+        0,
+        TotalTokenHolders_2,
+      );
 
-            expect(TotalTokenHolders_1).to.equal(0)
-            expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1)
+      expect(TotalTokenHolders_1).to.equal(0);
+      expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1);
 
-            expect(TotalTokenHolders_2).to.equal(3)
-            expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2)
-            expect(TokenHolders_2).to.have.members([
-                account_A,
-                account_B,
-                account_C,
-            ])
-        })
+      expect(TotalTokenHolders_2).to.equal(3);
+      expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2);
+      expect(TokenHolders_2).to.have.members([account_A, account_B, account_C]);
+    });
 
-        it('Check Security Total Holders and Holders when removing', async () => {
-            erc1410ManagementFacet = erc1410ManagementFacet.connect(signer_A)
+    it('Check Security Total Holders and Holders when removing', async () => {
+      erc1410ManagementFacet = erc1410ManagementFacet.connect(signer_A);
 
-            await erc1410ManagementFacet.issueByPartition({
-                partition: _PARTITION_ID_1,
-                tokenHolder: account_A,
-                value: 1,
-                data: '0x',
-            })
+      await erc1410ManagementFacet.issueByPartition({
+        partition: _PARTITION_ID_1,
+        tokenHolder: account_A,
+        value: 1,
+        data: '0x',
+      });
 
-            await erc1410ManagementFacet.issueByPartition({
-                partition: _PARTITION_ID_1,
-                tokenHolder: account_B,
-                value: 1,
-                data: '0x',
-            })
+      await erc1410ManagementFacet.issueByPartition({
+        partition: _PARTITION_ID_1,
+        tokenHolder: account_B,
+        value: 1,
+        data: '0x',
+      });
 
-            await erc1410ManagementFacet.issueByPartition({
-                partition: _PARTITION_ID_2,
-                tokenHolder: account_C,
-                value: 1,
-                data: '0x',
-            })
+      await erc1410ManagementFacet.issueByPartition({
+        partition: _PARTITION_ID_2,
+        tokenHolder: account_C,
+        value: 1,
+        data: '0x',
+      });
 
-            const TotalTokenHolders_1 =
-                await securityFacet.getTotalSecurityHolders()
-            const TokenHolders_1 = await securityFacet.getSecurityHolders(
-                0,
-                TotalTokenHolders_1
-            )
+      const TotalTokenHolders_1 = await securityFacet.getTotalSecurityHolders();
+      const TokenHolders_1 = await securityFacet.getSecurityHolders(
+        0,
+        TotalTokenHolders_1,
+      );
 
-            erc1410TokenHolderFacet = erc1410TokenHolderFacet.connect(signer_B)
+      erc1410TokenHolderFacet = erc1410TokenHolderFacet.connect(signer_B);
 
-            await erc1410TokenHolderFacet.redeemByPartition(
-                _PARTITION_ID_1,
-                1,
-                '0x'
-            )
+      await erc1410TokenHolderFacet.redeemByPartition(_PARTITION_ID_1, 1, '0x');
 
-            const TotalTokenHolders_2 =
-                await securityFacet.getTotalSecurityHolders()
-            const TokenHolders_2 = await securityFacet.getSecurityHolders(
-                0,
-                TotalTokenHolders_2
-            )
+      const TotalTokenHolders_2 = await securityFacet.getTotalSecurityHolders();
+      const TokenHolders_2 = await securityFacet.getSecurityHolders(
+        0,
+        TotalTokenHolders_2,
+      );
 
-            erc1410TokenHolderFacet = erc1410TokenHolderFacet.connect(signer_A)
+      erc1410TokenHolderFacet = erc1410TokenHolderFacet.connect(signer_A);
 
-            await erc1410TokenHolderFacet.redeemByPartition(
-                _PARTITION_ID_1,
-                1,
-                '0x'
-            )
+      await erc1410TokenHolderFacet.redeemByPartition(_PARTITION_ID_1, 1, '0x');
 
-            const TotalTokenHolders_3 =
-                await securityFacet.getTotalSecurityHolders()
-            const TokenHolders_3 = await securityFacet.getSecurityHolders(
-                0,
-                TotalTokenHolders_3
-            )
+      const TotalTokenHolders_3 = await securityFacet.getTotalSecurityHolders();
+      const TokenHolders_3 = await securityFacet.getSecurityHolders(
+        0,
+        TotalTokenHolders_3,
+      );
 
-            erc1410TokenHolderFacet = erc1410TokenHolderFacet.connect(signer_C)
+      erc1410TokenHolderFacet = erc1410TokenHolderFacet.connect(signer_C);
 
-            await erc1410TokenHolderFacet.redeemByPartition(
-                _PARTITION_ID_2,
-                1,
-                '0x'
-            )
+      await erc1410TokenHolderFacet.redeemByPartition(_PARTITION_ID_2, 1, '0x');
 
-            const TotalTokenHolders_4 =
-                await securityFacet.getTotalSecurityHolders()
-            const TokenHolders_4 = await securityFacet.getSecurityHolders(
-                0,
-                TotalTokenHolders_4
-            )
+      const TotalTokenHolders_4 = await securityFacet.getTotalSecurityHolders();
+      const TokenHolders_4 = await securityFacet.getSecurityHolders(
+        0,
+        TotalTokenHolders_4,
+      );
 
-            expect(TotalTokenHolders_1).to.equal(3)
-            expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1)
-            expect(TokenHolders_1).to.have.members([
-                account_A,
-                account_B,
-                account_C,
-            ])
+      expect(TotalTokenHolders_1).to.equal(3);
+      expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1);
+      expect(TokenHolders_1).to.have.members([account_A, account_B, account_C]);
 
-            expect(TotalTokenHolders_2).to.equal(2)
-            expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2)
-            expect(TokenHolders_2).to.have.members([account_A, account_C])
+      expect(TotalTokenHolders_2).to.equal(2);
+      expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2);
+      expect(TokenHolders_2).to.have.members([account_A, account_C]);
 
-            expect(TotalTokenHolders_3).to.equal(1)
-            expect(TokenHolders_3.length).to.equal(TotalTokenHolders_3)
-            expect(TokenHolders_3).to.have.members([account_C])
+      expect(TotalTokenHolders_3).to.equal(1);
+      expect(TokenHolders_3.length).to.equal(TotalTokenHolders_3);
+      expect(TokenHolders_3).to.have.members([account_C]);
 
-            expect(TotalTokenHolders_4).to.equal(0)
-            expect(TokenHolders_4.length).to.equal(TotalTokenHolders_4)
-        })
+      expect(TotalTokenHolders_4).to.equal(0);
+      expect(TokenHolders_4.length).to.equal(TotalTokenHolders_4);
+    });
 
-        it('Check Security Total Holders and Holders when replacing', async () => {
-            erc1410ManagementFacet = erc1410ManagementFacet.connect(signer_A)
+    it('Check Security Total Holders and Holders when replacing', async () => {
+      erc1410ManagementFacet = erc1410ManagementFacet.connect(signer_A);
 
-            await erc1410ManagementFacet.issueByPartition({
-                partition: _PARTITION_ID_1,
-                tokenHolder: account_A,
-                value: 1,
-                data: '0x',
-            })
+      await erc1410ManagementFacet.issueByPartition({
+        partition: _PARTITION_ID_1,
+        tokenHolder: account_A,
+        value: 1,
+        data: '0x',
+      });
 
-            const TotalTokenHolders_1 =
-                await securityFacet.getTotalSecurityHolders()
-            const TokenHolders_1 = await securityFacet.getSecurityHolders(
-                0,
-                TotalTokenHolders_1
-            )
+      const TotalTokenHolders_1 = await securityFacet.getTotalSecurityHolders();
+      const TokenHolders_1 = await securityFacet.getSecurityHolders(
+        0,
+        TotalTokenHolders_1,
+      );
 
-            await erc1410TokenHolderFacet.transferByPartition(
-                _PARTITION_ID_1,
-                {
-                    to: account_B,
-                    value: 1,
-                },
-                '0x'
-            )
+      await erc1410TokenHolderFacet.transferByPartition(
+        _PARTITION_ID_1,
+        {
+          to: account_B,
+          value: 1,
+        },
+        '0x',
+      );
 
-            const TotalTokenHolders_2 =
-                await securityFacet.getTotalSecurityHolders()
-            const TokenHolders_2 = await securityFacet.getSecurityHolders(
-                0,
-                TotalTokenHolders_2
-            )
+      const TotalTokenHolders_2 = await securityFacet.getTotalSecurityHolders();
+      const TokenHolders_2 = await securityFacet.getSecurityHolders(
+        0,
+        TotalTokenHolders_2,
+      );
 
-            expect(TotalTokenHolders_1).to.equal(1)
-            expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1)
-            expect(TokenHolders_1).to.have.members([account_A])
+      expect(TotalTokenHolders_1).to.equal(1);
+      expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1);
+      expect(TokenHolders_1).to.have.members([account_A]);
 
-            expect(TotalTokenHolders_2).to.equal(1)
-            expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2)
-            expect(TokenHolders_2).to.have.members([account_B])
-        })
-    })
-})
+      expect(TotalTokenHolders_2).to.equal(1);
+      expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2);
+      expect(TokenHolders_2).to.have.members([account_B]);
+    });
+  });
+});

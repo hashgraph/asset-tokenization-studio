@@ -237,9 +237,5 @@ interface IERC3643Operations {
      *
      * Emits a ControllerTransfer event.
      */
-    function forcedTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external returns (bool);
+    function forcedTransfer(address _from, address _to, uint256 _amount) external returns (bool);
 }

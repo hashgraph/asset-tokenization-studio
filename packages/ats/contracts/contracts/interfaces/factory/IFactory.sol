@@ -206,11 +206,11 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IResolverProxy} from '../resolver/resolverProxy/IResolverProxy.sol';
-import {IBusinessLogicResolver} from '../resolver/IBusinessLogicResolver.sol';
-import {IERC20} from '../../layer_1/interfaces/ERC1400/IERC20.sol';
-import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
-import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
+import { IResolverProxy } from '../resolver/resolverProxy/IResolverProxy.sol';
+import { IBusinessLogicResolver } from '../resolver/IBusinessLogicResolver.sol';
+import { IERC20 } from '../../layer_1/interfaces/ERC1400/IERC20.sol';
+import { IBondRead } from '../../layer_2/interfaces/bond/IBondRead.sol';
+import { IEquity } from '../../layer_2/interfaces/equity/IEquity.sol';
 import {
     FactoryRegulationData,
     RegulationData,

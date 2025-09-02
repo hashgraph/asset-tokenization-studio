@@ -203,63 +203,63 @@
 
 */
 
-import { Signer } from 'ethers'
-import { Network } from '@configuration'
+import { Signer } from 'ethers';
+import { Network } from '@configuration';
 
 interface DeployAtsContractsCommandNewParams {
-    signer: Signer
-    useDeployed?: boolean
-    useEnvironment?: boolean
-    timeTravelEnabled?: boolean
-    partialBatchDeploy?: boolean
+  signer: Signer;
+  useDeployed?: boolean;
+  useEnvironment?: boolean;
+  timeTravelEnabled?: boolean;
+  partialBatchDeploy?: boolean;
 }
 
 export interface DeployAtsContractsCommandParams
-    extends DeployAtsContractsCommandNewParams {
-    network: Network
+  extends DeployAtsContractsCommandNewParams {
+  network: Network;
 }
 
 export default class DeployAtsContractsCommand {
-    public readonly useDeployed: boolean
-    public readonly useEnvironment: boolean = false
-    public readonly signer: Signer
-    public readonly network: Network
-    public readonly timeTravelEnabled: boolean = false
-    public readonly partialBatchDeploy: boolean = false
+  public readonly useDeployed: boolean;
+  public readonly useEnvironment: boolean = false;
+  public readonly signer: Signer;
+  public readonly network: Network;
+  public readonly timeTravelEnabled: boolean = false;
+  public readonly partialBatchDeploy: boolean = false;
 
-    constructor({
-        signer,
-        network,
-        useDeployed = true,
-        useEnvironment = false,
-        timeTravelEnabled = false,
-        partialBatchDeploy = false,
-    }: DeployAtsContractsCommandParams) {
-        this.useDeployed = useDeployed
-        this.useEnvironment = useEnvironment
-        this.network = network!
-        this.signer = signer
-        this.timeTravelEnabled = timeTravelEnabled
-        this.partialBatchDeploy = partialBatchDeploy
-    }
+  constructor({
+    signer,
+    network,
+    useDeployed = true,
+    useEnvironment = false,
+    timeTravelEnabled = false,
+    partialBatchDeploy = false,
+  }: DeployAtsContractsCommandParams) {
+    this.useDeployed = useDeployed;
+    this.useEnvironment = useEnvironment;
+    this.network = network!;
+    this.signer = signer;
+    this.timeTravelEnabled = timeTravelEnabled;
+    this.partialBatchDeploy = partialBatchDeploy;
+  }
 
-    public static async newInstance({
-        signer,
-        useDeployed = true,
-        useEnvironment = false,
-        timeTravelEnabled = false,
-        partialBatchDeploy = false,
-    }: DeployAtsContractsCommandNewParams): Promise<DeployAtsContractsCommand> {
-        if (!signer.provider) {
-            throw new Error('Signer must have a provider')
-        }
-        return new DeployAtsContractsCommand({
-            signer,
-            network: (await signer.provider.getNetwork()).name as Network,
-            useDeployed,
-            useEnvironment,
-            timeTravelEnabled,
-            partialBatchDeploy,
-        })
+  public static async newInstance({
+    signer,
+    useDeployed = true,
+    useEnvironment = false,
+    timeTravelEnabled = false,
+    partialBatchDeploy = false,
+  }: DeployAtsContractsCommandNewParams): Promise<DeployAtsContractsCommand> {
+    if (!signer.provider) {
+      throw new Error('Signer must have a provider');
     }
+    return new DeployAtsContractsCommand({
+      signer,
+      network: (await signer.provider.getNetwork()).name as Network,
+      useDeployed,
+      useEnvironment,
+      timeTravelEnabled,
+      partialBatchDeploy,
+    });
+  }
 }

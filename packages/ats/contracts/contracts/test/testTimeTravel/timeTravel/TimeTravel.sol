@@ -206,17 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {TimeTravelStorageWrapper} from './TimeTravelStorageWrapper.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ITimeTravel} from '../interfaces/ITimeTravel.sol';
+import { TimeTravelStorageWrapper } from './TimeTravelStorageWrapper.sol';
+import { IStaticFunctionSelectors } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { ITimeTravel } from '../interfaces/ITimeTravel.sol';
 
-contract TimeTravel is
-    IStaticFunctionSelectors,
-    ITimeTravel,
-    TimeTravelStorageWrapper
-{
+contract TimeTravel is IStaticFunctionSelectors, ITimeTravel, TimeTravelStorageWrapper {
     function changeSystemTimestamp(uint256 newTimestamp) external override {
         _changeSystemTimestamp(newTimestamp);
     }
@@ -225,9 +219,7 @@ contract TimeTravel is
         _resetSystemTimestamp();
     }
 
-    function changeSystemBlocknumber(
-        uint256 _newSystemBlocknumber
-    ) external override {
+    function changeSystemBlocknumber(uint256 _newSystemBlocknumber) external override {
         _changeSystemBlocknumber(_newSystemBlocknumber);
     }
 
@@ -247,13 +239,7 @@ contract TimeTravel is
         _checkBlockChainid(chainId);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _TIME_TRAVEL_RESOLVER_KEY;
     }
 
@@ -266,33 +252,15 @@ contract TimeTravel is
     {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](6);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .changeSystemTimestamp
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .resetSystemTimestamp
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .blockTimestamp
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .checkBlockChainid
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .changeSystemBlocknumber
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .resetSystemBlocknumber
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.changeSystemTimestamp.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.resetSystemTimestamp.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.blockTimestamp.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.checkBlockChainid.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.changeSystemBlocknumber.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.resetSystemBlocknumber.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure virtual override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(ITimeTravel).interfaceId;

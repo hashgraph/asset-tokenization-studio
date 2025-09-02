@@ -206,13 +206,11 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from '../common/Common.sol';
-import {IClearingRead} from '../interfaces/clearing/IClearingRead.sol';
+import { Common } from '../common/Common.sol';
+import { IClearingRead } from '../interfaces/clearing/IClearingRead.sol';
 
 abstract contract ClearingRead is IClearingRead, Common {
-    function getClearedAmountFor(
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
+    function getClearedAmountFor(address _tokenHolder) external view returns (uint256 amount_) {
         return _getClearedAmountForAdjusted(_tokenHolder);
     }
 
@@ -220,8 +218,7 @@ abstract contract ClearingRead is IClearingRead, Common {
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 amount_) {
-        return
-            _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+        return _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function getClearingCountForByPartition(
@@ -229,12 +226,7 @@ abstract contract ClearingRead is IClearingRead, Common {
         address _tokenHolder,
         ClearingOperationType _clearingOperationType
     ) external view override returns (uint256 clearingCount_) {
-        return
-            _getClearingCountForByPartition(
-                _partition,
-                _tokenHolder,
-                _clearingOperationType
-            );
+        return _getClearingCountForByPartition(_partition, _tokenHolder, _clearingOperationType);
     }
 
     function getClearingsIdForByPartition(
@@ -244,14 +236,7 @@ abstract contract ClearingRead is IClearingRead, Common {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory clearingsId_) {
-        return
-            _getClearingsIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _clearingOperationType,
-                _pageIndex,
-                _pageLength
-            );
+        return _getClearingsIdForByPartition(_partition, _tokenHolder, _clearingOperationType, _pageIndex, _pageLength);
     }
 
     function getClearingThirdParty(
@@ -260,11 +245,6 @@ abstract contract ClearingRead is IClearingRead, Common {
         ClearingOperationType _clearingOpeartionType,
         uint256 _clearingId
     ) external view override returns (address thirdParty_) {
-        thirdParty_ = _getClearingThirdParty(
-            _partition,
-            _tokenHolder,
-            _clearingOpeartionType,
-            _clearingId
-        );
+        thirdParty_ = _getClearingThirdParty(_partition, _tokenHolder, _clearingOpeartionType, _clearingId);
     }
 }

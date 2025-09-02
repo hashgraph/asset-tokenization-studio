@@ -206,11 +206,9 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    IBusinessLogicResolver
-} from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {DiamondCutManager} from './diamondCutManager/DiamondCutManager.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../layer_1/constants/roles.sol';
+import { IBusinessLogicResolver } from '../interfaces/resolver/IBusinessLogicResolver.sol';
+import { DiamondCutManager } from './diamondCutManager/DiamondCutManager.sol';
+import { _DEFAULT_ADMIN_ROLE } from '../layer_1/constants/roles.sol';
 
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     error Unimplemented();
@@ -230,13 +228,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
 
     function registerBusinessLogics(
         BusinessLogicRegistryData[] calldata _businessLogics
-    )
-        external
-        override
-        onlyValidKeys(_businessLogics)
-        onlyRole(_DEFAULT_ADMIN_ROLE)
-        onlyUnpaused
-    {
+    ) external override onlyValidKeys(_businessLogics) onlyRole(_DEFAULT_ADMIN_ROLE) onlyUnpaused {
         uint256 latestVersion = _registerBusinessLogics(_businessLogics);
 
         emit BusinessLogicsRegistered(_businessLogics, latestVersion);
@@ -258,22 +250,11 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
 
     function getVersionStatus(
         uint256 _version
-    )
-        external
-        view
-        override
-        validVersion(_version)
-        returns (VersionStatus status_)
-    {
+    ) external view override validVersion(_version) returns (VersionStatus status_) {
         status_ = _getVersionStatus(_version);
     }
 
-    function getLatestVersion()
-        external
-        view
-        override
-        returns (uint256 latestVersion_)
-    {
+    function getLatestVersion() external view override returns (uint256 latestVersion_) {
         latestVersion_ = _getLatestVersion();
     }
 
@@ -286,25 +267,11 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     function resolveBusinessLogicByVersion(
         bytes32 _businessLogicKey,
         uint256 _version
-    )
-        external
-        view
-        override
-        validVersion(_version)
-        returns (address businessLogicAddress_)
-    {
-        businessLogicAddress_ = _resolveBusinessLogicByVersion(
-            _businessLogicKey,
-            _version
-        );
+    ) external view override validVersion(_version) returns (address businessLogicAddress_) {
+        businessLogicAddress_ = _resolveBusinessLogicByVersion(_businessLogicKey, _version);
     }
 
-    function getBusinessLogicCount()
-        external
-        view
-        override
-        returns (uint256 businessLogicCount_)
-    {
+    function getBusinessLogicCount() external view override returns (uint256 businessLogicCount_) {
         businessLogicCount_ = _getBusinessLogicCount();
     }
 
@@ -320,7 +287,6 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (bytes4[] memory selectors_) {
-        return
-            _getSelectorsBlacklist(_configurationId, _pageIndex, _pageLength);
+        return _getSelectorsBlacklist(_configurationId, _pageIndex, _pageLength);
     }
 }

@@ -206,19 +206,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IKyc} from '../kyc/IKyc.sol';
+import { IKyc } from '../kyc/IKyc.sol';
 
 interface IExternalKycListManagement {
-    event ExternalKycListsUpdated(
-        address indexed operator,
-        address[] kycLists,
-        bool[] actives
-    );
+    event ExternalKycListsUpdated(address indexed operator, address[] kycLists, bool[] actives);
     event AddedToExternalKycLists(address indexed operator, address kycList);
-    event RemovedFromExternalKycLists(
-        address indexed operator,
-        address kycList
-    );
+    event RemovedFromExternalKycLists(address indexed operator, address kycList);
 
     error ListedKycList(address kycList);
 
@@ -234,25 +227,15 @@ interface IExternalKycListManagement {
         bool[] calldata _actives
     ) external returns (bool success_);
 
-    function addExternalKycList(
-        address _kycList
-    ) external returns (bool success_);
+    function addExternalKycList(address _kycList) external returns (bool success_);
 
-    function removeExternalKycList(
-        address _kycList
-    ) external returns (bool success_);
+    function removeExternalKycList(address _kycList) external returns (bool success_);
 
     function isExternalKycList(address _kycList) external view returns (bool);
 
-    function isExternallyGranted(
-        address _account,
-        IKyc.KycStatus _kycStatus
-    ) external view returns (bool);
+    function isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) external view returns (bool);
 
-    function getExternalKycListsCount()
-        external
-        view
-        returns (uint256 externalKycListsCount_);
+    function getExternalKycListsCount() external view returns (uint256 externalKycListsCount_);
 
     function getExternalKycListsMembers(
         uint256 _pageIndex,

@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IClearing} from './IClearing.sol';
+import { IClearing } from './IClearing.sol';
 
 interface IClearingActions {
     enum ClearingActionType {
@@ -249,18 +249,15 @@ interface IClearingActions {
     function deactivateClearing() external returns (bool success_);
 
     function approveClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external returns (bool success_);
 
     function cancelClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external returns (bool success_);
 
     function reclaimClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external returns (bool success_);
 
     function isClearingActivated() external view returns (bool);

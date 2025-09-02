@@ -206,17 +206,11 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LibCommon} from '../../common/libraries/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    SsiManagementStorageWrapper
-} from '../ssi/SsiManagementStorageWrapper.sol';
+import { LibCommon } from '../../common/libraries/LibCommon.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { SsiManagementStorageWrapper } from '../ssi/SsiManagementStorageWrapper.sol';
 
-abstract contract ExternalListManagementStorageWrapper is
-    SsiManagementStorageWrapper
-{
+abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWrapper {
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -251,30 +245,19 @@ abstract contract ExternalListManagementStorageWrapper is
         success_ = true;
     }
 
-    function _addExternalList(
-        bytes32 _position,
-        address _list
-    ) internal returns (bool success_) {
+    function _addExternalList(bytes32 _position, address _list) internal returns (bool success_) {
         success_ = _externalListStorage(_position).list.add(_list);
     }
 
-    function _removeExternalList(
-        bytes32 _position,
-        address _list
-    ) internal returns (bool success_) {
+    function _removeExternalList(bytes32 _position, address _list) internal returns (bool success_) {
         success_ = _externalListStorage(_position).list.remove(_list);
     }
 
-    function _isExternalList(
-        bytes32 _position,
-        address _list
-    ) internal view returns (bool) {
+    function _isExternalList(bytes32 _position, address _list) internal view returns (bool) {
         return _externalListStorage(_position).list.contains(_list);
     }
 
-    function _getExternalListsCount(
-        bytes32 _position
-    ) internal view returns (uint256 count_) {
+    function _getExternalListsCount(bytes32 _position) internal view returns (uint256 count_) {
         count_ = _externalListStorage(_position).list.length();
     }
 
@@ -283,10 +266,7 @@ abstract contract ExternalListManagementStorageWrapper is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
-        members_ = _externalListStorage(_position).list.getFromSet(
-            _pageIndex,
-            _pageLength
-        );
+        members_ = _externalListStorage(_position).list.getFromSet(_pageIndex, _pageLength);
     }
 
     function _externalListStorage(

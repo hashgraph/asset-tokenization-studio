@@ -213,10 +213,7 @@ interface ISsiManagement {
      * @param oldRegistryAddress previous revocation list address
      * @param newRegistryAddress new revocation list address
      */
-    event RevocationRegistryUpdated(
-        address indexed oldRegistryAddress,
-        address indexed newRegistryAddress
-    );
+    event RevocationRegistryUpdated(address indexed oldRegistryAddress, address indexed newRegistryAddress);
 
     /**
      * @dev Emitted when an issuer is added to the issuerlist
@@ -232,10 +229,7 @@ interface ISsiManagement {
      * @param issuer The issuer that was removed from the issuerlist
      * @param operator The caller of the function that emitted the event
      */
-    event RemovedFromIssuerList(
-        address indexed operator,
-        address indexed issuer
-    );
+    event RemovedFromIssuerList(address indexed operator, address indexed issuer);
 
     error ListedIssuer(address issuer);
     error UnlistedIssuer(address issuer);
@@ -247,9 +241,7 @@ interface ISsiManagement {
      * @param _revocationRegistryAddress revocation list address
      * @return success_ true or false
      */
-    function setRevocationRegistryAddress(
-        address _revocationRegistryAddress
-    ) external returns (bool success_);
+    function setRevocationRegistryAddress(address _revocationRegistryAddress) external returns (bool success_);
 
     /**
      * @dev Adds an issuer to the issuer list
@@ -272,10 +264,7 @@ interface ISsiManagement {
      *
      * @return revocationRegistryAddress_
      */
-    function getRevocationRegistryAddress()
-        external
-        view
-        returns (address revocationRegistryAddress_);
+    function getRevocationRegistryAddress() external view returns (address revocationRegistryAddress_);
 
     /**
      * @dev Checks if an issuer is in the issuer list
@@ -290,10 +279,7 @@ interface ISsiManagement {
      *
      * @return issuerListCount_ The number of members
      */
-    function getIssuerListCount()
-        external
-        view
-        returns (uint256 issuerListCount_);
+    function getIssuerListCount() external view returns (uint256 issuerListCount_);
 
     /**
      * @dev Returns an array of members the issuerlist currently has

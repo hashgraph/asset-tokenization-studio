@@ -206,18 +206,14 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    _PROTECTED_PARTITIONS_PARTICIPANT_ROLE
-} from '../../constants/roles.sol';
-import {
-    _PROTECTED_PARTITIONS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
+import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from '../../constants/roles.sol';
+import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from '../../constants/storagePositions.sol';
 import {
     IProtectedPartitionsStorageWrapper
 } from '../../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol';
-import {IClearing} from '../../../layer_1/interfaces/clearing/IClearing.sol';
-import {Hold, ProtectedHold} from '../../../layer_1/interfaces/hold/IHold.sol';
-import {KycStorageWrapper} from '../kyc/KycStorageWrapper.sol';
+import { IClearing } from '../../../layer_1/interfaces/clearing/IClearing.sol';
+import { Hold, ProtectedHold } from '../../../layer_1/interfaces/hold/IHold.sol';
+import { KycStorageWrapper } from '../kyc/KycStorageWrapper.sol';
 import {
     getMessageHashTransfer,
     getMessageHashRedeem,
@@ -228,10 +224,7 @@ import {
     verify
 } from '../../../layer_1/protectedPartitions/signatureVerification.sol';
 
-abstract contract ProtectedPartitionsStorageWrapper is
-    IProtectedPartitionsStorageWrapper,
-    KycStorageWrapper
-{
+abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStorageWrapper, KycStorageWrapper {
     struct ProtectedPartitionsDataStorage {
         bool initialized;
         bool arePartitionsProtected;
@@ -281,17 +274,8 @@ abstract contract ProtectedPartitionsStorageWrapper is
         uint256 _nounce,
         bytes calldata _signature
     ) internal view {
-        if (
-            !_isTransferSignatureValid(
-                _partition,
-                _from,
-                _to,
-                _amount,
-                _deadline,
-                _nounce,
-                _signature
-            )
-        ) revert WrongSignature();
+        if (!_isTransferSignatureValid(_partition, _from, _to, _amount, _deadline, _nounce, _signature))
+            revert WrongSignature();
     }
 
     function _isTransferSignatureValid(
@@ -303,14 +287,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         uint256 _nounce,
         bytes calldata _signature
     ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashTransfer(
-            _partition,
-            _from,
-            _to,
-            _amount,
-            _deadline,
-            _nounce
-        );
+        bytes32 functionHash = getMessageHashTransfer(_partition, _from, _to, _amount, _deadline, _nounce);
         return
             verify(
                 _from,
@@ -331,16 +308,8 @@ abstract contract ProtectedPartitionsStorageWrapper is
         uint256 _nounce,
         bytes calldata _signature
     ) internal view {
-        if (
-            !_isRedeemSignatureValid(
-                _partition,
-                _from,
-                _amount,
-                _deadline,
-                _nounce,
-                _signature
-            )
-        ) revert WrongSignature();
+        if (!_isRedeemSignatureValid(_partition, _from, _amount, _deadline, _nounce, _signature))
+            revert WrongSignature();
     }
 
     function _isRedeemSignatureValid(
@@ -351,13 +320,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         uint256 _nounce,
         bytes calldata _signature
     ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashRedeem(
-            _partition,
-            _from,
-            _amount,
-            _deadline,
-            _nounce
-        );
+        bytes32 functionHash = getMessageHashRedeem(_partition, _from, _amount, _deadline, _nounce);
         return
             verify(
                 _from,
@@ -376,14 +339,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         ProtectedHold memory _protectedHold,
         bytes calldata _signature
     ) internal view {
-        if (
-            !_isCreateHoldSignatureValid(
-                _partition,
-                _from,
-                _protectedHold,
-                _signature
-            )
-        ) revert WrongSignature();
+        if (!_isCreateHoldSignatureValid(_partition, _from, _protectedHold, _signature)) revert WrongSignature();
     }
 
     function _isCreateHoldSignatureValid(
@@ -392,11 +348,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         ProtectedHold memory _protectedHold,
         bytes calldata _signature
     ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashCreateHold(
-            _partition,
-            _from,
-            _protectedHold
-        );
+        bytes32 functionHash = getMessageHashCreateHold(_partition, _from, _protectedHold);
 
         return
             verify(
@@ -415,13 +367,8 @@ abstract contract ProtectedPartitionsStorageWrapper is
         Hold memory _hold,
         bytes calldata _signature
     ) internal view {
-        if (
-            !_isClearingCreateHoldSignatureValid(
-                _protectedClearingOperation,
-                _hold,
-                _signature
-            )
-        ) revert WrongSignature();
+        if (!_isClearingCreateHoldSignatureValid(_protectedClearingOperation, _hold, _signature))
+            revert WrongSignature();
     }
 
     function _isClearingCreateHoldSignatureValid(
@@ -429,10 +376,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         Hold memory _hold,
         bytes calldata _signature
     ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashClearingCreateHold(
-            _protectedClearingOperation,
-            _hold
-        );
+        bytes32 functionHash = getMessageHashClearingCreateHold(_protectedClearingOperation, _hold);
 
         return
             verify(
@@ -447,34 +391,22 @@ abstract contract ProtectedPartitionsStorageWrapper is
     }
 
     function _checkClearingTransferSignature(
-        IClearing.ProtectedClearingOperation
-            calldata _protectedClearingOperation,
+        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         address _to,
         bytes calldata _signature
     ) internal view {
-        if (
-            !_isClearingTransferSignatureValid(
-                _protectedClearingOperation,
-                _to,
-                _amount,
-                _signature
-            )
-        ) revert WrongSignature();
+        if (!_isClearingTransferSignatureValid(_protectedClearingOperation, _to, _amount, _signature))
+            revert WrongSignature();
     }
 
     function _isClearingTransferSignatureValid(
-        IClearing.ProtectedClearingOperation
-            calldata _protectedClearingOperation,
+        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
         address _to,
         uint256 _amount,
         bytes calldata _signature
     ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashClearingTransfer(
-            _protectedClearingOperation,
-            _to,
-            _amount
-        );
+        bytes32 functionHash = getMessageHashClearingTransfer(_protectedClearingOperation, _to, _amount);
 
         return
             verify(
@@ -489,30 +421,19 @@ abstract contract ProtectedPartitionsStorageWrapper is
     }
 
     function _checkClearingRedeemSignature(
-        IClearing.ProtectedClearingOperation
-            calldata _protectedClearingOperation,
+        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature
     ) internal view {
-        if (
-            !_isClearingRedeemSignatureValid(
-                _protectedClearingOperation,
-                _amount,
-                _signature
-            )
-        ) revert WrongSignature();
+        if (!_isClearingRedeemSignatureValid(_protectedClearingOperation, _amount, _signature)) revert WrongSignature();
     }
 
     function _isClearingRedeemSignatureValid(
-        IClearing.ProtectedClearingOperation
-            calldata _protectedClearingOperation,
+        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature
     ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashClearingRedeem(
-            _protectedClearingOperation,
-            _amount
-        );
+        bytes32 functionHash = getMessageHashClearingRedeem(_protectedClearingOperation, _amount);
 
         return
             verify(
@@ -526,10 +447,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
             );
     }
 
-    function _checkRoleForPartition(
-        bytes32 partition,
-        address account
-    ) internal view {
+    function _checkRoleForPartition(bytes32 partition, address account) internal view {
         _checkRole(_calculateRoleForPartition(partition), account);
     }
 
@@ -537,24 +455,12 @@ abstract contract ProtectedPartitionsStorageWrapper is
         if (!_arePartitionsProtected()) revert PartitionsAreUnProtected();
     }
 
-    function _protectedPartitionsRole(
-        bytes32 _partition
-    ) internal pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(
-                    _PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
-                    _partition
-                )
-            );
+    function _protectedPartitionsRole(bytes32 _partition) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));
     }
 
-    function _calculateRoleForPartition(
-        bytes32 partition
-    ) internal pure returns (bytes32 role) {
-        role = keccak256(
-            abi.encode(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition)
-        );
+    function _calculateRoleForPartition(bytes32 partition) internal pure returns (bytes32 role) {
+        role = keccak256(abi.encode(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition));
     }
 
     function _protectedPartitionsStorage()
@@ -570,7 +476,6 @@ abstract contract ProtectedPartitionsStorageWrapper is
     }
 
     function _checkValidPartition(bytes32 _partition) private view {
-        if (_arePartitionsProtected())
-            _checkRoleForPartition(_partition, _msgSender());
+        if (_arePartitionsProtected()) _checkRoleForPartition(_partition, _msgSender());
     }
 }

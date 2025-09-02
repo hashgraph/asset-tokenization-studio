@@ -170,453 +170,423 @@
    limitations under the License.
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
-    type ResolverProxy,
-    type Pause,
-    BusinessLogicResolver,
-    IFactory,
-    ERC20Permit,
-    ERC20,
-    AccessControl,
-    ControlList,
-} from '@typechain'
+  type ResolverProxy,
+  type Pause,
+  BusinessLogicResolver,
+  IFactory,
+  ERC20Permit,
+  ERC20,
+  AccessControl,
+  ControlList,
+} from '@typechain';
 import {
-    PAUSER_ROLE,
-    MAX_UINT256,
-    deployEquityFromFactory,
-    Rbac,
-    RegulationSubType,
-    RegulationType,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    ADDRESS_ZERO,
-    CONTROL_LIST_ROLE,
-} from '@scripts'
+  PAUSER_ROLE,
+  MAX_UINT256,
+  deployEquityFromFactory,
+  Rbac,
+  RegulationSubType,
+  RegulationType,
+  deployAtsFullInfrastructure,
+  DeployAtsFullInfrastructureCommand,
+  ADDRESS_ZERO,
+  CONTROL_LIST_ROLE,
+} from '@scripts';
 
 describe('ERC20Permit Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
+  let diamond: ResolverProxy;
+  let signer_A: SignerWithAddress;
+  let signer_B: SignerWithAddress;
+  let signer_C: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
+  let account_A: string;
+  let account_B: string;
+  let account_C: string;
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let erc20PermitFacet: ERC20Permit
-    let erc20Facet: ERC20
-    let pauseFacet: Pause
-    let accessControlFacet: AccessControl
-    let controlList: ControlList
+  let factory: IFactory;
+  let businessLogicResolver: BusinessLogicResolver;
+  let erc20PermitFacet: ERC20Permit;
+  let erc20Facet: ERC20;
+  let pauseFacet: Pause;
+  let accessControlFacet: AccessControl;
+  let controlList: ControlList;
 
-    const name = 'TEST_AccessControl'
-    const symbol = 'TAC'
-    const decimals = 6
-    const isin = isinGenerator()
-    const CONTRACT_NAME_ERC20PERMIT = 'ERC20Permit'
-    const CONTRACT_VERSION_ERC20PERMIT = '1.0.0'
+  const name = 'TEST_AccessControl';
+  const symbol = 'TAC';
+  const decimals = 6;
+  const isin = isinGenerator();
+  const CONTRACT_NAME_ERC20PERMIT = 'ERC20Permit';
+  const CONTRACT_VERSION_ERC20PERMIT = '1.0.0';
 
-    function set_initRbacs(): Rbac[] {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_A],
-        }
-        return [rbacPause]
-    }
+  function set_initRbacs(): Rbac[] {
+    const rbacPause: Rbac = {
+      role: PAUSER_ROLE,
+      members: [account_A],
+    };
+    return [rbacPause];
+  }
 
-    async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+  async function setFacets({ diamond }: { diamond: ResolverProxy }) {
+    accessControlFacet = await ethers.getContractAt(
+      'AccessControl',
+      diamond.address,
+    );
+    controlList = await ethers.getContractAt('ControlList', diamond.address);
+
+    erc20PermitFacet = await ethers.getContractAt(
+      'ERC20Permit',
+      diamond.address,
+    );
+    pauseFacet = await ethers.getContractAt('Pause', diamond.address, signer_A);
+    erc20Facet = await ethers.getContractAt('ERC20', diamond.address, signer_A);
+  }
+
+  before(async () => {
+    // mute | mock console.log
+    console.log = () => {};
+    [signer_A, signer_B, signer_C] = await ethers.getSigners();
+    account_A = signer_A.address;
+    account_B = signer_B.address;
+    account_C = signer_C.address;
+
+    const { ...deployedContracts } = await deployAtsFullInfrastructure(
+      await DeployAtsFullInfrastructureCommand.newInstance({
+        signer: signer_A,
+        useDeployed: false,
+        useEnvironment: true,
+        timeTravelEnabled: true,
+      }),
+    );
+
+    factory = deployedContracts.factory.contract;
+    businessLogicResolver = deployedContracts.businessLogicResolver.contract;
+  });
+
+  beforeEach(async () => {
+    const init_rbacs: Rbac[] = set_initRbacs();
+
+    diamond = await deployEquityFromFactory({
+      adminAccount: account_A,
+      isWhiteList: false,
+      isControllable: false,
+      arePartitionsProtected: false,
+      clearingActive: false,
+      internalKycActivated: false,
+      isMultiPartition: false,
+      name,
+      symbol,
+      decimals,
+      isin,
+      votingRight: false,
+      informationRight: false,
+      liquidationRight: false,
+      subscriptionRight: true,
+      conversionRight: true,
+      redemptionRight: true,
+      putRight: false,
+      dividendRight: 1,
+      currency: '0x345678',
+      numberOfShares: MAX_UINT256,
+      nominalValue: 100,
+      regulationType: RegulationType.REG_S,
+      regulationSubType: RegulationSubType.NONE,
+      countriesControlListType: true,
+      listOfCountries: 'ES,FR,CH',
+      info: 'nothing',
+      init_rbacs,
+      factory,
+      businessLogicResolver: businessLogicResolver.address,
+    });
+
+    await setFacets({ diamond });
+  });
+
+  describe('Single Partition', () => {
+    describe('Nonces', () => {
+      it('GIVEN any account WHEN nonces is called THEN the current nonce for that account is returned', async () => {
+        const nonces = await erc20PermitFacet.nonces(account_A);
+        expect(nonces).to.equal(0);
+      });
+    });
+
+    describe('Domain Separator', () => {
+      it('GIVEN a deployed contract WHEN DOMAIN_SEPARATOR is called THEN the correct domain separator is returned', async () => {
+        const domainSeparator = await erc20PermitFacet.DOMAIN_SEPARATOR();
+        const domain = {
+          name: CONTRACT_NAME_ERC20PERMIT,
+          version: CONTRACT_VERSION_ERC20PERMIT,
+          chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
+          verifyingContract: diamond.address,
+        };
+        const domainHash = ethers.utils._TypedDataEncoder.hashDomain(domain);
+        expect(domainSeparator).to.equal(domainHash);
+      });
+    });
+
+    describe('permit', () => {
+      it('GIVEN a paused token WHEN permit is called THEN the transaction fails with TokenIsPaused', async () => {
+        await pauseFacet.pause();
+
+        await expect(
+          erc20PermitFacet.permit(
+            account_B,
+            account_A,
+            1,
+            Math.floor(Date.now() / 1000) + 3600,
+            27,
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+          ),
+        ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused');
+      });
+
+      it('GIVEN an owner address of zero WHEN permit is called THEN the transaction fails with ZeroAddressNotAllowed', async () => {
+        await expect(
+          erc20PermitFacet.permit(
+            ADDRESS_ZERO,
+            account_A,
+            1,
+            Math.floor(Date.now() / 1000) + 3600,
+            27,
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+          ),
+        ).to.be.revertedWithCustomError(
+          erc20PermitFacet,
+          'ZeroAddressNotAllowed',
+        );
+      });
+
+      it('GIVEN a spender address of zero WHEN permit is called THEN the transaction fails with ZeroAddressNotAllowed', async () => {
+        await expect(
+          erc20PermitFacet.permit(
+            account_A,
+            ADDRESS_ZERO,
+            1,
+            Math.floor(Date.now() / 1000) + 3600,
+            27,
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+          ),
+        ).to.be.revertedWithCustomError(
+          erc20PermitFacet,
+          'ZeroAddressNotAllowed',
+        );
+      });
+
+      it('GIVEN a blocked owner account WHEN permit is called THEN the transaction fails with AccountIsBlocked', async () => {
+        // Blacklisting accounts
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A);
+        controlList = controlList.connect(signer_A);
+        await controlList.addToControlList(account_C);
+
+        await expect(
+          erc20PermitFacet.permit(
+            account_C,
+            account_B,
+            1,
+            Math.floor(Date.now() / 1000) + 3600,
+            27,
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+          ),
+        ).to.be.revertedWithCustomError(erc20PermitFacet, 'AccountIsBlocked');
+      });
+
+      it('GIVEN a blocked spender account WHEN permit is called THEN the transaction fails with AccountIsBlocked', async () => {
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A);
+        controlList = controlList.connect(signer_A);
+        await controlList.addToControlList(account_C);
+
+        await expect(
+          erc20PermitFacet.permit(
+            account_B,
+            account_C,
+            1,
+            Math.floor(Date.now() / 1000) + 3600,
+            27,
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+          ),
+        ).to.be.revertedWithCustomError(erc20PermitFacet, 'AccountIsBlocked');
+      });
+
+      it('GIVEN an expired signature WHEN permit is called THEN the transaction reverts with ERC2612ExpiredSignature', async () => {
+        const expiry = Math.floor(Date.now() / 1000) - 3600; // 1 hour ago
+
+        await expect(
+          erc20PermitFacet.permit(
+            account_B,
+            account_C,
+            1,
+            expiry,
+            27,
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+          ),
         )
-        controlList = await ethers.getContractAt('ControlList', diamond.address)
+          .to.be.revertedWithCustomError(
+            erc20PermitFacet,
+            'ERC2612ExpiredSignature',
+          )
+          .withArgs(expiry);
+      });
 
-        erc20PermitFacet = await ethers.getContractAt(
-            'ERC20Permit',
-            diamond.address
+      it('GIVEN a signature from a different owner WHEN permit is called THEN the transaction reverts with ERC2612InvalidSigner', async () => {
+        const nonce = await erc20PermitFacet.nonces(account_A);
+        const expiry = Math.floor(Date.now() / 1000) + 3600; // 1 hour in the future
+
+        const domain = {
+          name: CONTRACT_NAME_ERC20PERMIT,
+          version: CONTRACT_VERSION_ERC20PERMIT,
+          chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
+          verifyingContract: diamond.address,
+        };
+
+        const types = {
+          Permit: [
+            { name: 'owner', type: 'address' },
+            { name: 'spender', type: 'address' },
+            { name: 'value', type: 'uint256' },
+            { name: 'nonce', type: 'uint256' },
+            { name: 'deadline', type: 'uint256' },
+          ],
+        };
+
+        const value = {
+          owner: account_A,
+          spender: account_B,
+          value: 1,
+          nonce: nonce,
+          deadline: expiry,
+        };
+
+        const signature = await signer_A._signTypedData(domain, types, value);
+        const sig = ethers.utils.splitSignature(signature);
+
+        await expect(
+          erc20PermitFacet.permit(
+            account_B,
+            account_A,
+            1,
+            expiry,
+            sig.v,
+            sig.r,
+            sig.s,
+          ),
+        ).to.be.revertedWithCustomError(
+          erc20PermitFacet,
+          'ERC2612InvalidSigner',
+        );
+      });
+
+      it('GIVEN a valid signature WHEN permit is called THEN the approval succeeds and emits Approval event', async () => {
+        const nonce = await erc20PermitFacet.nonces(account_A);
+        const expiry = Math.floor(Date.now() / 1000) + 3600; // 1 hour in the future
+
+        const domain = {
+          name: CONTRACT_NAME_ERC20PERMIT,
+          version: CONTRACT_VERSION_ERC20PERMIT,
+          chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
+          verifyingContract: diamond.address,
+        };
+
+        const types = {
+          Permit: [
+            { name: 'owner', type: 'address' },
+            { name: 'spender', type: 'address' },
+            { name: 'value', type: 'uint256' },
+            { name: 'nonce', type: 'uint256' },
+            { name: 'deadline', type: 'uint256' },
+          ],
+        };
+
+        const value = {
+          owner: account_A,
+          spender: account_B,
+          value: 1,
+          nonce: nonce,
+          deadline: expiry,
+        };
+
+        const signature = await signer_A._signTypedData(domain, types, value);
+        const sig = ethers.utils.splitSignature(signature);
+
+        await expect(
+          erc20PermitFacet.permit(
+            account_A,
+            account_B,
+            1,
+            expiry,
+            sig.v,
+            sig.r,
+            sig.s,
+          ),
         )
-        pauseFacet = await ethers.getContractAt(
-            'Pause',
-            diamond.address,
-            signer_A
-        )
-        erc20Facet = await ethers.getContractAt(
-            'ERC20',
-            diamond.address,
-            signer_A
-        )
-    }
+          .to.emit(erc20Facet, 'Approval')
+          .withArgs(account_A, account_B, 1);
+      });
+    });
+  });
+  describe('Multi Partition', () => {
+    it('GIVEN a new diamond contract with multi-partition enabled WHEN permit is called THEN the transaction fails with NotAllowedInMultiPartitionMode', async () => {
+      const init_rbacs: Rbac[] = set_initRbacs();
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+      const newDiamond = await deployEquityFromFactory({
+        adminAccount: account_A,
+        isWhiteList: false,
+        isControllable: false,
+        arePartitionsProtected: false,
+        clearingActive: false,
+        internalKycActivated: false,
+        isMultiPartition: true,
+        name,
+        symbol,
+        decimals,
+        isin,
+        votingRight: false,
+        informationRight: false,
+        liquidationRight: false,
+        subscriptionRight: true,
+        conversionRight: true,
+        redemptionRight: true,
+        putRight: false,
+        dividendRight: 1,
+        currency: '0x345678',
+        numberOfShares: MAX_UINT256,
+        nominalValue: 100,
+        regulationType: RegulationType.REG_S,
+        regulationSubType: RegulationSubType.NONE,
+        countriesControlListType: true,
+        listOfCountries: 'ES,FR,CH',
+        info: 'nothing',
+        init_rbacs,
+        factory,
+        businessLogicResolver: businessLogicResolver.address,
+      });
 
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: true,
-                timeTravelEnabled: true,
-            })
-        )
+      await setFacets({ diamond: newDiamond });
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    beforeEach(async () => {
-        const init_rbacs: Rbac[] = set_initRbacs()
-
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: false,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: false,
-            isMultiPartition: false,
-            name,
-            symbol,
-            decimals,
-            isin,
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_S,
-            regulationSubType: RegulationSubType.NONE,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-        })
-
-        await setFacets({ diamond })
-    })
-
-    describe('Single Partition', () => {
-        describe('Nonces', () => {
-            it('GIVEN any account WHEN nonces is called THEN the current nonce for that account is returned', async () => {
-                const nonces = await erc20PermitFacet.nonces(account_A)
-                expect(nonces).to.equal(0)
-            })
-        })
-
-        describe('Domain Separator', () => {
-            it('GIVEN a deployed contract WHEN DOMAIN_SEPARATOR is called THEN the correct domain separator is returned', async () => {
-                const domainSeparator =
-                    await erc20PermitFacet.DOMAIN_SEPARATOR()
-                const domain = {
-                    name: CONTRACT_NAME_ERC20PERMIT,
-                    version: CONTRACT_VERSION_ERC20PERMIT,
-                    chainId: await ethers.provider
-                        .getNetwork()
-                        .then((n) => n.chainId),
-                    verifyingContract: diamond.address,
-                }
-                const domainHash =
-                    ethers.utils._TypedDataEncoder.hashDomain(domain)
-                expect(domainSeparator).to.equal(domainHash)
-            })
-        })
-
-        describe('permit', () => {
-            it('GIVEN a paused token WHEN permit is called THEN the transaction fails with TokenIsPaused', async () => {
-                await pauseFacet.pause()
-
-                await expect(
-                    erc20PermitFacet.permit(
-                        account_B,
-                        account_A,
-                        1,
-                        Math.floor(Date.now() / 1000) + 3600,
-                        27,
-                        '0x0000000000000000000000000000000000000000000000000000000000000000',
-                        '0x0000000000000000000000000000000000000000000000000000000000000000'
-                    )
-                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
-            })
-
-            it('GIVEN an owner address of zero WHEN permit is called THEN the transaction fails with ZeroAddressNotAllowed', async () => {
-                await expect(
-                    erc20PermitFacet.permit(
-                        ADDRESS_ZERO,
-                        account_A,
-                        1,
-                        Math.floor(Date.now() / 1000) + 3600,
-                        27,
-                        '0x0000000000000000000000000000000000000000000000000000000000000000',
-                        '0x0000000000000000000000000000000000000000000000000000000000000000'
-                    )
-                ).to.be.revertedWithCustomError(
-                    erc20PermitFacet,
-                    'ZeroAddressNotAllowed'
-                )
-            })
-
-            it('GIVEN a spender address of zero WHEN permit is called THEN the transaction fails with ZeroAddressNotAllowed', async () => {
-                await expect(
-                    erc20PermitFacet.permit(
-                        account_A,
-                        ADDRESS_ZERO,
-                        1,
-                        Math.floor(Date.now() / 1000) + 3600,
-                        27,
-                        '0x0000000000000000000000000000000000000000000000000000000000000000',
-                        '0x0000000000000000000000000000000000000000000000000000000000000000'
-                    )
-                ).to.be.revertedWithCustomError(
-                    erc20PermitFacet,
-                    'ZeroAddressNotAllowed'
-                )
-            })
-
-            it('GIVEN a blocked owner account WHEN permit is called THEN the transaction fails with AccountIsBlocked', async () => {
-                // Blacklisting accounts
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-                controlList = controlList.connect(signer_A)
-                await controlList.addToControlList(account_C)
-
-                await expect(
-                    erc20PermitFacet.permit(
-                        account_C,
-                        account_B,
-                        1,
-                        Math.floor(Date.now() / 1000) + 3600,
-                        27,
-                        '0x0000000000000000000000000000000000000000000000000000000000000000',
-                        '0x0000000000000000000000000000000000000000000000000000000000000000'
-                    )
-                ).to.be.revertedWithCustomError(
-                    erc20PermitFacet,
-                    'AccountIsBlocked'
-                )
-            })
-
-            it('GIVEN a blocked spender account WHEN permit is called THEN the transaction fails with AccountIsBlocked', async () => {
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-                controlList = controlList.connect(signer_A)
-                await controlList.addToControlList(account_C)
-
-                await expect(
-                    erc20PermitFacet.permit(
-                        account_B,
-                        account_C,
-                        1,
-                        Math.floor(Date.now() / 1000) + 3600,
-                        27,
-                        '0x0000000000000000000000000000000000000000000000000000000000000000',
-                        '0x0000000000000000000000000000000000000000000000000000000000000000'
-                    )
-                ).to.be.revertedWithCustomError(
-                    erc20PermitFacet,
-                    'AccountIsBlocked'
-                )
-            })
-
-            it('GIVEN an expired signature WHEN permit is called THEN the transaction reverts with ERC2612ExpiredSignature', async () => {
-                const expiry = Math.floor(Date.now() / 1000) - 3600 // 1 hour ago
-
-                await expect(
-                    erc20PermitFacet.permit(
-                        account_B,
-                        account_C,
-                        1,
-                        expiry,
-                        27,
-                        '0x0000000000000000000000000000000000000000000000000000000000000000',
-                        '0x0000000000000000000000000000000000000000000000000000000000000000'
-                    )
-                )
-                    .to.be.revertedWithCustomError(
-                        erc20PermitFacet,
-                        'ERC2612ExpiredSignature'
-                    )
-                    .withArgs(expiry)
-            })
-
-            it('GIVEN a signature from a different owner WHEN permit is called THEN the transaction reverts with ERC2612InvalidSigner', async () => {
-                const nonce = await erc20PermitFacet.nonces(account_A)
-                const expiry = Math.floor(Date.now() / 1000) + 3600 // 1 hour in the future
-
-                const domain = {
-                    name: CONTRACT_NAME_ERC20PERMIT,
-                    version: CONTRACT_VERSION_ERC20PERMIT,
-                    chainId: await ethers.provider
-                        .getNetwork()
-                        .then((n) => n.chainId),
-                    verifyingContract: diamond.address,
-                }
-
-                const types = {
-                    Permit: [
-                        { name: 'owner', type: 'address' },
-                        { name: 'spender', type: 'address' },
-                        { name: 'value', type: 'uint256' },
-                        { name: 'nonce', type: 'uint256' },
-                        { name: 'deadline', type: 'uint256' },
-                    ],
-                }
-
-                const value = {
-                    owner: account_A,
-                    spender: account_B,
-                    value: 1,
-                    nonce: nonce,
-                    deadline: expiry,
-                }
-
-                const signature = await signer_A._signTypedData(
-                    domain,
-                    types,
-                    value
-                )
-                const sig = ethers.utils.splitSignature(signature)
-
-                await expect(
-                    erc20PermitFacet.permit(
-                        account_B,
-                        account_A,
-                        1,
-                        expiry,
-                        sig.v,
-                        sig.r,
-                        sig.s
-                    )
-                ).to.be.revertedWithCustomError(
-                    erc20PermitFacet,
-                    'ERC2612InvalidSigner'
-                )
-            })
-
-            it('GIVEN a valid signature WHEN permit is called THEN the approval succeeds and emits Approval event', async () => {
-                const nonce = await erc20PermitFacet.nonces(account_A)
-                const expiry = Math.floor(Date.now() / 1000) + 3600 // 1 hour in the future
-
-                const domain = {
-                    name: CONTRACT_NAME_ERC20PERMIT,
-                    version: CONTRACT_VERSION_ERC20PERMIT,
-                    chainId: await ethers.provider
-                        .getNetwork()
-                        .then((n) => n.chainId),
-                    verifyingContract: diamond.address,
-                }
-
-                const types = {
-                    Permit: [
-                        { name: 'owner', type: 'address' },
-                        { name: 'spender', type: 'address' },
-                        { name: 'value', type: 'uint256' },
-                        { name: 'nonce', type: 'uint256' },
-                        { name: 'deadline', type: 'uint256' },
-                    ],
-                }
-
-                const value = {
-                    owner: account_A,
-                    spender: account_B,
-                    value: 1,
-                    nonce: nonce,
-                    deadline: expiry,
-                }
-
-                const signature = await signer_A._signTypedData(
-                    domain,
-                    types,
-                    value
-                )
-                const sig = ethers.utils.splitSignature(signature)
-
-                await expect(
-                    erc20PermitFacet.permit(
-                        account_A,
-                        account_B,
-                        1,
-                        expiry,
-                        sig.v,
-                        sig.r,
-                        sig.s
-                    )
-                )
-                    .to.emit(erc20Facet, 'Approval')
-                    .withArgs(account_A, account_B, 1)
-            })
-        })
-    })
-    describe('Multi Partition', () => {
-        it('GIVEN a new diamond contract with multi-partition enabled WHEN permit is called THEN the transaction fails with NotAllowedInMultiPartitionMode', async () => {
-            const init_rbacs: Rbac[] = set_initRbacs()
-
-            const newDiamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: false,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                internalKycActivated: false,
-                isMultiPartition: true,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_S,
-                regulationSubType: RegulationSubType.NONE,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                factory,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            await setFacets({ diamond: newDiamond })
-
-            await expect(
-                erc20PermitFacet.permit(
-                    account_B,
-                    account_C,
-                    1,
-                    Math.floor(Date.now() / 1000) + 3600,
-                    27,
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    '0x0000000000000000000000000000000000000000000000000000000000000000'
-                )
-            ).to.be.revertedWithCustomError(
-                erc20PermitFacet,
-                'NotAllowedInMultiPartitionMode'
-            )
-        })
-    })
-})
+      await expect(
+        erc20PermitFacet.permit(
+          account_B,
+          account_C,
+          1,
+          Math.floor(Date.now() / 1000) + 3600,
+          27,
+          '0x0000000000000000000000000000000000000000000000000000000000000000',
+          '0x0000000000000000000000000000000000000000000000000000000000000000',
+        ),
+      ).to.be.revertedWithCustomError(
+        erc20PermitFacet,
+        'NotAllowedInMultiPartitionMode',
+      );
+    });
+  });
+});

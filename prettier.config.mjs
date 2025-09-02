@@ -1,8 +1,10 @@
 /**
+ * Root Prettier configuration for Asset Tokenization Studio monorepo
+ * This base configuration can be extended by package-specific configs
  * @see https://prettier.io/docs/configuration
  * @type {import("prettier").Config}
  */
-const config = {
+const baseConfig = {
   printWidth: 80,
   tabWidth: 2,
   useTabs: false,
@@ -12,9 +14,13 @@ const config = {
   jsxSingleQuote: false,
   trailingComma: 'all',
   bracketSpacing: true,
-  jsxBracketSameLine: false,
+  bracketSameLine: false,
   arrowParens: 'always',
   endOfLine: 'auto',
+
+  // Include Solidity plugin for global formatting scripts
+  plugins: ['prettier-plugin-solidity'],
+
   overrides: [
     {
       files: '*.sol',
@@ -57,7 +63,6 @@ const config = {
       },
     },
   ],
-  plugins: ['prettier-plugin-solidity'],
 };
 
-export default config;
+export default baseConfig;

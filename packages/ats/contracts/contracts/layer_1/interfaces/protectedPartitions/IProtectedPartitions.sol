@@ -4,9 +4,7 @@ pragma solidity 0.8.18;
 
 interface IProtectedPartitions {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProtectedPartitions(
-        bool _arePartitionsProtected
-    ) external returns (bool success_);
+    function initialize_ProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
 
     function protectPartitions() external returns (bool success_);
 
@@ -16,7 +14,5 @@ interface IProtectedPartitions {
 
     function getNounceFor(address account) external view returns (uint256);
 
-    function calculateRoleForPartition(
-        bytes32 _partition
-    ) external pure returns (bytes32 roleForPartition_);
+    function calculateRoleForPartition(bytes32 _partition) external pure returns (bytes32 roleForPartition_);
 }

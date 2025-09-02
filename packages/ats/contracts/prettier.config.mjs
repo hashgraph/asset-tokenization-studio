@@ -1,22 +1,7 @@
 /**
- * @see https://prettier.io/docs/configuration
- * @type {import("prettier").Config}
+ * Prettier configuration for ATS Contracts package
+ * Extends root monorepo configuration including Solidity formatting
  */
-const config = {
-    trailingComma: 'es5',
-    tabWidth: 4,
-    singleQuote: true,
-    printWidth: 80,
-    semi: false,
-    plugins: ['prettier-plugin-solidity'],
-    overrides: [
-        {
-            files: 'contracts/**/*.sol',
-            options: {
-                compiler: '0.8.18',
-            },
-        },
-    ],
-}
+import baseConfig from '../../../prettier.config.mjs';
 
-export default config
+export default baseConfig;

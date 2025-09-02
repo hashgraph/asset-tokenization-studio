@@ -32,20 +32,14 @@ library EnumerableSetBytes4 {
      * Returns true if the value was removed from the set, that is if it was
      * present.
      */
-    function remove(
-        Bytes4Set storage set,
-        bytes4 value
-    ) internal returns (bool) {
+    function remove(Bytes4Set storage set, bytes4 value) internal returns (bool) {
         return _remove(set._inner, value);
     }
 
     /**
      * @dev Returns true if the value is in the set. O(1).
      */
-    function contains(
-        Bytes4Set storage set,
-        bytes4 value
-    ) internal view returns (bool) {
+    function contains(Bytes4Set storage set, bytes4 value) internal view returns (bool) {
         return _contains(set._inner, value);
     }
 
@@ -66,10 +60,7 @@ library EnumerableSetBytes4 {
      *
      * - `index` must be strictly less than {length}.
      */
-    function at(
-        Bytes4Set storage set,
-        uint256 index
-    ) internal view returns (bytes4) {
+    function at(Bytes4Set storage set, uint256 index) internal view returns (bytes4) {
         return _at(set._inner, index);
     }
 
@@ -81,9 +72,7 @@ library EnumerableSetBytes4 {
      * this function has an unbounded cost, and using it as part of a state-changing function may render the function
      * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
      */
-    function values(
-        Bytes4Set storage set
-    ) internal view returns (bytes4[] memory) {
+    function values(Bytes4Set storage set) internal view returns (bytes4[] memory) {
         bytes4[] memory store = _values(set._inner);
         bytes4[] memory result;
 
@@ -157,10 +146,7 @@ library EnumerableSetBytes4 {
     /**
      * @dev Returns true if the value is in the set. O(1).
      */
-    function _contains(
-        Set storage set,
-        bytes4 value
-    ) private view returns (bool) {
+    function _contains(Set storage set, bytes4 value) private view returns (bool) {
         return set._indexes[value] != 0;
     }
 

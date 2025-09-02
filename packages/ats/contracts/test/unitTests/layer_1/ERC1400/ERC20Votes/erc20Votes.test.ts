@@ -203,625 +203,611 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
-    type ResolverProxy,
-    type IERC1410,
-    type Pause,
-    BusinessLogicResolver,
-    IFactory,
-    AdjustBalances,
-    TimeTravel,
-    ERC20Votes,
-    EquityUSA,
-} from '@typechain'
+  type ResolverProxy,
+  type IERC1410,
+  type Pause,
+  BusinessLogicResolver,
+  IFactory,
+  AdjustBalances,
+  TimeTravel,
+  ERC20Votes,
+  EquityUSA,
+} from '@typechain';
 import {
-    PAUSER_ROLE,
-    ISSUER_ROLE,
-    DEFAULT_PARTITION,
-    MAX_UINT256,
-    deployEquityFromFactory,
-    Rbac,
-    RegulationSubType,
-    RegulationType,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    ADJUSTMENT_BALANCE_ROLE,
-    CORPORATE_ACTION_ROLE,
-} from '@scripts'
+  PAUSER_ROLE,
+  ISSUER_ROLE,
+  DEFAULT_PARTITION,
+  MAX_UINT256,
+  deployEquityFromFactory,
+  Rbac,
+  RegulationSubType,
+  RegulationType,
+  deployAtsFullInfrastructure,
+  DeployAtsFullInfrastructureCommand,
+  ADJUSTMENT_BALANCE_ROLE,
+  CORPORATE_ACTION_ROLE,
+} from '@scripts';
 
-const amount = 1000
+const amount = 1000;
 
 describe('ERC20Votes Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
-    let signer_D: SignerWithAddress
+  let diamond: ResolverProxy;
+  let signer_A: SignerWithAddress;
+  let signer_B: SignerWithAddress;
+  let signer_C: SignerWithAddress;
+  let signer_D: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
-    let account_D: string
+  let account_A: string;
+  let account_B: string;
+  let account_C: string;
+  let account_D: string;
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let erc20VotesFacet: ERC20Votes
-    let pauseFacet: Pause
-    let erc1410Facet: IERC1410
-    let adjustBalancesFacet: AdjustBalances
-    let timeTravelFacet: TimeTravel
-    let equityFacet: EquityUSA
+  let factory: IFactory;
+  let businessLogicResolver: BusinessLogicResolver;
+  let erc20VotesFacet: ERC20Votes;
+  let pauseFacet: Pause;
+  let erc1410Facet: IERC1410;
+  let adjustBalancesFacet: AdjustBalances;
+  let timeTravelFacet: TimeTravel;
+  let equityFacet: EquityUSA;
 
-    const name = 'TEST_AccessControl'
-    const symbol = 'TAC'
-    const decimals = 6
-    const isin = isinGenerator()
-    const ABAF = 200
-    const DECIMALS = 2
-    const block = 100
+  const name = 'TEST_AccessControl';
+  const symbol = 'TAC';
+  const decimals = 6;
+  const isin = isinGenerator();
+  const ABAF = 200;
+  const DECIMALS = 2;
+  const block = 100;
 
-    async function checkVotingPowerAfterAdjustment() {
-        await timeTravelFacet.changeSystemBlocknumber(block + 1)
+  async function checkVotingPowerAfterAdjustment() {
+    await timeTravelFacet.changeSystemBlocknumber(block + 1);
 
-        const votesA1 = await erc20VotesFacet.getPastVotes(account_A, block - 1)
-        const votesA2 = await erc20VotesFacet.getVotes(account_A)
-        const votesB1 = await erc20VotesFacet.getPastVotes(account_B, block - 1)
-        const votesB2 = await erc20VotesFacet.getVotes(account_B)
-        const totalSupplyA1 = await erc20VotesFacet.getPastTotalSupply(
-            block - 1
-        )
-        const totalSupplyA2 = await erc20VotesFacet.getPastTotalSupply(block)
+    const votesA1 = await erc20VotesFacet.getPastVotes(account_A, block - 1);
+    const votesA2 = await erc20VotesFacet.getVotes(account_A);
+    const votesB1 = await erc20VotesFacet.getPastVotes(account_B, block - 1);
+    const votesB2 = await erc20VotesFacet.getVotes(account_B);
+    const totalSupplyA1 = await erc20VotesFacet.getPastTotalSupply(block - 1);
+    const totalSupplyA2 = await erc20VotesFacet.getPastTotalSupply(block);
 
-        expect(votesA1).to.equal(amount)
-        expect(votesA2).to.equal(0)
-        expect(votesB1).to.equal(0)
-        expect(votesB2).to.equal(amount * ABAF)
-        expect(totalSupplyA1).to.equal(amount)
-        expect(totalSupplyA2).to.equal(amount * ABAF)
+    expect(votesA1).to.equal(amount);
+    expect(votesA2).to.equal(0);
+    expect(votesB1).to.equal(0);
+    expect(votesB2).to.equal(amount * ABAF);
+    expect(totalSupplyA1).to.equal(amount);
+    expect(totalSupplyA2).to.equal(amount * ABAF);
+  }
+
+  before(async () => {
+    // mute | mock console.log
+    console.log = () => {};
+    [signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners();
+    account_A = signer_A.address;
+    account_B = signer_B.address;
+    account_C = signer_C.address;
+    account_D = signer_D.address;
+
+    const { ...deployedContracts } = await deployAtsFullInfrastructure(
+      await DeployAtsFullInfrastructureCommand.newInstance({
+        signer: signer_A,
+        useDeployed: false,
+        useEnvironment: true,
+        timeTravelEnabled: true,
+      }),
+    );
+
+    factory = deployedContracts.factory.contract;
+    businessLogicResolver = deployedContracts.businessLogicResolver.contract;
+  });
+
+  beforeEach(async () => {
+    const rbacPause: Rbac = {
+      role: PAUSER_ROLE,
+      members: [account_A],
+    };
+    const rbacAdjustment: Rbac = {
+      role: ADJUSTMENT_BALANCE_ROLE,
+      members: [account_A],
+    };
+    const rbacCorporateAction: Rbac = {
+      role: CORPORATE_ACTION_ROLE,
+      members: [account_A],
+    };
+    const rbacIssuer: Rbac = {
+      role: ISSUER_ROLE,
+      members: [account_A],
+    };
+    const init_rbacs: Rbac[] = [
+      rbacPause,
+      rbacAdjustment,
+      rbacCorporateAction,
+      rbacIssuer,
+    ];
+
+    diamond = await deployEquityFromFactory({
+      adminAccount: account_A,
+      isWhiteList: false,
+      isControllable: false,
+      arePartitionsProtected: false,
+      clearingActive: false,
+      internalKycActivated: false,
+      erc20VotesActivated: true,
+      isMultiPartition: true,
+      name,
+      symbol,
+      decimals,
+      isin,
+      votingRight: false,
+      informationRight: false,
+      liquidationRight: false,
+      subscriptionRight: true,
+      conversionRight: true,
+      redemptionRight: true,
+      putRight: false,
+      dividendRight: 1,
+      currency: '0x345678',
+      numberOfShares: MAX_UINT256,
+      nominalValue: 100,
+      regulationType: RegulationType.REG_S,
+      regulationSubType: RegulationSubType.NONE,
+      countriesControlListType: true,
+      listOfCountries: 'ES,FR,CH',
+      info: 'nothing',
+      init_rbacs,
+      factory,
+      businessLogicResolver: businessLogicResolver.address,
+    });
+
+    erc20VotesFacet = await ethers.getContractAt('ERC20Votes', diamond.address);
+    pauseFacet = await ethers.getContractAt('Pause', diamond.address, signer_A);
+    erc1410Facet = await ethers.getContractAt(
+      'IERC1410',
+      diamond.address,
+      signer_A,
+    );
+    adjustBalancesFacet = await ethers.getContractAt(
+      'AdjustBalances',
+      diamond.address,
+      signer_A,
+    );
+    timeTravelFacet = await ethers.getContractAt(
+      'TimeTravel',
+      diamond.address,
+      signer_A,
+    );
+    equityFacet = await ethers.getContractAt(
+      'EquityUSA',
+      diamond.address,
+      signer_A,
+    );
+  });
+
+  describe('Initialization', () => {
+    it('GIVEN a initialized ERC20Votes WHEN initialize again THEN transaction fails with AlreadyInitialized', async () => {
+      await expect(
+        erc20VotesFacet.initialize_ERC20Votes(true),
+      ).to.be.revertedWithCustomError(erc20VotesFacet, 'AlreadyInitialized');
+    });
+  });
+
+  describe('Clock and Clock Mode', () => {
+    it('GIVEN any state WHEN clock THEN returns current block number', async () => {
+      const blockNumber = 1000;
+      await timeTravelFacet.changeSystemBlocknumber(blockNumber);
+      const clockValue = await erc20VotesFacet.clock();
+      expect(clockValue).to.equal(blockNumber);
+    });
+
+    it('GIVEN any state WHEN CLOCK_MODE THEN returns correct mode string', async () => {
+      const clockMode = await erc20VotesFacet.CLOCK_MODE();
+      expect(clockMode).to.equal('mode=blocknumber&from=default');
+    });
+  });
+
+  describe('Delegation', () => {
+    beforeEach(async () => {
+      // Issue tokens to account_A
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: account_A,
+        value: amount,
+        data: '0x',
+      });
+    });
+
+    it('GIVEN a paused token WHEN delegate THEN transaction fails with TokenIsPaused', async () => {
+      // Pause the token
+      await pauseFacet.pause();
+
+      // Try to delegate while paused
+      await expect(
+        erc20VotesFacet.delegate(account_B),
+      ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused');
+    });
+
+    it('GIVEN tokens issued WHEN delegate THEN delegate is set correctly', async () => {
+      await expect(erc20VotesFacet.delegate(account_B))
+        .to.emit(erc20VotesFacet, 'DelegateChanged')
+        .withArgs(account_A, ethers.constants.AddressZero, account_B);
+
+      const delegate = await erc20VotesFacet.delegates(account_A);
+      expect(delegate).to.equal(account_B);
+    });
+
+    it('GIVEN delegation WHEN delegate to same address THEN no event emitted', async () => {
+      // First delegation
+      await erc20VotesFacet.delegate(account_B);
+
+      // Delegate to same address again
+      await expect(erc20VotesFacet.delegate(account_B)).to.not.emit(
+        erc20VotesFacet,
+        'DelegateChanged',
+      );
+    });
+
+    it('GIVEN delegation WHEN delegate to zero address THEN delegation is removed', async () => {
+      await erc20VotesFacet.delegate(account_B);
+      await expect(erc20VotesFacet.delegate(ethers.constants.AddressZero))
+        .to.emit(erc20VotesFacet, 'DelegateChanged')
+        .withArgs(account_A, account_B, ethers.constants.AddressZero);
+
+      const delegate = await erc20VotesFacet.delegates(account_A);
+      expect(delegate).to.equal(ethers.constants.AddressZero);
+    });
+  });
+
+  describe('Voting Power', () => {
+    async function checkTotalSupply(amount: number) {
+      const now = await erc20VotesFacet.clock();
+      await timeTravelFacet.changeSystemBlocknumber(now + 100);
+      const totalSupply = await erc20VotesFacet.getPastTotalSupply(now);
+      expect(totalSupply).to.equal(amount);
     }
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-        account_D = signer_D.address
-
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: true,
-                timeTravelEnabled: true,
-            })
-        )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
     beforeEach(async () => {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_A],
-        }
-        const rbacAdjustment: Rbac = {
-            role: ADJUSTMENT_BALANCE_ROLE,
-            members: [account_A],
-        }
-        const rbacCorporateAction: Rbac = {
-            role: CORPORATE_ACTION_ROLE,
-            members: [account_A],
-        }
-        const rbacIssuer: Rbac = {
-            role: ISSUER_ROLE,
-            members: [account_A],
-        }
-        const init_rbacs: Rbac[] = [
-            rbacPause,
-            rbacAdjustment,
-            rbacCorporateAction,
-            rbacIssuer,
-        ]
+      // Issue tokens to account_A
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: account_A,
+        value: amount,
+        data: '0x',
+      });
+    });
 
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: false,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: false,
-            erc20VotesActivated: true,
-            isMultiPartition: true,
-            name,
-            symbol,
-            decimals,
-            isin,
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_S,
-            regulationSubType: RegulationSubType.NONE,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-        })
+    it('GIVEN tokens issued WHEN getVotes for delegator THEN returns zero', async () => {
+      const votes = await erc20VotesFacet.getVotes(account_A);
+      expect(votes).to.equal(0);
+    });
 
-        erc20VotesFacet = await ethers.getContractAt(
-            'ERC20Votes',
-            diamond.address
+    it('GIVEN delegation WHEN getVotes for delegate THEN returns delegated amount', async () => {
+      await erc20VotesFacet.delegate(account_B);
+      const votes = await erc20VotesFacet.getVotes(account_B);
+      expect(votes).to.equal(amount);
+
+      await checkTotalSupply(amount);
+    });
+
+    it('GIVEN delegation WHEN delegate changes THEN voting power transfers correctly', async () => {
+      await erc20VotesFacet.delegate(account_B);
+      const votesB = await erc20VotesFacet.getVotes(account_B);
+      expect(votesB).to.equal(amount);
+
+      await erc20VotesFacet.delegate(account_C);
+      const votesBAfter = await erc20VotesFacet.getVotes(account_B);
+      const votesC = await erc20VotesFacet.getVotes(account_C);
+      expect(votesBAfter).to.equal(0);
+      expect(votesC).to.equal(amount);
+
+      await checkTotalSupply(amount);
+    });
+
+    it('GIVEN delegation WHEN tokens are transferred THEN voting power updates correctly', async () => {
+      await erc20VotesFacet.connect(signer_C).delegate(account_D);
+      await erc20VotesFacet.connect(signer_A).delegate(account_B);
+
+      // Transfer tokens
+      await expect(
+        erc1410Facet
+          .connect(signer_A)
+          .transferByPartition(
+            DEFAULT_PARTITION,
+            { to: account_C, value: amount / 2 },
+            '0x',
+          ),
+      )
+        .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
+        .withArgs(account_B, amount, amount / 2)
+        .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
+        .withArgs(account_D, 0, amount / 2);
+
+      const votesB = await erc20VotesFacet.getVotes(account_B);
+      const votesD = await erc20VotesFacet.getVotes(account_D);
+
+      expect(votesB).to.equal(amount / 2);
+      expect(votesD).to.equal(amount / 2);
+
+      await checkTotalSupply(amount);
+    });
+
+    it('GIVEN delegation WHEN tokens are redeemed THEN voting power updates correctly', async () => {
+      await erc20VotesFacet.delegate(account_B);
+
+      // Transfer tokens
+      await expect(
+        erc1410Facet.redeemByPartition(DEFAULT_PARTITION, amount, '0x'),
+      )
+        .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
+        .withArgs(account_B, amount, 0);
+
+      const votesB = await erc20VotesFacet.getVotes(account_B);
+
+      expect(votesB).to.equal(0);
+
+      await checkTotalSupply(0);
+    });
+  });
+
+  describe('Past Votes', () => {
+    beforeEach(async () => {
+      await timeTravelFacet.changeSystemBlocknumber(1);
+
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: account_A,
+        value: amount,
+        data: '0x',
+      });
+    });
+
+    it('GIVEN current time WHEN getPastVotes with future timepoint THEN reverts', async () => {
+      await expect(
+        erc20VotesFacet.getPastVotes(account_A, 100),
+      ).to.be.revertedWith('ERC20Votes: future lookup');
+    });
+
+    it('GIVEN delegation at specific block WHEN getPastVotes THEN returns correct historical votes', async () => {
+      const block_1 = 100;
+      const block_2 = 200;
+      const block_3 = 300;
+
+      await timeTravelFacet.changeSystemBlocknumber(block_1);
+
+      await erc20VotesFacet.delegate(account_A);
+      await erc20VotesFacet.connect(signer_B).delegate(account_B);
+
+      await timeTravelFacet.changeSystemBlocknumber(block_2);
+
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: account_A,
+        value: amount,
+        data: '0x',
+      });
+
+      await timeTravelFacet.changeSystemBlocknumber(block_3);
+
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: account_A,
+        value: amount,
+        data: '0x',
+      });
+
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: account_B,
+        value: amount,
+        data: '0x',
+      });
+
+      await timeTravelFacet.changeSystemBlocknumber(block_3 + 1);
+
+      const pastVotesA1 = await erc20VotesFacet.getPastVotes(
+        account_A,
+        block_1,
+      );
+      const pastVotesA2 = await erc20VotesFacet.getPastVotes(
+        account_A,
+        block_2,
+      );
+      const pastVotesA3 = await erc20VotesFacet.getPastVotes(
+        account_A,
+        block_3,
+      );
+      const pastVotesB1 = await erc20VotesFacet.getPastVotes(
+        account_B,
+        block_1,
+      );
+      const pastVotesB2 = await erc20VotesFacet.getPastVotes(
+        account_B,
+        block_2,
+      );
+      const pastVotesB3 = await erc20VotesFacet.getPastVotes(
+        account_B,
+        block_3,
+      );
+      const pastTotalSupplyA1 =
+        await erc20VotesFacet.getPastTotalSupply(block_1);
+      const pastTotalSupplyA2 =
+        await erc20VotesFacet.getPastTotalSupply(block_2);
+      const pastTotalSupplyA3 =
+        await erc20VotesFacet.getPastTotalSupply(block_3);
+
+      expect(pastVotesA1).to.equal(amount);
+      expect(pastVotesA2).to.equal(2 * amount);
+      expect(pastVotesA3).to.equal(3 * amount);
+
+      expect(pastVotesB1).to.equal(0);
+      expect(pastVotesB2).to.equal(0);
+      expect(pastVotesB3).to.equal(amount);
+
+      expect(pastTotalSupplyA1).to.equal(amount);
+      expect(pastTotalSupplyA2).to.equal(2 * amount);
+      expect(pastTotalSupplyA3).to.equal(4 * amount);
+    });
+  });
+
+  describe('Checkpoints', () => {
+    beforeEach(async () => {
+      // Issue tokens to account_A
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: account_A,
+        value: amount,
+        data: '0x',
+      });
+    });
+
+    it('GIVEN no delegation WHEN numCheckpoints THEN returns zero', async () => {
+      const numCheckpoints = await erc20VotesFacet.numCheckpoints(account_A);
+      expect(numCheckpoints).to.equal(0);
+    });
+
+    it('GIVEN delegation WHEN numCheckpoints THEN returns correct count', async () => {
+      await erc20VotesFacet.delegate(account_B);
+
+      const numCheckpoints = await erc20VotesFacet.numCheckpoints(account_B);
+      expect(numCheckpoints).to.equal(1);
+    });
+
+    it('GIVEN delegation WHEN checkpoints THEN returns correct checkpoint data', async () => {
+      await erc20VotesFacet.delegate(account_B);
+
+      const checkpoint = await erc20VotesFacet.checkpoints(account_B, 0);
+      expect(checkpoint.fromBlock).to.be.gt(0);
+      expect(checkpoint.votes).to.equal(amount);
+    });
+  });
+
+  describe('Balance adjustments', () => {
+    beforeEach(async () => {
+      await timeTravelFacet.changeSystemBlocknumber(1);
+      await erc20VotesFacet.delegate(account_A);
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: account_A,
+        value: amount,
+
+        data: '0x',
+      });
+    });
+
+    it('GIVEN an ERC20Votes when adjusting balances twice for same block THEN fails', async () => {
+      const ABAF = 200;
+      const DECIMALS = 2;
+      await adjustBalancesFacet.adjustBalances(ABAF, DECIMALS);
+
+      await expect(erc20VotesFacet.delegate(account_B))
+        .to.be.revertedWithCustomError(
+          erc20VotesFacet,
+          'AbafChangeForBlockForbidden',
         )
-        pauseFacet = await ethers.getContractAt(
-            'Pause',
-            diamond.address,
-            signer_A
-        )
-        erc1410Facet = await ethers.getContractAt(
-            'IERC1410',
-            diamond.address,
-            signer_A
-        )
-        adjustBalancesFacet = await ethers.getContractAt(
-            'AdjustBalances',
-            diamond.address,
-            signer_A
-        )
-        timeTravelFacet = await ethers.getContractAt(
-            'TimeTravel',
-            diamond.address,
-            signer_A
-        )
-        equityFacet = await ethers.getContractAt(
-            'EquityUSA',
-            diamond.address,
-            signer_A
-        )
-    })
-
-    describe('Initialization', () => {
-        it('GIVEN a initialized ERC20Votes WHEN initialize again THEN transaction fails with AlreadyInitialized', async () => {
-            await expect(
-                erc20VotesFacet.initialize_ERC20Votes(true)
-            ).to.be.revertedWithCustomError(
-                erc20VotesFacet,
-                'AlreadyInitialized'
-            )
-        })
-    })
-
-    describe('Clock and Clock Mode', () => {
-        it('GIVEN any state WHEN clock THEN returns current block number', async () => {
-            const blockNumber = 1000
-            await timeTravelFacet.changeSystemBlocknumber(blockNumber)
-            const clockValue = await erc20VotesFacet.clock()
-            expect(clockValue).to.equal(blockNumber)
-        })
-
-        it('GIVEN any state WHEN CLOCK_MODE THEN returns correct mode string', async () => {
-            const clockMode = await erc20VotesFacet.CLOCK_MODE()
-            expect(clockMode).to.equal('mode=blocknumber&from=default')
-        })
-    })
-
-    describe('Delegation', () => {
-        beforeEach(async () => {
-            // Issue tokens to account_A
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_A,
-                value: amount,
-                data: '0x',
-            })
-        })
-
-        it('GIVEN a paused token WHEN delegate THEN transaction fails with TokenIsPaused', async () => {
-            // Pause the token
-            await pauseFacet.pause()
-
-            // Try to delegate while paused
-            await expect(
-                erc20VotesFacet.delegate(account_B)
-            ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
-        })
-
-        it('GIVEN tokens issued WHEN delegate THEN delegate is set correctly', async () => {
-            await expect(erc20VotesFacet.delegate(account_B))
-                .to.emit(erc20VotesFacet, 'DelegateChanged')
-                .withArgs(account_A, ethers.constants.AddressZero, account_B)
-
-            const delegate = await erc20VotesFacet.delegates(account_A)
-            expect(delegate).to.equal(account_B)
-        })
-
-        it('GIVEN delegation WHEN delegate to same address THEN no event emitted', async () => {
-            // First delegation
-            await erc20VotesFacet.delegate(account_B)
-
-            // Delegate to same address again
-            await expect(erc20VotesFacet.delegate(account_B)).to.not.emit(
-                erc20VotesFacet,
-                'DelegateChanged'
-            )
-        })
-
-        it('GIVEN delegation WHEN delegate to zero address THEN delegation is removed', async () => {
-            await erc20VotesFacet.delegate(account_B)
-            await expect(erc20VotesFacet.delegate(ethers.constants.AddressZero))
-                .to.emit(erc20VotesFacet, 'DelegateChanged')
-                .withArgs(account_A, account_B, ethers.constants.AddressZero)
-
-            const delegate = await erc20VotesFacet.delegates(account_A)
-            expect(delegate).to.equal(ethers.constants.AddressZero)
-        })
-    })
-
-    describe('Voting Power', () => {
-        async function checkTotalSupply(amount: number) {
-            const now = await erc20VotesFacet.clock()
-            await timeTravelFacet.changeSystemBlocknumber(now + 100)
-            const totalSupply = await erc20VotesFacet.getPastTotalSupply(now)
-            expect(totalSupply).to.equal(amount)
-        }
-
-        beforeEach(async () => {
-            // Issue tokens to account_A
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_A,
-                value: amount,
-                data: '0x',
-            })
-        })
-
-        it('GIVEN tokens issued WHEN getVotes for delegator THEN returns zero', async () => {
-            const votes = await erc20VotesFacet.getVotes(account_A)
-            expect(votes).to.equal(0)
-        })
-
-        it('GIVEN delegation WHEN getVotes for delegate THEN returns delegated amount', async () => {
-            await erc20VotesFacet.delegate(account_B)
-            const votes = await erc20VotesFacet.getVotes(account_B)
-            expect(votes).to.equal(amount)
-
-            await checkTotalSupply(amount)
-        })
-
-        it('GIVEN delegation WHEN delegate changes THEN voting power transfers correctly', async () => {
-            await erc20VotesFacet.delegate(account_B)
-            const votesB = await erc20VotesFacet.getVotes(account_B)
-            expect(votesB).to.equal(amount)
-
-            await erc20VotesFacet.delegate(account_C)
-            const votesBAfter = await erc20VotesFacet.getVotes(account_B)
-            const votesC = await erc20VotesFacet.getVotes(account_C)
-            expect(votesBAfter).to.equal(0)
-            expect(votesC).to.equal(amount)
-
-            await checkTotalSupply(amount)
-        })
-
-        it('GIVEN delegation WHEN tokens are transferred THEN voting power updates correctly', async () => {
-            await erc20VotesFacet.connect(signer_C).delegate(account_D)
-            await erc20VotesFacet.connect(signer_A).delegate(account_B)
-
-            // Transfer tokens
-            await expect(
-                erc1410Facet
-                    .connect(signer_A)
-                    .transferByPartition(
-                        DEFAULT_PARTITION,
-                        { to: account_C, value: amount / 2 },
-                        '0x'
-                    )
-            )
-                .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
-                .withArgs(account_B, amount, amount / 2)
-                .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
-                .withArgs(account_D, 0, amount / 2)
-
-            const votesB = await erc20VotesFacet.getVotes(account_B)
-            const votesD = await erc20VotesFacet.getVotes(account_D)
-
-            expect(votesB).to.equal(amount / 2)
-            expect(votesD).to.equal(amount / 2)
-
-            await checkTotalSupply(amount)
-        })
-
-        it('GIVEN delegation WHEN tokens are redeemed THEN voting power updates correctly', async () => {
-            await erc20VotesFacet.delegate(account_B)
-
-            // Transfer tokens
-            await expect(
-                erc1410Facet.redeemByPartition(DEFAULT_PARTITION, amount, '0x')
-            )
-                .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
-                .withArgs(account_B, amount, 0)
-
-            const votesB = await erc20VotesFacet.getVotes(account_B)
-
-            expect(votesB).to.equal(0)
-
-            await checkTotalSupply(0)
-        })
-    })
-
-    describe('Past Votes', () => {
-        beforeEach(async () => {
-            await timeTravelFacet.changeSystemBlocknumber(1)
-
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_A,
-                value: amount,
-                data: '0x',
-            })
-        })
-
-        it('GIVEN current time WHEN getPastVotes with future timepoint THEN reverts', async () => {
-            await expect(
-                erc20VotesFacet.getPastVotes(account_A, 100)
-            ).to.be.revertedWith('ERC20Votes: future lookup')
-        })
-
-        it('GIVEN delegation at specific block WHEN getPastVotes THEN returns correct historical votes', async () => {
-            const block_1 = 100
-            const block_2 = 200
-            const block_3 = 300
-
-            await timeTravelFacet.changeSystemBlocknumber(block_1)
-
-            await erc20VotesFacet.delegate(account_A)
-            await erc20VotesFacet.connect(signer_B).delegate(account_B)
-
-            await timeTravelFacet.changeSystemBlocknumber(block_2)
-
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_A,
-                value: amount,
-                data: '0x',
-            })
-
-            await timeTravelFacet.changeSystemBlocknumber(block_3)
-
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_A,
-                value: amount,
-                data: '0x',
-            })
-
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_B,
-                value: amount,
-                data: '0x',
-            })
-
-            await timeTravelFacet.changeSystemBlocknumber(block_3 + 1)
-
-            const pastVotesA1 = await erc20VotesFacet.getPastVotes(
-                account_A,
-                block_1
-            )
-            const pastVotesA2 = await erc20VotesFacet.getPastVotes(
-                account_A,
-                block_2
-            )
-            const pastVotesA3 = await erc20VotesFacet.getPastVotes(
-                account_A,
-                block_3
-            )
-            const pastVotesB1 = await erc20VotesFacet.getPastVotes(
-                account_B,
-                block_1
-            )
-            const pastVotesB2 = await erc20VotesFacet.getPastVotes(
-                account_B,
-                block_2
-            )
-            const pastVotesB3 = await erc20VotesFacet.getPastVotes(
-                account_B,
-                block_3
-            )
-            const pastTotalSupplyA1 =
-                await erc20VotesFacet.getPastTotalSupply(block_1)
-            const pastTotalSupplyA2 =
-                await erc20VotesFacet.getPastTotalSupply(block_2)
-            const pastTotalSupplyA3 =
-                await erc20VotesFacet.getPastTotalSupply(block_3)
-
-            expect(pastVotesA1).to.equal(amount)
-            expect(pastVotesA2).to.equal(2 * amount)
-            expect(pastVotesA3).to.equal(3 * amount)
-
-            expect(pastVotesB1).to.equal(0)
-            expect(pastVotesB2).to.equal(0)
-            expect(pastVotesB3).to.equal(amount)
-
-            expect(pastTotalSupplyA1).to.equal(amount)
-            expect(pastTotalSupplyA2).to.equal(2 * amount)
-            expect(pastTotalSupplyA3).to.equal(4 * amount)
-        })
-    })
-
-    describe('Checkpoints', () => {
-        beforeEach(async () => {
-            // Issue tokens to account_A
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_A,
-                value: amount,
-                data: '0x',
-            })
-        })
-
-        it('GIVEN no delegation WHEN numCheckpoints THEN returns zero', async () => {
-            const numCheckpoints =
-                await erc20VotesFacet.numCheckpoints(account_A)
-            expect(numCheckpoints).to.equal(0)
-        })
-
-        it('GIVEN delegation WHEN numCheckpoints THEN returns correct count', async () => {
-            await erc20VotesFacet.delegate(account_B)
-
-            const numCheckpoints =
-                await erc20VotesFacet.numCheckpoints(account_B)
-            expect(numCheckpoints).to.equal(1)
-        })
-
-        it('GIVEN delegation WHEN checkpoints THEN returns correct checkpoint data', async () => {
-            await erc20VotesFacet.delegate(account_B)
-
-            const checkpoint = await erc20VotesFacet.checkpoints(account_B, 0)
-            expect(checkpoint.fromBlock).to.be.gt(0)
-            expect(checkpoint.votes).to.equal(amount)
-        })
-    })
-
-    describe('Balance adjustments', () => {
-        beforeEach(async () => {
-            await timeTravelFacet.changeSystemBlocknumber(1)
-            await erc20VotesFacet.delegate(account_A)
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_A,
-                value: amount,
-
-                data: '0x',
-            })
-        })
-
-        it('GIVEN an ERC20Votes when adjusting balances twice for same block THEN fails', async () => {
-            const ABAF = 200
-            const DECIMALS = 2
-            await adjustBalancesFacet.adjustBalances(ABAF, DECIMALS)
-
-            await expect(erc20VotesFacet.delegate(account_B))
-                .to.be.revertedWithCustomError(
-                    erc20VotesFacet,
-                    'AbafChangeForBlockForbidden'
-                )
-                .withArgs(1)
-        })
-
-        it('GIVEN an ERC20Votes when adjusting balances and delegating THEN values updated', async () => {
-            await timeTravelFacet.changeSystemBlocknumber(block)
-
-            await adjustBalancesFacet.adjustBalances(ABAF, DECIMALS)
-
-            await expect(erc20VotesFacet.delegate(account_B))
-                .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
-                .withArgs(account_A, amount * ABAF, 0)
-                .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
-                .withArgs(account_B, 0, amount * ABAF)
-
-            await checkVotingPowerAfterAdjustment()
-        })
-
-        it('GIVEN an ERC20Votes when adjusting balances and transferring THEN values updated', async () => {
-            await erc20VotesFacet.connect(signer_B).delegate(account_B)
-
-            await timeTravelFacet.changeSystemBlocknumber(block)
-
-            await adjustBalancesFacet.adjustBalances(ABAF, DECIMALS)
-
-            await expect(
-                erc1410Facet.transferByPartition(
-                    DEFAULT_PARTITION,
-                    { to: account_B, value: amount * ABAF },
-                    '0x'
-                )
-            )
-                .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
-                .withArgs(account_A, amount * ABAF, 0)
-                .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
-                .withArgs(account_B, 0, amount * ABAF)
-
-            await checkVotingPowerAfterAdjustment()
-        })
-    })
-
-    describe('Scheduled Balance adjustments', () => {
-        beforeEach(async () => {
-            await timeTravelFacet.changeSystemBlocknumber(1)
-            await timeTravelFacet.changeSystemTimestamp(1)
-            await erc20VotesFacet.delegate(account_A)
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_A,
-                value: amount,
-
-                data: '0x',
-            })
-        })
-
-        it('GIVEN an ERC20Votes when scheduling a balance adjustment and delegating THEN values updated', async () => {
-            const timestamp = 100000
-
-            await equityFacet.setScheduledBalanceAdjustment({
-                executionDate: timestamp,
-                factor: ABAF,
-                decimals: DECIMALS,
-            })
-
-            await timeTravelFacet.changeSystemBlocknumber(block)
-            await timeTravelFacet.changeSystemTimestamp(timestamp + 1)
-
-            await expect(erc20VotesFacet.delegate(account_B))
-                .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
-                .withArgs(account_A, amount * ABAF, 0)
-                .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
-                .withArgs(account_B, 0, amount * ABAF)
-
-            await checkVotingPowerAfterAdjustment()
-        })
-
-        it('GIVEN an ERC20Votes when adjusting balances and transferring THEN values updated', async () => {
-            await erc20VotesFacet.connect(signer_B).delegate(account_B)
-
-            const timestamp = 100000
-
-            await equityFacet.setScheduledBalanceAdjustment({
-                executionDate: timestamp,
-                factor: ABAF,
-                decimals: DECIMALS,
-            })
-
-            await timeTravelFacet.changeSystemBlocknumber(block)
-            await timeTravelFacet.changeSystemTimestamp(timestamp + 1)
-
-            await expect(
-                erc1410Facet.transferByPartition(
-                    DEFAULT_PARTITION,
-                    { to: account_B, value: amount * ABAF },
-                    '0x'
-                )
-            )
-                .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
-                .withArgs(account_A, amount * ABAF, 0)
-                .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
-                .withArgs(account_B, 0, amount * ABAF)
-
-            await checkVotingPowerAfterAdjustment()
-        })
-    })
-})
+        .withArgs(1);
+    });
+
+    it('GIVEN an ERC20Votes when adjusting balances and delegating THEN values updated', async () => {
+      await timeTravelFacet.changeSystemBlocknumber(block);
+
+      await adjustBalancesFacet.adjustBalances(ABAF, DECIMALS);
+
+      await expect(erc20VotesFacet.delegate(account_B))
+        .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
+        .withArgs(account_A, amount * ABAF, 0)
+        .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
+        .withArgs(account_B, 0, amount * ABAF);
+
+      await checkVotingPowerAfterAdjustment();
+    });
+
+    it('GIVEN an ERC20Votes when adjusting balances and transferring THEN values updated', async () => {
+      await erc20VotesFacet.connect(signer_B).delegate(account_B);
+
+      await timeTravelFacet.changeSystemBlocknumber(block);
+
+      await adjustBalancesFacet.adjustBalances(ABAF, DECIMALS);
+
+      await expect(
+        erc1410Facet.transferByPartition(
+          DEFAULT_PARTITION,
+          { to: account_B, value: amount * ABAF },
+          '0x',
+        ),
+      )
+        .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
+        .withArgs(account_A, amount * ABAF, 0)
+        .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
+        .withArgs(account_B, 0, amount * ABAF);
+
+      await checkVotingPowerAfterAdjustment();
+    });
+  });
+
+  describe('Scheduled Balance adjustments', () => {
+    beforeEach(async () => {
+      await timeTravelFacet.changeSystemBlocknumber(1);
+      await timeTravelFacet.changeSystemTimestamp(1);
+      await erc20VotesFacet.delegate(account_A);
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: account_A,
+        value: amount,
+
+        data: '0x',
+      });
+    });
+
+    it('GIVEN an ERC20Votes when scheduling a balance adjustment and delegating THEN values updated', async () => {
+      const timestamp = 100000;
+
+      await equityFacet.setScheduledBalanceAdjustment({
+        executionDate: timestamp,
+        factor: ABAF,
+        decimals: DECIMALS,
+      });
+
+      await timeTravelFacet.changeSystemBlocknumber(block);
+      await timeTravelFacet.changeSystemTimestamp(timestamp + 1);
+
+      await expect(erc20VotesFacet.delegate(account_B))
+        .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
+        .withArgs(account_A, amount * ABAF, 0)
+        .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
+        .withArgs(account_B, 0, amount * ABAF);
+
+      await checkVotingPowerAfterAdjustment();
+    });
+
+    it('GIVEN an ERC20Votes when adjusting balances and transferring THEN values updated', async () => {
+      await erc20VotesFacet.connect(signer_B).delegate(account_B);
+
+      const timestamp = 100000;
+
+      await equityFacet.setScheduledBalanceAdjustment({
+        executionDate: timestamp,
+        factor: ABAF,
+        decimals: DECIMALS,
+      });
+
+      await timeTravelFacet.changeSystemBlocknumber(block);
+      await timeTravelFacet.changeSystemTimestamp(timestamp + 1);
+
+      await expect(
+        erc1410Facet.transferByPartition(
+          DEFAULT_PARTITION,
+          { to: account_B, value: amount * ABAF },
+          '0x',
+        ),
+      )
+        .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
+        .withArgs(account_A, amount * ABAF, 0)
+        .to.emit(erc20VotesFacet, 'DelegateVotesChanged')
+        .withArgs(account_B, 0, amount * ABAF);
+
+      await checkVotingPowerAfterAdjustment();
+    });
+  });
+});

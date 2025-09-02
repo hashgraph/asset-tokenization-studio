@@ -235,17 +235,12 @@ function checkLength(string calldata _isin) pure {
 function checkChecksum(string calldata _isin) pure {
     bytes memory isin = bytes(_isin);
     (uint8[] memory conv, uint8 convLength) = convertISINToNumber(isin);
-    if (
-        byteToCode(isin[_CHECKSUM_POSITION_IN_ISIN]) !=
-        calculateChecksum(conv, convLength)
-    ) {
+    if (byteToCode(isin[_CHECKSUM_POSITION_IN_ISIN]) != calculateChecksum(conv, convLength)) {
         revert WrongISINChecksum(_isin);
     }
 }
 
-function convertISINToNumber(
-    bytes memory _isin
-) pure returns (uint8[] memory conv_, uint8 convLength_) {
+function convertISINToNumber(bytes memory _isin) pure returns (uint8[] memory conv_, uint8 convLength_) {
     unchecked {
         conv_ = new uint8[](_CHECKSUM_POSITION_IN_ISIN * 2);
         for (uint256 index; index < _CHECKSUM_POSITION_IN_ISIN; ++index) {
@@ -261,10 +256,7 @@ function convertISINToNumber(
     }
 }
 
-function calculateChecksum(
-    uint8[] memory _conv,
-    uint8 _convLength
-) pure returns (uint8 checksum_) {
+function calculateChecksum(uint8[] memory _conv, uint8 _convLength) pure returns (uint8 checksum_) {
     unchecked {
         uint256 pairing = (_convLength + 1) % 2;
         uint256 checksum;

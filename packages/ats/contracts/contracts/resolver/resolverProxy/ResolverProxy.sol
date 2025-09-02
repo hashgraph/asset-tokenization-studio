@@ -213,15 +213,9 @@ pragma solidity 0.8.18;
 * Implementation of a resolverProxy.
 /******************************************************************************/
 
-import {
-    ResolverProxyUnstructured
-} from './unstructured/ResolverProxyUnstructured.sol';
-import {
-    IResolverProxy
-} from '../../interfaces/resolver/resolverProxy/IResolverProxy.sol';
-import {
-    IBusinessLogicResolver
-} from '../../interfaces/resolver/IBusinessLogicResolver.sol';
+import { ResolverProxyUnstructured } from './unstructured/ResolverProxyUnstructured.sol';
+import { IResolverProxy } from '../../interfaces/resolver/resolverProxy/IResolverProxy.sol';
+import { IBusinessLogicResolver } from '../../interfaces/resolver/IBusinessLogicResolver.sol';
 
 contract ResolverProxy is ResolverProxyUnstructured {
     constructor(

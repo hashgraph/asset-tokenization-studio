@@ -205,31 +205,31 @@
 
 */
 
-import { Signer } from 'ethers'
-import { ContractName, LibraryName } from '@configuration'
+import { Signer } from 'ethers';
+import { ContractName, LibraryName } from '@configuration';
 
 interface DeployContractWithLibraryCommandParams {
-    name: ContractName
-    signer: Signer
-    libraries: LibraryName[]
-    args?: Array<unknown>
+  name: ContractName;
+  signer: Signer;
+  libraries: LibraryName[];
+  args?: Array<unknown>;
 }
 
 export default class DeployContractWithLibraryCommand {
-    public readonly name: ContractName
-    public readonly signer: Signer
-    public readonly libraries: LibraryName[]
-    public readonly args: Array<unknown> = []
+  public readonly name: ContractName;
+  public readonly signer: Signer;
+  public readonly libraries: LibraryName[];
+  public readonly args: Array<unknown> = [];
 
-    constructor({
-        name,
-        signer,
-        args = [],
-        libraries,
-    }: DeployContractWithLibraryCommandParams) {
-        this.name = name
-        this.signer = signer
-        this.args = args
-        this.libraries = libraries
-    }
+  constructor({
+    name,
+    signer,
+    args = [],
+    libraries,
+  }: DeployContractWithLibraryCommandParams) {
+    this.name = name;
+    this.signer = signer;
+    this.args = args;
+    this.libraries = libraries;
+  }
 }

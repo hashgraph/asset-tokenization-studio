@@ -209,13 +209,10 @@ pragma solidity ^0.8.17;
 
 // solhint-disable no-global-import
 import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import {TRexIAccessControl} from '../../interfaces/IAccessControl.sol';
+import { TRexIAccessControl } from '../../interfaces/IAccessControl.sol';
 import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
-import {TREXFactoryAts} from '../../TREXFactory.sol';
-import {
-    _TREX_OWNER_ROLE,
-    _DEFAULT_ADMIN_ROLE
-} from '../../interfaces/roles.sol';
+import { TREXFactoryAts } from '../../TREXFactory.sol';
+import { _TREX_OWNER_ROLE, _DEFAULT_ADMIN_ROLE } from '../../interfaces/roles.sol';
 
 // solhint-disable custom-errors
 library TREXBaseDeploymentLib {
@@ -244,31 +241,16 @@ library TREXBaseDeploymentLib {
         address _compliance
     ) internal {
         require(_tokenDeployed[_salt] == address(0), 'token already deployed');
+        require((_claimDetails.issuers).length == (_claimDetails.issuerClaims).length, 'claim pattern not valid');
+        require((_claimDetails.issuers).length <= 5, 'max 5 claim issuers at deployment');
+        require((_claimDetails.claimTopics).length <= 5, 'max 5 claim topics at deployment');
         require(
-            (_claimDetails.issuers).length ==
-                (_claimDetails.issuerClaims).length,
-            'claim pattern not valid'
-        );
-        require(
-            (_claimDetails.issuers).length <= 5,
-            'max 5 claim issuers at deployment'
-        );
-        require(
-            (_claimDetails.claimTopics).length <= 5,
-            'max 5 claim topics at deployment'
-        );
-        require(
-            (_tokenDetails.irAgents).length <= 5 &&
-                (_tokenDetails.tokenAgents).length <= 5,
+            (_tokenDetails.irAgents).length <= 5 && (_tokenDetails.tokenAgents).length <= 5,
             'max 5 agents at deployment'
         );
+        require((_tokenDetails.complianceModules).length <= 30, 'max 30 module actions at deployment');
         require(
-            (_tokenDetails.complianceModules).length <= 30,
-            'max 30 module actions at deployment'
-        );
-        require(
-            (_tokenDetails.complianceModules).length >=
-                (_tokenDetails.complianceSettings).length,
+            (_tokenDetails.complianceModules).length >= (_tokenDetails.complianceSettings).length,
             'invalid compliance pattern'
         );
 
@@ -286,58 +268,33 @@ library TREXBaseDeploymentLib {
         ITrustedIssuersRegistry tir;
         IClaimTopicsRegistry ctr;
         if (_identityRegistry == address(0)) {
-            tir = ITrustedIssuersRegistry(
-                _deployTIR(_salt, _implementationAuthority)
-            );
-            ctr = IClaimTopicsRegistry(
-                _deployCTR(_salt, _implementationAuthority)
-            );
+            tir = ITrustedIssuersRegistry(_deployTIR(_salt, _implementationAuthority));
+            ctr = IClaimTopicsRegistry(_deployCTR(_salt, _implementationAuthority));
             if (_tokenDetails.irs == address(0)) {
-                irs = IIdentityRegistryStorage(
-                    _deployIRS(_salt, _implementationAuthority)
-                );
+                irs = IIdentityRegistryStorage(_deployIRS(_salt, _implementationAuthority));
             } else {
                 irs = IIdentityRegistryStorage(_tokenDetails.irs);
             }
 
-            _identityRegistry = _deployIR(
-                _salt,
-                _implementationAuthority,
-                address(tir),
-                address(ctr),
-                address(irs)
-            );
+            _identityRegistry = _deployIR(_salt, _implementationAuthority, address(tir), address(ctr), address(irs));
             irs.bindIdentityRegistry(_identityRegistry);
             _token.setIdentityRegistry(_identityRegistry);
             transferOwnership |= 1 << 1;
         } else {
-            tir = ITrustedIssuersRegistry(
-                IIdentityRegistry(_identityRegistry).issuersRegistry()
-            );
-            ctr = IClaimTopicsRegistry(
-                IIdentityRegistry(_identityRegistry).topicsRegistry()
-            );
-            irs = IIdentityRegistryStorage(
-                IIdentityRegistry(_identityRegistry).identityStorage()
-            );
+            tir = ITrustedIssuersRegistry(IIdentityRegistry(_identityRegistry).issuersRegistry());
+            ctr = IClaimTopicsRegistry(IIdentityRegistry(_identityRegistry).topicsRegistry());
+            irs = IIdentityRegistryStorage(IIdentityRegistry(_identityRegistry).identityStorage());
         }
         address _tokenID = _tokenDetails.ONCHAINID;
         if (_tokenID == address(0)) {
-            _tokenID = IIdFactory(_idFactory).createTokenIdentity(
-                address(_token),
-                _tokenDetails.owner,
-                _salt
-            );
+            _tokenID = IIdFactory(_idFactory).createTokenIdentity(address(_token), _tokenDetails.owner, _salt);
         }
         _token.setOnchainID(_tokenID);
         for (uint256 i = 0; i < (_claimDetails.claimTopics).length; i++) {
             ctr.addClaimTopic(_claimDetails.claimTopics[i]);
         }
         for (uint256 i = 0; i < (_claimDetails.issuers).length; i++) {
-            tir.addTrustedIssuer(
-                IClaimIssuer((_claimDetails).issuers[i]),
-                _claimDetails.issuerClaims[i]
-            );
+            tir.addTrustedIssuer(IClaimIssuer((_claimDetails).issuers[i]), _claimDetails.issuerClaims[i]);
         }
         AgentRole(_identityRegistry).addAgent(address(_token));
         for (uint256 i = 0; i < (_tokenDetails.irAgents).length; i++) {
@@ -351,10 +308,7 @@ library TREXBaseDeploymentLib {
                 mc.addModule(_tokenDetails.complianceModules[i]);
             }
             if (i < (_tokenDetails.complianceSettings).length) {
-                mc.callModuleFunction(
-                    _tokenDetails.complianceSettings[i],
-                    _tokenDetails.complianceModules[i]
-                );
+                mc.callModuleFunction(_tokenDetails.complianceSettings[i], _tokenDetails.complianceModules[i]);
             }
         }
         _tokenDeployed[_salt] = address(_token);
@@ -383,10 +337,7 @@ library TREXBaseDeploymentLib {
      * @notice Deploy function with create2 opcode call
      * @notice Returns the address of the contract created
      */
-    function _deploy(
-        string memory salt,
-        bytes memory bytecode
-    ) private returns (address) {
+    function _deploy(string memory salt, bytes memory bytecode) private returns (address) {
         bytes32 saltBytes = bytes32(keccak256(abi.encodePacked(salt)));
         address addr;
         // solhint-disable-next-line no-inline-assembly
@@ -405,10 +356,7 @@ library TREXBaseDeploymentLib {
     /**
      * @dev Function used to deploy a trusted issuers registry using CREATE2
      */
-    function _deployTIR(
-        string memory _salt,
-        address implementationAuthority_
-    ) private returns (address) {
+    function _deployTIR(string memory _salt, address implementationAuthority_) private returns (address) {
         bytes memory _code = type(TrustedIssuersRegistryProxy).creationCode;
         bytes memory _constructData = abi.encode(implementationAuthority_);
         bytes memory bytecode = abi.encodePacked(_code, _constructData);
@@ -418,10 +366,7 @@ library TREXBaseDeploymentLib {
     /**
      * @dev Function used to deploy a claim topics registry using CREATE2
      */
-    function _deployCTR(
-        string memory _salt,
-        address implementationAuthority_
-    ) private returns (address) {
+    function _deployCTR(string memory _salt, address implementationAuthority_) private returns (address) {
         bytes memory _code = type(ClaimTopicsRegistryProxy).creationCode;
         bytes memory _constructData = abi.encode(implementationAuthority_);
         bytes memory bytecode = abi.encodePacked(_code, _constructData);
@@ -431,10 +376,7 @@ library TREXBaseDeploymentLib {
     /**
      * @dev Function used to deploy modular compliance contract using CREATE2
      */
-    function _deployMC(
-        string memory _salt,
-        address implementationAuthority_
-    ) private returns (address) {
+    function _deployMC(string memory _salt, address implementationAuthority_) private returns (address) {
         bytes memory _code = type(ModularComplianceProxy).creationCode;
         bytes memory _constructData = abi.encode(implementationAuthority_);
         bytes memory bytecode = abi.encodePacked(_code, _constructData);
@@ -444,10 +386,7 @@ library TREXBaseDeploymentLib {
     /**
      * @dev Function used to deploy an identity registry storage using CREATE2
      */
-    function _deployIRS(
-        string memory _salt,
-        address implementationAuthority_
-    ) private returns (address) {
+    function _deployIRS(string memory _salt, address implementationAuthority_) private returns (address) {
         bytes memory _code = type(IdentityRegistryStorageProxy).creationCode;
         bytes memory _constructData = abi.encode(implementationAuthority_);
         bytes memory bytecode = abi.encodePacked(_code, _constructData);

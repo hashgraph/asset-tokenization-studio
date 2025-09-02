@@ -203,77 +203,77 @@
 
 */
 
-import { ContractReceipt } from 'ethers'
+import { ContractReceipt } from 'ethers';
 import {
-    ProxyAdmin__factory,
-    TransparentUpgradeableProxy__factory,
-} from '@typechain'
+  ProxyAdmin__factory,
+  TransparentUpgradeableProxy__factory,
+} from '@typechain';
 import {
-    deployContractWithFactory,
-    DeployContractWithFactoryCommand,
-    DeployProxyAdminCommand,
-    DeployUpgradeableProxyCommand,
-    ProxyImplementationQuery,
-    UpgradeProxyImplementationCommand,
-    validateTxResponse,
-    ValidateTxResponseCommand,
-} from '@scripts'
+  deployContractWithFactory,
+  DeployContractWithFactoryCommand,
+  DeployProxyAdminCommand,
+  DeployUpgradeableProxyCommand,
+  ProxyImplementationQuery,
+  UpgradeProxyImplementationCommand,
+  validateTxResponse,
+  ValidateTxResponseCommand,
+} from '@scripts';
 
 export async function deployProxyAdmin({
-    signer,
-    overrides,
+  signer,
+  overrides,
 }: DeployProxyAdminCommand) {
-    const deployCommand = new DeployContractWithFactoryCommand({
-        factory: new ProxyAdmin__factory(),
-        signer: signer,
-        overrides,
-    })
-    return await deployContractWithFactory(deployCommand)
+  const deployCommand = new DeployContractWithFactoryCommand({
+    factory: new ProxyAdmin__factory(),
+    signer: signer,
+    overrides,
+  });
+  return await deployContractWithFactory(deployCommand);
 }
 export async function deployTransparentProxy({
-    proxyAdminAddress,
-    implementationAddress,
-    signer,
-    overrides,
+  proxyAdminAddress,
+  implementationAddress,
+  signer,
+  overrides,
 }: DeployUpgradeableProxyCommand) {
-    const deployCommand = new DeployContractWithFactoryCommand({
-        factory: new TransparentUpgradeableProxy__factory(),
-        signer: signer,
-        args: [implementationAddress, proxyAdminAddress, '0x'],
-        overrides,
-    })
-    return await deployContractWithFactory(deployCommand)
+  const deployCommand = new DeployContractWithFactoryCommand({
+    factory: new TransparentUpgradeableProxy__factory(),
+    signer: signer,
+    args: [implementationAddress, proxyAdminAddress, '0x'],
+    overrides,
+  });
+  return await deployContractWithFactory(deployCommand);
 }
 
 export async function upgradeProxyImplementation({
-    proxyAdminAddress,
+  proxyAdminAddress,
+  transparentProxyAddress,
+  newImplementationAddress,
+  signer,
+  overrides,
+}: UpgradeProxyImplementationCommand): Promise<ContractReceipt> {
+  const proxyAdmin = new ProxyAdmin__factory(signer).attach(proxyAdminAddress);
+  const txResponse = await proxyAdmin.upgrade(
     transparentProxyAddress,
     newImplementationAddress,
-    signer,
     overrides,
-}: UpgradeProxyImplementationCommand): Promise<ContractReceipt> {
-    const proxyAdmin = new ProxyAdmin__factory(signer).attach(proxyAdminAddress)
-    const txResponse = await proxyAdmin.upgrade(
-        transparentProxyAddress,
-        newImplementationAddress,
-        overrides
-    )
-    const { txReceipt } = await validateTxResponse(
-        new ValidateTxResponseCommand({ txResponse })
-    )
-    return txReceipt
+  );
+  const { txReceipt } = await validateTxResponse(
+    new ValidateTxResponseCommand({ txResponse }),
+  );
+  return txReceipt;
 }
 
 // * Read functions
 export async function proxyImplementation({
-    proxyAdminAddress,
+  proxyAdminAddress,
+  transparentProxyAddress,
+  overrides,
+}: ProxyImplementationQuery) {
+  const proxyAdmin = new ProxyAdmin__factory().attach(proxyAdminAddress);
+
+  return await proxyAdmin.getProxyImplementation(
     transparentProxyAddress,
     overrides,
-}: ProxyImplementationQuery) {
-    const proxyAdmin = new ProxyAdmin__factory().attach(proxyAdminAddress)
-
-    return await proxyAdmin.getProxyImplementation(
-        transparentProxyAddress,
-        overrides
-    )
+  );
 }

@@ -214,9 +214,5 @@ interface ICompliance {
 
     function destroyed(address _from, uint256 _amount) external;
 
-    function canTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external view returns (bool);
+    function canTransfer(address _from, address _to, uint256 _amount) external view returns (bool);
 }

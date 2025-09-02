@@ -206,40 +206,24 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
-import {LibCommon} from '../../common/libraries/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    IExternalPause
-} from '../../../layer_1/interfaces/externalPauses/IExternalPause.sol';
-import {
-    _PAUSE_MANAGEMENT_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
+import { ControlListStorageWrapper } from '../controlList/ControlListStorageWrapper.sol';
+import { LibCommon } from '../../common/libraries/LibCommon.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { IExternalPause } from '../../../layer_1/interfaces/externalPauses/IExternalPause.sol';
+import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from '../../constants/storagePositions.sol';
 
-abstract contract ExternalPauseManagementStorageWrapper is
-    ControlListStorageWrapper
-{
+abstract contract ExternalPauseManagementStorageWrapper is ControlListStorageWrapper {
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
     function _isExternallyPaused() internal view returns (bool) {
-        ExternalListDataStorage
-            storage externalPauseDataStorage = _externalListStorage(
-                _PAUSE_MANAGEMENT_STORAGE_POSITION
-            );
-        uint256 length = _getExternalListsCount(
+        ExternalListDataStorage storage externalPauseDataStorage = _externalListStorage(
             _PAUSE_MANAGEMENT_STORAGE_POSITION
         );
+        uint256 length = _getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
 
         for (uint256 index; index < length; ++index) {
-            if (
-                IExternalPause(externalPauseDataStorage.list.at(index))
-                    .isPaused()
-            ) return true;
+            if (IExternalPause(externalPauseDataStorage.list.at(index)).isPaused()) return true;
             unchecked {
                 ++index;
             }

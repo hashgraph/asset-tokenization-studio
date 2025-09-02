@@ -206,54 +206,27 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {IClearingRead} from '../interfaces/clearing/IClearingRead.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CLEARING_READ_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {ClearingRead} from './ClearingRead.sol';
+import { IClearingRead } from '../interfaces/clearing/IClearingRead.sol';
+import { IStaticFunctionSelectors } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { _CLEARING_READ_RESOLVER_KEY } from '../constants/resolverKeys.sol';
+import { ClearingRead } from './ClearingRead.sol';
 
 contract ClearingReadFacet is ClearingRead, IStaticFunctionSelectors {
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _CLEARING_READ_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearedAmountFor
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearedAmountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingCountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingsIdForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingThirdParty
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getClearedAmountFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getClearedAmountForByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getClearingCountForByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getClearingsIdForByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getClearingThirdParty.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IClearingRead).interfaceId;

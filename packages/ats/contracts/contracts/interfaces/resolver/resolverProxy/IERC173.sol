@@ -212,10 +212,7 @@ pragma solidity 0.8.18;
 /* is ERC165 */
 interface IERC173 {
     /// @dev This emits when ownership of a contract changes.
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /// @notice Set the address of the new owner of the contract
     /// @dev Set _newOwner to address(0) to renounce any ownership.

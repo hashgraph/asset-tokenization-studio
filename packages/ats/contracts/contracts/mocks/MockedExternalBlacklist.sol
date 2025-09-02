@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IExternalControlList
-} from '../layer_1/interfaces/externalControlLists/IExternalControlList.sol';
+import { IExternalControlList } from '../layer_1/interfaces/externalControlLists/IExternalControlList.sol';
 
 contract MockedBlacklist is IExternalControlList {
     mapping(address => bool) private _blacklist;

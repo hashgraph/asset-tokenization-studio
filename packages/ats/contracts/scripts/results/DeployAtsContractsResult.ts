@@ -203,253 +203,253 @@
 
 */
 
-import { Signer } from 'ethers'
+import { Signer } from 'ethers';
 import {
-    BusinessLogicResolver,
-    AccessControlFacet,
-    BondUSARead,
-    DiamondFacet,
-    ERC1410ReadFacet,
-    ERC1410ManagementFacet,
-    PauseFacet,
-    ClearingTransferFacet,
-    ClearingRedeemFacet,
-    ClearingHoldCreationFacet,
-    ClearingReadFacet,
-    ClearingActionsFacet,
-    TimeTravel,
-    FreezeFacet,
-    HoldReadFacet,
-    HoldManagementFacet,
-    HoldTokenHolderFacet,
-    ERC1410TokenHolderFacet,
-    ERC3643ManagementFacet,
-    ERC3643OperationsFacet,
-    ERC3643ReadFacet,
-    ERC3643BatchFacet,
-    CapFacet,
-    ControlListFacet,
-    KycFacet,
-    ERC20Facet,
-    ERC20PermitFacet,
-    ExternalPauseManagementFacet,
-    ExternalControlListManagementFacet,
-    ProtectedPartitionsFacet,
-    AdjustBalancesFacet,
-    BondUSAFacet,
-    CorporateActionsFacet,
-    EquityUSAFacet,
-    ERC1594Facet,
-    ERC1643Facet,
-    ERC1644Facet,
-    ExternalKycListManagementFacet,
-    LockFacet,
-    ScheduledBalanceAdjustmentsFacet,
-    ScheduledSnapshotsFacet,
-    ScheduledTasksFacet,
-    SnapshotsFacet,
-    SsiManagementFacet,
-    TransferAndLockFacet,
-    ERC20Votes,
-} from '@typechain'
-import { DeployContractWithFactoryResult } from '../index'
+  BusinessLogicResolver,
+  AccessControlFacet,
+  BondUSARead,
+  DiamondFacet,
+  ERC1410ReadFacet,
+  ERC1410ManagementFacet,
+  PauseFacet,
+  ClearingTransferFacet,
+  ClearingRedeemFacet,
+  ClearingHoldCreationFacet,
+  ClearingReadFacet,
+  ClearingActionsFacet,
+  TimeTravel,
+  FreezeFacet,
+  HoldReadFacet,
+  HoldManagementFacet,
+  HoldTokenHolderFacet,
+  ERC1410TokenHolderFacet,
+  ERC3643ManagementFacet,
+  ERC3643OperationsFacet,
+  ERC3643ReadFacet,
+  ERC3643BatchFacet,
+  CapFacet,
+  ControlListFacet,
+  KycFacet,
+  ERC20Facet,
+  ERC20PermitFacet,
+  ExternalPauseManagementFacet,
+  ExternalControlListManagementFacet,
+  ProtectedPartitionsFacet,
+  AdjustBalancesFacet,
+  BondUSAFacet,
+  CorporateActionsFacet,
+  EquityUSAFacet,
+  ERC1594Facet,
+  ERC1643Facet,
+  ERC1644Facet,
+  ExternalKycListManagementFacet,
+  LockFacet,
+  ScheduledBalanceAdjustmentsFacet,
+  ScheduledSnapshotsFacet,
+  ScheduledTasksFacet,
+  SnapshotsFacet,
+  SsiManagementFacet,
+  TransferAndLockFacet,
+  ERC20Votes,
+} from '@typechain';
+import { DeployContractWithFactoryResult } from '../index';
 
 export interface DeployAtsContractsResultParams {
-    businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    accessControlFacet: DeployContractWithFactoryResult<AccessControlFacet>
-    capFacet: DeployContractWithFactoryResult<CapFacet>
-    controlListFacet: DeployContractWithFactoryResult<ControlListFacet>
-    kycFacet: DeployContractWithFactoryResult<KycFacet>
-    ssiManagementFacet: DeployContractWithFactoryResult<SsiManagementFacet>
-    pauseFacet: DeployContractWithFactoryResult<PauseFacet>
-    erc20Facet: DeployContractWithFactoryResult<ERC20Facet>
-    erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
-    erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
-    erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>
-    erc20PermitFacet: DeployContractWithFactoryResult<ERC20PermitFacet>
-    erc20Votes: DeployContractWithFactoryResult<ERC20Votes>
-    erc1594Facet: DeployContractWithFactoryResult<ERC1594Facet>
-    erc1643Facet: DeployContractWithFactoryResult<ERC1643Facet>
-    erc1644Facet: DeployContractWithFactoryResult<ERC1644Facet>
-    diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
-    equityUsaFacet: DeployContractWithFactoryResult<EquityUSAFacet>
-    bondUsaFacet: DeployContractWithFactoryResult<BondUSAFacet>
-    bondUsaRead: DeployContractWithFactoryResult<BondUSARead>
-    scheduledSnapshotsFacet: DeployContractWithFactoryResult<ScheduledSnapshotsFacet>
-    scheduledBalanceAdjustmentsFacet: DeployContractWithFactoryResult<ScheduledBalanceAdjustmentsFacet>
-    scheduledTasksFacet: DeployContractWithFactoryResult<ScheduledTasksFacet>
-    snapshotsFacet: DeployContractWithFactoryResult<SnapshotsFacet>
-    corporateActionsFacet: DeployContractWithFactoryResult<CorporateActionsFacet>
-    transferAndLockFacet: DeployContractWithFactoryResult<TransferAndLockFacet>
-    lockFacet: DeployContractWithFactoryResult<LockFacet>
-    holdReadFacet: DeployContractWithFactoryResult<HoldReadFacet>
-    holdManagementFacet: DeployContractWithFactoryResult<HoldManagementFacet>
-    holdTokenHolderFacet: DeployContractWithFactoryResult<HoldTokenHolderFacet>
-    adjustBalancesFacet: DeployContractWithFactoryResult<AdjustBalancesFacet>
-    protectedPartitionsFacet: DeployContractWithFactoryResult<ProtectedPartitionsFacet>
-    clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>
-    clearingRedeemFacet: DeployContractWithFactoryResult<ClearingRedeemFacet>
-    clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
-    clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
-    clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
-    externalPauseManagementFacet: DeployContractWithFactoryResult<ExternalPauseManagementFacet>
-    externalControlListManagementFacet: DeployContractWithFactoryResult<ExternalControlListManagementFacet>
-    externalKycListManagementFacet: DeployContractWithFactoryResult<ExternalKycListManagementFacet>
-    erc3643ManagementFacet: DeployContractWithFactoryResult<ERC3643ManagementFacet>
-    erc3643OperationsFacet: DeployContractWithFactoryResult<ERC3643OperationsFacet>
-    erc3643ReadFacet: DeployContractWithFactoryResult<ERC3643ReadFacet>
-    erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>
-    freezeFacet: DeployContractWithFactoryResult<FreezeFacet>
-    timeTravel?: DeployContractWithFactoryResult<TimeTravel>
-    deployer?: Signer
+  businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>;
+  accessControlFacet: DeployContractWithFactoryResult<AccessControlFacet>;
+  capFacet: DeployContractWithFactoryResult<CapFacet>;
+  controlListFacet: DeployContractWithFactoryResult<ControlListFacet>;
+  kycFacet: DeployContractWithFactoryResult<KycFacet>;
+  ssiManagementFacet: DeployContractWithFactoryResult<SsiManagementFacet>;
+  pauseFacet: DeployContractWithFactoryResult<PauseFacet>;
+  erc20Facet: DeployContractWithFactoryResult<ERC20Facet>;
+  erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>;
+  erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>;
+  erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>;
+  erc20PermitFacet: DeployContractWithFactoryResult<ERC20PermitFacet>;
+  erc20Votes: DeployContractWithFactoryResult<ERC20Votes>;
+  erc1594Facet: DeployContractWithFactoryResult<ERC1594Facet>;
+  erc1643Facet: DeployContractWithFactoryResult<ERC1643Facet>;
+  erc1644Facet: DeployContractWithFactoryResult<ERC1644Facet>;
+  diamondFacet: DeployContractWithFactoryResult<DiamondFacet>;
+  equityUsaFacet: DeployContractWithFactoryResult<EquityUSAFacet>;
+  bondUsaFacet: DeployContractWithFactoryResult<BondUSAFacet>;
+  bondUsaRead: DeployContractWithFactoryResult<BondUSARead>;
+  scheduledSnapshotsFacet: DeployContractWithFactoryResult<ScheduledSnapshotsFacet>;
+  scheduledBalanceAdjustmentsFacet: DeployContractWithFactoryResult<ScheduledBalanceAdjustmentsFacet>;
+  scheduledTasksFacet: DeployContractWithFactoryResult<ScheduledTasksFacet>;
+  snapshotsFacet: DeployContractWithFactoryResult<SnapshotsFacet>;
+  corporateActionsFacet: DeployContractWithFactoryResult<CorporateActionsFacet>;
+  transferAndLockFacet: DeployContractWithFactoryResult<TransferAndLockFacet>;
+  lockFacet: DeployContractWithFactoryResult<LockFacet>;
+  holdReadFacet: DeployContractWithFactoryResult<HoldReadFacet>;
+  holdManagementFacet: DeployContractWithFactoryResult<HoldManagementFacet>;
+  holdTokenHolderFacet: DeployContractWithFactoryResult<HoldTokenHolderFacet>;
+  adjustBalancesFacet: DeployContractWithFactoryResult<AdjustBalancesFacet>;
+  protectedPartitionsFacet: DeployContractWithFactoryResult<ProtectedPartitionsFacet>;
+  clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>;
+  clearingRedeemFacet: DeployContractWithFactoryResult<ClearingRedeemFacet>;
+  clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>;
+  clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>;
+  clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>;
+  externalPauseManagementFacet: DeployContractWithFactoryResult<ExternalPauseManagementFacet>;
+  externalControlListManagementFacet: DeployContractWithFactoryResult<ExternalControlListManagementFacet>;
+  externalKycListManagementFacet: DeployContractWithFactoryResult<ExternalKycListManagementFacet>;
+  erc3643ManagementFacet: DeployContractWithFactoryResult<ERC3643ManagementFacet>;
+  erc3643OperationsFacet: DeployContractWithFactoryResult<ERC3643OperationsFacet>;
+  erc3643ReadFacet: DeployContractWithFactoryResult<ERC3643ReadFacet>;
+  erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>;
+  freezeFacet: DeployContractWithFactoryResult<FreezeFacet>;
+  timeTravel?: DeployContractWithFactoryResult<TimeTravel>;
+  deployer?: Signer;
 }
 
 export default class DeployAtsContractsResult {
-    public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    public readonly accessControlFacet: DeployContractWithFactoryResult<AccessControlFacet>
-    public readonly capFacet: DeployContractWithFactoryResult<CapFacet>
-    public readonly controlListFacet: DeployContractWithFactoryResult<ControlListFacet>
-    public readonly kycFacet: DeployContractWithFactoryResult<KycFacet>
-    public readonly ssiManagementFacet: DeployContractWithFactoryResult<SsiManagementFacet>
-    public readonly pauseFacet: DeployContractWithFactoryResult<PauseFacet>
-    public readonly erc20Facet: DeployContractWithFactoryResult<ERC20Facet>
-    public readonly erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
-    public readonly erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
-    public readonly erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>
-    public readonly erc20PermitFacet: DeployContractWithFactoryResult<ERC20PermitFacet>
-    public readonly erc20Votes: DeployContractWithFactoryResult<ERC20Votes>
-    public readonly erc1594Facet: DeployContractWithFactoryResult<ERC1594Facet>
-    public readonly erc1643Facet: DeployContractWithFactoryResult<ERC1643Facet>
-    public readonly erc1644Facet: DeployContractWithFactoryResult<ERC1644Facet>
-    public readonly diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
-    public readonly equityUsaFacet: DeployContractWithFactoryResult<EquityUSAFacet>
-    public readonly bondUsaFacet: DeployContractWithFactoryResult<BondUSAFacet>
-    public readonly bondUsaRead: DeployContractWithFactoryResult<BondUSARead>
-    public readonly scheduledSnapshotsFacet: DeployContractWithFactoryResult<ScheduledSnapshotsFacet>
-    public readonly scheduledBalanceAdjustmentsFacet: DeployContractWithFactoryResult<ScheduledBalanceAdjustmentsFacet>
-    public readonly scheduledTasksFacet: DeployContractWithFactoryResult<ScheduledTasksFacet>
-    public readonly snapshotsFacet: DeployContractWithFactoryResult<SnapshotsFacet>
-    public readonly corporateActionsFacet: DeployContractWithFactoryResult<CorporateActionsFacet>
-    public readonly transferAndLockFacet: DeployContractWithFactoryResult<TransferAndLockFacet>
-    public readonly lockFacet: DeployContractWithFactoryResult<LockFacet>
-    public readonly holdReadFacet: DeployContractWithFactoryResult<HoldReadFacet>
-    public readonly holdManagementFacet: DeployContractWithFactoryResult<HoldManagementFacet>
-    public readonly holdTokenHolderFacet: DeployContractWithFactoryResult<HoldTokenHolderFacet>
-    public readonly adjustBalancesFacet: DeployContractWithFactoryResult<AdjustBalancesFacet>
-    public readonly protectedPartitionsFacet: DeployContractWithFactoryResult<ProtectedPartitionsFacet>
-    public readonly clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>
-    public readonly clearingRedeemFacet: DeployContractWithFactoryResult<ClearingRedeemFacet>
-    public readonly clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
-    public readonly clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
-    public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
-    public readonly externalPauseManagementFacet: DeployContractWithFactoryResult<ExternalPauseManagementFacet>
-    public readonly externalControlListManagementFacet: DeployContractWithFactoryResult<ExternalControlListManagementFacet>
-    public readonly externalKycListManagementFacet: DeployContractWithFactoryResult<ExternalKycListManagementFacet>
-    public readonly erc3643ManagementFacet: DeployContractWithFactoryResult<ERC3643ManagementFacet>
-    public readonly erc3643OperationsFacet: DeployContractWithFactoryResult<ERC3643OperationsFacet>
-    public readonly erc3643ReadFacet: DeployContractWithFactoryResult<ERC3643ReadFacet>
-    public readonly erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>
-    public readonly freezeFacet: DeployContractWithFactoryResult<FreezeFacet>
-    public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
-    public readonly deployer?: Signer
+  public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>;
+  public readonly accessControlFacet: DeployContractWithFactoryResult<AccessControlFacet>;
+  public readonly capFacet: DeployContractWithFactoryResult<CapFacet>;
+  public readonly controlListFacet: DeployContractWithFactoryResult<ControlListFacet>;
+  public readonly kycFacet: DeployContractWithFactoryResult<KycFacet>;
+  public readonly ssiManagementFacet: DeployContractWithFactoryResult<SsiManagementFacet>;
+  public readonly pauseFacet: DeployContractWithFactoryResult<PauseFacet>;
+  public readonly erc20Facet: DeployContractWithFactoryResult<ERC20Facet>;
+  public readonly erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>;
+  public readonly erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>;
+  public readonly erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>;
+  public readonly erc20PermitFacet: DeployContractWithFactoryResult<ERC20PermitFacet>;
+  public readonly erc20Votes: DeployContractWithFactoryResult<ERC20Votes>;
+  public readonly erc1594Facet: DeployContractWithFactoryResult<ERC1594Facet>;
+  public readonly erc1643Facet: DeployContractWithFactoryResult<ERC1643Facet>;
+  public readonly erc1644Facet: DeployContractWithFactoryResult<ERC1644Facet>;
+  public readonly diamondFacet: DeployContractWithFactoryResult<DiamondFacet>;
+  public readonly equityUsaFacet: DeployContractWithFactoryResult<EquityUSAFacet>;
+  public readonly bondUsaFacet: DeployContractWithFactoryResult<BondUSAFacet>;
+  public readonly bondUsaRead: DeployContractWithFactoryResult<BondUSARead>;
+  public readonly scheduledSnapshotsFacet: DeployContractWithFactoryResult<ScheduledSnapshotsFacet>;
+  public readonly scheduledBalanceAdjustmentsFacet: DeployContractWithFactoryResult<ScheduledBalanceAdjustmentsFacet>;
+  public readonly scheduledTasksFacet: DeployContractWithFactoryResult<ScheduledTasksFacet>;
+  public readonly snapshotsFacet: DeployContractWithFactoryResult<SnapshotsFacet>;
+  public readonly corporateActionsFacet: DeployContractWithFactoryResult<CorporateActionsFacet>;
+  public readonly transferAndLockFacet: DeployContractWithFactoryResult<TransferAndLockFacet>;
+  public readonly lockFacet: DeployContractWithFactoryResult<LockFacet>;
+  public readonly holdReadFacet: DeployContractWithFactoryResult<HoldReadFacet>;
+  public readonly holdManagementFacet: DeployContractWithFactoryResult<HoldManagementFacet>;
+  public readonly holdTokenHolderFacet: DeployContractWithFactoryResult<HoldTokenHolderFacet>;
+  public readonly adjustBalancesFacet: DeployContractWithFactoryResult<AdjustBalancesFacet>;
+  public readonly protectedPartitionsFacet: DeployContractWithFactoryResult<ProtectedPartitionsFacet>;
+  public readonly clearingTransferFacet: DeployContractWithFactoryResult<ClearingTransferFacet>;
+  public readonly clearingRedeemFacet: DeployContractWithFactoryResult<ClearingRedeemFacet>;
+  public readonly clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>;
+  public readonly clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>;
+  public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>;
+  public readonly externalPauseManagementFacet: DeployContractWithFactoryResult<ExternalPauseManagementFacet>;
+  public readonly externalControlListManagementFacet: DeployContractWithFactoryResult<ExternalControlListManagementFacet>;
+  public readonly externalKycListManagementFacet: DeployContractWithFactoryResult<ExternalKycListManagementFacet>;
+  public readonly erc3643ManagementFacet: DeployContractWithFactoryResult<ERC3643ManagementFacet>;
+  public readonly erc3643OperationsFacet: DeployContractWithFactoryResult<ERC3643OperationsFacet>;
+  public readonly erc3643ReadFacet: DeployContractWithFactoryResult<ERC3643ReadFacet>;
+  public readonly erc3643BatchFacet: DeployContractWithFactoryResult<ERC3643BatchFacet>;
+  public readonly freezeFacet: DeployContractWithFactoryResult<FreezeFacet>;
+  public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>;
+  public readonly deployer?: Signer;
 
-    constructor({
-        businessLogicResolver,
-        accessControlFacet,
-        capFacet,
-        controlListFacet,
-        kycFacet,
-        ssiManagementFacet,
-        pauseFacet,
-        erc20Facet,
-        erc1410ReadFacet,
-        erc1410ManagementFacet,
-        erc1410TokenHolderFacet,
-        erc20PermitFacet,
-        erc20Votes,
-        erc1594Facet,
-        erc1643Facet,
-        erc1644Facet,
-        diamondFacet,
-        equityUsaFacet,
-        bondUsaFacet,
-        bondUsaRead,
-        scheduledSnapshotsFacet,
-        scheduledBalanceAdjustmentsFacet,
-        scheduledTasksFacet,
-        snapshotsFacet,
-        corporateActionsFacet,
-        transferAndLockFacet,
-        lockFacet,
-        adjustBalancesFacet,
-        protectedPartitionsFacet,
-        clearingTransferFacet,
-        clearingRedeemFacet,
-        clearingHoldCreationFacet,
-        clearingReadFacet,
-        clearingActionsFacet,
-        externalPauseManagementFacet,
-        externalControlListManagementFacet,
-        externalKycListManagementFacet,
-        freezeFacet,
-        timeTravel,
-        deployer,
-        erc3643ManagementFacet,
-        erc3643OperationsFacet,
-        erc3643ReadFacet,
-        erc3643BatchFacet,
-        holdReadFacet,
-        holdManagementFacet,
-        holdTokenHolderFacet,
-    }: DeployAtsContractsResultParams) {
-        this.businessLogicResolver = businessLogicResolver
-        this.accessControlFacet = accessControlFacet
-        this.capFacet = capFacet
-        this.controlListFacet = controlListFacet
-        this.kycFacet = kycFacet
-        this.ssiManagementFacet = ssiManagementFacet
-        this.pauseFacet = pauseFacet
-        this.erc20Facet = erc20Facet
-        this.erc20PermitFacet = erc20PermitFacet
-        this.erc20Votes = erc20Votes
-        this.erc1410ReadFacet = erc1410ReadFacet
-        this.erc1410ManagementFacet = erc1410ManagementFacet
-        this.erc1410TokenHolderFacet = erc1410TokenHolderFacet
-        this.erc1594Facet = erc1594Facet
-        this.erc1643Facet = erc1643Facet
-        this.erc1644Facet = erc1644Facet
-        this.diamondFacet = diamondFacet
-        this.equityUsaFacet = equityUsaFacet
-        this.bondUsaFacet = bondUsaFacet
-        this.bondUsaRead = bondUsaRead
-        this.scheduledSnapshotsFacet = scheduledSnapshotsFacet
-        this.scheduledBalanceAdjustmentsFacet = scheduledBalanceAdjustmentsFacet
-        this.scheduledTasksFacet = scheduledTasksFacet
-        this.snapshotsFacet = snapshotsFacet
-        this.corporateActionsFacet = corporateActionsFacet
-        this.transferAndLockFacet = transferAndLockFacet
-        this.lockFacet = lockFacet
-        this.holdReadFacet = holdReadFacet
-        this.holdManagementFacet = holdManagementFacet
-        this.holdTokenHolderFacet = holdTokenHolderFacet
-        this.adjustBalancesFacet = adjustBalancesFacet
-        this.protectedPartitionsFacet = protectedPartitionsFacet
-        this.clearingTransferFacet = clearingTransferFacet
-        this.clearingRedeemFacet = clearingRedeemFacet
-        this.clearingHoldCreationFacet = clearingHoldCreationFacet
-        this.clearingReadFacet = clearingReadFacet
-        this.clearingActionsFacet = clearingActionsFacet
-        this.externalPauseManagementFacet = externalPauseManagementFacet
-        this.externalControlListManagementFacet =
-            externalControlListManagementFacet
-        this.externalKycListManagementFacet = externalKycListManagementFacet
-        this.erc3643ManagementFacet = erc3643ManagementFacet
-        this.erc3643OperationsFacet = erc3643OperationsFacet
-        this.erc3643ReadFacet = erc3643ReadFacet
-        this.erc3643BatchFacet = erc3643BatchFacet
-        this.freezeFacet = freezeFacet
-        this.timeTravel = timeTravel
-        // Deployer
-        this.deployer = deployer
-    }
+  constructor({
+    businessLogicResolver,
+    accessControlFacet,
+    capFacet,
+    controlListFacet,
+    kycFacet,
+    ssiManagementFacet,
+    pauseFacet,
+    erc20Facet,
+    erc1410ReadFacet,
+    erc1410ManagementFacet,
+    erc1410TokenHolderFacet,
+    erc20PermitFacet,
+    erc20Votes,
+    erc1594Facet,
+    erc1643Facet,
+    erc1644Facet,
+    diamondFacet,
+    equityUsaFacet,
+    bondUsaFacet,
+    bondUsaRead,
+    scheduledSnapshotsFacet,
+    scheduledBalanceAdjustmentsFacet,
+    scheduledTasksFacet,
+    snapshotsFacet,
+    corporateActionsFacet,
+    transferAndLockFacet,
+    lockFacet,
+    adjustBalancesFacet,
+    protectedPartitionsFacet,
+    clearingTransferFacet,
+    clearingRedeemFacet,
+    clearingHoldCreationFacet,
+    clearingReadFacet,
+    clearingActionsFacet,
+    externalPauseManagementFacet,
+    externalControlListManagementFacet,
+    externalKycListManagementFacet,
+    freezeFacet,
+    timeTravel,
+    deployer,
+    erc3643ManagementFacet,
+    erc3643OperationsFacet,
+    erc3643ReadFacet,
+    erc3643BatchFacet,
+    holdReadFacet,
+    holdManagementFacet,
+    holdTokenHolderFacet,
+  }: DeployAtsContractsResultParams) {
+    this.businessLogicResolver = businessLogicResolver;
+    this.accessControlFacet = accessControlFacet;
+    this.capFacet = capFacet;
+    this.controlListFacet = controlListFacet;
+    this.kycFacet = kycFacet;
+    this.ssiManagementFacet = ssiManagementFacet;
+    this.pauseFacet = pauseFacet;
+    this.erc20Facet = erc20Facet;
+    this.erc20PermitFacet = erc20PermitFacet;
+    this.erc20Votes = erc20Votes;
+    this.erc1410ReadFacet = erc1410ReadFacet;
+    this.erc1410ManagementFacet = erc1410ManagementFacet;
+    this.erc1410TokenHolderFacet = erc1410TokenHolderFacet;
+    this.erc1594Facet = erc1594Facet;
+    this.erc1643Facet = erc1643Facet;
+    this.erc1644Facet = erc1644Facet;
+    this.diamondFacet = diamondFacet;
+    this.equityUsaFacet = equityUsaFacet;
+    this.bondUsaFacet = bondUsaFacet;
+    this.bondUsaRead = bondUsaRead;
+    this.scheduledSnapshotsFacet = scheduledSnapshotsFacet;
+    this.scheduledBalanceAdjustmentsFacet = scheduledBalanceAdjustmentsFacet;
+    this.scheduledTasksFacet = scheduledTasksFacet;
+    this.snapshotsFacet = snapshotsFacet;
+    this.corporateActionsFacet = corporateActionsFacet;
+    this.transferAndLockFacet = transferAndLockFacet;
+    this.lockFacet = lockFacet;
+    this.holdReadFacet = holdReadFacet;
+    this.holdManagementFacet = holdManagementFacet;
+    this.holdTokenHolderFacet = holdTokenHolderFacet;
+    this.adjustBalancesFacet = adjustBalancesFacet;
+    this.protectedPartitionsFacet = protectedPartitionsFacet;
+    this.clearingTransferFacet = clearingTransferFacet;
+    this.clearingRedeemFacet = clearingRedeemFacet;
+    this.clearingHoldCreationFacet = clearingHoldCreationFacet;
+    this.clearingReadFacet = clearingReadFacet;
+    this.clearingActionsFacet = clearingActionsFacet;
+    this.externalPauseManagementFacet = externalPauseManagementFacet;
+    this.externalControlListManagementFacet =
+      externalControlListManagementFacet;
+    this.externalKycListManagementFacet = externalKycListManagementFacet;
+    this.erc3643ManagementFacet = erc3643ManagementFacet;
+    this.erc3643OperationsFacet = erc3643OperationsFacet;
+    this.erc3643ReadFacet = erc3643ReadFacet;
+    this.erc3643BatchFacet = erc3643BatchFacet;
+    this.freezeFacet = freezeFacet;
+    this.timeTravel = timeTravel;
+    // Deployer
+    this.deployer = deployer;
+  }
 }

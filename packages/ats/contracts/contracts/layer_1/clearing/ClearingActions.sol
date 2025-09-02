@@ -206,61 +206,43 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from '../common/Common.sol';
-import {IClearingActions} from '../interfaces/clearing/IClearingActions.sol';
-import {IClearing} from '../interfaces/clearing/IClearing.sol';
-import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
-import {_CLEARING_ROLE} from '../constants/roles.sol';
+import { Common } from '../common/Common.sol';
+import { IClearingActions } from '../interfaces/clearing/IClearingActions.sol';
+import { IClearing } from '../interfaces/clearing/IClearing.sol';
+import { _CLEARING_VALIDATOR_ROLE } from '../constants/roles.sol';
+import { _CLEARING_ROLE } from '../constants/roles.sol';
 
 abstract contract ClearingActions is IClearingActions, Common {
-    function initializeClearing(
-        bool _clearingActive
-    ) external onlyUninitialized(_clearingStorage().initialized) {
-        IClearing.ClearingDataStorage
-            storage clearingStorage = _clearingStorage();
+    function initializeClearing(bool _clearingActive) external onlyUninitialized(_clearingStorage().initialized) {
+        IClearing.ClearingDataStorage storage clearingStorage = _clearingStorage();
         clearingStorage.initialized = true;
         clearingStorage.activated = _clearingActive;
     }
 
-    function activateClearing()
-        external
-        onlyRole(_CLEARING_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    function activateClearing() external onlyRole(_CLEARING_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _setClearing(true);
         emit ClearingActivated(_msgSender());
     }
 
-    function deactivateClearing()
-        external
-        onlyRole(_CLEARING_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    function deactivateClearing() external onlyRole(_CLEARING_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _setClearing(false);
         emit ClearingDeactivated(_msgSender());
     }
 
     function approveClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
         external
         override
         onlyRole(_CLEARING_VALIDATOR_ROLE)
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationIdentifier.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyClearingActivated
         validateExpirationTimestamp(_clearingOperationIdentifier, false)
         returns (bool success_)
     {
-        success_ = _approveClearingOperationByPartition(
-            _clearingOperationIdentifier
-        );
+        success_ = _approveClearingOperationByPartition(_clearingOperationIdentifier);
 
         emit ClearingOperationApproved(
             _msgSender(),
@@ -272,24 +254,19 @@ abstract contract ClearingActions is IClearingActions, Common {
     }
 
     function cancelClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
         external
         override
         onlyRole(_CLEARING_VALIDATOR_ROLE)
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationIdentifier.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyClearingActivated
         validateExpirationTimestamp(_clearingOperationIdentifier, false)
         returns (bool success_)
     {
-        success_ = _cancelClearingOperationByPartition(
-            _clearingOperationIdentifier
-        );
+        success_ = _cancelClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationCanceled(
             _msgSender(),
             _clearingOperationIdentifier.tokenHolder,
@@ -300,24 +277,19 @@ abstract contract ClearingActions is IClearingActions, Common {
     }
 
     function reclaimClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     )
         external
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationIdentifier.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyIdentified(_clearingOperationIdentifier.tokenHolder, address(0))
         onlyClearingActivated
         validateExpirationTimestamp(_clearingOperationIdentifier, true)
         returns (bool success_)
     {
-        success_ = _reclaimClearingOperationByPartition(
-            _clearingOperationIdentifier
-        );
+        success_ = _reclaimClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationReclaimed(
             _msgSender(),
             _clearingOperationIdentifier.tokenHolder,

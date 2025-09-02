@@ -206,25 +206,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_KYC_ROLE, _INTERNAL_KYC_MANAGER_ROLE} from '../constants/roles.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
-import {Common} from '../common/Common.sol';
+import { _KYC_ROLE, _INTERNAL_KYC_MANAGER_ROLE } from '../constants/roles.sol';
+import { IKyc } from '../interfaces/kyc/IKyc.sol';
+import { Common } from '../common/Common.sol';
 
 abstract contract Kyc is IKyc, Common {
-    function initializeInternalKyc(
-        bool _internalKycActivated
-    ) external onlyUninitialized(_kycStorage().initialized) {
+    function initializeInternalKyc(bool _internalKycActivated) external onlyUninitialized(_kycStorage().initialized) {
         KycStorage storage kycStorage = _kycStorage();
         kycStorage.initialized = true;
         kycStorage.internalKycActivated = _internalKycActivated;
     }
 
-    function activateInternalKyc()
-        external
-        onlyRole(_INTERNAL_KYC_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    function activateInternalKyc() external onlyRole(_INTERNAL_KYC_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _setInternalKyc(true);
         emit InternalKycStatusUpdated(_msgSender(), true);
     }
@@ -263,28 +256,16 @@ abstract contract Kyc is IKyc, Common {
 
     function revokeKyc(
         address _account
-    )
-        external
-        virtual
-        override
-        onlyRole(_KYC_ROLE)
-        onlyUnpaused
-        validateAddress(_account)
-        returns (bool success_)
-    {
+    ) external virtual override onlyRole(_KYC_ROLE) onlyUnpaused validateAddress(_account) returns (bool success_) {
         success_ = _revokeKyc(_account);
         emit KycRevoked(_account, _msgSender());
     }
 
-    function getKycStatusFor(
-        address _account
-    ) external view virtual override returns (KycStatus kycStatus_) {
+    function getKycStatusFor(address _account) external view virtual override returns (KycStatus kycStatus_) {
         kycStatus_ = _getKycStatusFor(_account);
     }
 
-    function getKycFor(
-        address _account
-    ) external view virtual override returns (KycData memory kyc_) {
+    function getKycFor(address _account) external view virtual override returns (KycData memory kyc_) {
         kyc_ = _getKycFor(_account);
     }
 
@@ -298,27 +279,11 @@ abstract contract Kyc is IKyc, Common {
         KycStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        virtual
-        override
-        returns (address[] memory accounts_, KycData[] memory kycData_)
-    {
-        (accounts_, kycData_) = _getKycAccountsData(
-            _kycStatus,
-            _pageIndex,
-            _pageLength
-        );
+    ) external view virtual override returns (address[] memory accounts_, KycData[] memory kycData_) {
+        (accounts_, kycData_) = _getKycAccountsData(_kycStatus, _pageIndex, _pageLength);
     }
 
-    function isInternalKycActivated()
-        external
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    function isInternalKycActivated() external view virtual override returns (bool) {
         return _isInternalKycActivated();
     }
 }

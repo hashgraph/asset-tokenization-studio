@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
+import { LibCommon } from '../../layer_0/common/libraries/LibCommon.sol';
 
 library ScheduledTasksLib {
     struct ScheduledTask {
@@ -225,10 +225,7 @@ library ScheduledTasksLib {
         uint256 _newScheduledTimestamp,
         bytes memory _newData
     ) internal {
-        ScheduledTask memory newScheduledTask = ScheduledTask(
-            _newScheduledTimestamp,
-            _newData
-        );
+        ScheduledTask memory newScheduledTask = ScheduledTask(_newScheduledTimestamp, _newData);
 
         uint256 scheduledTasksLength = getScheduledTaskCount(_scheduledTasks);
 
@@ -240,22 +237,11 @@ library ScheduledTasksLib {
             for (uint256 index = 1; index <= scheduledTasksLength; index++) {
                 uint256 scheduledTaskPosition = scheduledTasksLength - index;
 
-                if (
-                    _scheduledTasks
-                        .scheduledTasks[scheduledTaskPosition]
-                        .scheduledTimestamp < _newScheduledTimestamp
-                ) {
-                    _slideScheduledTasks(
-                        _scheduledTasks,
-                        scheduledTaskPosition
-                    );
+                if (_scheduledTasks.scheduledTasks[scheduledTaskPosition].scheduledTimestamp < _newScheduledTimestamp) {
+                    _slideScheduledTasks(_scheduledTasks, scheduledTaskPosition);
                 } else {
                     newScheduledTaskId = scheduledTaskPosition + 1;
-                    _insertScheduledTask(
-                        _scheduledTasks,
-                        newScheduledTaskId,
-                        newScheduledTask
-                    );
+                    _insertScheduledTask(_scheduledTasks, newScheduledTaskId, newScheduledTask);
                     added = true;
                     break;
                 }
@@ -289,11 +275,7 @@ library ScheduledTasksLib {
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = scheduledTasksLength - j;
 
-            ScheduledTask
-                memory currentScheduledTask = getScheduledTasksByIndex(
-                    _scheduledTasks,
-                    pos
-                );
+            ScheduledTask memory currentScheduledTask = getScheduledTasksByIndex(_scheduledTasks, pos);
 
             if (currentScheduledTask.scheduledTimestamp < _timestamp) {
                 _popScheduledTask(_scheduledTasks);
@@ -318,9 +300,7 @@ library ScheduledTasksLib {
                         }
                     } else {
                         // solhint-disable-next-line custom-errors
-                        revert(
-                            'onScheduledTaskTriggered method failed without reason'
-                        );
+                        revert('onScheduledTaskTriggered method failed without reason');
                     }
                 }
 
@@ -333,9 +313,7 @@ library ScheduledTasksLib {
         return newTaskID;
     }
 
-    function getScheduledTaskCount(
-        ScheduledTasksDataStorage storage _scheduledTasks
-    ) internal view returns (uint256) {
+    function getScheduledTaskCount(ScheduledTasksDataStorage storage _scheduledTasks) internal view returns (uint256) {
         return _scheduledTasks.scheduledTaskCount;
     }
 
@@ -351,39 +329,20 @@ library ScheduledTasksLib {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (ScheduledTask[] memory scheduledTask_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
-            _pageIndex,
-            _pageLength
-        );
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
 
-        scheduledTask_ = new ScheduledTask[](
-            LibCommon.getSize(
-                start,
-                end,
-                getScheduledTaskCount(_scheduledTasks)
-            )
-        );
+        scheduledTask_ = new ScheduledTask[](LibCommon.getSize(start, end, getScheduledTaskCount(_scheduledTasks)));
 
         for (uint256 i = 0; i < scheduledTask_.length; i++) {
-            scheduledTask_[i] = getScheduledTasksByIndex(
-                _scheduledTasks,
-                start + i
-            );
+            scheduledTask_[i] = getScheduledTasksByIndex(_scheduledTasks, start + i);
         }
     }
 
-    function _slideScheduledTasks(
-        ScheduledTasksDataStorage storage _scheduledTasks,
-        uint256 _pos
-    ) private {
-        _scheduledTasks
-            .scheduledTasks[_pos + 1]
-            .scheduledTimestamp = _scheduledTasks
+    function _slideScheduledTasks(ScheduledTasksDataStorage storage _scheduledTasks, uint256 _pos) private {
+        _scheduledTasks.scheduledTasks[_pos + 1].scheduledTimestamp = _scheduledTasks
             .scheduledTasks[_pos]
             .scheduledTimestamp;
-        _scheduledTasks.scheduledTasks[_pos + 1].data = _scheduledTasks
-            .scheduledTasks[_pos]
-            .data;
+        _scheduledTasks.scheduledTasks[_pos + 1].data = _scheduledTasks.scheduledTasks[_pos].data;
     }
 
     function _insertScheduledTask(
@@ -391,16 +350,12 @@ library ScheduledTasksLib {
         uint256 _pos,
         ScheduledTask memory scheduledTaskToInsert
     ) private {
-        _scheduledTasks
-            .scheduledTasks[_pos]
-            .scheduledTimestamp = scheduledTaskToInsert.scheduledTimestamp;
+        _scheduledTasks.scheduledTasks[_pos].scheduledTimestamp = scheduledTaskToInsert.scheduledTimestamp;
         _scheduledTasks.scheduledTasks[_pos].data = scheduledTaskToInsert.data;
         _scheduledTasks.scheduledTaskCount++;
     }
 
-    function _popScheduledTask(
-        ScheduledTasksDataStorage storage _scheduledTasks
-    ) private {
+    function _popScheduledTask(ScheduledTasksDataStorage storage _scheduledTasks) private {
         uint256 scheduledTasksLength = getScheduledTaskCount(_scheduledTasks);
         if (scheduledTasksLength == 0) {
             return;

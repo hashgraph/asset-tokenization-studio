@@ -203,131 +203,128 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
-    BusinessLogicResolver,
-    TimeTravel,
-    Equity,
-    IFactory,
-    TimeTravel__factory,
-} from '@typechain'
+  BusinessLogicResolver,
+  TimeTravel,
+  Equity,
+  IFactory,
+  TimeTravel__factory,
+} from '@typechain';
 import {
-    deployEquityFromFactory,
-    RegulationSubType,
-    RegulationType,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    MAX_UINT256,
-    dateToUnixTimestamp,
-} from '@scripts'
+  deployEquityFromFactory,
+  RegulationSubType,
+  RegulationType,
+  deployAtsFullInfrastructure,
+  DeployAtsFullInfrastructureCommand,
+  MAX_UINT256,
+  dateToUnixTimestamp,
+} from '@scripts';
 
 describe('Time Travel Tests', () => {
-    let factory: IFactory,
-        businessLogicResolver: BusinessLogicResolver,
-        diamond: Equity,
-        timeTravelFacet: TimeTravel
-    let signer_A: SignerWithAddress
-    let account_A: string
+  let factory: IFactory,
+    businessLogicResolver: BusinessLogicResolver,
+    diamond: Equity,
+    timeTravelFacet: TimeTravel;
+  let signer_A: SignerWithAddress;
+  let account_A: string;
 
-    const setupEnvironment = async () => {
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: true,
-            isMultiPartition: false,
-            name: 'TEST_AccessControl',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_B,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-        })
+  const setupEnvironment = async () => {
+    diamond = await deployEquityFromFactory({
+      adminAccount: account_A,
+      isWhiteList: false,
+      isControllable: true,
+      arePartitionsProtected: false,
+      clearingActive: false,
+      internalKycActivated: true,
+      isMultiPartition: false,
+      name: 'TEST_AccessControl',
+      symbol: 'TAC',
+      decimals: 6,
+      isin: isinGenerator(),
+      votingRight: false,
+      informationRight: false,
+      liquidationRight: false,
+      subscriptionRight: true,
+      conversionRight: true,
+      redemptionRight: true,
+      putRight: false,
+      dividendRight: 1,
+      currency: '0x345678',
+      numberOfShares: MAX_UINT256,
+      nominalValue: 100,
+      regulationType: RegulationType.REG_D,
+      regulationSubType: RegulationSubType.REG_D_506_B,
+      countriesControlListType: true,
+      listOfCountries: 'ES,FR,CH',
+      info: 'nothing',
+      factory,
+      businessLogicResolver: businessLogicResolver.address,
+    });
 
-        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
-    }
+    timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A);
+  };
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A] = await ethers.getSigners()
-        account_A = signer_A.address
+  before(async () => {
+    // mute | mock console.log
+    console.log = () => {};
+    [signer_A] = await ethers.getSigners();
+    account_A = signer_A.address;
 
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: false,
-                timeTravelEnabled: true,
-            })
-        )
+    const { ...deployedContracts } = await deployAtsFullInfrastructure(
+      await DeployAtsFullInfrastructureCommand.newInstance({
+        signer: signer_A,
+        useDeployed: false,
+        useEnvironment: false,
+        timeTravelEnabled: true,
+      }),
+    );
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
+    factory = deployedContracts.factory.contract;
+    businessLogicResolver = deployedContracts.businessLogicResolver.contract;
+  });
 
-    beforeEach(async () => {
-        await setupEnvironment()
-    })
+  beforeEach(async () => {
+    await setupEnvironment();
+  });
 
-    afterEach(async () => {
-        await timeTravelFacet.resetSystemTimestamp()
-    })
+  afterEach(async () => {
+    await timeTravelFacet.resetSystemTimestamp();
+  });
 
-    it('GIVEN succesful deployment THEN chainId is hardhat network id', async () => {
-        const chainId = 1337
-        await expect(timeTravelFacet.checkBlockChainid(chainId)).to.not.be
-            .reverted
-    })
+  it('GIVEN succesful deployment THEN chainId is hardhat network id', async () => {
+    const chainId = 1337;
+    await expect(timeTravelFacet.checkBlockChainid(chainId)).to.not.be.reverted;
+  });
 
-    it('GIVEN new system timestamp THEN change succeeds', async () => {
-        const newTimestamp = dateToUnixTimestamp('2030-01-01T00:00:00Z')
-        const oldSystemTime = 0
-        await expect(timeTravelFacet.changeSystemTimestamp(newTimestamp))
-            .to.emit(timeTravelFacet, 'SystemTimestampChanged')
-            .withArgs(oldSystemTime, newTimestamp)
-        expect(await timeTravelFacet.blockTimestamp()).to.be.equal(newTimestamp)
-    })
+  it('GIVEN new system timestamp THEN change succeeds', async () => {
+    const newTimestamp = dateToUnixTimestamp('2030-01-01T00:00:00Z');
+    const oldSystemTime = 0;
+    await expect(timeTravelFacet.changeSystemTimestamp(newTimestamp))
+      .to.emit(timeTravelFacet, 'SystemTimestampChanged')
+      .withArgs(oldSystemTime, newTimestamp);
+    expect(await timeTravelFacet.blockTimestamp()).to.be.equal(newTimestamp);
+  });
 
-    it('GIVEN incorrect system timestamp change THEN revert with InvalidTimestamp', async () => {
-        const newTimestamp = 0
-        await expect(
-            timeTravelFacet.changeSystemTimestamp(newTimestamp)
-        ).to.revertedWithCustomError(timeTravelFacet, 'InvalidTimestamp')
-    })
+  it('GIVEN incorrect system timestamp change THEN revert with InvalidTimestamp', async () => {
+    const newTimestamp = 0;
+    await expect(
+      timeTravelFacet.changeSystemTimestamp(newTimestamp),
+    ).to.revertedWithCustomError(timeTravelFacet, 'InvalidTimestamp');
+  });
 
-    it('GIVEN system timestamp reset THEN use network timestamp', async () => {
-        const newTimestamp = dateToUnixTimestamp('2030-01-01T00:00:00Z')
-        await timeTravelFacet.changeSystemTimestamp(newTimestamp)
-        await expect(timeTravelFacet.resetSystemTimestamp()).to.emit(
-            timeTravelFacet,
-            'SystemTimestampReset'
-        )
-        const latestBlock = await ethers.provider.getBlock('latest')
-        const latestTimestamp = latestBlock.timestamp
-        expect(await timeTravelFacet.blockTimestamp()).to.be.equal(
-            latestTimestamp
-        )
-    })
-})
+  it('GIVEN system timestamp reset THEN use network timestamp', async () => {
+    const newTimestamp = dateToUnixTimestamp('2030-01-01T00:00:00Z');
+    await timeTravelFacet.changeSystemTimestamp(newTimestamp);
+    await expect(timeTravelFacet.resetSystemTimestamp()).to.emit(
+      timeTravelFacet,
+      'SystemTimestampReset',
+    );
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const latestTimestamp = latestBlock.timestamp;
+    expect(await timeTravelFacet.blockTimestamp()).to.be.equal(latestTimestamp);
+  });
+});

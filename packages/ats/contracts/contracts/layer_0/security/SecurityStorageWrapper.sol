@@ -206,15 +206,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../../layer_3/constants/regulation.sol';
-import {
-    _SECURITY_STORAGE_POSITION
-} from '../../layer_3/constants/storagePositions.sol';
-import {ISecurity} from '../../layer_3/interfaces/ISecurity.sol';
-import {EquityStorageWrapper} from '../equity/EquityStorageWrapper.sol';
+import { RegulationData, AdditionalSecurityData } from '../../layer_3/constants/regulation.sol';
+import { _SECURITY_STORAGE_POSITION } from '../../layer_3/constants/storagePositions.sol';
+import { ISecurity } from '../../layer_3/interfaces/ISecurity.sol';
+import { EquityStorageWrapper } from '../equity/EquityStorageWrapper.sol';
 
 contract SecurityStorageWrapper is EquityStorageWrapper {
     function _initializeSecurity(
@@ -236,18 +231,12 @@ contract SecurityStorageWrapper is EquityStorageWrapper {
     function _getSecurityRegulationData()
         internal
         pure
-        returns (
-            ISecurity.SecurityRegulationData memory securityRegulationData_
-        )
+        returns (ISecurity.SecurityRegulationData memory securityRegulationData_)
     {
         securityRegulationData_ = _securityStorage();
     }
 
-    function _securityStorage()
-        internal
-        pure
-        returns (ISecurity.SecurityRegulationData storage securityStorage_)
-    {
+    function _securityStorage() internal pure returns (ISecurity.SecurityRegulationData storage securityStorage_) {
         bytes32 position = _SECURITY_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

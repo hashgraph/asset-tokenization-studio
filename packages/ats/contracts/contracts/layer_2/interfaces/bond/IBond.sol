@@ -206,19 +206,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {IBondRead} from './IBondRead.sol';
+import { IBondRead } from './IBondRead.sol';
 interface IBond {
-    function redeemAtMaturityByPartition(
-        address _tokenHolder,
-        bytes32 _partition,
-        uint256 _amount
-    ) external;
+    function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount) external;
 
-    function setCoupon(
-        IBondRead.Coupon calldata _newCoupon
-    ) external returns (bool success_, uint256 couponID_);
+    function setCoupon(IBondRead.Coupon calldata _newCoupon) external returns (bool success_, uint256 couponID_);
 
-    function updateMaturityDate(
-        uint256 _maturityDate
-    ) external returns (bool success_);
+    function updateMaturityDate(uint256 _maturityDate) external returns (bool success_);
 }

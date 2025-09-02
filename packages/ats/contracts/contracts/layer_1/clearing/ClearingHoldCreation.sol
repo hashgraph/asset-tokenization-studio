@@ -206,12 +206,10 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from '../common/Common.sol';
-import {
-    IClearingHoldCreation
-} from '../interfaces/clearing/IClearingHoldCreation.sol';
-import {Hold} from '../interfaces/hold/IHold.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import { Common } from '../common/Common.sol';
+import { IClearingHoldCreation } from '../interfaces/clearing/IClearingHoldCreation.sol';
+import { Hold } from '../interfaces/hold/IHold.sol';
+import { ThirdPartyType } from '../../layer_0/common/types/ThirdPartyType.sol';
 
 abstract contract ClearingHoldCreation is IClearingHoldCreation, Common {
     function clearingCreateHoldByPartition(
@@ -252,12 +250,8 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Common {
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         validateAddress(_hold.escrow)
         validateAddress(_clearingOperationFrom.from)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -295,20 +289,13 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Common {
         onlyUnrecoveredAddress(_hold.to)
         validateAddress(_hold.escrow)
         validateAddress(_clearingOperationFrom.from)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
-            _checkOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
+            _checkOperator(_clearingOperationFrom.clearingOperation.partition, _clearingOperationFrom.from);
             _checkExpirationTimestamp(_hold.expirationTimestamp);
             _checkUnProtectedPartitionsOrWildCardRole();
         }
@@ -334,14 +321,8 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Common {
         onlyUnrecoveredAddress(_hold.to)
         onlyProtectedPartitions
         validateAddress(_protectedClearingOperation.from)
-        onlyWithValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        )
-        onlyRole(
-            _protectedPartitionsRole(
-                _protectedClearingOperation.clearingOperation.partition
-            )
-        )
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
+        onlyRole(_protectedPartitionsRole(_protectedClearingOperation.clearingOperation.partition))
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
@@ -356,17 +337,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Common {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    )
-        external
-        view
-        override
-        returns (ClearingHoldCreationData memory clearingHoldCreationData_)
-    {
-        return
-            _getClearingHoldCreationForByPartitionAdjusted(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
+    ) external view override returns (ClearingHoldCreationData memory clearingHoldCreationData_) {
+        return _getClearingHoldCreationForByPartitionAdjusted(_partition, _tokenHolder, _clearingId);
     }
 }

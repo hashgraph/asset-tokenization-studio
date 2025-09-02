@@ -203,1222 +203,1203 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { isinGenerator } from '@thomaschaplin/isin-generator';
 import {
-    BusinessLogicResolver,
-    TREXFactoryAts,
-    ITREXFactory,
-    AccessControl,
-    ERC20,
-    Factory,
-} from '@typechain'
+  BusinessLogicResolver,
+  TREXFactoryAts,
+  ITREXFactory,
+  AccessControl,
+  ERC20,
+  Factory,
+} from '@typechain';
 import {
-    ADDRESS_ZERO,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    Rbac,
-    setEquityData,
-    setBondData,
-    DividendType,
-    setFactoryRegulationData,
-    RegulationType,
-    RegulationSubType,
-    DEFAULT_ADMIN_ROLE,
-    deployContractWithLibraries,
-    DeployContractWithLibraryCommand,
-    TREX_OWNER_ROLE,
-    dateToUnixTimestamp,
-} from '@scripts'
-import { deployFullSuiteFixture } from './fixtures/deploy-full-suite.fixture'
-import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
+  ADDRESS_ZERO,
+  deployAtsFullInfrastructure,
+  DeployAtsFullInfrastructureCommand,
+  Rbac,
+  setEquityData,
+  setBondData,
+  DividendType,
+  setFactoryRegulationData,
+  RegulationType,
+  RegulationSubType,
+  DEFAULT_ADMIN_ROLE,
+  deployContractWithLibraries,
+  DeployContractWithLibraryCommand,
+  TREX_OWNER_ROLE,
+  dateToUnixTimestamp,
+} from '@scripts';
+import { deployFullSuiteFixture } from './fixtures/deploy-full-suite.fixture';
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 
 describe('TREX Factory Tests', () => {
-    let deployer: SignerWithAddress
-
-    const init_rbacs: Rbac[] = []
-
-    const name = 'ATS-TREX-Token'
-    const symbol = 'ATS-TREX'
-    const decimals = 6
-    const isin = isinGenerator()
-    const isWhitelist = false
-    const isControllable = true
-    const isMultiPartition = false
-    const arePartitionsProtected = false
-    const clearingActive = true
-    const internalKycActivated = false
-
-    const votingRight = true
-    const informationRight = false
-    const liquidationRight = true
-    const subscriptionRight = false
-    const conversionRight = true
-    const redemptionRight = false
-    const putRight = true
-    const dividendRight = DividendType.PREFERRED
-    const numberOfShares = BigInt(2000)
-
-    const currency = '0x455552'
-    const numberOfUnits = BigInt(1000)
-    const nominalValue = 100
-    const startingDate = dateToUnixTimestamp(`2030-01-01T00:00:00Z`)
-    const maturityDate = dateToUnixTimestamp(`2031-01-01T00:00:00Z`)
-    const couponFrequency = 0
-    const couponRate = 0
-    const firstCouponDate = 0
-
-    const regulationType = RegulationType.REG_D
-    const regulationSubType = RegulationSubType.REG_D_506_B
-    const countriesControlListType = true
-    const listOfCountries = 'ES,FR,CH'
-    const info = 'info'
-
-    let businessLogicResolver: BusinessLogicResolver
-    let factoryAts: TREXFactoryAts
-    const tokenDetails: ITREXFactory.TokenDetailsStruct =
-        {} as ITREXFactory.TokenDetailsStruct
-    const claimDetails: ITREXFactory.ClaimDetailsStruct =
-        {} as ITREXFactory.ClaimDetailsStruct
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let trexDeployment: any
-
-    let accessControlFacet: AccessControl
-    let erc20Facet: ERC20
-    let factory: Factory
-
-    async function setFacets(diamond: string) {
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond
-        )
-
-        erc20Facet = await ethers.getContractAt('ERC20', diamond)
-    }
-
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-
-        deployer = (await ethers.getSigners())[0]
-
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: deployer,
-                useDeployed: false,
-                useEnvironment: false,
-                timeTravelEnabled: true,
-            })
-        )
-
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-        factory = await ethers.getContractAt(
-            'Factory',
-            deployedContracts.factory.address
-        )
-    })
-
-    beforeEach(async () => {
-        trexDeployment = await loadFixture(deployFullSuiteFixture)
-
-        factoryAts = (
-            await deployContractWithLibraries(
-                new DeployContractWithLibraryCommand({
-                    name: `TREXFactoryAts`,
-                    signer: deployer,
-                    args: [
-                        trexDeployment.authorities.trexImplementationAuthority
-                            .address,
-                        trexDeployment.factories.identityFactory.address,
-                        factory.address,
-                    ],
-                    libraries: [
-                        'TREXBondDeploymentLib',
-                        'TREXEquityDeploymentLib',
-                    ],
-                })
-            )
-        ).contract as TREXFactoryAts
-
-        await trexDeployment.factories.identityFactory
-            .connect(deployer)
-            .addTokenFactory(factoryAts.address)
-
-        tokenDetails.name = name
-        tokenDetails.symbol = symbol
-        tokenDetails.decimals = decimals
-        tokenDetails.ONCHAINID = ADDRESS_ZERO
-        tokenDetails.owner = deployer.address
-        tokenDetails.irAgents = [deployer.address]
-        tokenDetails.irs = ADDRESS_ZERO
-        tokenDetails.tokenAgents = [deployer.address]
-        tokenDetails.complianceModules = []
-        tokenDetails.complianceSettings = []
-
-        claimDetails.claimTopics = []
-        claimDetails.issuerClaims = []
-        claimDetails.issuers = []
-    })
-
-    describe('Equity tests', () => {
-        it('GIVEN a consumed salt WHEN reusing it THEN transaction reverts with token already deployed', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await factoryAts
-                .connect(deployer)
-                .deployTREXSuiteAtsEquity(
-                    'salt-equity',
-                    tokenDetails,
-                    claimDetails,
-                    equityData,
-                    factoryRegulationData
-                )
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('token already deployed')
-        })
-
-        it('GIVEN an invalid claim pattern THEN transaction reverts with claim pattern not valid', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            claimDetails.issuers = [await ethers.Wallet.createRandom().address]
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('claim pattern not valid')
-        })
-
-        it('GIVEN max claim issuers exceeded THEN transaction reverts with max 5 claim issuers at deployment', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            claimDetails.issuers = Array.from(
-                { length: 6 },
-                () => ethers.Wallet.createRandom().address
-            )
-            claimDetails.issuerClaims = Array.from({ length: 6 }, () => [
-                Math.floor(Math.random() * 10),
-            ])
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('max 5 claim issuers at deployment')
-        })
-
-        it('GIVEN max claim topics exceeded THEN transaction reverts with max 5 claim topics at deployment', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            claimDetails.claimTopics = Array.from({ length: 6 }, () =>
-                Math.floor(Math.random() * 10)
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('max 5 claim topics at deployment')
-        })
-
-        it('GIVEN max ir agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            tokenDetails.irAgents = Array.from(
-                { length: 6 },
-                () => ethers.Wallet.createRandom().address
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('max 5 agents at deployment')
-        })
-
-        it('GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            tokenDetails.tokenAgents = Array.from(
-                { length: 6 },
-                () => ethers.Wallet.createRandom().address
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('max 5 agents at deployment')
-        })
-
-        it('GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            tokenDetails.tokenAgents = Array.from(
-                { length: 6 },
-                () => ethers.Wallet.createRandom().address
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('max 5 agents at deployment')
-        })
-
-        it('GIVEN max modules actions exceeded THEN transaction reverts with max 30 module actions at deployment', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            tokenDetails.complianceModules = Array.from(
-                { length: 31 },
-                () => ethers.Wallet.createRandom().address
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsEquity(
-                        'salt-equity',
-                        tokenDetails,
-                        claimDetails,
-                        equityData,
-                        factoryRegulationData
-                    )
-            ).to.be.revertedWith('max 30 module actions at deployment')
-        })
-
-        it('GIVEN correct data WHEN deploying equity THEN deployment succeeds and events are emitted', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            const deploymentResult = await factoryAts
-                .connect(deployer)
-                .deployTREXSuiteAtsEquity(
-                    'salt-equity',
-                    tokenDetails,
-                    claimDetails,
-                    equityData,
-                    factoryRegulationData
-                )
-
-            const deploymentReceipt = await deploymentResult.wait()
-
-            const trexSuiteDeployedEvent = deploymentReceipt.events?.find(
-                (event) => event.event === 'TREXSuiteDeployed'
-            )
-            expect(trexSuiteDeployedEvent).to.not.be.undefined
-
-            const [trexAddr] = trexSuiteDeployedEvent?.args || []
-
-            await setFacets(trexAddr)
-
-            expect(await erc20Facet.name()).to.equal(name)
-            expect(await erc20Facet.symbol()).to.equal(symbol)
-            expect(await erc20Facet.decimals()).to.equal(decimals)
-            expect(
-                await accessControlFacet.hasRole(
-                    TREX_OWNER_ROLE,
-                    deployer.address
-                )
-            ).to.be.true
-            expect(
-                await accessControlFacet.hasRole(
-                    DEFAULT_ADMIN_ROLE,
-                    deployer.address
-                )
-            ).to.be.true
-        })
-
-        it('GIVEN correct data WHEN fetching deployed suite by salt THEN suite details are returned', async () => {
-            const equityData = await setEquityData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                votingRight,
-                informationRight,
-                liquidationRight,
-                subscriptionRight,
-                conversionRight,
-                redemptionRight,
-                putRight,
-                dividendRight,
-                currency,
-                numberOfShares,
-                nominalValue,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await factoryAts
-                .connect(deployer)
-                .deployTREXSuiteAtsEquity(
-                    'salt-equity',
-                    tokenDetails,
-                    claimDetails,
-                    equityData,
-                    factoryRegulationData
-                )
-
-            const suiteDetails = await factoryAts.getToken('salt-equity')
-            expect(suiteDetails).to.not.equal(ADDRESS_ZERO)
-        })
-    })
-
-    describe('Bond tests', () => {
-        it('GIVEN a consumed salt WHEN reusing it THEN transaction reverts with token already deployed', async () => {
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await factoryAts
-                .connect(deployer)
-                .deployTREXSuiteAtsBond(
-                    'salt-bond',
-                    tokenDetails,
-                    claimDetails,
-                    bondData,
-                    factoryRegulationData
-                )
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsBond(
-                        'salt-bond',
-                        tokenDetails,
-                        claimDetails,
-                        bondData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('token already deployed')
-        })
-
-        it('GIVEN an invalid claim pattern THEN transaction reverts with claim pattern not valid', async () => {
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            claimDetails.issuers = [await ethers.Wallet.createRandom().address]
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsBond(
-                        'salt-bond',
-                        tokenDetails,
-                        claimDetails,
-                        bondData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('claim pattern not valid')
-        })
-
-        it('GIVEN max claim issuers exceeded THEN transaction reverts with max 5 claim issuers at deployment', async () => {
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            claimDetails.issuers = Array.from(
-                { length: 6 },
-                () => ethers.Wallet.createRandom().address
-            )
-            claimDetails.issuerClaims = Array.from({ length: 6 }, () => [
-                Math.floor(Math.random() * 10),
-            ])
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsBond(
-                        'salt-bond',
-                        tokenDetails,
-                        claimDetails,
-                        bondData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('max 5 claim issuers at deployment')
-        })
-
-        it('GIVEN max claim topics exceeded THEN transaction reverts with max 5 claim topics at deployment', async () => {
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            claimDetails.claimTopics = Array.from({ length: 6 }, () =>
-                Math.floor(Math.random() * 10)
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsBond(
-                        'salt-bond',
-                        tokenDetails,
-                        claimDetails,
-                        bondData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('max 5 claim topics at deployment')
-        })
-
-        it('GIVEN max ir agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            tokenDetails.irAgents = Array.from(
-                { length: 6 },
-                () => ethers.Wallet.createRandom().address
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsBond(
-                        'salt-bond',
-                        tokenDetails,
-                        claimDetails,
-                        bondData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('max 5 agents at deployment')
-        })
-
-        it('GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            tokenDetails.tokenAgents = Array.from(
-                { length: 6 },
-                () => ethers.Wallet.createRandom().address
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsBond(
-                        'salt-bond',
-                        tokenDetails,
-                        claimDetails,
-                        bondData,
-                        factoryRegulationData
-                    )
-            ).to.revertedWith('max 5 agents at deployment')
-        })
-
-        it('GIVEN max modules actions exceeded THEN transaction reverts with max 30 module actions at deployment', async () => {
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            tokenDetails.complianceModules = Array.from(
-                { length: 31 },
-                () => ethers.Wallet.createRandom().address
-            )
-
-            await expect(
-                factoryAts
-                    .connect(deployer)
-                    .deployTREXSuiteAtsBond(
-                        'salt-bond',
-                        tokenDetails,
-                        claimDetails,
-                        bondData,
-                        factoryRegulationData
-                    )
-            ).to.be.revertedWith('max 30 module actions at deployment')
-        })
-
-        it('GIVEN correct data WHEN deploying bond THEN deployment succeeds and events are emitted', async () => {
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            const deploymentResult = await factoryAts
-                .connect(deployer)
-                .deployTREXSuiteAtsBond(
-                    'salt-bond',
-                    tokenDetails,
-                    claimDetails,
-                    bondData,
-                    factoryRegulationData
-                )
-
-            const deploymentReceipt = await deploymentResult.wait()
-
-            const trexSuiteDeployedEvent = deploymentReceipt.events?.find(
-                (event) => event.event === 'TREXSuiteDeployed'
-            )
-            expect(trexSuiteDeployedEvent).to.not.be.undefined
-
-            const [trexAddr] = trexSuiteDeployedEvent?.args || []
-
-            await setFacets(trexAddr)
-
-            expect(await erc20Facet.name()).to.equal(name)
-            expect(await erc20Facet.symbol()).to.equal(symbol)
-            expect(await erc20Facet.decimals()).to.equal(decimals)
-            expect(
-                await accessControlFacet.hasRole(
-                    TREX_OWNER_ROLE,
-                    deployer.address
-                )
-            ).to.be.true
-            expect(
-                await accessControlFacet.hasRole(
-                    DEFAULT_ADMIN_ROLE,
-                    deployer.address
-                )
-            ).to.be.true
-        })
-
-        it('GIVEN correct data WHEN fetching deployed suite by salt THEN suite details are returned', async () => {
-            const bondData = await setBondData({
-                adminAccount: deployer.address,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await factoryAts
-                .connect(deployer)
-                .deployTREXSuiteAtsBond(
-                    'salt-bond',
-                    tokenDetails,
-                    claimDetails,
-                    bondData,
-                    factoryRegulationData
-                )
-
-            const suiteDetails = await factoryAts.getToken('salt-bond')
-            expect(suiteDetails).to.not.equal(ADDRESS_ZERO)
-        })
-    })
-})
+  let deployer: SignerWithAddress;
+
+  const init_rbacs: Rbac[] = [];
+
+  const name = 'ATS-TREX-Token';
+  const symbol = 'ATS-TREX';
+  const decimals = 6;
+  const isin = isinGenerator();
+  const isWhitelist = false;
+  const isControllable = true;
+  const isMultiPartition = false;
+  const arePartitionsProtected = false;
+  const clearingActive = true;
+  const internalKycActivated = false;
+
+  const votingRight = true;
+  const informationRight = false;
+  const liquidationRight = true;
+  const subscriptionRight = false;
+  const conversionRight = true;
+  const redemptionRight = false;
+  const putRight = true;
+  const dividendRight = DividendType.PREFERRED;
+  const numberOfShares = BigInt(2000);
+
+  const currency = '0x455552';
+  const numberOfUnits = BigInt(1000);
+  const nominalValue = 100;
+  const startingDate = dateToUnixTimestamp(`2030-01-01T00:00:00Z`);
+  const maturityDate = dateToUnixTimestamp(`2031-01-01T00:00:00Z`);
+  const couponFrequency = 0;
+  const couponRate = 0;
+  const firstCouponDate = 0;
+
+  const regulationType = RegulationType.REG_D;
+  const regulationSubType = RegulationSubType.REG_D_506_B;
+  const countriesControlListType = true;
+  const listOfCountries = 'ES,FR,CH';
+  const info = 'info';
+
+  let businessLogicResolver: BusinessLogicResolver;
+  let factoryAts: TREXFactoryAts;
+  const tokenDetails: ITREXFactory.TokenDetailsStruct =
+    {} as ITREXFactory.TokenDetailsStruct;
+  const claimDetails: ITREXFactory.ClaimDetailsStruct =
+    {} as ITREXFactory.ClaimDetailsStruct;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let trexDeployment: any;
+
+  let accessControlFacet: AccessControl;
+  let erc20Facet: ERC20;
+  let factory: Factory;
+
+  async function setFacets(diamond: string) {
+    accessControlFacet = await ethers.getContractAt('AccessControl', diamond);
+
+    erc20Facet = await ethers.getContractAt('ERC20', diamond);
+  }
+
+  before(async () => {
+    // mute | mock console.log
+    console.log = () => {};
+
+    deployer = (await ethers.getSigners())[0];
+
+    const { ...deployedContracts } = await deployAtsFullInfrastructure(
+      await DeployAtsFullInfrastructureCommand.newInstance({
+        signer: deployer,
+        useDeployed: false,
+        useEnvironment: false,
+        timeTravelEnabled: true,
+      }),
+    );
+
+    businessLogicResolver = deployedContracts.businessLogicResolver.contract;
+    factory = await ethers.getContractAt(
+      'Factory',
+      deployedContracts.factory.address,
+    );
+  });
+
+  beforeEach(async () => {
+    trexDeployment = await loadFixture(deployFullSuiteFixture);
+
+    factoryAts = (
+      await deployContractWithLibraries(
+        new DeployContractWithLibraryCommand({
+          name: `TREXFactoryAts`,
+          signer: deployer,
+          args: [
+            trexDeployment.authorities.trexImplementationAuthority.address,
+            trexDeployment.factories.identityFactory.address,
+            factory.address,
+          ],
+          libraries: ['TREXBondDeploymentLib', 'TREXEquityDeploymentLib'],
+        }),
+      )
+    ).contract as TREXFactoryAts;
+
+    await trexDeployment.factories.identityFactory
+      .connect(deployer)
+      .addTokenFactory(factoryAts.address);
+
+    tokenDetails.name = name;
+    tokenDetails.symbol = symbol;
+    tokenDetails.decimals = decimals;
+    tokenDetails.ONCHAINID = ADDRESS_ZERO;
+    tokenDetails.owner = deployer.address;
+    tokenDetails.irAgents = [deployer.address];
+    tokenDetails.irs = ADDRESS_ZERO;
+    tokenDetails.tokenAgents = [deployer.address];
+    tokenDetails.complianceModules = [];
+    tokenDetails.complianceSettings = [];
+
+    claimDetails.claimTopics = [];
+    claimDetails.issuerClaims = [];
+    claimDetails.issuers = [];
+  });
+
+  describe('Equity tests', () => {
+    it('GIVEN a consumed salt WHEN reusing it THEN transaction reverts with token already deployed', async () => {
+      const equityData = await setEquityData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares,
+        nominalValue,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsEquity(
+          'salt-equity',
+          tokenDetails,
+          claimDetails,
+          equityData,
+          factoryRegulationData,
+        );
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsEquity(
+            'salt-equity',
+            tokenDetails,
+            claimDetails,
+            equityData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('token already deployed');
+    });
+
+    it('GIVEN an invalid claim pattern THEN transaction reverts with claim pattern not valid', async () => {
+      const equityData = await setEquityData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares,
+        nominalValue,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      claimDetails.issuers = [await ethers.Wallet.createRandom().address];
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsEquity(
+            'salt-equity',
+            tokenDetails,
+            claimDetails,
+            equityData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('claim pattern not valid');
+    });
+
+    it('GIVEN max claim issuers exceeded THEN transaction reverts with max 5 claim issuers at deployment', async () => {
+      const equityData = await setEquityData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares,
+        nominalValue,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      claimDetails.issuers = Array.from(
+        { length: 6 },
+        () => ethers.Wallet.createRandom().address,
+      );
+      claimDetails.issuerClaims = Array.from({ length: 6 }, () => [
+        Math.floor(Math.random() * 10),
+      ]);
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsEquity(
+            'salt-equity',
+            tokenDetails,
+            claimDetails,
+            equityData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('max 5 claim issuers at deployment');
+    });
+
+    it('GIVEN max claim topics exceeded THEN transaction reverts with max 5 claim topics at deployment', async () => {
+      const equityData = await setEquityData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares,
+        nominalValue,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      claimDetails.claimTopics = Array.from({ length: 6 }, () =>
+        Math.floor(Math.random() * 10),
+      );
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsEquity(
+            'salt-equity',
+            tokenDetails,
+            claimDetails,
+            equityData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('max 5 claim topics at deployment');
+    });
+
+    it('GIVEN max ir agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
+      const equityData = await setEquityData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares,
+        nominalValue,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      tokenDetails.irAgents = Array.from(
+        { length: 6 },
+        () => ethers.Wallet.createRandom().address,
+      );
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsEquity(
+            'salt-equity',
+            tokenDetails,
+            claimDetails,
+            equityData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('max 5 agents at deployment');
+    });
+
+    it('GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
+      const equityData = await setEquityData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares,
+        nominalValue,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      tokenDetails.tokenAgents = Array.from(
+        { length: 6 },
+        () => ethers.Wallet.createRandom().address,
+      );
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsEquity(
+            'salt-equity',
+            tokenDetails,
+            claimDetails,
+            equityData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('max 5 agents at deployment');
+    });
+
+    it('GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
+      const equityData = await setEquityData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares,
+        nominalValue,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      tokenDetails.tokenAgents = Array.from(
+        { length: 6 },
+        () => ethers.Wallet.createRandom().address,
+      );
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsEquity(
+            'salt-equity',
+            tokenDetails,
+            claimDetails,
+            equityData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('max 5 agents at deployment');
+    });
+
+    it('GIVEN max modules actions exceeded THEN transaction reverts with max 30 module actions at deployment', async () => {
+      const equityData = await setEquityData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares,
+        nominalValue,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      tokenDetails.complianceModules = Array.from(
+        { length: 31 },
+        () => ethers.Wallet.createRandom().address,
+      );
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsEquity(
+            'salt-equity',
+            tokenDetails,
+            claimDetails,
+            equityData,
+            factoryRegulationData,
+          ),
+      ).to.be.revertedWith('max 30 module actions at deployment');
+    });
+
+    it('GIVEN correct data WHEN deploying equity THEN deployment succeeds and events are emitted', async () => {
+      const equityData = await setEquityData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares,
+        nominalValue,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      const deploymentResult = await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsEquity(
+          'salt-equity',
+          tokenDetails,
+          claimDetails,
+          equityData,
+          factoryRegulationData,
+        );
+
+      const deploymentReceipt = await deploymentResult.wait();
+
+      const trexSuiteDeployedEvent = deploymentReceipt.events?.find(
+        (event) => event.event === 'TREXSuiteDeployed',
+      );
+      expect(trexSuiteDeployedEvent).to.not.be.undefined;
+
+      const [trexAddr] = trexSuiteDeployedEvent?.args || [];
+
+      await setFacets(trexAddr);
+
+      expect(await erc20Facet.name()).to.equal(name);
+      expect(await erc20Facet.symbol()).to.equal(symbol);
+      expect(await erc20Facet.decimals()).to.equal(decimals);
+      expect(
+        await accessControlFacet.hasRole(TREX_OWNER_ROLE, deployer.address),
+      ).to.be.true;
+      expect(
+        await accessControlFacet.hasRole(DEFAULT_ADMIN_ROLE, deployer.address),
+      ).to.be.true;
+    });
+
+    it('GIVEN correct data WHEN fetching deployed suite by salt THEN suite details are returned', async () => {
+      const equityData = await setEquityData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares,
+        nominalValue,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsEquity(
+          'salt-equity',
+          tokenDetails,
+          claimDetails,
+          equityData,
+          factoryRegulationData,
+        );
+
+      const suiteDetails = await factoryAts.getToken('salt-equity');
+      expect(suiteDetails).to.not.equal(ADDRESS_ZERO);
+    });
+  });
+
+  describe('Bond tests', () => {
+    it('GIVEN a consumed salt WHEN reusing it THEN transaction reverts with token already deployed', async () => {
+      const bondData = await setBondData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        currency,
+        numberOfUnits,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsBond(
+          'salt-bond',
+          tokenDetails,
+          claimDetails,
+          bondData,
+          factoryRegulationData,
+        );
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsBond(
+            'salt-bond',
+            tokenDetails,
+            claimDetails,
+            bondData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('token already deployed');
+    });
+
+    it('GIVEN an invalid claim pattern THEN transaction reverts with claim pattern not valid', async () => {
+      const bondData = await setBondData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        currency,
+        numberOfUnits,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      claimDetails.issuers = [await ethers.Wallet.createRandom().address];
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsBond(
+            'salt-bond',
+            tokenDetails,
+            claimDetails,
+            bondData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('claim pattern not valid');
+    });
+
+    it('GIVEN max claim issuers exceeded THEN transaction reverts with max 5 claim issuers at deployment', async () => {
+      const bondData = await setBondData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        currency,
+        numberOfUnits,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      claimDetails.issuers = Array.from(
+        { length: 6 },
+        () => ethers.Wallet.createRandom().address,
+      );
+      claimDetails.issuerClaims = Array.from({ length: 6 }, () => [
+        Math.floor(Math.random() * 10),
+      ]);
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsBond(
+            'salt-bond',
+            tokenDetails,
+            claimDetails,
+            bondData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('max 5 claim issuers at deployment');
+    });
+
+    it('GIVEN max claim topics exceeded THEN transaction reverts with max 5 claim topics at deployment', async () => {
+      const bondData = await setBondData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        currency,
+        numberOfUnits,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      claimDetails.claimTopics = Array.from({ length: 6 }, () =>
+        Math.floor(Math.random() * 10),
+      );
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsBond(
+            'salt-bond',
+            tokenDetails,
+            claimDetails,
+            bondData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('max 5 claim topics at deployment');
+    });
+
+    it('GIVEN max ir agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
+      const bondData = await setBondData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        currency,
+        numberOfUnits,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      tokenDetails.irAgents = Array.from(
+        { length: 6 },
+        () => ethers.Wallet.createRandom().address,
+      );
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsBond(
+            'salt-bond',
+            tokenDetails,
+            claimDetails,
+            bondData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('max 5 agents at deployment');
+    });
+
+    it('GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
+      const bondData = await setBondData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        currency,
+        numberOfUnits,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      tokenDetails.tokenAgents = Array.from(
+        { length: 6 },
+        () => ethers.Wallet.createRandom().address,
+      );
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsBond(
+            'salt-bond',
+            tokenDetails,
+            claimDetails,
+            bondData,
+            factoryRegulationData,
+          ),
+      ).to.revertedWith('max 5 agents at deployment');
+    });
+
+    it('GIVEN max modules actions exceeded THEN transaction reverts with max 30 module actions at deployment', async () => {
+      const bondData = await setBondData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        currency,
+        numberOfUnits,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      tokenDetails.complianceModules = Array.from(
+        { length: 31 },
+        () => ethers.Wallet.createRandom().address,
+      );
+
+      await expect(
+        factoryAts
+          .connect(deployer)
+          .deployTREXSuiteAtsBond(
+            'salt-bond',
+            tokenDetails,
+            claimDetails,
+            bondData,
+            factoryRegulationData,
+          ),
+      ).to.be.revertedWith('max 30 module actions at deployment');
+    });
+
+    it('GIVEN correct data WHEN deploying bond THEN deployment succeeds and events are emitted', async () => {
+      const bondData = await setBondData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        currency,
+        numberOfUnits,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      const deploymentResult = await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsBond(
+          'salt-bond',
+          tokenDetails,
+          claimDetails,
+          bondData,
+          factoryRegulationData,
+        );
+
+      const deploymentReceipt = await deploymentResult.wait();
+
+      const trexSuiteDeployedEvent = deploymentReceipt.events?.find(
+        (event) => event.event === 'TREXSuiteDeployed',
+      );
+      expect(trexSuiteDeployedEvent).to.not.be.undefined;
+
+      const [trexAddr] = trexSuiteDeployedEvent?.args || [];
+
+      await setFacets(trexAddr);
+
+      expect(await erc20Facet.name()).to.equal(name);
+      expect(await erc20Facet.symbol()).to.equal(symbol);
+      expect(await erc20Facet.decimals()).to.equal(decimals);
+      expect(
+        await accessControlFacet.hasRole(TREX_OWNER_ROLE, deployer.address),
+      ).to.be.true;
+      expect(
+        await accessControlFacet.hasRole(DEFAULT_ADMIN_ROLE, deployer.address),
+      ).to.be.true;
+    });
+
+    it('GIVEN correct data WHEN fetching deployed suite by salt THEN suite details are returned', async () => {
+      const bondData = await setBondData({
+        adminAccount: deployer.address,
+        isWhiteList: isWhitelist,
+        isControllable,
+        arePartitionsProtected,
+        clearingActive,
+        internalKycActivated,
+        isMultiPartition,
+        name,
+        symbol,
+        decimals,
+        isin,
+        currency,
+        numberOfUnits,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+        init_rbacs,
+        addAdmin: true,
+        businessLogicResolver: businessLogicResolver.address,
+      });
+
+      const factoryRegulationData = await setFactoryRegulationData(
+        regulationType,
+        regulationSubType,
+        countriesControlListType,
+        listOfCountries,
+        info,
+      );
+
+      await factoryAts
+        .connect(deployer)
+        .deployTREXSuiteAtsBond(
+          'salt-bond',
+          tokenDetails,
+          claimDetails,
+          bondData,
+          factoryRegulationData,
+        );
+
+      const suiteDetails = await factoryAts.getToken('salt-bond');
+      expect(suiteDetails).to.not.equal(ADDRESS_ZERO);
+    });
+  });
+});

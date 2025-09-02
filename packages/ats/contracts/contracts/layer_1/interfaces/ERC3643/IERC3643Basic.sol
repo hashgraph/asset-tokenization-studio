@@ -254,11 +254,7 @@ interface IERC3643Management {
      * @param _newWallet Address of the new wallet
      * @param _investorOnchainID OnchainID
      */
-    event RecoverySuccess(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID
-    );
+    event RecoverySuccess(address _lostWallet, address _newWallet, address _investorOnchainID);
 
     /**
      * @notice Thrown when calling from a recovered wallet
@@ -306,10 +302,7 @@ interface IERC3643Management {
      * Sets the compliance contract address
      */
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC3643(
-        address _compliance,
-        address _identityRegistry
-    ) external;
+    function initialize_ERC3643(address _compliance, address _identityRegistry) external;
 
     /**
      * @dev Sets the name of the token to `_name`.
