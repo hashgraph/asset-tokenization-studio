@@ -246,4 +246,13 @@ abstract contract LocalContext is Context {
     {
         blockTimestamp_ = block.timestamp;
     }
+
+    function _blockNumber()
+        internal
+        view
+        virtual
+        returns (uint256 blockNumber_)
+    {
+        blockNumber_ = block.number;
+    }
 }

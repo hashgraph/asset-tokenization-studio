@@ -1,9 +1,11 @@
 name: Publishing
 
+
 on:
   release:
     types:
       - published
+
 
 permissions:
   contents: read
@@ -31,6 +33,8 @@ jobs:
         run: |
           touch .npmrc
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+          cp .npmrc ./packages/ats/contracts/.npmrc
+          cp .npmrc ./packages/ats/sdk/.npmrc
           cp .npmrc ./packages/ats/contracts/.npmrc
           cp .npmrc ./packages/ats/sdk/.npmrc
 

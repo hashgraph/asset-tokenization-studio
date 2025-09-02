@@ -252,7 +252,8 @@ import {
   ERC1410ManagementFacet__factory,
   ERC1643__factory,
   ERC3643BatchFacet__factory,
-  ERC3643Facet__factory,
+  ERC3643ManagementFacet__factory,
+  ERC3643OperationsFacet__factory,
   ExternalControlListManagement__factory,
   ExternalKycListManagement__factory,
   ExternalPauseManagement__factory,
@@ -260,7 +261,7 @@ import {
   FreezeFacet__factory,
   HoldManagementFacet__factory,
   HoldTokenHolderFacet__factory,
-  IBond,
+  IBondRead,
   IEquity,
   Kyc__factory,
   Lock__factory,
@@ -528,7 +529,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      ERC3643Facet__factory.connect(
+      ERC3643OperationsFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
@@ -674,7 +675,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      ERC3643Facet__factory.connect(
+      ERC3643OperationsFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
@@ -761,7 +762,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      ERC3643Facet__factory.connect(
+      ERC3643OperationsFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
@@ -853,7 +854,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       executionDate: ${executionDate},
       rate : ${rate}  `,
     );
-    const couponStruct: IBond.CouponStruct = {
+    const couponStruct: IBondRead.CouponStruct = {
       recordDate: recordDate.toBigNumber(),
       executionDate: executionDate.toBigNumber(),
       rate: rate.toBigNumber(),
@@ -2634,7 +2635,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting name to ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC3643Facet__factory.connect(
+      ERC3643ManagementFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
@@ -2651,7 +2652,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC3643Facet__factory.connect(
+      ERC3643ManagementFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
@@ -2668,7 +2669,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting onchainID to ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC3643Facet__factory.connect(
+      ERC3643ManagementFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
@@ -2685,7 +2686,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting Identity Registry to ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC3643Facet__factory.connect(
+      ERC3643ManagementFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
@@ -2702,7 +2703,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting Compliance to ${security.toString()}`);
 
     return this.executeTransaction(
-      ERC3643Facet__factory.connect(
+      ERC3643ManagementFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
@@ -2762,7 +2763,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      ERC3643Facet__factory.connect(
+      ERC3643ManagementFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
@@ -2779,7 +2780,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Granting agent role to ${agentId.toString()}`);
 
     return this.executeTransaction(
-      ERC3643Facet__factory.connect(
+      ERC3643ManagementFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
@@ -2796,7 +2797,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Revoking agent role from ${agentId.toString()}`);
 
     return this.executeTransaction(
-      ERC3643Facet__factory.connect(
+      ERC3643ManagementFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),

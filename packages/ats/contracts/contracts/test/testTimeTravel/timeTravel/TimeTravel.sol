@@ -225,6 +225,16 @@ contract TimeTravel is
         _resetSystemTimestamp();
     }
 
+    function changeSystemBlocknumber(
+        uint256 _newSystemBlocknumber
+    ) external override {
+        _changeSystemBlocknumber(_newSystemBlocknumber);
+    }
+
+    function resetSystemBlocknumber() external override {
+        _resetSystemBlocknumber();
+    }
+
     function blockTimestamp() external view override returns (uint256) {
         return _blockTimestamp();
     }
@@ -255,7 +265,7 @@ contract TimeTravel is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
+        staticFunctionSelectors_ = new bytes4[](6);
         staticFunctionSelectors_[selectorIndex++] = this
             .changeSystemTimestamp
             .selector;
@@ -267,6 +277,12 @@ contract TimeTravel is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .checkBlockChainid
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .changeSystemBlocknumber
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .resetSystemBlocknumber
             .selector;
     }
 
