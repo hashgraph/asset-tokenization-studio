@@ -219,7 +219,7 @@ import {
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
-    EquityUSATimeTravel__factory,
+    EquityUSAFacetTimeTravel__factory,
     Pause__factory,
     Lock__factory,
     IHold__factory,
@@ -330,7 +330,7 @@ describe('Equity Tests', () => {
             diamond.address,
             signer_A
         )
-        equityFacet = EquityUSATimeTravel__factory.connect(
+        equityFacet = EquityUSAFacetTimeTravel__factory.connect(
             diamond.address,
             signer_A
         )

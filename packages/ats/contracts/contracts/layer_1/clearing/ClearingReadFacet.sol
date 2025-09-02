@@ -206,72 +206,14 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {Common} from '../common/Common.sol';
 import {IClearingRead} from '../interfaces/clearing/IClearingRead.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_READ_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ClearingRead} from './ClearingRead.sol';
 
-contract ClearingReadFacet is IStaticFunctionSelectors, IClearingRead, Common {
-    function getClearedAmountFor(
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return _getClearedAmountForAdjusted(_tokenHolder);
-    }
-
-    function getClearedAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return
-            _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder);
-    }
-
-    function getClearingCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        ClearingOperationType _clearingOperationType
-    ) external view override returns (uint256 clearingCount_) {
-        return
-            _getClearingCountForByPartition(
-                _partition,
-                _tokenHolder,
-                _clearingOperationType
-            );
-    }
-
-    function getClearingsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        ClearingOperationType _clearingOperationType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (uint256[] memory clearingsId_) {
-        return
-            _getClearingsIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _clearingOperationType,
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function getClearingThirdParty(
-        bytes32 _partition,
-        address _tokenHolder,
-        ClearingOperationType _clearingOpeartionType,
-        uint256 _clearingId
-    ) external view override returns (address thirdParty_) {
-        thirdParty_ = _getClearingThirdParty(
-            _partition,
-            _tokenHolder,
-            _clearingOpeartionType,
-            _clearingId
-        );
-    }
-
+contract ClearingReadFacet is ClearingRead, IStaticFunctionSelectors {
     function getStaticResolverKey()
         external
         pure

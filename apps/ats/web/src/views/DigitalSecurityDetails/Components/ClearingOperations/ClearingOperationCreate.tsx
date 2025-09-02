@@ -132,7 +132,7 @@ export const ClearingOperationsCreate = () => {
         amount: amount.toString(),
         clearingExpirationDate: dateToUnixTimestamp(expirationDate),
         holdExpirationDate: dateToUnixTimestamp(holdExpirationDate),
-        escrow: escrowAccount,
+        escrowId: escrowAccount,
         // TODO: check with SDK: sourceId,
         targetId,
         partitionId: DEFAULT_PARTITION,

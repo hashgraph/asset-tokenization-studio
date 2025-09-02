@@ -270,7 +270,7 @@ describe('LogService', () => {
         super(code, message);
       }
 
-      toString() {
+      toString(): string {
         return `BaseError: ${this.message}`;
       }
     }
