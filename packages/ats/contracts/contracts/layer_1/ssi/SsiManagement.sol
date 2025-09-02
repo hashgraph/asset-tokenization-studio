@@ -208,13 +208,9 @@ pragma solidity 0.8.18;
 
 import {Common} from '../common/Common.sol';
 import {_SSI_MANAGER_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_SSI_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {ISsiManagement} from '../interfaces/ssi/ISsiManagement.sol';
 
-contract SsiManagement is ISsiManagement, IStaticFunctionSelectors, Common {
+abstract contract SsiManagement is ISsiManagement, Common {
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
     )
@@ -291,54 +287,5 @@ contract SsiManagement is ISsiManagement, IStaticFunctionSelectors, Common {
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
         return _getIssuerListMembers(_pageIndex, _pageLength);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _SSI_MANAGEMENT_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setRevocationRegistryAddress
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.addIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.removeIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getRevocationRegistryAddress
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getIssuerListCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getIssuerListMembers
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISsiManagement)
-            .interfaceId;
     }
 }

@@ -206,9 +206,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
@@ -221,7 +218,7 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-abstract contract Equity is IEquity, IStaticFunctionSelectors, Common {
+abstract contract Equity is IEquity, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     function setDividends(
