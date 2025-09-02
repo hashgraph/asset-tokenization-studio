@@ -2,8 +2,7 @@ name: Publishing
 
 on:
   release:
-    types:
-      - published
+    types: [published]
 
 permissions:
   contents: read
@@ -12,6 +11,8 @@ jobs:
   publish:
     name: Publish NPM Packages
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     steps:
       - name: Harden Runner
@@ -40,19 +41,13 @@ jobs:
       # --- ATS publishing ---
       - name: Publish ats/contracts
         if: contains(github.ref_name, 'ats')
-        run: npm run ats:contracts:publish --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm run ats:contracts:publish
 
       - name: Publish ats/sdk
         if: contains(github.ref_name, 'ats')
-        run: npm run ats:sdk:publish --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm run ats:sdk:publish
 
       # --- Mass Payout publishing ---
       - name: Publish mass-payout
         if: contains(github.ref_name, 'mp')
-        run: npm run mass-payout:publish --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm run mass-payout:publish
