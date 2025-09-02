@@ -207,7 +207,7 @@ import { Query } from '@core/query/Query';
 import { QueryResponse } from '@core/query/QueryResponse';
 
 export class CanTransferByPartitionQueryResponse implements QueryResponse {
-  constructor(public readonly payload: string) {}
+  constructor(public readonly payload: [string, string]) {}
 }
 
 export class CanTransferByPartitionQuery extends Query<CanTransferByPartitionQueryResponse> {
