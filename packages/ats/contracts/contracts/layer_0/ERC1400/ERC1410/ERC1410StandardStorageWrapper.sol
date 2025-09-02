@@ -208,8 +208,8 @@ pragma solidity 0.8.18;
 
 import {_DEFAULT_PARTITION} from '../../constants/values.sol';
 import {
-    IERC3643Basic
-} from '../../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
+    IERC3643Management
+} from '../../../layer_1/interfaces/ERC3643/IERC3643Management.sol';
 import {ICompliance} from '../../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {IssueData} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
@@ -357,9 +357,16 @@ abstract contract ERC1410StandardStorageWrapper is
                     _issueData.tokenHolder,
                     _issueData.value
                 ),
-                IERC3643Basic.ComplianceCallFailed.selector
+                IERC3643Management.ComplianceCallFailed.selector
             );
         }
+
+        _afterTokenTransfer(
+            _issueData.partition,
+            address(0),
+            _issueData.tokenHolder,
+            _issueData.value
+        );
 
         emit IssuedByPartition(
             _issueData.partition,
@@ -391,9 +398,11 @@ abstract contract ERC1410StandardStorageWrapper is
                     _from,
                     _value
                 ),
-                IERC3643Basic.ComplianceCallFailed.selector
+                IERC3643Management.ComplianceCallFailed.selector
             );
         }
+
+        _afterTokenTransfer(_partition, _from, address(0), _value);
 
         emit RedeemedByPartition(
             _partition,

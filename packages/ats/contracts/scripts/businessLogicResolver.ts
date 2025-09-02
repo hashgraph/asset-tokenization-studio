@@ -249,6 +249,7 @@ export interface DeployedBusinessLogics {
     pause: IStaticFunctionSelectors
     ERC20: IStaticFunctionSelectors
     ERC20Permit: IStaticFunctionSelectors
+    ERC20Votes: IStaticFunctionSelectors
     ERC1644: IStaticFunctionSelectors
     erc1410ReadFacet: IStaticFunctionSelectors
     erc1410ManagementFacet: IStaticFunctionSelectors
@@ -257,6 +258,7 @@ export interface DeployedBusinessLogics {
     ERC1643: IStaticFunctionSelectors
     equityUSA: IStaticFunctionSelectors
     bondUSA: IStaticFunctionSelectors
+    bondUSARead: IStaticFunctionSelectors
     Snapshots: IStaticFunctionSelectors
     scheduledSnapshots: IStaticFunctionSelectors
     scheduledBalanceAdjustments: IStaticFunctionSelectors
@@ -273,7 +275,9 @@ export interface DeployedBusinessLogics {
     externalControlListManagement: IStaticFunctionSelectors
     externalKycListManagement: IStaticFunctionSelectors
     freeze: IStaticFunctionSelectors
-    ERC3643: IStaticFunctionSelectors
+    ERC3643Management: IStaticFunctionSelectors
+    ERC3643Operations: IStaticFunctionSelectors
+    ERC3643Read: IStaticFunctionSelectors
     ERC3643Batch: IStaticFunctionSelectors
 }
 
