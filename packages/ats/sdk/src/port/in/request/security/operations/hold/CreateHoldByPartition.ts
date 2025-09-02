@@ -211,7 +211,7 @@ export default class CreateHoldByPartitionRequest extends ValidatedRequest<Creat
   securityId: string;
   partitionId: string;
   amount: string;
-  escrow: string;
+  escrowId: string;
   targetId: string;
   expirationDate: string;
 
@@ -219,14 +219,14 @@ export default class CreateHoldByPartitionRequest extends ValidatedRequest<Creat
     securityId,
     partitionId,
     amount,
-    escrow,
+    escrowId,
     targetId,
     expirationDate,
   }: {
     securityId: string;
     partitionId: string;
     amount: string;
-    escrow: string;
+    escrowId: string;
     targetId: string;
     expirationDate: string;
   }) {
@@ -234,7 +234,7 @@ export default class CreateHoldByPartitionRequest extends ValidatedRequest<Creat
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       partitionId: FormatValidation.checkBytes32Format(),
       amount: FormatValidation.checkAmount(),
-      escrow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      escrowId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       expirationDate: (val) => {
         return SecurityDate.checkDateTimestamp(
@@ -247,7 +247,7 @@ export default class CreateHoldByPartitionRequest extends ValidatedRequest<Creat
     this.securityId = securityId;
     this.partitionId = partitionId;
     this.amount = amount;
-    this.escrow = escrow;
+    this.escrowId = escrowId;
     this.targetId = targetId;
     this.expirationDate = expirationDate;
   }
