@@ -213,8 +213,24 @@ import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC20PERMIT_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
+import {
+    _CONTRACT_NAME_ERC20PERMIT,
+    _CONTRACT_VERSION_ERC20PERMIT
+} from '../../constants/values.sol';
 
 contract ERC20Permit is IERC20Permit, IStaticFunctionSelectors, Common {
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC20Permit()
+        external
+        override
+        onlyUninitialized(_erc20PermitStorage().initialized)
+    {
+        ERC20PermitStorage storage erc20PermitStorage = _erc20PermitStorage();
+        erc20PermitStorage.initialized = true;
+        erc20PermitStorage.contractName = _CONTRACT_NAME_ERC20PERMIT;
+        erc20PermitStorage.contractVersion = _CONTRACT_VERSION_ERC20PERMIT;
+    }
+
     function permit(
         address owner,
         address spender,
@@ -262,8 +278,11 @@ contract ERC20Permit is IERC20Permit, IStaticFunctionSelectors, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_ = new bytes4[](4);
         uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .initialize_ERC20Permit
+            .selector;
         staticFunctionSelectors_[selectorsIndex++] = this.permit.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.nonces.selector;
         staticFunctionSelectors_[selectorsIndex++] = this

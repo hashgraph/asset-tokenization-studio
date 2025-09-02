@@ -232,7 +232,7 @@ export const CONTRACT_NAMES = [
     'PauseFacet',
     'ERC20',
     'ERC20Permit',
-    'ERC1410ScheduledTasks',
+    'ERC20Votes',
     'ERC1410ReadFacet',
     'ERC1410ManagementFacet',
     'ERC1410TokenHolderFacet',
@@ -242,6 +242,7 @@ export const CONTRACT_NAMES = [
     'DiamondFacet',
     'EquityUSA',
     'BondUSA',
+    'BondUSARead',
     'ScheduledSnapshots',
     'ScheduledBalanceAdjustments',
     'ScheduledTasks',
@@ -267,13 +268,25 @@ export const CONTRACT_NAMES = [
     'ExternalKycListManagement',
     'ERC3643',
     'FreezeFacet',
-    'ERC3643Facet',
+    'ERC3643ManagementFacet',
+    'ERC3643ReadFacet',
+    'ERC3643OperationsFacet',
     'ERC3643BatchFacet',
     'FreezeFacet',
+    'TREXFactoryAts',
     'ComplianceMock',
     'IdentityRegistryMock',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]
+
+export const LIBRARY_NAMES = [
+    'SecurityDeploymentLib',
+    'TREXBaseDeploymentLib',
+    'TREXBondDeploymentLib',
+    'TREXEquityDeploymentLib',
+] as const
+export type LibraryName = (typeof LIBRARY_NAMES)[number]
+
 export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
 
 export const CONTRACT_FACTORY_NAMES = CONTRACT_NAMES.map(
