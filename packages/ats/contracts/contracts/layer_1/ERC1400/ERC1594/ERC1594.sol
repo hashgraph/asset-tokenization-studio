@@ -206,17 +206,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {_ISSUER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
 import {Common} from '../../common/Common.sol';
 import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
-import {Common} from '../../common/Common.sol';
 
-contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
+abstract contract ERC1594 is IERC1594, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594()
         external
@@ -446,52 +441,5 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, Common {
                 ''
             );
         return (status, statusCode, reason);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC1594_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](9);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC1594
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .transferWithData
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .transferFromWithData
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.isIssuable.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.issue.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.redeem.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.redeemFrom.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.canTransfer.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .canTransferFrom
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC1594).interfaceId;
     }
 }

@@ -211,16 +211,8 @@ import {
 } from '../interfaces/corporateActions/ICorporateActions.sol';
 import {Common} from '../common/Common.sol';
 import {_CORPORATE_ACTION_ROLE} from '../constants/roles.sol';
-import {_CORPORATE_ACTIONS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-contract CorporateActions is
-    ICorporateActions,
-    IStaticFunctionSelectors,
-    Common
-{
+abstract contract CorporateActions is ICorporateActions, Common {
     function addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
@@ -291,54 +283,5 @@ contract CorporateActions is
             _pageIndex,
             _pageLength
         );
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _CORPORATE_ACTIONS_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](6);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .addCorporateAction
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCorporateAction
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCorporateActionCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCorporateActionIds
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCorporateActionCountByType
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCorporateActionIdsByType
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ICorporateActions)
-            .interfaceId;
     }
 }
