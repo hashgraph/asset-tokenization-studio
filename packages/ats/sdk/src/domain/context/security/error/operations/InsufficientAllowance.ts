@@ -206,10 +206,7 @@
 import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export class InsufficientAllowance extends BaseError {
-  constructor(fromId: string, spenderId: string) {
-    super(
-      ErrorCode.InsufficientAllowance,
-      `Insufficient allowance from ${fromId} to ${spenderId}`,
-    );
+  constructor() {
+    super(ErrorCode.InsufficientAllowance, `Insufficient allowance`);
   }
 }

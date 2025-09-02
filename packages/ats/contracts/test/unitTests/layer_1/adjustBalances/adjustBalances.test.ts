@@ -330,7 +330,7 @@ describe('Adjust Balances Tests', () => {
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
         scheduledTasksFacet = await ethers.getContractAt(
-            'ScheduledTasksTimeTravel',
+            'ScheduledTasksFacetTimeTravel',
             diamond.address
         )
 

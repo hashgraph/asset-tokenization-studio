@@ -328,7 +328,7 @@ describe('ProtectedClearingCreateHoldByPartitionCommandHandler', () => {
         );
         expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
           2,
-          command.escrow,
+          command.escrowId,
         );
         expect(
           accountServiceMock.getAccountEvmAddressOrNull,

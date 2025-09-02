@@ -320,7 +320,6 @@ describe('RedeemCommandHandler', () => {
           account.id.toString(),
           command.amount,
           _PARTITION_ID_1,
-          account.id.toString(),
         );
 
         expect(transactionServiceMock.getHandler().redeem).toHaveBeenCalledWith(

@@ -209,7 +209,6 @@ export class RedeemAtMaturityByPartitionCommandHandler
     try {
       const { securityId, partitionId, amount, sourceId } = command;
       const handler = this.transactionService.getHandler();
-      const account = this.accountService.getCurrentAccount();
       const security = await this.securityService.get(securityId);
 
       const securityEvmAddress: EvmAddress =
@@ -224,7 +223,6 @@ export class RedeemAtMaturityByPartitionCommandHandler
         sourceId,
         amount,
         partitionId,
-        account.id.toString(),
       );
 
       await this.validationService.checkDecimals(security, amount);
