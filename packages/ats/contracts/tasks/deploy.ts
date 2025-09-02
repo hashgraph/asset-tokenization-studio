@@ -205,7 +205,12 @@
 
 import { task, types } from 'hardhat/config'
 import { CONTRACT_NAMES, ContractName, Network } from '@configuration'
-import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments'
+import {
+    DeployAllArgs,
+    DeployArgs,
+    DeployTrexFactoryArgs,
+    GetSignerResult,
+} from './Arguments'
 import * as fs from 'fs'
 
 task(
@@ -261,46 +266,49 @@ task(
         const {
             factory,
             businessLogicResolver,
-            accessControl,
-            cap,
-            controlList,
-            kyc,
-            ssiManagement,
-            pause,
-            erc20,
+            accessControlFacet,
+            capFacet,
+            controlListFacet,
+            kycFacet,
+            ssiManagementFacet,
+            pauseFacet,
+            erc20Facet,
             erc1410ReadFacet,
             erc1410ManagementFacet,
             erc1410TokenHolderFacet,
-            erc1594,
-            erc1643,
-            erc1644,
-            snapshots,
+            erc1594Facet,
+            erc1643Facet,
+            erc1644Facet,
+            snapshotsFacet,
             diamondFacet,
-            equityUsa,
-            bondUsa,
-            scheduledSnapshots,
-            scheduledBalanceAdjustments,
-            scheduledTasks,
-            corporateActions,
-            lock,
+            equityUsaFacet,
+            bondUsaFacet,
+            bondUsaRead,
+            scheduledSnapshotsFacet,
+            scheduledBalanceAdjustmentsFacet,
+            scheduledTasksFacet,
+            corporateActionsFacet,
+            lockFacet,
             holdReadFacet,
             holdManagementFacet,
             holdTokenHolderFacet,
-            transferAndLock,
-            adjustBalances,
+            transferAndLockFacet,
+            adjustBalancesFacet,
             clearingActionsFacet,
             clearingTransferFacet,
             clearingRedeemFacet,
             clearingHoldCreationFacet,
             clearingReadFacet,
-            externalPauseManagement,
-            externalControlListManagement,
-            externalKycListManagement,
-            protectedPartitions,
-            erc3643Facet,
+            externalPauseManagementFacet,
+            externalControlListManagementFacet,
+            externalKycListManagementFacet,
+            protectedPartitionsFacet,
+            erc3643ManagementFacet,
+            erc3643OperationsFacet,
+            erc3643ReadFacet,
             erc3643BatchFacet,
-            freeze,
-            erc20Permit,
+            freezeFacet,
+            erc20PermitFacet,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -319,49 +327,53 @@ task(
             'Factory Proxy': factory.proxyAddress,
             'Factory Proxy Admin': factory.proxyAdminAddress,
             Factory: factory.address,
-            'Access Control': accessControl.address,
-            Cap: cap.address,
-            'Control List': controlList.address,
-            Kyc: kyc.address,
-            SsiManagement: ssiManagement.address,
-            Pause: pause.address,
-            ERC20: erc20.address,
-            ERC1410Read: erc1410ReadFacet.address,
-            ERC1410Management: erc1410ManagementFacet.address,
-            ERC1410TokenHolder: erc1410TokenHolderFacet.address,
-            ERC1594: erc1594.address,
-            ERC1643: erc1643.address,
-            ERC1644: erc1644.address,
-            Snapshots: snapshots.address,
+            'Access Control Facet': accessControlFacet.address,
+            'Cap Facet': capFacet.address,
+            'Control List Facet': controlListFacet.address,
+            'Kyc Facet': kycFacet.address,
+            'SsiManagement Facet': ssiManagementFacet.address,
+            'Pause Facet': pauseFacet.address,
+            'ERC20 Facet': erc20Facet.address,
+            'ERC1410 Read Facet': erc1410ReadFacet.address,
+            'ERC1410 Management Facet': erc1410ManagementFacet.address,
+            'ERC1410 TokenHolder Facet': erc1410TokenHolderFacet.address,
+            'ERC1594 Facet': erc1594Facet.address,
+            'ERC1643 Facet': erc1643Facet.address,
+            'ERC1644 Facet': erc1644Facet.address,
+            'Snapshots Facet': snapshotsFacet.address,
             'Diamond Facet': diamondFacet.address,
-            Equity: equityUsa.address,
-            Bond: bondUsa.address,
-            'Scheduled Snapshots': scheduledSnapshots.address,
-            'Scheduled Balance Adjustments':
-                scheduledBalanceAdjustments.address,
-            'Scheduled Tasks': scheduledTasks.address,
-            'Corporate Actions': corporateActions.address,
-            Lock: lock.address,
+            'Equity Facet': equityUsaFacet.address,
+            'Bond Facet': bondUsaFacet.address,
+            BondRead: bondUsaRead.address,
+            'Scheduled Snapshots Facet': scheduledSnapshotsFacet.address,
+            'Scheduled Balance Adjustments Facet':
+                scheduledBalanceAdjustmentsFacet.address,
+            'Scheduled Tasks Facet': scheduledTasksFacet.address,
+            'Corporate Actions Facet': corporateActionsFacet.address,
+            'Lock Facet': lockFacet.address,
             'Hold Read Facet': holdReadFacet.address,
             'Hold Management Facet': holdManagementFacet.address,
             'Hold TokenHolder Facet': holdTokenHolderFacet.address,
-            'Transfer and Lock': transferAndLock.address,
-            'Adjust Balances': adjustBalances.address,
+            'Transfer and Lock Facet': transferAndLockFacet.address,
+            'Adjust Balances Facet': adjustBalancesFacet.address,
             'Clearing Action Facet': clearingActionsFacet.address,
             'Clearing Transfer Facet': clearingTransferFacet.address,
             'Clearing Redeem Facet': clearingRedeemFacet.address,
             'Clearing Hold Creation Facet': clearingHoldCreationFacet.address,
             'Clearing Read Facet': clearingReadFacet.address,
-            'External Pause Management Facet': externalPauseManagement.address,
+            'External Pause Management Facet':
+                externalPauseManagementFacet.address,
             'External Control List Management Facet':
-                externalControlListManagement.address,
+                externalControlListManagementFacet.address,
             'External Kyc List Management Facet':
-                externalKycListManagement.address,
-            'Protected Partitions': protectedPartitions.address,
-            'ERC3643 Facet': erc3643Facet.address,
+                externalKycListManagementFacet.address,
+            'Protected Partitions Facet': protectedPartitionsFacet.address,
+            'ERC3643 Management Facet': erc3643ManagementFacet.address,
+            'ERC3643 Operations Facet': erc3643OperationsFacet.address,
+            'ERC3643 Read Facet': erc3643ReadFacet.address,
             'ERC3643 Batch Facet': erc3643BatchFacet.address,
-            Freeze: freeze.address,
-            ERC20Permit: erc20Permit.address,
+            'Freeze Facet': freezeFacet.address,
+            'ERC20Permit Facet': erc20PermitFacet.address,
         }
 
         const contractAddress = []
@@ -472,5 +484,93 @@ task('deploy', 'Deploy new contract')
         }
         console.log(
             `Implementation: ${address} (${contractId}) for ${contractName}`
+        )
+    })
+
+task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
+    .addOptionalParam(
+        'atsFactory',
+        'Address of the ATS factory',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'implementationAuthority',
+        'Address of the implementation authority (defaults to zero address)',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'idFactory',
+        'Address of the identity factory (defaults to zero address)',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'privateKey',
+        'The private key of the account in raw hexadecimal format',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
+    )
+    .setAction(async (args: DeployTrexFactoryArgs, hre) => {
+        const {
+            deployContractWithLibraries,
+            DeployContractWithLibraryCommand,
+            ADDRESS_ZERO,
+        } = await import('@scripts')
+
+        const { signer }: GetSignerResult = await hre.run('getSigner', {
+            privateKey: args.privateKey,
+            signerAddress: args.signerAddress,
+            signerPosition: args.signerPosition,
+        })
+
+        // Import validation utilities
+        const { validateDeploymentParams } = await import(
+            './utils/errorHandling'
+        )
+
+        // Validate and prepare deployment parameters
+        const implementationAuthority =
+            args.implementationAuthority ?? ADDRESS_ZERO
+        const idFactory = args.idFactory ?? ADDRESS_ZERO
+        const atsFactory = args.atsFactory ?? ADDRESS_ZERO
+
+        // Comprehensive parameter validation with warnings
+        validateDeploymentParams(
+            {
+                implementationAuthority,
+                idFactory,
+                atsFactory,
+            },
+            hre,
+            {
+                allowZeroAddress: true,
+                warnOnZeroAddress: true,
+                strict: false, // Set to true for production deployments
+            }
+        )
+
+        console.log(`   Signer: ${signer.address}`)
+
+        await deployContractWithLibraries(
+            new DeployContractWithLibraryCommand({
+                name: `TREXFactoryAts`,
+                signer,
+                args: [implementationAuthority, idFactory, atsFactory],
+                libraries: ['TREXBondDeploymentLib', 'TREXEquityDeploymentLib'],
+            })
         )
     })

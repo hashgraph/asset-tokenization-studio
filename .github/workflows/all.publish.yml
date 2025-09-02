@@ -1,9 +1,10 @@
 name: Publishing
 
+
 on:
   release:
-    types:
-      - published
+    types: [published]
+
 
 permissions:
   contents: read
@@ -12,6 +13,8 @@ jobs:
   publish:
     name: Publish NPM Packages
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     steps:
       - name: Harden Runner
@@ -33,9 +36,8 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
           cp .npmrc ./packages/ats/contracts/.npmrc
           cp .npmrc ./packages/ats/sdk/.npmrc
-
-      - name: Change references
-        run: ./changeProjectsReferencesToRepo.sh
+          cp .npmrc ./packages/ats/contracts/.npmrc
+          cp .npmrc ./packages/ats/sdk/.npmrc
 
       - name: Install dependencies
         run: npm ci
@@ -43,19 +45,13 @@ jobs:
       # --- ATS publishing ---
       - name: Publish ats/contracts
         if: contains(github.ref_name, 'ats')
-        run: npm run publish:ats:contracts --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm run ats:contracts:publish
 
       - name: Publish ats/sdk
         if: contains(github.ref_name, 'ats')
-        run: npm run publish:ats:sdk --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm run ats:sdk:publish
 
       # --- Mass Payout publishing ---
       - name: Publish mass-payout
         if: contains(github.ref_name, 'mp')
-        run: npm run publish:mass-payout --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm run mass-payout:publish

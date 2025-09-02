@@ -219,8 +219,8 @@ describe('ERC20Permit Tests', () => {
     const symbol = 'TAC'
     const decimals = 6
     const isin = isinGenerator()
-    const CONTRACT_NAME = 'ASSET_TOKENIZATION'
-    const CONTRACT_VERSION = '1.0.0'
+    const CONTRACT_NAME_ERC20PERMIT = 'ERC20Permit'
+    const CONTRACT_VERSION_ERC20PERMIT = '1.0.0'
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
@@ -326,8 +326,8 @@ describe('ERC20Permit Tests', () => {
                 const domainSeparator =
                     await erc20PermitFacet.DOMAIN_SEPARATOR()
                 const domain = {
-                    name: CONTRACT_NAME,
-                    version: CONTRACT_VERSION,
+                    name: CONTRACT_NAME_ERC20PERMIT,
+                    version: CONTRACT_VERSION_ERC20PERMIT,
                     chainId: await ethers.provider
                         .getNetwork()
                         .then((n) => n.chainId),
@@ -461,8 +461,8 @@ describe('ERC20Permit Tests', () => {
                 const expiry = Math.floor(Date.now() / 1000) + 3600 // 1 hour in the future
 
                 const domain = {
-                    name: CONTRACT_NAME,
-                    version: CONTRACT_VERSION,
+                    name: CONTRACT_NAME_ERC20PERMIT,
+                    version: CONTRACT_VERSION_ERC20PERMIT,
                     chainId: await ethers.provider
                         .getNetwork()
                         .then((n) => n.chainId),
@@ -515,8 +515,8 @@ describe('ERC20Permit Tests', () => {
                 const expiry = Math.floor(Date.now() / 1000) + 3600 // 1 hour in the future
 
                 const domain = {
-                    name: CONTRACT_NAME,
-                    version: CONTRACT_VERSION,
+                    name: CONTRACT_NAME_ERC20PERMIT,
+                    version: CONTRACT_VERSION_ERC20PERMIT,
                     chainId: await ethers.provider
                         .getNetwork()
                         .then((n) => n.chainId),

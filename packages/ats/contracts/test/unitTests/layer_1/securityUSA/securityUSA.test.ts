@@ -207,7 +207,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
-import { BusinessLogicResolver, IFactory } from '@typechain'
+import { type BondUSARead, BusinessLogicResolver, IFactory } from '@typechain'
 import {
     Rbac,
     deployBondFromFactory,
@@ -242,6 +242,7 @@ describe('Security USA Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
+    let bondUSAFacet: BondUSARead
 
     before(async () => {
         // mute | mock console.log
@@ -529,8 +530,8 @@ describe('Security USA Tests', () => {
                 factory,
             })
 
-            const bondUSAFacet = await ethers.getContractAt(
-                'BondUSA',
+            bondUSAFacet = await ethers.getContractAt(
+                'BondUSARead',
                 diamond.address,
                 signer_B
             )
@@ -601,8 +602,8 @@ describe('Security USA Tests', () => {
                 factory,
             })
 
-            const bondUSAFacet = await ethers.getContractAt(
-                'BondUSA',
+            bondUSAFacet = await ethers.getContractAt(
+                'BondUSARead',
                 diamond.address,
                 signer_B
             )
@@ -672,8 +673,8 @@ describe('Security USA Tests', () => {
                 factory,
             })
 
-            const bondUSAFacet = await ethers.getContractAt(
-                'BondUSA',
+            bondUSAFacet = await ethers.getContractAt(
+                'BondUSARead',
                 diamond.address,
                 signer_B
             )

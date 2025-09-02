@@ -1363,7 +1363,7 @@ describe('ERC3643 Tests', () => {
                 })
 
                 const erc3643NoCompliance = await ethers.getContractAt(
-                    'ERC3643',
+                    'IERC3643',
                     diamond.address
                 )
                 const kycNoCompliance = await ethers.getContractAt(
@@ -1484,7 +1484,7 @@ describe('ERC3643 Tests', () => {
                 })
 
                 const erc3643NoCompliance = await ethers.getContractAt(
-                    'ERC3643',
+                    'IERC3643',
                     diamond.address
                 )
                 const kycNoCompliance = await ethers.getContractAt(
@@ -1932,10 +1932,7 @@ describe('ERC3643 Tests', () => {
             //TODO: we should test when canTransfer returns false for the FROM, TO and SENDER separately
             it('GIVEN ComplianceMock::canTransfer returns false THEN operations fail with ComplianceNotAllowed', async () => {
                 // Setup: mint tokens and set compliance to return false for canTransfer
-                const erc20FacetE = await erc3643Facet.mint(
-                    account_E,
-                    2 * AMOUNT
-                )
+                await erc3643Facet.mint(account_E, 2 * AMOUNT)
                 await erc20Facet
                     .connect(signer_E)
                     .approve(account_D, MAX_UINT256)

@@ -231,13 +231,11 @@ export default class ContractService extends Service {
   }
 
   async getContractEvmAddress(contractId: string): Promise<EvmAddress> {
-    const evmAddress = new EvmAddress(
+    return new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.test(contractId)
         ? (await this.mirrorNodeAdapter.getContractInfo(contractId)).evmAddress
         : contractId.toString(),
     );
-
-    return evmAddress;
   }
 
   async getEvmAddressesFromHederaIds(
