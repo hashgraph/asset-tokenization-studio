@@ -1,109 +1,399 @@
-Obteniendo firmas de eventos (Ethers v5)...
-contractNames
-[
-  '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol:ArraysUpgradeable',
-  '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol:CountersUpgradeable',
-  '@openzeppelin/contracts-upgradeable/utils/StorageSlotUpgradeable.sol:StorageSlotUpgradeable',
-  '@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol:MathUpgradeable',
-  '@openzeppelin/contracts/access/Ownable.sol:Ownable',
-  '@openzeppelin/contracts/interfaces/IERC1967.sol:IERC1967',
-  '@openzeppelin/contracts/interfaces/draft-IERC1822.sol:IERC1822Proxiable',
-  '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy',
-  '@openzeppelin/contracts/proxy/ERC1967/ERC1967Upgrade.sol:ERC1967Upgrade',
-  '@openzeppelin/contracts/proxy/Proxy.sol:Proxy',
-  '@openzeppelin/contracts/proxy/beacon/IBeacon.sol:IBeacon',
-  '@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol:ProxyAdmin',
-  '@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol:ITransparentUpgradeableProxy',
-  '@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol:TransparentUpgradeableProxy',
-  '@openzeppelin/contracts/utils/Address.sol:Address',
-  '@openzeppelin/contracts/utils/Context.sol:Context',
-  '@openzeppelin/contracts/utils/StorageSlot.sol:StorageSlot',
-  '@openzeppelin/contracts/utils/Strings.sol:Strings',
-  '@openzeppelin/contracts/utils/introspection/IERC165.sol:IERC165',
-  '@openzeppelin/contracts/utils/math/Math.sol:Math',
-  '@openzeppelin/contracts/utils/math/SignedMath.sol:SignedMath',
-  '@openzeppelin/contracts/utils/structs/EnumerableSet.sol:EnumerableSet',
-  'contracts/factory/Factory.sol:Factory',
-  'contracts/interfaces/factory/IFactory.sol:IFactory',
-  'contracts/interfaces/resolver/IBusinessLogicResolver.sol:IBusinessLogicResolver',
-  'contracts/interfaces/resolver/IBusinessLogicResolverWrapper.sol:IBusinessLogicResolverWrapper',
-  'contracts/interfaces/resolver/diamondCutManager/IDiamondCutManager.sol:IDiamondCutManager',
-  'contracts/interfaces/resolver/resolverProxy/IDiamond.sol:IDiamond',
-  'contracts/interfaces/resolver/resolverProxy/IDiamondCut.sol:IDiamondCut',
-  'contracts/interfaces/resolver/resolverProxy/IDiamondLoupe.sol:IDiamondLoupe',
-  'contracts/interfaces/resolver/resolverProxy/IERC173.sol:IERC173',
-  'contracts/interfaces/resolver/resolverProxy/IResolverProxy.sol:IResolverProxy',
-  'contracts/interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol:IStaticFunctionSelectors',
-  'contracts/layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol:ERC1410BasicStorageWrapper',
-  'contracts/layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol:ERC1410BasicStorageWrapperRead',
-  'contracts/layer_0/ERC1400/ERC1410/ERC1410OperatorStorageWrapper.sol:ERC1410OperatorStorageWrapper',
-  'contracts/layer_0/ERC1400/ERC1410/ERC1410ProtectedPartitionsStorageWrapper.sol:ERC1410ProtectedPartitionsStorageWrapper',
-  'contracts/layer_0/ERC1400/ERC1410/ERC1410StandardStorageWrapper.sol:ERC1410StandardStorageWrapper',
-  'contracts/layer_0/ERC1400/ERC1410/ERC1410StorageWrapper.sol:ERC1410StorageWrapper',
-  'contracts/layer_0/ERC1400/ERC1594/ERC1594StorageWrapper.sol:ERC1594StorageWrapper',
-  'contracts/layer_0/ERC1400/ERC1644/ERC1644StorageWrapper.sol:ERC1644StorageWrapper',
-  'contracts/layer_0/ERC1400/ERC20/ERC20StorageWrapper1.sol:ERC20StorageWrapper1',
-  'contracts/layer_0/ERC1400/ERC20/ERC20StorageWrapper2.sol:ERC20StorageWrapper2',
-  'contracts/layer_0/ERC3643/ERC3643StorageWrapper1.sol:ERC3643StorageWrapper1',
-  'contracts/layer_0/ERC3643/ERC3643StorageWrapper2.sol:ERC3643StorageWrapper2',
-  'contracts/layer_0/adjustBalances/AdjustBalancesStorageWrapper1.sol:AdjustBalancesStorageWrapper1',
-  'contracts/layer_0/adjustBalances/AdjustBalancesStorageWrapper2.sol:AdjustBalancesStorageWrapper2',
-  'contracts/layer_0/cap/CapStorageWrapper1.sol:CapStorageWrapper1',
-  'contracts/layer_0/cap/CapStorageWrapper2.sol:CapStorageWrapper2',
-  'contracts/layer_0/clearing/ClearingStorageWrapper1.sol:ClearingStorageWrapper1',
-  'contracts/layer_0/clearing/ClearingStorageWrapper2.sol:ClearingStorageWrapper2',
-  'contracts/layer_0/common/libraries/ArrayLib.sol:ArrayLib',
-  'contracts/layer_0/common/libraries/Eip1066Lib.sol:Eip1066Lib',
-  'contracts/layer_0/common/libraries/EnumerableSetBytes4.sol:EnumerableSetBytes4',
-  'contracts/layer_0/common/libraries/LibCommon.sol:LibCommon',
-  'contracts/layer_0/common/libraries/LowLevelCall.sol:LowLevelCall',
-  'contracts/layer_0/constants/eip1066.sol:Eip1066',
-  'contracts/layer_0/context/LocalContext.sol:LocalContext',
-  'contracts/layer_0/core/accessControl/AccessControlStorageWrapper.sol:AccessControlStorageWrapper',
-  'contracts/layer_0/core/controlList/ControlListStorageWrapper.sol:ControlListStorageWrapper',
-  'contracts/layer_0/core/externalControlLists/ExternalControlListManagementStorageWrapper.sol:ExternalControlListManagementStorageWrapper',
-  'contracts/layer_0/core/externalKycLists/ExternalKycListManagementStorageWrapper.sol:ExternalKycListManagementStorageWrapper',
-  'contracts/layer_0/core/externalLists/ExternalListManagementStorageWrapper.sol:ExternalListManagementStorageWrapper',
-  'contracts/layer_0/core/externalPauses/ExternalPauseManagementStorageWrapper.sol:ExternalPauseManagementStorageWrapper',
-  'contracts/layer_0/core/kyc/KycStorageWrapper.sol:KycStorageWrapper',
-  'contracts/layer_0/core/pause/PauseStorageWrapper.sol:PauseStorageWrapper',
-  'contracts/layer_0/core/protectedPartitions/ProtectedPartitionsStorageWrapper.sol:ProtectedPartitionsStorageWrapper',
-  'contracts/layer_0/core/ssi/SsiManagementStorageWrapper.sol:SsiManagementStorageWrapper',
-  'contracts/layer_0/corporateActions/CorporateActionsStorageWrapper1.sol:CorporateActionsStorageWrapper1',
-  'contracts/layer_0/corporateActions/CorporateActionsStorageWrapper2.sol:CorporateActionsStorageWrapper2',
-  'contracts/layer_0/hold/HoldStorageWrapper1.sol:HoldStorageWrapper1',
-  'contracts/layer_0/hold/HoldStorageWrapper2.sol:HoldStorageWrapper2',
-  'contracts/layer_0/lock/LockStorageWrapper1.sol:LockStorageWrapper1',
-  'contracts/layer_0/lock/LockStorageWrapper2.sol:LockStorageWrapper2',
-  'contracts/layer_0/scheduledTasks/ScheduledTasksCommon.sol:ScheduledTasksCommon',
-  'contracts/layer_0/scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol:ScheduledBalanceAdjustmentsStorageWrapper',
-  'contracts/layer_0/scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapperRead.sol:ScheduledSnapshotsStorageWrapperRead',
-  'contracts/layer_0/scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol:ScheduledTasksStorageWrapper',
-  'contracts/layer_0/snapshots/SnapshotsStorageWrapper1.sol:SnapshotsStorageWrapper1',
-  'contracts/layer_0/snapshots/SnapshotsStorageWrapper2.sol:SnapshotsStorageWrapper2',
-  'contracts/layer_1/ERC1400/ERC1410/ERC1410Management.sol:ERC1410Management',
-  'contracts/layer_1/ERC1400/ERC1410/ERC1410ManagementFacet.sol:ERC1410ManagementFacet',
-  'contracts/layer_1/ERC1400/ERC1410/ERC1410Read.sol:ERC1410Read',
-  'contracts/layer_1/ERC1400/ERC1410/ERC1410ReadFacet.sol:ERC1410ReadFacet',
-  'contracts/layer_1/ERC1400/ERC1410/ERC1410TokenHolder.sol:ERC1410TokenHolder',
-  'contracts/layer_1/ERC1400/ERC1410/ERC1410TokenHolderFacet.sol:ERC1410TokenHolderFacet',
-  'contracts/layer_1/ERC1400/ERC1594/ERC1594.sol:ERC1594',
-  'contracts/layer_1/ERC1400/ERC1643/ERC1643.sol:ERC1643',
-  'contracts/layer_1/ERC1400/ERC1644/ERC1644.sol:ERC1644',
-  'contracts/layer_1/ERC1400/ERC20/ERC20.sol:ERC20',
-  'contracts/layer_1/ERC3643/ERC3643.sol:ERC3643',
-  'contracts/layer_1/ERC3643/ERC3643Batch.sol:ERC3643Batch',
-  'contracts/layer_1/ERC3643/ERC3643BatchFacet.sol:ERC3643BatchFacet',
-  'contracts/layer_1/ERC3643/ERC3643Facet.sol:ERC3643Facet',
-  'contracts/layer_1/accessControl/AccessControl.sol:AccessControl',
-  'contracts/layer_1/accessControl/AccessControlFacet.sol:AccessControlFacet',
-  'contracts/layer_1/cap/Cap.sol:Cap',
-  'contracts/layer_1/clearing/ClearingActionsFacet.sol:ClearingActionsFacet',
-  'contracts/layer_1/clearing/ClearingHoldCreationFacet.sol:ClearingHoldCreationFacet',
-  'contracts/layer_1/clearing/ClearingReadFacet.sol:ClearingReadFacet',
-  ... 168 more items
-]
+
 {
+  "ClaimIssuer": [
+    {
+      "name": "addClaim",
+      "selector": "0xb1a34e0d"
+    },
+    {
+      "name": "addKey",
+      "selector": "0x1d381240"
+    },
+    {
+      "name": "approve",
+      "selector": "0x747442d3"
+    },
+    {
+      "name": "execute",
+      "selector": "0xb61d27f6"
+    },
+    {
+      "name": "getClaim",
+      "selector": "0xc9100bcb"
+    },
+    {
+      "name": "getClaimIdsByTopic",
+      "selector": "0x80e9e9e1"
+    },
+    {
+      "name": "getKey",
+      "selector": "0x12aaac70"
+    },
+    {
+      "name": "getKeyPurposes",
+      "selector": "0xfb307b34"
+    },
+    {
+      "name": "getKeysByPurpose",
+      "selector": "0x9010f726"
+    },
+    {
+      "name": "getRecoveredAddress",
+      "selector": "0xc3b129e3"
+    },
+    {
+      "name": "initialize",
+      "selector": "0xc4d66de8"
+    },
+    {
+      "name": "isClaimRevoked",
+      "selector": "0x2646b264"
+    },
+    {
+      "name": "isClaimValid",
+      "selector": "0xc0969a6e"
+    },
+    {
+      "name": "keyHasPurpose",
+      "selector": "0xd202158d"
+    },
+    {
+      "name": "removeClaim",
+      "selector": "0x4eee424a"
+    },
+    {
+      "name": "removeKey",
+      "selector": "0x53d413c5"
+    },
+    {
+      "name": "revokeClaim",
+      "selector": "0x73c33708"
+    },
+    {
+      "name": "revokeClaimBySignature",
+      "selector": "0x9f7f9edd"
+    },
+    {
+      "name": "revokedClaims",
+      "selector": "0xd2345249"
+    },
+    {
+      "name": "version",
+      "selector": "0x54fd4d50"
+    }
+  ],
+  "Identity": [
+    {
+      "name": "addClaim",
+      "selector": "0xb1a34e0d"
+    },
+    {
+      "name": "addKey",
+      "selector": "0x1d381240"
+    },
+    {
+      "name": "approve",
+      "selector": "0x747442d3"
+    },
+    {
+      "name": "execute",
+      "selector": "0xb61d27f6"
+    },
+    {
+      "name": "getClaim",
+      "selector": "0xc9100bcb"
+    },
+    {
+      "name": "getClaimIdsByTopic",
+      "selector": "0x80e9e9e1"
+    },
+    {
+      "name": "getKey",
+      "selector": "0x12aaac70"
+    },
+    {
+      "name": "getKeyPurposes",
+      "selector": "0xfb307b34"
+    },
+    {
+      "name": "getKeysByPurpose",
+      "selector": "0x9010f726"
+    },
+    {
+      "name": "getRecoveredAddress",
+      "selector": "0xc3b129e3"
+    },
+    {
+      "name": "initialize",
+      "selector": "0xc4d66de8"
+    },
+    {
+      "name": "isClaimValid",
+      "selector": "0xc0969a6e"
+    },
+    {
+      "name": "keyHasPurpose",
+      "selector": "0xd202158d"
+    },
+    {
+      "name": "removeClaim",
+      "selector": "0x4eee424a"
+    },
+    {
+      "name": "removeKey",
+      "selector": "0x53d413c5"
+    },
+    {
+      "name": "version",
+      "selector": "0x54fd4d50"
+    }
+  ],
+  "IIdFactory": [
+    {
+      "name": "addTokenFactory",
+      "selector": "0x9ce19365"
+    },
+    {
+      "name": "createIdentity",
+      "selector": "0x8e952bfe"
+    },
+    {
+      "name": "createIdentityWithManagementKeys",
+      "selector": "0xfe5cd59a"
+    },
+    {
+      "name": "createTokenIdentity",
+      "selector": "0x3d56ff66"
+    },
+    {
+      "name": "getIdentity",
+      "selector": "0x2fea7b81"
+    },
+    {
+      "name": "getToken",
+      "selector": "0x59770438"
+    },
+    {
+      "name": "getWallets",
+      "selector": "0x422c29a4"
+    },
+    {
+      "name": "implementationAuthority",
+      "selector": "0x2307f882"
+    },
+    {
+      "name": "isSaltTaken",
+      "selector": "0x3a500451"
+    },
+    {
+      "name": "isTokenFactory",
+      "selector": "0x3e3bc3d7"
+    },
+    {
+      "name": "linkWallet",
+      "selector": "0xb8bb8126"
+    },
+    {
+      "name": "removeTokenFactory",
+      "selector": "0x937529ef"
+    },
+    {
+      "name": "unlinkWallet",
+      "selector": "0x5027dbe2"
+    }
+  ],
+  "IClaimIssuer": [
+    {
+      "name": "addClaim",
+      "selector": "0xb1a34e0d"
+    },
+    {
+      "name": "addKey",
+      "selector": "0x1d381240"
+    },
+    {
+      "name": "approve",
+      "selector": "0x747442d3"
+    },
+    {
+      "name": "execute",
+      "selector": "0xb61d27f6"
+    },
+    {
+      "name": "getClaim",
+      "selector": "0xc9100bcb"
+    },
+    {
+      "name": "getClaimIdsByTopic",
+      "selector": "0x80e9e9e1"
+    },
+    {
+      "name": "getKey",
+      "selector": "0x12aaac70"
+    },
+    {
+      "name": "getKeyPurposes",
+      "selector": "0xfb307b34"
+    },
+    {
+      "name": "getKeysByPurpose",
+      "selector": "0x9010f726"
+    },
+    {
+      "name": "isClaimRevoked",
+      "selector": "0x2646b264"
+    },
+    {
+      "name": "isClaimValid",
+      "selector": "0xc0969a6e"
+    },
+    {
+      "name": "keyHasPurpose",
+      "selector": "0xd202158d"
+    },
+    {
+      "name": "removeClaim",
+      "selector": "0x4eee424a"
+    },
+    {
+      "name": "removeKey",
+      "selector": "0x53d413c5"
+    },
+    {
+      "name": "revokeClaim",
+      "selector": "0x73c33708"
+    },
+    {
+      "name": "revokeClaimBySignature",
+      "selector": "0x9f7f9edd"
+    }
+  ],
+  "IERC734": [
+    {
+      "name": "addKey",
+      "selector": "0x1d381240"
+    },
+    {
+      "name": "approve",
+      "selector": "0x747442d3"
+    },
+    {
+      "name": "execute",
+      "selector": "0xb61d27f6"
+    },
+    {
+      "name": "getKey",
+      "selector": "0x12aaac70"
+    },
+    {
+      "name": "getKeyPurposes",
+      "selector": "0xfb307b34"
+    },
+    {
+      "name": "getKeysByPurpose",
+      "selector": "0x9010f726"
+    },
+    {
+      "name": "keyHasPurpose",
+      "selector": "0xd202158d"
+    },
+    {
+      "name": "removeKey",
+      "selector": "0x53d413c5"
+    }
+  ],
+  "IERC735": [
+    {
+      "name": "addClaim",
+      "selector": "0xb1a34e0d"
+    },
+    {
+      "name": "getClaim",
+      "selector": "0xc9100bcb"
+    },
+    {
+      "name": "getClaimIdsByTopic",
+      "selector": "0x80e9e9e1"
+    },
+    {
+      "name": "removeClaim",
+      "selector": "0x4eee424a"
+    }
+  ],
+  "IIdentity": [
+    {
+      "name": "addClaim",
+      "selector": "0xb1a34e0d"
+    },
+    {
+      "name": "addKey",
+      "selector": "0x1d381240"
+    },
+    {
+      "name": "approve",
+      "selector": "0x747442d3"
+    },
+    {
+      "name": "execute",
+      "selector": "0xb61d27f6"
+    },
+    {
+      "name": "getClaim",
+      "selector": "0xc9100bcb"
+    },
+    {
+      "name": "getClaimIdsByTopic",
+      "selector": "0x80e9e9e1"
+    },
+    {
+      "name": "getKey",
+      "selector": "0x12aaac70"
+    },
+    {
+      "name": "getKeyPurposes",
+      "selector": "0xfb307b34"
+    },
+    {
+      "name": "getKeysByPurpose",
+      "selector": "0x9010f726"
+    },
+    {
+      "name": "isClaimValid",
+      "selector": "0xc0969a6e"
+    },
+    {
+      "name": "keyHasPurpose",
+      "selector": "0xd202158d"
+    },
+    {
+      "name": "removeClaim",
+      "selector": "0x4eee424a"
+    },
+    {
+      "name": "removeKey",
+      "selector": "0x53d413c5"
+    }
+  ],
+  "Version": [
+    {
+      "name": "version",
+      "selector": "0x54fd4d50"
+    }
+  ],
+  "OwnableUpgradeable": [
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    }
+  ],
   "Ownable": [
     {
       "name": "owner",
@@ -116,6 +406,68 @@ contractNames
     {
       "name": "transferOwnership",
       "selector": "0xf2fde38b"
+    }
+  ],
+  "IVotes": [
+    {
+      "name": "delegate",
+      "selector": "0x5c19a95c"
+    },
+    {
+      "name": "delegates",
+      "selector": "0x587cde1e"
+    },
+    {
+      "name": "getPastTotalSupply",
+      "selector": "0x8e539e8c"
+    },
+    {
+      "name": "getPastVotes",
+      "selector": "0x3a46b1a8"
+    },
+    {
+      "name": "getVotes",
+      "selector": "0x9ab24eb0"
+    }
+  ],
+  "IERC5805": [
+    {
+      "name": "CLOCK_MODE",
+      "selector": "0x4bf5d7e9"
+    },
+    {
+      "name": "clock",
+      "selector": "0x91ddadf4"
+    },
+    {
+      "name": "delegate",
+      "selector": "0x5c19a95c"
+    },
+    {
+      "name": "delegates",
+      "selector": "0x587cde1e"
+    },
+    {
+      "name": "getPastTotalSupply",
+      "selector": "0x8e539e8c"
+    },
+    {
+      "name": "getPastVotes",
+      "selector": "0x3a46b1a8"
+    },
+    {
+      "name": "getVotes",
+      "selector": "0x9ab24eb0"
+    }
+  ],
+  "IERC6372": [
+    {
+      "name": "CLOCK_MODE",
+      "selector": "0x4bf5d7e9"
+    },
+    {
+      "name": "clock",
+      "selector": "0x91ddadf4"
     }
   ],
   "IERC1822Proxiable": [
@@ -186,20 +538,1748 @@ contractNames
       "selector": "0x4f1ef286"
     }
   ],
+  "IERC20": [
+    {
+      "name": "allowance",
+      "selector": "0xdd62ed3e"
+    },
+    {
+      "name": "approve",
+      "selector": "0x095ea7b3"
+    },
+    {
+      "name": "decimals",
+      "selector": "0x313ce567"
+    },
+    {
+      "name": "decimalsAdjusted",
+      "selector": "0xc67f05aa"
+    },
+    {
+      "name": "decimalsAdjustedAt",
+      "selector": "0x065dd252"
+    },
+    {
+      "name": "decimalsAt",
+      "selector": "0x771918ca"
+    },
+    {
+      "name": "decreaseAllowance",
+      "selector": "0xa457c2d7"
+    },
+    {
+      "name": "getERC20Metadata",
+      "selector": "0x8e649195"
+    },
+    {
+      "name": "increaseAllowance",
+      "selector": "0x39509351"
+    },
+    {
+      "name": "initialize_ERC20",
+      "selector": "0xe04fb235"
+    },
+    {
+      "name": "name",
+      "selector": "0x06fdde03"
+    },
+    {
+      "name": "symbol",
+      "selector": "0x95d89b41"
+    },
+    {
+      "name": "transfer",
+      "selector": "0xa9059cbb"
+    },
+    {
+      "name": "transferFrom",
+      "selector": "0x23b872dd"
+    }
+  ],
   "IERC165": [
     {
       "name": "supportsInterface",
       "selector": "0x01ffc9a7"
     }
   ],
-  "Factory": [
+  "BasicCompliance": [
+    {
+      "name": "addAgent",
+      "selector": "0x84e79842"
+    },
+    {
+      "name": "addTokenAgent",
+      "selector": "0xff3e6954"
+    },
+    {
+      "name": "bindToken",
+      "selector": "0x3ff5aa02"
+    },
+    {
+      "name": "canTransfer",
+      "selector": "0xe46638e6"
+    },
+    {
+      "name": "created",
+      "selector": "0x5f8dead3"
+    },
+    {
+      "name": "destroyed",
+      "selector": "0x8d2ea772"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "isTokenAgent",
+      "selector": "0x346531fa"
+    },
+    {
+      "name": "isTokenBound",
+      "selector": "0x993e8b95"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "removeAgent",
+      "selector": "0x97a6278e"
+    },
+    {
+      "name": "removeTokenAgent",
+      "selector": "0xcdde2932"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "tokenBound",
+      "selector": "0x93e62f07"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    },
+    {
+      "name": "transferred",
+      "selector": "0x8baf29b4"
+    },
+    {
+      "name": "unbindToken",
+      "selector": "0x40db3b50"
+    }
+  ],
+  "DefaultCompliance": [
+    {
+      "name": "addAgent",
+      "selector": "0x84e79842"
+    },
+    {
+      "name": "addTokenAgent",
+      "selector": "0xff3e6954"
+    },
+    {
+      "name": "bindToken",
+      "selector": "0x3ff5aa02"
+    },
+    {
+      "name": "canTransfer",
+      "selector": "0xe46638e6"
+    },
+    {
+      "name": "created",
+      "selector": "0x5f8dead3"
+    },
+    {
+      "name": "destroyed",
+      "selector": "0x8d2ea772"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "isTokenAgent",
+      "selector": "0x346531fa"
+    },
+    {
+      "name": "isTokenBound",
+      "selector": "0x993e8b95"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "removeAgent",
+      "selector": "0x97a6278e"
+    },
+    {
+      "name": "removeTokenAgent",
+      "selector": "0xcdde2932"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "tokenBound",
+      "selector": "0x93e62f07"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    },
+    {
+      "name": "transferred",
+      "selector": "0x8baf29b4"
+    },
+    {
+      "name": "unbindToken",
+      "selector": "0x40db3b50"
+    }
+  ],
+  "ICompliance": [
+    {
+      "name": "canTransfer",
+      "selector": "0xe46638e6"
+    },
+    {
+      "name": "created",
+      "selector": "0x5f8dead3"
+    },
+    {
+      "name": "destroyed",
+      "selector": "0x8d2ea772"
+    },
+    {
+      "name": "transferred",
+      "selector": "0x8baf29b4"
+    }
+  ],
+  "IModularCompliance": [
+    {
+      "name": "addModule",
+      "selector": "0x1ed86f19"
+    },
+    {
+      "name": "bindToken",
+      "selector": "0x3ff5aa02"
+    },
+    {
+      "name": "callModuleFunction",
+      "selector": "0xefb22d33"
+    },
+    {
+      "name": "canTransfer",
+      "selector": "0xe46638e6"
+    },
+    {
+      "name": "created",
+      "selector": "0x5f8dead3"
+    },
+    {
+      "name": "destroyed",
+      "selector": "0x8d2ea772"
+    },
+    {
+      "name": "getModules",
+      "selector": "0xb2494df3"
+    },
+    {
+      "name": "getTokenBound",
+      "selector": "0x6a3edf28"
+    },
+    {
+      "name": "isModuleBound",
+      "selector": "0xa446d49f"
+    },
+    {
+      "name": "removeModule",
+      "selector": "0xa0632461"
+    },
+    {
+      "name": "transferred",
+      "selector": "0x8baf29b4"
+    },
+    {
+      "name": "unbindToken",
+      "selector": "0x40db3b50"
+    }
+  ],
+  "ModularCompliance": [
+    {
+      "name": "addModule",
+      "selector": "0x1ed86f19"
+    },
+    {
+      "name": "bindToken",
+      "selector": "0x3ff5aa02"
+    },
+    {
+      "name": "callModuleFunction",
+      "selector": "0xefb22d33"
+    },
+    {
+      "name": "canTransfer",
+      "selector": "0xe46638e6"
+    },
+    {
+      "name": "created",
+      "selector": "0x5f8dead3"
+    },
+    {
+      "name": "destroyed",
+      "selector": "0x8d2ea772"
+    },
+    {
+      "name": "getModules",
+      "selector": "0xb2494df3"
+    },
+    {
+      "name": "getTokenBound",
+      "selector": "0x6a3edf28"
+    },
+    {
+      "name": "init",
+      "selector": "0xe1c7392a"
+    },
+    {
+      "name": "isModuleBound",
+      "selector": "0xa446d49f"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "removeModule",
+      "selector": "0xa0632461"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    },
+    {
+      "name": "transferred",
+      "selector": "0x8baf29b4"
+    },
+    {
+      "name": "unbindToken",
+      "selector": "0x40db3b50"
+    }
+  ],
+  "IModule": [
+    {
+      "name": "bindCompliance",
+      "selector": "0x4a932544"
+    },
+    {
+      "name": "canComplianceBind",
+      "selector": "0xbcc21053"
+    },
+    {
+      "name": "isComplianceBound",
+      "selector": "0x4cf4d295"
+    },
+    {
+      "name": "isPlugAndPlay",
+      "selector": "0xe6f5e807"
+    },
+    {
+      "name": "moduleBurnAction",
+      "selector": "0x372491a2"
+    },
+    {
+      "name": "moduleCheck",
+      "selector": "0x013b7ce4"
+    },
+    {
+      "name": "moduleMintAction",
+      "selector": "0xf104a8c9"
+    },
+    {
+      "name": "moduleTransferAction",
+      "selector": "0x2cb7e1ec"
+    },
+    {
+      "name": "name",
+      "selector": "0x06fdde03"
+    },
+    {
+      "name": "unbindCompliance",
+      "selector": "0x0694a5fb"
+    }
+  ],
+  "ITREXFactory": [
+    {
+      "name": "deployTREXSuite",
+      "selector": "0xcf753d37"
+    },
+    {
+      "name": "getIdFactory",
+      "selector": "0x5f2773a5"
+    },
+    {
+      "name": "getImplementationAuthority",
+      "selector": "0x2d5f1187"
+    },
+    {
+      "name": "getToken",
+      "selector": "0xc1733f68"
+    },
+    {
+      "name": "recoverContractOwnership",
+      "selector": "0x50b01838"
+    },
+    {
+      "name": "setIdFactory",
+      "selector": "0xccd41cce"
+    },
+    {
+      "name": "setImplementationAuthority",
+      "selector": "0x92dd9d65"
+    }
+  ],
+  "TREXFactory": [
+    {
+      "name": "deployTREXSuite",
+      "selector": "0xcf753d37"
+    },
+    {
+      "name": "getIdFactory",
+      "selector": "0x5f2773a5"
+    },
+    {
+      "name": "getImplementationAuthority",
+      "selector": "0x2d5f1187"
+    },
+    {
+      "name": "getToken",
+      "selector": "0xc1733f68"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "recoverContractOwnership",
+      "selector": "0x50b01838"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "setIdFactory",
+      "selector": "0xccd41cce"
+    },
+    {
+      "name": "setImplementationAuthority",
+      "selector": "0x92dd9d65"
+    },
+    {
+      "name": "tokenDeployed",
+      "selector": "0xfb88d79c"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    }
+  ],
+  "AbstractProxy": [
+    {
+      "name": "getImplementationAuthority",
+      "selector": "0x2d5f1187"
+    },
+    {
+      "name": "setImplementationAuthority",
+      "selector": "0x92dd9d65"
+    }
+  ],
+  "ClaimTopicsRegistryProxy": [
+    {
+      "name": "getImplementationAuthority",
+      "selector": "0x2d5f1187"
+    },
+    {
+      "name": "setImplementationAuthority",
+      "selector": "0x92dd9d65"
+    }
+  ],
+  "IdentityRegistryProxy": [
+    {
+      "name": "getImplementationAuthority",
+      "selector": "0x2d5f1187"
+    },
+    {
+      "name": "setImplementationAuthority",
+      "selector": "0x92dd9d65"
+    }
+  ],
+  "IdentityRegistryStorageProxy": [
+    {
+      "name": "getImplementationAuthority",
+      "selector": "0x2d5f1187"
+    },
+    {
+      "name": "setImplementationAuthority",
+      "selector": "0x92dd9d65"
+    }
+  ],
+  "ModularComplianceProxy": [
+    {
+      "name": "getImplementationAuthority",
+      "selector": "0x2d5f1187"
+    },
+    {
+      "name": "setImplementationAuthority",
+      "selector": "0x92dd9d65"
+    }
+  ],
+  "TokenProxy": [
+    {
+      "name": "getImplementationAuthority",
+      "selector": "0x2d5f1187"
+    },
+    {
+      "name": "setImplementationAuthority",
+      "selector": "0x92dd9d65"
+    }
+  ],
+  "TrustedIssuersRegistryProxy": [
+    {
+      "name": "getImplementationAuthority",
+      "selector": "0x2d5f1187"
+    },
+    {
+      "name": "setImplementationAuthority",
+      "selector": "0x92dd9d65"
+    }
+  ],
+  "IIAFactory": [
+    {
+      "name": "deployIA",
+      "selector": "0x52f1431b"
+    },
+    {
+      "name": "deployedByFactory",
+      "selector": "0xde87aeeb"
+    }
+  ],
+  "ITREXImplementationAuthority": [
+    {
+      "name": "addAndUseTREXVersion",
+      "selector": "0x71673bd0"
+    },
+    {
+      "name": "addTREXVersion",
+      "selector": "0x9585548a"
+    },
+    {
+      "name": "changeImplementationAuthority",
+      "selector": "0x7f82a5e7"
+    },
+    {
+      "name": "fetchVersion",
+      "selector": "0x0f3ca8ca"
+    },
+    {
+      "name": "getCTRImplementation",
+      "selector": "0x6ff6e83f"
+    },
+    {
+      "name": "getContracts",
+      "selector": "0xafce4bea"
+    },
+    {
+      "name": "getCurrentVersion",
+      "selector": "0xfabec44a"
+    },
+    {
+      "name": "getIRImplementation",
+      "selector": "0x1ee9ce8b"
+    },
+    {
+      "name": "getIRSImplementation",
+      "selector": "0x9e3e7bb9"
+    },
+    {
+      "name": "getMCImplementation",
+      "selector": "0x61f89825"
+    },
+    {
+      "name": "getReferenceContract",
+      "selector": "0xcd24be22"
+    },
+    {
+      "name": "getTIRImplementation",
+      "selector": "0xfedcc052"
+    },
+    {
+      "name": "getTREXFactory",
+      "selector": "0x2c5d4f8e"
+    },
+    {
+      "name": "getTokenImplementation",
+      "selector": "0x709bc7f3"
+    },
+    {
+      "name": "isReferenceContract",
+      "selector": "0x1320a65a"
+    },
+    {
+      "name": "setIAFactory",
+      "selector": "0xcf49020e"
+    },
+    {
+      "name": "setTREXFactory",
+      "selector": "0x6df23789"
+    },
+    {
+      "name": "useTREXVersion",
+      "selector": "0xf38d2491"
+    }
+  ],
+  "TREXImplementationAuthority": [
+    {
+      "name": "addAndUseTREXVersion",
+      "selector": "0x71673bd0"
+    },
+    {
+      "name": "addTREXVersion",
+      "selector": "0x9585548a"
+    },
+    {
+      "name": "changeImplementationAuthority",
+      "selector": "0x7f82a5e7"
+    },
+    {
+      "name": "fetchVersion",
+      "selector": "0x0f3ca8ca"
+    },
+    {
+      "name": "getCTRImplementation",
+      "selector": "0x6ff6e83f"
+    },
+    {
+      "name": "getContracts",
+      "selector": "0xafce4bea"
+    },
+    {
+      "name": "getCurrentVersion",
+      "selector": "0xfabec44a"
+    },
+    {
+      "name": "getIRImplementation",
+      "selector": "0x1ee9ce8b"
+    },
+    {
+      "name": "getIRSImplementation",
+      "selector": "0x9e3e7bb9"
+    },
+    {
+      "name": "getMCImplementation",
+      "selector": "0x61f89825"
+    },
+    {
+      "name": "getReferenceContract",
+      "selector": "0xcd24be22"
+    },
+    {
+      "name": "getTIRImplementation",
+      "selector": "0xfedcc052"
+    },
+    {
+      "name": "getTREXFactory",
+      "selector": "0x2c5d4f8e"
+    },
+    {
+      "name": "getTokenImplementation",
+      "selector": "0x709bc7f3"
+    },
+    {
+      "name": "isReferenceContract",
+      "selector": "0x1320a65a"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "setIAFactory",
+      "selector": "0xcf49020e"
+    },
+    {
+      "name": "setTREXFactory",
+      "selector": "0x6df23789"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    },
+    {
+      "name": "useTREXVersion",
+      "selector": "0xf38d2491"
+    }
+  ],
+  "IProxy": [
+    {
+      "name": "getImplementationAuthority",
+      "selector": "0x2d5f1187"
+    },
+    {
+      "name": "setImplementationAuthority",
+      "selector": "0x92dd9d65"
+    }
+  ],
+  "ClaimTopicsRegistry": [
+    {
+      "name": "addClaimTopic",
+      "selector": "0xc7b22551"
+    },
+    {
+      "name": "getClaimTopics",
+      "selector": "0xdf09d604"
+    },
+    {
+      "name": "init",
+      "selector": "0xe1c7392a"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "removeClaimTopic",
+      "selector": "0x08297846"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    }
+  ],
+  "IdentityRegistry": [
+    {
+      "name": "addAgent",
+      "selector": "0x84e79842"
+    },
+    {
+      "name": "batchRegisterIdentity",
+      "selector": "0x653dc9f1"
+    },
+    {
+      "name": "contains",
+      "selector": "0x5dbe47e8"
+    },
+    {
+      "name": "deleteIdentity",
+      "selector": "0xa8d29d1d"
+    },
+    {
+      "name": "identity",
+      "selector": "0xf0eb5e54"
+    },
+    {
+      "name": "identityStorage",
+      "selector": "0xf11abfd8"
+    },
+    {
+      "name": "init",
+      "selector": "0x184b9559"
+    },
+    {
+      "name": "investorCountry",
+      "selector": "0x7e42683b"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "isVerified",
+      "selector": "0xb9209e33"
+    },
+    {
+      "name": "issuersRegistry",
+      "selector": "0xb4f3fcb7"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "registerIdentity",
+      "selector": "0x454a03e0"
+    },
+    {
+      "name": "removeAgent",
+      "selector": "0x97a6278e"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "setClaimTopicsRegistry",
+      "selector": "0x670af6a9"
+    },
+    {
+      "name": "setIdentityRegistryStorage",
+      "selector": "0x26d941ae"
+    },
+    {
+      "name": "setTrustedIssuersRegistry",
+      "selector": "0xe744d789"
+    },
+    {
+      "name": "topicsRegistry",
+      "selector": "0x3b3e12f4"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    },
+    {
+      "name": "updateCountry",
+      "selector": "0x3b239a7f"
+    },
+    {
+      "name": "updateIdentity",
+      "selector": "0x8e098ca1"
+    }
+  ],
+  "IdentityRegistryStorage": [
+    {
+      "name": "addAgent",
+      "selector": "0x84e79842"
+    },
+    {
+      "name": "addIdentityToStorage",
+      "selector": "0xa53410dd"
+    },
+    {
+      "name": "bindIdentityRegistry",
+      "selector": "0x690a49f9"
+    },
+    {
+      "name": "init",
+      "selector": "0xe1c7392a"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "linkedIdentityRegistries",
+      "selector": "0xbf9eb959"
+    },
+    {
+      "name": "modifyStoredIdentity",
+      "selector": "0xe805cf86"
+    },
+    {
+      "name": "modifyStoredInvestorCountry",
+      "selector": "0x9f3418d5"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "removeAgent",
+      "selector": "0x97a6278e"
+    },
+    {
+      "name": "removeIdentityFromStorage",
+      "selector": "0xcf191bcd"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "storedIdentity",
+      "selector": "0x7988d3a5"
+    },
+    {
+      "name": "storedInvestorCountry",
+      "selector": "0x727e13bc"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    },
+    {
+      "name": "unbindIdentityRegistry",
+      "selector": "0x97a012f7"
+    }
+  ],
+  "TrustedIssuersRegistry": [
+    {
+      "name": "addTrustedIssuer",
+      "selector": "0x9f63ea98"
+    },
+    {
+      "name": "getTrustedIssuerClaimTopics",
+      "selector": "0xc28fb278"
+    },
+    {
+      "name": "getTrustedIssuers",
+      "selector": "0xd9dd24c5"
+    },
+    {
+      "name": "getTrustedIssuersForClaimTopic",
+      "selector": "0x52c111d1"
+    },
+    {
+      "name": "hasClaimTopic",
+      "selector": "0x34a89987"
+    },
+    {
+      "name": "init",
+      "selector": "0xe1c7392a"
+    },
+    {
+      "name": "isTrustedIssuer",
+      "selector": "0xef2ed1a4"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "removeTrustedIssuer",
+      "selector": "0xb93d28eb"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    },
+    {
+      "name": "updateIssuerClaimTopics",
+      "selector": "0x04bc7e84"
+    }
+  ],
+  "IClaimTopicsRegistry": [
+    {
+      "name": "addClaimTopic",
+      "selector": "0xc7b22551"
+    },
+    {
+      "name": "getClaimTopics",
+      "selector": "0xdf09d604"
+    },
+    {
+      "name": "removeClaimTopic",
+      "selector": "0x08297846"
+    }
+  ],
+  "IIdentityRegistry": [
+    {
+      "name": "isVerified",
+      "selector": "0xb9209e33"
+    }
+  ],
+  "IIdentityRegistryStorage": [
+    {
+      "name": "addIdentityToStorage",
+      "selector": "0xa53410dd"
+    },
+    {
+      "name": "bindIdentityRegistry",
+      "selector": "0x690a49f9"
+    },
+    {
+      "name": "linkedIdentityRegistries",
+      "selector": "0xbf9eb959"
+    },
+    {
+      "name": "modifyStoredIdentity",
+      "selector": "0xe805cf86"
+    },
+    {
+      "name": "modifyStoredInvestorCountry",
+      "selector": "0x9f3418d5"
+    },
+    {
+      "name": "removeIdentityFromStorage",
+      "selector": "0xcf191bcd"
+    },
+    {
+      "name": "storedIdentity",
+      "selector": "0x7988d3a5"
+    },
+    {
+      "name": "storedInvestorCountry",
+      "selector": "0x727e13bc"
+    },
+    {
+      "name": "unbindIdentityRegistry",
+      "selector": "0x97a012f7"
+    }
+  ],
+  "ITrustedIssuersRegistry": [
+    {
+      "name": "addTrustedIssuer",
+      "selector": "0x9f63ea98"
+    },
+    {
+      "name": "getTrustedIssuerClaimTopics",
+      "selector": "0xc28fb278"
+    },
+    {
+      "name": "getTrustedIssuers",
+      "selector": "0xd9dd24c5"
+    },
+    {
+      "name": "getTrustedIssuersForClaimTopic",
+      "selector": "0x52c111d1"
+    },
+    {
+      "name": "hasClaimTopic",
+      "selector": "0x34a89987"
+    },
+    {
+      "name": "isTrustedIssuer",
+      "selector": "0xef2ed1a4"
+    },
+    {
+      "name": "removeTrustedIssuer",
+      "selector": "0xb93d28eb"
+    },
+    {
+      "name": "updateIssuerClaimTopics",
+      "selector": "0x04bc7e84"
+    }
+  ],
+  "AgentRole": [
+    {
+      "name": "addAgent",
+      "selector": "0x84e79842"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "removeAgent",
+      "selector": "0x97a6278e"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    }
+  ],
+  "AgentRoleUpgradeable": [
+    {
+      "name": "addAgent",
+      "selector": "0x84e79842"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "removeAgent",
+      "selector": "0x97a6278e"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    }
+  ],
+  "IToken": [
+    {
+      "name": "allowance",
+      "selector": "0xdd62ed3e"
+    },
+    {
+      "name": "approve",
+      "selector": "0x095ea7b3"
+    },
+    {
+      "name": "balanceOf",
+      "selector": "0x70a08231"
+    },
+    {
+      "name": "batchBurn",
+      "selector": "0x4a6cc677"
+    },
+    {
+      "name": "batchForcedTransfer",
+      "selector": "0x42a47abc"
+    },
+    {
+      "name": "batchFreezePartialTokens",
+      "selector": "0xfc7e5fa8"
+    },
+    {
+      "name": "batchMint",
+      "selector": "0x68573107"
+    },
+    {
+      "name": "batchSetAddressFrozen",
+      "selector": "0x1a7af379"
+    },
+    {
+      "name": "batchTransfer",
+      "selector": "0x88d695b2"
+    },
+    {
+      "name": "batchUnfreezePartialTokens",
+      "selector": "0x4710362d"
+    },
+    {
+      "name": "burn",
+      "selector": "0x9dc29fac"
+    },
+    {
+      "name": "compliance",
+      "selector": "0x6290865d"
+    },
+    {
+      "name": "decimals",
+      "selector": "0x313ce567"
+    },
+    {
+      "name": "forcedTransfer",
+      "selector": "0x9fc1d0e7"
+    },
+    {
+      "name": "freezePartialTokens",
+      "selector": "0x125c4a33"
+    },
+    {
+      "name": "getFrozenTokens",
+      "selector": "0x158b1a57"
+    },
+    {
+      "name": "identityRegistry",
+      "selector": "0x134e18f4"
+    },
+    {
+      "name": "isFrozen",
+      "selector": "0xe5839836"
+    },
+    {
+      "name": "mint",
+      "selector": "0x40c10f19"
+    },
+    {
+      "name": "name",
+      "selector": "0x06fdde03"
+    },
+    {
+      "name": "onchainID",
+      "selector": "0xaba63705"
+    },
+    {
+      "name": "pause",
+      "selector": "0x8456cb59"
+    },
+    {
+      "name": "paused",
+      "selector": "0x5c975abb"
+    },
+    {
+      "name": "recoveryAddress",
+      "selector": "0x9285948a"
+    },
+    {
+      "name": "setAddressFrozen",
+      "selector": "0xc69c09cf"
+    },
+    {
+      "name": "setCompliance",
+      "selector": "0xf8981789"
+    },
+    {
+      "name": "setIdentityRegistry",
+      "selector": "0xcbf3f861"
+    },
+    {
+      "name": "setName",
+      "selector": "0xc47f0027"
+    },
+    {
+      "name": "setOnchainID",
+      "selector": "0x3d1ddc5b"
+    },
+    {
+      "name": "setSymbol",
+      "selector": "0xb84c8246"
+    },
+    {
+      "name": "symbol",
+      "selector": "0x95d89b41"
+    },
+    {
+      "name": "totalSupply",
+      "selector": "0x18160ddd"
+    },
+    {
+      "name": "transfer",
+      "selector": "0xa9059cbb"
+    },
+    {
+      "name": "transferFrom",
+      "selector": "0x23b872dd"
+    },
+    {
+      "name": "unfreezePartialTokens",
+      "selector": "0x1fe56f7d"
+    },
+    {
+      "name": "unpause",
+      "selector": "0x3f4ba83a"
+    },
+    {
+      "name": "version",
+      "selector": "0x54fd4d50"
+    }
+  ],
+  "TREXFactoryAts": [
+    {
+      "name": "deployTREXSuite",
+      "selector": "0xcf753d37"
+    },
+    {
+      "name": "deployTREXSuiteAtsBond",
+      "selector": "0x5897d123"
+    },
+    {
+      "name": "deployTREXSuiteAtsEquity",
+      "selector": "0xe6822e2b"
+    },
+    {
+      "name": "getIdFactory",
+      "selector": "0x5f2773a5"
+    },
+    {
+      "name": "getImplementationAuthority",
+      "selector": "0x2d5f1187"
+    },
+    {
+      "name": "getToken",
+      "selector": "0xc1733f68"
+    },
+    {
+      "name": "owner",
+      "selector": "0x8da5cb5b"
+    },
+    {
+      "name": "recoverContractOwnership",
+      "selector": "0x50b01838"
+    },
+    {
+      "name": "renounceOwnership",
+      "selector": "0x715018a6"
+    },
+    {
+      "name": "setAtsFactory",
+      "selector": "0x85eb8906"
+    },
+    {
+      "name": "setIdFactory",
+      "selector": "0xccd41cce"
+    },
+    {
+      "name": "setImplementationAuthority",
+      "selector": "0x92dd9d65"
+    },
+    {
+      "name": "tokenDeployed",
+      "selector": "0xfb88d79c"
+    },
+    {
+      "name": "transferOwnership",
+      "selector": "0xf2fde38b"
+    }
+  ],
+  "TRexIAccessControl": [
+    {
+      "name": "applyRoles",
+      "selector": "0xfcfffeec"
+    },
+    {
+      "name": "getRoleCountFor",
+      "selector": "0x8fa9b4fe"
+    },
+    {
+      "name": "getRoleMemberCount",
+      "selector": "0xca15c873"
+    },
+    {
+      "name": "getRoleMembers",
+      "selector": "0x2a861f57"
+    },
+    {
+      "name": "getRolesFor",
+      "selector": "0xa28cf9a9"
+    },
+    {
+      "name": "grantRole",
+      "selector": "0x2f2ff15d"
+    },
+    {
+      "name": "hasRole",
+      "selector": "0x91d14854"
+    },
+    {
+      "name": "renounceRole",
+      "selector": "0x8bb9c5bf"
+    },
+    {
+      "name": "revokeRole",
+      "selector": "0xd547741f"
+    }
+  ],
+  "TRexIBond": [
+    {
+      "name": "getBondDetails",
+      "selector": "0x4ce02414"
+    },
+    {
+      "name": "getCoupon",
+      "selector": "0x936e3169"
+    },
+    {
+      "name": "getCouponCount",
+      "selector": "0x468bb240"
+    },
+    {
+      "name": "getCouponDetails",
+      "selector": "0x82c5582a"
+    },
+    {
+      "name": "getCouponFor",
+      "selector": "0xbba7b56d"
+    },
+    {
+      "name": "getCouponHolders",
+      "selector": "0xa92e8371"
+    },
+    {
+      "name": "getTotalCouponHolders",
+      "selector": "0xec116ae3"
+    },
+    {
+      "name": "redeemAtMaturityByPartition",
+      "selector": "0x8a647211"
+    },
+    {
+      "name": "setCoupon",
+      "selector": "0xb3a6617d"
+    },
+    {
+      "name": "updateMaturityDate",
+      "selector": "0xc7a6ca35"
+    }
+  ],
+  "TRexIBondRead": [
+    {
+      "name": "getBondDetails",
+      "selector": "0x4ce02414"
+    },
+    {
+      "name": "getCoupon",
+      "selector": "0x936e3169"
+    },
+    {
+      "name": "getCouponCount",
+      "selector": "0x468bb240"
+    },
+    {
+      "name": "getCouponDetails",
+      "selector": "0x82c5582a"
+    },
+    {
+      "name": "getCouponFor",
+      "selector": "0xbba7b56d"
+    },
+    {
+      "name": "getCouponHolders",
+      "selector": "0xa92e8371"
+    },
+    {
+      "name": "getTotalCouponHolders",
+      "selector": "0xec116ae3"
+    }
+  ],
+  "TRexIBusinessLogicResolver": [
+    {
+      "name": "addSelectorsToBlacklist",
+      "selector": "0xe87c5d71"
+    },
+    {
+      "name": "getBusinessLogicCount",
+      "selector": "0x8373989d"
+    },
+    {
+      "name": "getBusinessLogicKeys",
+      "selector": "0xe7e936ee"
+    },
+    {
+      "name": "getLatestVersion",
+      "selector": "0x0e6d1de9"
+    },
+    {
+      "name": "getSelectorsBlacklist",
+      "selector": "0xbf3af9ea"
+    },
+    {
+      "name": "getVersionStatus",
+      "selector": "0x65b24dfc"
+    },
+    {
+      "name": "initialize_BusinessLogicResolver",
+      "selector": "0xb86ffa1a"
+    },
+    {
+      "name": "registerBusinessLogics",
+      "selector": "0xb0f57ddb"
+    },
+    {
+      "name": "removeSelectorsFromBlacklist",
+      "selector": "0xcccae751"
+    },
+    {
+      "name": "resolveBusinessLogicByVersion",
+      "selector": "0x9f77ad81"
+    },
+    {
+      "name": "resolveLatestBusinessLogic",
+      "selector": "0xbbced3bb"
+    }
+  ],
+  "TRexIDiamondCutManager": [
+    {
+      "name": "cancelBatchConfiguration",
+      "selector": "0xc5977c1f"
+    },
+    {
+      "name": "checkResolverProxyConfigurationRegistered",
+      "selector": "0xc595992a"
+    },
+    {
+      "name": "createBatchConfiguration",
+      "selector": "0xf4ec1fe4"
+    },
+    {
+      "name": "createConfiguration",
+      "selector": "0xf4d2a095"
+    },
+    {
+      "name": "getConfigurations",
+      "selector": "0xd826514c"
+    },
+    {
+      "name": "getConfigurationsLength",
+      "selector": "0x55ff30e3"
+    },
+    {
+      "name": "getFacetAddressByConfigurationIdVersionAndFacetId",
+      "selector": "0xcb17c131"
+    },
+    {
+      "name": "getFacetAddressesByConfigurationIdAndVersion",
+      "selector": "0x10933836"
+    },
+    {
+      "name": "getFacetByConfigurationIdVersionAndFacetId",
+      "selector": "0x9e6030d1"
+    },
+    {
+      "name": "getFacetIdByConfigurationIdVersionAndSelector",
+      "selector": "0x6204479f"
+    },
+    {
+      "name": "getFacetIdsByConfigurationIdAndVersion",
+      "selector": "0xe5ccd17c"
+    },
+    {
+      "name": "getFacetSelectorsByConfigurationIdVersionAndFacetId",
+      "selector": "0x45613a52"
+    },
+    {
+      "name": "getFacetSelectorsLengthByConfigurationIdVersionAndFacetId",
+      "selector": "0xf1d3d2f9"
+    },
+    {
+      "name": "getFacetsByConfigurationIdAndVersion",
+      "selector": "0x6118ce2b"
+    },
+    {
+      "name": "getFacetsLengthByConfigurationIdAndVersion",
+      "selector": "0x45348bd8"
+    },
+    {
+      "name": "getLatestVersionByConfiguration",
+      "selector": "0x5bf316cf"
+    },
+    {
+      "name": "isResolverProxyConfigurationRegistered",
+      "selector": "0x2b85c192"
+    },
+    {
+      "name": "resolveResolverProxyCall",
+      "selector": "0xb9ec2620"
+    },
+    {
+      "name": "resolveSupportsInterface",
+      "selector": "0x99ecdbd0"
+    }
+  ],
+  "TRexIDiamondLoupe": [
+    {
+      "name": "getFacet",
+      "selector": "0xe317d12f"
+    },
+    {
+      "name": "getFacetAddress",
+      "selector": "0x7a070c2d"
+    },
+    {
+      "name": "getFacetAddresses",
+      "selector": "0x3bed2f49"
+    },
+    {
+      "name": "getFacetAddressesByPage",
+      "selector": "0x9fea53e7"
+    },
+    {
+      "name": "getFacetIdBySelector",
+      "selector": "0xb3fd6894"
+    },
+    {
+      "name": "getFacetIds",
+      "selector": "0xcd25d535"
+    },
+    {
+      "name": "getFacetIdsByPage",
+      "selector": "0x20202e6d"
+    },
+    {
+      "name": "getFacetSelectors",
+      "selector": "0x8214de3e"
+    },
+    {
+      "name": "getFacetSelectorsByPage",
+      "selector": "0x39a9e956"
+    },
+    {
+      "name": "getFacetSelectorsLength",
+      "selector": "0xca1f70ec"
+    },
+    {
+      "name": "getFacets",
+      "selector": "0x662ea47d"
+    },
+    {
+      "name": "getFacetsByPage",
+      "selector": "0xbf02c5b9"
+    },
+    {
+      "name": "getFacetsLength",
+      "selector": "0x430720f9"
+    }
+  ],
+  "TRexIERC20": [
+    {
+      "name": "allowance",
+      "selector": "0xdd62ed3e"
+    },
+    {
+      "name": "approve",
+      "selector": "0x095ea7b3"
+    },
+    {
+      "name": "decimals",
+      "selector": "0x313ce567"
+    },
+    {
+      "name": "decimalsAdjusted",
+      "selector": "0xc67f05aa"
+    },
+    {
+      "name": "decimalsAdjustedAt",
+      "selector": "0x065dd252"
+    },
+    {
+      "name": "decimalsAt",
+      "selector": "0x771918ca"
+    },
+    {
+      "name": "decreaseAllowance",
+      "selector": "0xa457c2d7"
+    },
+    {
+      "name": "getERC20Metadata",
+      "selector": "0x8e649195"
+    },
+    {
+      "name": "increaseAllowance",
+      "selector": "0x39509351"
+    },
+    {
+      "name": "initialize_ERC20",
+      "selector": "0xe04fb235"
+    },
+    {
+      "name": "name",
+      "selector": "0x06fdde03"
+    },
+    {
+      "name": "symbol",
+      "selector": "0x95d89b41"
+    },
+    {
+      "name": "transfer",
+      "selector": "0xa9059cbb"
+    },
+    {
+      "name": "transferFrom",
+      "selector": "0x23b872dd"
+    }
+  ],
+  "TRexIEquity": [
+    {
+      "name": "getDividendHolders",
+      "selector": "0xeba3918e"
+    },
+    {
+      "name": "getDividends",
+      "selector": "0x3837ac88"
+    },
+    {
+      "name": "getDividendsCount",
+      "selector": "0x9e676952"
+    },
+    {
+      "name": "getDividendsFor",
+      "selector": "0x323e22da"
+    },
+    {
+      "name": "getEquityDetails",
+      "selector": "0xefcdcad8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustment",
+      "selector": "0x3d5338e8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustmentCount",
+      "selector": "0x7c62c7fc"
+    },
+    {
+      "name": "getTotalDividendHolders",
+      "selector": "0xd61a022b"
+    },
+    {
+      "name": "getTotalVotingHolders",
+      "selector": "0x92c51818"
+    },
+    {
+      "name": "getVoting",
+      "selector": "0x3afc7282"
+    },
+    {
+      "name": "getVotingCount",
+      "selector": "0x9c2aab5e"
+    },
+    {
+      "name": "getVotingFor",
+      "selector": "0x7633eccf"
+    },
+    {
+      "name": "getVotingHolders",
+      "selector": "0x009f64ac"
+    },
+    {
+      "name": "setDividends",
+      "selector": "0x054d2b88"
+    },
+    {
+      "name": "setScheduledBalanceAdjustment",
+      "selector": "0xd1661084"
+    },
+    {
+      "name": "setVoting",
+      "selector": "0x5adaa49e"
+    }
+  ],
+  "TRexIFactory": [
     {
       "name": "deployBond",
-      "selector": "0xddfc5275"
+      "selector": "0xe711865a"
     },
     {
       "name": "deployEquity",
-      "selector": "0xa18a439e"
+      "selector": "0x50d71072"
+    },
+    {
+      "name": "getAppliedRegulationData",
+      "selector": "0x7b5208d0"
+    }
+  ],
+  "TRexIStaticFunctionSelectors": [
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    }
+  ],
+  "Factory": [
+    {
+      "name": "deployBond",
+      "selector": "0xe711865a"
+    },
+    {
+      "name": "deployEquity",
+      "selector": "0x50d71072"
     },
     {
       "name": "getAppliedRegulationData",
@@ -209,11 +2289,11 @@ contractNames
   "IFactory": [
     {
       "name": "deployBond",
-      "selector": "0xddfc5275"
+      "selector": "0xe711865a"
     },
     {
       "name": "deployEquity",
-      "selector": "0xa18a439e"
+      "selector": "0x50d71072"
     },
     {
       "name": "getAppliedRegulationData",
@@ -1466,6 +3546,44 @@ contractNames
       "selector": "0x122eb575"
     },
     {
+      "name": "initialize_ERC1594",
+      "selector": "0x9be12cea"
+    },
+    {
+      "name": "isIssuable",
+      "selector": "0x2f1cae85"
+    },
+    {
+      "name": "issue",
+      "selector": "0xbb3acde9"
+    },
+    {
+      "name": "redeem",
+      "selector": "0xe77c646d"
+    },
+    {
+      "name": "redeemFrom",
+      "selector": "0x9675193c"
+    },
+    {
+      "name": "transferFromWithData",
+      "selector": "0xee532f31"
+    },
+    {
+      "name": "transferWithData",
+      "selector": "0x2535f762"
+    }
+  ],
+  "ERC1594Facet": [
+    {
+      "name": "canTransfer",
+      "selector": "0x1badb25c"
+    },
+    {
+      "name": "canTransferFrom",
+      "selector": "0x122eb575"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -1516,6 +3634,24 @@ contractNames
       "selector": "0xb10d6b41"
     },
     {
+      "name": "removeDocument",
+      "selector": "0xc3501848"
+    },
+    {
+      "name": "setDocument",
+      "selector": "0x010648ca"
+    }
+  ],
+  "ERC1643Facet": [
+    {
+      "name": "getAllDocuments",
+      "selector": "0x9fa5f50b"
+    },
+    {
+      "name": "getDocument",
+      "selector": "0xb10d6b41"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -1550,6 +3686,28 @@ contractNames
       "selector": "0xa213934f"
     },
     {
+      "name": "initialize_ERC1644",
+      "selector": "0xaa4ea38e"
+    },
+    {
+      "name": "isControllable",
+      "selector": "0x4c783bf5"
+    }
+  ],
+  "ERC1644Facet": [
+    {
+      "name": "controllerRedeem",
+      "selector": "0x2bc6acc3"
+    },
+    {
+      "name": "controllerTransfer",
+      "selector": "0xf282527a"
+    },
+    {
+      "name": "finalizeControllable",
+      "selector": "0xa213934f"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -1571,6 +3729,64 @@ contractNames
     }
   ],
   "ERC20": [
+    {
+      "name": "allowance",
+      "selector": "0xdd62ed3e"
+    },
+    {
+      "name": "approve",
+      "selector": "0x095ea7b3"
+    },
+    {
+      "name": "decimals",
+      "selector": "0x313ce567"
+    },
+    {
+      "name": "decimalsAdjusted",
+      "selector": "0xc67f05aa"
+    },
+    {
+      "name": "decimalsAdjustedAt",
+      "selector": "0x065dd252"
+    },
+    {
+      "name": "decimalsAt",
+      "selector": "0x771918ca"
+    },
+    {
+      "name": "decreaseAllowance",
+      "selector": "0xa457c2d7"
+    },
+    {
+      "name": "getERC20Metadata",
+      "selector": "0x8e649195"
+    },
+    {
+      "name": "increaseAllowance",
+      "selector": "0x39509351"
+    },
+    {
+      "name": "initialize_ERC20",
+      "selector": "0xe04fb235"
+    },
+    {
+      "name": "name",
+      "selector": "0x06fdde03"
+    },
+    {
+      "name": "symbol",
+      "selector": "0x95d89b41"
+    },
+    {
+      "name": "transfer",
+      "selector": "0xa9059cbb"
+    },
+    {
+      "name": "transferFrom",
+      "selector": "0x23b872dd"
+    }
+  ],
+  "ERC20Facet": [
     {
       "name": "allowance",
       "selector": "0xdd62ed3e"
@@ -1640,62 +3856,120 @@ contractNames
       "selector": "0x23b872dd"
     }
   ],
-  "ERC3643": [
+  "ERC20Permit": [
+    {
+      "name": "DOMAIN_SEPARATOR",
+      "selector": "0x3644e515"
+    },
+    {
+      "name": "initialize_ERC20Permit",
+      "selector": "0x70d162dc"
+    },
+    {
+      "name": "nonces",
+      "selector": "0x7ecebe00"
+    },
+    {
+      "name": "permit",
+      "selector": "0xd505accf"
+    }
+  ],
+  "ERC20PermitFacet": [
+    {
+      "name": "DOMAIN_SEPARATOR",
+      "selector": "0x3644e515"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ERC20Permit",
+      "selector": "0x70d162dc"
+    },
+    {
+      "name": "nonces",
+      "selector": "0x7ecebe00"
+    },
+    {
+      "name": "permit",
+      "selector": "0xd505accf"
+    }
+  ],
+  "ERC20Votes": [
+    {
+      "name": "CLOCK_MODE",
+      "selector": "0x4bf5d7e9"
+    },
+    {
+      "name": "checkpoints",
+      "selector": "0x0cdfebfa"
+    },
+    {
+      "name": "clock",
+      "selector": "0x91ddadf4"
+    },
+    {
+      "name": "delegate",
+      "selector": "0x5c19a95c"
+    },
+    {
+      "name": "delegates",
+      "selector": "0x587cde1e"
+    },
+    {
+      "name": "getPastTotalSupply",
+      "selector": "0x8e539e8c"
+    },
+    {
+      "name": "getPastVotes",
+      "selector": "0x3a46b1a8"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "getVotes",
+      "selector": "0x9ab24eb0"
+    },
+    {
+      "name": "initialize_ERC20Votes",
+      "selector": "0x65fa0b29"
+    },
+    {
+      "name": "isActivated",
+      "selector": "0x4a8c1fb4"
+    },
+    {
+      "name": "numCheckpoints",
+      "selector": "0x6fcfff45"
+    }
+  ],
+  "ERC3643Management": [
     {
       "name": "addAgent",
       "selector": "0x84e79842"
     },
     {
-      "name": "batchBurn",
-      "selector": "0x4a6cc677"
-    },
-    {
-      "name": "batchForcedTransfer",
-      "selector": "0x42a47abc"
-    },
-    {
-      "name": "batchMint",
-      "selector": "0x68573107"
-    },
-    {
-      "name": "batchTransfer",
-      "selector": "0x88d695b2"
-    },
-    {
-      "name": "burn",
-      "selector": "0x9dc29fac"
-    },
-    {
-      "name": "compliance",
-      "selector": "0x6290865d"
-    },
-    {
-      "name": "forcedTransfer",
-      "selector": "0x9fc1d0e7"
-    },
-    {
-      "name": "identityRegistry",
-      "selector": "0x134e18f4"
-    },
-    {
       "name": "initialize_ERC3643",
-      "selector": "0x888d9119"
-    },
-    {
-      "name": "isAddressRecovered",
-      "selector": "0x1b997ec2"
-    },
-    {
-      "name": "isAgent",
-      "selector": "0x1ffbb064"
-    },
-    {
-      "name": "mint",
-      "selector": "0x40c10f19"
-    },
-    {
-      "name": "onchainID",
-      "selector": "0xaba63705"
+      "selector": "0xc047bb6c"
     },
     {
       "name": "recoveryAddress",
@@ -1724,10 +3998,6 @@ contractNames
     {
       "name": "setSymbol",
       "selector": "0xb84c8246"
-    },
-    {
-      "name": "version",
-      "selector": "0x54fd4d50"
     }
   ],
   "ERC3643Batch": [
@@ -1778,22 +4048,10 @@ contractNames
       "selector": "0x1ef2fdc8"
     }
   ],
-  "ERC3643Facet": [
+  "ERC3643ManagementFacet": [
     {
       "name": "addAgent",
       "selector": "0x84e79842"
-    },
-    {
-      "name": "burn",
-      "selector": "0x9dc29fac"
-    },
-    {
-      "name": "compliance",
-      "selector": "0x6290865d"
-    },
-    {
-      "name": "forcedTransfer",
-      "selector": "0x9fc1d0e7"
     },
     {
       "name": "getStaticFunctionSelectors",
@@ -1808,28 +4066,8 @@ contractNames
       "selector": "0x1ef2fdc8"
     },
     {
-      "name": "identityRegistry",
-      "selector": "0x134e18f4"
-    },
-    {
       "name": "initialize_ERC3643",
-      "selector": "0x888d9119"
-    },
-    {
-      "name": "isAddressRecovered",
-      "selector": "0x1b997ec2"
-    },
-    {
-      "name": "isAgent",
-      "selector": "0x1ffbb064"
-    },
-    {
-      "name": "mint",
-      "selector": "0x40c10f19"
-    },
-    {
-      "name": "onchainID",
-      "selector": "0xaba63705"
+      "selector": "0xc047bb6c"
     },
     {
       "name": "recoveryAddress",
@@ -1858,6 +4096,106 @@ contractNames
     {
       "name": "setSymbol",
       "selector": "0xb84c8246"
+    }
+  ],
+  "ERC3643Operations": [
+    {
+      "name": "burn",
+      "selector": "0x9dc29fac"
+    },
+    {
+      "name": "forcedTransfer",
+      "selector": "0x9fc1d0e7"
+    },
+    {
+      "name": "mint",
+      "selector": "0x40c10f19"
+    }
+  ],
+  "ERC3643OperationsFacet": [
+    {
+      "name": "burn",
+      "selector": "0x9dc29fac"
+    },
+    {
+      "name": "forcedTransfer",
+      "selector": "0x9fc1d0e7"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "mint",
+      "selector": "0x40c10f19"
+    }
+  ],
+  "ERC3643Read": [
+    {
+      "name": "compliance",
+      "selector": "0x6290865d"
+    },
+    {
+      "name": "identityRegistry",
+      "selector": "0x134e18f4"
+    },
+    {
+      "name": "isAddressRecovered",
+      "selector": "0x1b997ec2"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "onchainID",
+      "selector": "0xaba63705"
+    },
+    {
+      "name": "version",
+      "selector": "0x54fd4d50"
+    }
+  ],
+  "ERC3643ReadFacet": [
+    {
+      "name": "compliance",
+      "selector": "0x6290865d"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "identityRegistry",
+      "selector": "0x134e18f4"
+    },
+    {
+      "name": "isAddressRecovered",
+      "selector": "0x1b997ec2"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "onchainID",
+      "selector": "0xaba63705"
     },
     {
       "name": "version",
@@ -1962,6 +4300,28 @@ contractNames
       "selector": "0x79f3653f"
     },
     {
+      "name": "initialize_Cap",
+      "selector": "0x56210c4e"
+    },
+    {
+      "name": "setMaxSupply",
+      "selector": "0x6f8b44b0"
+    },
+    {
+      "name": "setMaxSupplyByPartition",
+      "selector": "0x99b69647"
+    }
+  ],
+  "CapFacet": [
+    {
+      "name": "getMaxSupply",
+      "selector": "0x4c0f38c2"
+    },
+    {
+      "name": "getMaxSupplyByPartition",
+      "selector": "0x79f3653f"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -1984,6 +4344,36 @@ contractNames
     {
       "name": "setMaxSupplyByPartition",
       "selector": "0x99b69647"
+    }
+  ],
+  "ClearingActions": [
+    {
+      "name": "activateClearing",
+      "selector": "0xab2d18a9"
+    },
+    {
+      "name": "approveClearingOperationByPartition",
+      "selector": "0xd849cea2"
+    },
+    {
+      "name": "cancelClearingOperationByPartition",
+      "selector": "0x679141fb"
+    },
+    {
+      "name": "deactivateClearing",
+      "selector": "0x65c21860"
+    },
+    {
+      "name": "initializeClearing",
+      "selector": "0x86a0b46a"
+    },
+    {
+      "name": "isClearingActivated",
+      "selector": "0x4b4d8990"
+    },
+    {
+      "name": "reclaimClearingOperationByPartition",
+      "selector": "0x67e57fe2"
     }
   ],
   "ClearingActionsFacet": [
@@ -2028,6 +4418,28 @@ contractNames
       "selector": "0x67e57fe2"
     }
   ],
+  "ClearingHoldCreation": [
+    {
+      "name": "clearingCreateHoldByPartition",
+      "selector": "0x6ceae590"
+    },
+    {
+      "name": "clearingCreateHoldFromByPartition",
+      "selector": "0x5f1cf8c9"
+    },
+    {
+      "name": "getClearingCreateHoldForByPartition",
+      "selector": "0x190eb09b"
+    },
+    {
+      "name": "operatorClearingCreateHoldByPartition",
+      "selector": "0x7ab0c73f"
+    },
+    {
+      "name": "protectedClearingCreateHoldByPartition",
+      "selector": "0x9b646ab9"
+    }
+  ],
   "ClearingHoldCreationFacet": [
     {
       "name": "clearingCreateHoldByPartition",
@@ -2060,6 +4472,28 @@ contractNames
     {
       "name": "protectedClearingCreateHoldByPartition",
       "selector": "0x9b646ab9"
+    }
+  ],
+  "ClearingRead": [
+    {
+      "name": "getClearedAmountFor",
+      "selector": "0x46f8bc94"
+    },
+    {
+      "name": "getClearedAmountForByPartition",
+      "selector": "0xfed5a7d4"
+    },
+    {
+      "name": "getClearingCountForByPartition",
+      "selector": "0xcab70f17"
+    },
+    {
+      "name": "getClearingThirdParty",
+      "selector": "0x2714916d"
+    },
+    {
+      "name": "getClearingsIdForByPartition",
+      "selector": "0xcf38dab5"
     }
   ],
   "ClearingReadFacet": [
@@ -2096,6 +4530,28 @@ contractNames
       "selector": "0x1ef2fdc8"
     }
   ],
+  "ClearingRedeem": [
+    {
+      "name": "clearingRedeemByPartition",
+      "selector": "0x39921b12"
+    },
+    {
+      "name": "clearingRedeemFromByPartition",
+      "selector": "0x35114a78"
+    },
+    {
+      "name": "getClearingRedeemForByPartition",
+      "selector": "0x4ac3d940"
+    },
+    {
+      "name": "operatorClearingRedeemByPartition",
+      "selector": "0xc1d6d5a0"
+    },
+    {
+      "name": "protectedClearingRedeemByPartition",
+      "selector": "0x498f1f65"
+    }
+  ],
   "ClearingRedeemFacet": [
     {
       "name": "clearingRedeemByPartition",
@@ -2128,6 +4584,28 @@ contractNames
     {
       "name": "protectedClearingRedeemByPartition",
       "selector": "0x498f1f65"
+    }
+  ],
+  "ClearingTransfer": [
+    {
+      "name": "clearingTransferByPartition",
+      "selector": "0xde32aaa8"
+    },
+    {
+      "name": "clearingTransferFromByPartition",
+      "selector": "0x5c829d67"
+    },
+    {
+      "name": "getClearingTransferForByPartition",
+      "selector": "0x6f438552"
+    },
+    {
+      "name": "operatorClearingTransferByPartition",
+      "selector": "0x2ba8508d"
+    },
+    {
+      "name": "protectedClearingTransferByPartition",
+      "selector": "0x1f4eef27"
     }
   ],
   "ClearingTransferFacet": [
@@ -2165,6 +4643,36 @@ contractNames
     }
   ],
   "ControlList": [
+    {
+      "name": "addToControlList",
+      "selector": "0xe8204966"
+    },
+    {
+      "name": "getControlListCount",
+      "selector": "0x6b5d2ea5"
+    },
+    {
+      "name": "getControlListMembers",
+      "selector": "0xcad7e56b"
+    },
+    {
+      "name": "getControlListType",
+      "selector": "0x1d46c292"
+    },
+    {
+      "name": "initialize_ControlList",
+      "selector": "0xf88bd9f2"
+    },
+    {
+      "name": "isInControlList",
+      "selector": "0xfd5b071b"
+    },
+    {
+      "name": "removeFromControlList",
+      "selector": "0x47b52d3b"
+    }
+  ],
+  "ControlListFacet": [
     {
       "name": "addToControlList",
       "selector": "0xe8204966"
@@ -2230,6 +4738,32 @@ contractNames
     {
       "name": "getCorporateActionIdsByType",
       "selector": "0xe73bbddb"
+    }
+  ],
+  "CorporateActionsFacet": [
+    {
+      "name": "addCorporateAction",
+      "selector": "0xd9e4d92c"
+    },
+    {
+      "name": "getCorporateAction",
+      "selector": "0x911181da"
+    },
+    {
+      "name": "getCorporateActionCount",
+      "selector": "0x8859794c"
+    },
+    {
+      "name": "getCorporateActionCountByType",
+      "selector": "0x539b4e0b"
+    },
+    {
+      "name": "getCorporateActionIds",
+      "selector": "0x1b56ea1e"
+    },
+    {
+      "name": "getCorporateActionIdsByType",
+      "selector": "0xe73bbddb"
     },
     {
       "name": "getStaticFunctionSelectors",
@@ -2245,6 +4779,36 @@ contractNames
     }
   ],
   "ExternalControlListManagement": [
+    {
+      "name": "addExternalControlList",
+      "selector": "0x995e4649"
+    },
+    {
+      "name": "getExternalControlListsCount",
+      "selector": "0x9bec4167"
+    },
+    {
+      "name": "getExternalControlListsMembers",
+      "selector": "0xc4aa9df3"
+    },
+    {
+      "name": "initialize_ExternalControlLists",
+      "selector": "0x0a0a114f"
+    },
+    {
+      "name": "isExternalControlList",
+      "selector": "0x07c44711"
+    },
+    {
+      "name": "removeExternalControlList",
+      "selector": "0xb8913387"
+    },
+    {
+      "name": "updateExternalControlLists",
+      "selector": "0x0ba2b922"
+    }
+  ],
+  "ExternalControlListManagementFacet": [
     {
       "name": "addExternalControlList",
       "selector": "0x995e4649"
@@ -2300,6 +4864,40 @@ contractNames
       "selector": "0x999a2459"
     },
     {
+      "name": "initialize_ExternalKycLists",
+      "selector": "0x3ac7fadc"
+    },
+    {
+      "name": "isExternalKycList",
+      "selector": "0x20991e17"
+    },
+    {
+      "name": "isExternallyGranted",
+      "selector": "0x1d7d5749"
+    },
+    {
+      "name": "removeExternalKycList",
+      "selector": "0x16c94d54"
+    },
+    {
+      "name": "updateExternalKycLists",
+      "selector": "0xc391576d"
+    }
+  ],
+  "ExternalKycListManagementFacet": [
+    {
+      "name": "addExternalKycList",
+      "selector": "0x7570e044"
+    },
+    {
+      "name": "getExternalKycListsCount",
+      "selector": "0xd17e889e"
+    },
+    {
+      "name": "getExternalKycListsMembers",
+      "selector": "0x999a2459"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -2333,6 +4931,36 @@ contractNames
     }
   ],
   "ExternalPauseManagement": [
+    {
+      "name": "addExternalPause",
+      "selector": "0xd438cff1"
+    },
+    {
+      "name": "getExternalPausesCount",
+      "selector": "0x1e2bc3a6"
+    },
+    {
+      "name": "getExternalPausesMembers",
+      "selector": "0x5b175a35"
+    },
+    {
+      "name": "initialize_ExternalPauses",
+      "selector": "0x8f88d0d5"
+    },
+    {
+      "name": "isExternalPause",
+      "selector": "0xe26e35be"
+    },
+    {
+      "name": "removeExternalPause",
+      "selector": "0x9648d912"
+    },
+    {
+      "name": "updateExternalPauses",
+      "selector": "0x361d714a"
+    }
+  ],
+  "ExternalPauseManagementFacet": [
     {
       "name": "addExternalPause",
       "selector": "0xd438cff1"
@@ -2444,86 +5072,6 @@ contractNames
     {
       "name": "unfreezePartialTokens",
       "selector": "0x1fe56f7d"
-    }
-  ],
-  "Hold": [
-    {
-      "name": "controllerCreateHoldByPartition",
-      "selector": "0x5f3d8171"
-    },
-    {
-      "name": "createHoldByPartition",
-      "selector": "0x5d23449e"
-    },
-    {
-      "name": "createHoldFromByPartition",
-      "selector": "0x2361f007"
-    },
-    {
-      "name": "executeHoldByPartition",
-      "selector": "0x25fe8720"
-    },
-    {
-      "name": "operatorCreateHoldByPartition",
-      "selector": "0xc6062c3c"
-    },
-    {
-      "name": "protectedCreateHoldByPartition",
-      "selector": "0xc17f3554"
-    },
-    {
-      "name": "reclaimHoldByPartition",
-      "selector": "0xb437969e"
-    },
-    {
-      "name": "releaseHoldByPartition",
-      "selector": "0xf8bafc1c"
-    }
-  ],
-  "HoldFacet": [
-    {
-      "name": "controllerCreateHoldByPartition",
-      "selector": "0x5f3d8171"
-    },
-    {
-      "name": "createHoldByPartition",
-      "selector": "0x5d23449e"
-    },
-    {
-      "name": "createHoldFromByPartition",
-      "selector": "0x2361f007"
-    },
-    {
-      "name": "executeHoldByPartition",
-      "selector": "0x25fe8720"
-    },
-    {
-      "name": "getStaticFunctionSelectors",
-      "selector": "0xc1f0d742"
-    },
-    {
-      "name": "getStaticInterfaceIds",
-      "selector": "0xb378cf37"
-    },
-    {
-      "name": "getStaticResolverKey",
-      "selector": "0x1ef2fdc8"
-    },
-    {
-      "name": "operatorCreateHoldByPartition",
-      "selector": "0xc6062c3c"
-    },
-    {
-      "name": "protectedCreateHoldByPartition",
-      "selector": "0xc17f3554"
-    },
-    {
-      "name": "reclaimHoldByPartition",
-      "selector": "0xb437969e"
-    },
-    {
-      "name": "releaseHoldByPartition",
-      "selector": "0xf8bafc1c"
     }
   ],
   "HoldManagement": [
@@ -2704,14 +5252,6 @@ contractNames
       "selector": "0x4ee2cd7e"
     },
     {
-      "name": "balanceOfAtSnapshot",
-      "selector": "0x8e00ae2e"
-    },
-    {
-      "name": "balanceOfAtSnapshotByPartition",
-      "selector": "0xe002bcdf"
-    },
-    {
       "name": "balanceOfByPartition",
       "selector": "0x30e82803"
     },
@@ -2732,10 +5272,6 @@ contractNames
       "selector": "0xfb78befa"
     },
     {
-      "name": "decimalsAtSnapshot",
-      "selector": "0x69ed346f"
-    },
-    {
       "name": "initialize_ERC1410",
       "selector": "0x7b1df196"
     },
@@ -2752,20 +5288,8 @@ contractNames
       "selector": "0x6d77cad6"
     },
     {
-      "name": "isPaused",
-      "selector": "0xb187bd26"
-    },
-    {
       "name": "issueByPartition",
       "selector": "0x18180262"
-    },
-    {
-      "name": "lockedBalanceOfAtSnapshot",
-      "selector": "0xd9e6f164"
-    },
-    {
-      "name": "lockedBalanceOfAtSnapshotByPartition",
-      "selector": "0x4a13f5d0"
     },
     {
       "name": "operatorRedeemByPartition",
@@ -2778,14 +5302,6 @@ contractNames
     {
       "name": "partitionsOf",
       "selector": "0x740ab8f4"
-    },
-    {
-      "name": "partitionsOfAtSnapshot",
-      "selector": "0x09e84301"
-    },
-    {
-      "name": "pause",
-      "selector": "0x8456cb59"
     },
     {
       "name": "protectedRedeemFromByPartition",
@@ -2808,20 +5324,8 @@ contractNames
       "selector": "0x168ecec5"
     },
     {
-      "name": "takeSnapshot",
-      "selector": "0xb3d3d37e"
-    },
-    {
       "name": "totalSupply",
       "selector": "0x18160ddd"
-    },
-    {
-      "name": "totalSupplyAtSnapshot",
-      "selector": "0xda35f8f6"
-    },
-    {
-      "name": "totalSupplyAtSnapshotByPartition",
-      "selector": "0x9657ddb9"
     },
     {
       "name": "totalSupplyByPartition",
@@ -2834,24 +5338,6 @@ contractNames
     {
       "name": "triggerAndSyncAll",
       "selector": "0x6afb79db"
-    },
-    {
-      "name": "unpause",
-      "selector": "0x3f4ba83a"
-    }
-  ],
-  "IERC1410Controller": [
-    {
-      "name": "canTransferByPartition",
-      "selector": "0xa7b518b1"
-    },
-    {
-      "name": "controllerRedeemByPartition",
-      "selector": "0xb84777cc"
-    },
-    {
-      "name": "controllerTransferByPartition",
-      "selector": "0xfb78befa"
     }
   ],
   "IERC1410Management": [
@@ -3042,114 +5528,74 @@ contractNames
       "selector": "0x4c783bf5"
     }
   ],
-  "IERC20": [
+  "IERC20Permit": [
     {
-      "name": "allowance",
-      "selector": "0xdd62ed3e"
+      "name": "DOMAIN_SEPARATOR",
+      "selector": "0x3644e515"
     },
     {
-      "name": "approve",
-      "selector": "0x095ea7b3"
+      "name": "initialize_ERC20Permit",
+      "selector": "0x70d162dc"
     },
     {
-      "name": "decimals",
-      "selector": "0x313ce567"
+      "name": "nonces",
+      "selector": "0x7ecebe00"
     },
     {
-      "name": "decimalsAdjusted",
-      "selector": "0xc67f05aa"
-    },
-    {
-      "name": "decimalsAdjustedAt",
-      "selector": "0x065dd252"
-    },
-    {
-      "name": "decimalsAt",
-      "selector": "0x771918ca"
-    },
-    {
-      "name": "decreaseAllowance",
-      "selector": "0xa457c2d7"
-    },
-    {
-      "name": "getERC20Metadata",
-      "selector": "0x8e649195"
-    },
-    {
-      "name": "increaseAllowance",
-      "selector": "0x39509351"
-    },
-    {
-      "name": "initialize_ERC20",
-      "selector": "0xe04fb235"
-    },
-    {
-      "name": "name",
-      "selector": "0x06fdde03"
-    },
-    {
-      "name": "symbol",
-      "selector": "0x95d89b41"
-    },
-    {
-      "name": "transfer",
-      "selector": "0xa9059cbb"
-    },
-    {
-      "name": "transferFrom",
-      "selector": "0x23b872dd"
+      "name": "permit",
+      "selector": "0xd505accf"
     }
   ],
-  "ICompliance": [
+  "IERC20Votes": [
     {
-      "name": "canTransfer",
-      "selector": "0xe46638e6"
+      "name": "CLOCK_MODE",
+      "selector": "0x4bf5d7e9"
     },
     {
-      "name": "created",
-      "selector": "0x5f8dead3"
+      "name": "checkpoints",
+      "selector": "0x0cdfebfa"
     },
     {
-      "name": "destroyed",
-      "selector": "0x8d2ea772"
+      "name": "clock",
+      "selector": "0x91ddadf4"
     },
     {
-      "name": "transferred",
-      "selector": "0x8baf29b4"
+      "name": "delegate",
+      "selector": "0x5c19a95c"
+    },
+    {
+      "name": "delegates",
+      "selector": "0x587cde1e"
+    },
+    {
+      "name": "getPastTotalSupply",
+      "selector": "0x8e539e8c"
+    },
+    {
+      "name": "getPastVotes",
+      "selector": "0x3a46b1a8"
+    },
+    {
+      "name": "getVotes",
+      "selector": "0x9ab24eb0"
+    },
+    {
+      "name": "initialize_ERC20Votes",
+      "selector": "0x65fa0b29"
+    },
+    {
+      "name": "isActivated",
+      "selector": "0x4a8c1fb4"
+    },
+    {
+      "name": "numCheckpoints",
+      "selector": "0x6fcfff45"
     }
   ],
   "IERC3643": [
     {
       "name": "addAgent",
       "selector": "0x84e79842"
-    },
-    {
-      "name": "authorizeOperator",
-      "selector": "0x959b8c3f"
-    },
-    {
-      "name": "authorizeOperatorByPartition",
-      "selector": "0x103ef9e1"
-    },
-    {
-      "name": "balanceOf",
-      "selector": "0x70a08231"
-    },
-    {
-      "name": "balanceOfAt",
-      "selector": "0x4ee2cd7e"
-    },
-    {
-      "name": "balanceOfAtSnapshot",
-      "selector": "0x8e00ae2e"
-    },
-    {
-      "name": "balanceOfAtSnapshotByPartition",
-      "selector": "0xe002bcdf"
-    },
-    {
-      "name": "balanceOfByPartition",
-      "selector": "0x30e82803"
     },
     {
       "name": "batchBurn",
@@ -3172,28 +5618,8 @@ contractNames
       "selector": "0x9dc29fac"
     },
     {
-      "name": "canRedeemByPartition",
-      "selector": "0x7b7322c4"
-    },
-    {
-      "name": "canTransferByPartition",
-      "selector": "0xa7b518b1"
-    },
-    {
       "name": "compliance",
       "selector": "0x6290865d"
-    },
-    {
-      "name": "controllerRedeemByPartition",
-      "selector": "0xb84777cc"
-    },
-    {
-      "name": "controllerTransferByPartition",
-      "selector": "0xfb78befa"
-    },
-    {
-      "name": "decimalsAtSnapshot",
-      "selector": "0x69ed346f"
     },
     {
       "name": "forcedTransfer",
@@ -3204,12 +5630,8 @@ contractNames
       "selector": "0x134e18f4"
     },
     {
-      "name": "initialize_ERC1410",
-      "selector": "0x7b1df196"
-    },
-    {
       "name": "initialize_ERC3643",
-      "selector": "0x888d9119"
+      "selector": "0xc047bb6c"
     },
     {
       "name": "isAddressRecovered",
@@ -3220,34 +5642,6 @@ contractNames
       "selector": "0x1ffbb064"
     },
     {
-      "name": "isMultiPartition",
-      "selector": "0xbd09cc54"
-    },
-    {
-      "name": "isOperator",
-      "selector": "0xb6363cf2"
-    },
-    {
-      "name": "isOperatorForPartition",
-      "selector": "0x6d77cad6"
-    },
-    {
-      "name": "isPaused",
-      "selector": "0xb187bd26"
-    },
-    {
-      "name": "issueByPartition",
-      "selector": "0x18180262"
-    },
-    {
-      "name": "lockedBalanceOfAtSnapshot",
-      "selector": "0xd9e6f164"
-    },
-    {
-      "name": "lockedBalanceOfAtSnapshotByPartition",
-      "selector": "0x4a13f5d0"
-    },
-    {
       "name": "mint",
       "selector": "0x40c10f19"
     },
@@ -3256,52 +5650,12 @@ contractNames
       "selector": "0xaba63705"
     },
     {
-      "name": "operatorRedeemByPartition",
-      "selector": "0x13d557bc"
-    },
-    {
-      "name": "operatorTransferByPartition",
-      "selector": "0x6b9894fe"
-    },
-    {
-      "name": "partitionsOf",
-      "selector": "0x740ab8f4"
-    },
-    {
-      "name": "partitionsOfAtSnapshot",
-      "selector": "0x09e84301"
-    },
-    {
-      "name": "pause",
-      "selector": "0x8456cb59"
-    },
-    {
-      "name": "protectedRedeemFromByPartition",
-      "selector": "0xc98d9723"
-    },
-    {
-      "name": "protectedTransferFromByPartition",
-      "selector": "0x12e41c0a"
-    },
-    {
       "name": "recoveryAddress",
       "selector": "0x9285948a"
     },
     {
-      "name": "redeemByPartition",
-      "selector": "0x62eb0068"
-    },
-    {
       "name": "removeAgent",
       "selector": "0x97a6278e"
-    },
-    {
-      "name": "revokeOperator",
-      "selector": "0xfad8b32a"
-    },
-    {
-      "name": "revokeOperatorByPartition",
-      "selector": "0x168ecec5"
     },
     {
       "name": "setCompliance",
@@ -3322,84 +5676,20 @@ contractNames
     {
       "name": "setSymbol",
       "selector": "0xb84c8246"
-    },
-    {
-      "name": "takeSnapshot",
-      "selector": "0xb3d3d37e"
-    },
-    {
-      "name": "totalSupply",
-      "selector": "0x18160ddd"
-    },
-    {
-      "name": "totalSupplyAtSnapshot",
-      "selector": "0xda35f8f6"
-    },
-    {
-      "name": "totalSupplyAtSnapshotByPartition",
-      "selector": "0x9657ddb9"
-    },
-    {
-      "name": "totalSupplyByPartition",
-      "selector": "0xa26734dc"
-    },
-    {
-      "name": "transferByPartition",
-      "selector": "0x3bc9bcd8"
-    },
-    {
-      "name": "triggerAndSyncAll",
-      "selector": "0x6afb79db"
-    },
-    {
-      "name": "unpause",
-      "selector": "0x3f4ba83a"
     },
     {
       "name": "version",
       "selector": "0x54fd4d50"
     }
   ],
-  "IERC3643Basic": [
+  "IERC3643Management": [
     {
       "name": "addAgent",
       "selector": "0x84e79842"
     },
     {
-      "name": "burn",
-      "selector": "0x9dc29fac"
-    },
-    {
-      "name": "compliance",
-      "selector": "0x6290865d"
-    },
-    {
-      "name": "forcedTransfer",
-      "selector": "0x9fc1d0e7"
-    },
-    {
-      "name": "identityRegistry",
-      "selector": "0x134e18f4"
-    },
-    {
       "name": "initialize_ERC3643",
-      "selector": "0x888d9119"
-    },
-    {
-      "name": "isAddressRecovered",
-      "selector": "0x1b997ec2"
-    },
-    {
-      "name": "isAgent",
-      "selector": "0x1ffbb064"
-    },
-    {
-      "name": "mint",
-      "selector": "0x40c10f19"
-    },
-    {
-      "name": "onchainID",
-      "selector": "0xaba63705"
+      "selector": "0xc047bb6c"
     },
     {
       "name": "recoveryAddress",
@@ -3428,10 +5718,6 @@ contractNames
     {
       "name": "setSymbol",
       "selector": "0xb84c8246"
-    },
-    {
-      "name": "version",
-      "selector": "0x54fd4d50"
     }
   ],
   "IERC3643Batch": [
@@ -3450,6 +5736,64 @@ contractNames
     {
       "name": "batchTransfer",
       "selector": "0x88d695b2"
+    }
+  ],
+  "IERC3643Operations": [
+    {
+      "name": "burn",
+      "selector": "0x9dc29fac"
+    },
+    {
+      "name": "forcedTransfer",
+      "selector": "0x9fc1d0e7"
+    },
+    {
+      "name": "mint",
+      "selector": "0x40c10f19"
+    }
+  ],
+  "IERC3643Read": [
+    {
+      "name": "compliance",
+      "selector": "0x6290865d"
+    },
+    {
+      "name": "identityRegistry",
+      "selector": "0x134e18f4"
+    },
+    {
+      "name": "isAddressRecovered",
+      "selector": "0x1b997ec2"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "onchainID",
+      "selector": "0xaba63705"
+    },
+    {
+      "name": "version",
+      "selector": "0x54fd4d50"
+    }
+  ],
+  "IFreeze": [
+    {
+      "name": "freezePartialTokens",
+      "selector": "0x125c4a33"
+    },
+    {
+      "name": "getFrozenTokens",
+      "selector": "0x158b1a57"
+    },
+    {
+      "name": "setAddressFrozen",
+      "selector": "0xc69c09cf"
+    },
+    {
+      "name": "unfreezePartialTokens",
+      "selector": "0x1fe56f7d"
     }
   ],
   "IAccessControl": [
@@ -3798,24 +6142,6 @@ contractNames
       "selector": "0x361d714a"
     }
   ],
-  "IFreeze": [
-    {
-      "name": "freezePartialTokens",
-      "selector": "0x125c4a33"
-    },
-    {
-      "name": "getFrozenTokens",
-      "selector": "0x158b1a57"
-    },
-    {
-      "name": "setAddressFrozen",
-      "selector": "0xc69c09cf"
-    },
-    {
-      "name": "unfreezePartialTokens",
-      "selector": "0x1fe56f7d"
-    }
-  ],
   "IHold": [
     {
       "name": "applyRoles",
@@ -3836,14 +6162,6 @@ contractNames
     {
       "name": "balanceOfAt",
       "selector": "0x4ee2cd7e"
-    },
-    {
-      "name": "balanceOfAtSnapshot",
-      "selector": "0x8e00ae2e"
-    },
-    {
-      "name": "balanceOfAtSnapshotByPartition",
-      "selector": "0xe002bcdf"
     },
     {
       "name": "balanceOfByPartition",
@@ -3876,10 +6194,6 @@ contractNames
     {
       "name": "createHoldFromByPartition",
       "selector": "0x2361f007"
-    },
-    {
-      "name": "decimalsAtSnapshot",
-      "selector": "0x69ed346f"
     },
     {
       "name": "executeHoldByPartition",
@@ -3950,20 +6264,8 @@ contractNames
       "selector": "0x6d77cad6"
     },
     {
-      "name": "isPaused",
-      "selector": "0xb187bd26"
-    },
-    {
       "name": "issueByPartition",
       "selector": "0x18180262"
-    },
-    {
-      "name": "lockedBalanceOfAtSnapshot",
-      "selector": "0xd9e6f164"
-    },
-    {
-      "name": "lockedBalanceOfAtSnapshotByPartition",
-      "selector": "0x4a13f5d0"
     },
     {
       "name": "operatorCreateHoldByPartition",
@@ -3980,14 +6282,6 @@ contractNames
     {
       "name": "partitionsOf",
       "selector": "0x740ab8f4"
-    },
-    {
-      "name": "partitionsOfAtSnapshot",
-      "selector": "0x09e84301"
-    },
-    {
-      "name": "pause",
-      "selector": "0x8456cb59"
     },
     {
       "name": "protectedCreateHoldByPartition",
@@ -4030,20 +6324,8 @@ contractNames
       "selector": "0xd547741f"
     },
     {
-      "name": "takeSnapshot",
-      "selector": "0xb3d3d37e"
-    },
-    {
       "name": "totalSupply",
       "selector": "0x18160ddd"
-    },
-    {
-      "name": "totalSupplyAtSnapshot",
-      "selector": "0xda35f8f6"
-    },
-    {
-      "name": "totalSupplyAtSnapshotByPartition",
-      "selector": "0x9657ddb9"
     },
     {
       "name": "totalSupplyByPartition",
@@ -4056,10 +6338,6 @@ contractNames
     {
       "name": "triggerAndSyncAll",
       "selector": "0x6afb79db"
-    },
-    {
-      "name": "unpause",
-      "selector": "0x3f4ba83a"
     }
   ],
   "IHoldManagement": [
@@ -4276,6 +6554,14 @@ contractNames
       "selector": "0x69ed346f"
     },
     {
+      "name": "getTokenHoldersAtSnapshot",
+      "selector": "0xd22a73df"
+    },
+    {
+      "name": "getTotalTokenHoldersAtSnapshot",
+      "selector": "0x867126e1"
+    },
+    {
       "name": "lockedBalanceOfAtSnapshot",
       "selector": "0xd9e6f164"
     },
@@ -4356,6 +6642,48 @@ contractNames
       "selector": "0xe788a736"
     },
     {
+      "name": "grantKyc",
+      "selector": "0x81bea54d"
+    },
+    {
+      "name": "initializeInternalKyc",
+      "selector": "0xdf353624"
+    },
+    {
+      "name": "isInternalKycActivated",
+      "selector": "0x90b6c798"
+    },
+    {
+      "name": "revokeKyc",
+      "selector": "0x12283191"
+    }
+  ],
+  "KycFacet": [
+    {
+      "name": "activateInternalKyc",
+      "selector": "0xfbb08f50"
+    },
+    {
+      "name": "deactivateInternalKyc",
+      "selector": "0x4a5df31d"
+    },
+    {
+      "name": "getKycAccountsCount",
+      "selector": "0x5b712c4b"
+    },
+    {
+      "name": "getKycAccountsData",
+      "selector": "0x00497afb"
+    },
+    {
+      "name": "getKycFor",
+      "selector": "0x41322840"
+    },
+    {
+      "name": "getKycStatusFor",
+      "selector": "0xe788a736"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -4385,6 +6713,56 @@ contractNames
     }
   ],
   "Lock": [
+    {
+      "name": "getLockCountFor",
+      "selector": "0x4f131ba4"
+    },
+    {
+      "name": "getLockCountForByPartition",
+      "selector": "0x3b193d92"
+    },
+    {
+      "name": "getLockFor",
+      "selector": "0x6f14b024"
+    },
+    {
+      "name": "getLockForByPartition",
+      "selector": "0xa9acfccb"
+    },
+    {
+      "name": "getLockedAmountFor",
+      "selector": "0x36e74467"
+    },
+    {
+      "name": "getLockedAmountForByPartition",
+      "selector": "0x6e1c55ba"
+    },
+    {
+      "name": "getLocksIdFor",
+      "selector": "0xd2d2b9fc"
+    },
+    {
+      "name": "getLocksIdForByPartition",
+      "selector": "0x3ea8b59d"
+    },
+    {
+      "name": "lock",
+      "selector": "0xcf27cfc4"
+    },
+    {
+      "name": "lockByPartition",
+      "selector": "0x7a87884e"
+    },
+    {
+      "name": "release",
+      "selector": "0x8124fea6"
+    },
+    {
+      "name": "releaseByPartition",
+      "selector": "0xdc6a3e75"
+    }
+  ],
+  "LockFacet": [
     {
       "name": "getLockCountFor",
       "selector": "0x4f131ba4"
@@ -4500,6 +6878,32 @@ contractNames
       "selector": "0x9f6b67c2"
     },
     {
+      "name": "initialize_ProtectedPartitions",
+      "selector": "0x90c032cc"
+    },
+    {
+      "name": "protectPartitions",
+      "selector": "0x6c5fde55"
+    },
+    {
+      "name": "unprotectPartitions",
+      "selector": "0x1277b323"
+    }
+  ],
+  "ProtectedPartitionsFacet": [
+    {
+      "name": "arePartitionsProtected",
+      "selector": "0xa151c19f"
+    },
+    {
+      "name": "calculateRoleForPartition",
+      "selector": "0xcb4da6fc"
+    },
+    {
+      "name": "getNounceFor",
+      "selector": "0x9f6b67c2"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -4546,6 +6950,68 @@ contractNames
       "selector": "0x69ed346f"
     },
     {
+      "name": "getTokenHoldersAtSnapshot",
+      "selector": "0xd22a73df"
+    },
+    {
+      "name": "getTotalTokenHoldersAtSnapshot",
+      "selector": "0x867126e1"
+    },
+    {
+      "name": "heldBalanceOfAtSnapshot",
+      "selector": "0xb52e39aa"
+    },
+    {
+      "name": "heldBalanceOfAtSnapshotByPartition",
+      "selector": "0x977a3a71"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshot",
+      "selector": "0xd9e6f164"
+    },
+    {
+      "name": "lockedBalanceOfAtSnapshotByPartition",
+      "selector": "0x4a13f5d0"
+    },
+    {
+      "name": "partitionsOfAtSnapshot",
+      "selector": "0x09e84301"
+    },
+    {
+      "name": "takeSnapshot",
+      "selector": "0xb3d3d37e"
+    },
+    {
+      "name": "totalSupplyAtSnapshot",
+      "selector": "0xda35f8f6"
+    },
+    {
+      "name": "totalSupplyAtSnapshotByPartition",
+      "selector": "0x9657ddb9"
+    }
+  ],
+  "SnapshotsFacet": [
+    {
+      "name": "balanceOfAtSnapshot",
+      "selector": "0x8e00ae2e"
+    },
+    {
+      "name": "balanceOfAtSnapshotByPartition",
+      "selector": "0xe002bcdf"
+    },
+    {
+      "name": "clearedBalanceOfAtSnapshot",
+      "selector": "0x2bc16e9b"
+    },
+    {
+      "name": "clearedBalanceOfAtSnapshotByPartition",
+      "selector": "0x386e1405"
+    },
+    {
+      "name": "decimalsAtSnapshot",
+      "selector": "0x69ed346f"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -4556,6 +7022,14 @@ contractNames
     {
       "name": "getStaticResolverKey",
       "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "getTokenHoldersAtSnapshot",
+      "selector": "0xd22a73df"
+    },
+    {
+      "name": "getTotalTokenHoldersAtSnapshot",
+      "selector": "0x867126e1"
     },
     {
       "name": "heldBalanceOfAtSnapshot",
@@ -4608,6 +7082,36 @@ contractNames
       "selector": "0x12023976"
     },
     {
+      "name": "isIssuer",
+      "selector": "0x877b9a67"
+    },
+    {
+      "name": "removeIssuer",
+      "selector": "0x47bc7093"
+    },
+    {
+      "name": "setRevocationRegistryAddress",
+      "selector": "0xbb3daeaf"
+    }
+  ],
+  "SsiManagementFacet": [
+    {
+      "name": "addIssuer",
+      "selector": "0x20694db0"
+    },
+    {
+      "name": "getIssuerListCount",
+      "selector": "0x600b2940"
+    },
+    {
+      "name": "getIssuerListMembers",
+      "selector": "0x25ab0545"
+    },
+    {
+      "name": "getRevocationRegistryAddress",
+      "selector": "0x12023976"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -4636,6 +7140,12 @@ contractNames
     {
       "name": "adjustBalances",
       "selector": "0xe2d77e44"
+    }
+  ],
+  "AdjustBalancesFacet": [
+    {
+      "name": "adjustBalances",
+      "selector": "0xe2d77e44"
     },
     {
       "name": "getStaticFunctionSelectors",
@@ -4651,6 +7161,20 @@ contractNames
     }
   ],
   "Bond": [
+    {
+      "name": "redeemAtMaturityByPartition",
+      "selector": "0x8a647211"
+    },
+    {
+      "name": "setCoupon",
+      "selector": "0xb3a6617d"
+    },
+    {
+      "name": "updateMaturityDate",
+      "selector": "0xc7a6ca35"
+    }
+  ],
+  "BondRead": [
     {
       "name": "getBondDetails",
       "selector": "0x4ce02414"
@@ -4672,6 +7196,10 @@ contractNames
       "selector": "0xbba7b56d"
     },
     {
+      "name": "getCouponHolders",
+      "selector": "0xa92e8371"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -4684,15 +7212,15 @@ contractNames
       "selector": "0x1ef2fdc8"
     },
     {
-      "name": "setCoupon",
-      "selector": "0xb3a6617d"
-    },
-    {
-      "name": "updateMaturityDate",
-      "selector": "0xc7a6ca35"
+      "name": "getTotalCouponHolders",
+      "selector": "0xec116ae3"
     }
   ],
   "Equity": [
+    {
+      "name": "getDividendHolders",
+      "selector": "0xeba3918e"
+    },
     {
       "name": "getDividends",
       "selector": "0x3837ac88"
@@ -4718,16 +7246,12 @@ contractNames
       "selector": "0x7c62c7fc"
     },
     {
-      "name": "getStaticFunctionSelectors",
-      "selector": "0xc1f0d742"
+      "name": "getTotalDividendHolders",
+      "selector": "0xd61a022b"
     },
     {
-      "name": "getStaticInterfaceIds",
-      "selector": "0xb378cf37"
-    },
-    {
-      "name": "getStaticResolverKey",
-      "selector": "0x1ef2fdc8"
+      "name": "getTotalVotingHolders",
+      "selector": "0x92c51818"
     },
     {
       "name": "getVoting",
@@ -4740,6 +7264,10 @@ contractNames
     {
       "name": "getVotingFor",
       "selector": "0x7633eccf"
+    },
+    {
+      "name": "getVotingHolders",
+      "selector": "0x009f64ac"
     },
     {
       "name": "setDividends",
@@ -4762,6 +7290,20 @@ contractNames
   ],
   "IBond": [
     {
+      "name": "redeemAtMaturityByPartition",
+      "selector": "0x8a647211"
+    },
+    {
+      "name": "setCoupon",
+      "selector": "0xb3a6617d"
+    },
+    {
+      "name": "updateMaturityDate",
+      "selector": "0xc7a6ca35"
+    }
+  ],
+  "IBondRead": [
+    {
       "name": "getBondDetails",
       "selector": "0x4ce02414"
     },
@@ -4782,15 +7324,19 @@ contractNames
       "selector": "0xbba7b56d"
     },
     {
-      "name": "setCoupon",
-      "selector": "0xb3a6617d"
+      "name": "getCouponHolders",
+      "selector": "0xa92e8371"
     },
     {
-      "name": "updateMaturityDate",
-      "selector": "0xc7a6ca35"
+      "name": "getTotalCouponHolders",
+      "selector": "0xec116ae3"
     }
   ],
   "IEquity": [
+    {
+      "name": "getDividendHolders",
+      "selector": "0xeba3918e"
+    },
     {
       "name": "getDividends",
       "selector": "0x3837ac88"
@@ -4816,6 +7362,14 @@ contractNames
       "selector": "0x7c62c7fc"
     },
     {
+      "name": "getTotalDividendHolders",
+      "selector": "0xd61a022b"
+    },
+    {
+      "name": "getTotalVotingHolders",
+      "selector": "0x92c51818"
+    },
+    {
       "name": "getVoting",
       "selector": "0x3afc7282"
     },
@@ -4826,6 +7380,10 @@ contractNames
     {
       "name": "getVotingFor",
       "selector": "0x7633eccf"
+    },
+    {
+      "name": "getVotingHolders",
+      "selector": "0x009f64ac"
     },
     {
       "name": "setDividends",
@@ -4896,6 +7454,20 @@ contractNames
       "selector": "0xcb884d41"
     },
     {
+      "name": "onScheduledBalanceAdjustmentTriggered",
+      "selector": "0xd300de7a"
+    },
+    {
+      "name": "scheduledBalanceAdjustmentCount",
+      "selector": "0x2de241e3"
+    }
+  ],
+  "ScheduledBalanceAdjustmentsFacet": [
+    {
+      "name": "getScheduledBalanceAdjustments",
+      "selector": "0xcb884d41"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -4922,6 +7494,20 @@ contractNames
       "selector": "0xca21c53a"
     },
     {
+      "name": "onScheduledSnapshotTriggered",
+      "selector": "0x8e51d755"
+    },
+    {
+      "name": "scheduledSnapshotCount",
+      "selector": "0xa19e91fe"
+    }
+  ],
+  "ScheduledSnapshotsFacet": [
+    {
+      "name": "getScheduledSnapshots",
+      "selector": "0xca21c53a"
+    },
+    {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
     },
@@ -4943,6 +7529,28 @@ contractNames
     }
   ],
   "ScheduledTasks": [
+    {
+      "name": "getScheduledTasks",
+      "selector": "0xdcff09ba"
+    },
+    {
+      "name": "onScheduledTaskTriggered",
+      "selector": "0xdf1eb071"
+    },
+    {
+      "name": "scheduledTaskCount",
+      "selector": "0x6dfe790e"
+    },
+    {
+      "name": "triggerPendingScheduledTasks",
+      "selector": "0x1507f2a4"
+    },
+    {
+      "name": "triggerScheduledTasks",
+      "selector": "0x28a5d769"
+    }
+  ],
+  "ScheduledTasksFacet": [
     {
       "name": "getScheduledTasks",
       "selector": "0xdcff09ba"
@@ -4982,6 +7590,50 @@ contractNames
       "selector": "0xfe8d48bf"
     },
     {
+      "name": "redeemAtMaturityByPartition",
+      "selector": "0x8a647211"
+    },
+    {
+      "name": "setCoupon",
+      "selector": "0xb3a6617d"
+    },
+    {
+      "name": "updateMaturityDate",
+      "selector": "0xc7a6ca35"
+    }
+  ],
+  "BondUSAFacet": [
+    {
+      "name": "_initialize_bondUSA",
+      "selector": "0xfe8d48bf"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "redeemAtMaturityByPartition",
+      "selector": "0x8a647211"
+    },
+    {
+      "name": "setCoupon",
+      "selector": "0xb3a6617d"
+    },
+    {
+      "name": "updateMaturityDate",
+      "selector": "0xc7a6ca35"
+    }
+  ],
+  "BondUSARead": [
+    {
       "name": "getBondDetails",
       "selector": "0x4ce02414"
     },
@@ -5002,6 +7654,14 @@ contractNames
       "selector": "0xbba7b56d"
     },
     {
+      "name": "getCouponHolders",
+      "selector": "0xa92e8371"
+    },
+    {
+      "name": "getSecurityHolders",
+      "selector": "0x81438d2f"
+    },
+    {
       "name": "getSecurityRegulationData",
       "selector": "0x8fda5afe"
     },
@@ -5018,18 +7678,22 @@ contractNames
       "selector": "0x1ef2fdc8"
     },
     {
-      "name": "setCoupon",
-      "selector": "0xb3a6617d"
+      "name": "getTotalCouponHolders",
+      "selector": "0xec116ae3"
     },
     {
-      "name": "updateMaturityDate",
-      "selector": "0xc7a6ca35"
+      "name": "getTotalSecurityHolders",
+      "selector": "0xbd007c8f"
     }
   ],
   "EquityUSA": [
     {
       "name": "_initialize_equityUSA",
       "selector": "0xd34090aa"
+    },
+    {
+      "name": "getDividendHolders",
+      "selector": "0xeba3918e"
     },
     {
       "name": "getDividends",
@@ -5056,6 +7720,92 @@ contractNames
       "selector": "0x7c62c7fc"
     },
     {
+      "name": "getSecurityHolders",
+      "selector": "0x81438d2f"
+    },
+    {
+      "name": "getSecurityRegulationData",
+      "selector": "0x8fda5afe"
+    },
+    {
+      "name": "getTotalDividendHolders",
+      "selector": "0xd61a022b"
+    },
+    {
+      "name": "getTotalSecurityHolders",
+      "selector": "0xbd007c8f"
+    },
+    {
+      "name": "getTotalVotingHolders",
+      "selector": "0x92c51818"
+    },
+    {
+      "name": "getVoting",
+      "selector": "0x3afc7282"
+    },
+    {
+      "name": "getVotingCount",
+      "selector": "0x9c2aab5e"
+    },
+    {
+      "name": "getVotingFor",
+      "selector": "0x7633eccf"
+    },
+    {
+      "name": "getVotingHolders",
+      "selector": "0x009f64ac"
+    },
+    {
+      "name": "setDividends",
+      "selector": "0x054d2b88"
+    },
+    {
+      "name": "setScheduledBalanceAdjustment",
+      "selector": "0xd1661084"
+    },
+    {
+      "name": "setVoting",
+      "selector": "0x5adaa49e"
+    }
+  ],
+  "EquityUSAFacet": [
+    {
+      "name": "_initialize_equityUSA",
+      "selector": "0xd34090aa"
+    },
+    {
+      "name": "getDividendHolders",
+      "selector": "0xeba3918e"
+    },
+    {
+      "name": "getDividends",
+      "selector": "0x3837ac88"
+    },
+    {
+      "name": "getDividendsCount",
+      "selector": "0x9e676952"
+    },
+    {
+      "name": "getDividendsFor",
+      "selector": "0x323e22da"
+    },
+    {
+      "name": "getEquityDetails",
+      "selector": "0xefcdcad8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustment",
+      "selector": "0x3d5338e8"
+    },
+    {
+      "name": "getScheduledBalanceAdjustmentCount",
+      "selector": "0x7c62c7fc"
+    },
+    {
+      "name": "getSecurityHolders",
+      "selector": "0x81438d2f"
+    },
+    {
       "name": "getSecurityRegulationData",
       "selector": "0x8fda5afe"
     },
@@ -5072,6 +7822,18 @@ contractNames
       "selector": "0x1ef2fdc8"
     },
     {
+      "name": "getTotalDividendHolders",
+      "selector": "0xd61a022b"
+    },
+    {
+      "name": "getTotalSecurityHolders",
+      "selector": "0xbd007c8f"
+    },
+    {
+      "name": "getTotalVotingHolders",
+      "selector": "0x92c51818"
+    },
+    {
       "name": "getVoting",
       "selector": "0x3afc7282"
     },
@@ -5082,6 +7844,10 @@ contractNames
     {
       "name": "getVotingFor",
       "selector": "0x7633eccf"
+    },
+    {
+      "name": "getVotingHolders",
+      "selector": "0x009f64ac"
     },
     {
       "name": "setDividends",
@@ -5102,28 +7868,8 @@ contractNames
       "selector": "0xfe8d48bf"
     },
     {
-      "name": "getBondDetails",
-      "selector": "0x4ce02414"
-    },
-    {
-      "name": "getCoupon",
-      "selector": "0x936e3169"
-    },
-    {
-      "name": "getCouponCount",
-      "selector": "0x468bb240"
-    },
-    {
-      "name": "getCouponDetails",
-      "selector": "0x82c5582a"
-    },
-    {
-      "name": "getCouponFor",
-      "selector": "0xbba7b56d"
-    },
-    {
-      "name": "getSecurityRegulationData",
-      "selector": "0x8fda5afe"
+      "name": "redeemAtMaturityByPartition",
+      "selector": "0x8a647211"
     },
     {
       "name": "setCoupon",
@@ -5138,6 +7884,10 @@ contractNames
     {
       "name": "_initialize_equityUSA",
       "selector": "0xd34090aa"
+    },
+    {
+      "name": "getDividendHolders",
+      "selector": "0xeba3918e"
     },
     {
       "name": "getDividends",
@@ -5164,8 +7914,24 @@ contractNames
       "selector": "0x7c62c7fc"
     },
     {
+      "name": "getSecurityHolders",
+      "selector": "0x81438d2f"
+    },
+    {
       "name": "getSecurityRegulationData",
       "selector": "0x8fda5afe"
+    },
+    {
+      "name": "getTotalDividendHolders",
+      "selector": "0xd61a022b"
+    },
+    {
+      "name": "getTotalSecurityHolders",
+      "selector": "0xbd007c8f"
+    },
+    {
+      "name": "getTotalVotingHolders",
+      "selector": "0x92c51818"
     },
     {
       "name": "getVoting",
@@ -5178,6 +7944,10 @@ contractNames
     {
       "name": "getVotingFor",
       "selector": "0x7633eccf"
+    },
+    {
+      "name": "getVotingHolders",
+      "selector": "0x009f64ac"
     },
     {
       "name": "setDividends",
@@ -5194,8 +7964,16 @@ contractNames
   ],
   "ISecurity": [
     {
+      "name": "getSecurityHolders",
+      "selector": "0x81438d2f"
+    },
+    {
       "name": "getSecurityRegulationData",
       "selector": "0x8fda5afe"
+    },
+    {
+      "name": "getTotalSecurityHolders",
+      "selector": "0xbd007c8f"
     }
   ],
   "ITransferAndLock": [
@@ -5218,23 +7996,19 @@ contractNames
   ],
   "Security": [
     {
+      "name": "getSecurityHolders",
+      "selector": "0x81438d2f"
+    },
+    {
       "name": "getSecurityRegulationData",
       "selector": "0x8fda5afe"
+    },
+    {
+      "name": "getTotalSecurityHolders",
+      "selector": "0xbd007c8f"
     }
   ],
   "TransferAndLock": [
-    {
-      "name": "getStaticFunctionSelectors",
-      "selector": "0xc1f0d742"
-    },
-    {
-      "name": "getStaticInterfaceIds",
-      "selector": "0xb378cf37"
-    },
-    {
-      "name": "getStaticResolverKey",
-      "selector": "0x1ef2fdc8"
-    },
     {
       "name": "protectedTransferAndLock",
       "selector": "0xe2e20e05"
@@ -5252,7 +8026,19 @@ contractNames
       "selector": "0x3bd407b9"
     }
   ],
-  "TransferAndLockStorageWrapper": [
+  "TransferAndLockFacet": [
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
     {
       "name": "protectedTransferAndLock",
       "selector": "0xe2e20e05"
@@ -5922,12 +8708,26 @@ contractNames
       "selector": "0xc1194e7e"
     },
     {
+      "name": "setFlagsByMethod",
+      "selector": "0xe98940a1"
+    },
+    {
       "name": "transferred",
       "selector": "0x8baf29b4"
     },
     {
       "name": "transferredHit",
       "selector": "0x5a61e0a5"
+    }
+  ],
+  "IdentityRegistryMock": [
+    {
+      "name": "isVerified",
+      "selector": "0xb9209e33"
+    },
+    {
+      "name": "setFlags",
+      "selector": "0xc1194e7e"
     }
   ],
   "AccessControlFacetTimeTravel": [
@@ -5980,7 +8780,7 @@ contractNames
       "selector": "0xd547741f"
     }
   ],
-  "AdjustBalancesTimeTravel": [
+  "AdjustBalancesFacetTimeTravel": [
     {
       "name": "adjustBalances",
       "selector": "0xe2d77e44"
@@ -5998,11 +8798,37 @@ contractNames
       "selector": "0x1ef2fdc8"
     }
   ],
-  "BondUSATimeTravel": [
+  "BondUSAFacetTimeTravel": [
     {
       "name": "_initialize_bondUSA",
       "selector": "0xfe8d48bf"
     },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "redeemAtMaturityByPartition",
+      "selector": "0x8a647211"
+    },
+    {
+      "name": "setCoupon",
+      "selector": "0xb3a6617d"
+    },
+    {
+      "name": "updateMaturityDate",
+      "selector": "0xc7a6ca35"
+    }
+  ],
+  "BondUSAReadTimeTravel": [
     {
       "name": "getBondDetails",
       "selector": "0x4ce02414"
@@ -6024,6 +8850,14 @@ contractNames
       "selector": "0xbba7b56d"
     },
     {
+      "name": "getCouponHolders",
+      "selector": "0xa92e8371"
+    },
+    {
+      "name": "getSecurityHolders",
+      "selector": "0x81438d2f"
+    },
+    {
       "name": "getSecurityRegulationData",
       "selector": "0x8fda5afe"
     },
@@ -6040,15 +8874,15 @@ contractNames
       "selector": "0x1ef2fdc8"
     },
     {
-      "name": "setCoupon",
-      "selector": "0xb3a6617d"
+      "name": "getTotalCouponHolders",
+      "selector": "0xec116ae3"
     },
     {
-      "name": "updateMaturityDate",
-      "selector": "0xc7a6ca35"
+      "name": "getTotalSecurityHolders",
+      "selector": "0xbd007c8f"
     }
   ],
-  "CapTimeTravel": [
+  "CapFacetTimeTravel": [
     {
       "name": "getMaxSupply",
       "selector": "0x4c0f38c2"
@@ -6260,7 +9094,7 @@ contractNames
       "selector": "0x1f4eef27"
     }
   ],
-  "ControlListTimeTravel": [
+  "ControlListFacetTimeTravel": [
     {
       "name": "addToControlList",
       "selector": "0xe8204966"
@@ -6302,7 +9136,7 @@ contractNames
       "selector": "0x47b52d3b"
     }
   ],
-  "CorporateActionsTimeTravel": [
+  "CorporateActionsFacetTimeTravel": [
     {
       "name": "addCorporateAction",
       "selector": "0xd9e4d92c"
@@ -6340,7 +9174,7 @@ contractNames
       "selector": "0x1ef2fdc8"
     }
   ],
-  "ERC1410ManagementTimeTravel": [
+  "ERC1410ManagementFacetTimeTravel": [
     {
       "name": "controllerRedeemByPartition",
       "selector": "0xb84777cc"
@@ -6386,7 +9220,7 @@ contractNames
       "selector": "0x12e41c0a"
     }
   ],
-  "ERC1410ReadTimeTravel": [
+  "ERC1410ReadFacetTimeTravel": [
     {
       "name": "balanceOf",
       "selector": "0x70a08231"
@@ -6444,7 +9278,7 @@ contractNames
       "selector": "0xa26734dc"
     }
   ],
-  "ERC1410TokenHolderTimeTravel": [
+  "ERC1410TokenHolderFacetTimeTravel": [
     {
       "name": "authorizeOperator",
       "selector": "0x959b8c3f"
@@ -6486,7 +9320,7 @@ contractNames
       "selector": "0x6afb79db"
     }
   ],
-  "ERC1594TimeTravel": [
+  "ERC1594FacetTimeTravel": [
     {
       "name": "canTransfer",
       "selector": "0x1badb25c"
@@ -6536,7 +9370,7 @@ contractNames
       "selector": "0x2535f762"
     }
   ],
-  "ERC1643TimeTravel": [
+  "ERC1643FacetTimeTravel": [
     {
       "name": "getAllDocuments",
       "selector": "0x9fa5f50b"
@@ -6566,7 +9400,7 @@ contractNames
       "selector": "0x010648ca"
     }
   ],
-  "ERC1644TimeTravel": [
+  "ERC1644FacetTimeTravel": [
     {
       "name": "controllerRedeem",
       "selector": "0x2bc6acc3"
@@ -6600,7 +9434,7 @@ contractNames
       "selector": "0x4c783bf5"
     }
   ],
-  "ERC20TimeTravel": [
+  "ERC20FacetTimeTravel": [
     {
       "name": "allowance",
       "selector": "0xdd62ed3e"
@@ -6670,7 +9504,95 @@ contractNames
       "selector": "0x23b872dd"
     }
   ],
-  "ERC3643BatchTimeTravel": [
+  "ERC20PermitFacetTimeTravel": [
+    {
+      "name": "DOMAIN_SEPARATOR",
+      "selector": "0x3644e515"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "initialize_ERC20Permit",
+      "selector": "0x70d162dc"
+    },
+    {
+      "name": "nonces",
+      "selector": "0x7ecebe00"
+    },
+    {
+      "name": "permit",
+      "selector": "0xd505accf"
+    }
+  ],
+  "ERC20VotesTimeTravel": [
+    {
+      "name": "CLOCK_MODE",
+      "selector": "0x4bf5d7e9"
+    },
+    {
+      "name": "checkpoints",
+      "selector": "0x0cdfebfa"
+    },
+    {
+      "name": "clock",
+      "selector": "0x91ddadf4"
+    },
+    {
+      "name": "delegate",
+      "selector": "0x5c19a95c"
+    },
+    {
+      "name": "delegates",
+      "selector": "0x587cde1e"
+    },
+    {
+      "name": "getPastTotalSupply",
+      "selector": "0x8e539e8c"
+    },
+    {
+      "name": "getPastVotes",
+      "selector": "0x3a46b1a8"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "getVotes",
+      "selector": "0x9ab24eb0"
+    },
+    {
+      "name": "initialize_ERC20Votes",
+      "selector": "0x65fa0b29"
+    },
+    {
+      "name": "isActivated",
+      "selector": "0x4a8c1fb4"
+    },
+    {
+      "name": "numCheckpoints",
+      "selector": "0x6fcfff45"
+    }
+  ],
+  "ERC3643BatchFacetTimeTravel": [
     {
       "name": "batchBurn",
       "selector": "0x4a6cc677"
@@ -6700,22 +9622,10 @@ contractNames
       "selector": "0x1ef2fdc8"
     }
   ],
-  "ERC3643TimeTravel": [
+  "ERC3643ManagementTimeTravel": [
     {
       "name": "addAgent",
       "selector": "0x84e79842"
-    },
-    {
-      "name": "burn",
-      "selector": "0x9dc29fac"
-    },
-    {
-      "name": "compliance",
-      "selector": "0x6290865d"
-    },
-    {
-      "name": "forcedTransfer",
-      "selector": "0x9fc1d0e7"
     },
     {
       "name": "getStaticFunctionSelectors",
@@ -6730,28 +9640,8 @@ contractNames
       "selector": "0x1ef2fdc8"
     },
     {
-      "name": "identityRegistry",
-      "selector": "0x134e18f4"
-    },
-    {
       "name": "initialize_ERC3643",
-      "selector": "0x888d9119"
-    },
-    {
-      "name": "isAddressRecovered",
-      "selector": "0x1b997ec2"
-    },
-    {
-      "name": "isAgent",
-      "selector": "0x1ffbb064"
-    },
-    {
-      "name": "mint",
-      "selector": "0x40c10f19"
-    },
-    {
-      "name": "onchainID",
-      "selector": "0xaba63705"
+      "selector": "0xc047bb6c"
     },
     {
       "name": "recoveryAddress",
@@ -6780,16 +9670,80 @@ contractNames
     {
       "name": "setSymbol",
       "selector": "0xb84c8246"
+    }
+  ],
+  "ERC3643OperationsTimeTravel": [
+    {
+      "name": "burn",
+      "selector": "0x9dc29fac"
+    },
+    {
+      "name": "forcedTransfer",
+      "selector": "0x9fc1d0e7"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "mint",
+      "selector": "0x40c10f19"
+    }
+  ],
+  "ERC3643ReadTimeTravel": [
+    {
+      "name": "compliance",
+      "selector": "0x6290865d"
+    },
+    {
+      "name": "getStaticFunctionSelectors",
+      "selector": "0xc1f0d742"
+    },
+    {
+      "name": "getStaticInterfaceIds",
+      "selector": "0xb378cf37"
+    },
+    {
+      "name": "getStaticResolverKey",
+      "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "identityRegistry",
+      "selector": "0x134e18f4"
+    },
+    {
+      "name": "isAddressRecovered",
+      "selector": "0x1b997ec2"
+    },
+    {
+      "name": "isAgent",
+      "selector": "0x1ffbb064"
+    },
+    {
+      "name": "onchainID",
+      "selector": "0xaba63705"
     },
     {
       "name": "version",
       "selector": "0x54fd4d50"
     }
   ],
-  "EquityUSATimeTravel": [
+  "EquityUSAFacetTimeTravel": [
     {
       "name": "_initialize_equityUSA",
       "selector": "0xd34090aa"
+    },
+    {
+      "name": "getDividendHolders",
+      "selector": "0xeba3918e"
     },
     {
       "name": "getDividends",
@@ -6816,6 +9770,10 @@ contractNames
       "selector": "0x7c62c7fc"
     },
     {
+      "name": "getSecurityHolders",
+      "selector": "0x81438d2f"
+    },
+    {
       "name": "getSecurityRegulationData",
       "selector": "0x8fda5afe"
     },
@@ -6832,6 +9790,18 @@ contractNames
       "selector": "0x1ef2fdc8"
     },
     {
+      "name": "getTotalDividendHolders",
+      "selector": "0xd61a022b"
+    },
+    {
+      "name": "getTotalSecurityHolders",
+      "selector": "0xbd007c8f"
+    },
+    {
+      "name": "getTotalVotingHolders",
+      "selector": "0x92c51818"
+    },
+    {
       "name": "getVoting",
       "selector": "0x3afc7282"
     },
@@ -6842,6 +9812,10 @@ contractNames
     {
       "name": "getVotingFor",
       "selector": "0x7633eccf"
+    },
+    {
+      "name": "getVotingHolders",
+      "selector": "0x009f64ac"
     },
     {
       "name": "setDividends",
@@ -6856,7 +9830,7 @@ contractNames
       "selector": "0x5adaa49e"
     }
   ],
-  "ExternalControlListManagementTimeTravel": [
+  "ExternalControlListManagementFacetTimeTravel": [
     {
       "name": "addExternalControlList",
       "selector": "0x995e4649"
@@ -6898,7 +9872,7 @@ contractNames
       "selector": "0x0ba2b922"
     }
   ],
-  "ExternalKycListManagementTimeTravel": [
+  "ExternalKycListManagementFacetTimeTravel": [
     {
       "name": "addExternalKycList",
       "selector": "0x7570e044"
@@ -6944,7 +9918,7 @@ contractNames
       "selector": "0xc391576d"
     }
   ],
-  "ExternalPauseManagementTimeTravel": [
+  "ExternalPauseManagementFacetTimeTravel": [
     {
       "name": "addExternalPause",
       "selector": "0xd438cff1"
@@ -7028,7 +10002,7 @@ contractNames
       "selector": "0x1fe56f7d"
     }
   ],
-  "HoldManagementTimeTravel": [
+  "HoldManagementFacetTimeTravel": [
     {
       "name": "controllerCreateHoldByPartition",
       "selector": "0x5f3d8171"
@@ -7054,7 +10028,7 @@ contractNames
       "selector": "0xc17f3554"
     }
   ],
-  "HoldReadTimeTravel": [
+  "HoldReadFacetTimeTravel": [
     {
       "name": "getHeldAmountFor",
       "selector": "0x8493aabb"
@@ -7092,53 +10066,7 @@ contractNames
       "selector": "0x1ef2fdc8"
     }
   ],
-  "HoldTimeTravel": [
-    {
-      "name": "controllerCreateHoldByPartition",
-      "selector": "0x5f3d8171"
-    },
-    {
-      "name": "createHoldByPartition",
-      "selector": "0x5d23449e"
-    },
-    {
-      "name": "createHoldFromByPartition",
-      "selector": "0x2361f007"
-    },
-    {
-      "name": "executeHoldByPartition",
-      "selector": "0x25fe8720"
-    },
-    {
-      "name": "getStaticFunctionSelectors",
-      "selector": "0xc1f0d742"
-    },
-    {
-      "name": "getStaticInterfaceIds",
-      "selector": "0xb378cf37"
-    },
-    {
-      "name": "getStaticResolverKey",
-      "selector": "0x1ef2fdc8"
-    },
-    {
-      "name": "operatorCreateHoldByPartition",
-      "selector": "0xc6062c3c"
-    },
-    {
-      "name": "protectedCreateHoldByPartition",
-      "selector": "0xc17f3554"
-    },
-    {
-      "name": "reclaimHoldByPartition",
-      "selector": "0xb437969e"
-    },
-    {
-      "name": "releaseHoldByPartition",
-      "selector": "0xf8bafc1c"
-    }
-  ],
-  "HoldTokenHolderTimeTravel": [
+  "HoldTokenHolderFacetTimeTravel": [
     {
       "name": "createHoldByPartition",
       "selector": "0x5d23449e"
@@ -7172,7 +10100,7 @@ contractNames
       "selector": "0xf8bafc1c"
     }
   ],
-  "KycTimeTravel": [
+  "KycFacetTimeTravel": [
     {
       "name": "activateInternalKyc",
       "selector": "0xfbb08f50"
@@ -7226,7 +10154,7 @@ contractNames
       "selector": "0x12283191"
     }
   ],
-  "LockTimeTravel": [
+  "LockFacetTimeTravel": [
     {
       "name": "getLockCountFor",
       "selector": "0x4f131ba4"
@@ -7314,7 +10242,7 @@ contractNames
       "selector": "0x3f4ba83a"
     }
   ],
-  "ProtectedPartitionsTimeTravel": [
+  "ProtectedPartitionsFacetTimeTravel": [
     {
       "name": "arePartitionsProtected",
       "selector": "0xa151c19f"
@@ -7352,7 +10280,7 @@ contractNames
       "selector": "0x1277b323"
     }
   ],
-  "ScheduledBalanceAdjustmentsTimeTravel": [
+  "ScheduledBalanceAdjustmentsFacetTimeTravel": [
     {
       "name": "getScheduledBalanceAdjustments",
       "selector": "0xcb884d41"
@@ -7378,7 +10306,7 @@ contractNames
       "selector": "0x2de241e3"
     }
   ],
-  "ScheduledSnapshotsTimeTravel": [
+  "ScheduledSnapshotsFacetTimeTravel": [
     {
       "name": "getScheduledSnapshots",
       "selector": "0xca21c53a"
@@ -7404,7 +10332,7 @@ contractNames
       "selector": "0xa19e91fe"
     }
   ],
-  "ScheduledTasksTimeTravel": [
+  "ScheduledTasksFacetTimeTravel": [
     {
       "name": "getScheduledTasks",
       "selector": "0xdcff09ba"
@@ -7438,7 +10366,7 @@ contractNames
       "selector": "0x28a5d769"
     }
   ],
-  "SnapshotsTimeTravel": [
+  "SnapshotsFacetTimeTravel": [
     {
       "name": "balanceOfAtSnapshot",
       "selector": "0x8e00ae2e"
@@ -7470,6 +10398,14 @@ contractNames
     {
       "name": "getStaticResolverKey",
       "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "getTokenHoldersAtSnapshot",
+      "selector": "0xd22a73df"
+    },
+    {
+      "name": "getTotalTokenHoldersAtSnapshot",
+      "selector": "0x867126e1"
     },
     {
       "name": "heldBalanceOfAtSnapshot",
@@ -7504,7 +10440,7 @@ contractNames
       "selector": "0x9657ddb9"
     }
   ],
-  "SsiManagementTimeTravel": [
+  "SsiManagementFacetTimeTravel": [
     {
       "name": "addIssuer",
       "selector": "0x20694db0"
@@ -7546,7 +10482,7 @@ contractNames
       "selector": "0xbb3daeaf"
     }
   ],
-  "TransferAndLockTimeTravel": [
+  "TransferAndLockFacetTimeTravel": [
     {
       "name": "getStaticFunctionSelectors",
       "selector": "0xc1f0d742"
@@ -7582,8 +10518,16 @@ contractNames
       "selector": "0xadb61832"
     },
     {
+      "name": "changeSystemBlocknumber",
+      "selector": "0x4dd6b375"
+    },
+    {
       "name": "changeSystemTimestamp",
       "selector": "0xc0f0f67e"
+    },
+    {
+      "name": "resetSystemBlocknumber",
+      "selector": "0x64b677a4"
     },
     {
       "name": "resetSystemTimestamp",
@@ -7594,6 +10538,10 @@ contractNames
     {
       "name": "blockTimestamp",
       "selector": "0xadb61832"
+    },
+    {
+      "name": "changeSystemBlocknumber",
+      "selector": "0x4dd6b375"
     },
     {
       "name": "changeSystemTimestamp",
@@ -7614,6 +10562,10 @@ contractNames
     {
       "name": "getStaticResolverKey",
       "selector": "0x1ef2fdc8"
+    },
+    {
+      "name": "resetSystemBlocknumber",
+      "selector": "0x64b677a4"
     },
     {
       "name": "resetSystemTimestamp",
