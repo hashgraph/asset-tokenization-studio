@@ -261,11 +261,11 @@ export class CreateBondCommandHandler
         configId,
         configVersion,
         diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-        compliance,
-        identityRegistry,
+        externalPausesIds,
+        externalControlListsIds,
+        externalKycListsIds,
+        complianceId,
+        identityRegistryId,
       } = command;
 
       //TODO: Boy scout: remove request validations and adjust test
@@ -305,17 +305,19 @@ export class CreateBondCommandHandler
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,
       ] = await Promise.all([
-        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
-        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
-        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
+        this.contractService.getEvmAddressesFromHederaIds(externalPausesIds),
+        this.contractService.getEvmAddressesFromHederaIds(
+          externalControlListsIds,
+        ),
+        this.contractService.getEvmAddressesFromHederaIds(externalKycListsIds),
       ]);
 
-      const complianceEvmAddress = compliance
-        ? await this.contractService.getContractEvmAddress(compliance)
+      const complianceEvmAddress = complianceId
+        ? await this.contractService.getContractEvmAddress(complianceId)
         : new EvmAddress(EVM_ZERO_ADDRESS);
 
-      const identityRegistryAddress = identityRegistry
-        ? await this.contractService.getContractEvmAddress(identityRegistry)
+      const identityRegistryAddress = identityRegistryId
+        ? await this.contractService.getContractEvmAddress(identityRegistryId)
         : new EvmAddress(EVM_ZERO_ADDRESS);
 
       const handler = this.transactionService.getHandler();
