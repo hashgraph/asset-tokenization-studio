@@ -210,12 +210,8 @@ import {IERC1643} from '../../interfaces/ERC1400/IERC1643.sol';
 import {_DOCUMENTER_ROLE} from '../../constants/roles.sol';
 import {_ERC1643_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {Common} from '../../common/Common.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC1643_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 
-contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
+abstract contract ERC1643 is IERC1643, Common {
     struct Document {
         bytes32 docHash; // Hash of the document
         uint256 lastModified; // Timestamp at which document details was last modified
@@ -324,44 +320,6 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
         returns (bytes32[] memory)
     {
         return _erc1643Storage().docNames;
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC1643_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](4);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.getDocument.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.setDocument.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .removeDocument
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getAllDocuments
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC1643).interfaceId;
     }
 
     function _erc1643Storage()
