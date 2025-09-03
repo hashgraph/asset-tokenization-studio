@@ -209,12 +209,8 @@ pragma solidity 0.8.18;
 import {IControlList} from '../interfaces/controlList/IControlList.sol';
 import {Common} from '../common/Common.sol';
 import {_CONTROL_LIST_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CONTROL_LIST_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
-contract ControlList is IControlList, IStaticFunctionSelectors, Common {
+abstract contract ControlList is IControlList, Common {
     // TODO: UNPAUSED
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ControlList(
@@ -282,56 +278,5 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
         members_ = _getControlListMembers(_pageIndex, _pageLength);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _CONTROL_LIST_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_ControlList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .addToControlList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .removeFromControlList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .isInControlList
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getControlListType
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getControlListCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getControlListMembers
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IControlList).interfaceId;
     }
 }

@@ -1,7 +1,7 @@
 {
   "name": "@hashgraph/asset-tokenization-sdk",
   "description": "Asset Tokenization SDK for Hedera",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "main": "./build/cjs/src/index.js",
   "module": "./build/esm/src/index.js",
   "types": "./build/esm/src/index.d.ts",
@@ -76,5 +76,9 @@
   "overrides": {
     "ws": "7.5.10",
     "elliptic": "6.6.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }

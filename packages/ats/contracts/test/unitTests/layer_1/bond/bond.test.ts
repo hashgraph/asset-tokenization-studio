@@ -222,7 +222,6 @@ import {
     Lock__factory,
     Pause__factory,
     AccessControl__factory,
-    BondUSATimeTravel__factory,
     BondUSAReadTimeTravel__factory,
     TimeTravel__factory,
     Kyc,
@@ -233,6 +232,7 @@ import {
     ControlList,
     ClearingActionsFacet,
     ProtectedPartitions,
+    BondUSAFacetTimeTravel__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -356,7 +356,7 @@ describe('Bond Tests', () => {
     }
 
     async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-        bondFacet = BondUSATimeTravel__factory.connect(
+        bondFacet = BondUSAFacetTimeTravel__factory.connect(
             diamond.address,
             signer_A
         )
