@@ -207,10 +207,10 @@ pragma solidity 0.8.18;
 
 import {_DEFAULT_PARTITION} from '../constants/values.sol';
 import {
-SnapshotsStorageWrapper2
+    SnapshotsStorageWrapper2
 } from '../snapshots/SnapshotsStorageWrapper2.sol';
 import {
-IERC3643Basic
+    IERC3643Basic
 } from '../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
@@ -386,16 +386,45 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         return _getFrozenAmountFor(_tokenHolder) * factor;
     }
 
-    function _getTotalBalanceForByPartitionAdjusted(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
-        return super._getTotalBalanceForByPartitionAdjusted(_partition, _tokenHolder) + _getFrozenAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    function _getFrozenAmountForAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view returns (uint256 amount_) {
+        uint256 factor = _calculateFactorForFrozenAmountByTokenHolderAdjustedAt(
+            _tokenHolder,
+            _timestamp
+        );
+
+        return _getFrozenAmountFor(_tokenHolder) * factor;
     }
 
-    function _getTotalBalanceForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
-        return super._getTotalBalanceForAdjustedAt(_tokenHolder, _timestamp) + _getFrozenAmountForAdjusted(_tokenHolder);
+    function _getTotalBalanceForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalanceForByPartitionAdjusted(
+                _partition,
+                _tokenHolder
+            ) +
+            _getFrozenAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
-    function _getTotalBalance(address _tokenHolder) internal view returns (uint256) {
-        return super._getTotalBalance(_tokenHolder) + _getFrozenAmountForAdjusted(_tokenHolder);
+    function _getTotalBalanceForAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalanceForAdjustedAt(_tokenHolder, _timestamp) +
+            _getFrozenAmountForAdjustedAt(_tokenHolder, _timestamp);
+    }
+
+    function _getTotalBalance(
+        address _tokenHolder
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalance(_tokenHolder) +
+            _getFrozenAmountForAdjusted(_tokenHolder);
     }
 
     function _getFrozenAmountForByPartitionAdjusted(

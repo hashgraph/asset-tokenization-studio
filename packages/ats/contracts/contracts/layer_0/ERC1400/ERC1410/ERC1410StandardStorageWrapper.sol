@@ -509,6 +509,39 @@ abstract contract ERC1410StandardStorageWrapper is
         address _account
     ) internal view virtual returns (uint256);
 
+    function _getTotalBalance(
+        address _tokenHolder
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalance(_tokenHolder) +
+            _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
+    }
+
+    function _getTotalBalanceForAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalanceForAdjustedAt(_tokenHolder, _timestamp) +
+            _balanceOfAdjustedAt(_tokenHolder, _timestamp);
+    }
+
+    function _getTotalBalanceForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalanceForByPartitionAdjusted(
+                _partition,
+                _tokenHolder
+            ) +
+            _balanceOfByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                _blockTimestamp()
+            );
+    }
+
     function _validateParams(bytes32 _partition, uint256 _value) internal pure {
         if (_value == uint256(0)) {
             revert ZeroValue();
@@ -517,25 +550,4 @@ abstract contract ERC1410StandardStorageWrapper is
             revert ZeroPartition();
         }
     }
-
-    function _getTotalBalance(address _tokenHolder) internal view returns (uint256) {
-        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
-    }
-
-    function _getTotalBalanceForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
-        return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
-    }
-
-    function _getTotalBalanceForByPartitionAdjusted(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
-        return _balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp());
-    }
-
-    function _getTotalBalanceOfAtSnapshot(uint256 _snapshotId, address _tokenHolder) internal view returns (uint256) {
-        return _balanceOfAdjustedAt(_tokenHolder, _getTimestampOfSnapshot(_snapshotId));
-    }
-
-    function _getTotalBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotId, address _tokenHolder) internal view returns (uint256) {
-        return _balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _getTimestampOfSnapshot(_snapshotId));
-    }
-
 }

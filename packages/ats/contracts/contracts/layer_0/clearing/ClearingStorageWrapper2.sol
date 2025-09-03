@@ -870,16 +870,45 @@ abstract contract ClearingStorageWrapper2 is
         return _getClearedAmountFor(_tokenHolder) * factor;
     }
 
-    function _getTotalBalanceForByPartitionAdjusted(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
-        return super._getTotalBalanceForByPartitionAdjusted(_partition, _tokenHolder) + _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    function _getClearedAmountForAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view returns (uint256 amount_) {
+        uint256 factor = _calculateFactorForClearedAmountByTokenHolderAdjustedAt(
+                _tokenHolder,
+                _timestamp
+            );
+
+        return _getClearedAmountFor(_tokenHolder) * factor;
     }
 
-    function _getTotalBalanceForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
-        return super._getTotalBalanceForAdjustedAt(_tokenHolder) + _balanceOfAdjustedAt(_tokenHolder, _timestamp);
+    function _getTotalBalanceForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view override returns (uint256) {
+        return
+            super._getTotalBalanceForByPartitionAdjusted(
+                _partition,
+                _tokenHolder
+            ) +
+            _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
-    function _getTotalBalance(address _tokenHolder) internal view returns (uint256) {
-        return super._getTotalBalance(_tokenHolder) + _getClearedAmountForAdjusted(_tokenHolder);
+    function _getTotalBalanceForAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view override returns (uint256) {
+        return
+            super._getTotalBalanceForAdjustedAt(_tokenHolder, _timestamp) +
+            _getClearedAmountForAdjustedAt(_tokenHolder, _timestamp);
+    }
+
+    function _getTotalBalance(
+        address _tokenHolder
+    ) internal view override returns (uint256) {
+        return
+            super._getTotalBalance(_tokenHolder) +
+            _getClearedAmountForAdjusted(_tokenHolder);
     }
 
     function _getClearedAmountForByPartitionAdjusted(

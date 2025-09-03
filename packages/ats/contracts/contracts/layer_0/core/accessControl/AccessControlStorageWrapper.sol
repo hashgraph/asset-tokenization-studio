@@ -206,23 +206,25 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import "../../../resolver/BusinessLogicResolverWrapper.sol";
-import "../../totalBalances/TotalBalancesStorageWrapper.sol";
+import {LibCommon} from '../../common/libraries/LibCommon.sol';
+import {ArrayLib} from '../../common/libraries/ArrayLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
     IAccessControlStorageWrapper
 } from '../../../layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol';
+import {LocalContext} from '../../context/LocalContext.sol';
+import {
+    BusinessLogicResolverWrapper
+} from '../../../resolver/BusinessLogicResolverWrapper.sol';
 import {
     _ACCESS_CONTROL_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-import {ArrayLib} from '../../common/libraries/ArrayLib.sol';
-import {LibCommon} from '../../common/libraries/LibCommon.sol';
 
 abstract contract AccessControlStorageWrapper is
     IAccessControlStorageWrapper,
-    TotalBalancesStorageWrapper,
+    LocalContext,
     BusinessLogicResolverWrapper
 {
     // TODO: Check if it's possible to use only one dependency of AddressSet and Bytes32Set

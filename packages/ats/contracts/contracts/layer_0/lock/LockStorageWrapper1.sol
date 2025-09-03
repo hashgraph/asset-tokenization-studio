@@ -338,16 +338,24 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         return _getLockedAmountFor(tokenHolder) * factor;
     }
 
-    function _getTotalBalanceForByPartitionAdjusted(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
-        return super._getTotalBalanceForByPartitionAdjusted(_partition, _tokenHolder) + _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    function _getTotalBalanceForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
-    function _getTotalBalanceForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
-        return super._getTotalBalanceForAdjustedAt(_tokenHolder, _timestamp) + _getLockedAmountForAdjustedAt(_tokenHolder, _timestamp);
+    function _getTotalBalanceForAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
+        return _getLockedAmountForAdjustedAt(_tokenHolder, _timestamp);
     }
 
-    function _getTotalBalance(address _tokenHolder) internal view returns (uint256) {
-        return super._getTotalBalance(_tokenHolder) + _getLockedAmountForAdjustedAt(_tokenHolder, _blockTimestamp());
+    function _getTotalBalance(
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        return _getLockedAmountForAdjustedAt(_tokenHolder, _blockTimestamp());
     }
 
     function _getLockedAmountForByPartitionAdjusted(

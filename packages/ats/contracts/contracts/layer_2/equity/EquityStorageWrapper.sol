@@ -525,10 +525,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
 
             balance_ = (_snapshotId != 0)
                 ? _getTotalBalanceOfAtSnapshot(_snapshotId, _account)
-                : (_balanceOfAdjustedAt(_account, _date) +
-                    _getLockedAmountForAdjustedAt(_account, _blockTimestamp()) +
-                    _getHeldAmountForAdjusted(_account) +
-                    _getClearedAmountForAdjusted(_account));
+                : (_getTotalBalanceForAdjustedAt(_account, _date));
 
             decimals_ = (_snapshotId != 0)
                 ? _decimalsAtSnapshot(_snapshotId)
