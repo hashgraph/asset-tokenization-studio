@@ -206,29 +206,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import '../snapshots/SnapshotsStorageWrapper2.sol';
+import '../context/LocalContext.sol';
 
-abstract contract TotalBalancesStorageWrapper is SnapshotsStorageWrapper2 {
+abstract contract TotalBalancesStorageWrapper is LocalContext {
     /**
      * @dev Returns the total balance for a token holder by summing all adjusted balance types
      * @param tokenHolder The address of the token holder
      * @return totalBalance The sum of all adjusted balance types for the token holder
      */
     function _getTotalBalance(
-        address tokenHolder
-    ) internal view returns (uint256 totalBalance) {
-        uint256 timestamp = _blockTimestamp();
+        address _tokenHolder
+    ) internal view virtual returns (uint256 totalBalance);
 
-        // Use unchecked block since we're dealing with token balances that shouldn't overflow
-        unchecked {
-            totalBalance =
-                _balanceOfAdjustedAt(tokenHolder, timestamp) +
-                _getClearedAmountForAdjusted(tokenHolder) +
-                _getHeldAmountForAdjusted(tokenHolder) +
-                _getLockedAmountForAdjustedAt(tokenHolder, timestamp) +
-                _getFrozenAmountForAdjusted(tokenHolder);
-        }
-    }
+    /**
+     * @dev Returns the total balance for a token holder by summing all adjusted balance types at a specific date
+     * @param tokenHolder The address of the token holder
+     * @param date The specific date (timestamp)
+     * @return totalBalance The sum of all adjusted balance types for the token holder at the specified date
+     */
+    function _getTotalBalanceForAdjustedAt(
+        address tokenHolder,
+        uint256 timestamp
+    ) internal view virtual returns (uint256 totalBalance);
 
     /**
      * @dev Returns the total balance for a token holder by summing all adjusted balance types by partition
@@ -239,20 +238,7 @@ abstract contract TotalBalancesStorageWrapper is SnapshotsStorageWrapper2 {
     function _getTotalBalanceForByPartitionAdjusted(
         bytes32 partition,
         address tokenHolder
-    ) internal view returns (uint256 totalBalance) {
-        // Use unchecked block since we're dealing with token balances that shouldn't overflow
-        unchecked {
-            totalBalance =
-                _balanceOfByPartitionAdjusted(partition, tokenHolder) +
-                _getClearedAmountForByPartitionAdjusted(
-                    partition,
-                    tokenHolder
-                ) +
-                _getHeldAmountForByPartitionAdjusted(partition, tokenHolder) +
-                _getLockedAmountForByPartitionAdjusted(partition, tokenHolder) +
-                _getFrozenAmountForByPartitionAdjusted(partition, tokenHolder);
-        }
-    }
+    ) internal view virtual returns (uint256 totalBalance);
 
     /**
      * @dev Returns the sum of all balance types for a holder at a snapshot
@@ -263,17 +249,7 @@ abstract contract TotalBalancesStorageWrapper is SnapshotsStorageWrapper2 {
     function _getTotalBalanceOfAtSnapshot(
         uint256 snapshotId,
         address tokenHolder
-    ) internal view returns (uint256 totalBalance) {
-        // Use unchecked block since we're dealing with token balances that shouldn't overflow
-        unchecked {
-            totalBalance =
-                _balanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _clearedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _heldBalanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _lockedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _frozenBalanceOfAtSnapshot(snapshotId, tokenHolder);
-        }
-    }
+    ) internal view virtual returns (uint256 totalBalance);
 
     /**
      * @dev Returns the sum of all balance types for a holder in a partition at a snapshot
@@ -286,35 +262,5 @@ abstract contract TotalBalancesStorageWrapper is SnapshotsStorageWrapper2 {
         bytes32 partition,
         uint256 snapshotId,
         address tokenHolder
-    ) internal view returns (uint256 totalBalance) {
-        // Use unchecked block since we're dealing with token balances that shouldn't overflow
-        unchecked {
-            totalBalance =
-                _balanceOfAtSnapshotByPartition(
-                    partition,
-                    snapshotId,
-                    tokenHolder
-                ) +
-                _clearedBalanceOfAtSnapshotByPartition(
-                    partition,
-                    snapshotId,
-                    tokenHolder
-                ) +
-                _heldBalanceOfAtSnapshotByPartition(
-                    partition,
-                    snapshotId,
-                    tokenHolder
-                ) +
-                _lockedBalanceOfAtSnapshotByPartition(
-                    partition,
-                    snapshotId,
-                    tokenHolder
-                ) +
-                _frozenBalanceOfAtSnapshotByPartition(
-                    partition,
-                    snapshotId,
-                    tokenHolder
-                );
-        }
-    }
+    ) internal view virtual returns (uint256 totalBalance);
 }

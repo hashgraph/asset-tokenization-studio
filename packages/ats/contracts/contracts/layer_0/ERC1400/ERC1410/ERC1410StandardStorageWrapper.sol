@@ -517,4 +517,25 @@ abstract contract ERC1410StandardStorageWrapper is
             revert ZeroPartition();
         }
     }
+
+    function _getTotalBalance(address _tokenHolder) internal view returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
+    }
+
+    function _getTotalBalanceForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
+    }
+
+    function _getTotalBalanceForByPartitionAdjusted(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
+        return _balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp());
+    }
+
+    function _getTotalBalanceOfAtSnapshot(uint256 _snapshotId, address _tokenHolder) internal view returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _getTimestampOfSnapshot(_snapshotId));
+    }
+
+    function _getTotalBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotId, address _tokenHolder) internal view returns (uint256) {
+        return _balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _getTimestampOfSnapshot(_snapshotId));
+    }
+
 }
