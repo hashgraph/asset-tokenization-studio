@@ -223,6 +223,13 @@ interface ITimeTravelStorageWrapper {
     /// @notice Emitted when the system timestamp is reset
     event SystemTimestampReset();
 
+    event SystemBlocknumberChanged(
+        uint256 legacySystemNumber,
+        uint256 newSystemNumber
+    );
+
+    event SystemBlocknumberReset();
+
     // * Errors
     /// @notice Error thrown when attempting to set an invalid new system timestamp
     /// @param newSystemTime The new system timestamp that caused the error
@@ -230,4 +237,8 @@ interface ITimeTravelStorageWrapper {
 
     /// @notice Emitted when using time travel out of test environment
     error WrongChainId();
+
+    /// @notice Error thrown when attempting to set an invalid new system block number
+    /// @param newSystemNumber The new system timestamp that caused the error
+    error InvalidBlocknumber(uint256 newSystemNumber);
 }

@@ -217,7 +217,7 @@ pragma solidity ^0.8.17;
 ///    }
 ///```
 // HACK: I think that Loupe and Cut should be only one contract.
-interface TRexIDiamondLoupe is IStaticFunctionSelectors {
+interface TRexIDiamondLoupe {
     struct Facet {
         bytes32 id;
         address addr;

@@ -160,24 +160,14 @@ task('erc3643-clone-interfaces', async (_, hre) => {
                 )
             }
 
-            // Renombrar interface/contract y manejar herencia según configuración
-            if (i.removeHierarchy) {
-                source = source.replace(
-                    new RegExp(
-                        `(contract|interface)\\s+${originalArtifact.contractName}\\b(\\s+is[^\\{]+)?`,
-                        'm'
-                    ),
-                    `$1 TRex${originalArtifact.contractName}`
-                )
-            } else {
-                source = source.replace(
-                    new RegExp(
-                        `(contract|interface)\\s+${originalArtifact.contractName}\\b`,
-                        'm'
-                    ),
-                    `$1 TRex${originalArtifact.contractName}`
-                )
-            }
+            // Renombrar interface/contract y eliminar herencia en un solo paso
+            source = source.replace(
+                new RegExp(
+                    `(contract|interface)\\s+${originalArtifact.contractName}\\b(\\s+is[^\\{]+)?`,
+                    'm'
+                ),
+                `$1 TRex${originalArtifact.contractName}`
+            )
 
             const targetPath = `${targetDir}/${originalArtifact.contractName}.sol`
             fs.writeFileSync(targetPath, source, 'utf8')

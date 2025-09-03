@@ -208,39 +208,6 @@ pragma solidity 0.8.18;
 
 import {IBondRead} from './IBondRead.sol';
 interface IBond {
-    struct BondDetailsData {
-        bytes3 currency;
-        uint256 nominalValue;
-        uint256 startingDate;
-        uint256 maturityDate;
-    }
-
-    struct CouponDetailsData {
-        uint256 couponFrequency;
-        uint256 couponRate;
-        uint256 firstCouponDate;
-    }
-
-    struct Coupon {
-        uint256 recordDate;
-        uint256 executionDate;
-        uint256 rate;
-    }
-
-    struct RegisteredCoupon {
-        Coupon coupon;
-        uint256 snapshotId;
-    }
-
-    struct CouponFor {
-        uint256 tokenBalance;
-        uint256 rate;
-        uint256 recordDate;
-        uint256 executionDate;
-        uint8 decimals;
-        bool recordDateReached;
-    }
-
     /**
      * @notice Redeems a specified amount of bonds at maturity from a token holder from a specific partition
      * @param _tokenHolder The address of the token holder redeeming the bonds.
@@ -268,59 +235,4 @@ interface IBond {
     function updateMaturityDate(
         uint256 _maturityDate
     ) external returns (bool success_);
-
-    /**
-     * @notice Retrieves the bond details
-     */
-    function getBondDetails()
-        external
-        view
-        returns (BondDetailsData memory bondDetailsData_);
-
-    /**
-     * @notice Retrieves the coupon details
-     */
-    function getCouponDetails()
-        external
-        view
-        returns (CouponDetailsData memory couponDetails_);
-
-    /**
-     * @notice Retrieves a registered coupon by its ID
-     */
-    function getCoupon(
-        uint256 _couponID
-    ) external view returns (RegisteredCoupon memory registeredCoupon_);
-
-    /**
-     * @notice Retrieves coupon information for a specific account and coupon ID
-     * @dev Return value includes user balance at cupon record date
-     */
-    function getCouponFor(
-        uint256 _couponID,
-        address _account
-    ) external view returns (CouponFor memory couponFor_);
-
-    /**
-     * @notice Retrieves the total number of coupons set for the bond
-     * @dev Pending coupons are included in the count
-     */
-    function getCouponCount() external view returns (uint256 couponCount_);
-
-    /**
-     * @notice Retrieves a paginated list of coupon holders for a specific coupon ID
-     */
-    function getCouponHolders(
-        uint256 _couponID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_);
-
-    /**
-     * @notice Retrieves the total number of coupon holders for a specific coupon ID
-     * @dev It is the list of token holders at the snapshot taken at the record date
-     */
-    function getTotalCouponHolders(
-        uint256 _couponID
-    ) external view returns (uint256);
 }

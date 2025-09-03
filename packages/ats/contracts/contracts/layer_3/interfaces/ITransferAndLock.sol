@@ -215,16 +215,6 @@ interface ITransferAndLock {
         uint256 expirationTimestamp;
     }
 
-    event PartitionTransferredAndLocked(
-        bytes32 indexed partition,
-        address indexed from,
-        address to,
-        uint256 value,
-        bytes data,
-        uint256 expirationTimestamp,
-        uint256 lockId
-    );
-
     /**
      * @notice Transfers tokens to a specified address for a partition and locks them until the expiration timestamp
      * @param _partition The partition from which tokens will be transferred and locked

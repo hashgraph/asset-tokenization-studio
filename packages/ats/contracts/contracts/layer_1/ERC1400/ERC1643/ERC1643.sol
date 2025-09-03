@@ -211,7 +211,7 @@ import {_DOCUMENTER_ROLE} from '../../constants/roles.sol';
 import {_ERC1643_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {Common} from '../../common/Common.sol';
 
-abstract contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
+abstract contract ERC1643 is IERC1643, Common {
     function setDocument(
         bytes32 _name,
         string calldata _uri,
