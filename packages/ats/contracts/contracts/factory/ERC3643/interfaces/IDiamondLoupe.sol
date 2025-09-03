@@ -221,7 +221,7 @@ import {
 ///    }
 ///```
 // HACK: I think that Loupe and Cut should be only one contract.
-interface TRexIDiamondLoupe {
+interface TRexIDiamondLoupe is IStaticFunctionSelectors {
     struct Facet {
         bytes32 id;
         address addr;

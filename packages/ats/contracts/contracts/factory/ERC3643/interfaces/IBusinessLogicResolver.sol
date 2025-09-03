@@ -223,7 +223,7 @@ import {
  *			Registering a business logic (register = update its latest version or add it to the registry) will increase the
  *			latest version for all Business Logics by 1.
  */
-interface TRexIBusinessLogicResolver {
+interface TRexIBusinessLogicResolver is IDiamondCutManager {
     enum VersionStatus {
         NONE,
         ACTIVATED,
