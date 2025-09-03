@@ -240,47 +240,85 @@ interface TRexIBond {
         bool recordDateReached;
     }
 
+    /**
+     * @notice Redeems a specified amount of bonds at maturity from a token holder from a specific partition
+     * @param _tokenHolder The address of the token holder redeeming the bonds.
+     * @param _partition The partition from which the bonds are being redeemed.
+     * @param _amount The amount of bonds to be redeemed.
+     */
     function redeemAtMaturityByPartition(
         address _tokenHolder,
         bytes32 _partition,
         uint256 _amount
     ) external;
 
+    /**
+     * @notice Sets a new coupon for the bond
+     * @param _newCoupon The new coupon to be set
+     */
     function setCoupon(
         Coupon calldata _newCoupon
     ) external returns (bool success_, uint256 couponID_);
 
+    /**
+     * @notice Updates the maturity date of the bond.
+     * @param _maturityDate The new maturity date to be set.
+     */
     function updateMaturityDate(
         uint256 _maturityDate
     ) external returns (bool success_);
 
+    /**
+     * @notice Retrieves the bond details
+     */
     function getBondDetails()
         external
         view
         returns (BondDetailsData memory bondDetailsData_);
 
+    /**
+     * @notice Retrieves the coupon details
+     */
     function getCouponDetails()
         external
         view
         returns (CouponDetailsData memory couponDetails_);
 
+    /**
+     * @notice Retrieves a registered coupon by its ID
+     */
     function getCoupon(
         uint256 _couponID
     ) external view returns (RegisteredCoupon memory registeredCoupon_);
 
+    /**
+     * @notice Retrieves coupon information for a specific account and coupon ID
+     * @dev Return value includes user balance at cupon record date
+     */
     function getCouponFor(
         uint256 _couponID,
         address _account
     ) external view returns (CouponFor memory couponFor_);
 
+    /**
+     * @notice Retrieves the total number of coupons set for the bond
+     * @dev Pending coupons are included in the count
+     */
     function getCouponCount() external view returns (uint256 couponCount_);
 
+    /**
+     * @notice Retrieves a paginated list of coupon holders for a specific coupon ID
+     */
     function getCouponHolders(
         uint256 _couponID,
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (address[] memory holders_);
 
+    /**
+     * @notice Retrieves the total number of coupon holders for a specific coupon ID
+     * @dev It is the list of token holders at the snapshot taken at the record date
+     */
     function getTotalCouponHolders(
         uint256 _couponID
     ) external view returns (uint256);

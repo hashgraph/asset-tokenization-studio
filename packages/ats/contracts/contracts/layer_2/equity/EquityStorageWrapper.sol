@@ -321,7 +321,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
      *
      * @param _dividendID The dividend Id
      * @param _account The account
-
      */
     function _getDividendsFor(
         uint256 _dividendID,

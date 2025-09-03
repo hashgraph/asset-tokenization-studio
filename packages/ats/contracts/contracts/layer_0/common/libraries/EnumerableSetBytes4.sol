@@ -87,7 +87,6 @@ library EnumerableSetBytes4 {
         bytes4[] memory store = _values(set._inner);
         bytes4[] memory result;
 
-        /// @solidity memory-safe-assembly
         // solhint-disable-next-line no-inline-assembly
         assembly {
             result := store
