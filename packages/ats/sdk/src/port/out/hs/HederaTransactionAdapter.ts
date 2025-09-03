@@ -216,38 +216,39 @@ import {
   Transaction,
 } from '@hashgraph/sdk';
 import {
-  AccessControl__factory,
+  AccessControlFacet__factory,
   Bond__factory,
-  BondUSA__factory,
-  Cap__factory,
-  ControlList__factory,
+  BondUSAFacet__factory,
+  CapFacet__factory,
+  ControlListFacet__factory,
   DiamondFacet__factory,
-  EquityUSA__factory,
-  ERC1643__factory,
+  EquityUSAFacet__factory,
+  ERC1643Facet__factory,
   Factory__factory,
-  Lock__factory,
-  ScheduledTasks__factory,
-  Snapshots__factory,
-  TransferAndLock__factory,
-  SsiManagement__factory,
-  Kyc__factory,
+  LockFacet__factory,
+  ScheduledTasksFacet__factory,
+  SnapshotsFacet__factory,
+  TransferAndLockFacet__factory,
+  SsiManagementFacet__factory,
+  KycFacet__factory,
   ClearingTransferFacet__factory,
   ClearingRedeemFacet__factory,
   ClearingHoldCreationFacet__factory,
   ClearingActionsFacet__factory,
-  ExternalPauseManagement__factory,
+  ExternalPauseManagementFacet__factory,
   MockedExternalPause__factory,
-  ExternalControlListManagement__factory,
+  ExternalControlListManagementFacet__factory,
   MockedBlacklist__factory,
   MockedWhitelist__factory,
-  ExternalKycListManagement__factory,
+  ExternalKycListManagementFacet__factory,
   MockedExternalKycList__factory,
   FreezeFacet__factory,
   ERC1410TokenHolderFacet__factory,
   ERC1410ManagementFacet__factory,
   HoldTokenHolderFacet__factory,
   HoldManagementFacet__factory,
-  ERC3643Facet__factory,
+  ERC3643ManagementFacet__factory,
+  ERC3643OperationsFacet__factory,
   ERC3643BatchFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { _PARTITION_ID_1, EVM_ZERO_ADDRESS, GAS } from '@core/Constants';
@@ -469,6 +470,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         maxSupply: securityInfo.maxSupply
           ? securityInfo.maxSupply.toString()
           : '0',
+        erc20VotesActivated: securityInfo.erc20VotesActivated,
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
         internalKycActivated: securityInfo.internalKycActivated,
@@ -586,6 +588,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         maxSupply: securityInfo.maxSupply
           ? securityInfo.maxSupply.toString()
           : '0',
+        erc20VotesActivated: securityInfo.erc20VotesActivated,
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
         internalKycActivated: securityInfo.internalKycActivated,
@@ -686,7 +689,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
     );
     return this.executeWithArgs(
-      new TransferAndLock__factory().attach(security.toString()),
+      new TransferAndLockFacet__factory().attach(security.toString()),
       'transferAndLockByPartition',
       securityId,
       GAS.TRANSFER_AND_LOCK,
@@ -727,7 +730,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Burning ${amount} securities from account ${source.toString()}`,
     );
     return this.executeWithArgs(
-      new ERC3643Facet__factory().attach(security.toString()),
+      new ERC3643OperationsFacet__factory().attach(security.toString()),
       'burn',
       securityId,
       GAS.BURN,
@@ -775,7 +778,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const contract = new Contract(
       security.toString(),
-      AccessControl__factory.abi,
+      AccessControlFacet__factory.abi,
     );
 
     return this.executeWithArgs(
@@ -799,7 +802,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const contract = new Contract(
       security.toString(),
-      AccessControl__factory.abi,
+      AccessControlFacet__factory.abi,
     );
     return this.executeWithArgs(contract, 'applyRoles', securityId, gas, [
       roles,
@@ -820,7 +823,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const contract = new Contract(
       security.toString(),
-      AccessControl__factory.abi,
+      AccessControlFacet__factory.abi,
     );
     return this.executeWithArgs(
       contract,
@@ -840,7 +843,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const contract = new Contract(
       security.toString(),
-      AccessControl__factory.abi,
+      AccessControlFacet__factory.abi,
     );
     return this.executeWithArgs(
       contract,
@@ -886,7 +889,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ERC3643Facet__factory().attach(security.toString()),
+      new ERC3643OperationsFacet__factory().attach(security.toString()),
       'mint',
       securityId,
       GAS.MINT,
@@ -903,7 +906,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Adding account ${targetId.toString()} to a control list`,
     );
     return this.executeWithArgs(
-      new ControlList__factory().attach(security.toString()),
+      new ControlListFacet__factory().attach(security.toString()),
       'addToControlList',
       securityId,
       GAS.ADD_TO_CONTROL_LIST,
@@ -920,7 +923,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Removing account ${targetId.toString()} from a control list`,
     );
     return this.executeWithArgs(
-      new ControlList__factory().attach(security.toString()),
+      new ControlListFacet__factory().attach(security.toString()),
       'removeFromControlList',
       securityId,
       GAS.REMOVE_FROM_CONTROL_LIST,
@@ -952,7 +955,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeWithArgs(
-      new TransferAndLock__factory().attach(security.toString()),
+      new TransferAndLockFacet__factory().attach(security.toString()),
       'protectedTransferAndLockByPartition',
       securityId,
       GAS.PROTECTED_TRANSFER_AND_LOCK,
@@ -1003,7 +1006,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Forced transfer ${amount} tokens from account ${source.toString()} to account ${target.toString()}`,
     );
     return this.executeWithArgs(
-      new ERC3643Facet__factory().attach(security.toString()),
+      new ERC3643OperationsFacet__factory().attach(security.toString()),
       'forcedTransfer',
       securityId,
       GAS.FORCED_TRANSFER,
@@ -1049,7 +1052,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       amount: amount.toHexString(),
     };
     return this.executeWithArgs(
-      new EquityUSA__factory().attach(security.toString()),
+      new EquityUSAFacet__factory().attach(security.toString()),
       'setDividends',
       securityId,
       GAS.SET_DIVIDENDS,
@@ -1073,7 +1076,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: data,
     };
     return this.executeWithArgs(
-      new EquityUSA__factory().attach(security.toString()),
+      new EquityUSAFacet__factory().attach(security.toString()),
       'setVoting',
       securityId,
       GAS.SET_VOTING_RIGHTS,
@@ -1101,7 +1104,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       rate: rate.toHexString(),
     };
     return this.executeWithArgs(
-      new BondUSA__factory().attach(security.toString()),
+      new BondUSAFacet__factory().attach(security.toString()),
       'setCoupon',
       securityId,
       GAS.SET_COUPON,
@@ -1116,7 +1119,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Take snapshot of: ${security.toString()}`);
 
     return this.executeWithArgs(
-      new Snapshots__factory().attach(security.toString()),
+      new SnapshotsFacet__factory().attach(security.toString()),
       'takeSnapshot',
       securityId,
       GAS.TAKE_SNAPSHOT,
@@ -1135,7 +1138,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Setting document: ${name}, with ${uri}, and hash ${hash} for security ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ERC1643__factory().attach(security.toString()),
+      new ERC1643Facet__factory().attach(security.toString()),
       'setDocument',
       securityId,
       GAS.SET_DOCUMENT,
@@ -1152,7 +1155,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Removing document: ${name} for security ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ERC1643__factory().attach(security.toString()),
+      new ERC1643Facet__factory().attach(security.toString()),
       'removeDocument',
       securityId,
       GAS.REMOVE_DOCUMENT,
@@ -1269,7 +1272,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new Cap__factory().attach(security.toString()),
+      new CapFacet__factory().attach(security.toString()),
       'setMaxSupply',
       securityId,
       GAS.SET_MAX_SUPPLY,
@@ -1285,7 +1288,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Triggering pending scheduled snapshots for ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ScheduledTasks__factory().attach(security.toString()),
+      new ScheduledTasksFacet__factory().attach(security.toString()),
       'triggerPendingScheduledTasks',
       securityId,
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
@@ -1302,7 +1305,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Triggering up to ${max.toString()} pending scheduled snapshots for ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ScheduledTasks__factory().attach(security.toString()),
+      new ScheduledTasksFacet__factory().attach(security.toString()),
       'triggerScheduledTasks',
       securityId,
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
@@ -1321,7 +1324,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Locking ${amount} tokens from account ${sourceId.toString()} until ${expirationDate}`,
     );
     return this.executeWithArgs(
-      new Lock__factory().attach(security.toString()),
+      new LockFacet__factory().attach(security.toString()),
       'lockByPartition',
       securityId,
       GAS.LOCK,
@@ -1344,7 +1347,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Releasing lock ${lockId} from account ${sourceId.toString()}`,
     );
     return this.executeWithArgs(
-      new Lock__factory().attach(security.toString()),
+      new LockFacet__factory().attach(security.toString()),
       'releaseByPartition',
       securityId,
       GAS.RELEASE,
@@ -1438,7 +1441,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       decimals: decimals.toHexString(),
     };
     return this.executeWithArgs(
-      new EquityUSA__factory().attach(security.toString()),
+      new EquityUSAFacet__factory().attach(security.toString()),
       'setScheduledBalanceAdjustment',
       securityId,
       GAS.SET_SCHEDULED_BALANCE_ADJUSTMENT,
@@ -1559,7 +1562,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       expirationTimestamp: expirationDate.toBigNumber(),
     };
     return this.executeWithArgs(
-      new TransferAndLock__factory().attach(security.toString()),
+      new TransferAndLockFacet__factory().attach(security.toString()),
       'protectedTransferAndLock',
       securityId,
       GAS.PROTECTED_TRANSFER_AND_LOCK,
@@ -1575,19 +1578,19 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async createHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(
-      `Holding ${amount} tokens from account ${targetId.toString()} until ${expirationDate} with escrow ${escrow}`,
+      `Holding ${amount} tokens from account ${targetId.toString()} until ${expirationDate} with escrow ${escrowId}`,
     );
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: expirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -1603,7 +1606,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async createHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1611,13 +1614,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+      `Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrowId}`,
     );
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: expirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -1633,7 +1636,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async controllerCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1641,13 +1644,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Controller Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+      `Controller Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrowId}`,
     );
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: expirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -1665,7 +1668,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
@@ -1675,13 +1678,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Protected Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+      `Protected Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrowId}`,
     );
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: expirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -1787,7 +1790,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Adding issuer ${issuer}`);
 
     return this.executeWithArgs(
-      new SsiManagement__factory().attach(security.toString()),
+      new SsiManagementFacet__factory().attach(security.toString()),
       'addIssuer',
       securityId,
       GAS.ADD_ISSUER,
@@ -1804,7 +1807,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Setting revocation registry address ${revocationRegistry}`,
     );
     return this.executeWithArgs(
-      new SsiManagement__factory().attach(security.toString()),
+      new SsiManagementFacet__factory().attach(security.toString()),
       'setRevocationRegistryAddress',
       securityId,
       GAS.SET_REVOCATION_REGISTRY,
@@ -1820,7 +1823,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Removing issuer ${issuer}`);
 
     return this.executeWithArgs(
-      new SsiManagement__factory().attach(security.toString()),
+      new SsiManagementFacet__factory().attach(security.toString()),
       'removeIssuer',
       securityId,
       GAS.REMOVE_ISSUER,
@@ -1842,7 +1845,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new Kyc__factory().attach(security.toString()),
+      new KycFacet__factory().attach(security.toString()),
       'grantKyc',
       securityId,
       GAS.GRANT_KYC,
@@ -1864,7 +1867,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Revoking KYC to address ${targetId.toString()}`);
 
     return this.executeWithArgs(
-      new Kyc__factory().attach(security.toString()),
+      new KycFacet__factory().attach(security.toString()),
       'revokeKyc',
       securityId,
       GAS.REVOKE_KYC,
@@ -2186,7 +2189,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async clearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -2206,7 +2209,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: holdExpirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -2223,7 +2226,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async clearingCreateHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -2248,7 +2251,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: holdExpirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -2266,7 +2269,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -2294,7 +2297,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: holdExpirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -2311,7 +2314,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async operatorClearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -2336,7 +2339,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const hold: Hold = {
       amount: amount.toBigNumber(),
       expirationTimestamp: holdExpirationDate.toBigNumber(),
-      escrow: escrow.toString(),
+      escrow: escrowId.toString(),
       to: targetId.toString(),
       data: '0x',
     };
@@ -2424,7 +2427,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalPauseManagement__factory().attach(security.toString()),
+      new ExternalPauseManagementFacet__factory().attach(security.toString()),
       'updateExternalPauses',
       securityId,
       GAS.UPDATE_EXTERNAL_PAUSES,
@@ -2442,7 +2445,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalPauseManagement__factory().attach(security.toString()),
+      new ExternalPauseManagementFacet__factory().attach(security.toString()),
       'addExternalPause',
       securityId,
       GAS.ADD_EXTERNAL_PAUSE,
@@ -2460,7 +2463,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalPauseManagement__factory().attach(security.toString()),
+      new ExternalPauseManagementFacet__factory().attach(security.toString()),
       'removeExternalPause',
       securityId,
       GAS.REMOVE_EXTERNAL_PAUSE,
@@ -2512,7 +2515,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalControlListManagement__factory().attach(security.toString()),
+      new ExternalControlListManagementFacet__factory().attach(security.toString()),
       'updateExternalControlLists',
       securityId,
       GAS.UPDATE_EXTERNAL_CONTROL_LISTS,
@@ -2533,7 +2536,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalControlListManagement__factory().attach(security.toString()),
+      new ExternalControlListManagementFacet__factory().attach(security.toString()),
       'addExternalControlList',
       securityId,
       GAS.ADD_EXTERNAL_CONTROL_LIST,
@@ -2551,7 +2554,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalControlListManagement__factory().attach(security.toString()),
+      new ExternalControlListManagementFacet__factory().attach(security.toString()),
       'removeExternalControlList',
       securityId,
       GAS.REMOVE_EXTERNAL_CONTROL_LIST,
@@ -2672,7 +2675,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalKycListManagement__factory().attach(security.toString()),
+      new ExternalKycListManagementFacet__factory().attach(security.toString()),
       'updateExternalKycLists',
       securityId,
       GAS.UPDATE_EXTERNAL_KYC_LISTS,
@@ -2690,7 +2693,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalKycListManagement__factory().attach(security.toString()),
+      new ExternalKycListManagementFacet__factory().attach(security.toString()),
       'addExternalKycList',
       securityId,
       GAS.ADD_EXTERNAL_KYC_LIST,
@@ -2708,7 +2711,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalKycListManagement__factory().attach(security.toString()),
+      new ExternalKycListManagementFacet__factory().attach(security.toString()),
       'removeExternalKycList',
       securityId,
       GAS.REMOVE_EXTERNAL_KYC_LIST,
@@ -2805,7 +2808,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting name to ${security.toString()}`);
 
     return this.executeWithArgs(
-      new ERC3643Facet__factory().attach(security.toString()),
+      new ERC3643ManagementFacet__factory().attach(security.toString()),
       'setName',
       securityId,
       GAS.SET_NAME,
@@ -2821,7 +2824,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting symbol to ${security.toString()}`);
 
     return this.executeWithArgs(
-      new ERC3643Facet__factory().attach(security.toString()),
+      new ERC3643ManagementFacet__factory().attach(security.toString()),
       'setSymbol',
       securityId,
       GAS.SET_SYMBOL,
@@ -2837,7 +2840,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting onchainID to ${security.toString()}`);
 
     return this.executeWithArgs(
-      new ERC3643Facet__factory().attach(security.toString()),
+      new ERC3643ManagementFacet__factory().attach(security.toString()),
       'setOnchainID',
       securityId,
       GAS.SET_ONCHAIN_ID,
@@ -2853,7 +2856,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting identity registry to ${security.toString()}`);
 
     return this.executeWithArgs(
-      new ERC3643Facet__factory().attach(security.toString()),
+      new ERC3643ManagementFacet__factory().attach(security.toString()),
       'setIdentityRegistry',
       securityId,
       GAS.SET_IDENTITY_REGISTRY,
@@ -2869,7 +2872,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Setting compliance to ${security.toString()}`);
 
     return this.executeWithArgs(
-      new ERC3643Facet__factory().attach(security.toString()),
+      new ERC3643ManagementFacet__factory().attach(security.toString()),
       'setCompliance',
       securityId,
       GAS.SET_COMPLIANCE,
@@ -2926,7 +2929,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ERC3643Facet__factory().attach(security.toString()),
+      new ERC3643ManagementFacet__factory().attach(security.toString()),
       'recoveryAddress',
       securityId,
       GAS.RECOVERY_ADDRESS,
@@ -2942,7 +2945,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Granting agent role to ${agentId.toString()}`);
 
     return this.executeWithArgs(
-      new ERC3643Facet__factory().attach(security.toString()),
+      new ERC3643ManagementFacet__factory().attach(security.toString()),
       'addAgent',
       securityId,
       GAS.ADD_AGENT,
@@ -2958,7 +2961,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Revoking agent role from ${agentId.toString()}`);
 
     return this.executeWithArgs(
-      new ERC3643Facet__factory().attach(security.toString()),
+      new ERC3643ManagementFacet__factory().attach(security.toString()),
       'removeAgent',
       securityId,
       GAS.REMOVE_AGENT,

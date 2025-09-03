@@ -249,17 +249,18 @@ export class CanRedeemByPartitionQueryHandler
 
       const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-      const [, res] = await this.queryAdapter.canRedeemByPartition(
-        securityEvmAddress,
-        sourceEvmAddress,
-        amountBd,
-        partitionId,
-        EMPTY_BYTES,
-        EMPTY_BYTES,
-        account.evmAddress!,
-      );
+      const [, statusCode, reason] =
+        await this.queryAdapter.canRedeemByPartition(
+          securityEvmAddress,
+          sourceEvmAddress,
+          amountBd,
+          partitionId,
+          EMPTY_BYTES,
+          EMPTY_BYTES,
+          account.evmAddress!,
+        );
 
-      return new CanRedeemByPartitionQueryResponse(res);
+      return new CanRedeemByPartitionQueryResponse([statusCode, reason]);
     } catch (error) {
       throw new CanRedeemByPartitionQueryError(error as Error);
     }

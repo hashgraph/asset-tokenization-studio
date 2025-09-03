@@ -217,7 +217,7 @@ export class CreateHoldByPartitionCommand extends Command<CreateHoldByPartitionC
   constructor(
     public readonly securityId: string,
     public readonly partitionId: string,
-    public readonly escrow: string,
+    public readonly escrowId: string,
     public readonly amount: string,
     public readonly targetId: string,
     public readonly expirationDate: string,

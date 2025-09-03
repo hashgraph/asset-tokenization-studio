@@ -252,18 +252,19 @@ export class CanTransferByPartitionQueryHandler
 
       const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-      const [, res] = await this.queryAdapter.canTransferByPartition(
-        securityEvmAddress,
-        sourceEvmAddress,
-        targetEvmAddress,
-        amountBd,
-        partitionId,
-        EMPTY_BYTES,
-        EMPTY_BYTES,
-        account.evmAddress!,
-      );
+      const [, statusCode, reason] =
+        await this.queryAdapter.canTransferByPartition(
+          securityEvmAddress,
+          sourceEvmAddress,
+          targetEvmAddress,
+          amountBd,
+          partitionId,
+          EMPTY_BYTES,
+          EMPTY_BYTES,
+          account.evmAddress!,
+        );
 
-      return new CanTransferByPartitionQueryResponse(res);
+      return new CanTransferByPartitionQueryResponse([statusCode, reason]);
     } catch (error) {
       throw new CanTransferByPartitionQueryError(error as Error);
     }

@@ -311,6 +311,7 @@ export const StepReview = () => {
       isin,
       decimals,
       isWhiteList: !isBlocklist,
+      erc20VotesActivated: false,
       isControllable,
       clearingActive: isClearing,
       arePartitionsProtected: false,
@@ -343,15 +344,15 @@ export const StepReview = () => {
       configVersion: parseInt(process.env.REACT_APP_BOND_CONFIG_VERSION ?? '0'),
       ...(externalPausesList &&
         externalPausesList.length > 0 && {
-          externalPauses: externalPausesList,
+          externalPausesIds: externalPausesList,
         }),
       ...(externalControlList &&
         externalControlList.length > 0 && {
-          externalControlLists: externalControlList,
+          externalControlListsIds: externalControlList,
         }),
       ...(externalKYCList &&
         externalKYCList.length > 0 && {
-          externalKycLists: externalKYCList,
+          externalKycListsIds: externalKYCList,
         }),
       internalKycActivated,
       ...(complianceId && {

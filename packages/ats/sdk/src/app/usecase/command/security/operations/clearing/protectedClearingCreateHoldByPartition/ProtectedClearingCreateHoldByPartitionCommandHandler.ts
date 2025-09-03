@@ -243,7 +243,7 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
       const {
         securityId,
         partitionId,
-        escrow,
+        escrowId,
         amount,
         sourceId,
         targetId,
@@ -263,7 +263,7 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
         await this.accountService.getAccountEvmAddress(sourceId);
 
       const escrowEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(escrow);
+        await this.accountService.getAccountEvmAddress(escrowId);
 
       const targetEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddressOrNull(targetId);
