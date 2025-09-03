@@ -207,19 +207,16 @@
 pragma solidity 0.8.18;
 
 import {IBond} from '../interfaces/bond/IBond.sol';
+import {IBondRead} from '../interfaces/bond/IBondRead.sol';
 import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
-import {BondStorageWrapper} from './BondStorageWrapper.sol';
-import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
+import {Common} from '../../layer_1/common/Common.sol';
 import {
     _CORPORATE_ACTION_ROLE,
     _BOND_MANAGER_ROLE,
     _MATURITY_REDEEMER_ROLE
 } from '../../layer_1/constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
+abstract contract Bond is IBond, Common {
     function redeemAtMaturityByPartition(
         address _tokenHolder,
         bytes32 _partition,
@@ -249,7 +246,7 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     }
 
     function setCoupon(
-        Coupon calldata _newCoupon
+        IBondRead.Coupon calldata _newCoupon
     )
         external
         override
@@ -290,76 +287,10 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         return success_;
     }
 
-    function getBondDetails()
-        external
-        view
-        override
-        returns (BondDetailsData memory bondDetailsData_)
-    {
-        return _getBondDetails();
-    }
-
-    function getCouponDetails()
-        external
-        view
-        override
-        returns (CouponDetailsData memory couponDetails_)
-    {
-        return _getCouponDetails();
-    }
-
-    function getCoupon(
-        uint256 _couponID
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
-        returns (RegisteredCoupon memory registeredCoupon_)
-    {
-        return _getCoupon(_couponID);
-    }
-
-    function getCouponFor(
-        uint256 _couponID,
-        address _account
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
-        returns (CouponFor memory couponFor_)
-    {
-        return _getCouponFor(_couponID, _account);
-    }
-
-    function getCouponCount()
-        external
-        view
-        override
-        returns (uint256 couponCount_)
-    {
-        return _getCouponCount();
-    }
-
-    function getCouponHolders(
-        uint256 _couponID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_) {
-        return _getCouponHolders(_couponID, _pageIndex, _pageLength);
-    }
-
-    function getTotalCouponHolders(
-        uint256 _couponID
-    ) external view returns (uint256) {
-        return _getTotalCouponHolders(_couponID);
-    }
-
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_bond(
-        BondDetailsData calldata _bondDetailsData,
-        CouponDetailsData calldata _couponDetailsData
+        IBondRead.BondDetailsData calldata _bondDetailsData,
+        IBondRead.CouponDetailsData calldata _couponDetailsData
     )
         internal
         validateDates(

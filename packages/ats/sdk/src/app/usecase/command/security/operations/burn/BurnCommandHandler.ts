@@ -248,7 +248,6 @@ export class BurnCommandHandler implements ICommandHandler<BurnCommand> {
         sourceId,
         amount,
         _PARTITION_ID_1,
-        account.id.toString(),
       );
       const sourceEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(sourceId);

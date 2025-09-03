@@ -219,7 +219,7 @@ export class ProtectedCreateHoldByPartitionCommand extends Command<ProtectedCrea
   constructor(
     public readonly securityId: string,
     public readonly partitionId: string,
-    public readonly escrow: string,
+    public readonly escrowId: string,
     public readonly amount: string,
     public readonly sourceId: string,
     public readonly targetId: string,

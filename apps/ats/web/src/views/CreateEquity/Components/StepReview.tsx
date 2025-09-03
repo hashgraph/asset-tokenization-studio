@@ -304,6 +304,7 @@ export const StepReview = () => {
       isin: isin,
       decimals: decimals,
       isWhiteList: !isBlocklist,
+      erc20VotesActivated: false,
       isControllable: isControllable,
       clearingActive: isClearing,
       arePartitionsProtected: false,
@@ -335,15 +336,15 @@ export const StepReview = () => {
       ),
       ...(externalPausesList &&
         externalPausesList.length > 0 && {
-          externalPauses: externalPausesList,
+          externalPausesIds: externalPausesList,
         }),
       ...(externalControlList &&
         externalControlList.length > 0 && {
-          externalControlLists: externalControlList,
+          externalControlListsIds: externalControlList,
         }),
       ...(externalKYCList &&
         externalKYCList.length > 0 && {
-          externalKycLists: externalKYCList,
+          externalKycListsIds: externalKYCList,
         }),
       internalKycActivated,
       ...(complianceId && {

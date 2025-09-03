@@ -211,7 +211,7 @@ export default interface ClearingCreateHoldViewModel extends QueryResponse {
   expirationDate: Date;
   data: string;
   operatorData: string;
-  holdEscrow: string;
+  holdEscrowId: string;
   holdExpirationDate: Date;
   holdTo: string;
   holdData: string;

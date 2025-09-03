@@ -289,9 +289,9 @@ class BondInPort implements IBondInPort {
     ValidatedRequest.handleValidation('CreateBondRequest', req);
     const {
       diamondOwnerAccount,
-      externalPauses,
-      externalControlLists,
-      externalKycLists,
+      externalPausesIds,
+      externalControlListsIds,
+      externalKycListsIds,
     } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
@@ -303,6 +303,7 @@ class BondInPort implements IBondInPort {
       isin: req.isin,
       decimals: req.decimals,
       isWhiteList: req.isWhiteList,
+      erc20VotesActivated: req.erc20VotesActivated,
       isControllable: req.isControllable,
       arePartitionsProtected: req.arePartitionsProtected,
       clearingActive: req.clearingActive,
@@ -333,9 +334,9 @@ class BondInPort implements IBondInPort {
         req.configId,
         req.configVersion,
         diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
+        externalPausesIds,
+        externalControlListsIds,
+        externalKycListsIds,
         req.complianceId,
         req.identityRegistryId,
       ),

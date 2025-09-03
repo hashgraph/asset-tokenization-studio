@@ -206,6 +206,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+import {IBondRead} from './IBondRead.sol';
 interface IBond {
     struct BondDetailsData {
         bytes3 currency;
@@ -257,7 +258,7 @@ interface IBond {
      * @param _newCoupon The new coupon to be set
      */
     function setCoupon(
-        Coupon calldata _newCoupon
+        IBondRead.Coupon calldata _newCoupon
     ) external returns (bool success_, uint256 couponID_);
 
     /**

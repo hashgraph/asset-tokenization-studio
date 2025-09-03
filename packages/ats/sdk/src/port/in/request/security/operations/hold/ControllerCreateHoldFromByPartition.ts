@@ -212,7 +212,7 @@ export default class ControllerCreateHoldByPartitionRequest extends ValidatedReq
   securityId: string;
   partitionId: string;
   amount: string;
-  escrow: string;
+  escrowId: string;
   sourceId: string;
   targetId: string;
   expirationDate: string;
@@ -221,7 +221,7 @@ export default class ControllerCreateHoldByPartitionRequest extends ValidatedReq
     securityId,
     partitionId,
     amount,
-    escrow,
+    escrowId,
     sourceId,
     targetId,
     expirationDate,
@@ -229,7 +229,7 @@ export default class ControllerCreateHoldByPartitionRequest extends ValidatedReq
     securityId: string;
     partitionId: string;
     amount: string;
-    escrow: string;
+    escrowId: string;
     sourceId: string;
     targetId: string;
     expirationDate: string;
@@ -238,7 +238,7 @@ export default class ControllerCreateHoldByPartitionRequest extends ValidatedReq
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       partitionId: FormatValidation.checkBytes32Format(),
       amount: FormatValidation.checkAmount(),
-      escrow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      escrowId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       sourceId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       expirationDate: (val) => {
@@ -252,7 +252,7 @@ export default class ControllerCreateHoldByPartitionRequest extends ValidatedReq
     this.securityId = securityId;
     this.partitionId = partitionId;
     this.amount = amount;
-    this.escrow = escrow;
+    this.escrowId = escrowId;
     this.sourceId = sourceId;
     this.targetId = targetId;
     this.expirationDate = expirationDate;

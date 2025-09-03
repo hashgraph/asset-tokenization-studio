@@ -207,7 +207,7 @@ import { Query } from '@core/query/Query';
 import { QueryResponse } from '@core/query/QueryResponse';
 
 export class CanRedeemByPartitionQueryResponse implements QueryResponse {
-  constructor(public readonly payload: string) {}
+  constructor(public readonly payload: [string, string]) {}
 }
 
 export class CanRedeemByPartitionQuery extends Query<CanRedeemByPartitionQueryResponse> {

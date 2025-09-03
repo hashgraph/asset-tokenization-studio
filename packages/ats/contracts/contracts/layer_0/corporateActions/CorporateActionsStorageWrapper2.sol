@@ -223,7 +223,7 @@ import {
     AdjustBalancesStorageWrapper2
 } from '../adjustBalances/AdjustBalancesStorageWrapper2.sol';
 import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
-import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
+import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
 import {
     ICorporateActionsStorageWrapper,
     CorporateActionDataStorage
@@ -384,7 +384,10 @@ abstract contract CorporateActionsStorageWrapper2 is
             revert IBondStorageWrapper.CouponCreationFailed();
         }
 
-        IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
+        IBondRead.Coupon memory newCoupon = abi.decode(
+            _data,
+            (IBondRead.Coupon)
+        );
 
         _addScheduledTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
         _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));

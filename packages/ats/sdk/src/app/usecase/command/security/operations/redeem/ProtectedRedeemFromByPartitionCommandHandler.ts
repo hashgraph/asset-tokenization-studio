@@ -251,7 +251,6 @@ export class ProtectedRedeemFromByPartitionCommandHandler
       } = command;
 
       const handler = this.transactionService.getHandler();
-      const account = this.accountService.getCurrentAccount();
       const security = await this.securityService.get(securityId);
 
       const securityEvmAddress: EvmAddress =
@@ -266,7 +265,6 @@ export class ProtectedRedeemFromByPartitionCommandHandler
         sourceId,
         amount,
         partitionId,
-        account.id.toString(),
       );
 
       await this.validationService.checkDecimals(security, amount);

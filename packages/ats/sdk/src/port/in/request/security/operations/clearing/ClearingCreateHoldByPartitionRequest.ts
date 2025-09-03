@@ -212,7 +212,7 @@ export default class ClearingCreateHoldByPartitionRequest extends ValidatedReque
   securityId: string;
   partitionId: string;
   amount: string;
-  escrow: string;
+  escrowId: string;
   targetId: string;
   clearingExpirationDate: string;
   holdExpirationDate: string;
@@ -221,7 +221,7 @@ export default class ClearingCreateHoldByPartitionRequest extends ValidatedReque
     securityId,
     partitionId,
     amount,
-    escrow,
+    escrowId,
     targetId,
     clearingExpirationDate,
     holdExpirationDate,
@@ -229,7 +229,7 @@ export default class ClearingCreateHoldByPartitionRequest extends ValidatedReque
     securityId: string;
     partitionId: string;
     amount: string;
-    escrow: string;
+    escrowId: string;
     targetId: string;
     clearingExpirationDate: string;
     holdExpirationDate: string;
@@ -238,7 +238,7 @@ export default class ClearingCreateHoldByPartitionRequest extends ValidatedReque
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       partitionId: FormatValidation.checkBytes32Format(),
       amount: FormatValidation.checkAmount(),
-      escrow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      escrowId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       clearingExpirationDate: (val) => {
         return SecurityDate.checkDateTimestamp(
@@ -257,7 +257,7 @@ export default class ClearingCreateHoldByPartitionRequest extends ValidatedReque
     this.securityId = securityId;
     this.partitionId = partitionId;
     this.amount = amount;
-    this.escrow = escrow;
+    this.escrowId = escrowId;
     this.targetId = targetId;
     this.clearingExpirationDate = clearingExpirationDate;
     this.holdExpirationDate = holdExpirationDate;
