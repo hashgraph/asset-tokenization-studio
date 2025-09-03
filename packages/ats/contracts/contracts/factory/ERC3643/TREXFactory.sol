@@ -332,9 +332,6 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         );
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function recoverContractOwnership(
         address _contract,
         address _newOwner
@@ -342,9 +339,6 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         (Ownable(_contract)).transferOwnership(_newOwner);
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function setImplementationAuthority(
         address _implementationAuthority
     ) external override onlyOwner {
@@ -375,9 +369,6 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         emit ImplementationAuthoritySet(_implementationAuthority);
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function setIdFactory(address _idFactory) external override onlyOwner {
         require(_idFactory != address(0), 'invalid argument - zero address');
         idFactory = _idFactory;
@@ -392,9 +383,6 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         atsFactory = _atsFactory;
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function getImplementationAuthority()
         external
         view
@@ -404,16 +392,10 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         return implementationAuthority;
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function getIdFactory() external view override returns (address) {
         return idFactory;
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function getToken(
         string calldata _salt
     ) external view override returns (address) {

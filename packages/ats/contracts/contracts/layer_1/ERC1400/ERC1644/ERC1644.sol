@@ -223,9 +223,6 @@ abstract contract ERC1644 is IERC1644, Common {
         _erc1644Storage().initialized = true;
     }
 
-    /**
-     * @inheritdoc IERC1644
-     */
     function controllerTransfer(
         address _from,
         address _to,
@@ -248,9 +245,6 @@ abstract contract ERC1644 is IERC1644, Common {
         _controllerTransfer(_from, _to, _value, _data, _operatorData);
     }
 
-    /**
-     * @inheritdoc IERC1644
-     */
     function controllerRedeem(
         address _tokenHolder,
         uint256 _value,
@@ -272,9 +266,6 @@ abstract contract ERC1644 is IERC1644, Common {
         _controllerRedeem(_tokenHolder, _value, _data, _operatorData);
     }
 
-    /**
-     * @inheritdoc IERC1644
-     */
     function finalizeControllable()
         external
         override
@@ -284,9 +275,6 @@ abstract contract ERC1644 is IERC1644, Common {
         _finalizeControllable();
     }
 
-    /**
-     * @inheritdoc IERC1644
-     */
     function isControllable() external view override returns (bool) {
         return _isControllable();
     }

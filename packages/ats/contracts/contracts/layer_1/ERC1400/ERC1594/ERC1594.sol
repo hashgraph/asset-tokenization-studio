@@ -221,9 +221,6 @@ abstract contract ERC1594 is IERC1594, Common {
         super._initialize_ERC1594();
     }
 
-    /**
-     * @inheritdoc IERC1594
-     */
     function transferWithData(
         address _to,
         uint256 _value,
@@ -246,9 +243,6 @@ abstract contract ERC1594 is IERC1594, Common {
         _transfer(_msgSender(), _to, _value);
     }
 
-    /**
-     * @inheritdoc IERC1594
-     */
     function transferFromWithData(
         address _from,
         address _to,
@@ -277,9 +271,6 @@ abstract contract ERC1594 is IERC1594, Common {
         _transferFrom(_msgSender(), _from, _to, _value);
     }
 
-    /**
-     * @inheritdoc IERC1594
-     */
     function issue(
         address _tokenHolder,
         uint256 _value,
@@ -303,9 +294,6 @@ abstract contract ERC1594 is IERC1594, Common {
         _issue(_tokenHolder, _value, _data);
     }
 
-    /**
-     * @inheritdoc IERC1594
-     */
     function redeem(
         uint256 _value,
         bytes memory _data
@@ -325,9 +313,6 @@ abstract contract ERC1594 is IERC1594, Common {
         _redeem(_value, _data);
     }
 
-    /**
-     * @inheritdoc IERC1594
-     */
     function redeemFrom(
         address _tokenHolder,
         uint256 _value,
@@ -350,16 +335,10 @@ abstract contract ERC1594 is IERC1594, Common {
         _redeemFrom(_tokenHolder, _value, _data);
     }
 
-    /**
-     * @inheritdoc IERC1594
-     */
     function isIssuable() external view override returns (bool) {
         return _isIssuable();
     }
 
-    /**
-     * @inheritdoc IERC1594
-     */
     function canTransfer(
         address _to,
         uint256 _value,
@@ -387,9 +366,6 @@ abstract contract ERC1594 is IERC1594, Common {
         return (status, statusCode, reason);
     }
 
-    /**
-     * @inheritdoc IERC1594
-     */
     function canTransferFrom(
         address _from,
         address _to,
