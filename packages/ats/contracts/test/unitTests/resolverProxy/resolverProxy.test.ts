@@ -524,12 +524,11 @@ describe('ResolverProxy Tests', () => {
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, rbac)
 
-        let diamondCut = await ethers.getContractAt(
+        const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            resolverProxy.address
+            resolverProxy.address,
+            signer_A
         )
-
-        diamondCut = diamondCut.connect(signer_A)
 
         await expect(diamondCut.updateConfigVersion(100)).to.be.rejectedWith(
             'ResolverProxyConfigurationNoRegistered'
@@ -564,9 +563,10 @@ describe('ResolverProxy Tests', () => {
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac)
 
-        let diamondCut = await ethers.getContractAt(
+        const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            resolverProxy.address
+            resolverProxy.address,
+            signer_A
         )
 
         let result = await diamondCut.getConfigInfo()
@@ -574,8 +574,6 @@ describe('ResolverProxy Tests', () => {
         expect(result.resolver_).to.equal(resolver.address)
         expect(result.configurationId_).to.equal(CONFIG_ID)
         expect(result.version_).to.equal(oldVersion)
-
-        diamondCut = diamondCut.connect(signer_A)
 
         const newVersion = 0
 
@@ -643,12 +641,11 @@ describe('ResolverProxy Tests', () => {
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, rbac)
 
-        let diamondCut = await ethers.getContractAt(
+        const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            resolverProxy.address
+            resolverProxy.address,
+            signer_A
         )
-
-        diamondCut = diamondCut.connect(signer_A)
 
         await expect(
             diamondCut.updateConfig(CONFIG_ID_2, 1)
@@ -684,9 +681,10 @@ describe('ResolverProxy Tests', () => {
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac)
 
-        let diamondCut = await ethers.getContractAt(
+        const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            resolverProxy.address
+            resolverProxy.address,
+            signer_A
         )
 
         let result = await diamondCut.getConfigInfo()
@@ -694,8 +692,6 @@ describe('ResolverProxy Tests', () => {
         expect(result.resolver_).to.equal(resolver.address)
         expect(result.configurationId_).to.equal(CONFIG_ID)
         expect(result.version_).to.equal(oldVersion)
-
-        diamondCut = diamondCut.connect(signer_A)
 
         const newVersion = 0
 
@@ -767,12 +763,11 @@ describe('ResolverProxy Tests', () => {
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, rbac)
 
-        let diamondCut = await ethers.getContractAt(
+        const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            resolverProxy.address
+            resolverProxy.address,
+            signer_A
         )
-
-        diamondCut = diamondCut.connect(signer_A)
 
         await expect(
             diamondCut.updateResolver(resolver_2.address, CONFIG_ID_2, 1)
@@ -814,9 +809,10 @@ describe('ResolverProxy Tests', () => {
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac)
 
-        let diamondCut = await ethers.getContractAt(
+        const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            resolverProxy.address
+            resolverProxy.address,
+            signer_A
         )
 
         let result = await diamondCut.getConfigInfo()
@@ -824,8 +820,6 @@ describe('ResolverProxy Tests', () => {
         expect(result.resolver_).to.equal(resolver.address)
         expect(result.configurationId_).to.equal(CONFIG_ID)
         expect(result.version_).to.equal(oldVersion)
-
-        diamondCut = diamondCut.connect(signer_A)
 
         const newVersion = 0
 

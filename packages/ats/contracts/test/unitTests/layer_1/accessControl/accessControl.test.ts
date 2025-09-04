@@ -318,53 +318,42 @@ describe('Access Control Tests', () => {
     })
 
     it('GIVEN an account without administrative role WHEN grantRole THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non admin)
-        accessControlFacet = accessControlFacet.connect(signer_C)
-
         // grant role fails
         await expect(
-            accessControlFacet.grantRole(PAUSER_ROLE, account_D)
+            accessControlFacet
+                .connect(signer_C)
+                .grantRole(PAUSER_ROLE, account_D)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
     it('GIVEN an account without administrative role WHEN revokeRole THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non admin)
-        accessControlFacet = accessControlFacet.connect(signer_C)
-
         // revoke role fails
         await expect(
-            accessControlFacet.revokeRole(DEFAULT_ADMIN_ROLE, account_B)
+            accessControlFacet
+                .connect(signer_C)
+                .revokeRole(DEFAULT_ADMIN_ROLE, account_B)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
     it('GIVEN an account without administrative role WHEN applyRoles THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non admin)
-        accessControlFacet = accessControlFacet.connect(signer_C)
-
         // revoke role fails
         await expect(
-            accessControlFacet.applyRoles(
-                [DEFAULT_ADMIN_ROLE],
-                [true],
-                account_B
-            )
+            accessControlFacet
+                .connect(signer_C)
+                .applyRoles([DEFAULT_ADMIN_ROLE], [true], account_B)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
     it('GIVEN a list of roles and actives that is not equally long WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch', async () => {
-        // Using account C (non admin)
-        accessControlFacet = accessControlFacet.connect(signer_C)
-
         // revoke role fails
         await expect(
-            accessControlFacet.applyRoles([DEFAULT_ADMIN_ROLE], [], account_B)
+            accessControlFacet
+                .connect(signer_C)
+                .applyRoles([DEFAULT_ADMIN_ROLE], [], account_B)
         ).to.be.rejectedWith('RolesAndActivesLengthMismatch')
     })
 
     it('GIVEN a list of contradictory roles (enable and disbale) role WHEN applyRoles THEN transaction fails with ApplyRoleContradiction', async () => {
-        // Using account C (non admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
-
         const Roles_1 = [
             DEFAULT_ADMIN_ROLE,
             PAUSER_ROLE,
@@ -381,7 +370,9 @@ describe('Access Control Tests', () => {
 
         // revoke role fails
         await expect(
-            accessControlFacet.applyRoles(Roles_1, actives_1, account_B)
+            accessControlFacet
+                .connect(signer_A)
+                .applyRoles(Roles_1, actives_1, account_B)
         )
             .to.be.revertedWithCustomError(
                 accessControlFacet,
@@ -390,7 +381,9 @@ describe('Access Control Tests', () => {
             .withArgs(3, 6)
 
         await expect(
-            accessControlFacet.applyRoles(Roles_1, actives_2, account_B)
+            accessControlFacet
+                .connect(signer_A)
+                .applyRoles(Roles_1, actives_2, account_B)
         )
             .to.be.revertedWithCustomError(
                 accessControlFacet,
@@ -400,70 +393,60 @@ describe('Access Control Tests', () => {
     })
 
     it('GIVEN a paused Token WHEN grantRole THEN transaction fails with TokenIsPaused', async () => {
-        // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-        await pauseFacet.pause()
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
+        await pauseFacet.connect(signer_B).pause()
 
         // grant role fails
         await expect(
-            accessControlFacet.grantRole(PAUSER_ROLE, account_D)
+            accessControlFacet
+                .connect(signer_A)
+                .grantRole(PAUSER_ROLE, account_D)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN a paused Token WHEN revokeRole THEN transaction fails with TokenIsPaused', async () => {
-        // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-        await pauseFacet.pause()
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
+        await pauseFacet.connect(signer_B).pause()
 
         // revoke role fails
         await expect(
-            accessControlFacet.revokeRole(PAUSER_ROLE, account_B)
+            accessControlFacet
+                .connect(signer_A)
+                .revokeRole(PAUSER_ROLE, account_B)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN a paused Token WHEN renounce THEN transaction fails with TokenIsPaused', async () => {
         // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-        await pauseFacet.pause()
-        // Using account B (has the role)
-        accessControlFacet = accessControlFacet.connect(signer_B)
+        await pauseFacet.connect(signer_B).pause()
 
         // revoke role fails
         await expect(
-            accessControlFacet.renounceRole(PAUSER_ROLE)
+            accessControlFacet.connect(signer_B).renounceRole(PAUSER_ROLE)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN an paused Token WHEN applyRoles THEN transaction fails with TokenIsPaused', async () => {
         // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-        await pauseFacet.pause()
-        // Using account B (has the role)
-        accessControlFacet = accessControlFacet.connect(signer_B)
+        await pauseFacet.connect(signer_B).pause()
 
         // revoke role fails
         await expect(
-            accessControlFacet.applyRoles(
-                [DEFAULT_ADMIN_ROLE],
-                [true],
-                account_B
-            )
+            accessControlFacet
+                .connect(signer_B)
+                .applyRoles([DEFAULT_ADMIN_ROLE], [true], account_B)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN an account with administrative role WHEN grantRole THEN transaction succeeds', async () => {
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
         // check that C does not have the role
         let check_C = await accessControlFacet.hasRole(PAUSER_ROLE, account_C)
         expect(check_C).to.equal(false)
 
         // grant Role
-        await expect(accessControlFacet.grantRole(PAUSER_ROLE, account_C))
+        await expect(
+            accessControlFacet
+                .connect(signer_A)
+                .grantRole(PAUSER_ROLE, account_C)
+        )
             .to.emit(accessControlFacet, 'RoleGranted')
             .withArgs(account_A, account_C, PAUSER_ROLE)
 
@@ -499,14 +482,16 @@ describe('Access Control Tests', () => {
     })
 
     it('GIVEN an account with administrative role WHEN revokeRole THEN transaction succeeds', async () => {
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
         // check that B has the role
         let check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
         expect(check_B).to.equal(true)
 
         // revoke Role
-        await expect(accessControlFacet.revokeRole(PAUSER_ROLE, account_B))
+        await expect(
+            accessControlFacet
+                .connect(signer_A)
+                .revokeRole(PAUSER_ROLE, account_B)
+        )
             .to.emit(accessControlFacet, 'RoleRevoked')
             .withArgs(account_A, account_B, PAUSER_ROLE)
 
@@ -535,14 +520,14 @@ describe('Access Control Tests', () => {
     })
 
     it('GIVEN an account with pauser role WHEN renouncing the pauser role THEN transaction succeeds', async () => {
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_B)
         // check that B has the role
         let check_B = await accessControlFacet.hasRole(PAUSER_ROLE, account_B)
         expect(check_B).to.equal(true)
 
         // revoke Role
-        await expect(accessControlFacet.renounceRole(PAUSER_ROLE))
+        await expect(
+            accessControlFacet.connect(signer_B).renounceRole(PAUSER_ROLE)
+        )
             .to.emit(accessControlFacet, 'RoleRenounced')
             .withArgs(account_B, PAUSER_ROLE)
 
@@ -571,18 +556,20 @@ describe('Access Control Tests', () => {
     })
 
     it('GIVEN an account with administrative role WHEN applyRoles THEN transaction succeeds', async () => {
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
         // check that C does not have the role
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(PAUSER_ROLE, account_C)
 
         // grant Role
         await expect(
-            accessControlFacet.applyRoles(
-                [PAUSER_ROLE, DEFAULT_ADMIN_ROLE],
-                [false, true],
-                account_C
-            )
+            accessControlFacet
+                .connect(signer_A)
+                .applyRoles(
+                    [PAUSER_ROLE, DEFAULT_ADMIN_ROLE],
+                    [false, true],
+                    account_C
+                )
         )
             .to.emit(accessControlFacet, 'RolesApplied')
             .withArgs(
@@ -638,18 +625,20 @@ describe('Access Control Tests', () => {
     })
 
     it('GIVEN an account with administrative role, if roles are duplicated but not contradictory WHEN applyRoles THEN transaction succeeds', async () => {
-        // Using account A (admin)
-        accessControlFacet = accessControlFacet.connect(signer_A)
         // check that C does not have the role
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(PAUSER_ROLE, account_C)
 
         // grant Role
         await expect(
-            accessControlFacet.applyRoles(
-                [PAUSER_ROLE, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE],
-                [true, false, false],
-                account_C
-            )
+            accessControlFacet
+                .connect(signer_A)
+                .applyRoles(
+                    [PAUSER_ROLE, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_ROLE],
+                    [true, false, false],
+                    account_C
+                )
         )
             .to.emit(accessControlFacet, 'RolesApplied')
             .withArgs(

@@ -331,23 +331,21 @@ describe('Security Tests', () => {
                 TotalTokenHolders_1
             )
 
-            erc1410ManagementFacet = erc1410ManagementFacet.connect(signer_A)
-
-            await erc1410ManagementFacet.issueByPartition({
+            await erc1410ManagementFacet.connect(signer_A).issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_A,
                 value: 1,
                 data: '0x',
             })
 
-            await erc1410ManagementFacet.issueByPartition({
+            await erc1410ManagementFacet.connect(signer_A).issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_B,
                 value: 1,
                 data: '0x',
             })
 
-            await erc1410ManagementFacet.issueByPartition({
+            await erc1410ManagementFacet.connect(signer_A).issueByPartition({
                 partition: _PARTITION_ID_2,
                 tokenHolder: account_C,
                 value: 1,
@@ -374,23 +372,21 @@ describe('Security Tests', () => {
         })
 
         it('Check Security Total Holders and Holders when removing', async () => {
-            erc1410ManagementFacet = erc1410ManagementFacet.connect(signer_A)
-
-            await erc1410ManagementFacet.issueByPartition({
+            await erc1410ManagementFacet.connect(signer_A).issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_A,
                 value: 1,
                 data: '0x',
             })
 
-            await erc1410ManagementFacet.issueByPartition({
+            await erc1410ManagementFacet.connect(signer_A).issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_B,
                 value: 1,
                 data: '0x',
             })
 
-            await erc1410ManagementFacet.issueByPartition({
+            await erc1410ManagementFacet.connect(signer_A).issueByPartition({
                 partition: _PARTITION_ID_2,
                 tokenHolder: account_C,
                 value: 1,
@@ -404,13 +400,9 @@ describe('Security Tests', () => {
                 TotalTokenHolders_1
             )
 
-            erc1410TokenHolderFacet = erc1410TokenHolderFacet.connect(signer_B)
-
-            await erc1410TokenHolderFacet.redeemByPartition(
-                _PARTITION_ID_1,
-                1,
-                '0x'
-            )
+            await erc1410TokenHolderFacet
+                .connect(signer_B)
+                .redeemByPartition(_PARTITION_ID_1, 1, '0x')
 
             const TotalTokenHolders_2 =
                 await securityFacet.getTotalSecurityHolders()
@@ -419,13 +411,9 @@ describe('Security Tests', () => {
                 TotalTokenHolders_2
             )
 
-            erc1410TokenHolderFacet = erc1410TokenHolderFacet.connect(signer_A)
-
-            await erc1410TokenHolderFacet.redeemByPartition(
-                _PARTITION_ID_1,
-                1,
-                '0x'
-            )
+            await erc1410TokenHolderFacet
+                .connect(signer_A)
+                .redeemByPartition(_PARTITION_ID_1, 1, '0x')
 
             const TotalTokenHolders_3 =
                 await securityFacet.getTotalSecurityHolders()
@@ -434,13 +422,9 @@ describe('Security Tests', () => {
                 TotalTokenHolders_3
             )
 
-            erc1410TokenHolderFacet = erc1410TokenHolderFacet.connect(signer_C)
-
-            await erc1410TokenHolderFacet.redeemByPartition(
-                _PARTITION_ID_2,
-                1,
-                '0x'
-            )
+            await erc1410TokenHolderFacet
+                .connect(signer_C)
+                .redeemByPartition(_PARTITION_ID_2, 1, '0x')
 
             const TotalTokenHolders_4 =
                 await securityFacet.getTotalSecurityHolders()
@@ -470,9 +454,7 @@ describe('Security Tests', () => {
         })
 
         it('Check Security Total Holders and Holders when replacing', async () => {
-            erc1410ManagementFacet = erc1410ManagementFacet.connect(signer_A)
-
-            await erc1410ManagementFacet.issueByPartition({
+            await erc1410ManagementFacet.connect(signer_A).issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_A,
                 value: 1,

@@ -326,26 +326,18 @@ describe('ERC1643 Tests', () => {
     })
 
     it('GIVEN an account without documenter role WHEN setDocument THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non role)
-        erc1643Facet = erc1643Facet.connect(signer_C)
-
         // add document fails
         await expect(
-            erc1643Facet.setDocument(
-                documentName_1,
-                documentURI_1,
-                documentHASH_1
-            )
+            erc1643Facet
+                .connect(signer_C)
+                .setDocument(documentName_1, documentURI_1, documentHASH_1)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
     it('GIVEN an account without documenter role WHEN removeDocument THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non role)
-        erc1643Facet = erc1643Facet.connect(signer_C)
-
         // add document fails
         await expect(
-            erc1643Facet.removeDocument(documentName_1)
+            erc1643Facet.connect(signer_C).removeDocument(documentName_1)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
@@ -360,16 +352,11 @@ describe('ERC1643 Tests', () => {
             account_C
         )
 
-        // Using account C (with role)
-        erc1643Facet = erc1643Facet.connect(signer_C)
-
         // add document fails
         await expect(
-            erc1643Facet.setDocument(
-                documentName_1,
-                documentURI_1,
-                documentHASH_1
-            )
+            erc1643Facet
+                .connect(signer_C)
+                .setDocument(documentName_1, documentURI_1, documentHASH_1)
         ).to.be.revertedWithCustomError(erc1643Facet, 'TokenIsPaused')
     })
 
@@ -384,82 +371,74 @@ describe('ERC1643 Tests', () => {
             account_C
         )
 
-        // Using account C (with role)
-        erc1643Facet = erc1643Facet.connect(signer_C)
-
         // remove document
         await expect(
-            erc1643Facet.removeDocument(documentName_1)
+            erc1643Facet.connect(signer_C).removeDocument(documentName_1)
         ).to.be.revertedWithCustomError(erc1643Facet, 'TokenIsPaused')
     })
 
     it('GIVEN a document with no name WHEN setDocument THEN transaction fails with EmptyName', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
-        // Using account C (with role)
-        erc1643Facet = erc1643Facet.connect(signer_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(DOCUMENTER_ROLE, account_C)
 
         // add document fails
         await expect(
-            erc1643Facet.setDocument(
-                '0x0000000000000000000000000000000000000000000000000000000000000000',
-                documentURI_1,
-                documentHASH_1
-            )
+            erc1643Facet
+                .connect(signer_C)
+                .setDocument(
+                    '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    documentURI_1,
+                    documentHASH_1
+                )
         ).to.be.rejectedWith('EmptyName')
     })
 
     it('GIVEN a document with no URI WHEN setDocument THEN transaction fails with EmptyURI', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
-        // Using account C (with role)
-        erc1643Facet = erc1643Facet.connect(signer_C)
-
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(DOCUMENTER_ROLE, account_C)
         // add document fails
         await expect(
-            erc1643Facet.setDocument(documentName_1, '', documentHASH_1)
+            erc1643Facet
+                .connect(signer_C)
+                .setDocument(documentName_1, '', documentHASH_1)
         ).to.be.rejectedWith('EmptyURI')
     })
 
     it('GIVEN a document with no HASH WHEN setDocument THEN transaction fails with EmptyHASH', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
-        // Using account C (with role)
-        erc1643Facet = erc1643Facet.connect(signer_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(DOCUMENTER_ROLE, account_C)
 
         // add document fails
         await expect(
-            erc1643Facet.setDocument(
-                documentName_1,
-                documentURI_1,
-                '0x0000000000000000000000000000000000000000000000000000000000000000'
-            )
+            erc1643Facet
+                .connect(signer_C)
+                .setDocument(
+                    documentName_1,
+                    documentURI_1,
+                    '0x0000000000000000000000000000000000000000000000000000000000000000'
+                )
         ).to.be.rejectedWith('EmptyHASH')
     })
 
     it('GIVEN a document that does not exist WHEN removeDocument THEN transaction fails with DocumentDoesNotExist', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
-        // Using account C (with role)
-        erc1643Facet = erc1643Facet.connect(signer_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(DOCUMENTER_ROLE, account_C)
 
         // add document fails
         await expect(
-            erc1643Facet.removeDocument(documentName_1)
+            erc1643Facet.connect(signer_C).removeDocument(documentName_1)
         ).to.be.rejectedWith('DocumentDoesNotExist')
     })
 
     it('GIVEN an account with documenter role WHEN setDocument and removeDocument THEN transaction succeeds', async () => {
         // ADD TO LIST ------------------------------------------------------------------
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
-        // Using account C (with role)
-        erc1643Facet = erc1643Facet.connect(signer_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(DOCUMENTER_ROLE, account_C)
 
         // check that Document not in the list
         let documents = await erc1643Facet.getAllDocuments()
@@ -467,19 +446,15 @@ describe('ERC1643 Tests', () => {
 
         // add document
         await expect(
-            erc1643Facet.setDocument(
-                documentName_1,
-                documentURI_1,
-                documentHASH_1
-            )
+            erc1643Facet
+                .connect(signer_C)
+                .setDocument(documentName_1, documentURI_1, documentHASH_1)
         )
             .to.emit(erc1643Facet, 'DocumentUpdated')
             .withArgs(documentName_1, documentURI_1, documentHASH_1)
-        await erc1643Facet.setDocument(
-            documentName_2,
-            documentURI_2,
-            documentHASH_2
-        )
+        await erc1643Facet
+            .connect(signer_C)
+            .setDocument(documentName_2, documentURI_2, documentHASH_2)
 
         // check documents
         documents = await erc1643Facet.getAllDocuments()
@@ -491,10 +466,12 @@ describe('ERC1643 Tests', () => {
 
         // REMOVE FROM LIST ------------------------------------------------------------------
         // remove From list
-        await expect(erc1643Facet.removeDocument(documentName_1))
+        await expect(
+            erc1643Facet.connect(signer_C).removeDocument(documentName_1)
+        )
             .to.emit(erc1643Facet, 'DocumentRemoved')
             .withArgs(documentName_1, documentURI_1, documentHASH_1)
-        await erc1643Facet.removeDocument(documentName_2)
+        await erc1643Facet.connect(signer_C).removeDocument(documentName_2)
         // check documents
         documents = await erc1643Facet.getAllDocuments()
         expect(documents.length).to.equal(0)

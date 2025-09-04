@@ -349,11 +349,9 @@ describe('Scheduled BalanceAdjustments Tests', () => {
     })
 
     it('GIVEN a token WHEN triggerBalanceAdjustments THEN transaction succeeds', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-        // Using account C (with role)
-        equityFacet = equityFacet.connect(signer_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(CORPORATE_ACTION_ROLE, account_C)
 
         // set balanceAdjustment
         const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp(
@@ -383,9 +381,15 @@ describe('Scheduled BalanceAdjustments Tests', () => {
             factor: balanceAdjustmentsFactor,
             decimals: balanceAdjustmentsDecimals,
         }
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_3)
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+        await equityFacet
+            .connect(signer_C)
+            .setScheduledBalanceAdjustment(balanceAdjustmentData_2)
+        await equityFacet
+            .connect(signer_C)
+            .setScheduledBalanceAdjustment(balanceAdjustmentData_3)
+        await equityFacet
+            .connect(signer_C)
+            .setScheduledBalanceAdjustment(balanceAdjustmentData_1)
 
         const balanceAdjustment_2_Id =
             '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -430,11 +434,12 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         )
 
         // AFTER FIRST SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
         await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_1 + 1
         )
-        await scheduledTasksFacet.triggerPendingScheduledTasks()
+        await scheduledTasksFacet
+            .connect(signer_A)
+            .triggerPendingScheduledTasks()
 
         scheduledBalanceAdjustmentCount =
             await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
@@ -465,7 +470,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_2 + 1
         )
-        await scheduledTasksFacet.triggerScheduledTasks(100)
+        await scheduledTasksFacet.connect(signer_A).triggerScheduledTasks(100)
 
         scheduledBalanceAdjustmentCount =
             await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
@@ -490,7 +495,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_3 + 1
         )
-        await scheduledTasksFacet.triggerScheduledTasks(0)
+        await scheduledTasksFacet.connect(signer_A).triggerScheduledTasks(0)
 
         scheduledBalanceAdjustmentCount =
             await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
