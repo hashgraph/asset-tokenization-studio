@@ -273,6 +273,13 @@ export interface CouponDetailsData {
     firstCouponDate: number
 }
 
+export interface CouponData {
+    recordDate: number
+    executionDate: number
+    rate: number
+    period: number
+}
+
 export interface SecurityData {
     arePartitionsProtected: boolean
     isMultiPartition: boolean

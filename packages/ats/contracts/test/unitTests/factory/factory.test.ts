@@ -238,6 +238,7 @@ import {
     setFactoryRegulationData,
     RegulationType,
     RegulationSubType,
+    TIME_PERIODS_S,
 } from '@scripts'
 
 describe('Factory Tests', () => {
@@ -275,7 +276,7 @@ describe('Factory Tests', () => {
     const nominalValue = 100
     let startingDate = 999
     let maturityDate = 999
-    const couponFrequency = 1
+    const couponFrequency = TIME_PERIODS_S.DAY
     const couponRate = 1
     let firstCouponDate = 999
     const numberOfCoupon = 30

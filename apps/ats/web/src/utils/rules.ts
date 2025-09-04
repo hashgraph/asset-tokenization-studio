@@ -210,8 +210,8 @@ import isEqual from 'date-fns/isEqual';
 import i18n from '../i18n';
 import { formatDate, toDate } from './format';
 
-const t = (key: string, options?: object) => {
-  return i18n.t(`rules:${key}`, options || {});
+const t = (key: string, options?: Record<string, unknown>) => {
+  return i18n.t(`rules:${key}`, options);
 };
 
 export const maxLength = (value: number) => ({
@@ -320,4 +320,24 @@ export const isISINValid = (val: string) => {
 export const isValidHederaId = (val: string) => {
   const maskRegex = /^[0-9]\.[0-9]\.[0-9]{1,7}$/;
   return maskRegex.test(val) || t('isValidHederaId');
+};
+
+export const isValidCouponPeriod = (val: string) => {
+  try {
+    // Period is required - cannot be empty or null
+    if (!val || val.trim() === '') {
+      return 'Coupon period is required';
+    }
+
+    const periodValue = parseInt(val);
+    if (isNaN(periodValue) || periodValue <= 0) {
+      return 'Coupon period must be a valid positive number';
+    }
+
+    const { validateCouponPeriod } = require('./format');
+    const validation = validateCouponPeriod(periodValue);
+    return validation === true || validation;
+  } catch (error) {
+    return 'Invalid coupon period';
+  }
 };

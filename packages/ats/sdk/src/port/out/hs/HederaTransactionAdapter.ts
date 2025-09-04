@@ -1089,19 +1089,22 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    period: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(
       `bond: ${security} ,
       recordDate :${recordDate} , 
       executionDate: ${executionDate},
-      rate : ${rate}  `,
+      rate : ${rate},
+      period: ${period}`,
     );
 
     const coupon = {
       recordDate: recordDate.toHexString(),
       executionDate: executionDate.toHexString(),
       rate: rate.toHexString(),
+      period: period.toHexString(),
     };
     return this.executeWithArgs(
       new BondUSAFacet__factory().attach(security.toString()),

@@ -309,6 +309,7 @@ export const StepCoupon = () => {
           options={CouponTypeOptions}
         />
       </Stack>
+
       {couponType === 1 && (
         <>
           <Stack w="full">
