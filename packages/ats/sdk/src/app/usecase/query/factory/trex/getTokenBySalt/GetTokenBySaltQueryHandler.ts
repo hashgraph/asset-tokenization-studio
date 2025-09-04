@@ -213,7 +213,7 @@ import {
   GetTokenBySaltQueryResponse,
 } from './GetTokenBySaltQuery';
 import AccountService from '@service/account/AccountService';
-import { GetTokenQueryError } from './error/GetTokenQueryError';
+import { GetTokenBySaltQueryError } from './error/GetTokenBySaltQueryError';
 
 @QueryHandler(GetTokenBySaltQuery)
 export class GetTokenBySaltQueryHandler
@@ -242,7 +242,7 @@ export class GetTokenBySaltQueryHandler
 
       return Promise.resolve(new GetTokenBySaltQueryResponse(token));
     } catch (error) {
-      throw new GetTokenQueryError(error as Error);
+      throw new GetTokenBySaltQueryError(error as Error);
     }
   }
 }

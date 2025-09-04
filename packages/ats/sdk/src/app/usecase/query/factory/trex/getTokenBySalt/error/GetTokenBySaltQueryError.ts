@@ -206,7 +206,7 @@
 import { QueryError } from '@query/error/QueryError';
 import BaseError from '@core/error/BaseError';
 
-export class GetTokenQueryError extends QueryError {
+export class GetTokenBySaltQueryError extends QueryError {
   constructor(error: Error) {
     const msg = `An error occurred while querying token salt: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);

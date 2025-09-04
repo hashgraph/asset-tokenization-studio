@@ -217,7 +217,7 @@ import {
   GetTokenBySaltQueryResponse,
 } from './GetTokenBySaltQuery';
 import { GetTokenBySaltQueryHandler } from './GetTokenBySaltQueryHandler';
-import { GetTokenQueryError } from './error/GetTokenQueryError';
+import { GetTokenBySaltQueryError } from './error/GetTokenBySaltQueryError';
 import { GetTokenQueryFixture } from '@test/fixtures/trexFactroy/TrexFactoryFixture';
 
 describe('GetTokenBySaltQueryHandler', () => {
@@ -251,7 +251,9 @@ describe('GetTokenBySaltQueryHandler', () => {
 
       const resultPromise = handler.execute(query);
 
-      await expect(resultPromise).rejects.toBeInstanceOf(GetTokenQueryError);
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        GetTokenBySaltQueryError,
+      );
 
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(
