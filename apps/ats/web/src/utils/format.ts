@@ -329,22 +329,11 @@ export const validateCouponPeriod = (
   periodInSeconds: number,
   maturityDate?: Date,
 ): string | true => {
-  const {
-    MIN_COUPON_PERIOD_SECONDS,
-    MAX_COUPON_PERIOD_SECONDS,
-  } = require('./constants');
-
-  // Period is required - cannot be null, undefined, or 0
-  if (!periodInSeconds || periodInSeconds <= 0) {
-    return 'Coupon period is required and must be greater than 0';
+  // Period is required - cannot be null or undefined
+  if (!periodInSeconds || periodInSeconds < 0) {
+    return 'Coupon period is required and must be greater or equal to 0';
   }
 
-  if (periodInSeconds < MIN_COUPON_PERIOD_SECONDS) {
-    return 'Period must be at least 1 day';
-  }
-  if (periodInSeconds > MAX_COUPON_PERIOD_SECONDS) {
-    return 'Period cannot exceed 100 years';
-  }
   if (maturityDate) {
     const timeToMaturity = Math.floor(
       (maturityDate.getTime() - Date.now()) / 1000,

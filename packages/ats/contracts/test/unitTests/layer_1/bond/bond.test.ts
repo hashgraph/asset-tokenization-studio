@@ -739,13 +739,13 @@ describe('Bond Tests', () => {
                     )
 
                 // Verify coupon data includes period
-                const registeredCoupon = await bondFacet.getCoupon(
+                const registeredCoupon = await bondReadFacet.getCoupon(
                     numberOfCoupons + 1
                 )
                 expect(registeredCoupon.coupon.period).to.equal(customPeriod)
 
                 // Verify couponFor data includes period
-                const couponFor = await bondFacet.getCouponFor(
+                const couponFor = await bondReadFacet.getCouponFor(
                     numberOfCoupons + 1,
                     account_A
                 )
@@ -842,7 +842,7 @@ describe('Bond Tests', () => {
 
                 // Calculate period longer than remaining bond life
                 // maturityDate is set during bond creation, we need a period that exceeds it
-                const bondDetails = await bondFacet.getBondDetails()
+                const bondDetails = await bondReadFacet.getBondDetails()
                 const currentTime = (await ethers.provider.getBlock('latest'))
                     .timestamp
                 const timeToMaturity =
