@@ -400,13 +400,10 @@ describe('Snapshots Tests', () => {
     })
 
     it('GIVEN an account without snapshot role WHEN takeSnapshot THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non role)
-        snapshotFacet = snapshotFacet.connect(signer_C)
-
         // snapshot fails
-        await expect(snapshotFacet.takeSnapshot()).to.be.rejectedWith(
-            'AccountHasNoRole'
-        )
+        await expect(
+            snapshotFacet.connect(signer_C).takeSnapshot()
+        ).to.be.rejectedWith('AccountHasNoRole')
     })
 
     it('GIVEN a paused Token WHEN takeSnapshot THEN transaction fails with TokenIsPaused', async () => {
@@ -420,13 +417,9 @@ describe('Snapshots Tests', () => {
             account_C
         )
 
-        // Using account C (with role)
-        snapshotFacet = snapshotFacet.connect(signer_C)
-
-        // snapshot fails
-        await expect(snapshotFacet.takeSnapshot()).to.be.rejectedWith(
-            'TokenIsPaused'
-        )
+        await expect(
+            snapshotFacet.connect(signer_C).takeSnapshot()
+        ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN no snapshot WHEN reading snapshot values THEN transaction fails', async () => {
@@ -479,10 +472,12 @@ describe('Snapshots Tests', () => {
     })
 
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_C)
-        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(SNAPSHOT_ROLE, account_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(ISSUER_ROLE, account_A)
 
         await ssiManagementFacet.addIssuer(account_A)
         await kycFacet.grantKyc(
@@ -499,13 +494,8 @@ describe('Snapshots Tests', () => {
             MAX_UINT256,
             account_A
         )
-        // Using account C (with role)
-        snapshotFacet = snapshotFacet.connect(signer_C)
-        erc1410Facet = erc1410Facet.connect(signer_A)
-        lockFacet = lockFacet.connect(signer_B)
-        holdFacet = holdFacet.connect(signer_B)
 
-        await erc1410Facet.issueByPartition({
+        await erc1410Facet.connect(signer_A).issueByPartition({
             partition: _PARTITION_ID_1,
             tokenHolder: account_C,
             value: balanceOf_C_Original,
@@ -513,53 +503,56 @@ describe('Snapshots Tests', () => {
         })
 
         // snapshot
-        await expect(snapshotFacet.takeSnapshot())
+        await expect(snapshotFacet.connect(signer_C).takeSnapshot())
             .to.emit(snapshotFacet, 'SnapshotTaken')
             .withArgs(account_C, 1)
 
-        await erc1410Facet.issueByPartition({
+        await erc1410Facet.connect(signer_A).issueByPartition({
             partition: _PARTITION_ID_1,
             tokenHolder: account_A,
             value: amount,
             data: '0x',
         })
-        await erc1410Facet.issueByPartition({
+        await erc1410Facet.connect(signer_A).issueByPartition({
             partition: _PARTITION_ID_2,
             tokenHolder: account_A,
             value: amount,
             data: '0x',
         })
-        erc1410Facet = erc1410Facet.connect(signer_C)
 
         const basicTransferInfo = {
             to: account_A,
             value: amount,
         }
 
-        await erc1410Facet.transferByPartition(
-            _PARTITION_ID_1,
-            basicTransferInfo,
-            '0x'
-        )
+        await erc1410Facet
+            .connect(signer_C)
+            .transferByPartition(_PARTITION_ID_1, basicTransferInfo, '0x')
 
-        await lockFacet.lockByPartition(
-            _PARTITION_ID_1,
-            lockedAmountOf_A_Partition_1,
-            account_A,
-            MAX_UINT256
-        )
-        await lockFacet.lockByPartition(
-            _PARTITION_ID_1,
-            lockedAmountOf_C_Partition_1,
-            account_C,
-            MAX_UINT256
-        )
-        await lockFacet.lockByPartition(
-            _PARTITION_ID_2,
-            lockedAmountOf_A_Partition_2,
-            account_A,
-            MAX_UINT256
-        )
+        await lockFacet
+            .connect(signer_B)
+            .lockByPartition(
+                _PARTITION_ID_1,
+                lockedAmountOf_A_Partition_1,
+                account_A,
+                MAX_UINT256
+            )
+        await lockFacet
+            .connect(signer_B)
+            .lockByPartition(
+                _PARTITION_ID_1,
+                lockedAmountOf_C_Partition_1,
+                account_C,
+                MAX_UINT256
+            )
+        await lockFacet
+            .connect(signer_B)
+            .lockByPartition(
+                _PARTITION_ID_2,
+                lockedAmountOf_A_Partition_2,
+                account_A,
+                MAX_UINT256
+            )
 
         const hold = {
             amount: 0,
@@ -584,7 +577,7 @@ describe('Snapshots Tests', () => {
             .connect(signer_A)
             .createHoldByPartition(_PARTITION_ID_2, hold)
 
-        await snapshotFacet.takeSnapshot()
+        await snapshotFacet.connect(signer_C).takeSnapshot()
 
         // check snapshot
         const snapshot_Balance_Of_A_1 = await snapshotFacet.balanceOfAtSnapshot(
@@ -946,11 +939,15 @@ describe('Snapshots Tests', () => {
 
     describe('Scheduled tasks', async () => {
         it('GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds', async () => {
-            // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(SNAPSHOT_ROLE, account_A)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(ISSUER_ROLE, account_A)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_A)
 
             await ssiManagementFacet.addIssuer(account_A)
             await kycFacet.grantKyc(
@@ -968,16 +965,13 @@ describe('Snapshots Tests', () => {
                 account_A
             )
 
-            snapshotFacet = snapshotFacet.connect(signer_A)
-            erc1410Facet = erc1410Facet.connect(signer_A)
-            equityFacet = equityFacet.connect(signer_A)
-            await erc1410Facet.issueByPartition({
+            await erc1410Facet.connect(signer_A).issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_C,
                 value: balanceOf_C_Original,
                 data: '0x',
             })
-            await erc1410Facet.issueByPartition({
+            await erc1410Facet.connect(signer_A).issueByPartition({
                 partition: _PARTITION_ID_2,
                 tokenHolder: account_B,
                 value: balanceOf_B_Original,
@@ -1013,9 +1007,9 @@ describe('Snapshots Tests', () => {
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: dividendsAmountPerEquity,
             }
-            await equityFacet.setDividends(dividendData_1)
-            await equityFacet.setDividends(dividendData_2)
-            await equityFacet.setDividends(dividendData_3)
+            await equityFacet.connect(signer_A).setDividends(dividendData_1)
+            await equityFacet.connect(signer_A).setDividends(dividendData_2)
+            await equityFacet.connect(signer_A).setDividends(dividendData_3)
 
             const balanceAdjustmentExecutionDateInSeconds_1 =
                 dateToUnixTimestamp('2030-01-01T00:00:07Z')
@@ -1049,15 +1043,15 @@ describe('Snapshots Tests', () => {
                 factor: balanceAdjustmentsFactor_3,
                 decimals: balanceAdjustmentsDecimals_3,
             }
-            await equityFacet.setScheduledBalanceAdjustment(
-                balanceAdjustmentData_1
-            )
-            await equityFacet.setScheduledBalanceAdjustment(
-                balanceAdjustmentData_2
-            )
-            await equityFacet.setScheduledBalanceAdjustment(
-                balanceAdjustmentData_3
-            )
+            await equityFacet
+                .connect(signer_A)
+                .setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+            await equityFacet
+                .connect(signer_A)
+                .setScheduledBalanceAdjustment(balanceAdjustmentData_2)
+            await equityFacet
+                .connect(signer_A)
+                .setScheduledBalanceAdjustment(balanceAdjustmentData_3)
 
             //-------------------------
             await timeTravelFacet.changeSystemTimestamp(
@@ -1065,7 +1059,7 @@ describe('Snapshots Tests', () => {
             )
 
             // snapshot
-            await snapshotFacet.takeSnapshot()
+            await snapshotFacet.connect(signer_A).takeSnapshot()
 
             const adjustmentFactor_1 = balanceAdjustmentsFactor_1
             const adjustmentFactor_2 =
