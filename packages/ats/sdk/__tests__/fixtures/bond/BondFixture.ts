@@ -206,6 +206,7 @@
 import { CreateBondCommand } from '@command/bond/create/CreateBondCommand';
 import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
 import { createFixture } from '../config';
+import { TIME_PERIODS_S } from '@core/Constants';
 import ContractId from '@domain/context/contract/ContractId';
 import {
   ContractIdPropFixture,
@@ -258,6 +259,9 @@ export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
     );
     command.rate.faker((faker) =>
       faker.number.int({ min: 100, max: 999 }).toString(),
+    );
+    command.period.faker((faker) =>
+      faker.number.int({ min: 86400, max: 31536000 }).toString(),
     );
   },
 );
@@ -529,6 +533,7 @@ export const SetCouponRequestFixture = createFixture<SetCouponRequest>(
     request.executionTimestamp.faker((faker) =>
       faker.date.future().getTime().toString(),
     );
+    request.period.as(() => TIME_PERIODS_S.DAY.toString());
   },
 );
 
