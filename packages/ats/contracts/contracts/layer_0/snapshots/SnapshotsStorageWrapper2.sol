@@ -423,7 +423,7 @@ abstract contract SnapshotsStorageWrapper2 is
     function _getTotalBalanceOfAtSnapshot(
         uint256 _snapshotId,
         address _tokenHolder
-    ) internal view returns (uint256) {
+    ) internal view override returns (uint256) {
         // Use unchecked block since we're dealing with token balances that shouldn't overflow
         unchecked {
             return
@@ -439,7 +439,7 @@ abstract contract SnapshotsStorageWrapper2 is
         bytes32 _partition,
         uint256 _snapshotId,
         address _tokenHolder
-    ) internal view returns (uint256) {
+    ) internal view override returns (uint256) {
         // Use unchecked block since we're dealing with token balances that shouldn't overflow
         unchecked {
             return
