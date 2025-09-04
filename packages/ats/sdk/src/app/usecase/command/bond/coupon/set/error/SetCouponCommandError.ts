@@ -218,20 +218,6 @@ export class SetCouponCommandError extends CommandError {
       return error.errorCode;
     }
 
-    const errorMessage = error.message.toLowerCase();
-
-    if (errorMessage.includes('couponperiodtoosmall')) {
-      return ErrorCode.CouponPeriodTooSmall;
-    }
-
-    if (errorMessage.includes('couponperiodtoolarge')) {
-      return ErrorCode.CouponPeriodTooLarge;
-    }
-
-    if (errorMessage.includes('couponperiodexceedsmaturity')) {
-      return ErrorCode.CouponPeriodExceedsMaturity;
-    }
-
     return undefined;
   }
 }

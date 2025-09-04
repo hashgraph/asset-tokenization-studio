@@ -258,19 +258,4 @@ interface IBondStorageWrapper {
      * @notice Provided maturity date is invalid (e.g. in the past or before issuance).
      */
     error BondMaturityDateWrong();
-
-    /**
-     * @notice Coupon period is below the allowed minimum.
-     */
-    error CouponPeriodTooSmall();
-
-    /**
-     * @notice Coupon period exceeds the allowed maximum.
-     */
-    error CouponPeriodTooLarge();
-
-    /**
-     * @notice Coupon period extends beyond the bond's maturity date.
-     */
-    error CouponPeriodExceedsMaturity();
 }
