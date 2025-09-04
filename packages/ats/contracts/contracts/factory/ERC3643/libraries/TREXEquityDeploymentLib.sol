@@ -227,7 +227,7 @@ library TREXEquityDeploymentLib {
         ITREXFactory.ClaimDetails calldata _claimDetails,
         TRexIFactory.EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
-    ) external {
+    ) external returns (address) {
         IToken token = SecurityDeploymentLib.deployEquity(
             _atsFactory,
             _tokenDetails.owner,
@@ -245,5 +245,6 @@ library TREXEquityDeploymentLib {
             _equityData.security.identityRegistry,
             _equityData.security.compliance
         );
+        return (address(token));
     }
 }
