@@ -349,12 +349,21 @@ describe('ERC1410 Tests', () => {
     }
 
     async function grantRolesToAccounts() {
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
-        await accessControlFacet.grantRole(CAP_ROLE, account_A)
-        await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
-        await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
-        await accessControlFacet.grantRole(KYC_ROLE, account_A)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(CAP_ROLE, account_A)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(CONTROLLER_ROLE, account_A)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(LOCKER_ROLE, account_A)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(KYC_ROLE, account_A)
     }
 
     async function grantKycToAccounts() {
@@ -739,6 +748,8 @@ describe('ERC1410 Tests', () => {
             'ISnapshots',
             diamond.address
         )
+
+        capFacet = await ethers.getContractAt('Cap', diamond.address)
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         await ssiManagementFacet.addIssuer(account_E)
 
@@ -905,30 +916,30 @@ describe('ERC1410 Tests', () => {
             expect(isOperatorByPartition_E_1).to.be.equal(false)
             expect(isOperatorByPartition_E).to.be.equal(true)
 
-            erc1410Facet = erc1410Facet.connect(signer_D)
-            await erc1410Facet.operatorRedeemByPartition(
-                _PARTITION_ID_1,
-                account_C,
-                balanceOf_C_Original,
-                '0x',
-                '0x'
-            )
-            erc1410Facet = erc1410Facet.connect(signer_E)
-            await erc1410Facet.operatorRedeemByPartition(
-                _PARTITION_ID,
-                account_C,
-                balanceOf_C_Original,
-                '0x',
-                '0x'
-            )
+            await erc1410Facet
+                .connect(signer_D)
+                .operatorRedeemByPartition(
+                    _PARTITION_ID_1,
+                    account_C,
+                    balanceOf_C_Original,
+                    '0x',
+                    '0x'
+                )
+            await erc1410Facet
+                .connect(signer_E)
+                .operatorRedeemByPartition(
+                    _PARTITION_ID,
+                    account_C,
+                    balanceOf_C_Original,
+                    '0x',
+                    '0x'
+                )
 
             // revoke
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            await erc1410Facet.revokeOperator(account_D)
-            await erc1410Facet.revokeOperatorByPartition(
-                _PARTITION_ID,
-                account_E
-            )
+            await erc1410Facet.connect(signer_C).revokeOperator(account_D)
+            await erc1410Facet
+                .connect(signer_C)
+                .revokeOperatorByPartition(_PARTITION_ID, account_E)
 
             // check
             isOperator_D = await erc1410Facet.isOperator(account_D, account_C)
@@ -943,42 +954,47 @@ describe('ERC1410 Tests', () => {
 
         it('GIVEN a paused Token WHEN transfer THEN transaction fails with TokenIsPaused', async () => {
             // Pausing the token
-            pauseFacet = pauseFacet.connect(signer_B)
-            await pauseFacet.pause()
+            await pauseFacet.connect(signer_B).pause()
 
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            const canTransfer = await erc1410Facet.canTransferByPartition(
-                account_C,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-            const canTransfer_2 = await erc1410Facet.canTransferByPartition(
-                account_E,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            const canTransfer = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_C,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
+            const canTransfer_2 = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_E,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
 
             // transfer with data fails
             await expect(
-                erc1410Facet.transferByPartition(
-                    _PARTITION_ID_1,
-                    basicTransferInfo,
-                    data
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        data
+                    )
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(EIP1066_CODES.PAUSED)
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(EIP1066_CODES.PAUSED)
@@ -987,31 +1003,35 @@ describe('ERC1410 Tests', () => {
         it('GIVEN a token with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
             await clearingActionsFacet.activateClearing()
 
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            const canTransfer = await erc1410Facet.canTransferByPartition(
-                account_C,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-            const canTransfer_2 = await erc1410Facet.canTransferByPartition(
-                account_E,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            const canTransfer = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_C,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
+            const canTransfer_2 = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_E,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
             // transfer with data fails
             await expect(
-                erc1410Facet.transferByPartition(
-                    _PARTITION_ID_1,
-                    basicTransferInfo,
-                    data
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        data
+                    )
             ).to.be.revertedWithCustomError(
                 clearingInterface,
                 'ClearingIsActivated'
@@ -1020,7 +1040,9 @@ describe('ERC1410 Tests', () => {
             expect(canTransfer[1]).to.be.equal(EIP1066_CODES.UNAVAILABLE)
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorTransferByPartition(operatorTransferData)
             ).to.be.revertedWithCustomError(
                 clearingInterface,
                 'ClearingIsActivated'
@@ -1031,13 +1053,11 @@ describe('ERC1410 Tests', () => {
 
         it('GIVEN a paused Token WHEN issue THEN transaction fails with TokenIsPaused', async () => {
             // Pausing the token
-            pauseFacet = pauseFacet.connect(signer_B)
-            await pauseFacet.pause()
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
+            await pauseFacet.connect(signer_B).pause()
+
             // issue fails
             await expect(
-                erc1410Facet.issueByPartition({
+                erc1410Facet.connect(signer_C).issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_E,
                     value: amount,
@@ -1047,11 +1067,9 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN Token WHEN issue to partition 0 THEN transaction fails with ZeroPartition', async () => {
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_A)
             // issue fails
             await expect(
-                erc1410Facet.issueByPartition({
+                erc1410Facet.connect(signer_A).issueByPartition({
                     partition:
                         '0x0000000000000000000000000000000000000000000000000000000000000000',
                     tokenHolder: account_E,
@@ -1062,11 +1080,9 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN Token WHEN issue amount 0 THEN transaction fails with ZeroValue', async () => {
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_A)
             // issue fails
             await expect(
-                erc1410Facet.issueByPartition({
+                erc1410Facet.connect(signer_A).issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_E,
                     value: 0,
@@ -1077,42 +1093,47 @@ describe('ERC1410 Tests', () => {
 
         it('GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused', async () => {
             // Pausing the token
-            pauseFacet = pauseFacet.connect(signer_B)
-            await pauseFacet.pause()
+            await pauseFacet.connect(signer_B).pause()
 
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            const canRedeem = await erc1410Facet.canRedeemByPartition(
-                account_C,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-            const canRedeem_2 = await erc1410Facet.canRedeemByPartition(
-                account_E,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            const canRedeem = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
+                    account_C,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
+            const canRedeem_2 = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
+                    account_E,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
 
             // transfer with data fails
             await expect(
-                erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
+                erc1410Facet
+                    .connect(signer_C)
+                    .redeemByPartition(_PARTITION_ID_1, amount, data)
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canRedeem[0]).to.be.equal(false)
             expect(canRedeem[1]).to.be.equal(EIP1066_CODES.PAUSED)
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_E,
+                        amount,
+                        data,
+                        operatorData
+                    )
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canRedeem_2[0]).to.be.equal(false)
             expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.PAUSED)
@@ -1121,25 +1142,29 @@ describe('ERC1410 Tests', () => {
         it('GIVEN a token with clearing active WHEN redeem THEN transaction fails with ClearingIsActivated', async () => {
             await clearingActionsFacet.activateClearing()
 
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            const canRedeem = await erc1410Facet.canRedeemByPartition(
-                account_C,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-            const canRedeem_2 = await erc1410Facet.canRedeemByPartition(
-                account_E,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            const canRedeem = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
+                    account_C,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
+            const canRedeem_2 = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
+                    account_E,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
 
             await expect(
-                erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
+                erc1410Facet
+                    .connect(signer_C)
+                    .redeemByPartition(_PARTITION_ID_1, amount, data)
             ).to.be.revertedWithCustomError(
                 clearingInterface,
                 'ClearingIsActivated'
@@ -1148,13 +1173,15 @@ describe('ERC1410 Tests', () => {
             expect(canRedeem[1]).to.be.equal(EIP1066_CODES.UNAVAILABLE)
 
             await expect(
-                erc1410Facet.operatorRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_E,
+                        amount,
+                        data,
+                        operatorData
+                    )
             ).to.be.revertedWithCustomError(
                 clearingInterface,
                 'ClearingIsActivated'
@@ -1165,44 +1192,51 @@ describe('ERC1410 Tests', () => {
 
         it('GIVEN blocked accounts (sender, to, from) WHEN transfer THEN transaction fails with AccountIsBlocked', async () => {
             // Blacklisting accounts
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-            controlList = controlList.connect(signer_A)
-            await controlList.addToControlList(account_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CONTROL_LIST_ROLE, account_A)
+            await controlList.connect(signer_A).addToControlList(account_C)
 
             // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            let canTransfer = await erc1410Facet.canTransferByPartition(
-                account_C,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-            let canTransfer_2 = await erc1410Facet.canTransferByPartition(
-                account_E,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            let canTransfer = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_C,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
+            let canTransfer_2 = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_E,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
 
             // transfer with data fails
             await expect(
-                erc1410Facet.transferByPartition(
-                    _PARTITION_ID_1,
-                    basicTransferInfo,
-                    data
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        data
+                    )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
@@ -1210,39 +1244,47 @@ describe('ERC1410 Tests', () => {
             )
 
             // Update blacklist
-            await controlList.removeFromControlList(account_C)
-            await controlList.addToControlList(account_D)
-            canTransfer = await erc1410Facet.canTransferByPartition(
-                account_C,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-            canTransfer_2 = await erc1410Facet.canTransferByPartition(
-                account_E,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            await controlList.connect(signer_A).removeFromControlList(account_C)
+            await controlList.connect(signer_A).addToControlList(account_D)
+            canTransfer = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_C,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
+            canTransfer_2 = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_E,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
 
             // transfer with data fails
             await expect(
-                erc1410Facet.transferByPartition(
-                    _PARTITION_ID_1,
-                    basicTransferInfo,
-                    data
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        data
+                    )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
@@ -1250,20 +1292,24 @@ describe('ERC1410 Tests', () => {
             )
 
             // Update blacklist
-            await controlList.removeFromControlList(account_D)
-            await controlList.addToControlList(account_E)
-            canTransfer_2 = await erc1410Facet.canTransferByPartition(
-                account_E,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            await controlList.connect(signer_A).removeFromControlList(account_D)
+            await controlList.connect(signer_A).addToControlList(account_E)
+            canTransfer_2 = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_E,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
@@ -1276,26 +1322,31 @@ describe('ERC1410 Tests', () => {
             await erc1410Facet.connect(signer_D).authorizeOperator(account_C)
             await kycFacet.revokeKyc(account_D)
 
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            let canTransfer = await erc1410Facet.canTransferByPartition(
-                account_E,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            let canTransfer = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_E,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.transferByPartition(
-                    _PARTITION_ID_1,
-                    basicTransferInfo,
-                    data
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        data
+                    )
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             await expect(
-                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorTransferByPartition(operatorTransferData)
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
@@ -1308,14 +1359,16 @@ describe('ERC1410 Tests', () => {
                 account_E
             )
             await kycFacet.revokeKyc(account_E)
-            canTransfer = await erc1410Facet.canTransferByPartition(
-                account_E,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            canTransfer = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_E,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
 
             // transfer from with data fails
             await expect(
@@ -1328,7 +1381,9 @@ describe('ERC1410 Tests', () => {
                     )
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             await expect(
-                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorTransferByPartition(operatorTransferData)
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
@@ -1406,8 +1461,7 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN non Kyc account WHEN issue or redeem THEN transaction fails with InvalidKycStatus', async () => {
-            erc1410Facet = erc1410Facet.connect(signer_A)
-            await erc1410Facet.issueByPartition({
+            await erc1410Facet.connect(signer_A).issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_D,
                 value: amount,
@@ -1416,33 +1470,37 @@ describe('ERC1410 Tests', () => {
             await erc1410Facet.connect(signer_D).authorizeOperator(account_A)
             await kycFacet.revokeKyc(account_D)
             await expect(
-                erc1410Facet.issueByPartition({
+                erc1410Facet.connect(signer_A).issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_D,
                     value: amount,
                     data: data,
                 })
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
-            const canRedeem = await erc1410Facet.canRedeemByPartition(
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            const canRedeem = await erc1410Facet
+                .connect(signer_A)
+                .canRedeemByPartition(
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
             await expect(
                 erc1410Facet
                     .connect(signer_D)
                     .redeemByPartition(_PARTITION_ID_1, amount, data)
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             await expect(
-                erc1410Facet.operatorRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet
+                    .connect(signer_A)
+                    .operatorRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_D,
+                        amount,
+                        data,
+                        operatorData
+                    )
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             expect(canRedeem[0]).to.be.equal(false)
             expect(canRedeem[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
@@ -1450,44 +1508,50 @@ describe('ERC1410 Tests', () => {
 
         it('GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked', async () => {
             // Blacklisting accounts
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-            controlList = controlList.connect(signer_A)
-            await controlList.addToControlList(account_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CONTROL_LIST_ROLE, account_A)
+            await controlList.connect(signer_A).addToControlList(account_C)
 
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            const canRedeem = await erc1410Facet.canRedeemByPartition(
-                account_C,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-            let canRedeem_2 = await erc1410Facet.canRedeemByPartition(
-                account_E,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            const canRedeem = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
+                    account_C,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
+            let canRedeem_2 = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
+                    account_E,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
 
             // redeem with data fails
             await expect(
-                erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
+                erc1410Facet
+                    .connect(signer_C)
+                    .redeemByPartition(_PARTITION_ID_1, amount, data)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canRedeem[0]).to.be.equal(false)
             expect(canRedeem[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
 
             // redeem from with data fails
             await expect(
-                erc1410Facet.operatorRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_E,
+                        amount,
+                        data,
+                        operatorData
+                    )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canRedeem_2[0]).to.be.equal(false)
             expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
@@ -1495,77 +1559,78 @@ describe('ERC1410 Tests', () => {
             // Update blacklist
             await controlList.removeFromControlList(account_C)
             await controlList.addToControlList(account_E)
-            canRedeem_2 = await erc1410Facet.canRedeemByPartition(
-                account_E,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-
-            // redeem from with data fails
-            await expect(
-                erc1410Facet.operatorRedeemByPartition(
-                    _PARTITION_ID_1,
+            canRedeem_2 = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
                     account_E,
+                    _PARTITION_ID_1,
                     amount,
                     data,
                     operatorData
                 )
+
+            // redeem from with data fails
+            await expect(
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_E,
+                        amount,
+                        data,
+                        operatorData
+                    )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canRedeem_2[0]).to.be.equal(false)
             expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP)
         })
 
         it('GIVEN wrong partition WHEN transfer THEN transaction fails with InValidPartition', async () => {
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            const canTransfer = await erc1410Facet.canTransferByPartition(
-                account_C,
-                account_D,
-                _PARTITION_ID,
-                amount,
-                data,
-                operatorData
-            )
+            const canTransfer = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_C,
+                    account_D,
+                    _PARTITION_ID,
+                    amount,
+                    data,
+                    operatorData
+                )
             // transfer with data fails
             await expect(
-                erc1410Facet.transferByPartition(
-                    _PARTITION_ID,
-                    basicTransferInfo,
-                    data
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .transferByPartition(_PARTITION_ID, basicTransferInfo, data)
             ).to.be.rejectedWith('InvalidPartition')
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
         })
 
         it('GIVEN wrong partition WHEN redeem THEN transaction fails with InValidPartition', async () => {
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            const canRedeem = await erc1410Facet.canRedeemByPartition(
-                account_C,
-                _PARTITION_ID,
-                amount,
-                data,
-                operatorData
-            )
+            const canRedeem = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
+                    account_C,
+                    _PARTITION_ID,
+                    amount,
+                    data,
+                    operatorData
+                )
 
             // transfer with data fails
             await expect(
-                erc1410Facet.redeemByPartition(_PARTITION_ID, amount, data)
+                erc1410Facet
+                    .connect(signer_C)
+                    .redeemByPartition(_PARTITION_ID, amount, data)
             ).to.be.rejectedWith('InvalidPartition')
             expect(canRedeem[0]).to.be.equal(false)
             expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
         })
 
         it('GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-
             // add to list fails
             await expect(
-                erc1410Facet.issueByPartition({
+                erc1410Facet.connect(signer_C).issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_E,
                     value: amount,
@@ -1575,45 +1640,49 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN an account WHEN transfer more than its balance THEN transaction fails', async () => {
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-
             // transfer with data fails
-            const canTransfer = await erc1410Facet.canTransferByPartition(
-                account_C,
-                account_D,
-                _PARTITION_ID_1,
-                2 * balanceOf_C_Original,
-                data,
-                operatorData
-            )
+            const canTransfer = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_C,
+                    account_D,
+                    _PARTITION_ID_1,
+                    2 * balanceOf_C_Original,
+                    data,
+                    operatorData
+                )
             basicTransferInfo.value = 2 * balanceOf_C_Original
             await expect(
-                erc1410Facet.transferByPartition(
-                    _PARTITION_ID_1,
-                    basicTransferInfo,
-                    data
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        data
+                    )
             ).to.be.rejected
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
 
             // transfer from with data fails
-            erc1410Facet = erc1410Facet.connect(signer_E)
-            await erc1410Facet.authorizeOperator(account_C)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            const canTransfer_2 = await erc1410Facet.canTransferByPartition(
-                account_E,
-                account_D,
-                _PARTITION_ID_1,
-                2 * balanceOf_E_Original,
-                data,
-                operatorData
-            )
+            await erc1410Facet.connect(signer_E).authorizeOperator(account_C)
+
+            const canTransfer_2 = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_E,
+                    account_D,
+                    _PARTITION_ID_1,
+                    2 * balanceOf_E_Original,
+                    data,
+                    operatorData
+                )
 
             operatorTransferData.value = 2 * balanceOf_E_Original
             await expect(
-                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorTransferByPartition(operatorTransferData)
             ).to.be.rejected
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
@@ -1622,79 +1691,85 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN an account WHEN redeem more than its balance THEN transaction fails', async () => {
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-
             // transfer with data fails
-            const canRedeem = await erc1410Facet.canRedeemByPartition(
-                account_C,
-                _PARTITION_ID_1,
-                2 * balanceOf_C_Original,
-                data,
-                operatorData
-            )
-
-            await expect(
-                erc1410Facet.redeemByPartition(
+            const canRedeem = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
+                    account_C,
                     _PARTITION_ID_1,
                     2 * balanceOf_C_Original,
-                    data
+                    data,
+                    operatorData
                 )
+
+            await expect(
+                erc1410Facet
+                    .connect(signer_C)
+                    .redeemByPartition(
+                        _PARTITION_ID_1,
+                        2 * balanceOf_C_Original,
+                        data
+                    )
             ).to.be.rejected
             expect(canRedeem[0]).to.be.equal(false)
             expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
 
             // transfer from with data fails
-            await erc1410Facet.authorizeOperatorByPartition(
-                _PARTITION_ID_1,
-                account_E
-            )
-            erc1410Facet = erc1410Facet.connect(signer_E)
-            const canRedeem_2 = await erc1410Facet.canRedeemByPartition(
-                account_E,
-                _PARTITION_ID_1,
-                2 * balanceOf_C_Original,
-                data,
-                operatorData
-            )
-            await expect(
-                erc1410Facet.operatorRedeemByPartition(
+            await erc1410Facet
+                .connect(signer_C)
+                .authorizeOperatorByPartition(_PARTITION_ID_1, account_E)
+            const canRedeem_2 = await erc1410Facet
+                .connect(signer_E)
+                .canRedeemByPartition(
+                    account_E,
                     _PARTITION_ID_1,
-                    account_C,
                     2 * balanceOf_C_Original,
                     data,
                     operatorData
                 )
+            await expect(
+                erc1410Facet
+                    .connect(signer_E)
+                    .operatorRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_C,
+                        2 * balanceOf_C_Original,
+                        data,
+                        operatorData
+                    )
             ).to.be.rejected
             expect(canRedeem_2[0]).to.be.equal(false)
             expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
         })
 
         it('GIVEN an account WHEN transfer from address 0 THEN transaction fails', async () => {
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-
-            const canTransfer = await erc1410Facet.canTransferByPartition(
-                ADDRESS_ZERO,
-                account_D,
-                _PARTITION_ID_1,
-                balanceOf_E_Original,
-                data,
-                operatorData
-            )
+            const canTransfer = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    ADDRESS_ZERO,
+                    account_D,
+                    _PARTITION_ID_1,
+                    balanceOf_E_Original,
+                    data,
+                    operatorData
+                )
 
             operatorTransferData.from = ADDRESS_ZERO
             basicTransferInfo.to = ADDRESS_ZERO
 
             await expect(
-                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorTransferByPartition(operatorTransferData)
             ).to.be.rejected
             await expect(
-                erc1410Facet.transferByPartition(
-                    _PARTITION_ID_1,
-                    basicTransferInfo,
-                    data
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        data
+                    )
             ).to.be.rejected
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(
@@ -1703,24 +1778,26 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN an account WHEN redeem from address 0 THEN transaction fails', async () => {
-            // transfer from with data fails
-            erc1410Facet = erc1410Facet.connect(signer_E)
-            const canRedeem = await erc1410Facet.canRedeemByPartition(
-                ADDRESS_ZERO,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-            await erc1410Facet.authorizeOperator(account_C)
-            await expect(
-                erc1410Facet.operatorRedeemByPartition(
-                    _PARTITION_ID_1,
+            const canRedeem = await erc1410Facet
+                .connect(signer_E)
+                .canRedeemByPartition(
                     ADDRESS_ZERO,
-                    balanceOf_E_Original,
+                    _PARTITION_ID_1,
+                    amount,
                     data,
                     operatorData
                 )
+            await erc1410Facet.connect(signer_E).authorizeOperator(account_C)
+            await expect(
+                erc1410Facet
+                    .connect(signer_E)
+                    .operatorRedeemByPartition(
+                        _PARTITION_ID_1,
+                        ADDRESS_ZERO,
+                        balanceOf_E_Original,
+                        data,
+                        operatorData
+                    )
             ).to.be.rejected
             expect(canRedeem[0]).to.be.equal(false)
             expect(canRedeem[1]).to.be.equal(
@@ -1731,11 +1808,9 @@ describe('ERC1410 Tests', () => {
         it('GIVEN an account WHEN transfer THEN transaction succeeds', async () => {
             // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
             // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            equityFacet = equityFacet.connect(signer_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_C)
             // scheduling 2 snapshots
             const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
                 '2030-01-01T00:00:08Z'
@@ -1757,24 +1832,28 @@ describe('ERC1410 Tests', () => {
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
-            await equityFacet.setDividends(dividendData_1)
-            await equityFacet.setDividends(dividendData)
+            await equityFacet.connect(signer_C).setDividends(dividendData_1)
+            await equityFacet.connect(signer_C).setDividends(dividendData)
 
             //  transfer
-            const canTransfer = await erc1410Facet.canTransferByPartition(
-                account_C,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-            await expect(
-                erc1410Facet.transferByPartition(
+            const canTransfer = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
+                    account_C,
+                    account_D,
                     _PARTITION_ID_1,
-                    basicTransferInfo,
-                    data
+                    amount,
+                    data,
+                    operatorData
                 )
+            await expect(
+                erc1410Facet
+                    .connect(signer_C)
+                    .transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        data
+                    )
             )
                 .to.emit(erc1410Facet, 'TransferByPartition')
                 .withArgs(
@@ -1788,19 +1867,21 @@ describe('ERC1410 Tests', () => {
                 )
             expect(canTransfer[0]).to.be.equal(true)
             // transfer from
-            erc1410Facet = erc1410Facet.connect(signer_E)
-            await erc1410Facet.authorizeOperator(account_C)
-            const canTransfer_2 = await erc1410Facet.canTransferByPartition(
-                account_E,
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-            erc1410Facet = erc1410Facet.connect(signer_C)
+            await erc1410Facet.connect(signer_E).authorizeOperator(account_C)
+            const canTransfer_2 = await erc1410Facet
+                .connect(signer_E)
+                .canTransferByPartition(
+                    account_E,
+                    account_D,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
             await expect(
-                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorTransferByPartition(operatorTransferData)
             )
                 .to.emit(erc1410Facet, 'TransferByPartition')
                 .withArgs(
@@ -1876,11 +1957,13 @@ describe('ERC1410 Tests', () => {
 
             // transfer
             await expect(
-                erc1410Facet.transferByPartition(
-                    _PARTITION_ID_1,
-                    basicTransferInfo,
-                    data
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        data
+                    )
             )
                 .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 1)
@@ -1916,7 +1999,9 @@ describe('ERC1410 Tests', () => {
 
             // transfer From
             await expect(
-                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorTransferByPartition(operatorTransferData)
             )
                 .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 2)
@@ -1929,19 +2014,21 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN an account WHEN issue more than max supply THEN transaction fails with MaxSupplyReached or MaxSupplyReachedForPartition', async () => {
-            // Using account C (non role)
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CAP_ROLE, account_A)
-            erc1410Facet = erc1410Facet.connect(signer_A)
-            capFacet = await ethers.getContractAt('Cap', diamond.address)
-            capFacet = capFacet.connect(signer_A)
-            await capFacet.setMaxSupply(
-                balanceOf_C_Original + balanceOf_E_Original + 2 * amount
-            )
-            await capFacet.setMaxSupplyByPartition(
-                _PARTITION_ID_1,
-                balanceOf_C_Original + balanceOf_E_Original + amount
-            )
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CAP_ROLE, account_A)
+
+            await capFacet
+                .connect(signer_A)
+                .setMaxSupply(
+                    balanceOf_C_Original + balanceOf_E_Original + 2 * amount
+                )
+            await capFacet
+                .connect(signer_A)
+                .setMaxSupplyByPartition(
+                    _PARTITION_ID_1,
+                    balanceOf_C_Original + balanceOf_E_Original + amount
+                )
 
             // add to list fails
             await expect(
@@ -1966,11 +2053,10 @@ describe('ERC1410 Tests', () => {
         it('GIVEN an account WHEN issue THEN transaction succeeds', async () => {
             // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
             // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_A)
-            equityFacet = equityFacet.connect(signer_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_C)
+
             // scheduling 2 snapshots
             const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
                 '2030-01-01T00:00:08Z'
@@ -1991,12 +2077,12 @@ describe('ERC1410 Tests', () => {
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
-            await equityFacet.setDividends(dividendData_1)
-            await equityFacet.setDividends(dividendData)
+            await equityFacet.connect(signer_C).setDividends(dividendData_1)
+            await equityFacet.connect(signer_C).setDividends(dividendData)
 
             //  transfer
             await expect(
-                erc1410Facet.issueByPartition({
+                erc1410Facet.connect(signer_A).issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_D,
                     value: amount,
@@ -2035,17 +2121,21 @@ describe('ERC1410 Tests', () => {
             expect(dividend.snapshotId.toNumber()).to.equal(0)
 
             // Set Max supplies to test
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CAP_ROLE, account_A)
-            capFacet = await ethers.getContractAt('Cap', diamond.address)
-            capFacet = capFacet.connect(signer_A)
-            await capFacet.setMaxSupply(
-                balanceOf_C_Original + balanceOf_E_Original + 100 * amount
-            )
-            await capFacet.setMaxSupplyByPartition(
-                _PARTITION_ID_1,
-                balanceOf_C_Original + balanceOf_E_Original + 100 * amount
-            )
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CAP_ROLE, account_A)
+
+            await capFacet
+                .connect(signer_A)
+                .setMaxSupply(
+                    balanceOf_C_Original + balanceOf_E_Original + 100 * amount
+                )
+            await capFacet
+                .connect(signer_A)
+                .setMaxSupplyByPartition(
+                    _PARTITION_ID_1,
+                    balanceOf_C_Original + balanceOf_E_Original + 100 * amount
+                )
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
             await timeTravelFacet.changeSystemTimestamp(
@@ -2054,7 +2144,7 @@ describe('ERC1410 Tests', () => {
 
             // transfer
             await expect(
-                erc1410Facet.issueByPartition({
+                erc1410Facet.connect(signer_A).issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_D,
                     value: amount,
@@ -2073,12 +2163,10 @@ describe('ERC1410 Tests', () => {
 
         it('GIVEN an account WHEN redeem THEN transaction succeeds', async () => {
             // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            equityFacet = equityFacet.connect(signer_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_C)
+
             // scheduling 2 snapshots
             const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
                 '2030-01-01T00:00:08Z'
@@ -2099,20 +2187,24 @@ describe('ERC1410 Tests', () => {
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
-            await equityFacet.setDividends(dividendData_1)
-            await equityFacet.setDividends(dividendData)
+            await equityFacet.connect(signer_C).setDividends(dividendData_1)
+            await equityFacet.connect(signer_C).setDividends(dividendData)
 
             //  transfer
-            const canRedeem = await erc1410Facet.canRedeemByPartition(
-                account_C,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            const canRedeem = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
+                    account_C,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
             expect(canRedeem[0]).to.be.equal(true)
             await expect(
-                erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
+                erc1410Facet
+                    .connect(signer_C)
+                    .redeemByPartition(_PARTITION_ID_1, amount, data)
             )
                 .to.emit(erc1410Facet, 'RedeemedByPartition')
                 .withArgs(
@@ -2127,29 +2219,32 @@ describe('ERC1410 Tests', () => {
             let totalSupplyByPartition =
                 await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1)
             // transfer from
-            erc1410Facet = erc1410Facet.connect(signer_E)
-            await erc1410Facet.authorizeOperator(account_C)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            const canRedeem_2 = await erc1410Facet.canRedeemByPartition(
-                account_E,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
+            await erc1410Facet.connect(signer_E).authorizeOperator(account_C)
+
+            const canRedeem_2 = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
+                    account_E,
+                    _PARTITION_ID_1,
+                    amount,
+                    data,
+                    operatorData
+                )
             expect(canRedeem_2[0]).to.be.equal(true)
             expect(totalSupply).to.be.equal(
                 balanceOf_C_Original + balanceOf_E_Original - amount
             )
             expect(totalSupplyByPartition).to.be.equal(totalSupply)
             await expect(
-                erc1410Facet.operatorRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_E,
+                        amount,
+                        data,
+                        operatorData
+                    )
             )
                 .to.emit(erc1410Facet, 'RedeemedByPartition')
                 .withArgs(
@@ -2203,7 +2298,9 @@ describe('ERC1410 Tests', () => {
 
             // transfer
             await expect(
-                erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
+                erc1410Facet
+                    .connect(signer_C)
+                    .redeemByPartition(_PARTITION_ID_1, amount, data)
             )
                 .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 1)
@@ -2221,13 +2318,15 @@ describe('ERC1410 Tests', () => {
 
             // transfer From
             await expect(
-                erc1410Facet.operatorRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .operatorRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_E,
+                        amount,
+                        data,
+                        operatorData
+                    )
             )
                 .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 2)
@@ -2325,71 +2424,75 @@ describe('ERC1410 Tests', () => {
         })
 
         it('GIVEN an account without controller role WHEN controllerTransfer THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             const balanceOf_D_Original = 4 * amount
-            await erc1410Facet.issueByPartition({
+            await erc1410Facet.connect(signer_C).issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_D,
                 value: balanceOf_D_Original,
                 data: data,
             })
 
-            const canTransfer = await erc1410Facet.canTransferByPartition(
-                account_D,
-                account_E,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-
-            // controller transfer fails
-            await expect(
-                erc1410Facet.controllerTransferByPartition(
-                    _PARTITION_ID_1,
+            const canTransfer = await erc1410Facet
+                .connect(signer_C)
+                .canTransferByPartition(
                     account_D,
                     account_E,
+                    _PARTITION_ID_1,
                     amount,
                     data,
                     operatorData
                 )
+
+            // controller transfer fails
+            await expect(
+                erc1410Facet
+                    .connect(signer_C)
+                    .controllerTransferByPartition(
+                        _PARTITION_ID_1,
+                        account_D,
+                        account_E,
+                        amount,
+                        data,
+                        operatorData
+                    )
             ).to.be.rejectedWith('AccountHasNoRole')
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
         })
 
         it('GIVEN an account without controller role WHEN controllerRedeem THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             const balanceOf_D_Original = 4 * amount
 
-            await erc1410Facet.issueByPartition({
+            await erc1410Facet.connect(signer_C).issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_D,
                 value: balanceOf_D_Original,
                 data: '0x',
             })
 
-            const canRedeem = await erc1410Facet.canRedeemByPartition(
-                account_D,
-                _PARTITION_ID_1,
-                amount,
-                data,
-                operatorData
-            )
-
-            // controller redeem fails
-            await expect(
-                erc1410Facet.controllerRedeemByPartition(
-                    _PARTITION_ID_1,
+            const canRedeem = await erc1410Facet
+                .connect(signer_C)
+                .canRedeemByPartition(
                     account_D,
+                    _PARTITION_ID_1,
                     amount,
                     data,
                     operatorData
                 )
+
+            // controller redeem fails
+            await expect(
+                erc1410Facet
+                    .connect(signer_C)
+                    .controllerRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_D,
+                        amount,
+                        data,
+                        operatorData
+                    )
             ).to.be.rejectedWith('AccountHasNoRole')
             expect(canRedeem[0]).to.be.equal(false)
             expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS)
@@ -2406,19 +2509,18 @@ describe('ERC1410 Tests', () => {
                 account_C
             )
 
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-
             // controller transfer fails
             await expect(
-                erc1410Facet.controllerTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_D,
-                    account_E,
-                    amount,
-                    '0x',
-                    '0x'
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .controllerTransferByPartition(
+                        _PARTITION_ID_1,
+                        account_D,
+                        account_E,
+                        amount,
+                        '0x',
+                        '0x'
+                    )
             ).to.be.rejectedWith('TokenIsPaused')
         })
 
@@ -2433,34 +2535,36 @@ describe('ERC1410 Tests', () => {
                 account_C
             )
 
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-
             // remove document
             await expect(
-                erc1410Facet.controllerRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_D,
-                    amount,
-                    '0x',
-                    '0x'
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .controllerRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_D,
+                        amount,
+                        '0x',
+                        '0x'
+                    )
             ).to.be.rejectedWith('TokenIsPaused')
         })
 
         it('GIVEN an account with controller role WHEN controllerTransfer and controllerRedeem THEN transaction succeeds', async () => {
             // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            // Using account C (with role)
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            equityFacet = equityFacet.connect(signer_C)
+
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CONTROLLER_ROLE, account_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_C)
+
             // issueing 2 tokens to account D
             const balanceOf_D_Original = 4 * amount
-            await erc1410Facet.issueByPartition({
+            await erc1410Facet.connect(signer_C).issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_D,
                 value: balanceOf_D_Original,
@@ -2486,19 +2590,21 @@ describe('ERC1410 Tests', () => {
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
-            await equityFacet.setDividends(dividendData_1)
-            await equityFacet.setDividends(dividendData)
+            await equityFacet.connect(signer_C).setDividends(dividendData_1)
+            await equityFacet.connect(signer_C).setDividends(dividendData)
 
             // controller transfer
             await expect(
-                erc1410Facet.controllerTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_D,
-                    account_E,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .controllerTransferByPartition(
+                        _PARTITION_ID_1,
+                        account_D,
+                        account_E,
+                        amount,
+                        data,
+                        operatorData
+                    )
             )
                 .to.emit(erc1410Facet, 'TransferByPartition')
                 .withArgs(
@@ -2512,13 +2618,15 @@ describe('ERC1410 Tests', () => {
                 )
             // controller redeem
             await expect(
-                erc1410Facet.controllerRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .controllerRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_D,
+                        amount,
+                        data,
+                        operatorData
+                    )
             )
                 .to.emit(erc1410Facet, 'RedeemedByPartition')
                 .withArgs(
@@ -2559,14 +2667,16 @@ describe('ERC1410 Tests', () => {
 
             // controller transfer
             await expect(
-                erc1410Facet.controllerTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_D,
-                    account_E,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .controllerTransferByPartition(
+                        _PARTITION_ID_1,
+                        account_D,
+                        account_E,
+                        amount,
+                        data,
+                        operatorData
+                    )
             )
                 .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 1)
@@ -2584,13 +2694,15 @@ describe('ERC1410 Tests', () => {
 
             // controller redeem
             await expect(
-                erc1410Facet.controllerRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet
+                    .connect(signer_C)
+                    .controllerRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_D,
+                        amount,
+                        data,
+                        operatorData
+                    )
             )
                 .to.emit(snapshotsFacet, 'SnapshotTriggered')
                 .withArgs(account_C, 2)
@@ -2659,9 +2771,6 @@ describe('ERC1410 Tests', () => {
                     adjustDecimals
                 )
 
-                // scheduled two balance updates
-                equityFacet = equityFacet.connect(signer_B)
-
                 const balanceAdjustmentData = {
                     executionDate: dateToUnixTimestamp(
                         '2030-01-01T00:00:02Z'
@@ -2677,12 +2786,12 @@ describe('ERC1410 Tests', () => {
                     factor: adjustFactor,
                     decimals: adjustDecimals,
                 }
-                await equityFacet.setScheduledBalanceAdjustment(
-                    balanceAdjustmentData
-                )
-                await equityFacet.setScheduledBalanceAdjustment(
-                    balanceAdjustmentData_2
-                )
+                await equityFacet
+                    .connect(signer_B)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData)
+                await equityFacet
+                    .connect(signer_B)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData_2)
 
                 // wait for first scheduled balance adjustment only
                 await timeTravelFacet.changeSystemTimestamp(
@@ -2697,27 +2806,25 @@ describe('ERC1410 Tests', () => {
 
             describe('Issues', () => {
                 it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 IssueByPartition succeeds', async () => {
-                    // Granting Role to account C
-                    accessControlFacet = accessControlFacet.connect(signer_A)
-                    await accessControlFacet.grantRole(
-                        ADJUSTMENT_BALANCE_ROLE,
-                        account_C
-                    )
-                    await accessControlFacet.grantRole(CAP_ROLE, account_A)
-                    await accessControlFacet.grantRole(KYC_ROLE, account_A)
+                    await accessControlFacet
+                        .connect(signer_A)
+                        .grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
+                    await accessControlFacet
+                        .connect(signer_A)
+                        .grantRole(CAP_ROLE, account_A)
+                    await accessControlFacet
+                        .connect(signer_A)
+                        .grantRole(KYC_ROLE, account_A)
 
                     await grantKycToAccounts()
 
-                    // Using account C (with role)
-                    adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-                    erc1410Facet = erc1410Facet.connect(signer_A)
-                    await erc1410Facet.issueByPartition({
+                    await erc1410Facet.connect(signer_A).issueByPartition({
                         partition: _PARTITION_ID_1,
                         tokenHolder: account_A,
                         value: balanceOf_A_Original[0],
                         data: '0x',
                     })
-                    await erc1410Facet.issueByPartition({
+                    await erc1410Facet.connect(signer_A).issueByPartition({
                         partition: _PARTITION_ID,
                         tokenHolder: account_A,
                         value: balanceOf_A_Original[1],
@@ -2733,12 +2840,11 @@ describe('ERC1410 Tests', () => {
                         )
 
                     // adjustBalances
-                    await adjustBalancesFacet.adjustBalances(
-                        adjustFactor,
-                        adjustDecimals
-                    )
+                    await adjustBalancesFacet
+                        .connect(signer_C)
+                        .adjustBalances(adjustFactor, adjustDecimals)
                     // issue after adjust
-                    await erc1410Facet.issueByPartition({
+                    await erc1410Facet.connect(signer_A).issueByPartition({
                         partition: _PARTITION_ID_1,
                         tokenHolder: account_A,
                         value: balanceOf_A_Original[0],
@@ -3182,27 +3288,21 @@ describe('ERC1410 Tests', () => {
 
         describe('Issues', async () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 Issue succeeds', async () => {
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    ADJUSTMENT_BALANCE_ROLE,
-                    account_C
-                )
-                await accessControlFacet.grantRole(CAP_ROLE, account_A)
-                await accessControlFacet.grantRole(KYC_ROLE, account_A)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CAP_ROLE, account_A)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(KYC_ROLE, account_A)
 
                 await grantKycToAccounts()
 
-                // Using account C (with role)
-                adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-                erc1410Facet = erc1410Facet.connect(signer_A)
-                erc1594Facet = erc1594Facet.connect(signer_A)
-
-                await erc1594Facet.issue(
-                    account_A,
-                    balanceOf_A_Original[0],
-                    '0x'
-                )
+                await erc1594Facet
+                    .connect(signer_A)
+                    .issue(account_A, balanceOf_A_Original[0], '0x')
 
                 const balanceOf_A_Before =
                     await erc1410Facet.balanceOf(account_A)
@@ -3213,17 +3313,14 @@ describe('ERC1410 Tests', () => {
                     )
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 // issue after adjust
-                await erc1594Facet.issue(
-                    account_A,
-                    balanceOf_A_Original[0],
-                    '0x'
-                )
+                await erc1594Facet
+                    .connect(signer_A)
+                    .issue(account_A, balanceOf_A_Original[0], '0x')
 
                 const balanceOf_A_After =
                     await erc1410Facet.balanceOf(account_A)
@@ -3246,40 +3343,36 @@ describe('ERC1410 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 Issue with max supply succeeds', async () => {
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    ADJUSTMENT_BALANCE_ROLE,
-                    account_C
-                )
-                await accessControlFacet.grantRole(CAP_ROLE, account_A)
-                await accessControlFacet.grantRole(KYC_ROLE, account_A)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CAP_ROLE, account_A)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(KYC_ROLE, account_A)
 
                 await grantKycToAccounts()
 
-                // Using account C (with role)
-                adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-                erc1410Facet = erc1410Facet.connect(signer_A)
-                erc1594Facet = erc1594Facet.connect(signer_A)
-                capFacet = capFacet.connect(signer_A)
+                await capFacet
+                    .connect(signer_A)
+                    .setMaxSupply(balanceOf_A_Original[1])
 
-                await capFacet.setMaxSupply(balanceOf_A_Original[1])
-
-                await erc1594Facet.issue(
-                    account_A,
-                    balanceOf_A_Original[0],
-                    '0x'
-                )
+                await erc1594Facet
+                    .connect(signer_A)
+                    .issue(account_A, balanceOf_A_Original[0], '0x')
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 // issue after adjust
                 await expect(
-                    erc1594Facet.issue(account_A, balanceOf_A_Original[0], '0x')
+                    erc1594Facet
+                        .connect(signer_A)
+                        .issue(account_A, balanceOf_A_Original[0], '0x')
                 )
                     .to.emit(erc1594Facet, 'Issued')
                     .withArgs(
@@ -3305,14 +3398,15 @@ describe('ERC1410 Tests', () => {
                 )
 
                 // Transaction Partition 1
-                erc1644Facet = erc1644Facet.connect(signer_A)
-                await erc1644Facet.controllerTransfer(
-                    account_A,
-                    account_B,
-                    amount,
-                    '0x',
-                    '0x'
-                )
+                await erc1644Facet
+                    .connect(signer_A)
+                    .controllerTransfer(
+                        account_A,
+                        account_B,
+                        amount,
+                        '0x',
+                        '0x'
+                    )
 
                 // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
@@ -3333,8 +3427,9 @@ describe('ERC1410 Tests', () => {
                 )
 
                 // Transaction Partition 1
-                erc1594Facet = erc1594Facet.connect(signer_A)
-                await erc1594Facet.transferWithData(account_B, amount, '0x')
+                await erc1594Facet
+                    .connect(signer_A)
+                    .transferWithData(account_B, amount, '0x')
 
                 // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
@@ -3345,8 +3440,7 @@ describe('ERC1410 Tests', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 transferFromWithData succeeds', async () => {
                 await setPreBalanceAdjustment(true)
 
-                erc20Facet = erc20Facet.connect(signer_A)
-                await erc20Facet.approve(account_A, amount)
+                await erc20Facet.connect(signer_A).approve(account_A, amount)
 
                 // Before Values
                 const before = await getBalanceAdjustedValues()
@@ -3358,13 +3452,9 @@ describe('ERC1410 Tests', () => {
                 )
 
                 // Transaction Partition 1
-                erc1594Facet = erc1594Facet.connect(signer_A)
-                await erc1594Facet.transferFromWithData(
-                    account_A,
-                    account_B,
-                    amount,
-                    '0x'
-                )
+                await erc1594Facet
+                    .connect(signer_A)
+                    .transferFromWithData(account_A, account_B, amount, '0x')
 
                 // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
@@ -3375,8 +3465,7 @@ describe('ERC1410 Tests', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 transferFromWithData with expected allowance amount succeeds', async () => {
                 await setPreBalanceAdjustment(true)
 
-                erc20Facet = erc20Facet.connect(signer_A)
-                await erc20Facet.approve(account_A, amount)
+                await erc20Facet.connect(signer_A).approve(account_A, amount)
 
                 // Before Values
                 const before = await getBalanceAdjustedValues()
@@ -3390,13 +3479,14 @@ describe('ERC1410 Tests', () => {
                 const expectedAllowance = amount * adjustFactor
 
                 // Transaction Partition 1
-                erc1594Facet = erc1594Facet.connect(signer_A)
-                await erc1594Facet.transferFromWithData(
-                    account_A,
-                    account_B,
-                    expectedAllowance,
-                    '0x'
-                )
+                await erc1594Facet
+                    .connect(signer_A)
+                    .transferFromWithData(
+                        account_A,
+                        account_B,
+                        expectedAllowance,
+                        '0x'
+                    )
 
                 // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
@@ -3415,14 +3505,10 @@ describe('ERC1410 Tests', () => {
                     adjustDecimals
                 )
 
-                erc1594Facet = erc1594Facet.connect(signer_A)
-
                 expect(
-                    await erc1594Facet.canTransfer(
-                        account_B,
-                        adjustFactor * amount,
-                        '0x'
-                    )
+                    await erc1594Facet
+                        .connect(signer_A)
+                        .canTransfer(account_B, adjustFactor * amount, '0x')
                 ).to.be.deep.equal([
                     true,
                     EIP1066_CODES.SUCCESS,
@@ -3458,8 +3544,7 @@ describe('ERC1410 Tests', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferFrom succeeds', async () => {
                 await setPreBalanceAdjustment(true)
 
-                erc20Facet = erc20Facet.connect(signer_A)
-                await erc20Facet.approve(account_A, amount)
+                await erc20Facet.connect(signer_A).approve(account_A, amount)
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3467,15 +3552,15 @@ describe('ERC1410 Tests', () => {
                     adjustDecimals
                 )
 
-                erc1594Facet = erc1594Facet.connect(signer_A)
-
                 expect(
-                    await erc1594Facet.canTransferFrom(
-                        account_A,
-                        account_B,
-                        adjustFactor * amount,
-                        '0x'
-                    )
+                    await erc1594Facet
+                        .connect(signer_A)
+                        .canTransferFrom(
+                            account_A,
+                            account_B,
+                            adjustFactor * amount,
+                            '0x'
+                        )
                 ).to.be.deep.equal([
                     true,
                     EIP1066_CODES.SUCCESS,
@@ -3496,8 +3581,7 @@ describe('ERC1410 Tests', () => {
                 )
 
                 // Transaction Partition 1
-                erc20Facet = erc20Facet.connect(signer_A)
-                await erc20Facet.transfer(account_B, amount)
+                await erc20Facet.connect(signer_A).transfer(account_B, amount)
 
                 // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
@@ -3510,8 +3594,9 @@ describe('ERC1410 Tests', () => {
 
                 const before = await getBalanceAdjustedValues()
 
-                erc20Facet = erc20Facet.connect(signer_A)
-                await erc20Facet.approve(account_B, before.balanceOf_A)
+                await erc20Facet
+                    .connect(signer_A)
+                    .approve(account_B, before.balanceOf_A)
 
                 // Before Values
 
@@ -3521,15 +3606,12 @@ describe('ERC1410 Tests', () => {
                     adjustDecimals
                 )
 
-                erc20Facet = erc20Facet.connect(signer_B)
                 // Transaction Partition 1 with updated balance
                 const updatedBalance = before.balanceOf_A.mul(adjustFactor)
 
-                await erc20Facet.transferFrom(
-                    account_A,
-                    account_B,
-                    updatedBalance
-                )
+                await erc20Facet
+                    .connect(signer_B)
+                    .transferFrom(account_A, account_B, updatedBalance)
 
                 // // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
@@ -3602,9 +3684,8 @@ describe('ERC1410 Tests', () => {
                 )
 
                 // Transaction Partition 1
-                erc1594Facet = erc1594Facet.connect(signer_A)
 
-                await erc1594Facet.redeem(amount, '0x')
+                await erc1594Facet.connect(signer_A).redeem(amount, '0x')
 
                 // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
@@ -3624,9 +3705,9 @@ describe('ERC1410 Tests', () => {
                 const adjustAmount = amount * adjustFactor
 
                 // Transaction Partition 1
-                erc1594Facet = erc1594Facet.connect(signer_A)
-
-                await expect(erc1594Facet.redeem(adjustAmount, '0x'))
+                await expect(
+                    erc1594Facet.connect(signer_A).redeem(adjustAmount, '0x')
+                )
                     .to.emit(erc1594Facet, 'Redeemed')
                     .withArgs(ADDRESS_ZERO, account_A, adjustAmount, '0x')
             })
@@ -3634,8 +3715,7 @@ describe('ERC1410 Tests', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom succeeds', async () => {
                 await setPreBalanceAdjustment(true)
 
-                erc20Facet = erc20Facet.connect(signer_A)
-                await erc20Facet.approve(account_A, amount)
+                await erc20Facet.connect(signer_A).approve(account_A, amount)
 
                 // Before Values
                 const before = await getBalanceAdjustedValues()
@@ -3647,9 +3727,9 @@ describe('ERC1410 Tests', () => {
                 )
 
                 // Transaction Partition 1
-                erc1594Facet = erc1594Facet.connect(signer_A)
-
-                await erc1594Facet.redeemFrom(account_A, amount, '0x')
+                await erc1594Facet
+                    .connect(signer_A)
+                    .redeemFrom(account_A, amount, '0x')
 
                 // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
@@ -3660,8 +3740,7 @@ describe('ERC1410 Tests', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom with the expected adjusted amount succeeds', async () => {
                 await setPreBalanceAdjustment(true)
 
-                erc20Facet = erc20Facet.connect(signer_A)
-                await erc20Facet.approve(account_A, amount)
+                await erc20Facet.connect(signer_A).approve(account_A, amount)
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3672,10 +3751,10 @@ describe('ERC1410 Tests', () => {
                 const adjustAmount = amount * adjustFactor
 
                 // Transaction Partition 1
-                erc1594Facet = erc1594Facet.connect(signer_A)
-
                 await expect(
-                    erc1594Facet.redeemFrom(account_A, adjustAmount, '0x')
+                    erc1594Facet
+                        .connect(signer_A)
+                        .redeemFrom(account_A, adjustAmount, '0x')
                 )
                     .to.emit(erc1594Facet, 'Redeemed')
                     .withArgs(account_A, account_A, adjustAmount, '0x')
@@ -3686,14 +3765,11 @@ describe('ERC1410 Tests', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 allowance succeeds', async () => {
                 await setPreBalanceAdjustment(true)
 
-                erc20Facet = erc20Facet.connect(signer_A)
+                await erc20Facet.connect(signer_A).approve(account_B, amount)
 
-                await erc20Facet.approve(account_B, amount)
-
-                const allowance_Before = await erc20Facet.allowance(
-                    account_A,
-                    account_B
-                )
+                const allowance_Before = await erc20Facet
+                    .connect(signer_A)
+                    .allowance(account_A, account_B)
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3701,10 +3777,9 @@ describe('ERC1410 Tests', () => {
                     adjustDecimals
                 )
 
-                const allowance_After = await erc20Facet.allowance(
-                    account_A,
-                    account_B
-                )
+                const allowance_After = await erc20Facet
+                    .connect(signer_A)
+                    .allowance(account_A, account_B)
 
                 expect(allowance_After).to.be.equal(
                     allowance_Before.mul(adjustFactor)
@@ -3714,15 +3789,12 @@ describe('ERC1410 Tests', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 increaseAllowance succeeds', async () => {
                 await setPreBalanceAdjustment(true)
 
-                erc20Facet = erc20Facet.connect(signer_A)
-
                 // APPROVE 1
-                await erc20Facet.approve(account_B, amount)
+                await erc20Facet.connect(signer_A).approve(account_B, amount)
 
-                const allowance_Before = await erc20Facet.allowance(
-                    account_A,
-                    account_B
-                )
+                const allowance_Before = await erc20Facet
+                    .connect(signer_A)
+                    .allowance(account_A, account_B)
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3731,12 +3803,13 @@ describe('ERC1410 Tests', () => {
                 )
 
                 // APPROVE 2
-                await erc20Facet.increaseAllowance(account_B, amount)
+                await erc20Facet
+                    .connect(signer_A)
+                    .increaseAllowance(account_B, amount)
 
-                const allowance_After = await erc20Facet.allowance(
-                    account_A,
-                    account_B
-                )
+                const allowance_After = await erc20Facet
+                    .connect(signer_A)
+                    .allowance(account_A, account_B)
 
                 expect(allowance_After).to.be.equal(
                     allowance_Before.mul(adjustFactor).add(amount)
@@ -3746,15 +3819,12 @@ describe('ERC1410 Tests', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 decreaseAllowance succeeds', async () => {
                 await setPreBalanceAdjustment(true)
 
-                erc20Facet = erc20Facet.connect(signer_A)
-
                 // APPROVE 1
-                await erc20Facet.approve(account_B, amount)
+                await erc20Facet.connect(signer_A).approve(account_B, amount)
 
-                const allowance_Before = await erc20Facet.allowance(
-                    account_A,
-                    account_B
-                )
+                const allowance_Before = await erc20Facet
+                    .connect(signer_A)
+                    .allowance(account_A, account_B)
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3763,15 +3833,13 @@ describe('ERC1410 Tests', () => {
                 )
 
                 // APPROVE 2
-                await erc20Facet.decreaseAllowance(
-                    account_B,
-                    allowance_Before.add(amount)
-                )
+                await erc20Facet
+                    .connect(signer_A)
+                    .decreaseAllowance(account_B, allowance_Before.add(amount))
 
-                const allowance_After = await erc20Facet.allowance(
-                    account_A,
-                    account_B
-                )
+                const allowance_After = await erc20Facet
+                    .connect(signer_A)
+                    .allowance(account_A, account_B)
 
                 expect(allowance_After).to.be.equal(
                     allowance_Before

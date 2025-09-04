@@ -88,7 +88,7 @@ export const HoldCreate = () => {
 
     const baseRequest = {
       amount: amount.toString(),
-      escrow: escrowAccount.toString(),
+      escrowId: escrowAccount.toString(),
       expirationDate: dateToUnixTimestamp(expirationDate),
       partitionId: DEFAULT_PARTITION,
       securityId,

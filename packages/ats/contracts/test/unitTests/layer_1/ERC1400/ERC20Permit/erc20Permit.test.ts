@@ -392,10 +392,10 @@ describe('ERC20Permit Tests', () => {
 
             it('GIVEN a blocked owner account WHEN permit is called THEN the transaction fails with AccountIsBlocked', async () => {
                 // Blacklisting accounts
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-                controlList = controlList.connect(signer_A)
-                await controlList.addToControlList(account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CONTROL_LIST_ROLE, account_A)
+                await controlList.connect(signer_A).addToControlList(account_C)
 
                 await expect(
                     erc20PermitFacet.permit(
@@ -414,10 +414,10 @@ describe('ERC20Permit Tests', () => {
             })
 
             it('GIVEN a blocked spender account WHEN permit is called THEN the transaction fails with AccountIsBlocked', async () => {
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
-                controlList = controlList.connect(signer_A)
-                await controlList.addToControlList(account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CONTROL_LIST_ROLE, account_A)
+                await controlList.connect(signer_A).addToControlList(account_C)
 
                 await expect(
                     erc20PermitFacet.permit(

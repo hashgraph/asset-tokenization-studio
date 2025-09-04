@@ -656,7 +656,7 @@ describe('ValidationService', () => {
 
   describe('checkCanTransfer', () => {
     it('should work when transfer is possible', async () => {
-      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x01' });
+      queryBusMock.execute.mockResolvedValueOnce({ payload: ['0x01', 'test'] });
 
       await expect(
         service.checkCanTransfer(
@@ -702,7 +702,7 @@ describe('ValidationService', () => {
 
   describe('checkCanRedeem', () => {
     it('should work when redeem', async () => {
-      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x01' });
+      queryBusMock.execute.mockResolvedValueOnce({ payload: ['0x01', 'test'] });
 
       await expect(
         service.checkCanRedeem(
@@ -710,7 +710,6 @@ describe('ValidationService', () => {
           sourceId.value,
           amount.value.toString(),
           partitionId.value,
-          operatorId.value,
         ),
       ).resolves.toBeUndefined();
 
@@ -737,7 +736,6 @@ describe('ValidationService', () => {
           sourceId.value,
           partitionId.value,
           amount.value.toString(),
-          operatorId.value,
         ),
       ).rejects.toThrow('Transfer failed');
     });

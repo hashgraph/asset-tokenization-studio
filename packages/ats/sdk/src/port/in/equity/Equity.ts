@@ -328,9 +328,9 @@ class EquityInPort implements IEquityInPort {
     ValidatedRequest.handleValidation('CreateEquityRequest', req);
     const {
       diamondOwnerAccount,
-      externalPauses,
-      externalControlLists,
-      externalKycLists,
+      externalPausesIds,
+      externalControlListsIds,
+      externalKycListsIds,
     } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
@@ -376,9 +376,9 @@ class EquityInPort implements IEquityInPort {
         req.configId,
         req.configVersion,
         diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
+        externalPausesIds,
+        externalControlListsIds,
+        externalKycListsIds,
         req.complianceId,
         req.identityRegistryId,
       ),

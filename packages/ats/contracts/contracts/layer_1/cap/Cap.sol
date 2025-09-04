@@ -208,13 +208,9 @@ pragma solidity 0.8.18;
 
 import {ICap} from '../interfaces/cap/ICap.sol';
 import {_CAP_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {Common} from '../common/Common.sol';
 
-contract Cap is ICap, IStaticFunctionSelectors, Common {
+abstract contract Cap is ICap, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
         uint256 maxSupply,
@@ -280,46 +276,5 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         bytes32 _partition
     ) external view override returns (uint256 maxSupply_) {
         return _getMaxSupplyByPartitionAdjusted(_partition);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _CAP_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_Cap
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setMaxSupply.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setMaxSupplyByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getMaxSupply.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getMaxSupplyByPartition
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ICap).interfaceId;
     }
 }

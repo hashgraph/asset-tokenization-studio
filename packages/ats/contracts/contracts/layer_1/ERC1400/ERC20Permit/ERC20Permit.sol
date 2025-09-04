@@ -210,15 +210,11 @@ pragma solidity 0.8.18;
 import {Common} from '../../common/Common.sol';
 import {IERC20Permit} from '../../interfaces/ERC1400/IERC20Permit.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC20PERMIT_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {
     _CONTRACT_NAME_ERC20PERMIT,
     _CONTRACT_VERSION_ERC20PERMIT
 } from '../../constants/values.sol';
 
-contract ERC20Permit is IERC20Permit, IStaticFunctionSelectors, Common {
+abstract contract ERC20Permit is IERC20Permit, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20Permit()
         external
@@ -261,43 +257,5 @@ contract ERC20Permit is IERC20Permit, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view override returns (bytes32) {
         return _DOMAIN_SEPARATOR();
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC20PERMIT_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](4);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC20Permit
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.permit.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.nonces.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .DOMAIN_SEPARATOR
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC20Permit).interfaceId;
     }
 }
