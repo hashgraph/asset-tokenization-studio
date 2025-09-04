@@ -338,12 +338,11 @@ describe('Corporate Actions Tests', () => {
     })
 
     it('GIVEN an account without corporateActions role WHEN addCorporateAction THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non role)
-        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
-
         // add to list fails
         await expect(
-            corporateActionsFacet.addCorporateAction(actionType, actionData)
+            corporateActionsFacet
+                .connect(signer_C)
+                .addCorporateAction(actionType, actionData)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
@@ -358,24 +357,22 @@ describe('Corporate Actions Tests', () => {
             account_C
         )
 
-        // Using account C (with role)
-        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
-
         // add to list fails
         await expect(
-            corporateActionsFacet.addCorporateAction(actionType, actionData)
+            corporateActionsFacet
+                .connect(signer_C)
+                .addCorporateAction(actionType, actionData)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN an account with corporateActions role WHEN addCorporateAction THEN transaction succeeds', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-        // Using account C (with role)
-        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
-
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(CORPORATE_ACTION_ROLE, account_C)
         // add to list
-        await corporateActionsFacet.addCorporateAction(actionType, actionData)
+        await corporateActionsFacet
+            .connect(signer_C)
+            .addCorporateAction(actionType, actionData)
 
         // check list members
         const listCount = await corporateActionsFacet.getCorporateActionCount()

@@ -3317,19 +3317,12 @@ describe('Clearing Tests', () => {
 
         describe('Balance Adjustments', () => {
             async function setPreBalanceAdjustment() {
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    ADJUSTMENT_BALANCE_ROLE,
-                    account_C
-                )
-                await accessControlFacet.grantRole(
-                    CORPORATE_ACTION_ROLE,
-                    account_A
-                )
-
-                // Using account C (with role)
-                adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CORPORATE_ACTION_ROLE, account_A)
             }
 
             it('GIVEN a clearing WHEN adjustBalances THEN clearing amount gets updated succeeds', async () => {
@@ -3427,14 +3420,11 @@ describe('Clearing Tests', () => {
                     )
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 // scheduled two balance updates
-                equityFacet = equityFacet.connect(signer_A)
-
                 const balanceAdjustmentData = {
                     executionDate: dateToUnixTimestamp(
                         '2030-01-01T00:00:02Z'
@@ -3450,12 +3440,12 @@ describe('Clearing Tests', () => {
                     factor: adjustFactor,
                     decimals: adjustDecimals,
                 }
-                await equityFacet.setScheduledBalanceAdjustment(
-                    balanceAdjustmentData
-                )
-                await equityFacet.setScheduledBalanceAdjustment(
-                    balanceAdjustmentData_2
-                )
+                await equityFacet
+                    .connect(signer_A)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData)
+                await equityFacet
+                    .connect(signer_A)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData_2)
 
                 // wait for first scheduled balance adjustment only
                 await timeTravelFacet.changeSystemTimestamp(
@@ -3606,10 +3596,9 @@ describe('Clearing Tests', () => {
                     await holdFacet.getHeldAmountFor(account_A)
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 // APPROVE CLEARINGS
                 for (let opTypeId = 1; opTypeId <= 3; opTypeId++) {
@@ -3800,10 +3789,9 @@ describe('Clearing Tests', () => {
                     await holdFacet.getHeldAmountFor(account_A)
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 // CANCEL CLEARINGS
                 for (let opTypeId = 1; opTypeId <= 3; opTypeId++) {
@@ -3982,10 +3970,9 @@ describe('Clearing Tests', () => {
                     await holdFacet.getHeldAmountFor(account_A)
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 await timeTravelFacet.changeSystemTimestamp(
                     clearingOperation.expirationTimestamp + 1
@@ -4156,10 +4143,9 @@ describe('Clearing Tests', () => {
                     )
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 // CLEARING AFTER BALANCE ADJUSTMENT
                 // CLEARING TRANSFER

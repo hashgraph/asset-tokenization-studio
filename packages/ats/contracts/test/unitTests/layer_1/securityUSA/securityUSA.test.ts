@@ -207,13 +207,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
-import {
-    type ResolverProxy,
-    type EquityUSA,
-    type BondUSARead,
-    BusinessLogicResolver,
-    IFactory,
-} from '@typechain'
+import { type BondUSARead, BusinessLogicResolver, IFactory } from '@typechain'
 import {
     Rbac,
     deployBondFromFactory,
@@ -241,7 +235,6 @@ let maturityDate = startingDate + numberOfCoupons * frequency
 let firstCouponDate = startingDate + 1
 
 describe('Security USA Tests', () => {
-    let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
 
@@ -249,7 +242,6 @@ describe('Security USA Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let equityUSAFacet: EquityUSA
     let bondUSAFacet: BondUSARead
 
     before(async () => {
@@ -282,7 +274,7 @@ describe('Security USA Tests', () => {
 
     describe('equity USA', () => {
         it('Given regulation type REG_S and subtype NONE WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            diamond = await deployEquityFromFactory({
+            const diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
                 isWhiteList: false,
                 isControllable: true,
@@ -315,13 +307,11 @@ describe('Security USA Tests', () => {
                 factory,
             })
 
-            equityUSAFacet = await ethers.getContractAt(
+            const equityUSAFacet = await ethers.getContractAt(
                 'EquityUSA',
-                diamond.address
+                diamond.address,
+                signer_B
             )
-            // Using account C (non role)
-            equityUSAFacet = equityUSAFacet.connect(signer_B)
-
             // retrieve security regulation data
             const regulation = await equityUSAFacet.getSecurityRegulationData()
 
@@ -358,7 +348,7 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_B WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            diamond = await deployEquityFromFactory({
+            const diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
                 isWhiteList: false,
                 isControllable: true,
@@ -391,12 +381,11 @@ describe('Security USA Tests', () => {
                 factory,
             })
 
-            equityUSAFacet = await ethers.getContractAt(
+            const equityUSAFacet = await ethers.getContractAt(
                 'EquityUSA',
-                diamond.address
+                diamond.address,
+                signer_B
             )
-            // Using account C (non role)
-            equityUSAFacet = equityUSAFacet.connect(signer_B)
 
             // retrieve security regulation data
             const regulation = await equityUSAFacet.getSecurityRegulationData()
@@ -434,7 +423,7 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_C WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            diamond = await deployEquityFromFactory({
+            const diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
                 isWhiteList: false,
                 isControllable: true,
@@ -467,12 +456,11 @@ describe('Security USA Tests', () => {
                 factory,
             })
 
-            equityUSAFacet = await ethers.getContractAt(
+            const equityUSAFacet = await ethers.getContractAt(
                 'EquityUSA',
-                diamond.address
+                diamond.address,
+                signer_B
             )
-            // Using account C (non role)
-            equityUSAFacet = equityUSAFacet.connect(signer_B)
 
             // retrieve security regulation data
             const regulation = await equityUSAFacet.getSecurityRegulationData()
@@ -512,7 +500,7 @@ describe('Security USA Tests', () => {
 
     describe('bond USA', () => {
         it('Given regulation type REG_S and subtype NONE WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            diamond = await deployBondFromFactory({
+            const diamond = await deployBondFromFactory({
                 adminAccount: account_A,
                 isWhiteList: false,
                 isControllable: true,
@@ -546,8 +534,6 @@ describe('Security USA Tests', () => {
                 'BondUSARead',
                 diamond.address
             )
-            // Using account C (non role)
-            bondUSAFacet = bondUSAFacet.connect(signer_B)
 
             // retrieve security regulation data
             const regulation = await bondUSAFacet.getSecurityRegulationData()
@@ -585,7 +571,7 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_B WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            diamond = await deployBondFromFactory({
+            const diamond = await deployBondFromFactory({
                 adminAccount: account_A,
                 isWhiteList: false,
                 isControllable: true,
@@ -619,9 +605,6 @@ describe('Security USA Tests', () => {
                 'BondUSARead',
                 diamond.address
             )
-            // Using account C (non role)
-            bondUSAFacet = bondUSAFacet.connect(signer_B)
-
             // retrieve security regulation data
             const regulation = await bondUSAFacet.getSecurityRegulationData()
 
@@ -658,7 +641,7 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_C WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            diamond = await deployBondFromFactory({
+            const diamond = await deployBondFromFactory({
                 adminAccount: account_A,
                 isWhiteList: false,
                 isControllable: true,
@@ -692,9 +675,6 @@ describe('Security USA Tests', () => {
                 'BondUSARead',
                 diamond.address
             )
-            // Using account C (non role)
-            bondUSAFacet = bondUSAFacet.connect(signer_B)
-
             // retrieve security regulation data
             const regulation = await bondUSAFacet.getSecurityRegulationData()
 

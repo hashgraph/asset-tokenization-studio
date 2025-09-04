@@ -926,13 +926,14 @@ describe('Lock Tests', () => {
                     )
 
                 // LOCK
-                lockFacet = lockFacet.connect(signer_A)
-                await lockFacet.lockByPartition(
-                    _PARTITION_ID_1,
-                    _AMOUNT,
-                    account_A,
-                    dateToUnixTimestamp('2030-01-01T00:00:01Z')
-                )
+                await lockFacet
+                    .connect(signer_A)
+                    .lockByPartition(
+                        _PARTITION_ID_1,
+                        _AMOUNT,
+                        account_A,
+                        dateToUnixTimestamp('2030-01-01T00:00:01Z')
+                    )
 
                 const lock_TotalAmount_Before =
                     await lockFacet.getLockedAmountFor(account_A)
@@ -954,8 +955,6 @@ describe('Lock Tests', () => {
                 )
 
                 // scheduled two balance updates
-                equityFacet = equityFacet.connect(signer_B)
-
                 const balanceAdjustmentData = {
                     executionDate: dateToUnixTimestamp(
                         '2030-01-01T00:00:02Z'
@@ -971,12 +970,12 @@ describe('Lock Tests', () => {
                     factor: adjustFactor,
                     decimals: adjustDecimals,
                 }
-                await equityFacet.setScheduledBalanceAdjustment(
-                    balanceAdjustmentData
-                )
-                await equityFacet.setScheduledBalanceAdjustment(
-                    balanceAdjustmentData_2
-                )
+                await equityFacet
+                    .connect(signer_B)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData)
+                await equityFacet
+                    .connect(signer_B)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData_2)
 
                 // wait for first scheduled balance adjustment only
                 await timeTravelFacet.changeSystemTimestamp(
@@ -1040,19 +1039,22 @@ describe('Lock Tests', () => {
                     await ethers.provider.getBlock('latest')
                 ).timestamp
 
-                lockFacet = lockFacet.connect(signer_A)
-                await lockFacet.lockByPartition(
-                    _PARTITION_ID_1,
-                    _AMOUNT,
-                    account_A,
-                    currentTimestamp + ONE_SECOND
-                )
-                await lockFacet.lockByPartition(
-                    _PARTITION_ID_1,
-                    _AMOUNT,
-                    account_A,
-                    currentTimestamp + 100 * ONE_SECOND
-                )
+                await lockFacet
+                    .connect(signer_A)
+                    .lockByPartition(
+                        _PARTITION_ID_1,
+                        _AMOUNT,
+                        account_A,
+                        currentTimestamp + ONE_SECOND
+                    )
+                await lockFacet
+                    .connect(signer_A)
+                    .lockByPartition(
+                        _PARTITION_ID_1,
+                        _AMOUNT,
+                        account_A,
+                        currentTimestamp + 100 * ONE_SECOND
+                    )
 
                 const locked_Amount_Before =
                     await lockFacet.getLockedAmountFor(account_A)
@@ -1073,11 +1075,9 @@ describe('Lock Tests', () => {
                     (await ethers.provider.getBlock('latest')).timestamp +
                         2 * ONE_SECOND
                 )
-                await lockFacet.releaseByPartition(
-                    _PARTITION_ID_1,
-                    1,
-                    account_A
-                )
+                await lockFacet
+                    .connect(signer_A)
+                    .releaseByPartition(_PARTITION_ID_1, 1, account_A)
 
                 const balance_After_Release =
                     await erc1410Facet.balanceOf(account_A)
@@ -1132,13 +1132,14 @@ describe('Lock Tests', () => {
                     await ethers.provider.getBlock('latest')
                 ).timestamp
 
-                lockFacet = lockFacet.connect(signer_A)
-                await lockFacet.lockByPartition(
-                    _PARTITION_ID_1,
-                    _AMOUNT,
-                    account_A,
-                    currentTimestamp + 100 * ONE_SECOND
-                )
+                await lockFacet
+                    .connect(signer_A)
+                    .lockByPartition(
+                        _PARTITION_ID_1,
+                        _AMOUNT,
+                        account_A,
+                        currentTimestamp + 100 * ONE_SECOND
+                    )
 
                 const locked_Amount_Before =
                     await lockFacet.getLockedAmountFor(account_A)
@@ -1155,13 +1156,14 @@ describe('Lock Tests', () => {
                 )
 
                 // LOCK AFTER BALANCE ADJUSTMENT
-                lockFacet = lockFacet.connect(signer_A)
-                await lockFacet.lockByPartition(
-                    _PARTITION_ID_1,
-                    _AMOUNT,
-                    account_A,
-                    currentTimestamp + 100 * ONE_SECOND
-                )
+                await lockFacet
+                    .connect(signer_A)
+                    .lockByPartition(
+                        _PARTITION_ID_1,
+                        _AMOUNT,
+                        account_A,
+                        currentTimestamp + 100 * ONE_SECOND
+                    )
 
                 const balance_After_Lock =
                     await erc1410Facet.balanceOf(account_A)
