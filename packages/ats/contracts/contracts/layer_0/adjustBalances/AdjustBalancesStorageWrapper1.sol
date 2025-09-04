@@ -480,6 +480,36 @@ abstract contract AdjustBalancesStorageWrapper1 is
         );
     }
 
+    function _calculateFactorForFrozenAmountByTokenHolderAdjustedAt(
+        address tokenHolder,
+        uint256 timestamp
+    ) internal view returns (uint256 factor) {
+        factor = _calculateFactor(
+            _getAbafAdjustedAt(timestamp),
+            _adjustBalancesStorage().labafFrozenAmountByAccount[tokenHolder]
+        );
+    }
+
+    function _calculateFactorForHeldAmountByTokenHolderAdjustedAt(
+        address tokenHolder,
+        uint256 timestamp
+    ) internal view returns (uint256 factor) {
+        factor = _calculateFactor(
+            _getAbafAdjustedAt(timestamp),
+            _adjustBalancesStorage().labafHeldAmountByAccount[tokenHolder]
+        );
+    }
+
+    function _calculateFactorForClearedAmountByTokenHolderAdjustedAt(
+        address tokenHolder,
+        uint256 timestamp
+    ) internal view returns (uint256 factor) {
+        factor = _calculateFactor(
+            _getAbafAdjustedAt(timestamp),
+            _adjustBalancesStorage().labafClearedAmountByAccount[tokenHolder]
+        );
+    }
+
     function _getAbaf() internal view returns (uint256) {
         return _adjustBalancesStorage().abaf;
     }
