@@ -207,7 +207,7 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {IFactory} from '../interfaces/factory/IFactory.sol';
-import {ResolverProxy} from '../resolver/resolverProxy/ResolverProxy.sol';
+import {ResolverProxy} from '../resolver/resolverProxy/proxy/ResolverProxy.sol';
 import {
     IResolverProxy
 } from '../interfaces/resolver/resolverProxy/IResolverProxy.sol';

@@ -203,203 +203,64 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+/******************************************************************************\
+* Author: Nick Mudge <nick@perfectabstractions.com>, Twitter/Github: @mudgen
+* EIP-2535 ResolverProxys
+*
+* Implementation of a resolverProxy.
+/******************************************************************************/
 
 import {
-    _ERC3643_STORAGE_POSITION,
-    _RESOLVER_PROXY_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {_AGENT_ROLE} from '../constants/roles.sol';
+    ResolverProxyUnstructuredProxy
+} from './unstructured/ResolverProxyUnstructured.sol';
 import {
-    IERC3643Management
-} from '../../layer_1/interfaces/ERC3643/IERC3643Management.sol';
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+    IResolverProxy
+} from '../../../interfaces/resolver/resolverProxy/IResolverProxy.sol';
 import {
-    IAccessControl
-} from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
-import {
-    IERC3643StorageWrapper
-} from '../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol';
-import {
-    IIdentityRegistry
-} from '../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol';
-import {
-    ResolverProxyUnstructured
-} from '../../resolver/resolverProxy/unstructured/ResolverProxyUnstructured.sol';
-import {
-    _ERC3643_STORAGE_POSITION,
-    _RESOLVER_PROXY_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
-import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
-import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
-import {_AGENT_ROLE} from '../constants/roles.sol';
+    IBusinessLogicResolver
+} from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
 
-abstract contract ERC3643StorageWrapper1 is
-    IERC3643StorageWrapper,
-    ResolverProxyUnstructured
-{
-    using LowLevelCall for address;
-
-    modifier onlyUnrecoveredAddress(address _account) {
-        _checkRecoveredAddress(_account);
-        _;
+contract ResolverProxy is ResolverProxyUnstructuredProxy {
+    constructor(
+        IBusinessLogicResolver _resolver,
+        bytes32 _resolverProxyConfigurationId,
+        uint256 _version,
+        IResolverProxy.Rbac[] memory _rbac
+    ) payable {
+        _initialize(_resolver, _resolverProxyConfigurationId, _version, _rbac);
     }
 
-    modifier onlyValidInputAmountsArrayLength(
-        address[] memory _addresses,
-        uint256[] memory _amounts
-    ) {
-        _checkInputAmountsArrayLength(_addresses, _amounts);
-        _;
-    }
+    receive() external payable {}
 
-    modifier onlyValidInputBoolArrayLength(
-        address[] memory _addresses,
-        bool[] memory _status
-    ) {
-        _checkInputBoolArrayLength(_addresses, _status);
-        _;
-    }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC3643(
-        address _compliance,
-        address _identityRegistry
-    ) internal {
-        IERC3643Management.ERC3643Storage
-            storage eRC3643Storage = _erc3643Storage();
-        eRC3643Storage.initialized = true;
-        _setCompliance(_compliance);
-        _setIdentityRegistry(_identityRegistry);
-    }
-
-    function _setAddressFrozen(
-        address _userAddress,
-        bool _freezeStatus
-    ) internal {
-        if (_freezeStatus) {
-            _getControlListType()
-                ? _removeFromControlList(_userAddress)
-                : _addToControlList(_userAddress);
-            return;
+    // Find facet for function that is called and execute the
+    // function if a facet is found and return any value.
+    // solhint-disable-next-line no-complex-fallback
+    fallback() external payable {
+        // get facet from function selector
+        address facet = _getFacetAddress(_resolverProxyStorage(), msg.sig);
+        if (facet == address(0)) {
+            revert IResolverProxy.FunctionNotFound(msg.sig);
         }
-        _getControlListType()
-            ? _addToControlList(_userAddress)
-            : _removeFromControlList(_userAddress);
-    }
-
-    function _addAgent(address _agent) internal {
-        if (!_grantRole(_AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
-        }
-    }
-
-    function _removeAgent(address _agent) internal {
-        if (!_revokeRole(_AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
-        }
-    }
-
-    function _setCompliance(address _compliance) internal {
-        _erc3643Storage().compliance = _compliance;
-        emit ComplianceAdded(_compliance);
-    }
-
-    function _setIdentityRegistry(address _identityRegistry) internal {
-        _erc3643Storage().identityRegistry = _identityRegistry;
-    }
-
-    function _getFrozenAmountFor(
-        address _userAddress
-    ) internal view returns (uint256) {
-        IERC3643Management.ERC3643Storage storage st = _erc3643Storage();
-        return st.frozenTokens[_userAddress];
-    }
-
-    function _getFrozenAmountForByPartition(
-        bytes32 _partition,
-        address _userAddress
-    ) internal view returns (uint256) {
-        IERC3643Management.ERC3643Storage storage st = _erc3643Storage();
-        return st.frozenTokensByPartition[_userAddress][_partition];
-    }
-
-    function _checkRecoveredAddress(address _sender) internal view {
-        if (_isRecovered(_sender)) revert IERC3643Management.WalletRecovered();
-    }
-
-    function _isRecovered(address _sender) internal view returns (bool) {
-        return _erc3643Storage().addressRecovered[_sender];
-    }
-
-    function _version() internal view returns (string memory) {
-        return
-            string(
-                abi.encodePacked(
-                    '{',
-                    '"Resolver": "',
-                    Strings.toHexString(
-                        uint160(address(_resolverProxyStorage().resolver)),
-                        20
-                    ),
-                    '", ',
-                    '"Config ID": "',
-                    Strings.toHexString(
-                        uint256(
-                            _resolverProxyStorage().resolverProxyConfigurationId
-                        ),
-                        32
-                    ),
-                    '", ',
-                    '"Version": "',
-                    Strings.toString(_resolverProxyStorage().version),
-                    '"',
-                    '}'
-                )
-            );
-    }
-
-    function _getCompliance() internal view returns (ICompliance) {
-        return ICompliance(_erc3643Storage().compliance);
-    }
-
-    function _getIdentityRegistry() internal view returns (IIdentityRegistry) {
-        return IIdentityRegistry(_erc3643Storage().identityRegistry);
-    }
-
-    function _getOnchainID() internal view returns (address) {
-        return _erc3643Storage().onchainID;
-    }
-
-    function _checkInputAmountsArrayLength(
-        address[] memory _addresses,
-        uint256[] memory _amounts
-    ) internal pure {
-        if (_addresses.length != _amounts.length) {
-            revert IERC3643Management.InputAmountsArrayLengthMismatch();
-        }
-    }
-
-    function _checkInputBoolArrayLength(
-        address[] memory _addresses,
-        bool[] memory _status
-    ) internal pure {
-        if (_addresses.length != _status.length) {
-            revert IERC3643Management.InputBoolArrayLengthMismatch();
-        }
-    }
-
-    function _erc3643Storage()
-        internal
-        pure
-        returns (IERC3643Management.ERC3643Storage storage erc3643Storage_)
-    {
-        bytes32 position = _ERC3643_STORAGE_POSITION;
+        // Execute external function from facet using delegatecall and return any value.
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            erc3643Storage_.slot := position
+            // copy function selector and any arguments
+            calldatacopy(0, 0, calldatasize())
+            // execute function call using the facet
+            let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
+            // get any return value
+            returndatacopy(0, 0, returndatasize())
+            // return any return value or error back to the caller
+            switch result
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
         }
     }
 }

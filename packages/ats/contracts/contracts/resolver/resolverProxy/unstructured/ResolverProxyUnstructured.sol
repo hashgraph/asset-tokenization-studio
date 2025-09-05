@@ -216,9 +216,6 @@ import {
     IDiamondLoupe
 } from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
 import {
-    AccessControlStorageWrapper
-} from '../../../layer_0/core/accessControl/AccessControlStorageWrapper.sol';
-import {
     PauseStorageWrapper
 } from '../../../layer_0/core/pause/PauseStorageWrapper.sol';
 import {
@@ -227,10 +224,7 @@ import {
 
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
 // The loupe functions are required by the EIP2535 ResolverProxys standard
-abstract contract ResolverProxyUnstructured is
-    AccessControlStorageWrapper,
-    PauseStorageWrapper
-{
+abstract contract ResolverProxyUnstructured is PauseStorageWrapper {
     struct FacetIdsAndSelectorPosition {
         bytes32 facetId;
         uint16 selectorPosition;
