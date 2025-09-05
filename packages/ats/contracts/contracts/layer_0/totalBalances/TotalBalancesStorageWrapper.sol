@@ -206,9 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {LocalContext} from '../../layer_0/context/LocalContext.sol';
 
-abstract contract TotalBalancesStorageWrapper is PauseStorageWrapper {
+abstract contract TotalBalancesStorageWrapper is LocalContext {
     function _getTotalBalance(
         address _tokenHolder
     ) internal view virtual returns (uint256 totalBalance);
