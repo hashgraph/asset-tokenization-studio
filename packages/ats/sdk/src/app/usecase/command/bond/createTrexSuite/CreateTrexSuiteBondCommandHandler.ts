@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -205,46 +203,221 @@
 
 */
 
-pragma solidity ^0.8.17;
+import { InvalidRequest } from '@command/error/InvalidRequest';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import ContractId from '@domain/context/contract/ContractId';
+import { Security } from '@domain/context/security/Security';
+import AccountService from '@service/account/AccountService';
+import TransactionService from '@service/transaction/TransactionService';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { CouponDetails } from '@domain/context/bond/CouponDetails';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import ContractService from '@service/contract/ContractService';
 
-// solhint-disable no-global-import
-import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import {TRexIFactory, FactoryRegulationData} from '../interfaces/IFactory.sol';
-import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
-import {TREXFactoryAts} from '../TREXFactory.sol';
-import {SecurityDeploymentLib} from './core/SecurityDeploymentLib.sol';
-import {TREXBaseDeploymentLib} from './core/TREXBaseDeploymentLib.sol';
+import { Response } from '@domain/context/transaction/Response';
+import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
+import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
+import { EVM_ZERO_ADDRESS } from '@core/Constants';
+import {
+  CreateTrexSuiteBondCommand,
+  CreateTrexSuiteBondCommandResponse,
+} from './CreateTrexSuiteBondCommand';
+import { CreateTrexSuiteBondCommandError } from './error/CreateTrexSuiteBondError';
+import {
+  TrexClaimDetails,
+  TrexTokenDetailsAts,
+} from '@domain/context/factory/TRexFactory';
+import ValidationService from '@service/validation/ValidationService';
 
-library TREXEquityDeploymentLib {
-    function deployTREXSuiteAtsEquity(
-        mapping(string => address) storage _tokenDeployed,
-        address _implementationAuthority,
-        address _idFactory,
-        address _atsFactory,
-        string memory _salt,
-        TREXFactoryAts.TokenDetailsAts calldata _tokenDetails,
-        ITREXFactory.ClaimDetails calldata _claimDetails,
-        TRexIFactory.EquityData calldata _equityData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address) {
-        IToken token = SecurityDeploymentLib.deployEquity(
-            _atsFactory,
-            _tokenDetails.owner,
-            _equityData,
-            _factoryRegulationData
+@CommandHandler(CreateTrexSuiteBondCommand)
+export class CreateTrexSuiteBondCommandHandler
+  implements ICommandHandler<CreateTrexSuiteBondCommand>
+{
+  constructor(
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    private readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
+  ) {}
+
+  async execute(
+    command: CreateTrexSuiteBondCommand,
+  ): Promise<CreateTrexSuiteBondCommandResponse> {
+    let res: Response;
+    try {
+      const {
+        salt,
+        owner,
+        irs,
+        onchainId,
+        irAgents,
+        tokenAgents,
+        compliancesModules,
+        complianceSettings,
+        claimTopics,
+        issuers,
+        issuerClaims,
+
+        security,
+        currency,
+        nominalValue,
+        startingDate,
+        maturityDate,
+        couponFrequency,
+        couponRate,
+        firstCouponDate,
+
+        factory,
+        resolver,
+        configId,
+        configVersion,
+        diamondOwnerAccount,
+
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+
+        compliance,
+        identityRegistry,
+      } = command;
+
+      if (!security.regulationType) {
+        throw new MissingRegulationType();
+      }
+      if (!security.regulationsubType) {
+        throw new MissingRegulationSubType();
+      }
+
+      if (!salt || salt.length === 0) {
+        throw new InvalidRequest('Salt not found in request');
+      }
+
+      this.validationService.checkTrexTokenSaltExists(factory.toString(), salt);
+
+      const trexTokenDetails = new TrexTokenDetailsAts({
+        owner,
+        irs,
+        onchainId,
+        irAgents,
+        tokenAgents,
+        compliancesModules,
+        complianceSettings,
+      });
+      const claimDetails = new TrexClaimDetails({
+        claimTopics,
+        issuers,
+        issuerClaims,
+      });
+
+      const factoryEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(factory.toString());
+
+      const [
+        externalPausesEvmAddresses,
+        externalControlListsEvmAddresses,
+        externalKycListsEvmAddresses,
+      ] = await Promise.all([
+        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
+        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
+        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
+      ]);
+      const diamondOwnerAccountEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
+      const resolverEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(resolver.toString());
+
+      const complianceEvmAddress = compliance
+        ? await this.contractService.getContractEvmAddress(compliance)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
+      const identityRegistryAddress = identityRegistry
+        ? await this.contractService.getContractEvmAddress(identityRegistry)
+        : new EvmAddress(EVM_ZERO_ADDRESS);
+
+      const handler = this.transactionService.getHandler();
+
+      const bondInfo = new BondDetails(
+        currency,
+        BigDecimal.fromString(nominalValue),
+        parseInt(startingDate),
+        parseInt(maturityDate),
+      );
+
+      const couponInfo = new CouponDetails(
+        parseInt(couponFrequency),
+        BigDecimal.fromString(couponRate),
+        parseInt(firstCouponDate),
+      );
+
+      res = await handler.createTrexSuiteBond(
+        salt,
+        trexTokenDetails.owner,
+        trexTokenDetails.irs,
+        trexTokenDetails.onchainId,
+        trexTokenDetails.irAgents,
+        trexTokenDetails.tokenAgents,
+        trexTokenDetails.compliancesModules,
+        trexTokenDetails.complianceSettings,
+        claimDetails.claimTopics,
+        claimDetails.issuers,
+        claimDetails.issuerClaims,
+
+        new Security(security),
+        bondInfo,
+        couponInfo,
+        factoryEvmAddress,
+        resolverEvmAddress,
+        configId,
+        configVersion,
+        complianceEvmAddress,
+        identityRegistryAddress,
+        diamondOwnerAccountEvmAddress,
+        externalPausesEvmAddresses,
+        externalControlListsEvmAddresses,
+        externalKycListsEvmAddresses,
+        factory.toString(),
+      );
+
+      const contractAddress =
+        await this.transactionService.getTransactionResult({
+          res,
+          result: res.response?._token,
+          className: CreateTrexSuiteBondCommandHandler.name,
+          position: 0,
+          numberOfResultsItems: 1,
+        });
+
+      const contractId =
+        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
+          contractAddress,
         );
-        TREXBaseDeploymentLib.deployTREXSuite(
-            _tokenDeployed,
-            _implementationAuthority,
-            _idFactory,
-            _salt,
-            _tokenDetails,
-            _claimDetails,
-            token,
-            _equityData.security.identityRegistry,
-            _equityData.security.compliance
+
+      return Promise.resolve(
+        new CreateTrexSuiteBondCommandResponse(
+          new ContractId(contractId),
+          res.id!,
+        ),
+      );
+    } catch (error) {
+      if (res?.response == 1) {
+        return Promise.resolve(
+          new CreateTrexSuiteBondCommandResponse(
+            new ContractId('0.0.0'),
+            res.id!,
+          ),
         );
-        return (address(token));
+      }
+      throw new CreateTrexSuiteBondCommandError(error as Error);
     }
+  }
 }
