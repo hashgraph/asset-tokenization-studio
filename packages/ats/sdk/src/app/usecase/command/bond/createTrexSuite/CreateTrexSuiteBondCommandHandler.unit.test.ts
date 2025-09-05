@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -205,46 +203,219 @@
 
 */
 
-pragma solidity ^0.8.17;
+import TransactionService from '@service/transaction/TransactionService';
+import { CreateTrexSuiteBondCommandHandler } from './CreateTrexSuiteBondCommandHandler';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { createMock } from '@golevelup/ts-jest';
+import AccountService from '@service/account/AccountService';
+import { CreateTrexSuiteBondCommandFixture } from '@test/fixtures/bond/BondFixture';
+import {
+  CreateTrexSuiteBondCommand,
+  CreateTrexSuiteBondCommandResponse,
+} from './CreateTrexSuiteBondCommand';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  HederaIdPropsFixture,
+  HederaIdZeroAddressFixture,
+  TransactionIdFixture,
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { ErrorCode } from '@core/error/BaseError';
+import { CreateTrexSuiteBondCommandError } from './error/CreateTrexSuiteBondError';
+import ValidationService from '@service/validation/ValidationService';
 
-// solhint-disable no-global-import
-import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import {TRexIFactory, FactoryRegulationData} from '../interfaces/IFactory.sol';
-import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
-import {TREXFactoryAts} from '../TREXFactory.sol';
-import {SecurityDeploymentLib} from './core/SecurityDeploymentLib.sol';
-import {TREXBaseDeploymentLib} from './core/TREXBaseDeploymentLib.sol';
+describe('CreateTrexSuiteBondCommandHandler', () => {
+  let handler: CreateTrexSuiteBondCommandHandler;
+  let command: CreateTrexSuiteBondCommand;
 
-library TREXEquityDeploymentLib {
-    function deployTREXSuiteAtsEquity(
-        mapping(string => address) storage _tokenDeployed,
-        address _implementationAuthority,
-        address _idFactory,
-        address _atsFactory,
-        string memory _salt,
-        TREXFactoryAts.TokenDetailsAts calldata _tokenDetails,
-        ITREXFactory.ClaimDetails calldata _claimDetails,
-        TRexIFactory.EquityData calldata _equityData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address) {
-        IToken token = SecurityDeploymentLib.deployEquity(
-            _atsFactory,
-            _tokenDetails.owner,
-            _equityData,
-            _factoryRegulationData
+  const transactionServiceMock = createMock<TransactionService>();
+  const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
+  const accountServiceMock = createMock<AccountService>();
+  const contractServiceMock = createMock<ContractService>();
+  const validationServiceMock = createMock<ValidationService>();
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const externalPauseEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalControlEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const externalKycEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
+  const transactionId = TransactionIdFixture.create().id;
+  const hederaId = HederaIdPropsFixture.create();
+  const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
+  const errorMsg = ErrorMsgFixture.create().msg;
+
+  beforeEach(() => {
+    handler = new CreateTrexSuiteBondCommandHandler(
+      accountServiceMock,
+      transactionServiceMock,
+      mirrorNodeAdapterMock,
+      contractServiceMock,
+      validationServiceMock,
+    );
+    command = CreateTrexSuiteBondCommandFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws CreateTrexSuiteBondCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        accountServiceMock.getAccountEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          CreateTrexSuiteBondCommandError,
         );
-        TREXBaseDeploymentLib.deployTREXSuite(
-            _tokenDeployed,
-            _implementationAuthority,
-            _idFactory,
-            _salt,
-            _tokenDetails,
-            _claimDetails,
-            token,
-            _equityData.security.identityRegistry,
-            _equityData.security.compliance
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while creating the trex suite bond: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+
+    describe('success cases', () => {
+      it('should successfully create a bond with bondAddress in response', async () => {
+        contractServiceMock.getContractEvmAddress
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress)
+          .mockResolvedValueOnce(evmAddress);
+        contractServiceMock.getEvmAddressesFromHederaIds
+          .mockResolvedValueOnce([externalPauseEvmAddress])
+          .mockResolvedValueOnce([externalControlEvmAddress])
+          .mockResolvedValueOnce([externalKycEvmAddress]);
+        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+
+        transactionServiceMock
+          .getHandler()
+          .createTrexSuiteBond.mockResolvedValue({
+            id: transactionId,
+            response: { _token: evmAddress.value },
+          });
+
+        validationServiceMock.checkTrexTokenSaltExists.mockResolvedValue();
+        mirrorNodeAdapterMock.getHederaIdfromContractAddress.mockResolvedValue(
+          transactionId,
         );
-        return (address(token));
-    }
-}
+
+        transactionServiceMock.getTransactionResult.mockResolvedValue(
+          evmAddress.value,
+        );
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateTrexSuiteBondCommandResponse);
+        expect(result.securityId.value).toBe(transactionId);
+        expect(result.transactionId).toBe(transactionId);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          4,
+        );
+        expect(
+          contractServiceMock.getEvmAddressesFromHederaIds,
+        ).toHaveBeenCalledTimes(3);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(
+          transactionServiceMock.getHandler().createTrexSuiteBond,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          mirrorNodeAdapterMock.getHederaIdfromContractAddress,
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          transactionServiceMock.getHandler().createTrexSuiteBond,
+        ).toHaveBeenCalledWith(
+          command.salt,
+          command.owner,
+          command.irs,
+          command.onchainId,
+          command.irAgents,
+          command.tokenAgents,
+          command.compliancesModules,
+          command.complianceSettings,
+          command.claimTopics,
+          command.issuers,
+          command.issuerClaims,
+          expect.objectContaining(command.security),
+          expect.objectContaining({
+            currency: command.currency,
+            nominalValue: BigDecimal.fromString(command.nominalValue),
+            startingDate: parseInt(command.startingDate),
+            maturityDate: parseInt(command.maturityDate),
+          }),
+          {
+            couponFrequency: parseInt(command.couponFrequency),
+            couponRate: BigDecimal.fromString(command.couponRate),
+            firstCouponDate: parseInt(command.firstCouponDate),
+          },
+          evmAddress,
+          evmAddress,
+          command.configId,
+          command.configVersion,
+          evmAddress,
+          evmAddress,
+          evmAddress,
+          [externalPauseEvmAddress],
+          [externalControlEvmAddress],
+          [externalKycEvmAddress],
+          command.factory?.toString(),
+        );
+        expect(
+          transactionServiceMock.getTransactionResult,
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            res: {
+              id: transactionId,
+              response: { _token: evmAddress.value },
+            },
+            result: evmAddress.value,
+            className: CreateTrexSuiteBondCommandHandler.name,
+            position: 0,
+            numberOfResultsItems: 1,
+          }),
+        );
+      });
+
+      it('should handle error and return fallback response if response code is 1', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+
+        mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
+          id: hederaId.value,
+          evmAddress: evmAddress.value,
+        });
+
+        transactionServiceMock
+          .getHandler()
+          .createTrexSuiteBond.mockResolvedValue({
+            id: transactionId,
+            response: 1,
+          });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(CreateTrexSuiteBondCommandResponse);
+        expect(result.securityId.toString()).toBe(hederaIdZeroAddress);
+        expect(result.transactionId.toString()).toBe(transactionId);
+      });
+    });
+  });
+});
