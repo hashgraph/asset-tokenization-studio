@@ -216,11 +216,17 @@ interface ISecurity {
         AdditionalSecurityData additionalSecurityData;
     }
 
+    /**
+     * @notice Returns the security regulation data
+     */
     function getSecurityRegulationData()
         external
         view
         returns (SecurityRegulationData memory securityRegulationData_);
 
+    /**
+     * @notice Returns the security holders for a given page index and page length
+     */
     function getSecurityHolders(
         uint256 _pageIndex,
         uint256 _pageLength

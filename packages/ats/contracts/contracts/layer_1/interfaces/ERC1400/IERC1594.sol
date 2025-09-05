@@ -247,38 +247,65 @@ interface IERC1594 {
         bytes calldata _data
     ) external;
 
-    // Token Issuance
+    /**
+     * @notice This function must be called to increase the total supply (Corresponds to mint function of ERC20).
+     * @dev It only be called by the token issuer or the operator defined by the issuer. ERC1594 doesn't have
+     * have the any logic related to operator but its superset ERC1400 have the operator logic and this function
+     * is allowed to call by the operator.
+     * @param _tokenHolder The account that will receive the created tokens (account should be whitelisted or KYCed).
+     * @param _value The amount of tokens need to be issued
+     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
+     */
+
     function issue(
         address _tokenHolder,
         uint256 _value,
         bytes calldata _data
     ) external;
 
-    // Token Redemption
+    /**
+     * @notice This function redeem an amount of the token of a msg.sender. For doing so msg.sender may incentivize
+     * using different ways that could be implemented with in the `redeem` function definition. But those
+     * implementations are out of the scope of the ERC1594.
+     * @param _value The amount of tokens need to be redeemed
+     * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
+     */
     function redeem(uint256 _value, bytes calldata _data) external;
 
+    /**
+     * @notice This function redeem an amount of the token of a msg.sender. For doing so msg.sender may incentivize
+     * using different ways that could be implemented with in the `redeem` function definition. But those
+     * implementations are out of the scope of the ERC1594.
+     * @dev It is analogy to `transferFrom`
+     * @param _tokenHolder The account whose tokens gets redeemed.
+     * @param _value The amount of tokens need to be redeemed
+     * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
+     */
     function redeemFrom(
         address _tokenHolder,
         uint256 _value,
         bytes calldata _data
     ) external;
 
+    /**
+     * @notice A security token issuer can specify that issuance has finished for the token
+     * (i.e. no new tokens can be minted or issued).
+     * @dev If a token returns FALSE for `isIssuable()` then it MUST always return FALSE in the future.
+     * If a token returns FALSE for `isIssuable()` then it MUST never allow additional tokens to be issued.
+     * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
+     */
     function isIssuable() external view returns (bool);
 
-    // Transfer Validity
     /**
-     * @notice Checks whether a token transfer can be performed to a specified address with a given value and
-     * additional data.
-     * @param _to The address of the potential recipient of the tokens.
-     * @param _value The number of tokens that are intended to be transferred.
-     * @param _data Arbitrary additional data, often used for extra information required for the transfer,
-     * such as signed authorization or off-chain attestations.
-     * @return A tuple containing:
-     *   - bool: Indicates whether the transfer is possible (true) or not (false).
-     *   - bytes1: EIP-1066 status code providing a standardized, machine-readable reason for the transfer's
-     * success or failure (e.g., 0x11 for success, 0x10 for failure).
-     *   - bytes32: Application-specific reason code for more detailed, non-standardized information about the
-     * transfer's status.
+     * @notice Transfers of securities may fail for a number of reasons. So this function will used to understand the
+     * cause of failure by getting the byte value. Which will be the ESC that follows the EIP 1066. ESC can be mapped
+     * with a reson string to understand the failure cause, table of Ethereum status code will always reside off-chain
+     * @param _to address The address which you want to transfer to
+     * @param _value uint256 the amount of tokens to be transferred
+     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
+     * @return bool It signifies whether the transaction will be executed or not.
+     * @return byte Ethereum status code (ESC)
+     * @return bytes32 Application specific reason code
      */
     function canTransfer(
         address _to,
@@ -287,19 +314,16 @@ interface IERC1594 {
     ) external view returns (bool, bytes1, bytes32);
 
     /**
-     * @notice Checks whether a token transfer can be performed from a specified address to another address with
-     * a given value and additional data.
-     * @param _from The address of the sender of the tokens.
-     * @param _to The address of the potential recipient of the tokens.
-     * @param _value The number of tokens that are intended to be transferred.
-     * @param _data Arbitrary additional data, often used for extra information required for the transfer, such
-     * as signed authorization or off-chain attestations.
-     * @return A tuple containing:
-     *   - bool: Indicates whether the transfer is possible (true) or not (false).
-     *   - bytes1: EIP-1066 status code providing a standardized, machine-readable reason for the transfer's success
-     * or failure (e.g., 0x11 for success, 0x10 for failure).
-     *   - bytes32: Application-specific reason code for more detailed, non-standardized information about the
-     * transfer's status.
+     * @notice Transfers of securities may fail for a number of reasons. So this function will used to understand the
+     * cause of failure by getting the byte value. Which will be the ESC that follows the EIP 1066. ESC can be mapped
+     * with a reson string to understand the failure cause, table of Ethereum status code will always reside off-chain
+     * @param _from address The address which you want to send tokens from
+     * @param _to address The address which you want to transfer to
+     * @param _value uint256 the amount of tokens to be transferred
+     * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
+     * @return bool It signifies whether the transaction will be executed or not.
+     * @return byte Ethereum status code (ESC)
+     * @return bytes32 Application specific reason code
      */
     function canTransferFrom(
         address _from,

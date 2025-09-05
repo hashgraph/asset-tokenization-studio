@@ -25,6 +25,9 @@ build
 
 node_modules
 .env
+
+# Docs
+docs/
 coverage
 coverage.json
 gas-report.txt

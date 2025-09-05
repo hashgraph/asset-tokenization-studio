@@ -260,15 +260,6 @@ abstract contract ERC20StorageWrapper2 is
         return true;
     }
 
-    /**
-     * @dev Increase the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed_[_spender] == 0. To increment
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param spender The address which will spend the funds.
-     * @param addedValue The amount of tokens to increase the allowance by.
-     */
     function _increaseAllowance(
         address spender,
         uint256 addedValue
@@ -282,15 +273,6 @@ abstract contract ERC20StorageWrapper2 is
         return true;
     }
 
-    /**
-     * @dev Decrease the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed_[_spender] == 0. To decrement
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param spender The address which will spend the funds.
-     * @param subtractedValue The amount of tokens to decrease the allowance by.
-     */
     function _decreaseAllowance(
         address spender,
         uint256 subtractedValue

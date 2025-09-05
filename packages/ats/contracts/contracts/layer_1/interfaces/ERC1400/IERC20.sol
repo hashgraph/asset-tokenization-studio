@@ -316,19 +316,30 @@ interface IERC20 is IERC20StorageWrapper {
         address spender
     ) external view returns (uint256);
 
-    function decimalsAdjusted() external view returns (uint8);
-
-    function decimalsAdjustedAt(
-        uint256 _timestamp
-    ) external view returns (uint8);
-
+    /**
+     * @notice Returns the name of the scurity token
+     */
     function name() external view returns (string memory);
 
+    /**
+     * @notice Returns the symbol of the security token
+     */
     function symbol() external view returns (string memory);
 
+    /**
+     * @notice Returns the decimals simulating non-triggered decimal adjustments up until current timestamp
+     */
     function decimals() external view returns (uint8);
 
+    /**
+     * @notice Returns the decimals simulating non-triggered decimal adjustments
+     *
+     * @param _timestamp The timestamp until which ABAFs are simulated
+     */
     function decimalsAt(uint256 _timestamp) external view returns (uint8);
 
+    /**
+     * @notice Returns the metadata of the token in a struct
+     */
     function getERC20Metadata() external view returns (ERC20Metadata memory);
 }

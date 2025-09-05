@@ -248,32 +248,42 @@ abstract contract SnapshotsStorageWrapper1 is
     }
 
     struct SnapshotStorage {
-        // Snapshots for total balances per account
+        /// @dev Snapshots for total balances per account
         mapping(address => Snapshots) accountBalanceSnapshots;
-        // Snapshots for balances per account and partition
+        /// @dev Snapshots for balances per account and partition
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionBalanceSnapshots;
-        // Metadata for partitions associated with each account
+        /// @dev Metadata for partitions associated with each account
         mapping(address => PartitionSnapshots) accountPartitionMetadata;
-        Snapshots totalSupplySnapshots; // Snapshots for the total supply
-        // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
-        // Unique ID for the current snapshot
+        /// @dev Snapshots for the total supply
+        Snapshots totalSupplySnapshots;
+        /// @dev Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
+        /// Unique ID for the current snapshot
         CountersUpgradeable.Counter currentSnapshotId;
-        // Snapshots for locked balances per account
+        /// @dev Snapshots for locked balances per account
         mapping(address => Snapshots) accountLockedBalanceSnapshots;
-        // Snapshots for locked balances per account and partition
+        /// @dev Snapshots for locked balances per account and partition
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
-        // Snapshots for the total supply by partition
+        /// @dev Snapshots for the total supply by partition
         mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
+        /// @dev Snapshots for held balances per account
         mapping(address => Snapshots) accountHeldBalanceSnapshots;
+        /// @dev Snapshots for held balances per account and partition
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionHeldBalanceSnapshots;
-        // Clearing
+        /// @dev Snapshots for cleared balances per account
         mapping(address => Snapshots) accountClearedBalanceSnapshots;
+        /// @dev Snapshots for cleared balances per account and partition
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionClearedBalanceSnapshots;
+        /// @dev Snapshots for Adjustment Before Adjustment Factor values
         Snapshots abafSnapshots;
+        /// @dev Snapshots for decimal precision values
         Snapshots decimals;
+        /// @dev Snapshots for frozen balances per account
         mapping(address => Snapshots) accountFrozenBalanceSnapshots;
+        /// @dev Snapshots for frozen balances per account and partition
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionFrozenBalanceSnapshots;
+        /// @dev Snapshots of token holders by snapshot ID
         mapping(uint256 => SnapshotsAddress) tokenHoldersSnapshots;
+        /// @dev Snapshots for total number of token holders
         Snapshots totalTokenHoldersSnapshots;
     }
 

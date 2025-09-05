@@ -216,31 +216,34 @@ import {TRexIFactory, FactoryRegulationData} from './interfaces/IFactory.sol';
 import {TREXBondDeploymentLib} from './libraries/TREXBondDeploymentLib.sol';
 import {TREXEquityDeploymentLib} from './libraries/TREXEquityDeploymentLib.sol';
 
-/// @author Tokeny Solutions
-/// @notice Adapted from the T-REX official repository to deploy an ERC-3643-compatible ATS security token
-/// @dev Uses tree-like structure with libraries as leaves instead of resolver proxy pattern for simplicity
+/**
+ * @author Tokeny Solutions
+ * @notice Adapted from the T-REX official repository to deploy an ERC-3643-compatible ATS security token
+ * @dev Uses tree-like structure with libraries as leaves instead of resolver proxy pattern for simplicity
+ */
 // solhint-disable custom-errors
 contract TREXFactoryAts is ITREXFactory, Ownable {
     /// @notice TokenDetails with the ATS factory overlapping fields removed
-    /// @param owner Address of the owner of all contracts. The factory will append it to the provided RBACs if
-    /// the T_REX_OWNER_ROLE is not found. For a cheaper deployment, add the owner at the first position in the array
-    /// @param irs Identity registry storage address. Set it to ZERO address if you want to deploy a new storage.
-    /// If an address is provided, please ensure that the factory is set as owner of the contract
-    /// @param ONCHAINID ONCHAINID of the token
-    /// @param irAgents List of agents of the identity registry (can be set to an AgentManager contract)
-    /// @param tokenAgents List of agents of the token
-    /// @param complianceModules Modules to bind to the compliance, indexes are corresponding to the settings
-    /// callData indexes
-    /// If a module doesn't require settings, it can be added at the end of the array, at index > settings.length
-    /// @param complianceSettings Settings calls for compliance modules
     struct TokenDetailsAts {
+        /// @dev Address of the owner of all contracts. The factory will append it to the provided RBACs if
+        /// the T_REX_OWNER_ROLE is not found. For a cheaper deployment, add the owner at the first position
+        /// in the array
         address owner;
+        /// @dev Identity registry storage address. Set it to ZERO address if you want to deploy a new storage.
+        /// If an address is provided, please ensure that the factory is set as owner of the contract
         address irs;
+        /// @dev ONCHAINID of the token
         // solhint-disable-next-line var-name-mixedcase
         address ONCHAINID;
+        /// @dev List of agents of the identity registry (can be set to an AgentManager contract)
         address[] irAgents;
+        /// @dev List of agents of the token
         address[] tokenAgents;
+        /// @dev Modules to bind to the compliance, indexes are corresponding to the settings
+        /// callData indexes
+        /// If a module doesn't require settings, it can be added at the end of the array, at index > settings.length
         address[] complianceModules;
+        /// @dev Settings calls for compliance modules
         bytes[] complianceSettings;
     }
 
@@ -329,9 +332,6 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         );
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function recoverContractOwnership(
         address _contract,
         address _newOwner
@@ -339,9 +339,6 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         (Ownable(_contract)).transferOwnership(_newOwner);
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function setImplementationAuthority(
         address _implementationAuthority
     ) external override onlyOwner {
@@ -372,9 +369,6 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         emit ImplementationAuthoritySet(_implementationAuthority);
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function setIdFactory(address _idFactory) external override onlyOwner {
         require(_idFactory != address(0), 'invalid argument - zero address');
         idFactory = _idFactory;
@@ -389,9 +383,6 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         atsFactory = _atsFactory;
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function getImplementationAuthority()
         external
         view
@@ -401,16 +392,10 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         return implementationAuthority;
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function getIdFactory() external view override returns (address) {
         return idFactory;
     }
 
-    /**
-     *  @inheritdoc ITREXFactory
-     */
     function getToken(
         string calldata _salt
     ) external view override returns (address) {

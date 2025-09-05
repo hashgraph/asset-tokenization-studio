@@ -226,7 +226,6 @@ interface IKyc {
      * @param account The address for which the Kyc is granted
      * @param issuer The address of the issuer of the Kyc
      */
-
     event KycGranted(address indexed account, address indexed issuer);
 
     /**
@@ -235,7 +234,6 @@ interface IKyc {
      * @param operator The address for which the Kyc is updated
      * @param activated The status of the internal Kyc
      */
-
     event InternalKycStatusUpdated(address indexed operator, bool activated);
 
     /**
@@ -254,21 +252,18 @@ interface IKyc {
     /**
      * @dev Initialize Internal Kyc
      */
-
     function initializeInternalKyc(bool _activateInternalKyc) external;
 
     /**
      * @dev Activate Internal Kyc
      * @return success_ true or false
      */
-
     function activateInternalKyc() external returns (bool success_);
 
     /**
      * @dev Deactivate Internal Kyc
      * @return success_ true or false
      */
-
     function deactivateInternalKyc() external returns (bool success_);
 
     /**
@@ -295,7 +290,6 @@ interface IKyc {
      * @param _account user whose Kyc is being revoked
      * @return success_ true or false
      */
-
     function revokeKyc(address _account) external returns (bool success_);
 
     /**
@@ -304,7 +298,6 @@ interface IKyc {
      * @param _account the account to check
      * @return kycStatus_ GRANTED or NOT_GRANTED
      */
-
     function getKycStatusFor(
         address _account
     ) external view returns (KycStatus kycStatus_);
@@ -315,7 +308,6 @@ interface IKyc {
      * @param _account the account to check
      * @return kyc_
      */
-
     function getKycFor(
         address _account
     ) external view returns (KycData memory kyc_);
@@ -326,7 +318,6 @@ interface IKyc {
      * @param _kycStatus GRANTED or NOT_GRANTED
      * @return kycAccountsCount_ count of accounts with the given Kyc status
      */
-
     function getKycAccountsCount(
         KycStatus _kycStatus
     ) external view returns (uint256 kycAccountsCount_);
@@ -336,7 +327,6 @@ interface IKyc {
      *
      * @return bool true if the internal kyc is activated
      */
-
     function isInternalKycActivated() external view returns (bool);
 
     /**
@@ -348,7 +338,6 @@ interface IKyc {
      * @return accounts_ The array containing the accounts
      * @return kycData_ The array containing the data from the accounts
      */
-
     function getKycAccountsData(
         KycStatus _kycStatus,
         uint256 _pageIndex,

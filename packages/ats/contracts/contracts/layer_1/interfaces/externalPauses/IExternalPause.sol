@@ -207,5 +207,8 @@
 pragma solidity 0.8.18;
 
 interface IExternalPause {
+    /**
+     * @notice Checks if the contract is paused in the external pause contract
+     */
     function isPaused() external view returns (bool);
 }

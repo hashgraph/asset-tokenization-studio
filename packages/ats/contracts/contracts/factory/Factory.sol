@@ -307,7 +307,6 @@ contract Factory is IFactory, LocalContext {
         _;
     }
 
-    // Deploys a new equity given the input equity data
     function deployEquity(
         EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
@@ -344,7 +343,6 @@ contract Factory is IFactory, LocalContext {
         );
     }
 
-    // Deploys a new equity given the input equity data
     function deployBond(
         BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData

@@ -272,7 +272,6 @@ abstract contract ControlList is IControlList, Common {
         controlListCount_ = _getControlListCount();
     }
 
-    // returns the list of members from _start (included) to _end (not included)
     function getControlListMembers(
         uint256 _pageIndex,
         uint256 _pageLength

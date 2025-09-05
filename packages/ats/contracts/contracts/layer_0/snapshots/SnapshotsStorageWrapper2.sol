@@ -233,8 +233,10 @@ abstract contract SnapshotsStorageWrapper2 is
         );
     }
 
-    // Update balance and/or total supply snapshots before the values are modified. This is implemented
-    // in the _beforeTokenTransfer hook, which is executed for _mint, _burn, and _transfer operations.
+    /**
+     * @dev Update balance and/or total supply snapshots before the values are modified. This is implemented
+     * in the _beforeTokenTransfer hook, which is executed for _mint, _burn, and _transfer operations.
+     */
     function _updateAccountSnapshot(
         address account,
         bytes32 partition

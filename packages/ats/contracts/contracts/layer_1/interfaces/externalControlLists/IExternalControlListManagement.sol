@@ -235,28 +235,46 @@ interface IExternalControlListManagement {
         address[] calldata _controlLists
     ) external;
 
+    /**
+     * @notice Updates the status of multiple external control lists
+     */
     function updateExternalControlLists(
         address[] calldata _controlLists,
         bool[] calldata _actives
     ) external returns (bool success_);
 
+    /**
+     * @notice Adds a new external control list
+     */
     function addExternalControlList(
         address _controlList
     ) external returns (bool success_);
 
+    /**
+     * @notice Removes existing control lists
+     */
     function removeExternalControlList(
         address _controlList
     ) external returns (bool success_);
 
+    /**
+     * @notice Checks if an address is a listed external control list
+     */
     function isExternalControlList(
         address _controlList
     ) external view returns (bool);
 
+    /**
+     * @notice Returns the number of listed external control lists
+     */
     function getExternalControlListsCount()
         external
         view
         returns (uint256 externalControlListsCount_);
 
+    /**
+     * @notice Returns a paginated list of listed external control lists
+     */
     function getExternalControlListsMembers(
         uint256 _pageIndex,
         uint256 _pageLength

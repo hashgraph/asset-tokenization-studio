@@ -213,6 +213,7 @@ import 'hardhat-gas-reporter'
 import Configuration from '@configuration'
 import '@tasks'
 import 'hardhat-dependency-compiler'
+import '@primitivefi/hardhat-dodoc'
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -315,6 +316,9 @@ const config: HardhatUserConfig = {
             '@onchain-id/solidity/contracts/Identity.sol',
             '@onchain-id/solidity/contracts/ClaimIssuer.sol',
         ],
+    },
+    dodoc: {
+        runOnCompile: false,
     },
 }
 
