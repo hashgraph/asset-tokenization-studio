@@ -203,64 +203,34 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-/******************************************************************************\
-* Author: Nick Mudge <nick@perfectabstractions.com>, Twitter/Github: @mudgen
-* EIP-2535 ResolverProxys
-*
-* Implementation of a resolverProxy.
-/******************************************************************************/
+import {LocalContext} from '../../layer_0/context/LocalContext.sol';
 
-import {
-    ResolverProxyUnstructured
-} from './unstructured/ResolverProxyUnstructured.sol';
-import {
-    IResolverProxy
-} from '../../interfaces/resolver/resolverProxy/IResolverProxy.sol';
-import {
-    IBusinessLogicResolver
-} from '../../interfaces/resolver/IBusinessLogicResolver.sol';
+abstract contract TotalBalancesStorageWrapper is LocalContext {
+    function _getTotalBalance(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 totalBalance);
 
-contract ResolverProxy is ResolverProxyUnstructured {
-    constructor(
-        IBusinessLogicResolver _resolver,
-        bytes32 _resolverProxyConfigurationId,
-        uint256 _version,
-        IResolverProxy.Rbac[] memory _rbac
-    ) payable {
-        _initialize(_resolver, _resolverProxyConfigurationId, _version, _rbac);
-    }
+    function _getTotalBalanceForAdjustedAt(
+        address tokenHolder,
+        uint256 timestamp
+    ) internal view virtual returns (uint256 totalBalance);
 
-    receive() external payable {}
+    function _getTotalBalanceForByPartitionAdjusted(
+        bytes32 partition,
+        address tokenHolder
+    ) internal view virtual returns (uint256 totalBalance);
 
-    // Find facet for function that is called and execute the
-    // function if a facet is found and return any value.
-    // solhint-disable-next-line no-complex-fallback
-    fallback() external payable {
-        // get facet from function selector
-        address facet = _getFacetAddress(_resolverProxyStorage(), msg.sig);
-        if (facet == address(0)) {
-            revert IResolverProxy.FunctionNotFound(msg.sig);
-        }
-        // Execute external function from facet using delegatecall and return any value.
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            // copy function selector and any arguments
-            calldatacopy(0, 0, calldatasize())
-            // execute function call using the facet
-            let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
-            // get any return value
-            returndatacopy(0, 0, returndatasize())
-            // return any return value or error back to the caller
-            switch result
-            case 0 {
-                revert(0, returndatasize())
-            }
-            default {
-                return(0, returndatasize())
-            }
-        }
-    }
+    function _getTotalBalanceOfAtSnapshot(
+        uint256 snapshotId,
+        address tokenHolder
+    ) internal view virtual returns (uint256 totalBalance);
+
+    function _getTotalBalanceOfAtSnapshotByPartition(
+        bytes32 partition,
+        uint256 snapshotId,
+        address tokenHolder
+    ) internal view virtual returns (uint256 totalBalance);
 }

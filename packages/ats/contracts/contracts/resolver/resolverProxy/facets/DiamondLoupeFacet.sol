@@ -210,22 +210,16 @@ pragma solidity 0.8.18;
 // The EIP-2535 ResolverProxy standard requires these functions.
 
 import {
-    ResolverProxyUnstructured
-} from '../unstructured/ResolverProxyUnstructured.sol';
-import {
     IDiamondLoupe
 } from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
 import {IERC165} from '@openzeppelin/contracts/utils/introspection/IERC165.sol';
 import {
     _DIAMOND_LOUPE_RESOLVER_KEY
 } from '../../../layer_1/constants/resolverKeys.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
 
 // HACK: I think that Loupe and Cut implementation should be only one contract.
-contract DiamondLoupeFacet is
-    IDiamondLoupe,
-    IERC165,
-    ResolverProxyUnstructured
-{
+contract DiamondLoupeFacet is IDiamondLoupe, IERC165, Common {
     function getFacets()
         external
         view

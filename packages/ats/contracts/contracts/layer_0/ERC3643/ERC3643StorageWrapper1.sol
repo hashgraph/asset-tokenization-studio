@@ -235,13 +235,10 @@ import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import {_AGENT_ROLE} from '../constants/roles.sol';
-import {
-    TotalBalancesStorageWrapper
-} from '../totalBalances/totalBalancesStorageWrapper.sol';
 
 abstract contract ERC3643StorageWrapper1 is
     IERC3643StorageWrapper,
-    TotalBalancesStorageWrapper
+    ResolverProxyUnstructured
 {
     using LowLevelCall for address;
 
@@ -403,22 +400,6 @@ abstract contract ERC3643StorageWrapper1 is
         // solhint-disable-next-line no-inline-assembly
         assembly {
             erc3643Storage_.slot := position
-        }
-    }
-
-    /**
-     * @dev This belongs to the ResolverProxyUnstructured contract.
-     * Since it is not in the common inheritance chain we redeclare it here
-     */
-    function _resolverProxyStorage()
-        internal
-        pure
-        returns (ResolverProxyUnstructured.ResolverProxyStorage storage ds)
-    {
-        bytes32 position = _RESOLVER_PROXY_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            ds.slot := position
         }
     }
 }

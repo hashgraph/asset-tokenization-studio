@@ -209,9 +209,7 @@ pragma solidity 0.8.18;
 import {
     IDiamondCut
 } from '../../../interfaces/resolver/resolverProxy/IDiamondCut.sol';
-import {
-    ResolverProxyUnstructured
-} from '../unstructured/ResolverProxyUnstructured.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
 import {
     IBusinessLogicResolver
 } from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
@@ -220,7 +218,7 @@ import {
 } from '../../../layer_1/constants/resolverKeys.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../../../layer_1/constants/roles.sol';
 
-contract DiamondCutFacet is IDiamondCut, ResolverProxyUnstructured {
+contract DiamondCutFacet is IDiamondCut, Common {
     function updateConfigVersion(
         uint256 _newVersion
     ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
