@@ -214,16 +214,14 @@ pragma solidity 0.8.18;
 /******************************************************************************/
 
 import {
-    ResolverProxyUnstructuredProxy
-} from './unstructured/ResolverProxyUnstructured.sol';
-import {
     IResolverProxy
 } from '../../../interfaces/resolver/resolverProxy/IResolverProxy.sol';
 import {
     IBusinessLogicResolver
 } from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
 
-contract ResolverProxy is ResolverProxyUnstructuredProxy {
+contract ResolverProxy is Common {
     constructor(
         IBusinessLogicResolver _resolver,
         bytes32 _resolverProxyConfigurationId,

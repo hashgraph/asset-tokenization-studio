@@ -226,7 +226,7 @@ import {
 import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {LocalContext} from '../layer_0/context/LocalContext.sol';
+import {Common} from '../layer_1/common/Common.sol';
 import {
     FactoryRegulationData,
     buildRegulationData,
@@ -253,7 +253,7 @@ import {IKyc} from '../layer_1/interfaces/kyc/IKyc.sol';
 import {IERC3643} from '../layer_1/interfaces/ERC3643/IERC3643.sol';
 import {validateISIN} from './isinValidator.sol';
 
-contract Factory is IFactory, LocalContext {
+contract Factory is IFactory, Common {
     modifier checkResolver(IBusinessLogicResolver resolver) {
         if (address(resolver) == address(0)) {
             revert EmptyResolver(resolver);
