@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -205,46 +203,82 @@
 
 */
 
-pragma solidity ^0.8.17;
+import { createMock } from '@golevelup/ts-jest';
+import {
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
+import {
+  GetTokenBySaltQuery,
+  GetTokenBySaltQueryResponse,
+} from './GetTokenBySaltQuery';
+import { GetTokenBySaltQueryHandler } from './GetTokenBySaltQueryHandler';
+import { GetTokenBySaltQueryError } from './error/GetTokenBySaltQueryError';
+import { GetTokenQueryFixture } from '@test/fixtures/trexFactroy/TrexFactoryFixture';
 
-// solhint-disable no-global-import
-import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import {TRexIFactory, FactoryRegulationData} from '../interfaces/IFactory.sol';
-import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
-import {TREXFactoryAts} from '../TREXFactory.sol';
-import {SecurityDeploymentLib} from './core/SecurityDeploymentLib.sol';
-import {TREXBaseDeploymentLib} from './core/TREXBaseDeploymentLib.sol';
+describe('GetTokenBySaltQueryHandler', () => {
+  let handler: GetTokenBySaltQueryHandler;
+  let query: GetTokenBySaltQuery;
 
-library TREXEquityDeploymentLib {
-    function deployTREXSuiteAtsEquity(
-        mapping(string => address) storage _tokenDeployed,
-        address _implementationAuthority,
-        address _idFactory,
-        address _atsFactory,
-        string memory _salt,
-        TREXFactoryAts.TokenDetailsAts calldata _tokenDetails,
-        ITREXFactory.ClaimDetails calldata _claimDetails,
-        TRexIFactory.EquityData calldata _equityData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address) {
-        IToken token = SecurityDeploymentLib.deployEquity(
-            _atsFactory,
-            _tokenDetails.owner,
-            _equityData,
-            _factoryRegulationData
-        );
-        TREXBaseDeploymentLib.deployTREXSuite(
-            _tokenDeployed,
-            _implementationAuthority,
-            _idFactory,
-            _salt,
-            _tokenDetails,
-            _claimDetails,
-            token,
-            _equityData.security.identityRegistry,
-            _equityData.security.compliance
-        );
-        return (address(token));
-    }
-}
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const accountServiceMock = createMock<AccountService>();
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const Token = EvmAddressPropsFixture.create().value;
+
+  beforeEach(() => {
+    handler = new GetTokenBySaltQueryHandler(
+      queryAdapterServiceMock,
+      accountServiceMock,
+    );
+    query = GetTokenQueryFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    it('throws GetTokenQueryError when query fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      accountServiceMock.getAccountEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(query);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        GetTokenBySaltQueryError,
+      );
+
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while querying token salt: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtQueryError,
+      });
+    });
+
+    it('should successfully get factory token by salt', async () => {
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(evmAddress);
+      queryAdapterServiceMock.getTrexTokenBySalt.mockResolvedValue(Token);
+
+      const result = await handler.execute(query);
+
+      expect(result).toBeInstanceOf(GetTokenBySaltQueryResponse);
+      expect(result.token).toBe(Token);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
+        query.factory?.toString(),
+      );
+      expect(queryAdapterServiceMock.getTrexTokenBySalt).toHaveBeenCalledWith(
+        evmAddress,
+        query.salt,
+      );
+    });
+  });
+});

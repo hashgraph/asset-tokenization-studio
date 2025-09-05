@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -205,46 +203,46 @@
 
 */
 
-pragma solidity ^0.8.17;
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import {
+  GetTokenBySaltQuery,
+  GetTokenBySaltQueryResponse,
+} from './GetTokenBySaltQuery';
+import AccountService from '@service/account/AccountService';
+import { GetTokenBySaltQueryError } from './error/GetTokenBySaltQueryError';
 
-// solhint-disable no-global-import
-import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import {TRexIFactory, FactoryRegulationData} from '../interfaces/IFactory.sol';
-import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
-import {TREXFactoryAts} from '../TREXFactory.sol';
-import {SecurityDeploymentLib} from './core/SecurityDeploymentLib.sol';
-import {TREXBaseDeploymentLib} from './core/TREXBaseDeploymentLib.sol';
+@QueryHandler(GetTokenBySaltQuery)
+export class GetTokenBySaltQueryHandler
+  implements IQueryHandler<GetTokenBySaltQuery>
+{
+  constructor(
+    @lazyInject(RPCQueryAdapter)
+    private readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+  ) {}
 
-library TREXEquityDeploymentLib {
-    function deployTREXSuiteAtsEquity(
-        mapping(string => address) storage _tokenDeployed,
-        address _implementationAuthority,
-        address _idFactory,
-        address _atsFactory,
-        string memory _salt,
-        TREXFactoryAts.TokenDetailsAts calldata _tokenDetails,
-        ITREXFactory.ClaimDetails calldata _claimDetails,
-        TRexIFactory.EquityData calldata _equityData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address) {
-        IToken token = SecurityDeploymentLib.deployEquity(
-            _atsFactory,
-            _tokenDetails.owner,
-            _equityData,
-            _factoryRegulationData
-        );
-        TREXBaseDeploymentLib.deployTREXSuite(
-            _tokenDeployed,
-            _implementationAuthority,
-            _idFactory,
-            _salt,
-            _tokenDetails,
-            _claimDetails,
-            token,
-            _equityData.security.identityRegistry,
-            _equityData.security.compliance
-        );
-        return (address(token));
+  async execute(
+    query: GetTokenBySaltQuery,
+  ): Promise<GetTokenBySaltQueryResponse> {
+    try {
+      const { salt, factory } = query;
+
+      const factoryEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(factory);
+
+      const token: string = await this.queryAdapter.getTrexTokenBySalt(
+        factoryEvmAddress,
+        salt,
+      );
+
+      return Promise.resolve(new GetTokenBySaltQueryResponse(token));
+    } catch (error) {
+      throw new GetTokenBySaltQueryError(error as Error);
     }
+  }
 }

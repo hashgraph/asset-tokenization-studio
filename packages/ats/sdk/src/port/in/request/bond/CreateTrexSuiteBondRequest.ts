@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -205,46 +203,290 @@
 
 */
 
-pragma solidity ^0.8.17;
+import { OptionalField } from '@core/decorator/OptionalDecorator';
+import { Security } from '@domain/context/security/Security';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../FormatValidation';
 
-// solhint-disable no-global-import
-import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import {TRexIFactory, FactoryRegulationData} from '../interfaces/IFactory.sol';
-import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
-import {TREXFactoryAts} from '../TREXFactory.sol';
-import {SecurityDeploymentLib} from './core/SecurityDeploymentLib.sol';
-import {TREXBaseDeploymentLib} from './core/TREXBaseDeploymentLib.sol';
+import { SecurityDate } from '@domain/context/shared/SecurityDate';
+import { Factory } from '@domain/context/factory/Factories';
 
-library TREXEquityDeploymentLib {
-    function deployTREXSuiteAtsEquity(
-        mapping(string => address) storage _tokenDeployed,
-        address _implementationAuthority,
-        address _idFactory,
-        address _atsFactory,
-        string memory _salt,
-        TREXFactoryAts.TokenDetailsAts calldata _tokenDetails,
-        ITREXFactory.ClaimDetails calldata _claimDetails,
-        TRexIFactory.EquityData calldata _equityData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address) {
-        IToken token = SecurityDeploymentLib.deployEquity(
-            _atsFactory,
-            _tokenDetails.owner,
-            _equityData,
-            _factoryRegulationData
+export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateTrexSuiteBondRequest> {
+  salt: string;
+  owner: string;
+  irs: string;
+  onchainId: string;
+  irAgents: string[];
+  tokenAgents: string[];
+  compliancesModules: string[];
+  complianceSettings: string[];
+  claimTopics: number[];
+  issuers: string[];
+  issuerClaims: number[][];
+
+  name: string;
+  symbol: string;
+  isin: string;
+  private _decimals: number;
+  public get decimals(): number {
+    return this._decimals;
+  }
+  public set decimals(value: number | string) {
+    this._decimals = typeof value === 'number' ? value : parseFloat(value);
+  }
+  isWhiteList: boolean;
+  erc20VotesActivated: boolean;
+  isControllable: boolean;
+  arePartitionsProtected: boolean;
+  isMultiPartition: boolean;
+  clearingActive: boolean;
+  internalKycActivated: boolean;
+
+  @OptionalField()
+  externalPauses?: string[];
+
+  @OptionalField()
+  externalControlLists?: string[];
+
+  @OptionalField()
+  externalKycLists?: string[];
+
+  diamondOwnerAccount: string;
+
+  @OptionalField()
+  complianceId?: string;
+
+  @OptionalField()
+  identityRegistryId?: string;
+
+  currency: string;
+  numberOfUnits: string;
+  nominalValue: string;
+  startingDate: string;
+  maturityDate: string;
+  couponFrequency: string;
+  couponRate: string;
+  firstCouponDate: string;
+  regulationType: number;
+  regulationSubType: number;
+  isCountryControlListWhiteList: boolean;
+  countries: string;
+  info: string;
+  configId: string;
+  configVersion: number;
+
+  constructor({
+    salt,
+    owner,
+    irs,
+    onchainId,
+    irAgents,
+    tokenAgents,
+    compliancesModules,
+    complianceSettings,
+    claimTopics,
+    issuers,
+    issuerClaims,
+
+    name,
+    symbol,
+    isin,
+    decimals,
+    isWhiteList,
+    erc20VotesActivated,
+    isControllable,
+    arePartitionsProtected,
+    isMultiPartition,
+    clearingActive,
+    internalKycActivated,
+    externalPauses,
+    externalControlLists,
+    externalKycLists,
+    diamondOwnerAccount,
+    currency,
+    numberOfUnits,
+    nominalValue,
+    startingDate,
+    maturityDate,
+    couponFrequency,
+    couponRate,
+    firstCouponDate,
+    regulationType,
+    regulationSubType,
+    isCountryControlListWhiteList,
+    countries,
+    info,
+    configId,
+    configVersion,
+    complianceId,
+    identityRegistryId,
+  }: {
+    salt: string;
+    owner: string;
+    irs: string;
+    onchainId: string;
+    irAgents: string[];
+    tokenAgents: string[];
+    compliancesModules: string[];
+    complianceSettings: string[];
+    claimTopics: number[];
+    issuers: string[];
+    issuerClaims: number[][];
+
+    name: string;
+    symbol: string;
+    isin: string;
+    decimals: number | string;
+    isWhiteList: boolean;
+    erc20VotesActivated: boolean;
+    isControllable: boolean;
+    arePartitionsProtected: boolean;
+    isMultiPartition: boolean;
+    clearingActive: boolean;
+    internalKycActivated: boolean;
+    externalPauses?: string[];
+    externalControlLists?: string[];
+    externalKycLists?: string[];
+    diamondOwnerAccount: string;
+    currency: string;
+    numberOfUnits: string;
+    nominalValue: string;
+    startingDate: string;
+    maturityDate: string;
+    couponFrequency: string;
+    couponRate: string;
+    firstCouponDate: string;
+    regulationType: number;
+    regulationSubType: number;
+    isCountryControlListWhiteList: boolean;
+    countries: string;
+    info: string;
+    configId: string;
+    configVersion: number;
+    complianceId?: string;
+    identityRegistryId?: string;
+  }) {
+    super({
+      name: (val) => {
+        return Security.checkName(val);
+      },
+      symbol: (val) => {
+        return Security.checkSymbol(val);
+      },
+      isin: (val) => {
+        return Security.checkISIN(val);
+      },
+      decimals: (val) => {
+        return Security.checkInteger(val);
+      },
+      diamondOwnerAccount:
+        FormatValidation.checkHederaIdFormatOrEvmAddress(false),
+      currency: FormatValidation.checkBytes3Format(),
+      numberOfUnits: FormatValidation.checkNumber(),
+      nominalValue: FormatValidation.checkNumber(),
+      startingDate: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          Math.ceil(new Date().getTime() / 1000),
+          parseInt(this.maturityDate),
         );
-        TREXBaseDeploymentLib.deployTREXSuite(
-            _tokenDeployed,
-            _implementationAuthority,
-            _idFactory,
-            _salt,
-            _tokenDetails,
-            _claimDetails,
-            token,
-            _equityData.security.identityRegistry,
-            _equityData.security.compliance
+      },
+      maturityDate: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          parseInt(this.startingDate),
+          undefined,
         );
-        return (address(token));
-    }
+      },
+      couponFrequency: FormatValidation.checkNumber(),
+      couponRate: FormatValidation.checkNumber(),
+      firstCouponDate: (val) => {
+        if (parseInt(val) != 0) {
+          return SecurityDate.checkDateTimestamp(
+            parseInt(val),
+            parseInt(this.startingDate),
+            parseInt(this.maturityDate),
+          );
+        }
+      },
+      regulationType: (val) => {
+        return Factory.checkRegulationType(val);
+      },
+      regulationSubType: (val) => {
+        return Factory.checkRegulationSubType(val, this.regulationType);
+      },
+      configId: FormatValidation.checkBytes32Format(),
+      externalPauses: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalPauses',
+          true,
+        );
+      },
+      externalControlLists: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalControlLists',
+          true,
+        );
+      },
+      externalKycLists: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'externalKycLists',
+          true,
+        );
+      },
+      complianceId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      identityRegistryId:
+        FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      claimTopics: FormatValidation.checkArrayNumber(),
+    });
+
+    this.salt = salt;
+    this.owner = owner;
+    this.irs = irs;
+    this.onchainId = onchainId;
+    this.irAgents = irAgents;
+    this.tokenAgents = tokenAgents;
+    this.compliancesModules = compliancesModules;
+    this.complianceSettings = complianceSettings;
+    this.claimTopics = claimTopics;
+    this.issuers = issuers;
+    this.issuerClaims = issuerClaims;
+
+    this.name = name;
+    this.symbol = symbol;
+    this.isin = isin;
+    this.decimals =
+      typeof decimals === 'number' ? decimals : parseInt(decimals);
+    this.isWhiteList = isWhiteList;
+    this.erc20VotesActivated = erc20VotesActivated;
+    this.isControllable = isControllable;
+    this.arePartitionsProtected = arePartitionsProtected;
+    this.isMultiPartition = isMultiPartition;
+    this.clearingActive = clearingActive;
+    this.internalKycActivated = internalKycActivated;
+    this.diamondOwnerAccount = diamondOwnerAccount;
+    this.externalPauses = externalPauses;
+    this.externalControlLists = externalControlLists;
+    this.externalKycLists = externalKycLists;
+    this.currency = currency;
+    this.numberOfUnits = numberOfUnits;
+    this.nominalValue = nominalValue;
+    this.startingDate = startingDate;
+    this.maturityDate = maturityDate;
+    this.couponFrequency = couponFrequency;
+    this.couponRate = couponRate;
+    this.firstCouponDate = firstCouponDate;
+    this.regulationType = regulationType;
+    this.regulationSubType = regulationSubType;
+    this.isCountryControlListWhiteList = isCountryControlListWhiteList;
+    this.countries = countries;
+    this.info = info;
+    this.configId = configId;
+    this.configVersion = configVersion;
+    this.complianceId = complianceId;
+    this.identityRegistryId = identityRegistryId;
+  }
 }

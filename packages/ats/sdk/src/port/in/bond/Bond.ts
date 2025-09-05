@@ -248,6 +248,8 @@ import {
 } from '../request';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
+import CreateTrexSuiteBondRequest from '../request/bond/CreateTrexSuiteBondRequest';
+import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
 
 interface IBondInPort {
   create(
@@ -271,6 +273,9 @@ interface IBondInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]>;
   getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
+  createTrexSuite(
+    request: CreateTrexSuiteBondRequest,
+  ): Promise<{ security: SecurityViewModel; transactionId: string }>;
 }
 
 class BondInPort implements IBondInPort {
@@ -547,6 +552,98 @@ class BondInPort implements IBondInPort {
         new GetTotalCouponHoldersQuery(securityId, couponId),
       )
     ).payload;
+  }
+
+  @LogError
+  async createTrexSuite(
+    req: CreateTrexSuiteBondRequest,
+  ): Promise<{ security: SecurityViewModel; transactionId: string }> {
+    ValidatedRequest.handleValidation('CreateTrexSuiteBondRequest', req);
+
+    const {
+      diamondOwnerAccount,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+    } = req;
+
+    const securityFactory = this.networkService.configuration.factoryAddress;
+    const resolver = this.networkService.configuration.resolverAddress;
+
+    const newSecurity: SecurityProps = {
+      name: req.name,
+      symbol: req.symbol,
+      isin: req.isin,
+      decimals: req.decimals,
+      isWhiteList: req.isWhiteList,
+      isControllable: req.isControllable,
+      arePartitionsProtected: req.arePartitionsProtected,
+      clearingActive: req.clearingActive,
+      internalKycActivated: req.internalKycActivated,
+      isMultiPartition: req.isMultiPartition,
+      maxSupply: BigDecimal.fromString(req.numberOfUnits),
+      regulationType: CastRegulationType.fromNumber(req.regulationType),
+      regulationsubType: CastRegulationSubType.fromNumber(
+        req.regulationSubType,
+      ),
+      isCountryControlListWhiteList: req.isCountryControlListWhiteList,
+      countries: req.countries,
+      info: req.info,
+      erc20VotesActivated: req.erc20VotesActivated,
+    };
+
+    const createResponse = await this.commandBus.execute(
+      new CreateTrexSuiteBondCommand(
+        req.salt,
+        req.owner,
+        req.irs,
+        req.onchainId,
+        req.irAgents,
+        req.tokenAgents,
+        req.compliancesModules,
+        req.complianceSettings,
+        req.claimTopics,
+        req.issuers,
+        req.issuerClaims,
+        newSecurity,
+        req.currency,
+        req.nominalValue,
+        req.startingDate,
+        req.maturityDate,
+        req.couponFrequency,
+        req.couponRate,
+        req.firstCouponDate,
+        new ContractId(securityFactory),
+        new ContractId(resolver),
+        req.configId,
+        req.configVersion,
+        diamondOwnerAccount,
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+        req.complianceId,
+        req.identityRegistryId,
+      ),
+    );
+    const securityCreated =
+      createResponse.securityId.toString() !== ContractId.NULL.toString();
+
+    const res = securityCreated
+      ? (
+          await this.queryBus.execute(
+            new GetSecurityQuery(createResponse.securityId.toString()),
+          )
+        ).security
+      : {};
+
+    return {
+      security: securityCreated
+        ? {
+            ...res,
+          }
+        : {},
+      transactionId: createResponse.transactionId,
+    };
   }
 }
 

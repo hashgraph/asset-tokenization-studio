@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -205,46 +203,12 @@
 
 */
 
-pragma solidity ^0.8.17;
+import { CommandError } from '@command/error/CommandError';
+import BaseError from '@core/error/BaseError';
 
-// solhint-disable no-global-import
-import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import {TRexIFactory, FactoryRegulationData} from '../interfaces/IFactory.sol';
-import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
-import {TREXFactoryAts} from '../TREXFactory.sol';
-import {SecurityDeploymentLib} from './core/SecurityDeploymentLib.sol';
-import {TREXBaseDeploymentLib} from './core/TREXBaseDeploymentLib.sol';
-
-library TREXEquityDeploymentLib {
-    function deployTREXSuiteAtsEquity(
-        mapping(string => address) storage _tokenDeployed,
-        address _implementationAuthority,
-        address _idFactory,
-        address _atsFactory,
-        string memory _salt,
-        TREXFactoryAts.TokenDetailsAts calldata _tokenDetails,
-        ITREXFactory.ClaimDetails calldata _claimDetails,
-        TRexIFactory.EquityData calldata _equityData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address) {
-        IToken token = SecurityDeploymentLib.deployEquity(
-            _atsFactory,
-            _tokenDetails.owner,
-            _equityData,
-            _factoryRegulationData
-        );
-        TREXBaseDeploymentLib.deployTREXSuite(
-            _tokenDeployed,
-            _implementationAuthority,
-            _idFactory,
-            _salt,
-            _tokenDetails,
-            _claimDetails,
-            token,
-            _equityData.security.identityRegistry,
-            _equityData.security.compliance
-        );
-        return (address(token));
-    }
+export class CreateTrexSuiteBondCommandError extends CommandError {
+  constructor(error: Error) {
+    const msg = `An error occurred while creating the trex suite bond: ${error.message}`;
+    super(msg, error instanceof BaseError ? error.errorCode : undefined);
+  }
 }

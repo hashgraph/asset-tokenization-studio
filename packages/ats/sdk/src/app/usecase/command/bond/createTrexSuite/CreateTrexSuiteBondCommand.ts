@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -205,46 +203,57 @@
 
 */
 
-pragma solidity ^0.8.17;
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
+import ContractId from '@domain/context/contract/ContractId';
+import { SecurityProps } from '@domain/context/security/Security';
 
-// solhint-disable no-global-import
-import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import {TRexIFactory, FactoryRegulationData} from '../interfaces/IFactory.sol';
-import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
-import {TREXFactoryAts} from '../TREXFactory.sol';
-import {SecurityDeploymentLib} from './core/SecurityDeploymentLib.sol';
-import {TREXBaseDeploymentLib} from './core/TREXBaseDeploymentLib.sol';
+export class CreateTrexSuiteBondCommandResponse implements CommandResponse {
+  public readonly securityId: ContractId;
+  public readonly transactionId: string;
 
-library TREXEquityDeploymentLib {
-    function deployTREXSuiteAtsEquity(
-        mapping(string => address) storage _tokenDeployed,
-        address _implementationAuthority,
-        address _idFactory,
-        address _atsFactory,
-        string memory _salt,
-        TREXFactoryAts.TokenDetailsAts calldata _tokenDetails,
-        ITREXFactory.ClaimDetails calldata _claimDetails,
-        TRexIFactory.EquityData calldata _equityData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) external returns (address) {
-        IToken token = SecurityDeploymentLib.deployEquity(
-            _atsFactory,
-            _tokenDetails.owner,
-            _equityData,
-            _factoryRegulationData
-        );
-        TREXBaseDeploymentLib.deployTREXSuite(
-            _tokenDeployed,
-            _implementationAuthority,
-            _idFactory,
-            _salt,
-            _tokenDetails,
-            _claimDetails,
-            token,
-            _equityData.security.identityRegistry,
-            _equityData.security.compliance
-        );
-        return (address(token));
-    }
+  constructor(securityId: ContractId, transactionId: string) {
+    this.securityId = securityId;
+    this.transactionId = transactionId;
+  }
+}
+
+export class CreateTrexSuiteBondCommand extends Command<CreateTrexSuiteBondCommandResponse> {
+  constructor(
+    public readonly salt: string,
+    public readonly owner: string,
+    public readonly irs: string,
+    public readonly onchainId: string,
+    public readonly irAgents: string[],
+    public readonly tokenAgents: string[],
+    public readonly compliancesModules: string[],
+    public readonly complianceSettings: string[],
+    public readonly claimTopics: number[],
+    public readonly issuers: string[],
+    public readonly issuerClaims: number[][],
+
+    public readonly security: SecurityProps,
+    public readonly currency: string,
+    public readonly nominalValue: string,
+    public readonly startingDate: string,
+    public readonly maturityDate: string,
+    public readonly couponFrequency: string,
+    public readonly couponRate: string,
+    public readonly firstCouponDate: string,
+
+    public readonly factory: ContractId,
+    public readonly resolver: ContractId,
+    public readonly configId: string,
+    public readonly configVersion: number,
+    public readonly diamondOwnerAccount: string,
+
+    public readonly externalPauses?: string[],
+    public readonly externalControlLists?: string[],
+    public readonly externalKycLists?: string[],
+
+    public readonly compliance?: string,
+    public readonly identityRegistry?: string,
+  ) {
+    super();
+  }
 }
