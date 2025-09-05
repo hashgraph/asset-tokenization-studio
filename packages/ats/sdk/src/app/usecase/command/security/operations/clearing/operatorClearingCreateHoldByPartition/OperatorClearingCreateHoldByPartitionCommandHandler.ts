@@ -243,7 +243,7 @@ export class OperatorClearingCreateHoldByPartitionCommandHandler
       const {
         securityId,
         partitionId,
-        escrow,
+        escrowId,
         amount,
         sourceId,
         targetId,
@@ -269,7 +269,7 @@ export class OperatorClearingCreateHoldByPartitionCommandHandler
       await this.validationService.checkDecimals(security, amount);
 
       const escrowEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(escrow);
+        await this.accountService.getAccountEvmAddress(escrowId);
 
       const sourceEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(sourceId);

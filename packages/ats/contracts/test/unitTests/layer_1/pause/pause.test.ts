@@ -327,18 +327,15 @@ describe('Pause Tests', () => {
     })
 
     it('GIVEN an account without pause role WHEN pause THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account B (non role)
-        pauseFacet = pauseFacet.connect(signer_B)
         // pause fails
-        await expect(pauseFacet.pause()).to.be.rejectedWith('AccountHasNoRole')
+        await expect(pauseFacet.connect(signer_B).pause()).to.be.rejectedWith(
+            'AccountHasNoRole'
+        )
     })
 
     it('GIVEN an account without pause role WHEN unpause THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account B (non role)
-        pauseFacet = pauseFacet.connect(signer_B)
-
         // unpause fails
-        await expect(pauseFacet.unpause()).to.be.rejectedWith(
+        await expect(pauseFacet.connect(signer_B).unpause()).to.be.rejectedWith(
             'AccountHasNoRole'
         )
     })
@@ -355,35 +352,31 @@ describe('Pause Tests', () => {
         )
 
         // pause fails
-        pauseFacet = pauseFacet.connect(signer_B)
-        await expect(pauseFacet.pause()).to.be.revertedWithCustomError(
-            pauseFacet,
-            'TokenIsPaused'
-        )
+        await expect(
+            pauseFacet.connect(signer_B).pause()
+        ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
     })
 
     it('GIVEN an unpause Token WHEN unpause THEN transaction fails with TokenIsUnpaused', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_B)
-        pauseFacet = pauseFacet.connect(signer_B)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(PAUSER_ROLE, account_B)
 
         // unpause fails
-        await expect(pauseFacet.unpause()).to.be.revertedWithCustomError(
-            pauseFacet,
-            'TokenIsUnpaused'
-        )
+        await expect(
+            pauseFacet.connect(signer_B).unpause()
+        ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsUnpaused')
     })
 
     it('GIVEN an account with pause role WHEN pause and unpause THEN transaction succeeds', async () => {
         // PAUSE ------------------------------------------------------------------
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_B)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(PAUSER_ROLE, account_B)
         // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
 
-        await expect(pauseFacet.pause())
+        await expect(pauseFacet.connect(signer_B).pause())
             .to.emit(pauseFacet, 'TokenPaused')
             .withArgs(account_B)
         // check is paused
@@ -392,7 +385,7 @@ describe('Pause Tests', () => {
 
         // UNPAUSE ------------------------------------------------------------------
         // remove From list
-        await expect(pauseFacet.unpause())
+        await expect(pauseFacet.connect(signer_B).unpause())
             .to.emit(pauseFacet, 'TokenUnpaused')
             .withArgs(account_B)
         // check is unpaused

@@ -237,11 +237,11 @@ export class CreateEquityCommand extends Command<CreateEquityCommandResponse> {
     public readonly configId?: string,
     public readonly configVersion?: number,
     public readonly diamondOwnerAccount?: string,
-    public readonly externalPauses?: string[],
-    public readonly externalControlLists?: string[],
-    public readonly externalKycLists?: string[],
-    public readonly compliance?: string,
-    public readonly identityRegistry?: string,
+    public readonly externalPausesIds?: string[],
+    public readonly externalControlListsIds?: string[],
+    public readonly externalKycListsIds?: string[],
+    public readonly complianceId?: string,
+    public readonly identityRegistryId?: string,
   ) {
     super();
   }

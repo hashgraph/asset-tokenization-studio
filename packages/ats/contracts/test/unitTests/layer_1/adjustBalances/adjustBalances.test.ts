@@ -330,7 +330,7 @@ describe('Adjust Balances Tests', () => {
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
         scheduledTasksFacet = await ethers.getContractAt(
-            'ScheduledTasksTimeTravel',
+            'ScheduledTasksFacetTimeTravel',
             diamond.address
         )
 
@@ -392,12 +392,11 @@ describe('Adjust Balances Tests', () => {
     })
 
     it('GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-
         // adjustBalances fails
         await expect(
-            adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
+            adjustBalancesFacet
+                .connect(signer_C)
+                .adjustBalances(adjustFactor, adjustDecimals)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
@@ -412,46 +411,44 @@ describe('Adjust Balances Tests', () => {
             account_C
         )
 
-        // Using account C (with role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-
         // adjustBalances fails
         await expect(
-            adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
+            adjustBalancesFacet
+                .connect(signer_C)
+                .adjustBalances(adjustFactor, adjustDecimals)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero', async () => {
-        // Granting Role to account C and Pause
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
-
-        // Using account C (with role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
 
         // adjustBalances fails
         await expect(
-            adjustBalancesFacet.adjustBalances(0, adjustDecimals)
+            adjustBalancesFacet
+                .connect(signer_C)
+                .adjustBalances(0, adjustDecimals)
         ).to.be.revertedWithCustomError(adjustBalancesFacet, 'FactorIsZero')
     })
 
     it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_A)
-        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(ADJUSTMENT_BALANCE_ROLE, account_A)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(CORPORATE_ACTION_ROLE, account_A)
 
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
         await kycFacet
             .connect(signer_B)
             .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
 
-        erc1410Facet = erc1410Facet.connect(signer_A)
-        equityFacet = equityFacet.connect(signer_A)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
-
-        await erc1410Facet.issueByPartition({
+        await erc1410Facet.connect(signer_A).issueByPartition({
             partition: _PARTITION_ID_2,
             tokenHolder: account_B,
             value: balanceOf_B_Original,
@@ -470,7 +467,7 @@ describe('Adjust Balances Tests', () => {
             amount: dividendsAmountPerEquity,
         }
 
-        await equityFacet.setDividends(dividendData_1)
+        await equityFacet.connect(signer_A).setDividends(dividendData_1)
 
         const balanceAdjustmentExecutionDateInSeconds_1 =
             dateToUnixTimestamp(`2030-01-01T00:00:07Z`)
@@ -481,7 +478,9 @@ describe('Adjust Balances Tests', () => {
             decimals: adjustDecimals,
         }
 
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+        await equityFacet
+            .connect(signer_A)
+            .setScheduledBalanceAdjustment(balanceAdjustmentData_1)
 
         const tasks_count_Before =
             await scheduledTasksFacet.scheduledTaskCount()
@@ -492,8 +491,7 @@ describe('Adjust Balances Tests', () => {
         )
 
         // balance adjustment
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
-        await adjustBalancesFacet.adjustBalances(1, 0)
+        await adjustBalancesFacet.connect(signer_A).adjustBalances(1, 0)
 
         const tasks_count_After = await scheduledTasksFacet.scheduledTaskCount()
 

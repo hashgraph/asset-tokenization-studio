@@ -298,6 +298,23 @@ export default class FormatValidation {
     };
   };
 
+  public static checkArrayNumber = <T extends string | number | bigint>({
+    max,
+    min,
+  }: { max?: T; min?: T } = {}) => {
+    return (val: T[]): BaseError[] => {
+      const err: BaseError[] = [];
+      const check = this.checkNumber({ max, min });
+      for (const v of val) {
+        const e = check(v);
+        if (e.length > 0) {
+          err.push(...e);
+        }
+      }
+      return err;
+    };
+  };
+
   public static checkRole = () => {
     return (val: any): BaseError[] => {
       const err: BaseError[] = [];

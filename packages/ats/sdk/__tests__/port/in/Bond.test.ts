@@ -226,6 +226,7 @@ import {
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
 } from '@test/config';
+import { TIME_PERIODS_S } from '@core/Constants';
 import ConnectRequest from '@port/in/request/network/ConnectRequest';
 import { MirrorNode } from '@domain/context/network/MirrorNode';
 import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
@@ -444,6 +445,7 @@ describe('🧪 Bond test', () => {
         rate: rate,
         recordTimestamp: recordTimestamp.toString(),
         executionTimestamp: executionTimestamp.toString(),
+        period: TIME_PERIODS_S.DAY.toString(),
       }),
     );
 

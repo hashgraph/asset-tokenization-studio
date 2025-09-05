@@ -211,6 +211,7 @@ export class Coupon extends ValidatedDomain<Coupon> {
   recordTimeStamp: number;
   executionTimeStamp: number;
   rate: BigDecimal;
+  period: number;
 
   snapshotId?: number;
 
@@ -218,6 +219,7 @@ export class Coupon extends ValidatedDomain<Coupon> {
     recordTimeStamp: number,
     executionTimeStamp: number,
     rate: BigDecimal,
+    period: number,
     snapshotId?: number,
   ) {
     super({
@@ -229,6 +231,7 @@ export class Coupon extends ValidatedDomain<Coupon> {
     this.recordTimeStamp = recordTimeStamp;
     this.executionTimeStamp = executionTimeStamp;
     this.rate = rate;
+    this.period = period;
     this.snapshotId = snapshotId ? snapshotId : undefined;
 
     ValidatedDomain.handleValidation(Coupon.name, this);

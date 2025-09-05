@@ -271,9 +271,9 @@ The Asset Tokenization Studio uses a modular diamond pattern architecture where 
 - `ERC1410ManagementFacet`: Token partition management and administrative functions
 - `ERC1410ReadFacet`: Read-only token state queries
 - `ERC1410TokenHolderFacet`: Token holder operations (transfers, approvals)
-- `ERC20`: Basic ERC20 compatibility layer
-- `ERC1594`: Security token issuance and redemption
-- `ERC1644`: Controller operations for forced transfers
+- `ERC20Facet`: Basic ERC20 compatibility layer
+- `ERC1594Facet`: Security token issuance and redemption
+- `ERC1644Facet`: Controller operations for forced transfers
 
 **ERC3643 (T-REX) Compliance Facets:**
 

@@ -226,7 +226,7 @@ library TREXBondDeploymentLib {
         ITREXFactory.ClaimDetails calldata _claimDetails,
         TRexIFactory.BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
-    ) external {
+    ) external returns (address) {
         IToken token = SecurityDeploymentLib.deployBond(
             _atsFactory,
             _tokenDetails.owner,
@@ -244,5 +244,6 @@ library TREXBondDeploymentLib {
             _bondData.security.identityRegistry,
             _bondData.security.compliance
         );
+        return (address(token));
     }
 }

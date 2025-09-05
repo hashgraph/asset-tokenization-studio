@@ -266,6 +266,8 @@ import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetai
 import { OperationNotAllowed } from '@domain/context/security/error/operations/OperationNotAllowed';
 import { IsInternalKycActivatedQuery } from '@query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
 import { IsExternallyGrantedQuery } from '@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
+import { GetTokenBySaltQuery } from '@query/factory/trex/getTokenBySalt/GetTokenBySaltQuery';
+import { InvalidTrexTokenSalt } from '@domain/context/factory/error/InvalidTrexTokenSalt';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -438,13 +440,8 @@ export default class ValidationService extends Service {
       ),
     );
 
-    if (res.payload != '0x01') {
-      throw ContractsErrorMapper.mapError(
-        res.payload,
-        operatorId,
-        sourceId,
-        targetId,
-      );
+    if (res.payload[0] != '0x01') {
+      throw ContractsErrorMapper.mapError(res.payload[0], res.payload[1]);
     }
   }
 
@@ -453,20 +450,14 @@ export default class ValidationService extends Service {
     sourceId: string,
     amount: string,
     partitionId: string,
-    operatorId: string,
   ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
       new CanRedeemByPartitionQuery(securityId, sourceId, partitionId, amount),
     );
 
-    if (res.payload != '0x01') {
-      throw ContractsErrorMapper.mapError(
-        res.payload,
-        operatorId,
-        sourceId,
-        undefined,
-      );
+    if (res.payload[0] != '0x01') {
+      throw ContractsErrorMapper.mapError(res.payload[0], res.payload[1]);
     }
   }
 
@@ -691,6 +682,17 @@ export default class ValidationService extends Service {
       throw new OperationNotAllowed(
         'The maturity date cannot be earlier or equal than the current one',
       );
+    }
+  }
+
+  async checkTrexTokenSaltExists(factory: string, salt: string): Promise<void> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const exists = (
+      await this.queryBus.execute(new GetTokenBySaltQuery(factory, salt))
+    ).token;
+
+    if (!exists) {
+      throw new InvalidTrexTokenSalt(salt);
     }
   }
 

@@ -211,7 +211,7 @@ export default class ClearingCreateHoldFromByPartitionRequest extends ValidatedR
   securityId: string;
   partitionId: string;
   amount: string;
-  escrow: string;
+  escrowId: string;
   sourceId: string;
   targetId: string;
   clearingExpirationDate: string;
@@ -221,7 +221,7 @@ export default class ClearingCreateHoldFromByPartitionRequest extends ValidatedR
     securityId,
     partitionId,
     amount,
-    escrow,
+    escrowId,
     sourceId,
     targetId,
     clearingExpirationDate,
@@ -230,7 +230,7 @@ export default class ClearingCreateHoldFromByPartitionRequest extends ValidatedR
     securityId: string;
     partitionId: string;
     amount: string;
-    escrow: string;
+    escrowId: string;
     sourceId: string;
     targetId: string;
     clearingExpirationDate: string;
@@ -240,7 +240,7 @@ export default class ClearingCreateHoldFromByPartitionRequest extends ValidatedR
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       partitionId: FormatValidation.checkBytes32Format(),
       amount: FormatValidation.checkAmount(),
-      escrow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      escrowId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       sourceId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       clearingExpirationDate: (val) => {
@@ -260,7 +260,7 @@ export default class ClearingCreateHoldFromByPartitionRequest extends ValidatedR
     this.securityId = securityId;
     this.partitionId = partitionId;
     this.amount = amount;
-    this.escrow = escrow;
+    this.escrowId = escrowId;
     this.sourceId = sourceId;
     this.targetId = targetId;
     this.clearingExpirationDate = clearingExpirationDate;
