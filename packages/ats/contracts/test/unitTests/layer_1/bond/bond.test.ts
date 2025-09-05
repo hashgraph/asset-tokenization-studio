@@ -1164,7 +1164,7 @@ describe('Bond Tests', () => {
                     )
 
                 // --- Pre: before record date -> tokenBalance should be 0 and not reached
-                const before = await bondFacet.getCouponFor(
+                const before = await bondReadFacet.getCouponFor(
                     numberOfCoupons + 1,
                     account_A
                 )
@@ -1178,7 +1178,7 @@ describe('Bond Tests', () => {
                 await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
 
                 // --- Post: after record date -> tokenBalance should be sum of balances
-                const couponFor = await bondFacet.getCouponFor(
+                const couponFor = await bondReadFacet.getCouponFor(
                     numberOfCoupons + 1,
                     account_A
                 )
