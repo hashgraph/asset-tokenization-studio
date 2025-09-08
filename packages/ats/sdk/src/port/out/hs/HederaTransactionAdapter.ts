@@ -250,6 +250,7 @@ import {
   ERC3643ManagementFacet__factory,
   ERC3643OperationsFacet__factory,
   ERC3643BatchFacet__factory,
+  TREXFactoryAts__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { _PARTITION_ID_1, EVM_ZERO_ADDRESS, GAS } from '@core/Constants';
 import TransactionAdapter from '../TransactionAdapter';
@@ -1089,19 +1090,22 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    period: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(
       `bond: ${security} ,
       recordDate :${recordDate} , 
       executionDate: ${executionDate},
-      rate : ${rate}  `,
+      rate : ${rate},
+      period: ${period}`,
     );
 
     const coupon = {
       recordDate: recordDate.toHexString(),
       executionDate: executionDate.toHexString(),
       rate: rate.toHexString(),
+      period: period.toHexString(),
     };
     return this.executeWithArgs(
       new BondUSAFacet__factory().attach(security.toString()),
@@ -2515,7 +2519,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalControlListManagementFacet__factory().attach(security.toString()),
+      new ExternalControlListManagementFacet__factory().attach(
+        security.toString(),
+      ),
       'updateExternalControlLists',
       securityId,
       GAS.UPDATE_EXTERNAL_CONTROL_LISTS,
@@ -2536,7 +2542,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalControlListManagementFacet__factory().attach(security.toString()),
+      new ExternalControlListManagementFacet__factory().attach(
+        security.toString(),
+      ),
       'addExternalControlList',
       securityId,
       GAS.ADD_EXTERNAL_CONTROL_LIST,
@@ -2554,7 +2562,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeWithArgs(
-      new ExternalControlListManagementFacet__factory().attach(security.toString()),
+      new ExternalControlListManagementFacet__factory().attach(
+        security.toString(),
+      ),
       'removeExternalControlList',
       securityId,
       GAS.REMOVE_EXTERNAL_CONTROL_LIST,
@@ -3157,6 +3167,298 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       GAS.REDEEM_AT_MATURITY_BY_PARTITION_GAS,
       [sourceId.toString(), partitionId, amount.toBigNumber()],
     );
+  }
+
+  async createTrexSuiteBond(
+    salt: string,
+    owner: string,
+    irs: string,
+    onchainId: string,
+    irAgents: string[],
+    tokenAgents: string[],
+    compliancesModules: string[],
+    complianceSettings: string[],
+    claimTopics: number[],
+    issuers: string[],
+    issuerClaims: number[][],
+    security: Security,
+    bondDetails: BondDetails,
+    couponDetails: CouponDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    diamondOwnerAccount: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Deploying trex suite bond: ${security.toString()}`);
+    if (!security.regulationType) {
+      throw new MissingRegulationType();
+    }
+    if (!security.regulationsubType) {
+      throw new MissingRegulationSubType();
+    }
+
+    const rbacAdmin: Rbac = {
+      role: SecurityRole._DEFAULT_ADMIN_ROLE,
+      members: [diamondOwnerAccount!.toString()],
+    };
+    const rbacs: Rbac[] = [rbacAdmin];
+
+    const erc20MetadataInfo: ERC20MetadataInfo = {
+      name: security.name,
+      symbol: security.symbol,
+      isin: security.isin,
+      decimals: security.decimals,
+    };
+
+    const resolverProxyConfiguration: ResolverProxyConfiguration = {
+      key: configId,
+      version: configVersion,
+    };
+
+    const securityData: SecurityData = {
+      arePartitionsProtected: security.arePartitionsProtected,
+      isMultiPartition: security.isMultiPartition,
+      resolver: resolver.toString(),
+      resolverProxyConfiguration: resolverProxyConfiguration,
+      rbacs: rbacs,
+      isControllable: security.isControllable,
+      isWhiteList: security.isWhiteList,
+      maxSupply: security.maxSupply ? security.maxSupply.toString() : '0',
+      erc20MetadataInfo: erc20MetadataInfo,
+      clearingActive: security.clearingActive,
+      internalKycActivated: security.internalKycActivated,
+      externalPauses:
+        externalPauses?.map((address) => address.toString()) ?? [],
+      externalControlLists:
+        externalControlLists?.map((address) => address.toString()) ?? [],
+      externalKycLists:
+        externalKycLists?.map((address) => address.toString()) ?? [],
+      compliance: compliance.toString(),
+      identityRegistry: identityRegistryAddress.toString(),
+      erc20VotesActivated: security.erc20VotesActivated,
+    };
+
+    const bondDetailsData = new BondDetailsData(
+      bondDetails.currency,
+      bondDetails.nominalValue.toString(),
+      bondDetails.startingDate.toString(),
+      bondDetails.maturityDate.toString(),
+    );
+
+    const couponDetailsData: CouponDetailsData = {
+      couponFrequency: couponDetails.couponFrequency.toString(),
+      couponRate: couponDetails.couponRate.toString(),
+      firstCouponDate: couponDetails.firstCouponDate.toString(),
+    };
+
+    const securityTokenToCreate = new FactoryBondToken(
+      securityData,
+      bondDetailsData,
+      couponDetailsData,
+    );
+
+    const additionalSecurityData: AdditionalSecurityData = {
+      countriesControlListType: security.isCountryControlListWhiteList,
+      listOfCountries: security.countries ?? '',
+      info: security.info ?? '',
+    };
+
+    const factoryRegulationData = new FactoryRegulationData(
+      CastRegulationType.toNumber(security.regulationType),
+      CastRegulationSubType.toNumber(security.regulationsubType),
+      additionalSecurityData,
+    );
+    const contract = new Contract(
+      factory.toString(),
+      TREXFactoryAts__factory.abi,
+    );
+    try {
+      return this.executeWithArgs(
+        contract,
+        'deployTREXSuiteAtsBond',
+        factoryId!,
+        GAS.TREX_CREATE_SUITE,
+        [
+          salt,
+          {
+            owner,
+            irs,
+            ONCHAINID: onchainId,
+            irAgents,
+            tokenAgents,
+            complianceModules: compliancesModules,
+            complianceSettings,
+          },
+          {
+            claimTopics,
+            issuers,
+            issuerClaims,
+          },
+          securityTokenToCreate,
+          factoryRegulationData,
+        ],
+      );
+    } catch (error) {
+      LogService.logError(error);
+      throw new SigningError(
+        `Unexpected error in TREXFactoryAts__factory deploy operation : ${error}`,
+      );
+    }
+  }
+
+  async createTrexSuiteEquity(
+    salt: string,
+    owner: string,
+    irs: string,
+    onchainId: string,
+    irAgents: string[],
+    tokenAgents: string[],
+    compliancesModules: string[],
+    complianceSettings: string[],
+    claimTopics: number[],
+    issuers: string[],
+    issuerClaims: number[][],
+    security: Security,
+    equityDetails: EquityDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    diamondOwnerAccount: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Deploying trex suite equity: ${security.toString()}`);
+    try {
+      if (!security.regulationType) {
+        throw new MissingRegulationType();
+      }
+      if (!security.regulationsubType) {
+        throw new MissingRegulationSubType();
+      }
+
+      const rbacAdmin: Rbac = {
+        role: SecurityRole._DEFAULT_ADMIN_ROLE,
+        members: [diamondOwnerAccount!.toString()],
+      };
+      const rbacs: Rbac[] = [rbacAdmin];
+
+      const erc20MetadataInfo: ERC20MetadataInfo = {
+        name: security.name,
+        symbol: security.symbol,
+        isin: security.isin,
+        decimals: security.decimals,
+      };
+
+      const resolverProxyConfiguration: ResolverProxyConfiguration = {
+        key: configId,
+        version: configVersion,
+      };
+
+      const securityData: SecurityData = {
+        arePartitionsProtected: security.arePartitionsProtected,
+        isMultiPartition: security.isMultiPartition,
+        resolver: resolver.toString(),
+        resolverProxyConfiguration: resolverProxyConfiguration,
+        rbacs: rbacs,
+        isControllable: security.isControllable,
+        isWhiteList: security.isWhiteList,
+        maxSupply: security.maxSupply ? security.maxSupply.toString() : '0',
+        erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: security.clearingActive,
+        internalKycActivated: security.internalKycActivated,
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
+        externalKycLists:
+          externalKycLists?.map((address) => address.toString()) ?? [],
+        compliance: compliance.toString(),
+        identityRegistry: identityRegistryAddress?.toString(),
+        erc20VotesActivated: security.erc20VotesActivated,
+      };
+
+      const equityDetailsData: EquityDetailsData = {
+        votingRight: equityDetails.votingRight,
+        informationRight: equityDetails.informationRight,
+        liquidationRight: equityDetails.liquidationRight,
+        subscriptionRight: equityDetails.subscriptionRight,
+        conversionRight: equityDetails.conversionRight,
+        redemptionRight: equityDetails.redemptionRight,
+        putRight: equityDetails.putRight,
+        dividendRight: CastDividendType.toNumber(equityDetails.dividendRight),
+        currency: equityDetails.currency,
+        nominalValue: equityDetails.nominalValue.toString(),
+      };
+
+      const securityTokenToCreate = new FactoryEquityToken(
+        securityData,
+        equityDetailsData,
+      );
+
+      const additionalSecurityData: AdditionalSecurityData = {
+        countriesControlListType: security.isCountryControlListWhiteList,
+        listOfCountries: security.countries ?? '',
+        info: security.info ?? '',
+      };
+
+      const factoryRegulationData = new FactoryRegulationData(
+        CastRegulationType.toNumber(security.regulationType),
+        CastRegulationSubType.toNumber(security.regulationsubType),
+        additionalSecurityData,
+      );
+
+      LogService.logTrace(
+        `Deploying equity: ${{
+          security: securityTokenToCreate,
+        }}`,
+      );
+      const contract = new Contract(
+        factory.toString(),
+        TREXFactoryAts__factory.abi,
+      );
+      return this.executeWithArgs(
+        contract,
+        'deployTREXSuiteAtsEquity',
+        factoryId!,
+        GAS.TREX_CREATE_SUITE,
+        [
+          salt,
+          {
+            owner,
+            irs,
+            ONCHAINID: onchainId,
+            irAgents,
+            tokenAgents,
+            complianceModules: compliancesModules,
+            complianceSettings,
+          },
+          {
+            claimTopics,
+            issuers,
+            issuerClaims,
+          },
+          securityTokenToCreate,
+          factoryRegulationData,
+        ],
+      );
+    } catch (error) {
+      LogService.logError(error);
+      throw new SigningError(
+        `Unexpected error in HederaTransactionAdapter create operation : ${error}`,
+      );
+    }
   }
 
   // * Definition of the abstract methods

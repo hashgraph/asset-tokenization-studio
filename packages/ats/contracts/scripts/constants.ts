@@ -389,6 +389,29 @@ export const MESSAGES = {
     },
 }
 
+// * Time periods (in seconds and milliseconds)
+export const TIME_PERIODS_S = {
+    SECOND: 1,
+    MINUTE: 60,
+    HOUR: 60 * 60,
+    DAY: 24 * 60 * 60,
+    WEEK: 7 * 24 * 60 * 60,
+    MONTH: 30 * 24 * 60 * 60,
+    QUARTER: 90 * 24 * 60 * 60,
+    YEAR: 365 * 24 * 60 * 60,
+}
+
+export const TIME_PERIODS_MS = {
+    SECOND: TIME_PERIODS_S.SECOND * 1000,
+    MINUTE: TIME_PERIODS_S.MINUTE * 1000,
+    HOUR: TIME_PERIODS_S.HOUR * 1000,
+    DAY: TIME_PERIODS_S.DAY * 1000,
+    WEEK: TIME_PERIODS_S.WEEK * 1000,
+    MONTH: TIME_PERIODS_S.MONTH * 1000,
+    QUARTER: TIME_PERIODS_S.QUARTER * 1000,
+    YEAR: TIME_PERIODS_S.YEAR * 1000,
+}
+
 export const EIP1066_CODES = {
     // 0x0* Generic
     FAILURE: '0x00',

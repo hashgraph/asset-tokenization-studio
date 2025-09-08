@@ -217,6 +217,7 @@ import {
   RedeemAtMaturityByPartitionRequest,
   GetCouponHoldersRequest,
   GetTotalCouponHoldersRequest,
+  CreateTrexSuiteBondRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
@@ -243,6 +244,7 @@ import {
   GetTotalCouponHoldersRequestFixture,
   SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,
+  CreateTrexSuiteBondRequestFixture,
 } from '@test/fixtures/bond/BondFixture';
 import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import { Security } from '@domain/context/security/Security';
@@ -266,6 +268,7 @@ import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/Upda
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
+import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
 
 describe('Bond', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -283,6 +286,7 @@ describe('Bond', () => {
   let redeemAtMaturityByPartitionRequest: RedeemAtMaturityByPartitionRequest;
   let getCouponHoldersRequest: GetCouponHoldersRequest;
   let getTotalCouponHoldersRequest: GetTotalCouponHoldersRequest;
+  let createTrexSuiteBondRequest: CreateTrexSuiteBondRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -771,6 +775,7 @@ describe('Bond', () => {
           setCouponRequest.recordTimestamp,
           setCouponRequest.executionTimestamp,
           setCouponRequest.rate,
+          setCouponRequest.period,
         ),
       );
 
@@ -796,6 +801,7 @@ describe('Bond', () => {
           setCouponRequest.recordTimestamp,
           setCouponRequest.executionTimestamp,
           setCouponRequest.rate,
+          setCouponRequest.period,
         ),
       );
     });
@@ -1548,6 +1554,404 @@ describe('Bond', () => {
 
       await expect(
         BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('createTrexSuite', () => {
+    createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+      CreateTrexSuiteBondRequestFixture.create(),
+    );
+    it('should create successfully', async () => {
+      const expectedResponse = {
+        securityId: new ContractId(HederaIdPropsFixture.create().value),
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+      queryBusMock.execute.mockResolvedValue({
+        security: security,
+      });
+
+      const result = await BondToken.createTrexSuite(
+        createTrexSuiteBondRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'CreateTrexSuiteBondRequest',
+        createTrexSuiteBondRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CreateTrexSuiteBondCommand(
+          createTrexSuiteBondRequest.salt,
+          createTrexSuiteBondRequest.owner,
+          createTrexSuiteBondRequest.irs,
+          createTrexSuiteBondRequest.onchainId,
+          createTrexSuiteBondRequest.irAgents,
+          createTrexSuiteBondRequest.tokenAgents,
+          createTrexSuiteBondRequest.compliancesModules,
+          createTrexSuiteBondRequest.complianceSettings,
+          createTrexSuiteBondRequest.claimTopics,
+          createTrexSuiteBondRequest.issuers,
+          createTrexSuiteBondRequest.issuerClaims,
+          expect.objectContaining({
+            name: createTrexSuiteBondRequest.name,
+            symbol: createTrexSuiteBondRequest.symbol,
+            isin: createTrexSuiteBondRequest.isin,
+            decimals: createTrexSuiteBondRequest.decimals,
+            isWhiteList: createTrexSuiteBondRequest.isWhiteList,
+            isControllable: createTrexSuiteBondRequest.isControllable,
+            arePartitionsProtected:
+              createTrexSuiteBondRequest.arePartitionsProtected,
+            clearingActive: createTrexSuiteBondRequest.clearingActive,
+            internalKycActivated:
+              createTrexSuiteBondRequest.internalKycActivated,
+            isMultiPartition: createTrexSuiteBondRequest.isMultiPartition,
+            maxSupply: BigDecimal.fromString(
+              createTrexSuiteBondRequest.numberOfUnits,
+            ),
+            regulationType: CastRegulationType.fromNumber(
+              createTrexSuiteBondRequest.regulationType,
+            ),
+            regulationsubType: CastRegulationSubType.fromNumber(
+              createTrexSuiteBondRequest.regulationSubType,
+            ),
+            isCountryControlListWhiteList:
+              createTrexSuiteBondRequest.isCountryControlListWhiteList,
+            countries: createTrexSuiteBondRequest.countries,
+            info: createTrexSuiteBondRequest.info,
+          }),
+          createTrexSuiteBondRequest.currency,
+          createTrexSuiteBondRequest.nominalValue,
+          createTrexSuiteBondRequest.startingDate,
+          createTrexSuiteBondRequest.maturityDate,
+          createTrexSuiteBondRequest.couponFrequency,
+          createTrexSuiteBondRequest.couponRate,
+          createTrexSuiteBondRequest.firstCouponDate,
+          new ContractId(factoryAddress),
+          new ContractId(resolverAddress),
+          createTrexSuiteBondRequest.configId,
+          createTrexSuiteBondRequest.configVersion,
+          createTrexSuiteBondRequest.diamondOwnerAccount,
+          createTrexSuiteBondRequest.externalPauses,
+          createTrexSuiteBondRequest.externalControlLists,
+          createTrexSuiteBondRequest.externalKycLists,
+          createTrexSuiteBondRequest.complianceId,
+          createTrexSuiteBondRequest.identityRegistryId,
+        ),
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          security: security,
+          transactionId: expectedResponse.transactionId,
+        }),
+      );
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'CreateTrexSuiteBondRequest',
+        createTrexSuiteBondRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CreateTrexSuiteBondCommand(
+          createTrexSuiteBondRequest.salt,
+          createTrexSuiteBondRequest.owner,
+          createTrexSuiteBondRequest.irs,
+          createTrexSuiteBondRequest.onchainId,
+          createTrexSuiteBondRequest.irAgents,
+          createTrexSuiteBondRequest.tokenAgents,
+          createTrexSuiteBondRequest.compliancesModules,
+          createTrexSuiteBondRequest.complianceSettings,
+          createTrexSuiteBondRequest.claimTopics,
+          createTrexSuiteBondRequest.issuers,
+          createTrexSuiteBondRequest.issuerClaims,
+          expect.objectContaining({
+            name: createTrexSuiteBondRequest.name,
+            symbol: createTrexSuiteBondRequest.symbol,
+            isin: createTrexSuiteBondRequest.isin,
+            decimals: createTrexSuiteBondRequest.decimals,
+            isWhiteList: createTrexSuiteBondRequest.isWhiteList,
+            isControllable: createTrexSuiteBondRequest.isControllable,
+            arePartitionsProtected:
+              createTrexSuiteBondRequest.arePartitionsProtected,
+            clearingActive: createTrexSuiteBondRequest.clearingActive,
+            internalKycActivated:
+              createTrexSuiteBondRequest.internalKycActivated,
+            isMultiPartition: createTrexSuiteBondRequest.isMultiPartition,
+            maxSupply: BigDecimal.fromString(
+              createTrexSuiteBondRequest.numberOfUnits,
+            ),
+            regulationType: CastRegulationType.fromNumber(
+              createTrexSuiteBondRequest.regulationType,
+            ),
+            regulationsubType: CastRegulationSubType.fromNumber(
+              createTrexSuiteBondRequest.regulationSubType,
+            ),
+            isCountryControlListWhiteList:
+              createTrexSuiteBondRequest.isCountryControlListWhiteList,
+            countries: createTrexSuiteBondRequest.countries,
+            info: createTrexSuiteBondRequest.info,
+          }),
+          createTrexSuiteBondRequest.currency,
+          createTrexSuiteBondRequest.nominalValue,
+          createTrexSuiteBondRequest.startingDate,
+          createTrexSuiteBondRequest.maturityDate,
+          createTrexSuiteBondRequest.couponFrequency,
+          createTrexSuiteBondRequest.couponRate,
+          createTrexSuiteBondRequest.firstCouponDate,
+          new ContractId(factoryAddress),
+          new ContractId(resolverAddress),
+          createTrexSuiteBondRequest.configId,
+          createTrexSuiteBondRequest.configVersion,
+          createTrexSuiteBondRequest.diamondOwnerAccount,
+          createTrexSuiteBondRequest.externalPauses,
+          createTrexSuiteBondRequest.externalControlLists,
+          createTrexSuiteBondRequest.externalKycLists,
+          createTrexSuiteBondRequest.complianceId,
+          createTrexSuiteBondRequest.identityRegistryId,
+        ),
+      );
+    });
+
+    it('should throw error if name is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({ name: '' }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if symbol is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          symbol: '',
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if isin is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          isin: '',
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if decimals is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          decimals: 2.85,
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if diamondOwnerAccount is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          diamondOwnerAccount: 'invalid',
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if currency is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          currency: 'invalid',
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if numberOfUnits is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          numberOfUnits: 'invalid',
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if nominalValue is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          nominalValue: 'invalid',
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if startingDate is invalid', async () => {
+      const time = faker.date.past().getTime();
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          startingDate: time.toString(),
+          maturityDate: (time + 10).toString(),
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if maturityDate is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          maturityDate: faker.date.past().getTime().toString(),
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if couponFrequency is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          couponFrequency: 'invalid',
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if couponRate is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          couponRate: 'invalid',
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if firstCouponDate is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          firstCouponDate: faker.date.past().getTime().toString(),
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if regulationType is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          regulationType: 5,
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if regulationSubType is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          regulationSubType: 5,
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if configId is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          configId: 'invalid',
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalPauses is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          externalPauses: ['invalid'],
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalControlLists is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          externalControlLists: ['invalid'],
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalKycLists is invalid', async () => {
+      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
+        CreateTrexSuiteBondRequestFixture.create({
+          externalKycLists: ['invalid'],
+        }),
+      );
+
+      await expect(
+        BondToken.createTrexSuite(createTrexSuiteBondRequest),
       ).rejects.toThrow(ValidationError);
     });
   });
