@@ -261,6 +261,12 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   configId: string;
   configVersion: number;
 
+  @OptionalField()
+  beneficiariesIds?: string[];
+
+  @OptionalField()
+  beneficiariesData?: string[];
+
   constructor({
     name,
     symbol,
@@ -291,6 +297,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion,
     complianceId,
     identityRegistryId,
+    beneficiariesIds,
+    beneficiariesData,
   }: {
     name: string;
     symbol: string;
@@ -321,6 +329,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion: number;
     complianceId?: string;
     identityRegistryId?: string;
+    beneficiariesIds?: string[];
+    beneficiariesData?: string[];
   }) {
     super({
       name: (val) => {
@@ -385,6 +395,14 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
       complianceId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       identityRegistryId:
         FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      beneficiariesIds: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'beneficiariesIds',
+          true,
+        );
+      },
+      beneficiariesData: FormatValidation.checkBytesFormat(),
     });
     this.name = name;
     this.symbol = symbol;
@@ -416,5 +434,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.configVersion = configVersion;
     this.complianceId = complianceId;
     this.identityRegistryId = identityRegistryId;
+    this.beneficiariesIds = beneficiariesIds;
+    this.beneficiariesData = beneficiariesData;
   }
 }
