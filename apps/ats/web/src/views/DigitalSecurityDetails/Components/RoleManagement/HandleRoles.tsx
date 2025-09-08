@@ -205,7 +205,7 @@
 
 import { Button, HStack, VStack } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
-import { CheckboxGroupController, Text } from 'io-bricks-ui';
+import { Checkbox, CheckboxGroupController, Text } from 'io-bricks-ui';
 import { required } from '../../../../utils/rules';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { ApplyRolesRequest } from '@hashgraph/asset-tokenization-sdk';
@@ -241,13 +241,17 @@ export const HandleRoles = ({
   const { id = '' } = useParams();
 
   const { mutate: applyRoles, isLoading: isLoadingApply } = useApplyRoles();
-  const { handleSubmit: onHandleSubmit, control: controlRoles } =
-    useForm<EditRolesFormValues>({
-      mode: 'onSubmit',
-      defaultValues: {
-        roles: currentRoles,
-      },
-    });
+  const {
+    handleSubmit: onHandleSubmit,
+    control: controlRoles,
+    watch,
+    setValue,
+  } = useForm<EditRolesFormValues>({
+    mode: 'onSubmit',
+    defaultValues: {
+      roles: currentRoles,
+    },
+  });
 
   const onSubmitRoles: SubmitHandler<EditRolesFormValues> = (
     params: EditRolesFormValues,
@@ -269,6 +273,29 @@ export const HandleRoles = ({
     applyRoles(request);
   };
 
+  const roleListAvailable = rolesList.filter((role) => {
+    if (!securityDetails) return role;
+
+    return role.allowedSecurities.includes(
+      securityDetails.type as TSecurityType,
+    );
+  });
+
+  const handleSelectAllRoles = () => {
+    if (allRolesSelected) {
+      setValue(
+        'roles',
+        currentRoles.length === roleListAvailable.length ? [] : currentRoles,
+      );
+      return;
+    }
+
+    const allRoleValues = roleListAvailable.map((role) => role.label);
+    setValue('roles', allRoleValues);
+  };
+
+  const allRolesSelected = watch('roles').length === roleListAvailable.length;
+
   return (
     <VStack
       w={COLUMN_MAX_WIDTH}
@@ -279,26 +306,34 @@ export const HandleRoles = ({
       <HStack h={16} layerStyle="whiteContainer">
         <Text textStyle="HeadingMediumLG">{t('rolesDefinitions')}</Text>
       </HStack>
-      <CheckboxGroupController
-        control={controlRoles}
-        flexDirection={'column'}
-        id="roles"
-        options={rolesList
-          .filter((role) => {
-            if (!securityDetails) return role;
-
-            return role.allowedSecurities.includes(
-              securityDetails.type as TSecurityType,
-            );
-          })
-          .map((role) => ({
+      <VStack w="full" gap={2}>
+        <HStack
+          bgColor="white"
+          w="full"
+          p={4}
+          cursor="pointer"
+          onClick={handleSelectAllRoles}
+        >
+          <Checkbox
+            id="selectAllRoles"
+            isChecked={allRolesSelected}
+            onChange={handleSelectAllRoles}
+          />
+          <Text textStyle="BodyRegularXS">{t('selectAllRoles')}</Text>
+        </HStack>
+        <CheckboxGroupController
+          control={controlRoles}
+          flexDirection={'column'}
+          id="roles"
+          options={roleListAvailable.map((role) => ({
             value: role.label,
             label: tRoles(role.label),
           }))}
-        rules={{ required }}
-        variant="roles"
-        gap={4}
-      />
+          rules={{ required }}
+          variant="roles"
+          gap={4}
+        />
+      </VStack>
 
       <HStack w="full" justify="flex-end">
         <Button

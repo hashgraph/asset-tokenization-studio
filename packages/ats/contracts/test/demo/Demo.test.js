@@ -171,9 +171,9 @@ Deployed contracts:
             await testFacet2.getStaticResolverKey(),
         ])
         await (0, hardhat_network_helpers_1.loadFixture)(deployDiamond)
-        /*console.log(`    Diamond: ${await diamond.address}`)
+        console.log(`    Diamond: ${await diamond.address}`)
 
-        const loupeFacet: DiamondLoupeFacet = await ethers.getContractAt(
+        /*const loupeFacet: DiamondLoupeFacet = await ethers.getContractAt(
             'DiamondLoupeFacet',
             await diamond.address
         )

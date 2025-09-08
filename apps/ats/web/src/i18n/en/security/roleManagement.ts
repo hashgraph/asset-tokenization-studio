@@ -213,6 +213,8 @@ export default {
     subtitle: 'Add the ID account to manage its roles',
     currentRoles: 'Current roles',
     rolesDefinitions: 'Roles definitions',
+    selectAllRoles: 'Select all roles',
+    rolesSelected: 'roles selected',
     inputs: {
       search: {
         placeholder: '0.0.12345',

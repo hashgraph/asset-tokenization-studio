@@ -205,17 +205,13 @@
 
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {_LOCKER_ROLE} from '../constants/roles.sol';
 import {ILock} from '../interfaces/lock/ILock.sol';
 import {Common} from '../common/Common.sol';
-import {_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-contract Lock is ILock, IStaticFunctionSelectors, Common {
+abstract contract Lock is ILock, Common {
     // Functions
     function lockByPartition(
         bytes32 _partition,
@@ -418,63 +414,5 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
                 _tokenHolder,
                 _lockId
             );
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _LOCK_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .releaseByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockedAmountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockCountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLocksIdForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.lock.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.release.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockedAmountFor
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockCountFor
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getLocksIdFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getLockFor.selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ILock).interfaceId;
     }
 }

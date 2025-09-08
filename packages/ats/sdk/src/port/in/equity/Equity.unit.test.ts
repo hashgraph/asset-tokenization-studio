@@ -224,6 +224,7 @@ import {
   GetTotalDividendHoldersRequest,
   GetVotingHoldersRequest,
   GetTotalVotingHoldersRequest,
+  CreateTrexSuiteEquityRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
@@ -247,6 +248,7 @@ import { BigNumber } from 'ethers';
 import EquityToken from './Equity';
 import {
   CreateEquityRequestFixture,
+  CreateTrexSuiteEquityRequestFixture,
   DividendFixture,
   EquityDetailsFixture,
   GetAllDividendsRequestFixture,
@@ -287,6 +289,7 @@ import { GetDividendHoldersQuery } from '@query/equity/dividends/getDividendHold
 import { GetTotalDividendHoldersQuery } from '@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQuery';
 import { GetVotingHoldersQuery } from '@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery';
 import { GetTotalVotingHoldersQuery } from '@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery';
+import { CreateTrexSuiteEquityCommand } from '@command/equity/createTrexSuite/CreateTrexSuiteEquityCommand';
 
 describe('Equity', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -311,6 +314,7 @@ describe('Equity', () => {
   let getTotalDividendHoldersRequest: GetTotalDividendHoldersRequest;
   let getVotingHoldersRequest: GetVotingHoldersRequest;
   let getTotalVotingHoldersRequest: GetTotalVotingHoldersRequest;
+  let createTrexSuiteEquityRequest: CreateTrexSuiteEquityRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -407,9 +411,9 @@ describe('Equity', () => {
           createEquityRequest.configId,
           createEquityRequest.configVersion,
           createEquityRequest.diamondOwnerAccount,
-          createEquityRequest.externalPauses,
-          createEquityRequest.externalControlLists,
-          createEquityRequest.externalKycLists,
+          createEquityRequest.externalPausesIds,
+          createEquityRequest.externalControlListsIds,
+          createEquityRequest.externalKycListsIds,
           createEquityRequest.complianceId,
           createEquityRequest.identityRegistryId,
         ),
@@ -478,9 +482,9 @@ describe('Equity', () => {
           createEquityRequest.configId,
           createEquityRequest.configVersion,
           createEquityRequest.diamondOwnerAccount,
-          createEquityRequest.externalPauses,
-          createEquityRequest.externalControlLists,
-          createEquityRequest.externalKycLists,
+          createEquityRequest.externalPausesIds,
+          createEquityRequest.externalControlListsIds,
+          createEquityRequest.externalKycListsIds,
           createEquityRequest.complianceId,
           createEquityRequest.identityRegistryId,
         ),
@@ -629,10 +633,10 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if externalPauses is invalid', async () => {
+    it('should throw error if externalPausesIds is invalid', async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          externalPauses: ['invalid'],
+          externalPausesIds: ['invalid'],
         }),
       );
 
@@ -641,10 +645,10 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if externalControlLists is invalid', async () => {
+    it('should throw error if externalControlListsIds is invalid', async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          externalControlLists: ['invalid'],
+          externalControlListsIds: ['invalid'],
         }),
       );
 
@@ -653,10 +657,10 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if externalKycLists is invalid', async () => {
+    it('should throw error if externalKycListsIds is invalid', async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          externalKycLists: ['invalid'],
+          externalKycListsIds: ['invalid'],
         }),
       );
 
@@ -2230,6 +2234,364 @@ describe('Equity', () => {
 
       await expect(
         EquityToken.getTotalVotingHolders(getTotalVotingHoldersRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('createTrexSuite', () => {
+    createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+      CreateTrexSuiteEquityRequestFixture.create(),
+    );
+    it('should create equity successfully', async () => {
+      const expectedResponse = {
+        securityId: new ContractId(HederaIdPropsFixture.create().value),
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+      queryBusMock.execute.mockResolvedValue({
+        security: security,
+      });
+
+      const result = await EquityToken.createTrexSuite(
+        createTrexSuiteEquityRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'CreateTrexSuiteEquityRequest',
+        createTrexSuiteEquityRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CreateTrexSuiteEquityCommand(
+          createTrexSuiteEquityRequest.salt,
+          createTrexSuiteEquityRequest.owner,
+          createTrexSuiteEquityRequest.irs,
+          createTrexSuiteEquityRequest.onchainId,
+          createTrexSuiteEquityRequest.irAgents,
+          createTrexSuiteEquityRequest.tokenAgents,
+          createTrexSuiteEquityRequest.compliancesModules,
+          createTrexSuiteEquityRequest.complianceSettings,
+          createTrexSuiteEquityRequest.claimTopics,
+          createTrexSuiteEquityRequest.issuers,
+          createTrexSuiteEquityRequest.issuerClaims,
+          expect.objectContaining({
+            name: createTrexSuiteEquityRequest.name,
+            symbol: createTrexSuiteEquityRequest.symbol,
+            isin: createTrexSuiteEquityRequest.isin,
+            decimals: createTrexSuiteEquityRequest.decimals,
+            isWhiteList: createTrexSuiteEquityRequest.isWhiteList,
+            isControllable: createTrexSuiteEquityRequest.isControllable,
+            arePartitionsProtected:
+              createTrexSuiteEquityRequest.arePartitionsProtected,
+            clearingActive: createTrexSuiteEquityRequest.clearingActive,
+            internalKycActivated:
+              createTrexSuiteEquityRequest.internalKycActivated,
+            isMultiPartition: createTrexSuiteEquityRequest.isMultiPartition,
+            maxSupply: BigDecimal.fromString(
+              createTrexSuiteEquityRequest.numberOfShares,
+            ),
+            regulationType: CastRegulationType.fromNumber(
+              createTrexSuiteEquityRequest.regulationType,
+            ),
+            regulationsubType: CastRegulationSubType.fromNumber(
+              createTrexSuiteEquityRequest.regulationSubType,
+            ),
+            isCountryControlListWhiteList:
+              createTrexSuiteEquityRequest.isCountryControlListWhiteList,
+            countries: createTrexSuiteEquityRequest.countries,
+            info: createTrexSuiteEquityRequest.info,
+          }),
+          createTrexSuiteEquityRequest.votingRight,
+          createTrexSuiteEquityRequest.informationRight,
+          createTrexSuiteEquityRequest.liquidationRight,
+          createTrexSuiteEquityRequest.subscriptionRight,
+          createTrexSuiteEquityRequest.conversionRight,
+          createTrexSuiteEquityRequest.redemptionRight,
+          createTrexSuiteEquityRequest.putRight,
+          CastDividendType.fromNumber(
+            createTrexSuiteEquityRequest.dividendRight,
+          ),
+          createTrexSuiteEquityRequest.currency,
+          createTrexSuiteEquityRequest.nominalValue,
+          new ContractId(factoryAddress),
+          new ContractId(resolverAddress),
+          createTrexSuiteEquityRequest.configId,
+          createTrexSuiteEquityRequest.configVersion,
+          createTrexSuiteEquityRequest.diamondOwnerAccount,
+          createTrexSuiteEquityRequest.externalPauses,
+          createTrexSuiteEquityRequest.externalControlLists,
+          createTrexSuiteEquityRequest.externalKycLists,
+          createTrexSuiteEquityRequest.complianceId,
+          createTrexSuiteEquityRequest.identityRegistryId,
+        ),
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          security: security,
+          transactionId: expectedResponse.transactionId,
+        }),
+      );
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'CreateTrexSuiteEquityRequest',
+        createTrexSuiteEquityRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CreateTrexSuiteEquityCommand(
+          createTrexSuiteEquityRequest.salt,
+          createTrexSuiteEquityRequest.owner,
+          createTrexSuiteEquityRequest.irs,
+          createTrexSuiteEquityRequest.onchainId,
+          createTrexSuiteEquityRequest.irAgents,
+          createTrexSuiteEquityRequest.tokenAgents,
+          createTrexSuiteEquityRequest.compliancesModules,
+          createTrexSuiteEquityRequest.complianceSettings,
+          createTrexSuiteEquityRequest.claimTopics,
+          createTrexSuiteEquityRequest.issuers,
+          createTrexSuiteEquityRequest.issuerClaims,
+          expect.objectContaining({
+            name: createTrexSuiteEquityRequest.name,
+            symbol: createTrexSuiteEquityRequest.symbol,
+            isin: createTrexSuiteEquityRequest.isin,
+            decimals: createTrexSuiteEquityRequest.decimals,
+            isWhiteList: createTrexSuiteEquityRequest.isWhiteList,
+            isControllable: createTrexSuiteEquityRequest.isControllable,
+            arePartitionsProtected:
+              createTrexSuiteEquityRequest.arePartitionsProtected,
+            clearingActive: createTrexSuiteEquityRequest.clearingActive,
+            internalKycActivated:
+              createTrexSuiteEquityRequest.internalKycActivated,
+            isMultiPartition: createTrexSuiteEquityRequest.isMultiPartition,
+            maxSupply: BigDecimal.fromString(
+              createTrexSuiteEquityRequest.numberOfShares,
+            ),
+            regulationType: CastRegulationType.fromNumber(
+              createTrexSuiteEquityRequest.regulationType,
+            ),
+            regulationsubType: CastRegulationSubType.fromNumber(
+              createTrexSuiteEquityRequest.regulationSubType,
+            ),
+            isCountryControlListWhiteList:
+              createTrexSuiteEquityRequest.isCountryControlListWhiteList,
+            countries: createTrexSuiteEquityRequest.countries,
+            info: createTrexSuiteEquityRequest.info,
+          }),
+          createTrexSuiteEquityRequest.votingRight,
+          createTrexSuiteEquityRequest.informationRight,
+          createTrexSuiteEquityRequest.liquidationRight,
+          createTrexSuiteEquityRequest.subscriptionRight,
+          createTrexSuiteEquityRequest.conversionRight,
+          createTrexSuiteEquityRequest.redemptionRight,
+          createTrexSuiteEquityRequest.putRight,
+          CastDividendType.fromNumber(
+            createTrexSuiteEquityRequest.dividendRight,
+          ),
+          createTrexSuiteEquityRequest.currency,
+          createTrexSuiteEquityRequest.nominalValue,
+          new ContractId(factoryAddress),
+          new ContractId(resolverAddress),
+          createTrexSuiteEquityRequest.configId,
+          createTrexSuiteEquityRequest.configVersion,
+          createTrexSuiteEquityRequest.diamondOwnerAccount,
+          createTrexSuiteEquityRequest.externalPauses,
+          createTrexSuiteEquityRequest.externalControlLists,
+          createTrexSuiteEquityRequest.externalKycLists,
+          createTrexSuiteEquityRequest.complianceId,
+          createTrexSuiteEquityRequest.identityRegistryId,
+        ),
+      );
+    });
+
+    it('should throw error if name is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({ name: '' }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if symbol is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          symbol: '',
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if isin is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          isin: '',
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if decimals is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          decimals: 2.85,
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if diamondOwnerAccount is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          diamondOwnerAccount: 'invalid',
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if dividendRight is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          dividendRight: 100,
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if currency is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          currency: 'invalid',
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if numberOfShares is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          numberOfShares: 'invalid',
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if nominalValue is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          nominalValue: 'invalid',
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if regulationType is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          regulationType: 5,
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if regulationSubType is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          regulationSubType: 5,
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if configId is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          configId: 'invalid',
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalPauses is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          externalPauses: ['invalid'],
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalControlLists is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          externalControlLists: ['invalid'],
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if externalKycLists is invalid', async () => {
+      createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
+        CreateTrexSuiteEquityRequestFixture.create({
+          externalKycLists: ['invalid'],
+        }),
+      );
+
+      await expect(
+        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
       ).rejects.toThrow(ValidationError);
     });
   });

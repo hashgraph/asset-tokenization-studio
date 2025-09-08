@@ -215,11 +215,8 @@ import {
     _BOND_MANAGER_ROLE,
     _MATURITY_REDEEMER_ROLE
 } from '../../layer_1/constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-abstract contract Bond is IBond, IStaticFunctionSelectors, Common {
+abstract contract Bond is IBond, Common {
     function redeemAtMaturityByPartition(
         address _tokenHolder,
         bytes32 _partition,
@@ -267,7 +264,8 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, Common {
             _msgSender(),
             _newCoupon.recordDate,
             _newCoupon.executionDate,
-            _newCoupon.rate
+            _newCoupon.rate,
+            _newCoupon.period
         );
     }
 
