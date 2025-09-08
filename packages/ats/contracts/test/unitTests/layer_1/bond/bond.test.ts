@@ -1166,19 +1166,15 @@ describe('Bond Tests', () => {
             })
 
             it('Given a coupon and account with normal, cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct', async () => {
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    CORPORATE_ACTION_ROLE,
-                    account_C
-                )
-                await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-
-                // Using account C (with role)
-                bondFacet = bondFacet.connect(signer_C)
-                lockFacet = lockFacet.connect(signer_C)
-                erc1410Facet = erc1410Facet.connect(signer_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CORPORATE_ACTION_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(LOCKER_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ISSUER_ROLE, account_C)
 
                 const totalAmount = numberOfUnits
                 const lockedAmount = totalAmount / 5
@@ -1186,7 +1182,7 @@ describe('Bond Tests', () => {
                 const frozenAmount = totalAmount / 5
                 const clearedAmount = totalAmount / 5
 
-                await erc1410Facet.issueByPartition({
+                await erc1410Facet.connect(signer_C).issueByPartition({
                     partition: DEFAULT_PARTITION,
                     tokenHolder: account_A,
                     value: totalAmount,
@@ -1202,7 +1198,9 @@ describe('Bond Tests', () => {
                 }
 
                 await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)
-                await lockFacet.lock(lockedAmount, account_A, MAX_UINT256)
+                await lockFacet
+                    .connect(signer_C)
+                    .lock(lockedAmount, account_A, MAX_UINT256)
                 await freezeFacet.freezePartialTokens(account_A, frozenAmount)
                 await clearingActionsFacet.activateClearing()
 
@@ -1221,7 +1219,7 @@ describe('Bond Tests', () => {
                 )
 
                 // set coupon
-                await expect(bondFacet.setCoupon(couponData))
+                await expect(bondFacet.connect(signer_C).setCoupon(couponData))
                     .to.emit(bondFacet, 'CouponSet')
                     .withArgs(
                         '0x0000000000000000000000000000000000000000000000000000000000000033',
