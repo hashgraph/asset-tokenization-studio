@@ -327,6 +327,8 @@ import {
     TimeTravel__factory,
     ProxyAdmin__factory,
     TransparentUpgradeableProxy__factory,
+    Beneficiaries__factory,
+    BeneficiariesTimeTravel__factory,
 } from '@typechain'
 
 export let environment = Environment.empty()
@@ -887,6 +889,19 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        beneficiaries: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new Beneficiaries__factory(),
+                new BeneficiariesTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.BeneficiariesFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
         externalPauseManagementFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ExternalPauseManagementFacet__factory(),
@@ -1353,6 +1368,17 @@ export async function deployAtsContracts({
                 )
                 console.log(
                     `ClearingActionsFacet has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
+            beneficiariesFacet: await deployContractWithFactory(
+                commands.beneficiaries
+            ).then((result) => {
+                console.log(
+                    `Beneficiaries has been deployed successfully at ${result.address}`
+                )
+                console.log(
+                    `Beneficiaries has been deployed successfully at ${result.address}`
                 )
                 return result
             }),
