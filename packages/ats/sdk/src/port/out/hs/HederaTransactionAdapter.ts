@@ -604,7 +604,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         bondInfo.nominalValue.toString(),
         bondInfo.startingDate.toString(),
         bondInfo.maturityDate.toString(),
-        bondInfo.interestRateCalculator
+        bondInfo.kpiOracle
       );
 
       const couponDetails: CouponDetailsData = {
@@ -3157,21 +3157,21 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async setInterestRateCalculator(
+  async setKpiOracle(
     security: EvmAddress,
-    interestRateCalculatorId: EvmAddress,
+    kpiOracleId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Setting interest rate calculator to ${interestRateCalculatorId.toString()}`,
+      `Setting KPI oracle to ${kpiOracleId.toString()}`,
     );
     const contract = new Contract(security.toString(), Bond__factory.abi);
     return this.executeWithArgs(
       contract,
-      'setInterestRateCalculator',
+      'setKpiOracle',
       securityId,
-      GAS.SET_INTEREST_RATE_CALCULATOR_GAS,
-      [security.toString(), interestRateCalculatorId.toString()],
+      GAS.SET_KPI_ORACLE_GAS,
+      [security.toString(), kpiOracleId.toString()],
     );
   }
 

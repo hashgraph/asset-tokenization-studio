@@ -214,7 +214,7 @@ import {
     _CORPORATE_ACTION_ROLE,
     _BOND_MANAGER_ROLE,
     _MATURITY_REDEEMER_ROLE,
-    _IR_CALCULATOR_MANAGER_ROLE
+    _KPI_ORACLE_MANAGER_ROLE
 } from '../../layer_1/constants/roles.sol';
 import {
     IStaticFunctionSelectors
@@ -295,21 +295,17 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         return success_;
     }
 
-    function setInterestRateCalculator(
-        address _newInterestRateCalculator
+    function setKpiOracle(
+        address _newKpiOracle
     )
         external
         override
         onlyUnpaused
-        onlyRole(_IR_CALCULATOR_MANAGER_ROLE)
+        onlyRole(_KPI_ORACLE_MANAGER_ROLE)
         returns (bool success_)
     {
-        success_ = _setInterestRateCalculator(_newInterestRateCalculator);
-        emit InterestRateCalculatorSet(
-            address(this),
-            _msgSender(),
-            _newInterestRateCalculator
-        );
+        success_ = _setKpiOracle(_newKpiOracle);
+        emit KpiOracleSet(address(this), _msgSender(), _newKpiOracle);
     }
 
     function getBondDetails()

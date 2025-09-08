@@ -203,12 +203,117 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
+import {
+  SetKpiOracleCommand,
+  SetKpiOracleCommandResponse,
+} from './SetKpiOracleCommand';
+import { SetKpiOracleCommandHandler } from './SetKpiOracleCommandHandler';
+import { SetKpiOracleCommandFixture } from '@test/fixtures/bond/BondFixture';
+import { createMock } from '@golevelup/ts-jest';
+import TransactionService from '@service/transaction/TransactionService';
+import {
+  AccountPropsFixture,
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+  TransactionIdFixture,
+} from '@test/fixtures/shared/DataFixture';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { ErrorCode } from '@core/error/BaseError';
+import { SetKpiOracleCommandError } from './error/SetKpiOracleCommandError';
+import ValidationService from '@service/validation/ValidationService';
+import AccountService from '@service/account/AccountService';
+import Account from '@domain/context/account/Account';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
 
-interface IInterestRateCalculator {
-    function calculateInterestRate(
-        uint256 _recordDate,
-        uint256 _baseRate
-    ) external view returns (uint256 adjustedRate_);
-}
+describe('SetKpiOracleCommandHandler', () => {
+  let handler: SetKpiOracleCommandHandler;
+  let command: SetKpiOracleCommand;
+  const transactionServiceMock = createMock<TransactionService>();
+  const contractServiceMock = createMock<ContractService>();
+  const validationServiceMock = createMock<ValidationService>();
+  const accountServiceMock = createMock<AccountService>();
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const transactionId = TransactionIdFixture.create().id;
+  const account = new Account(AccountPropsFixture.create());
+  const errorMsg = ErrorMsgFixture.create().msg;
+
+  beforeEach(() => {
+    handler = new SetKpiOracleCommandHandler(
+      transactionServiceMock,
+      contractServiceMock,
+      validationServiceMock,
+      accountServiceMock,
+    );
+    command = SetKpiOracleCommandFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    describe('error cases', () => {
+      it('throws SetKpiOracleCommandError when command fails with uncaught error', async () => {
+        const fakeError = new Error(errorMsg);
+
+        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+        const resultPromise = handler.execute(command);
+
+        await expect(resultPromise).rejects.toBeInstanceOf(
+          SetKpiOracleCommandError,
+        );
+
+        await expect(resultPromise).rejects.toMatchObject({
+          message: expect.stringContaining(
+            `An error occurred while setting the KPI oracle: ${errorMsg}`,
+          ),
+          errorCode: ErrorCode.UncaughtCommandError,
+        });
+      });
+    });
+    describe('success cases', () => {
+      it('should successfully set KPI oracle', async () => {
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
+        accountServiceMock.getCurrentAccount.mockReturnValue(account);
+
+        transactionServiceMock.getHandler().setKpiOracle.mockResolvedValue({
+          id: transactionId,
+        });
+
+        const result = await handler.execute(command);
+
+        expect(result).toBeInstanceOf(SetKpiOracleCommandResponse);
+        expect(result.payload).toBe(true);
+        expect(result.transactionId).toBe(transactionId);
+
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+          2,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.securityId,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+          command.kpiOracleId,
+        );
+
+        expect(
+          transactionServiceMock.getHandler().setKpiOracle,
+        ).toHaveBeenCalledTimes(1);
+
+        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+          SecurityRole._IR_CALCULATOR_MANAGER_ROLE,
+          account.id.toString(),
+          command.securityId,
+        );
+
+        expect(
+          transactionServiceMock.getHandler().setKpiOracle,
+        ).toHaveBeenCalledWith(evmAddress, evmAddress, command.securityId);
+      });
+    });
+  });
+});

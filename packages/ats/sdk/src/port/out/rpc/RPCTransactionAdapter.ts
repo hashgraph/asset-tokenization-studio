@@ -3000,19 +3000,19 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async setInterestRateCalculator(
+  async setKpiOracle(
     securityId: EvmAddress,
-    interestRateCalculatorId: EvmAddress,
+    kpiOracleId: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Setting interest rate calculator address to ${interestRateCalculatorId.toString()}`,
+      `Setting KPI oracle to ${kpiOracleId.toString()}`,
     );
 
     return this.executeTransaction(
       Bond__factory.connect(securityId.toString(), this.getSignerOrProvider()),
-      'setInterestRateCalculator',
-      [securityId.toString(), interestRateCalculatorId.toString()],
-      GAS.SET_INTEREST_RATE_CALCULATOR_GAS,
+      'setKpiOracle',
+      [securityId.toString(), kpiOracleId.toString()],
+      GAS.SET_KPI_ORACLE_GAS,
     );
   }
 

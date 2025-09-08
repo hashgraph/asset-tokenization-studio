@@ -203,119 +203,67 @@
 
 */
 
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
 import {
-  SetInterestRateCalculatorCommand,
-  SetInterestRateCalculatorCommandResponse,
-} from './SetInterestRateCalculatorCommand';
-import { SetInterestRateCalculatorCommandHandler } from './SetInterestRateCalculatorCommandHandler';
-import { SetInterestRateCalculatorCommandFixture } from '@test/fixtures/bond/BondFixture';
-import { createMock } from '@golevelup/ts-jest';
+  SetKpiOracleCommand,
+  SetKpiOracleCommandResponse,
+} from './SetKpiOracleCommand';
 import TransactionService from '@service/transaction/TransactionService';
-import {
-  AccountPropsFixture,
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-  TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { ErrorCode } from '@core/error/BaseError';
-import { SetInterestRateCalculatorCommandError } from './error/SetInterestRateCalculatorCommandError';
+import { SetKpiOracleCommandError } from './error/SetKpiOracleCommandError';
 import ValidationService from '@service/validation/ValidationService';
-import AccountService from '@service/account/AccountService';
-import Account from '@domain/context/account/Account';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
+import AccountService from '@service/account/AccountService';
 
-describe('SetInterestRateCalculatorCommandHandler', () => {
-  let handler: SetInterestRateCalculatorCommandHandler;
-  let command: SetInterestRateCalculatorCommand;
-  const transactionServiceMock = createMock<TransactionService>();
-  const contractServiceMock = createMock<ContractService>();
-  const validationServiceMock = createMock<ValidationService>();
-  const accountServiceMock = createMock<AccountService>();
+@CommandHandler(SetKpiOracleCommand)
+export class SetKpiOracleCommandHandler
+  implements ICommandHandler<SetKpiOracleCommand>
+{
+  constructor(
+    @lazyInject(TransactionService)
+    private readonly transactionService: TransactionService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(ValidationService)
+    private readonly validationService: ValidationService,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+  ) {}
 
-  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const transactionId = TransactionIdFixture.create().id;
-  const account = new Account(AccountPropsFixture.create());
-  const errorMsg = ErrorMsgFixture.create().msg;
+  async execute(
+    command: SetKpiOracleCommand,
+  ): Promise<SetKpiOracleCommandResponse> {
+    try {
+      const { securityId, kpiOracleId } = command;
 
-  beforeEach(() => {
-    handler = new SetInterestRateCalculatorCommandHandler(
-      transactionServiceMock,
-      contractServiceMock,
-      validationServiceMock,
-      accountServiceMock,
-    );
-    command = SetInterestRateCalculatorCommandFixture.create();
-  });
+      const handler = this.transactionService.getHandler();
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
+      const account = this.accountService.getCurrentAccount();
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws SetInterestRateCalculatorCommandError when command fails with uncaught error', async () => {
-        const fakeError = new Error(errorMsg);
+      const securityEvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const kpiOracleEvmAddress =
+        await this.contractService.getContractEvmAddress(kpiOracleId);
 
-        contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+      await this.validationService.checkRole(
+        SecurityRole._IR_CALCULATOR_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-        const resultPromise = handler.execute(command);
+      const res = await handler.setKpiOracle(
+        securityEvmAddress,
+        kpiOracleEvmAddress,
+        securityId,
+      );
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          SetInterestRateCalculatorCommandError,
-        );
-
-        await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while setting the interest rate calculator: ${errorMsg}`,
-          ),
-          errorCode: ErrorCode.UncaughtCommandError,
-        });
-      });
-    });
-    describe('success cases', () => {
-      it('should successfully set interest rate calculator', async () => {
-        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
-        accountServiceMock.getCurrentAccount.mockReturnValue(account);
-
-        transactionServiceMock
-          .getHandler()
-          .setInterestRateCalculator.mockResolvedValue({
-            id: transactionId,
-          });
-
-        const result = await handler.execute(command);
-
-        expect(result).toBeInstanceOf(SetInterestRateCalculatorCommandResponse);
-        expect(result.payload).toBe(true);
-        expect(result.transactionId).toBe(transactionId);
-
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          2,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-          command.securityId,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-          command.interestRateCalculatorId,
-        );
-
-        expect(
-          transactionServiceMock.getHandler().setInterestRateCalculator,
-        ).toHaveBeenCalledTimes(1);
-
-        expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
-          SecurityRole._IR_CALCULATOR_MANAGER_ROLE,
-          account.id.toString(),
-          command.securityId,
-        );
-
-        expect(
-          transactionServiceMock.getHandler().setInterestRateCalculator,
-        ).toHaveBeenCalledWith(evmAddress, evmAddress, command.securityId);
-      });
-    });
-  });
-});
+      return Promise.resolve(
+        new SetKpiOracleCommandResponse(res.error == undefined, res.id!),
+      );
+    } catch (error) {
+      throw new SetKpiOracleCommandError(error as Error);
+    }
+  }
+}

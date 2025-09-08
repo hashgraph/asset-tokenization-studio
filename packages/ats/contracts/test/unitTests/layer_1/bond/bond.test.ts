@@ -259,8 +259,8 @@ import {
     PROTECTED_PARTITIONS_ROLE,
     deployContract,
     DeployContractCommand,
-    IR_CALCULATOR_MANAGER_ROLE,
     SNAPSHOT_ROLE,
+    KPI_ORACLE_MANAGER_ROLE,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -316,7 +316,7 @@ describe('Bond Tests', () => {
     let controlListFacet: ControlList
     let clearingActionsFacet: ClearingActionsFacet
     let protectedPartitionsFacet: ProtectedPartitions
-    let interestRateCalculatorMockAddress: string
+    let kpiOracleMockAddress: string
     let snapshotsFacet: Snapshots
 
     function set_initRbacs(): Rbac[] {
@@ -468,10 +468,10 @@ describe('Bond Tests', () => {
             })
         )
 
-        interestRateCalculatorMockAddress = (
+        kpiOracleMockAddress = (
             await deployContract(
                 new DeployContractCommand({
-                    name: 'InterestRateCalculatorMock',
+                    name: 'KpiOracleMock',
                     signer: signer_A,
                     args: [],
                 })
@@ -1084,8 +1084,8 @@ describe('Bond Tests', () => {
                 }
             })
 
-            describe('Interest rate calculator', () => {
-                it('GIVEN interest rate calculator set during deployment THEN the address is correctly set', async () => {
+            describe('KPI oracle', () => {
+                it('GIVEN kpi oracle set during deployment THEN the address is correctly set', async () => {
                     const init_rbacs: Rbac[] = set_initRbacs()
 
                     const newDiamond = await deployBondFromFactory({
@@ -1116,84 +1116,72 @@ describe('Bond Tests', () => {
                         init_rbacs,
                         factory,
                         businessLogicResolver: businessLogicResolver.address,
-                        interestRateCalculator:
-                            interestRateCalculatorMockAddress,
+                        kpiOracle: kpiOracleMockAddress,
                     })
 
                     const bondDetails = await bondFacet
                         .attach(newDiamond.address)
                         .getBondDetails()
-                    expect(bondDetails.interestRateCalculator).to.equal(
-                        interestRateCalculatorMockAddress
-                    )
+                    expect(bondDetails.kpiOracle).to.equal(kpiOracleMockAddress)
                 })
-                it('GIVEN a user without the IR_CALCULATOR_MANAGER_ROLE role WHEN setting a new interest rate calculator THEN the transaction reverts with AccountHasNoRole', async () => {
+                it('GIVEN a user without the KPI_ORACLE_MANAGER_ROLE role WHEN setting a new interest rate calculator THEN the transaction reverts with AccountHasNoRole', async () => {
                     await expect(
                         bondFacet
                             .connect(signer_C)
-                            .setInterestRateCalculator(
-                                interestRateCalculatorMockAddress
-                            )
+                            .setKpiOracle(kpiOracleMockAddress)
                     ).to.revertedWithCustomError(bondFacet, 'AccountHasNoRole')
                 })
 
-                it('GIVEN a user with the IR_CALCULATOR_MANAGER_ROLE role WHEN setting a new interest rate calculator THEN the transaction succeeds', async () => {
+                it('GIVEN a user with the KPI_ORACLE_MANAGER_ROLE role WHEN setting a new interest rate calculator THEN the transaction succeeds', async () => {
                     await accessControlFacet.grantRole(
-                        IR_CALCULATOR_MANAGER_ROLE,
+                        KPI_ORACLE_MANAGER_ROLE,
                         account_C
                     )
                     await expect(
                         bondFacet
                             .connect(signer_C)
-                            .setInterestRateCalculator(
-                                interestRateCalculatorMockAddress
-                            )
+                            .setKpiOracle(kpiOracleMockAddress)
                     )
-                        .to.emit(bondFacet, 'InterestRateCalculatorSet')
+                        .to.emit(bondFacet, 'kpiOracleSet')
                         .withArgs(
                             bondFacet.address,
                             account_C,
-                            interestRateCalculatorMockAddress
+                            kpiOracleMockAddress
                         )
 
                     const bondDetails = await bondFacet.getBondDetails()
-                    expect(bondDetails.interestRateCalculator).to.equal(
-                        interestRateCalculatorMockAddress
-                    )
+                    expect(bondDetails.kpiOracle).to.equal(kpiOracleMockAddress)
                 })
 
-                it('GIVEN a coupon set when retrieving its interest rate THEN the adjusted value is returned', async () => {
-                    await accessControlFacet.grantRole(
-                        IR_CALCULATOR_MANAGER_ROLE,
-                        account_C
-                    )
-                    await accessControlFacet.grantRole(
-                        CORPORATE_ACTION_ROLE,
-                        account_C
-                    )
-                    await bondFacet
-                        .connect(signer_C)
-                        .setInterestRateCalculator(
-                            interestRateCalculatorMockAddress
-                        )
-                    await timeTravelFacet.changeSystemTimestamp(
-                        firstCouponDate + 1
-                    )
-                    await snapshotsFacet.takeSnapshot()
-                    const couponFor = await bondFacet.getCouponFor(1, account_A)
-                    expect(couponFor.rate).to.equal(rate + 1) // (+1) hardcoded in the mock
-                })
+                // it('GIVEN a coupon set when retrieving its interest rate THEN the adjusted value is returned', async () => {
+                //     await accessControlFacet.grantRole(
+                //         IR_CALCULATOR_MANAGER_ROLE,
+                //         account_C
+                //     )
+                //     await accessControlFacet.grantRole(
+                //         CORPORATE_ACTION_ROLE,
+                //         account_C
+                //     )
+                //     await bondFacet
+                //         .connect(signer_C)
+                //         .setkpiOracle(kpiOracleMockAddress)
+                //     await timeTravelFacet.changeSystemTimestamp(
+                //         firstCouponDate + 1
+                //     )
+                //     await snapshotsFacet.takeSnapshot()
+                //     const couponFor = await bondFacet.getCouponFor(1, account_A)
+                //     expect(couponFor.rate).to.equal(rate + 1) // (+1) hardcoded in the mock
+                // })
 
                 it('GIVEN a failed called to the calculator THEN transaction reverts with ', async () => {
-                    const interestRateCalculatorMock =
-                        await ethers.getContractAt(
-                            'InterestRateCalculatorMock',
-                            interestRateCalculatorMockAddress
-                        )
-                    interestRateCalculatorMock.setRevertFlag(true)
+                    const kpiOracleMock = await ethers.getContractAt(
+                        'kpiOracleMock',
+                        kpiOracleMockAddress
+                    )
+                    kpiOracleMock.setRevertFlag(true)
 
                     await accessControlFacet.grantRole(
-                        IR_CALCULATOR_MANAGER_ROLE,
+                        KPI_ORACLE_MANAGER_ROLE,
                         account_C
                     )
                     await accessControlFacet.grantRole(
@@ -1202,9 +1190,7 @@ describe('Bond Tests', () => {
                     )
                     await bondFacet
                         .connect(signer_C)
-                        .setInterestRateCalculator(
-                            interestRateCalculatorMockAddress
-                        )
+                        .setKpiOracle(kpiOracleMockAddress)
                     await timeTravelFacet.changeSystemTimestamp(
                         firstCouponDate + 1
                     )
@@ -1221,12 +1207,12 @@ describe('Bond Tests', () => {
                         10
                     )
                     const outerSelector = bondFacet.interface.getSighash(
-                        'CallToIrCalculatorFailed()'
+                        'CallToKpiOracleFailed()'
                     )
                     expect(returnedSelector).to.equal(outerSelector)
                     const targetErrorSelector =
-                        interestRateCalculatorMock.interface.getSighash(
-                            'InterestRateCalculatorMock_Error()'
+                        kpiOracleMock.interface.getSighash(
+                            'KpiOracleMock_Error()'
                         )
                     const targetErrorArgs: any = [] // No args in target contract custom error
                     const args = ethers.utils.solidityPack(

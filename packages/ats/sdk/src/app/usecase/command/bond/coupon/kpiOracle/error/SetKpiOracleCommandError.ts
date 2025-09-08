@@ -203,43 +203,12 @@
 
 */
 
-import { Command } from '@core/command/Command';
-import { CommandResponse } from '@core/command/CommandResponse';
-import ContractId from '@domain/context/contract/ContractId';
-import { SecurityProps } from '@domain/context/security/Security';
+import { CommandError } from '@command/error/CommandError';
+import BaseError from '@core/error/BaseError';
 
-export class CreateBondCommandResponse implements CommandResponse {
-  public readonly securityId: ContractId;
-  public readonly transactionId: string;
-
-  constructor(securityId: ContractId, transactionId: string) {
-    this.securityId = securityId;
-    this.transactionId = transactionId;
-  }
-}
-
-export class CreateBondCommand extends Command<CreateBondCommandResponse> {
-  constructor(
-    public readonly security: SecurityProps,
-    public readonly currency: string,
-    public readonly nominalValue: string,
-    public readonly startingDate: string,
-    public readonly maturityDate: string,
-    public readonly couponFrequency: string,
-    public readonly couponRate: string,
-    public readonly firstCouponDate: string,
-    public readonly factory?: ContractId,
-    public readonly resolver?: ContractId,
-    public readonly configId?: string,
-    public readonly configVersion?: number,
-    public readonly diamondOwnerAccount?: string,
-    public readonly externalPauses?: string[],
-    public readonly externalControlLists?: string[],
-    public readonly externalKycLists?: string[],
-    public readonly compliance?: string,
-    public readonly identityRegistry?: string,
-    public readonly kpiOracleId?: string,
-  ) {
-    super();
+export class SetKpiOracleCommandError extends CommandError {
+  constructor(error: Error) {
+    const msg = `An error occurred while setting the KPI oracle: ${error.message}`;
+    super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
 }

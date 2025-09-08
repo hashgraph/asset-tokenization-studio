@@ -248,8 +248,8 @@ import {
 } from '../request';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
-import SetInterestRateCalculatorRequest from '../request/bond/SetInterestRateCalculatorRequest';
-import { SetInterestRateCalculatorCommand } from '@command/bond/coupon/interestRateCalculator/SetInterestRateCalculatorCommand';
+import SetKpiOracleRequest from '../request/bond/SetKpiOracleRequest';
+import { SetKpiOracleCommand } from '@command/bond/coupon/kpiOracle/SetKpiOracleCommand';
 
 interface IBondInPort {
   create(
@@ -273,8 +273,8 @@ interface IBondInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]>;
   getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
-  setInterestRateCalculator(
-    request: SetInterestRateCalculatorRequest,
+  setKpiOracle(
+    request: SetKpiOracleRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
@@ -522,20 +522,14 @@ class BondInPort implements IBondInPort {
   }
 
   @LogError
-  async setInterestRateCalculator(
-    request: SetInterestRateCalculatorRequest,
+  async setKpiOracle(
+    request: SetKpiOracleRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, interestRateCalculatorId } = request;
-    ValidatedRequest.handleValidation(
-      SetInterestRateCalculatorRequest.name,
-      request,
-    );
+    const { securityId, kpiOracleId } = request;
+    ValidatedRequest.handleValidation(SetKpiOracleRequest.name, request);
 
     return await this.commandBus.execute(
-      new SetInterestRateCalculatorCommand(
-        securityId,
-        interestRateCalculatorId,
-      ),
+      new SetKpiOracleCommand(securityId, kpiOracleId),
     );
   }
 

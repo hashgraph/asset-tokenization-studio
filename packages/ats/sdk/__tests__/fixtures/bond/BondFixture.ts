@@ -246,8 +246,8 @@ import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetC
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import GetCouponHoldersRequest from '@port/in/request/bond/GetCouponHoldersRequest';
 import GetTotalCouponHoldersRequest from '@port/in/request/bond/GetTotalCouponHoldersRequest';
-import { SetInterestRateCalculatorCommand } from '@command/bond/coupon/interestRateCalculator/SetInterestRateCalculatorCommand';
-import SetInterestRateCalculatorRequest from '@port/in/request/bond/SetInterestRateCalculatorRequest';
+import { SetKpiOracleCommand } from '@command/bond/coupon/kpiOracle/SetKpiOracleCommand';
+import SetKpiOracleRequest from '@port/in/request/bond/SetKpiOracleRequest';
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   (command) => {
@@ -264,13 +264,12 @@ export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   },
 );
 
-export const SetInterestRateCalculatorCommandFixture =
-  createFixture<SetInterestRateCalculatorCommand>((command) => {
+export const SetKpiOracleCommandFixture = createFixture<SetKpiOracleCommand>(
+  (command) => {
     command.securityId.as(() => HederaIdPropsFixture.create().value);
-    command.interestRateCalculatorId.as(
-      () => HederaIdPropsFixture.create().value,
-    );
-  });
+    command.kpiOracleId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
 
 export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
   (command) => {
@@ -582,10 +581,9 @@ export const RedeemAtMaturityByPartitionRequestFixture =
     request.partitionId.as(() => PartitionIdFixture.create().value);
   });
 
-export const SetInterestRateCalculatorRequestFixture =
-  createFixture<SetInterestRateCalculatorRequest>((request) => {
+export const SetKpiOracleRequestFixture = createFixture<SetKpiOracleRequest>(
+  (request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.interestRateCalculatorId.as(
-      () => HederaIdPropsFixture.create().value,
-    );
-  });
+    request.kpiOracleId.as(() => HederaIdPropsFixture.create().value);
+  },
+);

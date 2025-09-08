@@ -214,14 +214,13 @@ import {IBondStorageWrapper} from '../interfaces/bond/IBondStorageWrapper.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {LowLevelCall} from '../../layer_0/common/libraries/LowLevelCall.sol';
+import {IKpiOracle} from '../interfaces/bond/IKpiOracle.sol';
 import {
-    IInterestRateCalculator
-} from '../interfaces/bond/IInterestRateCalculator.sol';
+    InterestRateCalculatorLib
+} from './libraries/InterestRateCalculatorLib.sol';
 
 abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
-    using LowLevelCall for address;
 
     struct BondDataStorage {
         IBond.BondDetailsData bondDetail;
@@ -291,12 +290,10 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         return true;
     }
 
-    function _setInterestRateCalculator(
-        address _interestRateCalculator
+    function _setKpiOracle(
+        address _kpiOracle
     ) internal returns (bool success_) {
-        _bondStorage()
-            .bondDetail
-            .interestRateCalculator = _interestRateCalculator;
+        _bondStorage().bondDetail.kpiOracle = _kpiOracle;
         return true;
     }
 
@@ -342,27 +339,12 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     ) internal view returns (IBond.CouponFor memory couponFor_) {
         IBond.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
 
-        if (_bondStorage().bondDetail.interestRateCalculator == address(0)) {
-            couponFor_.rate = registeredCoupon.coupon.rate;
-        } else {
-            couponFor_.rate = abi.decode(
-                _bondStorage()
-                    .bondDetail
-                    .interestRateCalculator
-                    .functionStaticCall(
-                        abi.encodeWithSelector(
-                            IInterestRateCalculator
-                                .calculateInterestRate
-                                .selector,
-                            registeredCoupon.coupon.recordDate,
-                            registeredCoupon.coupon.rate
-                        ),
-                        CallToIrCalculatorFailed.selector
-                    ),
-                (uint256)
-            );
-        }
-
+        IBond.BondDetailsData memory bondDetails = _getBondDetails();
+        couponFor_.rate = InterestRateCalculatorLib.calculateInterestRate(
+            bondDetails.interesRateLimits,
+            bondDetails.impactLimits,
+            bondDetails.kpiOracle
+        );
         couponFor_.recordDate = registeredCoupon.coupon.recordDate;
         couponFor_.executionDate = registeredCoupon.coupon.executionDate;
 

@@ -212,7 +212,21 @@ interface IBond {
         uint256 nominalValue;
         uint256 startingDate;
         uint256 maturityDate;
-        address interestRateCalculator;
+        address kpiOracle;
+        InteresRateLimits interesRateLimits;
+        ImpactLimits impactLimits;
+    }
+
+    struct InteresRateLimits {
+        uint256 interestMarginCap;
+        uint256 baseInterestRate;
+        uint256 interestMarginFloor;
+    }
+
+    struct ImpactLimits {
+        uint256 impactMaxDeviationCap;
+        uint256 impactBaseLine;
+        uint256 impactMaxDeviationFloor;
     }
 
     struct CouponDetailsData {
@@ -255,9 +269,7 @@ interface IBond {
         uint256 _maturityDate
     ) external returns (bool success_);
 
-    function setInterestRateCalculator(
-        address _interestRateCalculator
-    ) external returns (bool success_);
+    function setKpiOracle(address _kpiOracle) external returns (bool success_);
 
     function getBondDetails()
         external

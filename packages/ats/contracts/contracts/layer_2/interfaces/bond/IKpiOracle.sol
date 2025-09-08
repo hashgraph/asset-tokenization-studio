@@ -203,12 +203,9 @@
 
 */
 
-import { CommandError } from '@command/error/CommandError';
-import BaseError from '@core/error/BaseError';
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.18;
 
-export class SetInterestRateCalculatorCommandError extends CommandError {
-  constructor(error: Error) {
-    const msg = `An error occurred while setting the interest rate calculator: ${error.message}`;
-    super(msg, error instanceof BaseError ? error.errorCode : undefined);
-  }
+interface IKpiOracle {
+    function getImpactData() external view returns (uint256 impactData_);
 }

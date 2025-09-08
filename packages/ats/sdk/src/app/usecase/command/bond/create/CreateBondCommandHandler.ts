@@ -266,7 +266,7 @@ export class CreateBondCommandHandler
         externalKycLists,
         compliance,
         identityRegistry,
-        interestRateCalculatorId,
+        kpiOracleId,
       } = command;
 
       //TODO: Boy scout: remove request validations and adjust test
@@ -318,10 +318,8 @@ export class CreateBondCommandHandler
       const identityRegistryAddress = identityRegistry
         ? await this.contractService.getContractEvmAddress(identityRegistry)
         : new EvmAddress(EVM_ZERO_ADDRESS);
-      const interestRateCalculatorEvmAddress = interestRateCalculatorId
-        ? await this.contractService.getContractEvmAddress(
-            interestRateCalculatorId,
-          )
+      const kpiOracleEvmAddress = kpiOracleId
+        ? await this.contractService.getContractEvmAddress(kpiOracleId)
         : new EvmAddress(EVM_ZERO_ADDRESS);
 
       const handler = this.transactionService.getHandler();
@@ -331,7 +329,7 @@ export class CreateBondCommandHandler
         BigDecimal.fromString(nominalValue),
         parseInt(startingDate),
         parseInt(maturityDate),
-        interestRateCalculatorEvmAddress.toString(),
+        kpiOracleEvmAddress.toString(),
       );
 
       const couponInfo = new CouponDetails(

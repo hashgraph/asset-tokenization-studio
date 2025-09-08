@@ -513,9 +513,9 @@ interface ITransactionAdapter {
     amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  setInterestRateCalculator(
+  setKpiOracle(
     security: EvmAddress,
-    interestRateCalculatorId: EvmAddress,
+    kpiOracleId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
@@ -1842,9 +1842,9 @@ export default abstract class TransactionAdapter
     amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  abstract setInterestRateCalculator(
+  abstract setKpiOracle(
     security: EvmAddress,
-    interestRateCalculatorId: EvmAddress,
+    kpiOracleId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }

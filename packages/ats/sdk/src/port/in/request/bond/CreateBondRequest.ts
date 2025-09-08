@@ -248,7 +248,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   identityRegistryId?: string;
 
   @OptionalField()
-  interestRateCalculatorId?: string;
+  kpiOracleId?: string;
 
   currency: string;
   numberOfUnits: string;
@@ -298,7 +298,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion,
     complianceId,
     identityRegistryId,
-    interestRateCalculatorId,
+    kpiOracleId,
   }: {
     name: string;
     symbol: string;
@@ -331,7 +331,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion: number;
     complianceId?: string;
     identityRegistryId?: string;
-    interestRateCalculatorId?: string;
+    kpiOracleId?: string;
   }) {
     super({
       name: (val) => {
@@ -407,8 +407,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
       complianceId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       identityRegistryId:
         FormatValidation.checkHederaIdFormatOrEvmAddress(true),
-      interestRateCalculatorId:
-        FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      kpiOracleId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
     });
     this.name = name;
     this.symbol = symbol;
@@ -442,6 +441,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.configVersion = configVersion;
     this.complianceId = complianceId;
     this.identityRegistryId = identityRegistryId;
-    this.interestRateCalculatorId = interestRateCalculatorId;
+    this.kpiOracleId = kpiOracleId;
   }
 }

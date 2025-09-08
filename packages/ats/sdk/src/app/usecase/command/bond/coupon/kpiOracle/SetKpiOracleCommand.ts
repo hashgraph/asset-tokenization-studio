@@ -203,27 +203,21 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
 
-export default class SetInterestRateCalculatorRequest extends ValidatedRequest<SetInterestRateCalculatorRequest> {
-  securityId: string;
-  interestRateCalculatorId: string;
+export class SetKpiOracleCommandResponse implements CommandResponse {
+  constructor(
+    public readonly payload: boolean,
+    public readonly transactionId: string,
+  ) {}
+}
 
-  constructor({
-    securityId,
-    interestRateCalculatorId,
-  }: {
-    securityId: string;
-    interestRateCalculatorId: string;
-  }) {
-    super({
-      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      interestRateCalculatorId:
-        FormatValidation.checkHederaIdFormatOrEvmAddress(true),
-    });
-
-    this.securityId = securityId;
-    this.interestRateCalculatorId = interestRateCalculatorId;
+export class SetKpiOracleCommand extends Command<SetKpiOracleCommandResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly kpiOracleId: string,
+  ) {
+    super();
   }
 }

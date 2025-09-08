@@ -243,7 +243,7 @@ import {
   GetTotalCouponHoldersRequestFixture,
   SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,
-  SetInterestRateCalculatorRequestFixture,
+  SetKpiOracleRequestFixture,
 } from '@test/fixtures/bond/BondFixture';
 import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import { Security } from '@domain/context/security/Security';
@@ -267,8 +267,8 @@ import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/Upda
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
-import SetInterestRateCalculatorRequest from '../request/bond/SetInterestRateCalculatorRequest';
-import { SetInterestRateCalculatorCommand } from '@command/bond/coupon/interestRateCalculator/SetInterestRateCalculatorCommand';
+import SetKpiOracleRequest from '../request/bond/SetKpiOracleRequest';
+import { SetKpiOracleCommand } from '@command/bond/coupon/kpiOracle/SetKpiOracleCommand';
 
 describe('Bond', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -284,7 +284,7 @@ describe('Bond', () => {
   let getAllCouponsRequest: GetAllCouponsRequest;
   let updateMaturityDateRequest: UpdateMaturityDateRequest;
   let redeemAtMaturityByPartitionRequest: RedeemAtMaturityByPartitionRequest;
-  let setInterestRateCalculatorRequest: SetInterestRateCalculatorRequest;
+  let setKpiOracleRequest: SetKpiOracleRequest;
   let getCouponHoldersRequest: GetCouponHoldersRequest;
   let getTotalCouponHoldersRequest: GetTotalCouponHoldersRequest;
 
@@ -1377,11 +1377,11 @@ describe('Bond', () => {
     });
   });
 
-  describe('setInterestRateCalculator', () => {
-    setInterestRateCalculatorRequest = new SetInterestRateCalculatorRequest(
-      SetInterestRateCalculatorRequestFixture.create(),
+  describe('setKpiOracle', () => {
+    setKpiOracleRequest = new SetKpiOracleRequest(
+      SetKpiOracleRequestFixture.create(),
     );
-    it('should set interest rate calculator successfully', async () => {
+    it('should set KPI oracle successfully', async () => {
       const expectedResponse = {
         payload: true,
         transactionId: transactionId,
@@ -1389,21 +1389,19 @@ describe('Bond', () => {
 
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await BondToken.setInterestRateCalculator(
-        setInterestRateCalculatorRequest,
-      );
+      const result = await BondToken.setKpiOracle(setKpiOracleRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        SetInterestRateCalculatorRequest.name,
-        setInterestRateCalculatorRequest,
+        SetKpiOracleRequest.name,
+        setKpiOracleRequest,
       );
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new SetInterestRateCalculatorCommand(
-          setInterestRateCalculatorRequest.securityId,
-          setInterestRateCalculatorRequest.interestRateCalculatorId,
+        new SetKpiOracleCommand(
+          setKpiOracleRequest.securityId,
+          setKpiOracleRequest.kpiOracleId,
         ),
       );
 
@@ -1414,43 +1412,43 @@ describe('Bond', () => {
       const error = new Error('Command execution failed');
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.setInterestRateCalculator(setInterestRateCalculatorRequest),
-      ).rejects.toThrow('Command execution failed');
+      await expect(BondToken.setKpiOracle(setKpiOracleRequest)).rejects.toThrow(
+        'Command execution failed',
+      );
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        SetInterestRateCalculatorRequest.name,
-        setInterestRateCalculatorRequest,
+        SetKpiOracleRequest.name,
+        setKpiOracleRequest,
       );
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new SetInterestRateCalculatorCommand(
-          setInterestRateCalculatorRequest.securityId,
-          setInterestRateCalculatorRequest.interestRateCalculatorId,
+        new SetKpiOracleCommand(
+          setKpiOracleRequest.securityId,
+          setKpiOracleRequest.kpiOracleId,
         ),
       );
     });
 
     it('should throw error if securityId is invalid', async () => {
-      setInterestRateCalculatorRequest = new SetInterestRateCalculatorRequest({
-        ...SetInterestRateCalculatorRequestFixture.create(),
+      setKpiOracleRequest = new SetKpiOracleRequest({
+        ...SetKpiOracleRequestFixture.create(),
         securityId: 'invalid',
       });
 
-      await expect(
-        BondToken.setInterestRateCalculator(setInterestRateCalculatorRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.setKpiOracle(setKpiOracleRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
 
-    it('should throw error if interestRateCalculatorId is invalid', async () => {
-      setInterestRateCalculatorRequest = new SetInterestRateCalculatorRequest({
-        ...SetInterestRateCalculatorRequestFixture.create(),
-        interestRateCalculatorId: 'invalid',
+    it('should throw error if kpiOracleId is invalid', async () => {
+      setKpiOracleRequest = new SetKpiOracleRequest({
+        ...SetKpiOracleRequestFixture.create(),
+        kpiOracleId: 'invalid',
       });
 
-      await expect(
-        BondToken.setInterestRateCalculator(setInterestRateCalculatorRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.setKpiOracle(setKpiOracleRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
   });
 

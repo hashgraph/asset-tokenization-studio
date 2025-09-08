@@ -221,15 +221,15 @@ interface IBondStorageWrapper {
         uint256 indexed maturityDate,
         uint256 indexed previousMaturityDate
     );
-    event InterestRateCalculatorSet(
+    event KpiOracleSet(
         address indexed bondId,
         address indexed operator,
-        address indexed newInterestRateCalculator
+        address indexed newKpiOracle
     );
 
     error CouponCreationFailed();
     error CouponFirstDateWrong();
     error CouponFrequencyWrong();
     error BondMaturityDateWrong();
-    error CallToIrCalculatorFailed();
+    error CallToKpiOracleFailed();
 }

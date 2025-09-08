@@ -283,9 +283,7 @@ contract BondUSA is IBondUSA, Bond, Security {
         staticFunctionSelectors_[selectorIndex++] = this
             .getTotalSecurityHolders
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setInterestRateCalculator
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setKpiOracle.selector;
     }
 
     function getStaticInterfaceIds()

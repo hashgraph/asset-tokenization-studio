@@ -297,7 +297,7 @@ export class SecurityDataBuilder {
       bondInfo.nominalValue.toString(),
       bondInfo.startingDate.toString(),
       bondInfo.maturityDate.toString(),
-      bondInfo.interestRateCalculator.toString(),
+      bondInfo.kpiOracle.toString(),
     );
   }
 
