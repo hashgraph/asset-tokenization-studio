@@ -207,17 +207,14 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {IBeneficiaries} from '../interfaces/beneficiaries/IBeneficiaries.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {Common} from '../../layer_1/common/Common.sol';
-import {_BENEFICIARIES_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {_BENEFICIARY_MANAGER_ROLE} from '../constants/roles.sol';
 import {
     _BENEFICIARIES_STORAGE_POSITION
 } from '../../layer_0/constants/storagePositions.sol';
 
-contract Beneficiaries is IBeneficiaries, IStaticFunctionSelectors, Common {
+contract Beneficiaries is IBeneficiaries, Common {
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_Beneficiaries(
         address[] calldata _beneficiaries,
         bytes[] calldata _data
@@ -285,55 +282,5 @@ contract Beneficiaries is IBeneficiaries, IStaticFunctionSelectors, Common {
                 _pageIndex,
                 _pageLength
             );
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _BENEFICIARIES_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_Beneficiaries
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .addBeneficiary
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .removeBeneficiary
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isBeneficiary.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getBeneficiaryData
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getBeneficiariesCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getBeneficiaries
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IBeneficiaries)
-            .interfaceId;
     }
 }

@@ -260,6 +260,8 @@ interface TRexIFactory {
     struct BondData {
         SecurityData security;
         IBondRead.BondDetailsData bondDetails;
+        address[] beneficiaries;
+        bytes[] beneficiariesData;
     }
 
     event EquityDeployed(
