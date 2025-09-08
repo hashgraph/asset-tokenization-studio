@@ -10,7 +10,7 @@
     "dev": "vite",
     "start": "vite preview",
     "clean:node": "npx --yes rimraf node_modules",
-    "clean:build": "npx --yes rimraf build",
+    "clean:build": "npx --yes rimraf dist",
     "clean:lock": "npx --yes rimraf package-lock.json yarn.lock",
     "test:update": "NODE_ENV=test jest --updateSnapshot",
     "test:clear:cache": "npx jest --clearCache",

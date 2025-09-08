@@ -701,6 +701,46 @@ abstract contract HoldStorageWrapper2 is
         return _getHeldAmountFor(_tokenHolder) * factor;
     }
 
+    function _getHeldAmountForAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view returns (uint256 amount_) {
+        uint256 factor = _calculateFactorForHeldAmountByTokenHolderAdjustedAt(
+            _tokenHolder,
+            _timestamp
+        );
+
+        return _getHeldAmountFor(_tokenHolder) * factor;
+    }
+
+    function _getTotalBalanceForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalanceForByPartitionAdjusted(
+                _partition,
+                _tokenHolder
+            ) + _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function _getTotalBalanceForAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalanceForAdjustedAt(_tokenHolder, _timestamp) +
+            _getHeldAmountForAdjustedAt(_tokenHolder, _timestamp);
+    }
+
+    function _getTotalBalance(
+        address _tokenHolder
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalance(_tokenHolder) +
+            _getHeldAmountForAdjusted(_tokenHolder);
+    }
+
     function _getHeldAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder

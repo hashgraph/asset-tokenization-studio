@@ -386,6 +386,47 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         return _getFrozenAmountFor(_tokenHolder) * factor;
     }
 
+    function _getFrozenAmountForAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view returns (uint256 amount_) {
+        uint256 factor = _calculateFactorForFrozenAmountByTokenHolderAdjustedAt(
+            _tokenHolder,
+            _timestamp
+        );
+
+        return _getFrozenAmountFor(_tokenHolder) * factor;
+    }
+
+    function _getTotalBalanceForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalanceForByPartitionAdjusted(
+                _partition,
+                _tokenHolder
+            ) +
+            _getFrozenAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function _getTotalBalanceForAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalanceForAdjustedAt(_tokenHolder, _timestamp) +
+            _getFrozenAmountForAdjustedAt(_tokenHolder, _timestamp);
+    }
+
+    function _getTotalBalance(
+        address _tokenHolder
+    ) internal view virtual override returns (uint256) {
+        return
+            super._getTotalBalance(_tokenHolder) +
+            _getFrozenAmountForAdjusted(_tokenHolder);
+    }
+
     function _getFrozenAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
