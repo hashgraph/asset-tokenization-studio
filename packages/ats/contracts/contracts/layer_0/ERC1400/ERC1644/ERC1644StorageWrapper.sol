@@ -260,10 +260,6 @@ abstract contract ERC1644StorageWrapper is
         );
     }
 
-    /**
-     * @notice It is used to end the controller feature from the token
-     * @dev It only be called by the `owner/issuer` of the token
-     */
     function _finalizeControllable() internal {
         if (!_erc1644Storage().isControllable) return;
 
@@ -271,11 +267,6 @@ abstract contract ERC1644StorageWrapper is
         emit FinalizedControllerFeature(_msgSender());
     }
 
-    /**
-     * @notice Internal function to know whether the controller functionality
-     * allowed or not.
-     * @return bool `true` when controller address is non-zero otherwise return `false`.
-     */
     function _isControllable() internal view returns (bool) {
         return _erc1644Storage().isControllable;
     }

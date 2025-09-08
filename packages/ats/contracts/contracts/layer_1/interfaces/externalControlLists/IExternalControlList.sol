@@ -207,5 +207,8 @@
 pragma solidity 0.8.18;
 
 interface IExternalControlList {
+    /**
+     * @dev Checks user control list status in the external control list contract
+     */
     function isAuthorized(address account) external view returns (bool);
 }

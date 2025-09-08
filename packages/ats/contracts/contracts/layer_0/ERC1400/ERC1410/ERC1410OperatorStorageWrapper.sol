@@ -217,9 +217,9 @@ import {ERC1410BasicStorageWrapper} from './ERC1410BasicStorageWrapper.sol';
 
 abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
     struct ERC1410OperatorStorage {
-        // Mapping from (investor, partition, operator) to approved status
+        /// @dev Mapping from (investor, partition, operator) to approved status
         mapping(address => mapping(bytes32 => mapping(address => bool))) partitionApprovals;
-        // Mapping from (investor, operator) to approved status (can be used against any partition)
+        /// @dev Mapping from (investor, operator) to approved status (can be used against any partition)
         mapping(address => mapping(address => bool)) approvals;
     }
 
