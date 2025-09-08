@@ -528,14 +528,8 @@ abstract contract EquityStorageWrapper is
             dateReached_ = true;
 
             balance_ = (_snapshotId != 0)
-                ? (_balanceOfAtSnapshot(_snapshotId, _account) +
-                    _lockedBalanceOfAtSnapshot(_snapshotId, _account) +
-                    _heldBalanceOfAtSnapshot(_snapshotId, _account) +
-                    _clearedBalanceOfAtSnapshot(_snapshotId, _account))
-                : (_balanceOfAdjustedAt(_account, _date) +
-                    _getLockedAmountForAdjustedAt(_account, _blockTimestamp()) +
-                    _getHeldAmountForAdjusted(_account) +
-                    _getClearedAmountForAdjusted(_account));
+                ? _getTotalBalanceOfAtSnapshot(_snapshotId, _account)
+                : (_getTotalBalanceForAdjustedAt(_account, _date));
 
             decimals_ = (_snapshotId != 0)
                 ? _decimalsAtSnapshot(_snapshotId)

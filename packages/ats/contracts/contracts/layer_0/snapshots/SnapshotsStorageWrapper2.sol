@@ -422,6 +422,57 @@ abstract contract SnapshotsStorageWrapper2 is
         return _balanceOfAt(_tokenHolder, _snapshotID);
     }
 
+    function _getTotalBalanceOfAtSnapshot(
+        uint256 _snapshotId,
+        address _tokenHolder
+    ) internal view override returns (uint256) {
+        // Use unchecked block since we're dealing with token balances that shouldn't overflow
+        unchecked {
+            return
+                _balanceOfAtSnapshot(_snapshotId, _tokenHolder) +
+                _clearedBalanceOfAtSnapshot(_snapshotId, _tokenHolder) +
+                _heldBalanceOfAtSnapshot(_snapshotId, _tokenHolder) +
+                _lockedBalanceOfAtSnapshot(_snapshotId, _tokenHolder) +
+                _frozenBalanceOfAtSnapshot(_snapshotId, _tokenHolder);
+        }
+    }
+
+    function _getTotalBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotId,
+        address _tokenHolder
+    ) internal view override returns (uint256) {
+        // Use unchecked block since we're dealing with token balances that shouldn't overflow
+        unchecked {
+            return
+                _balanceOfAtSnapshotByPartition(
+                    _partition,
+                    _snapshotId,
+                    _tokenHolder
+                ) +
+                _clearedBalanceOfAtSnapshotByPartition(
+                    _partition,
+                    _snapshotId,
+                    _tokenHolder
+                ) +
+                _heldBalanceOfAtSnapshotByPartition(
+                    _partition,
+                    _snapshotId,
+                    _tokenHolder
+                ) +
+                _lockedBalanceOfAtSnapshotByPartition(
+                    _partition,
+                    _snapshotId,
+                    _tokenHolder
+                ) +
+                _frozenBalanceOfAtSnapshotByPartition(
+                    _partition,
+                    _snapshotId,
+                    _tokenHolder
+                );
+        }
+    }
+
     function _balanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,
