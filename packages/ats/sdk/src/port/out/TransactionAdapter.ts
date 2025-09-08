@@ -1049,6 +1049,26 @@ interface IAgent {
   ): Promise<TransactionResponse>;
 }
 
+interface IBeneficiaries {
+  addBeneficiary(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeBeneficiary(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  updateBeneficiaryData(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     WalletAdapter,
@@ -1071,7 +1091,8 @@ export default abstract class TransactionAdapter
     IIdentityRegistryTransactionAdapter,
     IFreezeAdapter,
     IBatchAdapter,
-    IAgent
+    IAgent,
+    IBeneficiaries
 {
   abstract triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1862,6 +1883,8 @@ export default abstract class TransactionAdapter
     compliance: EvmAddress,
     identityRegistryAddress: EvmAddress,
     diamondOwnerAccount: EvmAddress,
+    beneficiaries?: EvmAddress[],
+    beneficiariesData?: string[],
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -1893,5 +1916,23 @@ export default abstract class TransactionAdapter
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract addBeneficiary(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract removeBeneficiary(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract updateBeneficiaryData(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
