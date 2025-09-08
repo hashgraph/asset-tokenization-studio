@@ -244,16 +244,48 @@ contract Beneficiaries is IBeneficiaries, Common {
     function addBeneficiary(
         address _beneficiary,
         bytes calldata _data
-    ) external override onlyUnpaused onlyRole(_BENEFICIARY_MANAGER_ROLE) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_BENEFICIARY_MANAGER_ROLE)
+        onlyIfNotBeneficiary(_beneficiary)
+    {
         _addBeneficiary(_beneficiary, _data);
         emit BeneficiaryAdded(_msgSender(), _beneficiary, _data);
     }
 
     function removeBeneficiary(
         address _beneficiary
-    ) external override onlyUnpaused onlyRole(_BENEFICIARY_MANAGER_ROLE) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_BENEFICIARY_MANAGER_ROLE)
+        onlyIfBeneficiary(_beneficiary)
+    {
         _removeBeneficiary(_beneficiary);
         emit BeneficiaryRemoved(_msgSender(), _beneficiary);
+    }
+
+    function updateBeneficiaryData(
+        address _beneficiary,
+        bytes calldata _data
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_BENEFICIARY_MANAGER_ROLE)
+        onlyIfBeneficiary(_beneficiary)
+    {
+        bytes memory previousData = _getBeneficiaryData(_beneficiary);
+        _setBeneficiaryData(_beneficiary, _data);
+        emit BeneficiaryDataUpdated(
+            _msgSender(),
+            _beneficiary,
+            previousData,
+            _data
+        );
     }
 
     function isBeneficiary(
