@@ -204,52 +204,42 @@
 */
 
 import {
-  DefinitionList,
-  DefinitionListProps,
-  ClipboardButton,
-  Text,
-} from 'io-bricks-ui';
+  ComplianceRequest,
+  SetComplianceRequest,
+} from '@hashgraph/asset-tokenization-sdk';
+import { useEffect, useState } from 'react';
+import { FieldValues, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import {
-  formatDate,
-  formatNumberLocale,
-  toNumber,
-} from '../../../utils/format';
-import { useSecurityStore } from '../../../store/securityStore';
-import { useParams } from 'react-router-dom';
 import { Flex } from '@chakra-ui/react';
 import {
-  BondDetailsViewModel,
-  ComplianceRequest,
-  EquityDetailsViewModel,
-  IdentityRegistryRequest,
-} from '@hashgraph/asset-tokenization-sdk';
-import { useMemo } from 'react';
-import { MaturityDateItem } from './MadurityDateItem';
-import { DATE_TIME_FORMAT } from '../../../utils/constants';
+  IconButton,
+  InputController,
+  PhosphorIcon,
+  PopUp,
+  Text,
+} from 'io-bricks-ui';
+import { Pencil, X, Info, Check } from '@phosphor-icons/react';
+import { useRolesStore } from '../../../store/rolesStore';
+import { SecurityRole } from '../../../utils/SecurityRole';
+import { useParams } from 'react-router-dom';
+import { useUpdateCompliance } from '../../../hooks/mutations/useUpdateCompliance';
 import { useGetCompliance } from '../../../hooks/queries/useCompliance';
-import { useGetIdentityRegistry } from '../../../hooks/queries/useIdentityRegistry';
-import { ComplianceItem } from './ComplianceItem';
-import { IdentityRegistryItem } from './IdentityRegistryItem';
 
-interface SecurityDetailsExtendedProps
-  extends Omit<DefinitionListProps, 'items'> {
-  bondDetailsResponse?: BondDetailsViewModel;
-  equityDetailsResponse?: EquityDetailsViewModel;
-  isLoadingSecurityDetails: boolean;
-  isFetchingSecurityDetails: boolean;
-}
+export const ComplianceItem = ({ securityId }: { securityId: string }) => {
+  const { id = '' } = useParams();
+  const { roles: accountRoles } = useRolesStore();
 
-export const SecurityDetailsExtended = ({
-  bondDetailsResponse,
-  equityDetailsResponse,
-  isLoadingSecurityDetails,
-  isFetchingSecurityDetails,
-  ...props
-}: SecurityDetailsExtendedProps) => {
-  const { t: tProperties } = useTranslation('properties');
-  const { details } = useSecurityStore();
-  const { id } = useParams();
+  const { t } = useTranslation('security', {
+    keyPrefix: 'details.bond.updateCompliance.toast',
+  });
+
+  const { control, reset, handleSubmit } = useForm({
+    mode: 'onChange',
+  });
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [showConfirmPopUp, setShowConfirmPopUp] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { data: compliance } = useGetCompliance(
     new ComplianceRequest({
@@ -260,132 +250,104 @@ export const SecurityDetailsExtended = ({
     },
   );
 
-  const { data: identityRegistry } = useGetIdentityRegistry(
-    new IdentityRegistryRequest({
-      securityId: id!,
-    }),
-    {
-      enabled: !!id,
-    },
-  );
+  const { mutate: updateComplianceMutation } = useUpdateCompliance();
 
-  const nominalValue = useMemo(() => {
-    return toNumber(
-      equityDetailsResponse?.nominalValue || bondDetailsResponse?.nominalValue,
-      2,
-    );
-  }, [equityDetailsResponse, bondDetailsResponse]);
+  useEffect(() => {
+    reset();
+  }, [isEditMode, reset]);
 
-  const listItems = useMemo(() => {
-    const items = [
-      {
-        title: tProperties('name'),
-        description: details?.name ?? '',
-      },
-      {
-        title: tProperties('symbol'),
-        description: details?.symbol ?? '',
-      },
-      {
-        title: tProperties('decimal'),
-        description: details?.decimals ?? '',
-      },
-      {
-        title: tProperties('isin'),
-        description: details?.isin ?? '',
-      },
-      {
-        title: tProperties('evmAddress'),
-        description: details?.evmDiamondAddress ?? '',
-        canCopy: true,
-      },
-      {
-        title: tProperties('id'),
-        description: (
-          <Flex w="full" align="center">
-            <Text textStyle="ElementsRegularSM">{id}</Text>
-            <ClipboardButton value={id!} />
-            <Text textStyle="ElementsSemiboldXS" ml={4}>
-              {tProperties('copyId')}
-            </Text>
-          </Flex>
-        ),
-      },
-      {
-        title: tProperties('currency'),
-        description: 'USD',
-      }, // TODO: - format from ASCII when more currencies are available
-      {
-        title: tProperties('nominalValue'),
-        description: formatNumberLocale(nominalValue, 2),
-      },
-      {
-        title: tProperties('maxSupply'),
-        description: `${details?.maxSupply} ${details?.symbol}`,
-      },
-      {
-        title: tProperties('totalSupply'),
-        description: `${details?.totalSupply} ${details?.symbol}`,
-      },
-      {
-        title: tProperties('pendingToBeMinted'),
-        description: `${
-          toNumber(details?.maxSupply) - toNumber(details?.totalSupply)
-        } ${details?.symbol}`,
-      },
-    ];
+  const onSubmit = (data: FieldValues) => {
+    setIsLoading(true);
 
-    if (compliance !== undefined && id) {
-      items.push({
-        title: tProperties('compliance'),
-        description: <ComplianceItem securityId={id} />,
-      });
-    }
+    const request = new SetComplianceRequest({
+      securityId,
+      compliance: data.compliance,
+    });
 
-    if (identityRegistry !== undefined && id) {
-      items.push({
-        title: tProperties('identityRegistry'),
-        description: <IdentityRegistryItem securityId={id} />,
-      });
-    }
-
-    const isBond = details?.type === 'BOND';
-
-    if (isBond && bondDetailsResponse?.startingDate) {
-      items.push({
-        title: tProperties('startingDate'),
-        description: formatDate(
-          bondDetailsResponse.startingDate,
-          DATE_TIME_FORMAT,
-        ),
-      });
-    }
-
-    if (isBond && bondDetailsResponse?.maturityDate && id) {
-      items.push({
-        title: tProperties('maturityDate'),
-        description: <MaturityDateItem securityId={id} />,
-      });
-    }
-
-    return items;
-  }, [
-    details,
-    id,
-    nominalValue,
-    tProperties,
-    bondDetailsResponse,
-    compliance,
-    identityRegistry,
-  ]);
+    updateComplianceMutation(request, {
+      onSettled() {
+        setShowConfirmPopUp(false);
+        setIsLoading(false);
+        setIsEditMode(false);
+      },
+    });
+  };
 
   return (
-    <DefinitionList
-      data-testid="security-details"
-      isLoading={isLoadingSecurityDetails || isFetchingSecurityDetails}
-      items={listItems}
-      title="Details"
-      {...props}
-    />
+    <Flex
+      alignItems={'center'}
+      justifyContent={'space-between'}
+      w={'full'}
+      flex={1}
+    >
+      <Flex alignItems={'center'} gap={4}>
+        {isEditMode && (
+          <>
+            <InputController
+              control={control}
+              id="compliance"
+              placeholder={compliance}
+              backgroundColor="neutral.600"
+              size="sm"
+              defaultValue={compliance}
+            />
+            <Flex alignItems={'center'} gap={2}>
+              <IconButton
+                icon={<PhosphorIcon as={Check} />}
+                aria-label="save button"
+                size={'sm'}
+                onClick={() => {
+                  setShowConfirmPopUp(true);
+                }}
+              />
+              <IconButton
+                icon={<PhosphorIcon as={X} />}
+                aria-label="cancel button"
+                size={'sm'}
+                onClick={() => setIsEditMode(false)}
+              />
+            </Flex>
+          </>
+        )}
+        {!isEditMode && (
+          <>
+            <Text>{compliance}</Text>
+            {accountRoles.includes(SecurityRole._TREX_OWNER_ROLE) &&
+              compliance !== '0.0.0' && (
+                <IconButton
+                  size={'sm'}
+                  icon={<PhosphorIcon as={Pencil} />}
+                  aria-label="edit button"
+                  variant="secondary"
+                  onClick={() => setIsEditMode(true)}
+                />
+              )}
+          </>
+        )}
+      </Flex>
+
+      <PopUp
+        id="confirmMaturityDate"
+        isOpen={showConfirmPopUp}
+        onClose={() => {
+          !isLoading && setShowConfirmPopUp(false);
+        }}
+        closeOnOverlayClick={!isLoading}
+        icon={<PhosphorIcon as={Info} size="md" />}
+        title={t('title')}
+        description={t('subtitle')}
+        cancelText={t('cancelButtonText')}
+        confirmText={t('confirmButtonText')}
+        confirmButtonProps={{
+          isLoading: isLoading,
+        }}
+        onConfirm={() => {
+          handleSubmit(onSubmit)();
+        }}
+        onCancel={() => {
+          !isLoading && setShowConfirmPopUp(false);
+        }}
+      />
+    </Flex>
   );
 };
