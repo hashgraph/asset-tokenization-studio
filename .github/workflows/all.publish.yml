@@ -6,7 +6,6 @@ on:
     types: [published]
 
 
-
 permissions:
   contents: read
 
