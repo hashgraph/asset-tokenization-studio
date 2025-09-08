@@ -240,6 +240,9 @@ contract BeneficiariesFacet is Beneficiaries, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this
             .removeBeneficiary
             .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .updateBeneficiaryData
+            .selector;
         staticFunctionSelectors_[selectorIndex++] = this.isBeneficiary.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getBeneficiaryData
