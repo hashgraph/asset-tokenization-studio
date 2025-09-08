@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 // Contract copy-pasted form OZ and extended
 
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {ERC1594} from '../../../layer_1/ERC1400/ERC1594/ERC1594.sol';
 import {

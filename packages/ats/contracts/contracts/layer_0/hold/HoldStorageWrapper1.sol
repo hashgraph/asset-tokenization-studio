@@ -203,7 +203,7 @@
 
 */
 
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {LibCommon} from '../common/libraries/LibCommon.sol';
 import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';

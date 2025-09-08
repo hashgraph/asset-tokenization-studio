@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 /// @notice Custom implementation of the OpenZeppelin Address library
 library LowLevelCall {

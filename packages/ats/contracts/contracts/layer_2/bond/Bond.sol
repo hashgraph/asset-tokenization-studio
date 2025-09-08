@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {IBond} from '../interfaces/bond/IBond.sol';
 import {IBondRead} from '../interfaces/bond/IBondRead.sol';

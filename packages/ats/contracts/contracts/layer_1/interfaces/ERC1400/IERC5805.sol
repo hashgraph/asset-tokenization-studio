@@ -205,7 +205,7 @@
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {IERC6372} from '@openzeppelin/contracts/interfaces/IERC6372.sol';
 import {IVotes} from './IVotes.sol';

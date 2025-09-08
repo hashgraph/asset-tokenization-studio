@@ -205,7 +205,7 @@
 
 // SPDX-License-Identifier: MIT
 // Contract copy-pasted form OZ and extended
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {Common} from '../../common/Common.sol';
 import {IERC20Permit} from '../../interfaces/ERC1400/IERC20Permit.sol';

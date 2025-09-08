@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 interface IRevocationList {
     function revoked(address, string calldata) external view returns (bool);

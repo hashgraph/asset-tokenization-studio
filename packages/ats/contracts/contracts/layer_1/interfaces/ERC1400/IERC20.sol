@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 // Contract copy-pasted form OZ and extended
 
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {IERC20StorageWrapper} from './IERC20StorageWrapper.sol';
 import {IFactory} from '../../../interfaces/factory/IFactory.sol';

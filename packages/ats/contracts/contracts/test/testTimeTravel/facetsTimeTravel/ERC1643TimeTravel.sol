@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {ERC1643} from '../../../layer_1/ERC1400/ERC1643/ERC1643.sol';
 import {

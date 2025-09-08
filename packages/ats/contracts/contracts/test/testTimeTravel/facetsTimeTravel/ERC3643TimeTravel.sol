@@ -204,7 +204,9 @@
 */
 
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+// Contract copy-pasted form OZ and extended
+
+pragma solidity >=0.8.0 <0.9.0;
 
 import {BondUSARead} from '../../../layer_3/bondUSA/BondUSARead.sol';
 import {
