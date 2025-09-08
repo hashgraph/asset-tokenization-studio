@@ -315,6 +315,8 @@ const config: HardhatUserConfig = {
             '@tokenysolutions/t-rex/contracts/compliance/legacy/DefaultCompliance.sol',
             '@onchain-id/solidity/contracts/Identity.sol',
             '@onchain-id/solidity/contracts/ClaimIssuer.sol',
+            '@onchain-id/solidity/contracts/factory/IdFactory.sol',
+            '@onchain-id/solidity/contracts/proxy/ImplementationAuthority.sol',
         ],
     },
     dodoc: {
