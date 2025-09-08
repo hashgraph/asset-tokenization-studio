@@ -73,7 +73,7 @@
         "@typechain/ethers-v5": "^10.1.0",
         "@typechain/hardhat": "^6.1.2",
         "@types/jest": "^29.5.14",
-        "chai": "^4.4.0",
+        "chai": "^6.0.1",
         "dotenv": "^16.0.3",
         "ethers": "^5.8.0",
         "hardhat": "^2.22.19",
