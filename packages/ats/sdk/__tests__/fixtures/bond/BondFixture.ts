@@ -350,6 +350,12 @@ export const CreateTrexSuiteBondCommandFixture =
     command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
     command.compliance?.as(() => HederaIdPropsFixture.create().value);
     command.identityRegistry?.as(() => HederaIdPropsFixture.create().value);
+    command.beneficiariesIds?.faker((faker) => [
+      faker.finance.ethereumAddress(),
+    ]);
+    command.beneficiariesData?.faker((faker) => [
+      faker.string.alphanumeric({ length: 32 }),
+    ]);
   });
 
 export const UpdateMaturityDateCommandFixture =

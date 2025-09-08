@@ -251,6 +251,7 @@ import {
   ERC3643OperationsFacet__factory,
   ERC3643BatchFacet__factory,
   TREXFactoryAts__factory,
+  BeneficiariesFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { _PARTITION_ID_1, EVM_ZERO_ADDRESS, GAS } from '@core/Constants';
 import TransactionAdapter from '../TransactionAdapter';
@@ -799,7 +800,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       security.toString(),
       AccessControlFacet__factory.abi,
     );
-    return this.executeWithArgs(contract, 'applyRoles', securityId, gas, [
+    return this.executeWithArgs(contract, '', securityId, gas, [
       roles,
       actives,
       targetId.toString(),
@@ -3185,6 +3186,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     compliance: EvmAddress,
     identityRegistryAddress: EvmAddress,
     diamondOwnerAccount: EvmAddress,
+    beneficiaries: EvmAddress[] = [],
+    beneficiariesData: string[] = [],
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -3249,6 +3252,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const securityTokenToCreate = new FactoryBondToken(
       securityData,
       bondDetailsData,
+      beneficiaries.map((b) => b.toString()),
+      beneficiariesData,
     );
 
     const additionalSecurityData: AdditionalSecurityData = {
@@ -3446,6 +3451,58 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         `Unexpected error in HederaTransactionAdapter create operation : ${error}`,
       );
     }
+  }
+
+  addBeneficiary(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding beneficiary: ${beneficiary} to security: ${security}`,
+    );
+
+    return this.executeWithArgs(
+      new BeneficiariesFacet__factory().attach(security.toString()),
+      'addBeneficiary',
+      securityId!,
+      GAS.ADD_BENEFICIARY,
+      [beneficiary.toString(), data],
+    );
+  }
+  removeBeneficiary(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing beneficiary: ${beneficiary} from security: ${security}`,
+    );
+    return this.executeWithArgs(
+      new BeneficiariesFacet__factory().attach(security.toString()),
+      'removeBeneficiary',
+      securityId!,
+      GAS.REMOVE_BENEFICIARY,
+      [beneficiary.toString()],
+    );
+  }
+  updateBeneficiaryData(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating beneficiary: ${beneficiary} data in security: ${security}`,
+    );
+    return this.executeWithArgs(
+      new BeneficiariesFacet__factory().attach(security.toString()),
+      'updateBeneficiaryData',
+      securityId!,
+      GAS.UPDATE_BENEFICIARY,
+      [beneficiary.toString(), data],
+    );
   }
 
   // * Definition of the abstract methods

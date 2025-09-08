@@ -211,6 +211,7 @@ import {
   Transaction,
   TransactionResponse as HTransactionResponse,
   TransactionResponseJSON,
+	ContractId,
 } from '@hashgraph/sdk';
 import { NetworkName } from '@hashgraph/sdk/lib/client/Client';
 import {
@@ -255,6 +256,7 @@ import { AccountNotRetrievedFromSigners } from './error/AccountNotRetrievedFromS
 import { AccountNotFound } from '../error/AccountNotFound';
 import { ConsensusNodesNotSet } from './error/ConsensusNodesNotSet';
 import { SignatureNotFound } from './error/SignatureNotFound';
+import EvmAddress from '@domain/context/contract/EvmAddress';
 
 @singleton()
 /**
