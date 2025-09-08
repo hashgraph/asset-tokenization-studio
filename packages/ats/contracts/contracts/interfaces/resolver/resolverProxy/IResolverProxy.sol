@@ -213,6 +213,6 @@ interface IResolverProxy {
         address[] members;
     }
 
-    // When no function exists for function called
+    /// @notice Thrown when no function exists for function called
     error FunctionNotFound(bytes4 _functionSelector);
 }
