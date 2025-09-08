@@ -1229,7 +1229,8 @@ describe('Bond Tests', () => {
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
-                        couponRate
+                        couponRate,
+                        couponPeriod
                     )
 
                 // --- Pre: before record date -> tokenBalance should be 0 and not reached
