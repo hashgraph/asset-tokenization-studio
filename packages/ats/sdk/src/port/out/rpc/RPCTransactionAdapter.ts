@@ -221,6 +221,7 @@ import { MirrorNodes } from '@domain/context/network/MirrorNode';
 import { JsonRpcRelays } from '@domain/context/network/JsonRpcRelay';
 import { Factories } from '@domain/context/factory/Factories';
 import BigDecimal from '@domain/context/shared/BigDecimal';
+import { ContractId } from '@hashgraph/sdk';
 import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter';
 import {
   _PARTITION_ID_1,
@@ -276,6 +277,7 @@ import {
   SsiManagementFacet__factory,
   TransferAndLockFacet__factory,
   ERC1410TokenHolderFacet__factory,
+  TREXFactoryAts__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { Resolvers } from '@domain/context/factory/Resolvers';
 import EvmAddress from '@domain/context/contract/EvmAddress';
@@ -541,7 +543,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Pausing security: ${security.toString()}`);
 
     return this.executeTransaction(
-      PauseFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      PauseFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
       'pause',
       [],
       GAS.PAUSE,
@@ -552,7 +557,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Unpausing security: ${security.toString()}`);
 
     return this.executeTransaction(
-      PauseFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      PauseFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
       'unpause',
       [],
       GAS.UNPAUSE,
@@ -845,17 +853,21 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    period: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `bond: ${security} ,
       recordDate :${recordDate} , 
       executionDate: ${executionDate},
-      rate : ${rate}  `,
+      rate : ${rate},
+      period: ${period}`,
     );
     const couponStruct: IBondRead.CouponStruct = {
       recordDate: recordDate.toBigNumber(),
       executionDate: executionDate.toBigNumber(),
       rate: rate.toBigNumber(),
+      period: period.toBigNumber(),
     };
 
     return this.executeTransaction(
@@ -892,7 +904,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      ERC1643Facet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      ERC1643Facet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
       'setDocument',
       [name, uri, hash],
       GAS.SET_DOCUMENT,
@@ -908,7 +923,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      ERC1643Facet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      ERC1643Facet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
       'removeDocument',
       [name],
       GAS.REMOVE_DOCUMENT,
@@ -1033,7 +1051,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      CapFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      CapFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
       'setMaxSupply',
       [maxSupply.toBigNumber()],
       GAS.SET_MAX_SUPPLY,
@@ -1088,7 +1109,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      LockFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      LockFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
       'lockByPartition',
       [
         _PARTITION_ID_1,
@@ -1110,7 +1134,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      LockFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      LockFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
       'releaseByPartition',
       [_PARTITION_ID_1, lockId.toBigNumber(), sourceId.toString()],
       GAS.RELEASE,
@@ -1643,7 +1670,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      KycFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      KycFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
       'grantKyc',
       [
         targetId.toString(),
@@ -1663,7 +1693,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Revoking KYC to address ${targetId.toString()}`);
 
     return this.executeTransaction(
-      KycFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      KycFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
       'revokeKyc',
       [targetId.toString()],
       GAS.REVOKE_KYC,
@@ -2604,7 +2637,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      KycFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      KycFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
       'activateInternalKyc',
       [],
       GAS.ACTIVATE_INTERNAL_KYC,
@@ -2619,7 +2655,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      KycFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
+      KycFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
       'deactivateInternalKyc',
       [],
       GAS.DEACTIVATE_INTERNAL_KYC,
@@ -3073,6 +3112,230 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       LogService.logError(error);
       throw new SigningError(
         `Unexpected error in ${deployMethod} operation: ${error}`,
+      );
+    }
+  }
+
+  async createTrexSuiteBond(
+    salt: string,
+    owner: string,
+    irs: string,
+    onchainId: string,
+    irAgents: string[],
+    tokenAgents: string[],
+    compliancesModules: string[],
+    complianceSettings: string[],
+    claimTopics: number[],
+    issuers: string[],
+    issuerClaims: number[][],
+    security: Security,
+    bondDetails: BondDetails,
+    couponDetails: CouponDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    diamondOwnerAccount: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+  ): Promise<TransactionResponse> {
+    return this.createTrexSuite(
+      'bond',
+      salt,
+      owner,
+      irs,
+      onchainId,
+      irAgents,
+      tokenAgents,
+      compliancesModules,
+      complianceSettings,
+      claimTopics,
+      issuers,
+      issuerClaims,
+      security,
+      { bondDetails, couponDetails },
+      factory,
+      resolver,
+      configId,
+      configVersion,
+      compliance,
+      identityRegistryAddress,
+      diamondOwnerAccount,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+    );
+  }
+
+  async createTrexSuiteEquity(
+    salt: string,
+    owner: string,
+    irs: string,
+    onchainId: string,
+    irAgents: string[],
+    tokenAgents: string[],
+    compliancesModules: string[],
+    complianceSettings: string[],
+    claimTopics: number[],
+    issuers: string[],
+    issuerClaims: number[][],
+    security: Security,
+    equityDetails: EquityDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    diamondOwnerAccount: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+  ): Promise<TransactionResponse> {
+    return this.createTrexSuite(
+      'equity',
+      salt,
+      owner,
+      irs,
+      onchainId,
+      irAgents,
+      tokenAgents,
+      compliancesModules,
+      complianceSettings,
+      claimTopics,
+      issuers,
+      issuerClaims,
+      security,
+      equityDetails,
+      factory,
+      resolver,
+      configId,
+      configVersion,
+      compliance,
+      identityRegistryAddress,
+      diamondOwnerAccount,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+    );
+  }
+
+  private async createTrexSuite(
+    tokenType: 'bond' | 'equity',
+    salt: string,
+    owner: string,
+    irs: string,
+    onchainId: string,
+    irAgents: string[],
+    tokenAgents: string[],
+    compliancesModules: string[],
+    complianceSettings: string[],
+    claimTopics: number[],
+    issuers: string[],
+    issuerClaims: number[][],
+    security: Security,
+    tokenDetails:
+      | { bondDetails: BondDetails; couponDetails: CouponDetails }
+      | EquityDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    diamondOwnerAccount: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+  ): Promise<TransactionResponse> {
+    const securityData = SecurityDataBuilder.buildSecurityData(
+      security,
+      resolver,
+      configId,
+      configVersion,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+      diamondOwnerAccount,
+      compliance,
+      identityRegistryAddress,
+    );
+
+    const regulationData = SecurityDataBuilder.buildRegulationData(security);
+
+    let tokenData: any;
+
+    if (tokenType === 'bond') {
+      const details = tokenDetails as {
+        bondDetails: BondDetails;
+        couponDetails: CouponDetails;
+      };
+      tokenData = {
+        securityData,
+        bondDetails: SecurityDataBuilder.buildBondDetails(details.bondDetails),
+        couponDetails: SecurityDataBuilder.buildCouponDetails(
+          details.couponDetails,
+        ),
+      };
+    } else {
+      tokenData = {
+        securityData,
+        equityDetails: SecurityDataBuilder.buildEquityDetails(
+          tokenDetails as EquityDetails,
+        ),
+      };
+    }
+
+    const factoryContract = TREXFactoryAts__factory.connect(
+      factory.toString(),
+      this.getSignerOrProvider(),
+    );
+
+    LogService.logTrace(
+      `Deploying TrexSuiteAts${tokenType.charAt(0).toUpperCase() + tokenType.slice(1)}:`,
+      {
+        security: tokenData,
+      },
+    );
+
+    const methodMap = {
+      bond: 'deployTREXSuiteAtsBond',
+      equity: 'deployTREXSuiteAtsEquity',
+    } as const;
+
+    try {
+      return this.executeTransaction(
+        factoryContract,
+        methodMap[tokenType],
+        [
+          salt,
+          {
+            owner,
+            irs,
+            ONCHAINID: onchainId,
+            irAgents,
+            tokenAgents,
+            complianceModules: compliancesModules,
+            complianceSettings,
+          },
+          {
+            claimTopics,
+            issuers,
+            issuerClaims,
+          },
+          tokenData,
+          regulationData,
+        ],
+        GAS.TREX_CREATE_SUITE,
+        'TREXSuiteDeployed',
+      );
+    } catch (error) {
+      LogService.logError(error);
+      throw new SigningError(
+        `Unexpected error in ${methodMap[tokenType]} operation: ${error}`,
       );
     }
   }

@@ -471,12 +471,9 @@ describe('Equity Tests', () => {
 
     describe('Dividends', () => {
         it('GIVEN an account without corporateActions role WHEN setDividends THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            equityFacet = equityFacet.connect(signer_C)
-
             // set dividend fails
             await expect(
-                equityFacet.setDividends(dividendData)
+                equityFacet.connect(signer_C).setDividends(dividendData)
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
@@ -491,12 +488,9 @@ describe('Equity Tests', () => {
                 account_C
             )
 
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
-
             // set dividend fails
             await expect(
-                equityFacet.setDividends(dividendData)
+                equityFacet.connect(signer_C).setDividends(dividendData)
             ).to.be.rejectedWith('TokenIsPaused')
         })
 
@@ -505,10 +499,9 @@ describe('Equity Tests', () => {
                 dateToUnixTimestamp('2030-01-01T00:00:00Z')
             )
             // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_C)
 
             // set dividend
             const wrongDividendData_1 = {
@@ -518,7 +511,7 @@ describe('Equity Tests', () => {
             }
 
             await expect(
-                equityFacet.setDividends(wrongDividendData_1)
+                equityFacet.connect(signer_C).setDividends(wrongDividendData_1)
             ).to.be.revertedWithCustomError(equityFacet, 'WrongDates')
 
             const wrongDividendData_2 = {
@@ -530,19 +523,20 @@ describe('Equity Tests', () => {
             }
 
             await expect(
-                equityFacet.setDividends(wrongDividendData_2)
+                equityFacet.connect(signer_C).setDividends(wrongDividendData_2)
             ).to.be.revertedWithCustomError(equityFacet, 'WrongTimestamp')
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends THEN transaction succeeds', async () => {
             // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_C)
 
             // set dividend
-            await expect(equityFacet.setDividends(dividendData))
+            await expect(
+                equityFacet.connect(signer_C).setDividends(dividendData)
+            )
                 .to.emit(equityFacet, 'DividendSet')
                 .withArgs(
                     '0x0000000000000000000000000000000000000000000000000000000000000001',
@@ -594,30 +588,35 @@ describe('Equity Tests', () => {
 
         it('GIVEN an account with corporateActions role WHEN setDividends and lock THEN transaction succeeds', async () => {
             // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
-            lockFacet = lockFacet.connect(signer_C)
-            erc1410Facet = erc1410Facet.connect(signer_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(LOCKER_ROLE, account_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(ISSUER_ROLE, account_C)
 
             // issue and lock
             const TotalAmount = number_Of_Shares
             const LockedAmount = TotalAmount - 5n
 
-            await erc1410Facet.issueByPartition({
+            await erc1410Facet.connect(signer_C).issueByPartition({
                 partition: DEFAULT_PARTITION,
                 tokenHolder: account_A,
                 value: TotalAmount,
                 data: '0x',
             })
 
-            await lockFacet.lock(LockedAmount, account_A, 99999999999)
+            await lockFacet
+                .connect(signer_C)
+                .lock(LockedAmount, account_A, 99999999999)
 
             // set dividend
-            await expect(equityFacet.setDividends(dividendData))
+            await expect(
+                equityFacet.connect(signer_C).setDividends(dividendData)
+            )
                 .to.emit(equityFacet, 'DividendSet')
                 .withArgs(
                     '0x0000000000000000000000000000000000000000000000000000000000000001',
@@ -650,18 +649,18 @@ describe('Equity Tests', () => {
 
         it('GIVEN an account with corporateActions role WHEN setDividends and hold THEN transaction succeeds', async () => {
             // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
-            erc1410Facet = erc1410Facet.connect(signer_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(ISSUER_ROLE, account_C)
 
             // issue and hold
             const TotalAmount = number_Of_Shares
             const HeldAmount = TotalAmount - 5n
 
-            await erc1410Facet.issueByPartition({
+            await erc1410Facet.connect(signer_C).issueByPartition({
                 partition: DEFAULT_PARTITION,
                 tokenHolder: account_A,
                 value: TotalAmount,
@@ -679,7 +678,9 @@ describe('Equity Tests', () => {
             await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)
 
             // set dividend
-            await expect(equityFacet.setDividends(dividendData))
+            await expect(
+                equityFacet.connect(signer_C).setDividends(dividendData)
+            )
                 .to.emit(equityFacet, 'DividendSet')
                 .withArgs(
                     '0x0000000000000000000000000000000000000000000000000000000000000001',
@@ -783,13 +784,10 @@ describe('Equity Tests', () => {
 
     describe('Voting rights', () => {
         it('GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            equityFacet = equityFacet.connect(signer_C)
-
             // set dividend fails
-            await expect(equityFacet.setVoting(votingData)).to.be.rejectedWith(
-                'AccountHasNoRole'
-            )
+            await expect(
+                equityFacet.connect(signer_C).setVoting(votingData)
+            ).to.be.rejectedWith('AccountHasNoRole')
         })
 
         it('GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused', async () => {
@@ -803,24 +801,20 @@ describe('Equity Tests', () => {
                 account_C
             )
 
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
-
             // set dividend fails
-            await expect(equityFacet.setVoting(votingData)).to.be.rejectedWith(
-                'TokenIsPaused'
-            )
+            await expect(
+                equityFacet.connect(signer_C).setVoting(votingData)
+            ).to.be.rejectedWith('TokenIsPaused')
         })
 
         it('GIVEN an account with corporateActions role WHEN setVoting THEN transaction succeeds', async () => {
             // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_C)
 
             // set dividend
-            await expect(equityFacet.setVoting(votingData))
+            await expect(equityFacet.connect(signer_C).setVoting(votingData))
                 .to.emit(equityFacet, 'VotingSet')
                 .withArgs(
                     '0x0000000000000000000000000000000000000000000000000000000000000001',
@@ -859,29 +853,32 @@ describe('Equity Tests', () => {
 
         it('GIVEN an account with corporateActions role WHEN setVoting and lock THEN transaction succeeds', async () => {
             // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
-            lockFacet = lockFacet.connect(signer_C)
-            erc1410Facet = erc1410Facet.connect(signer_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(LOCKER_ROLE, account_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(ISSUER_ROLE, account_C)
 
             // issue and lock
             const TotalAmount = number_Of_Shares
             const LockedAmount = TotalAmount - 5n
 
-            await erc1410Facet.issueByPartition({
+            await erc1410Facet.connect(signer_C).issueByPartition({
                 partition: DEFAULT_PARTITION,
                 tokenHolder: account_A,
                 value: TotalAmount,
                 data: '0x',
             })
-            await lockFacet.lock(LockedAmount, account_A, 99999999999)
+            await lockFacet
+                .connect(signer_C)
+                .lock(LockedAmount, account_A, 99999999999)
 
             // set dividend
-            await expect(equityFacet.setVoting(votingData))
+            await expect(equityFacet.connect(signer_C).setVoting(votingData))
                 .to.emit(equityFacet, 'VotingSet')
                 .withArgs(
                     '0x0000000000000000000000000000000000000000000000000000000000000001',
@@ -912,12 +909,11 @@ describe('Equity Tests', () => {
 
     describe('Balance adjustments', () => {
         it('GIVEN an account without corporateActions role WHEN setBalanceAdjustment THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            equityFacet = equityFacet.connect(signer_C)
-
             // set dividend fails
             await expect(
-                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
+                equityFacet
+                    .connect(signer_C)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData)
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
@@ -932,25 +928,25 @@ describe('Equity Tests', () => {
                 account_C
             )
 
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
-
             // set dividend fails
             await expect(
-                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
+                equityFacet
+                    .connect(signer_C)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData)
             ).to.be.rejectedWith('TokenIsPaused')
         })
 
         it('GIVEN an account with corporateActions role WHEN setBalanceAdjustment THEN transaction succeeds', async () => {
             // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(CORPORATE_ACTION_ROLE, account_C)
 
             // set dividend
             await expect(
-                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
+                equityFacet
+                    .connect(signer_C)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData)
             )
                 .to.emit(equityFacet, 'ScheduledBalanceAdjustmentSet')
                 .withArgs(

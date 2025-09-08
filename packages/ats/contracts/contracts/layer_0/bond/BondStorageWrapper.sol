@@ -346,6 +346,7 @@ abstract contract BondStorageWrapper is
         couponFor_.rate = registeredCoupon.coupon.rate;
         couponFor_.recordDate = registeredCoupon.coupon.recordDate;
         couponFor_.executionDate = registeredCoupon.coupon.executionDate;
+        couponFor_.period = registeredCoupon.coupon.period;
 
         if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
             couponFor_.recordDateReached = true;
@@ -431,6 +432,7 @@ abstract contract BondStorageWrapper is
             _newCoupon.recordDate = runDate;
             _newCoupon.executionDate = runDate;
             _newCoupon.rate = _rate;
+            _newCoupon.period = _couponFrequency;
 
             (success, , ) = _setCoupon(_newCoupon);
 

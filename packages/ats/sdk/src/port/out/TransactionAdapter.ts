@@ -381,6 +381,7 @@ interface ITransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    period: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setDocument(
@@ -1269,6 +1270,7 @@ export default abstract class TransactionAdapter
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    period: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   abstract setVotingRights(
@@ -1836,5 +1838,60 @@ export default abstract class TransactionAdapter
     sourceId: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract createTrexSuiteBond(
+    salt: string,
+    owner: string,
+    irs: string,
+    onchainId: string,
+    irAgents: string[],
+    tokenAgents: string[],
+    compliancesModules: string[],
+    complianceSettings: string[],
+    claimTopics: number[],
+    issuers: string[],
+    issuerClaims: number[][],
+    security: Security,
+    bondDetails: BondDetails,
+    couponDetails: CouponDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    diamondOwnerAccount: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract createTrexSuiteEquity(
+    salt: string,
+    owner: string,
+    irs: string,
+    onchainId: string,
+    irAgents: string[],
+    tokenAgents: string[],
+    compliancesModules: string[],
+    complianceSettings: string[],
+    claimTopics: number[],
+    issuers: string[],
+    issuerClaims: number[][],
+    security: Security,
+    equityDetails: EquityDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    diamondOwnerAccount: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }

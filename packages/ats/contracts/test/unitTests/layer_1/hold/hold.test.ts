@@ -1712,50 +1712,54 @@ describe('Hold Tests', () => {
 
         describe('Adjust balances', () => {
             async function setPreBalanceAdjustment() {
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    ADJUSTMENT_BALANCE_ROLE,
-                    account_C
-                )
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-                await accessControlFacet.grantRole(CAP_ROLE, account_A)
-                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ISSUER_ROLE, account_A)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CAP_ROLE, account_A)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CONTROLLER_ROLE, account_A)
 
-                // Using account C (with role)
-                adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-                erc1410Facet = erc1410Facet.connect(signer_A)
-                capFacet = capFacet.connect(signer_A)
+                await capFacet
+                    .connect(signer_A)
+                    .setMaxSupply(maxSupply_Original)
+                await capFacet
+                    .connect(signer_A)
+                    .setMaxSupplyByPartition(
+                        _PARTITION_ID_1,
+                        maxSupply_Partition_1_Original
+                    )
+                await capFacet
+                    .connect(signer_A)
+                    .setMaxSupplyByPartition(
+                        _PARTITION_ID_2,
+                        maxSupply_Partition_2_Original
+                    )
 
-                await capFacet.setMaxSupply(maxSupply_Original)
-                await capFacet.setMaxSupplyByPartition(
-                    _PARTITION_ID_1,
-                    maxSupply_Partition_1_Original
-                )
-                await capFacet.setMaxSupplyByPartition(
-                    _PARTITION_ID_2,
-                    maxSupply_Partition_2_Original
-                )
-
-                await erc1410Facet.issueByPartition({
+                await erc1410Facet.connect(signer_A).issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_A,
                     value: balanceOf_A_Original[0],
                     data: EMPTY_HEX_BYTES,
                 })
-                await erc1410Facet.issueByPartition({
+                await erc1410Facet.connect(signer_A).issueByPartition({
                     partition: _PARTITION_ID_2,
                     tokenHolder: account_A,
                     value: balanceOf_A_Original[1],
                     data: EMPTY_HEX_BYTES,
                 })
-                await erc1410Facet.issueByPartition({
+                await erc1410Facet.connect(signer_A).issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_B,
                     value: balanceOf_B_Original[0],
                     data: EMPTY_HEX_BYTES,
                 })
-                await erc1410Facet.issueByPartition({
+                await erc1410Facet.connect(signer_A).issueByPartition({
                     partition: _PARTITION_ID_2,
                     tokenHolder: account_B,
                     value: balanceOf_B_Original[1],
@@ -1774,7 +1778,6 @@ describe('Hold Tests', () => {
                     )
 
                 // HOLD
-                holdFacet = holdFacet.connect(signer_A)
                 const hold = {
                     amount: _AMOUNT,
                     expirationTimestamp: dateToUnixTimestamp(
@@ -1785,7 +1788,9 @@ describe('Hold Tests', () => {
                     data: EMPTY_HEX_BYTES,
                 }
 
-                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+                await holdFacet
+                    .connect(signer_A)
+                    .createHoldByPartition(_PARTITION_ID_1, hold)
 
                 const hold_TotalAmount_Before =
                     await holdFacet.getHeldAmountFor(account_A)
@@ -1798,13 +1803,11 @@ describe('Hold Tests', () => {
                     await holdFacet.getHoldForByPartition(holdIdentifier)
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 // scheduled two balance updates
-                equityFacet = equityFacet.connect(signer_B)
 
                 const balanceAdjustmentData = {
                     executionDate: dateToUnixTimestamp(
@@ -1821,12 +1824,12 @@ describe('Hold Tests', () => {
                     factor: adjustFactor,
                     decimals: adjustDecimals,
                 }
-                await equityFacet.setScheduledBalanceAdjustment(
-                    balanceAdjustmentData
-                )
-                await equityFacet.setScheduledBalanceAdjustment(
-                    balanceAdjustmentData_2
-                )
+                await equityFacet
+                    .connect(signer_B)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData)
+                await equityFacet
+                    .connect(signer_B)
+                    .setScheduledBalanceAdjustment(balanceAdjustmentData_2)
 
                 // wait for first scheduled balance adjustment only
                 await timeTravelFacet.changeSystemTimestamp(
@@ -1893,7 +1896,6 @@ describe('Hold Tests', () => {
                     await ethers.provider.getBlock('latest')
                 ).timestamp
 
-                holdFacet = holdFacet.connect(signer_A)
                 const hold = {
                     amount: _AMOUNT,
                     expirationTimestamp: currentTimestamp + 10 * ONE_SECOND,
@@ -1902,10 +1904,14 @@ describe('Hold Tests', () => {
                     data: EMPTY_HEX_BYTES,
                 }
 
-                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+                await holdFacet
+                    .connect(signer_A)
+                    .createHoldByPartition(_PARTITION_ID_1, hold)
 
                 hold.expirationTimestamp = currentTimestamp + 100 * ONE_SECOND
-                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+                await holdFacet
+                    .connect(signer_A)
+                    .createHoldByPartition(_PARTITION_ID_1, hold)
 
                 const held_Amount_Before =
                     await holdFacet.getHeldAmountFor(account_A)
@@ -1916,10 +1922,9 @@ describe('Hold Tests', () => {
                     )
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 // EXECUTE HOLD
                 await holdFacet
@@ -2001,7 +2006,6 @@ describe('Hold Tests', () => {
                     await ethers.provider.getBlock('latest')
                 ).timestamp
 
-                holdFacet = holdFacet.connect(signer_A)
                 const hold = {
                     amount: _AMOUNT,
                     expirationTimestamp: currentTimestamp + 10 * ONE_SECOND,
@@ -2010,10 +2014,14 @@ describe('Hold Tests', () => {
                     data: EMPTY_HEX_BYTES,
                 }
 
-                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+                await holdFacet
+                    .connect(signer_A)
+                    .createHoldByPartition(_PARTITION_ID_1, hold)
 
                 hold.expirationTimestamp = currentTimestamp + 100 * ONE_SECOND
-                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+                await holdFacet
+                    .connect(signer_A)
+                    .createHoldByPartition(_PARTITION_ID_1, hold)
 
                 const held_Amount_Before =
                     await holdFacet.getHeldAmountFor(account_A)
@@ -2024,10 +2032,9 @@ describe('Hold Tests', () => {
                     )
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 // RELEASE HOLD
                 await holdFacet
@@ -2090,7 +2097,6 @@ describe('Hold Tests', () => {
                     await ethers.provider.getBlock('latest')
                 ).timestamp
 
-                holdFacet = holdFacet.connect(signer_A)
                 const hold = {
                     amount: _AMOUNT,
                     expirationTimestamp: currentTimestamp + ONE_SECOND,
@@ -2099,10 +2105,14 @@ describe('Hold Tests', () => {
                     data: EMPTY_HEX_BYTES,
                 }
 
-                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+                await holdFacet
+                    .connect(signer_A)
+                    .createHoldByPartition(_PARTITION_ID_1, hold)
 
                 hold.expirationTimestamp = currentTimestamp + 100 * ONE_SECOND
-                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+                await holdFacet
+                    .connect(signer_A)
+                    .createHoldByPartition(_PARTITION_ID_1, hold)
 
                 const held_Amount_Before =
                     await holdFacet.getHeldAmountFor(account_A)
@@ -2113,17 +2123,18 @@ describe('Hold Tests', () => {
                     )
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 // RECLAIM HOLD
                 await time.setNextBlockTimestamp(
                     (await ethers.provider.getBlock('latest')).timestamp +
                         2 * ONE_SECOND
                 )
-                await holdFacet.reclaimHoldByPartition(holdIdentifier)
+                await holdFacet
+                    .connect(signer_B)
+                    .reclaimHoldByPartition(holdIdentifier)
 
                 const balance_After_Release =
                     await erc1410Facet.balanceOf(account_A)
@@ -2178,7 +2189,6 @@ describe('Hold Tests', () => {
                     await ethers.provider.getBlock('latest')
                 ).timestamp
 
-                holdFacet = holdFacet.connect(signer_A)
                 const hold = {
                     amount: _AMOUNT,
                     expirationTimestamp: currentTimestamp + 100 * ONE_SECOND,
@@ -2187,7 +2197,9 @@ describe('Hold Tests', () => {
                     data: EMPTY_HEX_BYTES,
                 }
 
-                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+                await holdFacet
+                    .connect(signer_A)
+                    .createHoldByPartition(_PARTITION_ID_1, hold)
 
                 const held_Amount_Before =
                     await holdFacet.getHeldAmountFor(account_A)
@@ -2198,14 +2210,14 @@ describe('Hold Tests', () => {
                     )
 
                 // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
+                await adjustBalancesFacet
+                    .connect(signer_C)
+                    .adjustBalances(adjustFactor, adjustDecimals)
 
                 // HOLD AFTER BALANCE ADJUSTMENT
-                holdFacet = holdFacet.connect(signer_A)
-                await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
+                await holdFacet
+                    .connect(signer_A)
+                    .createHoldByPartition(_PARTITION_ID_1, hold)
 
                 const balance_After_Hold =
                     await erc1410Facet.balanceOf(account_A)

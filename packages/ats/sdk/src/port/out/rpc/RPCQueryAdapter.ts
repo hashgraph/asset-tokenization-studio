@@ -258,7 +258,8 @@ import {
   Security__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
-	ERC3643ReadFacet__factory,
+  ERC3643ReadFacet__factory,
+  TREXFactoryAts__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -888,7 +889,10 @@ export class RPCQueryAdapter {
       `Checking if the security: ${address.toString()} is paused`,
     );
 
-    return await this.connect(PauseFacet__factory, address.toString()).isPaused();
+    return await this.connect(
+      PauseFacet__factory,
+      address.toString(),
+    ).isPaused();
   }
 
   async arePartitionsProtected(address: EvmAddress): Promise<boolean> {
@@ -939,14 +943,12 @@ export class RPCQueryAdapter {
   ): Promise<[boolean, string, string]> {
     LogService.logTrace(`Checking can transfer`);
 
-    return await this.connect(ERC1594Facet__factory, address.toString()).canTransfer(
-      targetId.toString(),
-      amount.toBigNumber(),
-      data,
-      {
-        from: operatorId,
-      },
-    );
+    return await this.connect(
+      ERC1594Facet__factory,
+      address.toString(),
+    ).canTransfer(targetId.toString(), amount.toBigNumber(), data, {
+      from: operatorId,
+    });
   }
 
   async canRedeemByPartition(
@@ -981,9 +983,10 @@ export class RPCQueryAdapter {
   ): Promise<[string, string, BigNumber]> {
     LogService.logTrace(`Getting document: ${name}`);
 
-    return await this.connect(ERC1643Facet__factory, address.toString()).getDocument(
-      name,
-    );
+    return await this.connect(
+      ERC1643Facet__factory,
+      address.toString(),
+    ).getDocument(name);
   }
 
   async getAllDocuments(address: EvmAddress): Promise<string[]> {
@@ -1064,7 +1067,10 @@ export class RPCQueryAdapter {
       `Getting max supply for ${address.toString()} security`,
     );
 
-    return await this.connect(CapFacet__factory, address.toString()).getMaxSupply();
+    return await this.connect(
+      CapFacet__factory,
+      address.toString(),
+    ).getMaxSupply();
   }
 
   async getMaxSupplyByPartition(
@@ -1833,7 +1839,10 @@ export class RPCQueryAdapter {
   async onchainID(address: EvmAddress): Promise<string> {
     LogService.logTrace(`Getting OnchainID for security ${address.toString()}`);
 
-    return await this.connect(ERC3643ReadFacet__factory, address.toString()).onchainID();
+    return await this.connect(
+      ERC3643ReadFacet__factory,
+      address.toString(),
+    ).onchainID();
   }
 
   async identityRegistry(address: EvmAddress): Promise<string> {
@@ -2037,5 +2046,14 @@ export class RPCQueryAdapter {
     ).getTotalSecurityHolders();
 
     return total.toNumber();
+  }
+
+  async getTrexTokenBySalt(factory: EvmAddress, salt: string): Promise<string> {
+    LogService.logTrace(`Getting TREX token by salt ${salt}`);
+    const token = await this.connect(
+      TREXFactoryAts__factory,
+      factory.toString(),
+    ).getToken(salt);
+    return token;
   }
 }

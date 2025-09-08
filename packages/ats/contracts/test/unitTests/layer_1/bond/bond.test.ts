@@ -235,6 +235,8 @@ import {
     BondUSAFacetTimeTravel__factory,
     FreezeFacet,
     ClearingTransferFacet,
+    IBondStorageWrapper__factory,
+    IBondStorageWrapper,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -262,6 +264,7 @@ import {
     PROTECTED_PARTITIONS_ROLE,
     FREEZE_MANAGER_ROLE,
     EMPTY_HEX_BYTES,
+    TIME_PERIODS_S,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -269,7 +272,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 const numberOfUnits = 1000
 let startingDate = 0
 const numberOfCoupons = 50
-const frequency = 7
+const frequency = TIME_PERIODS_S.DAY
 const rate = 1
 let maturityDate = 0
 let firstCouponDate = 0
@@ -283,12 +286,14 @@ const _PARTITION_ID =
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
+const couponPeriod = TIME_PERIODS_S.WEEK
 const EMPTY_VC_ID = EMPTY_STRING
 
 let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
     executionDate: couponExecutionDateInSeconds.toString(),
     rate: couponRate,
+    period: couponPeriod,
 }
 
 describe('Bond Tests', () => {
@@ -309,6 +314,7 @@ describe('Bond Tests', () => {
     let bondReadFacet: BondUSARead
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
+    let bondStorageWrapper: IBondStorageWrapper
     let lockFacet: Lock
     let holdFacet: IHold
     let erc1410Facet: IERC1410
@@ -375,6 +381,10 @@ describe('Bond Tests', () => {
             signer_A
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        bondStorageWrapper = IBondStorageWrapper__factory.connect(
+            diamond.address,
+            signer_A
+        )
         lockFacet = Lock__factory.connect(diamond.address, signer_A)
         holdFacet = IHold__factory.connect(diamond.address, signer_A)
         erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
@@ -490,12 +500,13 @@ describe('Bond Tests', () => {
             recordDate: couponRecordDateInSeconds.toString(),
             executionDate: couponExecutionDateInSeconds.toString(),
             rate: couponRate,
+            period: couponPeriod,
         }
         await loadFixture(deploySecurityFixtureSinglePartition)
     })
 
     afterEach(async () => {
-        timeTravelFacet.resetSystemTimestamp()
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     describe('Single Partition', () => {
@@ -625,11 +636,11 @@ describe('Bond Tests', () => {
                 )
             })
             it('GIVEN all conditions are met WHEN redeeming at maturity THEN transaction succeeds and emits RedeemedByPartition', async () => {
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-                erc1410Facet = erc1410Facet.connect(signer_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ISSUER_ROLE, account_C)
 
-                await erc1410Facet.issueByPartition({
+                await erc1410Facet.connect(signer_C).issueByPartition({
                     partition: DEFAULT_PARTITION,
                     tokenHolder: account_A,
                     value: amount,
@@ -659,12 +670,9 @@ describe('Bond Tests', () => {
 
         describe('Coupons', () => {
             it('GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                bondFacet = bondFacet.connect(signer_C)
-
                 // set coupon fails
                 await expect(
-                    bondFacet.setCoupon(couponData)
+                    bondFacet.connect(signer_C).setCoupon(couponData)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
@@ -679,34 +687,26 @@ describe('Bond Tests', () => {
                     account_C
                 )
 
-                // Using account C (with role)
-                bondFacet = bondFacet.connect(signer_C)
-
                 // set coupon fails
                 await expect(
-                    bondFacet.setCoupon(couponData)
+                    bondFacet.connect(signer_C).setCoupon(couponData)
                 ).to.be.rejectedWith('TokenIsPaused')
             })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails', async () => {
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    CORPORATE_ACTION_ROLE,
-                    account_C
-                )
-                // Using account C (with role)
-                bondFacet = bondFacet.connect(signer_C)
-
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CORPORATE_ACTION_ROLE, account_C)
                 // set coupon
                 const wrongcouponData_1 = {
                     recordDate: couponExecutionDateInSeconds.toString(),
                     executionDate: couponRecordDateInSeconds.toString(),
                     rate: couponRate,
+                    period: couponPeriod,
                 }
 
                 await expect(
-                    bondFacet.setCoupon(wrongcouponData_1)
+                    bondFacet.connect(signer_C).setCoupon(wrongcouponData_1)
                 ).to.be.revertedWithCustomError(bondFacet, 'WrongDates')
 
                 const wrongcouponData_2 = {
@@ -715,14 +715,15 @@ describe('Bond Tests', () => {
                     ).toString(),
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
+                    period: couponPeriod,
                 }
 
                 await expect(
-                    bondFacet.setCoupon(wrongcouponData_2)
+                    bondFacet.connect(signer_C).setCoupon(wrongcouponData_2)
                 ).to.be.revertedWithCustomError(bondFacet, 'WrongTimestamp')
             })
 
-            it('GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds', async () => {
+            it('GIVEN an account with corporateActions role WHEN setCoupon with period THEN period is stored correctly', async () => {
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(
@@ -732,8 +733,17 @@ describe('Bond Tests', () => {
                 // Using account C (with role)
                 bondFacet = bondFacet.connect(signer_C)
 
-                // set coupon
-                await expect(bondFacet.setCoupon(couponData))
+                // Create coupon with specific period
+                const customPeriod = 3 * 24 * 60 * 60 // 3 days in seconds
+                const customCouponData = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    period: customPeriod,
+                }
+
+                // Set coupon and verify event includes period
+                await expect(bondFacet.setCoupon(customCouponData))
                     .to.emit(bondFacet, 'CouponSet')
                     .withArgs(
                         '0x0000000000000000000000000000000000000000000000000000000000000033',
@@ -741,7 +751,71 @@ describe('Bond Tests', () => {
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
-                        couponRate
+                        couponRate,
+                        customPeriod
+                    )
+
+                // Verify coupon data includes period
+                const registeredCoupon = await bondReadFacet.getCoupon(
+                    numberOfCoupons + 1
+                )
+                expect(registeredCoupon.coupon.period).to.equal(customPeriod)
+
+                // Verify couponFor data includes period
+                const couponFor = await bondReadFacet.getCouponFor(
+                    numberOfCoupons + 1,
+                    account_A
+                )
+                expect(couponFor.period).to.equal(customPeriod)
+            })
+
+            it('GIVEN an account with corporateActions role WHEN setCoupon with period 0 THEN transaction succeeds', async () => {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    CORPORATE_ACTION_ROLE,
+                    account_C
+                )
+                // Using account C (with role)
+                bondFacet = bondFacet.connect(signer_C)
+
+                // Test minimum valid period (exactly 1 day)
+                const minValidPeriodCouponData = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    period: 0,
+                }
+
+                await expect(bondFacet.setCoupon(minValidPeriodCouponData))
+                    .to.emit(bondFacet, 'CouponSet')
+                    .withArgs(
+                        '0x0000000000000000000000000000000000000000000000000000000000000033',
+                        numberOfCoupons + 1,
+                        account_C,
+                        couponRecordDateInSeconds,
+                        couponExecutionDateInSeconds,
+                        couponRate,
+                        0
+                    )
+            })
+
+            it('GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds', async () => {
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CORPORATE_ACTION_ROLE, account_C)
+
+                // set coupon
+                await expect(bondFacet.connect(signer_C).setCoupon(couponData))
+                    .to.emit(bondFacet, 'CouponSet')
+                    .withArgs(
+                        '0x0000000000000000000000000000000000000000000000000000000000000033',
+                        numberOfCoupons + 1,
+                        account_C,
+                        couponRecordDateInSeconds,
+                        couponExecutionDateInSeconds,
+                        couponRate,
+                        couponPeriod
                     )
 
                 // check list members
@@ -788,34 +862,33 @@ describe('Bond Tests', () => {
             })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds', async () => {
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    CORPORATE_ACTION_ROLE,
-                    account_C
-                )
-                await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-                // Using account C (with role)
-                bondFacet = bondFacet.connect(signer_C)
-                lockFacet = lockFacet.connect(signer_C)
-                erc1410Facet = erc1410Facet.connect(signer_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CORPORATE_ACTION_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(LOCKER_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ISSUER_ROLE, account_C)
 
                 // issue and lock
                 const TotalAmount = numberOfUnits
                 const LockedAmount = TotalAmount - 5
 
-                await erc1410Facet.issueByPartition({
+                await erc1410Facet.connect(signer_C).issueByPartition({
                     partition: DEFAULT_PARTITION,
                     tokenHolder: account_A,
                     value: TotalAmount,
                     data: '0x',
                 })
 
-                await lockFacet.lock(LockedAmount, account_A, MAX_UINT256)
+                await lockFacet
+                    .connect(signer_C)
+                    .lock(LockedAmount, account_A, MAX_UINT256)
 
                 // set coupon
-                await expect(bondFacet.setCoupon(couponData))
+                await expect(bondFacet.connect(signer_C).setCoupon(couponData))
                     .to.emit(bondFacet, 'CouponSet')
                     .withArgs(
                         '0x0000000000000000000000000000000000000000000000000000000000000033',
@@ -823,14 +896,17 @@ describe('Bond Tests', () => {
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
-                        couponRate
+                        couponRate,
+                        couponPeriod
                     )
 
                 // check list members
                 await timeTravelFacet.changeSystemTimestamp(
                     couponRecordDateInSeconds + 1
                 )
-                await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .revokeRole(ISSUER_ROLE, account_C)
 
                 const couponFor = await bondReadFacet.getCouponFor(
                     numberOfCoupons + 1,
@@ -854,22 +930,18 @@ describe('Bond Tests', () => {
             })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds', async () => {
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    CORPORATE_ACTION_ROLE,
-                    account_C
-                )
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-                // Using account C (with role)
-                bondFacet = bondFacet.connect(signer_C)
-                erc1410Facet = erc1410Facet.connect(signer_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CORPORATE_ACTION_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ISSUER_ROLE, account_C)
 
                 // issue and hold
                 const TotalAmount = numberOfUnits
                 const HeldAmount = TotalAmount - 5
 
-                await erc1410Facet.issueByPartition({
+                await erc1410Facet.connect(signer_C).issueByPartition({
                     partition: DEFAULT_PARTITION,
                     tokenHolder: account_A,
                     value: TotalAmount,
@@ -887,7 +959,7 @@ describe('Bond Tests', () => {
                 await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)
 
                 // set coupon
-                await expect(bondFacet.setCoupon(couponData))
+                await expect(bondFacet.connect(signer_C).setCoupon(couponData))
                     .to.emit(bondFacet, 'CouponSet')
                     .withArgs(
                         '0x0000000000000000000000000000000000000000000000000000000000000033',
@@ -895,14 +967,17 @@ describe('Bond Tests', () => {
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
-                        couponRate
+                        couponRate,
+                        couponPeriod
                     )
 
                 // check list members
                 await timeTravelFacet.changeSystemTimestamp(
                     couponRecordDateInSeconds + 1
                 )
-                await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .revokeRole(ISSUER_ROLE, account_C)
 
                 const couponFor = await bondReadFacet.getCouponFor(
                     numberOfCoupons + 1,
@@ -928,10 +1003,9 @@ describe('Bond Tests', () => {
             it('GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds', async () => {
                 // * Arrange
                 // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(BOND_MANAGER_ROLE, account_C)
-                // Using account C (with role)
-                bondFacet = bondFacet.connect(signer_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(BOND_MANAGER_ROLE, account_C)
                 // Get maturity date
                 const maturityDateBefore = (
                     await bondReadFacet.getBondDetails()
@@ -941,13 +1015,11 @@ describe('Bond Tests', () => {
                     BigNumber.from(86400)
                 )
 
-                // * Act
-                // Set maturity date
-                const receipt =
-                    await bondFacet.updateMaturityDate(newMaturityDate)
-
-                // * Assert
-                await expect(receipt)
+                await expect(
+                    bondFacet
+                        .connect(signer_C)
+                        .updateMaturityDate(newMaturityDate)
+                )
                     .to.emit(bondFacet, 'MaturityDateUpdated')
                     .withArgs(
                         bondFacet.address,
@@ -964,10 +1036,9 @@ describe('Bond Tests', () => {
             it('GIVEN an account with bondManager role WHEN setMaturityDate to earlier date THEN transaction fails', async () => {
                 // * Arrange
                 // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(BOND_MANAGER_ROLE, account_C)
-                // Using account C (with role)
-                bondFacet = bondFacet.connect(signer_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(BOND_MANAGER_ROLE, account_C)
                 // Get maturity date
                 const maturityDateBefore = (
                     await bondReadFacet.getBondDetails()
@@ -981,7 +1052,9 @@ describe('Bond Tests', () => {
                 // * Act & Assert
                 // Set maturity date
                 await expect(
-                    bondFacet.updateMaturityDate(dayBeforeCurrentMaturity)
+                    bondFacet
+                        .connect(signer_C)
+                        .updateMaturityDate(dayBeforeCurrentMaturity)
                 ).to.be.revertedWithCustomError(
                     bondFacet,
                     'BondMaturityDateWrong'
@@ -994,8 +1067,6 @@ describe('Bond Tests', () => {
 
             it('GIVEN an account without bondManager role WHEN setMaturityDate THEN transaction fails with AccountHasNoRole', async () => {
                 // * Arrange
-                // Using account C (without role)
-                bondFacet = bondFacet.connect(signer_C)
                 // Get maturity date
                 const maturityDateBefore = (
                     await bondReadFacet.getBondDetails()
@@ -1008,7 +1079,9 @@ describe('Bond Tests', () => {
                 // * Act & Assert
                 // Set maturity date
                 await expect(
-                    bondFacet.updateMaturityDate(newMaturityDate)
+                    bondFacet
+                        .connect(signer_C)
+                        .updateMaturityDate(newMaturityDate)
                 ).to.be.rejectedWith('AccountHasNoRole')
                 // Ensure maturity date is not updated
                 const maturityDateAfter = (await bondReadFacet.getBondDetails())
@@ -1027,8 +1100,6 @@ describe('Bond Tests', () => {
                     signer_B,
                     account_C
                 )
-                // Using account C (with role)
-                bondFacet = bondFacet.connect(signer_C)
                 // Get maturity date
                 const maturityDateBefore = (
                     await bondReadFacet.getBondDetails()
@@ -1041,7 +1112,9 @@ describe('Bond Tests', () => {
                 // * Act & Assert
                 // Set maturity date
                 await expect(
-                    bondFacet.updateMaturityDate(newMaturityDate)
+                    bondFacet
+                        .connect(signer_C)
+                        .updateMaturityDate(newMaturityDate)
                 ).to.be.rejectedWith('TokenIsPaused')
                 // Ensure maturity date is not updated
                 const maturityDateAfter = (await bondReadFacet.getBondDetails())
@@ -1050,16 +1123,12 @@ describe('Bond Tests', () => {
             })
 
             it('Check number of created Coupon', async () => {
-                bondFacet = bondFacet.connect(signer_C)
-
                 const couponCount = await bondReadFacet.getCouponCount()
 
                 expect(couponCount).to.equal(numberOfCoupons)
             })
 
             it('Check Coupon', async () => {
-                bondFacet = bondFacet.connect(signer_C)
-
                 for (let i = 1; i <= numberOfCoupons; i++) {
                     const coupon = await bondReadFacet.getCoupon(i)
                     const couponFor = await bondReadFacet.getCouponFor(
@@ -1223,11 +1292,11 @@ describe('Bond Tests', () => {
 
             await setFacets({ diamond: newDiamond })
 
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-            erc1410Facet = erc1410Facet.connect(signer_C)
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(ISSUER_ROLE, account_C)
 
-            await erc1410Facet.issueByPartition({
+            await erc1410Facet.connect(signer_C).issueByPartition({
                 partition: _PARTITION_ID,
                 tokenHolder: account_A,
                 value: amount,
@@ -1252,6 +1321,47 @@ describe('Bond Tests', () => {
                     '0x',
                     '0x'
                 )
+        })
+    })
+
+    describe('Bond Initialization Period Validation', () => {
+        it('GIVEN bond deployment with zero couponFrequency WHEN deployBondFromFactory THEN deployment fails with CouponFrequencyWrong', async () => {
+            const init_rbacs: Rbac[] = set_initRbacs()
+
+            await expect(
+                deployBondFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList: false,
+                    isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
+                    isMultiPartition: false,
+                    name: 'TEST_ZeroFreq',
+                    symbol: 'TZF',
+                    decimals: 6,
+                    isin: isinGenerator(),
+                    currency: '0x455552',
+                    numberOfUnits: numberOfUnits,
+                    nominalValue: 100,
+                    startingDate: startingDate,
+                    maturityDate: maturityDate,
+                    couponFrequency: 0, // Invalid: zero frequency
+                    couponRate: rate,
+                    firstCouponDate: firstCouponDate,
+                    regulationType: RegulationType.REG_D,
+                    regulationSubType: RegulationSubType.REG_D_506_B,
+                    countriesControlListType: countriesControlListType,
+                    listOfCountries: listOfCountries,
+                    info: info,
+                    init_rbacs: init_rbacs,
+                    factory: factory,
+                    businessLogicResolver: businessLogicResolver.address,
+                })
+            ).to.be.revertedWithCustomError(
+                bondStorageWrapper,
+                'CouponFrequencyWrong'
+            )
         })
     })
 })
