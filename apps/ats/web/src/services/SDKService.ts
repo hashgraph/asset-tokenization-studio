@@ -210,7 +210,6 @@ import {
   BondDetailsViewModel,
   ConnectRequest,
   ControlListRequest,
-  CouponDetailsViewModel,
   CouponForViewModel,
   CouponViewModel,
   CreateBondRequest,
@@ -230,7 +229,6 @@ import {
   GetControlListCountRequest,
   GetControlListMembersRequest,
   GetControlListTypeRequest,
-  GetCouponDetailsRequest,
   GetCouponForRequest,
   GetCouponRequest,
   GetDividendsForRequest,
@@ -534,12 +532,6 @@ export class SDKService {
     req: GetBondDetailsRequest,
   ): Promise<BondDetailsViewModel> {
     return await Bond.getBondDetails(req);
-  }
-
-  public static async getCouponDetails(
-    req: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel> {
-    return await Bond.getCouponDetails(req);
   }
 
   public static async updateBondMaturityDate(
