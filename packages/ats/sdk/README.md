@@ -176,9 +176,6 @@ Sets a new configuration into the SDK.
   - nominalValue: only for information, represents the value of a single bond.
   - startingDate: Bond's starting date in seconds
   - maturityDate: Bond's maturity date in seconds
-  - couponFrequency: seconds in between two consecutives coupon's record date
-  - couponRate: coupon interest rate in percentage. Only for information.
-  - firstCouponDate: record date, in seconds, of the first coupon.
   - regulationType:
     - 0 : no regulation
     - 1 : Reg S

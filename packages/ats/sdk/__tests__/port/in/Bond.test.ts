@@ -209,7 +209,6 @@ import {
   LoggerTransports,
   CreateBondRequest,
   GetBondDetailsRequest,
-  GetCouponDetailsRequest,
   GetCouponRequest,
   GetAllCouponsRequest,
   SupportedWallets,
@@ -350,9 +349,6 @@ describe('🧪 Bond test', () => {
       nominalValue: nominalValue,
       startingDate: startingDate.toString(),
       maturityDate: maturityDate.toString(),
-      couponFrequency: couponFrequency.toString(),
-      couponRate: couponRate,
-      firstCouponDate: firstCouponDate.toString(),
       regulationType: CastRegulationType.toNumber(regulationType),
       regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
       isCountryControlListWhiteList: true,
@@ -381,20 +377,6 @@ describe('🧪 Bond test', () => {
     expect(bondDetails.startingDate.getTime() / 1000).toEqual(startingDate);
     expect(bondDetails.maturityDate.getTime() / 1000).toEqual(maturityDate);
   }, 60_000);
-
-  it('Check Coupon Details', async () => {
-    const couponDetails = await Bond.getCouponDetails(
-      new GetCouponDetailsRequest({
-        bondId: bond.evmDiamondAddress!.toString(),
-      }),
-    );
-
-    expect(couponDetails.couponFrequency).toEqual(couponFrequency);
-    expect(couponDetails.couponRate).toEqual(couponRate);
-    expect(couponDetails.firstCouponDate.getTime() / 1000).toEqual(
-      firstCouponDate,
-    );
-  }, 600_000);
 
   it('Coupons Fixed', async () => {
     const coupon = await Bond.getCoupon(
