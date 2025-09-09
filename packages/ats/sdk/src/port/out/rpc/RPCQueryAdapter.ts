@@ -259,6 +259,7 @@ import {
   SsiManagementFacet__factory,
   ERC3643ReadFacet__factory,
   TREXFactoryAts__factory,
+  BeneficiariesFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -2039,5 +2040,18 @@ export class RPCQueryAdapter {
       factory.toString(),
     ).getToken(salt);
     return token;
+  }
+
+  async isBeneficiary(
+    address: EvmAddress,
+    beneficiary: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the address ${beneficiary.toString()} is a beneficiary for the security: ${address.toString()}`,
+    );
+    return await this.connect(
+      BeneficiariesFacet__factory,
+      address.toString(),
+    ).isBeneficiary(beneficiary.toString());
   }
 }

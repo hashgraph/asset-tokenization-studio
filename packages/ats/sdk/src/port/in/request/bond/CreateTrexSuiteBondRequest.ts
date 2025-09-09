@@ -259,6 +259,12 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
   @OptionalField()
   identityRegistryId?: string;
 
+  @OptionalField()
+  beneficiariesIds?: string[];
+
+  @OptionalField()
+  beneficiariesData?: string[];
+
   currency: string;
   numberOfUnits: string;
   nominalValue: string;
@@ -314,6 +320,8 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     configVersion,
     complianceId,
     identityRegistryId,
+    beneficiariesIds,
+    beneficiariesData,
   }: {
     salt: string;
     owner: string;
@@ -356,6 +364,8 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     configVersion: number;
     complianceId?: string;
     identityRegistryId?: string;
+    beneficiariesIds?: string[];
+    beneficiariesData?: string[];
   }) {
     super({
       name: (val) => {
@@ -421,6 +431,14 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
       identityRegistryId:
         FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       claimTopics: FormatValidation.checkArrayNumber(),
+      beneficiariesIds: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'beneficiariesIds',
+          true,
+        );
+      },
+      beneficiariesData: FormatValidation.checkBytesFormat(),
     });
 
     this.salt = salt;
@@ -465,5 +483,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     this.configVersion = configVersion;
     this.complianceId = complianceId;
     this.identityRegistryId = identityRegistryId;
+    this.beneficiariesIds = beneficiariesIds;
+    this.beneficiariesData = beneficiariesData;
   }
 }
