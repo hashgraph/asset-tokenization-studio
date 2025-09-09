@@ -361,7 +361,6 @@ contract Factory is IFactory, LocalContext {
 
         IBondUSA(bondAddress_)._initialize_bondUSA(
             _bondData.bondDetails,
-            _bondData.couponDetails,
             buildRegulationData(
                 _factoryRegulationData.regulationType,
                 _factoryRegulationData.regulationSubType

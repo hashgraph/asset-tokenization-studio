@@ -229,7 +229,6 @@ abstract contract BondStorageWrapper is
 
     struct BondDataStorage {
         IBondRead.BondDetailsData bondDetail;
-        IBondRead.CouponDetailsData couponDetail;
         bool initialized;
     }
 
@@ -248,27 +247,6 @@ abstract contract BondStorageWrapper is
         IBondRead.BondDetailsData memory _bondDetails
     ) internal {
         _bondStorage().bondDetail = _bondDetails;
-    }
-
-    function _storeCouponDetails(
-        IBondRead.CouponDetailsData memory _couponDetails,
-        uint256 _startingDate,
-        uint256 _maturityDate
-    ) internal {
-        _bondStorage().couponDetail = _couponDetails;
-        if (_couponDetails.firstCouponDate == 0) return;
-        if (
-            _couponDetails.firstCouponDate < _startingDate ||
-            _couponDetails.firstCouponDate > _maturityDate
-        ) revert CouponFirstDateWrong();
-        if (_couponDetails.couponFrequency == 0) revert CouponFrequencyWrong();
-
-        _setFixedCoupons(
-            _couponDetails.firstCouponDate,
-            _couponDetails.couponFrequency,
-            _maturityDate,
-            _couponDetails.couponRate
-        );
     }
 
     function _setCoupon(
@@ -301,14 +279,6 @@ abstract contract BondStorageWrapper is
         returns (IBondRead.BondDetailsData memory bondDetails_)
     {
         bondDetails_ = _bondStorage().bondDetail;
-    }
-
-    function _getCouponDetails()
-        internal
-        view
-        returns (IBondRead.CouponDetailsData memory couponDetails_)
-    {
-        couponDetails_ = _bondStorage().couponDetail;
     }
 
     function _getMaturityDate() internal view returns (uint256 maturityDate_) {
@@ -414,34 +384,6 @@ abstract contract BondStorageWrapper is
         assembly {
             bondData_.slot := position
         }
-    }
-
-    function _setFixedCoupons(
-        uint256 _firstCouponDate,
-        uint256 _couponFrequency,
-        uint256 _maturityDate,
-        uint256 _rate
-    ) private returns (bool) {
-        uint256 numberOfSubsequentCoupons = (_maturityDate - _firstCouponDate) /
-            _couponFrequency;
-        bool success;
-        for (uint256 i = 0; i <= numberOfSubsequentCoupons; i++) {
-            uint256 runDate = _firstCouponDate + i * _couponFrequency;
-
-            IBondRead.Coupon memory _newCoupon;
-            _newCoupon.recordDate = runDate;
-            _newCoupon.executionDate = runDate;
-            _newCoupon.rate = _rate;
-            _newCoupon.period = _couponFrequency;
-
-            (success, , ) = _setCoupon(_newCoupon);
-
-            if (!success) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     function _checkMaturityDate(uint256 _maturityDate) private view {

@@ -214,12 +214,6 @@ interface IBondRead {
         uint256 maturityDate;
     }
 
-    struct CouponDetailsData {
-        uint256 couponFrequency;
-        uint256 couponRate;
-        uint256 firstCouponDate;
-    }
-
     struct Coupon {
         uint256 recordDate;
         uint256 executionDate;
@@ -248,14 +242,6 @@ interface IBondRead {
         external
         view
         returns (BondDetailsData memory bondDetailsData_);
-
-    /**
-     * @notice Retrieves the coupon details
-     */
-    function getCouponDetails()
-        external
-        view
-        returns (CouponDetailsData memory couponDetails_);
 
     /**
      * @notice Retrieves a registered coupon by its ID

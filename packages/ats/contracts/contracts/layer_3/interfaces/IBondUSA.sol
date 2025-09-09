@@ -218,7 +218,6 @@ interface IBondUSA is IBond {
     // solhint-disable-next-line private-vars-leading-underscore
     function _initialize_bondUSA(
         IBondRead.BondDetailsData calldata _bondDetailsData,
-        IBondRead.CouponDetailsData calldata _couponDetailsData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
     ) external;
