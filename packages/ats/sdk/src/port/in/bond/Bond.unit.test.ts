@@ -217,6 +217,8 @@ import {
   GetCouponHoldersRequest,
   GetTotalCouponHoldersRequest,
   CreateTrexSuiteBondRequest,
+  RemoveBeneficiaryRequest,
+  UpdateBeneficiaryDataRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
@@ -242,6 +244,9 @@ import {
   SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,
   CreateTrexSuiteBondRequestFixture,
+  AddBeneficiaryRequestFixture,
+  RemoveBeneficiaryRequestFixture,
+  UpdateBeneficiaryDataRequestFixture,
 } from '@test/fixtures/bond/BondFixture';
 import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import { Security } from '@domain/context/security/Security';
@@ -265,6 +270,10 @@ import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturi
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
+import AddBeneficiaryRequest from '../request/bond/AddBeneficiaryRequest';
+import { AddBeneficiaryCommand } from '@command/security/beneficiaries/addBeneficiary/AddBeneficiaryCommand';
+import { RemoveBeneficiaryCommand } from '@command/security/beneficiaries/removeBeneficiary/RemoveBeneficiaryCommand';
+import { UpdateBeneficiaryDataCommand } from '@command/security/beneficiaries/updateBeneficiaryData/UpdateBeneficiaryDataCommand';
 
 describe('Bond', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -1510,6 +1519,8 @@ describe('Bond', () => {
           createTrexSuiteBondRequest.configId,
           createTrexSuiteBondRequest.configVersion,
           createTrexSuiteBondRequest.diamondOwnerAccount,
+          createTrexSuiteBondRequest.beneficiariesIds,
+          createTrexSuiteBondRequest.beneficiariesData,
           createTrexSuiteBondRequest.externalPauses,
           createTrexSuiteBondRequest.externalControlLists,
           createTrexSuiteBondRequest.externalKycLists,
@@ -1588,6 +1599,8 @@ describe('Bond', () => {
           createTrexSuiteBondRequest.configId,
           createTrexSuiteBondRequest.configVersion,
           createTrexSuiteBondRequest.diamondOwnerAccount,
+          createTrexSuiteBondRequest.beneficiariesIds,
+          createTrexSuiteBondRequest.beneficiariesData,
           createTrexSuiteBondRequest.externalPauses,
           createTrexSuiteBondRequest.externalControlLists,
           createTrexSuiteBondRequest.externalKycLists,
@@ -1776,6 +1789,261 @@ describe('Bond', () => {
 
       await expect(
         BondToken.createTrexSuite(createTrexSuiteBondRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('AddBeneficiaryRequest', () => {
+    const addBeneficiaryRequest = new AddBeneficiaryRequest(
+      AddBeneficiaryRequestFixture.create(),
+    );
+    it('should add beneficiary successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.addBeneficiary(addBeneficiaryRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'AddBeneficiaryRequest',
+        addBeneficiaryRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new AddBeneficiaryCommand(
+          addBeneficiaryRequest.securityId,
+          addBeneficiaryRequest.beneficiaryId,
+          addBeneficiaryRequest.data,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.addBeneficiary(addBeneficiaryRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'AddBeneficiaryRequest',
+        addBeneficiaryRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new AddBeneficiaryCommand(
+          addBeneficiaryRequest.securityId,
+          addBeneficiaryRequest.beneficiaryId,
+          addBeneficiaryRequest.data,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      let addBeneficiaryRequest = new AddBeneficiaryRequest({
+        ...AddBeneficiaryRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.addBeneficiary(addBeneficiaryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if data is invalid', async () => {
+      let addBeneficiaryRequest = new AddBeneficiaryRequest({
+        ...AddBeneficiaryRequestFixture.create(),
+        data: 'invalid',
+      });
+
+      await expect(
+        BondToken.addBeneficiary(addBeneficiaryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if beneficiaryId is invalid', async () => {
+      let addBeneficiaryRequest = new AddBeneficiaryRequest({
+        ...AddBeneficiaryRequestFixture.create(),
+        beneficiaryId: 'invalid',
+      });
+
+      await expect(
+        BondToken.addBeneficiary(addBeneficiaryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('RemoveBeneficiaryRequest', () => {
+    const removeBeneficiaryRequest = new RemoveBeneficiaryRequest(
+      RemoveBeneficiaryRequestFixture.create(),
+    );
+    it('should remove beneficiary successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.removeBeneficiary(
+        removeBeneficiaryRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RemoveBeneficiaryRequest',
+        removeBeneficiaryRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RemoveBeneficiaryCommand(
+          removeBeneficiaryRequest.securityId,
+          removeBeneficiaryRequest.beneficiaryId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.removeBeneficiary(removeBeneficiaryRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'RemoveBeneficiaryRequest',
+        removeBeneficiaryRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new RemoveBeneficiaryCommand(
+          removeBeneficiaryRequest.securityId,
+          removeBeneficiaryRequest.beneficiaryId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      let removeBeneficiaryRequest = new RemoveBeneficiaryRequest({
+        ...RemoveBeneficiaryRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.removeBeneficiary(removeBeneficiaryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if beneficiaryId is invalid', async () => {
+      let removeBeneficiaryRequest = new RemoveBeneficiaryRequest({
+        ...RemoveBeneficiaryRequestFixture.create(),
+        beneficiaryId: 'invalid',
+      });
+
+      await expect(
+        BondToken.removeBeneficiary(removeBeneficiaryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('UpdateBeneficiaryDataRequest', () => {
+    const updateBeneficiaryDataRequest = new UpdateBeneficiaryDataRequest(
+      UpdateBeneficiaryDataRequestFixture.create(),
+    );
+    it('should update beneficiary data successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.updateBeneficiaryData(
+        updateBeneficiaryDataRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'UpdateBeneficiaryDataRequest',
+        updateBeneficiaryDataRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UpdateBeneficiaryDataCommand(
+          updateBeneficiaryDataRequest.securityId,
+          updateBeneficiaryDataRequest.beneficiaryId,
+          updateBeneficiaryDataRequest.data,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.updateBeneficiaryData(updateBeneficiaryDataRequest),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'UpdateBeneficiaryDataRequest',
+        updateBeneficiaryDataRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UpdateBeneficiaryDataCommand(
+          updateBeneficiaryDataRequest.securityId,
+          updateBeneficiaryDataRequest.beneficiaryId,
+          updateBeneficiaryDataRequest.data,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      let updateBeneficiaryDataRequest = new UpdateBeneficiaryDataRequest({
+        ...UpdateBeneficiaryDataRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.updateBeneficiaryData(updateBeneficiaryDataRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if data is invalid', async () => {
+      let updateBeneficiaryDataRequest = new UpdateBeneficiaryDataRequest({
+        ...UpdateBeneficiaryDataRequestFixture.create(),
+        data: 'invalid',
+      });
+
+      await expect(
+        BondToken.updateBeneficiaryData(updateBeneficiaryDataRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if beneficiaryId is invalid', async () => {
+      let updateBeneficiaryDataRequest = new UpdateBeneficiaryDataRequest({
+        ...UpdateBeneficiaryDataRequestFixture.create(),
+        beneficiaryId: 'invalid',
+      });
+
+      await expect(
+        BondToken.updateBeneficiaryData(updateBeneficiaryDataRequest),
       ).rejects.toThrow(ValidationError);
     });
   });

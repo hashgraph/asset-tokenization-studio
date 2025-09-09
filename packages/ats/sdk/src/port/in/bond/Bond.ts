@@ -247,6 +247,12 @@ import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetC
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import CreateTrexSuiteBondRequest from '../request/bond/CreateTrexSuiteBondRequest';
 import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
+import AddBeneficiaryRequest from '../request/bond/AddBeneficiaryRequest';
+import RemoveBeneficiaryRequest from '../request/bond/RemoveBeneficiaryRequest';
+import UpdateBeneficiaryDataRequest from '../request/bond/UpdateBeneficiaryDataRequest';
+import { UpdateBeneficiaryDataCommand } from '@command/security/beneficiaries/updateBeneficiaryData/UpdateBeneficiaryDataCommand';
+import { RemoveBeneficiaryCommand } from '@command/security/beneficiaries/removeBeneficiary/RemoveBeneficiaryCommand';
+import { AddBeneficiaryCommand } from '@command/security/beneficiaries/addBeneficiary/AddBeneficiaryCommand';
 
 interface IBondInPort {
   create(
@@ -270,6 +276,16 @@ interface IBondInPort {
   createTrexSuite(
     request: CreateTrexSuiteBondRequest,
   ): Promise<{ security: SecurityViewModel; transactionId: string }>;
+
+  addBeneficiary(
+    request: AddBeneficiaryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  removeBeneficiary(
+    request: RemoveBeneficiaryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  updateBeneficiaryData(
+    request: UpdateBeneficiaryDataRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class BondInPort implements IBondInPort {
@@ -588,6 +604,8 @@ class BondInPort implements IBondInPort {
         req.configId,
         req.configVersion,
         diamondOwnerAccount,
+        req.beneficiariesIds,
+        req.beneficiariesData,
         externalPauses,
         externalControlLists,
         externalKycLists,
@@ -614,6 +632,47 @@ class BondInPort implements IBondInPort {
         : {},
       transactionId: createResponse.transactionId,
     };
+  }
+
+  @LogError
+  async updateBeneficiaryData(
+    request: UpdateBeneficiaryDataRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(
+      UpdateBeneficiaryDataRequest.name,
+      request,
+    );
+    return await this.commandBus.execute(
+      new UpdateBeneficiaryDataCommand(
+        request.securityId,
+        request.beneficiaryId,
+        request.data,
+      ),
+    );
+  }
+
+  @LogError
+  async removeBeneficiary(
+    request: RemoveBeneficiaryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(RemoveBeneficiaryRequest.name, request);
+    return await this.commandBus.execute(
+      new RemoveBeneficiaryCommand(request.securityId, request.beneficiaryId),
+    );
+  }
+
+  @LogError
+  async addBeneficiary(
+    request: AddBeneficiaryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(AddBeneficiaryRequest.name, request);
+    return await this.commandBus.execute(
+      new AddBeneficiaryCommand(
+        request.securityId,
+        request.beneficiaryId,
+        request.data,
+      ),
+    );
   }
 }
 

@@ -268,6 +268,7 @@ import { IsInternalKycActivatedQuery } from '@query/security/kyc/isInternalKycAc
 import { IsExternallyGrantedQuery } from '@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
 import { GetTokenBySaltQuery } from '@query/factory/trex/getTokenBySalt/GetTokenBySaltQuery';
 import { InvalidTrexTokenSalt } from '@domain/context/factory/error/InvalidTrexTokenSalt';
+import { IsBeneficiaryQuery } from '@query/security/beneficiary/isBeneficiary/IsBeneficiaryQuery';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -763,5 +764,17 @@ export default class ValidationService extends Service {
       new GetKycStatusForQuery(securityId, address),
     );
     return kycResult.payload === kycStatus;
+  }
+
+  async isBeneficiary(
+    securityId: string,
+    beneficiary: string,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    return (
+      await this.queryBus.execute(
+        new IsBeneficiaryQuery(securityId, beneficiary),
+      )
+    ).payload;
   }
 }
