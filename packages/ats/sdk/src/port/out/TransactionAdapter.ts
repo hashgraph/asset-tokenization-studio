@@ -213,7 +213,6 @@ import LogService from '@service/log/LogService';
 import { Security } from '@domain/context/security/Security';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { BondDetails } from '@domain/context/bond/BondDetails';
-import { CouponDetails } from '@domain/context/bond/CouponDetails';
 import { EquityDetails } from '@domain/context/equity/EquityDetails';
 import HWCSettings from '@core/settings/walletConnect/HWCSettings';
 import { ContractId } from '@hashgraph/sdk';
@@ -271,7 +270,6 @@ interface ITransactionAdapter {
   createBond(
     security: Security,
     bondDetails: BondDetails,
-    couponDetails: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
@@ -1131,7 +1129,6 @@ export default abstract class TransactionAdapter
   abstract createBond(
     security: Security,
     bondDetails: BondDetails,
-    couponDetails: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
@@ -1854,7 +1851,6 @@ export default abstract class TransactionAdapter
     issuerClaims: number[][],
     security: Security,
     bondDetails: BondDetails,
-    couponDetails: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,

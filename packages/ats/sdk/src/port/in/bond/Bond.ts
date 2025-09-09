@@ -204,16 +204,13 @@
 */
 
 import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
-import { GetCouponDetailsQuery } from '@query/bond/get/getCouponDetails/GetCouponDetailsQuery';
 import Injectable from '@core/injectable/Injectable';
 import { LogError } from '@core/decorator/LogErrorDecorator';
 import { QueryBus } from '@core/query/QueryBus';
 import ValidatedRequest from '@core/validation/ValidatedArgs';
 
 import GetBondDetailsRequest from '../request/bond/GetBondDetailsRequest';
-import GetCouponDetailsRequest from '../request/bond/GetCouponDetailsRequest';
 import BondDetailsViewModel from '../response/BondDetailsViewModel';
-import CouponDetailsViewModel from '../response/CouponDetailsViewModel';
 import CouponViewModel from '../response/CouponViewModel';
 import CouponForViewModel from '../response/CouponForViewModel';
 import GetAllCouponsRequest from '../request/bond/GetAllCouponsRequest';
@@ -259,9 +256,6 @@ interface IBondInPort {
   setCoupon(
     request: SetCouponRequest,
   ): Promise<{ payload: number; transactionId: string }>;
-  getCouponDetails(
-    request: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel>;
   getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
   getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
   getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
@@ -331,9 +325,6 @@ class BondInPort implements IBondInPort {
         req.nominalValue,
         req.startingDate,
         req.maturityDate,
-        req.couponFrequency,
-        req.couponRate,
-        req.firstCouponDate,
         securityFactory ? new ContractId(securityFactory) : undefined,
         resolver ? new ContractId(resolver) : undefined,
         req.configId,
@@ -405,24 +396,6 @@ class BondInPort implements IBondInPort {
         period,
       ),
     );
-  }
-
-  @LogError
-  async getCouponDetails(
-    request: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel> {
-    ValidatedRequest.handleValidation('GetCouponDetailsRequest', request);
-
-    const res = await this.queryBus.execute(
-      new GetCouponDetailsQuery(request.bondId),
-    );
-
-    const couponDetails: CouponDetailsViewModel = {
-      couponFrequency: res.coupon.couponFrequency,
-      couponRate: res.coupon.couponRate.toString(),
-      firstCouponDate: new Date(res.coupon.firstCouponDate * ONE_THOUSAND),
-    };
-    return couponDetails;
   }
 
   @LogError
@@ -610,9 +583,6 @@ class BondInPort implements IBondInPort {
         req.nominalValue,
         req.startingDate,
         req.maturityDate,
-        req.couponFrequency,
-        req.couponRate,
-        req.firstCouponDate,
         new ContractId(securityFactory),
         new ContractId(resolver),
         req.configId,

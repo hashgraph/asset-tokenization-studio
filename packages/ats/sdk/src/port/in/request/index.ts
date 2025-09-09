@@ -237,7 +237,6 @@ import GetSecurityDetailsRequest from './security/GetSecurityDetailsRequest';
 import SetDividendsRequest from './equity/SetDividendsRequest';
 import SetCouponRequest from './bond/SetCouponRequest';
 import SetVotingRightsRequest from './equity/SetVotingRightsRequest';
-import GetCouponDetailsRequest from './bond/GetCouponDetailsRequest';
 import GetBondDetailsRequest from './bond/GetBondDetailsRequest';
 import GetEquityDetailsRequest from './equity/GetEquityDetailsRequest';
 import SetMaxSupplyRequest from './security/operations/cap/SetMaxSupplyRequest';
@@ -434,7 +433,6 @@ export {
   InitializationRequest,
   ConnectRequest,
   GetSecurityDetailsRequest,
-  GetCouponDetailsRequest,
   GetBondDetailsRequest,
   SetMaxSupplyRequest,
   GetMaxSupplyRequest,

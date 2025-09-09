@@ -218,7 +218,6 @@ import TransactionService from '@service/transaction/TransactionService';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { BondDetails } from '@domain/context/bond/BondDetails';
-import { CouponDetails } from '@domain/context/bond/CouponDetails';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import ContractService from '@service/contract/ContractService';
 import { CreateBondCommandError } from './error/CreateBondCommandError';
@@ -253,9 +252,6 @@ export class CreateBondCommandHandler
         nominalValue,
         startingDate,
         maturityDate,
-        couponFrequency,
-        couponRate,
-        firstCouponDate,
         factory,
         resolver,
         configId,
@@ -329,16 +325,9 @@ export class CreateBondCommandHandler
         parseInt(maturityDate),
       );
 
-      const couponInfo = new CouponDetails(
-        parseInt(couponFrequency),
-        BigDecimal.fromString(couponRate),
-        parseInt(firstCouponDate),
-      );
-
       res = await handler.createBond(
         new Security(security),
         bondInfo,
-        couponInfo,
         factoryEvmAddress,
         resolverEvmAddress,
         configId,
