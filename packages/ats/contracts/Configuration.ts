@@ -371,7 +371,8 @@ export default class Configuration {
                         name: `${network.toUpperCase()}_MIRROR_NODE_ENDPOINT`,
                         defaultValue:
                             network === 'local'
-                                ? 'http://localhost:5551'
+                                ? // ? 'http://localhost:5551' old value
+                                  'http://localhost:8081' // new value; this is mirrornode endpoint for Solo
                                 : `https://${network}.mirrornode.hedera.com`,
                     }),
                 }
