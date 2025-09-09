@@ -690,6 +690,11 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
             })
         )
 
+        const { IdFactory__factory } = await import('@typechain')
+        await IdFactory__factory.connect(idFactory, signer).addTokenFactory(
+            result.address
+        )
+
         const [trexFactoryId] = await addressListToHederaIdList({
             addressList: [result.address].filter(
                 (addr): addr is string => !!addr
