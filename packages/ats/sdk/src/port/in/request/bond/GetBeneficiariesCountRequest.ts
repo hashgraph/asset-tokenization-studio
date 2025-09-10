@@ -203,36 +203,16 @@
 
 */
 
-import { TOKENS } from '../Tokens';
-import { AddBeneficiaryCommandHandler } from '@command/security/beneficiaries/addBeneficiary/AddBeneficiaryCommandHandler';
-import { RemoveBeneficiaryCommandHandler } from '@command/security/beneficiaries/removeBeneficiary/RemoveBeneficiaryCommandHandler';
-import { UpdateBeneficiaryDataCommandHandler } from '@command/security/beneficiaries/updateBeneficiaryData/UpdateBeneficiaryDataCommandHandler';
-import { GetBeneficiariesQueryHandler } from '@query/security/beneficiary/getBeneficiaries/GetBeneficiariesQueryHandler';
-import { GetBeneficiariesCountQueryHandler } from '@query/security/beneficiary/getBeneficiariesCount/GetBeneficiariesCountQueryHandler';
-import { GetBeneficiaryDataQueryHandler } from '@query/security/beneficiary/getBeneficiaryData/GetBeneficiaryDataQueryHandler';
-import { IsBeneficiaryQueryHandler } from '@query/security/beneficiary/isBeneficiary/IsBeneficiaryQueryHandler';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../FormatValidation';
 
-export const COMMAND_HANDLERS_BENEFICIARY = [
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: AddBeneficiaryCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: RemoveBeneficiaryCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: UpdateBeneficiaryDataCommandHandler,
-  },
-];
+export default class GetBeneficiariesCountRequest extends ValidatedRequest<GetBeneficiariesCountRequest> {
+  securityId: string;
 
-export const QUERY_HANDLERS_BENEFICIARY = [
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: IsBeneficiaryQueryHandler,
-  },
-  { token: TOKENS.QUERY_HANDLER, useClass: GetBeneficiaryDataQueryHandler },
-  { token: TOKENS.QUERY_HANDLER, useClass: GetBeneficiariesCountQueryHandler },
-  { token: TOKENS.QUERY_HANDLER, useClass: GetBeneficiariesQueryHandler },
-];
+  constructor({ securityId }: { securityId: string }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+    });
+    this.securityId = securityId;
+  }
+}

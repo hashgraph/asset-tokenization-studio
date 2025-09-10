@@ -219,6 +219,10 @@ import {
   CreateTrexSuiteBondRequest,
   RemoveBeneficiaryRequest,
   UpdateBeneficiaryDataRequest,
+  IsBeneficiaryRequest,
+  GetBeneficiariesCountRequest,
+  GetBeneficiaryDataRequest,
+  GetBeneficiariesRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
@@ -247,6 +251,10 @@ import {
   AddBeneficiaryRequestFixture,
   RemoveBeneficiaryRequestFixture,
   UpdateBeneficiaryDataRequestFixture,
+  IsBeneficiaryRequestFixture,
+  GetBeneficiariesCountRequestFixture,
+  GetBeneficiaryDataRequestFixture,
+  GetBeneficiariesRequestFixture,
 } from '@test/fixtures/bond/BondFixture';
 import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import { Security } from '@domain/context/security/Security';
@@ -274,6 +282,10 @@ import AddBeneficiaryRequest from '../request/bond/AddBeneficiaryRequest';
 import { AddBeneficiaryCommand } from '@command/security/beneficiaries/addBeneficiary/AddBeneficiaryCommand';
 import { RemoveBeneficiaryCommand } from '@command/security/beneficiaries/removeBeneficiary/RemoveBeneficiaryCommand';
 import { UpdateBeneficiaryDataCommand } from '@command/security/beneficiaries/updateBeneficiaryData/UpdateBeneficiaryDataCommand';
+import { IsBeneficiaryQuery } from '@query/security/beneficiary/isBeneficiary/IsBeneficiaryQuery';
+import { GetBeneficiariesCountQuery } from '@query/security/beneficiary/getBeneficiariesCount/GetBeneficiariesCountQuery';
+import { GetBeneficiaryDataQuery } from '@query/security/beneficiary/getBeneficiaryData/GetBeneficiaryDataQuery';
+import { GetBeneficiariesQuery } from '@query/security/beneficiary/getBeneficiaries/GetBeneficiariesQuery';
 
 describe('Bond', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -2044,6 +2056,295 @@ describe('Bond', () => {
 
       await expect(
         BondToken.updateBeneficiaryData(updateBeneficiaryDataRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('IsBeneficiaryRequest', () => {
+    const isBeneficiaryRequest = new IsBeneficiaryRequest(
+      IsBeneficiaryRequestFixture.create(),
+    );
+    it('should get isBeneficiary successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.isBeneficiary(isBeneficiaryRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsBeneficiaryRequest',
+        isBeneficiaryRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsBeneficiaryQuery(
+          isBeneficiaryRequest.securityId,
+          isBeneficiaryRequest.beneficiaryId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.isBeneficiary(isBeneficiaryRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'IsBeneficiaryRequest',
+        isBeneficiaryRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsBeneficiaryQuery(
+          isBeneficiaryRequest.securityId,
+          isBeneficiaryRequest.beneficiaryId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      let isBeneficiaryRequest = new IsBeneficiaryRequest({
+        ...AddBeneficiaryRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.isBeneficiary(isBeneficiaryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if beneficiaryId is invalid', async () => {
+      let isBeneficiaryRequest = new IsBeneficiaryRequest({
+        ...AddBeneficiaryRequestFixture.create(),
+        beneficiaryId: 'invalid',
+      });
+
+      await expect(
+        BondToken.isBeneficiary(isBeneficiaryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('GetBeneficiariesCountRequest', () => {
+    const getBeneficiariesCountRequest = new GetBeneficiariesCountRequest(
+      GetBeneficiariesCountRequestFixture.create(),
+    );
+    it('should get beneficiaries count successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.getBeneficiariesCount(
+        getBeneficiariesCountRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetBeneficiariesCountRequest',
+        getBeneficiariesCountRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetBeneficiariesCountQuery(getBeneficiariesCountRequest.securityId),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.getBeneficiariesCount(getBeneficiariesCountRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetBeneficiariesCountRequest',
+        getBeneficiariesCountRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetBeneficiariesCountQuery(getBeneficiariesCountRequest.securityId),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      let getBeneficiariesCountRequest = new GetBeneficiariesCountRequest({
+        ...AddBeneficiaryRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getBeneficiariesCount(getBeneficiariesCountRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('GetBeneficiaryDataRequest', () => {
+    const getBeneficiaryDataRequest = new GetBeneficiaryDataRequest(
+      GetBeneficiaryDataRequestFixture.create(),
+    );
+    it('should get beneficiary data successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.getBeneficiaryData(
+        getBeneficiaryDataRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetBeneficiaryDataRequest',
+        getBeneficiaryDataRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetBeneficiaryDataQuery(
+          getBeneficiaryDataRequest.securityId,
+          getBeneficiaryDataRequest.beneficiaryId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.getBeneficiaryData(getBeneficiaryDataRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetBeneficiaryDataRequest',
+        getBeneficiaryDataRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetBeneficiaryDataQuery(
+          getBeneficiaryDataRequest.securityId,
+          getBeneficiaryDataRequest.beneficiaryId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      let isBeneficiaryRequest = new GetBeneficiaryDataRequest({
+        ...AddBeneficiaryRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.isBeneficiary(isBeneficiaryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if beneficiaryId is invalid', async () => {
+      let isBeneficiaryRequest = new GetBeneficiaryDataRequest({
+        ...AddBeneficiaryRequestFixture.create(),
+        beneficiaryId: 'invalid',
+      });
+
+      await expect(
+        BondToken.isBeneficiary(isBeneficiaryRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('GetBeneficiariesRequest', () => {
+    const getBeneficiariesRequest = new GetBeneficiariesRequest(
+      GetBeneficiariesRequestFixture.create(),
+    );
+    it('should get beneficiaries successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.getBeneficiaries(getBeneficiariesRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetBeneficiariesRequest',
+        getBeneficiariesRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetBeneficiariesQuery(
+          getBeneficiariesRequest.securityId,
+          getBeneficiariesRequest.pageIndex,
+          getBeneficiariesRequest.pageSize,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.getBeneficiaries(getBeneficiariesRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetBeneficiariesRequest',
+        getBeneficiariesRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetBeneficiariesQuery(
+          getBeneficiariesRequest.securityId,
+          getBeneficiariesRequest.pageIndex,
+          getBeneficiariesRequest.pageSize,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      let getBeneficiariesRequest = new GetBeneficiariesRequest({
+        ...GetBeneficiariesRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getBeneficiaries(getBeneficiariesRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if page size is invalid', async () => {
+      let getBeneficiariesRequest = new GetBeneficiariesRequest({
+        ...GetBeneficiariesRequestFixture.create(),
+        pageSize: -1,
+      });
+
+      await expect(
+        BondToken.getBeneficiaries(getBeneficiariesRequest),
       ).rejects.toThrow(ValidationError);
     });
   });

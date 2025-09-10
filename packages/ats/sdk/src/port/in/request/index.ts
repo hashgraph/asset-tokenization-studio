@@ -395,6 +395,10 @@ import CreateTrexSuiteBondRequest from './bond/CreateTrexSuiteBondRequest';
 import AddBeneficiaryRequest from './bond/AddBeneficiaryRequest';
 import RemoveBeneficiaryRequest from './bond/RemoveBeneficiaryRequest';
 import UpdateBeneficiaryDataRequest from './bond/UpdateBeneficiaryDataRequest';
+import GetBeneficiaryDataRequest from './bond/GetBeneficiaryDataRequest';
+import GetBeneficiariesCountRequest from './bond/GetBeneficiariesCountRequest';
+import GetBeneficiariesRequest from './bond/GetBeneficiariesRequest';
+import IsBeneficiaryRequest from './bond/IsBeneficiaryRequest';
 
 export {
   CreateEquityRequest,
@@ -588,4 +592,8 @@ export {
   AddBeneficiaryRequest,
   RemoveBeneficiaryRequest,
   UpdateBeneficiaryDataRequest,
+  IsBeneficiaryRequest,
+  GetBeneficiaryDataRequest,
+  GetBeneficiariesCountRequest,
+  GetBeneficiariesRequest,
 };

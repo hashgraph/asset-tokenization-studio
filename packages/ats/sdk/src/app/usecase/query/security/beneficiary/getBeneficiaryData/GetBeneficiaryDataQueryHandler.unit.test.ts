@@ -212,18 +212,18 @@ import { ErrorCode } from '@core/error/BaseError';
 import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import ContractService from '@service/contract/ContractService';
-import { IsBeneficiaryQueryHandler } from './IsBeneficiaryQueryHandler';
+import { GetBeneficiaryDataQueryHandler } from './GetBeneficiaryDataQueryHandler';
 import {
-  IsBeneficiaryQuery,
-  IsBeneficiaryQueryResponse,
-} from './IsBeneficiaryQuery';
+  GetBeneficiaryDataQuery,
+  GetBeneficiaryDataQueryResponse,
+} from './GetBeneficiaryDataQuery';
 import AccountService from '@service/account/AccountService';
-import { IsBeneficiaryQueryError } from './error/IsBeneficiaryQueryError';
-import { IsBeneficiaryQueryFixture } from '@test/fixtures/beneficiary/BeneficiaryFixture';
+import { GetBeneficiaryDataQueryError } from './error/GetBeneficiaryDataQueryError';
+import { GetBeneficiaryDataQueryFixture } from '@test/fixtures/beneficiary/BeneficiaryFixture';
 
-describe('IsBeneficiaryQueryHandler', () => {
-  let handler: IsBeneficiaryQueryHandler;
-  let query: IsBeneficiaryQuery;
+describe('GetBeneficiaryDataQueryHandler', () => {
+  let handler: GetBeneficiaryDataQueryHandler;
+  let query: GetBeneficiaryDataQuery;
 
   const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
   const contractServiceMock = createMock<ContractService>();
@@ -237,12 +237,12 @@ describe('IsBeneficiaryQueryHandler', () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new IsBeneficiaryQueryHandler(
+    handler = new GetBeneficiaryDataQueryHandler(
       contractServiceMock,
       queryAdapterServiceMock,
       accountServiceMock,
     );
-    query = IsBeneficiaryQueryFixture.create();
+    query = GetBeneficiaryDataQueryFixture.create();
   });
 
   afterEach(() => {
@@ -250,36 +250,37 @@ describe('IsBeneficiaryQueryHandler', () => {
   });
 
   describe('execute', () => {
-    it('throws IsBeneficiaryQueryError when query fails with uncaught error', async () => {
+    it('throws GetBeneficiaryDataQueryError when query fails with uncaught error', async () => {
       const fakeError = new Error(errorMsg);
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
       const resultPromise = handler.execute(query);
 
       await expect(resultPromise).rejects.toBeInstanceOf(
-        IsBeneficiaryQueryError,
+        GetBeneficiaryDataQueryError,
       );
 
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(
-          `An error occurred while querying isBeneficiary: ${errorMsg}`,
+          `An error occurred while querying GetBeneficiaryData: ${errorMsg}`,
         ),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });
 
-    it('should successfully get data', async () => {
+    it('should successfully get beneficiarydata', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         evmAddress,
       );
       accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
         targetEvmAddress,
       );
-      queryAdapterServiceMock.isBeneficiary.mockResolvedValueOnce(true);
+
+      queryAdapterServiceMock.getBeneficiaryData.mockResolvedValueOnce('0x123');
 
       const result = await handler.execute(query);
 
-      expect(result).toBeInstanceOf(IsBeneficiaryQueryResponse);
-      expect(result.payload).toStrictEqual(true);
+      expect(result).toBeInstanceOf(GetBeneficiaryDataQueryResponse);
+      expect(result.payload).toStrictEqual('0x123');
 
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
         1,
@@ -292,7 +293,7 @@ describe('IsBeneficiaryQueryHandler', () => {
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
         query.targetId,
       );
-      expect(queryAdapterServiceMock.isBeneficiary).toHaveBeenCalledWith(
+      expect(queryAdapterServiceMock.getBeneficiaryData).toHaveBeenCalledWith(
         evmAddress,
         targetEvmAddress,
       );
