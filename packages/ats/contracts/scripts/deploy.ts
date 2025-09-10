@@ -327,8 +327,8 @@ import {
     TimeTravel__factory,
     ProxyAdmin__factory,
     TransparentUpgradeableProxy__factory,
-    Beneficiaries__factory,
-    BeneficiariesTimeTravel__factory,
+    BeneficiariesFacetTimeTravel__factory,
+    BeneficiariesFacet__factory,
 } from '@typechain'
 
 export let environment = Environment.empty()
@@ -393,7 +393,6 @@ export async function deployAtsFullInfrastructure({
                 signer,
             })
         await registerDeployedContractBusinessLogics(registerCommand)
-
         // * Create configurations for all Securities (EquityUSA, BondUSA)
         console.log(MESSAGES.businessLogicResolver.info.creatingConfigurations)
         const createCommand =
@@ -891,8 +890,8 @@ export async function deployAtsContracts({
         }),
         beneficiaries: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new Beneficiaries__factory(),
-                new BeneficiariesTimeTravel__factory()
+                new BeneficiariesFacet__factory(),
+                new BeneficiariesFacetTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
@@ -1374,9 +1373,6 @@ export async function deployAtsContracts({
             beneficiariesFacet: await deployContractWithFactory(
                 commands.beneficiaries
             ).then((result) => {
-                console.log(
-                    `Beneficiaries has been deployed successfully at ${result.address}`
-                )
                 console.log(
                     `Beneficiaries has been deployed successfully at ${result.address}`
                 )

@@ -230,7 +230,7 @@ contract BeneficiariesFacet is Beneficiaries, IStaticFunctionSelectors {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_ = new bytes4[](8);
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_Beneficiaries
             .selector;
