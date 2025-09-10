@@ -254,7 +254,7 @@ describe('AddBeneficiaryCommandHandler', () => {
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
       validationServiceMock.checkPause.mockResolvedValue(undefined);
       validationServiceMock.checkRole.mockResolvedValue(undefined);
-      validationServiceMock.isBeneficiary.mockResolvedValue(false);
+      validationServiceMock.checkIsNotBeneficiary.mockResolvedValue(true);
       transactionServiceMock.getHandler().addBeneficiary.mockResolvedValue({
         id: transactionId,
       });

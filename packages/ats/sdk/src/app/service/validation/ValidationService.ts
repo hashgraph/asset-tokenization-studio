@@ -269,6 +269,8 @@ import { IsExternallyGrantedQuery } from '@query/security/externalKycLists/isExt
 import { GetTokenBySaltQuery } from '@query/factory/trex/getTokenBySalt/GetTokenBySaltQuery';
 import { InvalidTrexTokenSalt } from '@domain/context/factory/error/InvalidTrexTokenSalt';
 import { IsBeneficiaryQuery } from '@query/security/beneficiary/isBeneficiary/IsBeneficiaryQuery';
+import { AccountIsNotBeneficiary } from '@domain/context/security/error/operations/AccountIsNotBeneficiary';
+import { AccountIsBeneficiary } from '@domain/context/security/error/operations/AccountIsBeneficiary';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -766,15 +768,36 @@ export default class ValidationService extends Service {
     return kycResult.payload === kycStatus;
   }
 
-  async isBeneficiary(
+  async checkIsBeneficiary(
     securityId: string,
     beneficiary: string,
   ): Promise<boolean> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-    return (
+    const res = (
       await this.queryBus.execute(
         new IsBeneficiaryQuery(securityId, beneficiary),
       )
     ).payload;
+    if (!res) {
+      throw new AccountIsNotBeneficiary(securityId, beneficiary);
+    }
+
+    return res;
+  }
+  async checkIsNotBeneficiary(
+    securityId: string,
+    beneficiary: string,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const res = (
+      await this.queryBus.execute(
+        new IsBeneficiaryQuery(securityId, beneficiary),
+      )
+    ).payload;
+    if (res) {
+      throw new AccountIsBeneficiary(securityId, beneficiary);
+    }
+
+    return !res;
   }
 }

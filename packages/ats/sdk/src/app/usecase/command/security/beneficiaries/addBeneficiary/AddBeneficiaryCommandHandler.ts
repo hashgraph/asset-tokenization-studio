@@ -222,9 +222,10 @@ export class AddBeneficiaryCommandHandler
         securityId,
       );
 
-      if (await this.validationService.isBeneficiary(securityId, beneficiary)) {
-        throw new Error('The address is already a beneficiary');
-      }
+      await this.validationService.checkIsNotBeneficiary(
+        securityId,
+        beneficiary,
+      );
 
       const res = await handler.addBeneficiary(
         securityEvmAddress,
