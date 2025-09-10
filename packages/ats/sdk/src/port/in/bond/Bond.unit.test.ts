@@ -537,7 +537,7 @@ describe('Bond', () => {
     });
 
     it('should throw error if startingDate is invalid', async () => {
-      const time = faker.date.past().getTime();
+      const time = Math.floor(faker.date.past().getTime() / 1000);
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
           startingDate: time.toString(),
@@ -1692,7 +1692,7 @@ describe('Bond', () => {
     });
 
     it('should throw error if startingDate is invalid', async () => {
-      const time = faker.date.past().getTime();
+      const time = Math.floor(faker.date.past().getTime() / 1000);
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
           startingDate: time.toString(),
@@ -1708,7 +1708,9 @@ describe('Bond', () => {
     it('should throw error if maturityDate is invalid', async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          maturityDate: faker.date.past().getTime().toString(),
+          maturityDate: Math.floor(
+            faker.date.past().getTime() / 1000,
+          ).toString(),
         }),
       );
 
