@@ -222,11 +222,8 @@ export class UpdateBeneficiaryDataCommandHandler
         securityId,
       );
 
-      if (
-        !(await this.validationService.isBeneficiary(securityId, beneficiary))
-      ) {
-        throw new Error('The address is not a beneficiary');
-      }
+      await this.validationService.checkIsBeneficiary(securityId, beneficiary);
+
       const res = await handler.updateBeneficiaryData(
         securityEvmAddress,
         beneficiaryEvmAddress,
