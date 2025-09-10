@@ -1372,10 +1372,10 @@ Use the **Network.init** method, with the following input data:
   - _Testnet_: 'https://testnet.hashio.io/api'
   - _Mainnet_: 'https://mainnet.hashio.io/api'
 - **Resolver**: resolver proxy smart contract address, for instance
-  - _Testnet_: '0.0.3532144'
+  - _Testnet_: '0.0.6797832'
   - _Mainnet_: nothing deployed yet.
 - **Factory**:
-  - _Testnet_: '0.0.3532205'
+  - _Testnet_: '0.0.6797955'
   - _Mainnet_: nothing deployed yet.
 - **Business Logic Keys Common**: Check the .env.sample from "web".
 - **Business Logic Keys Equity**: Check the .env.sample from "web".
