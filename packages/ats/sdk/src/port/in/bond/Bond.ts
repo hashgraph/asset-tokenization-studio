@@ -239,10 +239,7 @@ import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
 import RedeemAtMaturityByPartitionRequest from '../request/bond/RedeemAtMaturityByPartitionRequest';
-import {
-  GetCouponHoldersRequest,
-  GetTotalCouponHoldersRequest,
-} from '../request';
+
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import CreateTrexSuiteBondRequest from '../request/bond/CreateTrexSuiteBondRequest';
@@ -253,6 +250,18 @@ import UpdateBeneficiaryDataRequest from '../request/bond/UpdateBeneficiaryDataR
 import { UpdateBeneficiaryDataCommand } from '@command/security/beneficiaries/updateBeneficiaryData/UpdateBeneficiaryDataCommand';
 import { RemoveBeneficiaryCommand } from '@command/security/beneficiaries/removeBeneficiary/RemoveBeneficiaryCommand';
 import { AddBeneficiaryCommand } from '@command/security/beneficiaries/addBeneficiary/AddBeneficiaryCommand';
+import IsBeneficiaryRequest from '../request/bond/IsBeneficiaryRequest';
+import { GetBeneficiariesQuery } from '@query/security/beneficiary/getBeneficiaries/GetBeneficiariesQuery';
+import { GetBeneficiariesCountQuery } from '@query/security/beneficiary/getBeneficiariesCount/GetBeneficiariesCountQuery';
+import { GetBeneficiaryDataQuery } from '@query/security/beneficiary/getBeneficiaryData/GetBeneficiaryDataQuery';
+import { IsBeneficiaryQuery } from '@query/security/beneficiary/isBeneficiary/IsBeneficiaryQuery';
+import {
+  GetCouponHoldersRequest,
+  GetTotalCouponHoldersRequest,
+  GetBeneficiaryDataRequest,
+  GetBeneficiariesCountRequest,
+  GetBeneficiariesRequest,
+} from '../request';
 
 interface IBondInPort {
   create(
@@ -286,6 +295,16 @@ interface IBondInPort {
   updateBeneficiaryData(
     request: UpdateBeneficiaryDataRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  isBeneficiary(request: IsBeneficiaryRequest): Promise<{ payload: boolean }>;
+  getBeneficiaryData(
+    request: GetBeneficiaryDataRequest,
+  ): Promise<{ payload: string }>;
+  getBeneficiariesCount(
+    request: GetBeneficiariesCountRequest,
+  ): Promise<{ payload: number }>;
+  getBeneficiaries(
+    request: GetBeneficiariesRequest,
+  ): Promise<{ payload: string[] }>;
 }
 
 class BondInPort implements IBondInPort {
@@ -673,6 +692,50 @@ class BondInPort implements IBondInPort {
         request.beneficiaryId,
         request.data,
       ),
+    );
+  }
+
+  @LogError
+  async getBeneficiaries(
+    request: GetBeneficiariesRequest,
+  ): Promise<{ payload: string[] }> {
+    ValidatedRequest.handleValidation(GetBeneficiariesRequest.name, request);
+    return await this.queryBus.execute(
+      new GetBeneficiariesQuery(
+        request.securityId,
+        request.pageIndex,
+        request.pageSize,
+      ),
+    );
+  }
+  @LogError
+  async getBeneficiariesCount(
+    request: GetBeneficiariesCountRequest,
+  ): Promise<{ payload: number }> {
+    ValidatedRequest.handleValidation(
+      GetBeneficiariesCountRequest.name,
+      request,
+    );
+    return await this.queryBus.execute(
+      new GetBeneficiariesCountQuery(request.securityId),
+    );
+  }
+  @LogError
+  async getBeneficiaryData(
+    request: GetBeneficiaryDataRequest,
+  ): Promise<{ payload: string }> {
+    ValidatedRequest.handleValidation(GetBeneficiaryDataRequest.name, request);
+    return await this.queryBus.execute(
+      new GetBeneficiaryDataQuery(request.securityId, request.beneficiaryId),
+    );
+  }
+  @LogError
+  async isBeneficiary(
+    request: IsBeneficiaryRequest,
+  ): Promise<{ payload: boolean }> {
+    ValidatedRequest.handleValidation(IsBeneficiaryRequest.name, request);
+    return await this.queryBus.execute(
+      new IsBeneficiaryQuery(request.securityId, request.beneficiaryId),
     );
   }
 }

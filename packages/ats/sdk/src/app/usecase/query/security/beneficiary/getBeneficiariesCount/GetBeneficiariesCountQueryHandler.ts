@@ -203,99 +203,44 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
 import {
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-} from '@test/fixtures/shared/DataFixture';
-import { ErrorCode } from '@core/error/BaseError';
+  GetBeneficiariesCountQuery,
+  GetBeneficiariesCountQueryResponse,
+} from './GetBeneficiariesCountQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
 import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import ContractService from '@service/contract/ContractService';
-import { IsBeneficiaryQueryHandler } from './IsBeneficiaryQueryHandler';
-import {
-  IsBeneficiaryQuery,
-  IsBeneficiaryQueryResponse,
-} from './IsBeneficiaryQuery';
-import AccountService from '@service/account/AccountService';
-import { IsBeneficiaryQueryError } from './error/IsBeneficiaryQueryError';
-import { IsBeneficiaryQueryFixture } from '@test/fixtures/beneficiary/BeneficiaryFixture';
+import { GetBeneficiariesCountQueryError } from './error/GetBeneficiariesCountQueryError';
 
-describe('IsBeneficiaryQueryHandler', () => {
-  let handler: IsBeneficiaryQueryHandler;
-  let query: IsBeneficiaryQuery;
+@QueryHandler(GetBeneficiariesCountQuery)
+export class GetBeneficiariesCountQueryHandler
+  implements IQueryHandler<GetBeneficiariesCountQuery>
+{
+  constructor(
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(RPCQueryAdapter)
+    private readonly queryAdapter: RPCQueryAdapter,
+  ) {}
 
-  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
-  const contractServiceMock = createMock<ContractService>();
-  const accountServiceMock = createMock<AccountService>();
+  async execute(
+    query: GetBeneficiariesCountQuery,
+  ): Promise<GetBeneficiariesCountQueryResponse> {
+    try {
+      const { securityId } = query;
 
-  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const targetEvmAddress = new EvmAddress(
-    EvmAddressPropsFixture.create().value,
-  );
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
 
-  const errorMsg = ErrorMsgFixture.create().msg;
+      const res =
+        await this.queryAdapter.getBeneficiariesCount(securityEvmAddress);
 
-  beforeEach(() => {
-    handler = new IsBeneficiaryQueryHandler(
-      contractServiceMock,
-      queryAdapterServiceMock,
-      accountServiceMock,
-    );
-    query = IsBeneficiaryQueryFixture.create();
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
-  describe('execute', () => {
-    it('throws IsBeneficiaryQueryError when query fails with uncaught error', async () => {
-      const fakeError = new Error(errorMsg);
-      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
-      const resultPromise = handler.execute(query);
-
-      await expect(resultPromise).rejects.toBeInstanceOf(
-        IsBeneficiaryQueryError,
-      );
-
-      await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(
-          `An error occurred while querying isBeneficiary: ${errorMsg}`,
-        ),
-        errorCode: ErrorCode.UncaughtQueryError,
-      });
-    });
-
-    it('should successfully get data', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
-        targetEvmAddress,
-      );
-      queryAdapterServiceMock.isBeneficiary.mockResolvedValueOnce(true);
-
-      const result = await handler.execute(query);
-
-      expect(result).toBeInstanceOf(IsBeneficiaryQueryResponse);
-      expect(result.payload).toStrictEqual(true);
-
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
-
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        query.securityId,
-      );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
-        query.targetId,
-      );
-      expect(queryAdapterServiceMock.isBeneficiary).toHaveBeenCalledWith(
-        evmAddress,
-        targetEvmAddress,
-      );
-    });
-  });
-});
+      return new GetBeneficiariesCountQueryResponse(res);
+    } catch (error) {
+      throw new GetBeneficiariesCountQueryError(error as Error);
+    }
+  }
+}

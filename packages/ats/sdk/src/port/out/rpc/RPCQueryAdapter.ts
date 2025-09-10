@@ -290,6 +290,7 @@ import {
   ClearingTransfer,
 } from '@domain/context/security/Clearing';
 import { HoldDetails } from '@domain/context/security/Hold';
+import { start } from 'repl';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -2053,5 +2054,43 @@ export class RPCQueryAdapter {
       BeneficiariesFacet__factory,
       address.toString(),
     ).isBeneficiary(beneficiary.toString());
+  }
+
+  async getBeneficiaryData(
+    address: EvmAddress,
+    beneficiary: EvmAddress,
+  ): Promise<string> {
+    LogService.logTrace(
+      `Getting beneficiary data for the address ${beneficiary.toString()} for the security: ${address.toString()}`,
+    );
+    return await this.connect(
+      BeneficiariesFacet__factory,
+      address.toString(),
+    ).getBeneficiaryData(beneficiary.toString());
+  }
+
+  async getBeneficiariesCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(
+      `Getting beneficiaries count for the security: ${address.toString()}`,
+    );
+    return (
+      await this.connect(
+        BeneficiariesFacet__factory,
+        address.toString(),
+      ).getBeneficiariesCount()
+    ).toNumber();
+  }
+  async getBeneficiaries(
+    address: EvmAddress,
+    page: number,
+    pageLength: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting beneficiaries from ${page} to ${pageLength} for the security: ${address.toString()}`,
+    );
+    return await this.connect(
+      BeneficiariesFacet__factory,
+      address.toString(),
+    ).getBeneficiaries(page, pageLength);
   }
 }

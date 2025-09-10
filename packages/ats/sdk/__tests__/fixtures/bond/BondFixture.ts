@@ -245,10 +245,17 @@ import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHo
 import GetCouponHoldersRequest from '@port/in/request/bond/GetCouponHoldersRequest';
 import GetTotalCouponHoldersRequest from '@port/in/request/bond/GetTotalCouponHoldersRequest';
 import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
-import { CreateTrexSuiteBondRequest } from 'src';
+import {
+  CreateTrexSuiteBondRequest,
+  GetBeneficiariesCountRequest,
+  GetBeneficiariesRequest,
+  GetBeneficiaryDataRequest,
+  IsBeneficiaryRequest,
+} from 'src';
 import AddBeneficiaryRequest from '@port/in/request/bond/AddBeneficiaryRequest';
 import RemoveBeneficiaryRequest from '@port/in/request/bond/RemoveBeneficiaryRequest';
 import UpdateBeneficiaryDataRequest from '@port/in/request/bond/UpdateBeneficiaryDataRequest';
+import GetBeneficiariesDataRequest from '@port/in/request/bond/GetBeneficiaryDataRequest';
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   (command) => {
@@ -717,6 +724,30 @@ export const UpdateBeneficiaryDataRequestFixture =
 
 export const RemoveBeneficiaryRequestFixture =
   createFixture<RemoveBeneficiaryRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.beneficiaryId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const IsBeneficiaryRequestFixture = createFixture<IsBeneficiaryRequest>(
+  (request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.beneficiaryId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const GetBeneficiariesRequestFixture =
+  createFixture<GetBeneficiariesRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.pageIndex.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.pageSize.faker((faker) => faker.number.int({ min: 1, max: 50 }));
+  });
+
+export const GetBeneficiariesCountRequestFixture =
+  createFixture<GetBeneficiariesCountRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+export const GetBeneficiaryDataRequestFixture =
+  createFixture<GetBeneficiaryDataRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
     request.beneficiaryId.as(() => HederaIdPropsFixture.create().value);
   });
