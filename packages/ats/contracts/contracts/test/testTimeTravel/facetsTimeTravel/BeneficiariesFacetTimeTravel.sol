@@ -206,13 +206,18 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {Beneficiaries} from '../../../layer_2/beneficiaries/Beneficiaries.sol';
+import {
+    BeneficiariesFacet
+} from '../../../layer_2/beneficiaries/BeneficiariesFacet.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract BeneficiariesTimeTravel is Beneficiaries, TimeTravelStorageWrapper {
+contract BeneficiariesFacetTimeTravel is
+    BeneficiariesFacet,
+    TimeTravelStorageWrapper
+{
     function _blockTimestamp()
         internal
         view

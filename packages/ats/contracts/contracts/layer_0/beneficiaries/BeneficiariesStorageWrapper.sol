@@ -206,7 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {
+    TotalBalancesStorageWrapper
+} from '../totalBalances/totalBalancesStorageWrapper.sol';
 import {
     _BENEFICIARIES_STORAGE_POSITION,
     _BENEFICIARIES_DATA_STORAGE_POSITION
@@ -215,7 +217,7 @@ import {
     IBeneficiaries
 } from '../../layer_2/interfaces/beneficiaries/IBeneficiaries.sol';
 
-abstract contract BeneficiariesStorageWrapper is PauseStorageWrapper {
+abstract contract BeneficiariesStorageWrapper is TotalBalancesStorageWrapper {
     struct BeneficiariesDataStorage {
         mapping(address => bytes) beneficiaryData;
     }
