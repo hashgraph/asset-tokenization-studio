@@ -237,9 +237,6 @@ export class CreateTrexSuiteBondCommand extends Command<CreateTrexSuiteBondComma
     public readonly nominalValue: string,
     public readonly startingDate: string,
     public readonly maturityDate: string,
-    public readonly couponFrequency: string,
-    public readonly couponRate: string,
-    public readonly firstCouponDate: string,
 
     public readonly factory: ContractId,
     public readonly resolver: ContractId,

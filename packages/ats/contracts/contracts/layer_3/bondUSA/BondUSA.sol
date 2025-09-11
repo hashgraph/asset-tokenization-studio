@@ -219,11 +219,10 @@ abstract contract BondUSA is IBondUSA, Bond {
     // solhint-disable-next-line private-vars-leading-underscore
     function _initialize_bondUSA(
         IBondRead.BondDetailsData calldata _bondDetailsData,
-        IBondRead.CouponDetailsData calldata _couponDetailsData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
     ) external override onlyUninitialized(_bondStorage().initialized) {
-        _initialize_bond(_bondDetailsData, _couponDetailsData);
+        _initialize_bond(_bondDetailsData);
         _initializeSecurity(_regulationData, _additionalSecurityData);
     }
 }

@@ -812,10 +812,6 @@ jest.mock('@port/out/rpc/RPCQueryAdapter', () => {
     return bondInfo;
   });
 
-  singletonInstance.getCouponDetails = jest.fn(async (address: EvmAddress) => {
-    return couponInfo;
-  });
-
   singletonInstance.getControlListMembers = jest.fn(
     async (address: EvmAddress, start: number, end: number) => {
       const listMembers: string[] = [];

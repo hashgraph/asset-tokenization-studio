@@ -280,9 +280,7 @@ import { Resolvers } from '@domain/context/factory/Resolvers';
 import { BusinessLogicKeys } from '@domain/context/factory/BusinessLogicKeys';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { BondDetails } from '@domain/context/bond/BondDetails';
-import { CouponDetails } from '@domain/context/bond/CouponDetails';
 import { BondDetailsData } from '@domain/context/factory/BondDetailsData';
-import { CouponDetailsData } from '@domain/context/factory/CouponDetailsData';
 import { EquityDetails } from '@domain/context/equity/EquityDetails';
 import { EquityDetailsData } from '@domain/context/factory/EquityDetailsData';
 import { SecurityData } from '@domain/context/factory/SecurityData';
@@ -539,7 +537,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async createBond(
     securityInfo: Security,
     bondInfo: BondDetails,
-    couponInfo: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
@@ -610,16 +607,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         bondInfo.maturityDate.toString(),
       );
 
-      const couponDetails: CouponDetailsData = {
-        couponFrequency: couponInfo.couponFrequency.toString(),
-        couponRate: couponInfo.couponRate.toString(),
-        firstCouponDate: couponInfo.firstCouponDate.toString(),
-      };
-
       const securityTokenToCreate = new FactoryBondToken(
         security,
         bondDetails,
-        couponDetails,
       );
 
       const additionalSecurityData: AdditionalSecurityData = {
@@ -3183,7 +3173,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     issuerClaims: number[][],
     security: Security,
     bondDetails: BondDetails,
-    couponDetails: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
@@ -3252,16 +3241,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       bondDetails.maturityDate.toString(),
     );
 
-    const couponDetailsData: CouponDetailsData = {
-      couponFrequency: couponDetails.couponFrequency.toString(),
-      couponRate: couponDetails.couponRate.toString(),
-      firstCouponDate: couponDetails.firstCouponDate.toString(),
-    };
-
     const securityTokenToCreate = new FactoryBondToken(
       securityData,
       bondDetailsData,
-      couponDetailsData,
     );
 
     const additionalSecurityData: AdditionalSecurityData = {
