@@ -210,7 +210,7 @@ import {
     IInterestRateKpi,
     InterestRateKpiDataDetails
 } from '../../interfaces/interestRate/kpi/IInterestRateKpi.sol';
-import {_KPI_ORACLE_MANAGER_ROLE} from '../../../layer_1/constants/roles.sol';
+import {_INTEREST_RATE_KPI_MANAGER_ROLE} from '../../../layer_1/constants/roles.sol';
 import {Common} from '../../common/Common.sol';
 
 abstract contract InterestRateKpi is IInterestRateKpi, Common {
@@ -226,7 +226,7 @@ abstract contract InterestRateKpi is IInterestRateKpi, Common {
 
     function setIneterestRateKpiData(
         InterestRateKpiDataDetails memory _newData
-    ) external {
+    ) external onlyRole(_INTEREST_RATE_KPI_MANAGER_ROLE) {
         _setIneterestRateKpiData(_newData);
         emit InterestRateKpiDataChanged(_newData);
     }
@@ -237,7 +237,7 @@ abstract contract InterestRateKpi is IInterestRateKpi, Common {
 
     function setKpiOracle(
         address _newKpiOracle
-    ) external onlyRole(_KPI_ORACLE_MANAGER_ROLE) {
+    ) external onlyRole(_INTEREST_RATE_KPI_MANAGER_ROLE) {
         address oldKpiOracle = _setKpiOracle(_newKpiOracle);
 
         emit KpiOracleSet(_newKpiOracle, oldKpiOracle);
