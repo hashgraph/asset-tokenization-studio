@@ -214,7 +214,7 @@ interface IBond {
         uint256 maturityDate;
     }
 
-    enum CouponType {
+    enum InterestRateMode {
         FIXED,
         FIXED_KPI
     }
@@ -223,13 +223,14 @@ interface IBond {
         uint256 couponFrequency;
         uint256 couponRate;
         uint256 firstCouponDate;
-        CouponType couponType;
+        InterestRateMode interestRateMode;
     }
 
     struct Coupon {
         uint256 recordDate;
         uint256 executionDate;
         uint256 rate;
+        uint256 period;
     }
 
     struct RegisteredCoupon {
@@ -246,7 +247,10 @@ interface IBond {
         bool recordDateReached;
     }
 
-    event CouponTypeChanged(CouponType oldCouponType, CouponType newCouponType);
+    event InterestRateModeChanged(
+        InterestRateMode oldInterestRateMode,
+        InterestRateMode newInterestRateMode
+    );
 
     function redeemAtMaturityByPartition(
         address _tokenHolder,
@@ -262,7 +266,7 @@ interface IBond {
         uint256 _maturityDate
     ) external returns (bool success_);
 
-    function setCouponType(CouponType _couponType) external;
+    function setInterestRateMode(InterestRateMode _couponType) external;
 
     function getCouponFor(
         uint256 _couponID,

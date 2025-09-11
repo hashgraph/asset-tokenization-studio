@@ -232,7 +232,6 @@ contract InterestRateKpiFacet is IStaticFunctionSelectors, InterestRateKpi {
         staticFunctionSelectors_[selectorIndex++] = this
             .calculateInterestRate
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setKpiOracle.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_InterestRateKpi
             .selector;

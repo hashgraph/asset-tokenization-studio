@@ -236,7 +236,10 @@ abstract contract InterestRateKpiStorageWrapper is
             .lastReportTimestamp;
     }
 
-    function _calculateInterestRateKpi() internal returns (uint256) {
+    function _calculateInterestRateKpi(
+        uint256 _fromDate,
+        uint256 _toDate
+    ) internal returns (uint256) {
         InterestRateKpiDataStorage memory params = _interestRateKpiStorage();
         if (params.kpiOracle == address(0)) {
             return params.interestRateData.limits.base;
@@ -248,23 +251,33 @@ abstract contract InterestRateKpiStorageWrapper is
             return params.interestRateData.startRate;
 
         uint256 impactData;
+        bool reportFound;
 
         if (_timeElapsed() >= params.reportData.resetPeriod) {
-            impactData = abi.decode(
+            (impactData, reportFound) = abi.decode(
                 params.kpiOracle.functionStaticCall(
-                    abi.encodeWithSelector(IKpiOracle.getImpactData.selector),
+                    abi.encodeWithSelector(
+                        IKpiOracle.getImpactData.selector,
+                        _fromDate,
+                        _toDate
+                    ),
                     IInterestRateKpi.CallToKpiOracleFailed.selector
                 ),
-                (uint256)
+                (uint256, bool)
             );
             _interestRateKpiStorage().lastReportTimestamp = _blockTimestamp();
             emit LastPeriodTimestampUpdated();
             // Missed report penalty
-            if (impactData == 0) {
-                return
-                    params.interestRateData.limits.base +
+            if (!reportFound) {
+                uint256 newRate = params.interestRateData.limits.base +
                     params.reportData.missedPenalty;
+
+                _interestRateKpiStorage().cahchedInterestRate = newRate;
+
+                return newRate;
             }
+        } else {
+            return params.cahchedInterestRate;
         }
 
         int256 impactDelta = int256(impactData) -
@@ -300,6 +313,7 @@ abstract contract InterestRateKpiStorageWrapper is
         if (targetRate < params.interestRateData.limits.marginFloor) {
             targetRate = params.interestRateData.limits.marginFloor;
         }
+        _interestRateKpiStorage().cahchedInterestRate = targetRate;
 
         return targetRate;
     }

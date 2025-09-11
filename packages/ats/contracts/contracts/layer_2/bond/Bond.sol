@@ -215,9 +215,7 @@ import {
     _BOND_MANAGER_ROLE,
     _MATURITY_REDEEMER_ROLE
 } from '../../layer_1/constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {IStaticFunctionSelectors} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
 abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     function redeemAtMaturityByPartition(
@@ -271,12 +269,14 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         );
     }
 
-    function setCouponType(
-        CouponType _newCouponType
+    function setInterestRateMode(
+        InterestRateMode _newInterestRateMode
     ) external override onlyRole(_CORPORATE_ACTION_ROLE) {
-        CouponType oldCouponType = _setCouponType(_newCouponType);
+        InterestRateMode oldInterestRateMode = _setInterestRateMode(
+            _newInterestRateMode
+        );
 
-        emit CouponTypeChanged(oldCouponType, _newCouponType);
+        emit InterestRateModeChanged(oldInterestRateMode, _newInterestRateMode);
     }
 
     /**

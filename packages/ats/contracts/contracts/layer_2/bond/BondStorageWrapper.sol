@@ -211,9 +211,7 @@ import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
 import {IBond} from '../interfaces/bond/IBond.sol';
 import {Common} from '../../layer_1/common/Common.sol';
 import {IBondStorageWrapper} from '../interfaces/bond/IBondStorageWrapper.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {EnumerableSet} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -294,8 +292,14 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
 
         IBond.CouponDetailsData memory couponDetails = _getCouponDetails();
 
-        if (couponDetails.couponType == IBond.CouponType.FIXED_KPI) {
-            couponFor_.rate = _calculateInterestRateKpi();
+        if (
+            couponDetails.interestRateMode == IBond.InterestRateMode.FIXED_KPI
+        ) {
+            couponFor_.rate = _calculateInterestRateKpi(
+                registeredCoupon.coupon.recordDate,
+                registeredCoupon.coupon.recordDate +
+                    registeredCoupon.coupon.period
+            );
         } else {
             couponFor_.rate = couponDetails.couponRate;
         }
@@ -329,11 +333,11 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         }
     }
 
-    function _setCouponType(
-        IBond.CouponType _newCouponType
-    ) internal returns (IBond.CouponType oldCouponTtype_) {
-        oldCouponTtype_ = _bondStorage().couponDetail.couponType;
-        _bondStorage().couponDetail.couponType = _newCouponType;
+    function _setInterestRateMode(
+        IBond.InterestRateMode _newInterestRateMode
+    ) internal returns (IBond.InterestRateMode oldInterestRateMode_) {
+        oldInterestRateMode_ = _bondStorage().couponDetail.interestRateMode;
+        _bondStorage().couponDetail.interestRateMode = _newCouponType;
     }
 
     function _getBondDetails()

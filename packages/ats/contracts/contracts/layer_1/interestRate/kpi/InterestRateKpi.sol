@@ -231,7 +231,10 @@ abstract contract InterestRateKpi is IInterestRateKpi, Common {
         emit InterestRateKpiDataChanged(_newData);
     }
 
-    function calculateInterestRate() external returns (uint256 interestRate_) {
-        interestRate_ = _calculateInterestRateKpi();
+    function calculateInterestRate(
+        uint256 _fromDate,
+        uint256 _toDate
+    ) external returns (uint256 interestRate_) {
+        interestRate_ = _calculateInterestRateKpi(_fromDate, _toDate);
     }
 }

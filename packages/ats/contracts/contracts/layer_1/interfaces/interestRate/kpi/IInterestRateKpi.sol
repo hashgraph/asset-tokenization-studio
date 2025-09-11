@@ -236,6 +236,7 @@ struct InterestRateKpiDataStorage {
     ImpactLimits impactLimits;
     ReportData reportData;
     uint256 lastReportTimestamp;
+    uint256 cahchedInterestRate;
 }
 
 struct InterestRateKpiDataDetails {
@@ -256,5 +257,8 @@ interface IInterestRateKpi {
         InterestRateKpiDataDetails memory _initData
     ) external;
 
-    function calculateInterestRate() external returns (uint256 interestRate_);
+    function calculateInterestRate(
+        uint256 _fromDate,
+        uint256 _toDate
+    ) external returns (uint256 interestRate_);
 }

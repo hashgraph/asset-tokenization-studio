@@ -207,5 +207,8 @@
 pragma solidity 0.8.18;
 
 interface IKpiOracle {
-    function getImpactData() external view returns (uint256 impactData_);
+    function getImpactData(
+        uint256 _fromDate,
+        uint256 _toDate
+    ) external view returns (uint256 impactData_, bool reportFound_);
 }
