@@ -230,6 +230,15 @@ struct ReportData {
 }
 
 struct InterestRateKpiDataStorage {
+    bool initialized;
+    address kpiOracle;
+    InterestRateData interestRateData;
+    ImpactLimits impactLimits;
+    ReportData reportData;
+    uint256 lastReportTimestamp;
+}
+
+struct InterestRateKpiDataDetails {
     address kpiOracle;
     InterestRateData interestRateData;
     ImpactLimits impactLimits;
@@ -239,8 +248,13 @@ struct InterestRateKpiDataStorage {
 
 interface IInterestRateKpi {
     event KpiOracleSet(address indexed _oldOracle, address indexed _newOracle);
+    event InterestRateKpiDataChanged(InterestRateKpiDataDetails _newData);
 
     error CallToKpiOracleFailed();
+
+    function initialize_InterestRateKpi(
+        InterestRateKpiDataDetails memory _initData
+    ) external;
 
     function calculateInterestRate() external returns (uint256 interestRate_);
     function setKpiOracle(address _newKpiOracle) external;

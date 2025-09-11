@@ -210,7 +210,8 @@ import {LowLevelCall} from '../../common/libraries/LowLevelCall.sol';
 import {PauseStorageWrapper} from '../../core/pause/PauseStorageWrapper.sol';
 import {
     IInterestRateKpi,
-    InterestRateKpiDataStorage
+    InterestRateKpiDataStorage,
+    InterestRateKpiDataDetails
 } from '../../../layer_1/interfaces/interestRate/kpi/IInterestRateKpi.sol';
 import {_INTEREST_RATE_KPI} from '../../constants/storagePositions.sol';
 import {
@@ -227,6 +228,17 @@ abstract contract InterestRateKpiStorageWrapper is
     using LowLevelCall for address;
 
     uint256 internal constant _DECIMALS_PRECISION = 1e18;
+
+    function _setIneterestRateKpiData(
+        InterestRateKpiDataDetails memory _newData
+    ) internal {
+        _interestRateKpiStorage().kpiOracle = _newData.kpiOracle;
+        _interestRateKpiStorage().interestRateData = _newData.interestRateData;
+        _interestRateKpiStorage().impactLimits = _newData.impactLimits;
+        _interestRateKpiStorage().reportData = _newData.reportData;
+        _interestRateKpiStorage().lastReportTimestamp = _newData
+            .lastReportTimestamp;
+    }
 
     function _calculateInterestRateKpi() internal returns (uint256) {
         InterestRateKpiDataStorage memory params = _interestRateKpiStorage();

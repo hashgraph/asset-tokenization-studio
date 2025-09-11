@@ -207,12 +207,30 @@
 pragma solidity 0.8.18;
 
 import {
-    IInterestRateKpi
+    IInterestRateKpi,
+    InterestRateKpiDataDetails
 } from '../../interfaces/interestRate/kpi/IInterestRateKpi.sol';
 import {_KPI_ORACLE_MANAGER_ROLE} from '../../../layer_1/constants/roles.sol';
 import {Common} from '../../common/Common.sol';
 
 abstract contract InterestRateKpi is IInterestRateKpi, Common {
+    function initialize_InterestRateKpi(
+        InterestRateKpiDataDetails memory _initData
+    )
+        external
+        override
+        onlyUninitialized(_interestRateKpiStorage().initialized)
+    {
+        _setIneterestRateKpiData(_initData);
+    }
+
+    function setIneterestRateKpiData(
+        InterestRateKpiDataDetails memory _newData
+    ) external {
+        _setIneterestRateKpiData(_newData);
+        emit InterestRateKpiDataChanged(_newData);
+    }
+
     function calculateInterestRate() external returns (uint256 interestRate_) {
         interestRate_ = _calculateInterestRateKpi();
     }
