@@ -405,11 +405,6 @@ describe('CreateBondCommandHandler', () => {
             startingDate: parseInt(command.startingDate),
             maturityDate: parseInt(command.maturityDate),
           }),
-          {
-            couponFrequency: parseInt(command.couponFrequency),
-            couponRate: BigDecimal.fromString(command.couponRate),
-            firstCouponDate: parseInt(command.firstCouponDate),
-          },
           evmAddress,
           evmAddress,
           command.configId,

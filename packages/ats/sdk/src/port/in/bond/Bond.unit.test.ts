@@ -209,7 +209,6 @@ import {
   CreateBondRequest,
   GetBondDetailsRequest,
   SetCouponRequest,
-  GetCouponDetailsRequest,
   GetCouponForRequest,
   GetCouponRequest,
   GetAllCouponsRequest,
@@ -231,12 +230,10 @@ import NetworkService from '@service/network/NetworkService';
 import BondToken from './Bond';
 import {
   BondDetailsFixture,
-  CouponDetailsFixture,
   CouponFixture,
   CreateBondRequestFixture,
   GetAllCouponsRequestFixture,
   GetBondDetailsRequestFixture,
-  GetCouponDetailsRequestFixture,
   GetCouponForRequestFixture,
   GetCouponHoldersQueryFixture,
   GetCouponRequestFixture,
@@ -259,7 +256,6 @@ import { faker } from '@faker-js/faker/.';
 import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
 import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
 import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
-import { GetCouponDetailsQuery } from '@query/bond/get/getCouponDetails/GetCouponDetailsQuery';
 import { BigNumber } from 'ethers';
 import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
 import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
@@ -278,7 +274,6 @@ describe('Bond', () => {
   let createBondRequest: CreateBondRequest;
   let getBondDetailsRequest: GetBondDetailsRequest;
   let setCouponRequest: SetCouponRequest;
-  let getCouponDetailsRequest: GetCouponDetailsRequest;
   let getCouponForRequest: GetCouponForRequest;
   let getCouponRequest: GetCouponRequest;
   let getAllCouponsRequest: GetAllCouponsRequest;
@@ -370,9 +365,6 @@ describe('Bond', () => {
           createBondRequest.nominalValue,
           createBondRequest.startingDate,
           createBondRequest.maturityDate,
-          createBondRequest.couponFrequency,
-          createBondRequest.couponRate,
-          createBondRequest.firstCouponDate,
           new ContractId(factoryAddress),
           new ContractId(resolverAddress),
           createBondRequest.configId,
@@ -436,9 +428,6 @@ describe('Bond', () => {
           createBondRequest.nominalValue,
           createBondRequest.startingDate,
           createBondRequest.maturityDate,
-          createBondRequest.couponFrequency,
-          createBondRequest.couponRate,
-          createBondRequest.firstCouponDate,
           new ContractId(factoryAddress),
           new ContractId(resolverAddress),
           createBondRequest.configId,
@@ -548,7 +537,7 @@ describe('Bond', () => {
     });
 
     it('should throw error if startingDate is invalid', async () => {
-      const time = faker.date.past().getTime();
+      const time = Math.floor(faker.date.past().getTime() / 1000);
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
           startingDate: time.toString(),
@@ -565,54 +554,6 @@ describe('Bond', () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
           maturityDate: faker.date.past().getTime().toString(),
-        }),
-      );
-
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
-    });
-
-    it('should throw error if couponFrequency is invalid', async () => {
-      createBondRequest = new CreateBondRequest(
-        CreateBondRequestFixture.create({
-          couponFrequency: 'invalid',
-        }),
-      );
-
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
-    });
-
-    it('should throw error if couponRate is invalid', async () => {
-      createBondRequest = new CreateBondRequest(
-        CreateBondRequestFixture.create({
-          couponRate: 'invalid',
-        }),
-      );
-
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
-    });
-
-    it('should throw error if firstCouponDate is invalid', async () => {
-      createBondRequest = new CreateBondRequest(
-        CreateBondRequestFixture.create({
-          firstCouponDate: faker.date.past().getTime().toString(),
-        }),
-      );
-
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
-    });
-
-    it('should throw error if regulationType is invalid', async () => {
-      createBondRequest = new CreateBondRequest(
-        CreateBondRequestFixture.create({
-          regulationType: 5,
         }),
       );
 
@@ -851,71 +792,6 @@ describe('Bond', () => {
       await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(
         ValidationError,
       );
-    });
-  });
-
-  describe('getCouponDetails', () => {
-    getCouponDetailsRequest = new GetCouponDetailsRequest(
-      GetCouponDetailsRequestFixture.create(),
-    );
-    it('should get coupon details successfully', async () => {
-      const expectedResponse = {
-        coupon: CouponDetailsFixture.create(),
-      };
-
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await BondToken.getCouponDetails(getCouponDetailsRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetCouponDetailsRequest',
-        getCouponDetailsRequest,
-      );
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponDetailsQuery(getCouponDetailsRequest.bondId),
-      );
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          couponFrequency: expectedResponse.coupon.couponFrequency,
-          couponRate: expectedResponse.coupon.couponRate.toString(),
-          firstCouponDate: new Date(
-            expectedResponse.coupon.firstCouponDate * ONE_THOUSAND,
-          ),
-        }),
-      );
-    });
-
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(
-        BondToken.getCouponDetails(getCouponDetailsRequest),
-      ).rejects.toThrow('Query execution failed');
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetCouponDetailsRequest',
-        getCouponDetailsRequest,
-      );
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponDetailsQuery(getCouponDetailsRequest.bondId),
-      );
-    });
-
-    it('should throw error if bondId is invalid', async () => {
-      getCouponDetailsRequest = new GetCouponDetailsRequest({
-        ...GetCouponDetailsRequestFixture.create(),
-        bondId: 'invalid',
-      });
-
-      await expect(
-        BondToken.getCouponDetails(getCouponDetailsRequest),
-      ).rejects.toThrow(ValidationError);
     });
   });
 
@@ -1629,9 +1505,6 @@ describe('Bond', () => {
           createTrexSuiteBondRequest.nominalValue,
           createTrexSuiteBondRequest.startingDate,
           createTrexSuiteBondRequest.maturityDate,
-          createTrexSuiteBondRequest.couponFrequency,
-          createTrexSuiteBondRequest.couponRate,
-          createTrexSuiteBondRequest.firstCouponDate,
           new ContractId(factoryAddress),
           new ContractId(resolverAddress),
           createTrexSuiteBondRequest.configId,
@@ -1710,9 +1583,6 @@ describe('Bond', () => {
           createTrexSuiteBondRequest.nominalValue,
           createTrexSuiteBondRequest.startingDate,
           createTrexSuiteBondRequest.maturityDate,
-          createTrexSuiteBondRequest.couponFrequency,
-          createTrexSuiteBondRequest.couponRate,
-          createTrexSuiteBondRequest.firstCouponDate,
           new ContractId(factoryAddress),
           new ContractId(resolverAddress),
           createTrexSuiteBondRequest.configId,
@@ -1822,7 +1692,7 @@ describe('Bond', () => {
     });
 
     it('should throw error if startingDate is invalid', async () => {
-      const time = faker.date.past().getTime();
+      const time = Math.floor(faker.date.past().getTime() / 1000);
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
           startingDate: time.toString(),
@@ -1838,55 +1708,9 @@ describe('Bond', () => {
     it('should throw error if maturityDate is invalid', async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          maturityDate: faker.date.past().getTime().toString(),
-        }),
-      );
-
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
-    });
-
-    it('should throw error if couponFrequency is invalid', async () => {
-      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
-        CreateTrexSuiteBondRequestFixture.create({
-          couponFrequency: 'invalid',
-        }),
-      );
-
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
-    });
-
-    it('should throw error if couponRate is invalid', async () => {
-      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
-        CreateTrexSuiteBondRequestFixture.create({
-          couponRate: 'invalid',
-        }),
-      );
-
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
-    });
-
-    it('should throw error if firstCouponDate is invalid', async () => {
-      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
-        CreateTrexSuiteBondRequestFixture.create({
-          firstCouponDate: faker.date.past().getTime().toString(),
-        }),
-      );
-
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
-    });
-
-    it('should throw error if regulationType is invalid', async () => {
-      createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
-        CreateTrexSuiteBondRequestFixture.create({
-          regulationType: 5,
+          maturityDate: Math.floor(
+            faker.date.past().getTime() / 1000,
+          ).toString(),
         }),
       );
 

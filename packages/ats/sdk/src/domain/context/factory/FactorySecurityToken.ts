@@ -204,7 +204,6 @@
 */
 
 import { BondDetailsData } from './BondDetailsData';
-import { CouponDetailsData } from './CouponDetailsData';
 import { SecurityData } from './SecurityData';
 import { EquityDetailsData } from './EquityDetailsData';
 import { AdditionalSecurityData } from './AdditionalSecurityData';
@@ -222,16 +221,10 @@ export class FactoryEquityToken {
 export class FactoryBondToken {
   public security: SecurityData;
   public bondDetails: BondDetailsData;
-  public couponDetails: CouponDetailsData;
 
-  constructor(
-    security: SecurityData,
-    bondDetails: BondDetailsData,
-    couponDetails: CouponDetailsData,
-  ) {
+  constructor(security: SecurityData, bondDetails: BondDetailsData) {
     this.security = security;
     this.bondDetails = bondDetails;
-    this.couponDetails = couponDetails;
   }
 }
 

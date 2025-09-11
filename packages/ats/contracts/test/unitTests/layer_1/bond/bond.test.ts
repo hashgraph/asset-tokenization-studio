@@ -235,8 +235,6 @@ import {
     BondUSAFacetTimeTravel__factory,
     FreezeFacet,
     ClearingTransferFacet,
-    IBondStorageWrapper__factory,
-    IBondStorageWrapper,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -314,7 +312,6 @@ describe('Bond Tests', () => {
     let bondReadFacet: BondUSARead
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let bondStorageWrapper: IBondStorageWrapper
     let lockFacet: Lock
     let holdFacet: IHold
     let erc1410Facet: IERC1410
@@ -381,10 +378,6 @@ describe('Bond Tests', () => {
             signer_A
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        bondStorageWrapper = IBondStorageWrapper__factory.connect(
-            diamond.address,
-            signer_A
-        )
         lockFacet = Lock__factory.connect(diamond.address, signer_A)
         holdFacet = IHold__factory.connect(diamond.address, signer_A)
         erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
@@ -746,8 +739,8 @@ describe('Bond Tests', () => {
                 await expect(bondFacet.setCoupon(customCouponData))
                     .to.emit(bondFacet, 'CouponSet')
                     .withArgs(
-                        '0x0000000000000000000000000000000000000000000000000000000000000033',
-                        numberOfCoupons + 1,
+                        '0x0000000000000000000000000000000000000000000000000000000000000001',
+                        1,
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
@@ -756,16 +749,11 @@ describe('Bond Tests', () => {
                     )
 
                 // Verify coupon data includes period
-                const registeredCoupon = await bondReadFacet.getCoupon(
-                    numberOfCoupons + 1
-                )
+                const registeredCoupon = await bondReadFacet.getCoupon(1)
                 expect(registeredCoupon.coupon.period).to.equal(customPeriod)
 
                 // Verify couponFor data includes period
-                const couponFor = await bondReadFacet.getCouponFor(
-                    numberOfCoupons + 1,
-                    account_A
-                )
+                const couponFor = await bondReadFacet.getCouponFor(1, account_A)
                 expect(couponFor.period).to.equal(customPeriod)
             })
 
@@ -790,8 +778,8 @@ describe('Bond Tests', () => {
                 await expect(bondFacet.setCoupon(minValidPeriodCouponData))
                     .to.emit(bondFacet, 'CouponSet')
                     .withArgs(
-                        '0x0000000000000000000000000000000000000000000000000000000000000033',
-                        numberOfCoupons + 1,
+                        '0x0000000000000000000000000000000000000000000000000000000000000001',
+                        1,
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
@@ -809,8 +797,8 @@ describe('Bond Tests', () => {
                 await expect(bondFacet.connect(signer_C).setCoupon(couponData))
                     .to.emit(bondFacet, 'CouponSet')
                     .withArgs(
-                        '0x0000000000000000000000000000000000000000000000000000000000000033',
-                        numberOfCoupons + 1,
+                        '0x0000000000000000000000000000000000000000000000000000000000000001',
+                        1,
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
@@ -824,24 +812,17 @@ describe('Bond Tests', () => {
                 )
 
                 const listCount = await bondReadFacet.getCouponCount()
-                const coupon = await bondReadFacet.getCoupon(
-                    numberOfCoupons + 1
-                )
-                const couponFor = await bondReadFacet.getCouponFor(
-                    numberOfCoupons + 1,
-                    account_A
-                )
+                const coupon = await bondReadFacet.getCoupon(1)
+                const couponFor = await bondReadFacet.getCouponFor(1, account_A)
                 const couponTotalHolders =
-                    await bondReadFacet.getTotalCouponHolders(
-                        numberOfCoupons + 1
-                    )
+                    await bondReadFacet.getTotalCouponHolders(1)
                 const couponHolders = await bondReadFacet.getCouponHolders(
-                    numberOfCoupons + 1,
+                    1,
                     0,
                     couponTotalHolders
                 )
 
-                expect(listCount).to.equal(numberOfCoupons + 1)
+                expect(listCount).to.equal(1)
                 expect(coupon.snapshotId).to.equal(0)
                 expect(coupon.coupon.recordDate).to.equal(
                     couponRecordDateInSeconds
@@ -891,8 +872,8 @@ describe('Bond Tests', () => {
                 await expect(bondFacet.connect(signer_C).setCoupon(couponData))
                     .to.emit(bondFacet, 'CouponSet')
                     .withArgs(
-                        '0x0000000000000000000000000000000000000000000000000000000000000033',
-                        numberOfCoupons + 1,
+                        '0x0000000000000000000000000000000000000000000000000000000000000001',
+                        1,
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
@@ -908,16 +889,11 @@ describe('Bond Tests', () => {
                     .connect(signer_A)
                     .revokeRole(ISSUER_ROLE, account_C)
 
-                const couponFor = await bondReadFacet.getCouponFor(
-                    numberOfCoupons + 1,
-                    account_A
-                )
+                const couponFor = await bondReadFacet.getCouponFor(1, account_A)
                 const couponTotalHolders =
-                    await bondReadFacet.getTotalCouponHolders(
-                        numberOfCoupons + 1
-                    )
+                    await bondReadFacet.getTotalCouponHolders(1)
                 const couponHolders = await bondReadFacet.getCouponHolders(
-                    numberOfCoupons + 1,
+                    1,
                     0,
                     couponTotalHolders
                 )
@@ -962,8 +938,8 @@ describe('Bond Tests', () => {
                 await expect(bondFacet.connect(signer_C).setCoupon(couponData))
                     .to.emit(bondFacet, 'CouponSet')
                     .withArgs(
-                        '0x0000000000000000000000000000000000000000000000000000000000000033',
-                        numberOfCoupons + 1,
+                        '0x0000000000000000000000000000000000000000000000000000000000000001',
+                        1,
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
@@ -979,16 +955,11 @@ describe('Bond Tests', () => {
                     .connect(signer_A)
                     .revokeRole(ISSUER_ROLE, account_C)
 
-                const couponFor = await bondReadFacet.getCouponFor(
-                    numberOfCoupons + 1,
-                    account_A
-                )
+                const couponFor = await bondReadFacet.getCouponFor(1, account_A)
                 const couponTotalHolders =
-                    await bondReadFacet.getTotalCouponHolders(
-                        numberOfCoupons + 1
-                    )
+                    await bondReadFacet.getTotalCouponHolders(1)
                 const couponHolders = await bondReadFacet.getCouponHolders(
-                    numberOfCoupons + 1,
+                    1,
                     0,
                     couponTotalHolders
                 )
@@ -1122,49 +1093,6 @@ describe('Bond Tests', () => {
                 expect(maturityDateAfter).to.be.equal(maturityDateBefore)
             })
 
-            it('Check number of created Coupon', async () => {
-                const couponCount = await bondReadFacet.getCouponCount()
-
-                expect(couponCount).to.equal(numberOfCoupons)
-            })
-
-            it('Check Coupon', async () => {
-                for (let i = 1; i <= numberOfCoupons; i++) {
-                    const coupon = await bondReadFacet.getCoupon(i)
-                    const couponFor = await bondReadFacet.getCouponFor(
-                        i,
-                        account_A
-                    )
-                    const couponTotalHolders =
-                        await bondReadFacet.getTotalCouponHolders(i)
-                    const couponHolders = await bondReadFacet.getCouponHolders(
-                        i,
-                        0,
-                        couponTotalHolders
-                    )
-
-                    expect(coupon.coupon.recordDate).to.equal(
-                        firstCouponDate + (i - 1) * frequency
-                    )
-                    expect(coupon.coupon.executionDate).to.equal(
-                        firstCouponDate + (i - 1) * frequency
-                    )
-                    expect(coupon.coupon.rate).to.equal(rate)
-                    expect(coupon.snapshotId).to.equal(0)
-                    expect(couponFor.recordDate).to.equal(
-                        firstCouponDate + (i - 1) * frequency
-                    )
-                    expect(couponFor.executionDate).to.equal(
-                        firstCouponDate + (i - 1) * frequency
-                    )
-                    expect(couponFor.tokenBalance).to.equal(0)
-                    expect(couponFor.rate).to.equal(rate)
-                    expect(couponFor.recordDateReached).to.equal(false)
-                    expect(couponTotalHolders).to.equal(0)
-                    expect(couponHolders.length).to.equal(couponTotalHolders)
-                }
-            })
-
             it('Given a coupon and account with normal, cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct', async () => {
                 await accessControlFacet
                     .connect(signer_A)
@@ -1222,8 +1150,8 @@ describe('Bond Tests', () => {
                 await expect(bondFacet.connect(signer_C).setCoupon(couponData))
                     .to.emit(bondFacet, 'CouponSet')
                     .withArgs(
-                        '0x0000000000000000000000000000000000000000000000000000000000000033',
-                        numberOfCoupons + 1,
+                        '0x0000000000000000000000000000000000000000000000000000000000000001',
+                        1,
                         account_C,
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
@@ -1232,10 +1160,7 @@ describe('Bond Tests', () => {
                     )
 
                 // --- Pre: before record date -> tokenBalance should be 0 and not reached
-                const before = await bondReadFacet.getCouponFor(
-                    numberOfCoupons + 1,
-                    account_A
-                )
+                const before = await bondReadFacet.getCouponFor(1, account_A)
                 expect(before.recordDateReached).to.equal(false)
                 expect(before.tokenBalance).to.equal(0)
 
@@ -1246,10 +1171,7 @@ describe('Bond Tests', () => {
                 await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
 
                 // --- Post: after record date -> tokenBalance should be sum of balances
-                const couponFor = await bondReadFacet.getCouponFor(
-                    numberOfCoupons + 1,
-                    account_A
-                )
+                const couponFor = await bondReadFacet.getCouponFor(1, account_A)
                 expect(couponFor.recordDateReached).to.equal(true)
                 expect(couponFor.tokenBalance).to.equal(totalAmount) // normal+cleared+held+locked+frozen
             })
@@ -1320,47 +1242,6 @@ describe('Bond Tests', () => {
                     '0x',
                     '0x'
                 )
-        })
-    })
-
-    describe('Bond Initialization Period Validation', () => {
-        it('GIVEN bond deployment with zero couponFrequency WHEN deployBondFromFactory THEN deployment fails with CouponFrequencyWrong', async () => {
-            const init_rbacs: Rbac[] = set_initRbacs()
-
-            await expect(
-                deployBondFromFactory({
-                    adminAccount: account_A,
-                    isWhiteList: false,
-                    isControllable: true,
-                    arePartitionsProtected: false,
-                    clearingActive: false,
-                    internalKycActivated: true,
-                    isMultiPartition: false,
-                    name: 'TEST_ZeroFreq',
-                    symbol: 'TZF',
-                    decimals: 6,
-                    isin: isinGenerator(),
-                    currency: '0x455552',
-                    numberOfUnits: numberOfUnits,
-                    nominalValue: 100,
-                    startingDate: startingDate,
-                    maturityDate: maturityDate,
-                    couponFrequency: 0, // Invalid: zero frequency
-                    couponRate: rate,
-                    firstCouponDate: firstCouponDate,
-                    regulationType: RegulationType.REG_D,
-                    regulationSubType: RegulationSubType.REG_D_506_B,
-                    countriesControlListType: countriesControlListType,
-                    listOfCountries: listOfCountries,
-                    info: info,
-                    init_rbacs: init_rbacs,
-                    factory: factory,
-                    businessLogicResolver: businessLogicResolver.address,
-                })
-            ).to.be.revertedWithCustomError(
-                bondStorageWrapper,
-                'CouponFrequencyWrong'
-            )
         })
     })
 })

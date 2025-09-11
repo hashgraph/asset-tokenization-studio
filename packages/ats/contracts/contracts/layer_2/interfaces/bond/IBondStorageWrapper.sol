@@ -245,16 +245,6 @@ interface IBondStorageWrapper {
     error CouponCreationFailed();
 
     /**
-     * @notice First coupon date is invalid or misaligned.
-     */
-    error CouponFirstDateWrong();
-
-    /**
-     * @notice Coupon frequency parameter is invalid.
-     */
-    error CouponFrequencyWrong();
-
-    /**
      * @notice Provided maturity date is invalid (e.g. in the past or before issuance).
      */
     error BondMaturityDateWrong();

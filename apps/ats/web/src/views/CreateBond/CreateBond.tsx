@@ -216,7 +216,6 @@ import { User } from '../../utils/constants';
 import { useUserStore } from '../../store/userStore';
 import { StepConfiguration } from './Components/StepConfiguration';
 import { StepReview } from './Components/StepReview';
-import { StepCoupon } from './Components/StepCoupon';
 import { StepRegulation } from '../CreateSecurityCommons/StepRegulation';
 import { StepExternalManagement } from '../CreateSecurityCommons/StepExternalManagement';
 import { StepERC3643 } from '../CreateSecurityCommons/StepERC3643';
@@ -253,10 +252,6 @@ export const CreateBond = () => {
     {
       title: t('header.configuration'),
       content: <StepConfiguration />,
-    },
-    {
-      title: t('header.coupon'),
-      content: <StepCoupon />,
     },
     {
       title: t('stepERC3643.title'),
