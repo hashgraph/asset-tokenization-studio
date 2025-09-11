@@ -257,5 +257,4 @@ interface IInterestRateKpi {
     ) external;
 
     function calculateInterestRate() external returns (uint256 interestRate_);
-    function setKpiOracle(address _newKpiOracle) external;
 }

@@ -234,12 +234,4 @@ abstract contract InterestRateKpi is IInterestRateKpi, Common {
     function calculateInterestRate() external returns (uint256 interestRate_) {
         interestRate_ = _calculateInterestRateKpi();
     }
-
-    function setKpiOracle(
-        address _newKpiOracle
-    ) external onlyRole(_INTEREST_RATE_KPI_MANAGER_ROLE) {
-        address oldKpiOracle = _setKpiOracle(_newKpiOracle);
-
-        emit KpiOracleSet(_newKpiOracle, oldKpiOracle);
-    }
 }

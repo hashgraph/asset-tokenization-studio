@@ -214,12 +214,8 @@ import {
     InterestRateKpiDataDetails
 } from '../../../layer_1/interfaces/interestRate/kpi/IInterestRateKpi.sol';
 import {_INTEREST_RATE_KPI} from '../../constants/storagePositions.sol';
-import {
-    IKpiOracle
-} from '../../../layer_1/interfaces/interestRate/kpi/IKpiOracle.sol';
-import {
-    IInterestRateKpiStorageWrapper
-} from '../../../layer_1/interfaces/interestRate/kpi/IInterestRateKpiStorageWrapper.sol';
+import {IKpiOracle} from '../../../layer_1/interfaces/interestRate/kpi/IKpiOracle.sol';
+import {IInterestRateKpiStorageWrapper} from '../../../layer_1/interfaces/interestRate/kpi/IInterestRateKpiStorageWrapper.sol';
 
 abstract contract InterestRateKpiStorageWrapper is
     IInterestRateKpiStorageWrapper,
@@ -306,13 +302,6 @@ abstract contract InterestRateKpiStorageWrapper is
         }
 
         return targetRate;
-    }
-
-    function _setKpiOracle(
-        address _newKpiOracle
-    ) internal returns (address oldKpiOracle_) {
-        oldKpiOracle_ = _interestRateKpiStorage().kpiOracle;
-        _interestRateKpiStorage().kpiOracle = _newKpiOracle;
     }
 
     function _timeElapsed() internal view returns (uint256 seconds_) {
