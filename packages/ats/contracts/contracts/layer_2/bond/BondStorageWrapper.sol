@@ -214,10 +214,6 @@ import {IBondStorageWrapper} from '../interfaces/bond/IBondStorageWrapper.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {IKpiOracle} from '../interfaces/bond/IKpiOracle.sol';
-import {
-    InterestRateCalculatorLib
-} from './libraries/InterestRateCalculatorLib.sol';
 
 abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -290,11 +286,47 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         return true;
     }
 
-    function _setKpiOracle(
-        address _kpiOracle
-    ) internal returns (bool success_) {
-        _bondStorage().bondDetail.kpiOracle = _kpiOracle;
-        return true;
+    function _getCouponFor(
+        uint256 _couponID,
+        address _account
+    ) internal returns (IBond.CouponFor memory couponFor_) {
+        IBond.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
+
+        IBond.CouponDetailsData memory couponDetails = _getCouponDetails();
+
+        if (couponDetails.couponType == IBond.CouponType.FIXED_KPI) {
+            couponFor_.rate = _calculateInterestRateKpi();
+        } else {
+            couponFor_.rate = couponDetails.couponRate;
+        }
+
+        couponFor_.recordDate = registeredCoupon.coupon.recordDate;
+        couponFor_.executionDate = registeredCoupon.coupon.executionDate;
+
+        if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
+            couponFor_.recordDateReached = true;
+
+            couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
+                ? (_balanceOfAtSnapshot(registeredCoupon.snapshotId, _account) +
+                    _lockedBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    ) +
+                    _heldBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    )) +
+                    _clearedBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    )
+                : (_balanceOf(_account) +
+                    _getLockedAmountFor(_account) +
+                    _getHeldAmountFor(_account)) +
+                    _getClearedAmountFor(_account);
+
+            couponFor_.decimals = _decimalsAdjusted();
+        }
     }
 
     function _getBondDetails()
@@ -332,48 +364,6 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
 
         registeredCoupon_.snapshotId = _getSnapshotID(actionId);
     }
-
-    function _getCouponFor(
-        uint256 _couponID,
-        address _account
-    ) internal view returns (IBond.CouponFor memory couponFor_) {
-        IBond.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
-
-        IBond.BondDetailsData memory bondDetails = _getBondDetails();
-        couponFor_.rate = InterestRateCalculatorLib.calculateInterestRate(
-            bondDetails.interesRateLimits,
-            bondDetails.impactLimits,
-            bondDetails.kpiOracle
-        );
-        couponFor_.recordDate = registeredCoupon.coupon.recordDate;
-        couponFor_.executionDate = registeredCoupon.coupon.executionDate;
-
-        if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
-            couponFor_.recordDateReached = true;
-
-            couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? (_balanceOfAtSnapshot(registeredCoupon.snapshotId, _account) +
-                    _lockedBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    ) +
-                    _heldBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    )) +
-                    _clearedBalanceOfAtSnapshot(
-                        registeredCoupon.snapshotId,
-                        _account
-                    )
-                : (_balanceOf(_account) +
-                    _getLockedAmountFor(_account) +
-                    _getHeldAmountFor(_account)) +
-                    _getClearedAmountFor(_account);
-
-            couponFor_.decimals = _decimalsAdjusted();
-        }
-    }
-
     function _getCouponCount() internal view returns (uint256 couponCount_) {
         return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }

@@ -212,27 +212,18 @@ interface IBond {
         uint256 nominalValue;
         uint256 startingDate;
         uint256 maturityDate;
-        address kpiOracle;
-        InteresRateLimits interesRateLimits;
-        ImpactLimits impactLimits;
     }
 
-    struct InteresRateLimits {
-        uint256 interestMarginCap;
-        uint256 baseInterestRate;
-        uint256 interestMarginFloor;
-    }
-
-    struct ImpactLimits {
-        uint256 impactMaxDeviationCap;
-        uint256 impactBaseLine;
-        uint256 impactMaxDeviationFloor;
+    enum CouponType {
+        FIXED,
+        FIXED_KPI
     }
 
     struct CouponDetailsData {
         uint256 couponFrequency;
         uint256 couponRate;
         uint256 firstCouponDate;
+        CouponType couponType;
     }
 
     struct Coupon {
@@ -269,7 +260,10 @@ interface IBond {
         uint256 _maturityDate
     ) external returns (bool success_);
 
-    function setKpiOracle(address _kpiOracle) external returns (bool success_);
+    function getCouponFor(
+        uint256 _couponID,
+        address _account
+    ) external returns (CouponFor memory couponFor_);
 
     function getBondDetails()
         external
@@ -284,11 +278,6 @@ interface IBond {
     function getCoupon(
         uint256 _couponID
     ) external view returns (RegisteredCoupon memory registeredCoupon_);
-
-    function getCouponFor(
-        uint256 _couponID,
-        address _account
-    ) external view returns (CouponFor memory couponFor_);
 
     function getCouponCount() external view returns (uint256 couponCount_);
 

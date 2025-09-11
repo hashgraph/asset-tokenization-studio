@@ -213,8 +213,7 @@ import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
 import {
     _CORPORATE_ACTION_ROLE,
     _BOND_MANAGER_ROLE,
-    _MATURITY_REDEEMER_ROLE,
-    _KPI_ORACLE_MANAGER_ROLE
+    _MATURITY_REDEEMER_ROLE
 } from '../../layer_1/constants/roles.sol';
 import {
     IStaticFunctionSelectors
@@ -295,17 +294,16 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         return success_;
     }
 
-    function setKpiOracle(
-        address _newKpiOracle
+    function getCouponFor(
+        uint256 _couponID,
+        address _account
     )
         external
         override
-        onlyUnpaused
-        onlyRole(_KPI_ORACLE_MANAGER_ROLE)
-        returns (bool success_)
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        returns (CouponFor memory couponFor_)
     {
-        success_ = _setKpiOracle(_newKpiOracle);
-        emit KpiOracleSet(address(this), _msgSender(), _newKpiOracle);
+        return _getCouponFor(_couponID, _account);
     }
 
     function getBondDetails()
@@ -336,19 +334,6 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         returns (RegisteredCoupon memory registeredCoupon_)
     {
         return _getCoupon(_couponID);
-    }
-
-    function getCouponFor(
-        uint256 _couponID,
-        address _account
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
-        returns (CouponFor memory couponFor_)
-    {
-        return _getCouponFor(_couponID, _account);
     }
 
     function getCouponCount()

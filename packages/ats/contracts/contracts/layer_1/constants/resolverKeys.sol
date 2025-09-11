@@ -315,3 +315,6 @@ bytes32 constant _ERC3643_BATCH_RESOLVER_KEY = 0x9e671b494908a7523ee4e531ae7b707
 
 // keccak256('security.token.standard.freeze.resolverKey');
 bytes32 constant _FREEZE_RESOLVER_KEY = 0x49f765e7155d979a148049c2a0ebed5e028b11799061897a255f99314f0bd3f1;
+
+// keccak256("security.token.standard.interest.rate.kpi.resolverKey")
+bytes32 constant _INTEREST_RATE_KPI_RESOLVER_KEY = 0x4caa1fdf5cec6844c6c1ae87aa2b6cf09aa6ffd7d94d2514006cc37806f5b9d9;

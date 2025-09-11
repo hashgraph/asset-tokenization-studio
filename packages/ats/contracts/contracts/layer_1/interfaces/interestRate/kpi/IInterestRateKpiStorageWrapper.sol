@@ -203,70 +203,9 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IBond} from '../../interfaces/bond/IBond.sol';
-import {
-    IBondStorageWrapper
-} from '../../interfaces/bond/IBondStorageWrapper.sol';
-import {LowLevelCall} from '../../../layer_0/common/libraries/LowLevelCall.sol';
-import {IKpiOracle} from '../../interfaces/bond/IKpiOracle.sol';
-
-library InterestRateCalculatorLib {
-    using LowLevelCall for address;
-
-    uint256 constant DECIMALS_PRECISION = 1e18;
-
-    function calculateInterestRate(
-        IBond.InteresRateLimits memory _interestRateLimits,
-        IBond.ImpactLimits memory _impactLimits,
-        address _kpiOracle
-    ) internal view returns (uint256) {
-        if (_kpiOracle == address(0)) {
-            return _interestRateLimits.baseInterestRate;
-        }
-        uint256 impactData = abi.decode(
-            _kpiOracle.functionStaticCall(
-                abi.encodeWithSelector(IKpiOracle.getImpactData.selector),
-                IBondStorageWrapper.CallToKpiOracleFailed.selector
-            ),
-            (uint256)
-        );
-        int256 impactDelta = int256(impactData) -
-            int256(_impactLimits.impactBaseLine);
-
-        uint256 targetRate = _interestRateLimits.baseInterestRate;
-
-        if (impactDelta >= 0) {
-            uint256 impactDeltaRate = (uint256(impactDelta) *
-                DECIMALS_PRECISION) /
-                (_impactLimits.impactMaxDeviationCap -
-                    _impactLimits.impactBaseLine);
-            targetRate =
-                _interestRateLimits.baseInterestRate -
-                (((_interestRateLimits.baseInterestRate -
-                    _interestRateLimits.interestMarginFloor) *
-                    impactDeltaRate) / DECIMALS_PRECISION);
-        } else {
-            uint256 impactDeltaRate = (uint256(-impactDelta) *
-                DECIMALS_PRECISION) /
-                (_impactLimits.impactBaseLine -
-                    _impactLimits.impactMaxDeviationFloor);
-            targetRate =
-                _interestRateLimits.baseInterestRate +
-                (((_interestRateLimits.interestMarginCap -
-                    _interestRateLimits.baseInterestRate) * impactDeltaRate) /
-                    DECIMALS_PRECISION);
-        }
-
-        if (targetRate > _interestRateLimits.interestMarginCap) {
-            targetRate = _interestRateLimits.interestMarginCap;
-        }
-        if (targetRate < _interestRateLimits.interestMarginFloor) {
-            targetRate = _interestRateLimits.interestMarginFloor;
-        }
-
-        return targetRate;
-    }
+interface IInterestRateKpiStorageWrapper {
+    event LastPeriodTimestampUpdated();
 }

@@ -214,7 +214,6 @@ import {_AGENT_ROLE} from '../constants/roles.sol';
 import {
     IERC3643Basic
 } from '../../layer_1/interfaces/ERC3643/IERC3643Basic.sol';
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
 import {
     IAccessControl
 } from '../../layer_1/interfaces/accessControl/IAccessControl.sol';
@@ -233,13 +232,15 @@ import {
 } from '../constants/storagePositions.sol';
 import {ICompliance} from '../../layer_1/interfaces/ERC3643/ICompliance.sol';
 import {LowLevelCall} from '../common/libraries/LowLevelCall.sol';
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {
+    InterestRateKpiStorageWrapper
+} from '../interestRate/kpi/InterestRateKpiStorageWrapper.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import {_AGENT_ROLE} from '../constants/roles.sol';
 
 abstract contract ERC3643StorageWrapper1 is
     IERC3643StorageWrapper,
-    PauseStorageWrapper
+    InterestRateKpiStorageWrapper
 {
     using LowLevelCall for address;
 
