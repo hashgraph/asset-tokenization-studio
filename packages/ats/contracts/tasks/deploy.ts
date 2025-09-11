@@ -245,7 +245,7 @@ task(
     .addOptionalParam(
         'fileName',
         'The output file name',
-        'deployedContracts',
+        'deployed-contracts',
         types.string
     )
     .setAction(async (args: DeployAllArgs, hre) => {

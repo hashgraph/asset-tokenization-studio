@@ -188,8 +188,8 @@ To run the project, you'll need to configure environment variables in the `.env`
 
 - **`REACT_APP_MIRROR_NODE`**: The URL of the Hedera Mirror Node API used to query historical data from the Hedera testnet. Example: `https://testnet.mirrornode.hedera.com/api/v1/`
 - **`REACT_APP_RPC_NODE`**: The RPC node URL used to communicate with the Hedera testnet. Example: `https://testnet.hashio.io/api`
-- **`REACT_APP_RPC_RESOLVER`**: The Hedera testnet account ID for the resolver. Example: `0.0.5479997`
-- **`REACT_APP_RPC_FACTORY`**: The Hedera testnet account ID for the factory. Example: `0.0.5480051`
+- **`REACT_APP_RPC_RESOLVER`**: The Hedera testnet account ID for the resolver. Example: `0.0.6797832`
+- **`REACT_APP_RPC_FACTORY`**: The Hedera testnet account ID for the factory. Example: `0.0.6797955`
 
 ## Optional Environment Variables (Hedera Wallet Connect)
 
@@ -222,8 +222,8 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 
    REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
    REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
-   REACT_APP_RPC_RESOLVER='0.0.6457760'
-   REACT_APP_RPC_FACTORY='0.0.6457855'
+   REACT_APP_RPC_RESOLVER='0.0.6797832'
+   REACT_APP_RPC_FACTORY='0.0.6797955'
 
    REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
    REACT_APP_DAPP_NAME="Asset Tokenization Studio"

@@ -219,7 +219,6 @@ import { BondDetails } from '@domain/context/bond/BondDetails';
 import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
 import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
 import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
-import { GetCouponDetailsQuery } from '@query/bond/get/getCouponDetails/GetCouponDetailsQuery';
 import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
 import { HederaId } from '@domain/context/shared/HederaId';
 import CreateBondRequest from '@port/in/request/bond/CreateBondRequest';
@@ -232,12 +231,10 @@ import {
 import { faker } from '@faker-js/faker/.';
 import GetBondDetailsRequest from '@port/in/request/bond/GetBondDetailsRequest';
 import SetCouponRequest from '@port/in/request/bond/SetCouponRequest';
-import GetCouponDetailsRequest from '@port/in/request/bond/GetCouponDetailsRequest';
 import GetCouponForRequest from '@port/in/request/bond/GetCouponForRequest';
 import GetCouponRequest from '@port/in/request/bond/GetCouponRequest';
 import GetAllCouponsRequest from '@port/in/request/bond/GetAllCouponsRequest';
 import UpdateMaturityDateRequest from '@port/in/request/bond/UpdateMaturityDateRequest';
-import { CouponDetails } from '@domain/context/bond/CouponDetails';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import { BigNumber } from 'ethers';
 import { Coupon } from '@domain/context/bond/Coupon';
@@ -280,15 +277,6 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
     );
     command.maturityDate.faker((faker) =>
       faker.date.future({ years: 2 }).getTime().toString(),
-    );
-    command.couponFrequency.faker((faker) =>
-      faker.number.int({ min: 1, max: 12 }).toString(),
-    );
-    command.couponRate.faker((faker) =>
-      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
-    );
-    command.firstCouponDate.faker((faker) =>
-      faker.date.soon({ days: 30 }).getTime().toString(),
     );
     command.factory?.as(
       () => new ContractId(ContractIdPropFixture.create().value),
@@ -344,15 +332,6 @@ export const CreateTrexSuiteBondCommandFixture =
     );
     command.maturityDate.faker((faker) =>
       faker.date.future({ years: 2 }).getTime().toString(),
-    );
-    command.couponFrequency.faker((faker) =>
-      faker.number.int({ min: 1, max: 12 }).toString(),
-    );
-    command.couponRate.faker((faker) =>
-      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
-    );
-    command.firstCouponDate.faker((faker) =>
-      faker.date.soon({ days: 30 }).getTime().toString(),
     );
     command.factory.as(
       () => new ContractId(ContractIdPropFixture.create().value),
@@ -425,11 +404,6 @@ export const GetBondDetailsQueryFixture = createFixture<GetBondDetailsQuery>(
   },
 );
 
-export const GetCouponDetailsQueryFixture =
-  createFixture<GetCouponDetailsQuery>((query) => {
-    query.bondId.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  });
-
 export const GetCouponHoldersQueryFixture =
   createFixture<GetCouponHoldersQuery>((query) => {
     query.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -443,15 +417,6 @@ export const GetTotalCouponHoldersQueryFixture =
     query.securityId.as(() => HederaIdPropsFixture.create().value);
     query.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
   });
-
-export const CouponDetailsFixture = createFixture<CouponDetails>((props) => {
-  props.couponFrequency.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-  props.couponRate.faker(
-    (faker) =>
-      new BigDecimal(BigNumber.from(faker.number.int({ min: 1, max: 5 }))),
-  );
-  props.firstCouponDate.faker((faker) => faker.number.int({ min: 1, max: 5 }));
-});
 
 export const CouponFixture = createFixture<Coupon>((props) => {
   props.recordTimeStamp.faker((faker) =>
@@ -545,21 +510,6 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
       maturityDate = faker.date.future({ years: 2 });
       return maturityDate.getTime().toString();
     });
-    request.couponFrequency.faker((faker) =>
-      faker.number.int({ min: 1, max: 12 }).toString(),
-    );
-    request.couponRate.faker((faker) =>
-      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
-    );
-    request.firstCouponDate.faker((faker) => {
-      return faker.date
-        .between({
-          from: startingDate,
-          to: maturityDate,
-        })
-        .getTime()
-        .toString();
-    });
 
     request.configId.faker(
       (faker) =>
@@ -599,11 +549,6 @@ export const SetCouponRequestFixture = createFixture<SetCouponRequest>(
     request.period.as(() => TIME_PERIODS_S.DAY.toString());
   },
 );
-
-export const GetCouponDetailsRequestFixture =
-  createFixture<GetCouponDetailsRequest>((request) => {
-    request.bondId.as(() => HederaIdPropsFixture.create().value);
-  });
 
 export const GetCouponForRequestFixture = createFixture<GetCouponForRequest>(
   (request) => {
@@ -727,21 +672,6 @@ export const CreateTrexSuiteBondRequestFixture =
     request.maturityDate.faker((faker) => {
       maturityDate = faker.date.future({ years: 2 });
       return maturityDate.getTime().toString();
-    });
-    request.couponFrequency.faker((faker) =>
-      faker.number.int({ min: 1, max: 12 }).toString(),
-    );
-    request.couponRate.faker((faker) =>
-      faker.finance.amount({ min: 1, max: 10, dec: 2 }),
-    );
-    request.firstCouponDate.faker((faker) => {
-      return faker.date
-        .between({
-          from: startingDate,
-          to: maturityDate,
-        })
-        .getTime()
-        .toString();
     });
 
     request.configId.faker(

@@ -218,7 +218,6 @@ import EvmAddress from '@domain/context/contract/EvmAddress';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter';
 import { Security } from '@domain/context/security/Security';
 import { BondDetails } from '@domain/context/bond/BondDetails';
-import { CouponDetails } from '@domain/context/bond/CouponDetails';
 import { Dividend } from '@domain/context/equity/Dividend';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import { HederaId } from '@domain/context/shared/HederaId';
@@ -689,22 +688,6 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getCouponDetails(address: EvmAddress): Promise<CouponDetails> {
-    LogService.logTrace(
-      `Requesting coupon details for bond: ${address.toString()}`,
-    );
-
-    const res = await this.connect(
-      BondRead__factory,
-      address.toString(),
-    ).getCouponDetails();
-
-    return new CouponDetails(
-      res.couponFrequency.toNumber(),
-      new BigDecimal(res.couponRate.toString()),
-      res.firstCouponDate.toNumber(),
-    );
-  }
 
   async getControlListMembers(
     address: EvmAddress,

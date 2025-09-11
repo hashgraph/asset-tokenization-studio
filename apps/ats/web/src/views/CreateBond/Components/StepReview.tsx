@@ -228,14 +228,13 @@ import { ICreateBondFormValues } from '../ICreateBondFormValues';
 import { RouterManager } from '../../../router/RouterManager';
 import { RouteName } from '../../../router/RouteName';
 import { WarningCircle, Question } from '@phosphor-icons/react';
-import { transformCouponType } from '../CouponType';
 import {
   dateToUnixTimestamp,
   formatNumber,
   numberToExponential,
 } from '../../../utils/format';
 import { FormStepContainer } from '../../../components/FormStepContainer';
-import { COUPONS_FACTOR, NOMINAL_VALUE_FACTOR } from '../../../utils/constants';
+import { NOMINAL_VALUE_FACTOR } from '../../../utils/constants';
 import { CountriesList } from '../../CreateSecurityCommons/CountriesList';
 import {
   COUNTRY_LIST_ALLOWED,
@@ -274,12 +273,6 @@ export const StepReview = () => {
   const totalAmount = getValues('totalAmount');
   const startingDate = getValues('startingDate');
   const maturityDate = getValues('maturityDate');
-  const couponType = getValues('couponType');
-  let couponFrequency = getValues('couponFrequency');
-  let couponRate = getValues('couponRate');
-  let firstCouponDate = getValues('firstCouponDate');
-  const lastCouponDate = getValues('lastCouponDate');
-  const totalCoupons = getValues('totalCoupons');
   const isBlocklist = getValues('isBlocklist');
   const isControllable = getValues('isControllable');
   const isClearing = getValues('isClearing');
@@ -299,12 +292,6 @@ export const StepReview = () => {
   );
 
   const submit = () => {
-    if (couponType === 2) {
-      couponRate = 0;
-      couponFrequency = '0';
-      firstCouponDate = '0';
-    }
-
     const request = new CreateBondRequest({
       name,
       symbol,
@@ -321,15 +308,6 @@ export const StepReview = () => {
       nominalValue: (nominalValue * NOMINAL_VALUE_FACTOR).toString(),
       startingDate: dateToUnixTimestamp(startingDate),
       maturityDate: dateToUnixTimestamp(maturityDate),
-      couponFrequency: (
-        parseInt(couponFrequency) *
-        (30 * 24 * 60 * 60)
-      ).toString(),
-      couponRate: (couponRate * COUPONS_FACTOR).toString(),
-      firstCouponDate:
-        firstCouponDate != '0'
-          ? dateToUnixTimestamp(firstCouponDate)
-          : firstCouponDate,
       currency:
         '0x' +
         currency.charCodeAt(0) +
@@ -443,37 +421,6 @@ export const StepReview = () => {
     },
   ];
 
-  const couponDetails: DetailReviewProps[] = [
-    {
-      title: t('stepCoupon.couponType'),
-      value: transformCouponType(couponType),
-    },
-  ];
-  if (couponType === 1) {
-    couponDetails.push(
-      {
-        title: t('stepCoupon.couponRate'),
-        value: formatNumber(couponRate) + ' %',
-      },
-      {
-        title: t('stepCoupon.couponFrequency'),
-        value: 'Every ' + couponFrequency + ' months',
-      },
-      {
-        title: t('stepCoupon.firstCouponDate'),
-        value: new Date(firstCouponDate).toLocaleDateString(),
-      },
-      {
-        title: t('stepCoupon.lastCouponDate'),
-        value: lastCouponDate,
-      },
-      {
-        title: t('stepCoupon.totalCoupons'),
-        value: totalCoupons,
-      },
-    );
-  }
-
   const regulationDetails: DetailReviewProps[] = [
     {
       title: tRegulation('regulationTypeReview'),
@@ -523,18 +470,7 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
-          <InfoDivider
-            step={3}
-            title={t('header.coupon') + ' details'}
-            type="main"
-          />
-          <SimpleGrid columns={1} gap={6} w="full">
-            {couponDetails.map((props) => (
-              <DetailReview {...props} />
-            ))}
-          </SimpleGrid>
-
-          <InfoDivider step={4} title={t('stepERC3643.title')} type="main" />
+          <InfoDivider step={3} title={t('stepERC3643.title')} type="main" />
           <SimpleGrid columns={1} gap={6} w="full">
             {erc3643Details.map((props) => (
               <DetailReview {...props} />
@@ -542,7 +478,7 @@ export const StepReview = () => {
           </SimpleGrid>
 
           <InfoDivider
-            step={5}
+            step={4}
             title={t('stepExternalManagement.title')}
             type="main"
           />
@@ -552,7 +488,7 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
-          <InfoDivider step={6} title={t('header.regulation')} type="main" />
+          <InfoDivider step={5} title={t('header.regulation')} type="main" />
           <SimpleGrid columns={1} gap={6} w="full">
             {regulationDetails.map((props) => (
               <DetailReview {...props} />

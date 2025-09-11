@@ -258,7 +258,6 @@ interface IFactory {
     struct BondData {
         SecurityData security;
         IBondRead.BondDetailsData bondDetails;
-        IBondRead.CouponDetailsData couponDetails;
     }
 
     event EquityDeployed(

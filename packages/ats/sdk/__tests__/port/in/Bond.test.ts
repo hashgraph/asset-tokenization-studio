@@ -209,7 +209,6 @@ import {
   LoggerTransports,
   CreateBondRequest,
   GetBondDetailsRequest,
-  GetCouponDetailsRequest,
   GetCouponRequest,
   GetAllCouponsRequest,
   SupportedWallets,
@@ -258,11 +257,7 @@ const numberOfUnits = '1000';
 const nominalValue = '100';
 const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1000;
 const startingDate = currentTimeInSeconds + TIME;
-const numberOfCoupons = 15;
-const couponFrequency = 7;
-const couponRate = '3';
-const maturityDate = startingDate + numberOfCoupons * couponFrequency;
-const firstCouponDate = startingDate + 1;
+const maturityDate = startingDate + 365; // 1 year maturity
 const regulationType = RegulationType.REG_S;
 const regulationSubType = RegulationSubType.NONE;
 const countries = 'AF,HG,BN';
@@ -350,9 +345,6 @@ describe('🧪 Bond test', () => {
       nominalValue: nominalValue,
       startingDate: startingDate.toString(),
       maturityDate: maturityDate.toString(),
-      couponFrequency: couponFrequency.toString(),
-      couponRate: couponRate,
-      firstCouponDate: firstCouponDate.toString(),
       regulationType: CastRegulationType.toNumber(regulationType),
       regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
       isCountryControlListWhiteList: true,
@@ -382,21 +374,22 @@ describe('🧪 Bond test', () => {
     expect(bondDetails.maturityDate.getTime() / 1000).toEqual(maturityDate);
   }, 60_000);
 
-  it('Check Coupon Details', async () => {
-    const couponDetails = await Bond.getCouponDetails(
-      new GetCouponDetailsRequest({
-        bondId: bond.evmDiamondAddress!.toString(),
+  it('Coupons Fixed', async () => {
+    // Manually create a coupon since automatic creation was removed
+    const couponRate = '3';
+    const couponRecordDate = startingDate + 30;
+    const couponExecutionDate = startingDate + 35;
+
+    await Bond.setCoupon(
+      new SetCouponRequest({
+        securityId: bond.evmDiamondAddress!.toString(),
+        rate: couponRate,
+        recordTimestamp: couponRecordDate.toString(),
+        executionTimestamp: couponExecutionDate.toString(),
+        period: TIME_PERIODS_S.DAY.toString(),
       }),
     );
 
-    expect(couponDetails.couponFrequency).toEqual(couponFrequency);
-    expect(couponDetails.couponRate).toEqual(couponRate);
-    expect(couponDetails.firstCouponDate.getTime() / 1000).toEqual(
-      firstCouponDate,
-    );
-  }, 600_000);
-
-  it('Coupons Fixed', async () => {
     const coupon = await Bond.getCoupon(
       new GetCouponRequest({
         securityId: bond.evmDiamondAddress!.toString(),
@@ -420,10 +413,10 @@ describe('🧪 Bond test', () => {
 
     expect(coupon.rate).toEqual(couponRate);
     expect(coupon.couponId).toEqual(1);
-    expect(coupon.recordDate.getTime() / 1000).toEqual(firstCouponDate);
-    expect(coupon.executionDate.getTime() / 1000).toEqual(firstCouponDate);
+    expect(coupon.recordDate.getTime() / 1000).toEqual(couponRecordDate);
+    expect(coupon.executionDate.getTime() / 1000).toEqual(couponExecutionDate);
     expect(couponFor.value).toEqual('0');
-    expect(allCoupon.length).toEqual(numberOfCoupons);
+    expect(allCoupon.length).toEqual(1); // Now only 1 manually created coupon
   }, 600_000);
 
   it('Coupons Custom', async () => {
@@ -452,11 +445,11 @@ describe('🧪 Bond test', () => {
     const coupon = await Bond.getCoupon(
       new GetCouponRequest({
         securityId: bond.evmDiamondAddress!.toString(),
-        couponId: numberOfCoupons + 1,
+        couponId: 2, // Second coupon (first one was created in 'Coupons Fixed' test)
       }),
     );
 
-    expect(coupon.couponId).toEqual(numberOfCoupons + 1);
+    expect(coupon.couponId).toEqual(2);
     expect(coupon.recordDate.getTime() / 1000).toEqual(recordTimestamp);
     expect(coupon.executionDate.getTime() / 1000).toEqual(executionTimestamp);
   }, 600_000);

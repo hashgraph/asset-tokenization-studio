@@ -223,15 +223,6 @@ abstract contract BondRead is IBondRead, IStaticFunctionSelectors, Common {
         return _getBondDetails();
     }
 
-    function getCouponDetails()
-        external
-        view
-        override
-        returns (CouponDetailsData memory couponDetails_)
-    {
-        return _getCouponDetails();
-    }
-
     function getCoupon(
         uint256 _couponID
     )

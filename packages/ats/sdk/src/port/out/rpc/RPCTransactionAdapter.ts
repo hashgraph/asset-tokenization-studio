@@ -282,7 +282,6 @@ import {
 import { Resolvers } from '@domain/context/factory/Resolvers';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { BondDetails } from '@domain/context/bond/BondDetails';
-import { CouponDetails } from '@domain/context/bond/CouponDetails';
 import { EquityDetails } from '@domain/context/equity/EquityDetails';
 import { SecurityData } from '@domain/context/factory/SecurityData';
 import { TransferAndLock } from '@domain/context/security/TransferAndLock';
@@ -412,7 +411,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   async createBond(
     securityInfo: Security,
     bondInfo: BondDetails,
-    couponInfo: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
@@ -428,7 +426,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       securityInfo,
       {
         bondDetails: SecurityDataBuilder.buildBondDetails(bondInfo),
-        couponDetails: SecurityDataBuilder.buildCouponDetails(couponInfo),
       },
       factory,
       resolver,
@@ -442,7 +439,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         new FactoryBondToken(
           security,
           details.bondDetails,
-          details.couponDetails,
         ),
       'deployBond',
       GAS.CREATE_BOND_ST,
@@ -3130,7 +3126,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     issuerClaims: number[][],
     security: Security,
     bondDetails: BondDetails,
-    couponDetails: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
@@ -3156,7 +3151,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       issuers,
       issuerClaims,
       security,
-      { bondDetails, couponDetails },
+      { bondDetails },
       factory,
       resolver,
       configId,
@@ -3238,7 +3233,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     issuerClaims: number[][],
     security: Security,
     tokenDetails:
-      | { bondDetails: BondDetails; couponDetails: CouponDetails }
+      | { bondDetails: BondDetails }
       | EquityDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
@@ -3271,14 +3266,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     if (tokenType === 'bond') {
       const details = tokenDetails as {
         bondDetails: BondDetails;
-        couponDetails: CouponDetails;
       };
       tokenData = {
         securityData,
         bondDetails: SecurityDataBuilder.buildBondDetails(details.bondDetails),
-        couponDetails: SecurityDataBuilder.buildCouponDetails(
-          details.couponDetails,
-        ),
       };
     } else {
       tokenData = {

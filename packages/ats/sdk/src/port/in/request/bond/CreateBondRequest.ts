@@ -253,9 +253,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   nominalValue: string;
   startingDate: string;
   maturityDate: string;
-  couponFrequency: string;
-  couponRate: string;
-  firstCouponDate: string;
   regulationType: number;
   regulationSubType: number;
   isCountryControlListWhiteList: boolean;
@@ -285,9 +282,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     nominalValue,
     startingDate,
     maturityDate,
-    couponFrequency,
-    couponRate,
-    firstCouponDate,
     regulationType,
     regulationSubType,
     isCountryControlListWhiteList,
@@ -318,9 +312,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     nominalValue: string;
     startingDate: string;
     maturityDate: string;
-    couponFrequency: string;
-    couponRate: string;
-    firstCouponDate: string;
     regulationType: number;
     regulationSubType: number;
     isCountryControlListWhiteList: boolean;
@@ -362,17 +353,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
           parseInt(this.startingDate),
           undefined,
         );
-      },
-      couponFrequency: FormatValidation.checkNumber(),
-      couponRate: FormatValidation.checkNumber(),
-      firstCouponDate: (val) => {
-        if (parseInt(val) != 0) {
-          return SecurityDate.checkDateTimestamp(
-            parseInt(val),
-            parseInt(this.startingDate),
-            parseInt(this.maturityDate),
-          );
-        }
       },
       regulationType: (val) => {
         return Factory.checkRegulationType(val);
@@ -427,9 +407,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.nominalValue = nominalValue;
     this.startingDate = startingDate;
     this.maturityDate = maturityDate;
-    this.couponFrequency = couponFrequency;
-    this.couponRate = couponRate;
-    this.firstCouponDate = firstCouponDate;
     this.regulationType = regulationType;
     this.regulationSubType = regulationSubType;
     this.isCountryControlListWhiteList = isCountryControlListWhiteList;

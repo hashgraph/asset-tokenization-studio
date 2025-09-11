@@ -290,8 +290,7 @@ abstract contract Bond is IBond, Common {
 
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_bond(
-        IBondRead.BondDetailsData calldata _bondDetailsData,
-        IBondRead.CouponDetailsData calldata _couponDetailsData
+        IBondRead.BondDetailsData calldata _bondDetailsData
     )
         internal
         validateDates(
@@ -303,10 +302,5 @@ abstract contract Bond is IBond, Common {
         BondDataStorage storage bondStorage = _bondStorage();
         bondStorage.initialized = true;
         _storeBondDetails(_bondDetailsData);
-        _storeCouponDetails(
-            _couponDetailsData,
-            _bondDetailsData.startingDate,
-            _bondDetailsData.maturityDate
-        );
     }
 }

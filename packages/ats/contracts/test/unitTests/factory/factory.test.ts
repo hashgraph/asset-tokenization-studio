@@ -857,104 +857,6 @@ describe('Factory Tests', () => {
             ).to.be.rejectedWith('WrongTimestamp')
         })
 
-        it('GIVEN incorrect first coupon date WHEN deploying a new bond THEN transaction fails', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 10
-            firstCouponDate = maturityDate + 1
-
-            const bondData = await setBondData({
-                adminAccount: account_A,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await expect(
-                factory.deployBond(bondData, factoryRegulationData)
-            ).to.be.rejectedWith('CouponFirstDateWrong')
-
-            bondData.couponDetails.firstCouponDate =
-                bondData.bondDetails.startingDate - 1
-
-            await expect(
-                factory.deployBond(bondData, factoryRegulationData)
-            ).to.be.rejectedWith('CouponFirstDateWrong')
-        })
-
-        it('GIVEN incorrect coupon frequency WHEN deploying a new bond THEN transaction fails', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = startingDate + 1
-            const couponFrequency_2 = 0
-
-            const bondData = await setBondData({
-                adminAccount: account_A,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency: couponFrequency_2,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await expect(
-                factory.deployBond(bondData, factoryRegulationData)
-            ).to.be.rejectedWith('CouponFrequencyWrong')
-        })
-
         it('GIVEN the proper information WHEN deploying a new bond with fixed coupons THEN transaction succeeds', async () => {
             const currentTimeInSeconds =
                 Math.floor(new Date().getTime() / 1000) + 1
@@ -1057,19 +959,8 @@ describe('Factory Tests', () => {
             expect(bondDetails.maturityDate).to.be.deep.equal(
                 bondData.bondDetails.maturityDate
             )
-            const couponDetails = await bondFacet.getCouponDetails()
-            expect(couponDetails.couponFrequency).to.be.deep.equal(
-                bondData.couponDetails.couponFrequency
-            )
-            expect(couponDetails.couponRate).to.be.deep.equal(
-                bondData.couponDetails.couponRate
-            )
-            expect(couponDetails.firstCouponDate).to.be.deep.equal(
-                bondData.couponDetails.firstCouponDate
-            )
 
-            const couponCount = await bondFacet.getCouponCount()
-            expect(couponCount).to.equal(numberOfCoupon)
+            // Coupon count assertion removed - no automatic coupons created
         })
 
         it('GIVEN wrong regulation type WHEN deploying a new resolverProxy THEN transaction fails', async () => {
@@ -1257,16 +1148,6 @@ describe('Factory Tests', () => {
             )
             expect(bondDetails.maturityDate).to.be.deep.equal(
                 bondData.bondDetails.maturityDate
-            )
-            const couponDetails = await bondFacet.getCouponDetails()
-            expect(couponDetails.couponFrequency).to.be.deep.equal(
-                bondData.couponDetails.couponFrequency
-            )
-            expect(couponDetails.couponRate).to.be.deep.equal(
-                bondData.couponDetails.couponRate
-            )
-            expect(couponDetails.firstCouponDate).to.be.deep.equal(
-                bondData.couponDetails.firstCouponDate
             )
 
             const couponCount = await bondFacet.getCouponCount()
