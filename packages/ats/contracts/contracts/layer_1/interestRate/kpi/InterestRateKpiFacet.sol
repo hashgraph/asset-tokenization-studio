@@ -206,15 +206,9 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import {
-    _INTEREST_RATE_KPI_RESOLVER_KEY
-} from '../../constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {
-    IInterestRateKpi
-} from '../../interfaces/interestRate/kpi/IInterestRateKpi.sol';
+import {_INTEREST_RATE_KPI_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
+import {IStaticFunctionSelectors} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {IInterestRateKpi} from '../../interfaces/interestRate/kpi/IInterestRateKpi.sol';
 import {InterestRateKpi} from './InterestRateKpi.sol';
 
 contract InterestRateKpiFacet is IStaticFunctionSelectors, InterestRateKpi {
@@ -234,11 +228,14 @@ contract InterestRateKpiFacet is IStaticFunctionSelectors, InterestRateKpi {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_ = new bytes4[](3);
         staticFunctionSelectors_[selectorIndex++] = this
             .calculateInterestRate
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this.setKpiOracle.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .initialize_InterestRateKpi
+            .selector;
     }
 
     function getStaticInterfaceIds()
