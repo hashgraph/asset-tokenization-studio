@@ -329,6 +329,13 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         }
     }
 
+    function _setCouponType(
+        IBond.CouponType _newCouponType
+    ) internal returns (IBond.CouponType oldCouponTtype_) {
+        oldCouponTtype_ = _bondStorage().couponDetail.couponType;
+        _bondStorage().couponDetail.couponType = _newCouponType;
+    }
+
     function _getBondDetails()
         internal
         view

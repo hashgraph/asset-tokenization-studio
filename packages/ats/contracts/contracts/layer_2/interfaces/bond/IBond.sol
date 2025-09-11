@@ -246,6 +246,8 @@ interface IBond {
         bool recordDateReached;
     }
 
+    event CouponTypeChanged(CouponType oldCouponType, CouponType newCouponType);
+
     function redeemAtMaturityByPartition(
         address _tokenHolder,
         bytes32 _partition,
@@ -259,6 +261,8 @@ interface IBond {
     function updateMaturityDate(
         uint256 _maturityDate
     ) external returns (bool success_);
+
+    function setCouponType(CouponType _couponType) external;
 
     function getCouponFor(
         uint256 _couponID,

@@ -271,6 +271,14 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         );
     }
 
+    function setCouponType(
+        CouponType _newCouponType
+    ) external override onlyRole(_CORPORATE_ACTION_ROLE) {
+        CouponType oldCouponType = _setCouponType(_newCouponType);
+
+        emit CouponTypeChanged(oldCouponType, _newCouponType);
+    }
+
     /**
      * @dev Updates the maturity date of the bond.
      * @param _newMaturityDate The new maturity date to be set.
