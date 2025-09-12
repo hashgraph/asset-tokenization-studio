@@ -205,6 +205,7 @@
 
 import { createMock } from '@golevelup/ts-jest';
 import {
+  AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
 } from '@test/fixtures/shared/DataFixture';
@@ -219,6 +220,8 @@ import {
 } from './GetBeneficiariesQuery';
 import { GetBeneficiariesQueryError } from './error/GetBeneficiariesQueryError';
 import { GetBeneficiariesQueryFixture } from '@test/fixtures/beneficiary/BeneficiaryFixture';
+import AccountService from '@service/account/AccountService';
+import Account from '@domain/context/account/Account';
 
 describe('GetBeneficiariesQueryHandler', () => {
   let handler: GetBeneficiariesQueryHandler;
@@ -226,15 +229,17 @@ describe('GetBeneficiariesQueryHandler', () => {
 
   const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
   const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-
+  const account = new Account(AccountPropsFixture.create());
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
     handler = new GetBeneficiariesQueryHandler(
       contractServiceMock,
       queryAdapterServiceMock,
+      accountServiceMock,
     );
     query = GetBeneficiariesQueryFixture.create();
   });
@@ -267,10 +272,12 @@ describe('GetBeneficiariesQueryHandler', () => {
       );
       queryAdapterServiceMock.getBeneficiaries.mockResolvedValueOnce(['0x']);
 
+      accountServiceMock.getAccountInfo.mockResolvedValueOnce(account);
+
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(GetBeneficiariesQueryResponse);
-      expect(result.payload).toStrictEqual(['0x']);
+      expect(result.payload).toStrictEqual([account.id.toString()]);
 
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
         1,

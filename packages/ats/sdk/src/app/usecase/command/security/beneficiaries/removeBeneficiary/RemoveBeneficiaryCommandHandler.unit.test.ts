@@ -248,10 +248,13 @@ describe('RemoveBeneficiaryCommandHandler', () => {
       });
     });
     it('should successfully add beneficiary', async () => {
-      contractServiceMock.getContractEvmAddress
-        .mockResolvedValueOnce(evmAddress)
-        .mockResolvedValueOnce(beneficiaryEvmAddress);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        beneficiaryEvmAddress,
+      );
       validationServiceMock.checkPause.mockResolvedValue(undefined);
       validationServiceMock.checkRole.mockResolvedValue(undefined);
       validationServiceMock.checkIsBeneficiary.mockResolvedValue(true);
@@ -266,11 +269,12 @@ describe('RemoveBeneficiaryCommandHandler', () => {
       expect(result.transactionId).toBe(transactionId);
 
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        2,
+        1,
       );
       expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
       expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(
         transactionServiceMock.getHandler().removeBeneficiary,
       ).toHaveBeenCalledTimes(1);
@@ -287,8 +291,8 @@ describe('RemoveBeneficiaryCommandHandler', () => {
         1,
         command.securityId,
       );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(
-        2,
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
+        1,
         command.beneficiary,
       );
 

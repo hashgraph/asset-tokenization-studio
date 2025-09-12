@@ -3364,7 +3364,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   addBeneficiary(
     security: EvmAddress,
     beneficiary: EvmAddress,
-    data: string,
+    data?: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
@@ -3376,7 +3376,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.getSignerOrProvider(),
       ),
       'addBeneficiary',
-      [beneficiary.toString(), data],
+      [beneficiary.toString(), data ?? '0x'],
       GAS.ADD_BENEFICIARY,
     );
   }

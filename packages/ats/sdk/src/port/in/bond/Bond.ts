@@ -370,6 +370,8 @@ class BondInPort implements IBondInPort {
         externalKycListsIds,
         req.complianceId,
         req.identityRegistryId,
+        req.beneficiariesIds,
+        req.beneficiariesData,
       ),
     );
 

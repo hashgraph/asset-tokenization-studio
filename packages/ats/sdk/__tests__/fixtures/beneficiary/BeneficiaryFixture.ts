@@ -45,7 +45,7 @@ export const AddBeneficiaryCommandFixture =
   createFixture<AddBeneficiaryCommand>((command) => {
     command.securityId.as(() => HederaIdPropsFixture.create().value);
     command.beneficiary.as(() => HederaIdPropsFixture.create().value);
-    command.data.as(() => '0x');
+    command.data?.as(() => '0x');
   });
 
 export const RemoveBeneficiaryCommandFixture =
