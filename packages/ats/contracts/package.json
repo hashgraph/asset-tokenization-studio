@@ -71,15 +71,14 @@
         "@terminal3/ecdsa_vc": "^0.1.19",
         "@thomaschaplin/isin-generator": "^1.0.3",
         "@tokenysolutions/t-rex": "^4.1.6",
-        "@typechain/ethers-v5": "^10.1.0",
+        "@typechain/ethers-v5": "^11.1.2",
         "@typechain/hardhat": "^6.1.2",
         "@types/jest": "^29.5.14",
-        "blob": "^0.1.0",
         "chai": "^4.4.0",
         "dotenv": "^16.0.3",
         "ethers": "^5.8.0",
         "glob": "^11.0.3",
-        "hardhat": "^2.22.19",
+        "hardhat": "^v2.26.3",
         "hardhat-abi-exporter": "^2.11.0",
         "hardhat-contract-sizer": "^2.10.0",
         "hardhat-dependency-compiler": "^1.2.1",
@@ -91,6 +90,7 @@
         "typescript": "^5.8.2"
     },
     "overrides": {
+        "@typechain/ethers-v5": "^11.1.2",
         "ws": "^8.15.0"
     },
     "publishConfig": {
