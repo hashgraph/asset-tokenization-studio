@@ -214,6 +214,7 @@ import { lazyInject } from '@core/decorator/LazyInjectDecorator';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import ContractService from '@service/contract/ContractService';
 import { GetBeneficiariesQueryError } from './error/GetBeneficiariesQueryError';
+import AccountService from '@service/account/AccountService';
 
 @QueryHandler(GetBeneficiariesQuery)
 export class GetBeneficiariesQueryHandler
@@ -224,6 +225,8 @@ export class GetBeneficiariesQueryHandler
     private readonly contractService: ContractService,
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(
@@ -241,7 +244,13 @@ export class GetBeneficiariesQueryHandler
         pageSize,
       );
 
-      return new GetBeneficiariesQueryResponse(res);
+      const beneficiariesIds = await Promise.all(
+        res.map(async (b) => {
+          return (await this.accountService.getAccountInfo(b)).id.toString();
+        }),
+      );
+
+      return new GetBeneficiariesQueryResponse(beneficiariesIds);
     } catch (error) {
       throw new GetBeneficiariesQueryError(error as Error);
     }

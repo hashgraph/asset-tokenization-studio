@@ -184,7 +184,7 @@ export class AddBeneficiaryCommand extends Command<AddBeneficiaryCommandResponse
   constructor(
     public readonly securityId: string,
     public readonly beneficiary: string,
-    public readonly data: string,
+    public readonly data?: string,
   ) {
     super();
   }

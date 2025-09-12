@@ -212,7 +212,7 @@ export class UpdateBeneficiaryDataCommandHandler
         await this.contractService.getContractEvmAddress(securityId);
 
       const beneficiaryEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(beneficiary);
+        await this.accountService.getAccountEvmAddress(beneficiary);
 
       await this.validationService.checkPause(securityId);
 

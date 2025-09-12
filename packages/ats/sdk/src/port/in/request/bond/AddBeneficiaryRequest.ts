@@ -205,11 +205,13 @@
 
 import ValidatedRequest from '@core/validation/ValidatedArgs';
 import FormatValidation from '../FormatValidation';
+import { OptionalField } from '@core/decorator/OptionalDecorator';
 
 export default class AddBeneficiaryRequest extends ValidatedRequest<AddBeneficiaryRequest> {
   securityId: string;
   beneficiaryId: string;
-  data: string;
+  @OptionalField()
+  data?: string;
 
   constructor({
     securityId,
@@ -218,7 +220,7 @@ export default class AddBeneficiaryRequest extends ValidatedRequest<AddBeneficia
   }: {
     securityId: string;
     beneficiaryId: string;
-    data: string;
+    data?: string;
   }) {
     super({
       beneficiaryId: FormatValidation.checkHederaIdFormatOrEvmAddress(),

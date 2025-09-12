@@ -255,7 +255,6 @@ import {
 import AddBeneficiaryRequest from '@port/in/request/bond/AddBeneficiaryRequest';
 import RemoveBeneficiaryRequest from '@port/in/request/bond/RemoveBeneficiaryRequest';
 import UpdateBeneficiaryDataRequest from '@port/in/request/bond/UpdateBeneficiaryDataRequest';
-import GetBeneficiariesDataRequest from '@port/in/request/bond/GetBeneficiaryDataRequest';
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   (command) => {
@@ -542,6 +541,10 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
     ]);
     request.complianceId?.as(() => HederaIdPropsFixture.create().value);
     request.identityRegistryId?.as(() => HederaIdPropsFixture.create().value);
+    request.beneficiariesIds?.faker((faker) => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    request.beneficiariesData?.as(() => ['0x0000']);
   },
 );
 
@@ -699,7 +702,7 @@ export const CreateTrexSuiteBondRequestFixture =
     request.beneficiariesIds?.faker((faker) => [
       faker.finance.ethereumAddress(),
     ]);
-    request.beneficiariesData?.faker((faker) => ['0x']);
+    request.beneficiariesData?.faker((faker) => ['0x0000']);
     request.externalPauses?.as(() => [HederaIdPropsFixture.create().value]);
     request.externalControlLists?.as(() => [
       HederaIdPropsFixture.create().value,
@@ -713,7 +716,7 @@ export const AddBeneficiaryRequestFixture =
   createFixture<AddBeneficiaryRequest>((request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
     request.beneficiaryId.as(() => HederaIdPropsFixture.create().value);
-    request.data.as(() => '0x');
+    request.data?.as(() => '0x');
   });
 export const UpdateBeneficiaryDataRequestFixture =
   createFixture<UpdateBeneficiaryDataRequest>((request) => {
