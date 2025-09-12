@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
 import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';

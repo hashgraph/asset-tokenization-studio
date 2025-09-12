@@ -203,7 +203,7 @@
 
 */
 
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 import {IClearingRead} from '../interfaces/clearing/IClearingRead.sol';

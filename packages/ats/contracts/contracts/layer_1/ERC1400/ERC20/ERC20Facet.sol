@@ -205,7 +205,7 @@
 
 // SPDX-License-Identifier: MIT
 // Contract copy-pasted form OZ and extended
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
 import {

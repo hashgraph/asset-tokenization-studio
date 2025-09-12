@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 // Contract copy-pasted form OZ and extended
 
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {IERC5805} from './IERC5805.sol';
 

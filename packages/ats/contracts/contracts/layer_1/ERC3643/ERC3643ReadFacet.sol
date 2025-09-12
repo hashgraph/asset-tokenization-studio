@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {_ERC3643_READ_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {IERC3643Read} from '../interfaces/ERC3643/IERC3643Read.sol';

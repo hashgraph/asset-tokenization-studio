@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 uint256 constant _REGS_DEAL_SIZE = 0;
 AccreditedInvestors constant _REGS_ACCREDITED_INVESTORS = AccreditedInvestors

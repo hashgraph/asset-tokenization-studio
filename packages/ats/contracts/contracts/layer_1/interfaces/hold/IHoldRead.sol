@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
 import {HoldIdentifier} from './IHold.sol';

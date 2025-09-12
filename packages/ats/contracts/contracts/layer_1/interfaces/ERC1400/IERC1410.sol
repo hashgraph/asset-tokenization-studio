@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {IERC1410StorageWrapper} from './IERC1410StorageWrapper.sol';
 import {IERC1410Read} from './IERC1410Read.sol';
