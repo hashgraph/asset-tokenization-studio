@@ -137,8 +137,8 @@ npm run mass-payout:dev       # Start mass payout development
 
 ```bash
 npm run clean:deps            # Remove all node_modules and lock files
-npm run lint                  # Lint JavaScript and Solidity code
-npm run format                # Format code with Prettier
+npm run lint                  # Lint all code using centralized configuration
+npm run format                # Format all code using centralized Prettier config
 ```
 
 ## Workspace Dependencies
