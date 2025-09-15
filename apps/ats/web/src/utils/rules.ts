@@ -322,6 +322,20 @@ export const isValidHederaId = (val: string) => {
   return maskRegex.test(val) || t('isValidHederaId');
 };
 
+export const isValidHex = (val: string) => {
+  const hexRegex = /^0x[0-9a-fA-F]*$/;
+  if (!hexRegex.test(val)) {
+    return t('isValidHex');
+  }
+
+  const hexPart = val.slice(2);
+  if (hexPart.length % 2 !== 0) {
+    return t('isValidHex');
+  }
+
+  return true;
+};
+
 export const isValidCouponPeriod = (val: string) => {
   try {
     // Period is required - cannot be empty or null

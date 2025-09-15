@@ -203,115 +203,75 @@
 
 */
 
-import { Box, HStack, Stack } from '@chakra-ui/react';
-import { StepTokenDetails } from './Components/StepTokenDetails';
-import { FormProvider, useForm } from 'react-hook-form';
-import { useSteps, Wizard } from 'io-bricks-ui';
-import { useTranslation } from 'react-i18next';
-import { History } from '../../components/History';
-import { RouteName } from '../../router/RouteName';
-import { ICreateBondFormValues } from './ICreateBondFormValues';
-import { useEffect } from 'react';
-import { User } from '../../utils/constants';
-import { useUserStore } from '../../store/userStore';
-import { StepConfiguration } from './Components/StepConfiguration';
-import { StepReview } from './Components/StepReview';
-import { StepRegulation } from '../CreateSecurityCommons/StepRegulation';
-import { StepExternalManagement } from '../CreateSecurityCommons/StepExternalManagement';
-import { StepERC3643 } from '../CreateSecurityCommons/StepERC3643';
-import { StepBeneficiaries } from './Components/StepBeneficiaries';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
+import {
+  GetBeneficiariesCountRequest,
+  GetBeneficiariesRequest,
+  GetBeneficiaryDataRequest,
+} from '@hashgraph/asset-tokenization-sdk';
 
-export const CreateBond = () => {
-  const { t } = useTranslation('security', { keyPrefix: 'createBond' });
-  const { t: tRoutes } = useTranslation('routes');
-  const { setType } = useUserStore();
+export interface BeneficiaryDataViewModelResponse {
+  address: string;
+  data?: string;
+}
 
-  const steps = useSteps();
-  const form = useForm<ICreateBondFormValues>({
-    mode: 'all',
-    defaultValues: {
-      isControllable: true,
-      isBlocklist: true,
-      isApproval: false,
-      isClearing: false,
-      regulationType: 1,
-      regulationSubType: 0,
-      countriesListType: 1,
-      countriesList: [] as string[],
-      externalPausesList: [],
-      externalControlList: [],
-      externalKYCList: [],
-      internalKycActivated: true,
-    },
-  });
+export const GET_BENEFICIARY_LIST = (securityId: string) =>
+  `GET_BENEFICIARY_LIST_${securityId}`;
 
-  const wizardSteps = [
-    {
-      title: t('header.details'),
-      content: <StepTokenDetails />,
-    },
-    {
-      title: t('header.configuration'),
-      content: <StepConfiguration />,
-    },
-    {
-      title: t('stepBeneficiaries.title'),
-      content: <StepBeneficiaries />,
-    },
-    {
-      title: t('stepERC3643.title'),
-      content: <StepERC3643 />,
-    },
-    {
-      title: t('stepExternalManagement.title'),
-      content: <StepExternalManagement />,
-    },
-    {
-      title: t('header.regulation'),
-      content: <StepRegulation />,
-    },
-    {
-      title: t('header.review'),
-      content: <StepReview />,
-    },
-  ];
+export const IS_INTERNAL_BENEFICIARY_ACTIVATED = (securityId: string) =>
+  `IS_INTERNAL_BENEFICIARY_ACTIVATED_${securityId}`;
 
-  useEffect(() => {
-    setType(User.admin);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+export const useGetBeneficiaryList = (
+  request: GetBeneficiariesCountRequest,
+  options?: UseQueryOptions<
+    BeneficiaryDataViewModelResponse[],
+    unknown,
+    BeneficiaryDataViewModelResponse[],
+    string[]
+  >,
+) => {
+  return useQuery(
+    [GET_BENEFICIARY_LIST(request.securityId)],
+    async () => {
+      try {
+        const beneficiariesCount =
+          await SDKService.getBeneficiariesCount(request);
 
-  return (
-    <>
-      <Stack gap={6}>
-        <History label={tRoutes(RouteName.CreateBond)} />
+        const beneficiaries = await SDKService.getBeneficiaries(
+          new GetBeneficiariesRequest({
+            securityId: request.securityId,
+            pageIndex: 0,
+            pageSize: beneficiariesCount ?? 100,
+          }),
+        );
 
-        <HStack
-          w="full"
-          h="full"
-          bg="neutral.50"
-          padding={4}
-          p={4}
-          pb={10}
-          justifyContent="center"
-          alignItems="center"
-          display="flex"
-        >
-          <Box
-            as="form"
-            data-testid="create-equity-form"
-            layerStyle="container"
-          >
-            <FormProvider {...form}>
-              <Wizard
-                // @ts-ignore
-                steps={wizardSteps}
-                {...steps}
-              />
-            </FormProvider>
-          </Box>
-        </HStack>
-      </Stack>
-    </>
+        const beneficiariesWithData = await Promise.all(
+          beneficiaries.map(async (beneficiary) => {
+            try {
+              const data = await SDKService.getBeneficiaryData(
+                new GetBeneficiaryDataRequest({
+                  securityId: request.securityId,
+                  beneficiaryId: beneficiary,
+                }),
+              );
+              return {
+                address: beneficiary,
+                data,
+              } as BeneficiaryDataViewModelResponse;
+            } catch (error) {
+              console.error('Error fetching beneficiary data', error);
+              return { address: beneficiary, data: undefined };
+            }
+          }),
+        );
+
+        return beneficiariesWithData;
+      } catch (error) {
+        console.error('Error fetching beneficiaries', error);
+        throw error;
+      }
+    },
+    options,
   );
 };
