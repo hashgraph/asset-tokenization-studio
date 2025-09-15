@@ -210,6 +210,7 @@ import FormatValidation from '../FormatValidation';
 
 import { SecurityDate } from '@domain/context/shared/SecurityDate';
 import { Factory } from '@domain/context/factory/Factories';
+import { InvalidValue } from '../error/InvalidValue';
 
 export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateTrexSuiteBondRequest> {
   salt: string;
@@ -438,7 +439,21 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
           true,
         );
       },
-      beneficiariesData: FormatValidation.checkBytesFormat(),
+      beneficiariesData: (val) => {
+        const validation = FormatValidation.checkBytesFormat();
+        if (val?.length != this.beneficiariesIds?.length) {
+          return [
+            new InvalidValue(
+              `The list of beneficiariesIds and beneficiariesData must have equal length.`,
+            ),
+          ];
+        }
+        for (const data of val ?? []) {
+          if (data == '') continue;
+          const result = validation(data);
+          if (result) return result;
+        }
+      },
     });
 
     this.salt = salt;

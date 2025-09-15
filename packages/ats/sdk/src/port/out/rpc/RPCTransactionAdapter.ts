@@ -423,7 +423,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
     beneficiaries: EvmAddress[] = [],
-    beneficiariesData?: string[],
+    beneficiariesData: string[] = [],
   ): Promise<TransactionResponse> {
     return this.createSecurity(
       securityInfo,
@@ -443,7 +443,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           security,
           details.bondDetails,
           beneficiaries.map((addr) => addr.toString()),
-          beneficiariesData ?? [],
+          beneficiariesData,
         ),
       'deployBond',
       GAS.CREATE_BOND_ST,
