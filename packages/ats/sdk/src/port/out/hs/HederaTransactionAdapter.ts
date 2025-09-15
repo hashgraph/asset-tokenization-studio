@@ -3253,7 +3253,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       securityData,
       bondDetailsData,
       beneficiaries.map((b) => b.toString()),
-      beneficiariesData,
+      beneficiariesData.map((data) => (data == '' ? '0x' : data)),
     );
 
     const additionalSecurityData: AdditionalSecurityData = {
