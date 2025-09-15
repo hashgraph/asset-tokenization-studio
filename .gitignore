@@ -136,6 +136,7 @@ asset-tokenization-studio.iml
 
 # AI files
 .kiro/
+.claude/
 CLAUDE.md
 
 # Extracted methods from contracts
