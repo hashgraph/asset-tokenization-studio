@@ -59,7 +59,7 @@
     "@hashgraph/asset-tokenization-sdk": "file:../../../packages/ats/sdk",
     "@tanstack/react-query": "^4.35.3",
     "framer-motion": "^10.16.4",
-    "i18next": "23.5.1",
+    "i18next": "25.5.2",
     "i18next-browser-languagedetector": "7.1.0",
     "io-bricks-ui": "^2.7.4",
     "named-urls": "^2.0.1",
