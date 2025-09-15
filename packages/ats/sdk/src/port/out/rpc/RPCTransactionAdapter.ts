@@ -3415,7 +3415,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.getSignerOrProvider(),
       ),
       'updateBeneficiaryData',
-      [beneficiary.toString(), data ?? '0x'],
+      [beneficiary.toString(), data],
       GAS.UPDATE_BENEFICIARY,
     );
   }
