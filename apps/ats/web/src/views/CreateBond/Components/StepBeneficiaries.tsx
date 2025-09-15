@@ -367,16 +367,9 @@ export const StepBeneficiaries = () => {
           placeholder={t('stepBeneficiaries.dataPlaceholder')}
           rules={{
             validate: (value: string) =>
-              isValidHex(value) || t('stepBeneficiaries.invalidHexFormat'),
-            //   {
-            //   if (!value) return true;
-
-            //   const hexRegex = /^0x[0-9a-fA-F]*$/;
-
-            //   return (
-            //     hexRegex.test(value) || t('stepBeneficiaries.invalidHexFormat')
-            //   );
-            // },
+              !value ||
+              isValidHex(value) ||
+              t('stepBeneficiaries.invalidHexFormat'),
           }}
         />
       </Stack>
