@@ -443,7 +443,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           security,
           details.bondDetails,
           beneficiaries.map((addr) => addr.toString()),
-          beneficiariesData,
+          beneficiariesData.map((data) => (data == '' ? '0x' : data)),
         ),
       'deployBond',
       GAS.CREATE_BOND_ST,
@@ -3298,7 +3298,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security: securityData,
         bondDetails: SecurityDataBuilder.buildBondDetails(details.bondDetails),
         beneficiaries: beneficiariesId.map((addr) => addr.toString()),
-        beneficiariesData: beneficiariesData ?? [],
+        beneficiariesData: beneficiariesData.map((data) =>
+          data == '' ? '0x' : data,
+        ),
       } as FactoryBondToken;
     } else {
       tokenData = {
