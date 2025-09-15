@@ -227,10 +227,12 @@ export class AddBeneficiaryCommandHandler
         beneficiary,
       );
 
+      const dataToValidate = !data || data === '' ? '0x' : data;
+
       const res = await handler.addBeneficiary(
         securityEvmAddress,
         beneficiaryEvmAddress,
-        data,
+        dataToValidate,
         securityId,
       );
 

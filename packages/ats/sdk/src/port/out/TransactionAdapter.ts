@@ -1921,7 +1921,7 @@ export default abstract class TransactionAdapter
   abstract addBeneficiary(
     security: EvmAddress,
     beneficiary: EvmAddress,
-    data?: string,
+    data: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   abstract removeBeneficiary(
