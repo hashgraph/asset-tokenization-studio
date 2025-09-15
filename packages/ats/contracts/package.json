@@ -61,7 +61,7 @@
     },
     "devDependencies": {
         "@hashgraph/sdk": "^2.62.0",
-        "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
+        "@nomicfoundation/hardhat-chai-matchers": "^2.1.0",
         "@nomicfoundation/hardhat-toolbox": "^2.0.2",
         "@onchain-id/solidity": "^2.2.1",
         "@openzeppelin/contracts": "^4.9.6",
