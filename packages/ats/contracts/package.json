@@ -64,7 +64,7 @@
         "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
         "@nomicfoundation/hardhat-toolbox": "^2.0.2",
         "@onchain-id/solidity": "^2.2.1",
-        "@openzeppelin/contracts": "^4.9.6",
+        "@openzeppelin/contracts": "^5.4.0",
         "@openzeppelin/contracts-upgradeable": "^4.9.6",
         "@openzeppelin/hardhat-upgrades": "^1.22.1",
         "@terminal3/ecdsa_vc": "^0.1.19",
