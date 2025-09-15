@@ -325,13 +325,20 @@ export class CreateTrexSuiteBondCommandHandler
         externalPausesEvmAddresses,
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,
-        beneficiariesEvmAddresses,
       ] = await Promise.all([
         this.contractService.getEvmAddressesFromHederaIds(externalPauses),
         this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
         this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
-        this.contractService.getEvmAddressesFromHederaIds(beneficiariesIds),
       ]);
+
+      let beneficiariesEvmAddresses: EvmAddress[] = [];
+      if (beneficiariesIds)
+        beneficiariesEvmAddresses = await Promise.all(
+          beneficiariesIds.map(
+            async (id) => await this.accountService.getAccountEvmAddress(id),
+          ),
+        );
+
       const diamondOwnerAccountEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
       const resolverEvmAddress: EvmAddress =

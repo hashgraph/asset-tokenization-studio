@@ -302,15 +302,21 @@ export class CreateBondCommandHandler
         externalPausesEvmAddresses,
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,
-        beneficiariesEvmAddresses,
       ] = await Promise.all([
         this.contractService.getEvmAddressesFromHederaIds(externalPausesIds),
         this.contractService.getEvmAddressesFromHederaIds(
           externalControlListsIds,
         ),
         this.contractService.getEvmAddressesFromHederaIds(externalKycListsIds),
-        this.contractService.getEvmAddressesFromHederaIds(beneficiariesIds),
       ]);
+
+      let beneficiariesEvmAddresses: EvmAddress[] = [];
+      if (beneficiariesIds)
+        beneficiariesEvmAddresses = await Promise.all(
+          beneficiariesIds.map(
+            async (id) => await this.accountService.getAccountEvmAddress(id),
+          ),
+        );
 
       const complianceEvmAddress = complianceId
         ? await this.contractService.getContractEvmAddress(complianceId)

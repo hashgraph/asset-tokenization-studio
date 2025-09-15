@@ -463,6 +463,17 @@ describe('Bond', () => {
       );
     });
 
+    it('should not throw error if beneficiaryData not has bytes', async () => {
+      createBondRequest = new CreateBondRequest(
+        CreateBondRequestFixture.create({
+          beneficiariesData: ['', '0x1234'],
+          beneficiariesIds: ['0.0.1234', '0.0.5678'],
+        }),
+      );
+
+      await expect(BondToken.create(createBondRequest)).resolves.not.toThrow();
+    });
+
     it('should throw error if name is invalid', async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({ name: '' }),
