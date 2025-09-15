@@ -211,7 +211,6 @@ import {
   Transaction,
   TransactionResponse as HTransactionResponse,
   TransactionResponseJSON,
-  ContractId,
 } from '@hashgraph/sdk';
 import { NetworkName } from '@hashgraph/sdk/lib/client/Client';
 import {
