@@ -222,7 +222,12 @@ export default class UpdateBeneficiaryDataRequest extends ValidatedRequest<Updat
   }) {
     super({
       beneficiaryId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      data: FormatValidation.checkBytesFormat(),
+      data: (val) => {
+        const validation = FormatValidation.checkBytesFormat();
+        if (val == '') return;
+        const result = validation(val);
+        if (result) return result;
+      },
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });
     this.securityId = securityId;
