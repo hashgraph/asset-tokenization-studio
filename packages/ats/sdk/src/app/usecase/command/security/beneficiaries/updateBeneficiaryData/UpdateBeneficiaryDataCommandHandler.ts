@@ -204,7 +204,7 @@ export class UpdateBeneficiaryDataCommandHandler
     command: UpdateBeneficiaryDataCommand,
   ): Promise<UpdateBeneficiaryDataCommandResponse> {
     try {
-      const { securityId, beneficiary } = command;
+      const { securityId, beneficiary, data } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
@@ -223,10 +223,12 @@ export class UpdateBeneficiaryDataCommandHandler
       );
 
       await this.validationService.checkIsBeneficiary(securityId, beneficiary);
+      const finalData = data === '' ? '0x' : data;
 
       const res = await handler.updateBeneficiaryData(
         securityEvmAddress,
         beneficiaryEvmAddress,
+        finalData,
         securityId,
       );
 
