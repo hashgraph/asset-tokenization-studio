@@ -203,115 +203,80 @@
 
 */
 
-import { Box, HStack, Stack } from '@chakra-ui/react';
-import { StepTokenDetails } from './Components/StepTokenDetails';
-import { FormProvider, useForm } from 'react-hook-form';
-import { useSteps, Wizard } from 'io-bricks-ui';
-import { useTranslation } from 'react-i18next';
-import { History } from '../../components/History';
-import { RouteName } from '../../router/RouteName';
-import { ICreateBondFormValues } from './ICreateBondFormValues';
-import { useEffect } from 'react';
-import { User } from '../../utils/constants';
-import { useUserStore } from '../../store/userStore';
-import { StepConfiguration } from './Components/StepConfiguration';
-import { StepReview } from './Components/StepReview';
-import { StepRegulation } from '../CreateSecurityCommons/StepRegulation';
-import { StepExternalManagement } from '../CreateSecurityCommons/StepExternalManagement';
-import { StepERC3643 } from '../CreateSecurityCommons/StepERC3643';
-import { StepBeneficiaries } from './Components/StepBeneficiaries';
-
-export const CreateBond = () => {
-  const { t } = useTranslation('security', { keyPrefix: 'createBond' });
-  const { t: tRoutes } = useTranslation('routes');
-  const { setType } = useUserStore();
-
-  const steps = useSteps();
-  const form = useForm<ICreateBondFormValues>({
-    mode: 'all',
-    defaultValues: {
-      isControllable: true,
-      isBlocklist: true,
-      isApproval: false,
-      isClearing: false,
-      regulationType: 1,
-      regulationSubType: 0,
-      countriesListType: 1,
-      countriesList: [] as string[],
-      externalPausesList: [],
-      externalControlList: [],
-      externalKYCList: [],
-      internalKycActivated: true,
+export default {
+  title: 'Beneficiaries',
+  subtitle: 'List of beneficiaries of the bond',
+  add: 'Add',
+  table: {
+    fields: {
+      address: 'Address',
+      data: 'Data',
+      actions: 'Actions',
+      edit: 'Edit',
+      remove: 'Remove',
     },
-  });
-
-  const wizardSteps = [
-    {
-      title: t('header.details'),
-      content: <StepTokenDetails />,
+  },
+  create: {
+    title: 'Add Beneficiary',
+    description: 'Fill in the form below to add a beneficiary',
+    form: {
+      address: {
+        label: 'Address',
+        placeholder: '0.0.1234567',
+      },
+      data: {
+        label: 'Data',
+        placeholder: '0x',
+      },
     },
-    {
-      title: t('header.configuration'),
-      content: <StepConfiguration />,
+    buttons: {
+      cancel: 'Cancel',
+      add: 'Add',
     },
-    {
-      title: t('stepBeneficiaries.title'),
-      content: <StepBeneficiaries />,
+    messages: {
+      success: 'Success: ',
+      descriptionSuccess: 'Beneficiary creation was successful',
+      error: 'Error: ',
+      descriptionFailed: 'Beneficiary creation failed',
     },
-    {
-      title: t('stepERC3643.title'),
-      content: <StepERC3643 />,
+  },
+  update: {
+    title: 'Update Beneficiary',
+    description: 'Fill in the form below to update a beneficiary',
+    form: {
+      address: {
+        label: 'Address',
+        placeholder: '0.0.1234567',
+      },
+      data: {
+        label: 'Data',
+        placeholder: '0x',
+      },
     },
-    {
-      title: t('stepExternalManagement.title'),
-      content: <StepExternalManagement />,
+    buttons: {
+      cancel: 'Cancel',
+      update: 'Update',
     },
-    {
-      title: t('header.regulation'),
-      content: <StepRegulation />,
+    messages: {
+      success: 'Success: ',
+      descriptionSuccess: 'Beneficiary update was successful',
+      error: 'Error: ',
+      descriptionFailed: 'Beneficiary update failed',
     },
-    {
-      title: t('header.review'),
-      content: <StepReview />,
+  },
+  remove: {
+    confirmPopUp: {
+      title: 'Remove Beneficiary',
+      description: 'Are you sure you want to remove this beneficiary?',
+      confirmText: 'Remove',
+      cancelText: 'Cancel',
     },
-  ];
-
-  useEffect(() => {
-    setType(User.admin);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return (
-    <>
-      <Stack gap={6}>
-        <History label={tRoutes(RouteName.CreateBond)} />
-
-        <HStack
-          w="full"
-          h="full"
-          bg="neutral.50"
-          padding={4}
-          p={4}
-          pb={10}
-          justifyContent="center"
-          alignItems="center"
-          display="flex"
-        >
-          <Box
-            as="form"
-            data-testid="create-equity-form"
-            layerStyle="container"
-          >
-            <FormProvider {...form}>
-              <Wizard
-                // @ts-ignore
-                steps={wizardSteps}
-                {...steps}
-              />
-            </FormProvider>
-          </Box>
-        </HStack>
-      </Stack>
-    </>
-  );
+    messages: {
+      success: 'Success: ',
+      descriptionSuccess:
+        'The removal operation has been executed successfully',
+      error: 'Error: ',
+      descriptionFailed: 'The removal operation has failed',
+    },
+  },
 };

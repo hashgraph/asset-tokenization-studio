@@ -220,12 +220,13 @@ export default {
     EnvironmentPlugin('all'),
     pluginRewriteAll(),
     {
-      name: 'singleHMR',
-      handleHotUpdate({ modules }) {
-        modules.map((m) => {
-          m.importedModules = new Set();
-          m.importers = new Set();
-        });
+      name: 'selectiveHMR',
+      handleHotUpdate({ file, modules }) {
+        // Solo forzar reload para archivos específicos problemáticos
+        if (file.includes('problematic-file.ts')) {
+          return [];
+        }
+        // Permitir HMR normal para el resto
         return modules;
       },
     },
@@ -288,6 +289,10 @@ export default {
     include: [
       '@hashgraph/asset-tokenization-contracts',
       '@hashgraph/asset-tokenization-sdk',
+      '@chakra-ui/react',
+      '@emotion/react',
+      '@emotion/styled',
+      'framer-motion',
     ],
     exclude: ['winston', 'winston-daily-rotate-file', 'winston-transport'],
     esbuildOptions: {
