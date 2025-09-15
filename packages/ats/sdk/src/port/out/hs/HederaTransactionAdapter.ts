@@ -3456,7 +3456,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   addBeneficiary(
     security: EvmAddress,
     beneficiary: EvmAddress,
-    data?: string,
+    data: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
@@ -3468,7 +3468,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       'addBeneficiary',
       securityId!,
       GAS.ADD_BENEFICIARY,
-      [beneficiary.toString(), data ?? '0x'],
+      [beneficiary.toString(), data],
     );
   }
   removeBeneficiary(
