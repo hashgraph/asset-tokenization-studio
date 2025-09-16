@@ -222,11 +222,10 @@ export default {
     {
       name: 'selectiveHMR',
       handleHotUpdate({ file, modules }) {
-        // Solo forzar reload para archivos específicos problemáticos
         if (file.includes('problematic-file.ts')) {
           return [];
         }
-        // Permitir HMR normal para el resto
+
         return modules;
       },
     },

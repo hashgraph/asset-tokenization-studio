@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useUpdateBeneficiary } from '../../../../hooks/mutations/useBeneficiaries';
 import { UpdateBeneficiaryDataRequest } from '@hashgraph/asset-tokenization-sdk';
+import { isValidHex } from '../../../../utils/rules';
 
 interface FormValues {
   address: string;
@@ -98,6 +99,12 @@ export const UpdateBeneficiaryModal = ({
               label={tUpdate('form.data.label')}
               placeholder={tUpdate('form.data.placeholder')}
               isRequired={false}
+              rules={{
+                validate: (value: string) =>
+                  !value ||
+                  isValidHex(value) ||
+                  tUpdate('form.data.invalidHexFormat'),
+              }}
             />
           </VStack>
         </ModalBody>
