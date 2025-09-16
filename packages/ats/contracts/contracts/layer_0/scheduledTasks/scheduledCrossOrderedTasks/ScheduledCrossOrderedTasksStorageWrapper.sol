@@ -206,31 +206,98 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {ScheduledTasksLib} from '../../../scheduledTasks/ScheduledTasksLib.sol';
+import {
+    IScheduledCrossOrderedTasks
+} from '../../../layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol';
+import {
+    ScheduledTasksLib
+} from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
+import {
+    _SCHEDULED_TASKS_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {SNAPSHOT_TASK_TYPE} from '../../constants/values.sol';
 
-struct ScheduledTask {
-    uint256 scheduledTimestamp;
-    bytes data;
-}
+abstract contract ScheduledCrossOrderedTasksStorageWrapper is
+    ScheduledBalanceAdjustmentsStorageWrapper
+{
+    function _addScheduledCrossOrderedTask(
+        uint256 _newScheduledTimestamp,
+        bytes memory _newData
+    ) internal {
+        ScheduledTasksLib.addScheduledTask(
+            _scheduledCrossOrderedTaskStorage(),
+            _newScheduledTimestamp,
+            _newData
+        );
+    }
 
-interface IScheduledTasks {
-    function onScheduledTaskTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
+    function _triggerScheduledCrossOrderedTasks(
+        uint256 _max
+    ) internal returns (uint256) {
+        return
+            _triggerScheduledTasks(
+                _scheduledCrossOrderedTaskStorage(),
+                IScheduledCrossOrderedTasks
+                    .onScheduledCrossOrderedTaskTriggered
+                    .selector,
+                _max,
+                _blockTimestamp()
+            );
+    }
+
+    function _onScheduledCrossOrderedTaskTriggered(
         bytes memory _data
-    ) external;
+    ) internal {
+        if (_data.length == 0) return;
+        if (abi.decode(_data, (bytes32)) == SNAPSHOT_TASK_TYPE) {
+            _triggerScheduledSnapshots(1);
+            return;
+        }
+        _triggerScheduledBalanceAdjustments(1);
+    }
 
-    function triggerPendingScheduledTasks() external returns (uint256);
+    function _getScheduledCrossOrderedTaskCount()
+        internal
+        view
+        returns (uint256)
+    {
+        return
+            ScheduledTasksLib.getScheduledTaskCount(
+                _scheduledCrossOrderedTaskStorage()
+            );
+    }
 
-    function triggerScheduledTasks(uint256 _max) external returns (uint256);
-
-    function scheduledTaskCount() external view returns (uint256);
-
-    function getScheduledTasks(
+    function _getScheduledCrossOrderedTasks(
         uint256 _pageIndex,
         uint256 _pageLength
     )
-        external
+        internal
         view
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_);
+        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
+    {
+        return
+            ScheduledTasksLib.getScheduledTasks(
+                _scheduledCrossOrderedTaskStorage(),
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _scheduledCrossOrderedTaskStorage()
+        internal
+        pure
+        returns (
+            ScheduledTasksLib.ScheduledTasksDataStorage
+                storage scheduledCrossOrderedTasks_
+        )
+    {
+        bytes32 position = _SCHEDULED_TASKS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledCrossOrderedTasks_.slot := position
+        }
+    }
 }

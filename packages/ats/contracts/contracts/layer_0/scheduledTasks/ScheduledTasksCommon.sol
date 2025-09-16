@@ -209,6 +209,9 @@ pragma solidity 0.8.18;
 import {
     SnapshotsStorageWrapper1
 } from '../snapshots/SnapshotsStorageWrapper1.sol';
+import {
+    ScheduledTasksLib
+} from '../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
 
 abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     error WrongTimestamp(uint256 timeStamp);
@@ -222,6 +225,73 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     modifier onlyAutoCalling(bool _autoCalling) {
         _checkAutoCalling(_autoCalling);
         _;
+    }
+
+    function _triggerScheduledTasks(
+        ScheduledTasksLib.ScheduledTasksDataStorage storage _scheduledTasks,
+        bytes4 onScheduledTaskTriggeredSelector,
+        uint256 _max,
+        uint256 _timestamp
+    ) internal returns (uint256) {
+        uint256 scheduledTasksLength = ScheduledTasksLib.getScheduledTaskCount(
+            _scheduledTasks
+        );
+
+        if (scheduledTasksLength == 0) {
+            return 0;
+        }
+
+        uint256 max = _max;
+
+        uint256 newTaskID;
+
+        if (max > scheduledTasksLength || max == 0) {
+            max = scheduledTasksLength;
+        }
+
+        for (uint256 j = 1; j <= max; j++) {
+            uint256 pos = scheduledTasksLength - j;
+
+            ScheduledTasksLib.ScheduledTask
+                memory currentScheduledTask = ScheduledTasksLib
+                    .getScheduledTasksByIndex(_scheduledTasks, pos);
+
+            if (currentScheduledTask.scheduledTimestamp < _timestamp) {
+                ScheduledTasksLib.popScheduledTask(_scheduledTasks);
+
+                _scheduledTasks.autoCalling = true;
+
+                // solhint-disable-next-line avoid-low-level-calls
+                (bool success, bytes memory data) = address(this).delegatecall(
+                    abi.encodeWithSelector(
+                        onScheduledTaskTriggeredSelector,
+                        pos,
+                        scheduledTasksLength,
+                        currentScheduledTask.data
+                    )
+                );
+                if (!success) {
+                    if (data.length > 0) {
+                        // solhint-disable-next-line no-inline-assembly
+                        assembly {
+                            let returndata_size := mload(data)
+                            revert(add(32, data), returndata_size)
+                        }
+                    } else {
+                        // solhint-disable-next-line custom-errors
+                        revert(
+                            'onScheduledTaskTriggered method failed without reason'
+                        );
+                    }
+                }
+
+                _scheduledTasks.autoCalling = false;
+            } else {
+                break;
+            }
+        }
+
+        return newTaskID;
     }
 
     function _checkTimestamp(uint256 _timestamp) private view {

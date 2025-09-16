@@ -266,7 +266,18 @@ library ScheduledTasksLib {
         }
     }
 
-    function triggerScheduledTasks(
+    function popScheduledTask(
+        ScheduledTasksDataStorage storage _scheduledTasks
+    ) internal {
+        uint256 scheduledTasksLength = getScheduledTaskCount(_scheduledTasks);
+        if (scheduledTasksLength == 0) {
+            return;
+        }
+        delete (_scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
+        _scheduledTasks.scheduledTaskCount--;
+    }
+
+    /*function triggerScheduledTasks(
         ScheduledTasksDataStorage storage _scheduledTasks,
         bytes4 onScheduledTaskTriggeredSelector,
         uint256 _max,
@@ -296,7 +307,7 @@ library ScheduledTasksLib {
                 );
 
             if (currentScheduledTask.scheduledTimestamp < _timestamp) {
-                _popScheduledTask(_scheduledTasks);
+                popScheduledTask(_scheduledTasks);
 
                 _scheduledTasks.autoCalling = true;
 
@@ -331,7 +342,7 @@ library ScheduledTasksLib {
         }
 
         return newTaskID;
-    }
+    }*/
 
     function getScheduledTaskCount(
         ScheduledTasksDataStorage storage _scheduledTasks
@@ -396,16 +407,5 @@ library ScheduledTasksLib {
             .scheduledTimestamp = scheduledTaskToInsert.scheduledTimestamp;
         _scheduledTasks.scheduledTasks[_pos].data = scheduledTaskToInsert.data;
         _scheduledTasks.scheduledTaskCount++;
-    }
-
-    function _popScheduledTask(
-        ScheduledTasksDataStorage storage _scheduledTasks
-    ) private {
-        uint256 scheduledTasksLength = getScheduledTaskCount(_scheduledTasks);
-        if (scheduledTasksLength == 0) {
-            return;
-        }
-        delete (_scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
-        _scheduledTasks.scheduledTaskCount--;
     }
 }

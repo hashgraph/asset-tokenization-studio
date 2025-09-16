@@ -213,14 +213,14 @@ import {
     type Pause,
     type AccessControl,
     TimeTravel,
-    ScheduledTasks,
+    ScheduledCrossOrderedTasks,
     type IERC1410,
     BusinessLogicResolver,
     IFactory,
     AccessControl__factory,
     EquityUSA__factory,
     Pause__factory,
-    ScheduledTasks__factory,
+    ScheduledCrossOrderedTasks__factory,
     TimeTravel__factory,
     Kyc,
     SsiManagement,
@@ -264,7 +264,7 @@ describe('Scheduled Tasks Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let equityFacet: EquityUSA
-    let scheduledTasksFacet: ScheduledTasks
+    let scheduledTasksFacet: ScheduledCrossOrderedTasks
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: IERC1410
@@ -317,7 +317,7 @@ describe('Scheduled Tasks Tests', () => {
             signer_A
         )
         equityFacet = EquityUSA__factory.connect(diamond.address, signer_A)
-        scheduledTasksFacet = ScheduledTasks__factory.connect(
+        scheduledTasksFacet = ScheduledCrossOrderedTasks__factory.connect(
             diamond.address,
             signer_A
         )
@@ -395,10 +395,14 @@ describe('Scheduled Tasks Tests', () => {
 
         // trigger scheduled snapshots
         await expect(
-            scheduledTasksFacet.connect(signer_C).triggerPendingScheduledTasks()
+            scheduledTasksFacet
+                .connect(signer_C)
+                .triggerPendingScheduledCrossOrderedTasks()
         ).to.be.rejectedWith('TokenIsPaused')
         await expect(
-            scheduledTasksFacet.connect(signer_C).triggerScheduledTasks(1)
+            scheduledTasksFacet
+                .connect(signer_C)
+                .triggerScheduledCrossOrderedTasks(1)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
@@ -470,8 +474,10 @@ describe('Scheduled Tasks Tests', () => {
 
         // check schedled tasks
 
-        let scheduledTasksCount = await scheduledTasksFacet.scheduledTaskCount()
-        let scheduledTasks = await scheduledTasksFacet.getScheduledTasks(0, 100)
+        let scheduledTasksCount =
+            await scheduledTasksFacet.scheduledCrossOrderedTaskCount()
+        let scheduledTasks =
+            await scheduledTasksFacet.getScheduledCrossOrderedTasks(0, 100)
 
         expect(scheduledTasksCount).to.equal(4)
         expect(scheduledTasks.length).to.equal(scheduledTasksCount)
@@ -514,11 +520,13 @@ describe('Scheduled Tasks Tests', () => {
         // triggering from the queue
         await scheduledTasksFacet
             .connect(signer_A)
-            .triggerPendingScheduledTasks()
+            .triggerPendingScheduledCrossOrderedTasks()
 
-        scheduledTasksCount = await scheduledTasksFacet.scheduledTaskCount()
+        scheduledTasksCount =
+            await scheduledTasksFacet.scheduledCrossOrderedTaskCount()
 
-        scheduledTasks = await scheduledTasksFacet.getScheduledTasks(0, 100)
+        scheduledTasks =
+            await scheduledTasksFacet.getScheduledCrossOrderedTasks(0, 100)
 
         expect(scheduledTasksCount).to.equal(2)
         expect(scheduledTasks.length).to.equal(scheduledTasksCount)
@@ -546,11 +554,15 @@ describe('Scheduled Tasks Tests', () => {
         )
 
         // triggering from the queue
-        await scheduledTasksFacet.connect(signer_A).triggerScheduledTasks(100)
+        await scheduledTasksFacet
+            .connect(signer_A)
+            .triggerScheduledCrossOrderedTasks(100)
 
-        scheduledTasksCount = await scheduledTasksFacet.scheduledTaskCount()
+        scheduledTasksCount =
+            await scheduledTasksFacet.scheduledCrossOrderedTaskCount()
 
-        scheduledTasks = await scheduledTasksFacet.getScheduledTasks(0, 100)
+        scheduledTasks =
+            await scheduledTasksFacet.getScheduledCrossOrderedTasks(0, 100)
 
         expect(scheduledTasksCount).to.equal(0)
         expect(scheduledTasks.length).to.equal(scheduledTasksCount)

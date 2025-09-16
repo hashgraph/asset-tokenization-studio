@@ -223,7 +223,7 @@ abstract contract AdjustBalances is IAdjustBalances, Common {
         validateFactor(factor)
         returns (bool success_)
     {
-        _triggerScheduledTasks(0);
+        _triggerScheduledCrossOrderedTasks(0);
         _adjustBalances(factor, decimals);
         success_ = true;
     }

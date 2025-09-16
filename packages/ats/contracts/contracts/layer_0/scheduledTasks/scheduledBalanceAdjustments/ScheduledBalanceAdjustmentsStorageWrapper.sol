@@ -238,7 +238,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
         uint256 _max
     ) internal returns (uint256) {
         return
-            ScheduledTasksLib.triggerScheduledTasks(
+            _triggerScheduledTasks(
                 _scheduledBalanceAdjustmentStorage(),
                 IScheduledBalanceAdjustments
                     .onScheduledBalanceAdjustmentTriggered

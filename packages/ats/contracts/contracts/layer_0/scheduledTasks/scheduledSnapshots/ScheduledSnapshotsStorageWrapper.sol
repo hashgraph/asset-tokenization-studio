@@ -234,7 +234,7 @@ abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
         uint256 _max
     ) internal returns (uint256) {
         return
-            ScheduledTasksLib.triggerScheduledTasks(
+            _triggerScheduledTasks(
                 _scheduledSnapshotStorage(),
                 IScheduledSnapshots.onScheduledSnapshotTriggered.selector,
                 _max,

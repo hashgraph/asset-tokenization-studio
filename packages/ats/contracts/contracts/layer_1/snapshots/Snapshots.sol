@@ -218,7 +218,7 @@ abstract contract Snapshots is ISnapshots, Common {
         onlyRole(_SNAPSHOT_ROLE)
         returns (uint256 snapshotID_)
     {
-        _triggerScheduledTasks(0);
+        _triggerScheduledCrossOrderedTasks(0);
         snapshotID_ = _takeSnapshot();
     }
 

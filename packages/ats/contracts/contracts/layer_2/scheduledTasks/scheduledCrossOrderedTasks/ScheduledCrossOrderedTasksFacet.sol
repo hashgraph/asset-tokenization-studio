@@ -207,83 +207,62 @@
 pragma solidity 0.8.18;
 
 import {
-    IScheduledTasks
-} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {
-    ScheduledTasksLib
-} from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
-import {
-    _SCHEDULED_TASKS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
-import {SNAPSHOT_TASK_TYPE} from '../../constants/values.sol';
+    IScheduledCrossOrderedTasks
+} from '../../interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol';
+import {ScheduledCrossOrderedTasks} from './ScheduledCrossOrderedTasks.sol';
 
-abstract contract ScheduledTasksStorageWrapper is
-    ScheduledBalanceAdjustmentsStorageWrapper
+contract ScheduledCrossOrderedTasksFacet is
+    ScheduledCrossOrderedTasks,
+    IStaticFunctionSelectors
 {
-    function _addScheduledTask(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal {
-        ScheduledTasksLib.addScheduledTask(
-            _scheduledTaskStorage(),
-            _newScheduledTimestamp,
-            _newData
-        );
-    }
-
-    function _triggerScheduledTasks(uint256 _max) internal returns (uint256) {
-        return
-            ScheduledTasksLib.triggerScheduledTasks(
-                _scheduledTaskStorage(),
-                IScheduledTasks.onScheduledTaskTriggered.selector,
-                _max,
-                _blockTimestamp()
-            );
-    }
-
-    function _onScheduledTaskTriggered(bytes memory _data) internal {
-        if (_data.length == 0) return;
-        if (abi.decode(_data, (bytes32)) == SNAPSHOT_TASK_TYPE) {
-            _triggerScheduledSnapshots(1);
-            return;
-        }
-        _triggerScheduledBalanceAdjustments(1);
-    }
-
-    function _getScheduledTaskCount() internal view returns (uint256) {
-        return ScheduledTasksLib.getScheduledTaskCount(_scheduledTaskStorage());
-    }
-
-    function _getScheduledTasks(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        internal
-        view
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
-    {
-        return
-            ScheduledTasksLib.getScheduledTasks(
-                _scheduledTaskStorage(),
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function _scheduledTaskStorage()
-        internal
+    function getStaticResolverKey()
+        external
         pure
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage storage scheduledTasks_
-        )
+        override
+        returns (bytes32 staticResolverKey_)
     {
-        bytes32 position = _SCHEDULED_TASKS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledTasks_.slot := position
-        }
+        staticResolverKey_ = _SCHEDULED_TASKS_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerPendingScheduledCrossOrderedTasks
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerScheduledCrossOrderedTasks
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .scheduledCrossOrderedTaskCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getScheduledCrossOrderedTasks
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .onScheduledCrossOrderedTaskTriggered
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(
+            IScheduledCrossOrderedTasks
+        ).interfaceId;
     }
 }

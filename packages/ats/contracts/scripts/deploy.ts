@@ -288,8 +288,8 @@ import {
     ScheduledSnapshotsFacetTimeTravel__factory,
     ScheduledBalanceAdjustmentsFacet__factory,
     ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
-    ScheduledTasksFacet__factory,
-    ScheduledTasksFacetTimeTravel__factory,
+    ScheduledCrossOrderedTasksFacet__factory,
+    ScheduledCrossOrderedTasksFacetTimeTravel__factory,
     CorporateActionsFacet__factory,
     CorporateActionsFacetTimeTravel__factory,
     TransferAndLockFacet__factory,
@@ -761,8 +761,8 @@ export async function deployAtsContracts({
         }),
         scheduledTasksFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new ScheduledTasksFacet__factory(),
-                new ScheduledTasksFacetTimeTravel__factory()
+                new ScheduledCrossOrderedTasksFacet__factory(),
+                new ScheduledCrossOrderedTasksFacetTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed

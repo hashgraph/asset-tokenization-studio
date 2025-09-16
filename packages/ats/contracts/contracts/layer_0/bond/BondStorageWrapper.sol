@@ -283,7 +283,10 @@ abstract contract BondStorageWrapper is
             (IBondRead.Coupon)
         );
 
-        _addScheduledTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
+        _addScheduledCrossOrderedTask(
+            newCoupon.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
         _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
     }
 

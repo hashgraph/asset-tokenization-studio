@@ -206,59 +206,35 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {
-    IScheduledTasks
-} from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-import {ScheduledTasks} from './ScheduledTasks.sol';
+import {ScheduledTasksLib} from '../../../scheduledTasks/ScheduledTasksLib.sol';
 
-contract ScheduledTasksFacet is ScheduledTasks, IStaticFunctionSelectors {
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _SCHEDULED_TASKS_RESOLVER_KEY;
-    }
+struct ScheduledTask {
+    uint256 scheduledTimestamp;
+    bytes data;
+}
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerPendingScheduledTasks
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerScheduledTasks
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .scheduledTaskCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getScheduledTasks
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .onScheduledTaskTriggered
-            .selector;
-    }
+interface IScheduledCrossOrderedTasks {
+    function onScheduledCrossOrderedTaskTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        bytes memory _data
+    ) external;
 
-    function getStaticInterfaceIds()
+    function triggerPendingScheduledCrossOrderedTasks()
         external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IScheduledTasks)
-            .interfaceId;
-    }
+        returns (uint256);
+
+    function triggerScheduledCrossOrderedTasks(
+        uint256 _max
+    ) external returns (uint256);
+
+    function scheduledCrossOrderedTaskCount() external view returns (uint256);
+
+    function getScheduledCrossOrderedTasks(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_);
 }

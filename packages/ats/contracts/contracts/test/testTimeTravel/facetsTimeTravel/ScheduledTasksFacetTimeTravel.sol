@@ -207,15 +207,15 @@
 pragma solidity 0.8.18;
 
 import {
-    ScheduledTasksFacet
-} from '../../../layer_2/scheduledTasks/scheduledTasks/ScheduledTasksFacet.sol';
+    ScheduledCrossOrderedTasksFacet
+} from '../../../layer_2/scheduledTasks/scheduledCrossOrderedTasks/ScheduledCrossOrderedTasksFacet.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract ScheduledTasksFacetTimeTravel is
-    ScheduledTasksFacet,
+contract ScheduledCrossOrderedTasksFacetTimeTravel is
+    ScheduledCrossOrderedTasksFacet,
     TimeTravelStorageWrapper
 {
     function _blockTimestamp()

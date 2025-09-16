@@ -273,7 +273,7 @@ abstract contract EquityStorageWrapper is
             (IEquity.Dividend)
         );
 
-        _addScheduledTask(
+        _addScheduledCrossOrderedTask(
             newDividend.recordDate,
             abi.encode(SNAPSHOT_TASK_TYPE)
         );
@@ -307,7 +307,10 @@ abstract contract EquityStorageWrapper is
 
         IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
 
-        _addScheduledTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
+        _addScheduledCrossOrderedTask(
+            newVoting.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
         _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
     }
 
@@ -344,7 +347,7 @@ abstract contract EquityStorageWrapper is
         IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
             .decode(_data, (IEquity.ScheduledBalanceAdjustment));
 
-        _addScheduledTask(
+        _addScheduledCrossOrderedTask(
             newBalanceAdjustment.executionDate,
             abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
         );

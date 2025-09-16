@@ -208,52 +208,69 @@ pragma solidity 0.8.18;
 
 import {Common} from '../../../layer_1/common/Common.sol';
 import {
-    IScheduledTasks
-} from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
+    IScheduledCrossOrderedTasks
+} from '../../interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol';
 import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-abstract contract ScheduledTasks is IScheduledTasks, Common {
+abstract contract ScheduledCrossOrderedTasks is
+    IScheduledCrossOrderedTasks,
+    Common
+{
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    function onScheduledTaskTriggered(
+    function onScheduledCrossOrderedTaskTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         bytes memory _data
-    ) external override onlyAutoCalling(_scheduledTaskStorage().autoCalling) {
-        _onScheduledTaskTriggered(_data);
+    )
+        external
+        override
+        onlyAutoCalling(_scheduledCrossOrderedTaskStorage().autoCalling)
+    {
+        _onScheduledCrossOrderedTaskTriggered(_data);
     }
 
-    function triggerPendingScheduledTasks()
+    function triggerPendingScheduledCrossOrderedTasks()
         external
         override
         onlyUnpaused
         returns (uint256)
     {
-        return _triggerScheduledTasks(0);
+        return _triggerScheduledCrossOrderedTasks(0);
     }
 
-    function triggerScheduledTasks(
+    function triggerScheduledCrossOrderedTasks(
         uint256 _max
     ) external override onlyUnpaused returns (uint256) {
-        return _triggerScheduledTasks(_max);
+        return _triggerScheduledCrossOrderedTasks(_max);
     }
 
-    function scheduledTaskCount() external view override returns (uint256) {
-        return _getScheduledTaskCount();
+    function scheduledCrossOrderedTaskCount()
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return _getScheduledCrossOrderedTaskCount();
     }
 
-    function getScheduledTasks(
+    function getScheduledCrossOrderedTasks(
         uint256 _pageIndex,
         uint256 _pageLength
     )
         external
         view
         override
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
+        returns (
+            ScheduledTasksLib.ScheduledTask[] memory scheduledCrossOrderedTask_
+        )
     {
-        scheduledTask_ = _getScheduledTasks(_pageIndex, _pageLength);
+        scheduledCrossOrderedTask_ = _getScheduledCrossOrderedTasks(
+            _pageIndex,
+            _pageLength
+        );
     }
 }
