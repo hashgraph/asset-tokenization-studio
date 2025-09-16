@@ -213,12 +213,16 @@ import {
     ScheduledTasksLib
 } from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
 import {
-    _SCHEDULED_TASKS_STORAGE_POSITION
+    _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from '../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
 import {SNAPSHOT_TASK_TYPE} from '../../constants/values.sol';
+import {
+    ScheduledTask,
+    ScheduledTasksDataStorage
+} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol';
 
 abstract contract ScheduledCrossOrderedTasksStorageWrapper is
     ScheduledBalanceAdjustmentsStorageWrapper
@@ -240,19 +244,21 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is
         return
             _triggerScheduledTasks(
                 _scheduledCrossOrderedTaskStorage(),
-                IScheduledCrossOrderedTasks
-                    .onScheduledCrossOrderedTaskTriggered
-                    .selector,
+                _onScheduledCrossOrderedTaskTriggered,
                 _max,
                 _blockTimestamp()
             );
     }
 
     function _onScheduledCrossOrderedTaskTriggered(
-        bytes memory _data
+        uint256 /*_pos*/,
+        uint256 /*_scheduledTasksLength*/,
+        ScheduledTask memory _scheduledTask
     ) internal {
-        if (_data.length == 0) return;
-        if (abi.decode(_data, (bytes32)) == SNAPSHOT_TASK_TYPE) {
+        bytes memory data = _scheduledTask.data;
+
+        if (data.length == 0) return;
+        if (abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE) {
             _triggerScheduledSnapshots(1);
             return;
         }
@@ -273,11 +279,7 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is
     function _getScheduledCrossOrderedTasks(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        internal
-        view
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
-    {
+    ) internal view returns (ScheduledTask[] memory scheduledTask_) {
         return
             ScheduledTasksLib.getScheduledTasks(
                 _scheduledCrossOrderedTaskStorage(),
@@ -289,12 +291,9 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is
     function _scheduledCrossOrderedTaskStorage()
         internal
         pure
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage
-                storage scheduledCrossOrderedTasks_
-        )
+        returns (ScheduledTasksDataStorage storage scheduledCrossOrderedTasks_)
     {
-        bytes32 position = _SCHEDULED_TASKS_STORAGE_POSITION;
+        bytes32 position = _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             scheduledCrossOrderedTasks_.slot := position

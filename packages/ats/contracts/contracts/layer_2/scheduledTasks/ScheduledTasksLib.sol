@@ -207,19 +207,12 @@
 pragma solidity 0.8.18;
 
 import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
+import {
+    ScheduledTask,
+    ScheduledTasksDataStorage
+} from '../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol';
 
 library ScheduledTasksLib {
-    struct ScheduledTask {
-        uint256 scheduledTimestamp;
-        bytes data;
-    }
-
-    struct ScheduledTasksDataStorage {
-        mapping(uint256 => ScheduledTask) scheduledTasks;
-        uint256 scheduledTaskCount;
-        bool autoCalling;
-    }
-
     function addScheduledTask(
         ScheduledTasksDataStorage storage _scheduledTasks,
         uint256 _newScheduledTimestamp,
@@ -276,73 +269,6 @@ library ScheduledTasksLib {
         delete (_scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
         _scheduledTasks.scheduledTaskCount--;
     }
-
-    /*function triggerScheduledTasks(
-        ScheduledTasksDataStorage storage _scheduledTasks,
-        bytes4 onScheduledTaskTriggeredSelector,
-        uint256 _max,
-        uint256 _timestamp
-    ) internal returns (uint256) {
-        uint256 scheduledTasksLength = getScheduledTaskCount(_scheduledTasks);
-
-        if (scheduledTasksLength == 0) {
-            return 0;
-        }
-
-        uint256 max = _max;
-
-        uint256 newTaskID;
-
-        if (max > scheduledTasksLength || max == 0) {
-            max = scheduledTasksLength;
-        }
-
-        for (uint256 j = 1; j <= max; j++) {
-            uint256 pos = scheduledTasksLength - j;
-
-            ScheduledTask
-                memory currentScheduledTask = getScheduledTasksByIndex(
-                    _scheduledTasks,
-                    pos
-                );
-
-            if (currentScheduledTask.scheduledTimestamp < _timestamp) {
-                popScheduledTask(_scheduledTasks);
-
-                _scheduledTasks.autoCalling = true;
-
-                // solhint-disable-next-line avoid-low-level-calls
-                (bool success, bytes memory data) = address(this).delegatecall(
-                    abi.encodeWithSelector(
-                        onScheduledTaskTriggeredSelector,
-                        pos,
-                        scheduledTasksLength,
-                        currentScheduledTask.data
-                    )
-                );
-                if (!success) {
-                    if (data.length > 0) {
-                        // solhint-disable-next-line no-inline-assembly
-                        assembly {
-                            let returndata_size := mload(data)
-                            revert(add(32, data), returndata_size)
-                        }
-                    } else {
-                        // solhint-disable-next-line custom-errors
-                        revert(
-                            'onScheduledTaskTriggered method failed without reason'
-                        );
-                    }
-                }
-
-                _scheduledTasks.autoCalling = false;
-            } else {
-                break;
-            }
-        }
-
-        return newTaskID;
-    }*/
 
     function getScheduledTaskCount(
         ScheduledTasksDataStorage storage _scheduledTasks

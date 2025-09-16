@@ -206,20 +206,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {ScheduledTasksLib} from '../../../scheduledTasks/ScheduledTasksLib.sol';
-
-struct ScheduledTask {
-    uint256 scheduledTimestamp;
-    bytes data;
-}
+import {ScheduledTask} from '../scheduledTasksCommon/IScheduledTasksCommon.sol';
 
 interface IScheduledCrossOrderedTasks {
-    function onScheduledCrossOrderedTaskTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external;
-
     function triggerPendingScheduledCrossOrderedTasks()
         external
         returns (uint256);
@@ -233,8 +222,5 @@ interface IScheduledCrossOrderedTasks {
     function getScheduledCrossOrderedTasks(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_);
+    ) external view returns (ScheduledTask[] memory scheduledTask_);
 }

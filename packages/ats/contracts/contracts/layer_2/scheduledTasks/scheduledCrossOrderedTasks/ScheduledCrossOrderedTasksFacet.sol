@@ -235,7 +235,7 @@ contract ScheduledCrossOrderedTasksFacet is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_ = new bytes4[](4);
         staticFunctionSelectors_[selectorIndex++] = this
             .triggerPendingScheduledCrossOrderedTasks
             .selector;
@@ -247,9 +247,6 @@ contract ScheduledCrossOrderedTasksFacet is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getScheduledCrossOrderedTasks
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .onScheduledCrossOrderedTaskTriggered
             .selector;
     }
 

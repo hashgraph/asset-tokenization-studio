@@ -210,7 +210,9 @@ import {Common} from '../../../layer_1/common/Common.sol';
 import {
     IScheduledCrossOrderedTasks
 } from '../../interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {
+    ScheduledTask
+} from '../../interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -220,18 +222,6 @@ abstract contract ScheduledCrossOrderedTasks is
     Common
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    function onScheduledCrossOrderedTaskTriggered(
-        uint256 /*_pos*/,
-        uint256 /*_scheduledTasksLength*/,
-        bytes memory _data
-    )
-        external
-        override
-        onlyAutoCalling(_scheduledCrossOrderedTaskStorage().autoCalling)
-    {
-        _onScheduledCrossOrderedTaskTriggered(_data);
-    }
 
     function triggerPendingScheduledCrossOrderedTasks()
         external
@@ -264,9 +254,7 @@ abstract contract ScheduledCrossOrderedTasks is
         external
         view
         override
-        returns (
-            ScheduledTasksLib.ScheduledTask[] memory scheduledCrossOrderedTask_
-        )
+        returns (ScheduledTask[] memory scheduledCrossOrderedTask_)
     {
         scheduledCrossOrderedTask_ = _getScheduledCrossOrderedTasks(
             _pageIndex,

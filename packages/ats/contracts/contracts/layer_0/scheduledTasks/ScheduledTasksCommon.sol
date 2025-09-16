@@ -212,6 +212,10 @@ import {
 import {
     ScheduledTasksLib
 } from '../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
+import {
+    ScheduledTask,
+    ScheduledTasksDataStorage
+} from '../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol';
 
 abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     error WrongTimestamp(uint256 timeStamp);
@@ -228,8 +232,8 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     }
 
     function _triggerScheduledTasks(
-        ScheduledTasksLib.ScheduledTasksDataStorage storage _scheduledTasks,
-        bytes4 onScheduledTaskTriggeredSelector,
+        ScheduledTasksDataStorage storage _scheduledTasks,
+        function(uint256, uint256, ScheduledTask memory) internal callBack,
         uint256 _max,
         uint256 _timestamp
     ) internal returns (uint256) {
@@ -252,40 +256,12 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = scheduledTasksLength - j;
 
-            ScheduledTasksLib.ScheduledTask
-                memory currentScheduledTask = ScheduledTasksLib
-                    .getScheduledTasksByIndex(_scheduledTasks, pos);
+            ScheduledTask memory currentScheduledTask = ScheduledTasksLib
+                .getScheduledTasksByIndex(_scheduledTasks, pos);
 
             if (currentScheduledTask.scheduledTimestamp < _timestamp) {
                 ScheduledTasksLib.popScheduledTask(_scheduledTasks);
-
-                _scheduledTasks.autoCalling = true;
-
-                // solhint-disable-next-line avoid-low-level-calls
-                (bool success, bytes memory data) = address(this).delegatecall(
-                    abi.encodeWithSelector(
-                        onScheduledTaskTriggeredSelector,
-                        pos,
-                        scheduledTasksLength,
-                        currentScheduledTask.data
-                    )
-                );
-                if (!success) {
-                    if (data.length > 0) {
-                        // solhint-disable-next-line no-inline-assembly
-                        assembly {
-                            let returndata_size := mload(data)
-                            revert(add(32, data), returndata_size)
-                        }
-                    } else {
-                        // solhint-disable-next-line custom-errors
-                        revert(
-                            'onScheduledTaskTriggered method failed without reason'
-                        );
-                    }
-                }
-
-                _scheduledTasks.autoCalling = false;
+                callBack(pos, scheduledTasksLength, currentScheduledTask);
             } else {
                 break;
             }
