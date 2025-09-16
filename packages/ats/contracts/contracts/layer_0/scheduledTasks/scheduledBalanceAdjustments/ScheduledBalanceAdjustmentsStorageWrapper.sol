@@ -210,8 +210,8 @@ import {
     IScheduledBalanceAdjustments
 } from '../../../layer_2/interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
 import {
-    ScheduledSnapshotsStorageWrapper
-} from '../scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
+    ScheduledCouponListingStorageWrapper
+} from '../scheduledCouponListing/ScheduledCouponListingStorageWrapper.sol';
 import {
     ScheduledTasksLib
 } from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
@@ -225,7 +225,7 @@ import {
 } from '../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol';
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
-    ScheduledSnapshotsStorageWrapper
+    ScheduledCouponListingStorageWrapper
 {
     function _addScheduledBalanceAdjustment(
         uint256 _newScheduledTimestamp,

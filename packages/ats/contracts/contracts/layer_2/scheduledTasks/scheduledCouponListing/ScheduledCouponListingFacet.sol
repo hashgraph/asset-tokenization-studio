@@ -206,229 +206,55 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
 import {
-    DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-} from '../../layer_0/constants/values.sol';
-import {IEquity} from '../interfaces/equity/IEquity.sol';
-import {Common} from '../../layer_1/common/Common.sol';
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    _SCHEDULED_COUPON_LISTING_RESOLVER_KEY
+} from '../../constants/resolverKeys.sol';
+import {
+    IScheduledCouponListing
+} from '../../interfaces/scheduledTasks/scheduledCouponListing/IScheduledCouponListing.sol';
+import {ScheduledCouponListing} from './ScheduledCouponListing.sol';
 
-abstract contract Equity is IEquity, Common {
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    function setDividends(
-        Dividend calldata _newDividend
-    )
+contract ScheduledCouponListingFacet is
+    ScheduledCouponListing,
+    IStaticFunctionSelectors
+{
+    function getStaticResolverKey()
         external
+        pure
         override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        validateDates(_newDividend.recordDate, _newDividend.executionDate)
-        onlyValidTimestamp(_newDividend.recordDate)
-        returns (bool success_, uint256 dividendID_)
+        returns (bytes32 staticResolverKey_)
     {
-        bytes32 corporateActionID;
-        (success_, corporateActionID, dividendID_) = _setDividends(
-            _newDividend
-        );
-        emit DividendSet(
-            corporateActionID,
-            dividendID_,
-            _msgSender(),
-            _newDividend.recordDate,
-            _newDividend.executionDate,
-            _newDividend.amount
-        );
+        staticResolverKey_ = _SCHEDULED_COUPON_LISTING_RESOLVER_KEY;
     }
 
-    function setVoting(
-        Voting calldata _newVoting
-    )
+    function getStaticFunctionSelectors()
         external
+        pure
         override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        onlyValidTimestamp(_newVoting.recordDate)
-        returns (bool success_, uint256 voteID_)
+        returns (bytes4[] memory staticFunctionSelectors_)
     {
-        bytes32 corporateActionID;
-        (success_, corporateActionID, voteID_) = _setVoting(_newVoting);
-        emit VotingSet(
-            corporateActionID,
-            voteID_,
-            _msgSender(),
-            _newVoting.recordDate,
-            _newVoting.data
-        );
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .scheduledCouponListingCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getScheduledCouponListing
+            .selector;
     }
 
-    function setScheduledBalanceAdjustment(
-        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    )
+    function getStaticInterfaceIds()
         external
+        pure
         override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        onlyValidTimestamp(_newBalanceAdjustment.executionDate)
-        validateFactor(_newBalanceAdjustment.factor)
-        returns (bool success_, uint256 balanceAdjustmentID_)
+        returns (bytes4[] memory staticInterfaceIds_)
     {
-        bytes32 corporateActionID;
-        (
-            success_,
-            corporateActionID,
-            balanceAdjustmentID_
-        ) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
-        emit ScheduledBalanceAdjustmentSet(
-            corporateActionID,
-            balanceAdjustmentID_,
-            _msgSender(),
-            _newBalanceAdjustment.executionDate,
-            _newBalanceAdjustment.factor,
-            _newBalanceAdjustment.decimals
-        );
-    }
-
-    function getEquityDetails()
-        external
-        view
-        override
-        returns (EquityDetailsData memory equityDetailsData_)
-    {
-        return _getEquityDetails();
-    }
-
-    function getDividends(
-        uint256 _dividendID
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
-        returns (RegisteredDividend memory registeredDividend_)
-    {
-        return _getDividends(_dividendID);
-    }
-
-    function getDividendsFor(
-        uint256 _dividendID,
-        address _account
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
-        returns (DividendFor memory dividendFor_)
-    {
-        return _getDividendsFor(_dividendID, _account);
-    }
-
-    function getDividendsCount()
-        external
-        view
-        override
-        returns (uint256 dividendCount_)
-    {
-        return _getDividendsCount();
-    }
-
-    function getDividendHolders(
-        uint256 _dividendID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_) {
-        return _getDividendHolders(_dividendID, _pageIndex, _pageLength);
-    }
-
-    function getTotalDividendHolders(
-        uint256 _dividendID
-    ) external view returns (uint256) {
-        return _getTotalDividendHolders(_dividendID);
-    }
-
-    function getVoting(
-        uint256 _voteID
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
-        returns (RegisteredVoting memory registeredVoting_)
-    {
-        return _getVoting(_voteID);
-    }
-
-    function getVotingFor(
-        uint256 _voteID,
-        address _account
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
-        returns (VotingFor memory votingFor_)
-    {
-        return _getVotingFor(_voteID, _account);
-    }
-
-    function getVotingCount()
-        external
-        view
-        override
-        returns (uint256 votingCount_)
-    {
-        return _getVotingCount();
-    }
-
-    function getVotingHolders(
-        uint256 _voteID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_) {
-        return _getVotingHolders(_voteID, _pageIndex, _pageLength);
-    }
-
-    function getTotalVotingHolders(
-        uint256 _voteID
-    ) external view returns (uint256) {
-        return _getTotalVotingHolders(_voteID);
-    }
-
-    function getScheduledBalanceAdjustment(
-        uint256 _balanceAdjustmentID
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-            _balanceAdjustmentID - 1
-        )
-        returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
-    {
-        return _getScheduledBalanceAdjusment(_balanceAdjustmentID);
-    }
-
-    function getScheduledBalanceAdjustmentCount()
-        external
-        view
-        override
-        returns (uint256 balanceAdjustmentCount_)
-    {
-        return _getScheduledBalanceAdjustmentsCount();
-    }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function _initializeEquity(
-        EquityDetailsData calldata _equityDetailsData
-    ) internal {
-        EquityDataStorage storage equityStorage = _equityStorage();
-        equityStorage.initialized = true;
-        _storeEquityDetails(_equityDetailsData);
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IScheduledCouponListing)
+            .interfaceId;
     }
 }
