@@ -208,7 +208,7 @@ import isBefore from 'date-fns/isBefore';
 import isToday from 'date-fns/isToday';
 import isEqual from 'date-fns/isEqual';
 import i18n from '../i18n';
-import { formatDate, toDate } from './format';
+import { formatDate, toDate, validateCouponPeriod } from './format';
 
 const t = (key: string, options?: Record<string, unknown>) => {
   return i18n.t(`rules:${key}`, options);
@@ -334,7 +334,6 @@ export const isValidCouponPeriod = (val: string) => {
       return 'Coupon period must be a valid positive number';
     }
 
-    const { validateCouponPeriod } = require('./format');
     const validation = validateCouponPeriod(periodValue);
     return validation === true || validation;
   } catch (error) {

@@ -229,7 +229,7 @@ export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest>
     period: string;
   }) {
     super({
-      rate: FormatValidation.checkAmount(),
+      rate: FormatValidation.checkAmount(true),
       recordTimestamp: (val) => {
         return SecurityDate.checkDateTimestamp(
           parseInt(val),

@@ -265,6 +265,7 @@ abstract contract Bond is IBond, Common {
             _newCoupon.recordDate,
             _newCoupon.executionDate,
             _newCoupon.rate,
+            _newCoupon.rateDecimals,
             _newCoupon.period
         );
     }
