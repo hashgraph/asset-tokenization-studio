@@ -1095,6 +1095,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       recordDate: recordDate.toHexString(),
       executionDate: executionDate.toHexString(),
       rate: rate.toHexString(),
+      rateDecimals: rate.decimals,
       period: period.toHexString(),
     };
     return this.executeWithArgs(
