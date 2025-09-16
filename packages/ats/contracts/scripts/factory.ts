@@ -270,6 +270,7 @@ export interface BondDetailsData {
 export interface CouponDetailsData {
     couponFrequency: number
     couponRate: number
+    couponRateDecimals: number
     firstCouponDate: number
 }
 
@@ -277,6 +278,7 @@ export interface CouponData {
     recordDate: number
     executionDate: number
     rate: number
+    rateDecimals: number
     period: number
 }
 
@@ -509,6 +511,7 @@ export async function setBondData({
     maturityDate,
     couponFrequency,
     couponRate,
+    couponRateDecimals,
     firstCouponDate,
     init_rbacs,
     addAdmin = true,
@@ -538,6 +541,7 @@ export async function setBondData({
     maturityDate: number
     couponFrequency: number
     couponRate: number
+    couponRateDecimals: number
     firstCouponDate: number
     init_rbacs?: Rbac[]
     addAdmin: boolean
@@ -604,6 +608,7 @@ export async function setBondData({
     const couponDetails: CouponDetailsData = {
         couponFrequency: couponFrequency,
         couponRate: couponRate,
+        couponRateDecimals: couponRateDecimals,
         firstCouponDate: firstCouponDate,
     }
 
@@ -762,6 +767,7 @@ export async function deployBondFromFactory({
     maturityDate,
     couponFrequency,
     couponRate,
+    couponRateDecimals,
     firstCouponDate,
     regulationType,
     regulationSubType,
@@ -794,6 +800,7 @@ export async function deployBondFromFactory({
     maturityDate: number
     couponFrequency: number
     couponRate: number
+    couponRateDecimals: number
     firstCouponDate: number
     regulationType: number
     regulationSubType: number
@@ -827,6 +834,7 @@ export async function deployBondFromFactory({
         maturityDate,
         couponFrequency,
         couponRate,
+        couponRateDecimals,
         firstCouponDate,
         init_rbacs,
         addAdmin,

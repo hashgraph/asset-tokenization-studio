@@ -852,6 +852,7 @@ export class RPCQueryAdapter {
       couponInfo.coupon.recordDate.toNumber(),
       couponInfo.coupon.executionDate.toNumber(),
       new BigDecimal(couponInfo.coupon.rate.toString()),
+      couponInfo.coupon.rateDecimals,
       couponInfo.snapshotId.toNumber(),
     );
   }

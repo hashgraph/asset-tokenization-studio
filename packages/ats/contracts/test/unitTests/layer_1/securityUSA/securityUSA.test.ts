@@ -232,6 +232,7 @@ let startingDate = 0
 const numberOfCoupons = 50
 const frequency = TIME_PERIODS_S.DAY
 const rate = 1
+const rateDecimals = 0
 let maturityDate = startingDate + numberOfCoupons * frequency
 let firstCouponDate = startingDate + 1
 
@@ -520,6 +521,7 @@ describe('Security USA Tests', () => {
                 maturityDate,
                 couponFrequency: frequency,
                 couponRate: rate,
+                couponRateDecimals: rateDecimals,
                 firstCouponDate,
                 regulationType: RegulationType.REG_S,
                 regulationSubType: RegulationSubType.NONE,
@@ -591,6 +593,7 @@ describe('Security USA Tests', () => {
                 maturityDate,
                 couponFrequency: frequency,
                 couponRate: rate,
+                couponRateDecimals: rateDecimals,
                 firstCouponDate,
                 regulationType: RegulationType.REG_D,
                 regulationSubType: RegulationSubType.REG_D_506_B,
@@ -661,6 +664,7 @@ describe('Security USA Tests', () => {
                 maturityDate,
                 couponFrequency: frequency,
                 couponRate: rate,
+                couponRateDecimals: rateDecimals,
                 firstCouponDate,
                 regulationType: RegulationType.REG_D,
                 regulationSubType: RegulationSubType.REG_D_506_C,

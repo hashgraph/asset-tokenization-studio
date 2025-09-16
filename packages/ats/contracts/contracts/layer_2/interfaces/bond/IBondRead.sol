@@ -218,6 +218,7 @@ interface IBondRead {
         uint256 recordDate;
         uint256 executionDate;
         uint256 rate;
+        uint8 rateDecimals;
         uint256 period;
     }
 
@@ -229,6 +230,7 @@ interface IBondRead {
     struct CouponFor {
         uint256 tokenBalance;
         uint256 rate;
+        uint8 rateDecimals;
         uint256 recordDate;
         uint256 executionDate;
         uint256 period;
