@@ -78,6 +78,13 @@ export const Beneficiaries = () => {
     columnsHelper.accessor('data', {
       header: tTable('fields.data'),
       enableSorting: false,
+      cell({
+        row: {
+          original: { data },
+        },
+      }) {
+        return data === '0x' ? '-' : data;
+      },
     }),
     ...(hasBeneficiaryManagerRole
       ? [

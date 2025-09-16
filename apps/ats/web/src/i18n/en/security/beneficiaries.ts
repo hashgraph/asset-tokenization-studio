@@ -227,6 +227,7 @@ export default {
       data: {
         label: 'Data',
         placeholder: '0x',
+        invalidHexFormat: 'Invalid hex format',
       },
     },
     buttons: {
@@ -251,6 +252,7 @@ export default {
       data: {
         label: 'Data',
         placeholder: '0x',
+        invalidHexFormat: 'Invalid hex format',
       },
     },
     buttons: {

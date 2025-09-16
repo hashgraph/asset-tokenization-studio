@@ -14,7 +14,7 @@ import { Button, InputController } from 'io-bricks-ui';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { isValidHederaId, required } from '../../../../utils/rules';
+import { isValidHederaId, isValidHex, required } from '../../../../utils/rules';
 import { useAddBeneficiary } from '../../../../hooks/mutations/useBeneficiaries';
 import { AddBeneficiaryRequest } from '@hashgraph/asset-tokenization-sdk';
 
@@ -95,6 +95,12 @@ export const AddBeneficiaryModal = ({
               id="data"
               label={tCreate('form.data.label')}
               placeholder={tCreate('form.data.placeholder')}
+              rules={{
+                validate: (value: string) =>
+                  !value ||
+                  isValidHex(value) ||
+                  tCreate('form.data.invalidHexFormat'),
+              }}
             />
           </VStack>
         </ModalBody>
