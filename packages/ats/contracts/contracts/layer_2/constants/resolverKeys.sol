@@ -228,3 +228,6 @@ bytes32 constant _SCHEDULED_TASKS_RESOLVER_KEY = 0xa4934195ab83f1497ce5fc99b68d0
 
 // keccak256('security.token.standard.balanceAdjustments.resolverKey');
 bytes32 constant _BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8;
+
+// keccak256('security.token.standard.beneficiaries.resolverKey');
+bytes32 constant _BENEFICIARIES_RESOLVER_KEY = 0x87f4b676bf89cd24a01a78fd8e7fb2102c2f6d034be73d16402f7297e0ae625b;

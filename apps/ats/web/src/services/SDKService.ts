@@ -372,6 +372,13 @@ import {
   GetVotingHoldersRequest,
   SetComplianceRequest,
   SetIdentityRegistryRequest,
+  AddBeneficiaryRequest,
+  RemoveBeneficiaryRequest,
+  UpdateBeneficiaryDataRequest,
+  GetBeneficiariesCountRequest,
+  GetBeneficiariesRequest,
+  IsBeneficiaryRequest,
+  GetBeneficiaryDataRequest,
 } from '@hashgraph/asset-tokenization-sdk';
 
 export class SDKService {
@@ -563,6 +570,56 @@ export class SDKService {
     payload: boolean;
   }> {
     return await Security.setIdentityRegistry(req);
+  }
+
+  // Beneficiaries
+  public static async getBeneficiariesCount(
+    req: GetBeneficiariesCountRequest,
+  ): Promise<number> {
+    const request = await Bond.getBeneficiariesCount(req);
+    return request.payload;
+  }
+
+  public static async getBeneficiaries(
+    req: GetBeneficiariesRequest,
+  ): Promise<string[]> {
+    const request = await Bond.getBeneficiaries(req);
+    return request.payload;
+  }
+
+  public static async getBeneficiaryData(
+    req: GetBeneficiaryDataRequest,
+  ): Promise<string> {
+    const request = await Bond.getBeneficiaryData(req);
+    return request.payload;
+  }
+
+  public static async isBeneficiary(
+    req: IsBeneficiaryRequest,
+  ): Promise<boolean> {
+    const request = await Bond.isBeneficiary(req);
+    return request.payload;
+  }
+
+  public static async addBeneficiary(
+    req: AddBeneficiaryRequest,
+  ): Promise<boolean> {
+    const response = await Bond.addBeneficiary(req);
+    return response.payload;
+  }
+
+  public static async removeBeneficiary(
+    req: RemoveBeneficiaryRequest,
+  ): Promise<boolean> {
+    const response = await Bond.removeBeneficiary(req);
+    return response.payload;
+  }
+
+  public static async updateBeneficiaryData(
+    req: UpdateBeneficiaryDataRequest,
+  ): Promise<boolean> {
+    const response = await Bond.updateBeneficiaryData(req);
+    return response.payload;
   }
 
   // COUPONS ////////////////////////////////////////////
