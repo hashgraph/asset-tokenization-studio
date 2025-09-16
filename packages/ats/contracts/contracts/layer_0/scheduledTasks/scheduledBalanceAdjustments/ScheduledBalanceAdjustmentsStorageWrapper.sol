@@ -210,8 +210,8 @@ import {
     IScheduledBalanceAdjustments
 } from '../../../layer_2/interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
 import {
-    ScheduledSnapshotsStorageWrapperRead
-} from '../scheduledSnapshots/ScheduledSnapshotsStorageWrapperRead.sol';
+    ScheduledSnapshotsStorageWrapper
+} from '../scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
 import {
     ScheduledTasksLib
 } from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
@@ -221,7 +221,7 @@ import {
 import {IEquity} from '../../../layer_2/interfaces/equity/IEquity.sol';
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
-    ScheduledSnapshotsStorageWrapperRead
+    ScheduledSnapshotsStorageWrapper
 {
     function _addScheduledBalanceAdjustment(
         uint256 _newScheduledTimestamp,
@@ -247,6 +247,24 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
                 _blockTimestamp()
             );
     }
+
+    function _onScheduledBalanceAdjustmentTriggered(
+        bytes memory _data
+    ) internal {
+        if (_data.length == 0) return;
+        (, bytes memory balanceAdjustmentData) = _getCorporateAction(
+            abi.decode(_data, (bytes32))
+        );
+        if (balanceAdjustmentData.length == 0) return;
+        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi
+            .decode(
+                balanceAdjustmentData,
+                (IEquity.ScheduledBalanceAdjustment)
+            );
+        _adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
+    }
+
+    function _adjustBalances(uint256 _factor, uint8 _decimals) internal virtual;
 
     function _getScheduledBalanceAdjustmentCount()
         internal

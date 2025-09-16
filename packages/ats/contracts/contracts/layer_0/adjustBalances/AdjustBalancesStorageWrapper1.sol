@@ -210,8 +210,8 @@ import {
     _ADJUST_BALANCES_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+    ScheduledTasksStorageWrapper
+} from '../../layer_0/scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
 import {
     IAdjustBalancesStorageWrapper
 } from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
@@ -219,7 +219,7 @@ import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 
 abstract contract AdjustBalancesStorageWrapper1 is
     IAdjustBalancesStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper
+    ScheduledTasksStorageWrapper
 {
     struct AdjustBalancesStorage {
         // Mapping from investor to their partitions labaf

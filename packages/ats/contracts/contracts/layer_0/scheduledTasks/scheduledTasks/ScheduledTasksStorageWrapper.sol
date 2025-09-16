@@ -215,9 +215,14 @@ import {
 import {
     _SCHEDULED_TASKS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {SNAPSHOT_TASK_TYPE} from '../../constants/values.sol';
 
-abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
+abstract contract ScheduledTasksStorageWrapper is
+    ScheduledBalanceAdjustmentsStorageWrapper
+{
     function _addScheduledTask(
         uint256 _newScheduledTimestamp,
         bytes memory _newData
@@ -237,6 +242,15 @@ abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
                 _max,
                 _blockTimestamp()
             );
+    }
+
+    function _onScheduledTaskTriggered(bytes memory _data) internal {
+        if (_data.length == 0) return;
+        if (abi.decode(_data, (bytes32)) == SNAPSHOT_TASK_TYPE) {
+            _triggerScheduledSnapshots(1);
+            return;
+        }
+        _triggerScheduledBalanceAdjustments(1);
     }
 
     function _getScheduledTaskCount() internal view returns (uint256) {

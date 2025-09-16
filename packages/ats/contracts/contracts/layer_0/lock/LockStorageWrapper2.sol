@@ -209,11 +209,11 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    CorporateActionsStorageWrapper2
-} from '../corporateActions/CorporateActionsStorageWrapper2.sol';
+    AdjustBalancesStorageWrapper2
+} from '../adjustBalances/AdjustBalancesStorageWrapper2.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
+abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
     using EnumerableSet for EnumerableSet.UintSet;
 
     function _lockByPartition(

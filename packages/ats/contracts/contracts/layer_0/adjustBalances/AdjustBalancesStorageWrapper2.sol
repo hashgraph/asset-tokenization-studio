@@ -216,7 +216,10 @@ abstract contract AdjustBalancesStorageWrapper2 is
     IAdjustBalancesStorageWrapper,
     ClearingStorageWrapper2
 {
-    function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
+    function _adjustBalances(
+        uint256 _factor,
+        uint8 _decimals
+    ) internal override {
         _updateDecimalsSnapshot();
         _updateAbafSnapshot();
         _updateAssetTotalSupplySnapshot();
