@@ -432,6 +432,7 @@ class BondInPort implements IBondInPort {
       recordDate: new Date(res.coupon.recordTimeStamp * ONE_THOUSAND),
       executionDate: new Date(res.coupon.executionTimeStamp * ONE_THOUSAND),
       rate: res.coupon.rate.toString(),
+      rateDecimals: res.coupon.rateDecimals,
       period: res.coupon.period,
     };
 
