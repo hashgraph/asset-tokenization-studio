@@ -299,7 +299,8 @@ describe('CreateTrexSuiteBondCommandHandler', () => {
         contractServiceMock.getEvmAddressesFromHederaIds
           .mockResolvedValueOnce([externalPauseEvmAddress])
           .mockResolvedValueOnce([externalControlEvmAddress])
-          .mockResolvedValueOnce([externalKycEvmAddress]);
+          .mockResolvedValueOnce([externalKycEvmAddress])
+          .mockResolvedValueOnce([evmAddress]); // beneficiaries
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
 
         transactionServiceMock
@@ -330,7 +331,7 @@ describe('CreateTrexSuiteBondCommandHandler', () => {
           contractServiceMock.getEvmAddressesFromHederaIds,
         ).toHaveBeenCalledTimes(3);
         expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          1,
+          2,
         );
         expect(
           transactionServiceMock.getHandler().createTrexSuiteBond,
@@ -369,6 +370,8 @@ describe('CreateTrexSuiteBondCommandHandler', () => {
           evmAddress,
           evmAddress,
           evmAddress,
+          [evmAddress],
+          command.beneficiariesData,
           [externalPauseEvmAddress],
           [externalControlEvmAddress],
           [externalKycEvmAddress],

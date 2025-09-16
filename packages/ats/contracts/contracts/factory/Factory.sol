@@ -238,6 +238,9 @@ import {
 import {IEquityUSA} from '../layer_3/interfaces/IEquityUSA.sol';
 import {IBondUSA} from '../layer_3/interfaces/IBondUSA.sol';
 import {
+    IBeneficiaries
+} from '../layer_2/interfaces/beneficiaries/IBeneficiaries.sol';
+import {
     IProtectedPartitions
 } from '../layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol';
 import {
@@ -366,6 +369,11 @@ contract Factory is IFactory, LocalContext {
                 _factoryRegulationData.regulationSubType
             ),
             _factoryRegulationData.additionalSecurityData
+        );
+
+        IBeneficiaries(bondAddress_).initialize_Beneficiaries(
+            _bondData.beneficiaries,
+            _bondData.beneficiariesData
         );
 
         emit BondDeployed(

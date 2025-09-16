@@ -212,7 +212,7 @@ import {
 } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { PreviousStepButton } from './PreviousStepButton';
-import { PhosphorIcon } from 'io-bricks-ui';
+import { PhosphorIcon, Table, Text } from 'io-bricks-ui';
 import { useFormContext } from 'react-hook-form';
 import {
   Button,
@@ -240,6 +240,12 @@ import {
   COUNTRY_LIST_ALLOWED,
   COUNTRY_LIST_BLOCKED,
 } from '../../../utils/countriesConfig';
+import { createColumnHelper } from '@tanstack/table-core';
+
+interface IBeneficiary {
+  address: string;
+  data?: string;
+}
 
 export const StepReview = () => {
   const { t } = useTranslation('security', { keyPrefix: 'createBond' });
@@ -286,10 +292,31 @@ export const StepReview = () => {
   const internalKycActivated = getValues('internalKycActivated');
   const complianceId = getValues('complianceId');
   const identityRegistryId = getValues('identityRegistryId');
+  const beneficiariesIds = getValues('beneficiariesIds');
+  const beneficiariesData = getValues('beneficiariesData');
 
   countriesList = countriesList.concat(
     countriesListType === 2 ? COUNTRY_LIST_ALLOWED : COUNTRY_LIST_BLOCKED,
   );
+
+  const beneficiariesTableData: IBeneficiary[] = (beneficiariesIds || []).map(
+    (address, index) => ({
+      address,
+      data: (beneficiariesData || [])[index] || '',
+    }),
+  );
+
+  const columnsHelper = createColumnHelper<IBeneficiary>();
+  const columnsBeneficiaries = [
+    columnsHelper.accessor('address', {
+      header: t('stepBeneficiaries.address'),
+      enableSorting: false,
+    }),
+    columnsHelper.accessor('data', {
+      header: t('stepBeneficiaries.data'),
+      enableSorting: false,
+    }),
+  ];
 
   const submit = () => {
     const request = new CreateBondRequest({
@@ -338,6 +365,12 @@ export const StepReview = () => {
       }),
       ...(identityRegistryId && {
         identityRegistryId: identityRegistryId,
+      }),
+      ...(beneficiariesIds && {
+        beneficiariesIds: beneficiariesIds,
+      }),
+      ...(beneficiariesData && {
+        beneficiariesData: beneficiariesData,
       }),
     });
 
@@ -470,7 +503,23 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
-          <InfoDivider step={3} title={t('stepERC3643.title')} type="main" />
+          <InfoDivider
+            step={3}
+            title={t('stepBeneficiaries.title')}
+            type="main"
+          />
+          <Stack w="full">
+            {beneficiariesTableData.length > 0 && (
+              <Table
+                name="beneficiaries"
+                columns={columnsBeneficiaries}
+                data={beneficiariesTableData}
+              />
+            )}
+            {!beneficiariesTableData.length && <Text>-</Text>}
+          </Stack>
+
+          <InfoDivider step={4} title={t('stepERC3643.title')} type="main" />
           <SimpleGrid columns={1} gap={6} w="full">
             {erc3643Details.map((props) => (
               <DetailReview {...props} />
@@ -478,7 +527,7 @@ export const StepReview = () => {
           </SimpleGrid>
 
           <InfoDivider
-            step={4}
+            step={5}
             title={t('stepExternalManagement.title')}
             type="main"
           />
@@ -488,7 +537,7 @@ export const StepReview = () => {
             ))}
           </SimpleGrid>
 
-          <InfoDivider step={5} title={t('header.regulation')} type="main" />
+          <InfoDivider step={6} title={t('header.regulation')} type="main" />
           <SimpleGrid columns={1} gap={6} w="full">
             {regulationDetails.map((props) => (
               <DetailReview {...props} />

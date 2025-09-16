@@ -326,6 +326,7 @@ export default {
     internalKYCManager: 'Internal KYC Manager role',
     freezer: 'Freeze Manager Role',
     trexOwner: 'TREX Owner Role',
+    beneficiaryManager: 'Beneficiary Manager Role',
   },
   landing,
   routes,
