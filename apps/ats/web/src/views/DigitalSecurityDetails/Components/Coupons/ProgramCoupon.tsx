@@ -227,11 +227,7 @@ import {
   dateToUnixTimestamp,
   validateCouponPeriod,
 } from '../../../../utils/format';
-import {
-  COUPONS_FACTOR,
-  DATE_TIME_FORMAT,
-  TIME_PERIODS_S,
-} from '../../../../utils/constants';
+import { DATE_TIME_FORMAT, TIME_PERIODS_S } from '../../../../utils/constants';
 import { isBeforeDate } from '../../../../utils/helpers';
 
 interface ProgramCouponFormValues {
@@ -263,7 +259,7 @@ export const ProgramCoupon = () => {
   const submit: SubmitHandler<ProgramCouponFormValues> = (params) => {
     const request = new SetCouponRequest({
       securityId: id ?? '',
-      rate: (params.rate * COUPONS_FACTOR).toString(),
+      rate: params.rate.toString(),
       recordTimestamp: dateToUnixTimestamp(params.recordTimestamp),
       executionTimestamp: dateToUnixTimestamp(params.executionTimestamp),
       period: params.period,

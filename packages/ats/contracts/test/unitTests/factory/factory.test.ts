@@ -277,7 +277,8 @@ describe('Factory Tests', () => {
     let startingDate = 999
     let maturityDate = 999
     const couponFrequency = TIME_PERIODS_S.DAY
-    const couponRate = 1
+    const couponRate = 1000
+    const couponRateDecimals = 3
     let firstCouponDate = 999
     const numberOfCoupon = 30
 
@@ -703,6 +704,7 @@ describe('Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -742,6 +744,7 @@ describe('Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -785,6 +788,7 @@ describe('Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: false,
@@ -826,6 +830,7 @@ describe('Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -883,6 +888,7 @@ describe('Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -983,6 +989,7 @@ describe('Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -1025,6 +1032,7 @@ describe('Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -1073,6 +1081,7 @@ describe('Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
