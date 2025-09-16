@@ -219,6 +219,7 @@ import { StepReview } from './Components/StepReview';
 import { StepRegulation } from '../CreateSecurityCommons/StepRegulation';
 import { StepExternalManagement } from '../CreateSecurityCommons/StepExternalManagement';
 import { StepERC3643 } from '../CreateSecurityCommons/StepERC3643';
+import { StepBeneficiaries } from './Components/StepBeneficiaries';
 
 export const CreateBond = () => {
   const { t } = useTranslation('security', { keyPrefix: 'createBond' });
@@ -252,6 +253,10 @@ export const CreateBond = () => {
     {
       title: t('header.configuration'),
       content: <StepConfiguration />,
+    },
+    {
+      title: t('stepBeneficiaries.title'),
+      content: <StepBeneficiaries />,
     },
     {
       title: t('stepERC3643.title'),

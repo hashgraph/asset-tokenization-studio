@@ -210,6 +210,7 @@ import FormatValidation from '../FormatValidation';
 
 import { SecurityDate } from '@domain/context/shared/SecurityDate';
 import { Factory } from '@domain/context/factory/Factories';
+import { InvalidValue } from '../error/InvalidValue';
 
 export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateTrexSuiteBondRequest> {
   salt: string;
@@ -258,6 +259,12 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
 
   @OptionalField()
   identityRegistryId?: string;
+
+  @OptionalField()
+  beneficiariesIds?: string[];
+
+  @OptionalField()
+  beneficiariesData?: string[];
 
   currency: string;
   numberOfUnits: string;
@@ -314,6 +321,8 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     configVersion,
     complianceId,
     identityRegistryId,
+    beneficiariesIds,
+    beneficiariesData,
   }: {
     salt: string;
     owner: string;
@@ -356,6 +365,8 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     configVersion: number;
     complianceId?: string;
     identityRegistryId?: string;
+    beneficiariesIds?: string[];
+    beneficiariesData?: string[];
   }) {
     super({
       name: (val) => {
@@ -421,6 +432,28 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
       identityRegistryId:
         FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       claimTopics: FormatValidation.checkArrayNumber(),
+      beneficiariesIds: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'beneficiariesIds',
+          true,
+        );
+      },
+      beneficiariesData: (val) => {
+        const validation = FormatValidation.checkBytesFormat();
+        if (val?.length != this.beneficiariesIds?.length) {
+          return [
+            new InvalidValue(
+              `The list of beneficiariesIds and beneficiariesData must have equal length.`,
+            ),
+          ];
+        }
+        for (const data of val ?? []) {
+          if (data == '') continue;
+          const result = validation(data);
+          if (result) return result;
+        }
+      },
     });
 
     this.salt = salt;
@@ -465,5 +498,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     this.configVersion = configVersion;
     this.complianceId = complianceId;
     this.identityRegistryId = identityRegistryId;
+    this.beneficiariesIds = beneficiariesIds;
+    this.beneficiariesData = beneficiariesData;
   }
 }
