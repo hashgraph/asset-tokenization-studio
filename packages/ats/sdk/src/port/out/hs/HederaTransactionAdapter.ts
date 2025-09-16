@@ -800,7 +800,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       security.toString(),
       AccessControlFacet__factory.abi,
     );
-    return this.executeWithArgs(contract, '', securityId, gas, [
+    return this.executeWithArgs(contract, 'applyRoles', securityId, gas, [
       roles,
       actives,
       targetId.toString(),
