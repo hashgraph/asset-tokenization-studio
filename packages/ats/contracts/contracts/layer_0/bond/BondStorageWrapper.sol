@@ -314,6 +314,7 @@ abstract contract BondStorageWrapper is
         );
 
         couponFor_.rate = registeredCoupon.coupon.rate;
+        couponFor_.rateDecimals = registeredCoupon.coupon.rateDecimals;
         couponFor_.recordDate = registeredCoupon.coupon.recordDate;
         couponFor_.executionDate = registeredCoupon.coupon.executionDate;
         couponFor_.period = registeredCoupon.coupon.period;

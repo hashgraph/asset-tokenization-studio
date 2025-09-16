@@ -268,6 +268,7 @@ describe('TREX Factory Tests', () => {
     const maturityDate = dateToUnixTimestamp(`2031-01-01T00:00:00Z`)
     const couponFrequency = 0
     const couponRate = 0
+    const couponRateDecimals = 0
     const firstCouponDate = 0
 
     const regulationType = RegulationType.REG_D
@@ -954,6 +955,7 @@ describe('TREX Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -1010,6 +1012,7 @@ describe('TREX Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -1059,6 +1062,7 @@ describe('TREX Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -1114,6 +1118,7 @@ describe('TREX Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -1165,6 +1170,7 @@ describe('TREX Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -1217,6 +1223,7 @@ describe('TREX Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -1269,6 +1276,7 @@ describe('TREX Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -1321,6 +1329,7 @@ describe('TREX Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
@@ -1393,6 +1402,7 @@ describe('TREX Factory Tests', () => {
                 maturityDate,
                 couponFrequency,
                 couponRate,
+                couponRateDecimals,
                 firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
