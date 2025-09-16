@@ -30,6 +30,7 @@ const BENEFICIARY_2 = '0x2345678901234567890123456789012345678901'
 const BENEFICIARY_2_DATA = '0x88888888'
 const numberOfUnits = 1000
 let startingDate = 999999999999990
+const couponRateDecimals = 2
 const couponFrequency = 0
 const couponRate = 0
 let maturityDate = 999999999999999
@@ -90,6 +91,7 @@ describe('Beneficiaries Tests', () => {
             maturityDate,
             couponFrequency,
             couponRate,
+            couponRateDecimals,
             firstCouponDate,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_C,
@@ -136,14 +138,12 @@ describe('Beneficiaries Tests', () => {
 
     describe('Add Tests', () => {
         it('GIVEN an unlisted beneficiary WHEN unauthorized user adds it THEN it reverts with AccountHasNoRole', async () => {
-            beneficiariesFacet = beneficiariesFacet.connect(signer_B)
-
             await expect(
-                beneficiariesFacet.addBeneficiary(
-                    BENEFICIARY_1,
-                    BENEFICIARY_1_DATA,
-                    { gasLimit: GAS_LIMIT.default }
-                )
+                beneficiariesFacet
+                    .connect(signer_B)
+                    .addBeneficiary(BENEFICIARY_1, BENEFICIARY_1_DATA, {
+                        gasLimit: GAS_LIMIT.default,
+                    })
             ).to.be.revertedWithCustomError(
                 beneficiariesFacet,
                 'AccountHasNoRole'
@@ -203,12 +203,12 @@ describe('Beneficiaries Tests', () => {
 
     describe('Remove Tests', () => {
         it('GIVEN a listed beneficiary WHEN unauthorized user removes it THEN it reverts with AccountHasNoRole', async () => {
-            beneficiariesFacet = beneficiariesFacet.connect(signer_B)
-
             await expect(
-                beneficiariesFacet.removeBeneficiary(BENEFICIARY_2, {
-                    gasLimit: GAS_LIMIT.default,
-                })
+                beneficiariesFacet
+                    .connect(signer_B)
+                    .removeBeneficiary(BENEFICIARY_2, {
+                        gasLimit: GAS_LIMIT.default,
+                    })
             ).to.be.revertedWithCustomError(
                 beneficiariesFacet,
                 'AccountHasNoRole'
@@ -217,7 +217,6 @@ describe('Beneficiaries Tests', () => {
 
         it('GIVEN an listed beneficiary WHEN user removes it if token is paused THEN it reverts with TokenIsPaused', async () => {
             await pauseFacet.pause({ gasLimit: GAS_LIMIT.default })
-
             await expect(
                 beneficiariesFacet.removeBeneficiary(BENEFICIARY_2, {
                     gasLimit: GAS_LIMIT.default,
@@ -258,14 +257,12 @@ describe('Beneficiaries Tests', () => {
 
     describe('Update Data Tests', () => {
         it('GIVEN a listed beneficiary WHEN unauthorized user updates its data THEN it reverts with AccountHasNoRole', async () => {
-            beneficiariesFacet = beneficiariesFacet.connect(signer_B)
-
             await expect(
-                beneficiariesFacet.updateBeneficiaryData(
-                    BENEFICIARY_2,
-                    BENEFICIARY_1_DATA,
-                    { gasLimit: GAS_LIMIT.default }
-                )
+                beneficiariesFacet
+                    .connect(signer_B)
+                    .updateBeneficiaryData(BENEFICIARY_2, BENEFICIARY_1_DATA, {
+                        gasLimit: GAS_LIMIT.default,
+                    })
             ).to.be.revertedWithCustomError(
                 beneficiariesFacet,
                 'AccountHasNoRole'
@@ -274,7 +271,6 @@ describe('Beneficiaries Tests', () => {
 
         it('GIVEN an listed beneficiary WHEN user updates its data if token is paused THEN it reverts with TokenIsPaused', async () => {
             await pauseFacet.pause({ gasLimit: GAS_LIMIT.default })
-
             await expect(
                 beneficiariesFacet.updateBeneficiaryData(
                     BENEFICIARY_2,

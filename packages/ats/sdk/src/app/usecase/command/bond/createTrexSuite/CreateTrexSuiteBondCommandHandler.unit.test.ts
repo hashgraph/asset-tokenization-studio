@@ -329,9 +329,9 @@ describe('CreateTrexSuiteBondCommandHandler', () => {
         );
         expect(
           contractServiceMock.getEvmAddressesFromHederaIds,
-        ).toHaveBeenCalledTimes(4);
+        ).toHaveBeenCalledTimes(3);
         expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          1,
+          2,
         );
         expect(
           transactionServiceMock.getHandler().createTrexSuiteBond,

@@ -306,6 +306,10 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
     ]);
     command.complianceId?.as(() => HederaIdPropsFixture.create().value);
     command.identityRegistryId?.as(() => HederaIdPropsFixture.create().value);
+    command.beneficiariesIds?.faker((faker) => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    command.beneficiariesData?.as(() => ['0x0000']);
   },
 );
 

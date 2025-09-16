@@ -396,6 +396,8 @@ describe('Bond', () => {
           createBondRequest.externalKycListsIds,
           createBondRequest.complianceId,
           createBondRequest.identityRegistryId,
+          createBondRequest.beneficiariesIds,
+          createBondRequest.beneficiariesData,
         ),
       );
 
@@ -459,6 +461,8 @@ describe('Bond', () => {
           createBondRequest.externalKycListsIds,
           createBondRequest.complianceId,
           createBondRequest.identityRegistryId,
+          createBondRequest.beneficiariesIds,
+          createBondRequest.beneficiariesData,
         ),
       );
     });

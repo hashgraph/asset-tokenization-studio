@@ -303,6 +303,7 @@ describe('UpdateBeneficiaryDataCommandHandler', () => {
       ).toHaveBeenCalledWith(
         evmAddress,
         beneficiaryEvmAddress,
+        command.data,
         command.securityId,
       );
     });

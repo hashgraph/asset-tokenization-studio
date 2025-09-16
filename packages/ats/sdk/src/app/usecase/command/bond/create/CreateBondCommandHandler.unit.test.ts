@@ -356,9 +356,10 @@ describe('CreateBondCommandHandler', () => {
         contractServiceMock.getEvmAddressesFromHederaIds
           .mockResolvedValueOnce([externalPauseEvmAddress])
           .mockResolvedValueOnce([externalControlEvmAddress])
-          .mockResolvedValueOnce([externalKycEvmAddress])
-          .mockResolvedValueOnce([evmAddress]);
-        accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
+          .mockResolvedValueOnce([externalKycEvmAddress]);
+        accountServiceMock.getAccountEvmAddress
+          .mockResolvedValue(evmAddress)
+          .mockResolvedValue(evmAddress);
 
         transactionServiceMock.getHandler().createBond.mockResolvedValue({
           id: transactionId,
@@ -383,9 +384,9 @@ describe('CreateBondCommandHandler', () => {
         );
         expect(
           contractServiceMock.getEvmAddressesFromHederaIds,
-        ).toHaveBeenCalledTimes(4);
+        ).toHaveBeenCalledTimes(3);
         expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          1,
+          2,
         );
         expect(
           transactionServiceMock.getHandler().createBond,
