@@ -225,6 +225,7 @@ import {
 import {
     ERC20PermitStorageWrapper
 } from '../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol';
+import {LibCommon} from '../common/libraries/LibCommon.sol';
 
 abstract contract BondStorageWrapper is
     IBondStorageWrapper,
@@ -324,7 +325,18 @@ abstract contract BondStorageWrapper is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (uint256[] memory couponIDs_) {
-        revert('Not implemented');
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
+            _pageIndex,
+            _pageLength
+        );
+
+        couponIDs_ = new uint256[](
+            LibCommon.getSize(start, end, _getCouponsOrderedListTotal())
+        );
+
+        for (uint256 i = 0; i < couponIDs_.length; i++) {
+            couponIDs_[i] = _getCouponFromOrderedListAt(start + i);
+        }
     }
 
     function _getCouponsOrderedListTotal()

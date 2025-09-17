@@ -218,7 +218,11 @@ import {
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from '../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
-import {SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE, COUPON_LISTING_TASK_TYPE} from '../../constants/values.sol';
+import {
+    SNAPSHOT_TASK_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE,
+    COUPON_LISTING_TASK_TYPE
+} from '../../constants/values.sol';
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
