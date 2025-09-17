@@ -290,6 +290,8 @@ import {
     ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
     ScheduledCrossOrderedTasksFacet__factory,
     ScheduledCrossOrderedTasksFacetTimeTravel__factory,
+    ScheduledCouponListingFacet__factory,
+    ScheduledCouponListingFacetTimeTravel__factory,
     CorporateActionsFacet__factory,
     CorporateActionsFacetTimeTravel__factory,
     TransferAndLockFacet__factory,
@@ -759,16 +761,27 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        scheduledTasksFacet: new DeployContractWithFactoryCommand({
+        scheduledCrossOrderedTasksFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ScheduledCrossOrderedTasksFacet__factory(),
                 new ScheduledCrossOrderedTasksFacetTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ScheduledTasksFacet.addresses?.[
-                      network
-                  ]
+                ? Configuration.contracts.ScheduledCrossOrderedTasksFacet
+                      .addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        scheduledCouponListingFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ScheduledCouponListingFacet__factory(),
+                new ScheduledCouponListingFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ScheduledCouponListingFacet
+                      .addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -1252,14 +1265,19 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
-            scheduledTasksFacet: await deployContractWithFactory(
-                commands.scheduledTasksFacet
+            scheduledCouponListingFacet: await deployContractWithFactory(
+                commands.scheduledCouponListingFacet
             ).then((result) => {
                 console.log(
-                    `ScheduledTasksFacet has been deployed successfully at ${result.address}`
+                    `ScheduledCouponListingFacet has been deployed successfully at ${result.address}`
                 )
+                return result
+            }),
+            scheduledCrossOrderedTasksFacet: await deployContractWithFactory(
+                commands.scheduledCrossOrderedTasksFacet
+            ).then((result) => {
                 console.log(
-                    `TransferAndLock has been deployed successfully at ${result.address}`
+                    `ScheduledCrossOrderedTasksFacet has been deployed successfully at ${result.address}`
                 )
                 return result
             }),

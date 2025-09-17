@@ -287,7 +287,8 @@ task(
             bondUsaRead,
             scheduledSnapshotsFacet,
             scheduledBalanceAdjustmentsFacet,
-            scheduledTasksFacet,
+            scheduledCrossOrderedTasksFacet,
+            scheduledCouponListingFacet,
             corporateActionsFacet,
             lockFacet,
             holdReadFacet,
@@ -349,7 +350,10 @@ task(
             'Scheduled Snapshots Facet': scheduledSnapshotsFacet.address,
             'Scheduled Balance Adjustments Facet':
                 scheduledBalanceAdjustmentsFacet.address,
-            'Scheduled Tasks Facet': scheduledTasksFacet.address,
+            'Scheduled Cross Ordered Tasks Facet':
+                scheduledCrossOrderedTasksFacet.address,
+            'Scheduled Coupon Listing Facet':
+                scheduledCouponListingFacet.address,
             'Corporate Actions Facet': corporateActionsFacet.address,
             'Lock Facet': lockFacet.address,
             'Hold Read Facet': holdReadFacet.address,

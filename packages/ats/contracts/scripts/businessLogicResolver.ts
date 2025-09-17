@@ -262,7 +262,8 @@ export interface DeployedBusinessLogics {
     SnapshotsFacet: IStaticFunctionSelectors
     scheduledSnapshotsFacet: IStaticFunctionSelectors
     scheduledBalanceAdjustmentsFacet: IStaticFunctionSelectors
-    scheduledTasksFacet: IStaticFunctionSelectors
+    scheduledCrossOrderedTasksFacet: IStaticFunctionSelectors
+    scheduledCouponListingFacet: IStaticFunctionSelectors
     CapFacet: IStaticFunctionSelectors
     LockFacet: IStaticFunctionSelectors
     transferAndLockFacet: IStaticFunctionSelectors
