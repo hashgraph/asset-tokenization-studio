@@ -9,7 +9,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "setup": "npm install",
-    "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "NODE_ENV=local nest start",
     "start:local": "docker-compose up -d --no-recreate; NODE_ENV=local nest start",
