@@ -20,7 +20,7 @@
     "dev": "npm run ats:web:dev",
     "start": "npm run ats:start",
     "clean:deps": "rimraf packages/*/node_modules packages/*/*/node_modules apps/*/node_modules apps/*/*/node_modules node_modules && echo '\n✅ Dependency files cleaned (package-lock.json preserved)'",
-    "clean:deps:full": "npm run clean:deps && rimraf package-lock.json && echo '\n✅ All dependency files have been cleaned (including package-lock.json)'",
+    "clean:deps:full": "npm run clean:deps && rimraf package-lock.json packages/*/dist packages/*/*/dist apps/*/dist apps/*/*/dist packages/*/build packages/*/*/build apps/*/build apps/*/*/build && echo '\n✅ All dependency files have been cleaned (including package-lock.json)'",
     "lint:staged:js": "eslint --cache",
     "lint:staged:sol": "solhint --config packages/ats/contracts/.solhint.json",
     "format:staged": "prettier --check",
@@ -65,8 +65,6 @@
     "mass-payout:lint:fix": "eslint '*.{js,mjs,cjs,ts,tsx,mts,json}' 'packages/mass-payout/**/*' 'apps/mass-payout/**/*' --fix && npm run mass-payout:format",
     "mass-payout:format": "prettier --write '*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'packages/mass-payout/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'apps/mass-payout/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
     "mass-payout:format:check": "prettier --check '*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'packages/mass-payout/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'apps/mass-payout/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
-    "mass-payout:dev": "npm run dev --workspace=apps/mass-payout/* --if-present",
-    "mass-payout:start": "npm run mass-payout:build && npm run mass-payout:dev",
     "mass-payout:clean": "npm run clean --workspace=packages/mass-payout/* --if-present && npm run clean --workspace=apps/mass-payout/* --if-present && echo '\n✅ All mass-payout compilation and build files have been cleaned'",
     "mass-payout:publish": "npm run publish --workspace=packages/mass-payout/* --if-present"
   },
