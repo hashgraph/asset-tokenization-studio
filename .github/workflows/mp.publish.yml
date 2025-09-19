@@ -1,0 +1,122 @@
+name: Mass Payout Publish
+
+on:
+  # Manual trigger with dry-run option
+  workflow_dispatch:
+    inputs:
+      dry-run-enabled:
+        description: 'Run npm publish with dry-run flag'
+        required: false
+        type: boolean
+        default: false
+      ref:
+        description: 'Branch/tag/commit to publish from'
+        required: false
+        type: string
+        default: 'main'
+
+  # Release published trigger (GitHub release creation) - only for Mass Payout releases (tags ending with -mp)
+  release:
+    types:
+      - published
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  mass-payout:
+    name: Publish Mass Payout Packages
+    runs-on: token-studio-linux-large
+    # Only run if manual trigger OR release tag contains 'mp'
+    if: github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-mp')
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.x
+          registry-url: https://registry.npmjs.org
+
+      - name: Create .npmrc file
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cat << 'EOF' > .npmrc
+          //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+          EOF
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Mass Payout packages
+        run: npm run mass-payout:build
+
+      - name: Publish Mass Payout packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DRY_RUN: ${{ inputs.dry-run-enabled }}
+        run: |
+          echo "DRY_RUN is set to: '${DRY_RUN}'"
+
+          # Find and publish all Mass Payout packages
+          for package_dir in packages/mass-payout/*/; do
+            if [ -d "$package_dir" ] && [ -f "${package_dir}package.json" ]; then
+              package_name=$(basename "$package_dir")
+              echo "📦 Processing Mass Payout package: $package_name"
+
+              cd "$package_dir"
+
+              # Check if package is publishable (not private)
+              if ! node -p "require('./package.json').private || false" | grep -q "true"; then
+                PUBLISH_ARGS=("--access=restricted")
+                if [[ "${DRY_RUN}" == "true" ]]; then
+                  PUBLISH_ARGS+=("--dry-run")
+                  echo "🔍 DRY RUN MODE: Would publish @hashgraph/mass-payout-${package_name}"
+                fi
+
+                npm publish "${PUBLISH_ARGS[@]}"
+              else
+                echo "⏭️  Skipping private package: $package_name"
+              fi
+
+              cd - > /dev/null
+            fi
+          done
+
+  # Summary job to report results
+  summary:
+    name: Publish Summary
+    runs-on: token-studio-linux-large
+    needs: [mass-payout]
+    if: always()
+    steps:
+      - name: Report Results
+        run: |
+          echo "## Mass Payout Publish Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Package Type | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mass Payout | ${{ needs.mass-payout.result }} |" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ inputs.dry-run-enabled }}" == "true" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "🔍 **DRY RUN MODE** - No packages were actually published" >> $GITHUB_STEP_SUMMARY
+          fi

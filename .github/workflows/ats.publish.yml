@@ -15,7 +15,7 @@ on:
         type: string
         default: 'main'
 
-  # Release published trigger (GitHub release creation) - only for ATS releases
+  # Release published trigger (GitHub release creation) - only for ATS releases (tags ending with -ats)
   release:
     types:
       - published
