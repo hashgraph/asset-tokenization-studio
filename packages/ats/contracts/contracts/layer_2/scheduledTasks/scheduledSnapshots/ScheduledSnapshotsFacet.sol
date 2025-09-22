@@ -32,15 +32,12 @@ contract ScheduledSnapshotsFacet is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_ = new bytes4[](2);
         staticFunctionSelectors_[selectorIndex++] = this
             .scheduledSnapshotCount
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getScheduledSnapshots
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .onScheduledSnapshotTriggered
             .selector;
     }
 

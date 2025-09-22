@@ -17,9 +17,8 @@ import {
     _CORPORATE_ACTION_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {ClearingStorageWrapper1} from '../clearing/ClearingStorageWrapper1.sol';
-import {SNAPSHOT_RESULT_ID} from '../constants/values.sol';
 
-abstract contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
+abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -28,24 +27,38 @@ abstract contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
         _;
     }
 
-    function _onScheduledSnapshotTriggered(
-        uint256 _snapShotID,
-        bytes memory _data
-    ) internal {
-        if (_data.length > 0) {
-            bytes32 actionId = abi.decode(_data, (bytes32));
-            _addSnapshotToAction(actionId, _snapShotID);
-        }
+    modifier onlyMatchingActionType(bytes32 _actionType, uint256 _index) {
+        _checkMatchingActionType(_actionType, _index);
+        _;
     }
 
-    function _addSnapshotToAction(
-        bytes32 _actionId,
-        uint256 _snapshotId
-    ) internal {
-        _updateCorporateActionResult(
-            _actionId,
-            SNAPSHOT_RESULT_ID,
-            abi.encodePacked(_snapshotId)
+    // Internal
+    function _addCorporateAction(
+        bytes32 _actionType,
+        bytes memory _data
+    )
+        internal
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 corporateActionIndexByType_
+        )
+    {
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
+        // TODO: Review when it can return false.
+        success_ =
+            corporateActions_.actions.add(corporateActionId_) &&
+            corporateActions_.actionsByType[_actionType].add(
+                corporateActionId_
+            );
+        corporateActions_
+            .actionsData[corporateActionId_]
+            .actionType = _actionType;
+        corporateActions_.actionsData[corporateActionId_].data = _data;
+        corporateActionIndexByType_ = _getCorporateActionCountByType(
+            _actionType
         );
     }
 
@@ -120,12 +133,14 @@ abstract contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
             .getFromSet(_pageIndex, _pageLength);
     }
 
-    function _getResult(
+    function _getCorporateActionResult(
         bytes32 actionId,
         uint256 resultId
     ) internal view returns (bytes memory result_) {
         if (_getCorporateActionResultCount(actionId) > resultId)
-            result_ = _getCorporateActionResult(actionId, resultId);
+            result_ = _corporateActionsStorage().actionsData[actionId].results[
+                resultId
+            ];
     }
 
     function _getCorporateActionResultCount(
@@ -134,23 +149,30 @@ abstract contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
         return _corporateActionsStorage().actionsData[actionId].results.length;
     }
 
-    /**
-     * @dev returns a corporate action result.
-     *
-     * @param actionId The corporate action Id
-     */
-    function _getCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view returns (bytes memory) {
-        return
-            _corporateActionsStorage().actionsData[actionId].results[resultId];
-    }
-
     function _getCorporateActionData(
         bytes32 actionId
     ) internal view returns (bytes memory) {
         return _corporateActionsStorage().actionsData[actionId].data;
+    }
+
+    function _getUintResultAt(
+        bytes32 _actionId,
+        uint256 resultId
+    ) internal view returns (uint256) {
+        bytes memory data = _getCorporateActionResult(_actionId, resultId);
+
+        uint256 bytesLength = data.length;
+
+        if (bytesLength < 32) return 0;
+
+        uint256 value;
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            value := mload(add(data, 0x20))
+        }
+
+        return value;
     }
 
     function _corporateActionsStorage()
@@ -163,6 +185,17 @@ abstract contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
         assembly {
             corporateActions_.slot := position
         }
+    }
+
+    function _checkMatchingActionType(
+        bytes32 _actionType,
+        uint256 _index
+    ) private view {
+        if (_getCorporateActionCountByType(_actionType) <= _index)
+            revert ICorporateActionsStorageWrapper.WrongIndexForAction(
+                _index,
+                _actionType
+            );
     }
 
     function _checkDates(uint256 _firstDate, uint256 _secondDate) private pure {

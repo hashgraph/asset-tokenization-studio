@@ -5,10 +5,10 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    CorporateActionsStorageWrapper2
-} from '../corporateActions/CorporateActionsStorageWrapper2.sol';
+    AdjustBalancesStorageWrapper2
+} from '../adjustBalances/AdjustBalancesStorageWrapper2.sol';
 
-abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
+abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
     using EnumerableSet for EnumerableSet.UintSet;
 
     function _lockByPartition(

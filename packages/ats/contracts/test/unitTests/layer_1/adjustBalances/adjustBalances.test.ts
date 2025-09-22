@@ -213,7 +213,7 @@ import {
     type IERC1410,
     type AccessControl,
     Equity,
-    ScheduledTasks,
+    ScheduledCrossOrderedTasks,
     BusinessLogicResolver,
     IFactory,
     TimeTravel,
@@ -268,7 +268,7 @@ describe('Adjust Balances Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let equityFacet: Equity
-    let scheduledTasksFacet: ScheduledTasks
+    let scheduledTasksFacet: ScheduledCrossOrderedTasks
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
@@ -330,7 +330,7 @@ describe('Adjust Balances Tests', () => {
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
         scheduledTasksFacet = await ethers.getContractAt(
-            'ScheduledTasksFacetTimeTravel',
+            'ScheduledCrossOrderedTasksFacetTimeTravel',
             diamond.address
         )
 
@@ -483,7 +483,7 @@ describe('Adjust Balances Tests', () => {
             .setScheduledBalanceAdjustment(balanceAdjustmentData_1)
 
         const tasks_count_Before =
-            await scheduledTasksFacet.scheduledTaskCount()
+            await scheduledTasksFacet.scheduledCrossOrderedTaskCount()
 
         //-------------------------
         await timeTravelFacet.changeSystemTimestamp(
@@ -493,7 +493,8 @@ describe('Adjust Balances Tests', () => {
         // balance adjustment
         await adjustBalancesFacet.connect(signer_A).adjustBalances(1, 0)
 
-        const tasks_count_After = await scheduledTasksFacet.scheduledTaskCount()
+        const tasks_count_After =
+            await scheduledTasksFacet.scheduledCrossOrderedTaskCount()
 
         expect(tasks_count_Before).to.be.equal(2)
         expect(tasks_count_After).to.be.equal(0)

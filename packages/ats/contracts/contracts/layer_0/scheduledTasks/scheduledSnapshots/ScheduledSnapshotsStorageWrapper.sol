@@ -7,16 +7,17 @@ import {
 import {
     ScheduledTasksLib
 } from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
-import {
-    ScheduledTasksStorageWrapper
-} from '../scheduledTasks/ScheduledTasksStorageWrapper.sol';
+import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
+import {SNAPSHOT_RESULT_ID} from '../../constants/values.sol';
+import {
+    ScheduledTask,
+    ScheduledTasksDataStorage
+} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol';
 
-abstract contract ScheduledSnapshotsStorageWrapperRead is
-    ScheduledTasksStorageWrapper
-{
+abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
     function _addScheduledSnapshot(
         uint256 _newScheduledTimestamp,
         bytes memory _newData
@@ -32,12 +33,34 @@ abstract contract ScheduledSnapshotsStorageWrapperRead is
         uint256 _max
     ) internal returns (uint256) {
         return
-            ScheduledTasksLib.triggerScheduledTasks(
+            _triggerScheduledTasks(
                 _scheduledSnapshotStorage(),
-                IScheduledSnapshots.onScheduledSnapshotTriggered.selector,
+                _onScheduledSnapshotTriggered,
                 _max,
                 _blockTimestamp()
             );
+    }
+
+    function _onScheduledSnapshotTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        ScheduledTask memory _scheduledTask
+    ) internal {
+        uint256 newSnapShotID;
+        if (_pos == _scheduledTasksLength - 1) {
+            newSnapShotID = _snapshot();
+        } else newSnapShotID = _getCurrentSnapshotId();
+
+        bytes memory data = _scheduledTask.data;
+
+        if (data.length > 0) {
+            bytes32 actionId = abi.decode(data, (bytes32));
+            _updateCorporateActionResult(
+                actionId,
+                SNAPSHOT_RESULT_ID,
+                abi.encodePacked(newSnapShotID)
+            );
+        }
     }
 
     function _getScheduledSnapshotCount() internal view returns (uint256) {
@@ -50,11 +73,7 @@ abstract contract ScheduledSnapshotsStorageWrapperRead is
     function _getScheduledSnapshots(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        internal
-        view
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
-    {
+    ) internal view returns (ScheduledTask[] memory scheduledSnapshot_) {
         return
             ScheduledTasksLib.getScheduledTasks(
                 _scheduledSnapshotStorage(),
@@ -66,10 +85,7 @@ abstract contract ScheduledSnapshotsStorageWrapperRead is
     function _scheduledSnapshotStorage()
         internal
         pure
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage
-                storage scheduledSnapshots_
-        )
+        returns (ScheduledTasksDataStorage storage scheduledSnapshots_)
     {
         bytes32 position = _SCHEDULED_SNAPSHOTS_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
