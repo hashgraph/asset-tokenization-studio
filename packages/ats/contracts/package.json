@@ -26,7 +26,7 @@
     "scripts": {
         "build": "npx -y rimraf build && npm run compile && npx tsc -p tsconfig.json",
         "test": "npx hardhat test",
-        "clean": "npm run clean:build && npm run clean:cache",
+        "clean": "rimraf dist build artifacts cache typechain-types",
         "publish": "npm publish",
         "compile": "npx hardhat compile",
         "compile:traces": "npx hardhat --show-stack-traces compile",
@@ -60,7 +60,7 @@
         "extractMethods": "npx -y tsx scripts/extractMethods.ts"
     },
     "devDependencies": {
-        "@hashgraph/sdk": "2.62.0",
+        "@hashgraph/sdk": "2.64.5",
         "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
         "@nomicfoundation/hardhat-toolbox": "^2.0.2",
         "@onchain-id/solidity": "^2.2.1",
