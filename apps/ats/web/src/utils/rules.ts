@@ -208,7 +208,7 @@ import isBefore from 'date-fns/isBefore';
 import isToday from 'date-fns/isToday';
 import isEqual from 'date-fns/isEqual';
 import i18n from '../i18n';
-import { formatDate, toDate } from './format';
+import { formatDate, toDate, validateCouponPeriod } from './format';
 
 const t = (key: string, options?: Record<string, unknown>) => {
   return i18n.t(`rules:${key}`, options);
@@ -322,6 +322,20 @@ export const isValidHederaId = (val: string) => {
   return maskRegex.test(val) || t('isValidHederaId');
 };
 
+export const isValidHex = (val: string) => {
+  const hexRegex = /^0x[0-9a-fA-F]*$/;
+  if (!hexRegex.test(val)) {
+    return t('isValidHex');
+  }
+
+  const hexPart = val.slice(2);
+  if (hexPart.length % 2 !== 0) {
+    return t('isValidHex');
+  }
+
+  return true;
+};
+
 export const isValidCouponPeriod = (val: string) => {
   try {
     // Period is required - cannot be empty or null
@@ -334,7 +348,6 @@ export const isValidCouponPeriod = (val: string) => {
       return 'Coupon period must be a valid positive number';
     }
 
-    const { validateCouponPeriod } = require('./format');
     const validation = validateCouponPeriod(periodValue);
     return validation === true || validation;
   } catch (error) {

@@ -324,4 +324,9 @@ export const rolesList: TRole[] = [
     value: SecurityRole._TREX_OWNER_ROLE,
     allowedSecurities: ['BOND', 'EQUITY'],
   },
+  {
+    label: 'beneficiaryManager',
+    value: SecurityRole._BENEFICIARY_MANAGER_ROLE,
+    allowedSecurities: ['BOND'],
+  },
 ];

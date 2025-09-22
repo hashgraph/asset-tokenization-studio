@@ -541,7 +541,13 @@ function createBondMockImplementation(
   for (let i = 0; i < numberOfCoupons; i++) {
     const timeStamp =
       couponInfo.firstCouponDate + couponInfo.couponFrequency * i;
-    const coupon = new Coupon(timeStamp, timeStamp, couponInfo.couponRate, 0);
+    const coupon = new Coupon(
+      timeStamp,
+      timeStamp,
+      couponInfo.couponRate,
+      couponInfo.couponRateDecimals,
+      0,
+    );
     coupons.push(coupon);
   }
 
@@ -1968,6 +1974,7 @@ jest.mock('@port/out/rpc/RPCTransactionAdapter', () => {
         parseInt(recordDate.toString()),
         parseInt(executionDate.toString()),
         rate,
+        rate.decimals,
         0,
       );
       coupons.push(coupon);

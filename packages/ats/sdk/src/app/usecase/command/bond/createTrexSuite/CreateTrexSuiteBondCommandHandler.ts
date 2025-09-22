@@ -279,6 +279,9 @@ export class CreateTrexSuiteBondCommandHandler
         configVersion,
         diamondOwnerAccount,
 
+        beneficiariesIds,
+        beneficiariesData,
+
         externalPauses,
         externalControlLists,
         externalKycLists,
@@ -327,6 +330,15 @@ export class CreateTrexSuiteBondCommandHandler
         this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
         this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
       ]);
+
+      let beneficiariesEvmAddresses: EvmAddress[] = [];
+      if (beneficiariesIds)
+        beneficiariesEvmAddresses = await Promise.all(
+          beneficiariesIds.map(
+            async (id) => await this.accountService.getAccountEvmAddress(id),
+          ),
+        );
+
       const diamondOwnerAccountEvmAddress: EvmAddress =
         await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
       const resolverEvmAddress: EvmAddress =
@@ -371,6 +383,8 @@ export class CreateTrexSuiteBondCommandHandler
         complianceEvmAddress,
         identityRegistryAddress,
         diamondOwnerAccountEvmAddress,
+        beneficiariesEvmAddresses,
+        beneficiariesData,
         externalPausesEvmAddresses,
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,

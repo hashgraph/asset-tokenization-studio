@@ -32,7 +32,11 @@
     "clean:all": "npx --yes npm-run-all --parallel clean:cache clean:node clean:build clean:coverage",
     "test:local": "npx --yes jest --forceExit",
     "test:demo": "npx --yes jest demo.test.ts",
-    "test:clear:cache": "npx --yes jest --clearCache"
+    "test:clear:cache": "npx --yes jest --clearCache",
+    "lint": "eslint '**/*.{js,mjs,cjs,ts,tsx,mts}' --cache",
+    "lint:fix": "eslint '**/*.{js,mjs,cjs,ts,tsx,mts}' --fix --cache && npm run format",
+    "format": "prettier --write '**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
+    "format:check": "prettier --check '**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.6.0",

@@ -301,6 +301,7 @@ task(
             clearingHoldCreationFacet,
             clearingReadFacet,
             externalPauseManagementFacet,
+            beneficiariesFacet,
             externalControlListManagementFacet,
             externalKycListManagementFacet,
             protectedPartitionsFacet,
@@ -362,6 +363,7 @@ task(
             'Clearing Redeem Facet': clearingRedeemFacet.address,
             'Clearing Hold Creation Facet': clearingHoldCreationFacet.address,
             'Clearing Read Facet': clearingReadFacet.address,
+            'Beneficiaries Facet': beneficiariesFacet.address,
             'External Pause Management Facet':
                 externalPauseManagementFacet.address,
             'External Control List Management Facet':
@@ -690,8 +692,8 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
             })
         )
 
-        const { IdFactory__factory } = await import('@typechain')
-        await IdFactory__factory.connect(idFactory, signer).addTokenFactory(
+        const { IIdFactory__factory } = await import('@typechain')
+        await IIdFactory__factory.connect(idFactory, signer).addTokenFactory(
             result.address
         )
 

@@ -245,7 +245,16 @@ import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHo
 import GetCouponHoldersRequest from '@port/in/request/bond/GetCouponHoldersRequest';
 import GetTotalCouponHoldersRequest from '@port/in/request/bond/GetTotalCouponHoldersRequest';
 import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
-import { CreateTrexSuiteBondRequest } from 'src';
+import {
+  CreateTrexSuiteBondRequest,
+  GetBeneficiariesCountRequest,
+  GetBeneficiariesRequest,
+  GetBeneficiaryDataRequest,
+  IsBeneficiaryRequest,
+} from 'src';
+import AddBeneficiaryRequest from '@port/in/request/bond/AddBeneficiaryRequest';
+import RemoveBeneficiaryRequest from '@port/in/request/bond/RemoveBeneficiaryRequest';
+import UpdateBeneficiaryDataRequest from '@port/in/request/bond/UpdateBeneficiaryDataRequest';
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   (command) => {
@@ -297,6 +306,10 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
     ]);
     command.complianceId?.as(() => HederaIdPropsFixture.create().value);
     command.identityRegistryId?.as(() => HederaIdPropsFixture.create().value);
+    command.beneficiariesIds?.faker((faker) => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    command.beneficiariesData?.as(() => ['0x0000']);
   },
 );
 
@@ -350,6 +363,12 @@ export const CreateTrexSuiteBondCommandFixture =
     command.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
     command.compliance?.as(() => HederaIdPropsFixture.create().value);
     command.identityRegistry?.as(() => HederaIdPropsFixture.create().value);
+    command.beneficiariesIds?.faker((faker) => [
+      faker.finance.ethereumAddress(),
+    ]);
+    command.beneficiariesData?.faker((faker) => [
+      faker.string.alphanumeric({ length: 32 }),
+    ]);
   });
 
 export const UpdateMaturityDateCommandFixture =
@@ -526,6 +545,10 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
     ]);
     request.complianceId?.as(() => HederaIdPropsFixture.create().value);
     request.identityRegistryId?.as(() => HederaIdPropsFixture.create().value);
+    request.beneficiariesIds?.faker((faker) => [
+      HederaIdPropsFixture.create().value,
+    ]);
+    request.beneficiariesData?.as(() => ['0x0000']);
   },
 );
 
@@ -680,6 +703,10 @@ export const CreateTrexSuiteBondRequestFixture =
     );
     request.configVersion.as(() => 1);
     request.diamondOwnerAccount?.as(() => HederaIdPropsFixture.create().value);
+    request.beneficiariesIds?.faker((faker) => [
+      faker.finance.ethereumAddress(),
+    ]);
+    request.beneficiariesData?.faker((faker) => ['0x0000']);
     request.externalPauses?.as(() => [HederaIdPropsFixture.create().value]);
     request.externalControlLists?.as(() => [
       HederaIdPropsFixture.create().value,
@@ -687,4 +714,47 @@ export const CreateTrexSuiteBondRequestFixture =
     request.externalKycLists?.as(() => [HederaIdPropsFixture.create().value]);
     request.complianceId?.as(() => HederaIdPropsFixture.create().value);
     request.identityRegistryId?.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const AddBeneficiaryRequestFixture =
+  createFixture<AddBeneficiaryRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.beneficiaryId.as(() => HederaIdPropsFixture.create().value);
+    request.data?.as(() => '0x');
+  });
+export const UpdateBeneficiaryDataRequestFixture =
+  createFixture<UpdateBeneficiaryDataRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.beneficiaryId.as(() => HederaIdPropsFixture.create().value);
+    request.data.as(() => '0x');
+  });
+
+export const RemoveBeneficiaryRequestFixture =
+  createFixture<RemoveBeneficiaryRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.beneficiaryId.as(() => HederaIdPropsFixture.create().value);
+  });
+
+export const IsBeneficiaryRequestFixture = createFixture<IsBeneficiaryRequest>(
+  (request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.beneficiaryId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
+export const GetBeneficiariesRequestFixture =
+  createFixture<GetBeneficiariesRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.pageIndex.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+    request.pageSize.faker((faker) => faker.number.int({ min: 1, max: 50 }));
+  });
+
+export const GetBeneficiariesCountRequestFixture =
+  createFixture<GetBeneficiariesCountRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+  });
+export const GetBeneficiaryDataRequestFixture =
+  createFixture<GetBeneficiaryDataRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.beneficiaryId.as(() => HederaIdPropsFixture.create().value);
   });

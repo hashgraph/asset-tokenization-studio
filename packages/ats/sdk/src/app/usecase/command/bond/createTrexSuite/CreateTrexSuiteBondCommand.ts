@@ -244,6 +244,9 @@ export class CreateTrexSuiteBondCommand extends Command<CreateTrexSuiteBondComma
     public readonly configVersion: number,
     public readonly diamondOwnerAccount: string,
 
+    public readonly beneficiariesIds?: string[],
+    public readonly beneficiariesData?: string[],
+
     public readonly externalPauses?: string[],
     public readonly externalControlLists?: string[],
     public readonly externalKycLists?: string[],

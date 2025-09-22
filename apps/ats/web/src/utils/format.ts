@@ -207,7 +207,7 @@ import _capitalize from 'lodash/capitalize';
 import _formatDate from 'date-fns/format';
 import { TimeUnit } from './types';
 import i18n from '../i18n';
-import { LOCALE } from './constants';
+import { LOCALE, TIME_PERIODS_S } from './constants';
 
 export const formatAddressAccount = (address: string) => `${_capitalize(
   address.slice(0, 2),
@@ -296,8 +296,6 @@ export const formatPeriod = ({
  * Formats a period in seconds to human-readable format
  */
 export const formatCouponPeriod = (periodInSeconds: number): string => {
-  const { TIME_PERIODS_S } = require('./constants');
-
   if (periodInSeconds >= TIME_PERIODS_S.YEAR) {
     const years = Math.floor(periodInSeconds / TIME_PERIODS_S.YEAR);
     return `${years} ${years === 1 ? 'Year' : 'Years'}`;

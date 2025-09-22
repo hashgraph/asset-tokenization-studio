@@ -209,7 +209,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import TransactionResponse from '@domain/context/transaction/TransactionResponse';
 import TransactionAdapter, { InitializationData } from '../TransactionAdapter';
-import { Signer } from 'ethers';
+import { BaseContract, ContractTransaction, Signer } from 'ethers';
 import { singleton } from 'tsyringe';
 import Account from '@domain/context/account/Account';
 import { lazyInject } from '@core/decorator/LazyInjectDecorator';
@@ -278,6 +278,7 @@ import {
   TransferAndLockFacet__factory,
   ERC1410TokenHolderFacet__factory,
   TREXFactoryAts__factory,
+  BeneficiariesFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { Resolvers } from '@domain/context/factory/Resolvers';
 import EvmAddress from '@domain/context/contract/EvmAddress';
@@ -421,6 +422,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
+    beneficiaries: EvmAddress[] = [],
+    beneficiariesData: string[] = [],
   ): Promise<TransactionResponse> {
     return this.createSecurity(
       securityInfo,
@@ -439,6 +442,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         new FactoryBondToken(
           security,
           details.bondDetails,
+          beneficiaries.map((addr) => addr.toString()),
+          beneficiariesData.map((data) => (data == '' ? '0x' : data)),
         ),
       'deployBond',
       GAS.CREATE_BOND_ST,
@@ -863,6 +868,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       recordDate: recordDate.toBigNumber(),
       executionDate: executionDate.toBigNumber(),
       rate: rate.toBigNumber(),
+      rateDecimals: rate.decimals,
       period: period.toBigNumber(),
     };
 
@@ -3036,15 +3042,31 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  private async executeTransaction<T>(
-    factory: any,
-    method: string,
-    args: any[],
+  private async executeTransaction<
+    C extends BaseContract,
+    F extends {
+      [K in keyof C]: C[K] extends (
+        ...args: any[]
+      ) => Promise<ContractTransaction>
+        ? K
+        : never;
+    }[keyof C] &
+      string,
+  >(
+    factory: C,
+    method: F,
+    args: Parameters<
+      C[F] extends (...args: infer P) => any ? (...args: P) => any : never
+    >,
     gasLimit: number,
     eventName?: string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Executing ${method} with args:`, args);
-    const tx = await factory[method](...args, { gasLimit });
+
+    const fn = factory[method] as (
+      ...args: any[]
+    ) => Promise<ContractTransaction>;
+    const tx = await fn(...args, { gasLimit });
     return RPCTransactionResponseAdapter.manageResponse(
       tx,
       this.networkService.environment,
@@ -3133,6 +3155,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     compliance: EvmAddress,
     identityRegistryAddress: EvmAddress,
     diamondOwnerAccount: EvmAddress,
+    beneficiaries: EvmAddress[] = [],
+    beneficiariesData: string[] = [],
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -3159,6 +3183,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       compliance,
       identityRegistryAddress,
       diamondOwnerAccount,
+      beneficiaries,
+      beneficiariesData,
       externalPauses,
       externalControlLists,
       externalKycLists,
@@ -3212,6 +3238,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       compliance,
       identityRegistryAddress,
       diamondOwnerAccount,
+      [],
+      [],
       externalPauses,
       externalControlLists,
       externalKycLists,
@@ -3232,9 +3260,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     issuers: string[],
     issuerClaims: number[][],
     security: Security,
-    tokenDetails:
-      | { bondDetails: BondDetails }
-      | EquityDetails,
+    tokenDetails: { bondDetails: BondDetails } | EquityDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
@@ -3242,6 +3268,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     compliance: EvmAddress,
     identityRegistryAddress: EvmAddress,
     diamondOwnerAccount: EvmAddress,
+    beneficiariesId: EvmAddress[],
+    beneficiariesData: string[],
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -3268,16 +3296,20 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         bondDetails: BondDetails;
       };
       tokenData = {
-        securityData,
+        security: securityData,
         bondDetails: SecurityDataBuilder.buildBondDetails(details.bondDetails),
-      };
+        beneficiaries: beneficiariesId.map((addr) => addr.toString()),
+        beneficiariesData: beneficiariesData.map((data) =>
+          data == '' ? '0x' : data,
+        ),
+      } as FactoryBondToken;
     } else {
       tokenData = {
-        securityData,
+        security: securityData,
         equityDetails: SecurityDataBuilder.buildEquityDetails(
           tokenDetails as EquityDetails,
         ),
-      };
+      } as FactoryEquityToken;
     }
 
     const factoryContract = TREXFactoryAts__factory.connect(
@@ -3329,5 +3361,63 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         `Unexpected error in ${methodMap[tokenType]} operation: ${error}`,
       );
     }
+  }
+
+  addBeneficiary(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding beneficiary ${beneficiary.toString()} to security ${security.toString()}`,
+    );
+    return this.executeTransaction(
+      BeneficiariesFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
+      'addBeneficiary',
+      [beneficiary.toString(), data],
+      GAS.ADD_BENEFICIARY,
+    );
+  }
+
+  removeBeneficiary(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing beneficiary ${beneficiary.toString()} from security ${security.toString()}`,
+    );
+    return this.executeTransaction(
+      BeneficiariesFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
+      'removeBeneficiary',
+      [beneficiary.toString()],
+      GAS.REMOVE_BENEFICIARY,
+    );
+  }
+
+  updateBeneficiaryData(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    data: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating beneficiary ${beneficiary.toString()} for security ${security.toString()}`,
+    );
+    return this.executeTransaction(
+      BeneficiariesFacet__factory.connect(
+        security.toString(),
+        this.getSignerOrProvider(),
+      ),
+      'updateBeneficiaryData',
+      [beneficiary.toString(), data],
+      GAS.UPDATE_BENEFICIARY,
+    );
   }
 }
