@@ -226,7 +226,7 @@ import {
   ERC1643Facet__factory,
   Factory__factory,
   LockFacet__factory,
-  ScheduledTasksFacet__factory,
+  ScheduledCrossOrderedTasksFacet__factory,
   SnapshotsFacet__factory,
   TransferAndLockFacet__factory,
   SsiManagementFacet__factory,
@@ -252,6 +252,7 @@ import {
   ERC3643BatchFacet__factory,
   TREXFactoryAts__factory,
   BeneficiariesFacet__factory,
+  ERC1410IssuerFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { _PARTITION_ID_1, EVM_ZERO_ADDRESS, GAS } from '@core/Constants';
 import TransactionAdapter from '../TransactionAdapter';
@@ -866,7 +867,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
     return this.executeWithArgs(
-      new ERC1410ManagementFacet__factory().attach(security.toString()),
+      new ERC1410IssuerFacet__factory().attach(security.toString()),
       'issueByPartition',
       securityId,
       GAS.ISSUE,
@@ -1288,8 +1289,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Triggering pending scheduled snapshots for ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ScheduledTasksFacet__factory().attach(security.toString()),
-      'triggerPendingScheduledTasks',
+      new ScheduledCrossOrderedTasksFacet__factory().attach(security.toString()),
+      'triggerPendingScheduledCrossOrderedTasks',
       securityId,
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
       [],
@@ -1305,8 +1306,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Triggering up to ${max.toString()} pending scheduled snapshots for ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ScheduledTasksFacet__factory().attach(security.toString()),
-      'triggerScheduledTasks',
+      new ScheduledCrossOrderedTasksFacet__factory().attach(security.toString()),
+      'triggerScheduledCrossOrderedTasks',
       securityId,
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
       [max.toHexString()],

@@ -7,7 +7,10 @@ import {
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+    SNAPSHOT_RESULT_ID,
+    SNAPSHOT_TASK_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE
 } from '../../layer_2/constants/values.sol';
 import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
 import {
@@ -41,10 +44,35 @@ abstract contract EquityStorageWrapper is
         internal
         returns (bool success_, bytes32 corporateActionId_, uint256 dividendId_)
     {
+        bytes memory data = abi.encode(_newDividend);
+
         (success_, corporateActionId_, dividendId_) = _addCorporateAction(
             DIVIDEND_CORPORATE_ACTION_TYPE,
-            abi.encode(_newDividend)
+            data
         );
+
+        _initDividend(success_, corporateActionId_, data);
+    }
+
+    function _initDividend(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) internal {
+        if (!_success) {
+            revert IEquityStorageWrapper.DividendCreationFailed();
+        }
+
+        IEquity.Dividend memory newDividend = abi.decode(
+            _data,
+            (IEquity.Dividend)
+        );
+
+        _addScheduledCrossOrderedTask(
+            newDividend.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
+        _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));
     }
 
     function _setVoting(
@@ -53,10 +81,32 @@ abstract contract EquityStorageWrapper is
         internal
         returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
     {
+        bytes memory data = abi.encode(_newVoting);
+
         (success_, corporateActionId_, voteID_) = _addCorporateAction(
             VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            abi.encode(_newVoting)
+            data
         );
+
+        _initVotingRights(success_, corporateActionId_, data);
+    }
+
+    function _initVotingRights(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) internal {
+        if (!_success) {
+            revert IEquityStorageWrapper.VotingRightsCreationFailed();
+        }
+
+        IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
+
+        _addScheduledCrossOrderedTask(
+            newVoting.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
+        _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
     }
 
     function _setScheduledBalanceAdjustment(
@@ -69,13 +119,36 @@ abstract contract EquityStorageWrapper is
             uint256 balanceAdjustmentID_
         )
     {
+        bytes memory data = abi.encode(_newBalanceAdjustment);
+
         (
             success_,
             corporateActionId_,
             balanceAdjustmentID_
-        ) = _addCorporateAction(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-            abi.encode(_newBalanceAdjustment)
+        ) = _addCorporateAction(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, data);
+
+        _initBalanceAdjustment(success_, corporateActionId_, data);
+    }
+
+    function _initBalanceAdjustment(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) internal {
+        if (!_success) {
+            revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
+        }
+
+        IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
+            .decode(_data, (IEquity.ScheduledBalanceAdjustment));
+
+        _addScheduledCrossOrderedTask(
+            newBalanceAdjustment.executionDate,
+            abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
+        );
+        _addScheduledBalanceAdjustment(
+            newBalanceAdjustment.executionDate,
+            abi.encode(_actionId)
         );
     }
 
@@ -113,7 +186,10 @@ abstract contract EquityStorageWrapper is
             );
         }
 
-        registeredDividend_.snapshotId = _getSnapshotID(actionId);
+        registeredDividend_.snapshotId = _getUintResultAt(
+            actionId,
+            SNAPSHOT_RESULT_ID
+        );
     }
 
     /**
@@ -209,7 +285,10 @@ abstract contract EquityStorageWrapper is
             (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
         }
 
-        registeredVoting_.snapshotId = _getSnapshotID(actionId);
+        registeredVoting_.snapshotId = _getUintResultAt(
+            actionId,
+            SNAPSHOT_RESULT_ID
+        );
     }
 
     /**

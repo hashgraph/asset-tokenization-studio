@@ -6,11 +6,14 @@ import {
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {
-    IScheduledTasks
-} from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-import {ScheduledTasks} from './ScheduledTasks.sol';
+    IScheduledCrossOrderedTasks
+} from '../../interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol';
+import {ScheduledCrossOrderedTasks} from './ScheduledCrossOrderedTasks.sol';
 
-contract ScheduledTasksFacet is ScheduledTasks, IStaticFunctionSelectors {
+contract ScheduledCrossOrderedTasksFacet is
+    ScheduledCrossOrderedTasks,
+    IStaticFunctionSelectors
+{
     function getStaticResolverKey()
         external
         pure
@@ -27,21 +30,18 @@ contract ScheduledTasksFacet is ScheduledTasks, IStaticFunctionSelectors {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_ = new bytes4[](4);
         staticFunctionSelectors_[selectorIndex++] = this
-            .triggerPendingScheduledTasks
+            .triggerPendingScheduledCrossOrderedTasks
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .triggerScheduledTasks
+            .triggerScheduledCrossOrderedTasks
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .scheduledTaskCount
+            .scheduledCrossOrderedTaskCount
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getScheduledTasks
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .onScheduledTaskTriggered
+            .getScheduledCrossOrderedTasks
             .selector;
     }
 
@@ -53,7 +53,8 @@ contract ScheduledTasksFacet is ScheduledTasks, IStaticFunctionSelectors {
     {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IScheduledTasks)
-            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(
+            IScheduledCrossOrderedTasks
+        ).interfaceId;
     }
 }

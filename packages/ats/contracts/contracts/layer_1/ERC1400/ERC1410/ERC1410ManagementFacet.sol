@@ -42,7 +42,7 @@ contract ERC1410ManagementFacet is IStaticFunctionSelectors, ERC1410Management {
         pure
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](8);
+        staticFunctionSelectors_ = new bytes4[](7);
         uint256 selectorIndex = 0;
         // Initialization function
         staticFunctionSelectors_[selectorIndex++] = this
@@ -68,10 +68,6 @@ contract ERC1410ManagementFacet is IStaticFunctionSelectors, ERC1410Management {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .protectedRedeemFromByPartition
-            .selector;
-        // Issue function
-        staticFunctionSelectors_[selectorIndex++] = this
-            .issueByPartition
             .selector;
     }
 

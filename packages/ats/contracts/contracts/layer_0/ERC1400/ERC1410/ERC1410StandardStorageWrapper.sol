@@ -76,7 +76,7 @@ abstract contract ERC1410StandardStorageWrapper is
         address _from,
         address _to
     ) internal {
-        _triggerScheduledTasks(0);
+        _triggerScheduledCrossOrderedTasks(0);
         _syncBalanceAdjustments(_partition, _from, _to);
     }
 

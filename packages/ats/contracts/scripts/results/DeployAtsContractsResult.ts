@@ -211,6 +211,7 @@ import {
     DiamondFacet,
     ERC1410ReadFacet,
     ERC1410ManagementFacet,
+    ERC1410IssuerFacet,
     PauseFacet,
     ClearingTransferFacet,
     ClearingRedeemFacet,
@@ -246,7 +247,7 @@ import {
     LockFacet,
     ScheduledBalanceAdjustmentsFacet,
     ScheduledSnapshotsFacet,
-    ScheduledTasksFacet,
+    ScheduledCrossOrderedTasksFacet,
     SnapshotsFacet,
     SsiManagementFacet,
     TransferAndLockFacet,
@@ -266,6 +267,7 @@ export interface DeployAtsContractsResultParams {
     erc20Facet: DeployContractWithFactoryResult<ERC20Facet>
     erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
     erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
+    erc1410IssuerFacet: DeployContractWithFactoryResult<ERC1410IssuerFacet>
     erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>
     erc20PermitFacet: DeployContractWithFactoryResult<ERC20PermitFacet>
     erc20Votes: DeployContractWithFactoryResult<ERC20Votes>
@@ -278,7 +280,7 @@ export interface DeployAtsContractsResultParams {
     bondUsaRead: DeployContractWithFactoryResult<BondUSARead>
     scheduledSnapshotsFacet: DeployContractWithFactoryResult<ScheduledSnapshotsFacet>
     scheduledBalanceAdjustmentsFacet: DeployContractWithFactoryResult<ScheduledBalanceAdjustmentsFacet>
-    scheduledTasksFacet: DeployContractWithFactoryResult<ScheduledTasksFacet>
+    scheduledCrossOrderedTasksFacet: DeployContractWithFactoryResult<ScheduledCrossOrderedTasksFacet>
     snapshotsFacet: DeployContractWithFactoryResult<SnapshotsFacet>
     corporateActionsFacet: DeployContractWithFactoryResult<CorporateActionsFacet>
     transferAndLockFacet: DeployContractWithFactoryResult<TransferAndLockFacet>
@@ -317,6 +319,7 @@ export default class DeployAtsContractsResult {
     public readonly erc20Facet: DeployContractWithFactoryResult<ERC20Facet>
     public readonly erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
     public readonly erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
+    public readonly erc1410IssuerFacet: DeployContractWithFactoryResult<ERC1410IssuerFacet>
     public readonly erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>
     public readonly erc20PermitFacet: DeployContractWithFactoryResult<ERC20PermitFacet>
     public readonly erc20Votes: DeployContractWithFactoryResult<ERC20Votes>
@@ -329,7 +332,7 @@ export default class DeployAtsContractsResult {
     public readonly bondUsaRead: DeployContractWithFactoryResult<BondUSARead>
     public readonly scheduledSnapshotsFacet: DeployContractWithFactoryResult<ScheduledSnapshotsFacet>
     public readonly scheduledBalanceAdjustmentsFacet: DeployContractWithFactoryResult<ScheduledBalanceAdjustmentsFacet>
-    public readonly scheduledTasksFacet: DeployContractWithFactoryResult<ScheduledTasksFacet>
+    public readonly scheduledCrossOrderedTasksFacet: DeployContractWithFactoryResult<ScheduledCrossOrderedTasksFacet>
     public readonly snapshotsFacet: DeployContractWithFactoryResult<SnapshotsFacet>
     public readonly corporateActionsFacet: DeployContractWithFactoryResult<CorporateActionsFacet>
     public readonly transferAndLockFacet: DeployContractWithFactoryResult<TransferAndLockFacet>
@@ -367,6 +370,7 @@ export default class DeployAtsContractsResult {
         erc20Facet,
         erc1410ReadFacet,
         erc1410ManagementFacet,
+        erc1410IssuerFacet,
         erc1410TokenHolderFacet,
         erc20PermitFacet,
         erc20Votes,
@@ -379,7 +383,7 @@ export default class DeployAtsContractsResult {
         bondUsaRead,
         scheduledSnapshotsFacet,
         scheduledBalanceAdjustmentsFacet,
-        scheduledTasksFacet,
+        scheduledCrossOrderedTasksFacet,
         snapshotsFacet,
         corporateActionsFacet,
         transferAndLockFacet,
@@ -418,6 +422,7 @@ export default class DeployAtsContractsResult {
         this.erc20Votes = erc20Votes
         this.erc1410ReadFacet = erc1410ReadFacet
         this.erc1410ManagementFacet = erc1410ManagementFacet
+        this.erc1410IssuerFacet = erc1410IssuerFacet
         this.erc1410TokenHolderFacet = erc1410TokenHolderFacet
         this.erc1594Facet = erc1594Facet
         this.erc1643Facet = erc1643Facet
@@ -428,7 +433,7 @@ export default class DeployAtsContractsResult {
         this.bondUsaRead = bondUsaRead
         this.scheduledSnapshotsFacet = scheduledSnapshotsFacet
         this.scheduledBalanceAdjustmentsFacet = scheduledBalanceAdjustmentsFacet
-        this.scheduledTasksFacet = scheduledTasksFacet
+        this.scheduledCrossOrderedTasksFacet = scheduledCrossOrderedTasksFacet
         this.snapshotsFacet = snapshotsFacet
         this.corporateActionsFacet = corporateActionsFacet
         this.transferAndLockFacet = transferAndLockFacet

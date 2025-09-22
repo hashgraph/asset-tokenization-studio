@@ -12,12 +12,12 @@ import {
     ISnapshotsStorageWrapper
 } from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
 import {
-    CorporateActionsStorageWrapper1
-} from '../corporateActions/CorporateActionsStorageWrapper1.sol';
+    CorporateActionsStorageWrapper
+} from '../corporateActions/CorporateActionsStorageWrapper.sol';
 
 abstract contract SnapshotsStorageWrapper1 is
     ISnapshotsStorageWrapper,
-    CorporateActionsStorageWrapper1
+    CorporateActionsStorageWrapper
 {
     using ArraysUpgradeable for uint256[];
     using CountersUpgradeable for CountersUpgradeable.Counter;
