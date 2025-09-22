@@ -7,7 +7,6 @@ import {
 import {
     AdjustBalancesStorageWrapper2
 } from '../adjustBalances/AdjustBalancesStorageWrapper2.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
     using EnumerableSet for EnumerableSet.UintSet;

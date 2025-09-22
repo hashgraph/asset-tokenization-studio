@@ -25,28 +25,6 @@ abstract contract ERC1410Management is IERC1410Management, Common {
         _erc1410BasicStorage().initialized = true;
     }
 
-    function issueByPartition(
-        IssueData calldata _issueData
-    )
-        external
-        onlyUnpaused
-        onlyIssuable
-        onlyWithinMaxSupply(_issueData.value)
-        onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
-        onlyDefaultPartitionWithSinglePartition(_issueData.partition)
-        onlyIdentified(address(0), _issueData.tokenHolder)
-        onlyCompliant(address(0), _issueData.tokenHolder, false)
-    {
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _ISSUER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
-            _checkRecoveredAddress(_msgSender());
-        }
-        _issueByPartition(_issueData);
-    }
-
     function controllerTransferByPartition(
         bytes32 _partition,
         address _from,
