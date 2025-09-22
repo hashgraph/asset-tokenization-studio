@@ -267,6 +267,8 @@ import {
     ERC1410ReadFacetTimeTravel__factory,
     ERC1410ManagementFacet__factory,
     ERC1410ManagementFacetTimeTravel__factory,
+    ERC1410IssuerFacet__factory,
+    ERC1410IssuerFacetTimeTravel__factory,
     ERC1410TokenHolderFacet__factory,
     ERC1410TokenHolderFacetTimeTravel__factory,
     ERC1594Facet__factory,
@@ -637,6 +639,19 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        erc1410IssuerFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC1410IssuerFacet__factory(),
+                new ERC1410IssuerFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC1410IssuerFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
         erc1410TokenHolderFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ERC1410TokenHolderFacet__factory(),
@@ -760,16 +775,15 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        scheduledTasksFacet: new DeployContractWithFactoryCommand({
+        scheduledCrossOrderedTasksFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ScheduledCrossOrderedTasksFacet__factory(),
                 new ScheduledCrossOrderedTasksFacetTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ScheduledTasksFacet.addresses?.[
-                      network
-                  ]
+                ? Configuration.contracts.scheduledCrossOrderedTasksFacet
+                      .addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -1143,6 +1157,14 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
+            erc1410IssuerFacet: await deployContractWithFactory(
+                commands.erc1410IssuerFacet
+            ).then((result) => {
+                console.log(
+                    `ERC1410IssuerFacet has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
             erc1410TokenHolderFacet: await deployContractWithFactory(
                 commands.erc1410TokenHolderFacet
             ).then((result) => {
@@ -1266,11 +1288,11 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
-            scheduledTasksFacet: await deployContractWithFactory(
-                commands.scheduledTasksFacet
+            scheduledCrossOrderedTasksFacet: await deployContractWithFactory(
+                commands.scheduledCrossOrderedTasksFacet
             ).then((result) => {
                 console.log(
-                    `ScheduledTasksFacet has been deployed successfully at ${result.address}`
+                    `ScheduledCrossOrderedTasksFacet has been deployed successfully at ${result.address}`
                 )
                 console.log(
                     `TransferAndLock has been deployed successfully at ${result.address}`
