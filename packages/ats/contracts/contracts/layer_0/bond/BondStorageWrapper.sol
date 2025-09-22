@@ -4,7 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     _BOND_STORAGE_POSITION
 } from '../../layer_2/constants/storagePositions.sol';
-import {COUPON_CORPORATE_ACTION_TYPE} from '../../layer_2/constants/values.sol';
+import {
+    COUPON_CORPORATE_ACTION_TYPE,
+    SNAPSHOT_RESULT_ID,
+    SNAPSHOT_TASK_TYPE
+} from '../../layer_2/constants/values.sol';
 import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
 import {
     IBondStorageWrapper
@@ -50,10 +54,35 @@ abstract contract BondStorageWrapper is
         internal
         returns (bool success_, bytes32 corporateActionId_, uint256 couponID_)
     {
+        bytes memory data = abi.encode(_newCoupon);
+
         (success_, corporateActionId_, couponID_) = _addCorporateAction(
             COUPON_CORPORATE_ACTION_TYPE,
-            abi.encode(_newCoupon)
+            data
         );
+
+        _initCoupon(success_, corporateActionId_, data);
+    }
+
+    function _initCoupon(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) internal {
+        if (!_success) {
+            revert IBondStorageWrapper.CouponCreationFailed();
+        }
+
+        IBondRead.Coupon memory newCoupon = abi.decode(
+            _data,
+            (IBondRead.Coupon)
+        );
+
+        _addScheduledCrossOrderedTask(
+            newCoupon.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
+        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
     }
 
     /**
@@ -97,7 +126,10 @@ abstract contract BondStorageWrapper is
             (registeredCoupon_.coupon) = abi.decode(data, (IBondRead.Coupon));
         }
 
-        registeredCoupon_.snapshotId = _getSnapshotID(actionId);
+        registeredCoupon_.snapshotId = _getUintResultAt(
+            actionId,
+            SNAPSHOT_RESULT_ID
+        );
     }
 
     function _getCouponFor(

@@ -212,13 +212,13 @@ import {
     type Equity,
     type ScheduledSnapshots,
     type AccessControl,
-    ScheduledTasks,
+    ScheduledCrossOrderedTasks,
     TimeTravel,
     BusinessLogicResolver,
     IFactory,
     AccessControl__factory,
     Equity__factory,
-    ScheduledTasks__factory,
+    ScheduledCrossOrderedTasks__factory,
     ScheduledSnapshots__factory,
     TimeTravel__factory,
 } from '@typechain'
@@ -250,7 +250,7 @@ describe('Scheduled Snapshots Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let equityFacet: Equity
     let scheduledSnapshotsFacet: ScheduledSnapshots
-    let scheduledTasksFacet: ScheduledTasks
+    let scheduledTasksFacet: ScheduledCrossOrderedTasks
     let accessControlFacet: AccessControl
     let timeTravelFacet: TimeTravel
 
@@ -303,7 +303,7 @@ describe('Scheduled Snapshots Tests', () => {
             diamond.address,
             signer_A
         )
-        scheduledTasksFacet = ScheduledTasks__factory.connect(
+        scheduledTasksFacet = ScheduledCrossOrderedTasks__factory.connect(
             diamond.address,
             signer_A
         )
@@ -418,7 +418,9 @@ describe('Scheduled Snapshots Tests', () => {
             dividendsRecordDateInSeconds_1 + 1
         )
         await expect(
-            scheduledTasksFacet.connect(signer_A).triggerPendingScheduledTasks()
+            scheduledTasksFacet
+                .connect(signer_A)
+                .triggerPendingScheduledCrossOrderedTasks()
         )
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 1)
@@ -444,7 +446,9 @@ describe('Scheduled Snapshots Tests', () => {
             dividendsRecordDateInSeconds_2 + 1
         )
         await expect(
-            scheduledTasksFacet.connect(signer_A).triggerScheduledTasks(100)
+            scheduledTasksFacet
+                .connect(signer_A)
+                .triggerScheduledCrossOrderedTasks(100)
         )
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 2)
@@ -466,7 +470,9 @@ describe('Scheduled Snapshots Tests', () => {
             dividendsRecordDateInSeconds_3 + 1
         )
         await expect(
-            scheduledTasksFacet.connect(signer_A).triggerScheduledTasks(0)
+            scheduledTasksFacet
+                .connect(signer_A)
+                .triggerScheduledCrossOrderedTasks(0)
         )
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 3)

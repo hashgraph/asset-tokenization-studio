@@ -272,13 +272,14 @@ import {
   MockedWhitelist__factory,
   PauseFacet__factory,
   ProtectedPartitionsFacet__factory,
-  ScheduledTasksFacet__factory,
+  ScheduledCrossOrderedTasksFacet__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
   TransferAndLockFacet__factory,
   ERC1410TokenHolderFacet__factory,
   TREXFactoryAts__factory,
   BeneficiariesFacet__factory,
+  ERC1410IssuerFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { Resolvers } from '@domain/context/factory/Resolvers';
 import EvmAddress from '@domain/context/contract/EvmAddress';
@@ -662,7 +663,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      ERC1410ManagementFacet__factory.connect(
+      ERC1410IssuerFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
@@ -1071,11 +1072,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      ScheduledTasksFacet__factory.connect(
+      ScheduledCrossOrderedTasksFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
-      'triggerPendingScheduledTasks',
+      'triggerPendingScheduledCrossOrderedTasks',
       [],
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
     );
@@ -1090,11 +1091,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return this.executeTransaction(
-      ScheduledTasksFacet__factory.connect(
+      ScheduledCrossOrderedTasksFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
-      'triggerScheduledTasks',
+      'triggerScheduledCrossOrderedTasks',
       [max.toBigNumber()],
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
     );

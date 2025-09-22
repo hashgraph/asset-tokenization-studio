@@ -17,8 +17,6 @@ interface IERC1410Management {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(bool _multiPartition) external;
 
-    function issueByPartition(IssueData calldata _issueData) external;
-
     /**
      * @notice Forces a transfer in a partition from a token holder to a destination address
      * @dev Can only be used by the controller role

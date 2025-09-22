@@ -5,8 +5,8 @@ import {
     IScheduledBalanceAdjustments
 } from '../../../layer_2/interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
 import {
-    ScheduledSnapshotsStorageWrapperRead
-} from '../scheduledSnapshots/ScheduledSnapshotsStorageWrapperRead.sol';
+    ScheduledSnapshotsStorageWrapper
+} from '../scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
 import {
     ScheduledTasksLib
 } from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
@@ -14,9 +14,13 @@ import {
     _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {IEquity} from '../../../layer_2/interfaces/equity/IEquity.sol';
+import {
+    ScheduledTask,
+    ScheduledTasksDataStorage
+} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol';
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
-    ScheduledSnapshotsStorageWrapperRead
+    ScheduledSnapshotsStorageWrapper
 {
     function _addScheduledBalanceAdjustment(
         uint256 _newScheduledTimestamp,
@@ -33,15 +37,35 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
         uint256 _max
     ) internal returns (uint256) {
         return
-            ScheduledTasksLib.triggerScheduledTasks(
+            _triggerScheduledTasks(
                 _scheduledBalanceAdjustmentStorage(),
-                IScheduledBalanceAdjustments
-                    .onScheduledBalanceAdjustmentTriggered
-                    .selector,
+                _onScheduledBalanceAdjustmentTriggered,
                 _max,
                 _blockTimestamp()
             );
     }
+
+    function _onScheduledBalanceAdjustmentTriggered(
+        uint256 /*_pos*/,
+        uint256 /*_scheduledTasksLength*/,
+        ScheduledTask memory _scheduledTask
+    ) internal {
+        bytes memory data = _scheduledTask.data;
+
+        if (data.length == 0) return;
+        (, bytes memory balanceAdjustmentData) = _getCorporateAction(
+            abi.decode(data, (bytes32))
+        );
+        if (balanceAdjustmentData.length == 0) return;
+        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi
+            .decode(
+                balanceAdjustmentData,
+                (IEquity.ScheduledBalanceAdjustment)
+            );
+        _adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
+    }
+
+    function _adjustBalances(uint256 _factor, uint8 _decimals) internal virtual;
 
     function _getScheduledBalanceAdjustmentCount()
         internal
@@ -60,9 +84,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
     )
         internal
         view
-        returns (
-            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
-        )
+        returns (ScheduledTask[] memory scheduledBalanceAdjustment_)
     {
         return
             ScheduledTasksLib.getScheduledTasks(
@@ -79,7 +101,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
         pendingABAF_ = 1;
         pendingDecimals_ = 0;
 
-        ScheduledTasksLib.ScheduledTasksDataStorage
+        ScheduledTasksDataStorage
             storage scheduledBalanceAdjustments = _scheduledBalanceAdjustmentStorage();
 
         uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(
@@ -89,9 +111,8 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
         for (uint256 i = 1; i <= scheduledTaskCount; i++) {
             uint256 pos = scheduledTaskCount - i;
 
-            ScheduledTasksLib.ScheduledTask
-                memory scheduledTask = ScheduledTasksLib
-                    .getScheduledTasksByIndex(scheduledBalanceAdjustments, pos);
+            ScheduledTask memory scheduledTask = ScheduledTasksLib
+                .getScheduledTasksByIndex(scheduledBalanceAdjustments, pos);
 
             if (scheduledTask.scheduledTimestamp < _timestamp) {
                 bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
@@ -116,10 +137,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
     function _scheduledBalanceAdjustmentStorage()
         internal
         pure
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage
-                storage scheduledBalanceAdjustments_
-        )
+        returns (ScheduledTasksDataStorage storage scheduledBalanceAdjustments_)
     {
         bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
