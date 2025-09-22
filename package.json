@@ -57,6 +57,7 @@
     "ats:web:test:update": "npm run test:update --workspace=apps/ats/web",
     "ats:web:test:ci": "npm run test:ci --workspace=apps/ats/web",
     "ats:web:dev": "npm run dev --workspace=apps/ats/web",
+    "ats:web:start": "npm run start --workspace=apps/ats/web",
     "ats:web:clean": "npm run clean --workspace=apps/ats/web",
     "mass-payout:setup": "npm ci && npm run mass-payout:build",
     "mass-payout:build": "npm run build --workspace=packages/mass-payout/* && npm run build --workspace=apps/mass-payout/* --if-present",
