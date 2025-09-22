@@ -225,11 +225,7 @@ import {
   EXECUTE_PERCENTAGE_SNAPSHOT_GAS,
   EXECUTE_PERCENTAGE_SNAPSHOT_BY_ADDRESSES_GAS,
 } from "@core/Constants"
-import {
-  LifeCycleCashFlow__factory,
-  ProxyAdmin__factory,
-  TransparentUpgradeableProxy__factory,
-} from "@scheduler-payment-distribution/contracts"
+
 import {
   Hbar,
   Signer,
@@ -252,6 +248,7 @@ import { TransactionType } from "../TransactionResponseEnums"
 import EvmAddress from "@domain/contract/EvmAddress"
 import BigDecimal from "@domain/shared/BigDecimal"
 import { ethers, BaseContract, ContractTransaction } from "ethers"
+import {LifeCycleCashFlow__factory, ProxyAdmin__factory, TransparentUpgradeableProxy__factory} from "@scheduler-payment-distribution/contracts"
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   protected readonly logger = new Logger(HederaTransactionAdapter.name)

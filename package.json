@@ -9,6 +9,18 @@
     "apps/ats/*",
     "apps/mass-payout/*"
   ],
+  "overrides": {
+    "@hashgraph/asset-tokenization-dapp": {
+      "i18next": "23.5.1",
+      "i18next-browser-languagedetector": "7.1.0",
+      "zustand": "4.4.1"
+    },
+    "@scheduler-payment-distribution/frontend": {
+      "i18next": "23.10.1",
+      "i18next-browser-languagedetector": "7.2.0",
+      "zustand": "4.5.2"
+    }
+  },
   "scripts": {
     "setup": "npm run ats:setup && npm run mass-payout:setup",
     "lint": "npm run lint:js && npm run lint:sol",
@@ -58,15 +70,40 @@
     "ats:web:test:ci": "npm run test:ci --workspace=apps/ats/web",
     "ats:web:dev": "npm run dev --workspace=apps/ats/web",
     "ats:web:clean": "npm run clean --workspace=apps/ats/web",
-    "mass-payout:setup": "npm ci && npm run mass-payout:build",
-    "mass-payout:build": "npm run build --workspace=packages/mass-payout/* && npm run build --workspace=apps/mass-payout/* --if-present",
-    "mass-payout:test": "npm run test --workspace=packages/mass-payout/* && npm run test --workspace=apps/mass-payout/* --if-present",
+    "mass-payout:setup": "npm ci && npm run mass-payout:contracts:build && npm run mass-payout:sdk:build && npm run mass-payout:backend:build && npm run mass-payout:frontend:build",
+    "mass-payout:setup:clean": "npm run mass-payout:clean && npm install && npm run mass-payout:build",
+    "mass-payout:build": "npm run mass-payout:sdk:build && npm run mass-payout:backend:build && npm run mass-payout:frontend:build && npm run mass-payout:contracts:build",
+    "mass-payout:test": "npm run mass-payout:sdk:test && npm run mass-payout:backend:test && npm run mass-payout:frontend:test && npm run mass-payout:contracts:test",
+    "mass-payout:test:ci": "npm run mass-payout:sdk:test:ci && npm run mass-payout:backend:test:ci && npm run mass-payout:frontend:test:ci && npm run mass-payout:contracts:test:ci",
     "mass-payout:lint": "eslint '*.{js,mjs,cjs,ts,tsx,mts,json}' 'packages/mass-payout/**/*' 'apps/mass-payout/**/*' --cache",
     "mass-payout:lint:fix": "eslint '*.{js,mjs,cjs,ts,tsx,mts,json}' 'packages/mass-payout/**/*' 'apps/mass-payout/**/*' --fix && npm run mass-payout:format",
     "mass-payout:format": "prettier --write '*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'packages/mass-payout/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'apps/mass-payout/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
     "mass-payout:format:check": "prettier --check '*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'packages/mass-payout/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'apps/mass-payout/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
     "mass-payout:clean": "npm run clean --workspace=packages/mass-payout/* --if-present && npm run clean --workspace=apps/mass-payout/* --if-present && echo '\n✅ All mass-payout compilation and build files have been cleaned'",
-    "mass-payout:publish": "npm run publish --workspace=packages/mass-payout/* --if-present"
+    "mass-payout:publish": "npm run mass-payout:sdk:publish && npm run mass-payout:contracts:publish",
+    "mass-payout:contracts:build": "npm run build --workspace=packages/mass-payout/contracts",
+    "mass-payout:contracts:compile": "npm run compile --workspace=packages/mass-payout/contracts",
+    "mass-payout:contracts:compile:force": "npm run compile:force --workspace=packages/mass-payout/contracts",
+    "mass-payout:contracts:test": "npm run test --workspace=packages/mass-payout/contracts",
+    "mass-payout:contracts:test:ci": "npm run test:ci --workspace=packages/mass-payout/contracts --if-present || npm run test --workspace=packages/mass-payout/contracts",
+    "mass-payout:contracts:clean": "npm run clean --workspace=packages/mass-payout/contracts",
+    "mass-payout:contracts:publish": "npm run publish --workspace=packages/mass-payout/contracts",
+    "mass-payout:sdk:build": "npm run build --workspace=packages/mass-payout/sdk",
+    "mass-payout:sdk:test": "npm run test --workspace=packages/mass-payout/sdk",
+    "mass-payout:sdk:test:ci": "npm run test:ci --workspace=packages/mass-payout/sdk --if-present || npm run test --workspace=packages/mass-payout/sdk",
+    "mass-payout:sdk:clean": "npm run clean --workspace=packages/mass-payout/sdk",
+    "mass-payout:backend:build": "npm run build --workspace=apps/mass-payout/backend",
+    "mass-payout:backend:test": "npm run test --workspace=apps/mass-payout/backend",
+    "mass-payout:backend:test:ci": "npm run test:ci --workspace=apps/mass-payout/backend --if-present || npm run test --workspace=apps/mass-payout/backend",
+    "mass-payout:backend:dev": "npm run start:dev --workspace=apps/mass-payout/backend",
+    "mass-payout:backend:start": "npm run start --workspace=apps/mass-payout/backend",
+    "mass-payout:backend:clean": "npm run clean --workspace=apps/mass-payout/backend",
+    "mass-payout:frontend:build": "npm run build --workspace=apps/mass-payout/frontend",
+    "mass-payout:frontend:test": "npm run test --workspace=apps/mass-payout/frontend",
+    "mass-payout:frontend:test:update": "npm run test:update --workspace=apps/mass-payout/frontend",
+    "mass-payout:frontend:test:ci": "npm run test:ci --workspace=apps/mass-payout/frontend --if-present || npm run test --workspace=apps/mass-payout/frontend",
+    "mass-payout:frontend:dev": "npm run dev --workspace=apps/mass-payout/frontend",
+    "mass-payout:frontend:clean": "npm run clean --workspace=apps/mass-payout/frontend"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",
