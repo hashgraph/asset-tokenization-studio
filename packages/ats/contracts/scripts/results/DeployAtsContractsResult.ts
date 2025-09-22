@@ -211,6 +211,7 @@ import {
     DiamondFacet,
     ERC1410ReadFacet,
     ERC1410ManagementFacet,
+    ERC1410IssuerFacet,
     PauseFacet,
     ClearingTransferFacet,
     ClearingRedeemFacet,
@@ -252,6 +253,7 @@ import {
     SsiManagementFacet,
     TransferAndLockFacet,
     ERC20Votes,
+    Beneficiaries,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -266,6 +268,7 @@ export interface DeployAtsContractsResultParams {
     erc20Facet: DeployContractWithFactoryResult<ERC20Facet>
     erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
     erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
+    erc1410IssuerFacet: DeployContractWithFactoryResult<ERC1410IssuerFacet>
     erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>
     erc20PermitFacet: DeployContractWithFactoryResult<ERC20PermitFacet>
     erc20Votes: DeployContractWithFactoryResult<ERC20Votes>
@@ -294,6 +297,7 @@ export interface DeployAtsContractsResultParams {
     clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
     clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
     clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
+    beneficiariesFacet: DeployContractWithFactoryResult<Beneficiaries>
     externalPauseManagementFacet: DeployContractWithFactoryResult<ExternalPauseManagementFacet>
     externalControlListManagementFacet: DeployContractWithFactoryResult<ExternalControlListManagementFacet>
     externalKycListManagementFacet: DeployContractWithFactoryResult<ExternalKycListManagementFacet>
@@ -317,6 +321,7 @@ export default class DeployAtsContractsResult {
     public readonly erc20Facet: DeployContractWithFactoryResult<ERC20Facet>
     public readonly erc1410ReadFacet: DeployContractWithFactoryResult<ERC1410ReadFacet>
     public readonly erc1410ManagementFacet: DeployContractWithFactoryResult<ERC1410ManagementFacet>
+    public readonly erc1410IssuerFacet: DeployContractWithFactoryResult<ERC1410IssuerFacet>
     public readonly erc1410TokenHolderFacet: DeployContractWithFactoryResult<ERC1410TokenHolderFacet>
     public readonly erc20PermitFacet: DeployContractWithFactoryResult<ERC20PermitFacet>
     public readonly erc20Votes: DeployContractWithFactoryResult<ERC20Votes>
@@ -345,6 +350,7 @@ export default class DeployAtsContractsResult {
     public readonly clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
     public readonly clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
     public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
+    public readonly beneficiariesFacet: DeployContractWithFactoryResult<Beneficiaries>
     public readonly externalPauseManagementFacet: DeployContractWithFactoryResult<ExternalPauseManagementFacet>
     public readonly externalControlListManagementFacet: DeployContractWithFactoryResult<ExternalControlListManagementFacet>
     public readonly externalKycListManagementFacet: DeployContractWithFactoryResult<ExternalKycListManagementFacet>
@@ -367,6 +373,7 @@ export default class DeployAtsContractsResult {
         erc20Facet,
         erc1410ReadFacet,
         erc1410ManagementFacet,
+        erc1410IssuerFacet,
         erc1410TokenHolderFacet,
         erc20PermitFacet,
         erc20Votes,
@@ -392,6 +399,7 @@ export default class DeployAtsContractsResult {
         clearingHoldCreationFacet,
         clearingReadFacet,
         clearingActionsFacet,
+        beneficiariesFacet,
         externalPauseManagementFacet,
         externalControlListManagementFacet,
         externalKycListManagementFacet,
@@ -418,6 +426,7 @@ export default class DeployAtsContractsResult {
         this.erc20Votes = erc20Votes
         this.erc1410ReadFacet = erc1410ReadFacet
         this.erc1410ManagementFacet = erc1410ManagementFacet
+        this.erc1410IssuerFacet = erc1410IssuerFacet
         this.erc1410TokenHolderFacet = erc1410TokenHolderFacet
         this.erc1594Facet = erc1594Facet
         this.erc1643Facet = erc1643Facet
@@ -444,6 +453,7 @@ export default class DeployAtsContractsResult {
         this.clearingHoldCreationFacet = clearingHoldCreationFacet
         this.clearingReadFacet = clearingReadFacet
         this.clearingActionsFacet = clearingActionsFacet
+        this.beneficiariesFacet = beneficiariesFacet
         this.externalPauseManagementFacet = externalPauseManagementFacet
         this.externalControlListManagementFacet =
             externalControlListManagementFacet

@@ -210,6 +210,7 @@ import FormatValidation from '../FormatValidation';
 
 import { SecurityDate } from '@domain/context/shared/SecurityDate';
 import { Factory } from '@domain/context/factory/Factories';
+import { InvalidValue } from '../error/InvalidValue';
 
 export default class CreateBondRequest extends ValidatedRequest<CreateBondRequest> {
   name: string;
@@ -261,6 +262,12 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   configId: string;
   configVersion: number;
 
+  @OptionalField()
+  beneficiariesIds?: string[];
+
+  @OptionalField()
+  beneficiariesData?: string[];
+
   constructor({
     name,
     symbol,
@@ -291,6 +298,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion,
     complianceId,
     identityRegistryId,
+    beneficiariesIds,
+    beneficiariesData,
   }: {
     name: string;
     symbol: string;
@@ -321,6 +330,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion: number;
     complianceId?: string;
     identityRegistryId?: string;
+    beneficiariesIds?: string[];
+    beneficiariesData?: string[];
   }) {
     super({
       name: (val) => {
@@ -385,6 +396,29 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
       complianceId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       identityRegistryId:
         FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      beneficiariesIds: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'beneficiariesIds',
+          true,
+        );
+      },
+
+      beneficiariesData: (val) => {
+        const validation = FormatValidation.checkBytesFormat();
+        if (val?.length != this.beneficiariesIds?.length) {
+          return [
+            new InvalidValue(
+              `The list of beneficiariesIds and beneficiariesData must have equal length.`,
+            ),
+          ];
+        }
+        for (const data of val ?? []) {
+          if (data == '') continue;
+          const result = validation(data);
+          if (result) return result;
+        }
+      },
     });
     this.name = name;
     this.symbol = symbol;
@@ -416,5 +450,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.configVersion = configVersion;
     this.complianceId = complianceId;
     this.identityRegistryId = identityRegistryId;
+    this.beneficiariesIds = beneficiariesIds;
+    this.beneficiariesData = beneficiariesData;
   }
 }

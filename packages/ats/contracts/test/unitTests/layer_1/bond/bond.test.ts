@@ -273,7 +273,8 @@ const numberOfUnits = 1000
 let startingDate = 0
 const numberOfCoupons = 50
 const frequency = TIME_PERIODS_S.DAY
-const rate = 1
+const rate = 100
+const rateDecimals = 2
 let maturityDate = 0
 let firstCouponDate = 0
 const countriesControlListType = true
@@ -285,7 +286,8 @@ const _PARTITION_ID =
 
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
-const couponRate = 5
+const couponRate = 50
+const couponRateDecimals = 1
 const couponPeriod = TIME_PERIODS_S.WEEK
 const EMPTY_VC_ID = EMPTY_STRING
 
@@ -293,6 +295,7 @@ let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
     executionDate: couponExecutionDateInSeconds.toString(),
     rate: couponRate,
+    rateDecimals: couponRateDecimals,
     period: couponPeriod,
 }
 
@@ -453,6 +456,7 @@ describe('Bond Tests', () => {
             maturityDate,
             couponFrequency: frequency,
             couponRate: rate,
+            couponRateDecimals: rateDecimals,
             firstCouponDate,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_C,
@@ -500,6 +504,7 @@ describe('Bond Tests', () => {
             recordDate: couponRecordDateInSeconds.toString(),
             executionDate: couponExecutionDateInSeconds.toString(),
             rate: couponRate,
+            rateDecimals: couponRateDecimals,
             period: couponPeriod,
         }
         await loadFixture(deploySecurityFixtureSinglePartition)
@@ -702,6 +707,7 @@ describe('Bond Tests', () => {
                     recordDate: couponExecutionDateInSeconds.toString(),
                     executionDate: couponRecordDateInSeconds.toString(),
                     rate: couponRate,
+                    rateDecimals: couponRateDecimals,
                     period: couponPeriod,
                 }
 
@@ -715,6 +721,7 @@ describe('Bond Tests', () => {
                     ).toString(),
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
+                    rateDecimals: couponRateDecimals,
                     period: couponPeriod,
                 }
 
@@ -739,6 +746,7 @@ describe('Bond Tests', () => {
                     recordDate: couponRecordDateInSeconds.toString(),
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
+                    rateDecimals: couponRateDecimals,
                     period: customPeriod,
                 }
 
@@ -752,6 +760,7 @@ describe('Bond Tests', () => {
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
                         couponRate,
+                        couponRateDecimals,
                         customPeriod
                     )
 
@@ -779,6 +788,7 @@ describe('Bond Tests', () => {
                     recordDate: couponRecordDateInSeconds.toString(),
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
+                    rateDecimals: couponRateDecimals,
                     period: 0,
                 }
 
@@ -791,6 +801,7 @@ describe('Bond Tests', () => {
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
                         couponRate,
+                        couponRateDecimals,
                         0
                     )
             })
@@ -810,6 +821,7 @@ describe('Bond Tests', () => {
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
                         couponRate,
+                        couponRateDecimals,
                         couponPeriod
                     )
 
@@ -838,11 +850,13 @@ describe('Bond Tests', () => {
                     couponExecutionDateInSeconds
                 )
                 expect(coupon.coupon.rate).to.equal(couponRate)
+                expect(coupon.coupon.rateDecimals).to.equal(couponRateDecimals)
                 expect(couponFor.recordDate).to.equal(couponRecordDateInSeconds)
                 expect(couponFor.executionDate).to.equal(
                     couponExecutionDateInSeconds
                 )
                 expect(couponFor.rate).to.equal(couponRate)
+                expect(couponFor.rateDecimals).to.equal(couponRateDecimals)
                 expect(couponFor.tokenBalance).to.equal(0)
                 expect(couponFor.recordDateReached).to.equal(false)
                 expect(couponTotalHolders).to.equal(0)
@@ -885,6 +899,7 @@ describe('Bond Tests', () => {
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
                         couponRate,
+                        couponRateDecimals,
                         couponPeriod
                     )
 
@@ -951,6 +966,7 @@ describe('Bond Tests', () => {
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
                         couponRate,
+                        couponRateDecimals,
                         couponPeriod
                     )
 
@@ -997,6 +1013,7 @@ describe('Bond Tests', () => {
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
                     period: customPeriod,
+                    rateDecimals: couponRateDecimals,
                 }
 
                 const customCouponData_2 = {
@@ -1008,6 +1025,7 @@ describe('Bond Tests', () => {
                     ).toString(),
                     rate: couponRate,
                     period: customPeriod,
+                    rateDecimals: couponRateDecimals,
                 }
 
                 const customCouponData_3 = {
@@ -1019,6 +1037,7 @@ describe('Bond Tests', () => {
                     ).toString(),
                     rate: couponRate,
                     period: customPeriod,
+                    rateDecimals: couponRateDecimals,
                 }
 
                 const expectedCouponOrderList = [1, 3, 2]
@@ -1236,6 +1255,7 @@ describe('Bond Tests', () => {
                         couponRecordDateInSeconds,
                         couponExecutionDateInSeconds,
                         couponRate,
+                        couponRateDecimals,
                         couponPeriod
                     )
 
@@ -1280,6 +1300,7 @@ describe('Bond Tests', () => {
                 maturityDate,
                 couponFrequency: frequency,
                 couponRate: rate,
+                couponRateDecimals: rateDecimals,
                 firstCouponDate,
                 regulationType: RegulationType.REG_D,
                 regulationSubType: RegulationSubType.REG_D_506_C,

@@ -240,7 +240,8 @@ const numberOfUnits = 1000
 let startingDate = 9999999999
 const numberOfCoupons = 50
 const frequency = TIME_PERIODS_S.DAY
-const rate = 1
+const rate = 10
+const rateDecimals = 1
 let maturityDate = startingDate + numberOfCoupons * frequency
 let firstCouponDate = startingDate + 1
 const countriesControlListType = true
@@ -287,6 +288,7 @@ describe('Scheduled Coupon Listing Tests', () => {
             maturityDate,
             couponFrequency: frequency,
             couponRate: rate,
+            couponRateDecimals: rateDecimals,
             firstCouponDate,
             regulationType: RegulationType.REG_S,
             regulationSubType: RegulationSubType.NONE,
@@ -374,6 +376,7 @@ describe('Scheduled Coupon Listing Tests', () => {
             '2030-01-01T00:01:00Z'
         )
         const couponsRate = 1
+        const couponRateDecimals = 0
         const couponsPeriod = 10
 
         const couponData_1 = {
@@ -381,18 +384,21 @@ describe('Scheduled Coupon Listing Tests', () => {
             executionDate: couponsExecutionDateInSeconds.toString(),
             rate: couponsRate,
             period: couponsPeriod,
+            rateDecimals: couponRateDecimals,
         }
         const couponData_2 = {
             recordDate: couponsRecordDateInSeconds_2.toString(),
             executionDate: couponsExecutionDateInSeconds.toString(),
             rate: couponsRate,
             period: couponsPeriod,
+            rateDecimals: couponRateDecimals,
         }
         const couponData_3 = {
             recordDate: couponsRecordDateInSeconds_3.toString(),
             executionDate: couponsExecutionDateInSeconds.toString(),
             rate: couponsRate,
             period: couponsPeriod,
+            rateDecimals: couponRateDecimals,
         }
         await bondFacet.connect(signer_C).setCoupon(couponData_2)
         await bondFacet.connect(signer_C).setCoupon(couponData_3)

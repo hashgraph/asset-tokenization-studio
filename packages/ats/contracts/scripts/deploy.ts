@@ -267,6 +267,8 @@ import {
     ERC1410ReadFacetTimeTravel__factory,
     ERC1410ManagementFacet__factory,
     ERC1410ManagementFacetTimeTravel__factory,
+    ERC1410IssuerFacet__factory,
+    ERC1410IssuerFacetTimeTravel__factory,
     ERC1410TokenHolderFacet__factory,
     ERC1410TokenHolderFacetTimeTravel__factory,
     ERC1594Facet__factory,
@@ -329,6 +331,8 @@ import {
     TimeTravel__factory,
     ProxyAdmin__factory,
     TransparentUpgradeableProxy__factory,
+    BeneficiariesFacetTimeTravel__factory,
+    BeneficiariesFacet__factory,
 } from '@typechain'
 
 export let environment = Environment.empty()
@@ -393,7 +397,6 @@ export async function deployAtsFullInfrastructure({
                 signer,
             })
         await registerDeployedContractBusinessLogics(registerCommand)
-
         // * Create configurations for all Securities (EquityUSA, BondUSA)
         console.log(MESSAGES.businessLogicResolver.info.creatingConfigurations)
         const createCommand =
@@ -633,6 +636,19 @@ export async function deployAtsContracts({
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.ERC1410ManagementFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
+        erc1410IssuerFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ERC1410IssuerFacet__factory(),
+                new ERC1410IssuerFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC1410IssuerFacet.addresses?.[
                       network
                   ]
                 : undefined,
@@ -900,6 +916,19 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        beneficiaries: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new BeneficiariesFacet__factory(),
+                new BeneficiariesFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.BeneficiariesFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
         externalPauseManagementFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ExternalPauseManagementFacet__factory(),
@@ -1142,6 +1171,14 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
+            erc1410IssuerFacet: await deployContractWithFactory(
+                commands.erc1410IssuerFacet
+            ).then((result) => {
+                console.log(
+                    `ERC1410IssuerFacet has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
             erc1410TokenHolderFacet: await deployContractWithFactory(
                 commands.erc1410TokenHolderFacet
             ).then((result) => {
@@ -1371,6 +1408,14 @@ export async function deployAtsContracts({
                 )
                 console.log(
                     `ClearingActionsFacet has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
+            beneficiariesFacet: await deployContractWithFactory(
+                commands.beneficiaries
+            ).then((result) => {
+                console.log(
+                    `Beneficiaries has been deployed successfully at ${result.address}`
                 )
                 return result
             }),

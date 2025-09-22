@@ -226,7 +226,7 @@ import {
   ERC1643Facet__factory,
   Factory__factory,
   LockFacet__factory,
-  ScheduledTasksFacet__factory,
+  ScheduledCrossOrderedTasksFacet__factory,
   SnapshotsFacet__factory,
   TransferAndLockFacet__factory,
   SsiManagementFacet__factory,
@@ -251,6 +251,8 @@ import {
   ERC3643OperationsFacet__factory,
   ERC3643BatchFacet__factory,
   TREXFactoryAts__factory,
+  BeneficiariesFacet__factory,
+  ERC1410IssuerFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { _PARTITION_ID_1, EVM_ZERO_ADDRESS, GAS } from '@core/Constants';
 import TransactionAdapter from '../TransactionAdapter';
@@ -547,6 +549,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
+    beneficiaries: EvmAddress[] = [],
+    beneficiariesData: string[] = [],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
     try {
@@ -610,6 +614,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       const securityTokenToCreate = new FactoryBondToken(
         security,
         bondDetails,
+        beneficiaries.map((addr) => addr.toString()),
+        beneficiariesData.map((data) => (data == '' ? '0x' : data)),
       );
 
       const additionalSecurityData: AdditionalSecurityData = {
@@ -861,7 +867,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
     };
     return this.executeWithArgs(
-      new ERC1410ManagementFacet__factory().attach(security.toString()),
+      new ERC1410IssuerFacet__factory().attach(security.toString()),
       'issueByPartition',
       securityId,
       GAS.ISSUE,
@@ -1095,6 +1101,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       recordDate: recordDate.toHexString(),
       executionDate: executionDate.toHexString(),
       rate: rate.toHexString(),
+      rateDecimals: rate.decimals,
       period: period.toHexString(),
     };
     return this.executeWithArgs(
@@ -1282,8 +1289,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Triggering pending scheduled snapshots for ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ScheduledTasksFacet__factory().attach(security.toString()),
-      'triggerPendingScheduledTasks',
+      new ScheduledCrossOrderedTasksFacet__factory().attach(security.toString()),
+      'triggerPendingScheduledCrossOrderedTasks',
       securityId,
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
       [],
@@ -1299,8 +1306,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Triggering up to ${max.toString()} pending scheduled snapshots for ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ScheduledTasksFacet__factory().attach(security.toString()),
-      'triggerScheduledTasks',
+      new ScheduledCrossOrderedTasksFacet__factory().attach(security.toString()),
+      'triggerScheduledCrossOrderedTasks',
       securityId,
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
       [max.toHexString()],
@@ -3180,6 +3187,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     compliance: EvmAddress,
     identityRegistryAddress: EvmAddress,
     diamondOwnerAccount: EvmAddress,
+    beneficiaries: EvmAddress[] = [],
+    beneficiariesData: string[] = [],
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -3244,6 +3253,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const securityTokenToCreate = new FactoryBondToken(
       securityData,
       bondDetailsData,
+      beneficiaries.map((b) => b.toString()),
+      beneficiariesData.map((data) => (data == '' ? '0x' : data)),
     );
 
     const additionalSecurityData: AdditionalSecurityData = {
@@ -3441,6 +3452,58 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         `Unexpected error in HederaTransactionAdapter create operation : ${error}`,
       );
     }
+  }
+
+  addBeneficiary(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding beneficiary: ${beneficiary} to security: ${security}`,
+    );
+
+    return this.executeWithArgs(
+      new BeneficiariesFacet__factory().attach(security.toString()),
+      'addBeneficiary',
+      securityId!,
+      GAS.ADD_BENEFICIARY,
+      [beneficiary.toString(), data],
+    );
+  }
+  removeBeneficiary(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Removing beneficiary: ${beneficiary} from security: ${security}`,
+    );
+    return this.executeWithArgs(
+      new BeneficiariesFacet__factory().attach(security.toString()),
+      'removeBeneficiary',
+      securityId!,
+      GAS.REMOVE_BENEFICIARY,
+      [beneficiary.toString()],
+    );
+  }
+  updateBeneficiaryData(
+    security: EvmAddress,
+    beneficiary: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating beneficiary: ${beneficiary} data in security: ${security}`,
+    );
+    return this.executeWithArgs(
+      new BeneficiariesFacet__factory().attach(security.toString()),
+      'updateBeneficiaryData',
+      securityId!,
+      GAS.UPDATE_BENEFICIARY,
+      [beneficiary.toString(), data],
+    );
   }
 
   // * Definition of the abstract methods

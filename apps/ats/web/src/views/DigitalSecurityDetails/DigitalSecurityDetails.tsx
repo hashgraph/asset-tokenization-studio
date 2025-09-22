@@ -400,6 +400,7 @@ export const DigitalSecurityDetails = () => {
     };
 
     const controlConfig = {
+      showBeneficiaries: !isSecurityPaused && securityDetails?.type === 'BOND',
       showControlList:
         !isSecurityPaused &&
         hasRole(rolesStored, SecurityRole._CONTROLLIST_ROLE),
