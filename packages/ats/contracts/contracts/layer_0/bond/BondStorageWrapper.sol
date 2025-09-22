@@ -7,8 +7,9 @@ import {
 import {
     COUPON_CORPORATE_ACTION_TYPE,
     SNAPSHOT_RESULT_ID,
-    SNAPSHOT_TASK_TYPE
-} from '../../layer_2/constants/values.sol';
+    SNAPSHOT_TASK_TYPE,
+    COUPON_LISTING_TASK_TYPE
+} from '../constants/values.sol';
 import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
 import {
     IBondStorageWrapper
@@ -19,6 +20,7 @@ import {
 import {
     ERC20PermitStorageWrapper
 } from '../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol';
+import {LibCommon} from '../common/libraries/LibCommon.sol';
 
 abstract contract BondStorageWrapper is
     IBondStorageWrapper,
@@ -29,6 +31,7 @@ abstract contract BondStorageWrapper is
     struct BondDataStorage {
         IBondRead.BondDetailsData bondDetail;
         bool initialized;
+        uint256[] counponsOrderedListByIds;
     }
 
     /**
@@ -82,7 +85,12 @@ abstract contract BondStorageWrapper is
             newCoupon.recordDate,
             abi.encode(SNAPSHOT_TASK_TYPE)
         );
+        _addScheduledCrossOrderedTask(
+            newCoupon.recordDate,
+            abi.encode(COUPON_LISTING_TASK_TYPE)
+        );
         _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
+        _addScheduledCouponListing(newCoupon.recordDate, abi.encode(_actionId));
     }
 
     /**
@@ -95,6 +103,44 @@ abstract contract BondStorageWrapper is
     ) internal returns (bool success_) {
         _bondStorage().bondDetail.maturityDate = _maturityDate;
         return true;
+    }
+
+    function _addToCouponsOrderedList(uint256 _couponID) internal override {
+        _bondStorage().counponsOrderedListByIds.push(_couponID);
+    }
+
+    function _getCouponFromOrderedListAt(
+        uint256 _pos
+    ) internal view returns (uint256 couponID_) {
+        if (_pos >= _getCouponsOrderedListTotal()) return 0;
+        return _bondStorage().counponsOrderedListByIds[_pos];
+    }
+
+    function _getCouponsOrderedList(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (uint256[] memory couponIDs_) {
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
+            _pageIndex,
+            _pageLength
+        );
+
+        couponIDs_ = new uint256[](
+            LibCommon.getSize(start, end, _getCouponsOrderedListTotal())
+        );
+
+        for (uint256 i = 0; i < couponIDs_.length; i++) {
+            couponIDs_[i] = _getCouponFromOrderedListAt(start + i);
+        }
+    }
+
+    function _getCouponsOrderedListTotal()
+        internal
+        view
+        override
+        returns (uint256 total_)
+    {
+        return _bondStorage().counponsOrderedListByIds.length;
     }
 
     function _getBondDetails()

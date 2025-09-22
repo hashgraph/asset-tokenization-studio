@@ -289,6 +289,7 @@ task(
             scheduledSnapshotsFacet,
             scheduledBalanceAdjustmentsFacet,
             scheduledCrossOrderedTasksFacet,
+            scheduledCouponListingFacet,
             corporateActionsFacet,
             lockFacet,
             holdReadFacet,
@@ -354,6 +355,8 @@ task(
                 scheduledBalanceAdjustmentsFacet.address,
             'Scheduled Cross Ordered Tasks Facet':
                 scheduledCrossOrderedTasksFacet.address,
+            'Scheduled Coupon Listing Facet':
+                scheduledCouponListingFacet.address,
             'Corporate Actions Facet': corporateActionsFacet.address,
             'Lock Facet': lockFacet.address,
             'Hold Read Facet': holdReadFacet.address,

@@ -292,6 +292,8 @@ import {
     ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
     ScheduledCrossOrderedTasksFacet__factory,
     ScheduledCrossOrderedTasksFacetTimeTravel__factory,
+    ScheduledCouponListingFacet__factory,
+    ScheduledCouponListingFacetTimeTravel__factory,
     CorporateActionsFacet__factory,
     CorporateActionsFacetTimeTravel__factory,
     TransferAndLockFacet__factory,
@@ -782,7 +784,19 @@ export async function deployAtsContracts({
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.scheduledCrossOrderedTasksFacet
+                ? Configuration.contracts.ScheduledCrossOrderedTasksFacet
+                      .addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        scheduledCouponListingFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ScheduledCouponListingFacet__factory(),
+                new ScheduledCouponListingFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ScheduledCouponListingFacet
                       .addresses?.[network]
                 : undefined,
             overrides,
@@ -1288,14 +1302,19 @@ export async function deployAtsContracts({
                 )
                 return result
             }),
+            scheduledCouponListingFacet: await deployContractWithFactory(
+                commands.scheduledCouponListingFacet
+            ).then((result) => {
+                console.log(
+                    `ScheduledCouponListingFacet has been deployed successfully at ${result.address}`
+                )
+                return result
+            }),
             scheduledCrossOrderedTasksFacet: await deployContractWithFactory(
                 commands.scheduledCrossOrderedTasksFacet
             ).then((result) => {
                 console.log(
                     `ScheduledCrossOrderedTasksFacet has been deployed successfully at ${result.address}`
-                )
-                console.log(
-                    `TransferAndLock has been deployed successfully at ${result.address}`
                 )
                 return result
             }),

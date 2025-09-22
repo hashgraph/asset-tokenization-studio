@@ -203,126 +203,301 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
-    IBusinessLogicResolver,
-    IBusinessLogicResolver__factory,
+    type ResolverProxy,
+    type Bond,
+    type ScheduledCouponListing,
+    type AccessControl,
+    ScheduledCrossOrderedTasks,
+    TimeTravel,
+    BusinessLogicResolver,
     IFactory,
-    IFactory__factory,
-    IStaticFunctionSelectors,
-    ProxyAdmin,
-    ProxyAdmin__factory,
+    AccessControl__factory,
+    Bond__factory,
+    ScheduledCrossOrderedTasks__factory,
+    ScheduledCouponListing__factory,
+    TimeTravel__factory,
 } from '@typechain'
 import {
-    DeployedBusinessLogics,
-    DeployAtsFullInfrastructureCommand,
+    CORPORATE_ACTION_ROLE,
+    PAUSER_ROLE,
+    deployBondFromFactory,
+    Rbac,
+    RegulationSubType,
+    RegulationType,
     deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+    dateToUnixTimestamp,
+    TIME_PERIODS_S,
 } from '@scripts'
-import { Network } from '@configuration'
-import { network } from 'hardhat'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
-export interface Environment {
-    deployedBusinessLogics: DeployedBusinessLogics
-    facetIdsEquities: string[]
-    facetVersionsEquities: number[]
-    facetIdsBonds: string[]
-    facetVersionsBonds: number[]
-    proxyAdmin: ProxyAdmin
-    resolver: IBusinessLogicResolver
-    factory: IFactory
-}
+const numberOfUnits = 1000
+let startingDate = 9999999999
+const numberOfCoupons = 50
+const frequency = TIME_PERIODS_S.DAY
+const rate = 10
+const rateDecimals = 1
+let maturityDate = startingDate + numberOfCoupons * frequency
+let firstCouponDate = startingDate + 1
+const countriesControlListType = true
+const listOfCountries = 'ES,FR,CH'
+const info = 'info'
 
-export const environment: Environment = buildEmptyEnvironment()
-let environmentInitialized = false
+describe('Scheduled Coupon Listing Tests', () => {
+    let diamond: ResolverProxy
+    let signer_A: SignerWithAddress
+    let signer_B: SignerWithAddress
+    let signer_C: SignerWithAddress
 
-export async function deployEnvironment({
-    signer,
-    timeTravelEnabled = false,
-}: {
-    signer: SignerWithAddress
-    timeTravelEnabled?: boolean
-}) {
-    if (!environmentInitialized) {
-        const { deployer, factory, businessLogicResolver } =
-            await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
-                    signer: signer,
-                    network: network.name as Network,
-                    useDeployed: false,
-                    timeTravelEnabled: timeTravelEnabled,
-                })
-            )
+    let account_A: string
+    let account_B: string
+    let account_C: string
 
-        environment.proxyAdmin = ProxyAdmin__factory.connect(
-            businessLogicResolver.proxyAdminAddress!,
-            deployer!
-        )
-        environment.resolver = IBusinessLogicResolver__factory.connect(
-            businessLogicResolver.proxyAddress!,
-            deployer!
-        )
-        environment.factory = IFactory__factory.connect(
-            factory.proxyAddress!,
-            deployer!
-        )
-        environmentInitialized = true
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
+    let bondFacet: Bond
+    let scheduledCouponListingFacet: ScheduledCouponListing
+    let scheduledTasksFacet: ScheduledCrossOrderedTasks
+    let accessControlFacet: AccessControl
+    let timeTravelFacet: TimeTravel
+
+    async function deploySecurityFixtureSinglePartition() {
+        const init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployBondFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            clearingActive: false,
+            internalKycActivated: true,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            currency: '0x455552',
+            numberOfUnits,
+            nominalValue: 100,
+            startingDate,
+            maturityDate,
+            couponFrequency: frequency,
+            couponRate: rate,
+            couponRateDecimals: rateDecimals,
+            firstCouponDate,
+            regulationType: RegulationType.REG_S,
+            regulationSubType: RegulationSubType.NONE,
+            countriesControlListType,
+            listOfCountries,
+            info,
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory,
+        })
+
+        await setFacets(diamond)
     }
-}
 
-function buildEmptyEnvironment(): Environment {
-    return {
-        deployedBusinessLogics: {
-            businessLogicResolver: {} as IStaticFunctionSelectors,
-            factory: {} as IStaticFunctionSelectors,
-            diamondFacet: {} as IStaticFunctionSelectors,
-            accessControlFacet: {} as IStaticFunctionSelectors,
-            controlListFacet: {} as IStaticFunctionSelectors,
-            kycFacet: {} as IStaticFunctionSelectors,
-            ssiManagementFacet: {} as IStaticFunctionSelectors,
-            corporateActionsFacet: {} as IStaticFunctionSelectors,
-            pauseFacet: {} as IStaticFunctionSelectors,
-            ERC20Facet: {} as IStaticFunctionSelectors,
-            ERC20PermitFacet: {} as IStaticFunctionSelectors,
-            ERC20Votes: {} as IStaticFunctionSelectors,
-            ERC1644Facet: {} as IStaticFunctionSelectors,
-            erc1410ReadFacet: {} as IStaticFunctionSelectors,
-            erc1410ManagementFacet: {} as IStaticFunctionSelectors,
-            erc1410IssuerFacet: {} as IStaticFunctionSelectors,
-            erc1410TokenHolderFacet: {} as IStaticFunctionSelectors,
-            ERC1594Facet: {} as IStaticFunctionSelectors,
-            ERC1643Facet: {} as IStaticFunctionSelectors,
-            equityUSAFacet: {} as IStaticFunctionSelectors,
-            bondUSAFacet: {} as IStaticFunctionSelectors,
-            bondUSARead: {} as IStaticFunctionSelectors,
-            SnapshotsFacet: {} as IStaticFunctionSelectors,
-            scheduledSnapshotsFacet: {} as IStaticFunctionSelectors,
-            scheduledBalanceAdjustmentsFacet: {} as IStaticFunctionSelectors,
-            scheduledCrossOrderedTasksFacet: {} as IStaticFunctionSelectors,
-            scheduledCouponListingFacet: {} as IStaticFunctionSelectors,
-            CapFacet: {} as IStaticFunctionSelectors,
-            LockFacet: {} as IStaticFunctionSelectors,
-            transferAndLockFacet: {} as IStaticFunctionSelectors,
-            adjustBalancesFacet: {} as IStaticFunctionSelectors,
-            protectedPartitionsFacet: {} as IStaticFunctionSelectors,
-            holdReadFacet: {} as IStaticFunctionSelectors,
-            holdManagementFacet: {} as IStaticFunctionSelectors,
-            holdTokenHolderFacet: {} as IStaticFunctionSelectors,
-            externalPauseManagementFacet: {} as IStaticFunctionSelectors,
-            externalControlListManagementFacet: {} as IStaticFunctionSelectors,
-            externalKycListManagementFacet: {} as IStaticFunctionSelectors,
-            freezeFacet: {} as IStaticFunctionSelectors,
-            beneficiariesFacet: {} as IStaticFunctionSelectors,
-            ERC3643Management: {} as IStaticFunctionSelectors,
-            ERC3643Operations: {} as IStaticFunctionSelectors,
-            ERC3643Read: {} as IStaticFunctionSelectors,
-            ERC3643BatchFacet: {} as IStaticFunctionSelectors,
-        },
-        facetIdsEquities: [],
-        facetVersionsEquities: [],
-        facetIdsBonds: [],
-        facetVersionsBonds: [],
-        proxyAdmin: {} as ProxyAdmin,
-        resolver: {} as IBusinessLogicResolver,
-        factory: {} as IFactory,
+    async function setFacets(diamond: ResolverProxy) {
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        bondFacet = Bond__factory.connect(diamond.address, signer_A)
+        scheduledCouponListingFacet = ScheduledCouponListing__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        scheduledTasksFacet = ScheduledCrossOrderedTasks__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
     }
-}
+
+    function set_initRbacs(): Rbac[] {
+        const rbacPause: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_B],
+        }
+        return [rbacPause]
+    }
+
+    before(async () => {
+        //mute | mock console.log
+        console.log = () => {}
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+
+        const { ...deployedContracts } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: true,
+                timeTravelEnabled: true,
+            })
+        )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
+        await loadFixture(deploySecurityFixtureSinglePartition)
+    })
+
+    afterEach(async () => {
+        timeTravelFacet.resetSystemTimestamp()
+    })
+
+    it('GIVEN a token WHEN triggerCouponListing THEN transaction succeeds', async () => {
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(CORPORATE_ACTION_ROLE, account_C)
+
+        // set coupons
+        const couponsRecordDateInSeconds_1 = dateToUnixTimestamp(
+            '2030-01-01T00:00:06Z'
+        )
+        const couponsRecordDateInSeconds_2 = dateToUnixTimestamp(
+            '2030-01-01T00:00:12Z'
+        )
+        const couponsRecordDateInSeconds_3 = dateToUnixTimestamp(
+            '2030-01-01T00:00:18Z'
+        )
+        const couponsExecutionDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:01:00Z'
+        )
+        const couponsRate = 1
+        const couponRateDecimals = 0
+        const couponsPeriod = 10
+
+        const couponData_1 = {
+            recordDate: couponsRecordDateInSeconds_1.toString(),
+            executionDate: couponsExecutionDateInSeconds.toString(),
+            rate: couponsRate,
+            period: couponsPeriod,
+            rateDecimals: couponRateDecimals,
+        }
+        const couponData_2 = {
+            recordDate: couponsRecordDateInSeconds_2.toString(),
+            executionDate: couponsExecutionDateInSeconds.toString(),
+            rate: couponsRate,
+            period: couponsPeriod,
+            rateDecimals: couponRateDecimals,
+        }
+        const couponData_3 = {
+            recordDate: couponsRecordDateInSeconds_3.toString(),
+            executionDate: couponsExecutionDateInSeconds.toString(),
+            rate: couponsRate,
+            period: couponsPeriod,
+            rateDecimals: couponRateDecimals,
+        }
+        await bondFacet.connect(signer_C).setCoupon(couponData_2)
+        await bondFacet.connect(signer_C).setCoupon(couponData_3)
+        await bondFacet.connect(signer_C).setCoupon(couponData_1)
+
+        const coupon_2_Id =
+            '0x0000000000000000000000000000000000000000000000000000000000000001'
+        const coupon_3_Id =
+            '0x0000000000000000000000000000000000000000000000000000000000000002'
+        const coupon_1_Id =
+            '0x0000000000000000000000000000000000000000000000000000000000000003'
+
+        // check schedled CouponListing
+        let scheduledCouponListingCount =
+            await scheduledCouponListingFacet.scheduledCouponListingCount()
+        let scheduledCouponListing =
+            await scheduledCouponListingFacet.getScheduledCouponListing(0, 100)
+
+        expect(scheduledCouponListingCount).to.equal(3)
+        expect(scheduledCouponListing.length).to.equal(
+            scheduledCouponListingCount
+        )
+        expect(
+            scheduledCouponListing[0].scheduledTimestamp.toNumber()
+        ).to.equal(couponsRecordDateInSeconds_3)
+        expect(scheduledCouponListing[0].data).to.equal(coupon_3_Id)
+        expect(
+            scheduledCouponListing[1].scheduledTimestamp.toNumber()
+        ).to.equal(couponsRecordDateInSeconds_2)
+        expect(scheduledCouponListing[1].data).to.equal(coupon_2_Id)
+        expect(
+            scheduledCouponListing[2].scheduledTimestamp.toNumber()
+        ).to.equal(couponsRecordDateInSeconds_1)
+        expect(scheduledCouponListing[2].data).to.equal(coupon_1_Id)
+
+        // AFTER FIRST SCHEDULED CouponListing ------------------------------------------------------------------
+        await timeTravelFacet.changeSystemTimestamp(
+            couponsRecordDateInSeconds_1 + 1
+        )
+        await scheduledTasksFacet
+            .connect(signer_A)
+            .triggerPendingScheduledCrossOrderedTasks()
+
+        scheduledCouponListingCount =
+            await scheduledCouponListingFacet.scheduledCouponListingCount()
+        scheduledCouponListing =
+            await scheduledCouponListingFacet.getScheduledCouponListing(0, 100)
+
+        expect(scheduledCouponListingCount).to.equal(2)
+        expect(scheduledCouponListing.length).to.equal(
+            scheduledCouponListingCount
+        )
+        expect(
+            scheduledCouponListing[0].scheduledTimestamp.toNumber()
+        ).to.equal(couponsRecordDateInSeconds_3)
+        expect(scheduledCouponListing[0].data).to.equal(coupon_3_Id)
+        expect(
+            scheduledCouponListing[1].scheduledTimestamp.toNumber()
+        ).to.equal(couponsRecordDateInSeconds_2)
+        expect(scheduledCouponListing[1].data).to.equal(coupon_2_Id)
+
+        // AFTER SECOND SCHEDULED CouponListing ------------------------------------------------------------------
+        await timeTravelFacet.changeSystemTimestamp(
+            couponsRecordDateInSeconds_2 + 1
+        )
+        await scheduledTasksFacet
+            .connect(signer_A)
+            .triggerScheduledCrossOrderedTasks(100)
+
+        scheduledCouponListingCount =
+            await scheduledCouponListingFacet.scheduledCouponListingCount()
+        scheduledCouponListing =
+            await scheduledCouponListingFacet.getScheduledCouponListing(0, 100)
+
+        expect(scheduledCouponListingCount).to.equal(1)
+        expect(scheduledCouponListing.length).to.equal(
+            scheduledCouponListingCount
+        )
+        expect(
+            scheduledCouponListing[0].scheduledTimestamp.toNumber()
+        ).to.equal(couponsRecordDateInSeconds_3)
+        expect(scheduledCouponListing[0].data).to.equal(coupon_3_Id)
+
+        // AFTER SECOND SCHEDULED CouponListing ------------------------------------------------------------------
+        await timeTravelFacet.changeSystemTimestamp(
+            couponsRecordDateInSeconds_3 + 1
+        )
+        await scheduledTasksFacet
+            .connect(signer_A)
+            .triggerScheduledCrossOrderedTasks(0)
+
+        scheduledCouponListingCount =
+            await scheduledCouponListingFacet.scheduledCouponListingCount()
+        scheduledCouponListing =
+            await scheduledCouponListingFacet.getScheduledCouponListing(0, 100)
+
+        expect(scheduledCouponListingCount).to.equal(0)
+        expect(scheduledCouponListing.length).to.equal(
+            scheduledCouponListingCount
+        )
+    })
+})

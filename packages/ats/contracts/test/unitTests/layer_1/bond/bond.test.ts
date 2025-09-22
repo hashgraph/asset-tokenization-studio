@@ -235,6 +235,8 @@ import {
     BondUSAFacetTimeTravel__factory,
     FreezeFacet,
     ClearingTransferFacet,
+    ScheduledCrossOrderedTasks,
+    ScheduledCrossOrderedTasks__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -326,6 +328,7 @@ describe('Bond Tests', () => {
     let protectedPartitionsFacet: ProtectedPartitions
     let freezeFacet: FreezeFacet
     let clearingTransferFacet: ClearingTransferFacet
+    let scheduledTasksFacet: ScheduledCrossOrderedTasks
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
@@ -387,6 +390,10 @@ describe('Bond Tests', () => {
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = SsiManagement__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        scheduledTasksFacet = ScheduledCrossOrderedTasks__factory.connect(
             diamond.address,
             signer_A
         )
@@ -985,6 +992,82 @@ describe('Bond Tests', () => {
                 expect(couponTotalHolders).to.equal(1)
                 expect(couponHolders.length).to.equal(couponTotalHolders)
                 expect(couponHolders).to.have.members([account_A])
+            })
+
+            it('GIVEN an account with corporateActions role WHEN setCoupon multiple times THEN coupons ordered list properly set up', async () => {
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    CORPORATE_ACTION_ROLE,
+                    account_C
+                )
+                // Using account C (with role)
+                bondFacet = bondFacet.connect(signer_C)
+
+                const customPeriod = 3 * 24 * 60 * 60 // 3 days in seconds
+                const DelayCoupon_2 = 100
+                const DelayCoupon_3 = 50
+
+                const customCouponData_1 = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    period: customPeriod,
+                    rateDecimals: couponRateDecimals,
+                }
+
+                const customCouponData_2 = {
+                    recordDate: (
+                        couponRecordDateInSeconds + DelayCoupon_2
+                    ).toString(),
+                    executionDate: (
+                        couponExecutionDateInSeconds + DelayCoupon_2
+                    ).toString(),
+                    rate: couponRate,
+                    period: customPeriod,
+                    rateDecimals: couponRateDecimals,
+                }
+
+                const customCouponData_3 = {
+                    recordDate: (
+                        couponRecordDateInSeconds + DelayCoupon_3
+                    ).toString(),
+                    executionDate: (
+                        couponExecutionDateInSeconds + DelayCoupon_3
+                    ).toString(),
+                    rate: couponRate,
+                    period: customPeriod,
+                    rateDecimals: couponRateDecimals,
+                }
+
+                const expectedCouponOrderList = [1, 3, 2]
+
+                await bondFacet.setCoupon(customCouponData_1)
+                await bondFacet.setCoupon(customCouponData_2)
+                await bondFacet.setCoupon(customCouponData_3)
+
+                await timeTravelFacet.changeSystemTimestamp(
+                    couponRecordDateInSeconds + DelayCoupon_2 + 1
+                )
+
+                await scheduledTasksFacet.triggerPendingScheduledCrossOrderedTasks()
+
+                const couponOrderedListTotal =
+                    await bondReadFacet.getCouponsOrderedListTotal()
+                const couponOrderedList =
+                    await bondReadFacet.getCouponsOrderedList(0, 1000)
+
+                expect(couponOrderedListTotal).to.equal(3)
+                expect(couponOrderedList.length).to.equal(3)
+
+                for (let i = 0; i < 3; i++) {
+                    expect(couponOrderedList[i]).to.equal(
+                        expectedCouponOrderList[i]
+                    )
+                    const couponAt =
+                        await bondReadFacet.getCouponFromOrderedListAt(i)
+                    expect(couponAt).to.equal(expectedCouponOrderList[i])
+                }
             })
 
             it('GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds', async () => {

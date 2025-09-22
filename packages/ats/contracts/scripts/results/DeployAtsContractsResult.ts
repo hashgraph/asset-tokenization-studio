@@ -248,6 +248,7 @@ import {
     ScheduledBalanceAdjustmentsFacet,
     ScheduledSnapshotsFacet,
     ScheduledCrossOrderedTasksFacet,
+    ScheduledCouponListingFacet,
     SnapshotsFacet,
     SsiManagementFacet,
     TransferAndLockFacet,
@@ -281,6 +282,7 @@ export interface DeployAtsContractsResultParams {
     scheduledSnapshotsFacet: DeployContractWithFactoryResult<ScheduledSnapshotsFacet>
     scheduledBalanceAdjustmentsFacet: DeployContractWithFactoryResult<ScheduledBalanceAdjustmentsFacet>
     scheduledCrossOrderedTasksFacet: DeployContractWithFactoryResult<ScheduledCrossOrderedTasksFacet>
+    scheduledCouponListingFacet: DeployContractWithFactoryResult<ScheduledCouponListingFacet>
     snapshotsFacet: DeployContractWithFactoryResult<SnapshotsFacet>
     corporateActionsFacet: DeployContractWithFactoryResult<CorporateActionsFacet>
     transferAndLockFacet: DeployContractWithFactoryResult<TransferAndLockFacet>
@@ -333,6 +335,7 @@ export default class DeployAtsContractsResult {
     public readonly scheduledSnapshotsFacet: DeployContractWithFactoryResult<ScheduledSnapshotsFacet>
     public readonly scheduledBalanceAdjustmentsFacet: DeployContractWithFactoryResult<ScheduledBalanceAdjustmentsFacet>
     public readonly scheduledCrossOrderedTasksFacet: DeployContractWithFactoryResult<ScheduledCrossOrderedTasksFacet>
+    public readonly scheduledCouponListingFacet: DeployContractWithFactoryResult<ScheduledCouponListingFacet>
     public readonly snapshotsFacet: DeployContractWithFactoryResult<SnapshotsFacet>
     public readonly corporateActionsFacet: DeployContractWithFactoryResult<CorporateActionsFacet>
     public readonly transferAndLockFacet: DeployContractWithFactoryResult<TransferAndLockFacet>
@@ -384,6 +387,7 @@ export default class DeployAtsContractsResult {
         scheduledSnapshotsFacet,
         scheduledBalanceAdjustmentsFacet,
         scheduledCrossOrderedTasksFacet,
+        scheduledCouponListingFacet,
         snapshotsFacet,
         corporateActionsFacet,
         transferAndLockFacet,
@@ -434,6 +438,7 @@ export default class DeployAtsContractsResult {
         this.scheduledSnapshotsFacet = scheduledSnapshotsFacet
         this.scheduledBalanceAdjustmentsFacet = scheduledBalanceAdjustmentsFacet
         this.scheduledCrossOrderedTasksFacet = scheduledCrossOrderedTasksFacet
+        this.scheduledCouponListingFacet = scheduledCouponListingFacet
         this.snapshotsFacet = snapshotsFacet
         this.corporateActionsFacet = corporateActionsFacet
         this.transferAndLockFacet = transferAndLockFacet

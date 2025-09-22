@@ -6,7 +6,7 @@ import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-} from '../constants/values.sol';
+} from '../../layer_0/constants/values.sol';
 import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {Common} from '../../layer_1/common/Common.sol';
 import {
