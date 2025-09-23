@@ -297,7 +297,7 @@ export const AssetDistributions = ({
   const columnsByTab = createColumnsByTab(
     upcomingColumnsData.columns,
     ongoingColumnsData.columns,
-    completedColumnsData.columns
+    completedColumnsData.columns,
   );
 
   const distributionTabs = useMemo(() => {
@@ -305,7 +305,7 @@ export const AssetDistributions = ({
       const columns = getColumnsForTab(
         columnsByTab,
         filterType,
-        upcomingColumnsData.columns
+        upcomingColumnsData.columns,
       );
       return (
         <TabContent
@@ -346,13 +346,13 @@ export const AssetDistributions = ({
 
   return (
     <>
-      <HStack spacing={6} align='center' my={6} justify='flex-end'>
-        <HStack align='center' spacing={2}>
+      <HStack spacing={6} align="center" my={6} justify="flex-end">
+        <HStack align="center" spacing={2}>
           <Switch
             isChecked={isImportingCorporateActions}
             onChange={onImportCorporateActions}
           />
-          <Text textStyle='ElementsRegularXS' color='neutral.1000'>
+          <Text textStyle="ElementsRegularXS" color="neutral.1000">
             {isImportingCorporateActions
               ? t('detail.buttons.importCorporateActions')
               : t('detail.buttons.notImportCorporateActions')}
@@ -364,7 +364,7 @@ export const AssetDistributions = ({
           leftIcon={
             <PhosphorIcon
               as={isPaused ? Play : Pause}
-              size='xxs'
+              size="xxs"
               weight={Weight.Light}
             />
           }
@@ -374,34 +374,34 @@ export const AssetDistributions = ({
             : t('detail.buttons.pauseDistributions')}
         </Button>
         {!isPaused && (
-          <Button variant='primary' onClick={handleNewDistribution}>
+          <Button variant="primary" onClick={handleNewDistribution}>
             {t('detail.buttons.newDistribution')}
           </Button>
         )}
       </HStack>
       <Box
-        bg='neutral.50'
-        borderRadius='lg'
-        boxShadow='sm'
+        bg="neutral.50"
+        borderRadius="lg"
+        boxShadow="sm"
         p={6}
-        flex='1'
-        display='flex'
-        flexDirection='column'
-        justifyContent='space-between'
+        flex="1"
+        display="flex"
+        flexDirection="column"
+        justifyContent="space-between"
       >
         <Box
-          flex='1'
-          display='flex'
-          flexDirection='column'
-          minHeight='0'
-          w='full'
+          flex="1"
+          display="flex"
+          flexDirection="column"
+          minHeight="0"
+          w="full"
         >
           <Tabs
             tabs={distributionTabs}
-            variant='table'
+            variant="table"
             onChange={handleTabChange}
             index={activeTabIndex}
-            w='full'
+            w="full"
           />
         </Box>
       </Box>

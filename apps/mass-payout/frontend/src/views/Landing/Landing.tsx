@@ -209,12 +209,12 @@ export const Landing = () => {
   const { t } = useTranslation();
 
   return (
-    <Center bg='#F8F7FC' w='full' h='full'>
-      <VStack spacing={6} align='center'>
-        <Heading as='h1' size='2xl'>
+    <Center bg="#F8F7FC" w="full" h="full">
+      <VStack spacing={6} align="center">
+        <Heading as="h1" size="2xl">
           {t('app.title')}
         </Heading>
-        <Text fontSize='xl'>{t('app.description')}</Text>
+        <Text fontSize="xl">{t('app.description')}</Text>
       </VStack>
     </Center>
   );

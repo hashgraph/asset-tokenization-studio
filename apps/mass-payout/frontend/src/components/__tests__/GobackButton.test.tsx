@@ -239,7 +239,7 @@ describe(`${GobackButton.name}`, () => {
       <GobackButton
         {...defaultProps}
         to={RouterManager.getUrl(RouteName.Landing)}
-      />
+      />,
     );
 
     expect(component.asFragment()).toMatchSnapshot('withTo');
@@ -254,12 +254,12 @@ describe(`${GobackButton.name}`, () => {
 
   test('if have to prop should redirect to desired route', () => {
     const component = render(
-      <GobackButton {...defaultProps} to={RoutePath.ASSETS} />
+      <GobackButton {...defaultProps} to={RoutePath.ASSETS} />,
     );
 
     expect(component.getByRole('link')).toHaveAttribute(
       'href',
-      RoutePath.ASSETS
+      RoutePath.ASSETS,
     );
   });
 

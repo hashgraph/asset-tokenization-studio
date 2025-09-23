@@ -203,17 +203,17 @@
 
 */
 
-import ValidatedRequest from "@core/validation/ValidatedArgs"
-import FormatValidation from "@port/in/request/FormatValidation"
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '@port/in/request/FormatValidation';
 
 export default class PauseRequest extends ValidatedRequest<PauseRequest> {
-  lifeCycleCashFlow: string
+  lifeCycleCashFlow: string;
 
   constructor({ lifeCycleCashFlow }: { lifeCycleCashFlow: string }) {
     super({
       lifeCycleCashFlow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-    })
+    });
 
-    this.lifeCycleCashFlow = lifeCycleCashFlow
+    this.lifeCycleCashFlow = lifeCycleCashFlow;
   }
 }

@@ -206,12 +206,12 @@
 export const LogError = (
   target: unknown,
   propertyKey: string,
-  descriptor: PropertyDescriptor
+  descriptor: PropertyDescriptor,
 ): PropertyDescriptor => {
-  const originalMethod = descriptor.value
+  const originalMethod = descriptor.value;
   descriptor.value = async function (...args: unknown[]): Promise<unknown> {
-    return await originalMethod.apply(this, args)
-  }
+    return await originalMethod.apply(this, args);
+  };
 
-  return descriptor
-}
+  return descriptor;
+};

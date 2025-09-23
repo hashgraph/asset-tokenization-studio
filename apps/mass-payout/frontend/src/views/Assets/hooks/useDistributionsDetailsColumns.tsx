@@ -245,7 +245,7 @@ export const useDistributionsDetailsColumns = (): ColumnDef<
       }),
       columnHelper.accessor('receieverAddressHedera', {
         header: () => (
-          <Text textAlign='left' overflow='hidden' h='40px' w='110px'>
+          <Text textAlign="left" overflow="hidden" h="40px" w="110px">
             {t('table.headers.receieverAddressHedera')}
           </Text>
         ),
@@ -255,7 +255,7 @@ export const useDistributionsDetailsColumns = (): ColumnDef<
           const address = getValue();
           return (
             <HStack>
-              <Text fontFamily='mono' fontSize='sm' color='neutral.700'>
+              <Text fontFamily="mono" fontSize="sm" color="neutral.700">
                 {address}
               </Text>
               <ClipboardButton value={address} />
@@ -265,7 +265,7 @@ export const useDistributionsDetailsColumns = (): ColumnDef<
       }),
       columnHelper.accessor('receieverAddressEvm', {
         header: () => (
-          <Text textAlign='left' overflow='hidden' h='40px' w='110px'>
+          <Text textAlign="left" overflow="hidden" h="40px" w="110px">
             {t('table.headers.receieverAddressEvm')}
           </Text>
         ),
@@ -275,7 +275,7 @@ export const useDistributionsDetailsColumns = (): ColumnDef<
           const address = getValue();
           return (
             <HStack>
-              <Text fontFamily='mono' fontSize='sm' color='neutral.700'>
+              <Text fontFamily="mono" fontSize="sm" color="neutral.700">
                 {address}
               </Text>
               <ClipboardButton value={address} />
@@ -290,7 +290,7 @@ export const useDistributionsDetailsColumns = (): ColumnDef<
       }),
       columnHelper.accessor('executionDate', {
         header: () => (
-          <Text textAlign='left' overflow='hidden' h='40px' w='75px'>
+          <Text textAlign="left" overflow="hidden" h="40px" w="75px">
             {t('table.headers.executionDate')}
           </Text>
         ),
@@ -307,10 +307,10 @@ export const useDistributionsDetailsColumns = (): ColumnDef<
           return (
             <Button
               as={Link}
-              target='_blank'
+              target="_blank"
               href={`https://hashscan.io/testnet/transactionsById/${txHash}`}
-              variant='table'
-              onClick={e => e.stopPropagation()}
+              variant="table"
+              onClick={(e) => e.stopPropagation()}
             >
               {truncatedId}
             </Button>
@@ -327,10 +327,10 @@ export const useDistributionsDetailsColumns = (): ColumnDef<
             statusMap[backendStatus as keyof typeof statusMap] ||
             DistributionsDetailsStatus.PENDING;
           const { tagVariant } = getStatusVariants(status);
-          return <Tag variant={tagVariant} size='sm' label={status} />;
+          return <Tag variant={tagVariant} size="sm" label={status} />;
         },
       }),
     ],
-    []
+    [],
   );
 };

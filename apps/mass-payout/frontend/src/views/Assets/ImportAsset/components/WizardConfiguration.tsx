@@ -52,13 +52,13 @@ export const WizardConfiguration = ({ steps }: WizardConfigurationProps) => {
 
   return (
     <Box
-      bg='neutral.50'
-      borderRadius='lg'
-      boxShadow='sm'
+      bg="neutral.50"
+      borderRadius="lg"
+      boxShadow="sm"
       p={6}
-      flex='1'
-      display='flex'
-      flexDirection='column'
+      flex="1"
+      display="flex"
+      flexDirection="column"
     >
       <Wizard
         // @ts-ignore

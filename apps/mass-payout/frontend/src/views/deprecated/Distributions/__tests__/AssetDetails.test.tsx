@@ -263,21 +263,21 @@ describe.skip('AssetDetails', () => {
 
       expect(screen.getByTestId('definition-list')).toBeInTheDocument();
       expect(
-        screen.getByTestId('definition-list-item-detail.fields.assetId')
+        screen.getByTestId('definition-list-item-detail.fields.assetId'),
       ).toBeInTheDocument();
       expect(
         screen.getByTestId(
-          'definition-list-item-detail.fields.lifecycleCashFlowId'
-        )
+          'definition-list-item-detail.fields.lifecycleCashFlowId',
+        ),
       ).toBeInTheDocument();
       expect(
-        screen.getByTestId('definition-list-item-detail.fields.maturityDate')
+        screen.getByTestId('definition-list-item-detail.fields.maturityDate'),
       ).toBeInTheDocument();
       expect(
-        screen.getByTestId('definition-list-item-detail.fields.name')
+        screen.getByTestId('definition-list-item-detail.fields.name'),
       ).toBeInTheDocument();
       expect(
-        screen.getByTestId('definition-list-item-detail.fields.assetType')
+        screen.getByTestId('definition-list-item-detail.fields.assetType'),
       ).toBeInTheDocument();
     });
 
@@ -337,19 +337,19 @@ describe.skip('AssetDetails', () => {
       factoryComponent();
 
       const assetIdItem = screen.getByTestId(
-        'definition-list-item-detail.fields.assetId'
+        'definition-list-item-detail.fields.assetId',
       );
       const lifecycleItem = screen.getByTestId(
-        'definition-list-item-detail.fields.lifecycleCashFlowId'
+        'definition-list-item-detail.fields.lifecycleCashFlowId',
       );
       const maturityItem = screen.getByTestId(
-        'definition-list-item-detail.fields.maturityDate'
+        'definition-list-item-detail.fields.maturityDate',
       );
       const nameItem = screen.getByTestId(
-        'definition-list-item-detail.fields.name'
+        'definition-list-item-detail.fields.name',
       );
       const typeItem = screen.getByTestId(
-        'definition-list-item-detail.fields.assetType'
+        'definition-list-item-detail.fields.assetType',
       );
 
       expect(assetIdItem).toBeInTheDocument();

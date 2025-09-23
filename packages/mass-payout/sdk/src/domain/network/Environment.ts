@@ -203,19 +203,19 @@
 
 */
 
-export const testnet = "testnet"
-export const previewnet = "previewnet"
-export const mainnet = "mainnet"
-export const local = "local"
-export const unrecognized = "unrecognized"
+export const testnet = 'testnet';
+export const previewnet = 'previewnet';
+export const mainnet = 'mainnet';
+export const local = 'local';
+export const unrecognized = 'unrecognized';
 
 export type Environment =
-  | "testnet"
-  | "previewnet"
-  | "mainnet"
-  | "local"
-  | "unrecognized"
-  | string
+  | 'testnet'
+  | 'previewnet'
+  | 'mainnet'
+  | 'local'
+  | 'unrecognized'
+  | string;
 
 export const HederaNetworks = [
   {
@@ -234,4 +234,4 @@ export const HederaNetworks = [
     network: local,
     chainId: 298,
   },
-]
+];

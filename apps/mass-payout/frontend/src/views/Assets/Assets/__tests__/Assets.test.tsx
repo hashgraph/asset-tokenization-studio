@@ -303,7 +303,7 @@ describe('Assets Component', () => {
       render(<Assets />);
       await waitFor(() => {
         expect(
-          screen.getByRole('button', { name: /import/i })
+          screen.getByRole('button', { name: /import/i }),
         ).toBeInTheDocument();
       });
     });
@@ -340,7 +340,7 @@ describe('Assets Component', () => {
       await user.click(selector);
 
       const equityOptions = await screen.findAllByText(
-        'filters.options.equity'
+        'filters.options.equity',
       );
       await user.click(equityOptions[0]);
 
@@ -496,7 +496,7 @@ describe('Assets Component', () => {
         const links = screen.getAllByRole('link');
         expect(links.length).toBeGreaterThan(0);
 
-        links.forEach(link => {
+        links.forEach((link) => {
           expect(link).toHaveAttribute('href');
           expect(link).toHaveAttribute('target', '_blank');
         });
@@ -549,7 +549,7 @@ describe('Assets Component', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByRole('button', { name: /import/i })
+          screen.getByRole('button', { name: /import/i }),
         ).toBeInTheDocument();
       });
 

@@ -27,19 +27,19 @@ export const AssetFilters = ({
   const { t } = useTranslation('assets');
 
   return (
-    <Stack direction='row' mb={6} alignItems='center' gap={4}>
-      <Box w='full' maxW={'280px'}>
+    <Stack direction="row" mb={6} alignItems="center" gap={4}>
+      <Box w="full" maxW={'280px'}>
         <SelectController
           control={control}
-          id='assetType'
+          id="assetType"
           placeholder={<PlaceholderWithIcon />}
           options={assetTypeOptions}
           isSearchable={false}
         />
       </Box>
-      <Box w='full' maxW={'280px'}>
+      <Box w="full" maxW={'280px'}>
         <SearchInputController
-          id='search'
+          id="search"
           placeholder={t('filters.searchPlaceholder')}
           control={control}
           onSearch={() => {}}

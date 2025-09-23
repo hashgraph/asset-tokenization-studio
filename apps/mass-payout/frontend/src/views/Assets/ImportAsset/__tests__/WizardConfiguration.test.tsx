@@ -210,14 +210,14 @@ import { render } from '@/test-utils';
 // Mock the step components that use useFormContext
 jest.mock('../components/StepAssetDetails', () => ({
   StepAssetDetails: ({ goToNext }: { goToNext: () => void }) => (
-    <div data-testid='step-asset-details'>
+    <div data-testid="step-asset-details">
       <button onClick={goToNext}>Next</button>
     </div>
   ),
 }));
 
 jest.mock('../components/StepReview', () => ({
-  StepReview: () => <div data-testid='step-review'>Review Step</div>,
+  StepReview: () => <div data-testid="step-review">Review Step</div>,
 }));
 
 interface ImportAssetFormValues {

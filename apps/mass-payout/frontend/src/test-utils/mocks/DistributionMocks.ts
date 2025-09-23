@@ -365,7 +365,7 @@ export const mockDistributionService = {
  * Utility function to create a custom mock distribution with overrides
  */
 export const createMockDistribution = (
-  overrides: Partial<MockDistribution> = {}
+  overrides: Partial<MockDistribution> = {},
 ): MockDistribution => ({
   ...mockDistributions[0],
   ...overrides,
@@ -376,7 +376,7 @@ export const createMockDistribution = (
  */
 export const createMockDistributions = (
   count: number,
-  baseOverrides: Partial<MockDistribution> = {}
+  baseOverrides: Partial<MockDistribution> = {},
 ): MockDistribution[] => {
   return Array.from({ length: count }, (_, index) =>
     createMockDistribution({
@@ -387,7 +387,7 @@ export const createMockDistributions = (
         id: `0.0.${123456 + index}`,
         name: `Test Distribution Asset ${index + 1}`,
       },
-    })
+    }),
   );
 };
 
@@ -395,13 +395,13 @@ export const createMockDistributions = (
  * Reset all distribution mocks to their initial state
  */
 export const resetDistributionMocks = (): void => {
-  Object.values(mockAssetDistributionService).forEach(mock => {
+  Object.values(mockAssetDistributionService).forEach((mock) => {
     if (jest.isMockFunction(mock)) {
       mock.mockClear();
     }
   });
 
-  Object.values(mockDistributionService).forEach(mock => {
+  Object.values(mockDistributionService).forEach((mock) => {
     if (jest.isMockFunction(mock)) {
       mock.mockClear();
     }

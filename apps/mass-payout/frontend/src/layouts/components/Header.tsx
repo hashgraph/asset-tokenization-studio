@@ -215,16 +215,16 @@ import { User } from '@phosphor-icons/react';
 export const Header = () => {
   return (
     <HeaderBase
-      data-testid='header-layout'
-      leftContent={<Logo size='iso' alt='Hedera' height='32px' />}
+      data-testid="header-layout"
+      leftContent={<Logo size="iso" alt="Hedera" height="32px" />}
       rightContent={
-        <Flex gap={4} alignItems='center'>
-          <Divider orientation='vertical' />
+        <Flex gap={4} alignItems="center">
+          <Divider orientation="vertical" />
           <HStack gap={2}>
-            <Text textStyle='ElementsMediumXS' color='neutral.800'>
+            <Text textStyle="ElementsMediumXS" color="neutral.800">
               Admin
             </Text>
-            <PhosphorIcon as={User} size='xs' weight={Weight.Light} />
+            <PhosphorIcon as={User} size="xs" weight={Weight.Light} />
           </HStack>
         </Flex>
       }

@@ -226,7 +226,7 @@ export const Sidebar = () => {
 
   return (
     <BaseSidebar
-      data-testid='sidebar-layout'
+      data-testid="sidebar-layout"
       topContent={
         <Stack spacing={6}>
           {routes.map((props, index) => (

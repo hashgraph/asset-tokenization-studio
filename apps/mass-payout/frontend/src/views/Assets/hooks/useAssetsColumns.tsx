@@ -228,7 +228,7 @@ export const useAssetsColumns = (): { columns: ColumnDef<Asset, any>[] } => {
     }),
     columnsHelper.accessor('type', {
       header: () => (
-        <Text textAlign='left' overflow='hidden' h='40px' w='50px'>
+        <Text textAlign="left" overflow="hidden" h="40px" w="50px">
           {t('table.headers.assetType')}
         </Text>
       ),
@@ -238,7 +238,7 @@ export const useAssetsColumns = (): { columns: ColumnDef<Asset, any>[] } => {
     }),
     columnsHelper.accessor('hederaTokenAddress', {
       header: () => (
-        <Text textAlign='left' overflow='hidden' w='100px'>
+        <Text textAlign="left" overflow="hidden" w="100px">
           {t('table.headers.hederaAdress')}
         </Text>
       ),
@@ -247,13 +247,13 @@ export const useAssetsColumns = (): { columns: ColumnDef<Asset, any>[] } => {
       cell: ({ getValue }) => {
         const assetId = getValue();
         return (
-          <HStack spacing='-80px'>
+          <HStack spacing="-80px">
             <Button
               as={Link}
-              target='_blank'
+              target="_blank"
               href={`https://hashscan.io/testnet/contract/${assetId}`}
-              variant='table'
-              onClick={e => e.stopPropagation()}
+              variant="table"
+              onClick={(e) => e.stopPropagation()}
             >
               {assetId}
             </Button>
@@ -264,7 +264,7 @@ export const useAssetsColumns = (): { columns: ColumnDef<Asset, any>[] } => {
     }),
     columnsHelper.accessor('evmTokenAddress', {
       header: () => (
-        <Text textAlign='left' overflow='hidden' w='100px'>
+        <Text textAlign="left" overflow="hidden" w="100px">
           {t('table.headers.evmTokenAddress')}
         </Text>
       ),
@@ -276,10 +276,10 @@ export const useAssetsColumns = (): { columns: ColumnDef<Asset, any>[] } => {
           <HStack>
             <Button
               as={Link}
-              target='_blank'
+              target="_blank"
               href={`https://etherscan.io/address/${evmAddress}`}
-              variant='table'
-              onClick={e => e.stopPropagation()}
+              variant="table"
+              onClick={(e) => e.stopPropagation()}
             >
               {evmAddress.slice(0, 10)}...{evmAddress.slice(-8)}
             </Button>
@@ -290,7 +290,7 @@ export const useAssetsColumns = (): { columns: ColumnDef<Asset, any>[] } => {
     }),
     columnsHelper.accessor('lifeCycleCashFlowHederaAddress', {
       header: () => (
-        <Text textAlign='left' overflow='hidden' w='110px'>
+        <Text textAlign="left" overflow="hidden" w="110px">
           {t('table.headers.distributionsHedera')}
         </Text>
       ),
@@ -299,13 +299,13 @@ export const useAssetsColumns = (): { columns: ColumnDef<Asset, any>[] } => {
       cell: ({ getValue }) => {
         const cashFlowId = getValue();
         return (
-          <HStack spacing='-90px'>
+          <HStack spacing="-90px">
             <Button
               as={Link}
-              target='_blank'
+              target="_blank"
               href={`https://hashscan.io/testnet/contract/${cashFlowId}`}
-              variant='table'
-              onClick={e => e.stopPropagation()}
+              variant="table"
+              onClick={(e) => e.stopPropagation()}
             >
               {cashFlowId}
             </Button>
@@ -317,7 +317,7 @@ export const useAssetsColumns = (): { columns: ColumnDef<Asset, any>[] } => {
 
     columnsHelper.accessor('lifeCycleCashFlowEvmAddress', {
       header: () => (
-        <Text textAlign='left' overflow='hidden' w='110px'>
+        <Text textAlign="left" overflow="hidden" w="110px">
           {t('table.headers.distributionsEVM')}
         </Text>
       ),
@@ -329,10 +329,10 @@ export const useAssetsColumns = (): { columns: ColumnDef<Asset, any>[] } => {
           <HStack>
             <Button
               as={Link}
-              target='_blank'
+              target="_blank"
               href={`https://etherscan.io/address/${evmCashFlowAddress}`}
-              variant='table'
-              onClick={e => e.stopPropagation()}
+              variant="table"
+              onClick={(e) => e.stopPropagation()}
             >
               {evmCashFlowAddress.slice(0, 10)}...
               {evmCashFlowAddress.slice(-8)}
@@ -350,7 +350,7 @@ export const useAssetsColumns = (): { columns: ColumnDef<Asset, any>[] } => {
         const isPaused = getValue();
         const status = isPaused ? t(AssetStatus.PAUSED) : t(AssetStatus.ACTIVE);
         const variant = isPaused ? 'paused' : 'active';
-        return <Tag label={status} variant={variant} size='md' />;
+        return <Tag label={status} variant={variant} size="md" />;
       },
     }),
   ];

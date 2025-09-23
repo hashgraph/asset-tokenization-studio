@@ -203,14 +203,14 @@
 
 */
 
-import ValidatedRequest from "@core/validation/ValidatedArgs"
-import FormatValidation from "@port/in/request/FormatValidation"
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '@port/in/request/FormatValidation';
 
 export default class ExecuteBondCashOutRequest extends ValidatedRequest<ExecuteBondCashOutRequest> {
-  lifeCycleCashFlow: string
-  bond: string
-  pageIndex: number
-  pageLength: number
+  lifeCycleCashFlow: string;
+  bond: string;
+  pageIndex: number;
+  pageLength: number;
 
   constructor({
     lifeCycleCashFlow,
@@ -228,11 +228,11 @@ export default class ExecuteBondCashOutRequest extends ValidatedRequest<ExecuteB
       bond: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       pageIndex: FormatValidation.checkNumber({ min: 0 }),
       pageLength: FormatValidation.checkNumber({ min: 1 }),
-    })
+    });
 
-    this.lifeCycleCashFlow = lifeCycleCashFlow
-    this.bond = bond
-    this.pageIndex = pageIndex
-    this.pageLength = pageLength
+    this.lifeCycleCashFlow = lifeCycleCashFlow;
+    this.bond = bond;
+    this.pageIndex = pageIndex;
+    this.pageLength = pageLength;
   }
 }

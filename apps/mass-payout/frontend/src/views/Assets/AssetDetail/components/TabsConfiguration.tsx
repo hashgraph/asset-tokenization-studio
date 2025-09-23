@@ -70,10 +70,10 @@ export const TabsConfiguration = ({
   ]);
 
   return (
-    <Stack w='full' h='full' borderRadius={1} gap={4}>
+    <Stack w="full" h="full" borderRadius={1} gap={4}>
       <Tabs
         tabs={tabs}
-        variant='primary'
+        variant="primary"
         index={activeTabIndex}
         onChange={onTabChange}
       />

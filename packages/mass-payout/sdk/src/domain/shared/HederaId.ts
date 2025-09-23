@@ -203,36 +203,36 @@
 
 */
 
-import { AccountId } from "@hashgraph/sdk"
-import { InvalidIdFormat } from "./error/InvalidIdFormat"
+import { AccountId } from '@hashgraph/sdk';
+import { InvalidIdFormat } from './error/InvalidIdFormat';
 
 export const HEDERA_FORMAT_ID_REGEX =
-  /^(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))(?:-([a-z]{5}))?$/
+  /^(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))(?:-([a-z]{5}))?$/;
 
 export class HederaId {
-  public static readonly NULL: HederaId = new HederaId("0.0.0")
+  public static readonly NULL: HederaId = new HederaId('0.0.0');
 
-  value: string
+  value: string;
   constructor(value: string) {
     if (!HEDERA_FORMAT_ID_REGEX.exec(value)) {
-      throw new InvalidIdFormat(value)
+      throw new InvalidIdFormat(value);
     }
-    this.value = value
+    this.value = value;
   }
 
   static from(value?: string): HederaId {
-    return new HederaId(value ?? "")
+    return new HederaId(value ?? '');
   }
 
   toHederaAddress(): AccountId {
-    return AccountId.fromString(this.value)
+    return AccountId.fromString(this.value);
   }
 
   toString(): string {
-    return this.value
+    return this.value;
   }
 
   isNull(): boolean {
-    return this.value == "0.0.0"
+    return this.value == '0.0.0';
   }
 }

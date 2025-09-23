@@ -18,19 +18,19 @@ export const AssetHeader = () => {
   };
 
   return (
-    <Stack direction='row' justify='space-between' align='center' mb={4}>
-      <Text textStyle='HeadingBoldXL' color='neutral.800' ml={4}>
+    <Stack direction="row" justify="space-between" align="center" mb={4}>
+      <Text textStyle="HeadingBoldXL" color="neutral.800" ml={4}>
         {t('title')}
       </Text>
       <Tooltip
-        data-testid='tooltip-assetheader'
+        data-testid="tooltip-assetheader"
         label={t('tooltipText')}
-        placement='bottom-end'
-        bg='neutral.900'
-        color='white'
-        textStyle='ElementsRegularSM'
+        placement="bottom-end"
+        bg="neutral.900"
+        color="white"
+        textStyle="ElementsRegularSM"
       >
-        <Button colorScheme='blue' size='md' onClick={handleNewAsset}>
+        <Button colorScheme="blue" size="md" onClick={handleNewAsset}>
           {t('importAsset')}
         </Button>
       </Tooltip>

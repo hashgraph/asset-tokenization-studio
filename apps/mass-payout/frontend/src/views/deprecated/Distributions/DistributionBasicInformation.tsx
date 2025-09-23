@@ -258,7 +258,7 @@ export function DistributionBasicInformation({
   ];
 
   return (
-    <Box layerStyle='boxContainer'>
+    <Box layerStyle="boxContainer">
       <DefinitionList
         isLoading={isLoading}
         items={distributionDetailsItems}

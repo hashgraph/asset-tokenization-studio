@@ -216,13 +216,13 @@ export interface NewDistributionFormValues {
 
 // Mapping functions to convert form values to API values
 export const mapFormAmountTypeToAPI = (
-  formType: FormAmountType
+  formType: FormAmountType,
 ): AmountType => {
   return formType.toUpperCase() as AmountType;
 };
 
 export const mapFormDistributionTypeToSubtype = (
-  formType: FormDistributionType
+  formType: FormDistributionType,
 ): DistributionSubtype => {
   const typeToSubtypeMap: Record<FormDistributionType, DistributionSubtype> = {
     [FormDistributionType.MANUAL]: 'IMMEDIATE',
@@ -234,7 +234,7 @@ export const mapFormDistributionTypeToSubtype = (
 };
 
 export const mapRecurringFrequencyToAPI = (
-  frequency: RecurringFrequency
+  frequency: RecurringFrequency,
 ): 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY' => {
   return frequency.toUpperCase() as 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
 };

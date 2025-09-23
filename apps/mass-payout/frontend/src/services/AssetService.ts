@@ -295,7 +295,7 @@ export interface AssetMetadata {
 
 export class AssetService {
   static async getAssets(
-    params: GetAssetsParams = {}
+    params: GetAssetsParams = {},
   ): Promise<PaginatedResponse<Asset>> {
     const { filters, page = 0, sort = [], size = 10 } = params;
 
@@ -306,7 +306,7 @@ export class AssetService {
 
     if (sort.length > 0) {
       sort.forEach((col: SortParam) =>
-        query.append('sort', `${col.id},${col.desc ? 'desc' : 'asc'}`)
+        query.append('sort', `${col.id},${col.desc ? 'desc' : 'asc'}`),
       );
     }
 
@@ -340,7 +340,7 @@ export class AssetService {
   }
 
   static async getAssetMetadata(
-    hederaTokenAddress: string
+    hederaTokenAddress: string,
   ): Promise<AssetMetadata> {
     const url = buildUrl(BackendUrls.GetAssetMetadata, { hederaTokenAddress });
     return apiRequest<AssetMetadata>(url, {
@@ -370,7 +370,7 @@ export class AssetService {
   }
 
   static async getAssetDistributions(
-    params: GetAssetDistributionsParams
+    params: GetAssetDistributionsParams,
   ): Promise<PaginatedResponse<AssetDistribution>> {
     const { assetId, page = 0, size = 10, search } = params;
 
@@ -402,7 +402,7 @@ export class AssetService {
   }
 
   static async createManualPayout(
-    params: CreateManualPayoutParams
+    params: CreateManualPayoutParams,
   ): Promise<void> {
     const { assetId, ...body } = params;
     const url = buildUrl(BackendUrls.CreateManualPayout, { assetId });

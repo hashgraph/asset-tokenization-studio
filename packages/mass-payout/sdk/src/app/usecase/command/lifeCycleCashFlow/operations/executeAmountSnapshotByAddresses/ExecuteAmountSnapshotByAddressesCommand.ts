@@ -203,8 +203,8 @@
 
 */
 
-import { Command } from "@core/command/Command"
-import { CommandResponse } from "@core/command/CommandResponse"
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
 
 export class ExecuteAmountSnapshotByAddressesCommandResponse
   implements CommandResponse
@@ -213,7 +213,7 @@ export class ExecuteAmountSnapshotByAddressesCommandResponse
     public readonly failed: string[],
     public readonly succeeded: string[],
     public readonly paidAmount: string[],
-    public readonly transactionId: string
+    public readonly transactionId: string,
   ) {}
 }
 
@@ -224,8 +224,8 @@ export class ExecuteAmountSnapshotByAddressesCommand extends Command<ExecuteAmou
     public readonly snapshotId: string,
     public readonly holders: string[],
     public readonly amount: string,
-    public readonly paymentTokenDecimals: number
+    public readonly paymentTokenDecimals: number,
   ) {
-    super()
+    super();
   }
 }

@@ -245,7 +245,8 @@ export class RetryFailedHoldersDomainService {
 
     const batchPayoutIds = Object.keys(groupedByBatchPayout)
     for (const batchPayoutId of batchPayoutIds) {
-      const batchPayout = groupedByBatchPayout[batchPayoutId][0].batchPayout // Get BatchPayout from first holder as all holders form the same group are related to the same BatchPayout
+      // Get BatchPayout from first holder as all holders form the same group are related to the same BatchPayout
+      const batchPayout = groupedByBatchPayout[batchPayoutId][0].batchPayout
       const batchPayoutFailedHolders = groupedByBatchPayout[batchPayoutId]
       await this.updateHoldersStatusToRetrying(batchPayoutFailedHolders)
       const executeDistributionResponse = await this.executeDistribution(batchPayoutFailedHolders, distribution)

@@ -206,5 +206,5 @@
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface BaseQuery {}
 export class Query<T> implements BaseQuery {
-  private $resultType!: T
+  private $resultType!: T;
 }

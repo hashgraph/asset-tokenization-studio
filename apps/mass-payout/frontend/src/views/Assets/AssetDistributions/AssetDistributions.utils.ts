@@ -14,12 +14,12 @@ import {
 export const getFilteredDistributionsByStatus = (
   data: AssetDistributionData[] | undefined,
   filterType: DistributionFilterType,
-  statusFilterMap: StatusFilterMap
+  statusFilterMap: StatusFilterMap,
 ): AssetDistributionData[] => {
   const rawData = data || [];
   const filterFn = statusFilterMap[filterType];
 
-  const filtered = rawData.filter(distribution => {
+  const filtered = rawData.filter((distribution) => {
     const shouldInclude = filterFn ? filterFn(distribution) : true;
     return shouldInclude;
   });
@@ -32,7 +32,7 @@ export const getFilteredDistributionsByStatus = (
  */
 export const filterByDistributionType = (
   distributions: AssetDistributionData[],
-  selectedDistributionType: string
+  selectedDistributionType: string,
 ): AssetDistributionData[] => {
   if (
     !selectedDistributionType ||
@@ -42,7 +42,7 @@ export const filterByDistributionType = (
     return distributions;
   }
 
-  return distributions.filter(distribution => {
+  return distributions.filter((distribution) => {
     return (
       distribution.type === selectedDistributionType ||
       distribution.subtype === selectedDistributionType
@@ -55,14 +55,14 @@ export const filterByDistributionType = (
  */
 export const filterBySearchTerm = (
   distributions: AssetDistributionData[],
-  searchTerm: string
+  searchTerm: string,
 ): AssetDistributionData[] => {
   if (!searchTerm) {
     return distributions;
   }
 
   const searchLower = searchTerm.toLowerCase();
-  return distributions.filter(distribution => {
+  return distributions.filter((distribution) => {
     const matches = distribution.id.toLowerCase().includes(searchLower);
     return matches;
   });
@@ -74,7 +74,7 @@ export const filterBySearchTerm = (
 export const applyPagination = (
   distributions: AssetDistributionData[],
   pageIndex: number,
-  pageSize: number
+  pageSize: number,
 ): FilteredDistributionsResult => {
   const totalFilteredElements = distributions.length;
   const startIndex = pageIndex * pageSize;
@@ -110,7 +110,7 @@ export const getProcessedDistributions = ({
   let filtered = getFilteredDistributionsByStatus(
     data,
     activeFilter,
-    statusFilterMap
+    statusFilterMap,
   );
   filtered = filterByDistributionType(filtered, selectedDistributionType);
   filtered = filterBySearchTerm(filtered, searchTerm);
@@ -130,7 +130,7 @@ export const isDistributionRowClickable = (status: string): boolean => {
  */
 export const calculateTotalPages = (
   totalElements: number,
-  pageSize: number
+  pageSize: number,
 ): number => {
   return Math.ceil(totalElements / pageSize);
 };
@@ -141,7 +141,7 @@ export const calculateTotalPages = (
 export const createColumnsByTab = (
   upcomingColumns: AssetDistributionColumn[],
   ongoingColumns: AssetDistributionColumn[],
-  completedColumns: AssetDistributionColumn[]
+  completedColumns: AssetDistributionColumn[],
 ): ColumnsByTab => ({
   upcoming: upcomingColumns,
   ongoing: ongoingColumns,
@@ -154,7 +154,7 @@ export const createColumnsByTab = (
 export const getColumnsForTab = (
   columnsByTab: ColumnsByTab,
   filterType: DistributionFilterType,
-  fallbackColumns: AssetDistributionColumn[]
+  fallbackColumns: AssetDistributionColumn[],
 ): AssetDistributionColumn[] => {
   return columnsByTab[filterType] || fallbackColumns;
 };
@@ -164,7 +164,7 @@ export const getColumnsForTab = (
  */
 export const createDistributionTabs = (
   createTabContentFn: (filterType: DistributionFilterType) => JSX.Element,
-  t: TFunction
+  t: TFunction,
 ) => [
   {
     content: createTabContentFn('upcoming'),

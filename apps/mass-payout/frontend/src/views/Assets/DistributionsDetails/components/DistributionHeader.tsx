@@ -37,18 +37,18 @@ export const DistributionHeader: React.FC<DistributionHeaderProps> = ({
   const isFailed = distribution?.status === 'FAILED';
 
   return (
-    <VStack alignItems='left' gap='12px' mb={6}>
+    <VStack alignItems="left" gap="12px" mb={6}>
       <Breadcrumb items={breadcrumbItems} />
-      <HStack align='center' w='full'>
-        <HStack align='center' spacing={2}>
+      <HStack align="center" w="full">
+        <HStack align="center" spacing={2}>
           <GobackButton label={title} mr={4} onClick={onGoBack} />
           {distribution && (
             <Tooltip
               label={t('failedMessage')}
-              placement='bottom'
-              bg='neutral.900'
-              color='white'
-              textStyle='ElementsRegularSM'
+              placement="bottom"
+              bg="neutral.900"
+              color="white"
+              textStyle="ElementsRegularSM"
             >
               <Tag
                 label={
@@ -61,7 +61,7 @@ export const DistributionHeader: React.FC<DistributionHeaderProps> = ({
                     distribution.status as keyof typeof statusVariantMap
                   ] || ''
                 }
-                size='md'
+                size="md"
               />
             </Tooltip>
           )}
@@ -69,8 +69,8 @@ export const DistributionHeader: React.FC<DistributionHeaderProps> = ({
         <Spacer />
         {isFailed && (
           <Button
-            variant='primary'
-            size='md'
+            variant="primary"
+            size="md"
             onClick={onRetryAll}
             isLoading={isRetryPending}
             isDisabled={isRetryPending}

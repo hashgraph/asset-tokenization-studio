@@ -13,14 +13,14 @@ export const PlaceholderWithIcon = () => {
   const { t } = useTranslation('assets');
 
   return (
-    <HStack spacing={2} color='neutral.400'>
+    <HStack spacing={2} color="neutral.400">
       <PhosphorIcon
         as={CalendarBlank}
-        size='2xs'
+        size="2xs"
         weight={Weight.Light}
-        color='inherit'
+        color="inherit"
       />
-      <Text textStyle='ElementsRegularSM'>{t('filters.selectByType')}</Text>
+      <Text textStyle="ElementsRegularSM">{t('filters.selectByType')}</Text>
     </HStack>
   );
 };

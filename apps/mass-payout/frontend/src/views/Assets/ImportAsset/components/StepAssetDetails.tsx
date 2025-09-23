@@ -255,40 +255,40 @@ export const StepAssetDetails = ({ goToNext }: StepAssetDetailsProps) => {
   }, [assetMetadata, setValue]);
 
   return (
-    <Stack gap={8} w='full' maxW='500px' align='flex-start' mt={12}>
-      <Stack gap={2} align='flex-start'>
-        <Text textStyle='HeadingMediumLG' color='neutral.800'>
+    <Stack gap={8} w="full" maxW="500px" align="flex-start" mt={12}>
+      <Stack gap={2} align="flex-start">
+        <Text textStyle="HeadingMediumLG" color="neutral.800">
           {t('details.title')}
         </Text>
-        <Text textStyle='BodyTextRegularMD' color='neutral.800'>
+        <Text textStyle="BodyTextRegularMD" color="neutral.800">
           {t('details.subtitle')}
         </Text>
       </Stack>
-      <Text textStyle='BodyTextRegularMD' color='neutral.800'>
+      <Text textStyle="BodyTextRegularMD" color="neutral.800">
         {t('details.description')}
       </Text>
-      <Stack gap={6} w='full'>
-        <Stack gap={2} w='full'>
-          <Text textStyle='BodyTextRegularSM' fontWeight='medium'>
+      <Stack gap={6} w="full">
+        <Stack gap={2} w="full">
+          <Text textStyle="BodyTextRegularSM" fontWeight="medium">
             {t('form.assetId.label')}
           </Text>
-          <HStack spacing={4} alignItems='flex-start'>
+          <HStack spacing={4} alignItems="flex-start">
             <InputController
               autoFocus
               control={control}
-              id='assetId'
+              id="assetId"
               rules={{
                 required: t('form.assetId.required'),
               }}
               placeholder={t('form.assetId.placeholder')}
-              size='md'
-              w='full'
+              size="md"
+              w="full"
             />
             <IconButton
-              aria-label='fetch-button'
+              aria-label="fetch-button"
               icon={<PhosphorIcon as={Eject} />}
-              size='md'
-              variant='primary'
+              size="md"
+              variant="primary"
               onClick={handleFetchAsset}
               isLoading={isLoading}
               isDisabled={!assetId || isLoading}
@@ -297,46 +297,46 @@ export const StepAssetDetails = ({ goToNext }: StepAssetDetailsProps) => {
         </Stack>
       </Stack>
       {assetMetadata && (
-        <VStack gap={6} w='full' align='flex-start'>
-          <InfoDivider title={t('details.assetInfo')} type='main' />
-          <Text textStyle='BodyTextRegularMD' color='neutral.800'>
+        <VStack gap={6} w="full" align="flex-start">
+          <InfoDivider title={t('details.assetInfo')} type="main" />
+          <Text textStyle="BodyTextRegularMD" color="neutral.800">
             <Trans
-              i18nKey='importAsset:details.assetName'
+              i18nKey="importAsset:details.assetName"
               values={{ name: assetMetadata.name }}
               components={{
-                bold: <Text as='span' fontWeight='bold' />,
+                bold: <Text as="span" fontWeight="bold" />,
               }}
             />
           </Text>
-          <Text textStyle='BodyTextRegularMD' color='neutral.800'>
+          <Text textStyle="BodyTextRegularMD" color="neutral.800">
             <Trans
-              i18nKey='importAsset:details.symbol'
+              i18nKey="importAsset:details.symbol"
               values={{ symbol: assetMetadata.symbol }}
               components={{
-                bold: <Text as='span' fontWeight='bold' />,
+                bold: <Text as="span" fontWeight="bold" />,
               }}
             />
           </Text>
-          <Text textStyle='BodyTextRegularMD' color='neutral.800'>
+          <Text textStyle="BodyTextRegularMD" color="neutral.800">
             <Trans
-              i18nKey='importAsset:details.assetType'
+              i18nKey="importAsset:details.assetType"
               values={{ type: assetMetadata.assetType }}
               components={{
-                bold: <Text as='span' fontWeight='bold' />,
+                bold: <Text as="span" fontWeight="bold" />,
               }}
             />
           </Text>
         </VStack>
       )}
-      <HStack w='full' pt={4} justifyContent='space-between'>
-        <Button variant='secondary' onClick={handleCancel} size='md'>
+      <HStack w="full" pt={4} justifyContent="space-between">
+        <Button variant="secondary" onClick={handleCancel} size="md">
           {t('buttons.cancel')}
         </Button>
         <Button
-          variant='primary'
+          variant="primary"
           isDisabled={isPending}
           onClick={goToNext}
-          size='md'
+          size="md"
         >
           {t('buttons.nextStep')}
         </Button>

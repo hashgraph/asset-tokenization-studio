@@ -266,27 +266,27 @@ export const StepReview = () => {
 
   return (
     <FormStepContainer>
-      <Stack w='full' spacing={8}>
-        <VStack gap={6} align='flex-start' w='full'>
+      <Stack w="full" spacing={8}>
+        <VStack gap={6} align="flex-start" w="full">
           <InfoDivider
             step={1}
             title={t('review.assetConfiguration')}
-            type='main'
+            type="main"
           />
 
-          <VStack gap={4} w='full' align='flex-start'>
+          <VStack gap={4} w="full" align="flex-start">
             {assetDetails.map((props, index) => (
               <DetailReview key={index} {...props} />
             ))}
           </VStack>
         </VStack>
 
-        <HStack gap={3} w='full' justify='space-between' pt={8}>
+        <HStack gap={3} w="full" justify="space-between" pt={8}>
           <Button
-            size='md'
-            variant='secondary'
+            size="md"
+            variant="secondary"
             onClick={handleCancel}
-            minW='80px'
+            minW="80px"
           >
             {t('buttons.cancel')}
           </Button>
@@ -294,11 +294,11 @@ export const StepReview = () => {
           <HStack gap={3}>
             <PreviousStepButton />
             <Button
-              size='md'
-              variant='primary'
+              size="md"
+              variant="primary"
               onClick={handleCreateAsset}
-              data-testid='final-import-asset-button'
-              minW='100px'
+              data-testid="final-import-asset-button"
+              minW="100px"
               isLoading={importAssetMutation.isPending}
               isDisabled={importAssetMutation.isPending || !assetId}
             >

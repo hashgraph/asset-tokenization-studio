@@ -289,7 +289,7 @@ export interface GetHoldersParams {
 
 export class DistributionService {
   static async getDistributions(
-    params: GetDistributionsParams = {}
+    params: GetDistributionsParams = {},
   ): Promise<PaginatedResponse<Distribution>> {
     const { filters, page = 0, sort = [], size = 10, status } = params;
 
@@ -335,7 +335,7 @@ export class DistributionService {
   }
 
   static async getDistributionHolders(
-    params: GetHoldersParams
+    params: GetHoldersParams,
   ): Promise<PaginatedResponse<Holder>> {
     const { distributionId, page = 0, size = 10, search } = params;
 

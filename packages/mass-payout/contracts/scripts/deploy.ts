@@ -203,21 +203,12 @@
 
    */
 
-import { ethers } from 'hardhat'
-import {
-    Contract,
-    ContractFactory
-} from 'ethers'
-import {
-    Client,
-    TransactionResponse,
-    TokenAssociateTransaction
-} from '@hashgraph/sdk'
-import Configuration from '@configuration'
-import DeployContractCommand from './commands/DeployContractCommand'
-import DeployContractResult from './results/DeployContractResult'
+import { ethers } from 'hardhat';
 
-const SuccessStatus = 22
+import DeployContractCommand from './commands/DeployContractCommand';
+import DeployContractResult from './results/DeployContractResult';
+
+const SuccessStatus = 22;
 
 /**
  * Deploys a smart contract and optionally its proxy and proxy admin.
@@ -236,87 +227,91 @@ const SuccessStatus = 22
  * });
  */
 export async function deployLifeCycleCashFlowContracts({
-    name,
-    signer,
-    args,
+  name,
+  signer,
+  args,
 }: DeployContractCommand): Promise<DeployContractResult> {
-    console.log(`Deploying ${name}. please wait...`)
+  console.log(`Deploying ${name}. please wait...`);
 
-    const contractResult = await deployContract(
-        new DeployContractCommand({
-            name,
-            signer,
-            args: []
-        })
-    )
+  const contractResult = await deployContract(
+    new DeployContractCommand({
+      name,
+      signer,
+      args: [],
+    }),
+  );
 
-    console.log(`${name} deployed at ${contractResult.address}`)
+  console.log(`${name} deployed at ${contractResult.address}`);
 
-    console.log(`Deploying ${name} Proxy Admin. please wait...`)
+  console.log(`Deploying ${name} Proxy Admin. please wait...`);
 
-    const proxyAdminContractResult = await deployContract(
-        new DeployContractCommand({
-            name: 'ProxyAdmin',
-            signer,
-            args: []
-        })
-    )
+  const proxyAdminContractResult = await deployContract(
+    new DeployContractCommand({
+      name: 'ProxyAdmin',
+      signer,
+      args: [],
+    }),
+  );
 
-    console.log(`${name} Proxy Admin deployed at ${proxyAdminContractResult.address}`)
+  console.log(
+    `${name} Proxy Admin deployed at ${proxyAdminContractResult.address}`,
+  );
 
-    console.log(`Deploying ${name} Proxy. please wait...`)
+  console.log(`Deploying ${name} Proxy. please wait...`);
 
-    const proxyContractResult = await deployContract(
-        new DeployContractCommand({
-            name: 'TransparentUpgradeableProxy',
-            signer,
-            args: [contractResult.address, proxyAdminContractResult.address, '0x']
-        })
-    )
+  const proxyContractResult = await deployContract(
+    new DeployContractCommand({
+      name: 'TransparentUpgradeableProxy',
+      signer,
+      args: [contractResult.address, proxyAdminContractResult.address, '0x'],
+    }),
+  );
 
-    console.log(`${name} Proxy deployed at ${proxyContractResult.address}`)
+  console.log(`${name} Proxy deployed at ${proxyContractResult.address}`);
 
-    let lifeCycleCashFlow = await ethers.getContractAt(
-       name,
-       proxyContractResult.address
-    )
+  let lifeCycleCashFlow = await ethers.getContractAt(
+    name,
+    proxyContractResult.address,
+  );
 
-    lifeCycleCashFlow = lifeCycleCashFlow.connect(signer)
+  lifeCycleCashFlow = lifeCycleCashFlow.connect(signer);
 
-    try {
-        const tx = await lifeCycleCashFlow.initialize(...(args as [string, string]))
-        const receipt = await tx.wait(); // wait for execution & revert to be caught
-        console.log(`${name} initialize function was successfully executed`);
-    } catch (error: any) {
-        console.error(`${name} initialize function failed!`);
-        console.error(`Message: ${error.message}`);
-    }
+  try {
+    const tx = await lifeCycleCashFlow.initialize(
+      ...(args as [string, string]),
+    );
+    const receipt = await tx.wait(); // wait for execution & revert to be caught
+    console.log(`${name} initialize function was successfully executed`);
+  } catch (error: any) {
+    console.error(`${name} initialize function failed!`);
+    console.error(`Message: ${error.message}`);
+  }
 
-    // associateToken((args as [string, string])[1], contractResult.address, signer)
+  // associateToken((args as [string, string])[1], contractResult.address, signer)
 
-    return new DeployContractResult({
-        name,
-        address: contractResult.address,
-        contract: contractResult.contract,
-        proxyAddress: proxyContractResult.address,
-        proxyAdminAddress: proxyAdminContractResult.address,
-        receipt: await proxyContractResult.receipt,
-    })
+  return new DeployContractResult({
+    name,
+    address: contractResult.address,
+    contract: contractResult.contract,
+    proxyAddress: proxyContractResult.address,
+    proxyAdminAddress: proxyAdminContractResult.address,
+    receipt: await proxyContractResult.receipt,
+  });
 }
 
 export async function deployContract({
-    name,
-    signer,
-    args,
+  name,
+  signer,
+  args,
 }: DeployContractCommand): Promise<DeployContractResult> {
-    const contractFactory = await ethers.getContractFactory(name, signer)
-    const contract = await contractFactory.deploy(...args)
-    const receipt = contract.deployTransaction.wait()
+  const contractFactory = await ethers.getContractFactory(name, signer);
+  const contract = await contractFactory.deploy(...args);
+  const receipt = contract.deployTransaction.wait();
 
-    return new DeployContractResult({
-            name,
-            contract,
-            address: contract.address,
-            receipt: await receipt,
-    })
+  return new DeployContractResult({
+    name,
+    contract,
+    address: contract.address,
+    receipt: await receipt,
+  });
 }

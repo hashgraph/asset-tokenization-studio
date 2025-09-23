@@ -38,23 +38,23 @@ export const AssetTable = ({
 
   return (
     <Box
-      bg='neutral.50'
-      borderRadius='lg'
-      boxShadow='sm'
+      bg="neutral.50"
+      borderRadius="lg"
+      boxShadow="sm"
       p={6}
-      flex='1'
-      display='flex'
-      flexDirection='column'
-      justifyContent='space-between'
+      flex="1"
+      display="flex"
+      flexDirection="column"
+      justifyContent="space-between"
     >
-      <Text textStyle='ElementsSemiboldLG' color='neutral.900' mb={6}>
+      <Text textStyle="ElementsSemiboldLG" color="neutral.900" mb={6}>
         {t('title')}
       </Text>
 
-      <Box flex='1' display='flex' flexDirection='column' minHeight='0'>
+      <Box flex="1" display="flex" flexDirection="column" minHeight="0">
         <Table
           isLoading={isLoading}
-          name='assets'
+          name="assets"
           columns={columns}
           data={filteredAssets}
           onClickRow={onClickRow}

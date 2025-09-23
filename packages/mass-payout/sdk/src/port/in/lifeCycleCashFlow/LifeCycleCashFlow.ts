@@ -203,53 +203,51 @@
 
 */
 
-import { Injectable } from "@nestjs/common"
-import { LogError } from "@core/decorator/LogErrorDecorator"
-import ValidatedRequest from "@core/validation/ValidatedArgs"
-import { CommandBus } from "@core/command/CommandBus"
-import { QueryBus } from "@core/query/QueryBus"
-import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter"
-import DeployRequest from "@port/in/request/lifeCycleCashFlow/DeployRequest"
-import PauseRequest from "@port/in/request/lifeCycleCashFlow/PauseRequest"
-import UnpauseRequest from "@port/in/request/lifeCycleCashFlow/UnpauseRequest"
-import IsPausedRequest from "@port/in/request/lifeCycleCashFlow/IsPausedRequest"
-import GetPaymentTokenRequest from "@port/in/request/lifeCycleCashFlow/GetPaymentTokenRequest"
-import GetPaymentTokenDecimalsRequest from "@port/in/request/lifeCycleCashFlow/GetPaymentTokenDecimalsRequest"
-import ExecuteDistributionRequest from "@port/in/request/lifeCycleCashFlow/ExecuteDistributionRequest"
-import ExecuteDistributionByAddressesRequest from "@port/in/request/lifeCycleCashFlow/ExecuteDistributionByAddressesRequest"
-import ExecuteBondCashOutRequest from "@port/in/request/lifeCycleCashFlow/ExecuteBondCashOutRequest"
-import ExecuteBondCashOutByAddressesRequest from "@port/in/request/lifeCycleCashFlow/ExecuteBondCashOutByAddressesRequest"
-import ExecuteAmountSnapshotRequest from "@port/in/request/lifeCycleCashFlow/ExecuteAmountSnapshotRequest"
-import ExecutePercentageSnapshotRequest from "@port/in/request/lifeCycleCashFlow/ExecutePercentageSnapshotRequest"
-import ExecuteAmountSnapshotByAddressesRequest from "@port/in/request/lifeCycleCashFlow/ExecuteAmountSnapshotByAddressesRequest"
-import ExecutePercentageSnapshotByAddressesRequest from "@port/in/request/lifeCycleCashFlow/ExecutePercentageSnapshotByAddressesRequest"
-import { DeployCommand } from "@app/usecase/command/lifeCycleCashFlow/operations/deploy/DeployCommand"
-import { PauseCommand } from "@app/usecase/command/lifeCycleCashFlow/operations/pause/PauseCommand"
-import { UnpauseCommand } from "@app/usecase/command/lifeCycleCashFlow/operations/unpause/UnpauseCommand"
-import { IsPausedQuery } from "@app/usecase/query/lifeCycleCashFlow/isPaused/IsPausedQuery"
-import { GetPaymentTokenQuery } from "@app/usecase/query/lifeCycleCashFlow/getPaymentToken/GetPaymentTokenQuery"
-import { GetPaymentTokenDecimalsQuery } from "@app/usecase/query/lifeCycleCashFlow/getPaymentTokenDecimals/GetPaymentTokenDecimalsQuery"
-import { ExecuteDistributionCommand } from "@app/usecase/command/lifeCycleCashFlow/operations/executeDistribution/ExecuteDistributionCommand"
-import { ExecuteDistributionByAddressesCommand } from "@app/usecase/command/lifeCycleCashFlow/operations/executeDistributionByAddresses/ExecuteDistributionByAddressesCommand"
-import { ExecuteBondCashOutCommand } from "@app/usecase/command/lifeCycleCashFlow/operations/executeBondCashOut/ExecuteBondCashOutCommand"
-import { ExecuteBondCashOutByAddressesCommand } from "@app/usecase/command/lifeCycleCashFlow/operations/executeBondCashOutByAddresses/ExecuteBondCashOutByAddressesCommand"
-import { ExecuteAmountSnapshotCommand } from "@app/usecase/command/lifeCycleCashFlow/operations/executeAmountSnapshot/ExecuteAmountSnapshotCommand"
-import { ExecuteAmountSnapshotByAddressesCommand } from "@app/usecase/command/lifeCycleCashFlow/operations/executeAmountSnapshotByAddresses/ExecuteAmountSnapshotByAddressesCommand"
-import { ExecutePercentageSnapshotCommand } from "@app/usecase/command/lifeCycleCashFlow/operations/executePercentageSnapshot/ExecutePercentageSnapshotCommand"
-import { ExecutePercentageSnapshotByAddressesCommand } from "@app/usecase/command/lifeCycleCashFlow/operations/executePercentageSnapshotByAddresses/ExecutePercentageSnapshotByAddressesCommand"
+import { Injectable } from '@nestjs/common';
+import { LogError } from '@core/decorator/LogErrorDecorator';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { CommandBus } from '@core/command/CommandBus';
+import { QueryBus } from '@core/query/QueryBus';
+import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import DeployRequest from '@port/in/request/lifeCycleCashFlow/DeployRequest';
+import PauseRequest from '@port/in/request/lifeCycleCashFlow/PauseRequest';
+import UnpauseRequest from '@port/in/request/lifeCycleCashFlow/UnpauseRequest';
+import IsPausedRequest from '@port/in/request/lifeCycleCashFlow/IsPausedRequest';
+import GetPaymentTokenRequest from '@port/in/request/lifeCycleCashFlow/GetPaymentTokenRequest';
+import GetPaymentTokenDecimalsRequest from '@port/in/request/lifeCycleCashFlow/GetPaymentTokenDecimalsRequest';
+import ExecuteDistributionRequest from '@port/in/request/lifeCycleCashFlow/ExecuteDistributionRequest';
+import ExecuteDistributionByAddressesRequest from '@port/in/request/lifeCycleCashFlow/ExecuteDistributionByAddressesRequest';
+import ExecuteBondCashOutRequest from '@port/in/request/lifeCycleCashFlow/ExecuteBondCashOutRequest';
+import ExecuteBondCashOutByAddressesRequest from '@port/in/request/lifeCycleCashFlow/ExecuteBondCashOutByAddressesRequest';
+import ExecuteAmountSnapshotRequest from '@port/in/request/lifeCycleCashFlow/ExecuteAmountSnapshotRequest';
+import ExecutePercentageSnapshotRequest from '@port/in/request/lifeCycleCashFlow/ExecutePercentageSnapshotRequest';
+import ExecuteAmountSnapshotByAddressesRequest from '@port/in/request/lifeCycleCashFlow/ExecuteAmountSnapshotByAddressesRequest';
+import ExecutePercentageSnapshotByAddressesRequest from '@port/in/request/lifeCycleCashFlow/ExecutePercentageSnapshotByAddressesRequest';
+import { DeployCommand } from '@app/usecase/command/lifeCycleCashFlow/operations/deploy/DeployCommand';
+import { PauseCommand } from '@app/usecase/command/lifeCycleCashFlow/operations/pause/PauseCommand';
+import { UnpauseCommand } from '@app/usecase/command/lifeCycleCashFlow/operations/unpause/UnpauseCommand';
+import { IsPausedQuery } from '@app/usecase/query/lifeCycleCashFlow/isPaused/IsPausedQuery';
+import { GetPaymentTokenQuery } from '@app/usecase/query/lifeCycleCashFlow/getPaymentToken/GetPaymentTokenQuery';
+import { GetPaymentTokenDecimalsQuery } from '@app/usecase/query/lifeCycleCashFlow/getPaymentTokenDecimals/GetPaymentTokenDecimalsQuery';
+import { ExecuteDistributionCommand } from '@app/usecase/command/lifeCycleCashFlow/operations/executeDistribution/ExecuteDistributionCommand';
+import { ExecuteDistributionByAddressesCommand } from '@app/usecase/command/lifeCycleCashFlow/operations/executeDistributionByAddresses/ExecuteDistributionByAddressesCommand';
+import { ExecuteBondCashOutCommand } from '@app/usecase/command/lifeCycleCashFlow/operations/executeBondCashOut/ExecuteBondCashOutCommand';
+import { ExecuteBondCashOutByAddressesCommand } from '@app/usecase/command/lifeCycleCashFlow/operations/executeBondCashOutByAddresses/ExecuteBondCashOutByAddressesCommand';
+import { ExecuteAmountSnapshotCommand } from '@app/usecase/command/lifeCycleCashFlow/operations/executeAmountSnapshot/ExecuteAmountSnapshotCommand';
+import { ExecuteAmountSnapshotByAddressesCommand } from '@app/usecase/command/lifeCycleCashFlow/operations/executeAmountSnapshotByAddresses/ExecuteAmountSnapshotByAddressesCommand';
+import { ExecutePercentageSnapshotCommand } from '@app/usecase/command/lifeCycleCashFlow/operations/executePercentageSnapshot/ExecutePercentageSnapshotCommand';
+import { ExecutePercentageSnapshotByAddressesCommand } from '@app/usecase/command/lifeCycleCashFlow/operations/executePercentageSnapshotByAddresses/ExecutePercentageSnapshotByAddressesCommand';
 
 interface ILifeCycleCashFlowPort {
   deploy(request: DeployRequest): Promise<{ payload: string }>;
   pause(
-    request: PauseRequest
+    request: PauseRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   unpause(
-    request: UnpauseRequest
+    request: UnpauseRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   isPaused(request: IsPausedRequest): Promise<{ payload: boolean }>;
-  executeDistribution(
-    request: ExecuteDistributionRequest
-  ): Promise<{
+  executeDistribution(request: ExecuteDistributionRequest): Promise<{
     failed: string[];
     succeeded: string[];
     paidAmount: string[];
@@ -257,16 +255,14 @@ interface ILifeCycleCashFlowPort {
     transactionId: string;
   }>;
   executeDistributionByAddresses(
-    request: ExecuteDistributionByAddressesRequest
+    request: ExecuteDistributionByAddressesRequest,
   ): Promise<{
     failed: string[];
     succeeded: string[];
     paidAmount: string[];
     transactionId: string;
   }>;
-  executeBondCashOut(
-    request: ExecuteBondCashOutRequest
-  ): Promise<{
+  executeBondCashOut(request: ExecuteBondCashOutRequest): Promise<{
     failed: string[];
     succeeded: string[];
     paidAmount: string[];
@@ -274,16 +270,14 @@ interface ILifeCycleCashFlowPort {
     transactionId: string;
   }>;
   executeBondCashOutByAddresses(
-    request: ExecuteBondCashOutByAddressesRequest
+    request: ExecuteBondCashOutByAddressesRequest,
   ): Promise<{
     failed: string[];
     succeeded: string[];
     paidAmount: string[];
     transactionId: string;
   }>;
-  executeAmountSnapshot(
-    request: ExecuteAmountSnapshotRequest
-  ): Promise<{
+  executeAmountSnapshot(request: ExecuteAmountSnapshotRequest): Promise<{
     failed: string[];
     succeeded: string[];
     paidAmount: string[];
@@ -291,7 +285,7 @@ interface ILifeCycleCashFlowPort {
     transactionId: string;
   }>;
   executePercentageSnapshot(
-    request: ExecutePercentageSnapshotRequest
+    request: ExecutePercentageSnapshotRequest,
   ): Promise<{
     failed: string[];
     succeeded: string[];
@@ -300,7 +294,7 @@ interface ILifeCycleCashFlowPort {
     transactionId: string;
   }>;
   executeAmountSnapshotByAddresses(
-    request: ExecuteAmountSnapshotByAddressesRequest
+    request: ExecuteAmountSnapshotByAddressesRequest,
   ): Promise<{
     failed: string[];
     succeeded: string[];
@@ -308,7 +302,7 @@ interface ILifeCycleCashFlowPort {
     transactionId: string;
   }>;
   executePercentageSnapshotByAddresses(
-    request: ExecutePercentageSnapshotByAddressesRequest
+    request: ExecutePercentageSnapshotByAddressesRequest,
   ): Promise<{
     failed: string[];
     succeeded: string[];
@@ -316,10 +310,10 @@ interface ILifeCycleCashFlowPort {
     transactionId: string;
   }>;
   getPaymentToken(
-    request: GetPaymentTokenRequest
+    request: GetPaymentTokenRequest,
   ): Promise<{ payload: string }>;
   getPaymentTokenDecimals(
-    request: GetPaymentTokenDecimalsRequest
+    request: GetPaymentTokenDecimalsRequest,
   ): Promise<{ payload: number }>;
 }
 
@@ -328,78 +322,76 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    private readonly mirrorNode: MirrorNodeAdapter
+    private readonly mirrorNode: MirrorNodeAdapter,
   ) {}
 
   @LogError
   async deploy(request: DeployRequest): Promise<{ payload: string }> {
-    const { asset, paymentToken } = request
-    ValidatedRequest.handleValidation("DeployRequest", request)
+    const { asset, paymentToken } = request;
+    ValidatedRequest.handleValidation('DeployRequest', request);
 
     return await this.commandBus.execute(
-      new DeployCommand(asset, paymentToken)
-    )
+      new DeployCommand(asset, paymentToken),
+    );
   }
 
   @LogError
   async pause(
-    request: PauseRequest
+    request: PauseRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    const { lifeCycleCashFlow } = request
-    ValidatedRequest.handleValidation("PauseRequest", request)
+    const { lifeCycleCashFlow } = request;
+    ValidatedRequest.handleValidation('PauseRequest', request);
 
-    return await this.commandBus.execute(new PauseCommand(lifeCycleCashFlow))
+    return await this.commandBus.execute(new PauseCommand(lifeCycleCashFlow));
   }
 
   @LogError
   async unpause(
-    request: UnpauseRequest
+    request: UnpauseRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    const { lifeCycleCashFlow } = request
-    ValidatedRequest.handleValidation("UnpauseRequest", request)
+    const { lifeCycleCashFlow } = request;
+    ValidatedRequest.handleValidation('UnpauseRequest', request);
 
-    return await this.commandBus.execute(new UnpauseCommand(lifeCycleCashFlow))
+    return await this.commandBus.execute(new UnpauseCommand(lifeCycleCashFlow));
   }
 
   @LogError
   async isPaused(request: IsPausedRequest): Promise<{ payload: boolean }> {
-    const { lifeCycleCashFlow } = request
-    IsPausedRequest.handleValidation("IsPausedRequest", request)
+    const { lifeCycleCashFlow } = request;
+    IsPausedRequest.handleValidation('IsPausedRequest', request);
 
-    return await this.queryBus.execute(new IsPausedQuery(lifeCycleCashFlow))
+    return await this.queryBus.execute(new IsPausedQuery(lifeCycleCashFlow));
   }
 
   @LogError
   async getPaymentToken(
-    request: GetPaymentTokenRequest
+    request: GetPaymentTokenRequest,
   ): Promise<{ payload: string }> {
-    const { lifeCycleCashFlow } = request
-    GetPaymentTokenRequest.handleValidation("GetPaymentTokenRequest", request)
+    const { lifeCycleCashFlow } = request;
+    GetPaymentTokenRequest.handleValidation('GetPaymentTokenRequest', request);
 
     return await this.queryBus.execute(
-      new GetPaymentTokenQuery(lifeCycleCashFlow)
-    )
+      new GetPaymentTokenQuery(lifeCycleCashFlow),
+    );
   }
 
   @LogError
   async getPaymentTokenDecimals(
-    request: GetPaymentTokenDecimalsRequest
+    request: GetPaymentTokenDecimalsRequest,
   ): Promise<{ payload: number }> {
-    const { lifeCycleCashFlow } = request
+    const { lifeCycleCashFlow } = request;
     GetPaymentTokenDecimalsRequest.handleValidation(
-      "GetPaymentTokenDecimalsRequest",
-      request
-    )
+      'GetPaymentTokenDecimalsRequest',
+      request,
+    );
 
     return await this.queryBus.execute(
-      new GetPaymentTokenDecimalsQuery(lifeCycleCashFlow)
-    )
+      new GetPaymentTokenDecimalsQuery(lifeCycleCashFlow),
+    );
   }
 
   @LogError
-  async executeDistribution(
-    request: ExecuteDistributionRequest
-  ): Promise<{
+  async executeDistribution(request: ExecuteDistributionRequest): Promise<{
     failed: string[];
     succeeded: string[];
     paidAmount: string[];
@@ -407,14 +399,14 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
     transactionId: string;
   }> {
     const { lifeCycleCashFlow, asset, pageIndex, pageLength, distributionId } =
-      request
-    ValidatedRequest.handleValidation("ExecuteDistributionRequest", request)
+      request;
+    ValidatedRequest.handleValidation('ExecuteDistributionRequest', request);
 
     const { payload: tokenDecimals } = await this.getPaymentTokenDecimals(
       new GetPaymentTokenDecimalsRequest({
         lifeCycleCashFlow: lifeCycleCashFlow,
-      })
-    )
+      }),
+    );
 
     return await this.commandBus.execute(
       new ExecuteDistributionCommand(
@@ -423,31 +415,31 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
         pageIndex,
         pageLength,
         distributionId,
-        tokenDecimals
-      )
-    )
+        tokenDecimals,
+      ),
+    );
   }
 
   @LogError
   async executeDistributionByAddresses(
-    request: ExecuteDistributionByAddressesRequest
+    request: ExecuteDistributionByAddressesRequest,
   ): Promise<{
     failed: string[];
     succeeded: string[];
     paidAmount: string[];
     transactionId: string;
   }> {
-    const { lifeCycleCashFlow, asset, holders, distributionId } = request
+    const { lifeCycleCashFlow, asset, holders, distributionId } = request;
     ValidatedRequest.handleValidation(
-      "ExecuteDistributionByAddressesRequest",
-      request
-    )
+      'ExecuteDistributionByAddressesRequest',
+      request,
+    );
 
     const { payload: tokenDecimals } = await this.getPaymentTokenDecimals(
       new GetPaymentTokenDecimalsRequest({
         lifeCycleCashFlow: lifeCycleCashFlow,
-      })
-    )
+      }),
+    );
 
     return await this.commandBus.execute(
       new ExecuteDistributionByAddressesCommand(
@@ -455,29 +447,27 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
         asset,
         holders,
         distributionId,
-        tokenDecimals
-      )
-    )
+        tokenDecimals,
+      ),
+    );
   }
 
   @LogError
-  async executeBondCashOut(
-    request: ExecuteBondCashOutRequest
-  ): Promise<{
+  async executeBondCashOut(request: ExecuteBondCashOutRequest): Promise<{
     failed: string[];
     succeeded: string[];
     paidAmount: string[];
     executed: boolean;
     transactionId: string;
   }> {
-    const { lifeCycleCashFlow, bond, pageIndex, pageLength } = request
-    ValidatedRequest.handleValidation("ExecuteBondCashOutRequest", request)
+    const { lifeCycleCashFlow, bond, pageIndex, pageLength } = request;
+    ValidatedRequest.handleValidation('ExecuteBondCashOutRequest', request);
 
     const { payload: tokenDecimals } = await this.getPaymentTokenDecimals(
       new GetPaymentTokenDecimalsRequest({
         lifeCycleCashFlow: lifeCycleCashFlow,
-      })
-    )
+      }),
+    );
 
     return await this.commandBus.execute(
       new ExecuteBondCashOutCommand(
@@ -485,46 +475,44 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
         bond,
         pageIndex,
         pageLength,
-        tokenDecimals
-      )
-    )
+        tokenDecimals,
+      ),
+    );
   }
 
   @LogError
   async executeBondCashOutByAddresses(
-    request: ExecuteBondCashOutByAddressesRequest
+    request: ExecuteBondCashOutByAddressesRequest,
   ): Promise<{
     failed: string[];
     succeeded: string[];
     paidAmount: string[];
     transactionId: string;
   }> {
-    const { lifeCycleCashFlow, bond, holders } = request
+    const { lifeCycleCashFlow, bond, holders } = request;
     ValidatedRequest.handleValidation(
-      "ExecuteBondCashOutByAddressesRequest",
-      request
-    )
+      'ExecuteBondCashOutByAddressesRequest',
+      request,
+    );
 
     const { payload: tokenDecimals } = await this.getPaymentTokenDecimals(
       new GetPaymentTokenDecimalsRequest({
         lifeCycleCashFlow: lifeCycleCashFlow,
-      })
-    )
+      }),
+    );
 
     return await this.commandBus.execute(
       new ExecuteBondCashOutByAddressesCommand(
         lifeCycleCashFlow,
         bond,
         holders,
-        tokenDecimals
-      )
-    )
+        tokenDecimals,
+      ),
+    );
   }
 
   @LogError
-  async executeAmountSnapshot(
-    request: ExecuteAmountSnapshotRequest
-  ): Promise<{
+  async executeAmountSnapshot(request: ExecuteAmountSnapshotRequest): Promise<{
     failed: string[];
     succeeded: string[];
     paidAmount: string[];
@@ -538,14 +526,14 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
       pageIndex,
       pageLength,
       amount,
-    } = request
-    ValidatedRequest.handleValidation("ExecuteAmountSnapshotRequest", request)
+    } = request;
+    ValidatedRequest.handleValidation('ExecuteAmountSnapshotRequest', request);
 
     const { payload: tokenDecimals } = await this.getPaymentTokenDecimals(
       new GetPaymentTokenDecimalsRequest({
         lifeCycleCashFlow: lifeCycleCashFlow,
-      })
-    )
+      }),
+    );
 
     return await this.commandBus.execute(
       new ExecuteAmountSnapshotCommand(
@@ -555,31 +543,31 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
         pageIndex,
         pageLength,
         amount,
-        tokenDecimals
-      )
-    )
+        tokenDecimals,
+      ),
+    );
   }
 
   @LogError
   async executeAmountSnapshotByAddresses(
-    request: ExecuteAmountSnapshotByAddressesRequest
+    request: ExecuteAmountSnapshotByAddressesRequest,
   ): Promise<{
     failed: string[];
     succeeded: string[];
     paidAmount: string[];
     transactionId: string;
   }> {
-    const { lifeCycleCashFlow, asset, snapshotId, holders, amount } = request
+    const { lifeCycleCashFlow, asset, snapshotId, holders, amount } = request;
     ValidatedRequest.handleValidation(
-      "ExecuteAmountSnapshotByAddressesRequest",
-      request
-    )
+      'ExecuteAmountSnapshotByAddressesRequest',
+      request,
+    );
 
     const { payload: tokenDecimals } = await this.getPaymentTokenDecimals(
       new GetPaymentTokenDecimalsRequest({
         lifeCycleCashFlow: lifeCycleCashFlow,
-      })
-    )
+      }),
+    );
 
     return await this.commandBus.execute(
       new ExecuteAmountSnapshotByAddressesCommand(
@@ -588,14 +576,14 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
         snapshotId,
         holders,
         amount,
-        tokenDecimals
-      )
-    )
+        tokenDecimals,
+      ),
+    );
   }
 
   @LogError
   async executePercentageSnapshot(
-    request: ExecutePercentageSnapshotRequest
+    request: ExecutePercentageSnapshotRequest,
   ): Promise<{
     failed: string[];
     succeeded: string[];
@@ -610,17 +598,17 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
       pageIndex,
       pageLength,
       percentage,
-    } = request
+    } = request;
     ValidatedRequest.handleValidation(
-      "ExecutePercentageSnapshotRequest",
-      request
-    )
+      'ExecutePercentageSnapshotRequest',
+      request,
+    );
 
     const { payload: tokenDecimals } = await this.getPaymentTokenDecimals(
       new GetPaymentTokenDecimalsRequest({
         lifeCycleCashFlow: lifeCycleCashFlow,
-      })
-    )
+      }),
+    );
 
     return await this.commandBus.execute(
       new ExecutePercentageSnapshotCommand(
@@ -630,14 +618,14 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
         pageIndex,
         pageLength,
         percentage,
-        tokenDecimals
-      )
-    )
+        tokenDecimals,
+      ),
+    );
   }
 
   @LogError
   async executePercentageSnapshotByAddresses(
-    request: ExecutePercentageSnapshotByAddressesRequest
+    request: ExecutePercentageSnapshotByAddressesRequest,
   ): Promise<{
     failed: string[];
     succeeded: string[];
@@ -645,17 +633,17 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
     transactionId: string;
   }> {
     const { lifeCycleCashFlow, asset, snapshotId, holders, percentage } =
-      request
+      request;
     ValidatedRequest.handleValidation(
-      "ExecutePercentageSnapshotByAddressesRequest",
-      request
-    )
+      'ExecutePercentageSnapshotByAddressesRequest',
+      request,
+    );
 
     const { payload: tokenDecimals } = await this.getPaymentTokenDecimals(
       new GetPaymentTokenDecimalsRequest({
         lifeCycleCashFlow: lifeCycleCashFlow,
-      })
-    )
+      }),
+    );
 
     return await this.commandBus.execute(
       new ExecutePercentageSnapshotByAddressesCommand(
@@ -664,8 +652,8 @@ export class LifeCycleCashFlow implements ILifeCycleCashFlowPort {
         snapshotId,
         holders,
         percentage,
-        tokenDecimals
-      )
-    )
+        tokenDecimals,
+      ),
+    );
   }
 }

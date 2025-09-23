@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from "@core/error/BaseError"
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export class InvalidValue extends BaseError {
   constructor(msg: string) {
-    super(ErrorCode.InvalidValue, msg)
+    super(ErrorCode.InvalidValue, msg);
   }
 }

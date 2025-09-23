@@ -203,13 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from "@core/error/BaseError"
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export class InvalidCommandHandlerException extends BaseError {
   constructor() {
     super(
       ErrorCode.RuntimeError,
-      "Invalid command handler exception (missing @CommandHandler() decorator?)"
-    )
+      'Invalid command handler exception (missing @CommandHandler() decorator?)',
+    );
   }
 }

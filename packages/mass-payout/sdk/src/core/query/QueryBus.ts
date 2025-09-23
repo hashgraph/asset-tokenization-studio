@@ -204,17 +204,17 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, Inject } from "@nestjs/common"
-import { QUERY_HANDLER_METADATA, QUERY_METADATA, TOKENS } from "../Constants"
-import { QueryMetadata } from "../decorator/QueryMetadata"
-import { Type } from "../Type"
-import { Query } from "./Query"
-import { IQueryHandler } from "./QueryHandler"
-import { QueryResponse } from "./QueryResponse"
-import { QueryHandlerNotFoundException } from "./error/QueryHandlerNotFoundException"
-import { InvalidQueryHandlerException } from "./error/InvalidQueryHandlerException"
+import { Injectable, Inject } from '@nestjs/common';
+import { QUERY_HANDLER_METADATA, QUERY_METADATA, TOKENS } from '../Constants';
+import { QueryMetadata } from '../decorator/QueryMetadata';
+import { Type } from '../Type';
+import { Query } from './Query';
+import { IQueryHandler } from './QueryHandler';
+import { QueryResponse } from './QueryResponse';
+import { QueryHandlerNotFoundException } from './error/QueryHandlerNotFoundException';
+import { InvalidQueryHandlerException } from './error/InvalidQueryHandlerException';
 
-export type QueryHandlerType = IQueryHandler<Query<QueryResponse>>
+export type QueryHandlerType = IQueryHandler<Query<QueryResponse>>;
 
 export interface IQueryBus<T extends QueryResponse> {
   execute<X extends T>(query: Query<X>): Promise<X>;
@@ -225,60 +225,60 @@ export interface IQueryBus<T extends QueryResponse> {
 export class QueryBus<T extends QueryResponse = QueryResponse>
   implements IQueryBus<T>
 {
-  public handlers = new Map<string, IQueryHandler<Query<T>>>()
+  public handlers = new Map<string, IQueryHandler<Query<T>>>();
 
   constructor(
     @Inject(TOKENS.QUERY_HANDLER)
-    private readonly providedHandlers: IQueryHandler<any>[]
+    private readonly providedHandlers: IQueryHandler<any>[],
   ) {
-    this.registerHandlers(providedHandlers)
+    this.registerHandlers(providedHandlers);
   }
 
   execute<X extends T>(query: Query<X>): Promise<X> {
-    const queryId = this.getQueryId(query)
-    const handler = this.handlers.get(queryId)
+    const queryId = this.getQueryId(query);
+    const handler = this.handlers.get(queryId);
     if (!handler) {
-      throw new QueryHandlerNotFoundException(queryId)
+      throw new QueryHandlerNotFoundException(queryId);
     }
-    return handler.execute(query) as Promise<X>
+    return handler.execute(query) as Promise<X>;
   }
 
   bind<X extends T>(handler: IQueryHandler<Query<X>>, id: string): void {
-    this.handlers.set(id, handler)
+    this.handlers.set(id, handler);
   }
 
   private getQueryId<X>(query: Query<X>): string {
-    const { constructor: queryType } = Object.getPrototypeOf(query)
+    const { constructor: queryType } = Object.getPrototypeOf(query);
     const queryMetadata: QueryMetadata = Reflect.getMetadata(
       QUERY_METADATA,
-      queryType
-    )
+      queryType,
+    );
     if (!queryMetadata) {
-      throw new QueryHandlerNotFoundException(queryType.name)
+      throw new QueryHandlerNotFoundException(queryType.name);
     }
-    return queryMetadata.id
+    return queryMetadata.id;
   }
 
   protected registerHandlers(handlers: QueryHandlerType[]): void {
-    handlers.forEach(handler => {
-      const target = this.reflectQueryId(handler)
+    handlers.forEach((handler) => {
+      const target = this.reflectQueryId(handler);
       if (!target) {
-        throw new InvalidQueryHandlerException()
+        throw new InvalidQueryHandlerException();
       }
-      this.bind(handler as IQueryHandler<Query<T>>, target)
-    })
+      this.bind(handler as IQueryHandler<Query<T>>, target);
+    });
   }
 
   private reflectQueryId(handler: QueryHandlerType): string | undefined {
-    const { constructor: handlerType } = Object.getPrototypeOf(handler)
+    const { constructor: handlerType } = Object.getPrototypeOf(handler);
     const query: Type<Query<QueryResponse>> = Reflect.getMetadata(
       QUERY_HANDLER_METADATA,
-      handlerType
-    )
+      handlerType,
+    );
     const queryMetadata: QueryMetadata = Reflect.getMetadata(
       QUERY_METADATA,
-      query
-    )
-    return queryMetadata.id
+      query,
+    );
+    return queryMetadata.id;
   }
 }

@@ -264,10 +264,10 @@ jest.mock('io-bricks-ui', () => ({
             onChange={handleChange}
             onBlur={handleBlur}
           />
-          {error && touched && <div role='alert'>{error}</div>}
+          {error && touched && <div role="alert">{error}</div>}
         </div>
       );
-    }
+    },
   ),
 }));
 
@@ -289,10 +289,10 @@ const TestWrapper = ({
 
   return (
     <DateField
-      name='testDate'
+      name="testDate"
       control={control}
-      label='Test Date'
-      placeholder='Select a date'
+      label="Test Date"
+      placeholder="Select a date"
       isRequired={isRequired}
       requiredMessage={requiredMessage}
       futureDateMessage={futureDateMessage}
@@ -329,10 +329,10 @@ describe('DateField', () => {
 
         return (
           <DateField
-            name='testDate'
+            name="testDate"
             control={control}
-            label='Custom Label'
-            placeholder='Custom placeholder'
+            label="Custom Label"
+            placeholder="Custom placeholder"
           />
         );
       };
@@ -341,7 +341,7 @@ describe('DateField', () => {
 
       expect(screen.getByLabelText('Custom Label')).toBeInTheDocument();
       expect(
-        screen.getByPlaceholderText('Custom placeholder')
+        screen.getByPlaceholderText('Custom placeholder'),
       ).toBeInTheDocument();
     });
   });
@@ -350,7 +350,7 @@ describe('DateField', () => {
     test('should apply required validation when isRequired is true', async () => {
       const user = userEvent.setup();
       render(
-        <TestWrapper isRequired={true} requiredMessage='Date is required' />
+        <TestWrapper isRequired={true} requiredMessage="Date is required" />,
       );
 
       const input = screen.getByTestId('date-field-testDate');
@@ -379,7 +379,7 @@ describe('DateField', () => {
       mockValidateFutureDate.mockReturnValue('Date must be in the future');
 
       const user = userEvent.setup();
-      render(<TestWrapper futureDateMessage='Date must be in the future' />);
+      render(<TestWrapper futureDateMessage="Date must be in the future" />);
 
       const input = screen.getByTestId('date-field-testDate');
 
@@ -389,7 +389,7 @@ describe('DateField', () => {
       await waitFor(() => {
         expect(mockValidateFutureDate).toHaveBeenCalledWith(
           '2020-01-01',
-          'Date must be in the future'
+          'Date must be in the future',
         );
       });
     });
@@ -398,7 +398,7 @@ describe('DateField', () => {
       mockValidateFutureDate.mockReturnValue(true);
 
       const user = userEvent.setup();
-      render(<TestWrapper futureDateMessage='Date must be in the future' />);
+      render(<TestWrapper futureDateMessage="Date must be in the future" />);
 
       const input = screen.getByTestId('date-field-testDate');
 
@@ -408,7 +408,7 @@ describe('DateField', () => {
       await waitFor(() => {
         expect(mockValidateFutureDate).toHaveBeenCalledWith(
           '2030-01-01',
-          'Date must be in the future'
+          'Date must be in the future',
         );
       });
 
@@ -420,9 +420,9 @@ describe('DateField', () => {
       render(
         <TestWrapper
           isRequired={true}
-          requiredMessage='Date is required'
-          futureDateMessage='Date must be in the future'
-        />
+          requiredMessage="Date is required"
+          futureDateMessage="Date must be in the future"
+        />,
       );
 
       const input = screen.getByTestId('date-field-testDate');

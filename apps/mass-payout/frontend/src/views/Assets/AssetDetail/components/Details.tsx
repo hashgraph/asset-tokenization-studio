@@ -284,24 +284,24 @@ export const Details = ({ assetData, isLoading }: DetailsProps) => {
 
   return (
     <Box
-      bg='neutral.50'
-      borderRadius='lg'
-      boxShadow='sm'
+      bg="neutral.50"
+      borderRadius="lg"
+      boxShadow="sm"
       pt={16}
       px={12}
       pb={12}
-      minH='720px'
-      flex='1'
-      display='flex'
-      flexDirection='column'
-      w='full'
+      minH="720px"
+      flex="1"
+      display="flex"
+      flexDirection="column"
+      w="full"
     >
-      <VStack w='full' gap={12} align='center'>
-        <Box maxW='550' w='full'>
+      <VStack w="full" gap={12} align="center">
+        <Box maxW="550" w="full">
           <DefinitionList
             isLoading={isLoading}
             items={assetDetailsItems}
-            title='Asset details'
+            title="Asset details"
           />
         </Box>
       </VStack>

@@ -263,16 +263,16 @@ export function AssetDetails({
 
   return (
     <Box
-      flex='1'
-      bg='neutral.50'
-      borderRadius='lg'
-      boxShadow='sm'
+      flex="1"
+      bg="neutral.50"
+      borderRadius="lg"
+      boxShadow="sm"
       pt={4}
       px={6}
       pb={6}
     >
       <DefinitionList
-        data-testid='definition-list'
+        data-testid="definition-list"
         isLoading={isLoading}
         items={assetDetailsItems}
         title={t('detail.sections.assetDetails')}

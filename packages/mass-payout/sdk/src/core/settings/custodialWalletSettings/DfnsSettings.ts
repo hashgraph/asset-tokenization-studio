@@ -213,6 +213,6 @@ export default class DfnsSettings {
     public baseUrl: string,
     public walletId: string,
     public hederaAccountId: string,
-    public publicKey: string
+    public publicKey: string,
   ) {}
 }

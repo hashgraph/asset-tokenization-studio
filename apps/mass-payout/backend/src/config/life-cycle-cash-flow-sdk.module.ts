@@ -203,13 +203,7 @@
  */
 
 import { Logger, Module, OnModuleInit, Provider } from "@nestjs/common"
-import {
-  ConnectRequest,
-  InitializationRequest,
-  MassPayoutSDK,
-  Network,
-  SupportedWallets,
-} from "@scheduler-payment-distribution/sdk"
+import { ConnectRequest, InitializationRequest, MassPayoutSDK, Network, SupportedWallets } from "@mass-payout/sdk"
 import { LifeCycleCashFlowSdkService } from "@infrastructure/adapters/life-cycle-cash-flow-sdk.service"
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { ConfigKeys } from "./config-keys"
@@ -242,11 +236,7 @@ function networkInitProvider(): Provider {
   return {
     provide: NETWORK_INIT,
     inject: [ConfigService, Network, LifeCycleCashFlowSdkService],
-    useFactory: async (
-      config: ConfigService,
-      network: Network,
-      lifeCycleCashFlowSdkService: LifeCycleCashFlowSdkService,
-    ) => {
+    useFactory: async (config: ConfigService, network: Network) => {
       const logger = new Logger(NETWORK_INIT.toString())
 
       try {
@@ -283,20 +273,6 @@ function networkInitProvider(): Provider {
             },
           }),
         )
-
-        //logger.log(await lifeCycleCashFlowSdkService.deploy("0.0.6124008", "0.0.6464797"))
-        //await lifeCycleCashFlowSdkService.executeDistribution("0.0.6465789", "0.0.6124008", 1234, 1, 1)
-        //await lifeCycleCashFlowSdkService.executeDistributionByAddresses("0.0.6465789", "0.0.6124008", 1234, ["0xe6c90ab6625668e8bc698a9f5caa23bd1a215e8f"])
-        //await lifeCycleCashFlowSdkService.executeBondCashOut("0.0.6465789", "0.0.6124008", 1, 1)
-        //await lifeCycleCashFlowSdkService.executeBondCashOutByAddresses("0.0.6465789", "0.0.6124008", ["0xe6c90ab6625668e8bc698a9f5caa23bd1a215e8f"])
-        //await lifeCycleCashFlowSdkService.executeAmountSnapshot("0.0.6465789", "0.0.6124008", 1234, 1, 1, "90")
-        //await lifeCycleCashFlowSdkService.executeAmountSnapshotByAddresses("0.0.6465789", "0.0.6124008", 1234, ["0xe6c90ab6625668e8bc698a9f5caa23bd1a215e8f"], "90")
-        //await lifeCycleCashFlowSdkService.executePercentageSnapshot("0.0.6465789", "0.0.6124008", 1234, 1, 1, "90")
-        //await lifeCycleCashFlowSdkService.executePercentageSnapshotByAddresses("0.0.6465789", "0.0.6124008", 1234, ["0xe6c90ab6625668e8bc698a9f5caa23bd1a215e8f"], "90")
-        //logger.log(await lifeCycleCashFlowSdkService.isPaused("0.0.6465789"))
-        //logger.log(await lifeCycleCashFlowSdkService.getPaymentToken("0.0.6465789"))
-        //await lifeCycleCashFlowSdkService.pause("0.0.6465789")
-        //await lifeCycleCashFlowSdkService.unpause("0.0.6465789")
 
         return true
       } catch (error) {

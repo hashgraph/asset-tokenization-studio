@@ -206,9 +206,9 @@
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
-import { LifeCycleCashFlow } from "../../LifeCycleCashFlow.sol";
-import { LocalContext } from "../../common/LocalContext.sol";
-import { TimeTravel } from "./timeTravel/TimeTravel.sol";
+import { LifeCycleCashFlow } from '../../LifeCycleCashFlow.sol';
+import { LocalContext } from '../../common/LocalContext.sol';
+import { TimeTravel } from './timeTravel/TimeTravel.sol';
 
 contract LifeCycleCashFlowTimeTravel is LifeCycleCashFlow, TimeTravel {
     // solhint-disable-next-line no-empty-blocks

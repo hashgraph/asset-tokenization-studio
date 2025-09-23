@@ -222,17 +222,17 @@ jest.mock('react-router-dom', () => ({
 // Mock DistributionQueries
 const mockUseGetDistribution = jest.spyOn(
   DistributionQueries,
-  'useGetDistribution'
+  'useGetDistribution',
 );
 const mockUseGetDistributionHolders = jest.spyOn(
   DistributionQueries,
-  'useGetDistributionHolders'
+  'useGetDistributionHolders',
 );
 
 // Mock useDistributionsDetailsColumns
 const mockUseDistributionsDetailsColumns = jest.spyOn(
   useDistributionsDetailsColumns,
-  'useDistributionsDetailsColumns'
+  'useDistributionsDetailsColumns',
 );
 
 // Mock navigate function
@@ -346,7 +346,7 @@ describe('DistributionsDetails', () => {
       render(<DistributionsDetails />);
 
       expect(mockUseGetDistribution).toHaveBeenCalledWith(
-        'test-distribution-id'
+        'test-distribution-id',
       );
     });
 

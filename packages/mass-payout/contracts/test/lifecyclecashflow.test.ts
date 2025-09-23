@@ -234,7 +234,7 @@ enum AssetType {
 }
 
 describe('Security operations', () => {
-  [AssetType.BOND, AssetType.EQUITY].forEach(assetType => {
+  [AssetType.BOND, AssetType.EQUITY].forEach((assetType) => {
     describe(`Security operations with assetType: ${assetType}`, () => {
       let asset_A, asset_B;
 
@@ -266,14 +266,14 @@ describe('Security operations', () => {
             name: 'LifeCycleCashFlowTimeTravel',
             signer: signer_A,
             args: [asset_A.address, stablecoin.address],
-          })
+          }),
         );
 
         lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
 
         lifeCycleCashFlow = await ethers.getContractAt(
           'LifeCycleCashFlowTimeTravel',
-          lifeCycleCashFlowAddress
+          lifeCycleCashFlowAddress,
         );
       });
 
@@ -284,10 +284,10 @@ describe('Security operations', () => {
           await lifeCycleCashFlow.pause();
 
           await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1)
+            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
           ).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused'
+            'LifeCycleCashFlowIsPaused',
           );
         });
 
@@ -295,11 +295,11 @@ describe('Security operations', () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
           await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1)
+            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
@@ -310,11 +310,11 @@ describe('Security operations', () => {
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
           await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1)
+            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
@@ -323,7 +323,7 @@ describe('Security operations', () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await expect(
-            lifeCycleCashFlow.executeDistribution(asset_B.address, 1, 1, 1)
+            lifeCycleCashFlow.executeDistribution(asset_B.address, 1, 1, 1),
           )
             .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
             .withArgs(asset_B.address);
@@ -333,11 +333,11 @@ describe('Security operations', () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.changeSystemTimestamp(
-            assetPaymentRequestDate
+            assetPaymentRequestDate,
           );
 
           await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1)
+            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
           )
             .to.be.revertedWithCustomError(lifeCycleCashFlow, 'NotPaymentDate')
             .withArgs(assetInitialPaymentDate, assetPaymentRequestDate);
@@ -349,13 +349,13 @@ describe('Security operations', () => {
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
           await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1)
+            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
           )
             .to.emit(lifeCycleCashFlow, 'DistributionExecuted')
             .withArgs(1, 1, 1, [signer_B.address], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0)
+            ethers.utils.parseUnits('0', 0),
           );
         });
 
@@ -370,7 +370,7 @@ describe('Security operations', () => {
                 name: 'LifeCycleCashFlowTimeTravel',
                 signer: signer_A,
                 args: [asset_C.address, stablecoin.address],
-              })
+              }),
             );
 
           const lifeCycleCashFlowAddressWithoutHolders =
@@ -378,14 +378,14 @@ describe('Security operations', () => {
 
           let lifeCycleCashFlowWithoutHolders = await ethers.getContractAt(
             'LifeCycleCashFlowTimeTravel',
-            lifeCycleCashFlowAddressWithoutHolders
+            lifeCycleCashFlowAddressWithoutHolders,
           );
 
           lifeCycleCashFlowWithoutHolders =
             lifeCycleCashFlowWithoutHolders.connect(signer_A);
 
           await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(
-            1753874807
+            1753874807,
           );
 
           const result =
@@ -393,7 +393,7 @@ describe('Security operations', () => {
               asset_C.address,
               1,
               1,
-              1
+              1,
             );
 
           expect(result.executed_).to.equal(false);
@@ -406,11 +406,11 @@ describe('Security operations', () => {
 
           await stablecoin.transfer(
             lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2)
+            ethers.utils.parseUnits('1000000', 2),
           );
 
           await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1)
+            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
           )
             .to.emit(lifeCycleCashFlow, 'DistributionExecuted')
             .withArgs(
@@ -419,11 +419,11 @@ describe('Security operations', () => {
               1,
               [AddressZero],
               [signer_B.address],
-              [amountToBePaid]
+              [amountToBePaid],
             );
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits(amountToBePaid, 0)
+            ethers.utils.parseUnits(amountToBePaid, 0),
           );
         });
 
@@ -434,11 +434,11 @@ describe('Security operations', () => {
 
           await stablecoin.transfer(
             lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2)
+            ethers.utils.parseUnits('1000000', 2),
           );
 
           await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1)
+            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
           )
             .to.emit(lifeCycleCashFlow, 'DistributionExecuted')
             .withArgs(
@@ -447,21 +447,21 @@ describe('Security operations', () => {
               1,
               [AddressZero],
               [signer_B.address],
-              [amountToBePaid]
+              [amountToBePaid],
             );
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            amountToBePaid
+            amountToBePaid,
           );
 
           await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1)
+            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
           )
             .to.emit(lifeCycleCashFlow, 'DistributionExecuted')
             .withArgs(1, 1, 1, [signer_B.address], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            amountToBePaid
+            amountToBePaid,
           );
         });
       });
@@ -476,11 +476,11 @@ describe('Security operations', () => {
             lifeCycleCashFlow.executeDistributionByAddresses(
               asset_A.address,
               1,
-              [asset_A.address, asset_B.address]
-            )
+              [asset_A.address, asset_B.address],
+            ),
           ).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused'
+            'LifeCycleCashFlowIsPaused',
           );
         });
 
@@ -491,12 +491,12 @@ describe('Security operations', () => {
             lifeCycleCashFlow.executeDistributionByAddresses(
               asset_A.address,
               1,
-              [asset_A.address, asset_B.address]
-            )
+              [asset_A.address, asset_B.address],
+            ),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
@@ -510,12 +510,12 @@ describe('Security operations', () => {
             lifeCycleCashFlow.executeDistributionByAddresses(
               asset_A.address,
               1,
-              [asset_A.address, asset_B.address]
-            )
+              [asset_A.address, asset_B.address],
+            ),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
@@ -527,8 +527,8 @@ describe('Security operations', () => {
             lifeCycleCashFlow.executeDistributionByAddresses(
               asset_B.address,
               1,
-              [asset_A.address, asset_B.address]
-            )
+              [asset_A.address, asset_B.address],
+            ),
           )
             .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
             .withArgs(asset_B.address);
@@ -538,15 +538,15 @@ describe('Security operations', () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.changeSystemTimestamp(
-            assetPaymentRequestDate
+            assetPaymentRequestDate,
           );
 
           await expect(
             lifeCycleCashFlow.executeDistributionByAddresses(
               asset_A.address,
               1,
-              [asset_A.address, asset_B.address]
-            )
+              [asset_A.address, asset_B.address],
+            ),
           )
             .to.be.revertedWithCustomError(lifeCycleCashFlow, 'NotPaymentDate')
             .withArgs(assetInitialPaymentDate, assetPaymentRequestDate);
@@ -561,14 +561,14 @@ describe('Security operations', () => {
             lifeCycleCashFlow.executeDistributionByAddresses(
               asset_A.address,
               1,
-              [signer_B.address]
-            )
+              [signer_B.address],
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'DistributionByAddressesExecuted')
             .withArgs(1, [signer_B.address], [signer_B.address], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0)
+            ethers.utils.parseUnits('0', 0),
           );
         });
 
@@ -579,15 +579,15 @@ describe('Security operations', () => {
 
           await stablecoin.transfer(
             lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2)
+            ethers.utils.parseUnits('1000000', 2),
           );
 
           await expect(
             lifeCycleCashFlow.executeDistributionByAddresses(
               asset_A.address,
               1,
-              [signer_B.address]
-            )
+              [signer_B.address],
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'DistributionByAddressesExecuted')
             .withArgs(
@@ -595,11 +595,11 @@ describe('Security operations', () => {
               [signer_B.address],
               [AddressZero],
               [signer_B.address],
-              [amountToBePaid]
+              [amountToBePaid],
             );
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            amountToBePaid
+            amountToBePaid,
           );
         });
 
@@ -610,15 +610,15 @@ describe('Security operations', () => {
 
           await stablecoin.transfer(
             lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2)
+            ethers.utils.parseUnits('1000000', 2),
           );
 
           await expect(
             lifeCycleCashFlow.executeDistributionByAddresses(
               asset_A.address,
               1,
-              [signer_B.address]
-            )
+              [signer_B.address],
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'DistributionByAddressesExecuted')
             .withArgs(
@@ -626,25 +626,25 @@ describe('Security operations', () => {
               [signer_B.address],
               [AddressZero],
               [signer_B.address],
-              [amountToBePaid]
+              [amountToBePaid],
             );
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            amountToBePaid
+            amountToBePaid,
           );
 
           await expect(
             lifeCycleCashFlow.executeDistributionByAddresses(
               asset_A.address,
               1,
-              [signer_B.address]
-            )
+              [signer_B.address],
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'DistributionByAddressesExecuted')
             .withArgs(1, [signer_B.address], [signer_B.address], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            amountToBePaid
+            amountToBePaid,
           );
         });
       });
@@ -657,10 +657,10 @@ describe('Security operations', () => {
             await lifeCycleCashFlow.pause();
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1)
+              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
             ).to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'LifeCycleCashFlowIsPaused'
+              'LifeCycleCashFlowIsPaused',
             );
           });
 
@@ -668,11 +668,11 @@ describe('Security operations', () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1)
+              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
             )
               .to.be.revertedWithCustomError(
                 lifeCycleCashFlow,
-                'AccountHasNoRole'
+                'AccountHasNoRole',
               )
               .withArgs(signer_B.address, CASHOUT_ROLE);
           });
@@ -683,11 +683,11 @@ describe('Security operations', () => {
             await lifeCycleCashFlow.revokeRole(CASHOUT_ROLE, signer_A.address);
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1)
+              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
             )
               .to.be.revertedWithCustomError(
                 lifeCycleCashFlow,
-                'AccountHasNoRole'
+                'AccountHasNoRole',
               )
               .withArgs(signer_A.address, CASHOUT_ROLE);
           });
@@ -696,7 +696,7 @@ describe('Security operations', () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_B.address, 1, 1)
+              lifeCycleCashFlow.executeBondCashOut(asset_B.address, 1, 1),
             )
               .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
               .withArgs(asset_B.address);
@@ -706,15 +706,15 @@ describe('Security operations', () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutRequestDate
+              bondCashoutRequestDate,
             );
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1)
+              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
             )
               .to.be.revertedWithCustomError(
                 lifeCycleCashFlow,
-                'NotPaymentDate'
+                'NotPaymentDate',
               )
               .withArgs(bondCashoutInitialDate, bondCashoutRequestDate);
           });
@@ -723,17 +723,17 @@ describe('Security operations', () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate
+              bondCashoutInitialDate,
             );
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1)
+              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
             )
               .to.emit(lifeCycleCashFlow, 'CashOutExecuted')
               .withArgs(1, 1, [signer_B.address], [], []);
 
             expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('0', 0)
+              ethers.utils.parseUnits('0', 0),
             );
           });
 
@@ -748,7 +748,7 @@ describe('Security operations', () => {
                   name: 'LifeCycleCashFlowTimeTravel',
                   signer: signer_A,
                   args: [asset_C.address, stablecoin.address],
-                })
+                }),
               );
 
             const lifeCycleCashFlowAddressWithoutHolders =
@@ -756,21 +756,21 @@ describe('Security operations', () => {
 
             let lifeCycleCashFlowWithoutHolders = await ethers.getContractAt(
               'LifeCycleCashFlowTimeTravel',
-              lifeCycleCashFlowAddressWithoutHolders
+              lifeCycleCashFlowAddressWithoutHolders,
             );
 
             lifeCycleCashFlowWithoutHolders =
               lifeCycleCashFlowWithoutHolders.connect(signer_A);
 
             await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(
-              bondCashoutInitialDate
+              bondCashoutInitialDate,
             );
 
             const result =
               await lifeCycleCashFlowWithoutHolders.callStatic.executeBondCashOut(
                 asset_C.address,
                 1,
-                1
+                1,
               );
 
             expect(result.executed_).to.equal(false);
@@ -780,22 +780,22 @@ describe('Security operations', () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate
+              bondCashoutInitialDate,
             );
 
             await stablecoin.transfer(
               lifeCycleCashFlowAddress,
-              ethers.utils.parseUnits('1000000', 2)
+              ethers.utils.parseUnits('1000000', 2),
             );
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1)
+              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
             )
               .to.emit(lifeCycleCashFlow, 'CashOutExecuted')
               .withArgs(1, 1, [AddressZero], [signer_B.address], [281481]);
 
             expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0)
+              ethers.utils.parseUnits('281481', 0),
             );
           });
 
@@ -803,32 +803,32 @@ describe('Security operations', () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate
+              bondCashoutInitialDate,
             );
 
             await stablecoin.transfer(
               lifeCycleCashFlowAddress,
-              ethers.utils.parseUnits('1000000', 2)
+              ethers.utils.parseUnits('1000000', 2),
             );
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1)
+              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
             )
               .to.emit(lifeCycleCashFlow, 'CashOutExecuted')
               .withArgs(1, 1, [AddressZero], [signer_B.address], [281481]);
 
             expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0)
+              ethers.utils.parseUnits('281481', 0),
             );
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1)
+              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
             )
               .to.emit(lifeCycleCashFlow, 'CashOutExecuted')
               .withArgs(1, 1, [signer_B.address], [], []);
 
             expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0)
+              ethers.utils.parseUnits('281481', 0),
             );
           });
         });
@@ -843,10 +843,10 @@ describe('Security operations', () => {
               lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
                 asset_A.address,
                 asset_B.address,
-              ])
+              ]),
             ).to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'LifeCycleCashFlowIsPaused'
+              'LifeCycleCashFlowIsPaused',
             );
           });
 
@@ -857,11 +857,11 @@ describe('Security operations', () => {
               lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
                 asset_A.address,
                 asset_B.address,
-              ])
+              ]),
             )
               .to.be.revertedWithCustomError(
                 lifeCycleCashFlow,
-                'AccountHasNoRole'
+                'AccountHasNoRole',
               )
               .withArgs(signer_B.address, CASHOUT_ROLE);
           });
@@ -875,11 +875,11 @@ describe('Security operations', () => {
               lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
                 asset_A.address,
                 asset_B.address,
-              ])
+              ]),
             )
               .to.be.revertedWithCustomError(
                 lifeCycleCashFlow,
-                'AccountHasNoRole'
+                'AccountHasNoRole',
               )
               .withArgs(signer_A.address, CASHOUT_ROLE);
           });
@@ -891,7 +891,7 @@ describe('Security operations', () => {
               lifeCycleCashFlow.executeBondCashOutByAddresses(asset_B.address, [
                 asset_A.address,
                 asset_B.address,
-              ])
+              ]),
             )
               .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
               .withArgs(asset_B.address);
@@ -901,18 +901,18 @@ describe('Security operations', () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutRequestDate
+              bondCashoutRequestDate,
             );
 
             await expect(
               lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
                 asset_A.address,
                 asset_B.address,
-              ])
+              ]),
             )
               .to.be.revertedWithCustomError(
                 lifeCycleCashFlow,
-                'NotPaymentDate'
+                'NotPaymentDate',
               )
               .withArgs(bondCashoutInitialDate, bondCashoutRequestDate);
           });
@@ -921,19 +921,19 @@ describe('Security operations', () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate
+              bondCashoutInitialDate,
             );
 
             await expect(
               lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
                 signer_B.address,
-              ])
+              ]),
             )
               .to.emit(lifeCycleCashFlow, 'CashOutByAddressesExecuted')
               .withArgs([signer_B.address], [signer_B.address], [], []);
 
             expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('0', 0)
+              ethers.utils.parseUnits('0', 0),
             );
           });
 
@@ -941,29 +941,29 @@ describe('Security operations', () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate
+              bondCashoutInitialDate,
             );
 
             await stablecoin.transfer(
               lifeCycleCashFlowAddress,
-              ethers.utils.parseUnits('1000000', 2)
+              ethers.utils.parseUnits('1000000', 2),
             );
 
             await expect(
               lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
                 signer_B.address,
-              ])
+              ]),
             )
               .to.emit(lifeCycleCashFlow, 'CashOutByAddressesExecuted')
               .withArgs(
                 [signer_B.address],
                 [AddressZero],
                 [signer_B.address],
-                [281481]
+                [281481],
               );
 
             expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0)
+              ethers.utils.parseUnits('281481', 0),
             );
           });
 
@@ -971,41 +971,41 @@ describe('Security operations', () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate
+              bondCashoutInitialDate,
             );
 
             await stablecoin.transfer(
               lifeCycleCashFlowAddress,
-              ethers.utils.parseUnits('1000000', 2)
+              ethers.utils.parseUnits('1000000', 2),
             );
 
             await expect(
               lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
                 signer_B.address,
-              ])
+              ]),
             )
               .to.emit(lifeCycleCashFlow, 'CashOutByAddressesExecuted')
               .withArgs(
                 [signer_B.address],
                 [AddressZero],
                 [signer_B.address],
-                [281481]
+                [281481],
               );
 
             expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0)
+              ethers.utils.parseUnits('281481', 0),
             );
 
             await expect(
               lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
                 signer_B.address,
-              ])
+              ]),
             )
               .to.emit(lifeCycleCashFlow, 'CashOutByAddressesExecuted')
               .withArgs([signer_B.address], [signer_B.address], [], []);
 
             expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0)
+              ethers.utils.parseUnits('281481', 0),
             );
           });
         });
@@ -1018,10 +1018,16 @@ describe('Security operations', () => {
           await lifeCycleCashFlow.pause();
 
           await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1)
+            lifeCycleCashFlow.executeAmountSnapshot(
+              asset_A.address,
+              1,
+              1,
+              1,
+              1,
+            ),
           ).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused'
+            'LifeCycleCashFlowIsPaused',
           );
         });
 
@@ -1029,11 +1035,17 @@ describe('Security operations', () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
           await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1)
+            lifeCycleCashFlow.executeAmountSnapshot(
+              asset_A.address,
+              1,
+              1,
+              1,
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
@@ -1044,11 +1056,17 @@ describe('Security operations', () => {
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
           await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1)
+            lifeCycleCashFlow.executeAmountSnapshot(
+              asset_A.address,
+              1,
+              1,
+              1,
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
@@ -1057,7 +1075,13 @@ describe('Security operations', () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(asset_B.address, 1, 1, 1, 1)
+            lifeCycleCashFlow.executeAmountSnapshot(
+              asset_B.address,
+              1,
+              1,
+              1,
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
             .withArgs(asset_B.address);
@@ -1072,14 +1096,14 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              1000
-            )
+              1000,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'AmountSnapshotExecuted')
             .withArgs(1, 1, 1, 1000, [signer_B.address], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0)
+            ethers.utils.parseUnits('0', 0),
           );
         });
 
@@ -1094,7 +1118,7 @@ describe('Security operations', () => {
                 name: 'LifeCycleCashFlowTimeTravel',
                 signer: signer_A,
                 args: [asset_C.address, stablecoin.address],
-              })
+              }),
             );
 
           const lifeCycleCashFlowAddressWithoutHolders =
@@ -1102,14 +1126,14 @@ describe('Security operations', () => {
 
           let lifeCycleCashFlowWithoutHolders = await ethers.getContractAt(
             'LifeCycleCashFlowTimeTravel',
-            lifeCycleCashFlowAddressWithoutHolders
+            lifeCycleCashFlowAddressWithoutHolders,
           );
 
           lifeCycleCashFlowWithoutHolders =
             lifeCycleCashFlowWithoutHolders.connect(signer_A);
 
           await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(
-            bondCashoutInitialDate
+            bondCashoutInitialDate,
           );
 
           const result =
@@ -1118,7 +1142,7 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              1000
+              1000,
             );
 
           expect(result.executed_).to.equal(false);
@@ -1129,7 +1153,7 @@ describe('Security operations', () => {
 
           await stablecoin.transfer(
             lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2)
+            ethers.utils.parseUnits('1000000', 2),
           );
 
           await expect(
@@ -1138,8 +1162,8 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              1000
-            )
+              1000,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'AmountSnapshotExecuted')
             .withArgs(
@@ -1149,11 +1173,11 @@ describe('Security operations', () => {
               1000,
               [AddressZero],
               [signer_B.address],
-              [ethers.utils.parseUnits('80', 0)]
+              [ethers.utils.parseUnits('80', 0)],
             );
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('80', 0)
+            ethers.utils.parseUnits('80', 0),
           );
         });
 
@@ -1162,7 +1186,7 @@ describe('Security operations', () => {
 
           await stablecoin.transfer(
             lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2)
+            ethers.utils.parseUnits('1000000', 2),
           );
 
           await expect(
@@ -1171,8 +1195,8 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              1000
-            )
+              1000,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'AmountSnapshotExecuted')
             .withArgs(
@@ -1182,11 +1206,11 @@ describe('Security operations', () => {
               1000,
               [AddressZero],
               [signer_B.address],
-              [ethers.utils.parseUnits('80', 0)]
+              [ethers.utils.parseUnits('80', 0)],
             );
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('80', 0)
+            ethers.utils.parseUnits('80', 0),
           );
 
           await expect(
@@ -1195,14 +1219,14 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              1000
-            )
+              1000,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'AmountSnapshotExecuted')
             .withArgs(1, 1, 1, 1000, [signer_B.address], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('80', 0)
+            ethers.utils.parseUnits('80', 0),
           );
         });
       });
@@ -1219,11 +1243,11 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              1
-            )
+              1,
+            ),
           ).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused'
+            'LifeCycleCashFlowIsPaused',
           );
         });
 
@@ -1236,12 +1260,12 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              1
-            )
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
@@ -1257,12 +1281,12 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              1
-            )
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
@@ -1276,8 +1300,8 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              1
-            )
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
             .withArgs(asset_B.address);
@@ -1292,12 +1316,12 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              10100
-            )
+              10100,
+            ),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'InvalidPercentage'
+              'InvalidPercentage',
             )
             .withArgs(10100);
         });
@@ -1311,14 +1335,14 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              50
-            )
+              50,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'PercentageSnapshotExecuted')
             .withArgs(1, 1, 1, 50, [AddressZero], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0)
+            ethers.utils.parseUnits('0', 0),
           );
         });
 
@@ -1333,7 +1357,7 @@ describe('Security operations', () => {
                 name: 'LifeCycleCashFlowTimeTravel',
                 signer: signer_A,
                 args: [asset_C.address, stablecoin.address],
-              })
+              }),
             );
 
           const lifeCycleCashFlowAddressWithoutHolders =
@@ -1341,14 +1365,14 @@ describe('Security operations', () => {
 
           let lifeCycleCashFlowWithoutHolders = await ethers.getContractAt(
             'LifeCycleCashFlowTimeTravel',
-            lifeCycleCashFlowAddressWithoutHolders
+            lifeCycleCashFlowAddressWithoutHolders,
           );
 
           lifeCycleCashFlowWithoutHolders =
             lifeCycleCashFlowWithoutHolders.connect(signer_A);
 
           await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(
-            bondCashoutInitialDate
+            bondCashoutInitialDate,
           );
 
           const result =
@@ -1357,7 +1381,7 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              50
+              50,
             );
 
           expect(result.executed_).to.equal(false);
@@ -1368,7 +1392,7 @@ describe('Security operations', () => {
 
           await stablecoin.transfer(
             lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2)
+            ethers.utils.parseUnits('1000000', 2),
           );
 
           await expect(
@@ -1377,8 +1401,8 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              50
-            )
+              50,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'PercentageSnapshotExecuted')
             .withArgs(
@@ -1388,11 +1412,11 @@ describe('Security operations', () => {
               50,
               [AddressZero],
               [signer_B.address],
-              [ethers.utils.parseUnits('400', 2)]
+              [ethers.utils.parseUnits('400', 2)],
             );
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('400', 2)
+            ethers.utils.parseUnits('400', 2),
           );
         });
 
@@ -1401,7 +1425,7 @@ describe('Security operations', () => {
 
           await stablecoin.transfer(
             lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2)
+            ethers.utils.parseUnits('1000000', 2),
           );
 
           await expect(
@@ -1410,8 +1434,8 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              50
-            )
+              50,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'PercentageSnapshotExecuted')
             .withArgs(
@@ -1421,11 +1445,11 @@ describe('Security operations', () => {
               50,
               [AddressZero],
               [signer_B.address],
-              [ethers.utils.parseUnits('400', 2)]
+              [ethers.utils.parseUnits('400', 2)],
             );
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('400', 2)
+            ethers.utils.parseUnits('400', 2),
           );
 
           await expect(
@@ -1434,14 +1458,14 @@ describe('Security operations', () => {
               1,
               1,
               1,
-              50
-            )
+              50,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'PercentageSnapshotExecuted')
             .withArgs(1, 1, 1, 50, [signer_B.address], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('400', 2)
+            ethers.utils.parseUnits('400', 2),
           );
         });
       });
@@ -1457,11 +1481,11 @@ describe('Security operations', () => {
               asset_A.address,
               1,
               [signer_A.address],
-              1
-            )
+              1,
+            ),
           ).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused'
+            'LifeCycleCashFlowIsPaused',
           );
         });
 
@@ -1473,12 +1497,12 @@ describe('Security operations', () => {
               asset_A.address,
               1,
               [signer_A.address],
-              1
-            )
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
@@ -1493,12 +1517,12 @@ describe('Security operations', () => {
               asset_A.address,
               1,
               [signer_A.address],
-              1
-            )
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
@@ -1511,8 +1535,8 @@ describe('Security operations', () => {
               asset_B.address,
               1,
               [signer_A.address],
-              1
-            )
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
             .withArgs(asset_B.address);
@@ -1526,14 +1550,14 @@ describe('Security operations', () => {
               asset_A.address,
               1,
               [signer_B.address],
-              1000
-            )
+              1000,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'AmountSnapshotByAddressesExecuted')
             .withArgs(1, [signer_B.address], 1000, [signer_B.address], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0)
+            ethers.utils.parseUnits('0', 0),
           );
         });
 
@@ -1542,7 +1566,7 @@ describe('Security operations', () => {
 
           await stablecoin.transfer(
             lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2)
+            ethers.utils.parseUnits('1000000', 2),
           );
 
           await expect(
@@ -1550,8 +1574,8 @@ describe('Security operations', () => {
               asset_A.address,
               1,
               [signer_B.address],
-              1000
-            )
+              1000,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'AmountSnapshotByAddressesExecuted')
             .withArgs(
@@ -1560,11 +1584,11 @@ describe('Security operations', () => {
               1000,
               [AddressZero],
               [signer_B.address],
-              [ethers.utils.parseUnits('80', 0)]
+              [ethers.utils.parseUnits('80', 0)],
             );
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('80', 0)
+            ethers.utils.parseUnits('80', 0),
           );
         });
       });
@@ -1580,11 +1604,11 @@ describe('Security operations', () => {
               asset_A.address,
               1,
               [signer_A.address],
-              1
-            )
+              1,
+            ),
           ).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused'
+            'LifeCycleCashFlowIsPaused',
           );
         });
 
@@ -1596,12 +1620,12 @@ describe('Security operations', () => {
               asset_A.address,
               1,
               [signer_A.address],
-              1
-            )
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
@@ -1616,12 +1640,12 @@ describe('Security operations', () => {
               asset_A.address,
               1,
               [signer_A.address],
-              1
-            )
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
@@ -1634,8 +1658,8 @@ describe('Security operations', () => {
               asset_B.address,
               1,
               [signer_A.address],
-              1
-            )
+              1,
+            ),
           )
             .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
             .withArgs(asset_B.address);
@@ -1649,14 +1673,14 @@ describe('Security operations', () => {
               asset_A.address,
               1,
               [signer_B.address],
-              50
-            )
+              50,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'PercentageSnapshotByAddressesExecuted')
             .withArgs(1, [signer_B.address], 50, [AddressZero], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0)
+            ethers.utils.parseUnits('0', 0),
           );
         });
 
@@ -1665,7 +1689,7 @@ describe('Security operations', () => {
 
           await stablecoin.transfer(
             lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2)
+            ethers.utils.parseUnits('1000000', 2),
           );
 
           await expect(
@@ -1673,8 +1697,8 @@ describe('Security operations', () => {
               asset_A.address,
               1,
               [signer_B.address],
-              50
-            )
+              50,
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'PercentageSnapshotByAddressesExecuted')
             .withArgs(
@@ -1683,11 +1707,11 @@ describe('Security operations', () => {
               50,
               [AddressZero],
               [signer_B.address],
-              [ethers.utils.parseUnits('400', 2)]
+              [ethers.utils.parseUnits('400', 2)],
             );
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('400', 2)
+            ethers.utils.parseUnits('400', 2),
           );
         });
       });
@@ -1699,10 +1723,10 @@ describe('Security operations', () => {
           await lifeCycleCashFlow.pause();
 
           await expect(
-            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1)
+            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1),
           ).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused'
+            'LifeCycleCashFlowIsPaused',
           );
         });
 
@@ -1710,11 +1734,11 @@ describe('Security operations', () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
           await expect(
-            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1)
+            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_B.address, TRANSFERER_ROLE);
         });
@@ -1725,11 +1749,11 @@ describe('Security operations', () => {
           await lifeCycleCashFlow.revokeRole(TRANSFERER_ROLE, signer_A.address);
 
           await expect(
-            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1)
+            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_A.address, TRANSFERER_ROLE);
         });
@@ -1738,11 +1762,11 @@ describe('Security operations', () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await expect(
-            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 200)
+            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 200),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'NotEnoughBalance'
+              'NotEnoughBalance',
             )
             .withArgs(200);
         });
@@ -1752,20 +1776,20 @@ describe('Security operations', () => {
 
           await stablecoin.transfer(
             lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1', 2)
+            ethers.utils.parseUnits('1', 2),
           );
 
           await expect(
             lifeCycleCashFlow.transferPaymentToken(
               signer_B.address,
-              ethers.utils.parseUnits('1', 2)
-            )
+              ethers.utils.parseUnits('1', 2),
+            ),
           )
             .to.emit(lifeCycleCashFlow, 'PaymentTokenTransferred')
             .withArgs(signer_B.address, ethers.utils.parseUnits('1', 2));
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('1', 2)
+            ethers.utils.parseUnits('1', 2),
           );
         });
       });
@@ -1786,10 +1810,10 @@ describe('Security operations', () => {
           await lifeCycleCashFlow.pause();
 
           await expect(
-            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address)
+            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address),
           ).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused'
+            'LifeCycleCashFlowIsPaused',
           );
         });
 
@@ -1797,11 +1821,11 @@ describe('Security operations', () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
           await expect(
-            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address)
+            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_B.address, PAYMENT_TOKEN_MANAGER_ROLE);
         });
@@ -1811,21 +1835,21 @@ describe('Security operations', () => {
 
           await lifeCycleCashFlow.revokeRole(
             PAYMENT_TOKEN_MANAGER_ROLE,
-            signer_A.address
+            signer_A.address,
           );
 
           await expect(
-            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address)
+            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address),
           )
             .to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'AccountHasNoRole'
+              'AccountHasNoRole',
             )
             .withArgs(signer_A.address, PAYMENT_TOKEN_MANAGER_ROLE);
 
           await lifeCycleCashFlow.grantRole(
             PAYMENT_TOKEN_MANAGER_ROLE,
-            signer_A.address
+            signer_A.address,
           );
         });
 
@@ -1833,13 +1857,13 @@ describe('Security operations', () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await expect(
-            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address)
+            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address),
           )
             .to.emit(lifeCycleCashFlow, 'PaymentTokenChanged')
             .withArgs(stablecoin_B.address);
 
           expect(await lifeCycleCashFlow.getPaymentToken()).to.equal(
-            stablecoin_B.address
+            stablecoin_B.address,
           );
         });
       });
@@ -1855,7 +1879,7 @@ describe('Security operations', () => {
 
           await lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address);
           expect(await lifeCycleCashFlow.getPaymentToken()).to.equal(
-            stablecoin_B.address
+            stablecoin_B.address,
           );
         });
       });

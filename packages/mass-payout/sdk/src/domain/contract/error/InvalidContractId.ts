@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from "@core/error/BaseError"
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export class InvalidContractId extends BaseError {
   constructor(contractId: string) {
-    super(ErrorCode.InvalidContractId, `Contract ${contractId} is not valid`)
+    super(ErrorCode.InvalidContractId, `Contract ${contractId} is not valid`);
   }
 }

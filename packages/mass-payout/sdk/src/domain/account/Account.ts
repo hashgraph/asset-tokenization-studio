@@ -203,9 +203,9 @@
 
 */
 
-import PrivateKey from "./PrivateKey"
-import PublicKey from "./PublicKey"
-import { HederaId } from "../shared/HederaId"
+import PrivateKey from './PrivateKey';
+import PublicKey from './PublicKey';
+import { HederaId } from '../shared/HederaId';
 
 export interface AccountProps {
   id: string;
@@ -216,13 +216,13 @@ export interface AccountProps {
 }
 
 export default class Account {
-  public static readonly NULL: Account = new Account({ id: "0.0.0" })
-  public id: HederaId
-  public evmAddress?: string
-  public privateKey?: PrivateKey
-  public publicKey?: PublicKey
-  public alias?: string
+  public static readonly NULL: Account = new Account({ id: '0.0.0' });
+  public id: HederaId;
+  public evmAddress?: string;
+  public privateKey?: PrivateKey;
+  public publicKey?: PublicKey;
+  public alias?: string;
   constructor(props: AccountProps) {
-    Object.assign(this, { ...props, id: HederaId.from(props.id) })
+    Object.assign(this, { ...props, id: HederaId.from(props.id) });
   }
 }

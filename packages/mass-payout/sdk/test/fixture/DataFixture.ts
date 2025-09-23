@@ -203,16 +203,20 @@
 
 */
 
-import { createFixture } from "./config"
+import { createFixture } from './config';
 
 export const EvmAddressPropsFixture = createFixture<{ value: string }>(
-  props => {
-    props.value.faker(faker =>
-      faker.string.hexadecimal({ length: 40, casing: "lower" })
-    )
-  }
-)
+  (props) => {
+    props.value.faker((faker) =>
+      faker.string.hexadecimal({ length: 40, casing: 'lower' }),
+    );
+  },
+);
 
-export const HederaIdPropsFixture = createFixture<{ value: string }>(props => {
-  props.value.faker(faker => `0.0.${faker.number.int({ min: 100, max: 999 })}`)
-})
+export const HederaIdPropsFixture = createFixture<{ value: string }>(
+  (props) => {
+    props.value.faker(
+      (faker) => `0.0.${faker.number.int({ min: 100, max: 999 })}`,
+    );
+  },
+);

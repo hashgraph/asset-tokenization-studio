@@ -213,7 +213,7 @@ import { TabsConfiguration } from '../components/TabsConfiguration';
 jest.mock('io-bricks-ui', () => ({
   Tabs: ({ tabs, variant, index, onChange, ...props }: any) => (
     <div
-      data-testid='tabs'
+      data-testid="tabs"
       data-variant={variant}
       data-index={index}
       data-tabs-count={tabs?.length}
@@ -243,23 +243,23 @@ jest.mock('../../AssetDistributions/AssetDistributions', () => ({
     ...props
   }: any) => (
     <div
-      data-testid='asset-distributions'
+      data-testid="asset-distributions"
       data-asset-id={assetId}
       data-is-paused={isPaused}
       data-is-importing={isImportingCorporateActions}
       {...props}
     >
-      <button data-testid='pause-unpause-btn' onClick={onPauseUnpause}>
+      <button data-testid="pause-unpause-btn" onClick={onPauseUnpause}>
         {isPaused ? 'Unpause' : 'Pause'}
       </button>
       <button
-        data-testid='import-actions-btn'
+        data-testid="import-actions-btn"
         onClick={onImportCorporateActions}
       >
         Import Actions
       </button>
       <button
-        data-testid='new-distribution-btn'
+        data-testid="new-distribution-btn"
         onClick={handleNewDistribution}
       >
         New Distribution
@@ -271,18 +271,18 @@ jest.mock('../../AssetDistributions/AssetDistributions', () => ({
 jest.mock('../components/Details', () => ({
   Details: ({ assetData, isLoading, ...props }: any) => (
     <div
-      data-testid='details'
+      data-testid="details"
       data-is-loading={isLoading}
       data-has-asset={!!assetData}
       {...props}
     >
       {assetData ? (
-        <div data-testid='asset-data'>
-          <span data-testid='asset-name'>{assetData.name}</span>
-          <span data-testid='asset-symbol'>{assetData.symbol}</span>
+        <div data-testid="asset-data">
+          <span data-testid="asset-name">{assetData.name}</span>
+          <span data-testid="asset-symbol">{assetData.symbol}</span>
         </div>
       ) : (
-        <div data-testid='no-asset'>No asset data</div>
+        <div data-testid="no-asset">No asset data</div>
       )}
     </div>
   ),
@@ -334,7 +334,7 @@ describe('TabsConfiguration Component', () => {
       expect(screen.getByTestId('tab-1')).toBeInTheDocument();
       expect(screen.getByTestId('tabs')).toHaveAttribute(
         'data-tabs-count',
-        '2'
+        '2',
       );
     });
 
@@ -343,7 +343,7 @@ describe('TabsConfiguration Component', () => {
 
       expect(screen.getByTestId('tab-header-0')).toHaveTextContent('Details');
       expect(screen.getByTestId('tab-header-1')).toHaveTextContent(
-        'Distributions'
+        'Distributions',
       );
     });
   });

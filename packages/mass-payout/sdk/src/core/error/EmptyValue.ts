@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from "./BaseError"
+import BaseError, { ErrorCode } from './BaseError';
 
 export class EmptyValue extends BaseError {
   constructor(val: unknown) {
-    super(ErrorCode.EmptyValue, `Value ${val} cannot be empty`)
+    super(ErrorCode.EmptyValue, `Value ${val} cannot be empty`);
   }
 }

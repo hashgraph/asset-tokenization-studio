@@ -355,7 +355,7 @@ export const useAssetDistributionsColumns = ({
           );
         },
       }),
-      trigger: columnHelper.accessor(row => row.type, {
+      trigger: columnHelper.accessor((row) => row.type, {
         id: 'trigger',
         header: t('trigger'),
         size: currentSizes.trigger || 120,
@@ -375,10 +375,10 @@ export const useAssetDistributionsColumns = ({
           );
         },
       }),
-      configuratedAmount: columnHelper.accessor(row => row.amount, {
+      configuratedAmount: columnHelper.accessor((row) => row.amount, {
         id: 'configuratedAmount',
         header: () => (
-          <Text textAlign='left' overflow='hidden' h='40px' w='100px'>
+          <Text textAlign="left" overflow="hidden" h="40px" w="100px">
             {t('configuratedAmount')}
           </Text>
         ),
@@ -392,11 +392,11 @@ export const useAssetDistributionsColumns = ({
         },
       }),
       distributedAmount: columnHelper.accessor(
-        row => row.asset?.distributedAmount,
+        (row) => row.asset?.distributedAmount,
         {
           id: 'distributedAmount',
           header: () => (
-            <Text textAlign='left' overflow='hidden' h='40px' w='100px'>
+            <Text textAlign="left" overflow="hidden" h="40px" w="100px">
               {t('distributedAmount')}
             </Text>
           ),
@@ -408,12 +408,12 @@ export const useAssetDistributionsColumns = ({
             if (!amount) return '-';
             return `${amountType === 'FIXED' ? '$' : '%'} ${formatNumber(amount)}`;
           },
-        }
+        },
       ),
-      recipientHolders: columnHelper.accessor(row => row?.holdersNumber, {
+      recipientHolders: columnHelper.accessor((row) => row?.holdersNumber, {
         id: 'recipientHolders',
         header: () => (
-          <Text textAlign='left' overflow='hidden' h={10} w={25}>
+          <Text textAlign="left" overflow="hidden" h={10} w={25}>
             {t('recipientHolders')}
           </Text>
         ),
@@ -424,7 +424,7 @@ export const useAssetDistributionsColumns = ({
       nextExecutionTime: columnHelper.accessor('executionDate', {
         id: 'executionDate',
         header: () => (
-          <Text textAlign='left' overflow='hidden' h='40px' w='100px'>
+          <Text textAlign="left" overflow="hidden" h="40px" w="100px">
             {t('nextExecutionTime')}
           </Text>
         ),
@@ -435,15 +435,15 @@ export const useAssetDistributionsColumns = ({
           const date = new Date(getValue() as string);
           return (
             <Box
-              minH='40px'
-              display='flex'
-              flexDirection='column'
-              justifyContent='center'
+              minH="40px"
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
             >
-              <Text fontSize='sm' lineHeight='1.2' whiteSpace='nowrap'>
+              <Text fontSize="sm" lineHeight="1.2" whiteSpace="nowrap">
                 {format(date, 'dd/MM/yyyy')}
               </Text>
-              <Text fontSize='xs' lineHeight='1.2' whiteSpace='nowrap'>
+              <Text fontSize="xs" lineHeight="1.2" whiteSpace="nowrap">
                 {format(date, 'HH:mm:ss')}
               </Text>
             </Box>
@@ -453,7 +453,7 @@ export const useAssetDistributionsColumns = ({
       executionStartTime: columnHelper.accessor('executionDate', {
         id: 'createdAt',
         header: () => (
-          <Text textAlign='left' overflow='hidden' h='40px' w='80px'>
+          <Text textAlign="left" overflow="hidden" h="40px" w="80px">
             {t('executionStartTime')}
           </Text>
         ),
@@ -464,15 +464,15 @@ export const useAssetDistributionsColumns = ({
           const date = new Date(getValue() as string);
           return (
             <Box
-              minH='40px'
-              display='flex'
-              flexDirection='column'
-              justifyContent='center'
+              minH="40px"
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
             >
-              <Text fontSize='sm' lineHeight='1.2' whiteSpace='nowrap'>
+              <Text fontSize="sm" lineHeight="1.2" whiteSpace="nowrap">
                 {format(date, 'dd/MM/yyyy')}
               </Text>
-              <Text fontSize='xs' lineHeight='1.2' whiteSpace='nowrap'>
+              <Text fontSize="xs" lineHeight="1.2" whiteSpace="nowrap">
                 {format(date, 'HH:mm:ss')}
               </Text>
             </Box>
@@ -482,7 +482,7 @@ export const useAssetDistributionsColumns = ({
       executionEndTime: columnHelper.accessor('updatedAt', {
         id: 'updatedAt',
         header: () => (
-          <Text textAlign='left' overflow='hidden' h='40px' w='80px'>
+          <Text textAlign="left" overflow="hidden" h="40px" w="80px">
             {t('executionEndTime')}
           </Text>
         ),
@@ -493,15 +493,15 @@ export const useAssetDistributionsColumns = ({
           const date = new Date(getValue());
           return (
             <Box
-              minH='40px'
-              display='flex'
-              flexDirection='column'
-              justifyContent='center'
+              minH="40px"
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
             >
-              <Text fontSize='sm' lineHeight='1.2' whiteSpace='nowrap'>
+              <Text fontSize="sm" lineHeight="1.2" whiteSpace="nowrap">
                 {format(date, 'dd/MM/yyyy')}
               </Text>
-              <Text fontSize='xs' lineHeight='1.2' whiteSpace='nowrap'>
+              <Text fontSize="xs" lineHeight="1.2" whiteSpace="nowrap">
                 {format(date, 'HH:mm:ss')}
               </Text>
             </Box>
@@ -522,10 +522,10 @@ export const useAssetDistributionsColumns = ({
           return (
             <Tag
               variant={tagVariant}
-              size='sm'
-              display='flex'
-              alignItems='center'
-              justifyContent='center'
+              size="sm"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
               label={status}
             />
           );
@@ -544,19 +544,19 @@ export const useAssetDistributionsColumns = ({
           const progress = calculateProgressByStatus(status);
           const { progressVariant } = getStatusVariants(status);
           return (
-            <Flex align='center' gap={2} w='full'>
+            <Flex align="center" gap={2} w="full">
               <Progress
                 variant={progressVariant}
                 value={progress}
-                size='md'
-                w='150px'
-                borderRadius='md'
+                size="md"
+                w="150px"
+                borderRadius="md"
               />
               <Box
                 w={10}
-                display='flex'
-                alignItems='center'
-                justifyContent='center'
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
               >
                 {renderProgressIndicator(status, progress)}
               </Box>
@@ -587,17 +587,17 @@ export const useAssetDistributionsColumns = ({
             canCancel && (
               <HStack spacing={3}>
                 <IconButton
-                  aria-label='cancel-distribution'
+                  aria-label="cancel-distribution"
                   icon={
                     <PhosphorIcon
                       as={XSquare}
-                      size='xs'
+                      size="xs"
                       weight={Weight.Fill}
-                      fill='red'
+                      fill="red"
                     />
                   }
-                  variant='tertiary'
-                  size='xxs'
+                  variant="tertiary"
+                  size="xxs"
                   isDisabled={!canCancel || cancelDistribution.isPending}
                   isLoading={cancelDistribution.isPending}
                   onClick={handleCancelDistribution}
@@ -650,8 +650,8 @@ export const useAssetDistributionsColumns = ({
       columns: columnSets[tabType || 'upcoming'],
       modal: (
         <PopUp
-          id='cancelDistribution'
-          icon={<PhosphorIcon as={Warning} size='md' weight={Weight.Light} />}
+          id="cancelDistribution"
+          icon={<PhosphorIcon as={Warning} size="md" weight={Weight.Light} />}
           isOpen={showCancelModal}
           onClose={handleCancelModal}
           title={tAssets('detail.popup.cancelDistribution.title')}
@@ -660,7 +660,7 @@ export const useAssetDistributionsColumns = ({
           cancelText={tAssets('detail.popup.cancelDistribution.cancelText')}
           onConfirm={handleConfirmCancel}
           onCancel={handleCancelModal}
-          variant='error'
+          variant="error"
           confirmButtonProps={{
             isLoading: cancelDistribution.isPending,
             status: 'danger',

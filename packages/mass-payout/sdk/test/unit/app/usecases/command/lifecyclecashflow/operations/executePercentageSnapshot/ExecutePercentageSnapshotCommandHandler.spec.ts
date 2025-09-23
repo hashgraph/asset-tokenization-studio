@@ -203,47 +203,47 @@
 
 */
 
-import { ExecutePercentageSnapshotCommandHandler } from "@app/usecase/command/lifeCycleCashFlow/operations/executePercentageSnapshot/ExecutePercentageSnapshotCommandHandler"
+import { ExecutePercentageSnapshotCommandHandler } from '@app/usecase/command/lifeCycleCashFlow/operations/executePercentageSnapshot/ExecutePercentageSnapshotCommandHandler';
 import {
   ExecutePercentageSnapshotCommand,
   ExecutePercentageSnapshotCommandResponse,
-} from "@app/usecase/command/lifeCycleCashFlow/operations/executePercentageSnapshot/ExecutePercentageSnapshotCommand"
-import { ExecutePercentageSnapshotCommandError } from "@app/usecase/command/lifeCycleCashFlow/operations/executePercentageSnapshot/error/ExecutePercentageSnapshotCommandError"
-import ContractService from "@app/services/contract/ContractService"
-import TransactionService from "@app/services/transaction/TransactionService"
-import EvmAddress from "@domain/contract/EvmAddress"
-import BigDecimal from "@domain/shared/BigDecimal"
+} from '@app/usecase/command/lifeCycleCashFlow/operations/executePercentageSnapshot/ExecutePercentageSnapshotCommand';
+import { ExecutePercentageSnapshotCommandError } from '@app/usecase/command/lifeCycleCashFlow/operations/executePercentageSnapshot/error/ExecutePercentageSnapshotCommandError';
+import ContractService from '@app/services/contract/ContractService';
+import TransactionService from '@app/services/transaction/TransactionService';
+import EvmAddress from '@domain/contract/EvmAddress';
+import BigDecimal from '@domain/shared/BigDecimal';
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
-} from "../../../../../../../fixture/DataFixture"
+} from '../../../../../../../fixture/DataFixture';
 
-describe("ExecutePercentageSnapshotCommandHandler", () => {
-  let handler: ExecutePercentageSnapshotCommandHandler
-  let transactionService: jest.Mocked<TransactionService>
-  let contractService: jest.Mocked<ContractService>
-  let transactionHandlerMock: any
+describe('ExecutePercentageSnapshotCommandHandler', () => {
+  let handler: ExecutePercentageSnapshotCommandHandler;
+  let transactionService: jest.Mocked<TransactionService>;
+  let contractService: jest.Mocked<ContractService>;
+  let transactionHandlerMock: any;
 
   beforeEach(() => {
     transactionHandlerMock = {
       executePercentageSnapshot: jest.fn(),
-    }
+    };
 
     transactionService = {
       getHandler: jest.fn().mockReturnValue(transactionHandlerMock),
-    } as any
+    } as any;
 
     contractService = {
       getContractEvmAddress: jest.fn(),
-    } as any
+    } as any;
 
     handler = new ExecutePercentageSnapshotCommandHandler(
       transactionService,
-      contractService
-    )
-  })
+      contractService,
+    );
+  });
 
-  it("should execute successfully and return a response", async () => {
+  it('should execute successfully and return a response', async () => {
     // Arrange
     const command: ExecutePercentageSnapshotCommand = {
       lifeCycleCashFlowId: HederaIdPropsFixture.create().value,
@@ -251,25 +251,25 @@ describe("ExecutePercentageSnapshotCommandHandler", () => {
       snapshotId: 1,
       pageIndex: 0,
       pageLength: 10,
-      percentage: "25",
+      percentage: '25',
       paymentTokenDecimals: 6,
-    } as any
+    } as any;
 
     const mockLifeCycleAddress = new EvmAddress(
-      EvmAddressPropsFixture.create().value
-    )
+      EvmAddressPropsFixture.create().value,
+    );
     const mockAssetAddress = new EvmAddress(
-      EvmAddressPropsFixture.create().value
-    )
-    const percentageBd = BigDecimal.fromString("25", 2);
+      EvmAddressPropsFixture.create().value,
+    );
+    const percentageBd = BigDecimal.fromString('25', 2);
 
     (contractService.getContractEvmAddress as jest.Mock)
       .mockResolvedValueOnce(mockLifeCycleAddress)
-      .mockResolvedValueOnce(mockAssetAddress)
+      .mockResolvedValueOnce(mockAssetAddress);
 
-    const failed = EvmAddressPropsFixture.create().value
-    const succeeded1 = EvmAddressPropsFixture.create().value
-    const succeeded2 = EvmAddressPropsFixture.create().value
+    const failed = EvmAddressPropsFixture.create().value;
+    const succeeded1 = EvmAddressPropsFixture.create().value;
+    const succeeded2 = EvmAddressPropsFixture.create().value;
     const mockedRes = {
       response: [
         [failed],
@@ -277,26 +277,26 @@ describe("ExecutePercentageSnapshotCommandHandler", () => {
         [1000000, 2000000], // numeric values to transform with BigDecimal
         true,
       ],
-      id: "tx123",
-    }
+      id: 'tx123',
+    };
 
     transactionHandlerMock.executePercentageSnapshot.mockResolvedValue(
-      mockedRes
-    )
+      mockedRes,
+    );
 
     // Act
-    const result = await handler.execute(command)
+    const result = await handler.execute(command);
 
     // Assert
     expect(contractService.getContractEvmAddress).toHaveBeenCalledWith(
-      command.lifeCycleCashFlowId
-    )
+      command.lifeCycleCashFlowId,
+    );
     expect(contractService.getContractEvmAddress).toHaveBeenCalledWith(
-      command.asset
-    )
+      command.asset,
+    );
 
     expect(
-      transactionHandlerMock.executePercentageSnapshot
+      transactionHandlerMock.executePercentageSnapshot,
     ).toHaveBeenCalledWith(
       mockLifeCycleAddress,
       command.lifeCycleCashFlowId,
@@ -304,34 +304,34 @@ describe("ExecutePercentageSnapshotCommandHandler", () => {
       1,
       0,
       10,
-      percentageBd
-    )
+      percentageBd,
+    );
 
-    expect(result).toBeInstanceOf(ExecutePercentageSnapshotCommandResponse)
-    expect(result.failed).toStrictEqual([failed])
-    expect(result.succeeded).toStrictEqual([succeeded1, succeeded2])
-    expect(result.paidAmount).toEqual(["1", "2"])
-    expect(result.executed).toBe(true)
-    expect(result.transactionId).toBe("tx123")
-  })
+    expect(result).toBeInstanceOf(ExecutePercentageSnapshotCommandResponse);
+    expect(result.failed).toStrictEqual([failed]);
+    expect(result.succeeded).toStrictEqual([succeeded1, succeeded2]);
+    expect(result.paidAmount).toEqual(['1', '2']);
+    expect(result.executed).toBe(true);
+    expect(result.transactionId).toBe('tx123');
+  });
 
-  it("should throw ExecutePercentageSnapshotCommandError on failure", async () => {
+  it('should throw ExecutePercentageSnapshotCommandError on failure', async () => {
     const command: ExecutePercentageSnapshotCommand = {
       lifeCycleCashFlowId: HederaIdPropsFixture.create().value,
       asset: HederaIdPropsFixture.create().value,
       snapshotId: 1,
       pageIndex: 0,
       pageLength: 10,
-      percentage: "25",
+      percentage: '25',
       paymentTokenDecimals: 6,
-    } as any
+    } as any;
 
     contractService.getContractEvmAddress.mockRejectedValue(
-      new Error("Error getting contract address")
-    )
+      new Error('Error getting contract address'),
+    );
 
     await expect(handler.execute(command)).rejects.toThrow(
-      ExecutePercentageSnapshotCommandError
-    )
-  })
-})
+      ExecutePercentageSnapshotCommandError,
+    );
+  });
+});

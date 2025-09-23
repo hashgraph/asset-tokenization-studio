@@ -253,10 +253,10 @@ export const useDistributionsColumns = () => {
           return (
             <Button
               as={Link}
-              target='_blank'
+              target="_blank"
               href={`https://hashscan.io/testnet/contract/${distributionId}`}
-              variant='table'
-              onClick={e => e.stopPropagation()}
+              variant="table"
+              onClick={(e) => e.stopPropagation()}
             >
               {truncatedId}
             </Button>
@@ -264,27 +264,27 @@ export const useDistributionsColumns = () => {
         },
       }),
       distributionType: columnHelper.accessor(
-        row => (row.corporateActionID ? 'Corporate Action' : 'Manual'),
+        (row) => (row.corporateActionID ? 'Corporate Action' : 'Manual'),
         {
           header: t('distributionType'),
           size: 110,
           enableSorting: false,
           cell: ({ getValue }) => getValue(),
-        }
+        },
       ),
-      assetType: columnHelper.accessor(row => row.asset.type, {
+      assetType: columnHelper.accessor((row) => row.asset.type, {
         header: t('assetType'),
         size: 90,
         enableSorting: false,
         cell: ({ getValue }) => getValue(),
       }),
-      assetName: columnHelper.accessor(row => row.asset.name, {
+      assetName: columnHelper.accessor((row) => row.asset.name, {
         header: t('assetName'),
         size: 140,
         enableSorting: false,
         cell: ({ getValue }) => getValue(),
       }),
-      assetId: columnHelper.accessor(row => row.asset.id, {
+      assetId: columnHelper.accessor((row) => row.asset.id, {
         header: t('assetId'),
         size: 100,
         enableSorting: false,
@@ -293,13 +293,13 @@ export const useDistributionsColumns = () => {
           const truncatedAssetId =
             assetId.length > 10 ? `${assetId.slice(0, 8)}...` : assetId;
           return (
-            <HStack spacing='-15px'>
+            <HStack spacing="-15px">
               <Button
                 as={Link}
-                target='_blank'
+                target="_blank"
                 href={`https://hashscan.io/testnet/contract/${assetId}`}
-                variant='table'
-                onClick={e => e.stopPropagation()}
+                variant="table"
+                onClick={(e) => e.stopPropagation()}
               >
                 {truncatedAssetId}
               </Button>
@@ -308,34 +308,37 @@ export const useDistributionsColumns = () => {
           );
         },
       }),
-      evmTokenAddress: columnHelper.accessor(row => row.asset.evmTokenAddress, {
-        header: t('assetEvmAddress'),
-        size: 150,
-        enableSorting: false,
-        cell: ({ getValue }) => {
-          const evmAddress = getValue();
-          const truncatedAddress = `${evmAddress.slice(
-            0,
-            11
-          )}...${evmAddress.slice(-4)}`;
-          return (
-            <HStack spacing='-15px'>
-              <Button
-                as={Link}
-                target='_blank'
-                href={`https://etherscan.io/address/${evmAddress}`}
-                variant='table'
-                onClick={e => e.stopPropagation()}
-              >
-                {truncatedAddress}
-              </Button>
-              <ClipboardButton value={evmAddress} />
-            </HStack>
-          );
+      evmTokenAddress: columnHelper.accessor(
+        (row) => row.asset.evmTokenAddress,
+        {
+          header: t('assetEvmAddress'),
+          size: 150,
+          enableSorting: false,
+          cell: ({ getValue }) => {
+            const evmAddress = getValue();
+            const truncatedAddress = `${evmAddress.slice(
+              0,
+              11,
+            )}...${evmAddress.slice(-4)}`;
+            return (
+              <HStack spacing="-15px">
+                <Button
+                  as={Link}
+                  target="_blank"
+                  href={`https://etherscan.io/address/${evmAddress}`}
+                  variant="table"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {truncatedAddress}
+                </Button>
+                <ClipboardButton value={evmAddress} />
+              </HStack>
+            );
+          },
         },
-      }),
+      ),
       lifecycleCashFlowId: columnHelper.accessor(
-        row => row.asset.lifeCycleCashFlowHederaAddress || '',
+        (row) => row.asset.lifeCycleCashFlowHederaAddress || '',
         {
           header: t('lifecycleCashFlowId'),
           size: 140,
@@ -344,13 +347,13 @@ export const useDistributionsColumns = () => {
             const flowId = getValue();
             if (!flowId) return '-';
             return (
-              <HStack spacing='-50px'>
+              <HStack spacing="-50px">
                 <Button
                   as={Link}
-                  target='_blank'
+                  target="_blank"
                   href={`https://hashscan.io/testnet/contract/${flowId}`}
-                  variant='table'
-                  onClick={e => e.stopPropagation()}
+                  variant="table"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   {flowId}
                 </Button>
@@ -358,9 +361,9 @@ export const useDistributionsColumns = () => {
               </HStack>
             );
           },
-        }
+        },
       ),
-      status: columnHelper.accessor(row => row.status, {
+      status: columnHelper.accessor((row) => row.status, {
         header: t('status'),
         size: 90,
         enableSorting: false,
@@ -389,10 +392,10 @@ export const useDistributionsColumns = () => {
           const { status, variant } =
             statusMap[rawStatus.toLowerCase() as keyof typeof statusMap] ||
             statusMap.scheduled;
-          return <Tag label={status} variant={variant} size='md' />;
+          return <Tag label={status} variant={variant} size="md" />;
         },
       }),
-      amount: columnHelper.accessor(row => row.amount || 0, {
+      amount: columnHelper.accessor((row) => row.amount || 0, {
         header: t('amount'),
         size: 70,
         enableSorting: false,

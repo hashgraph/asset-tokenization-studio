@@ -242,7 +242,7 @@ export const usePauseAsset = () => {
       queryClient.invalidateQueries({ queryKey: ['assets'] });
       console.log('Asset paused successfully');
     },
-    onError: error => {
+    onError: (error) => {
       console.error('Error pausing asset:', error);
     },
   });
@@ -257,7 +257,7 @@ export const useUnpauseAsset = () => {
       queryClient.invalidateQueries({ queryKey: ['assets'] });
       console.log('Asset resumed successfully');
     },
-    onError: error => {
+    onError: (error) => {
       console.error('Error unpausing asset:', error);
     },
   });
@@ -273,14 +273,14 @@ export const useImportAsset = () => {
       queryClient.invalidateQueries({ queryKey: ['assets'] });
       console.log('Asset imported successfully');
     },
-    onError: error => {
+    onError: (error) => {
       console.error('Error importing asset:', error);
     },
   });
 };
 
 export const useGetAssetDistributions = (
-  params: GetAssetDistributionsParams
+  params: GetAssetDistributionsParams,
 ) => {
   return useQuery({
     queryKey: ['assetDistributions', params.assetId, params],
@@ -314,7 +314,7 @@ export const useEnableAssetSync = () => {
       queryClient.invalidateQueries({ queryKey: ['assets'] });
       console.log('Asset sync enabled successfully');
     },
-    onError: error => {
+    onError: (error) => {
       console.error('Error enabling asset sync:', error);
     },
   });
@@ -329,7 +329,7 @@ export const useDisableAssetSync = () => {
       queryClient.invalidateQueries({ queryKey: ['assets'] });
       console.log('Asset sync disabled successfully');
     },
-    onError: error => {
+    onError: (error) => {
       console.error('Error disabling asset sync:', error);
     },
   });

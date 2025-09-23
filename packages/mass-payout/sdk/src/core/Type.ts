@@ -216,9 +216,9 @@ export interface IndexableObject {
 export type Constructible<
   Params extends readonly any[] = any[],
   T = any,
-> = new (...params: Params) => T
+> = new (...params: Params) => T;
 
-export type MapFunction<T, K, O> = (value: T, object: O) => K
+export type MapFunction<T, K, O> = (value: T, object: O) => K;
 
 export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
   T,
@@ -226,8 +226,8 @@ export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
 > &
   {
     [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>;
-  }[Keys]
+  }[Keys];
 
 export type Constructor<T> = {
   new (...args: any[]): T;
-}
+};

@@ -32,7 +32,7 @@ export const PopupConfigurations = ({
 
   const popupConfig = isPaused
     ? {
-        icon: <PhosphorIcon as={Info} size='md' weight={Weight.Light} />,
+        icon: <PhosphorIcon as={Info} size="md" weight={Weight.Light} />,
         title: t('detail.popup.unpause.title'),
         description: t('detail.popup.unpause.description'),
         confirmText: t('detail.popup.unpause.confirmText'),
@@ -40,7 +40,7 @@ export const PopupConfigurations = ({
         variant: 'info',
       }
     : {
-        icon: <PhosphorIcon as={Warning} size='md' weight={Weight.Light} />,
+        icon: <PhosphorIcon as={Warning} size="md" weight={Weight.Light} />,
         title: t('detail.popup.pause.title'),
         description: t('detail.popup.pause.description'),
         confirmText: t('detail.popup.pause.confirmText'),
@@ -49,7 +49,7 @@ export const PopupConfigurations = ({
       };
 
   const importCorporateActionsPopupConfig = {
-    icon: <PhosphorIcon as={Info} size='md' weight={Weight.Light} />,
+    icon: <PhosphorIcon as={Info} size="md" weight={Weight.Light} />,
     title: isImportingCorporateActions
       ? t('detail.popup.stopImportCorporateActions.title', {
           name: asset?.name,
@@ -72,7 +72,7 @@ export const PopupConfigurations = ({
   return (
     <>
       <PopUp
-        id='pauseUnpauseDistributions'
+        id="pauseUnpauseDistributions"
         isOpen={isOpen}
         onClose={onClose}
         icon={popupConfig.icon}
@@ -88,7 +88,7 @@ export const PopupConfigurations = ({
         }}
       />
       <PopUp
-        id='importCorporateActions'
+        id="importCorporateActions"
         isOpen={isImportOpen}
         onClose={onImportClose}
         icon={importCorporateActionsPopupConfig.icon}

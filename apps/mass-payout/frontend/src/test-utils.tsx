@@ -218,7 +218,7 @@ import userEvent from '@testing-library/user-event';
 export const selectCalendar = async (
   component: RenderResult,
   id: string,
-  day: string | number = new Date().getDate()
+  day: string | number = new Date().getDate(),
 ) => {
   const calendar = component.getByTestId(id);
   await userEvent.click(calendar);
@@ -226,7 +226,9 @@ export const selectCalendar = async (
   await waitFor(() => {
     const daysToSelect = component.getAllByTestId(`day-${day}`);
 
-    const dayToSelect = daysToSelect.find(day => !day.hasAttribute('disabled'));
+    const dayToSelect = daysToSelect.find(
+      (day) => !day.hasAttribute('disabled'),
+    );
 
     if (dayToSelect) {
       userEvent.click(dayToSelect);
@@ -279,7 +281,7 @@ const customRender = (
   }: {
     options?: RenderOptions;
     history?: MemoryHistory;
-  } = {}
+  } = {},
 ): RenderResult =>
   render(ui, {
     wrapper: ({ children }) => (

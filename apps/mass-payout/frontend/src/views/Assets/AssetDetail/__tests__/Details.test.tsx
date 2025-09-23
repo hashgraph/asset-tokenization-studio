@@ -257,22 +257,22 @@ describe('Details Component', () => {
   describe('Basic Rendering', () => {
     it('should match snapshot', () => {
       const component = render(
-        <Details assetData={mockAsset} isLoading={false} />
+        <Details assetData={mockAsset} isLoading={false} />,
       );
       expect(component.asFragment()).toMatchSnapshot();
     });
 
     it('should render the component with asset data', () => {
       const component = render(
-        <Details assetData={mockAsset} isLoading={false} />
+        <Details assetData={mockAsset} isLoading={false} />,
       );
 
       expect(component.getByText('Asset details')).toBeInTheDocument();
       expect(
-        component.getByTestId('definition-list-item-Name')
+        component.getByTestId('definition-list-item-Name'),
       ).toBeInTheDocument();
       expect(
-        component.getByTestId('definition-list-item-Symbol')
+        component.getByTestId('definition-list-item-Symbol'),
       ).toBeInTheDocument();
       expect(component.getByText('Test Asset')).toBeInTheDocument();
       expect(component.getByText('TEST')).toBeInTheDocument();
@@ -289,10 +289,10 @@ describe('Details Component', () => {
       expect(component.getByText('Asset details')).toBeInTheDocument();
 
       expect(
-        component.getByTestId('definition-list-item-Name')
+        component.getByTestId('definition-list-item-Name'),
       ).toBeInTheDocument();
       expect(
-        component.getByTestId('definition-list-item-Symbol')
+        component.getByTestId('definition-list-item-Symbol'),
       ).toBeInTheDocument();
     });
   });
@@ -300,7 +300,7 @@ describe('Details Component', () => {
   describe('Asset Data Display', () => {
     it('should display asset name and symbol', () => {
       const component = render(
-        <Details assetData={mockAsset} isLoading={false} />
+        <Details assetData={mockAsset} isLoading={false} />,
       );
 
       expect(component.getByText('Test Asset')).toBeInTheDocument();
@@ -309,19 +309,22 @@ describe('Details Component', () => {
 
     it('should display formatted maturity date when available', () => {
       const component = render(
-        <Details assetData={mockAsset} isLoading={false} />
+        <Details assetData={mockAsset} isLoading={false} />,
       );
 
       expect(format).toHaveBeenCalledWith(
         new Date('2025-12-15T00:00:00Z'),
-        'dd/MM/yyyy'
+        'dd/MM/yyyy',
       );
       expect(component.getByText('15/12/2025')).toBeInTheDocument();
     });
 
     it('should not display maturity date when not available', () => {
       const component = render(
-        <Details assetData={mockAssetWithoutOptionalFields} isLoading={false} />
+        <Details
+          assetData={mockAssetWithoutOptionalFields}
+          isLoading={false}
+        />,
       );
 
       expect(component.queryByText('Maturity Date')).not.toBeInTheDocument();
@@ -329,11 +332,14 @@ describe('Details Component', () => {
 
     it('should display empty strings for missing addresses', () => {
       const component = render(
-        <Details assetData={mockAssetWithoutOptionalFields} isLoading={false} />
+        <Details
+          assetData={mockAssetWithoutOptionalFields}
+          isLoading={false}
+        />,
       );
 
       expect(
-        component.queryByTestId('clipboard-button')
+        component.queryByTestId('clipboard-button'),
       ).not.toBeInTheDocument();
     });
   });

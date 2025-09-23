@@ -284,12 +284,14 @@ export const AssetPayments = () => {
     let filtered = payments;
 
     if (selectedStatus && selectedStatus !== 'all' && selectedStatus !== '') {
-      filtered = filtered.filter(payment => payment.status === selectedStatus);
+      filtered = filtered.filter(
+        (payment) => payment.status === selectedStatus,
+      );
     }
 
     if (searchTerm) {
-      filtered = filtered.filter(payment =>
-        payment.paymentId.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter((payment) =>
+        payment.paymentId.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
@@ -306,47 +308,47 @@ export const AssetPayments = () => {
   return (
     <>
       <Box
-        bg='neutral.50'
-        borderRadius='lg'
-        boxShadow='sm'
+        bg="neutral.50"
+        borderRadius="lg"
+        boxShadow="sm"
         p={6}
-        flex='1'
-        display='flex'
-        flexDirection='column'
+        flex="1"
+        display="flex"
+        flexDirection="column"
       >
-        <Text textStyle='ElementsSemiboldLG' color='neutral.900' mb={6}>
+        <Text textStyle="ElementsSemiboldLG" color="neutral.900" mb={6}>
           {t('detail.tabs.paymentsTab.subtitle')}
         </Text>
 
-        <Stack direction='row' mb={6} alignItems='center' gap={4}>
-          <Box w='full' maxW={'280px'}>
+        <Stack direction="row" mb={6} alignItems="center" gap={4}>
+          <Box w="full" maxW={'280px'}>
             <SearchInputController
-              id='search'
-              name='search'
-              placeholder='Search by payment ID'
+              id="search"
+              name="search"
+              placeholder="Search by payment ID"
               onSearch={() => {}}
               control={control}
             />
           </Box>
         </Stack>
 
-        <Box flex='1' display='flex' flexDirection='column' minHeight='0'>
+        <Box flex="1" display="flex" flexDirection="column" minHeight="0">
           <Table
-            name='asset-payments'
+            name="asset-payments"
             columns={columns}
             data={paginatedPayments}
-            onClickRow={row => {
+            onClickRow={(row) => {
               if (row.status === ProcessStatus.FAILED && id) {
                 navigate(
                   RoutePath.FAILED_HOLDERS.replace(':id', id)
                     .replace(':type', 'payment')
-                    .replace(':itemId', row.paymentId)
+                    .replace(':itemId', row.paymentId),
                 );
               }
             }}
             totalElements={filteredPayments.length}
             totalPages={Math.ceil(
-              filteredPayments.length / table.pagination.pageSize
+              filteredPayments.length / table.pagination.pageSize,
             )}
             {...table}
           />

@@ -259,7 +259,7 @@ describe.skip('DistributionDetail Component', () => {
 
       expect(screen.getByText('Details')).toBeInTheDocument();
       expect(
-        screen.getByText('Corporate Actions Distribution Details')
+        screen.getByText('Corporate Actions Distribution Details'),
       ).toBeInTheDocument();
     });
 
@@ -276,12 +276,12 @@ describe.skip('DistributionDetail Component', () => {
       render(<DistributionDetail />, { history });
 
       const holdersTab = screen.getByText(
-        'Corporate Actions Distribution Details'
+        'Corporate Actions Distribution Details',
       );
       await user.click(holdersTab);
 
       expect(
-        screen.getByText('Corporate Actions Distribution Details')
+        screen.getByText('Corporate Actions Distribution Details'),
       ).toBeInTheDocument();
 
       const detailsTab = screen.getByText('Details');
@@ -311,7 +311,7 @@ describe.skip('DistributionDetail Component', () => {
       render(<DistributionDetail />, { history: historyWithTab });
 
       expect(
-        screen.getByText('Corporate Actions Distribution Details')
+        screen.getByText('Corporate Actions Distribution Details'),
       ).toBeInTheDocument();
     });
 
@@ -319,12 +319,12 @@ describe.skip('DistributionDetail Component', () => {
       render(<DistributionDetail />, { history });
 
       const holdersTab = screen.getByText(
-        'Corporate Actions Distribution Details'
+        'Corporate Actions Distribution Details',
       );
       await user.click(holdersTab);
 
       expect(
-        screen.getByText('Corporate Actions Distribution Details')
+        screen.getByText('Corporate Actions Distribution Details'),
       ).toBeInTheDocument();
     });
   });
@@ -358,12 +358,12 @@ describe.skip('DistributionDetail Component', () => {
       render(<DistributionDetail />, { history });
 
       const holdersTab = screen.getByText(
-        'Corporate Actions Distribution Details'
+        'Corporate Actions Distribution Details',
       );
       await user.click(holdersTab);
 
       expect(
-        screen.getByText('Corporate Actions Distribution Details')
+        screen.getByText('Corporate Actions Distribution Details'),
       ).toBeInTheDocument();
     });
   });
@@ -374,14 +374,14 @@ describe.skip('DistributionDetail Component', () => {
 
       expect(screen.getByText('Details')).toBeInTheDocument();
       expect(
-        screen.getByText('Corporate Actions Distribution Details')
+        screen.getByText('Corporate Actions Distribution Details'),
       ).toBeInTheDocument();
     });
 
     test('should handle missing distribution ID', () => {
       const mockUseParams = jest.spyOn(
         require('react-router-dom'),
-        'useParams'
+        'useParams',
       );
       mockUseParams.mockReturnValue({ id: undefined });
 

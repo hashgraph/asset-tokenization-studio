@@ -26,13 +26,13 @@ export const DISTRIBUTION_FILTER_TYPES: DistributionFilterType[] = [
 ];
 
 export const createStatusFilterMap = (): StatusFilterMap => ({
-  upcoming: distribution => {
+  upcoming: (distribution) => {
     const status =
       statusMap[distribution.status as keyof typeof statusMap] ||
       ProcessStatus.SCHEDULED;
     return status === ProcessStatus.SCHEDULED;
   },
-  ongoing: distribution => {
+  ongoing: (distribution) => {
     const status =
       statusMap[distribution.status as keyof typeof statusMap] ||
       ProcessStatus.SCHEDULED;
@@ -40,7 +40,7 @@ export const createStatusFilterMap = (): StatusFilterMap => ({
       status === ProcessStatus.IN_PROGRESS || status === ProcessStatus.FAILED
     );
   },
-  completed: distribution => {
+  completed: (distribution) => {
     const status =
       statusMap[distribution.status as keyof typeof statusMap] ||
       ProcessStatus.SCHEDULED;

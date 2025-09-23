@@ -203,13 +203,13 @@
 
 */
 
-import BaseError, { ErrorCode } from "../../error/BaseError"
+import BaseError, { ErrorCode } from '../../error/BaseError';
 
 export class InvalidQueryHandlerException extends BaseError {
   constructor() {
     super(
       ErrorCode.RuntimeError,
-      "Invalid query handler exception (missing @QueryHandler() decorator?)"
-    )
+      'Invalid query handler exception (missing @QueryHandler() decorator?)',
+    );
   }
 }

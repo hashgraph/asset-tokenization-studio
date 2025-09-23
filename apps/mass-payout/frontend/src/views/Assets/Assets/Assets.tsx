@@ -240,7 +240,7 @@ export const Assets = () => {
   const selectedAssetType = useWatch({ control, name: 'assetType' });
   const searchTerm = useWatch({ control, name: 'search' });
 
-  const filteredAssets = (data?.queryData || []).filter(asset => {
+  const filteredAssets = (data?.queryData || []).filter((asset) => {
     if (
       selectedAssetType &&
       selectedAssetType !== 'all' &&

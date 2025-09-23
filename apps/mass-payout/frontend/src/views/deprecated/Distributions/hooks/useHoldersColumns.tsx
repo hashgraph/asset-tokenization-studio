@@ -239,13 +239,13 @@ export const useHoldersColumns = () => {
           const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
           return (
             <HStack spacing={2}>
-              <Text fontSize='sm' color='gray.700'>
+              <Text fontSize="sm" color="gray.700">
                 {truncatedAddress}
               </Text>
               <ClipboardButton
                 value={address}
-                size='sm'
-                variant='ghost'
+                size="sm"
+                variant="ghost"
                 aria-label={t('detail.table.copyAddress')}
               />
             </HStack>
@@ -259,13 +259,13 @@ export const useHoldersColumns = () => {
           const truncatedId = `${hederaId.slice(0, 6)}...${hederaId.slice(-4)}`;
           return (
             <HStack spacing={2}>
-              <Text fontSize='sm' color='gray.700'>
+              <Text fontSize="sm" color="gray.700">
                 {truncatedId}
               </Text>
               <ClipboardButton
                 value={hederaId}
-                size='sm'
-                variant='ghost'
+                size="sm"
+                variant="ghost"
                 aria-label={t('detail.table.copyHederaId')}
               />
             </HStack>
@@ -275,7 +275,7 @@ export const useHoldersColumns = () => {
       columnHelper.accessor('attemptDate', {
         header: t('detail.table.headers.attemptDate'),
         cell: ({ getValue }) => (
-          <Text fontSize='sm' color='gray.700'>
+          <Text fontSize="sm" color="gray.700">
             {getValue()}
           </Text>
         ),
@@ -293,7 +293,7 @@ export const useHoldersColumns = () => {
 
           const getVariant = () => statusVariantMap[status] || 'info';
           return (
-            <Tag variant={getVariant()} size='sm'>
+            <Tag variant={getVariant()} size="sm">
               {status}
             </Tag>
           );
@@ -302,12 +302,12 @@ export const useHoldersColumns = () => {
       columnHelper.accessor('retryCount', {
         header: t('detail.table.headers.retryCount'),
         cell: ({ getValue }) => (
-          <Text fontSize='sm' color='gray.700'>
+          <Text fontSize="sm" color="gray.700">
             {getValue()}
           </Text>
         ),
       }),
     ],
-    [t]
+    [t],
   );
 };

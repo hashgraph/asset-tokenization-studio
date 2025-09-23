@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from "./BaseError"
+import BaseError, { ErrorCode } from './BaseError';
 
 export class RuntimeError extends BaseError {
   constructor(msg: string) {
-    super(ErrorCode.RuntimeError, `Runtime error: ${msg}`)
+    super(ErrorCode.RuntimeError, `Runtime error: ${msg}`);
   }
 }

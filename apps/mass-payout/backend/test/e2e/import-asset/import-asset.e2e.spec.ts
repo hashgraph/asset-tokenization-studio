@@ -339,7 +339,7 @@ describe("Import Asset", () => {
   it(
     "returns 500 when the database fails (e.g. missing table)",
     async () => {
-      await internalAssetRepository.query("DROP TABLE IF EXISTS \"Asset\" CASCADE;")
+      await internalAssetRepository.query('DROP TABLE IF EXISTS "Asset" CASCADE;')
       const payload = {
         hederaTokenAddress: fakeHederaAddress(),
       }

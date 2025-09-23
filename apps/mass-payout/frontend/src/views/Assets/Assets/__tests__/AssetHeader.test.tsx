@@ -233,7 +233,7 @@ describe('AssetHeader', () => {
       const component = render(<AssetHeader />);
 
       expect(
-        component.getAllByRole('button', { name: 'Import Asset' })[0]
+        component.getAllByRole('button', { name: 'Import Asset' })[0],
       ).toBeInTheDocument();
     });
   });

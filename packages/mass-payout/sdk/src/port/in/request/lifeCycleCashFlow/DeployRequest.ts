@@ -203,12 +203,12 @@
 
 */
 
-import ValidatedRequest from "@core/validation/ValidatedArgs"
-import FormatValidation from "@port/in/request/FormatValidation"
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '@port/in/request/FormatValidation';
 
 export default class DeployRequest extends ValidatedRequest<DeployRequest> {
-  asset: string
-  paymentToken: string
+  asset: string;
+  paymentToken: string;
 
   constructor({
     asset,
@@ -220,9 +220,9 @@ export default class DeployRequest extends ValidatedRequest<DeployRequest> {
     super({
       asset: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       paymentToken: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-    })
+    });
 
-    this.asset = asset
-    this.paymentToken = paymentToken
+    this.asset = asset;
+    this.paymentToken = paymentToken;
   }
 }

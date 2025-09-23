@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from "@core/error/BaseError"
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export default class InvalidDecimalRange extends BaseError {
   constructor(val: number | string, min: number, max?: number) {
@@ -211,7 +211,7 @@ export default class InvalidDecimalRange extends BaseError {
       ErrorCode.InvalidRange,
       `Invalid Decimal Value ${val}, outside range ${
         max !== undefined ? `[${min}, ${max}]` : min
-      }`
-    )
+      }`,
+    );
   }
 }

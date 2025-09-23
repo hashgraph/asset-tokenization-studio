@@ -220,7 +220,7 @@ jest.mock('io-bricks-ui', () => ({
       data-testid={`search-input-controller`}
       data-id={id}
       data-placeholder={placeholder}
-      onChange={e => {
+      onChange={(e) => {
         // Simulate react-hook-form behavior
         control.setValue(id, e.target.value);
       }}
@@ -236,23 +236,23 @@ jest.mock('io-bricks-ui', () => ({
     ...props
   }: any) => (
     <div
-      data-testid='select-controller'
+      data-testid="select-controller"
       data-id={id}
       data-searchable={isSearchable?.toString()}
       data-options-count={'3'}
     >
       <select
         data-testid={`select-${id}`}
-        onChange={e => {
+        onChange={(e) => {
           // Simulate react-hook-form behavior
           control.setValue(id, e.target.value);
         }}
         {...props}
       >
-        <option value=''>{placeholder}</option>
-        <option value='dividend'>Dividend</option>
-        <option value='interest'>Interest</option>
-        <option value='principal'>Principal</option>
+        <option value="">{placeholder}</option>
+        <option value="dividend">Dividend</option>
+        <option value="interest">Interest</option>
+        <option value="principal">Principal</option>
       </select>
     </div>
   ),
@@ -261,7 +261,7 @@ jest.mock('io-bricks-ui', () => ({
 // Mock PlaceholderWithIcon
 jest.mock('../../Components/PlaceholderWithIcon', () => ({
   PlaceholderWithIcon: () => (
-    <div data-testid='placeholder-with-icon'>Placeholder Icon</div>
+    <div data-testid="placeholder-with-icon">Placeholder Icon</div>
   ),
 }));
 
@@ -276,19 +276,19 @@ jest.mock('io-bricks-ui/Theme', () => ({
 // Mock Chakra UI components
 jest.mock('@chakra-ui/react', () => ({
   Box: ({ children, ...props }: any) => (
-    <div className='css-kq3qcu' {...props}>
+    <div className="css-kq3qcu" {...props}>
       {children}
     </div>
   ),
   Stack: ({ children, ...props }: any) => (
-    <div className='chakra-stack css-spc5cv' data-testid='stack' {...props}>
+    <div className="chakra-stack css-spc5cv" data-testid="stack" {...props}>
       {children}
     </div>
   ),
   ChakraProvider: ({ children }: any) => (
     <div>
       {children}
-      <span hidden id='__chakra_env' />
+      <span hidden id="__chakra_env" />
     </div>
   ),
   extendTheme: jest.fn(() => ({})),
@@ -376,7 +376,7 @@ describe('FilterControls', () => {
 
       expect(mockControl.setValue).toHaveBeenCalledWith(
         'distributionType',
-        'dividend'
+        'dividend',
       );
     });
 
@@ -388,7 +388,7 @@ describe('FilterControls', () => {
 
       expect(mockControl.setValue).toHaveBeenCalledWith(
         'distributionType',
-        'interest'
+        'interest',
       );
     });
   });
@@ -412,7 +412,7 @@ describe('FilterControls', () => {
       const searchController = screen.getByTestId('search-input-controller');
       expect(searchController).toHaveAttribute(
         'data-placeholder',
-        'Search distributions...'
+        'Search distributions...',
       );
     });
 
@@ -426,7 +426,7 @@ describe('FilterControls', () => {
       const searchController = screen.getByTestId('search-input-controller');
       expect(searchController).toHaveAttribute(
         'data-placeholder',
-        'Custom: filters.searchPlaceholder'
+        'Custom: filters.searchPlaceholder',
       );
     });
   });

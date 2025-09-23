@@ -231,7 +231,7 @@ const routeBreadcrumbMap: Record<string, string> = {
 };
 
 export const useBreadcrumbs = (
-  options?: RouterBreadcrumbsOptions
+  options?: RouterBreadcrumbsOptions,
 ): BreadcrumbItem[] => {
   const location = useLocation();
   const { excludePaths = [] } = options || {};

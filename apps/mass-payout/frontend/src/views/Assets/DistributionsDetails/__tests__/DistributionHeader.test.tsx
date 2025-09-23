@@ -281,7 +281,7 @@ describe('DistributionHeader', () => {
 
       // Check that no status tag is rendered
       expect(
-        screen.queryByText(ProcessStatus.COMPLETED)
+        screen.queryByText(ProcessStatus.COMPLETED),
       ).not.toBeInTheDocument();
       expect(screen.queryByText(ProcessStatus.FAILED)).not.toBeInTheDocument();
     });

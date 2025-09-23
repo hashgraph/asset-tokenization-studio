@@ -225,7 +225,7 @@ describe.skip('DistributionBasicInformation', () => {
       <DistributionBasicInformation
         distributionData={mockDistributionData}
         isLoading={false}
-      />
+      />,
     );
 
     expect(screen.getByText('DIST-123456')).toBeInTheDocument();
@@ -241,7 +241,7 @@ describe.skip('DistributionBasicInformation', () => {
       <DistributionBasicInformation
         distributionData={mockDistributionData}
         isLoading={true}
-      />
+      />,
     );
 
     expect(container.firstChild).toBeInTheDocument();
@@ -249,7 +249,10 @@ describe.skip('DistributionBasicInformation', () => {
 
   it('renders correctly with null distribution data', () => {
     const { container } = render(
-      <DistributionBasicInformation distributionData={null} isLoading={false} />
+      <DistributionBasicInformation
+        distributionData={null}
+        isLoading={false}
+      />,
     );
 
     expect(container.firstChild).toBeInTheDocument();
@@ -269,7 +272,7 @@ describe.skip('DistributionBasicInformation', () => {
       <DistributionBasicInformation
         distributionData={partialData}
         isLoading={false}
-      />
+      />,
     );
 
     expect(screen.getByText('DIST-789')).toBeInTheDocument();
@@ -292,7 +295,7 @@ describe.skip('DistributionBasicInformation', () => {
       <DistributionBasicInformation
         distributionData={dataWithUndefined}
         isLoading={false}
-      />
+      />,
     );
 
     expect(screen.getByText('DIST-999')).toBeInTheDocument();
@@ -306,7 +309,7 @@ describe.skip('DistributionBasicInformation', () => {
       <DistributionBasicInformation
         distributionData={mockDistributionData}
         isLoading={false}
-      />
+      />,
     );
 
     const boxElement = container.firstChild as HTMLElement;

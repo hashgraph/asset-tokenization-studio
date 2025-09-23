@@ -213,11 +213,11 @@ export const PreviousStepButton = (props: ButtonProps) => {
 
   return (
     <Button
-      w='123px'
-      h='40px'
-      data-testid='previous-step-button'
-      size='md'
-      variant='secondary'
+      w="123px"
+      h="40px"
+      data-testid="previous-step-button"
+      size="md"
+      variant="secondary"
       onClick={goToPrevious}
       {...props}
     >

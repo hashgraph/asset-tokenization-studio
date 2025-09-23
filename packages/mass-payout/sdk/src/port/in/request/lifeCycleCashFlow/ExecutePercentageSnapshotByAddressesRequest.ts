@@ -203,16 +203,16 @@
 
 */
 
-import ValidatedRequest from "@core/validation/ValidatedArgs"
-import FormatValidation from "@port/in/request/FormatValidation"
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '@port/in/request/FormatValidation';
 
 // eslint-disable-next-line max-len
 export default class ExecutePercentageSnapshotByAddressesRequest extends ValidatedRequest<ExecutePercentageSnapshotByAddressesRequest> {
-  lifeCycleCashFlow: string
-  asset: string
-  snapshotId: string
-  holders: string[]
-  percentage: string
+  lifeCycleCashFlow: string;
+  asset: string;
+  snapshotId: string;
+  holders: string[];
+  percentage: string;
 
   constructor({
     lifeCycleCashFlow,
@@ -231,15 +231,15 @@ export default class ExecutePercentageSnapshotByAddressesRequest extends Validat
       lifeCycleCashFlow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       asset: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       snapshotId: FormatValidation.checkNumber(),
-      holders: vals =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(vals, "holders", false),
+      holders: (vals) =>
+        FormatValidation.checkHederaIdOrEvmAddressArray(vals, 'holders', false),
       percentage: FormatValidation.checkAmount(),
-    })
+    });
 
-    this.lifeCycleCashFlow = lifeCycleCashFlow
-    this.asset = asset
-    this.snapshotId = snapshotId
-    this.holders = holders
-    this.percentage = percentage
+    this.lifeCycleCashFlow = lifeCycleCashFlow;
+    this.asset = asset;
+    this.snapshotId = snapshotId;
+    this.holders = holders;
+    this.percentage = percentage;
   }
 }

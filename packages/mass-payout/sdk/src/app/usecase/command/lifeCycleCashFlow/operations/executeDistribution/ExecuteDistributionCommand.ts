@@ -203,8 +203,8 @@
 
 */
 
-import { Command } from "@core/command/Command"
-import { CommandResponse } from "@core/command/CommandResponse"
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
 
 export class ExecuteDistributionCommandResponse implements CommandResponse {
   constructor(
@@ -212,7 +212,7 @@ export class ExecuteDistributionCommandResponse implements CommandResponse {
     public readonly succeeded: string[],
     public readonly paidAmount: string[],
     public readonly executed: boolean,
-    public readonly transactionId: string
+    public readonly transactionId: string,
   ) {}
 }
 
@@ -223,8 +223,8 @@ export class ExecuteDistributionCommand extends Command<ExecuteDistributionComma
     public readonly pageIndex: number,
     public readonly pageLength: number,
     public readonly distributionId: string,
-    public readonly paymentTokenDecimals: number
+    public readonly paymentTokenDecimals: number,
   ) {
-    super()
+    super();
   }
 }

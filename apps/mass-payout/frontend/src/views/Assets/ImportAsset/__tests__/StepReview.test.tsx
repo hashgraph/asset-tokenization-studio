@@ -290,7 +290,7 @@ describe('StepReview Component', () => {
 
       expect(screen.getByText('stepAssetDetails.assetId')).toBeInTheDocument();
       expect(
-        screen.getByText('stepAssetDetails.assetName')
+        screen.getByText('stepAssetDetails.assetName'),
       ).toBeInTheDocument();
       expect(screen.getByText('0.0.123456')).toBeInTheDocument();
       expect(screen.getByText('Test Asset')).toBeInTheDocument();
@@ -300,11 +300,11 @@ describe('StepReview Component', () => {
       render(<TestWrapper />);
 
       expect(
-        screen.getByRole('button', { name: /cancel/i })
+        screen.getByRole('button', { name: /cancel/i }),
       ).toBeInTheDocument();
       expect(screen.getByText('previousStep')).toBeInTheDocument();
       expect(
-        screen.getByTestId('final-import-asset-button')
+        screen.getByTestId('final-import-asset-button'),
       ).toBeInTheDocument();
     });
   });

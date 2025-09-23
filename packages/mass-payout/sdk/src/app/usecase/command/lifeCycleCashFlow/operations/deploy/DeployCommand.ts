@@ -203,8 +203,8 @@
 
 */
 
-import { Command } from "@core/command/Command"
-import { CommandResponse } from "@core/command/CommandResponse"
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
 
 export class DeployCommandResponse implements CommandResponse {
   constructor(public readonly payload: string) {}
@@ -213,8 +213,8 @@ export class DeployCommandResponse implements CommandResponse {
 export class DeployCommand extends Command<DeployCommandResponse> {
   constructor(
     public readonly asset: string,
-    public readonly paymentToken: string
+    public readonly paymentToken: string,
   ) {
-    super()
+    super();
   }
 }

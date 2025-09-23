@@ -221,7 +221,7 @@ import {
   LifeCycleCashFlow,
   PauseRequest,
   UnpauseRequest,
-} from "@scheduler-payment-distribution/sdk"
+} from "@mass-payout/sdk"
 import { ExecuteDistributionResponse } from "@domain/ports/execute-distribution-response.interface"
 import { HederaService } from "@domain/ports/hedera.port"
 

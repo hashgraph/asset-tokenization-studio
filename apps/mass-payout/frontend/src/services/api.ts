@@ -231,7 +231,7 @@ const API_BASE_URL = getApiBaseUrl();
 export class ApiError extends Error {
   constructor(
     public status: number,
-    message: string
+    message: string,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -242,7 +242,7 @@ const handleResponse = async (response: Response) => {
   if (!response.ok) {
     throw new ApiError(
       response.status,
-      `HTTP error! status: ${response.status}`
+      `HTTP error! status: ${response.status}`,
     );
   }
   return response;
@@ -256,7 +256,7 @@ export interface ApiRequestOptions {
 
 export const apiRequest = async <T>(
   endpoint: string,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<T> => {
   const { method = 'GET', headers = {}, body } = options;
 
@@ -285,10 +285,10 @@ export const apiRequest = async <T>(
 
 export const buildUrl = (
   template: string,
-  params: Record<string, string>
+  params: Record<string, string>,
 ): string => {
   return Object.entries(params).reduce(
     (url, [key, value]) => url.replace(`:${key}`, value),
-    template
+    template,
   );
 };

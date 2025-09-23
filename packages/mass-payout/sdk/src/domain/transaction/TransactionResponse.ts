@@ -204,7 +204,7 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Response } from "./Response"
+import { Response } from './Response';
 
 export default class TransactionResponse<
   T extends Response = Response,
@@ -213,6 +213,6 @@ export default class TransactionResponse<
   constructor(
     public readonly id?: string,
     public response?: T,
-    public readonly error?: X
+    public readonly error?: X,
   ) {}
 }

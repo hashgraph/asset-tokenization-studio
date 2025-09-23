@@ -272,7 +272,7 @@ describe('NewDistribution Component', () => {
       render(<NewDistribution />, { history });
       expect(screen.getByText('Payment Configuration')).toBeInTheDocument();
       expect(
-        screen.getByText('Please provide the payment configuration details')
+        screen.getByText('Please provide the payment configuration details'),
       ).toBeInTheDocument();
     });
 
@@ -288,10 +288,10 @@ describe('NewDistribution Component', () => {
     test('should display action buttons', () => {
       render(<NewDistribution />, { history });
       expect(
-        screen.getByRole('button', { name: /Cancel/i })
+        screen.getByRole('button', { name: /Cancel/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: /Create Distribution/i })
+        screen.getByRole('button', { name: /Create Distribution/i }),
       ).toBeInTheDocument();
     });
   });
@@ -474,7 +474,7 @@ describe('NewDistribution Component', () => {
       await user.click(confirmButton);
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        '/assets/0.0.890123?tab=distributions'
+        '/assets/0.0.890123?tab=distributions',
       );
     });
 

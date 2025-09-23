@@ -203,16 +203,16 @@
 
 */
 
-import ValidatedRequest from "@core/validation/ValidatedArgs"
-import FormatValidation from "@port/in/request/FormatValidation"
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '@port/in/request/FormatValidation';
 
 export default class ExecutePercentageSnapshotRequest extends ValidatedRequest<ExecutePercentageSnapshotRequest> {
-  lifeCycleCashFlow: string
-  asset: string
-  snapshotId: string
-  pageIndex: number
-  pageLength: number
-  percentage: string
+  lifeCycleCashFlow: string;
+  asset: string;
+  snapshotId: string;
+  pageIndex: number;
+  pageLength: number;
+  percentage: string;
 
   constructor({
     lifeCycleCashFlow,
@@ -239,13 +239,13 @@ export default class ExecutePercentageSnapshotRequest extends ValidatedRequest<E
         max: 100,
         min: 0.01,
       }),
-    })
+    });
 
-    this.lifeCycleCashFlow = lifeCycleCashFlow
-    this.asset = asset
-    this.snapshotId = snapshotId
-    this.pageIndex = pageIndex
-    this.pageLength = pageLength
-    this.percentage = percentage
+    this.lifeCycleCashFlow = lifeCycleCashFlow;
+    this.asset = asset;
+    this.snapshotId = snapshotId;
+    this.pageIndex = pageIndex;
+    this.pageLength = pageLength;
+    this.percentage = percentage;
   }
 }

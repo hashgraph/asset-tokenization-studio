@@ -302,7 +302,7 @@ export const AssetDetail = () => {
   if (error || !asset) {
     return (
       <Box p={6}>
-        <Text color='red.500'>
+        <Text color="red.500">
           {t('error', 'Error loading asset or asset not found')}
         </Text>
       </Box>

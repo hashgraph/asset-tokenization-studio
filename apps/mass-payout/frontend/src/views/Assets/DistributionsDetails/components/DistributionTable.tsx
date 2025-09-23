@@ -23,20 +23,20 @@ export const DistributionTable: React.FC<DistributionTableProps> = ({
 }) => {
   return (
     <Box
-      bg='neutral.50'
-      borderRadius='lg'
-      boxShadow='sm'
+      bg="neutral.50"
+      borderRadius="lg"
+      boxShadow="sm"
       p={6}
-      flex='1'
-      display='flex'
-      flexDirection='column'
+      flex="1"
+      display="flex"
+      flexDirection="column"
     >
-      <Text textStyle='ElementsSemiboldLG' color='neutral.900' mb={6}>
+      <Text textStyle="ElementsSemiboldLG" color="neutral.900" mb={6}>
         {title}
       </Text>
-      <Box flex='1' display='flex' flexDirection='column' minHeight='0'>
+      <Box flex="1" display="flex" flexDirection="column" minHeight="0">
         <Table
-          name='ca-distributions-details'
+          name="ca-distributions-details"
           columns={columns}
           data={data}
           totalElements={totalElements}

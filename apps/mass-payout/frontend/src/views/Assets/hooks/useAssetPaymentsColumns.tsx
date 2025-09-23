@@ -266,32 +266,32 @@ export const useAssetPaymentsColumns = () => {
           const { tagVariant, progressVariant } = getStatusVariants(status);
 
           return (
-            <Flex align='center' gap={0} w='full' h='40px'>
-              <Box w='120px' display='flex' alignItems='center'>
+            <Flex align="center" gap={0} w="full" h="40px">
+              <Box w="120px" display="flex" alignItems="center">
                 <Tag
                   variant={tagVariant}
-                  size='md'
-                  w='full'
-                  h='32px'
-                  display='flex'
-                  alignItems='center'
-                  justifyContent='center'
+                  size="md"
+                  w="full"
+                  h="32px"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
                   label={status}
                 />
               </Box>
-              <Box w='200px' display='flex' alignItems='center' pl={3}>
+              <Box w="200px" display="flex" alignItems="center" pl={3}>
                 <Progress
                   variant={progressVariant}
                   value={progress}
-                  size='md'
-                  w='150px'
-                  borderRadius='md'
+                  size="md"
+                  w="150px"
+                  borderRadius="md"
                 />
                 <Box
-                  w='40px'
-                  display='flex'
-                  alignItems='center'
-                  justifyContent='center'
+                  w="40px"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
                   ml={2}
                 >
                   {renderProgressIndicator(status, progress)}
@@ -302,6 +302,6 @@ export const useAssetPaymentsColumns = () => {
         },
       }),
     ],
-    [renderProgressIndicator, getStatusVariants]
+    [renderProgressIndicator, getStatusVariants],
   );
 };

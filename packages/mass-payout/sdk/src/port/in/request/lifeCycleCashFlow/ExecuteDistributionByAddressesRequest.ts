@@ -203,15 +203,15 @@
 
 */
 
-import ValidatedRequest from "@core/validation/ValidatedArgs"
-import FormatValidation from "@port/in/request/FormatValidation"
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '@port/in/request/FormatValidation';
 
 // eslint-disable-next-line max-len
 export default class ExecuteDistributionByAddressesRequest extends ValidatedRequest<ExecuteDistributionByAddressesRequest> {
-  lifeCycleCashFlow: string
-  asset: string
-  holders: string[]
-  distributionId: string
+  lifeCycleCashFlow: string;
+  asset: string;
+  holders: string[];
+  distributionId: string;
 
   constructor({
     lifeCycleCashFlow,
@@ -227,14 +227,14 @@ export default class ExecuteDistributionByAddressesRequest extends ValidatedRequ
     super({
       lifeCycleCashFlow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       asset: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      holders: vals =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(vals, "holders", false),
+      holders: (vals) =>
+        FormatValidation.checkHederaIdOrEvmAddressArray(vals, 'holders', false),
       distributionId: FormatValidation.checkNumber(),
-    })
+    });
 
-    this.lifeCycleCashFlow = lifeCycleCashFlow
-    this.asset = asset
-    this.holders = holders
-    this.distributionId = distributionId
+    this.lifeCycleCashFlow = lifeCycleCashFlow;
+    this.asset = asset;
+    this.holders = holders;
+    this.distributionId = distributionId;
   }
 }

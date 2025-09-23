@@ -203,16 +203,16 @@
 
 */
 
-import { OptionalField } from "@core/decorator/OptionalDecorator"
-import { Environment } from "@domain/network/Environment"
-import { MirrorNode } from "@domain/network/MirrorNode"
-import { JsonRpcRelay } from "@domain/network/JsonRpcRelay"
-import { SupportedWallets } from "@domain/network/Wallet"
-import { BaseRequest, RequestAccount } from "../BaseRequest"
-import ValidatedRequest from "@core/validation/ValidatedArgs"
-import FormatValidation from "../FormatValidation"
+import { OptionalField } from '@core/decorator/OptionalDecorator';
+import { Environment } from '@domain/network/Environment';
+import { MirrorNode } from '@domain/network/MirrorNode';
+import { JsonRpcRelay } from '@domain/network/JsonRpcRelay';
+import { SupportedWallets } from '@domain/network/Wallet';
+import { BaseRequest, RequestAccount } from '../BaseRequest';
+import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from '../FormatValidation';
 
-export { SupportedWallets }
+export { SupportedWallets };
 
 export interface DFNSConfigRequest {
   authorizationToken: string;
@@ -226,20 +226,20 @@ export interface DFNSConfigRequest {
   publicKey: string;
 }
 
-export type CustodialSettings = DFNSConfigRequest
+export type CustodialSettings = DFNSConfigRequest;
 
 export default class ConnectRequest
   extends ValidatedRequest<ConnectRequest>
   implements BaseRequest
 {
   @OptionalField()
-  account?: RequestAccount
+  account?: RequestAccount;
 
-  network: Environment
-  mirrorNode: MirrorNode
-  rpcNode: JsonRpcRelay
-  wallet: SupportedWallets
-  custodialWalletSettings?: CustodialSettings
+  network: Environment;
+  mirrorNode: MirrorNode;
+  rpcNode: JsonRpcRelay;
+  wallet: SupportedWallets;
+  custodialWalletSettings?: CustodialSettings;
 
   constructor({
     account,
@@ -259,13 +259,13 @@ export default class ConnectRequest
     super({
       account: FormatValidation.checkAccount(),
       wallet: FormatValidation.checkString({ emptyCheck: true }),
-    })
-    this.account = account
-    this.network = network
-    this.mirrorNode = mirrorNode
-    this.rpcNode = rpcNode
-    this.wallet = wallet
-    this.custodialWalletSettings = custodialWalletSettings
+    });
+    this.account = account;
+    this.network = network;
+    this.mirrorNode = mirrorNode;
+    this.rpcNode = rpcNode;
+    this.wallet = wallet;
+    this.custodialWalletSettings = custodialWalletSettings;
   }
 
   [n: string]: any;

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -203,19 +203,26 @@
    limitations under the License.
 
 */
-Object.defineProperty(exports, "__esModule", { value: true });
-const DeployContractWithFactoryResult_1 = require("./DeployContractWithFactoryResult");
+Object.defineProperty(exports, '__esModule', { value: true });
+const DeployContractWithFactoryResult_1 = require('./DeployContractWithFactoryResult');
 class DeployContractResult extends DeployContractWithFactoryResult_1.default {
-    name;
-    constructor({ name, address, contract, proxyAddress, proxyAdminAddress, receipt, }) {
-        super({
-            address,
-            contract,
-            proxyAddress,
-            proxyAdminAddress,
-            receipt,
-        });
-        this.name = name;
-    }
+  name;
+  constructor({
+    name,
+    address,
+    contract,
+    proxyAddress,
+    proxyAdminAddress,
+    receipt,
+  }) {
+    super({
+      address,
+      contract,
+      proxyAddress,
+      proxyAdminAddress,
+      receipt,
+    });
+    this.name = name;
+  }
 }
 exports.default = DeployContractResult;

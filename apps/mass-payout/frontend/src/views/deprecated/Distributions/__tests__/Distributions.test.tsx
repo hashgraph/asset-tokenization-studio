@@ -261,7 +261,7 @@ describe.skip('Distributions Component', () => {
     test('should not show import button', () => {
       factoryComponent();
       expect(
-        screen.queryByRole('button', { name: /import/i })
+        screen.queryByRole('button', { name: /import/i }),
       ).not.toBeInTheDocument();
     });
   });

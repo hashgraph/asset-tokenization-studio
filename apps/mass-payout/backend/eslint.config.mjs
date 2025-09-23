@@ -318,4 +318,20 @@ export default [
       ],
     },
   },
+  {
+    files: ["**/*.spec.ts", "**/*.test.ts", "**/test/**/*.ts", "**/e2e/**/*.ts"],
+    languageOptions: {
+      globals: {
+        describe: "readonly",
+        it: "readonly",
+        test: "readonly",
+        expect: "readonly",
+        beforeAll: "readonly",
+        beforeEach: "readonly",
+        afterAll: "readonly",
+        afterEach: "readonly",
+        jest: "readonly",
+      },
+    },
+  },
 ]

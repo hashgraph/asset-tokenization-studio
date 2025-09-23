@@ -192,7 +192,7 @@ import { VALIDATION_CONSTANTS } from './NewDistribution.constants';
 export const isFormValid = (
   isValid: boolean,
   amount: number,
-  formValues: NewDistributionFormValues
+  formValues: NewDistributionFormValues,
 ): boolean => {
   const {
     distributionType,
@@ -228,7 +228,7 @@ export const isFormValid = (
  */
 export const formatAmount = (
   amount: number,
-  amountType: FormAmountType
+  amountType: FormAmountType,
 ): string => {
   const safeAmount = typeof amount === 'number' && !isNaN(amount) ? amount : 0;
   return amountType === FormAmountType.FIXED
@@ -244,7 +244,7 @@ export const formatDistributionDescription = (
   amount: number,
   amountType: FormAmountType,
   formValues: NewDistributionFormValues,
-  assetData?: Asset
+  assetData?: Asset,
 ): string => {
   const formattedAmount = formatAmount(amount, amountType);
 
@@ -256,12 +256,12 @@ export const formatDistributionDescription = (
  */
 export const createPayload = (
   assetId: string,
-  data: NewDistributionFormValues
+  data: NewDistributionFormValues,
 ) => {
   const basePayload = {
     assetId,
     subtype: mapFormDistributionTypeToSubtype(
-      data.distributionType as FormDistributionType
+      data.distributionType as FormDistributionType,
     ),
     amount: data.amount.toString(),
     amountType: mapFormAmountTypeToAPI(data.amountType),
@@ -281,12 +281,12 @@ export const createPayload = (
   if (data.distributionType === FormDistributionType.RECURRING) {
     if (data.recurringStartDate) {
       conditionalFields.executeAt = new Date(
-        data.recurringStartDate
+        data.recurringStartDate,
       ).toISOString();
     }
     if (data.recurringFrequency) {
       conditionalFields.recurrency = mapRecurringFrequencyToAPI(
-        data.recurringFrequency
+        data.recurringFrequency,
       );
     }
   }
@@ -298,7 +298,7 @@ export const createPayload = (
  * Validates if the distribution type requires additional fields
  */
 export const isDistributionTypeValid = (
-  data: NewDistributionFormValues
+  data: NewDistributionFormValues,
 ): boolean => {
   const {
     distributionType,
@@ -330,7 +330,7 @@ export const isDistributionTypeValid = (
  */
 export const validateFutureDate = (
   value: Date | string | undefined,
-  errorMessage: string
+  errorMessage: string,
 ): string | true => {
   if (!value) return true;
   const selectedDate = new Date(value);

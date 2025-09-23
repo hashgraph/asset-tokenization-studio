@@ -221,9 +221,9 @@ export const History = (props: HistoryProps) => {
   const routes = useBreadcrumbs({ excludePaths });
 
   return (
-    <VStack alignItems='left' gap='12px' {...stackProps}>
+    <VStack alignItems="left" gap="12px" {...stackProps}>
       <Breadcrumb items={routes} />
-      <Flex gap='24px' align='center'>
+      <Flex gap="24px" align="center">
         <GobackButton label={label} to={to} />
       </Flex>
     </VStack>

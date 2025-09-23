@@ -235,13 +235,13 @@ export const GobackButton = (props: GobackButtonProps) => {
   };
 
   return (
-    <Flex data-testid='go-back-button' gap={6} align='center' {...buttonProps}>
+    <Flex data-testid="go-back-button" gap={6} align="center" {...buttonProps}>
       <IconButton
-        data-testid='go-back-button-button'
-        aria-label='Go back'
+        data-testid="go-back-button-button"
+        aria-label="Go back"
         icon={<PhosphorIcon as={ArrowLeft} />}
-        size='md'
-        variant='secondary'
+        size="md"
+        variant="secondary"
         {...(to
           ? {
               as: RouterLink,
@@ -252,9 +252,9 @@ export const GobackButton = (props: GobackButtonProps) => {
             })}
       />
       <Text
-        data-testid='go-back-button-label'
-        textStyle='HeadingBoldXL'
-        color='neutral.800'
+        data-testid="go-back-button-label"
+        textStyle="HeadingBoldXL"
+        color="neutral.800"
       >
         {label}
       </Text>

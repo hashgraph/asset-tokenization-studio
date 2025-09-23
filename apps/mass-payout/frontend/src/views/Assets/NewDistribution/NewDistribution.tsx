@@ -320,11 +320,11 @@ export const NewDistribution = () => {
   const amountTypeOptions = createAmountTypeOptions(t);
 
   return (
-    <Stack spacing='16px' w='full' h='full'>
+    <Stack spacing="16px" w="full" h="full">
       <Breadcrumb items={BREADCRUMB_ITEMS} />
-      <HStack align='center' w='full'>
+      <HStack align="center" w="full">
         <GobackButton label={t('newDistribution.title')} mr={4} />
-        <Text textStyle='BodyRegularXS' color='neutral.500'>
+        <Text textStyle="BodyRegularXS" color="neutral.500">
           {t('newDistribution.subtitle', {
             asset: assetData?.type,
             id: assetData?.id,
@@ -332,114 +332,114 @@ export const NewDistribution = () => {
         </Text>
       </HStack>
       <Box
-        bg='neutral.50'
-        borderRadius='lg'
-        boxShadow='sm'
+        bg="neutral.50"
+        borderRadius="lg"
+        boxShadow="sm"
         p={6}
-        flex='1'
-        display='flex'
-        flexDirection='column'
-        alignItems='center'
+        flex="1"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
       >
-        <Stack gap={6} w='full' maxW='500px' align='flex-start' mt={2}>
-          <Stack gap={2} align='flex-start'>
-            <Text textStyle='HeadingMediumLG'>
+        <Stack gap={6} w="full" maxW="500px" align="flex-start" mt={2}>
+          <Stack gap={2} align="flex-start">
+            <Text textStyle="HeadingMediumLG">
               {t('newDistribution.configuration')}
             </Text>
-            <Text textStyle='BodyTextRegularMD' color='gray.600'>
+            <Text textStyle="BodyTextRegularMD" color="gray.600">
               {t('newDistribution.description')}
             </Text>
           </Stack>
 
-          <Stack gap={3} w='full'>
-            <HStack w='full'>
-              <Text textStyle='BodyTextRegularSM' fontWeight='medium'>
+          <Stack gap={3} w="full">
+            <HStack w="full">
+              <Text textStyle="BodyTextRegularSM" fontWeight="medium">
                 {t('newDistribution.assetId')}
               </Text>
               <Text
-                textStyle='BodyTextRegularSM'
-                color='gray.700'
-                fontWeight='medium'
+                textStyle="BodyTextRegularSM"
+                color="gray.700"
+                fontWeight="medium"
               >
                 {assetData?.id}
               </Text>
             </HStack>
 
-            <HStack w='full'>
-              <Text textStyle='BodyTextRegularSM' fontWeight='medium'>
+            <HStack w="full">
+              <Text textStyle="BodyTextRegularSM" fontWeight="medium">
                 {t('newDistribution.assetName')}
               </Text>
               <Text
-                textStyle='BodyTextRegularSM'
-                color='gray.700'
-                fontWeight='medium'
+                textStyle="BodyTextRegularSM"
+                color="gray.700"
+                fontWeight="medium"
               >
                 {assetData?.name}
               </Text>
             </HStack>
 
-            <HStack w='full'>
-              <Text textStyle='BodyTextRegularSM' fontWeight='medium'>
+            <HStack w="full">
+              <Text textStyle="BodyTextRegularSM" fontWeight="medium">
                 {t('newDistribution.assetType')}
               </Text>
               <Text
-                textStyle='BodyTextRegularSM'
-                color='gray.700'
-                fontWeight='medium'
+                textStyle="BodyTextRegularSM"
+                color="gray.700"
+                fontWeight="medium"
               >
                 {assetData?.type}
               </Text>
             </HStack>
-            <VStack align='left'>
+            <VStack align="left">
               <SelectController
-                id='distributionType'
+                id="distributionType"
                 control={control}
                 label={t('newDistribution.selectType')}
                 options={distributionTypeOptions}
                 isSearchable={false}
               />
               {distributionType === 'automated' && (
-                <Text textStyle='BodyRegularSM' color='neutral.800'>
+                <Text textStyle="BodyRegularSM" color="neutral.800">
                   {t('newDistribution.selectInfo')}
                 </Text>
               )}
             </VStack>
             <InputController
               control={control}
-              id='concept'
+              id="concept"
               placeholder={t('newDistribution.conceptPlaceholder')}
               label={t('newDistribution.concept')}
-              size='md'
-              w='full'
+              size="md"
+              w="full"
             />
-            <Stack gap={2} w='full'>
-              <Text textStyle='BodyTextRegularXXS' fontWeight='medium'>
+            <Stack gap={2} w="full">
+              <Text textStyle="BodyTextRegularXXS" fontWeight="medium">
                 {t('newDistribution.paymentType')}
               </Text>
               <RadioGroupController
                 control={control}
-                id='amountType'
-                defaultValue='fixed'
-                display='flex'
-                flexDirection='column'
+                id="amountType"
+                defaultValue="fixed"
+                display="flex"
+                flexDirection="column"
                 gap={4}
                 options={amountTypeOptions}
               />
             </Stack>
-            <Stack gap={2} w='full'>
+            <Stack gap={2} w="full">
               <InputNumberController
                 label={t('newDistribution.amount')}
                 control={control}
-                id='amount'
+                id="amount"
                 placeholder={amountType === 'fixed' ? '0.00' : '0'}
                 addonLeft={<Text>{amountType === 'fixed' ? '$' : '%'}</Text>}
                 minValue={0.01}
                 maxValue={amountType === 'percentage' ? 100 : undefined}
                 decimalScale={2}
-                decimalSeparator='.'
-                thousandSeparator=','
-                size='md'
-                w='full'
+                decimalSeparator="."
+                thousandSeparator=","
+                size="md"
+                w="full"
                 rules={{
                   required: t('newDistribution.validation.amountRequired'),
                   min: {
@@ -448,85 +448,85 @@ export const NewDistribution = () => {
                       amountType === 'fixed'
                         ? t('newDistribution.validation.minimumAmountFixed')
                         : t(
-                            'newDistribution.validation.minimumAmountPercentage'
+                            'newDistribution.validation.minimumAmountPercentage',
                           ),
                   },
                 }}
               />
             </Stack>
             {distributionType === 'scheduled' && (
-              <Stack gap={2} w='full'>
+              <Stack gap={2} w="full">
                 <DateField
-                  name='scheduledDate'
+                  name="scheduledDate"
                   control={control}
                   label={t('newDistribution.scheduledExecutionTime')}
                   placeholder={t('newDistribution.selectDateAndTime')}
                   isRequired
                   requiredMessage={t(
-                    'newDistribution.validation.scheduledDateRequired'
+                    'newDistribution.validation.scheduledDateRequired',
                   )}
                   futureDateMessage={t(
-                    'newDistribution.validation.futureDateRequired'
+                    'newDistribution.validation.futureDateRequired',
                   )}
                 />
               </Stack>
             )}
             {distributionType === 'recurring' && (
               <>
-                <Stack gap={2} w='full'>
+                <Stack gap={2} w="full">
                   <SelectController
-                    id='recurringFrequency'
+                    id="recurringFrequency"
                     label={t('newDistribution.recurringOptions.label')}
                     control={control}
                     options={recurringOptions}
                     isSearchable={false}
                   />
                 </Stack>
-                <Stack gap={2} w='full'>
+                <Stack gap={2} w="full">
                   <DateField
-                    name='recurringStartDate'
+                    name="recurringStartDate"
                     control={control}
                     label={t('newDistribution.startTime')}
                     placeholder={t('newDistribution.selectDateAndTime')}
                     isRequired
                     requiredMessage={t(
-                      'newDistribution.validation.startDateRequired'
+                      'newDistribution.validation.startDateRequired',
                     )}
                     futureDateMessage={t(
-                      'newDistribution.validation.futureDateRequired'
+                      'newDistribution.validation.futureDateRequired',
                     )}
                   />
                 </Stack>
               </>
             )}
             {distributionType === 'automated' && (
-              <Stack gap={2} w='full'>
+              <Stack gap={2} w="full">
                 <SelectController
-                  id='triggerCondition'
-                  name='triggerCondition'
+                  id="triggerCondition"
+                  name="triggerCondition"
                   control={control}
                   label={t('newDistribution.trigerCondition')}
-                  placeholder='Select trigger condition'
+                  placeholder="Select trigger condition"
                   options={triggerConditionOptions}
                   isRequired
                 />
               </Stack>
             )}
           </Stack>
-          <HStack w='full' pt={4} justifyContent='flex-end' gap={3}>
+          <HStack w="full" pt={4} justifyContent="flex-end" gap={3}>
             <Button
-              variant='secondary'
+              variant="secondary"
               onClick={() => navigate(`/assets/${id}`)}
-              size='md'
+              size="md"
             >
               {t('newDistribution.buttons.cancel')}
             </Button>
             <Button
-              variant='primary'
+              variant="primary"
               isDisabled={!isFormValidResult}
               isLoading={createManualPayoutMutation.isPending}
               onClick={onOpen}
-              size='md'
+              size="md"
             >
               {t('newDistribution.buttons.createDistribution')}
             </Button>
@@ -535,20 +535,20 @@ export const NewDistribution = () => {
         <PopUp
           isOpen={isOpen}
           onClose={handleClose}
-          icon={<PhosphorIcon as={Warning} size='md' weight={Weight.Light} />}
+          icon={<PhosphorIcon as={Warning} size="md" weight={Weight.Light} />}
           title={t('newDistribution.popup.title')}
           description={formatDistributionDescription(
             t,
             amount,
             amountType,
             formValues,
-            assetData
+            assetData,
           )}
           confirmText={t('newDistribution.popup.confirmText')}
           cancelText={t('newDistribution.popup.cancelText')}
           onConfirm={handleMakeNewDistribution}
           onCancel={onClose}
-          variant='info'
+          variant="info"
           confirmButtonProps={{
             isDisabled: createManualPayoutMutation.isPending,
           }}

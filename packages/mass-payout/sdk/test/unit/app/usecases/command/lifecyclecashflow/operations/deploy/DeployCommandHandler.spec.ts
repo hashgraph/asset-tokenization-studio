@@ -203,87 +203,87 @@
 
 */
 
-import { DeployCommandHandler } from "@app/usecase/command/lifeCycleCashFlow/operations/deploy/DeployCommandHandler"
-import TransactionService from "@app/services/transaction/TransactionService"
-import ContractService from "@app/services/contract/ContractService"
-import EvmAddress from "@domain/contract/EvmAddress"
+import { DeployCommandHandler } from '@app/usecase/command/lifeCycleCashFlow/operations/deploy/DeployCommandHandler';
+import TransactionService from '@app/services/transaction/TransactionService';
+import ContractService from '@app/services/contract/ContractService';
+import EvmAddress from '@domain/contract/EvmAddress';
 import {
   DeployCommand,
   DeployCommandResponse,
-} from "@app/usecase/command/lifeCycleCashFlow/operations/deploy/DeployCommand"
-import { DeployCommandError } from "@app/usecase/command/lifeCycleCashFlow/operations/deploy/error/DeployCommandError"
+} from '@app/usecase/command/lifeCycleCashFlow/operations/deploy/DeployCommand';
+import { DeployCommandError } from '@app/usecase/command/lifeCycleCashFlow/operations/deploy/error/DeployCommandError';
 import {
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
-} from "../../../../../../../fixture/DataFixture"
+} from '../../../../../../../fixture/DataFixture';
 
-jest.mock("@hashgraph/sdk", () => ({
+jest.mock('@hashgraph/sdk', () => ({
   TokenId: {
     fromString: jest.fn().mockReturnValue({
       toSolidityAddress: jest
         .fn()
-        .mockReturnValue("0x1ba302dcf33f7f9fd08be50ddc2bbe44e4cccb3c"),
+        .mockReturnValue('0x1ba302dcf33f7f9fd08be50ddc2bbe44e4cccb3c'),
     }),
   },
-}))
+}));
 
-describe("DeployCommandHandler", () => {
-  let handler: DeployCommandHandler
-  let transactionService: jest.Mocked<TransactionService>
-  let contractService: jest.Mocked<ContractService>
-  let mockDeploy: jest.Mock
+describe('DeployCommandHandler', () => {
+  let handler: DeployCommandHandler;
+  let transactionService: jest.Mocked<TransactionService>;
+  let contractService: jest.Mocked<ContractService>;
+  let mockDeploy: jest.Mock;
 
   beforeEach(() => {
-    mockDeploy = jest.fn()
+    mockDeploy = jest.fn();
 
     transactionService = {
       getHandler: jest.fn().mockReturnValue({ deploy: mockDeploy }),
-    } as any
+    } as any;
 
     contractService = {
       getContractEvmAddress: jest.fn(),
-    } as any
+    } as any;
 
-    handler = new DeployCommandHandler(transactionService, contractService)
-  })
+    handler = new DeployCommandHandler(transactionService, contractService);
+  });
 
-  it("should deploy contract and return DeployCommandResponse", async () => {
+  it('should deploy contract and return DeployCommandResponse', async () => {
     const command: DeployCommand = {
       asset: HederaIdPropsFixture.create().value,
       paymentToken: HederaIdPropsFixture.create().value,
-    } as any
+    } as any;
 
-    const mockAssetAddress = EvmAddressPropsFixture.create().value
-    const mockDeployedAddress = EvmAddressPropsFixture.create().value
+    const mockAssetAddress = EvmAddressPropsFixture.create().value;
+    const mockDeployedAddress = EvmAddressPropsFixture.create().value;
 
     contractService.getContractEvmAddress.mockResolvedValue(
-      new EvmAddress(mockAssetAddress)
-    )
-    mockDeploy.mockResolvedValue(mockDeployedAddress)
+      new EvmAddress(mockAssetAddress),
+    );
+    mockDeploy.mockResolvedValue(mockDeployedAddress);
 
-    const response = await handler.execute(command)
+    const response = await handler.execute(command);
 
     expect(contractService.getContractEvmAddress).toHaveBeenCalledWith(
-      command.asset
-    )
+      command.asset,
+    );
     expect(mockDeploy).toHaveBeenCalledWith(
       new EvmAddress(mockAssetAddress),
-      expect.any(EvmAddress)
-    )
-    expect(response).toBeInstanceOf(DeployCommandResponse)
-    expect(response.payload).toBe(mockDeployedAddress)
-  })
+      expect.any(EvmAddress),
+    );
+    expect(response).toBeInstanceOf(DeployCommandResponse);
+    expect(response.payload).toBe(mockDeployedAddress);
+  });
 
-  it("should wrap errors in DeployCommandError", async () => {
+  it('should wrap errors in DeployCommandError', async () => {
     const command: DeployCommand = {
       asset: HederaIdPropsFixture.create().value,
       paymentToken: HederaIdPropsFixture.create().value,
-    } as any
+    } as any;
 
     contractService.getContractEvmAddress.mockRejectedValue(
-      new Error("Error getting contract address")
-    )
+      new Error('Error getting contract address'),
+    );
 
-    await expect(handler.execute(command)).rejects.toThrow(DeployCommandError)
-  })
-})
+    await expect(handler.execute(command)).rejects.toThrow(DeployCommandError);
+  });
+});

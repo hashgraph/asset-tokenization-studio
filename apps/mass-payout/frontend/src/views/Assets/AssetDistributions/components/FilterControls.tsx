@@ -11,19 +11,19 @@ export const FilterControls: React.FC<{
   control: Control<AssetDistributionsFormValues>;
   t: TFunction;
 }> = ({ control, t }) => (
-  <Stack direction='row' mb={6} alignItems='center' gap={4}>
-    <Box w='full' maxW='280px'>
+  <Stack direction="row" mb={6} alignItems="center" gap={4}>
+    <Box w="full" maxW="280px">
       <SelectController
         control={control}
-        id='distributionType'
+        id="distributionType"
         placeholder={<PlaceholderWithIcon />}
         options={DISTRIBUTION_TYPE_OPTIONS}
         isSearchable={false}
       />
     </Box>
-    <Box w='full' maxW='280px'>
+    <Box w="full" maxW="280px">
       <SearchInputController
-        id='search'
+        id="search"
         placeholder={t('filters.searchPlaceholder')}
         control={control}
         onSearch={() => {}}

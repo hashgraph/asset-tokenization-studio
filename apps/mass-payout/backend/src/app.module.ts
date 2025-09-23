@@ -207,7 +207,7 @@ import { ConfigurationModule } from "@config/configuration.module"
 import { PostgresModule } from "@config/postgres.module"
 import { AssetTokenizationStudioSdkModule } from "@config/asset-tokenization-studio-sdk.module"
 import { LifeCycleCashFlowSdkModule } from "@config/life-cycle-cash-flow-sdk.module"
-import { MassPayoutSDK } from "@scheduler-payment-distribution/sdk"
+import { MassPayoutSDK } from "@mass-payout/sdk"
 import { CONTROLLERS, PROVIDERS } from "./app.module-components"
 import { ScheduleModule } from "@nestjs/schedule"
 

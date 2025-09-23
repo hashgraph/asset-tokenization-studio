@@ -277,21 +277,21 @@ export const DistributionDetail = () => {
 
   return (
     <>
-      <VStack alignItems='left' gap='12px' mb={6}>
+      <VStack alignItems="left" gap="12px" mb={6}>
         <Breadcrumb items={routes} />
-        <HStack align='center' w='full'>
-          <HStack align='center' spacing={2}>
+        <HStack align="center" w="full">
+          <HStack align="center" spacing={2}>
             <GobackButton label={distributionLabel} mr={4} />
-            <Tag label={t('detail.status.failed')} variant='error' size='md' />
+            <Tag label={t('detail.status.failed')} variant="error" size="md" />
           </HStack>
           <Spacer />
         </HStack>
       </VStack>
 
-      <Stack w='full' h='full' borderRadius={1} gap={4}>
+      <Stack w="full" h="full" borderRadius={1} gap={4}>
         <Tabs
           tabs={tabs}
-          variant='primary'
+          variant="primary"
           index={activeTabIndex}
           onChange={handleTabChange}
         />

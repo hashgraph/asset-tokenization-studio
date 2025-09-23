@@ -36,14 +36,14 @@ export const TabContent: React.FC<TabContentProps> = ({
   };
 
   return (
-    <Box flex='1' display='flex' flexDirection='column' minHeight='0'>
-      <Text textStyle='ElementsSemiboldLG' color='neutral.900' mb={6} mt={3}>
+    <Box flex="1" display="flex" flexDirection="column" minHeight="0">
+      <Text textStyle="ElementsSemiboldLG" color="neutral.900" mb={6} mt={3}>
         {getTabTitle(filterType)}
       </Text>
 
       <FilterControls control={control} t={t} />
 
-      <Box flex='1' display='flex' flexDirection='column' minHeight='0'>
+      <Box flex="1" display="flex" flexDirection="column" minHeight="0">
         {!isLoading && filteredDistributions.length === 0 ? (
           <EmptyDistributionsState t={t} />
         ) : (
@@ -55,7 +55,7 @@ export const TabContent: React.FC<TabContentProps> = ({
             totalElements={totalFilteredElements}
             totalPages={calculateTotalPages(
               totalFilteredElements,
-              table.pagination.pageSize
+              table.pagination.pageSize,
             )}
             isLoading={isLoading}
             {...table}

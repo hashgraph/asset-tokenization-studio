@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from "@core/error/BaseError"
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
 export class InvalidBytes extends BaseError {
   constructor(value: string) {
-    super(ErrorCode.InvalidBytes, `Bytes ${value} is not valid`)
+    super(ErrorCode.InvalidBytes, `Bytes ${value} is not valid`);
   }
 }

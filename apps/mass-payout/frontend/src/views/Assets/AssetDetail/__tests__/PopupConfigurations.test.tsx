@@ -227,30 +227,30 @@ jest.mock('io-bricks-ui', () => ({
     }) =>
       isOpen ? (
         <div data-testid={`popup-${id}`}>
-          <div data-testid='popup-icon'>{icon}</div>
-          <div data-testid='popup-title'>{title}</div>
-          <div data-testid='popup-description'>{description}</div>
+          <div data-testid="popup-icon">{icon}</div>
+          <div data-testid="popup-title">{title}</div>
+          <div data-testid="popup-description">{description}</div>
           <button
-            data-testid='popup-confirm'
+            data-testid="popup-confirm"
             onClick={onConfirm}
             disabled={confirmButtonProps?.isLoading}
             data-loading={confirmButtonProps?.isLoading}
           >
             {confirmText}
           </button>
-          <button data-testid='popup-cancel' onClick={onCancel}>
+          <button data-testid="popup-cancel" onClick={onCancel}>
             {cancelText}
           </button>
-          <button data-testid='popup-close' onClick={onClose}>
+          <button data-testid="popup-close" onClick={onClose}>
             Close
           </button>
-          <div data-testid='popup-variant' data-variant={variant}></div>
+          <div data-testid="popup-variant" data-variant={variant}></div>
         </div>
-      ) : null
+      ) : null,
   ),
   PhosphorIcon: jest.fn(({ as: IconComponent, size, weight, ...props }) => (
     <div
-      data-testid='phosphor-icon'
+      data-testid="phosphor-icon"
       data-size={size}
       data-weight={weight}
       {...props}
@@ -316,10 +316,10 @@ describe('PopupConfigurations', () => {
       renderPopupConfigurations();
 
       expect(
-        screen.queryByTestId('popup-pauseUnpauseDistributions')
+        screen.queryByTestId('popup-pauseUnpauseDistributions'),
       ).not.toBeInTheDocument();
       expect(
-        screen.queryByTestId('popup-importCorporateActions')
+        screen.queryByTestId('popup-importCorporateActions'),
       ).not.toBeInTheDocument();
     });
 
@@ -329,10 +329,10 @@ describe('PopupConfigurations', () => {
       const popup = screen.getByTestId('popup-pauseUnpauseDistributions');
       expect(popup).toBeInTheDocument();
       expect(screen.getByTestId('popup-title')).toHaveTextContent(
-        'Pause Asset'
+        'Pause Asset',
       );
       expect(screen.getByTestId('popup-description')).toHaveTextContent(
-        'Are you sure you want to pause this asset?'
+        'Are you sure you want to pause this asset?',
       );
       expect(screen.getByTestId('popup-confirm')).toHaveTextContent('Pause');
       expect(screen.getByTestId('popup-cancel')).toHaveTextContent('Cancel');
@@ -344,10 +344,10 @@ describe('PopupConfigurations', () => {
       const popup = screen.getByTestId('popup-pauseUnpauseDistributions');
       expect(popup).toBeInTheDocument();
       expect(screen.getByTestId('popup-title')).toHaveTextContent(
-        'Unpause Asset'
+        'Unpause Asset',
       );
       expect(screen.getByTestId('popup-description')).toHaveTextContent(
-        'Are you sure you want to unpause this asset?'
+        'Are you sure you want to unpause this asset?',
       );
       expect(screen.getByTestId('popup-confirm')).toHaveTextContent('Unpause');
       expect(screen.getByTestId('popup-cancel')).toHaveTextContent('Cancel');

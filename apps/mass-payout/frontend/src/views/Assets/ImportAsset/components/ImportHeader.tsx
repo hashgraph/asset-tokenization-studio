@@ -29,7 +29,7 @@ export const ImportHeader = ({ breadcrumbs }: ImportHeaderProps) => {
     <Box>
       <Stack spacing={4}>
         <Breadcrumb items={breadcrumbs} />
-        <Text fontSize='2xl' fontWeight='bold'>
+        <Text fontSize="2xl" fontWeight="bold">
           {t('importAsset')}
         </Text>
       </Stack>

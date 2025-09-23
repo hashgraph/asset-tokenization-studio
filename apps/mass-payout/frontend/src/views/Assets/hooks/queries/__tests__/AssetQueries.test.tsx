@@ -421,7 +421,7 @@ describe('Asset Queries', () => {
         });
 
         expect(consoleSpy.log).toHaveBeenCalledWith(
-          'Asset paused successfully'
+          'Asset paused successfully',
         );
       });
 
@@ -430,7 +430,7 @@ describe('Asset Queries', () => {
         assetService.pauseAsset.mockResolvedValueOnce(undefined);
         const invalidateQueriesSpy = jest.spyOn(
           testQueryClient,
-          'invalidateQueries'
+          'invalidateQueries',
         );
 
         const { result } = renderHook(() => usePauseAsset(), {
@@ -493,7 +493,7 @@ describe('Asset Queries', () => {
 
         expect(consoleSpy.error).toHaveBeenCalledWith(
           'Error pausing asset:',
-          error
+          error,
         );
       });
 
@@ -518,7 +518,7 @@ describe('Asset Queries', () => {
         expect(result.current.error).toEqual(apiError);
         expect(consoleSpy.error).toHaveBeenCalledWith(
           'Error pausing asset:',
-          apiError
+          apiError,
         );
       });
 
@@ -539,7 +539,7 @@ describe('Asset Queries', () => {
 
         expect(consoleSpy.error).toHaveBeenCalledWith(
           'Error pausing asset:',
-          timeoutError
+          timeoutError,
         );
       });
     });
@@ -548,7 +548,7 @@ describe('Asset Queries', () => {
       test('should show loading state during mutation', async () => {
         const assetId = mockAsset.id;
         let resolvePromise: (value?: void) => void;
-        const pausePromise = new Promise<void>(resolve => {
+        const pausePromise = new Promise<void>((resolve) => {
           resolvePromise = resolve;
         });
         assetService.pauseAsset.mockReturnValueOnce(pausePromise);
@@ -607,7 +607,7 @@ describe('Asset Queries', () => {
         });
 
         expect(consoleSpy.log).toHaveBeenCalledWith(
-          'Asset resumed successfully'
+          'Asset resumed successfully',
         );
       });
 
@@ -616,7 +616,7 @@ describe('Asset Queries', () => {
         assetService.unpauseAsset.mockResolvedValueOnce(undefined);
         const invalidateQueriesSpy = jest.spyOn(
           testQueryClient,
-          'invalidateQueries'
+          'invalidateQueries',
         );
 
         const { result } = renderHook(() => useUnpauseAsset(), {
@@ -679,7 +679,7 @@ describe('Asset Queries', () => {
 
         expect(consoleSpy.error).toHaveBeenCalledWith(
           'Error unpausing asset:',
-          error
+          error,
         );
       });
 
@@ -704,7 +704,7 @@ describe('Asset Queries', () => {
         expect(result.current.error).toEqual(apiError);
         expect(consoleSpy.error).toHaveBeenCalledWith(
           'Error unpausing asset:',
-          apiError
+          apiError,
         );
       });
 
@@ -725,7 +725,7 @@ describe('Asset Queries', () => {
 
         expect(consoleSpy.error).toHaveBeenCalledWith(
           'Error unpausing asset:',
-          timeoutError
+          timeoutError,
         );
       });
     });
@@ -734,7 +734,7 @@ describe('Asset Queries', () => {
       test('should show loading state during mutation', async () => {
         const assetId = mockAsset.id;
         let resolvePromise: (value?: void) => void;
-        const unpausePromise = new Promise<void>(resolve => {
+        const unpausePromise = new Promise<void>((resolve) => {
           resolvePromise = resolve;
         });
         assetService.unpauseAsset.mockReturnValueOnce(unpausePromise);

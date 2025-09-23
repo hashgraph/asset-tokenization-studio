@@ -5,13 +5,13 @@ import { TFunction } from 'i18next';
 
 export const EmptyDistributionsState: React.FC<{ t: TFunction }> = ({ t }) => (
   <Box
-    display='flex'
-    alignItems='center'
-    justifyContent='center'
-    flex='1'
-    minHeight='200px'
+    display="flex"
+    alignItems="center"
+    justifyContent="center"
+    flex="1"
+    minHeight="200px"
   >
-    <Text textStyle='ElementsRegularMD' color='neutral.500' textAlign='center'>
+    <Text textStyle="ElementsRegularMD" color="neutral.500" textAlign="center">
       {t('assets:noDistributionsYet')}
     </Text>
   </Box>

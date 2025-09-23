@@ -214,15 +214,15 @@ import {
 export const useStatusIcons = () => {
   const renderProgressIndicator = (
     status: ProcessStatusType,
-    progress: number
+    progress: number,
   ) => {
     if (status === ProcessStatus.COMPLETED) {
       return (
         <PhosphorIcon
           as={Check}
-          fill='white'
-          bg='status.success.700'
-          borderRadius='full'
+          fill="white"
+          bg="status.success.700"
+          borderRadius="full"
           p={0.5}
           boxSize={4}
         />
@@ -232,23 +232,23 @@ export const useStatusIcons = () => {
       return (
         <PhosphorIcon
           as={ExclamationMark}
-          fill='white'
-          bg='status.error.500'
-          borderRadius='full'
+          fill="white"
+          bg="status.error.500"
+          borderRadius="full"
           p={0.5}
           boxSize={4}
         />
       );
     }
     return (
-      <Text fontSize='sm' color='neutral.600' minW='35px' textAlign='right'>
+      <Text fontSize="sm" color="neutral.600" minW="35px" textAlign="right">
         {progress}%
       </Text>
     );
   };
 
   const getStatusVariants = (
-    status: ProcessStatusType | DistributionsDetailsStatus
+    status: ProcessStatusType | DistributionsDetailsStatus,
   ) => {
     let tagVariant:
       | 'active'
@@ -265,7 +265,7 @@ export const useStatusIcons = () => {
     let progressVariant: 'inProgress' | 'success' | 'error';
 
     const getStatusVariants = (
-      status: ProcessStatus | DistributionsDetailsStatus
+      status: ProcessStatus | DistributionsDetailsStatus,
     ) => {
       if (status === ProcessStatus.COMPLETED) {
         return {

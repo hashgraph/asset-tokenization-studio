@@ -210,8 +210,8 @@ pragma solidity 0.8.18;
 import {
     RegulationData,
     AdditionalSecurityData
-} from "@hashgraph/asset-tokenization-contracts/contracts/layer_3/constants/regulation.sol";
-import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/interfaces/factory/IFactory.sol";
+} from '@hashgraph/asset-tokenization-contracts/contracts/layer_3/constants/regulation.sol';
+import { IFactory } from '@hashgraph/asset-tokenization-contracts/contracts/interfaces/factory/IFactory.sol';
 
 interface IAssetMock {
     enum DividendType {

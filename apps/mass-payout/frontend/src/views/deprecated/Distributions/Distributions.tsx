@@ -206,21 +206,18 @@
  * @deprecated This component is not currently used. Kept for potential future usage.
  */
 
-import { Box, HStack, Stack } from '@chakra-ui/react';
+import { Box, Stack } from '@chakra-ui/react';
 import {
   Table,
   Text,
   SearchInputController,
   SelectController,
-  PhosphorIcon,
-  Weight,
 } from 'io-bricks-ui';
 import { useForm, useWatch } from 'react-hook-form';
 import { useTable } from '@/hooks/useTable';
 import { useTranslation } from 'react-i18next';
 import { RouterManager } from '@/router/RouterManager';
 import { RouteName } from '@/router/RouteName';
-import { CalendarBlank } from '@phosphor-icons/react';
 import { PlaceholderWithIcon } from '@/views/Assets/Components/PlaceholderWithIcon';
 
 export const Distributions = () => {
@@ -259,31 +256,33 @@ export const Distributions = () => {
   });
   const searchTerm = useWatch({ control, name: 'search' });
 
-  const filteredDistributions = (data?.queryData || []).filter(distribution => {
-    if (
-      selectedDistributionType &&
-      selectedDistributionType !== 'all' &&
-      selectedDistributionType !== ''
-    ) {
-      const distributionType = distribution.corporateActionID
-        ? 'Corporate Action'
-        : 'Manual';
-      if (distributionType !== selectedDistributionType) return false;
-    }
+  const filteredDistributions = (data?.queryData || []).filter(
+    (distribution) => {
+      if (
+        selectedDistributionType &&
+        selectedDistributionType !== 'all' &&
+        selectedDistributionType !== ''
+      ) {
+        const distributionType = distribution.corporateActionID
+          ? 'Corporate Action'
+          : 'Manual';
+        if (distributionType !== selectedDistributionType) return false;
+      }
 
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        distribution.asset.name.toLowerCase().includes(searchLower) ||
-        distribution.asset.id.toLowerCase().includes(searchLower) ||
-        (distribution.asset.lifeCycleCashFlowHederaAddress || '')
-          .toLowerCase()
-          .includes(searchLower)
-      );
-    }
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          distribution.asset.name.toLowerCase().includes(searchLower) ||
+          distribution.asset.id.toLowerCase().includes(searchLower) ||
+          (distribution.asset.lifeCycleCashFlowHederaAddress || '')
+            .toLowerCase()
+            .includes(searchLower)
+        );
+      }
 
-    return true;
-  });
+      return true;
+    },
+  );
 
   const onClickRow = (distribution: DistributionData) => {
     RouterManager.to(RouteName.DistributionsDetails, {
@@ -293,47 +292,47 @@ export const Distributions = () => {
 
   return (
     <>
-      <Stack direction='row' justify='flex-start' align='center' mb={4}>
-        <Text textStyle='HeadingBoldXL' color='neutral.800' ml={4}>
+      <Stack direction="row" justify="flex-start" align="center" mb={4}>
+        <Text textStyle="HeadingBoldXL" color="neutral.800" ml={4}>
           {t('Distributions')}
         </Text>
       </Stack>
 
       <Box
-        bg='neutral.50'
-        borderRadius='lg'
-        boxShadow='sm'
+        bg="neutral.50"
+        borderRadius="lg"
+        boxShadow="sm"
         p={6}
-        flex='1'
-        display='flex'
-        flexDirection='column'
+        flex="1"
+        display="flex"
+        flexDirection="column"
       >
-        <Text textStyle='ElementsSemiboldLG' color='neutral.900' mb={6}>
+        <Text textStyle="ElementsSemiboldLG" color="neutral.900" mb={6}>
           {tDistributions('title')}
         </Text>
 
-        <Stack direction='row' mb={6} alignItems='center' gap={4}>
-          <Box w='full' maxW={'280px'}>
+        <Stack direction="row" mb={6} alignItems="center" gap={4}>
+          <Box w="full" maxW={'280px'}>
             <SelectController
               control={control}
-              id='distributionType'
+              id="distributionType"
               placeholder={<PlaceholderWithIcon />}
               options={distributionTypeOptions}
             />
           </Box>
-          <Box w='full' maxW={'280px'}>
+          <Box w="full" maxW={'280px'}>
             <SearchInputController
-              id='search'
+              id="search"
               placeholder={tDistributions('filters.searchPlaceholder')}
-              onSearch={search => console.log('SEARCHING: ', search)}
+              onSearch={(search) => console.log('SEARCHING: ', search)}
               control={control}
             />
           </Box>
         </Stack>
 
-        <Box flex='1' display='flex' flexDirection='column' minHeight='0'>
+        <Box flex="1" display="flex" flexDirection="column" minHeight="0">
           <Table
-            name='distributions'
+            name="distributions"
             columns={columns}
             data={filteredDistributions}
             isLoading={isLoading}

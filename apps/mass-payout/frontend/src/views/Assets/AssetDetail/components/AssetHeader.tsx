@@ -21,16 +21,16 @@ export const AssetHeader = ({ asset, routes, isPaused }: AssetHeaderProps) => {
   const statusVariant = isPaused ? 'paused' : 'active';
 
   return (
-    <VStack alignItems='left' gap='12px' mb={6}>
+    <VStack alignItems="left" gap="12px" mb={6}>
       <Breadcrumb items={routes} />
-      <HStack align='center' w='full'>
-        <HStack align='center' spacing={2}>
+      <HStack align="center" w="full">
+        <HStack align="center" spacing={2}>
           <GobackButton label={assetLabel} mr={4} />
           <HStack>
-            <Text textStyle='ElementsRegularXS' color='neutral.700'>
+            <Text textStyle="ElementsRegularXS" color="neutral.700">
               {t('distributionsStatus')}
             </Text>
-            <Tag label={status} variant={statusVariant} size='md' />
+            <Tag label={status} variant={statusVariant} size="md" />
           </HStack>
         </HStack>
         <Spacer />

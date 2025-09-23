@@ -245,8 +245,8 @@ jest.mock('@/hooks/useBreadcrumbs', () => ({
 // Mock child components
 jest.mock('../components/AssetHeader', () => ({
   AssetHeader: jest.fn(({ asset }) => (
-    <div data-testid='asset-header'>
-      <div data-testid='asset-status'>
+    <div data-testid="asset-header">
+      <div data-testid="asset-status">
         {asset?.isPaused ? 'Paused' : 'Active'}
       </div>
       {asset && (
@@ -260,21 +260,21 @@ jest.mock('../components/AssetHeader', () => ({
 
 jest.mock('../components/TabsConfiguration', () => ({
   TabsConfiguration: jest.fn(({ asset }) => (
-    <div data-testid='tabs-configuration'>
-      <button data-testid='pause-unpause-button'>
+    <div data-testid="tabs-configuration">
+      <button data-testid="pause-unpause-button">
         {asset?.isPaused ? 'Unpause Asset' : 'Pause Asset'}
       </button>
-      <button data-testid='import-corporate-actions-button'>
+      <button data-testid="import-corporate-actions-button">
         {asset?.syncEnabled ? 'Disable Sync' : 'Enable Sync'}
       </button>
-      <button data-testid='new-distribution-button'>New Distribution</button>
+      <button data-testid="new-distribution-button">New Distribution</button>
     </div>
   )),
 }));
 
 jest.mock('../components/PopupConfigurations', () => ({
   PopupConfigurations: jest.fn(() => (
-    <div data-testid='popup-configurations'>Mock Popup</div>
+    <div data-testid="popup-configurations">Mock Popup</div>
   )),
 }));
 
@@ -341,7 +341,7 @@ describe('AssetDetail Component', () => {
       expect(screen.getByTestId('tabs-configuration')).toBeInTheDocument();
       expect(screen.getByTestId('pause-unpause-button')).toBeInTheDocument();
       expect(
-        screen.getByTestId('import-corporate-actions-button')
+        screen.getByTestId('import-corporate-actions-button'),
       ).toBeInTheDocument();
       expect(screen.getByTestId('new-distribution-button')).toBeInTheDocument();
     });
@@ -373,7 +373,7 @@ describe('AssetDetail Component', () => {
 
       render(<AssetDetail />, { history });
       expect(
-        screen.getByText('Error loading asset or asset not found')
+        screen.getByText('Error loading asset or asset not found'),
       ).toBeInTheDocument();
     });
 
@@ -386,7 +386,7 @@ describe('AssetDetail Component', () => {
 
       render(<AssetDetail />, { history });
       expect(
-        screen.getByText('Error loading asset or asset not found')
+        screen.getByText('Error loading asset or asset not found'),
       ).toBeInTheDocument();
     });
   });
@@ -403,7 +403,7 @@ describe('AssetDetail Component', () => {
       render(<AssetDetail />, { history });
       expect(screen.getByTestId('asset-status')).toHaveTextContent('Active');
       expect(screen.getByTestId('pause-unpause-button')).toHaveTextContent(
-        'Pause Asset'
+        'Pause Asset',
       );
     });
 
@@ -418,7 +418,7 @@ describe('AssetDetail Component', () => {
       render(<AssetDetail />, { history });
       expect(screen.getByTestId('asset-status')).toHaveTextContent('Paused');
       expect(screen.getByTestId('pause-unpause-button')).toHaveTextContent(
-        'Unpause Asset'
+        'Unpause Asset',
       );
     });
 
@@ -439,7 +439,7 @@ describe('AssetDetail Component', () => {
 
       render(<AssetDetail />, { history });
       expect(
-        screen.getByTestId('import-corporate-actions-button')
+        screen.getByTestId('import-corporate-actions-button'),
       ).toHaveTextContent('Disable Sync');
     });
 
@@ -453,14 +453,14 @@ describe('AssetDetail Component', () => {
 
       render(<AssetDetail />, { history });
       expect(
-        screen.getByTestId('import-corporate-actions-button')
+        screen.getByTestId('import-corporate-actions-button'),
       ).toHaveTextContent('Enable Sync');
     });
 
     test('should render import corporate actions button', () => {
       render(<AssetDetail />, { history });
       expect(
-        screen.getByTestId('import-corporate-actions-button')
+        screen.getByTestId('import-corporate-actions-button'),
       ).toBeInTheDocument();
     });
   });
@@ -489,7 +489,7 @@ describe('AssetDetail Component', () => {
       render(<AssetDetail />, { history });
 
       expect(
-        screen.getByText(`${bondAsset.name} - ${bondAsset.hederaTokenAddress}`)
+        screen.getByText(`${bondAsset.name} - ${bondAsset.hederaTokenAddress}`),
       ).toBeInTheDocument();
     });
 

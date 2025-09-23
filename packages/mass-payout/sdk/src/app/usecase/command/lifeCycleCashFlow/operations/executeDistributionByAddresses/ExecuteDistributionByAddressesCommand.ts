@@ -203,8 +203,8 @@
 
 */
 
-import { Command } from "@core/command/Command"
-import { CommandResponse } from "@core/command/CommandResponse"
+import { Command } from '@core/command/Command';
+import { CommandResponse } from '@core/command/CommandResponse';
 
 export class ExecuteDistributionByAddressesCommandResponse
   implements CommandResponse
@@ -213,7 +213,7 @@ export class ExecuteDistributionByAddressesCommandResponse
     public readonly failed: string[],
     public readonly succeeded: string[],
     public readonly paidAmount: string[],
-    public readonly transactionId: string
+    public readonly transactionId: string,
   ) {}
 }
 
@@ -223,8 +223,8 @@ export class ExecuteDistributionByAddressesCommand extends Command<ExecuteDistri
     public readonly asset: string,
     public readonly holders: string[],
     public readonly distributionId: string,
-    public readonly paymentTokenDecimals: number
+    public readonly paymentTokenDecimals: number,
   ) {
-    super()
+    super();
   }
 }

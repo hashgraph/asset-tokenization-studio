@@ -294,14 +294,14 @@ export const createMockAsset = (overrides: Partial<Asset> = {}): Asset => ({
  */
 export const createMockAssets = (
   count: number,
-  baseOverrides: Partial<Asset> = {}
+  baseOverrides: Partial<Asset> = {},
 ): Asset[] => {
   return Array.from({ length: count }, (_, index) =>
     createMockAsset({
       ...baseOverrides,
       id: `0.0.${890123 + index}`,
       name: `Test Asset ${index + 1}`,
-    })
+    }),
   );
 };
 
@@ -309,7 +309,7 @@ export const createMockAssets = (
  * Reset all mocks to their initial state
  */
 export const resetAssetMocks = (): void => {
-  Object.values(mockAssetService).forEach(mock => {
+  Object.values(mockAssetService).forEach((mock) => {
     if (jest.isMockFunction(mock)) {
       mock.mockClear();
     }

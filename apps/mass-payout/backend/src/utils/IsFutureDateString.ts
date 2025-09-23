@@ -8,7 +8,7 @@ export function IsFutureDateString(validationOptions?: ValidationOptions) {
       propertyName: propertyName,
       options: validationOptions,
       validator: {
-        validate(value: any, args: ValidationArguments) {
+        validate(value: any) {
           if (typeof value !== "string") return false
           const date = new Date(value)
           if (isNaN(date.getTime())) return false

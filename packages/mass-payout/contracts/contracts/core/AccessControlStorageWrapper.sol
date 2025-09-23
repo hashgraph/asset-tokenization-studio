@@ -206,11 +206,11 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import { LibCommon } from "../common/libraries/LibCommon.sol";
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IAccessControlStorageWrapper } from "./interfaces/IAccessControlStorageWrapper.sol";
-import { LocalContext } from "../common/LocalContext.sol";
-import { _ACCESS_CONTROL_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { LibCommon } from '../common/libraries/LibCommon.sol';
+import { EnumerableSet } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import { IAccessControlStorageWrapper } from './interfaces/IAccessControlStorageWrapper.sol';
+import { LocalContext } from '../common/LocalContext.sol';
+import { _ACCESS_CONTROL_STORAGE_POSITION } from '../constants/storagePositions.sol';
 
 abstract contract AccessControlStorageWrapper is IAccessControlStorageWrapper, LocalContext {
     using LibCommon for EnumerableSet.AddressSet;

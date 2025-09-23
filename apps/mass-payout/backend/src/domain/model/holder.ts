@@ -337,7 +337,8 @@ export class Holder extends BaseEntity {
   }
 
   private validateHolderHederaAddress(): void {
-    // const hederaAddressRegex = /^\d+\.\d+\.\d+$/ TODO restore regexp validation after solving problem with hedera address from evm address
+    // const hederaAddressRegex = /^\d+\.\d+\.\d+$/
+    // TODO restore regexp validation after solving problem with hedera address from evm address
     if (isNil(this.holderHederaAddress)) {
       // || !hederaAddressRegex.test(this.holderHederaAddress)) {
       throw new HolderHederaAddressInvalidError()

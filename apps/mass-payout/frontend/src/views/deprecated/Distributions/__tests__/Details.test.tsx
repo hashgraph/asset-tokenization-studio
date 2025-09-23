@@ -212,7 +212,7 @@ import { Details } from '../Details';
 
 jest.mock('../DistributionBasicInformation', () => ({
   DistributionBasicInformation: ({ distributionData, isLoading }: any) => (
-    <div data-testid='distribution-basic-information'>
+    <div data-testid="distribution-basic-information">
       {isLoading
         ? 'Loading basic info...'
         : distributionData
@@ -224,7 +224,7 @@ jest.mock('../DistributionBasicInformation', () => ({
 
 jest.mock('../AssetDetails', () => ({
   AssetDetails: ({ distributionData, isLoading }: any) => (
-    <div data-testid='asset-details'>
+    <div data-testid="asset-details">
       {isLoading
         ? 'Loading asset details...'
         : distributionData
@@ -256,11 +256,11 @@ describe.skip('Details Component', () => {
   describe('Basic rendering', () => {
     test('should render both child components with data', () => {
       render(
-        <Details distributionData={mockDistributionData} isLoading={false} />
+        <Details distributionData={mockDistributionData} isLoading={false} />,
       );
 
       expect(
-        screen.getByTestId('distribution-basic-information')
+        screen.getByTestId('distribution-basic-information'),
       ).toBeInTheDocument();
       expect(screen.getByTestId('asset-details')).toBeInTheDocument();
       expect(screen.getByText('Basic Information')).toBeInTheDocument();
@@ -271,7 +271,7 @@ describe.skip('Details Component', () => {
       render(<Details distributionData={null} isLoading={true} />);
 
       expect(
-        screen.getByTestId('distribution-basic-information')
+        screen.getByTestId('distribution-basic-information'),
       ).toBeInTheDocument();
       expect(screen.getByTestId('asset-details')).toBeInTheDocument();
       expect(screen.getByText('Loading basic info...')).toBeInTheDocument();
@@ -282,7 +282,7 @@ describe.skip('Details Component', () => {
       render(<Details distributionData={null} isLoading={false} />);
 
       expect(
-        screen.getByTestId('distribution-basic-information')
+        screen.getByTestId('distribution-basic-information'),
       ).toBeInTheDocument();
       expect(screen.getByTestId('asset-details')).toBeInTheDocument();
       expect(screen.getByText('No data')).toBeInTheDocument();
@@ -300,14 +300,14 @@ describe.skip('Details Component', () => {
 
     test('should not show loading when data is available', () => {
       render(
-        <Details distributionData={mockDistributionData} isLoading={false} />
+        <Details distributionData={mockDistributionData} isLoading={false} />,
       );
 
       expect(
-        screen.queryByText('Loading basic info...')
+        screen.queryByText('Loading basic info...'),
       ).not.toBeInTheDocument();
       expect(
-        screen.queryByText('Loading asset details...')
+        screen.queryByText('Loading asset details...'),
       ).not.toBeInTheDocument();
     });
   });
@@ -322,7 +322,7 @@ describe.skip('Details Component', () => {
 
     test('should pass distribution data to child components', () => {
       render(
-        <Details distributionData={mockDistributionData} isLoading={false} />
+        <Details distributionData={mockDistributionData} isLoading={false} />,
       );
 
       expect(screen.getByText('Basic Information')).toBeInTheDocument();
@@ -345,7 +345,7 @@ describe.skip('Details Component', () => {
   describe('Component structure', () => {
     test('should render components in HStack layout', () => {
       render(
-        <Details distributionData={mockDistributionData} isLoading={false} />
+        <Details distributionData={mockDistributionData} isLoading={false} />,
       );
 
       const basicInfo = screen.getByTestId('distribution-basic-information');

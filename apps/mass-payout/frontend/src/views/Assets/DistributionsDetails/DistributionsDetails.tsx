@@ -290,7 +290,7 @@ export const DistributionsDetails = () => {
       onSuccess: () => {
         console.log('Retry all successful');
       },
-      onError: error => {
+      onError: (error) => {
         console.error('Error retrying distribution:', error);
       },
     });

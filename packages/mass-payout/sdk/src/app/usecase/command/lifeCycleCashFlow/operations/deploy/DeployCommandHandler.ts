@@ -203,48 +203,48 @@
 
 */
 
-import { Logger } from "@nestjs/common"
-import { ICommandHandler } from "@core/command/CommandHandler"
-import { CommandHandler } from "@core/decorator/CommandHandlerDecorator"
-import EvmAddress from "@domain/contract/EvmAddress"
-import ContractService from "@app/services/contract/ContractService"
-import TransactionService from "@app/services/transaction/TransactionService"
+import { Logger } from '@nestjs/common';
+import { ICommandHandler } from '@core/command/CommandHandler';
+import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import EvmAddress from '@domain/contract/EvmAddress';
+import ContractService from '@app/services/contract/ContractService';
+import TransactionService from '@app/services/transaction/TransactionService';
 import {
   DeployCommand,
   DeployCommandResponse,
-} from "@app/usecase/command/lifeCycleCashFlow/operations/deploy/DeployCommand"
-import { TokenId } from "@hashgraph/sdk"
-import { DeployCommandError } from "./error/DeployCommandError"
+} from '@app/usecase/command/lifeCycleCashFlow/operations/deploy/DeployCommand';
+import { TokenId } from '@hashgraph/sdk';
+import { DeployCommandError } from './error/DeployCommandError';
 
 @CommandHandler(DeployCommand)
 export class DeployCommandHandler implements ICommandHandler<DeployCommand> {
-  private readonly logger = new Logger(DeployCommandHandler.name)
+  private readonly logger = new Logger(DeployCommandHandler.name);
 
   constructor(
     private readonly transactionService: TransactionService,
-    private readonly contractService: ContractService
+    private readonly contractService: ContractService,
   ) {}
 
   async execute(command: DeployCommand): Promise<DeployCommandResponse> {
     try {
-      const { asset, paymentToken } = command
-      const handler = this.transactionService.getHandler()
+      const { asset, paymentToken } = command;
+      const handler = this.transactionService.getHandler();
 
       const assetAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(asset)
+        await this.contractService.getContractEvmAddress(asset);
       const paymentTokenAddress =
-        TokenId.fromString(paymentToken).toSolidityAddress()
+        TokenId.fromString(paymentToken).toSolidityAddress();
 
       const lifeCycleCashFlowAddress = await handler.deploy(
         assetAddress,
-        new EvmAddress(paymentTokenAddress)
-      )
+        new EvmAddress(paymentTokenAddress),
+      );
 
       return Promise.resolve(
-        new DeployCommandResponse(lifeCycleCashFlowAddress)
-      )
+        new DeployCommandResponse(lifeCycleCashFlowAddress),
+      );
     } catch (error) {
-      throw new DeployCommandError(error as Error)
+      throw new DeployCommandError(error as Error);
     }
   }
 }

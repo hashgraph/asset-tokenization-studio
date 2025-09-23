@@ -232,9 +232,12 @@ export class HolderTypeOrmRepository implements HolderRepository {
     try {
       const persistences = holders.map((holder) => {
         const holderPersistence = HolderPersistence.fromHolder(holder)
-        // TODO We do not need to set updateAt as it is done automatically due to @UpdateDateColumn, the problem is that the date is set in UTC, but we are setting createdAt as
-        // new Date() in entities constructors, giving error when transforming from persistence to domain model because updateAt is less than createdAt in that case. We should
-        // avoid setting createdAt dates in constructors or store @UpdateDateColumn as dates with proper timezone or set project timezone to UTC
+        // TODO We do not need to set updateAt as it is done automatically due to @UpdateDateColumn,
+        //  the problem is that the date is set in UTC, but we are setting createdAt as
+        // new Date() in entities constructors, giving error when transforming from persistence to domain
+        // model because updateAt is less than createdAt in that case. We should
+        // avoid setting createdAt dates in constructors or store @UpdateDateColumn as dates with
+        // proper timezone or set project timezone to UTC
         holderPersistence.updatedAt = new Date()
         return holderPersistence
       })

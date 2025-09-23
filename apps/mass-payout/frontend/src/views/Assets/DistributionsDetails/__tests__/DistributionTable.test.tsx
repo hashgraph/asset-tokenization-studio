@@ -354,7 +354,7 @@ describe('DistributionTable', () => {
           data={largeData}
           totalElements={100}
           totalPages={10}
-        />
+        />,
       );
 
       const table = screen.getByTestId('table-ca-distributions-details');

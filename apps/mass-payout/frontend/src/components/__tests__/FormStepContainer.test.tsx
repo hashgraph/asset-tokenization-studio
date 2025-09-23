@@ -212,7 +212,7 @@ describe(`${FormStepContainer.name}`, () => {
     const component = render(
       <FormStepContainer>
         <Text>TESTING</Text>
-      </FormStepContainer>
+      </FormStepContainer>,
     );
 
     expect(component.asFragment()).toMatchSnapshot();

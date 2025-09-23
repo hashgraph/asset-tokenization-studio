@@ -236,13 +236,13 @@ export function Details({ distributionData, isLoading }: DetailsProps) {
       pl={0}
       pr={6}
       pb={6}
-      minH='720px'
-      flex='1'
-      display='flex'
-      flexDirection='column'
-      w='full'
+      minH="720px"
+      flex="1"
+      display="flex"
+      flexDirection="column"
+      w="full"
     >
-      <HStack w='full' gap={6} align='flex-start' justify='stretch'>
+      <HStack w="full" gap={6} align="flex-start" justify="stretch">
         <DistributionBasicInformation
           distributionData={distributionData}
           isLoading={isLoading}

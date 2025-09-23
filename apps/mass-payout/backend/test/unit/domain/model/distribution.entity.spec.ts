@@ -254,23 +254,27 @@ describe(Distribution.name, () => {
       expect(distribution.updatedAt).toBe(updatedAt)
     })
 
-    it("should create a Corporate Action Distribution with default values when optional parameters are not provided", () => {
-      const asset = AssetUtils.newInstance()
-      const corporateActionIdValue = faker.string.alpha({ length: 10 })
-      const corporateActionId = CorporateActionId.create(corporateActionIdValue)
-      const executionDate = faker.date.future()
+    it(
+      "should create a Corporate Action Distribution with default " +
+        "values when optional parameters are not provided",
+      () => {
+        const asset = AssetUtils.newInstance()
+        const corporateActionIdValue = faker.string.alpha({ length: 10 })
+        const corporateActionId = CorporateActionId.create(corporateActionIdValue)
+        const executionDate = faker.date.future()
 
-      const distribution = Distribution.createCorporateAction(asset, corporateActionId, executionDate)
+        const distribution = Distribution.createCorporateAction(asset, corporateActionId, executionDate)
 
-      expect(distribution).toBeInstanceOf(Distribution)
-      expect(distribution.id).toBeDefined()
-      expect(distribution.asset).toBe(asset)
-      expect(distribution.details.type).toBe(DistributionType.CORPORATE_ACTION)
-      expect((distribution.details as any).corporateActionId).toBe(corporateActionId)
-      expect((distribution.details as any).executionDate).toBe(executionDate)
-      expect(distribution.status).toBe(DistributionStatus.SCHEDULED)
-      expect(distribution.createdAt.getTime()).toBe(distribution.updatedAt.getTime())
-    })
+        expect(distribution).toBeInstanceOf(Distribution)
+        expect(distribution.id).toBeDefined()
+        expect(distribution.asset).toBe(asset)
+        expect(distribution.details.type).toBe(DistributionType.CORPORATE_ACTION)
+        expect((distribution.details as any).corporateActionId).toBe(corporateActionId)
+        expect((distribution.details as any).executionDate).toBe(executionDate)
+        expect(distribution.status).toBe(DistributionStatus.SCHEDULED)
+        expect(distribution.createdAt.getTime()).toBe(distribution.updatedAt.getTime())
+      },
+    )
 
     it("should fail if createdAt is after updatedAt", () => {
       const asset = AssetUtils.newInstance()
@@ -641,7 +645,7 @@ describe(Distribution.name, () => {
   })
 
   describe("updateSnapshotId", () => {
-    it("should update snapshotId for payout distribution ", () => {
+    it("should update snapshotId for payout distribution", () => {
       const asset = AssetUtils.newInstance()
       const originalSnapshotIdValue = faker.string.alpha({ length: 10 })
       const originalSnapshotId = SnapshotId.create(originalSnapshotIdValue)
@@ -717,28 +721,31 @@ describe(Distribution.name, () => {
       expect(distribution.updatedAt).toBe(updatedAt)
     })
 
-    it("should create a One-Off Payout Distribution with default values when optional parameters are not provided", () => {
-      const asset = AssetUtils.newInstance()
-      const snapshotIdValue = faker.string.alpha({ length: 10 })
-      const snapshotId = SnapshotId.create(snapshotIdValue)
-      const executeAt = faker.date.future()
-      const amount = faker.number.int({ min: 1, max: 1000 }).toString()
-      const amountType = faker.helpers.objectValue(AmountType)
+    it(
+      "should create a One-Off Payout Distribution with default values when " + "optional parameters are not provided",
+      () => {
+        const asset = AssetUtils.newInstance()
+        const snapshotIdValue = faker.string.alpha({ length: 10 })
+        const snapshotId = SnapshotId.create(snapshotIdValue)
+        const executeAt = faker.date.future()
+        const amount = faker.number.int({ min: 1, max: 1000 }).toString()
+        const amountType = faker.helpers.objectValue(AmountType)
 
-      const distribution = Distribution.createOneOff(asset, executeAt, amount, amountType, snapshotId)
+        const distribution = Distribution.createOneOff(asset, executeAt, amount, amountType, snapshotId)
 
-      expect(distribution).toBeInstanceOf(Distribution)
-      expect(distribution.id).toBeDefined()
-      expect(distribution.asset).toBe(asset)
-      expect(distribution.details.type).toBe(DistributionType.PAYOUT)
-      expect((distribution.details as any).snapshotId).toBe(snapshotId)
-      expect((distribution.details as any).subtype).toBe(PayoutSubtype.ONE_OFF)
-      expect((distribution.details as any).executeAt).toBe(executeAt)
-      expect((distribution.details as any).amount).toBe(amount)
-      expect((distribution.details as any).amountType).toBe(amountType)
-      expect(distribution.status).toBe(DistributionStatus.SCHEDULED)
-      expect(distribution.createdAt.getTime()).toBe(distribution.updatedAt.getTime())
-    })
+        expect(distribution).toBeInstanceOf(Distribution)
+        expect(distribution.id).toBeDefined()
+        expect(distribution.asset).toBe(asset)
+        expect(distribution.details.type).toBe(DistributionType.PAYOUT)
+        expect((distribution.details as any).snapshotId).toBe(snapshotId)
+        expect((distribution.details as any).subtype).toBe(PayoutSubtype.ONE_OFF)
+        expect((distribution.details as any).executeAt).toBe(executeAt)
+        expect((distribution.details as any).amount).toBe(amount)
+        expect((distribution.details as any).amountType).toBe(amountType)
+        expect(distribution.status).toBe(DistributionStatus.SCHEDULED)
+        expect(distribution.createdAt.getTime()).toBe(distribution.updatedAt.getTime())
+      },
+    )
 
     it("fails when asset is null or undefined", () => {
       const invalidAssets = [null, undefined] as unknown[]
@@ -938,30 +945,34 @@ describe(Distribution.name, () => {
       expect(distribution.updatedAt).toBe(updatedAt)
     })
 
-    it("should create a Recurring Payout Distribution with default values when optional parameters are not provided", () => {
-      const asset = AssetUtils.newInstance()
-      const snapshotIdValue = faker.string.alpha({ length: 10 })
-      const snapshotId = SnapshotId.create(snapshotIdValue)
-      const executeAt = faker.date.future()
-      const recurrency = faker.helpers.objectValue(Recurrency)
-      const amount = faker.number.int({ min: 1, max: 1000 }).toString()
-      const amountType = faker.helpers.objectValue(AmountType)
+    it(
+      "should create a Recurring Payout Distribution with default values when " +
+        "optional parameters are not provided",
+      () => {
+        const asset = AssetUtils.newInstance()
+        const snapshotIdValue = faker.string.alpha({ length: 10 })
+        const snapshotId = SnapshotId.create(snapshotIdValue)
+        const executeAt = faker.date.future()
+        const recurrency = faker.helpers.objectValue(Recurrency)
+        const amount = faker.number.int({ min: 1, max: 1000 }).toString()
+        const amountType = faker.helpers.objectValue(AmountType)
 
-      const distribution = Distribution.createRecurring(asset, executeAt, recurrency, amount, amountType, snapshotId)
+        const distribution = Distribution.createRecurring(asset, executeAt, recurrency, amount, amountType, snapshotId)
 
-      expect(distribution).toBeInstanceOf(Distribution)
-      expect(distribution.id).toBeDefined()
-      expect(distribution.asset).toBe(asset)
-      expect(distribution.details.type).toBe(DistributionType.PAYOUT)
-      expect((distribution.details as any).snapshotId).toBe(snapshotId)
-      expect((distribution.details as any).subtype).toBe(PayoutSubtype.RECURRING)
-      expect((distribution.details as any).amount).toBe(amount)
-      expect((distribution.details as any).amountType).toBe(amountType)
-      expect((distribution.details as any).executeAt).toBe(executeAt)
-      expect((distribution.details as any).recurrency).toBe(recurrency)
-      expect(distribution.status).toBe(DistributionStatus.SCHEDULED)
-      expect(distribution.createdAt.getTime()).toBe(distribution.updatedAt.getTime())
-    })
+        expect(distribution).toBeInstanceOf(Distribution)
+        expect(distribution.id).toBeDefined()
+        expect(distribution.asset).toBe(asset)
+        expect(distribution.details.type).toBe(DistributionType.PAYOUT)
+        expect((distribution.details as any).snapshotId).toBe(snapshotId)
+        expect((distribution.details as any).subtype).toBe(PayoutSubtype.RECURRING)
+        expect((distribution.details as any).amount).toBe(amount)
+        expect((distribution.details as any).amountType).toBe(amountType)
+        expect((distribution.details as any).executeAt).toBe(executeAt)
+        expect((distribution.details as any).recurrency).toBe(recurrency)
+        expect(distribution.status).toBe(DistributionStatus.SCHEDULED)
+        expect(distribution.createdAt.getTime()).toBe(distribution.updatedAt.getTime())
+      },
+    )
 
     it("should create next Recurring Payout Distribution", () => {
       const asset = AssetUtils.newInstance()
@@ -1164,39 +1175,43 @@ describe(Distribution.name, () => {
       expect(distribution.updatedAt).toBe(updatedAt)
     })
 
-    it("should create a Recurring Payout Distribution with default values when optional parameters are not provided", () => {
-      const id = faker.string.uuid()
-      const asset = AssetUtils.newInstance()
-      const snapshotIdValue = faker.string.alpha({ length: 10 })
-      const snapshotId = SnapshotId.create(snapshotIdValue)
-      const executeAt = faker.date.future()
-      const recurrency = faker.helpers.objectValue(Recurrency)
-      const amount = faker.number.int({ min: 1, max: 1000 }).toString()
-      const amountType = faker.helpers.objectValue(AmountType)
+    it(
+      "should create a Recurring Payout Distribution with default values when " +
+        "optional parameters are not provided",
+      () => {
+        const id = faker.string.uuid()
+        const asset = AssetUtils.newInstance()
+        const snapshotIdValue = faker.string.alpha({ length: 10 })
+        const snapshotId = SnapshotId.create(snapshotIdValue)
+        const executeAt = faker.date.future()
+        const recurrency = faker.helpers.objectValue(Recurrency)
+        const amount = faker.number.int({ min: 1, max: 1000 }).toString()
+        const amountType = faker.helpers.objectValue(AmountType)
 
-      const distribution = Distribution.createExistingRecurring(
-        id,
-        asset,
-        executeAt,
-        recurrency,
-        amount,
-        amountType,
-        snapshotId,
-      )
+        const distribution = Distribution.createExistingRecurring(
+          id,
+          asset,
+          executeAt,
+          recurrency,
+          amount,
+          amountType,
+          snapshotId,
+        )
 
-      expect(distribution).toBeInstanceOf(Distribution)
-      expect(distribution.id).toBeDefined()
-      expect(distribution.asset).toBe(asset)
-      expect(distribution.details.type).toBe(DistributionType.PAYOUT)
-      expect((distribution.details as any).snapshotId).toBe(snapshotId)
-      expect((distribution.details as any).subtype).toBe(PayoutSubtype.RECURRING)
-      expect((distribution.details as any).amount).toBe(amount)
-      expect((distribution.details as any).amountType).toBe(amountType)
-      expect((distribution.details as any).executeAt).toBe(executeAt)
-      expect((distribution.details as any).recurrency).toBe(recurrency)
-      expect(distribution.status).toBe(DistributionStatus.SCHEDULED)
-      expect(distribution.createdAt.getTime()).toBe(distribution.updatedAt.getTime())
-    })
+        expect(distribution).toBeInstanceOf(Distribution)
+        expect(distribution.id).toBeDefined()
+        expect(distribution.asset).toBe(asset)
+        expect(distribution.details.type).toBe(DistributionType.PAYOUT)
+        expect((distribution.details as any).snapshotId).toBe(snapshotId)
+        expect((distribution.details as any).subtype).toBe(PayoutSubtype.RECURRING)
+        expect((distribution.details as any).amount).toBe(amount)
+        expect((distribution.details as any).amountType).toBe(amountType)
+        expect((distribution.details as any).executeAt).toBe(executeAt)
+        expect((distribution.details as any).recurrency).toBe(recurrency)
+        expect(distribution.status).toBe(DistributionStatus.SCHEDULED)
+        expect(distribution.createdAt.getTime()).toBe(distribution.updatedAt.getTime())
+      },
+    )
 
     it("fails when asset is null or undefined", () => {
       const id = faker.string.uuid()
@@ -1323,27 +1338,31 @@ describe(Distribution.name, () => {
       expect(distribution.updatedAt).toBe(updatedAt)
     })
 
-    it("should create an Automated Payout Distribution with default values when optional parameters are not provided", () => {
-      const asset = AssetUtils.newInstance()
-      const snapshotIdValue = faker.string.alpha({ length: 10 })
-      const snapshotId = SnapshotId.create(snapshotIdValue)
-      const executeAt = faker.date.future()
-      const amount = faker.number.int({ min: 1, max: 1000 }).toString()
-      const amountType = faker.helpers.objectValue(AmountType)
+    it(
+      "should create an Automated Payout Distribution with default values " +
+        "when optional parameters are not provided",
+      () => {
+        const asset = AssetUtils.newInstance()
+        const snapshotIdValue = faker.string.alpha({ length: 10 })
+        const snapshotId = SnapshotId.create(snapshotIdValue)
+        const executeAt = faker.date.future()
+        const amount = faker.number.int({ min: 1, max: 1000 }).toString()
+        const amountType = faker.helpers.objectValue(AmountType)
 
-      const distribution = Distribution.createAutomated(asset, amount, amountType, undefined, snapshotId)
+        const distribution = Distribution.createAutomated(asset, amount, amountType, undefined, snapshotId)
 
-      expect(distribution).toBeInstanceOf(Distribution)
-      expect(distribution.id).toBeDefined()
-      expect(distribution.asset).toBe(asset)
-      expect(distribution.details.type).toBe(DistributionType.PAYOUT)
-      expect((distribution.details as any).snapshotId).toBe(snapshotId)
-      expect((distribution.details as any).subtype).toBe(PayoutSubtype.AUTOMATED)
-      expect((distribution.details as any).amount).toBe(amount)
-      expect((distribution.details as any).amountType).toBe(amountType)
-      expect(distribution.status).toBe(DistributionStatus.SCHEDULED)
-      expect(distribution.createdAt.getTime()).toBe(distribution.updatedAt.getTime())
-    })
+        expect(distribution).toBeInstanceOf(Distribution)
+        expect(distribution.id).toBeDefined()
+        expect(distribution.asset).toBe(asset)
+        expect(distribution.details.type).toBe(DistributionType.PAYOUT)
+        expect((distribution.details as any).snapshotId).toBe(snapshotId)
+        expect((distribution.details as any).subtype).toBe(PayoutSubtype.AUTOMATED)
+        expect((distribution.details as any).amount).toBe(amount)
+        expect((distribution.details as any).amountType).toBe(amountType)
+        expect(distribution.status).toBe(DistributionStatus.SCHEDULED)
+        expect(distribution.createdAt.getTime()).toBe(distribution.updatedAt.getTime())
+      },
+    )
 
     it("fails when asset is null or undefined", () => {
       const invalidAssets = [null, undefined] as unknown[]

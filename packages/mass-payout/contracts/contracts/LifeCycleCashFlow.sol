@@ -207,13 +207,13 @@ pragma solidity 0.8.18;
 
 // solhint-disable max-line-length
 
-import { ILifeCycleCashFlow, AssetType } from "./interfaces/ILifeCycleCashFlow.sol";
-import { Pause } from "./core/Pause.sol";
-import { AccessControl } from "./core/AccessControl.sol";
-import { LifeCycleCashFlowStorageWrapper } from "./LifeCycleCashFlowStorageWrapper.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { ERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/ERC1400/ERC20/ERC20.sol";
+import { ILifeCycleCashFlow, AssetType } from './interfaces/ILifeCycleCashFlow.sol';
+import { Pause } from './core/Pause.sol';
+import { AccessControl } from './core/AccessControl.sol';
+import { LifeCycleCashFlowStorageWrapper } from './LifeCycleCashFlowStorageWrapper.sol';
+import { IERC20 } from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import { Initializable } from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import { ERC20 } from '@hashgraph/asset-tokenization-contracts/contracts/layer_1/ERC1400/ERC20/ERC20.sol';
 import {
     _DEFAULT_ADMIN_ROLE,
     _PAUSER_ROLE,
@@ -221,7 +221,7 @@ import {
     _CASHOUT_ROLE,
     _TRANSFERER_ROLE,
     _PAYMENT_TOKEN_MANAGER_ROLE
-} from "./constants/roles.sol";
+} from './constants/roles.sol';
 
 contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFlowStorageWrapper, Pause, AccessControl {
     function initialize(address _asset, address _paymentToken) public initializer {

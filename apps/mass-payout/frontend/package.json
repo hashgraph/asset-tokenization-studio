@@ -1,5 +1,5 @@
 {
-  "name": "@scheduler-payment-distribution/frontend",
+  "name": "@mass-payout/frontend",
   "version": "0.1.0",
   "description": "UI for scheduler payment distribution",
   "private": true,
@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx --cache",
-    "lint:fix": "eslint src --ext ts,tsx --fix",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "test": "NODE_ENV=test jest --ci --runInBand",
     "test:watch": "jest --watch",

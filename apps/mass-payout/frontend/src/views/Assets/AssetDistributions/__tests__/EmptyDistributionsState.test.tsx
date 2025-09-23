@@ -210,7 +210,7 @@ import { render } from '@/test-utils';
 jest.mock('io-bricks-ui', () => ({
   Text: ({ children, textStyle, color, textAlign, ...props }: any) => (
     <p
-      data-testid='text'
+      data-testid="text"
       data-text-style={textStyle}
       data-color={color}
       data-text-align={textAlign}
@@ -234,7 +234,7 @@ jest.mock('@chakra-ui/react', () => ({
     ...props
   }: any) => (
     <div
-      data-testid='box'
+      data-testid="box"
       data-display={display}
       data-align-items={alignItems}
       data-justify-content={justifyContent}
@@ -277,7 +277,7 @@ describe('EmptyDistributionsState', () => {
 
       expect(screen.getByTestId('text')).toBeInTheDocument();
       expect(
-        screen.getByText('No distributions available yet')
+        screen.getByText('No distributions available yet'),
       ).toBeInTheDocument();
     });
 

@@ -203,11 +203,11 @@
 
 */
 
-import { Injectable } from "@nestjs/common"
-import { QUERY_HANDLER_METADATA, QUERY_METADATA } from "../Constants"
-import { v4 } from "uuid"
-import { BaseQuery } from "../query/Query"
-import { Constructor } from "../Type"
+import { Injectable } from '@nestjs/common';
+import { QUERY_HANDLER_METADATA, QUERY_METADATA } from '../Constants';
+import { v4 } from 'uuid';
+import { BaseQuery } from '../query/Query';
+import { Constructor } from '../Type';
 
 /**
  * This decorator determines that a class is a query handler
@@ -218,10 +218,10 @@ import { Constructor } from "../Type"
  */
 export const QueryHandler = (query: BaseQuery): ClassDecorator => {
   return (target: object) => {
-    Injectable()(target as Constructor<typeof target>)
+    Injectable()(target as Constructor<typeof target>);
     if (!Reflect.hasMetadata(QUERY_METADATA, query)) {
-      Reflect.defineMetadata(QUERY_METADATA, { id: v4() }, query)
+      Reflect.defineMetadata(QUERY_METADATA, { id: v4() }, query);
     }
-    Reflect.defineMetadata(QUERY_HANDLER_METADATA, query, target)
-  }
-}
+    Reflect.defineMetadata(QUERY_HANDLER_METADATA, query, target);
+  };
+};

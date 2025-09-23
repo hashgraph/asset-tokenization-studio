@@ -291,7 +291,7 @@ describe('StepAssetDetails Component', () => {
       render(<TestWrapper goToNext={mockGoToNext} />);
 
       expect(
-        screen.getByText('Please provide the asset ID to import the asset')
+        screen.getByText('Please provide the asset ID to import the asset'),
       ).toBeInTheDocument();
     });
 
@@ -352,7 +352,7 @@ describe('StepAssetDetails Component', () => {
         <TestWrapper
           defaultValues={{ assetId: '0.0.123456' }}
           goToNext={mockGoToNext}
-        />
+        />,
       );
 
       const fetchButton = screen.getByLabelText('fetch-button');
@@ -364,7 +364,7 @@ describe('StepAssetDetails Component', () => {
         <TestWrapper
           defaultValues={{ assetId: '0.0.123456' }}
           goToNext={mockGoToNext}
-        />
+        />,
       );
 
       const fetchButton = screen.getByLabelText('fetch-button');
@@ -452,7 +452,7 @@ describe('StepAssetDetails Component', () => {
         <TestWrapper
           defaultValues={{ assetId: '0.0.123456' }}
           goToNext={mockGoToNext}
-        />
+        />,
       );
 
       expect(screen.queryByText('Asset Information')).not.toBeInTheDocument();

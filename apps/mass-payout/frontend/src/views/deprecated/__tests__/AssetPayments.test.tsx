@@ -240,7 +240,7 @@ describe.skip('AssetPayments Component', () => {
     test('should display search input', () => {
       factoryComponent();
       expect(
-        screen.getByPlaceholderText('Search by payment ID')
+        screen.getByPlaceholderText('Search by payment ID'),
       ).toBeInTheDocument();
     });
 
@@ -353,7 +353,7 @@ describe.skip('AssetPayments Component', () => {
       factoryComponent();
 
       const progressElements = document.querySelectorAll(
-        '[role="progressbar"], .chakra-progress'
+        '[role="progressbar"], .chakra-progress',
       );
       expect(progressElements.length).toBeGreaterThan(0);
     });
@@ -386,7 +386,7 @@ describe.skip('AssetPayments Component', () => {
         '$5,000.00',
       ];
 
-      const foundAmounts = amountTexts.filter(amount => {
+      const foundAmounts = amountTexts.filter((amount) => {
         try {
           return screen.queryByText(amount) !== null;
         } catch {

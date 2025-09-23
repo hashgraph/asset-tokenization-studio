@@ -260,7 +260,7 @@ describe('AssetHeader', () => {
     const goBackButton = screen.getByTestId('go-back-button');
     expect(goBackButton).toBeInTheDocument();
     expect(goBackButton).toHaveTextContent(
-      `${mockAsset.name} - ${mockAsset.hederaTokenAddress}`
+      `${mockAsset.name} - ${mockAsset.hederaTokenAddress}`,
     );
   });
 

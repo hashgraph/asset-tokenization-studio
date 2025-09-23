@@ -254,19 +254,19 @@ jest.mock('@/router/RoutePath', () => ({
 }));
 
 jest.mock('../AssetDistributions.constants', () => ({
-  getTabTitle: jest.fn(filterType => `${filterType} title`),
+  getTabTitle: jest.fn((filterType) => `${filterType} title`),
 }));
 
 jest.mock('../AssetDistributions.utils', () => ({
-  isDistributionRowClickable: jest.fn(status => status !== 'CANCELLED'),
+  isDistributionRowClickable: jest.fn((status) => status !== 'CANCELLED'),
   calculateTotalPages: jest.fn((total, pageSize) =>
-    Math.ceil(total / pageSize)
+    Math.ceil(total / pageSize),
   ),
 }));
 
 jest.mock('../components/FilterControls', () => ({
   FilterControls: ({ control, t }: MockFilterControlsProps) => (
-    <div data-testid='filter-controls'>
+    <div data-testid="filter-controls">
       Filter Controls - {typeof control} - {typeof t}
     </div>
   ),
@@ -274,7 +274,7 @@ jest.mock('../components/FilterControls', () => ({
 
 jest.mock('../components/EmptyDistributionsState', () => ({
   EmptyDistributionsState: ({ t }: MockEmptyStateProps) => (
-    <div data-testid='empty-distributions-state'>Empty State - {typeof t}</div>
+    <div data-testid="empty-distributions-state">Empty State - {typeof t}</div>
   ),
 }));
 
@@ -288,11 +288,11 @@ jest.mock('io-bricks-ui', () => ({
     totalPages,
     isLoading,
   }: MockTableProps) => (
-    <div data-testid='table' data-name={name} data-loading={isLoading}>
-      <div data-testid='table-columns'>{columns?.length || 0} columns</div>
-      <div data-testid='table-data'>{data?.length || 0} rows</div>
-      <div data-testid='table-total-elements'>{totalElements}</div>
-      <div data-testid='table-total-pages'>{totalPages}</div>
+    <div data-testid="table" data-name={name} data-loading={isLoading}>
+      <div data-testid="table-columns">{columns?.length || 0} columns</div>
+      <div data-testid="table-data">{data?.length || 0} rows</div>
+      <div data-testid="table-total-elements">{totalElements}</div>
+      <div data-testid="table-total-pages">{totalPages}</div>
       {data?.map((row: AssetDistributionData, index: number) => (
         <div
           key={row.id || index}
@@ -307,7 +307,7 @@ jest.mock('io-bricks-ui', () => ({
   ),
   Text: ({ children, textStyle, color, mb, mt, ...props }: MockTextProps) => (
     <div
-      data-testid='text'
+      data-testid="text"
       data-text-style={textStyle}
       data-color={color}
       {...props}
@@ -435,7 +435,7 @@ describe('TabContent', () => {
 
       expect(screen.getByTestId('table')).toBeInTheDocument();
       expect(screen.getByTestId('table-columns')).toHaveTextContent(
-        '3 columns'
+        '3 columns',
       );
       expect(screen.getByTestId('table-data')).toHaveTextContent('3 rows');
     });
@@ -448,7 +448,7 @@ describe('TabContent', () => {
       });
 
       expect(
-        screen.getByTestId('empty-distributions-state')
+        screen.getByTestId('empty-distributions-state'),
       ).toBeInTheDocument();
       expect(screen.queryByTestId('table')).not.toBeInTheDocument();
     });
@@ -462,7 +462,7 @@ describe('TabContent', () => {
 
       expect(screen.getByTestId('table')).toBeInTheDocument();
       expect(
-        screen.queryByTestId('empty-distributions-state')
+        screen.queryByTestId('empty-distributions-state'),
       ).not.toBeInTheDocument();
     });
   });
@@ -474,7 +474,7 @@ describe('TabContent', () => {
       const table = screen.getByTestId('table');
       expect(table).toHaveAttribute(
         'data-name',
-        'asset-distributions-upcoming'
+        'asset-distributions-upcoming',
       );
       expect(table).toHaveAttribute('data-loading', 'false');
       expect(screen.getByTestId('table-total-elements')).toHaveTextContent('3');
@@ -513,7 +513,7 @@ describe('TabContent', () => {
       await user.click(firstRow);
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        '/distributions/asset-123/distribution/1'
+        '/distributions/asset-123/distribution/1',
       );
     });
 
@@ -561,7 +561,7 @@ describe('TabContent', () => {
       fireEvent.click(firstRow);
 
       expect(mockNavigate).toHaveBeenCalledWith(
-        '/distributions/asset-123/distribution/1'
+        '/distributions/asset-123/distribution/1',
       );
     });
   });
@@ -582,7 +582,7 @@ describe('TabContent', () => {
       const table = screen.getByTestId('table');
       expect(table).toHaveAttribute(
         'data-name',
-        'asset-distributions-completed'
+        'asset-distributions-completed',
       );
     });
   });
@@ -616,7 +616,7 @@ describe('TabContent', () => {
       renderTabContent({ columns: customColumns });
 
       expect(screen.getByTestId('table-columns')).toHaveTextContent(
-        '2 columns'
+        '2 columns',
       );
     });
 
