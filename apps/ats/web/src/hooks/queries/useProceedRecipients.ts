@@ -203,207 +203,75 @@
 
 */
 
-import { Flex, HStack, Stack } from '@chakra-ui/react';
-import { useTranslation } from 'react-i18next';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import SDKService from '../../services/SDKService';
 import {
-  PhosphorIcon,
-  Text,
-  Table,
-  Button,
-  InputController,
-} from 'io-bricks-ui';
-import { CancelButton } from '../../../components/CancelButton';
-import { NextStepButton } from './NextStepButton';
-import { PreviousStepButton } from './PreviousStepButton';
-import { ICreateBondFormValues } from '../ICreateBondFormValues';
-import { useFormContext, useFormState, useForm } from 'react-hook-form';
-import { FormStepContainer } from '../../../components/FormStepContainer';
-import { Trash } from '@phosphor-icons/react';
-import { createColumnHelper } from '@tanstack/table-core';
-import { isValidHederaId, isValidHex, required } from '../../../utils/rules';
+  GetProceedRecipientsCountRequest,
+  GetProceedRecipientsRequest,
+  GetProceedRecipientDataRequest,
+} from '@hashgraph/asset-tokenization-sdk';
 
-interface IBeneficiary {
+export interface ProceedRecipientDataViewModelResponse {
   address: string;
   data?: string;
 }
 
-interface ILocalBeneficiaryForm {
-  address: string;
-  data?: string;
-}
+export const GET_PROCEED_RECIPIENT_LIST = (securityId: string) =>
+  `GET_PROCEED_RECIPIENT_LIST_${securityId}`;
 
-export const StepBeneficiaries = () => {
-  const { t } = useTranslation('security', { keyPrefix: 'createBond' });
-  const { control, watch, setValue } = useFormContext<ICreateBondFormValues>();
-  const stepFormState = useFormState({ control });
+export const IS_INTERNAL_PROCEED_RECIPIENT_ACTIVATED = (securityId: string) =>
+  `IS_INTERNAL_PROCEED_RECIPIENT_ACTIVATED_${securityId}`;
 
-  const {
-    control: localControl,
-    handleSubmit: handleLocalSubmit,
-    reset: resetLocalForm,
-    formState: localFormState,
-  } = useForm<ILocalBeneficiaryForm>({
-    defaultValues: {
-      address: '',
-      data: '',
-    },
-    mode: 'onChange',
-  });
+export const useGetProceedRecipientList = (
+  request: GetProceedRecipientsCountRequest,
+  options?: UseQueryOptions<
+    ProceedRecipientDataViewModelResponse[],
+    unknown,
+    ProceedRecipientDataViewModelResponse[],
+    string[]
+  >,
+) => {
+  return useQuery(
+    [GET_PROCEED_RECIPIENT_LIST(request.securityId)],
+    async () => {
+      try {
+        const proceedRecipientsCount =
+          await SDKService.getProceedRecipientsCount(request);
 
-  const currentBeneficiariesIds = watch('beneficiariesIds') || [];
-  const currentBeneficiariesData = watch('beneficiariesData') || [];
-
-  const beneficiaries: IBeneficiary[] = currentBeneficiariesIds.map(
-    (address, index) => ({
-      address,
-      data: currentBeneficiariesData[index] || '',
-    }),
-  );
-
-  const handleAddBeneficiary = handleLocalSubmit((data) => {
-    const newBeneficiariesIds = [
-      ...currentBeneficiariesIds,
-      data.address.trim(),
-    ];
-    const newBeneficiariesData = [
-      ...currentBeneficiariesData,
-      data?.data?.trim() ?? '',
-    ];
-
-    setValue('beneficiariesIds', newBeneficiariesIds);
-    setValue('beneficiariesData', newBeneficiariesData);
-
-    resetLocalForm();
-  });
-
-  const handleRemoveBeneficiary = (addressToRemove: string) => {
-    const indexToRemove = currentBeneficiariesIds.indexOf(addressToRemove);
-    if (indexToRemove !== -1) {
-      const newBeneficiariesIds = currentBeneficiariesIds.filter(
-        (_, index) => index !== indexToRemove,
-      );
-      const newBeneficiariesData = currentBeneficiariesData.filter(
-        (_, index) => index !== indexToRemove,
-      );
-
-      setValue('beneficiariesIds', newBeneficiariesIds);
-      setValue('beneficiariesData', newBeneficiariesData);
-    }
-  };
-
-  const columnsHelper = createColumnHelper<IBeneficiary>();
-
-  const columns = [
-    columnsHelper.accessor('address', {
-      header: t('stepBeneficiaries.address'),
-      enableSorting: false,
-    }),
-    columnsHelper.accessor('data', {
-      header: t('stepBeneficiaries.data'),
-      enableSorting: false,
-    }),
-    columnsHelper.display({
-      id: 'actions',
-      header: t('stepBeneficiaries.actions'),
-      enableSorting: false,
-      cell(props) {
-        const {
-          row: {
-            original: { address },
-          },
-        } = props;
-
-        return (
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRemoveBeneficiary(address);
-            }}
-            variant="table"
-            size="xs"
-          >
-            <PhosphorIcon as={Trash} sx={{ color: 'secondary.500' }} />
-          </Button>
+        const proceedRecipients = await SDKService.getProceedRecipients(
+          new GetProceedRecipientsRequest({
+            securityId: request.securityId,
+            pageIndex: 0,
+            pageSize: proceedRecipientsCount ?? 100,
+          }),
         );
-      },
-    }),
-  ];
 
-  return (
-    <FormStepContainer>
-      <Stack gap={2}>
-        <Text textStyle="HeadingMediumLG">{t('stepBeneficiaries.title')}</Text>
-        <Text textStyle="BodyTextRegularMD">
-          {t('stepBeneficiaries.subtitle')}
-        </Text>
-        <Text textStyle="ElementsRegularSM" mt={6}>
-          {t('stepBeneficiaries.mandatoryFields')}
-        </Text>
-      </Stack>
-      <Stack w="full">
-        <Text textStyle="BodyTextRegularSM">
-          {t('stepBeneficiaries.address')}
-        </Text>
-        <InputController
-          control={localControl}
-          id="address"
-          name="address"
-          placeholder={t('stepBeneficiaries.addressPlaceholder')}
-          rules={{
-            required,
-            validate: (value: string) =>
-              !value ||
-              isValidHederaId(value) ||
-              t('stepBeneficiaries.invalidHederaId'),
-          }}
-        />
-      </Stack>
-      <Stack w="full">
-        <Text textStyle="BodyTextRegularSM">{t('stepBeneficiaries.data')}</Text>
-        <InputController
-          control={localControl}
-          id="data"
-          name="data"
-          placeholder={t('stepBeneficiaries.dataPlaceholder')}
-          rules={{
-            validate: (value: string) =>
-              !value ||
-              isValidHex(value) ||
-              t('stepBeneficiaries.invalidHexFormat'),
-          }}
-        />
-      </Stack>
-      <Stack w="full" align="end" justifyContent={'flex-end'}>
-        <Button
-          onClick={handleAddBeneficiary}
-          size="md"
-          isDisabled={!localFormState.isValid}
-        >
-          {t('stepBeneficiaries.addBeneficiary')}
-        </Button>
-      </Stack>
-      <Table
-        w="full"
-        name="beneficiaries-list"
-        columns={columns}
-        data={beneficiaries ?? []}
-        emptyComponent={
-          <Flex>
-            <Text textStyle="BodyRegularMD">The list is empty</Text>
-          </Flex>
-        }
-      />
-      <HStack
-        gap={4}
-        w="full"
-        h="100px"
-        align="end"
-        justifyContent={'flex-end'}
-      >
-        <CancelButton />
-        <PreviousStepButton />
-        <NextStepButton isDisabled={!stepFormState.isValid} />
-      </HStack>
-    </FormStepContainer>
+        const proceedRecipientsWithData = await Promise.all(
+          proceedRecipients.map(async (proceedRecipient) => {
+            try {
+              const data = await SDKService.getProceedRecipientData(
+                new GetProceedRecipientDataRequest({
+                  securityId: request.securityId,
+                  proceedRecipientId: proceedRecipient,
+                }),
+              );
+              return {
+                address: proceedRecipient,
+                data,
+              } as ProceedRecipientDataViewModelResponse;
+            } catch (error) {
+              console.error('Error fetching proceed recipient data', error);
+              return { address: proceedRecipient, data: undefined };
+            }
+          }),
+        );
+
+        return proceedRecipientsWithData;
+      } catch (error) {
+        console.error('Error fetching proceed recipients', error);
+        throw error;
+      }
+    },
+    options,
   );
 };

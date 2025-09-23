@@ -7,34 +7,35 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { createColumnHelper } from '@tanstack/table-core';
 import { Pencil, Trash } from '@phosphor-icons/react';
-import { AddBeneficiaryModal } from './AddBeneficiaryModal';
+import { AddProceedRecipientModal } from './AddProceedRecipientModal';
 import {
-  GetBeneficiariesCountRequest,
-  RemoveBeneficiaryRequest,
+  GetProceedRecipientsCountRequest,
+  RemoveProceedRecipientRequest,
 } from '@hashgraph/asset-tokenization-sdk';
 import {
-  BeneficiaryDataViewModelResponse,
-  useGetBeneficiaryList,
-} from '../../../../hooks/queries/useBeneficiaries';
-import { UpdateBeneficiaryModal } from './UpdateBeneficiaryModal';
-import { useRemoveBeneficiary } from '../../../../hooks/mutations/useBeneficiaries';
+  ProceedRecipientDataViewModelResponse,
+  useGetProceedRecipientList,
+} from '../../../../hooks/queries/useProceedRecipients';
+import { UpdateProceedRecipientModal } from './UpdateProceedRecipientModal';
+import { useRemoveProceedRecipient } from '../../../../hooks/mutations/useProceedRecipients';
 
-export const Beneficiaries = () => {
+export const ProceedRecipients = () => {
   const { id: securityId = '' } = useParams();
 
   const { roles: accountRoles } = useRolesStore();
 
-  const { t: tBeneficiaries } = useTranslation('security', {
-    keyPrefix: 'details.beneficiaries',
+  const { t: tProceedRecipients } = useTranslation('security', {
+    keyPrefix: 'details.proceedRecipients',
   });
   const { t: tTable } = useTranslation('security', {
-    keyPrefix: 'details.beneficiaries.table',
+    keyPrefix: 'details.proceedRecipients.table',
   });
   const { t: tRemove } = useTranslation('security', {
-    keyPrefix: 'details.beneficiaries.remove',
+    keyPrefix: 'details.proceedRecipients.remove',
   });
 
-  const [beneficiaryIdSelected, setBeneficiaryIdSelected] = useState('');
+  const [proceedRecipientIdSelected, setProceedRecipientIdSelected] =
+    useState('');
 
   const { isOpen, onClose, onOpen } = useDisclosure();
   const {
@@ -43,32 +44,33 @@ export const Beneficiaries = () => {
     onOpen: onOpenUpdate,
   } = useDisclosure();
   const {
-    isOpen: isOpenRemoveBeneficiaryModal,
-    onClose: onCloseRemoveBeneficiaryModal,
-    onOpen: onOpenRemoveBeneficiaryModal,
+    isOpen: isOpenRemoveProceedRecipientModal,
+    onClose: onCloseRemoveProceedRecipientModal,
+    onOpen: onOpenRemoveProceedRecipientModal,
   } = useDisclosure();
 
-  const hasBeneficiaryManagerRole = useMemo(
+  const hasProceedRecipientManagerRole = useMemo(
     () =>
       accountRoles.findIndex(
-        (rol) => rol === SecurityRole._BENEFICIARY_MANAGER_ROLE,
+        (rol) => rol === SecurityRole._PROCEED_RECIPIENT_MANAGER_ROLE,
       ) !== -1,
     [accountRoles],
   );
 
-  const { data: beneficiaries, isLoading: isLoadingBeneficiaries } =
-    useGetBeneficiaryList(
-      new GetBeneficiariesCountRequest({
+  const { data: proceedRecipients, isLoading: isLoadingProceedRecipients } =
+    useGetProceedRecipientList(
+      new GetProceedRecipientsCountRequest({
         securityId,
       }),
     );
 
   const {
-    mutate: removeBeneficiaryMutation,
-    isPending: isPendingRemoveBeneficiary,
-  } = useRemoveBeneficiary();
+    mutate: removeProceedRecipientMutation,
+    isPending: isPendingRemoveProceedRecipient,
+  } = useRemoveProceedRecipient();
 
-  const columnsHelper = createColumnHelper<BeneficiaryDataViewModelResponse>();
+  const columnsHelper =
+    createColumnHelper<ProceedRecipientDataViewModelResponse>();
 
   const columns = [
     columnsHelper.accessor('address', {
@@ -86,7 +88,7 @@ export const Beneficiaries = () => {
         return data === '0x' ? '-' : data;
       },
     }),
-    ...(hasBeneficiaryManagerRole
+    ...(hasProceedRecipientManagerRole
       ? [
           columnsHelper.display({
             id: 'remove',
@@ -105,7 +107,7 @@ export const Beneficiaries = () => {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setBeneficiaryIdSelected(address);
+                      setProceedRecipientIdSelected(address);
                       onOpenUpdate();
                     }}
                     variant="table"
@@ -116,8 +118,8 @@ export const Beneficiaries = () => {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setBeneficiaryIdSelected(address);
-                      onOpenRemoveBeneficiaryModal();
+                      setProceedRecipientIdSelected(address);
+                      onOpenRemoveProceedRecipientModal();
                     }}
                     variant="table"
                     size="xs"
@@ -145,61 +147,61 @@ export const Beneficiaries = () => {
       >
         <HStack justifyContent={'space-between'}>
           <Text textStyle="ElementsSemiboldLG" color="neutral.light">
-            {tBeneficiaries('title')}
+            {tProceedRecipients('title')}
           </Text>
-          {hasBeneficiaryManagerRole && (
+          {hasProceedRecipientManagerRole && (
             <Button
               onClick={() => {
                 onOpen();
               }}
               size="sm"
             >
-              {tBeneficiaries('add')}
+              {tProceedRecipients('add')}
             </Button>
           )}
         </HStack>
         <Table
-          name="beneficiaries-list"
+          name="proceedRecipients-list"
           columns={columns}
-          data={beneficiaries ?? []}
-          isLoading={isLoadingBeneficiaries}
+          data={proceedRecipients ?? []}
+          isLoading={isLoadingProceedRecipients}
           emptyComponent={
             <Flex>
-              <Text textStyle="ElementsSemiboldMD">No beneficiaries</Text>
+              <Text textStyle="ElementsSemiboldMD">No proceed recipients</Text>
             </Flex>
           }
         />
       </Stack>
-      <AddBeneficiaryModal isOpen={isOpen} onClose={onClose} />
-      <UpdateBeneficiaryModal
+      <AddProceedRecipientModal isOpen={isOpen} onClose={onClose} />
+      <UpdateProceedRecipientModal
         isOpen={isOpenUpdate}
         onClose={onCloseUpdate}
-        beneficiaryId={beneficiaryIdSelected}
+        proceedRecipientId={proceedRecipientIdSelected}
       />
       <PopUp
-        id="removeBeneficiaryModal"
-        isOpen={isOpenRemoveBeneficiaryModal}
-        onClose={onCloseRemoveBeneficiaryModal}
+        id="removeProceedRecipientModal"
+        isOpen={isOpenRemoveProceedRecipientModal}
+        onClose={onCloseRemoveProceedRecipientModal}
         icon={<PhosphorIcon as={Trash} size="md" />}
         title={tRemove('confirmPopUp.title')}
         description={tRemove('confirmPopUp.description')}
         confirmText={tRemove('confirmPopUp.confirmText')}
         onConfirm={() => {
-          const request = new RemoveBeneficiaryRequest({
+          const request = new RemoveProceedRecipientRequest({
             securityId,
-            beneficiaryId: beneficiaryIdSelected,
+            proceedRecipientId: proceedRecipientIdSelected,
           });
 
-          removeBeneficiaryMutation(request, {
+          removeProceedRecipientMutation(request, {
             onSuccess() {
-              onCloseRemoveBeneficiaryModal();
+              onCloseRemoveProceedRecipientModal();
             },
           });
         }}
-        onCancel={onCloseRemoveBeneficiaryModal}
+        onCancel={onCloseRemoveProceedRecipientModal}
         cancelText={tRemove('confirmPopUp.cancelText')}
         confirmButtonProps={{
-          isLoading: isPendingRemoveBeneficiary,
+          isLoading: isPendingRemoveProceedRecipient,
         }}
       />
     </>

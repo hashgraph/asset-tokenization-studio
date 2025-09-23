@@ -15,24 +15,24 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { isValidHederaId, required } from '../../../../utils/rules';
-import { useAddBeneficiary } from '../../../../hooks/mutations/useBeneficiaries';
-import { AddBeneficiaryRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useAddProceedRecipient } from '../../../../hooks/mutations/useProceedRecipients';
+import { AddProceedRecipientRequest } from '@hashgraph/asset-tokenization-sdk';
 
 interface FormValues {
   address: string;
   data?: string;
 }
 
-interface AddBeneficiaryModalProps extends Omit<ModalProps, 'children'> {}
+interface AddProceedRecipientModalProps extends Omit<ModalProps, 'children'> {}
 
-export const AddBeneficiaryModal = ({
+export const AddProceedRecipientModal = ({
   isOpen,
   onClose,
-}: AddBeneficiaryModalProps) => {
+}: AddProceedRecipientModalProps) => {
   const { id: securityId = '' } = useParams();
 
   const { t: tCreate } = useTranslation('security', {
-    keyPrefix: 'details.beneficiaries.create',
+    keyPrefix: 'details.proceedRecipients.create',
   });
 
   const {
@@ -44,19 +44,21 @@ export const AddBeneficiaryModal = ({
     mode: 'onChange',
   });
 
-  const { mutate: addBeneficiaryMutation, isPending: isPendingAddBeneficiary } =
-    useAddBeneficiary();
+  const {
+    mutate: addProceedRecipientMutation,
+    isPending: isPendingAddProceedRecipient,
+  } = useAddProceedRecipient();
 
   const onSubmit = (values: FormValues) => {
-    const request = new AddBeneficiaryRequest({
+    const request = new AddProceedRecipientRequest({
       securityId,
-      beneficiaryId: values.address,
+      proceedRecipientId: values.address,
       data: values.data ?? '',
     });
 
     console.log('request', request);
 
-    addBeneficiaryMutation(request, {
+    addProceedRecipientMutation(request, {
       onSettled() {
         onClose();
       },
@@ -111,8 +113,8 @@ export const AddBeneficiaryModal = ({
               {tCreate('buttons.cancel')}
             </Button>
             <Button
-              isDisabled={!isValid || isPendingAddBeneficiary}
-              isLoading={isPendingAddBeneficiary}
+              isDisabled={!isValid || isPendingAddProceedRecipient}
+              isLoading={isPendingAddProceedRecipient}
               type="submit"
               onClick={handleSubmit(onSubmit)}
             >

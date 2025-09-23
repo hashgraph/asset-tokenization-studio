@@ -14,8 +14,8 @@ import { Button, Input, InputController } from 'io-bricks-ui';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { useUpdateBeneficiary } from '../../../../hooks/mutations/useBeneficiaries';
-import { UpdateBeneficiaryDataRequest } from '@hashgraph/asset-tokenization-sdk';
+import { useUpdateProceedRecipient } from '../../../../hooks/mutations/useProceedRecipients';
+import { UpdateProceedRecipientDataRequest } from '@hashgraph/asset-tokenization-sdk';
 import { isValidHex } from '../../../../utils/rules';
 
 interface FormValues {
@@ -23,19 +23,20 @@ interface FormValues {
   data?: string;
 }
 
-interface UpdateBeneficiaryModalProps extends Omit<ModalProps, 'children'> {
-  beneficiaryId: string;
+interface UpdateProceedRecipientModalProps
+  extends Omit<ModalProps, 'children'> {
+  proceedRecipientId: string;
 }
 
-export const UpdateBeneficiaryModal = ({
+export const UpdateProceedRecipientModal = ({
   isOpen,
   onClose,
-  beneficiaryId,
-}: UpdateBeneficiaryModalProps) => {
+  proceedRecipientId,
+}: UpdateProceedRecipientModalProps) => {
   const { id: securityId = '' } = useParams();
 
   const { t: tUpdate } = useTranslation('security', {
-    keyPrefix: 'details.beneficiaries.update',
+    keyPrefix: 'details.proceedRecipients.update',
   });
 
   const {
@@ -46,23 +47,23 @@ export const UpdateBeneficiaryModal = ({
   } = useForm<FormValues>({
     mode: 'onChange',
     defaultValues: {
-      address: beneficiaryId,
+      address: proceedRecipientId,
     },
   });
 
   const {
-    mutate: updateBeneficiaryMutation,
-    isPending: isPendingUpdateBeneficiary,
-  } = useUpdateBeneficiary();
+    mutate: updateProceedRecipientMutation,
+    isPending: isPendingUpdateProceedRecipient,
+  } = useUpdateProceedRecipient();
 
   const onSubmit = (values: FormValues) => {
-    const request = new UpdateBeneficiaryDataRequest({
+    const request = new UpdateProceedRecipientDataRequest({
       securityId,
-      beneficiaryId,
+      proceedRecipientId,
       data: values.data ?? '',
     });
 
-    updateBeneficiaryMutation(request, {
+    updateProceedRecipientMutation(request, {
       onSettled() {
         onClose();
       },
@@ -91,7 +92,7 @@ export const UpdateBeneficiaryModal = ({
               label={tUpdate('form.address.label')}
               isRequired={true}
               isDisabled={true}
-              value={beneficiaryId}
+              value={proceedRecipientId}
             />
             <InputController
               control={control}
@@ -121,8 +122,8 @@ export const UpdateBeneficiaryModal = ({
               {tUpdate('buttons.cancel')}
             </Button>
             <Button
-              isDisabled={!isValid || isPendingUpdateBeneficiary}
-              isLoading={isPendingUpdateBeneficiary}
+              isDisabled={!isValid || isPendingUpdateProceedRecipient}
+              isLoading={isPendingUpdateProceedRecipient}
               type="submit"
               onClick={handleSubmit(onSubmit)}
             >

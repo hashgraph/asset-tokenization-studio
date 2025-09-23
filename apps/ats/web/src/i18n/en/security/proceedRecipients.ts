@@ -203,75 +203,82 @@
 
 */
 
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import SDKService from '../../services/SDKService';
-import {
-  GetBeneficiariesCountRequest,
-  GetBeneficiariesRequest,
-  GetBeneficiaryDataRequest,
-} from '@hashgraph/asset-tokenization-sdk';
-
-export interface BeneficiaryDataViewModelResponse {
-  address: string;
-  data?: string;
-}
-
-export const GET_BENEFICIARY_LIST = (securityId: string) =>
-  `GET_BENEFICIARY_LIST_${securityId}`;
-
-export const IS_INTERNAL_BENEFICIARY_ACTIVATED = (securityId: string) =>
-  `IS_INTERNAL_BENEFICIARY_ACTIVATED_${securityId}`;
-
-export const useGetBeneficiaryList = (
-  request: GetBeneficiariesCountRequest,
-  options?: UseQueryOptions<
-    BeneficiaryDataViewModelResponse[],
-    unknown,
-    BeneficiaryDataViewModelResponse[],
-    string[]
-  >,
-) => {
-  return useQuery(
-    [GET_BENEFICIARY_LIST(request.securityId)],
-    async () => {
-      try {
-        const beneficiariesCount =
-          await SDKService.getBeneficiariesCount(request);
-
-        const beneficiaries = await SDKService.getBeneficiaries(
-          new GetBeneficiariesRequest({
-            securityId: request.securityId,
-            pageIndex: 0,
-            pageSize: beneficiariesCount ?? 100,
-          }),
-        );
-
-        const beneficiariesWithData = await Promise.all(
-          beneficiaries.map(async (beneficiary) => {
-            try {
-              const data = await SDKService.getBeneficiaryData(
-                new GetBeneficiaryDataRequest({
-                  securityId: request.securityId,
-                  beneficiaryId: beneficiary,
-                }),
-              );
-              return {
-                address: beneficiary,
-                data,
-              } as BeneficiaryDataViewModelResponse;
-            } catch (error) {
-              console.error('Error fetching beneficiary data', error);
-              return { address: beneficiary, data: undefined };
-            }
-          }),
-        );
-
-        return beneficiariesWithData;
-      } catch (error) {
-        console.error('Error fetching beneficiaries', error);
-        throw error;
-      }
+export default {
+  title: 'Proceed Recipients',
+  subtitle: 'List of proceed recipients of the bond',
+  add: 'Add',
+  table: {
+    fields: {
+      address: 'Address',
+      data: 'Data',
+      actions: 'Actions',
+      edit: 'Edit',
+      remove: 'Remove',
     },
-    options,
-  );
+  },
+  create: {
+    title: 'Add Proceed Recipient',
+    description: 'Fill in the form below to add a proceed recipient',
+    form: {
+      address: {
+        label: 'Address',
+        placeholder: '0.0.1234567',
+      },
+      data: {
+        label: 'Data',
+        placeholder: '0x',
+        invalidHexFormat: 'Invalid hex format',
+      },
+    },
+    buttons: {
+      cancel: 'Cancel',
+      add: 'Add',
+    },
+    messages: {
+      success: 'Success: ',
+      descriptionSuccess: 'Proceed recipient creation was successful',
+      error: 'Error: ',
+      descriptionFailed: 'Proceed recipient creation failed',
+    },
+  },
+  update: {
+    title: 'Update Proceed Recipient',
+    description: 'Fill in the form below to update a proceed recipient',
+    form: {
+      address: {
+        label: 'Address',
+        placeholder: '0.0.1234567',
+      },
+      data: {
+        label: 'Data',
+        placeholder: '0x',
+        invalidHexFormat: 'Invalid hex format',
+      },
+    },
+    buttons: {
+      cancel: 'Cancel',
+      update: 'Update',
+    },
+    messages: {
+      success: 'Success: ',
+      descriptionSuccess: 'Proceed recipient update was successful',
+      error: 'Error: ',
+      descriptionFailed: 'Proceed recipient update failed',
+    },
+  },
+  remove: {
+    confirmPopUp: {
+      title: 'Remove Proceed Recipient',
+      description: 'Are you sure you want to remove this proceed recipient?',
+      confirmText: 'Remove',
+      cancelText: 'Cancel',
+    },
+    messages: {
+      success: 'Success: ',
+      descriptionSuccess:
+        'The removal operation has been executed successfully',
+      error: 'Error: ',
+      descriptionFailed: 'The removal operation has failed',
+    },
+  },
 };
