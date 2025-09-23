@@ -13,12 +13,14 @@
     "@hashgraph/asset-tokenization-dapp": {
       "i18next": "23.5.1",
       "i18next-browser-languagedetector": "7.1.0",
-      "zustand": "4.4.1"
+      "zustand": "4.4.1",
+      "@phosphor-icons/react": "2.0.9"
     },
     "@scheduler-payment-distribution/frontend": {
       "i18next": "23.10.1",
       "i18next-browser-languagedetector": "7.2.0",
-      "zustand": "4.5.2"
+      "zustand": "4.5.2",
+      "@phosphor-icons/react": "2.1.7"
     }
   },
   "scripts": {
@@ -31,8 +33,12 @@
     "format:check": "prettier --check '*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'packages/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml,sol}' 'apps/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' '.github/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
     "dev": "npm run ats:web:dev",
     "start": "npm run ats:start",
-    "clean:deps": "rimraf packages/*/node_modules packages/*/*/node_modules apps/*/node_modules apps/*/*/node_modules node_modules && echo '\n✅ Dependency files cleaned (package-lock.json preserved)'",
-    "clean:deps:full": "npm run clean:deps && rimraf package-lock.json packages/*/dist packages/*/*/dist apps/*/dist apps/*/*/dist packages/*/build packages/*/*/build apps/*/build apps/*/*/build && echo '\n✅ All dependency files have been cleaned (including package-lock.json)'",
+    "clean": "npm run clean:workspaces && npm run clean:root && echo '\\n✅ Full cleanup finished — workspaces and root junk removed'",
+    "clean:workspaces": "npm run clean --workspace=packages/ats/* --if-present && npm run clean --workspace=packages/mass-payout/* --if-present && npm run clean --workspace=apps/ats/* --if-present && npm run clean --workspace=apps/mass-payout/* --if-present && echo '\\n✅ All workspaces cleaned'",
+    "clean:root": "rimraf dist build artifacts cache typechain-types node_modules/.cache .eslintcache .prettierignore coverage .nyc_output junit.xml test-results *.log *.tgz *.tar.gz .DS_Store Thumbs.db && echo '\\n✅ Root junk files removed'",
+    "clean:deps": "rimraf packages/*/node_modules packages/*/*/node_modules apps/*/node_modules apps/*/*/node_modules node_modules && echo '\\n✅ Dependency folders cleaned (package-lock.json preserved)'",
+    "clean:deps:full": "npm run clean:deps && rimraf package-lock.json packages/*/dist packages/*/*/dist apps/*/dist apps/*/*/dist packages/*/build packages/*/*/build apps/*/build apps/*/*/build && echo '\\n✅ All dependency files have been cleaned (including package-lock.json)'",
+    "clean:full": "npm run clean:workspaces && npm run clean:deps:full && npm run clean:root && echo '\\n✅ Complete cleanup finished — workspaces, dependencies, and root junk removed'",
     "lint:staged:js": "eslint --cache",
     "lint:staged:sol": "solhint --config packages/ats/contracts/.solhint.json",
     "format:staged": "prettier --check",
@@ -72,7 +78,7 @@
     "ats:web:clean": "npm run clean --workspace=apps/ats/web",
     "mass-payout:setup": "npm ci && npm run mass-payout:contracts:build && npm run mass-payout:sdk:build && npm run mass-payout:backend:build && npm run mass-payout:frontend:build",
     "mass-payout:setup:clean": "npm run mass-payout:clean && npm install && npm run mass-payout:build",
-    "mass-payout:build": "npm run mass-payout:sdk:build && npm run mass-payout:backend:build && npm run mass-payout:frontend:build && npm run mass-payout:contracts:build",
+    "mass-payout:build": "npm run mass-payout:contracts:build && npm run mass-payout:sdk:build && npm run mass-payout:backend:build && npm run mass-payout:frontend:build",
     "mass-payout:test": "npm run mass-payout:sdk:test && npm run mass-payout:backend:test && npm run mass-payout:frontend:test && npm run mass-payout:contracts:test",
     "mass-payout:test:ci": "npm run mass-payout:sdk:test:ci && npm run mass-payout:backend:test:ci && npm run mass-payout:frontend:test:ci && npm run mass-payout:contracts:test:ci",
     "mass-payout:lint": "eslint '*.{js,mjs,cjs,ts,tsx,mts,json}' 'packages/mass-payout/**/*' 'apps/mass-payout/**/*' --cache",
