@@ -259,7 +259,7 @@ import {
   SsiManagementFacet__factory,
   ERC3643ReadFacet__factory,
   TREXFactoryAts__factory,
-  BeneficiariesFacet__factory,
+  ProceedRecipientsFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -2043,54 +2043,54 @@ export class RPCQueryAdapter {
     return token;
   }
 
-  async isBeneficiary(
+  async isProceedRecipient(
     address: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
   ): Promise<boolean> {
     LogService.logTrace(
-      `Checking if the address ${beneficiary.toString()} is a beneficiary for the security: ${address.toString()}`,
+      `Checking if the address ${proceedRecipient.toString()} is a proceed recipient for the security: ${address.toString()}`,
     );
     return await this.connect(
-      BeneficiariesFacet__factory,
+      ProceedRecipientsFacet__factory,
       address.toString(),
-    ).isBeneficiary(beneficiary.toString());
+    ).isProceedRecipient(proceedRecipient.toString());
   }
 
-  async getBeneficiaryData(
+  async getProceedRecipientData(
     address: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
   ): Promise<string> {
     LogService.logTrace(
-      `Getting beneficiary data for the address ${beneficiary.toString()} for the security: ${address.toString()}`,
+      `Getting proceed recipient data for the address ${proceedRecipient.toString()} for the security: ${address.toString()}`,
     );
     return await this.connect(
-      BeneficiariesFacet__factory,
+      ProceedRecipientsFacet__factory,
       address.toString(),
-    ).getBeneficiaryData(beneficiary.toString());
+    ).getProceedRecipientData(proceedRecipient.toString());
   }
 
-  async getBeneficiariesCount(address: EvmAddress): Promise<number> {
+  async getProceedRecipientsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(
-      `Getting beneficiaries count for the security: ${address.toString()}`,
+      `Getting proceedRecipients count for the security: ${address.toString()}`,
     );
     return (
       await this.connect(
-        BeneficiariesFacet__factory,
+        ProceedRecipientsFacet__factory,
         address.toString(),
-      ).getBeneficiariesCount()
+      ).getProceedRecipientsCount()
     ).toNumber();
   }
-  async getBeneficiaries(
+  async getProceedRecipients(
     address: EvmAddress,
     page: number,
     pageLength: number,
   ): Promise<string[]> {
     LogService.logTrace(
-      `Getting beneficiaries from ${page} to ${pageLength} for the security: ${address.toString()}`,
+      `Getting proceedRecipients from ${page} to ${pageLength} for the security: ${address.toString()}`,
     );
     return await this.connect(
-      BeneficiariesFacet__factory,
+      ProceedRecipientsFacet__factory,
       address.toString(),
-    ).getBeneficiaries(page, pageLength);
+    ).getProceedRecipients(page, pageLength);
   }
 }

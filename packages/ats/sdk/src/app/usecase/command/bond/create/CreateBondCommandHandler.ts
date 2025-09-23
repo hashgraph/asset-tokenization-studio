@@ -262,8 +262,8 @@ export class CreateBondCommandHandler
         externalKycListsIds,
         complianceId,
         identityRegistryId,
-        beneficiariesIds,
-        beneficiariesData,
+        proceedRecipientIds,
+        proceedRecipientsData,
       } = command;
 
       //TODO: Boy scout: remove request validations and adjust test
@@ -310,10 +310,10 @@ export class CreateBondCommandHandler
         this.contractService.getEvmAddressesFromHederaIds(externalKycListsIds),
       ]);
 
-      let beneficiariesEvmAddresses: EvmAddress[] = [];
-      if (beneficiariesIds)
-        beneficiariesEvmAddresses = await Promise.all(
-          beneficiariesIds.map(
+      let proceedRecipientsEvmAddresses: EvmAddress[] = [];
+      if (proceedRecipientIds)
+        proceedRecipientsEvmAddresses = await Promise.all(
+          proceedRecipientIds.map(
             async (id) => await this.accountService.getAccountEvmAddress(id),
           ),
         );
@@ -348,8 +348,8 @@ export class CreateBondCommandHandler
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,
         diamondOwnerAccountEvmAddress,
-        beneficiariesEvmAddresses,
-        beneficiariesData,
+        proceedRecipientsEvmAddresses,
+        proceedRecipientsData,
         factory.toString(),
       );
 
