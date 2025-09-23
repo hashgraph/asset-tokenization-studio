@@ -11,8 +11,8 @@
   ],
   "overrides": {
     "@hashgraph/asset-tokenization-dapp": {
-      "i18next": "23.5.1",
-      "i18next-browser-languagedetector": "7.1.0",
+      "i18next": "23.10.1",
+      "i18next-browser-languagedetector": "7.2.0",
       "zustand": "4.4.1",
       "@phosphor-icons/react": "2.0.9"
     },
