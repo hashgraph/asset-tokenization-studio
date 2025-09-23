@@ -85,11 +85,12 @@ abstract contract BondStorageWrapper is
             newCoupon.recordDate,
             abi.encode(SNAPSHOT_TASK_TYPE)
         );
+        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
+
         _addScheduledCrossOrderedTask(
             newCoupon.recordDate,
             abi.encode(COUPON_LISTING_TASK_TYPE)
         );
-        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
         _addScheduledCouponListing(newCoupon.recordDate, abi.encode(_actionId));
     }
 
