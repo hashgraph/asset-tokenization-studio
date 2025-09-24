@@ -212,14 +212,14 @@ import {
     type Equity,
     type ScheduledBalanceAdjustments,
     type AccessControl,
-    ScheduledTasks,
+    ScheduledCrossOrderedTasks,
     TimeTravel,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
     Equity__factory,
     ScheduledBalanceAdjustments__factory,
-    ScheduledTasks__factory,
+    ScheduledCrossOrderedTasks__factory,
     TimeTravel__factory,
 } from '@typechain'
 import {
@@ -250,7 +250,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let equityFacet: Equity
     let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments
-    let scheduledTasksFacet: ScheduledTasks
+    let scheduledTasksFacet: ScheduledCrossOrderedTasks
     let accessControlFacet: AccessControl
     let timeTravelFacet: TimeTravel
 
@@ -304,7 +304,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
                 diamond.address,
                 signer_A
             )
-        scheduledTasksFacet = ScheduledTasks__factory.connect(
+        scheduledTasksFacet = ScheduledCrossOrderedTasks__factory.connect(
             diamond.address,
             signer_A
         )
@@ -439,7 +439,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         )
         await scheduledTasksFacet
             .connect(signer_A)
-            .triggerPendingScheduledTasks()
+            .triggerPendingScheduledCrossOrderedTasks()
 
         scheduledBalanceAdjustmentCount =
             await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
@@ -470,7 +470,9 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_2 + 1
         )
-        await scheduledTasksFacet.connect(signer_A).triggerScheduledTasks(100)
+        await scheduledTasksFacet
+            .connect(signer_A)
+            .triggerScheduledCrossOrderedTasks(100)
 
         scheduledBalanceAdjustmentCount =
             await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
@@ -495,7 +497,9 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_3 + 1
         )
-        await scheduledTasksFacet.connect(signer_A).triggerScheduledTasks(0)
+        await scheduledTasksFacet
+            .connect(signer_A)
+            .triggerScheduledCrossOrderedTasks(0)
 
         scheduledBalanceAdjustmentCount =
             await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()

@@ -203,83 +203,95 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
-
+import { createMock } from '@golevelup/ts-jest';
 import {
-    IScheduledSnapshots
-} from '../../../layer_2/interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol';
+  AccountPropsFixture,
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetBeneficiariesQueryHandler } from './GetBeneficiariesQueryHandler';
 import {
-    ScheduledTasksLib
-} from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
-import {
-    ScheduledTasksStorageWrapper
-} from '../scheduledTasks/ScheduledTasksStorageWrapper.sol';
-import {
-    _SCHEDULED_SNAPSHOTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
+  GetBeneficiariesQuery,
+  GetBeneficiariesQueryResponse,
+} from './GetBeneficiariesQuery';
+import { GetBeneficiariesQueryError } from './error/GetBeneficiariesQueryError';
+import { GetBeneficiariesQueryFixture } from '@test/fixtures/beneficiary/BeneficiaryFixture';
+import AccountService from '@service/account/AccountService';
+import Account from '@domain/context/account/Account';
 
-abstract contract ScheduledSnapshotsStorageWrapperRead is
-    ScheduledTasksStorageWrapper
-{
-    function _addScheduledSnapshot(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal {
-        ScheduledTasksLib.addScheduledTask(
-            _scheduledSnapshotStorage(),
-            _newScheduledTimestamp,
-            _newData
-        );
-    }
+describe('GetBeneficiariesQueryHandler', () => {
+  let handler: GetBeneficiariesQueryHandler;
+  let query: GetBeneficiariesQuery;
 
-    function _triggerScheduledSnapshots(
-        uint256 _max
-    ) internal returns (uint256) {
-        return
-            ScheduledTasksLib.triggerScheduledTasks(
-                _scheduledSnapshotStorage(),
-                IScheduledSnapshots.onScheduledSnapshotTriggered.selector,
-                _max,
-                _blockTimestamp()
-            );
-    }
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
-    function _getScheduledSnapshotCount() internal view returns (uint256) {
-        return
-            ScheduledTasksLib.getScheduledTaskCount(
-                _scheduledSnapshotStorage()
-            );
-    }
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const account = new Account(AccountPropsFixture.create());
+  const errorMsg = ErrorMsgFixture.create().msg;
 
-    function _getScheduledSnapshots(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        internal
-        view
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
-    {
-        return
-            ScheduledTasksLib.getScheduledTasks(
-                _scheduledSnapshotStorage(),
-                _pageIndex,
-                _pageLength
-            );
-    }
+  beforeEach(() => {
+    handler = new GetBeneficiariesQueryHandler(
+      contractServiceMock,
+      queryAdapterServiceMock,
+      accountServiceMock,
+    );
+    query = GetBeneficiariesQueryFixture.create();
+  });
 
-    function _scheduledSnapshotStorage()
-        internal
-        pure
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage
-                storage scheduledSnapshots_
-        )
-    {
-        bytes32 position = _SCHEDULED_SNAPSHOTS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledSnapshots_.slot := position
-        }
-    }
-}
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('execute', () => {
+    it('throws GetBeneficiariesQueryError when query fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+      const resultPromise = handler.execute(query);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        GetBeneficiariesQueryError,
+      );
+
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while querying GetBeneficiaries: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtQueryError,
+      });
+    });
+
+    it('should successfully get beneficiaries data', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      queryAdapterServiceMock.getBeneficiaries.mockResolvedValueOnce(['0x']);
+
+      accountServiceMock.getAccountInfo.mockResolvedValueOnce(account);
+
+      const result = await handler.execute(query);
+
+      expect(result).toBeInstanceOf(GetBeneficiariesQueryResponse);
+      expect(result.payload).toStrictEqual([account.id.toString()]);
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+
+      expect(queryAdapterServiceMock.getBeneficiaries).toHaveBeenCalledWith(
+        evmAddress,
+        query.pageIndex,
+        query.pageSize,
+      );
+    });
+  });
+});

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity 0.8.18;
+pragma solidity >=0.8.0 <0.9.0;
 
 import {
     OperatorTransferData
@@ -16,8 +16,6 @@ interface IERC1410Management {
     // Initialization function
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(bool _multiPartition) external;
-
-    function issueByPartition(IssueData calldata _issueData) external;
 
     /**
      * @notice Forces a transfer in a partition from a token holder to a destination address

@@ -276,6 +276,7 @@ task(
             erc20Facet,
             erc1410ReadFacet,
             erc1410ManagementFacet,
+            erc1410IssuerFacet,
             erc1410TokenHolderFacet,
             erc1594Facet,
             erc1643Facet,
@@ -287,7 +288,7 @@ task(
             bondUsaRead,
             scheduledSnapshotsFacet,
             scheduledBalanceAdjustmentsFacet,
-            scheduledTasksFacet,
+            scheduledCrossOrderedTasksFacet,
             corporateActionsFacet,
             lockFacet,
             holdReadFacet,
@@ -301,6 +302,7 @@ task(
             clearingHoldCreationFacet,
             clearingReadFacet,
             externalPauseManagementFacet,
+            beneficiariesFacet,
             externalControlListManagementFacet,
             externalKycListManagementFacet,
             protectedPartitionsFacet,
@@ -337,6 +339,7 @@ task(
             'ERC20 Facet': erc20Facet.address,
             'ERC1410 Read Facet': erc1410ReadFacet.address,
             'ERC1410 Management Facet': erc1410ManagementFacet.address,
+            'ERC1410 Issuer Facet': erc1410IssuerFacet.address,
             'ERC1410 TokenHolder Facet': erc1410TokenHolderFacet.address,
             'ERC1594 Facet': erc1594Facet.address,
             'ERC1643 Facet': erc1643Facet.address,
@@ -349,7 +352,8 @@ task(
             'Scheduled Snapshots Facet': scheduledSnapshotsFacet.address,
             'Scheduled Balance Adjustments Facet':
                 scheduledBalanceAdjustmentsFacet.address,
-            'Scheduled Tasks Facet': scheduledTasksFacet.address,
+            'Scheduled Cross Ordered Tasks Facet':
+                scheduledCrossOrderedTasksFacet.address,
             'Corporate Actions Facet': corporateActionsFacet.address,
             'Lock Facet': lockFacet.address,
             'Hold Read Facet': holdReadFacet.address,
@@ -362,6 +366,7 @@ task(
             'Clearing Redeem Facet': clearingRedeemFacet.address,
             'Clearing Hold Creation Facet': clearingHoldCreationFacet.address,
             'Clearing Read Facet': clearingReadFacet.address,
+            'Beneficiaries Facet': beneficiariesFacet.address,
             'External Pause Management Facet':
                 externalPauseManagementFacet.address,
             'External Control List Management Facet':
@@ -690,8 +695,8 @@ task('deployTrexFactory', 'Deploys ATS adapted TREX factory')
             })
         )
 
-        const { IdFactory__factory } = await import('@typechain')
-        await IdFactory__factory.connect(idFactory, signer).addTokenFactory(
+        const { IIdFactory__factory } = await import('@typechain')
+        await IIdFactory__factory.connect(idFactory, signer).addTokenFactory(
             result.address
         )
 

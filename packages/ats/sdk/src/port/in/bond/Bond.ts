@@ -239,14 +239,29 @@ import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
 import RedeemAtMaturityByPartitionRequest from '../request/bond/RedeemAtMaturityByPartitionRequest';
-import {
-  GetCouponHoldersRequest,
-  GetTotalCouponHoldersRequest,
-} from '../request';
+
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import CreateTrexSuiteBondRequest from '../request/bond/CreateTrexSuiteBondRequest';
 import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
+import AddBeneficiaryRequest from '../request/bond/AddBeneficiaryRequest';
+import RemoveBeneficiaryRequest from '../request/bond/RemoveBeneficiaryRequest';
+import UpdateBeneficiaryDataRequest from '../request/bond/UpdateBeneficiaryDataRequest';
+import { UpdateBeneficiaryDataCommand } from '@command/security/beneficiaries/updateBeneficiaryData/UpdateBeneficiaryDataCommand';
+import { RemoveBeneficiaryCommand } from '@command/security/beneficiaries/removeBeneficiary/RemoveBeneficiaryCommand';
+import { AddBeneficiaryCommand } from '@command/security/beneficiaries/addBeneficiary/AddBeneficiaryCommand';
+import IsBeneficiaryRequest from '../request/bond/IsBeneficiaryRequest';
+import { GetBeneficiariesQuery } from '@query/security/beneficiary/getBeneficiaries/GetBeneficiariesQuery';
+import { GetBeneficiariesCountQuery } from '@query/security/beneficiary/getBeneficiariesCount/GetBeneficiariesCountQuery';
+import { GetBeneficiaryDataQuery } from '@query/security/beneficiary/getBeneficiaryData/GetBeneficiaryDataQuery';
+import { IsBeneficiaryQuery } from '@query/security/beneficiary/isBeneficiary/IsBeneficiaryQuery';
+import {
+  GetCouponHoldersRequest,
+  GetTotalCouponHoldersRequest,
+  GetBeneficiaryDataRequest,
+  GetBeneficiariesCountRequest,
+  GetBeneficiariesRequest,
+} from '../request';
 
 interface IBondInPort {
   create(
@@ -270,6 +285,26 @@ interface IBondInPort {
   createTrexSuite(
     request: CreateTrexSuiteBondRequest,
   ): Promise<{ security: SecurityViewModel; transactionId: string }>;
+
+  addBeneficiary(
+    request: AddBeneficiaryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  removeBeneficiary(
+    request: RemoveBeneficiaryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  updateBeneficiaryData(
+    request: UpdateBeneficiaryDataRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  isBeneficiary(request: IsBeneficiaryRequest): Promise<{ payload: boolean }>;
+  getBeneficiaryData(
+    request: GetBeneficiaryDataRequest,
+  ): Promise<{ payload: string }>;
+  getBeneficiariesCount(
+    request: GetBeneficiariesCountRequest,
+  ): Promise<{ payload: number }>;
+  getBeneficiaries(
+    request: GetBeneficiariesRequest,
+  ): Promise<{ payload: string[] }>;
 }
 
 class BondInPort implements IBondInPort {
@@ -335,6 +370,8 @@ class BondInPort implements IBondInPort {
         externalKycListsIds,
         req.complianceId,
         req.identityRegistryId,
+        req.beneficiariesIds,
+        req.beneficiariesData,
       ),
     );
 
@@ -589,6 +626,8 @@ class BondInPort implements IBondInPort {
         req.configId,
         req.configVersion,
         diamondOwnerAccount,
+        req.beneficiariesIds,
+        req.beneficiariesData,
         externalPauses,
         externalControlLists,
         externalKycLists,
@@ -615,6 +654,91 @@ class BondInPort implements IBondInPort {
         : {},
       transactionId: createResponse.transactionId,
     };
+  }
+
+  @LogError
+  async updateBeneficiaryData(
+    request: UpdateBeneficiaryDataRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(
+      UpdateBeneficiaryDataRequest.name,
+      request,
+    );
+    return await this.commandBus.execute(
+      new UpdateBeneficiaryDataCommand(
+        request.securityId,
+        request.beneficiaryId,
+        request.data,
+      ),
+    );
+  }
+
+  @LogError
+  async removeBeneficiary(
+    request: RemoveBeneficiaryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(RemoveBeneficiaryRequest.name, request);
+    return await this.commandBus.execute(
+      new RemoveBeneficiaryCommand(request.securityId, request.beneficiaryId),
+    );
+  }
+
+  @LogError
+  async addBeneficiary(
+    request: AddBeneficiaryRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(AddBeneficiaryRequest.name, request);
+    return await this.commandBus.execute(
+      new AddBeneficiaryCommand(
+        request.securityId,
+        request.beneficiaryId,
+        request.data,
+      ),
+    );
+  }
+
+  @LogError
+  async getBeneficiaries(
+    request: GetBeneficiariesRequest,
+  ): Promise<{ payload: string[] }> {
+    ValidatedRequest.handleValidation(GetBeneficiariesRequest.name, request);
+    return await this.queryBus.execute(
+      new GetBeneficiariesQuery(
+        request.securityId,
+        request.pageIndex,
+        request.pageSize,
+      ),
+    );
+  }
+  @LogError
+  async getBeneficiariesCount(
+    request: GetBeneficiariesCountRequest,
+  ): Promise<{ payload: number }> {
+    ValidatedRequest.handleValidation(
+      GetBeneficiariesCountRequest.name,
+      request,
+    );
+    return await this.queryBus.execute(
+      new GetBeneficiariesCountQuery(request.securityId),
+    );
+  }
+  @LogError
+  async getBeneficiaryData(
+    request: GetBeneficiaryDataRequest,
+  ): Promise<{ payload: string }> {
+    ValidatedRequest.handleValidation(GetBeneficiaryDataRequest.name, request);
+    return await this.queryBus.execute(
+      new GetBeneficiaryDataQuery(request.securityId, request.beneficiaryId),
+    );
+  }
+  @LogError
+  async isBeneficiary(
+    request: IsBeneficiaryRequest,
+  ): Promise<{ payload: boolean }> {
+    ValidatedRequest.handleValidation(IsBeneficiaryRequest.name, request);
+    return await this.queryBus.execute(
+      new IsBeneficiaryQuery(request.securityId, request.beneficiaryId),
+    );
   }
 }
 

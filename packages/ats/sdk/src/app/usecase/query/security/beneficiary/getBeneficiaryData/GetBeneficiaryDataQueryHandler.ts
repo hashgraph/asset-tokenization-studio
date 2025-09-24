@@ -203,73 +203,51 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
-
 import {
-    IScheduledTasks
-} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-import {
-    ScheduledTasksLib
-} from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
-import {
-    _SCHEDULED_TASKS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+  GetBeneficiaryDataQuery,
+  GetBeneficiaryDataQueryResponse,
+} from './GetBeneficiaryDataQuery';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import AccountService from '@service/account/AccountService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import ContractService from '@service/contract/ContractService';
+import { GetBeneficiaryDataQueryError } from './error/GetBeneficiaryDataQueryError';
 
-abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
-    function _addScheduledTask(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal {
-        ScheduledTasksLib.addScheduledTask(
-            _scheduledTaskStorage(),
-            _newScheduledTimestamp,
-            _newData
-        );
-    }
+@QueryHandler(GetBeneficiaryDataQuery)
+export class GetBeneficiaryDataQueryHandler
+  implements IQueryHandler<GetBeneficiaryDataQuery>
+{
+  constructor(
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+    @lazyInject(RPCQueryAdapter)
+    private readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+  ) {}
 
-    function _triggerScheduledTasks(uint256 _max) internal returns (uint256) {
-        return
-            ScheduledTasksLib.triggerScheduledTasks(
-                _scheduledTaskStorage(),
-                IScheduledTasks.onScheduledTaskTriggered.selector,
-                _max,
-                _blockTimestamp()
-            );
-    }
+  async execute(
+    query: GetBeneficiaryDataQuery,
+  ): Promise<GetBeneficiaryDataQueryResponse> {
+    try {
+      const { targetId, securityId } = query;
 
-    function _getScheduledTaskCount() internal view returns (uint256) {
-        return ScheduledTasksLib.getScheduledTaskCount(_scheduledTaskStorage());
-    }
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
 
-    function _getScheduledTasks(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        internal
-        view
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
-    {
-        return
-            ScheduledTasksLib.getScheduledTasks(
-                _scheduledTaskStorage(),
-                _pageIndex,
-                _pageLength
-            );
-    }
+      const res = await this.queryAdapter.getBeneficiaryData(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
 
-    function _scheduledTaskStorage()
-        internal
-        pure
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage storage scheduledTasks_
-        )
-    {
-        bytes32 position = _SCHEDULED_TASKS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledTasks_.slot := position
-        }
+      return new GetBeneficiaryDataQueryResponse(res);
+    } catch (error) {
+      throw new GetBeneficiaryDataQueryError(error as Error);
     }
+  }
 }

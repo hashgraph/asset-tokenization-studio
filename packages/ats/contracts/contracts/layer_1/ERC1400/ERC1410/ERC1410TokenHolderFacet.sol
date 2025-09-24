@@ -1,16 +1,5 @@
-/*
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-   [Full Apache License text omitted for brevity but would be identical to previous files]
-
-*/
-
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
 
 import {
     _ERC1410_TOKEN_HOLDER_RESOLVER_KEY

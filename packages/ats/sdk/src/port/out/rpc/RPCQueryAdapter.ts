@@ -259,6 +259,7 @@ import {
   SsiManagementFacet__factory,
   ERC3643ReadFacet__factory,
   TREXFactoryAts__factory,
+  BeneficiariesFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -289,6 +290,7 @@ import {
   ClearingTransfer,
 } from '@domain/context/security/Clearing';
 import { HoldDetails } from '@domain/context/security/Hold';
+import { start } from 'repl';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -2039,5 +2041,56 @@ export class RPCQueryAdapter {
       factory.toString(),
     ).getToken(salt);
     return token;
+  }
+
+  async isBeneficiary(
+    address: EvmAddress,
+    beneficiary: EvmAddress,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the address ${beneficiary.toString()} is a beneficiary for the security: ${address.toString()}`,
+    );
+    return await this.connect(
+      BeneficiariesFacet__factory,
+      address.toString(),
+    ).isBeneficiary(beneficiary.toString());
+  }
+
+  async getBeneficiaryData(
+    address: EvmAddress,
+    beneficiary: EvmAddress,
+  ): Promise<string> {
+    LogService.logTrace(
+      `Getting beneficiary data for the address ${beneficiary.toString()} for the security: ${address.toString()}`,
+    );
+    return await this.connect(
+      BeneficiariesFacet__factory,
+      address.toString(),
+    ).getBeneficiaryData(beneficiary.toString());
+  }
+
+  async getBeneficiariesCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(
+      `Getting beneficiaries count for the security: ${address.toString()}`,
+    );
+    return (
+      await this.connect(
+        BeneficiariesFacet__factory,
+        address.toString(),
+      ).getBeneficiariesCount()
+    ).toNumber();
+  }
+  async getBeneficiaries(
+    address: EvmAddress,
+    page: number,
+    pageLength: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting beneficiaries from ${page} to ${pageLength} for the security: ${address.toString()}`,
+    );
+    return await this.connect(
+      BeneficiariesFacet__factory,
+      address.toString(),
+    ).getBeneficiaries(page, pageLength);
   }
 }
