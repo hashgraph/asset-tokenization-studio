@@ -690,7 +690,6 @@ export class RPCQueryAdapter {
     );
   }
 
-
   async getControlListMembers(
     address: EvmAddress,
     start: number,

@@ -19,7 +19,9 @@ module.exports = {
     '^.+\\.ts?$': ['ts-jest', { isolatedModules: true }],
     '^.+\\.[t|j]sx?$': 'babel-jest',
   },
-  transformIgnorePatterns: ['node_modules/(?!@ngrx|(?!deck.gl)|ng-dynamic)'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(did-jwt|@scure|@terminal3|@hashgraph)/)',
+  ],
   setupFilesAfterEnv: ['./__tests__/jest-setup-file.ts'],
   testTimeout: 10_000,
   moduleNameMapper: {
