@@ -20,7 +20,9 @@ module.exports = {
     '^.+\\.[t|j]sx?$': 'babel-jest',
     '^.+\\.m?js$': 'babel-jest',
   },
-  transformIgnorePatterns: [],
+  transformIgnorePatterns: [
+    'node_modules/(?!(@terminal3/vc_core|@terminal3/ecdsa_vc|did-jwt|@scure/base|@noble/curves|@noble/hashes)/)',
+  ],
   setupFilesAfterEnv: ['./__tests__/jest-setup-file.ts'],
   testTimeout: 10_000,
   moduleNameMapper: {
