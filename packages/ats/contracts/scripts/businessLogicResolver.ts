@@ -272,7 +272,7 @@ export interface DeployedBusinessLogics {
     holdReadFacet: IStaticFunctionSelectors
     holdManagementFacet: IStaticFunctionSelectors
     holdTokenHolderFacet: IStaticFunctionSelectors
-    beneficiariesFacet: IStaticFunctionSelectors
+    proceedRecipientsFacet: IStaticFunctionSelectors
     externalPauseManagementFacet: IStaticFunctionSelectors
     externalControlListManagementFacet: IStaticFunctionSelectors
     externalKycListManagementFacet: IStaticFunctionSelectors

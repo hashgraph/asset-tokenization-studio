@@ -244,23 +244,23 @@ import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetC
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import CreateTrexSuiteBondRequest from '../request/bond/CreateTrexSuiteBondRequest';
 import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
-import AddBeneficiaryRequest from '../request/bond/AddBeneficiaryRequest';
-import RemoveBeneficiaryRequest from '../request/bond/RemoveBeneficiaryRequest';
-import UpdateBeneficiaryDataRequest from '../request/bond/UpdateBeneficiaryDataRequest';
-import { UpdateBeneficiaryDataCommand } from '@command/security/beneficiaries/updateBeneficiaryData/UpdateBeneficiaryDataCommand';
-import { RemoveBeneficiaryCommand } from '@command/security/beneficiaries/removeBeneficiary/RemoveBeneficiaryCommand';
-import { AddBeneficiaryCommand } from '@command/security/beneficiaries/addBeneficiary/AddBeneficiaryCommand';
-import IsBeneficiaryRequest from '../request/bond/IsBeneficiaryRequest';
-import { GetBeneficiariesQuery } from '@query/security/beneficiary/getBeneficiaries/GetBeneficiariesQuery';
-import { GetBeneficiariesCountQuery } from '@query/security/beneficiary/getBeneficiariesCount/GetBeneficiariesCountQuery';
-import { GetBeneficiaryDataQuery } from '@query/security/beneficiary/getBeneficiaryData/GetBeneficiaryDataQuery';
-import { IsBeneficiaryQuery } from '@query/security/beneficiary/isBeneficiary/IsBeneficiaryQuery';
+import AddProceedRecipientRequest from '../request/bond/AddProceedRecipientRequest';
+import RemoveProceedRecipientRequest from '../request/bond/RemoveProceedRecipientRequest';
+import UpdateProceedRecipientDataRequest from '../request/bond/UpdateProceedRecipientDataRequest';
+import { UpdateProceedRecipientDataCommand } from '@command/security/proceedRecipients/updateProceedRecipientData/UpdateProceedRecipientDataCommand';
+import { RemoveProceedRecipientCommand } from '@command/security/proceedRecipients/removeProceedRecipient/RemoveProceedRecipientCommand';
+import { AddProceedRecipientCommand } from '@command/security/proceedRecipients/addProceedRecipient/AddProceedRecipientCommand';
+import IsProceedRecipientRequest from '../request/bond/IsProceedRecipientRequest';
+import { GetProceedRecipientsQuery } from '@query/security/proceedRecipient/getProceedRecipients/GetProceedRecipientsQuery';
+import { GetProceedRecipientsCountQuery } from '@query/security/proceedRecipient/getProceedRecipientsCount/GetProceedRecipientsCountQuery';
+import { GetProceedRecipientDataQuery } from '@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQuery';
+import { IsProceedRecipientQuery } from '@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery';
 import {
   GetCouponHoldersRequest,
   GetTotalCouponHoldersRequest,
-  GetBeneficiaryDataRequest,
-  GetBeneficiariesCountRequest,
-  GetBeneficiariesRequest,
+  GetProceedRecipientDataRequest,
+  GetProceedRecipientsCountRequest,
+  GetProceedRecipientsRequest,
 } from '../request';
 
 interface IBondInPort {
@@ -286,24 +286,26 @@ interface IBondInPort {
     request: CreateTrexSuiteBondRequest,
   ): Promise<{ security: SecurityViewModel; transactionId: string }>;
 
-  addBeneficiary(
-    request: AddBeneficiaryRequest,
+  addProceedRecipient(
+    request: AddProceedRecipientRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
-  removeBeneficiary(
-    request: RemoveBeneficiaryRequest,
+  removeProceedRecipient(
+    request: RemoveProceedRecipientRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
-  updateBeneficiaryData(
-    request: UpdateBeneficiaryDataRequest,
+  updateProceedRecipientData(
+    request: UpdateProceedRecipientDataRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
-  isBeneficiary(request: IsBeneficiaryRequest): Promise<{ payload: boolean }>;
-  getBeneficiaryData(
-    request: GetBeneficiaryDataRequest,
+  isProceedRecipient(
+    request: IsProceedRecipientRequest,
+  ): Promise<{ payload: boolean }>;
+  getProceedRecipientData(
+    request: GetProceedRecipientDataRequest,
   ): Promise<{ payload: string }>;
-  getBeneficiariesCount(
-    request: GetBeneficiariesCountRequest,
+  getProceedRecipientsCount(
+    request: GetProceedRecipientsCountRequest,
   ): Promise<{ payload: number }>;
-  getBeneficiaries(
-    request: GetBeneficiariesRequest,
+  getProceedRecipients(
+    request: GetProceedRecipientsRequest,
   ): Promise<{ payload: string[] }>;
 }
 
@@ -370,8 +372,8 @@ class BondInPort implements IBondInPort {
         externalKycListsIds,
         req.complianceId,
         req.identityRegistryId,
-        req.beneficiariesIds,
-        req.beneficiariesData,
+        req.proceedRecipientIds,
+        req.proceedRecipientsData,
       ),
     );
 
@@ -626,8 +628,8 @@ class BondInPort implements IBondInPort {
         req.configId,
         req.configVersion,
         diamondOwnerAccount,
-        req.beneficiariesIds,
-        req.beneficiariesData,
+        req.proceedRecipientIds,
+        req.proceedRecipientsData,
         externalPauses,
         externalControlLists,
         externalKycLists,
@@ -657,53 +659,62 @@ class BondInPort implements IBondInPort {
   }
 
   @LogError
-  async updateBeneficiaryData(
-    request: UpdateBeneficiaryDataRequest,
+  async updateProceedRecipientData(
+    request: UpdateProceedRecipientDataRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     ValidatedRequest.handleValidation(
-      UpdateBeneficiaryDataRequest.name,
+      UpdateProceedRecipientDataRequest.name,
       request,
     );
     return await this.commandBus.execute(
-      new UpdateBeneficiaryDataCommand(
+      new UpdateProceedRecipientDataCommand(
         request.securityId,
-        request.beneficiaryId,
+        request.proceedRecipientId,
         request.data,
       ),
     );
   }
 
   @LogError
-  async removeBeneficiary(
-    request: RemoveBeneficiaryRequest,
+  async removeProceedRecipient(
+    request: RemoveProceedRecipientRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    ValidatedRequest.handleValidation(RemoveBeneficiaryRequest.name, request);
+    ValidatedRequest.handleValidation(
+      RemoveProceedRecipientRequest.name,
+      request,
+    );
     return await this.commandBus.execute(
-      new RemoveBeneficiaryCommand(request.securityId, request.beneficiaryId),
+      new RemoveProceedRecipientCommand(
+        request.securityId,
+        request.proceedRecipientId,
+      ),
     );
   }
 
   @LogError
-  async addBeneficiary(
-    request: AddBeneficiaryRequest,
+  async addProceedRecipient(
+    request: AddProceedRecipientRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    ValidatedRequest.handleValidation(AddBeneficiaryRequest.name, request);
+    ValidatedRequest.handleValidation(AddProceedRecipientRequest.name, request);
     return await this.commandBus.execute(
-      new AddBeneficiaryCommand(
+      new AddProceedRecipientCommand(
         request.securityId,
-        request.beneficiaryId,
+        request.proceedRecipientId,
         request.data,
       ),
     );
   }
 
   @LogError
-  async getBeneficiaries(
-    request: GetBeneficiariesRequest,
+  async getProceedRecipients(
+    request: GetProceedRecipientsRequest,
   ): Promise<{ payload: string[] }> {
-    ValidatedRequest.handleValidation(GetBeneficiariesRequest.name, request);
+    ValidatedRequest.handleValidation(
+      GetProceedRecipientsRequest.name,
+      request,
+    );
     return await this.queryBus.execute(
-      new GetBeneficiariesQuery(
+      new GetProceedRecipientsQuery(
         request.securityId,
         request.pageIndex,
         request.pageSize,
@@ -711,33 +722,42 @@ class BondInPort implements IBondInPort {
     );
   }
   @LogError
-  async getBeneficiariesCount(
-    request: GetBeneficiariesCountRequest,
+  async getProceedRecipientsCount(
+    request: GetProceedRecipientsCountRequest,
   ): Promise<{ payload: number }> {
     ValidatedRequest.handleValidation(
-      GetBeneficiariesCountRequest.name,
+      GetProceedRecipientsCountRequest.name,
       request,
     );
     return await this.queryBus.execute(
-      new GetBeneficiariesCountQuery(request.securityId),
+      new GetProceedRecipientsCountQuery(request.securityId),
     );
   }
   @LogError
-  async getBeneficiaryData(
-    request: GetBeneficiaryDataRequest,
+  async getProceedRecipientData(
+    request: GetProceedRecipientDataRequest,
   ): Promise<{ payload: string }> {
-    ValidatedRequest.handleValidation(GetBeneficiaryDataRequest.name, request);
+    ValidatedRequest.handleValidation(
+      GetProceedRecipientDataRequest.name,
+      request,
+    );
     return await this.queryBus.execute(
-      new GetBeneficiaryDataQuery(request.securityId, request.beneficiaryId),
+      new GetProceedRecipientDataQuery(
+        request.securityId,
+        request.proceedRecipientId,
+      ),
     );
   }
   @LogError
-  async isBeneficiary(
-    request: IsBeneficiaryRequest,
+  async isProceedRecipient(
+    request: IsProceedRecipientRequest,
   ): Promise<{ payload: boolean }> {
-    ValidatedRequest.handleValidation(IsBeneficiaryRequest.name, request);
+    ValidatedRequest.handleValidation(IsProceedRecipientRequest.name, request);
     return await this.queryBus.execute(
-      new IsBeneficiaryQuery(request.securityId, request.beneficiaryId),
+      new IsProceedRecipientQuery(
+        request.securityId,
+        request.proceedRecipientId,
+      ),
     );
   }
 }

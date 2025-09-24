@@ -222,19 +222,19 @@ export class FactoryBondToken {
   public security: SecurityData;
   public bondDetails: BondDetailsData;
 
-  public beneficiaries: string[];
-  public beneficiariesData: string[];
+  public proceedRecipients: string[];
+  public proceedRecipientsData: string[];
 
   constructor(
     security: SecurityData,
     bondDetails: BondDetailsData,
-    beneficiaries: string[],
-    beneficiariesData: string[],
+    proceedRecipients: string[],
+    proceedRecipientsData: string[],
   ) {
     this.security = security;
     this.bondDetails = bondDetails;
-    this.beneficiaries = beneficiaries;
-    this.beneficiariesData = beneficiariesData;
+    this.proceedRecipients = proceedRecipients;
+    this.proceedRecipientsData = proceedRecipientsData;
   }
 }
 

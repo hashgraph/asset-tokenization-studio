@@ -228,6 +228,6 @@ export interface ICreateBondFormValues {
   internalKycActivated: boolean;
   complianceId?: string;
   identityRegistryId?: string;
-  beneficiariesIds?: string[];
-  beneficiariesData?: string[];
+  proceedRecipientsIds?: string[];
+  proceedRecipientsData?: string[];
 }
