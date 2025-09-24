@@ -242,7 +242,7 @@ import {
 } from '../../../utils/countriesConfig';
 import { createColumnHelper } from '@tanstack/table-core';
 
-interface IBeneficiary {
+interface IProceedRecipient {
   address: string;
   data?: string;
 }
@@ -292,28 +292,28 @@ export const StepReview = () => {
   const internalKycActivated = getValues('internalKycActivated');
   const complianceId = getValues('complianceId');
   const identityRegistryId = getValues('identityRegistryId');
-  const beneficiariesIds = getValues('beneficiariesIds');
-  const beneficiariesData = getValues('beneficiariesData');
+  const proceedRecipientsIds = getValues('proceedRecipientsIds');
+  const proceedRecipientsData = getValues('proceedRecipientsData');
 
   countriesList = countriesList.concat(
     countriesListType === 2 ? COUNTRY_LIST_ALLOWED : COUNTRY_LIST_BLOCKED,
   );
 
-  const beneficiariesTableData: IBeneficiary[] = (beneficiariesIds || []).map(
-    (address, index) => ({
-      address,
-      data: (beneficiariesData || [])[index] || '',
-    }),
-  );
+  const proceedRecipientsTableData: IProceedRecipient[] = (
+    proceedRecipientsIds || []
+  ).map((address, index) => ({
+    address,
+    data: (proceedRecipientsData || [])[index] || '',
+  }));
 
-  const columnsHelper = createColumnHelper<IBeneficiary>();
-  const columnsBeneficiaries = [
+  const columnsHelper = createColumnHelper<IProceedRecipient>();
+  const columnsProceedRecipients = [
     columnsHelper.accessor('address', {
-      header: t('stepBeneficiaries.address'),
+      header: t('stepProceedRecipients.address'),
       enableSorting: false,
     }),
     columnsHelper.accessor('data', {
-      header: t('stepBeneficiaries.data'),
+      header: t('stepProceedRecipients.data'),
       enableSorting: false,
     }),
   ];
@@ -366,11 +366,11 @@ export const StepReview = () => {
       ...(identityRegistryId && {
         identityRegistryId: identityRegistryId,
       }),
-      ...(beneficiariesIds && {
-        beneficiariesIds: beneficiariesIds,
+      ...(proceedRecipientsIds && {
+        proceedRecipientsIds: proceedRecipientsIds,
       }),
-      ...(beneficiariesData && {
-        beneficiariesData: beneficiariesData,
+      ...(proceedRecipientsData && {
+        proceedRecipientsData: proceedRecipientsData,
       }),
     });
 
@@ -505,18 +505,18 @@ export const StepReview = () => {
 
           <InfoDivider
             step={3}
-            title={t('stepBeneficiaries.title')}
+            title={t('stepProceedRecipients.title')}
             type="main"
           />
           <Stack w="full">
-            {beneficiariesTableData.length > 0 && (
+            {proceedRecipientsTableData.length > 0 && (
               <Table
-                name="beneficiaries"
-                columns={columnsBeneficiaries}
-                data={beneficiariesTableData}
+                name="proceedRecipients"
+                columns={columnsProceedRecipients}
+                data={proceedRecipientsTableData}
               />
             )}
-            {!beneficiariesTableData.length && <Text>-</Text>}
+            {!proceedRecipientsTableData.length && <Text>-</Text>}
           </Stack>
 
           <InfoDivider step={4} title={t('stepERC3643.title')} type="main" />

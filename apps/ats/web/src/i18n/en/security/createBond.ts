@@ -293,9 +293,9 @@ export default {
     totalCoupons: 'Total coupons',
   },
 
-  stepBeneficiaries: {
-    title: 'Beneficiaries',
-    subtitle: 'Add beneficiaries',
+  stepProceedRecipients: {
+    title: 'Proceed Recipients',
+    subtitle: 'Add proceed recipients',
     mandatoryFields: '*Mandatory fields',
     address: 'Address',
     addressPlaceholder: '0.0.1234567',
@@ -304,7 +304,7 @@ export default {
     invalidHederaId: 'Invalid Hedera ID',
     actions: 'Actions',
     invalidHexFormat: 'Invalid hex format',
-    addBeneficiary: 'Add beneficiary',
+    addProceedRecipient: 'Add proceed recipient',
   },
 
   stepERC3643: {

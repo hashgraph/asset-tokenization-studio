@@ -392,13 +392,13 @@ import GetSecurityHoldersRequest from './security/GetSecurityHoldersRequest';
 import GetTotalSecurityHoldersRequest from './security/GetTotalSecurityHoldersRequest';
 import CreateTrexSuiteEquityRequest from './equity/CreateTrexSuiteEquityRequest';
 import CreateTrexSuiteBondRequest from './bond/CreateTrexSuiteBondRequest';
-import AddBeneficiaryRequest from './bond/AddBeneficiaryRequest';
-import RemoveBeneficiaryRequest from './bond/RemoveBeneficiaryRequest';
-import UpdateBeneficiaryDataRequest from './bond/UpdateBeneficiaryDataRequest';
-import GetBeneficiaryDataRequest from './bond/GetBeneficiaryDataRequest';
-import GetBeneficiariesCountRequest from './bond/GetBeneficiariesCountRequest';
-import GetBeneficiariesRequest from './bond/GetBeneficiariesRequest';
-import IsBeneficiaryRequest from './bond/IsBeneficiaryRequest';
+import AddProceedRecipientRequest from './bond/AddProceedRecipientRequest';
+import RemoveProceedRecipientRequest from './bond/RemoveProceedRecipientRequest';
+import UpdateProceedRecipientDataRequest from './bond/UpdateProceedRecipientDataRequest';
+import GetProceedRecipientDataRequest from './bond/GetProceedRecipientDataRequest';
+import GetProceedRecipientsCountRequest from './bond/GetProceedRecipientsCountRequest';
+import GetProceedRecipientsRequest from './bond/GetProceedRecipientsRequest';
+import IsProceedRecipientRequest from './bond/IsProceedRecipientRequest';
 
 export {
   CreateEquityRequest,
@@ -589,11 +589,11 @@ export {
   GetTotalSecurityHoldersRequest,
   CreateTrexSuiteBondRequest,
   CreateTrexSuiteEquityRequest,
-  AddBeneficiaryRequest,
-  RemoveBeneficiaryRequest,
-  UpdateBeneficiaryDataRequest,
-  IsBeneficiaryRequest,
-  GetBeneficiaryDataRequest,
-  GetBeneficiariesCountRequest,
-  GetBeneficiariesRequest,
+  AddProceedRecipientRequest,
+  RemoveProceedRecipientRequest,
+  UpdateProceedRecipientDataRequest,
+  IsProceedRecipientRequest,
+  GetProceedRecipientDataRequest,
+  GetProceedRecipientsCountRequest,
+  GetProceedRecipientsRequest,
 };

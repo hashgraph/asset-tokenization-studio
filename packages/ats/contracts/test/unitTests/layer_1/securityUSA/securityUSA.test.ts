@@ -231,10 +231,7 @@ let currentTimeInSeconds = 0
 let startingDate = 0
 const numberOfCoupons = 50
 const frequency = TIME_PERIODS_S.DAY
-const rate = 1
-const rateDecimals = 0
 let maturityDate = startingDate + numberOfCoupons * frequency
-let firstCouponDate = startingDate + 1
 
 describe('Security USA Tests', () => {
     let signer_A: SignerWithAddress
@@ -267,11 +264,8 @@ describe('Security USA Tests', () => {
             .timestamp
         startingDate = currentTimeInSeconds + TIME
         maturityDate = startingDate + numberOfCoupons * frequency
-        firstCouponDate = startingDate + 1
-
         expect(startingDate).to.be.gt(currentTimeInSeconds)
         expect(maturityDate).to.be.gt(startingDate)
-        expect(firstCouponDate).to.be.gt(startingDate)
     })
 
     describe('equity USA', () => {
@@ -519,10 +513,6 @@ describe('Security USA Tests', () => {
                 nominalValue: 100,
                 startingDate,
                 maturityDate,
-                couponFrequency: frequency,
-                couponRate: rate,
-                couponRateDecimals: rateDecimals,
-                firstCouponDate,
                 regulationType: RegulationType.REG_S,
                 regulationSubType: RegulationSubType.NONE,
                 countriesControlListType,
@@ -591,10 +581,6 @@ describe('Security USA Tests', () => {
                 nominalValue: 100,
                 startingDate,
                 maturityDate,
-                couponFrequency: frequency,
-                couponRate: rate,
-                couponRateDecimals: rateDecimals,
-                firstCouponDate,
                 regulationType: RegulationType.REG_D,
                 regulationSubType: RegulationSubType.REG_D_506_B,
                 countriesControlListType,
@@ -662,10 +648,6 @@ describe('Security USA Tests', () => {
                 nominalValue: 100,
                 startingDate,
                 maturityDate,
-                couponFrequency: frequency,
-                couponRate: rate,
-                couponRateDecimals: rateDecimals,
-                firstCouponDate,
                 regulationType: RegulationType.REG_D,
                 regulationSubType: RegulationSubType.REG_D_506_C,
                 countriesControlListType,
