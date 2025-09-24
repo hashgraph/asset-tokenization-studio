@@ -277,6 +277,8 @@ contract AssetMock is IAssetMock {
         registeredCoupon_.coupon.recordDate = 1753874807;
         registeredCoupon_.coupon.executionDate = 1753874807;
         registeredCoupon_.coupon.rate = 1;
+        registeredCoupon_.coupon.period = 2592000;
+        registeredCoupon_.coupon.rateDecimals = 1;
         registeredCoupon_.snapshotId = 1;
     }
 
@@ -285,6 +287,8 @@ contract AssetMock is IAssetMock {
         couponFor_.rate = 2;
         couponFor_.recordDate = 1753874807;
         couponFor_.executionDate = 1753874807;
+        couponFor_.period = 2592000;
+        couponFor_.rateDecimals = 1;
         couponFor_.decimals = 2;
         couponFor_.recordDateReached = true;
     }

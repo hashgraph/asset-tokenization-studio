@@ -244,7 +244,7 @@ describe('Security operations', () => {
       });
 
       beforeEach(async () => {
-        amountToBePaid = assetType == AssetType.BOND ? '78272966' : '6';
+        amountToBePaid = assetType == AssetType.BOND ? '11567' : '6';
 
         [signer_A, signer_B] = await ethers.getSigners();
 

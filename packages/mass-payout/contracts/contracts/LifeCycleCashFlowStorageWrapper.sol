@@ -221,6 +221,7 @@ import {
     ISnapshots
 } from '@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/snapshots/ISnapshots.sol';
 import { IBond } from '@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBond.sol';
+import { IBondRead } from '@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBondRead.sol';
 import { IEquity } from '@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/equity/IEquity.sol';
 import { ISecurity } from '@hashgraph/asset-tokenization-contracts/contracts/layer_3/interfaces/ISecurity.sol';
 import { _DEFAULT_PARTITION, _PERCENTAGE_DECIMALS_SIZE } from './constants/values.sol';
@@ -674,15 +675,15 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 nominalValue;
 
         if (_assetType == AssetType.Bond) {
-            nominalValue = IBond(_asset).getBondDetails().nominalValue;
+            nominalValue = IBondRead(_asset).getBondDetails().nominalValue;
         }
 
         for (uint256 index; index < _holders.length; ) {
-            uint256 amount = (_assetType == AssetType.Bond)
+            (bool success, uint256 amount) = (_assetType == AssetType.Bond)
                 ? _getCouponAmount(_asset, _distributionID, _holders[index], nominalValue)
                 : _getDividendAmount(_asset, _distributionID, _holders[index]);
 
-            if (!_payHolderDistribution(_distributionID, _holders[index], amount, paymentToken)) {
+            if (!success || !_payHolderDistribution(_distributionID, _holders[index], amount, paymentToken)) {
                 failedAddresses_[failedIndex] = _holders[index];
                 unchecked {
                     ++failedIndex;
@@ -915,7 +916,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 _pageLength
     ) private view returns (address[] memory holders_) {
         if (_assetType == AssetType.Bond) {
-            return IBond(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
+            return IBondRead(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
         } else {
             return IEquity(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
         }
@@ -979,7 +980,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @param bond The bond address
      */
     function _checkMaturityDate(address _bond) private view {
-        uint256 maturityDateInit = IBond(_bond).getBondDetails().maturityDate;
+        uint256 maturityDateInit = IBondRead(_bond).getBondDetails().maturityDate;
         _checkPaymentDate(maturityDateInit, _blockTimestamp());
     }
 
@@ -1014,6 +1015,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @param holder The holder address to be paid
      * @param bondDetailsData Bond details to calculate the amount
      *
+     * @return True if getting coupon for was successfully executed, false otherwise
      * @return The amount to be paid
      */
     function _getCouponAmount(
@@ -1021,17 +1023,17 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 _couponID,
         address _holder,
         uint256 _nominalValue
-    ) private view returns (uint256) {
-        IBond.CouponFor memory couponFor = IBond(_asset).getCouponFor(_couponID, _holder);
-        return (
-            ((couponFor.tokenBalance *
-                _nominalValue *
-                (couponFor.executionDate - /*couponFor.fromDate*/ 0) * // TO BE FIXEDDDDDDDDDDDDDD
-                couponFor.rate) /
+    ) private view returns (bool success, uint256 amount) {
+        try IBondRead(_asset).getCouponFor(_couponID, _holder) returns (IBondRead.CouponFor memory couponFor) {
+            amount = ((couponFor.tokenBalance * _nominalValue * couponFor.period * couponFor.rate) /
                 100 /
                 (365 * 24 * 60 * 60) /
-                10 ** couponFor.decimals)
-        );
+                10 ** couponFor.decimals /
+                10 ** couponFor.rateDecimals);
+            return (true, amount);
+        } catch {
+            return (false, 0);
+        }
     }
 
     /*
@@ -1041,12 +1043,21 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @param dividendID The dividend identifier
      * @param holder The holder address to be paid
      *
+     * @return True if getting dividends for was successfully executed, false otherwise
      * @return The amount to be paid
      */
-    function _getDividendAmount(address _asset, uint256 _dividendID, address _holder) private view returns (uint256) {
+    function _getDividendAmount(
+        address _asset,
+        uint256 _dividendID,
+        address _holder
+    ) private view returns (bool success, uint256 amount) {
         IEquity equity = IEquity(_asset);
-        IEquity.DividendFor memory dividendFor = equity.getDividendsFor(_dividendID, _holder);
-        return ((dividendFor.tokenBalance * dividendFor.amount) / 10 ** dividendFor.decimals);
+        try equity.getDividendsFor(_dividendID, _holder) returns (IEquity.DividendFor memory dividendFor) {
+            amount = ((dividendFor.tokenBalance * dividendFor.amount) / 10 ** dividendFor.decimals);
+            return (true, amount);
+        } catch {
+            return (false, 0);
+        }
     }
 
     /*
@@ -1058,7 +1069,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @return The amount to be paid
      */
     function _getCashOutAmount(address _asset, address _holder) private view returns (uint256) {
-        IBond.BondDetailsData memory bondDetailsData = IBond(_asset).getBondDetails();
+        IBondRead.BondDetailsData memory bondDetailsData = IBondRead(_asset).getBondDetails();
         uint8 bondDecimals = ERC20(_asset).getERC20Metadata().info.decimals;
         return ((IERC1410(_asset).balanceOf(_holder) * bondDetailsData.nominalValue) / 10 ** bondDecimals);
     }
@@ -1074,7 +1085,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
     function _getDistributionExecutionDate(address _asset, uint256 _distributionID) private view returns (uint256) {
         return
             (_lifeCycleCashFlowStorage().assetType == AssetType.Bond)
-                ? IBond(_asset).getCoupon(_distributionID).coupon.executionDate
+                ? IBondRead(_asset).getCoupon(_distributionID).coupon.executionDate
                 : IEquity(_asset).getDividends(_distributionID).dividend.executionDate;
     }
 
