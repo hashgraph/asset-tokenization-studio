@@ -325,8 +325,8 @@ export const rolesList: TRole[] = [
     allowedSecurities: ['BOND', 'EQUITY'],
   },
   {
-    label: 'beneficiaryManager',
-    value: SecurityRole._BENEFICIARY_MANAGER_ROLE,
+    label: 'proceedRecipientManager',
+    value: SecurityRole._PROCEED_RECIPIENT_MANAGER_ROLE,
     allowedSecurities: ['BOND'],
   },
 ];

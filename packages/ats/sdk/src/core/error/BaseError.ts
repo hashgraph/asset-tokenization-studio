@@ -279,8 +279,8 @@ export enum ErrorCode {
   InvalidKycStatus = '20041',
   WalletRecovered = '20042',
   AddressNotVerified = '20043',
-  AccountIsBeneficiary = '20044',
-  AccountIsNotBeneficiary = '20045',
+  AccountIsProceedRecipient = '20044',
+  AccountIsNotProceedRecipient = '20045',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',

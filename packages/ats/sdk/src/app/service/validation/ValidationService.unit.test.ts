@@ -273,9 +273,9 @@ import { OperationNotAllowed } from '@domain/context/security/error/operations/O
 import { KycStatus } from '@domain/context/kyc/Kyc';
 import { IsInternalKycActivatedQuery } from '@query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
 import { IsExternallyGrantedQuery } from '@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
-import { IsBeneficiaryQuery } from '@query/security/beneficiary/isBeneficiary/IsBeneficiaryQuery';
-import { AccountIsNotBeneficiary } from '@domain/context/security/error/operations/AccountIsNotBeneficiary';
-import { AccountIsBeneficiary } from '@domain/context/security/error/operations/AccountIsBeneficiary';
+import { IsProceedRecipientQuery } from '@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery';
+import { AccountIsNotProceedRecipient } from '@domain/context/security/error/operations/AccountIsNotProceedRecipient';
+import { AccountIsProceedRecipient } from '@domain/context/security/error/operations/AccountIsProceedRecipient';
 
 describe('ValidationService', () => {
   let service: ValidationService;
@@ -1317,47 +1317,47 @@ describe('ValidationService', () => {
     });
   });
 
-  describe('checkIsBeneficiary', () => {
-    it('should resolve successfully when address is a beneficiary', async () => {
+  describe('checkIsProceedRecipient', () => {
+    it('should resolve successfully when address is a proceed recipient', async () => {
       queryBusMock.execute.mockResolvedValueOnce({ payload: true });
-      const res = await service.checkIsBeneficiary(
+      const res = await service.checkIsProceedRecipient(
         securityId.value,
         targetId.value,
       );
 
       expect(res).toBe(true);
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new IsBeneficiaryQuery(securityId.value, targetId.value),
+        new IsProceedRecipientQuery(securityId.value, targetId.value),
       );
     });
 
-    it('should throw AccountIsNotBeneficiary when security is not issuable', async () => {
+    it('should throw AccountIsNotProceedRecipient when security is not issuable', async () => {
       queryBusMock.execute.mockResolvedValueOnce({ payload: false });
       await expect(
-        service.checkIsBeneficiary(securityId.value, targetId.value),
-      ).rejects.toThrow(AccountIsNotBeneficiary);
+        service.checkIsProceedRecipient(securityId.value, targetId.value),
+      ).rejects.toThrow(AccountIsNotProceedRecipient);
     });
   });
 
-  describe('checkIsNotBeneficiary', () => {
-    it('should resolve successfully when address is not a beneficiary', async () => {
+  describe('checkIsNotProceedRecipient', () => {
+    it('should resolve successfully when address is not a proceed recipient', async () => {
       queryBusMock.execute.mockResolvedValueOnce({ payload: false });
-      const res = await service.checkIsNotBeneficiary(
+      const res = await service.checkIsNotProceedRecipient(
         securityId.value,
         targetId.value,
       );
 
       expect(res).toBe(true);
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new IsBeneficiaryQuery(securityId.value, targetId.value),
+        new IsProceedRecipientQuery(securityId.value, targetId.value),
       );
     });
 
-    it('should throw AccountIsBeneficiary when security is not issuable', async () => {
+    it('should throw AccountIsProceedRecipient when security is not issuable', async () => {
       queryBusMock.execute.mockResolvedValueOnce({ payload: true });
       await expect(
-        service.checkIsNotBeneficiary(securityId.value, targetId.value),
-      ).rejects.toThrow(AccountIsBeneficiary);
+        service.checkIsNotProceedRecipient(securityId.value, targetId.value),
+      ).rejects.toThrow(AccountIsProceedRecipient);
     });
   });
 });

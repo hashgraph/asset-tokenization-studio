@@ -173,7 +173,7 @@ exports[`CreateBond render correctly 1`] = `
                   class="chakra-step__title css-gryw16"
                   data-status="incomplete"
                 >
-                  Beneficiaries
+                  Proceed Recipients
                 </h3>
               </div>
               <div

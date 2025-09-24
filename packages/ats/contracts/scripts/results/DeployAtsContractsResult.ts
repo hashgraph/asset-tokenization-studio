@@ -252,7 +252,7 @@ import {
     SsiManagementFacet,
     TransferAndLockFacet,
     ERC20Votes,
-    Beneficiaries,
+    ProceedRecipients,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -295,7 +295,7 @@ export interface DeployAtsContractsResultParams {
     clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
     clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
     clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
-    beneficiariesFacet: DeployContractWithFactoryResult<Beneficiaries>
+    proceedRecipientsFacet: DeployContractWithFactoryResult<ProceedRecipients>
     externalPauseManagementFacet: DeployContractWithFactoryResult<ExternalPauseManagementFacet>
     externalControlListManagementFacet: DeployContractWithFactoryResult<ExternalControlListManagementFacet>
     externalKycListManagementFacet: DeployContractWithFactoryResult<ExternalKycListManagementFacet>
@@ -347,7 +347,7 @@ export default class DeployAtsContractsResult {
     public readonly clearingHoldCreationFacet: DeployContractWithFactoryResult<ClearingHoldCreationFacet>
     public readonly clearingReadFacet: DeployContractWithFactoryResult<ClearingReadFacet>
     public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
-    public readonly beneficiariesFacet: DeployContractWithFactoryResult<Beneficiaries>
+    public readonly proceedRecipientsFacet: DeployContractWithFactoryResult<ProceedRecipients>
     public readonly externalPauseManagementFacet: DeployContractWithFactoryResult<ExternalPauseManagementFacet>
     public readonly externalControlListManagementFacet: DeployContractWithFactoryResult<ExternalControlListManagementFacet>
     public readonly externalKycListManagementFacet: DeployContractWithFactoryResult<ExternalKycListManagementFacet>
@@ -395,7 +395,7 @@ export default class DeployAtsContractsResult {
         clearingHoldCreationFacet,
         clearingReadFacet,
         clearingActionsFacet,
-        beneficiariesFacet,
+        proceedRecipientsFacet,
         externalPauseManagementFacet,
         externalControlListManagementFacet,
         externalKycListManagementFacet,
@@ -448,7 +448,7 @@ export default class DeployAtsContractsResult {
         this.clearingHoldCreationFacet = clearingHoldCreationFacet
         this.clearingReadFacet = clearingReadFacet
         this.clearingActionsFacet = clearingActionsFacet
-        this.beneficiariesFacet = beneficiariesFacet
+        this.proceedRecipientsFacet = proceedRecipientsFacet
         this.externalPauseManagementFacet = externalPauseManagementFacet
         this.externalControlListManagementFacet =
             externalControlListManagementFacet
