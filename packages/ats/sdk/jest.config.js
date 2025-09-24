@@ -18,10 +18,9 @@ module.exports = {
   transform: {
     '^.+\\.ts?$': ['ts-jest', { isolatedModules: true }],
     '^.+\\.[t|j]sx?$': 'babel-jest',
+    '^.+\\.m?js$': 'babel-jest',
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(did-jwt|@scure|@terminal3|@hashgraph)/)',
-  ],
+  transformIgnorePatterns: [],
   setupFilesAfterEnv: ['./__tests__/jest-setup-file.ts'],
   testTimeout: 10_000,
   moduleNameMapper: {
