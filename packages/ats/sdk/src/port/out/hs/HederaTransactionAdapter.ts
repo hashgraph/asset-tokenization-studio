@@ -1289,7 +1289,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Triggering pending scheduled snapshots for ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ScheduledCrossOrderedTasksFacet__factory().attach(security.toString()),
+      new ScheduledCrossOrderedTasksFacet__factory().attach(
+        security.toString(),
+      ),
       'triggerPendingScheduledCrossOrderedTasks',
       securityId,
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
@@ -1306,7 +1308,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Triggering up to ${max.toString()} pending scheduled snapshots for ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ScheduledCrossOrderedTasksFacet__factory().attach(security.toString()),
+      new ScheduledCrossOrderedTasksFacet__factory().attach(
+        security.toString(),
+      ),
       'triggerScheduledCrossOrderedTasks',
       securityId,
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
