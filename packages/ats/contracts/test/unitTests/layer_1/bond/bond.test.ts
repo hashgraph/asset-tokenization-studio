@@ -712,19 +712,19 @@ describe('Bond Tests', () => {
                 ).to.be.rejectedWith('TokenIsPaused')
             })
 
-            it('GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails', async () => {
+            it('GIVEN an account with corporateActions role WHEN setCoupon with wrong record date THEN transaction fails', async () => {
                 await accessControlFacet
                     .connect(signer_A)
                     .grantRole(CORPORATE_ACTION_ROLE, account_C)
                 // set coupon
                 const wrongcouponData_1 = {
-                    recordDate: couponExecutionDateInSeconds.toString(),
-                    executionDate: couponRecordDateInSeconds.toString(),
+                    recordDate: (couponExecutionDateInSeconds + 1).toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
                     rateDecimals: couponRateDecimals,
-                    startDate: couponStartDateInSeconds,
-                    endDate: couponEndDateInSeconds,
-                    fixingDate: couponFixingDateInSeconds,
+                    startDate: couponStartDateInSeconds.toString(),
+                    endDate: couponEndDateInSeconds.toString(),
+                    fixingDate: couponFixingDateInSeconds.toString(),
                 }
 
                 await expect(
@@ -741,6 +741,62 @@ describe('Bond Tests', () => {
                     startDate: couponStartDateInSeconds,
                     endDate: couponEndDateInSeconds,
                     fixingDate: couponFixingDateInSeconds,
+                }
+
+                await expect(
+                    bondFacet.connect(signer_C).setCoupon(wrongcouponData_2)
+                ).to.be.revertedWithCustomError(bondFacet, 'WrongTimestamp')
+            })
+
+            it('GIVEN an account with corporateActions role WHEN setCoupon with wrong start and end dates THEN transaction fails', async () => {
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CORPORATE_ACTION_ROLE, account_C)
+                // set coupon
+                const wrongcouponData = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    rateDecimals: couponRateDecimals,
+                    startDate: (couponEndDateInSeconds + 1).toString(),
+                    endDate: couponEndDateInSeconds.toString(),
+                    fixingDate: couponFixingDateInSeconds.toString(),
+                }
+
+                await expect(
+                    bondFacet.connect(signer_C).setCoupon(wrongcouponData)
+                ).to.be.revertedWithCustomError(bondFacet, 'WrongDates')
+            })
+
+            it('GIVEN an account with corporateActions role WHEN setCoupon with wrong fixing dates THEN transaction fails', async () => {
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CORPORATE_ACTION_ROLE, account_C)
+                // set coupon
+                const wrongcouponData_1 = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    rateDecimals: couponRateDecimals,
+                    startDate: couponStartDateInSeconds.toString(),
+                    endDate: couponEndDateInSeconds.toString(),
+                    fixingDate: (couponExecutionDateInSeconds + 1).toString(),
+                }
+
+                await expect(
+                    bondFacet.connect(signer_C).setCoupon(wrongcouponData_1)
+                ).to.be.revertedWithCustomError(bondFacet, 'WrongDates')
+
+                const wrongcouponData_2 = {
+                    recordDate: couponRecordDateInSeconds.toString(),
+                    executionDate: couponExecutionDateInSeconds.toString(),
+                    rate: couponRate,
+                    rateDecimals: couponRateDecimals,
+                    startDate: couponStartDateInSeconds,
+                    endDate: couponEndDateInSeconds,
+                    fixingDate: (
+                        (await ethers.provider.getBlock('latest')).timestamp - 1
+                    ).toString(),
                 }
 
                 await expect(
