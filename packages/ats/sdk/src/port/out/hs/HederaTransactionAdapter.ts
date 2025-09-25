@@ -312,7 +312,7 @@ import {
 import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { BaseContract, Contract, ContractTransaction } from 'ethers';
-import { CastInterestRateType } from '../../../domain/context/factory/InterestRateType.js';
+import { CastInterestRateType } from '../../../domain/context/factory/InterestRateType';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;

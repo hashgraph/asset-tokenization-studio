@@ -255,7 +255,14 @@ import {
 import AddBeneficiaryRequest from '@port/in/request/bond/AddBeneficiaryRequest';
 import RemoveBeneficiaryRequest from '@port/in/request/bond/RemoveBeneficiaryRequest';
 import UpdateBeneficiaryDataRequest from '@port/in/request/bond/UpdateBeneficiaryDataRequest';
-import { InterestRateType } from '../../../src/domain/context/factory/InterestRateType.js';
+import {
+  CastInterestRateType,
+  InterestRateType,
+} from '@domain/context/factory/InterestRateType';
+
+const interestRateValues = Object.values(
+  InterestRateType,
+) as InterestRateType[];
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   (command) => {
@@ -292,6 +299,10 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
     command.maturityDate.faker((faker) =>
       faker.date.future({ years: 2 }).getTime().toString(),
     );
+    const interestRateType = CastInterestRateType.toNumber(
+      faker.helpers.arrayElement(interestRateValues),
+    );
+    command.interestRateType.as(() => interestRateType);
     command.factory?.as(
       () => new ContractId(ContractIdPropFixture.create().value),
     );
@@ -374,6 +385,10 @@ export const CreateTrexSuiteBondCommandFixture =
     command.beneficiariesData?.faker((faker) => [
       faker.string.alphanumeric({ length: 32 }),
     ]);
+    const interestRateType = CastInterestRateType.toNumber(
+      faker.helpers.arrayElement(interestRateValues),
+    );
+    command.interestRateType.as(() => interestRateType);
   });
 
 export const UpdateMaturityDateCommandFixture =
@@ -401,6 +416,11 @@ export const BondDetailsFixture = createFixture<BondDetails>((props) => {
   );
   props.startingDate.faker((faker) => faker.date.past());
   props.maturityDate.faker((faker) => faker.date.recent());
+  props.interestRateType.faker((faker) =>
+    CastInterestRateType.toNumber(
+      faker.helpers.arrayElement(interestRateValues),
+    ),
+  );
 });
 
 export const GetCouponQueryFixture = createFixture<GetCouponQuery>((query) => {
@@ -554,6 +574,10 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
       HederaIdPropsFixture.create().value,
     ]);
     request.beneficiariesData?.as(() => ['0x0000']);
+    const interestRateType = CastInterestRateType.toNumber(
+      faker.helpers.arrayElement(interestRateValues),
+    );
+    request.interestRateType.as(() => interestRateType);
   },
 );
 
@@ -705,7 +729,10 @@ export const CreateTrexSuiteBondRequestFixture =
       maturityDate = faker.date.future({ years: 2 });
       return maturityDate.getTime().toString();
     });
-    request.interestRateType.as(() => InterestRateType.FIXED_FOR_ALL_COUPONS);
+    const interestRateType = CastInterestRateType.toNumber(
+      faker.helpers.arrayElement(interestRateValues),
+    );
+    request.interestRateType.as(() => interestRateType);
 
     request.configId.faker(
       (faker) =>

@@ -262,7 +262,7 @@ import {
   GetBeneficiariesCountRequest,
   GetBeneficiariesRequest,
 } from '../request';
-import { CastInterestRateType } from '../../../domain/context/factory/InterestRateType.js';
+import { CastInterestRateType } from '@domain/context/factory/InterestRateType';
 
 interface IBondInPort {
   create(
@@ -361,6 +361,7 @@ class BondInPort implements IBondInPort {
         req.nominalValue,
         req.startingDate,
         req.maturityDate,
+        CastInterestRateType.fromNumber(req.interestRateType),
         securityFactory ? new ContractId(securityFactory) : undefined,
         resolver ? new ContractId(resolver) : undefined,
         req.configId,
@@ -373,7 +374,6 @@ class BondInPort implements IBondInPort {
         req.identityRegistryId,
         req.beneficiariesIds,
         req.beneficiariesData,
-        CastInterestRateType.fromNumber(req.interestRateType),
       ),
     );
 

@@ -225,7 +225,6 @@ import { Response } from '@domain/context/transaction/Response';
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
 import { EVM_ZERO_ADDRESS } from '@core/Constants';
-import { MissingInterestRateType } from '@domain/context/factory/error/MissingInterestRateType';
 
 @CommandHandler(CreateBondCommand)
 export class CreateBondCommandHandler
@@ -289,9 +288,6 @@ export class CreateBondCommandHandler
       }
       if (!security.regulationsubType) {
         throw new MissingRegulationSubType();
-      }
-      if (!interestRateType) {
-        throw new MissingInterestRateType();
       }
 
       const diamondOwnerAccountEvmAddress: EvmAddress =

@@ -290,7 +290,7 @@ import {
   ClearingTransfer,
 } from '@domain/context/security/Clearing';
 import { HoldDetails } from '@domain/context/security/Hold';
-import { CastInterestRateType } from '@domain/context/factory/InterestRateType.js';
+import { CastInterestRateType } from '@domain/context/factory/InterestRateType';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 

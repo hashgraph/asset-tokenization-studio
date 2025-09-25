@@ -207,7 +207,7 @@ import { Command } from '@core/command/Command';
 import { CommandResponse } from '@core/command/CommandResponse';
 import ContractId from '@domain/context/contract/ContractId';
 import { SecurityProps } from '@domain/context/security/Security';
-import { InterestRateType } from '@domain/context/factory/InterestRateType.js';
+import { InterestRateType } from '@domain/context/factory/InterestRateType';
 
 export class CreateTrexSuiteBondCommandResponse implements CommandResponse {
   public readonly securityId: ContractId;
