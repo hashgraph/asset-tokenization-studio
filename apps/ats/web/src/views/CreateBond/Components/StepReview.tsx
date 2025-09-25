@@ -232,6 +232,7 @@ import {
   dateToUnixTimestamp,
   formatNumber,
   numberToExponential,
+  textToHex,
 } from '../../../utils/format';
 import { FormStepContainer } from '../../../components/FormStepContainer';
 import { NOMINAL_VALUE_FACTOR } from '../../../utils/constants';
@@ -370,7 +371,9 @@ export const StepReview = () => {
         proceedRecipientsIds: proceedRecipientsIds,
       }),
       ...(proceedRecipientsData && {
-        proceedRecipientsData: proceedRecipientsData,
+        proceedRecipientsData: proceedRecipientsData.map((data) =>
+          textToHex(data),
+        ),
       }),
     });
 
