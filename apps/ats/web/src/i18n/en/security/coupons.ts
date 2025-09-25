@@ -240,18 +240,21 @@ export default {
         placeholder: '0,123%',
         tooltip: 'Interest rate for the coupon.',
       },
-      period: {
-        label: 'Coupon period',
-        placeholder: 'Select coupon period',
+      startDate: {
+        label: 'Start date',
+        placeholder: 'Select start date',
+        tooltip: 'Coupon’s start date, must occur before the end date.',
+      },
+      endDate: {
+        label: 'End date',
+        placeholder: 'Select end date',
         tooltip:
-          'The period between coupon payments. This field is required for all coupon operations.',
-        options: {
-          day: '1 Day',
-          week: '1 Week',
-          month: '1 Month',
-          quarter: '3 Months',
-          year: '1 Year',
-        },
+          'Coupon’s end date, Accrual period correspond to the period between start and end date.',
+      },
+      fixingDate: {
+        label: 'Fixing date',
+        placeholder: 'Select fixing date',
+        tooltip: 'Coupon’s fixing date, floating rate coupons only.',
       },
     },
   },
@@ -275,7 +278,9 @@ export default {
     details: {
       title: 'Detail',
       paymentDay: 'Payment day',
-      period: 'Period',
+      startDay: 'start day',
+      endDay: 'end day',
+      fixingDay: 'fixing day',
       amount: 'Amount',
     },
   },

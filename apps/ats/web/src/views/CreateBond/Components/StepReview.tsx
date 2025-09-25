@@ -335,6 +335,7 @@ export const StepReview = () => {
       nominalValue: (nominalValue * NOMINAL_VALUE_FACTOR).toString(),
       startingDate: dateToUnixTimestamp(startingDate),
       maturityDate: dateToUnixTimestamp(maturityDate),
+      interestRateType: 1,
       currency:
         '0x' +
         currency.charCodeAt(0) +

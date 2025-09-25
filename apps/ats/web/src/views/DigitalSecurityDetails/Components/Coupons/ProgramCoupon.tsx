@@ -208,7 +208,6 @@ import {
   CalendarInputController,
   InputNumberController,
   PhosphorIcon,
-  SelectController,
   Text,
   Tooltip,
 } from 'io-bricks-ui';
@@ -223,18 +222,17 @@ import {
 import { useParams } from 'react-router-dom';
 import { useCoupons } from '../../../../hooks/queries/useCoupons';
 import { useGetBondDetails } from '../../../../hooks/queries/useGetSecurityDetails';
-import {
-  dateToUnixTimestamp,
-  validateCouponPeriod,
-} from '../../../../utils/format';
-import { DATE_TIME_FORMAT, TIME_PERIODS_S } from '../../../../utils/constants';
+import { dateToUnixTimestamp } from '../../../../utils/format';
+import { DATE_TIME_FORMAT } from '../../../../utils/constants';
 import { isBeforeDate } from '../../../../utils/helpers';
 
 interface ProgramCouponFormValues {
   rate: number;
   recordTimestamp: string;
   executionTimestamp: string;
-  period: string;
+  startTimestamp: string;
+  endTimestamp: string;
+  fixingTimestamp: string;
 }
 
 export const ProgramCoupon = () => {
@@ -249,6 +247,8 @@ export const ProgramCoupon = () => {
   const { t: tGlobal } = useTranslation('globals');
   const { id = '' } = useParams();
   const recordTimestamp = watch('recordTimestamp');
+  const startTimestamp = watch('startTimestamp');
+  const fixingTimestamp = watch('fixingTimestamp');
 
   const { data: bondDetails } = useGetBondDetails(
     new GetBondDetailsRequest({
@@ -262,7 +262,9 @@ export const ProgramCoupon = () => {
       rate: params.rate.toString(),
       recordTimestamp: dateToUnixTimestamp(params.recordTimestamp),
       executionTimestamp: dateToUnixTimestamp(params.executionTimestamp),
-      period: params.period,
+      startTimestamp: dateToUnixTimestamp(params.startTimestamp),
+      endTimestamp: dateToUnixTimestamp(params.endTimestamp),
+      fixingTimestamp: dateToUnixTimestamp(params.fixingTimestamp),
     });
 
     createCoupon(request, {
@@ -321,11 +323,84 @@ export const ProgramCoupon = () => {
                 id="executionTimestamp"
                 rules={{
                   required,
-                  validate: isAfterDate(new Date(recordTimestamp)),
+                  validate:
+                    isAfterDate(new Date(recordTimestamp)) &&
+                    isAfterDate(new Date(fixingTimestamp)),
                 }}
                 fromDate={new Date()}
                 toDate={new Date(bondDetails.maturityDate)}
                 placeholder={tForm('paymentDate.placeholder')}
+                withTimeInput
+                format={DATE_TIME_FORMAT}
+              />
+            )}
+          </Stack>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">
+                {tForm('startDate.label')}*
+              </Text>
+              <Tooltip label={tForm('startDate.tooltip')} placement="right">
+                <PhosphorIcon as={Info} />
+              </Tooltip>
+            </HStack>
+            {bondDetails && (
+              <CalendarInputController
+                control={control}
+                id="startTimestamp"
+                rules={{ required }}
+                fromDate={new Date()}
+                toDate={new Date(bondDetails.maturityDate)}
+                placeholder={tForm('startDate.placeholder')}
+                withTimeInput
+                format={DATE_TIME_FORMAT}
+              />
+            )}
+          </Stack>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">
+                {tForm('endDate.label')}*
+              </Text>
+              <Tooltip label={tForm('endDate.tooltip')} placement="right">
+                <PhosphorIcon as={Info} />
+              </Tooltip>
+            </HStack>
+            {bondDetails && (
+              <CalendarInputController
+                control={control}
+                id="endTimestamp"
+                rules={{
+                  required,
+                  validate: isAfterDate(new Date(startTimestamp)),
+                }}
+                fromDate={new Date()}
+                toDate={new Date(bondDetails.maturityDate)}
+                placeholder={tForm('endDate.placeholder')}
+                withTimeInput
+                format={DATE_TIME_FORMAT}
+              />
+            )}
+          </Stack>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">
+                {tForm('fixingDate.label')}*
+              </Text>
+              <Tooltip label={tForm('fixingDate.tooltip')} placement="right">
+                <PhosphorIcon as={Info} />
+              </Tooltip>
+            </HStack>
+            {bondDetails && (
+              <CalendarInputController
+                control={control}
+                id="fixingTimestamp"
+                rules={{
+                  required,
+                }}
+                fromDate={new Date()}
+                toDate={new Date(bondDetails.maturityDate)}
+                placeholder={tForm('fixingDate.placeholder')}
                 withTimeInput
                 format={DATE_TIME_FORMAT}
               />
@@ -349,50 +424,6 @@ export const ProgramCoupon = () => {
               suffix="%"
               thousandSeparator=","
               decimalSeparator="."
-            />
-          </Stack>
-          <Stack w="full">
-            <HStack justifySelf="flex-start">
-              <Text textStyle="BodyTextRegularSM">
-                {tForm('period.label')}*
-              </Text>
-              <Tooltip label={tForm('period.tooltip')} placement="right">
-                <PhosphorIcon as={Info} />
-              </Tooltip>
-            </HStack>
-            <SelectController
-              control={control}
-              id="period"
-              rules={{
-                required,
-                validate: (value: string) => {
-                  const validation = validateCouponPeriod(parseInt(value));
-                  return validation === true || validation;
-                },
-              }}
-              placeholder={tForm('period.placeholder')}
-              options={[
-                {
-                  label: tForm('period.options.day'),
-                  value: TIME_PERIODS_S.DAY.toString(),
-                },
-                {
-                  label: tForm('period.options.week'),
-                  value: TIME_PERIODS_S.WEEK.toString(),
-                },
-                {
-                  label: tForm('period.options.month'),
-                  value: TIME_PERIODS_S.MONTH.toString(),
-                },
-                {
-                  label: tForm('period.options.quarter'),
-                  value: TIME_PERIODS_S.QUARTER.toString(),
-                },
-                {
-                  label: tForm('period.options.year'),
-                  value: TIME_PERIODS_S.YEAR.toString(),
-                },
-              ]}
             />
           </Stack>
           <Button
