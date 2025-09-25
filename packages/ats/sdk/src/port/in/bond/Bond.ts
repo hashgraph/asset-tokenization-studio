@@ -484,9 +484,9 @@ class BondInPort implements IBondInPort {
       executionDate: new Date(res.coupon.executionTimeStamp * ONE_THOUSAND),
       rate: res.coupon.rate.toString(),
       rateDecimals: res.coupon.rateDecimals,
-      startDate: res.coupon.startDate,
-      endDate: res.coupon.endDate,
-      fixingDate: res.coupon.fixingDate,
+      startDate: new Date(res.coupon.startTimeStamp * ONE_THOUSAND),
+      endDate: new Date(res.coupon.endTimeStamp * ONE_THOUSAND),
+      fixingDate: new Date(res.coupon.fixingTimeStamp * ONE_THOUSAND),
     };
 
     return coupon;

@@ -212,9 +212,9 @@ export class Coupon extends ValidatedDomain<Coupon> {
   executionTimeStamp: number;
   rate: BigDecimal;
   rateDecimals: number;
-  startDate: number;
-  endDate: number;
-  fixingDate: number;
+  startTimeStamp: number;
+  endTimeStamp: number;
+  fixingTimeStamp: number;
 
   snapshotId?: number;
 
@@ -223,9 +223,9 @@ export class Coupon extends ValidatedDomain<Coupon> {
     executionTimeStamp: number,
     rate: BigDecimal,
     rateDecimals: number,
-    startDate: number,
-    endDate: number,
-    fixingDate: number,
+    startTimeStamp: number,
+    endTimeStamp: number,
+    fixingTimeStamp: number,
     snapshotId?: number,
   ) {
     super({
@@ -238,9 +238,9 @@ export class Coupon extends ValidatedDomain<Coupon> {
     this.executionTimeStamp = executionTimeStamp;
     this.rate = rate;
     this.rateDecimals = rateDecimals;
-    this.startDate = startDate;
-    this.endDate = endDate;
-    this.fixingDate = fixingDate;
+    this.startTimeStamp = startTimeStamp;
+    this.endTimeStamp = endTimeStamp;
+    this.fixingTimeStamp = fixingTimeStamp;
     this.snapshotId = snapshotId ? snapshotId : undefined;
 
     ValidatedDomain.handleValidation(Coupon.name, this);
