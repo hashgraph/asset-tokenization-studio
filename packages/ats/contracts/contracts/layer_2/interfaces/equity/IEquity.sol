@@ -71,7 +71,7 @@ interface IEquity {
      */
     function setDividends(
         Dividend calldata _newDividend
-    ) external returns (bool success_, uint256 dividendID_);
+    ) external returns (uint256 dividendID_);
 
     /**
      * @notice Sets a new voting
@@ -79,7 +79,7 @@ interface IEquity {
      */
     function setVoting(
         Voting calldata _newVoting
-    ) external returns (bool success_, uint256 voteID_);
+    ) external returns (uint256 voteID_);
 
     /**
      * @notice Sets a new scheduled balance adjustment
@@ -87,7 +87,7 @@ interface IEquity {
      */
     function setScheduledBalanceAdjustment(
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    ) external returns (bool success_, uint256 balanceAdjustmentID_);
+    ) external returns (uint256 balanceAdjustmentID_);
 
     function getEquityDetails()
         external

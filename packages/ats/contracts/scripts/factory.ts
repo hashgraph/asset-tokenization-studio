@@ -265,7 +265,6 @@ export interface BondDetailsData {
     nominalValue: number
     startingDate: number
     maturityDate: number
-    interestRateType: number
 }
 
 export interface CouponDetailsData {
@@ -311,6 +310,7 @@ export interface EquityData {
 export interface BondData {
     security: SecurityData
     bondDetails: BondDetailsData
+    interestRateType: number
     couponDetails: CouponDetailsData
     beneficiaries: string[]
     beneficiariesData: string[]
@@ -618,7 +618,6 @@ export async function setBondData({
         nominalValue: nominalValue,
         startingDate: startingDate,
         maturityDate: maturityDate,
-        interestRateType: interestRateType,
     }
 
     const couponDetails: CouponDetailsData = {
@@ -634,6 +633,7 @@ export async function setBondData({
     const bondData: BondData = {
         security,
         bondDetails,
+        interestRateType,
         couponDetails,
         beneficiaries,
         beneficiariesData,

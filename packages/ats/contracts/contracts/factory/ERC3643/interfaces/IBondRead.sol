@@ -13,7 +13,6 @@ interface TRexIBondRead {
         uint256 nominalValue;
         uint256 startingDate;
         uint256 maturityDate;
-        InterestRateTypes interestRateType;
     }
 
     struct Coupon {
@@ -44,6 +43,11 @@ interface TRexIBondRead {
         external
         view
         returns (BondDetailsData memory bondDetailsData_);
+
+    function getInterestRateType()
+        external
+        view
+        returns (InterestRateTypes interestRateType_);
 
     /**
      * @notice Retrieves a registered coupon by its ID

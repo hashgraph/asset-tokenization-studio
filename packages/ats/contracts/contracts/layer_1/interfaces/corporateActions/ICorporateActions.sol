@@ -27,7 +27,6 @@ interface ICorporateActions {
     )
         external
         returns (
-            bool success_,
             bytes32 corporateActionId_,
             uint256 corporateActionIndexByType_
         );

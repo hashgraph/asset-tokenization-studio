@@ -17,18 +17,16 @@ abstract contract CorporateActions is ICorporateActions, Common {
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
         returns (
-            bool success_,
             bytes32 corporateActionId_,
             uint256 corporateActionIndexByType_
         )
     {
-        (
-            success_,
-            corporateActionId_,
-            corporateActionIndexByType_
-        ) = _addCorporateAction(_actionType, _data);
+        (corporateActionId_, corporateActionIndexByType_) = _addCorporateAction(
+            _actionType,
+            _data
+        );
 
-        if (!success_) {
+        if (corporateActionId_ == bytes32(0)) {
             revert DuplicatedCorporateAction(_actionType, _data);
         }
         emit CorporateActionAdded(

@@ -1169,6 +1169,9 @@ describe('Factory Tests', () => {
                 bondData.bondDetails.maturityDate
             )
 
+            const interestRateTypeData = await bondFacet.getInterestRateType()
+            expect(interestRateTypeData).to.be.equal(interestRateType)
+
             const couponCount = await bondFacet.getCouponCount()
             expect(couponCount).to.equal(0)
         })

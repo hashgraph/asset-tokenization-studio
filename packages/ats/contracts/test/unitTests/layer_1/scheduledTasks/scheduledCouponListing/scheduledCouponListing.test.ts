@@ -248,7 +248,7 @@ let firstCouponDate = startingDate + 1
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
-const interestRateType = InterestRateType.FIXED_PER_COUPON
+const interestRateType = InterestRateType.KPI_BASED_PER_COUPON
 
 describe('Scheduled Coupon Listing Tests', () => {
     let diamond: ResolverProxy
@@ -366,14 +366,8 @@ describe('Scheduled Coupon Listing Tests', () => {
             .grantRole(CORPORATE_ACTION_ROLE, account_C)
 
         // set coupons
-        const couponsRecordDateInSeconds_1 = dateToUnixTimestamp(
+        const couponsRecordDateInSeconds = dateToUnixTimestamp(
             '2030-01-01T00:00:06Z'
-        )
-        const couponsRecordDateInSeconds_2 = dateToUnixTimestamp(
-            '2030-01-01T00:00:12Z'
-        )
-        const couponsRecordDateInSeconds_3 = dateToUnixTimestamp(
-            '2030-01-01T00:00:18Z'
         )
         const couponsExecutionDateInSeconds = dateToUnixTimestamp(
             '2030-01-01T00:01:00Z'
@@ -384,37 +378,43 @@ describe('Scheduled Coupon Listing Tests', () => {
         const couponsEndDateInSeconds = dateToUnixTimestamp(
             '2029-12-31T00:10:00Z'
         )
-        const couponsFixingDateInSeconds = dateToUnixTimestamp(
-            '2029-12-30T00:00:00Z'
+        const couponsFixingDateInSeconds_1 = dateToUnixTimestamp(
+            '2030-01-01T00:00:06Z'
+        )
+        const couponsFixingDateInSeconds_2 = dateToUnixTimestamp(
+            '2030-01-01T00:00:12Z'
+        )
+        const couponsFixingDateInSeconds_3 = dateToUnixTimestamp(
+            '2030-01-01T00:00:18Z'
         )
         const couponsRate = 1
         const couponRateDecimals = 0
 
         const couponData_1 = {
-            recordDate: couponsRecordDateInSeconds_1.toString(),
+            recordDate: couponsRecordDateInSeconds.toString(),
             executionDate: couponsExecutionDateInSeconds.toString(),
             rate: couponsRate,
-            startDate: couponsStartDateInSeconds,
-            endDate: couponsEndDateInSeconds,
-            fixingDate: couponsFixingDateInSeconds,
+            startDate: couponsStartDateInSeconds.toString(),
+            endDate: couponsEndDateInSeconds.toString(),
+            fixingDate: couponsFixingDateInSeconds_1.toString(),
             rateDecimals: couponRateDecimals,
         }
         const couponData_2 = {
-            recordDate: couponsRecordDateInSeconds_2.toString(),
+            recordDate: couponsRecordDateInSeconds.toString(),
             executionDate: couponsExecutionDateInSeconds.toString(),
             rate: couponsRate,
-            startDate: couponsStartDateInSeconds,
-            endDate: couponsEndDateInSeconds,
-            fixingDate: couponsFixingDateInSeconds,
+            startDate: couponsStartDateInSeconds.toString(),
+            endDate: couponsEndDateInSeconds.toString(),
+            fixingDate: couponsFixingDateInSeconds_2.toString(),
             rateDecimals: couponRateDecimals,
         }
         const couponData_3 = {
-            recordDate: couponsRecordDateInSeconds_3.toString(),
+            recordDate: couponsRecordDateInSeconds.toString(),
             executionDate: couponsExecutionDateInSeconds.toString(),
             rate: couponsRate,
-            startDate: couponsStartDateInSeconds,
-            endDate: couponsEndDateInSeconds,
-            fixingDate: couponsFixingDateInSeconds,
+            startDate: couponsStartDateInSeconds.toString(),
+            endDate: couponsEndDateInSeconds.toString(),
+            fixingDate: couponsFixingDateInSeconds_3.toString(),
             rateDecimals: couponRateDecimals,
         }
         await bondFacet.connect(signer_C).setCoupon(couponData_2)
@@ -440,20 +440,20 @@ describe('Scheduled Coupon Listing Tests', () => {
         )
         expect(
             scheduledCouponListing[0].scheduledTimestamp.toNumber()
-        ).to.equal(couponsRecordDateInSeconds_3)
+        ).to.equal(couponsFixingDateInSeconds_3)
         expect(scheduledCouponListing[0].data).to.equal(coupon_3_Id)
         expect(
             scheduledCouponListing[1].scheduledTimestamp.toNumber()
-        ).to.equal(couponsRecordDateInSeconds_2)
+        ).to.equal(couponsFixingDateInSeconds_2)
         expect(scheduledCouponListing[1].data).to.equal(coupon_2_Id)
         expect(
             scheduledCouponListing[2].scheduledTimestamp.toNumber()
-        ).to.equal(couponsRecordDateInSeconds_1)
+        ).to.equal(couponsFixingDateInSeconds_1)
         expect(scheduledCouponListing[2].data).to.equal(coupon_1_Id)
 
         // AFTER FIRST SCHEDULED CouponListing ------------------------------------------------------------------
         await timeTravelFacet.changeSystemTimestamp(
-            couponsRecordDateInSeconds_1 + 1
+            couponsFixingDateInSeconds_1 + 1
         )
         await scheduledTasksFacet
             .connect(signer_A)
@@ -470,16 +470,16 @@ describe('Scheduled Coupon Listing Tests', () => {
         )
         expect(
             scheduledCouponListing[0].scheduledTimestamp.toNumber()
-        ).to.equal(couponsRecordDateInSeconds_3)
+        ).to.equal(couponsFixingDateInSeconds_3)
         expect(scheduledCouponListing[0].data).to.equal(coupon_3_Id)
         expect(
             scheduledCouponListing[1].scheduledTimestamp.toNumber()
-        ).to.equal(couponsRecordDateInSeconds_2)
+        ).to.equal(couponsFixingDateInSeconds_2)
         expect(scheduledCouponListing[1].data).to.equal(coupon_2_Id)
 
         // AFTER SECOND SCHEDULED CouponListing ------------------------------------------------------------------
         await timeTravelFacet.changeSystemTimestamp(
-            couponsRecordDateInSeconds_2 + 1
+            couponsFixingDateInSeconds_2 + 1
         )
         await scheduledTasksFacet
             .connect(signer_A)
@@ -496,12 +496,12 @@ describe('Scheduled Coupon Listing Tests', () => {
         )
         expect(
             scheduledCouponListing[0].scheduledTimestamp.toNumber()
-        ).to.equal(couponsRecordDateInSeconds_3)
+        ).to.equal(couponsFixingDateInSeconds_3)
         expect(scheduledCouponListing[0].data).to.equal(coupon_3_Id)
 
         // AFTER SECOND SCHEDULED CouponListing ------------------------------------------------------------------
         await timeTravelFacet.changeSystemTimestamp(
-            couponsRecordDateInSeconds_3 + 1
+            couponsFixingDateInSeconds_3 + 1
         )
         await scheduledTasksFacet
             .connect(signer_A)

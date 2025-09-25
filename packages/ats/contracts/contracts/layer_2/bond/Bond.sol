@@ -47,12 +47,15 @@ abstract contract Bond is IBond, Common {
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
+        validateDates(_newCoupon.startDate, _newCoupon.endDate)
         validateDates(_newCoupon.recordDate, _newCoupon.executionDate)
+        validateDates(_newCoupon.fixingDate, _newCoupon.executionDate)
         onlyValidTimestamp(_newCoupon.recordDate)
-        returns (bool success_, uint256 couponID_)
+        onlyValidTimestamp(_newCoupon.fixingDate)
+        returns (uint256 couponID_)
     {
         bytes32 corporateActionID;
-        (success_, corporateActionID, couponID_) = _setCoupon(_newCoupon);
+        (corporateActionID, couponID_) = _setCoupon(_newCoupon);
         emit CouponSet(corporateActionID, couponID_, _msgSender(), _newCoupon);
     }
 

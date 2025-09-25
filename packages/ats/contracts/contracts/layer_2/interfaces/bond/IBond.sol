@@ -21,7 +21,7 @@ interface IBond {
      */
     function setCoupon(
         IBondRead.Coupon calldata _newCoupon
-    ) external returns (bool success_, uint256 couponID_);
+    ) external returns (uint256 couponID_);
 
     /**
      * @notice Updates the maturity date of the bond.

@@ -18,6 +18,15 @@ abstract contract BondRead is IBondRead, IStaticFunctionSelectors, Common {
         return _getBondDetails();
     }
 
+    function getInterestRateType()
+        external
+        view
+        override
+        returns (InterestRateTypes interestRateType_)
+    {
+        return _getInterestRateType();
+    }
+
     function getCoupon(
         uint256 _couponID
     )

@@ -25,12 +25,10 @@ abstract contract Equity is IEquity, Common {
         onlyRole(_CORPORATE_ACTION_ROLE)
         validateDates(_newDividend.recordDate, _newDividend.executionDate)
         onlyValidTimestamp(_newDividend.recordDate)
-        returns (bool success_, uint256 dividendID_)
+        returns (uint256 dividendID_)
     {
         bytes32 corporateActionID;
-        (success_, corporateActionID, dividendID_) = _setDividends(
-            _newDividend
-        );
+        (corporateActionID, dividendID_) = _setDividends(_newDividend);
         emit DividendSet(
             corporateActionID,
             dividendID_,
@@ -49,10 +47,10 @@ abstract contract Equity is IEquity, Common {
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
         onlyValidTimestamp(_newVoting.recordDate)
-        returns (bool success_, uint256 voteID_)
+        returns (uint256 voteID_)
     {
         bytes32 corporateActionID;
-        (success_, corporateActionID, voteID_) = _setVoting(_newVoting);
+        (corporateActionID, voteID_) = _setVoting(_newVoting);
         emit VotingSet(
             corporateActionID,
             voteID_,
@@ -71,11 +69,10 @@ abstract contract Equity is IEquity, Common {
         onlyRole(_CORPORATE_ACTION_ROLE)
         onlyValidTimestamp(_newBalanceAdjustment.executionDate)
         validateFactor(_newBalanceAdjustment.factor)
-        returns (bool success_, uint256 balanceAdjustmentID_)
+        returns (uint256 balanceAdjustmentID_)
     {
         bytes32 corporateActionID;
         (
-            success_,
             corporateActionID,
             balanceAdjustmentID_
         ) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);

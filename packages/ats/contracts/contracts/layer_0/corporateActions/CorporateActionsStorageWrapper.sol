@@ -35,7 +35,6 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     )
         internal
         returns (
-            bool success_,
             bytes32 corporateActionId_,
             uint256 corporateActionIndexByType_
         )
@@ -44,11 +43,14 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
             storage corporateActions_ = _corporateActionsStorage();
         corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
         // TODO: Review when it can return false.
-        success_ =
-            corporateActions_.actions.add(corporateActionId_) &&
+        bool success = corporateActions_.actions.add(corporateActionId_) &&
             corporateActions_.actionsByType[_actionType].add(
                 corporateActionId_
             );
+
+        if (!success) {
+            return (bytes32(0), 0);
+        }
         corporateActions_
             .actionsData[corporateActionId_]
             .actionType = _actionType;

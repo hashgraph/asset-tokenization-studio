@@ -303,9 +303,9 @@ let couponData = {
     executionDate: couponExecutionDateInSeconds.toString(),
     rate: couponRate,
     rateDecimals: couponRateDecimals,
-    startDate: couponStartDateInSeconds,
-    endDate: couponEndDateInSeconds,
-    fixingDate: couponFixingDateInSeconds,
+    startDate: couponStartDateInSeconds.toString(),
+    endDate: couponEndDateInSeconds.toString(),
+    fixingDate: couponFixingDateInSeconds.toString(),
 }
 
 describe('Bond Tests', () => {
@@ -477,8 +477,6 @@ describe('Bond Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
             interestRateType,
         })
-
-        await setFacets({ diamond })
     }
 
     before(async () => {
@@ -518,11 +516,12 @@ describe('Bond Tests', () => {
             executionDate: couponExecutionDateInSeconds.toString(),
             rate: couponRate,
             rateDecimals: couponRateDecimals,
-            startDate: couponStartDateInSeconds,
-            endDate: couponEndDateInSeconds,
-            fixingDate: couponFixingDateInSeconds,
+            startDate: couponStartDateInSeconds.toString(),
+            endDate: couponEndDateInSeconds.toString(),
+            fixingDate: couponFixingDateInSeconds.toString(),
         }
         await loadFixture(deploySecurityFixtureSinglePartition)
+        await setFacets({ diamond })
     })
 
     afterEach(async () => {
@@ -1058,6 +1057,42 @@ describe('Bond Tests', () => {
             })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon multiple times THEN coupons ordered list properly set up', async () => {
+                const init_rbacs: Rbac[] = set_initRbacs()
+
+                const newDiamond = await deployBondFromFactory({
+                    adminAccount: account_A,
+                    isWhiteList: false,
+                    isControllable: true,
+                    arePartitionsProtected: false,
+                    clearingActive: false,
+                    internalKycActivated: true,
+                    isMultiPartition: true,
+                    name: 'TEST_AccessControl',
+                    symbol: 'TAC',
+                    decimals: 6,
+                    isin: isinGenerator(),
+                    currency: '0x455552',
+                    numberOfUnits,
+                    nominalValue: 100,
+                    startingDate,
+                    maturityDate,
+                    couponFrequency: frequency,
+                    couponRate: rate,
+                    couponRateDecimals: rateDecimals,
+                    firstCouponDate,
+                    regulationType: RegulationType.REG_D,
+                    regulationSubType: RegulationSubType.REG_D_506_C,
+                    countriesControlListType,
+                    listOfCountries,
+                    info,
+                    init_rbacs,
+                    factory,
+                    businessLogicResolver: businessLogicResolver.address,
+                    interestRateType: InterestRateType.KPI_BASED_PER_COUPON,
+                })
+
+                await setFacets({ diamond: newDiamond })
+
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(
@@ -1077,37 +1112,37 @@ describe('Bond Tests', () => {
                     recordDate: couponRecordDateInSeconds.toString(),
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
-                    startDate: couponStartDateInSeconds,
-                    endDate: couponEndDateInSeconds,
-                    fixingDate: couponFixingDateInSeconds,
+                    startDate: couponStartDateInSeconds.toString(),
+                    endDate: couponEndDateInSeconds.toString(),
+                    fixingDate: couponFixingDateInSeconds.toString(),
                     rateDecimals: couponRateDecimals,
                 }
 
                 const customCouponData_2 = {
-                    recordDate: (
-                        couponRecordDateInSeconds + DelayCoupon_2
-                    ).toString(),
+                    recordDate: couponRecordDateInSeconds.toString(),
                     executionDate: (
                         couponExecutionDateInSeconds + DelayCoupon_2
                     ).toString(),
                     rate: couponRate,
-                    startDate: couponStartDateInSeconds,
-                    endDate: couponEndDateInSeconds,
-                    fixingDate: couponFixingDateInSeconds,
+                    startDate: couponStartDateInSeconds.toString(),
+                    endDate: couponEndDateInSeconds.toString(),
+                    fixingDate: (
+                        couponFixingDateInSeconds + DelayCoupon_2
+                    ).toString(),
                     rateDecimals: couponRateDecimals,
                 }
 
                 const customCouponData_3 = {
-                    recordDate: (
-                        couponRecordDateInSeconds + DelayCoupon_3
-                    ).toString(),
+                    recordDate: couponRecordDateInSeconds.toString(),
                     executionDate: (
                         couponExecutionDateInSeconds + DelayCoupon_3
                     ).toString(),
                     rate: couponRate,
-                    startDate: couponStartDateInSeconds,
-                    endDate: couponEndDateInSeconds,
-                    fixingDate: couponFixingDateInSeconds,
+                    startDate: couponStartDateInSeconds.toString(),
+                    endDate: couponEndDateInSeconds.toString(),
+                    fixingDate: (
+                        couponFixingDateInSeconds + DelayCoupon_3
+                    ).toString(),
                     rateDecimals: couponRateDecimals,
                 }
 
@@ -1118,7 +1153,7 @@ describe('Bond Tests', () => {
                 await bondFacet.setCoupon(customCouponData_3)
 
                 await timeTravelFacet.changeSystemTimestamp(
-                    couponRecordDateInSeconds + DelayCoupon_2 + 1
+                    couponFixingDateInSeconds + DelayCoupon_2 + 1
                 )
 
                 await scheduledTasksFacet.triggerPendingScheduledCrossOrderedTasks()

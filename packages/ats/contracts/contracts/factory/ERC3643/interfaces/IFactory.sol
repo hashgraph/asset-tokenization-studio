@@ -55,6 +55,7 @@ interface TRexIFactory {
     struct BondData {
         SecurityData security;
         IBondRead.BondDetailsData bondDetails;
+        IBondRead.InterestRateTypes interestRateType;
         address[] beneficiaries;
         bytes[] beneficiariesData;
     }
