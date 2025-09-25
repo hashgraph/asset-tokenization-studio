@@ -18,6 +18,7 @@ import {
 } from '../../../../hooks/queries/useProceedRecipients';
 import { UpdateProceedRecipientModal } from './UpdateProceedRecipientModal';
 import { useRemoveProceedRecipient } from '../../../../hooks/mutations/useProceedRecipients';
+import { hexToText } from '../../../../utils/format';
 
 export const ProceedRecipients = () => {
   const { id: securityId = '' } = useParams();
@@ -85,7 +86,7 @@ export const ProceedRecipients = () => {
           original: { data },
         },
       }) {
-        return data === '0x' ? '-' : data;
+        return data ? hexToText(data) : '-';
       },
     }),
     ...(hasProceedRecipientManagerRole
