@@ -473,6 +473,11 @@ export const CouponFixture = createFixture<Coupon>((props) => {
     (faker) =>
       new BigDecimal(BigNumber.from(faker.number.int({ min: 1, max: 5 }))),
   );
+  props.startTimeStamp.faker((faker) => faker.date.past().getTime().toString());
+  props.endTimeStamp.faker((faker) => faker.date.past().getTime().toString());
+  props.fixingTimeStamp.faker((faker) =>
+    faker.date.past().getTime().toString(),
+  );
 });
 
 export const GetCouponHoldersRequestFixture =
