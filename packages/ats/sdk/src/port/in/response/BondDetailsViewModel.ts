@@ -210,4 +210,5 @@ export default interface BondDetailsViewModel extends QueryResponse {
   nominalValue: string;
   startingDate: Date;
   maturityDate: Date;
+  interestRateType: number;
 }

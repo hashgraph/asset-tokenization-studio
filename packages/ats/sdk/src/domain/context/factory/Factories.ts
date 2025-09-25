@@ -215,6 +215,8 @@ import {
   InvalidRegulationSubTypeForType,
 } from './error/InvalidRegulationSubType';
 import { InvalidRegulationType } from './error/InvalidRegulationType';
+import { InterestRateType } from './InterestRateType';
+import { InvalidInterestRateType } from './error/InvalidInterestRateType';
 
 export class EnvironmentFactory {
   factory: string;
@@ -257,6 +259,16 @@ export class Factory {
 
     if (!CheckRegulations.typeAndSubtype(type, value))
       errorList.push(new InvalidRegulationSubTypeForType(value, type));
+
+    return errorList;
+  }
+
+  public static checkInterestRateType(value: number): BaseError[] {
+    const errorList: BaseError[] = [];
+
+    const length = Object.keys(InterestRateType).length;
+
+    if (value >= length) errorList.push(new InvalidInterestRateType(value));
 
     return errorList;
   }

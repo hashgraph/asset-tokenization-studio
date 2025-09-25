@@ -203,37 +203,13 @@
 
 */
 
-import ValidatedDomain from '@core/validation/ValidatedArgs';
-import BigDecimal from '../shared/BigDecimal';
-import { SecurityDate } from '../shared/SecurityDate';
-import { InterestRateType } from '../factory/InterestRateType';
+import BaseError, { ErrorCode } from '@core/error/BaseError';
 
-export class BondDetails extends ValidatedDomain<BondDetails> {
-  currency: string;
-  nominalValue: BigDecimal;
-  startingDate: number;
-  maturityDate: number;
-  interestRateType: InterestRateType;
-
-  constructor(
-    currency: string,
-    nominalValue: BigDecimal,
-    startingDate: number,
-    maturityDate: number,
-    interestRateType: InterestRateType,
-  ) {
-    super({
-      maturityDate: (val) => {
-        return SecurityDate.checkDateTimestamp(val, this.startingDate);
-      },
-    });
-
-    this.currency = currency;
-    this.nominalValue = nominalValue;
-    this.startingDate = startingDate;
-    this.maturityDate = maturityDate;
-    this.interestRateType = interestRateType;
-
-    ValidatedDomain.handleValidation(BondDetails.name, this);
+export class InvalidInterestRateType extends BaseError {
+  constructor(value: number) {
+    super(
+      ErrorCode.InvalidInterestRateType,
+      `Interest Rate Type ${value} is not valid`,
+    );
   }
 }

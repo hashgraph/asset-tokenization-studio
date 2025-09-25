@@ -244,6 +244,10 @@ import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
 import { Wallet, ethers } from 'ethers';
 import BaseError from '@core/error/BaseError';
+import {
+  CastInterestRateType,
+  InterestRateType,
+} from '@domain/context/factory/InterestRateType';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -260,6 +264,7 @@ const startingDate = currentTimeInSeconds + TIME;
 const maturityDate = startingDate + 365; // 1 year maturity
 const regulationType = RegulationType.REG_S;
 const regulationSubType = RegulationSubType.NONE;
+const interestRateType = InterestRateType.FIXED_PER_COUPON;
 const countries = 'AF,HG,BN';
 const info = 'Anything';
 const configId =
@@ -352,6 +357,7 @@ describe('🧪 Bond test', () => {
       info: info,
       configId: configId,
       configVersion: configVersion,
+      interestRateType: CastInterestRateType.toNumber(interestRateType),
     });
 
     Injectable.resolveTransactionHandler();
@@ -379,6 +385,7 @@ describe('🧪 Bond test', () => {
     const couponRate = '3';
     const couponRecordDate = startingDate + 30;
     const couponExecutionDate = startingDate + 35;
+    const couponFixingDate = startingDate + 25;
 
     await Bond.setCoupon(
       new SetCouponRequest({
@@ -386,7 +393,9 @@ describe('🧪 Bond test', () => {
         rate: couponRate,
         recordTimestamp: couponRecordDate.toString(),
         executionTimestamp: couponExecutionDate.toString(),
-        period: TIME_PERIODS_S.DAY.toString(),
+        startTimestamp: '0',
+        endTimestamp: TIME_PERIODS_S.DAY.toString(),
+        fixingTimestamp: couponFixingDate.toString(),
       }),
     );
 
@@ -431,6 +440,7 @@ describe('🧪 Bond test', () => {
     const rate = '1';
     const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
     const executionTimestamp = recordTimestamp + 1000;
+    const couponFixingDate = recordTimestamp - 1000;
 
     await Bond.setCoupon(
       new SetCouponRequest({
@@ -438,7 +448,9 @@ describe('🧪 Bond test', () => {
         rate: rate,
         recordTimestamp: recordTimestamp.toString(),
         executionTimestamp: executionTimestamp.toString(),
-        period: TIME_PERIODS_S.DAY.toString(),
+        startTimestamp: '0',
+        endTimestamp: TIME_PERIODS_S.DAY.toString(),
+        fixingTimestamp: couponFixingDate.toString(),
       }),
     );
 

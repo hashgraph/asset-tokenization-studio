@@ -278,6 +278,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
   info: string;
   configId: string;
   configVersion: number;
+  interestRateType: number;
 
   constructor({
     salt,
@@ -323,6 +324,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     identityRegistryId,
     beneficiariesIds,
     beneficiariesData,
+    interestRateType,
   }: {
     salt: string;
     owner: string;
@@ -367,6 +369,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     identityRegistryId?: string;
     beneficiariesIds?: string[];
     beneficiariesData?: string[];
+    interestRateType: number;
   }) {
     super({
       name: (val) => {
@@ -454,6 +457,9 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
           if (result) return result;
         }
       },
+      interestRateType: (val) => {
+        return Factory.checkInterestRateType(val);
+      },
     });
 
     this.salt = salt;
@@ -500,5 +506,6 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     this.identityRegistryId = identityRegistryId;
     this.beneficiariesIds = beneficiariesIds;
     this.beneficiariesData = beneficiariesData;
+    this.interestRateType = interestRateType;
   }
 }

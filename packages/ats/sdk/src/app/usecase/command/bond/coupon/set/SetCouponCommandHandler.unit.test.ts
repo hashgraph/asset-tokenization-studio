@@ -314,7 +314,9 @@ describe('SetCouponCommandHandler', () => {
       BigDecimal.fromString(command.recordDate),
       BigDecimal.fromString(command.executionDate),
       BigDecimal.fromString(command.rate),
-      BigDecimal.fromString(command.period),
+      BigDecimal.fromString(command.startDate),
+      BigDecimal.fromString(command.endDate),
+      BigDecimal.fromString(command.fixingDate),
       command.address,
     );
     expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith(

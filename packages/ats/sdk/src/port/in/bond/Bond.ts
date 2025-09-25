@@ -262,6 +262,7 @@ import {
   GetBeneficiariesCountRequest,
   GetBeneficiariesRequest,
 } from '../request';
+import { CastInterestRateType } from '../../../domain/context/factory/InterestRateType.js';
 
 interface IBondInPort {
   create(
@@ -372,6 +373,7 @@ class BondInPort implements IBondInPort {
         req.identityRegistryId,
         req.beneficiariesIds,
         req.beneficiariesData,
+        CastInterestRateType.fromNumber(req.interestRateType),
       ),
     );
 
@@ -411,6 +413,9 @@ class BondInPort implements IBondInPort {
       nominalValue: res.bond.nominalValue.toString(),
       startingDate: new Date(res.bond.startingDate * ONE_THOUSAND),
       maturityDate: new Date(res.bond.maturityDate * ONE_THOUSAND),
+      interestRateType: CastInterestRateType.toNumber(
+        res.bond.interestRateType,
+      ),
     };
 
     return bondDetails;
@@ -420,8 +425,15 @@ class BondInPort implements IBondInPort {
   async setCoupon(
     request: SetCouponRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    const { rate, recordTimestamp, executionTimestamp, securityId, period } =
-      request;
+    const {
+      rate,
+      recordTimestamp,
+      executionTimestamp,
+      securityId,
+      startTimestamp,
+      endTimestamp,
+      fixingTimestamp,
+    } = request;
     ValidatedRequest.handleValidation('SetCouponRequest', request);
 
     return await this.commandBus.execute(
@@ -430,7 +442,9 @@ class BondInPort implements IBondInPort {
         recordTimestamp,
         executionTimestamp,
         rate,
-        period,
+        startTimestamp,
+        endTimestamp,
+        fixingTimestamp,
       ),
     );
   }
@@ -470,7 +484,9 @@ class BondInPort implements IBondInPort {
       executionDate: new Date(res.coupon.executionTimeStamp * ONE_THOUSAND),
       rate: res.coupon.rate.toString(),
       rateDecimals: res.coupon.rateDecimals,
-      period: res.coupon.period,
+      startDate: res.coupon.startDate,
+      endDate: res.coupon.endDate,
+      fixingDate: res.coupon.fixingDate,
     };
 
     return coupon;
@@ -621,6 +637,7 @@ class BondInPort implements IBondInPort {
         req.nominalValue,
         req.startingDate,
         req.maturityDate,
+        CastInterestRateType.fromNumber(req.interestRateType),
         new ContractId(securityFactory),
         new ContractId(resolver),
         req.configId,

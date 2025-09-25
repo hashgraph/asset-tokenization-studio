@@ -219,7 +219,9 @@ export class SetCouponCommand extends Command<SetCouponCommandResponse> {
     public readonly recordDate: string,
     public readonly executionDate: string,
     public readonly rate: string,
-    public readonly period: string,
+    public readonly startDate: string,
+    public readonly endDate: string,
+    public readonly fixingDate: string,
   ) {
     super();
   }

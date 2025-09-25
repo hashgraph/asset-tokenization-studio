@@ -213,20 +213,26 @@ export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest>
   rate: string;
   recordTimestamp: string;
   executionTimestamp: string;
-  period: string;
+  startTimestamp: string;
+  endTimestamp: string;
+  fixingTimestamp: string;
 
   constructor({
     securityId,
     rate,
     recordTimestamp,
     executionTimestamp,
-    period,
+    startTimestamp,
+    endTimestamp,
+    fixingTimestamp,
   }: {
     securityId: string;
     rate: string;
     recordTimestamp: string;
     executionTimestamp: string;
-    period: string;
+    startTimestamp: string;
+    endTimestamp: string;
+    fixingTimestamp: string;
   }) {
     super({
       rate: FormatValidation.checkAmount(true),
@@ -245,13 +251,28 @@ export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest>
         );
       },
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      period: FormatValidation.checkAmount(),
+      endTimestamp: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          parseInt(this.startTimestamp),
+          undefined,
+        );
+      },
+      fixingTimestamp: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          undefined,
+          parseInt(this.executionTimestamp),
+        );
+      },
     });
 
     this.securityId = securityId;
     this.rate = rate;
     this.recordTimestamp = recordTimestamp;
     this.executionTimestamp = executionTimestamp;
-    this.period = period;
+    this.startTimestamp = startTimestamp;
+    this.endTimestamp = endTimestamp;
+    this.fixingTimestamp = fixingTimestamp;
   }
 }

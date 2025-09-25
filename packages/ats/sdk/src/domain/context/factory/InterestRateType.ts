@@ -203,37 +203,22 @@
 
 */
 
-import ValidatedDomain from '@core/validation/ValidatedArgs';
-import BigDecimal from '../shared/BigDecimal';
-import { SecurityDate } from '../shared/SecurityDate';
-import { InterestRateType } from '../factory/InterestRateType';
+export enum InterestRateType {
+  FIXED_FOR_ALL_COUPONS = 'FIXED_FOR_ALL_COUPONS',
+  FIXED_PER_COUPON = 'FIXED_PER_COUPON ',
+  KPI_BASED_PER_COUPON = 'KPI_BASED_PER_COUPON',
+}
 
-export class BondDetails extends ValidatedDomain<BondDetails> {
-  currency: string;
-  nominalValue: BigDecimal;
-  startingDate: number;
-  maturityDate: number;
-  interestRateType: InterestRateType;
+export class CastInterestRateType {
+  static fromNumber(id: number): InterestRateType {
+    if (id == 0) return InterestRateType.FIXED_FOR_ALL_COUPONS;
+    if (id == 1) return InterestRateType.FIXED_PER_COUPON;
+    return InterestRateType.KPI_BASED_PER_COUPON;
+  }
 
-  constructor(
-    currency: string,
-    nominalValue: BigDecimal,
-    startingDate: number,
-    maturityDate: number,
-    interestRateType: InterestRateType,
-  ) {
-    super({
-      maturityDate: (val) => {
-        return SecurityDate.checkDateTimestamp(val, this.startingDate);
-      },
-    });
-
-    this.currency = currency;
-    this.nominalValue = nominalValue;
-    this.startingDate = startingDate;
-    this.maturityDate = maturityDate;
-    this.interestRateType = interestRateType;
-
-    ValidatedDomain.handleValidation(BondDetails.name, this);
+  static toNumber(value: InterestRateType): number {
+    if (value == InterestRateType.FIXED_FOR_ALL_COUPONS) return 0;
+    if (value == InterestRateType.FIXED_PER_COUPON) return 1;
+    return 2;
   }
 }

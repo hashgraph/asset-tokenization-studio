@@ -282,6 +282,8 @@ export class CreateTrexSuiteBondCommandHandler
         beneficiariesIds,
         beneficiariesData,
 
+        interestRateType,
+
         externalPauses,
         externalControlLists,
         externalKycLists,
@@ -359,6 +361,7 @@ export class CreateTrexSuiteBondCommandHandler
         BigDecimal.fromString(nominalValue),
         parseInt(startingDate),
         parseInt(maturityDate),
+        interestRateType,
       );
 
       res = await handler.createTrexSuiteBond(

@@ -220,6 +220,7 @@ import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
 import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
 import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
 import { ClearingOperationType } from '@domain/context/security/Clearing';
+import { InterestRateType } from '@domain/context/factory/InterestRateType';
 
 export interface InitializationData {
   account?: Account;
@@ -381,7 +382,9 @@ interface ITransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
-    period: BigDecimal,
+    startDate: BigDecimal,
+        endDate: BigDecimal,
+        fixingDate: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setDocument(
@@ -1292,7 +1295,9 @@ export default abstract class TransactionAdapter
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
-    period: BigDecimal,
+    startDate: BigDecimal,
+        endDate: BigDecimal,
+        fixingDate: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   abstract setVotingRights(

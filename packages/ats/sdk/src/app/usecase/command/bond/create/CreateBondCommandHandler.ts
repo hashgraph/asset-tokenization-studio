@@ -225,6 +225,7 @@ import { Response } from '@domain/context/transaction/Response';
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
 import { EVM_ZERO_ADDRESS } from '@core/Constants';
+import { MissingInterestRateType } from '@domain/context/factory/error/MissingInterestRateType';
 
 @CommandHandler(CreateBondCommand)
 export class CreateBondCommandHandler
@@ -264,6 +265,7 @@ export class CreateBondCommandHandler
         identityRegistryId,
         beneficiariesIds,
         beneficiariesData,
+        interestRateType,
       } = command;
 
       //TODO: Boy scout: remove request validations and adjust test
@@ -287,6 +289,9 @@ export class CreateBondCommandHandler
       }
       if (!security.regulationsubType) {
         throw new MissingRegulationSubType();
+      }
+      if (!interestRateType) {
+        throw new MissingInterestRateType();
       }
 
       const diamondOwnerAccountEvmAddress: EvmAddress =
@@ -333,6 +338,7 @@ export class CreateBondCommandHandler
         BigDecimal.fromString(nominalValue),
         parseInt(startingDate),
         parseInt(maturityDate),
+        interestRateType,
       );
 
       res = await handler.createBond(

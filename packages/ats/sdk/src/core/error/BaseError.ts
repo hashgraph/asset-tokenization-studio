@@ -236,6 +236,7 @@ export enum ErrorCode {
   InvalidVcFormat = '10034',
   InvalidVcDates = '10036',
   InvalidTimeUnits = '10037',
+  InvalidInterestRateType = '10038',
 
   // Error codes for Logic Errors (Prefix: 2XXXX)
   AccountAlreadyInControlList = '20013',

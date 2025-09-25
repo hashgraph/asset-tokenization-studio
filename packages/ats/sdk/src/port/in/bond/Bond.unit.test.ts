@@ -286,6 +286,7 @@ import { IsBeneficiaryQuery } from '@query/security/beneficiary/isBeneficiary/Is
 import { GetBeneficiariesCountQuery } from '@query/security/beneficiary/getBeneficiariesCount/GetBeneficiariesCountQuery';
 import { GetBeneficiaryDataQuery } from '@query/security/beneficiary/getBeneficiaryData/GetBeneficiaryDataQuery';
 import { GetBeneficiariesQuery } from '@query/security/beneficiary/getBeneficiaries/GetBeneficiariesQuery';
+import { CastInterestRateType } from '@domain/context/factory/InterestRateType';
 
 describe('Bond', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -752,7 +753,9 @@ describe('Bond', () => {
           setCouponRequest.recordTimestamp,
           setCouponRequest.executionTimestamp,
           setCouponRequest.rate,
-          setCouponRequest.period,
+          setCouponRequest.startTimestamp,
+          setCouponRequest.endTimestamp,
+          setCouponRequest.fixingTimestamp,
         ),
       );
 
@@ -778,7 +781,9 @@ describe('Bond', () => {
           setCouponRequest.recordTimestamp,
           setCouponRequest.executionTimestamp,
           setCouponRequest.rate,
-          setCouponRequest.period,
+          setCouponRequest.startTimestamp,
+          setCouponRequest.endTimestamp,
+          setCouponRequest.fixingTimestamp,
         ),
       );
     });
@@ -1541,6 +1546,9 @@ describe('Bond', () => {
           createTrexSuiteBondRequest.nominalValue,
           createTrexSuiteBondRequest.startingDate,
           createTrexSuiteBondRequest.maturityDate,
+          CastInterestRateType.fromNumber(
+            createTrexSuiteBondRequest.interestRateType,
+          ),
           new ContractId(factoryAddress),
           new ContractId(resolverAddress),
           createTrexSuiteBondRequest.configId,
@@ -1621,6 +1629,9 @@ describe('Bond', () => {
           createTrexSuiteBondRequest.nominalValue,
           createTrexSuiteBondRequest.startingDate,
           createTrexSuiteBondRequest.maturityDate,
+          CastInterestRateType.fromNumber(
+            createTrexSuiteBondRequest.interestRateType,
+          ),
           new ContractId(factoryAddress),
           new ContractId(resolverAddress),
           createTrexSuiteBondRequest.configId,

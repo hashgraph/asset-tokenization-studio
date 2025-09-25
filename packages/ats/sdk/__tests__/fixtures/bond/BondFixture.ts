@@ -255,6 +255,7 @@ import {
 import AddBeneficiaryRequest from '@port/in/request/bond/AddBeneficiaryRequest';
 import RemoveBeneficiaryRequest from '@port/in/request/bond/RemoveBeneficiaryRequest';
 import UpdateBeneficiaryDataRequest from '@port/in/request/bond/UpdateBeneficiaryDataRequest';
+import { InterestRateType } from '../../../src/domain/context/factory/InterestRateType.js';
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
   (command) => {
@@ -268,8 +269,12 @@ export const SetCouponCommandFixture = createFixture<SetCouponCommand>(
     command.rate.faker((faker) =>
       faker.number.int({ min: 100, max: 999 }).toString(),
     );
-    command.period.faker((faker) =>
-      faker.number.int({ min: 86400, max: 31536000 }).toString(),
+    command.startDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
+    );
+    command.endDate.faker((faker) => faker.date.future().getTime().toString());
+    command.fixingDate.faker((faker) =>
+      faker.date.future().getTime().toString(),
     );
   },
 );
@@ -569,7 +574,11 @@ export const SetCouponRequestFixture = createFixture<SetCouponRequest>(
     request.executionTimestamp.faker((faker) =>
       faker.date.future().getTime().toString(),
     );
-    request.period.as(() => TIME_PERIODS_S.DAY.toString());
+    request.startTimestamp.as(() => '0');
+    request.endTimestamp.as(() => TIME_PERIODS_S.DAY.toString());
+    request.fixingTimestamp.faker((faker) =>
+      faker.date.past().getTime().toString(),
+    );
   },
 );
 
@@ -696,6 +705,7 @@ export const CreateTrexSuiteBondRequestFixture =
       maturityDate = faker.date.future({ years: 2 });
       return maturityDate.getTime().toString();
     });
+    request.interestRateType.as(() => InterestRateType.FIXED_FOR_ALL_COUPONS);
 
     request.configId.faker(
       (faker) =>

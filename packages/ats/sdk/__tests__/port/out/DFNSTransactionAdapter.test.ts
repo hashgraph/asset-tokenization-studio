@@ -225,6 +225,7 @@ import {
   RegulationSubType,
   RegulationType,
 } from '@domain/context/factory/RegulationType';
+import { CastInterestRateType, InterestRateType } from '@domain/context/factory/InterestRateType';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -245,6 +246,7 @@ const maturityDate = startingDate + numberOfCoupons * couponFrequency;
 const firstCouponDate = startingDate + 1;
 const regulationType = RegulationType.REG_S;
 const regulationSubType = RegulationSubType.NONE;
+const interestRateType = InterestRateType.FIXED_PER_COUPON;
 const countries = 'AF,HG,BN';
 const info = 'Anything';
 const configId =
@@ -314,6 +316,7 @@ describe('DFNS Transaction Adapter test', () => {
       info: info,
       configId: configId,
       configVersion: configVersion,
+      interestRateType: CastInterestRateType.toNumber(interestRateType),
     });
 
     bond = (await Bond.create(requestST)).security;

@@ -546,7 +546,9 @@ function createBondMockImplementation(
       timeStamp,
       couponInfo.couponRate,
       couponInfo.couponRateDecimals,
-      0,
+      timeStamp,
+      timeStamp,
+      timeStamp,
     );
     coupons.push(coupon);
   }
@@ -1969,13 +1971,18 @@ jest.mock('@port/out/rpc/RPCTransactionAdapter', () => {
       recordDate: BigDecimal,
       executionDate: BigDecimal,
       rate: BigDecimal,
+      startDate: BigDecimal,
+      endDate: BigDecimal,
+      fixingDate: BigDecimal,
     ) => {
       const coupon = new Coupon(
         parseInt(recordDate.toString()),
         parseInt(executionDate.toString()),
         rate,
         rate.decimals,
-        0,
+        parseInt(startDate.toString()),
+        parseInt(endDate.toString()),
+        parseInt(fixingDate.toString()),
       );
       coupons.push(coupon);
       return {
@@ -2244,6 +2251,7 @@ jest.mock('@port/out/rpc/RPCTransactionAdapter', () => {
       bondInfo.nominalValue,
       bondInfo.startingDate,
       _maturityDate,
+      bondInfo.interestRateType,
     );
 
     return { status: 'success', data: [] } as TransactionResponse<

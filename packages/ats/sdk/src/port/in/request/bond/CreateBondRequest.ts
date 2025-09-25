@@ -268,6 +268,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   @OptionalField()
   beneficiariesData?: string[];
 
+  interestRateType: number;
+
   constructor({
     name,
     symbol,
@@ -300,6 +302,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     identityRegistryId,
     beneficiariesIds,
     beneficiariesData,
+    interestRateType,
   }: {
     name: string;
     symbol: string;
@@ -332,6 +335,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     identityRegistryId?: string;
     beneficiariesIds?: string[];
     beneficiariesData?: string[];
+    interestRateType: number;
   }) {
     super({
       name: (val) => {
@@ -419,6 +423,9 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
           if (result) return result;
         }
       },
+      interestRateType: (val) => {
+        return Factory.checkInterestRateType(val);
+      },
     });
     this.name = name;
     this.symbol = symbol;
@@ -452,5 +459,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.identityRegistryId = identityRegistryId;
     this.beneficiariesIds = beneficiariesIds;
     this.beneficiariesData = beneficiariesData;
+    this.interestRateType = interestRateType;
   }
 }
