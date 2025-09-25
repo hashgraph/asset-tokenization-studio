@@ -265,6 +265,7 @@ export interface BondDetailsData {
     nominalValue: number
     startingDate: number
     maturityDate: number
+    interestRateType: number
 }
 
 export interface CouponDetailsData {
@@ -337,6 +338,12 @@ export const RegulationSubType = {
     NONE: 0,
     REG_D_506_B: 1,
     REG_D_506_C: 2,
+}
+
+export const InterestRateType = {
+    FIXED_FOR_ALL_COUPONS: 0,
+    FIXED_PER_COUPON: 1,
+    KPI_BASED_PER_COUPON: 2,
 }
 
 export async function setFactoryRegulationData(
@@ -525,6 +532,7 @@ export async function setBondData({
     identityRegistry,
     beneficiariesList,
     beneficiariesListData,
+    interestRateType,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -557,6 +565,7 @@ export async function setBondData({
     identityRegistry?: string
     beneficiariesList?: string[]
     beneficiariesListData?: string[]
+    interestRateType: number
 }) {
     let rbacs: Rbac[] = []
 
@@ -609,6 +618,7 @@ export async function setBondData({
         nominalValue: nominalValue,
         startingDate: startingDate,
         maturityDate: maturityDate,
+        interestRateType: interestRateType,
     }
 
     const couponDetails: CouponDetailsData = {
@@ -793,6 +803,7 @@ export async function deployBondFromFactory({
     identityRegistry,
     beneficiariesList,
     beneficiariesListData,
+    interestRateType,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -828,6 +839,7 @@ export async function deployBondFromFactory({
     identityRegistry?: string
     beneficiariesList?: string[]
     beneficiariesListData?: string[]
+    interestRateType: number
 }) {
     const bondData = await setBondData({
         adminAccount,
@@ -858,6 +870,7 @@ export async function deployBondFromFactory({
         identityRegistry,
         beneficiariesList,
         beneficiariesListData,
+        interestRateType,
     })
 
     const factoryRegulationData = await setFactoryRegulationData(

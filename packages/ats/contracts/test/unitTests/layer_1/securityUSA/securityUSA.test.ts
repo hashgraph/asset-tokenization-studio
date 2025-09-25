@@ -218,6 +218,7 @@ import {
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
     TIME_PERIODS_S,
+    InterestRateType,
 } from '@scripts'
 
 const countriesControlListType = true
@@ -235,6 +236,7 @@ const rate = 1
 const rateDecimals = 0
 let maturityDate = startingDate + numberOfCoupons * frequency
 let firstCouponDate = startingDate + 1
+const interestRateType = InterestRateType.FIXED_PER_COUPON
 
 describe('Security USA Tests', () => {
     let signer_A: SignerWithAddress
@@ -531,6 +533,7 @@ describe('Security USA Tests', () => {
                 init_rbacs,
                 businessLogicResolver: businessLogicResolver.address,
                 factory,
+                interestRateType,
             })
 
             bondUSAFacet = await ethers.getContractAt(
@@ -603,6 +606,7 @@ describe('Security USA Tests', () => {
                 init_rbacs,
                 businessLogicResolver: businessLogicResolver.address,
                 factory,
+                interestRateType,
             })
 
             bondUSAFacet = await ethers.getContractAt(
@@ -674,6 +678,7 @@ describe('Security USA Tests', () => {
                 init_rbacs,
                 businessLogicResolver: businessLogicResolver.address,
                 factory,
+                interestRateType,
             })
 
             bondUSAFacet = await ethers.getContractAt(

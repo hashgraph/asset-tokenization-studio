@@ -32,6 +32,7 @@ abstract contract BondStorageWrapper is
         IBondRead.BondDetailsData bondDetail;
         bool initialized;
         uint256[] counponsOrderedListByIds;
+        IBondRead.InterestRateTypes interestRateType;
     }
 
     /**
@@ -43,6 +44,22 @@ abstract contract BondStorageWrapper is
     modifier onlyAfterCurrentMaturityDate(uint256 _maturityDate) {
         _checkMaturityDate(_maturityDate);
         _;
+    }
+
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_bond(
+        IBondRead.BondDetailsData calldata _bondDetailsData
+    )
+        internal
+        validateDates(
+            _bondDetailsData.startingDate,
+            _bondDetailsData.maturityDate
+        )
+        onlyValidTimestamp(_bondDetailsData.startingDate)
+    {
+        BondDataStorage storage bondStorage = _bondStorage();
+        bondStorage.initialized = true;
+        _storeBondDetails(_bondDetailsData);
     }
 
     function _storeBondDetails(
@@ -187,11 +204,7 @@ abstract contract BondStorageWrapper is
             _couponID
         );
 
-        couponFor_.rate = registeredCoupon.coupon.rate;
-        couponFor_.rateDecimals = registeredCoupon.coupon.rateDecimals;
-        couponFor_.recordDate = registeredCoupon.coupon.recordDate;
-        couponFor_.executionDate = registeredCoupon.coupon.executionDate;
-        couponFor_.period = registeredCoupon.coupon.period;
+        couponFor_.coupon = registeredCoupon.coupon;
 
         if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
             couponFor_.recordDateReached = true;

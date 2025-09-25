@@ -233,6 +233,7 @@ import {
     DeployAtsFullInfrastructureCommand,
     dateToUnixTimestamp,
     TIME_PERIODS_S,
+    InterestRateType,
 } from '@scripts'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
@@ -247,6 +248,7 @@ let firstCouponDate = startingDate + 1
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
+const interestRateType = InterestRateType.FIXED_PER_COUPON
 
 describe('Scheduled Coupon Listing Tests', () => {
     let diamond: ResolverProxy
@@ -298,6 +300,7 @@ describe('Scheduled Coupon Listing Tests', () => {
             init_rbacs,
             businessLogicResolver: businessLogicResolver.address,
             factory,
+            interestRateType,
         })
 
         await setFacets(diamond)
@@ -375,29 +378,43 @@ describe('Scheduled Coupon Listing Tests', () => {
         const couponsExecutionDateInSeconds = dateToUnixTimestamp(
             '2030-01-01T00:01:00Z'
         )
+        const couponsStartDateInSeconds = dateToUnixTimestamp(
+            '2029-12-31T00:00:00Z'
+        )
+        const couponsEndDateInSeconds = dateToUnixTimestamp(
+            '2029-12-31T00:10:00Z'
+        )
+        const couponsFixingDateInSeconds = dateToUnixTimestamp(
+            '2029-12-30T00:00:00Z'
+        )
         const couponsRate = 1
         const couponRateDecimals = 0
-        const couponsPeriod = 10
 
         const couponData_1 = {
             recordDate: couponsRecordDateInSeconds_1.toString(),
             executionDate: couponsExecutionDateInSeconds.toString(),
             rate: couponsRate,
-            period: couponsPeriod,
+            startDate: couponsStartDateInSeconds,
+            endDate: couponsEndDateInSeconds,
+            fixingDate: couponsFixingDateInSeconds,
             rateDecimals: couponRateDecimals,
         }
         const couponData_2 = {
             recordDate: couponsRecordDateInSeconds_2.toString(),
             executionDate: couponsExecutionDateInSeconds.toString(),
             rate: couponsRate,
-            period: couponsPeriod,
+            startDate: couponsStartDateInSeconds,
+            endDate: couponsEndDateInSeconds,
+            fixingDate: couponsFixingDateInSeconds,
             rateDecimals: couponRateDecimals,
         }
         const couponData_3 = {
             recordDate: couponsRecordDateInSeconds_3.toString(),
             executionDate: couponsExecutionDateInSeconds.toString(),
             rate: couponsRate,
-            period: couponsPeriod,
+            startDate: couponsStartDateInSeconds,
+            endDate: couponsEndDateInSeconds,
+            fixingDate: couponsFixingDateInSeconds,
             rateDecimals: couponRateDecimals,
         }
         await bondFacet.connect(signer_C).setCoupon(couponData_2)

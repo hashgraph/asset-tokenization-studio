@@ -22,6 +22,7 @@ import {
     RegulationSubType,
     RegulationType,
     PAUSER_ROLE,
+    InterestRateType,
 } from '@scripts'
 
 const BENEFICIARY_1 = '0x1234567890123456789012345678901234567890'
@@ -38,6 +39,7 @@ let firstCouponDate = 0
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
+const interestRateType = InterestRateType.FIXED_PER_COUPON
 
 describe('Beneficiaries Tests', () => {
     let signer_A: SignerWithAddress
@@ -102,6 +104,7 @@ describe('Beneficiaries Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
             beneficiariesList: [BENEFICIARY_2],
             beneficiariesListData: [BENEFICIARY_2_DATA],
+            interestRateType,
         })
 
         beneficiariesFacet = Beneficiaries__factory.connect(

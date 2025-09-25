@@ -231,6 +231,7 @@ import {
     DeployContractWithLibraryCommand,
     TREX_OWNER_ROLE,
     dateToUnixTimestamp,
+    InterestRateType,
 } from '@scripts'
 import { deployFullSuiteFixture } from './fixtures/deploy-full-suite.fixture'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -276,6 +277,7 @@ describe('TREX Factory Tests', () => {
     const countriesControlListType = true
     const listOfCountries = 'ES,FR,CH'
     const info = 'info'
+    const interestRateType = InterestRateType.FIXED_PER_COUPON
 
     let businessLogicResolver: BusinessLogicResolver
     let factoryAts: TREXFactoryAts
@@ -960,6 +962,7 @@ describe('TREX Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -1017,6 +1020,7 @@ describe('TREX Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -1067,6 +1071,7 @@ describe('TREX Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -1123,6 +1128,7 @@ describe('TREX Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -1175,6 +1181,7 @@ describe('TREX Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -1228,6 +1235,7 @@ describe('TREX Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -1281,6 +1289,7 @@ describe('TREX Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -1334,6 +1343,7 @@ describe('TREX Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -1407,6 +1417,7 @@ describe('TREX Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(

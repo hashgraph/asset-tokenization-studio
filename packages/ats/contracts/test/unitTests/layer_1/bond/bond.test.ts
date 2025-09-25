@@ -265,6 +265,7 @@ import {
     FREEZE_MANAGER_ROLE,
     EMPTY_HEX_BYTES,
     TIME_PERIODS_S,
+    InterestRateType,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
@@ -283,12 +284,18 @@ const info = 'info'
 const amount = numberOfUnits
 const _PARTITION_ID =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
+const interestRateType = InterestRateType.FIXED_PER_COUPON
+
+const couponPeriod = TIME_PERIODS_S.WEEK
 
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
+let couponStartDateInSeconds = 0
+let couponEndDateInSeconds = couponPeriod
+let couponFixingDateInSeconds = 0
+
 const couponRate = 50
 const couponRateDecimals = 1
-const couponPeriod = TIME_PERIODS_S.WEEK
 const EMPTY_VC_ID = EMPTY_STRING
 
 let couponData = {
@@ -296,7 +303,9 @@ let couponData = {
     executionDate: couponExecutionDateInSeconds.toString(),
     rate: couponRate,
     rateDecimals: couponRateDecimals,
-    period: couponPeriod,
+    startDate: couponStartDateInSeconds,
+    endDate: couponEndDateInSeconds,
+    fixingDate: couponFixingDateInSeconds,
 }
 
 describe('Bond Tests', () => {
@@ -466,6 +475,7 @@ describe('Bond Tests', () => {
             init_rbacs,
             factory,
             businessLogicResolver: businessLogicResolver.address,
+            interestRateType,
         })
 
         await setFacets({ diamond })
@@ -500,12 +510,17 @@ describe('Bond Tests', () => {
         couponRecordDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:01:00Z`)
         couponExecutionDateInSeconds =
             dateToUnixTimestamp(`2030-01-01T00:10:00Z`)
+        couponStartDateInSeconds = dateToUnixTimestamp(`2029-12-31T00:10:00Z`)
+        couponEndDateInSeconds = dateToUnixTimestamp(`2029-12-31T00:30:00Z`)
+        couponFixingDateInSeconds = dateToUnixTimestamp(`2029-12-31T00:00:00Z`)
         couponData = {
             recordDate: couponRecordDateInSeconds.toString(),
             executionDate: couponExecutionDateInSeconds.toString(),
             rate: couponRate,
             rateDecimals: couponRateDecimals,
-            period: couponPeriod,
+            startDate: couponStartDateInSeconds,
+            endDate: couponEndDateInSeconds,
+            fixingDate: couponFixingDateInSeconds,
         }
         await loadFixture(deploySecurityFixtureSinglePartition)
     })
@@ -708,7 +723,9 @@ describe('Bond Tests', () => {
                     executionDate: couponRecordDateInSeconds.toString(),
                     rate: couponRate,
                     rateDecimals: couponRateDecimals,
-                    period: couponPeriod,
+                    startDate: couponStartDateInSeconds,
+                    endDate: couponEndDateInSeconds,
+                    fixingDate: couponFixingDateInSeconds,
                 }
 
                 await expect(
@@ -722,7 +739,9 @@ describe('Bond Tests', () => {
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
                     rateDecimals: couponRateDecimals,
-                    period: couponPeriod,
+                    startDate: couponStartDateInSeconds,
+                    endDate: couponEndDateInSeconds,
+                    fixingDate: couponFixingDateInSeconds,
                 }
 
                 await expect(
@@ -747,7 +766,9 @@ describe('Bond Tests', () => {
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
                     rateDecimals: couponRateDecimals,
-                    period: customPeriod,
+                    startDate: couponStartDateInSeconds,
+                    endDate: couponStartDateInSeconds + customPeriod,
+                    fixingDate: couponFixingDateInSeconds,
                 }
 
                 // Set coupon and verify event includes period
@@ -757,20 +778,30 @@ describe('Bond Tests', () => {
                         '0x0000000000000000000000000000000000000000000000000000000000000001',
                         1,
                         account_C,
-                        couponRecordDateInSeconds,
-                        couponExecutionDateInSeconds,
-                        couponRate,
-                        couponRateDecimals,
-                        customPeriod
+                        [
+                            couponRecordDateInSeconds,
+                            couponExecutionDateInSeconds,
+                            couponStartDateInSeconds,
+                            couponStartDateInSeconds + customPeriod,
+                            couponFixingDateInSeconds,
+                            couponRate,
+                            couponRateDecimals,
+                        ]
                     )
 
                 // Verify coupon data includes period
                 const registeredCoupon = await bondReadFacet.getCoupon(1)
-                expect(registeredCoupon.coupon.period).to.equal(customPeriod)
+                expect(
+                    registeredCoupon.coupon.endDate.sub(
+                        registeredCoupon.coupon.startDate
+                    )
+                ).to.equal(customPeriod)
 
                 // Verify couponFor data includes period
                 const couponFor = await bondReadFacet.getCouponFor(1, account_A)
-                expect(couponFor.period).to.equal(customPeriod)
+                expect(
+                    couponFor.coupon.endDate.sub(couponFor.coupon.startDate)
+                ).to.equal(customPeriod)
             })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon with period 0 THEN transaction succeeds', async () => {
@@ -789,7 +820,9 @@ describe('Bond Tests', () => {
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
                     rateDecimals: couponRateDecimals,
-                    period: 0,
+                    startDate: couponStartDateInSeconds,
+                    endDate: couponStartDateInSeconds,
+                    fixingDate: couponFixingDateInSeconds,
                 }
 
                 await expect(bondFacet.setCoupon(minValidPeriodCouponData))
@@ -798,11 +831,15 @@ describe('Bond Tests', () => {
                         '0x0000000000000000000000000000000000000000000000000000000000000001',
                         1,
                         account_C,
-                        couponRecordDateInSeconds,
-                        couponExecutionDateInSeconds,
-                        couponRate,
-                        couponRateDecimals,
-                        0
+                        [
+                            couponRecordDateInSeconds,
+                            couponExecutionDateInSeconds,
+                            couponStartDateInSeconds,
+                            couponStartDateInSeconds,
+                            couponFixingDateInSeconds,
+                            couponRate,
+                            couponRateDecimals,
+                        ]
                     )
             })
 
@@ -818,11 +855,15 @@ describe('Bond Tests', () => {
                         '0x0000000000000000000000000000000000000000000000000000000000000001',
                         1,
                         account_C,
-                        couponRecordDateInSeconds,
-                        couponExecutionDateInSeconds,
-                        couponRate,
-                        couponRateDecimals,
-                        couponPeriod
+                        [
+                            couponRecordDateInSeconds,
+                            couponExecutionDateInSeconds,
+                            couponStartDateInSeconds,
+                            couponEndDateInSeconds,
+                            couponFixingDateInSeconds,
+                            couponRate,
+                            couponRateDecimals,
+                        ]
                     )
 
                 // check list members
@@ -851,12 +892,26 @@ describe('Bond Tests', () => {
                 )
                 expect(coupon.coupon.rate).to.equal(couponRate)
                 expect(coupon.coupon.rateDecimals).to.equal(couponRateDecimals)
-                expect(couponFor.recordDate).to.equal(couponRecordDateInSeconds)
-                expect(couponFor.executionDate).to.equal(
+                expect(couponFor.coupon.recordDate).to.equal(
+                    couponRecordDateInSeconds
+                )
+                expect(couponFor.coupon.executionDate).to.equal(
                     couponExecutionDateInSeconds
                 )
-                expect(couponFor.rate).to.equal(couponRate)
-                expect(couponFor.rateDecimals).to.equal(couponRateDecimals)
+                expect(couponFor.coupon.rate).to.equal(couponRate)
+                expect(couponFor.coupon.rateDecimals).to.equal(
+                    couponRateDecimals
+                )
+                expect(couponFor.coupon.startDate).to.equal(
+                    couponStartDateInSeconds
+                )
+                expect(couponFor.coupon.endDate).to.equal(
+                    couponEndDateInSeconds
+                )
+                expect(couponFor.coupon.fixingDate).to.equal(
+                    couponFixingDateInSeconds
+                )
+
                 expect(couponFor.tokenBalance).to.equal(0)
                 expect(couponFor.recordDateReached).to.equal(false)
                 expect(couponTotalHolders).to.equal(0)
@@ -896,11 +951,15 @@ describe('Bond Tests', () => {
                         '0x0000000000000000000000000000000000000000000000000000000000000001',
                         1,
                         account_C,
-                        couponRecordDateInSeconds,
-                        couponExecutionDateInSeconds,
-                        couponRate,
-                        couponRateDecimals,
-                        couponPeriod
+                        [
+                            couponRecordDateInSeconds,
+                            couponExecutionDateInSeconds,
+                            couponStartDateInSeconds,
+                            couponEndDateInSeconds,
+                            couponFixingDateInSeconds,
+                            couponRate,
+                            couponRateDecimals,
+                        ]
                     )
 
                 // check list members
@@ -963,11 +1022,15 @@ describe('Bond Tests', () => {
                         '0x0000000000000000000000000000000000000000000000000000000000000001',
                         1,
                         account_C,
-                        couponRecordDateInSeconds,
-                        couponExecutionDateInSeconds,
-                        couponRate,
-                        couponRateDecimals,
-                        couponPeriod
+                        [
+                            couponRecordDateInSeconds,
+                            couponExecutionDateInSeconds,
+                            couponStartDateInSeconds,
+                            couponEndDateInSeconds,
+                            couponFixingDateInSeconds,
+                            couponRate,
+                            couponRateDecimals,
+                        ]
                     )
 
                 // check list members
@@ -1005,6 +1068,8 @@ describe('Bond Tests', () => {
                 bondFacet = bondFacet.connect(signer_C)
 
                 const customPeriod = 3 * 24 * 60 * 60 // 3 days in seconds
+                couponStartDateInSeconds = 0
+                couponEndDateInSeconds = customPeriod
                 const DelayCoupon_2 = 100
                 const DelayCoupon_3 = 50
 
@@ -1012,7 +1077,9 @@ describe('Bond Tests', () => {
                     recordDate: couponRecordDateInSeconds.toString(),
                     executionDate: couponExecutionDateInSeconds.toString(),
                     rate: couponRate,
-                    period: customPeriod,
+                    startDate: couponStartDateInSeconds,
+                    endDate: couponEndDateInSeconds,
+                    fixingDate: couponFixingDateInSeconds,
                     rateDecimals: couponRateDecimals,
                 }
 
@@ -1024,7 +1091,9 @@ describe('Bond Tests', () => {
                         couponExecutionDateInSeconds + DelayCoupon_2
                     ).toString(),
                     rate: couponRate,
-                    period: customPeriod,
+                    startDate: couponStartDateInSeconds,
+                    endDate: couponEndDateInSeconds,
+                    fixingDate: couponFixingDateInSeconds,
                     rateDecimals: couponRateDecimals,
                 }
 
@@ -1036,7 +1105,9 @@ describe('Bond Tests', () => {
                         couponExecutionDateInSeconds + DelayCoupon_3
                     ).toString(),
                     rate: couponRate,
-                    period: customPeriod,
+                    startDate: couponStartDateInSeconds,
+                    endDate: couponEndDateInSeconds,
+                    fixingDate: couponFixingDateInSeconds,
                     rateDecimals: couponRateDecimals,
                 }
 
@@ -1252,11 +1323,15 @@ describe('Bond Tests', () => {
                         '0x0000000000000000000000000000000000000000000000000000000000000001',
                         1,
                         account_C,
-                        couponRecordDateInSeconds,
-                        couponExecutionDateInSeconds,
-                        couponRate,
-                        couponRateDecimals,
-                        couponPeriod
+                        [
+                            couponRecordDateInSeconds,
+                            couponExecutionDateInSeconds,
+                            couponStartDateInSeconds,
+                            couponEndDateInSeconds,
+                            couponFixingDateInSeconds,
+                            couponRate,
+                            couponRateDecimals,
+                        ]
                     )
 
                 // --- Pre: before record date -> tokenBalance should be 0 and not reached
@@ -1310,6 +1385,7 @@ describe('Bond Tests', () => {
                 init_rbacs,
                 factory,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             await setFacets({ diamond: newDiamond })

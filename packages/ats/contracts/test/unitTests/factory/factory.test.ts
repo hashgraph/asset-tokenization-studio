@@ -239,6 +239,7 @@ import {
     RegulationType,
     RegulationSubType,
     TIME_PERIODS_S,
+    InterestRateType,
 } from '@scripts'
 
 describe('Factory Tests', () => {
@@ -287,6 +288,7 @@ describe('Factory Tests', () => {
     const countriesControlListType = true
     const listOfCountries = 'ES,FR,CH'
     const info = 'info'
+    const interestRateType = InterestRateType.FIXED_PER_COUPON
 
     let factory: Factory
     let businessLogicResolver: BusinessLogicResolver
@@ -709,6 +711,7 @@ describe('Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: ADDRESS_ZERO,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -749,6 +752,7 @@ describe('Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -793,6 +797,7 @@ describe('Factory Tests', () => {
                 init_rbacs,
                 addAdmin: false,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -835,6 +840,7 @@ describe('Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -893,6 +899,7 @@ describe('Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -994,6 +1001,7 @@ describe('Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -1037,6 +1045,7 @@ describe('Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -1086,6 +1095,7 @@ describe('Factory Tests', () => {
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
+                interestRateType,
             })
 
             const factoryRegulationData = await setFactoryRegulationData(

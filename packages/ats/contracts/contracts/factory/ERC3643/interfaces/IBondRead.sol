@@ -2,19 +2,28 @@
 pragma solidity ^0.8.17;
 
 interface TRexIBondRead {
+    enum InterestRateTypes {
+        FIXED_FOR_ALL_COUPONS,
+        FIXED_PER_COUPON,
+        KPI_BASED_PER_COUPON
+    }
+
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;
         uint256 startingDate;
         uint256 maturityDate;
+        InterestRateTypes interestRateType;
     }
 
     struct Coupon {
         uint256 recordDate;
         uint256 executionDate;
+        uint256 startDate;
+        uint256 endDate;
+        uint256 fixingDate;
         uint256 rate;
         uint8 rateDecimals;
-        uint256 period;
     }
 
     struct RegisteredCoupon {
@@ -24,13 +33,9 @@ interface TRexIBondRead {
 
     struct CouponFor {
         uint256 tokenBalance;
-        uint256 rate;
-        uint8 rateDecimals;
-        uint256 recordDate;
-        uint256 executionDate;
-        uint256 period;
         uint8 decimals;
         bool recordDateReached;
+        Coupon coupon;
     }
     /**
      * @notice Retrieves the bond details
