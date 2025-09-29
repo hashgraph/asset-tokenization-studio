@@ -383,60 +383,106 @@ import {
 
 export class SDKService {
   static initData?: InitializationData = undefined;
-  static testnetNetwork = 'testnet';
-  static testnetMirrorNode = {
+
+  // Everything comes from environment variables
+  static currentNetwork = process.env.REACT_APP_NETWORK ?? 'testnet';
+
+  static mirrorNode = {
     baseUrl: process.env.REACT_APP_MIRROR_NODE ?? '',
     apiKey: '',
     headerName: '',
   };
-  static testnetMirrorNodes = {
-    nodes: [
-      {
-        mirrorNode: this.testnetMirrorNode,
-        environment: this.testnetNetwork,
-      },
-    ],
-  };
-  static testnetRPCNode = {
+
+  static rpcNode = {
     baseUrl: process.env.REACT_APP_RPC_NODE ?? '',
-    //baseUrl: "http://127.0.0.1:7546",
     apiKey: '',
     headerName: '',
   };
-  static testnetRPCNodes = {
-    nodes: [
-      {
-        jsonRpcRelay: this.testnetRPCNode,
-        environment: this.testnetNetwork,
-      },
-    ],
-  };
-  static testnetResolverAddress = process.env.REACT_APP_RPC_RESOLVER ?? '0.0.0';
-  static testnetFactoryAddress = process.env.REACT_APP_RPC_FACTORY ?? '0.0.0';
 
-  static testnetConfiguration = {
-    factoryAddress: this.testnetFactoryAddress,
-    resolverAddress: this.testnetResolverAddress,
-  };
-  static factories = {
-    factories: [
-      {
-        factory: this.testnetFactoryAddress,
-        environment: this.testnetNetwork,
-      },
-    ],
-  };
-  static resolvers = {
-    resolvers: [
-      {
-        resolver: this.testnetResolverAddress,
-        environment: this.testnetNetwork,
-      },
-    ],
-  };
+  static resolverAddress = process.env.REACT_APP_RPC_RESOLVER ?? '0.0.0';
+  static factoryAddress = process.env.REACT_APP_RPC_FACTORY ?? '0.0.0';
+
+  static get mirrorNodes() {
+    return {
+      nodes: [
+        {
+          mirrorNode: this.mirrorNode,
+          environment: this.currentNetwork,
+        },
+      ],
+    };
+  }
+
+  static get rpcNodes() {
+    return {
+      nodes: [
+        {
+          jsonRpcRelay: this.rpcNode,
+          environment: this.currentNetwork,
+        },
+      ],
+    };
+  }
+
+  static get configuration() {
+    return {
+      factoryAddress: this.factoryAddress,
+      resolverAddress: this.resolverAddress,
+    };
+  }
+
+  static get factories() {
+    return {
+      factories: [
+        {
+          factory: this.factoryAddress,
+          environment: this.currentNetwork,
+        },
+      ],
+    };
+  }
+
+  static get resolvers() {
+    return {
+      resolvers: [
+        {
+          resolver: this.resolverAddress,
+          environment: this.currentNetwork,
+        },
+      ],
+    };
+  }
 
   public static isInit() {
     return !!this.initData;
+  }
+
+  public static validateConfiguration() {
+    const config = {
+      network: this.currentNetwork,
+      mirrorNode: this.mirrorNode.baseUrl,
+      rpcNode: this.rpcNode.baseUrl,
+      resolver: this.resolverAddress,
+      factory: this.factoryAddress,
+    };
+
+    console.log('🔧 SDK Configuration:', config);
+
+    const missing = [];
+    if (!config.mirrorNode) missing.push('REACT_APP_MIRROR_NODE');
+    if (!config.rpcNode) missing.push('REACT_APP_RPC_NODE');
+    if (!config.resolver || config.resolver === '0.0.0')
+      missing.push('REACT_APP_RPC_RESOLVER');
+    if (!config.factory || config.factory === '0.0.0')
+      missing.push('REACT_APP_RPC_FACTORY');
+
+    if (missing.length > 0) {
+      console.warn('⚠️ Missing or invalid configuration:', missing);
+    } else {
+      console.log('✅ All configuration variables are set');
+    }
+
+    return config;
   }
 
   public static async connectWallet(wallet: SupportedWallets) {
@@ -461,9 +507,9 @@ export class SDKService {
     console.log(hwcSettings); // Placeholder usage to avoid TS6133
     this.initData = await Network.connect(
       new ConnectRequest({
-        network: this.testnetNetwork,
-        mirrorNode: this.testnetMirrorNode,
-        rpcNode: this.testnetRPCNode,
+        network: this.currentNetwork,
+        mirrorNode: this.mirrorNode,
+        rpcNode: this.rpcNode,
         hwcSettings,
         wallet,
       }),
@@ -474,14 +520,17 @@ export class SDKService {
 
   public static async init(events: Partial<WalletEvent>) {
     try {
+      // Validate configuration before initializing
+      this.validateConfiguration();
+
       const initReq: InitializationRequest = new InitializationRequest({
-        network: this.testnetNetwork,
-        mirrorNode: this.testnetMirrorNode,
-        rpcNode: this.testnetRPCNode,
+        network: this.currentNetwork,
+        mirrorNode: this.mirrorNode,
+        rpcNode: this.rpcNode,
         events,
-        configuration: this.testnetConfiguration,
-        mirrorNodes: this.testnetMirrorNodes,
-        jsonRpcRelays: this.testnetRPCNodes,
+        configuration: this.configuration,
+        mirrorNodes: this.mirrorNodes,
+        jsonRpcRelays: this.rpcNodes,
         factories: this.factories,
         resolvers: this.resolvers,
       });
