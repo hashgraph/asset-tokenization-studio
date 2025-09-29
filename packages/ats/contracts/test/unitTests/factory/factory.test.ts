@@ -238,6 +238,7 @@ import {
     setFactoryRegulationData,
     RegulationType,
     RegulationSubType,
+    TIME_PERIODS_S,
 } from '@scripts'
 
 describe('Factory Tests', () => {
@@ -275,9 +276,6 @@ describe('Factory Tests', () => {
     const nominalValue = 100
     let startingDate = 999
     let maturityDate = 999
-    const couponFrequency = 1
-    const couponRate = 1
-    let firstCouponDate = 999
     const numberOfCoupon = 30
 
     const regulationType = RegulationType.REG_D
@@ -700,9 +698,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: ADDRESS_ZERO,
@@ -739,9 +734,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -782,9 +774,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: false,
                 businessLogicResolver: businessLogicResolver.address,
@@ -823,9 +812,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -848,119 +834,17 @@ describe('Factory Tests', () => {
             bondData.bondDetails.startingDate = currentTimeInSeconds - 10000
             bondData.bondDetails.maturityDate =
                 bondData.bondDetails.startingDate + 10
-            bondData.couponDetails.firstCouponDate =
-                bondData.bondDetails.startingDate + 1
 
             await expect(
                 factory.deployBond(bondData, factoryRegulationData)
             ).to.be.rejectedWith('WrongTimestamp')
         })
 
-        it('GIVEN incorrect first coupon date WHEN deploying a new bond THEN transaction fails', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 10
-            firstCouponDate = maturityDate + 1
-
-            const bondData = await setBondData({
-                adminAccount: account_A,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await expect(
-                factory.deployBond(bondData, factoryRegulationData)
-            ).to.be.rejectedWith('CouponFirstDateWrong')
-
-            bondData.couponDetails.firstCouponDate =
-                bondData.bondDetails.startingDate - 1
-
-            await expect(
-                factory.deployBond(bondData, factoryRegulationData)
-            ).to.be.rejectedWith('CouponFirstDateWrong')
-        })
-
-        it('GIVEN incorrect coupon frequency WHEN deploying a new bond THEN transaction fails', async () => {
-            const currentTimeInSeconds =
-                Math.floor(new Date().getTime() / 1000) + 1
-            startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + 30
-            firstCouponDate = startingDate + 1
-            const couponFrequency_2 = 0
-
-            const bondData = await setBondData({
-                adminAccount: account_A,
-                isWhiteList: isWhitelist,
-                isControllable,
-                arePartitionsProtected,
-                clearingActive,
-                internalKycActivated,
-                isMultiPartition,
-                name,
-                symbol,
-                decimals,
-                isin,
-                currency,
-                numberOfUnits,
-                nominalValue,
-                startingDate,
-                maturityDate,
-                couponFrequency: couponFrequency_2,
-                couponRate,
-                firstCouponDate,
-                init_rbacs,
-                addAdmin: true,
-                businessLogicResolver: businessLogicResolver.address,
-            })
-
-            const factoryRegulationData = await setFactoryRegulationData(
-                regulationType,
-                regulationSubType,
-                countriesControlListType,
-                listOfCountries,
-                info
-            )
-
-            await expect(
-                factory.deployBond(bondData, factoryRegulationData)
-            ).to.be.rejectedWith('CouponFrequencyWrong')
-        })
-
         it('GIVEN the proper information WHEN deploying a new bond with fixed coupons THEN transaction succeeds', async () => {
             const currentTimeInSeconds =
                 Math.floor(new Date().getTime() / 1000) + 1
             startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + numberOfCoupon * couponFrequency
-            firstCouponDate = startingDate + 1
-
+            maturityDate = startingDate + numberOfCoupon * TIME_PERIODS_S.DAY
             const bondData = await setBondData({
                 adminAccount: account_A,
                 isWhiteList: isWhitelist,
@@ -978,9 +862,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -1056,19 +937,8 @@ describe('Factory Tests', () => {
             expect(bondDetails.maturityDate).to.be.deep.equal(
                 bondData.bondDetails.maturityDate
             )
-            const couponDetails = await bondFacet.getCouponDetails()
-            expect(couponDetails.couponFrequency).to.be.deep.equal(
-                bondData.couponDetails.couponFrequency
-            )
-            expect(couponDetails.couponRate).to.be.deep.equal(
-                bondData.couponDetails.couponRate
-            )
-            expect(couponDetails.firstCouponDate).to.be.deep.equal(
-                bondData.couponDetails.firstCouponDate
-            )
 
-            const couponCount = await bondFacet.getCouponCount()
-            expect(couponCount).to.equal(numberOfCoupon)
+            // Coupon count assertion removed - no automatic coupons created
         })
 
         it('GIVEN wrong regulation type WHEN deploying a new resolverProxy THEN transaction fails', async () => {
@@ -1089,9 +959,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -1131,9 +998,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -1160,7 +1024,6 @@ describe('Factory Tests', () => {
                 Math.floor(new Date().getTime() / 1000) + 1
             startingDate = currentTimeInSeconds + 10000
             maturityDate = startingDate + 30
-            firstCouponDate = 0
 
             const bondData = await setBondData({
                 adminAccount: account_A,
@@ -1179,9 +1042,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -1256,16 +1116,6 @@ describe('Factory Tests', () => {
             )
             expect(bondDetails.maturityDate).to.be.deep.equal(
                 bondData.bondDetails.maturityDate
-            )
-            const couponDetails = await bondFacet.getCouponDetails()
-            expect(couponDetails.couponFrequency).to.be.deep.equal(
-                bondData.couponDetails.couponFrequency
-            )
-            expect(couponDetails.couponRate).to.be.deep.equal(
-                bondData.couponDetails.couponRate
-            )
-            expect(couponDetails.firstCouponDate).to.be.deep.equal(
-                bondData.couponDetails.firstCouponDate
             )
 
             const couponCount = await bondFacet.getCouponCount()

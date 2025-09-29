@@ -208,6 +208,7 @@ import {
   CalendarInputController,
   InputNumberController,
   PhosphorIcon,
+  SelectController,
   Text,
   Tooltip,
 } from 'io-bricks-ui';
@@ -222,14 +223,18 @@ import {
 import { useParams } from 'react-router-dom';
 import { useCoupons } from '../../../../hooks/queries/useCoupons';
 import { useGetBondDetails } from '../../../../hooks/queries/useGetSecurityDetails';
-import { dateToUnixTimestamp } from '../../../../utils/format';
-import { COUPONS_FACTOR, DATE_TIME_FORMAT } from '../../../../utils/constants';
+import {
+  dateToUnixTimestamp,
+  validateCouponPeriod,
+} from '../../../../utils/format';
+import { DATE_TIME_FORMAT, TIME_PERIODS_S } from '../../../../utils/constants';
 import { isBeforeDate } from '../../../../utils/helpers';
 
 interface ProgramCouponFormValues {
   rate: number;
   recordTimestamp: string;
   executionTimestamp: string;
+  period: string;
 }
 
 export const ProgramCoupon = () => {
@@ -254,9 +259,10 @@ export const ProgramCoupon = () => {
   const submit: SubmitHandler<ProgramCouponFormValues> = (params) => {
     const request = new SetCouponRequest({
       securityId: id ?? '',
-      rate: (params.rate * COUPONS_FACTOR).toString(),
+      rate: params.rate.toString(),
       recordTimestamp: dateToUnixTimestamp(params.recordTimestamp),
       executionTimestamp: dateToUnixTimestamp(params.executionTimestamp),
+      period: params.period,
     });
 
     createCoupon(request, {
@@ -343,6 +349,50 @@ export const ProgramCoupon = () => {
               suffix="%"
               thousandSeparator=","
               decimalSeparator="."
+            />
+          </Stack>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">
+                {tForm('period.label')}*
+              </Text>
+              <Tooltip label={tForm('period.tooltip')} placement="right">
+                <PhosphorIcon as={Info} />
+              </Tooltip>
+            </HStack>
+            <SelectController
+              control={control}
+              id="period"
+              rules={{
+                required,
+                validate: (value: string) => {
+                  const validation = validateCouponPeriod(parseInt(value));
+                  return validation === true || validation;
+                },
+              }}
+              placeholder={tForm('period.placeholder')}
+              options={[
+                {
+                  label: tForm('period.options.day'),
+                  value: TIME_PERIODS_S.DAY.toString(),
+                },
+                {
+                  label: tForm('period.options.week'),
+                  value: TIME_PERIODS_S.WEEK.toString(),
+                },
+                {
+                  label: tForm('period.options.month'),
+                  value: TIME_PERIODS_S.MONTH.toString(),
+                },
+                {
+                  label: tForm('period.options.quarter'),
+                  value: TIME_PERIODS_S.QUARTER.toString(),
+                },
+                {
+                  label: tForm('period.options.year'),
+                  value: TIME_PERIODS_S.YEAR.toString(),
+                },
+              ]}
             />
           </Stack>
           <Button

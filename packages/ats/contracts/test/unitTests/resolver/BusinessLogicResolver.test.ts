@@ -252,17 +252,15 @@ describe('BusinessLogicResolver', () => {
 
     async function deployBusinessLogicResolverFixture() {
         businessLogicResolver = await (
-            await ethers.getContractFactory('BusinessLogicResolver')
+            await ethers.getContractFactory('BusinessLogicResolver', signer_A)
         ).deploy()
-
-        businessLogicResolver = businessLogicResolver.connect(signer_A)
 
         await businessLogicResolver.initialize_BusinessLogicResolver()
         accessControl = await ethers.getContractAt(
             'AccessControl',
-            businessLogicResolver.address
+            businessLogicResolver.address,
+            signer_A
         )
-        accessControl = accessControl.connect(signer_A)
         await accessControl.grantRole(PAUSER_ROLE, account_B)
 
         pause = await ethers.getContractAt(
@@ -289,14 +287,10 @@ describe('BusinessLogicResolver', () => {
     describe('Paused', () => {
         beforeEach(async () => {
             // Pausing the token
-            pause = pause.connect(signer_B)
-            await pause.pause()
+            await pause.connect(signer_B).pause()
         })
 
         it('GIVEN a paused Token WHEN registrying logics THEN transaction fails with TokenIsPaused', async () => {
-            // Using account C (with role)
-            businessLogicResolver = businessLogicResolver.connect(signer_A)
-
             // transfer with data fails
             await expect(
                 businessLogicResolver.registerBusinessLogics(
@@ -308,14 +302,11 @@ describe('BusinessLogicResolver', () => {
 
     describe('AccessControl', () => {
         it('GIVEN an account without admin role WHEN registrying logics THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            businessLogicResolver = businessLogicResolver.connect(signer_C)
-
             // add to list fails
             await expect(
-                businessLogicResolver.registerBusinessLogics(
-                    BUSINESS_LOGIC_KEYS.slice(0, 2)
-                )
+                businessLogicResolver
+                    .connect(signer_C)
+                    .registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2))
             ).to.be.rejectedWith('AccountHasNoRole')
         })
     })

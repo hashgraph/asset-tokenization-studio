@@ -230,8 +230,8 @@ export default class CreateConfigurationsForDeployedContractsCommand extends Bas
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             deployer: _,
             businessLogicResolver,
-            equityUsa,
-            bondUsa,
+            equityUsaFacet,
+            bondUsaFacet,
             ...contractListToRegister
         } = deployedContractList
 
@@ -250,12 +250,15 @@ export default class CreateConfigurationsForDeployedContractsCommand extends Bas
             signer,
             overrides,
         })
-        this.equityUsaAddress = equityUsa.address
-        this.excludeEquityAddresses = [deployedContractList.bondUsaRead.address]
-        this.bondUsaAddress = bondUsa.address
+        this.equityUsaAddress = equityUsaFacet.address
+        this.excludeEquityAddresses = [
+            deployedContractList.bondUsaRead.address,
+            deployedContractList.proceedRecipientsFacet.address,
+        ]
+        this.bondUsaAddress = bondUsaFacet.address
         this.excludeBondAddresses = [
-            deployedContractList.adjustBalances.address,
-            deployedContractList.scheduledBalanceAdjustments.address,
+            deployedContractList.adjustBalancesFacet.address,
+            deployedContractList.scheduledBalanceAdjustmentsFacet.address,
         ]
     }
 

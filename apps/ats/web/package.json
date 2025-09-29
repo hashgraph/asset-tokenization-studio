@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-dapp",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc && vite build",
@@ -10,11 +10,15 @@
     "dev": "vite",
     "start": "vite preview",
     "clean:node": "npx --yes rimraf node_modules",
-    "clean:build": "npx --yes rimraf build",
+    "clean:build": "npx --yes rimraf dist",
     "clean:lock": "npx --yes rimraf package-lock.json yarn.lock",
     "test:update": "NODE_ENV=test jest --updateSnapshot",
     "test:clear:cache": "npx jest --clearCache",
-    "theme": "chakra-cli tokens src/theme/index.ts"
+    "theme": "chakra-cli tokens src/theme/index.ts",
+    "lint": "eslint '**/*.{js,jsx,mjs,cjs,ts,tsx,mts}' --cache",
+    "lint:fix": "eslint '**/*.{js,jsx,mjs,cjs,ts,tsx,mts}' --fix --cache && npm run format",
+    "format": "prettier --write '**/*.{js,jsx,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
+    "format:check": "prettier --check '**/*.{js,jsx,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.21.4",
@@ -45,10 +49,11 @@
     "rimraf": "^6.0.1",
     "ts-jest": "^29.1.0",
     "ts-xor": "^1.1.0",
-    "typescript": "4.9.5",
+    "typescript": "5.3.3",
     "util": "^0.12.5",
     "vite": "4.5.5",
     "vite-plugin-environment": "^1.1.3",
+    "vite-plugin-node-polyfills": "^0.24.0",
     "vite-plugin-rewrite-all": "1.0.1",
     "vite-tsconfig-paths": "^4.2.1"
   },
@@ -59,22 +64,18 @@
     "@hashgraph/asset-tokenization-sdk": "file:../../../packages/ats/sdk",
     "@tanstack/react-query": "^4.35.3",
     "framer-motion": "^10.16.4",
-    "i18next": "23.5.1",
-    "i18next-browser-languagedetector": "7.1.0",
-    "io-bricks-ui": "^2.7.4",
+    "i18next": "23.10.1",
+    "i18next-browser-languagedetector": "7.2.0",
+    "io-bricks-ui": "2.7.4",
+    "@phosphor-icons/react": "2.0.9",
     "named-urls": "^2.0.1",
     "react": "^18.2.0",
     "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.41.5",
-    "react-i18next": "^13.2.0",
-    "react-router-dom": "^6.10.0",
+    "react-hook-form": "7.41.5",
+    "react-i18next": "13.2.0",
+    "react-router-dom": "6.10.0",
     "use-react-router-breadcrumbs": "^4.0.1",
-    "zustand": "^4.4.1"
-  },
-  "overrides": {
-    "ws": "7.5.10",
-    "elliptic": "6.6.1",
-    "path-to-regexp": "6.3.0"
+    "zustand": "4.4.1"
   }
 }

@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TabsConfiguration Component Basic Rendering should match snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-gtokrm"
+  >
+    <div
+      data-index="0"
+      data-tabs-count="2"
+      data-testid="tabs"
+      data-variant="primary"
+    >
+      <div
+        data-testid="tab-0"
+      >
+        <div
+          data-testid="tab-header-0"
+        >
+          Details
+        </div>
+        <div
+          data-testid="tab-content-0"
+        >
+          <div
+            data-has-asset="true"
+            data-is-loading="false"
+            data-testid="details"
+          >
+            <div
+              data-testid="asset-data"
+            >
+              <span
+                data-testid="asset-name"
+              >
+                Test Asset
+              </span>
+              <span
+                data-testid="asset-symbol"
+              >
+                TST
+              </span>
+            </div>
+          </div>
+        </div>
+        <button
+          data-testid="tab-button-0"
+        >
+          Details
+        </button>
+      </div>
+      <div
+        data-testid="tab-1"
+      >
+        <div
+          data-testid="tab-header-1"
+        >
+          Distributions
+        </div>
+        <div
+          data-testid="tab-content-1"
+        >
+          <div
+            data-asset-id="asset-123"
+            data-is-importing="false"
+            data-is-paused="false"
+            data-testid="asset-distributions"
+          >
+            <button
+              data-testid="pause-unpause-btn"
+            >
+              Pause
+            </button>
+            <button
+              data-testid="import-actions-btn"
+            >
+              Import Actions
+            </button>
+            <button
+              data-testid="new-distribution-btn"
+            >
+              New Distribution
+            </button>
+          </div>
+        </div>
+        <button
+          data-testid="tab-button-1"
+        >
+          Distributions
+        </button>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

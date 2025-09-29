@@ -212,7 +212,7 @@ import {
 } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { PreviousStepButton } from './PreviousStepButton';
-import { PhosphorIcon } from 'io-bricks-ui';
+import { PhosphorIcon, Table, Text } from 'io-bricks-ui';
 import { useFormContext } from 'react-hook-form';
 import {
   Button,
@@ -228,19 +228,24 @@ import { ICreateBondFormValues } from '../ICreateBondFormValues';
 import { RouterManager } from '../../../router/RouterManager';
 import { RouteName } from '../../../router/RouteName';
 import { WarningCircle, Question } from '@phosphor-icons/react';
-import { transformCouponType } from '../CouponType';
 import {
   dateToUnixTimestamp,
   formatNumber,
   numberToExponential,
 } from '../../../utils/format';
 import { FormStepContainer } from '../../../components/FormStepContainer';
-import { COUPONS_FACTOR, NOMINAL_VALUE_FACTOR } from '../../../utils/constants';
+import { NOMINAL_VALUE_FACTOR } from '../../../utils/constants';
 import { CountriesList } from '../../CreateSecurityCommons/CountriesList';
 import {
   COUNTRY_LIST_ALLOWED,
   COUNTRY_LIST_BLOCKED,
 } from '../../../utils/countriesConfig';
+import { createColumnHelper } from '@tanstack/table-core';
+
+interface IProceedRecipient {
+  address: string;
+  data?: string;
+}
 
 export const StepReview = () => {
   const { t } = useTranslation('security', { keyPrefix: 'createBond' });
@@ -274,12 +279,6 @@ export const StepReview = () => {
   const totalAmount = getValues('totalAmount');
   const startingDate = getValues('startingDate');
   const maturityDate = getValues('maturityDate');
-  const couponType = getValues('couponType');
-  let couponFrequency = getValues('couponFrequency');
-  let couponRate = getValues('couponRate');
-  let firstCouponDate = getValues('firstCouponDate');
-  const lastCouponDate = getValues('lastCouponDate');
-  const totalCoupons = getValues('totalCoupons');
   const isBlocklist = getValues('isBlocklist');
   const isControllable = getValues('isControllable');
   const isClearing = getValues('isClearing');
@@ -293,18 +292,33 @@ export const StepReview = () => {
   const internalKycActivated = getValues('internalKycActivated');
   const complianceId = getValues('complianceId');
   const identityRegistryId = getValues('identityRegistryId');
+  const proceedRecipientsIds = getValues('proceedRecipientsIds');
+  const proceedRecipientsData = getValues('proceedRecipientsData');
 
   countriesList = countriesList.concat(
     countriesListType === 2 ? COUNTRY_LIST_ALLOWED : COUNTRY_LIST_BLOCKED,
   );
 
-  const submit = () => {
-    if (couponType === 2) {
-      couponRate = 0;
-      couponFrequency = '0';
-      firstCouponDate = '0';
-    }
+  const proceedRecipientsTableData: IProceedRecipient[] = (
+    proceedRecipientsIds || []
+  ).map((address, index) => ({
+    address,
+    data: (proceedRecipientsData || [])[index] || '',
+  }));
 
+  const columnsHelper = createColumnHelper<IProceedRecipient>();
+  const columnsProceedRecipients = [
+    columnsHelper.accessor('address', {
+      header: t('stepProceedRecipients.address'),
+      enableSorting: false,
+    }),
+    columnsHelper.accessor('data', {
+      header: t('stepProceedRecipients.data'),
+      enableSorting: false,
+    }),
+  ];
+
+  const submit = () => {
     const request = new CreateBondRequest({
       name,
       symbol,
@@ -321,15 +335,6 @@ export const StepReview = () => {
       nominalValue: (nominalValue * NOMINAL_VALUE_FACTOR).toString(),
       startingDate: dateToUnixTimestamp(startingDate),
       maturityDate: dateToUnixTimestamp(maturityDate),
-      couponFrequency: (
-        parseInt(couponFrequency) *
-        (30 * 24 * 60 * 60)
-      ).toString(),
-      couponRate: (couponRate * COUPONS_FACTOR).toString(),
-      firstCouponDate:
-        firstCouponDate != '0'
-          ? dateToUnixTimestamp(firstCouponDate)
-          : firstCouponDate,
       currency:
         '0x' +
         currency.charCodeAt(0) +
@@ -344,15 +349,15 @@ export const StepReview = () => {
       configVersion: parseInt(process.env.REACT_APP_BOND_CONFIG_VERSION ?? '0'),
       ...(externalPausesList &&
         externalPausesList.length > 0 && {
-          externalPauses: externalPausesList,
+          externalPausesIds: externalPausesList,
         }),
       ...(externalControlList &&
         externalControlList.length > 0 && {
-          externalControlLists: externalControlList,
+          externalControlListsIds: externalControlList,
         }),
       ...(externalKYCList &&
         externalKYCList.length > 0 && {
-          externalKycLists: externalKYCList,
+          externalKycListsIds: externalKYCList,
         }),
       internalKycActivated,
       ...(complianceId && {
@@ -360,6 +365,12 @@ export const StepReview = () => {
       }),
       ...(identityRegistryId && {
         identityRegistryId: identityRegistryId,
+      }),
+      ...(proceedRecipientsIds && {
+        proceedRecipientsIds: proceedRecipientsIds,
+      }),
+      ...(proceedRecipientsData && {
+        proceedRecipientsData: proceedRecipientsData,
       }),
     });
 
@@ -443,37 +454,6 @@ export const StepReview = () => {
     },
   ];
 
-  const couponDetails: DetailReviewProps[] = [
-    {
-      title: t('stepCoupon.couponType'),
-      value: transformCouponType(couponType),
-    },
-  ];
-  if (couponType === 1) {
-    couponDetails.push(
-      {
-        title: t('stepCoupon.couponRate'),
-        value: formatNumber(couponRate) + ' %',
-      },
-      {
-        title: t('stepCoupon.couponFrequency'),
-        value: 'Every ' + couponFrequency + ' months',
-      },
-      {
-        title: t('stepCoupon.firstCouponDate'),
-        value: new Date(firstCouponDate).toLocaleDateString(),
-      },
-      {
-        title: t('stepCoupon.lastCouponDate'),
-        value: lastCouponDate,
-      },
-      {
-        title: t('stepCoupon.totalCoupons'),
-        value: totalCoupons,
-      },
-    );
-  }
-
   const regulationDetails: DetailReviewProps[] = [
     {
       title: tRegulation('regulationTypeReview'),
@@ -525,14 +505,19 @@ export const StepReview = () => {
 
           <InfoDivider
             step={3}
-            title={t('header.coupon') + ' details'}
+            title={t('stepProceedRecipients.title')}
             type="main"
           />
-          <SimpleGrid columns={1} gap={6} w="full">
-            {couponDetails.map((props) => (
-              <DetailReview {...props} />
-            ))}
-          </SimpleGrid>
+          <Stack w="full">
+            {proceedRecipientsTableData.length > 0 && (
+              <Table
+                name="proceedRecipients"
+                columns={columnsProceedRecipients}
+                data={proceedRecipientsTableData}
+              />
+            )}
+            {!proceedRecipientsTableData.length && <Text>-</Text>}
+          </Stack>
 
           <InfoDivider step={4} title={t('stepERC3643.title')} type="main" />
           <SimpleGrid columns={1} gap={6} w="full">

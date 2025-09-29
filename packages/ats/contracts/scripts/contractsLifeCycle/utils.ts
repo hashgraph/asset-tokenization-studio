@@ -254,7 +254,7 @@ function encodeFunctionCall(functionName: string, parameters: any[], abi: any) {
     const encodedParametersHex = iface
         .encodeFunctionData(functionName, parameters)
         .slice(2)
-    return Buffer.from(encodedParametersHex, 'hex')
+    return new Uint8Array(Buffer.from(encodedParametersHex, 'hex'))
 }
 
 function decodeFunctionResult(

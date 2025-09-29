@@ -211,12 +211,12 @@ import { Details } from './Components/Details';
 import { Balance } from './Components/Balance';
 import {
   GetSecurityDetailsRequest,
-  GetRoleCountForRequest,
-  GetRolesForRequest,
   PauseRequest,
   SecurityViewModel,
   GetEquityDetailsRequest,
   GetBondDetailsRequest,
+  GetRoleCountForRequest,
+  GetRolesForRequest,
 } from '@hashgraph/asset-tokenization-sdk';
 import {
   useGetBondDetails,
@@ -227,7 +227,6 @@ import {
   useGetSecurityRolesFor,
 } from '../../hooks/queries/useGetSecurityDetails';
 import { useParams } from 'react-router-dom';
-import { useWalletStore } from '../../store/walletStore';
 import { useMemo } from 'react';
 import { User } from '../../utils/constants';
 import { useUserStore } from '../../store/userStore';
@@ -238,6 +237,7 @@ import { OperationsTab } from './Components/Tabs/Operations';
 import { ControlTab } from './Components/Tabs/Control';
 import { CorporateActionsTab } from './Components/Tabs/CorporateActions';
 import { hasRole } from '../../utils/helpers';
+import { useWalletStore } from '../../store/walletStore';
 
 export const DigitalSecurityDetails = () => {
   const { id = '' } = useParams();
@@ -251,7 +251,7 @@ export const DigitalSecurityDetails = () => {
 
   const { address: walletAddress } = useWalletStore();
   const { type: userType } = useUserStore();
-  const { setRoles } = useRolesStore();
+  const { roles: rolesStored, setRoles } = useRolesStore();
 
   const {
     data: securityDetails,
@@ -301,21 +301,20 @@ export const DigitalSecurityDetails = () => {
   );
 
   // ROLES FOR
-  const { data: roles = [], isLoading: isLoadingRoles } =
-    useGetSecurityRolesFor(
-      new GetRolesForRequest({
-        securityId: id,
-        targetId: walletAddress,
-        start: 0,
-        end: roleCountFor ?? 0,
-      }),
-      {
-        enabled: !!roleCountFor,
-        onSuccess: (roles) => setRoles(roles as SecurityRole[]),
-        staleTime: 0,
-        cacheTime: 0,
-      },
-    );
+  const { isLoading: isLoadingRoles } = useGetSecurityRolesFor(
+    new GetRolesForRequest({
+      securityId: id,
+      targetId: walletAddress,
+      start: 0,
+      end: roleCountFor ?? 0,
+    }),
+    {
+      enabled: !!roleCountFor,
+      onSuccess: (roles) => setRoles(roles as SecurityRole[]),
+      staleTime: 0,
+      cacheTime: 0,
+    },
+  );
 
   // IS PAUSED
   const { data: isPaused, isLoading: isLoadingIsPaused } = useGetIsPaused(
@@ -369,51 +368,59 @@ export const DigitalSecurityDetails = () => {
 
     const operationsConfig = {
       showLocker:
-        !isSecurityPaused && hasRole(roles, SecurityRole._LOCKER_ROLE),
+        !isSecurityPaused && hasRole(rolesStored, SecurityRole._LOCKER_ROLE),
       showHold: !isSecurityPaused,
-      showCap: !isSecurityPaused && hasRole(roles, SecurityRole._CAP_ROLE),
+      showCap:
+        !isSecurityPaused && hasRole(rolesStored, SecurityRole._CAP_ROLE),
       showClearingOperations:
         !isSecurityPaused &&
-        hasRole(roles, SecurityRole._CLEARING_VALIDATOR_ROLE),
+        hasRole(rolesStored, SecurityRole._CLEARING_VALIDATOR_ROLE),
       showFreeze:
-        !isSecurityPaused && hasRole(roles, SecurityRole._FREEZE_MANAGER_ROLE),
+        !isSecurityPaused &&
+        hasRole(rolesStored, SecurityRole._FREEZE_MANAGER_ROLE),
     };
 
     const corporateActionsConfig = {
       showBalanceAdjustment:
         !isSecurityPaused &&
         securityDetails?.type === 'EQUITY' &&
-        hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
+        hasRole(rolesStored, SecurityRole._CORPORATEACTIONS_ROLE),
       showDividends:
         !isSecurityPaused &&
         securityDetails?.type === 'EQUITY' &&
-        hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
+        hasRole(rolesStored, SecurityRole._CORPORATEACTIONS_ROLE),
       showVotingRights:
         !isSecurityPaused &&
         securityDetails?.type === 'EQUITY' &&
-        hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
+        hasRole(rolesStored, SecurityRole._CORPORATEACTIONS_ROLE),
       showCoupons:
         !isSecurityPaused &&
         securityDetails?.type === 'BOND' &&
-        hasRole(roles, SecurityRole._CORPORATEACTIONS_ROLE),
+        hasRole(rolesStored, SecurityRole._CORPORATEACTIONS_ROLE),
     };
 
     const controlConfig = {
+      showProceedRecipients:
+        !isSecurityPaused && securityDetails?.type === 'BOND',
       showControlList:
-        !isSecurityPaused && hasRole(roles, SecurityRole._CONTROLLIST_ROLE),
-      showKYC: !isSecurityPaused && hasRole(roles, SecurityRole._KYC_ROLE),
+        !isSecurityPaused &&
+        hasRole(rolesStored, SecurityRole._CONTROLLIST_ROLE),
+      showKYC:
+        !isSecurityPaused && hasRole(rolesStored, SecurityRole._KYC_ROLE),
       showSSIManager:
-        !isSecurityPaused && hasRole(roles, SecurityRole._SSI_MANAGER_ROLE),
+        !isSecurityPaused &&
+        hasRole(rolesStored, SecurityRole._SSI_MANAGER_ROLE),
       showFreeze:
-        !isSecurityPaused && hasRole(roles, SecurityRole._FREEZE_MANAGER_ROLE),
+        !isSecurityPaused &&
+        hasRole(rolesStored, SecurityRole._FREEZE_MANAGER_ROLE),
     };
 
     const managementConfig = {
       showRoleManagement: !isSecurityPaused,
       showDangerZone:
-        hasRole(roles, SecurityRole._CLEARING_ROLE) ||
-        hasRole(roles, SecurityRole._PAUSER_ROLE) ||
-        hasRole(roles, SecurityRole._INTERNAL_KYC_MANAGER_ROLE),
+        hasRole(rolesStored, SecurityRole._CLEARING_ROLE) ||
+        hasRole(rolesStored, SecurityRole._PAUSER_ROLE) ||
+        hasRole(rolesStored, SecurityRole._INTERNAL_KYC_MANAGER_ROLE),
       showConfiguration: true,
     };
 
@@ -488,11 +495,15 @@ export const DigitalSecurityDetails = () => {
     isFetchingSecurityDetails,
     tTabs,
     userType,
-    isLoadingRoles,
     isPaused,
     isLoadingIsPaused,
-    roles,
+    isLoadingRoles,
+    rolesStored,
   ]);
+
+  const tabsKey = useMemo(() => {
+    return `tabs-${rolesStored.join('-')}-${tabs.length}`;
+  }, [rolesStored, tabs.length]);
 
   return (
     <>
@@ -504,7 +515,7 @@ export const DigitalSecurityDetails = () => {
       </HStack>
 
       <Stack w="full" h="full" borderRadius={1} pt={6} gap={4}>
-        <Tabs tabs={tabs} variant="primary" isLazy />
+        <Tabs tabs={tabs} variant="primary" isLazy key={tabsKey} />
       </Stack>
     </>
   );

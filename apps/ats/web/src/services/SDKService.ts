@@ -210,7 +210,6 @@ import {
   BondDetailsViewModel,
   ConnectRequest,
   ControlListRequest,
-  CouponDetailsViewModel,
   CouponForViewModel,
   CouponViewModel,
   CreateBondRequest,
@@ -230,7 +229,6 @@ import {
   GetControlListCountRequest,
   GetControlListMembersRequest,
   GetControlListTypeRequest,
-  GetCouponDetailsRequest,
   GetCouponForRequest,
   GetCouponRequest,
   GetDividendsForRequest,
@@ -365,12 +363,22 @@ import {
   UnfreezePartialTokensRequest,
   GetFrozenPartialTokensRequest,
   ComplianceRequest,
+  IdentityRegistryRequest,
   GetCouponHoldersRequest,
   GetTotalCouponHoldersRequest,
   GetTotalDividendHoldersRequest,
   GetDividendHoldersRequest,
   GetTotalVotingHoldersRequest,
   GetVotingHoldersRequest,
+  SetComplianceRequest,
+  SetIdentityRegistryRequest,
+  AddProceedRecipientRequest,
+  RemoveProceedRecipientRequest,
+  UpdateProceedRecipientDataRequest,
+  GetProceedRecipientsCountRequest,
+  GetProceedRecipientsRequest,
+  IsProceedRecipientRequest,
+  GetProceedRecipientDataRequest,
 } from '@hashgraph/asset-tokenization-sdk';
 
 export class SDKService {
@@ -533,12 +541,6 @@ export class SDKService {
     return await Bond.getBondDetails(req);
   }
 
-  public static async getCouponDetails(
-    req: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel> {
-    return await Bond.getCouponDetails(req);
-  }
-
   public static async updateBondMaturityDate(
     req: UpdateMaturityDateRequest,
   ): Promise<boolean> {
@@ -548,6 +550,76 @@ export class SDKService {
 
   public static async getCompliance(req: ComplianceRequest): Promise<string> {
     return await Security.compliance(req);
+  }
+
+  public static async updateCompliance(req: SetComplianceRequest): Promise<{
+    payload: boolean;
+  }> {
+    return await Security.setCompliance(req);
+  }
+
+  public static async getIdentityRegistry(
+    req: IdentityRegistryRequest,
+  ): Promise<string> {
+    return await Security.identityRegistry(req);
+  }
+
+  public static async updateIdentityRegistry(
+    req: SetIdentityRegistryRequest,
+  ): Promise<{
+    payload: boolean;
+  }> {
+    return await Security.setIdentityRegistry(req);
+  }
+
+  // Proceed Recipients
+  public static async getProceedRecipientsCount(
+    req: GetProceedRecipientsCountRequest,
+  ): Promise<number> {
+    const request = await Bond.getProceedRecipientsCount(req);
+    return request.payload;
+  }
+
+  public static async getProceedRecipients(
+    req: GetProceedRecipientsRequest,
+  ): Promise<string[]> {
+    const request = await Bond.getProceedRecipients(req);
+    return request.payload;
+  }
+
+  public static async getProceedRecipientData(
+    req: GetProceedRecipientDataRequest,
+  ): Promise<string> {
+    const request = await Bond.getProceedRecipientData(req);
+    return request.payload;
+  }
+
+  public static async isProceedRecipient(
+    req: IsProceedRecipientRequest,
+  ): Promise<boolean> {
+    const request = await Bond.isProceedRecipient(req);
+    return request.payload;
+  }
+
+  public static async addProceedRecipient(
+    req: AddProceedRecipientRequest,
+  ): Promise<boolean> {
+    const response = await Bond.addProceedRecipient(req);
+    return response.payload;
+  }
+
+  public static async removeProceedRecipient(
+    req: RemoveProceedRecipientRequest,
+  ): Promise<boolean> {
+    const response = await Bond.removeProceedRecipient(req);
+    return response.payload;
+  }
+
+  public static async updateProceedRecipientData(
+    req: UpdateProceedRecipientDataRequest,
+  ): Promise<boolean> {
+    const response = await Bond.updateProceedRecipientData(req);
+    return response.payload;
   }
 
   // COUPONS ////////////////////////////////////////////

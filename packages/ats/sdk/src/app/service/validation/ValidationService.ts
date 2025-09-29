@@ -266,6 +266,11 @@ import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetai
 import { OperationNotAllowed } from '@domain/context/security/error/operations/OperationNotAllowed';
 import { IsInternalKycActivatedQuery } from '@query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
 import { IsExternallyGrantedQuery } from '@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
+import { GetTokenBySaltQuery } from '@query/factory/trex/getTokenBySalt/GetTokenBySaltQuery';
+import { InvalidTrexTokenSalt } from '@domain/context/factory/error/InvalidTrexTokenSalt';
+import { IsProceedRecipientQuery } from '@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery';
+import { AccountIsNotProceedRecipient } from '@domain/context/security/error/operations/AccountIsNotProceedRecipient';
+import { AccountIsProceedRecipient } from '@domain/context/security/error/operations/AccountIsProceedRecipient';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -438,13 +443,8 @@ export default class ValidationService extends Service {
       ),
     );
 
-    if (res.payload != '0x01') {
-      throw ContractsErrorMapper.mapError(
-        res.payload,
-        operatorId,
-        sourceId,
-        targetId,
-      );
+    if (res.payload[0] != '0x01') {
+      throw ContractsErrorMapper.mapError(res.payload[0], res.payload[1]);
     }
   }
 
@@ -453,20 +453,14 @@ export default class ValidationService extends Service {
     sourceId: string,
     amount: string,
     partitionId: string,
-    operatorId: string,
   ): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
       new CanRedeemByPartitionQuery(securityId, sourceId, partitionId, amount),
     );
 
-    if (res.payload != '0x01') {
-      throw ContractsErrorMapper.mapError(
-        res.payload,
-        operatorId,
-        sourceId,
-        undefined,
-      );
+    if (res.payload[0] != '0x01') {
+      throw ContractsErrorMapper.mapError(res.payload[0], res.payload[1]);
     }
   }
 
@@ -694,6 +688,17 @@ export default class ValidationService extends Service {
     }
   }
 
+  async checkTrexTokenSaltExists(factory: string, salt: string): Promise<void> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const exists = (
+      await this.queryBus.execute(new GetTokenBySaltQuery(factory, salt))
+    ).token;
+
+    if (!exists) {
+      throw new InvalidTrexTokenSalt(salt);
+    }
+  }
+
   private async checkUserInControlList(
     controListType: SecurityControlListType,
     controlListMembers: string[],
@@ -761,5 +766,38 @@ export default class ValidationService extends Service {
       new GetKycStatusForQuery(securityId, address),
     );
     return kycResult.payload === kycStatus;
+  }
+
+  async checkIsProceedRecipient(
+    securityId: string,
+    proceedRecipient: string,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const res = (
+      await this.queryBus.execute(
+        new IsProceedRecipientQuery(securityId, proceedRecipient),
+      )
+    ).payload;
+    if (!res) {
+      throw new AccountIsNotProceedRecipient(securityId, proceedRecipient);
+    }
+
+    return res;
+  }
+  async checkIsNotProceedRecipient(
+    securityId: string,
+    proceedRecipient: string,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const res = (
+      await this.queryBus.execute(
+        new IsProceedRecipientQuery(securityId, proceedRecipient),
+      )
+    ).payload;
+    if (res) {
+      throw new AccountIsProceedRecipient(securityId, proceedRecipient);
+    }
+
+    return !res;
   }
 }
