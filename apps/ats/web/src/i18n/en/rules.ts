@@ -218,4 +218,5 @@ export default {
   isISINValid: 'Length should be {{length}}.',
   isISINValidFormat: 'Invalid format',
   isValidHederaId: 'Wrong id',
+  isValidHex: 'Invalid hex format',
 };

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FormStepContainer should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-1jjeqci"
+  >
+    <p
+      class="css-0"
+    >
+      TESTING
+    </p>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

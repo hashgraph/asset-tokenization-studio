@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true, // Skip type checking all .d.ts files.
+    "importHelpers": true,
+    "outDir": "./build",
+    "resolveJsonModule": true,
+    //"alwaysStrict": true,
+    //"strict": true,
+    "paths": {
+      "@config/*": ["./src/config/*"],
+      "@configuration": ["./Configuration"],
+      "@domain/*": ["./src/domain/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"],
+      "@test/*": ["./test/*"],
+      "@typechain": ["./typechain-types/*", "./typechain-types/index.ts"]
+    }
+  }
+}

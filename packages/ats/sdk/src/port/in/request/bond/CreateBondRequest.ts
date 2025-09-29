@@ -210,6 +210,7 @@ import FormatValidation from '../FormatValidation';
 
 import { SecurityDate } from '@domain/context/shared/SecurityDate';
 import { Factory } from '@domain/context/factory/Factories';
+import { InvalidValue } from '../error/InvalidValue';
 
 export default class CreateBondRequest extends ValidatedRequest<CreateBondRequest> {
   name: string;
@@ -231,13 +232,13 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   internalKycActivated: boolean;
 
   @OptionalField()
-  externalPauses?: string[];
+  externalPausesIds?: string[];
 
   @OptionalField()
-  externalControlLists?: string[];
+  externalControlListsIds?: string[];
 
   @OptionalField()
-  externalKycLists?: string[];
+  externalKycListsIds?: string[];
 
   @OptionalField()
   diamondOwnerAccount?: string;
@@ -253,9 +254,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   nominalValue: string;
   startingDate: string;
   maturityDate: string;
-  couponFrequency: string;
-  couponRate: string;
-  firstCouponDate: string;
   regulationType: number;
   regulationSubType: number;
   isCountryControlListWhiteList: boolean;
@@ -263,6 +261,12 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   info: string;
   configId: string;
   configVersion: number;
+
+  @OptionalField()
+  proceedRecipientIds?: string[];
+
+  @OptionalField()
+  proceedRecipientsData?: string[];
 
   constructor({
     name,
@@ -276,18 +280,15 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     isMultiPartition,
     clearingActive,
     internalKycActivated,
-    externalPauses,
-    externalControlLists,
-    externalKycLists,
+    externalPausesIds,
+    externalControlListsIds,
+    externalKycListsIds,
     diamondOwnerAccount,
     currency,
     numberOfUnits,
     nominalValue,
     startingDate,
     maturityDate,
-    couponFrequency,
-    couponRate,
-    firstCouponDate,
     regulationType,
     regulationSubType,
     isCountryControlListWhiteList,
@@ -297,6 +298,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion,
     complianceId,
     identityRegistryId,
+    proceedRecipientIds,
+    proceedRecipientsData,
   }: {
     name: string;
     symbol: string;
@@ -309,18 +312,15 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     isMultiPartition: boolean;
     clearingActive: boolean;
     internalKycActivated: boolean;
-    externalPauses?: string[];
-    externalControlLists?: string[];
-    externalKycLists?: string[];
+    externalPausesIds?: string[];
+    externalControlListsIds?: string[];
+    externalKycListsIds?: string[];
     diamondOwnerAccount?: string;
     currency: string;
     numberOfUnits: string;
     nominalValue: string;
     startingDate: string;
     maturityDate: string;
-    couponFrequency: string;
-    couponRate: string;
-    firstCouponDate: string;
     regulationType: number;
     regulationSubType: number;
     isCountryControlListWhiteList: boolean;
@@ -330,6 +330,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion: number;
     complianceId?: string;
     identityRegistryId?: string;
+    proceedRecipientIds?: string[];
+    proceedRecipientsData?: string[];
   }) {
     super({
       name: (val) => {
@@ -363,17 +365,6 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
           undefined,
         );
       },
-      couponFrequency: FormatValidation.checkNumber(),
-      couponRate: FormatValidation.checkNumber(),
-      firstCouponDate: (val) => {
-        if (parseInt(val) != 0) {
-          return SecurityDate.checkDateTimestamp(
-            parseInt(val),
-            parseInt(this.startingDate),
-            parseInt(this.maturityDate),
-          );
-        }
-      },
       regulationType: (val) => {
         return Factory.checkRegulationType(val);
       },
@@ -381,30 +372,53 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
       configId: FormatValidation.checkBytes32Format(),
-      externalPauses: (val) => {
+      externalPausesIds: (val) => {
         return FormatValidation.checkHederaIdOrEvmAddressArray(
           val ?? [],
-          'externalPauses',
+          'externalPausesIds',
           true,
         );
       },
-      externalControlLists: (val) => {
+      externalControlListsIds: (val) => {
         return FormatValidation.checkHederaIdOrEvmAddressArray(
           val ?? [],
-          'externalControlLists',
+          'externalControlListsIds',
           true,
         );
       },
-      externalKycLists: (val) => {
+      externalKycListsIds: (val) => {
         return FormatValidation.checkHederaIdOrEvmAddressArray(
           val ?? [],
-          'externalKycLists',
+          'externalKycListsIds',
           true,
         );
       },
       complianceId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       identityRegistryId:
         FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      proceedRecipientIds: (val) => {
+        return FormatValidation.checkHederaIdOrEvmAddressArray(
+          val ?? [],
+          'proceedRecipientIds',
+          true,
+        );
+      },
+
+      proceedRecipientsData: (val) => {
+        const validation = FormatValidation.checkBytesFormat();
+        if (val?.length != this.proceedRecipientIds?.length) {
+          return [
+            new InvalidValue(
+              `The list of proceedRecipientIds and proceedRecipientsData must have equal length.`,
+            ),
+          ];
+        }
+        for (const data of val ?? []) {
+          if (data == '') continue;
+          const result = validation(data);
+          if (result) return result;
+        }
+      },
     });
     this.name = name;
     this.symbol = symbol;
@@ -419,17 +433,14 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.clearingActive = clearingActive;
     this.internalKycActivated = internalKycActivated;
     this.diamondOwnerAccount = diamondOwnerAccount;
-    this.externalPauses = externalPauses;
-    this.externalControlLists = externalControlLists;
-    this.externalKycLists = externalKycLists;
+    this.externalPausesIds = externalPausesIds;
+    this.externalControlListsIds = externalControlListsIds;
+    this.externalKycListsIds = externalKycListsIds;
     this.currency = currency;
     this.numberOfUnits = numberOfUnits;
     this.nominalValue = nominalValue;
     this.startingDate = startingDate;
     this.maturityDate = maturityDate;
-    this.couponFrequency = couponFrequency;
-    this.couponRate = couponRate;
-    this.firstCouponDate = firstCouponDate;
     this.regulationType = regulationType;
     this.regulationSubType = regulationSubType;
     this.isCountryControlListWhiteList = isCountryControlListWhiteList;
@@ -439,5 +450,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.configVersion = configVersion;
     this.complianceId = complianceId;
     this.identityRegistryId = identityRegistryId;
+    this.proceedRecipientIds = proceedRecipientIds;
+    this.proceedRecipientsData = proceedRecipientsData;
   }
 }

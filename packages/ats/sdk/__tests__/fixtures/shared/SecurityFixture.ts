@@ -229,6 +229,7 @@ export const SecurityPropsFixture = createFixture<SecurityProps>((security) => {
   );
   security.decimals.faker((faker) => faker.number.int({ min: 0, max: 18 }));
   security.isWhiteList.faker((faker) => faker.datatype.boolean());
+  security.erc20VotesActivated?.faker((faker) => faker.datatype.boolean());
   security.isControllable.faker((faker) => faker.datatype.boolean());
   security.arePartitionsProtected.faker((faker) => faker.datatype.boolean());
   security.clearingActive.faker((faker) => faker.datatype.boolean());

@@ -273,6 +273,9 @@ import { OperationNotAllowed } from '@domain/context/security/error/operations/O
 import { KycStatus } from '@domain/context/kyc/Kyc';
 import { IsInternalKycActivatedQuery } from '@query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQuery';
 import { IsExternallyGrantedQuery } from '@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
+import { IsProceedRecipientQuery } from '@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery';
+import { AccountIsNotProceedRecipient } from '@domain/context/security/error/operations/AccountIsNotProceedRecipient';
+import { AccountIsProceedRecipient } from '@domain/context/security/error/operations/AccountIsProceedRecipient';
 
 describe('ValidationService', () => {
   let service: ValidationService;
@@ -656,7 +659,7 @@ describe('ValidationService', () => {
 
   describe('checkCanTransfer', () => {
     it('should work when transfer is possible', async () => {
-      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x01' });
+      queryBusMock.execute.mockResolvedValueOnce({ payload: ['0x01', 'test'] });
 
       await expect(
         service.checkCanTransfer(
@@ -702,7 +705,7 @@ describe('ValidationService', () => {
 
   describe('checkCanRedeem', () => {
     it('should work when redeem', async () => {
-      queryBusMock.execute.mockResolvedValueOnce({ payload: '0x01' });
+      queryBusMock.execute.mockResolvedValueOnce({ payload: ['0x01', 'test'] });
 
       await expect(
         service.checkCanRedeem(
@@ -710,7 +713,6 @@ describe('ValidationService', () => {
           sourceId.value,
           amount.value.toString(),
           partitionId.value,
-          operatorId.value,
         ),
       ).resolves.toBeUndefined();
 
@@ -737,7 +739,6 @@ describe('ValidationService', () => {
           sourceId.value,
           partitionId.value,
           amount.value.toString(),
-          operatorId.value,
         ),
       ).rejects.toThrow('Transfer failed');
     });
@@ -1313,6 +1314,50 @@ describe('ValidationService', () => {
       await expect(
         service.checkMaturityDate(securityId.value, currentTime.toString()),
       ).rejects.toThrow(OperationNotAllowed);
+    });
+  });
+
+  describe('checkIsProceedRecipient', () => {
+    it('should resolve successfully when address is a proceed recipient', async () => {
+      queryBusMock.execute.mockResolvedValueOnce({ payload: true });
+      const res = await service.checkIsProceedRecipient(
+        securityId.value,
+        targetId.value,
+      );
+
+      expect(res).toBe(true);
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsProceedRecipientQuery(securityId.value, targetId.value),
+      );
+    });
+
+    it('should throw AccountIsNotProceedRecipient when security is not issuable', async () => {
+      queryBusMock.execute.mockResolvedValueOnce({ payload: false });
+      await expect(
+        service.checkIsProceedRecipient(securityId.value, targetId.value),
+      ).rejects.toThrow(AccountIsNotProceedRecipient);
+    });
+  });
+
+  describe('checkIsNotProceedRecipient', () => {
+    it('should resolve successfully when address is not a proceed recipient', async () => {
+      queryBusMock.execute.mockResolvedValueOnce({ payload: false });
+      const res = await service.checkIsNotProceedRecipient(
+        securityId.value,
+        targetId.value,
+      );
+
+      expect(res).toBe(true);
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new IsProceedRecipientQuery(securityId.value, targetId.value),
+      );
+    });
+
+    it('should throw AccountIsProceedRecipient when security is not issuable', async () => {
+      queryBusMock.execute.mockResolvedValueOnce({ payload: true });
+      await expect(
+        service.checkIsNotProceedRecipient(securityId.value, targetId.value),
+      ).rejects.toThrow(AccountIsProceedRecipient);
     });
   });
 });

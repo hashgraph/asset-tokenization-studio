@@ -204,16 +204,13 @@
 */
 
 import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
-import { GetCouponDetailsQuery } from '@query/bond/get/getCouponDetails/GetCouponDetailsQuery';
 import Injectable from '@core/injectable/Injectable';
 import { LogError } from '@core/decorator/LogErrorDecorator';
 import { QueryBus } from '@core/query/QueryBus';
 import ValidatedRequest from '@core/validation/ValidatedArgs';
 
 import GetBondDetailsRequest from '../request/bond/GetBondDetailsRequest';
-import GetCouponDetailsRequest from '../request/bond/GetCouponDetailsRequest';
 import BondDetailsViewModel from '../response/BondDetailsViewModel';
-import CouponDetailsViewModel from '../response/CouponDetailsViewModel';
 import CouponViewModel from '../response/CouponViewModel';
 import CouponForViewModel from '../response/CouponForViewModel';
 import GetAllCouponsRequest from '../request/bond/GetAllCouponsRequest';
@@ -242,12 +239,29 @@ import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
 import RedeemAtMaturityByPartitionRequest from '../request/bond/RedeemAtMaturityByPartitionRequest';
+
+import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
+import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
+import CreateTrexSuiteBondRequest from '../request/bond/CreateTrexSuiteBondRequest';
+import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
+import AddProceedRecipientRequest from '../request/bond/AddProceedRecipientRequest';
+import RemoveProceedRecipientRequest from '../request/bond/RemoveProceedRecipientRequest';
+import UpdateProceedRecipientDataRequest from '../request/bond/UpdateProceedRecipientDataRequest';
+import { UpdateProceedRecipientDataCommand } from '@command/security/proceedRecipients/updateProceedRecipientData/UpdateProceedRecipientDataCommand';
+import { RemoveProceedRecipientCommand } from '@command/security/proceedRecipients/removeProceedRecipient/RemoveProceedRecipientCommand';
+import { AddProceedRecipientCommand } from '@command/security/proceedRecipients/addProceedRecipient/AddProceedRecipientCommand';
+import IsProceedRecipientRequest from '../request/bond/IsProceedRecipientRequest';
+import { GetProceedRecipientsQuery } from '@query/security/proceedRecipient/getProceedRecipients/GetProceedRecipientsQuery';
+import { GetProceedRecipientsCountQuery } from '@query/security/proceedRecipient/getProceedRecipientsCount/GetProceedRecipientsCountQuery';
+import { GetProceedRecipientDataQuery } from '@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQuery';
+import { IsProceedRecipientQuery } from '@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery';
 import {
   GetCouponHoldersRequest,
   GetTotalCouponHoldersRequest,
+  GetProceedRecipientDataRequest,
+  GetProceedRecipientsCountRequest,
+  GetProceedRecipientsRequest,
 } from '../request';
-import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
-import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 
 interface IBondInPort {
   create(
@@ -257,9 +271,6 @@ interface IBondInPort {
   setCoupon(
     request: SetCouponRequest,
   ): Promise<{ payload: number; transactionId: string }>;
-  getCouponDetails(
-    request: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel>;
   getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
   getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
   getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
@@ -271,6 +282,31 @@ interface IBondInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]>;
   getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
+  createTrexSuite(
+    request: CreateTrexSuiteBondRequest,
+  ): Promise<{ security: SecurityViewModel; transactionId: string }>;
+
+  addProceedRecipient(
+    request: AddProceedRecipientRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  removeProceedRecipient(
+    request: RemoveProceedRecipientRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  updateProceedRecipientData(
+    request: UpdateProceedRecipientDataRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  isProceedRecipient(
+    request: IsProceedRecipientRequest,
+  ): Promise<{ payload: boolean }>;
+  getProceedRecipientData(
+    request: GetProceedRecipientDataRequest,
+  ): Promise<{ payload: string }>;
+  getProceedRecipientsCount(
+    request: GetProceedRecipientsCountRequest,
+  ): Promise<{ payload: number }>;
+  getProceedRecipients(
+    request: GetProceedRecipientsRequest,
+  ): Promise<{ payload: string[] }>;
 }
 
 class BondInPort implements IBondInPort {
@@ -289,9 +325,9 @@ class BondInPort implements IBondInPort {
     ValidatedRequest.handleValidation('CreateBondRequest', req);
     const {
       diamondOwnerAccount,
-      externalPauses,
-      externalControlLists,
-      externalKycLists,
+      externalPausesIds,
+      externalControlListsIds,
+      externalKycListsIds,
     } = req;
 
     const securityFactory = this.networkService.configuration.factoryAddress;
@@ -326,19 +362,18 @@ class BondInPort implements IBondInPort {
         req.nominalValue,
         req.startingDate,
         req.maturityDate,
-        req.couponFrequency,
-        req.couponRate,
-        req.firstCouponDate,
         securityFactory ? new ContractId(securityFactory) : undefined,
         resolver ? new ContractId(resolver) : undefined,
         req.configId,
         req.configVersion,
         diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
+        externalPausesIds,
+        externalControlListsIds,
+        externalKycListsIds,
         req.complianceId,
         req.identityRegistryId,
+        req.proceedRecipientIds,
+        req.proceedRecipientsData,
       ),
     );
 
@@ -387,7 +422,8 @@ class BondInPort implements IBondInPort {
   async setCoupon(
     request: SetCouponRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    const { rate, recordTimestamp, executionTimestamp, securityId } = request;
+    const { rate, recordTimestamp, executionTimestamp, securityId, period } =
+      request;
     ValidatedRequest.handleValidation('SetCouponRequest', request);
 
     return await this.commandBus.execute(
@@ -396,26 +432,9 @@ class BondInPort implements IBondInPort {
         recordTimestamp,
         executionTimestamp,
         rate,
+        period,
       ),
     );
-  }
-
-  @LogError
-  async getCouponDetails(
-    request: GetCouponDetailsRequest,
-  ): Promise<CouponDetailsViewModel> {
-    ValidatedRequest.handleValidation('GetCouponDetailsRequest', request);
-
-    const res = await this.queryBus.execute(
-      new GetCouponDetailsQuery(request.bondId),
-    );
-
-    const couponDetails: CouponDetailsViewModel = {
-      couponFrequency: res.coupon.couponFrequency,
-      couponRate: res.coupon.couponRate.toString(),
-      firstCouponDate: new Date(res.coupon.firstCouponDate * ONE_THOUSAND),
-    };
-    return couponDetails;
   }
 
   @LogError
@@ -452,6 +471,8 @@ class BondInPort implements IBondInPort {
       recordDate: new Date(res.coupon.recordTimeStamp * ONE_THOUSAND),
       executionDate: new Date(res.coupon.executionTimeStamp * ONE_THOUSAND),
       rate: res.coupon.rate.toString(),
+      rateDecimals: res.coupon.rateDecimals,
+      period: res.coupon.period,
     };
 
     return coupon;
@@ -544,6 +565,200 @@ class BondInPort implements IBondInPort {
         new GetTotalCouponHoldersQuery(securityId, couponId),
       )
     ).payload;
+  }
+
+  @LogError
+  async createTrexSuite(
+    req: CreateTrexSuiteBondRequest,
+  ): Promise<{ security: SecurityViewModel; transactionId: string }> {
+    ValidatedRequest.handleValidation('CreateTrexSuiteBondRequest', req);
+
+    const {
+      diamondOwnerAccount,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+    } = req;
+
+    const securityFactory = this.networkService.configuration.factoryAddress;
+    const resolver = this.networkService.configuration.resolverAddress;
+
+    const newSecurity: SecurityProps = {
+      name: req.name,
+      symbol: req.symbol,
+      isin: req.isin,
+      decimals: req.decimals,
+      isWhiteList: req.isWhiteList,
+      isControllable: req.isControllable,
+      arePartitionsProtected: req.arePartitionsProtected,
+      clearingActive: req.clearingActive,
+      internalKycActivated: req.internalKycActivated,
+      isMultiPartition: req.isMultiPartition,
+      maxSupply: BigDecimal.fromString(req.numberOfUnits),
+      regulationType: CastRegulationType.fromNumber(req.regulationType),
+      regulationsubType: CastRegulationSubType.fromNumber(
+        req.regulationSubType,
+      ),
+      isCountryControlListWhiteList: req.isCountryControlListWhiteList,
+      countries: req.countries,
+      info: req.info,
+      erc20VotesActivated: req.erc20VotesActivated,
+    };
+
+    const createResponse = await this.commandBus.execute(
+      new CreateTrexSuiteBondCommand(
+        req.salt,
+        req.owner,
+        req.irs,
+        req.onchainId,
+        req.irAgents,
+        req.tokenAgents,
+        req.compliancesModules,
+        req.complianceSettings,
+        req.claimTopics,
+        req.issuers,
+        req.issuerClaims,
+        newSecurity,
+        req.currency,
+        req.nominalValue,
+        req.startingDate,
+        req.maturityDate,
+        new ContractId(securityFactory),
+        new ContractId(resolver),
+        req.configId,
+        req.configVersion,
+        diamondOwnerAccount,
+        req.proceedRecipientIds,
+        req.proceedRecipientsData,
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+        req.complianceId,
+        req.identityRegistryId,
+      ),
+    );
+    const securityCreated =
+      createResponse.securityId.toString() !== ContractId.NULL.toString();
+
+    const res = securityCreated
+      ? (
+          await this.queryBus.execute(
+            new GetSecurityQuery(createResponse.securityId.toString()),
+          )
+        ).security
+      : {};
+
+    return {
+      security: securityCreated
+        ? {
+            ...res,
+          }
+        : {},
+      transactionId: createResponse.transactionId,
+    };
+  }
+
+  @LogError
+  async updateProceedRecipientData(
+    request: UpdateProceedRecipientDataRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(
+      UpdateProceedRecipientDataRequest.name,
+      request,
+    );
+    return await this.commandBus.execute(
+      new UpdateProceedRecipientDataCommand(
+        request.securityId,
+        request.proceedRecipientId,
+        request.data,
+      ),
+    );
+  }
+
+  @LogError
+  async removeProceedRecipient(
+    request: RemoveProceedRecipientRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(
+      RemoveProceedRecipientRequest.name,
+      request,
+    );
+    return await this.commandBus.execute(
+      new RemoveProceedRecipientCommand(
+        request.securityId,
+        request.proceedRecipientId,
+      ),
+    );
+  }
+
+  @LogError
+  async addProceedRecipient(
+    request: AddProceedRecipientRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation(AddProceedRecipientRequest.name, request);
+    return await this.commandBus.execute(
+      new AddProceedRecipientCommand(
+        request.securityId,
+        request.proceedRecipientId,
+        request.data,
+      ),
+    );
+  }
+
+  @LogError
+  async getProceedRecipients(
+    request: GetProceedRecipientsRequest,
+  ): Promise<{ payload: string[] }> {
+    ValidatedRequest.handleValidation(
+      GetProceedRecipientsRequest.name,
+      request,
+    );
+    return await this.queryBus.execute(
+      new GetProceedRecipientsQuery(
+        request.securityId,
+        request.pageIndex,
+        request.pageSize,
+      ),
+    );
+  }
+  @LogError
+  async getProceedRecipientsCount(
+    request: GetProceedRecipientsCountRequest,
+  ): Promise<{ payload: number }> {
+    ValidatedRequest.handleValidation(
+      GetProceedRecipientsCountRequest.name,
+      request,
+    );
+    return await this.queryBus.execute(
+      new GetProceedRecipientsCountQuery(request.securityId),
+    );
+  }
+  @LogError
+  async getProceedRecipientData(
+    request: GetProceedRecipientDataRequest,
+  ): Promise<{ payload: string }> {
+    ValidatedRequest.handleValidation(
+      GetProceedRecipientDataRequest.name,
+      request,
+    );
+    return await this.queryBus.execute(
+      new GetProceedRecipientDataQuery(
+        request.securityId,
+        request.proceedRecipientId,
+      ),
+    );
+  }
+  @LogError
+  async isProceedRecipient(
+    request: IsProceedRecipientRequest,
+  ): Promise<{ payload: boolean }> {
+    ValidatedRequest.handleValidation(IsProceedRecipientRequest.name, request);
+    return await this.queryBus.execute(
+      new IsProceedRecipientQuery(
+        request.securityId,
+        request.proceedRecipientId,
+      ),
+    );
   }
 }
 

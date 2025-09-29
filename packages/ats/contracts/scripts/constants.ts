@@ -288,6 +288,8 @@ export const MATURITY_REDEEMER_ROLE =
     '0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c'
 export const TREX_OWNER_ROLE =
     '0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f910aa17b627f801a6aafab7'
+export const PROCEED_RECIPIENT_MANAGER_ROLE =
+    '0xebc53fe99fea28c7aa9476a714959af5b931f34a8a8734365ec63113198d512f'
 // * Errors
 export const IS_PAUSED_ERROR_ID = '0x40'
 export const OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = '0x41'
@@ -387,6 +389,29 @@ export const MESSAGES = {
             notSupported: 'Time travel not supported in production',
         },
     },
+}
+
+// * Time periods (in seconds and milliseconds)
+export const TIME_PERIODS_S = {
+    SECOND: 1,
+    MINUTE: 60,
+    HOUR: 60 * 60,
+    DAY: 24 * 60 * 60,
+    WEEK: 7 * 24 * 60 * 60,
+    MONTH: 30 * 24 * 60 * 60,
+    QUARTER: 90 * 24 * 60 * 60,
+    YEAR: 365 * 24 * 60 * 60,
+}
+
+export const TIME_PERIODS_MS = {
+    SECOND: TIME_PERIODS_S.SECOND * 1000,
+    MINUTE: TIME_PERIODS_S.MINUTE * 1000,
+    HOUR: TIME_PERIODS_S.HOUR * 1000,
+    DAY: TIME_PERIODS_S.DAY * 1000,
+    WEEK: TIME_PERIODS_S.WEEK * 1000,
+    MONTH: TIME_PERIODS_S.MONTH * 1000,
+    QUARTER: TIME_PERIODS_S.QUARTER * 1000,
+    YEAR: TIME_PERIODS_S.YEAR * 1000,
 }
 
 export const EIP1066_CODES = {

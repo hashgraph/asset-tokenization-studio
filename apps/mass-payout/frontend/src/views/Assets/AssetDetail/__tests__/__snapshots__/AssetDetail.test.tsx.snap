@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AssetDetail Component Basic rendering should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    data-testid="asset-header"
+  >
+    <div
+      data-testid="asset-status"
+    >
+      Active
+    </div>
+    <div>
+      Test Asset - 0.0.123456
+    </div>
+  </div>
+  <div
+    data-testid="tabs-configuration"
+  >
+    <button
+      data-testid="pause-unpause-button"
+    >
+      Pause Asset
+    </button>
+    <button
+      data-testid="import-corporate-actions-button"
+    >
+      Disable Sync
+    </button>
+    <button
+      data-testid="new-distribution-button"
+    >
+      New Distribution
+    </button>
+  </div>
+  <div
+    data-testid="popup-configurations"
+  >
+    Mock Popup
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

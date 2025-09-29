@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DateField Basic Rendering should render correctly 1`] = `
+<DocumentFragment>
+  <div>
+    <label
+      for="testDate"
+    >
+      Test Date
+    </label>
+    <input
+      data-testid="date-field-testDate"
+      id="testDate"
+      placeholder="Select a date"
+      value=""
+    />
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

@@ -21,6 +21,15 @@ jest.mock('../../../../hooks/queries/usePauseSecurity', () => ({
   })),
 }));
 
+// Mock para useGetIsPaused
+jest.mock('../../../../hooks/queries/useGetSecurityDetails', () => ({
+  useGetIsPaused: jest.fn(() => ({
+    data: false,
+    refetch: jest.fn(),
+    isPending: false,
+  })),
+}));
+
 jest.mock('../../../../hooks/queries/useUnpauseSecurity', () => ({
   useUnpauseSecurity: jest.fn(() => ({
     mutate: jest.fn(),
@@ -65,7 +74,7 @@ describe(`${DangerZone.name}`, () => {
       expect(component.asFragment()).toMatchSnapshot('pauserRole');
     });
 
-    test('should show pauser toogle', () => {
+    test('should show pauser spinner toggle', () => {
       const component = factoryComponent();
 
       expect(component.getByTestId('pauser-button')).toBeInTheDocument();

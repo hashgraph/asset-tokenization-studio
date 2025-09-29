@@ -1,0 +1,133 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepReview Component Basic rendering should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-1jjeqci"
+  >
+    <div
+      class="chakra-stack css-1tds2la"
+    >
+      <div
+        class="chakra-stack css-1vf183u"
+      >
+        <div
+          class="css-7xu97p"
+          data-testid="info-divider"
+        >
+          <div
+            class="css-1qxb07t"
+          >
+            <p
+              class="css-wc1iqz"
+            >
+              1
+            </p>
+            <p
+              class="css-au6g18"
+            >
+              Asset Configuration
+            </p>
+          </div>
+          <hr
+            aria-orientation="horizontal"
+            class="chakra-divider css-17lr3d7"
+          />
+        </div>
+        <div
+          class="chakra-stack css-1atiywt"
+        >
+          <div
+            class="css-2xph3x"
+          >
+            <p
+              class="css-ek1zv3"
+            >
+              stepAssetDetails.assetId
+            </p>
+            <p
+              class="css-1wzmjm0"
+            >
+              0.0.123456
+            </p>
+          </div>
+          <div
+            class="css-2xph3x"
+          >
+            <p
+              class="css-ek1zv3"
+            >
+              stepAssetDetails.assetName
+            </p>
+            <p
+              class="css-1wzmjm0"
+            >
+              Test Asset
+            </p>
+          </div>
+          <div
+            class="css-2xph3x"
+          >
+            <p
+              class="css-ek1zv3"
+            >
+              stepAssetDetails.symbol
+            </p>
+            <p
+              class="css-1wzmjm0"
+            >
+              SYM
+            </p>
+          </div>
+          <div
+            class="css-2xph3x"
+          >
+            <p
+              class="css-ek1zv3"
+            >
+              stepAssetDetails.type
+            </p>
+            <p
+              class="css-1wzmjm0"
+            >
+              BOND
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        class="chakra-stack css-o3lkgz"
+      >
+        <button
+          class="chakra-button css-vueqt9"
+          type="button"
+        >
+          Cancel
+        </button>
+        <div
+          class="chakra-stack css-u7x1yf"
+        >
+          <button
+            class="chakra-button css-r8hqod"
+            data-testid="previous-step-button"
+            type="button"
+          >
+            previousStep
+          </button>
+          <button
+            class="chakra-button css-1145i8e"
+            data-testid="final-import-asset-button"
+            type="button"
+          >
+            buttons.importAsset
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

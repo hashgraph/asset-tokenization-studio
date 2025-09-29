@@ -271,9 +271,9 @@ The Asset Tokenization Studio uses a modular diamond pattern architecture where 
 - `ERC1410ManagementFacet`: Token partition management and administrative functions
 - `ERC1410ReadFacet`: Read-only token state queries
 - `ERC1410TokenHolderFacet`: Token holder operations (transfers, approvals)
-- `ERC20`: Basic ERC20 compatibility layer
-- `ERC1594`: Security token issuance and redemption
-- `ERC1644`: Controller operations for forced transfers
+- `ERC20Facet`: Basic ERC20 compatibility layer
+- `ERC1594Facet`: Security token issuance and redemption
+- `ERC1644Facet`: Controller operations for forced transfers
 
 **ERC3643 (T-REX) Compliance Facets:**
 
@@ -336,52 +336,52 @@ When introducing a new facet to the project, make sure to follow these steps:
 
 | **Contract**                           | **Address**                                | **ID**      |
 | -------------------------------------- | ------------------------------------------ | ----------- |
-| Business Logic Resolver Proxy          | 0x6E70DC7E1E9C96355076bd85258F65f9DDa54b20 | 0.0.6574176 |
-| Business Logic Resolver Proxy Admin    | 0xFaff76f576abfCc48F239FDD438E626E1DD4310F | 0.0.6574175 |
-| Business Logic Resolver                | 0x3806Bf042D6f0f431B709F6a43254F9128E067c7 | 0.0.6574174 |
-| Factory Proxy                          | 0x72EE20a9E9571c3940bE41C6aad5fE9A28e01a85 | 0.0.6574245 |
-| Factory Proxy Admin                    | 0xf9488F063AFEc34dc44CC94C99DCFE6b435B5768 | 0.0.6574243 |
-| Factory                                | 0x1693C2bBC0b58E47638065059e7e5e163a6ff913 | 0.0.6574242 |
-| Access Control                         | 0x02625B1cecc491d476629876ec9Cd88Ba0c682B1 | 0.0.6574178 |
-| Cap                                    | 0x30745dd65C27Fc196738dB8f937a9265FBdb56CC | 0.0.6574179 |
-| Control List                           | 0xC6C39235773Af61CDE02b6E466061f6BC254CB0c | 0.0.6574181 |
-| Kyc                                    | 0xaca020408aD7110a2A04606457F8B4f4990a27AC | 0.0.6574182 |
-| SsiManagement                          | 0x40cfF59FFe6248DDcfA8d2237443c3969fB3029B | 0.0.6574183 |
-| Pause                                  | 0x6E5413c4E1442ab91BbD2e22c95C618323d29E59 | 0.0.6574184 |
-| ERC20                                  | 0xfa7C3442423D02966cc0eaEF37B2B337cbBa26df | 0.0.6574190 |
-| ERC1410Read                            | 0xCD530Eff64aa3cfF36996978f63dDd3f365ba783 | 0.0.6574193 |
-| ERC1410Management                      | 0xc4d83a9B197ef79E83d36e9a96BBcF47F91D2a33 | 0.0.6574194 |
-| ERC1410TokenHolder                     | 0xB385Be34DD8F59dBB51d865Ce6D5355b9faA21ae | 0.0.6574195 |
-| ERC1594                                | 0xB74FFC76fd989c7BfdC5e85Ed22D1d1Ad74490a8 | 0.0.6574198 |
-| ERC1643                                | 0x2E3Ae9875c86b80661c894dBB0e730BdeE816bF3 | 0.0.6574200 |
-| ERC1644                                | 0xAAA44b82B62148771A7826a31fF6254476a36B74 | 0.0.6574201 |
-| Snapshots                              | 0xA6787f85faff989edfB0D3F9aBc9e36e2130c94B | 0.0.6574203 |
-| Diamond Facet                          | 0xE808213fc51A8AE8F810F7c5aAAd2888597a2Aa4 | 0.0.6574206 |
-| Equity                                 | 0x65717323114dfD290Cac05d9B98E4b57e26fcC7b | 0.0.6574207 |
-| Bond                                   | 0xae2003B0BeE6887342F074ab08e7a85a4417fcDe | 0.0.6574209 |
-| Scheduled Snapshots                    | 0x7843C4576798F12aa8357B8ed72c89B7e2038CE5 | 0.0.6574210 |
-| Scheduled Balance Adjustments          | 0x23DfA40D1623C798D2026Da225C9753dcB57400c | 0.0.6574211 |
-| Scheduled Tasks                        | 0xb34c65CF033570B946c77E877288ab27Ab0F9f6E | 0.0.6574214 |
-| Corporate Actions                      | 0x35d39582f3b14e9B742916d554563c8e54f01406 | 0.0.6574215 |
-| Lock                                   | 0x245B3C1D1AD59e1449af0a57370559fD15Db7329 | 0.0.6574185 |
-| Hold Read Facet                        | 0x15edFd54B5E76664B60Af47eF691d94608fc57CD | 0.0.6574186 |
-| Hold Management Facet                  | 0x9c53C72f7e6DAd515B35959F770e82313193032b | 0.0.6574187 |
-| Hold TokenHolder Facet                 | 0x11Aa9898371b18Ef2FfA19E062f8f6395AcD9BA1 | 0.0.6574189 |
-| Transfer and Lock                      | 0xea1Df18b3AaFB37D44C024Db32ffBe80F3b666fc | 0.0.6574216 |
-| Adjust Balances                        | 0x027698e5d8950146aC2792423ac5404a2A3B3f28 | 0.0.6574217 |
-| Clearing Action Facet                  | 0x341e459241d860e91e45E8466b41c6BdcFd90399 | 0.0.6574227 |
-| Clearing Transfer Facet                | 0x77D22229E5B70b81c5F8d00355F808C088945f91 | 0.0.6574219 |
-| Clearing Redeem Facet                  | 0x402d0f49B745247aa91dF94BE9e475AA2E7116f4 | 0.0.6574222 |
-| Clearing Hold Creation Facet           | 0x23AdC4348139aC936632605b11CFbBd26F9C726D | 0.0.6574225 |
-| Clearing Read Facet                    | 0xbf5481Ca849dbDcbEC2857da4FaAf86782Bcf239 | 0.0.6574226 |
-| External Pause Management Facet        | 0x888766208e2Fe9f3dc49EA580d7dEc7bd803eA52 | 0.0.6574229 |
-| External Control List Management Facet | 0xA4d54d17d5cA23C7d59CFcEC0c68151df6Bdf6e2 | 0.0.6574230 |
-| External Kyc List Management Facet     | 0xb4F2f8dD3D039014A7Fb640235CDfE2635D208f9 | 0.0.6574231 |
-| Protected Partitions                   | 0xA52cEd9F146c608Df8330B8566aA02BB883Cd67e | 0.0.6574218 |
-| ERC3643 Facet                          | 0x4d1307bCdDef88EA32988BB9e545b9e9f00787a1 | 0.0.6574233 |
-| ERC3643 Batch Facet                    | 0x747D1309c11cC9ED8D56D6E5cef592824eEF8d1D | 0.0.6574235 |
-| Freeze                                 | 0x7de236dFC57E70A001553De9D884b29603d7DEc8 | 0.0.6574236 |
-| ERC20Permit                            | 0x7718c915A8988B9FB07d284D16Ec7eF8Fc3D8918 | 0.0.6574197 |
+| Business Logic Resolver Proxy          | 0x2463a7603C43E99D5aeFDCa9Fba752751CaF7B56 | 0.0.6797832 |
+| Business Logic Resolver Proxy Admin    | 0xD8946D49b4709e8D50Eba3134Be5535a1f29F3b4 | 0.0.6797830 |
+| Business Logic Resolver                | 0xe50D66DBf5562f21F6435589718BDc7476d1822B | 0.0.6797829 |
+| Factory Proxy                          | 0xc4028832d0B086e52a8771C39da08529fD3E0d3C | 0.0.6797955 |
+| Factory Proxy Admin                    | 0x74C90f57F95Ba359D408290f08EBf3c6B2668c84 | 0.0.6797954 |
+| Factory                                | 0x0D8076eAfB5606A0CE5098BB0e37f0B8334f3f49 | 0.0.6797953 |
+| Access Control                         | 0x34066e3cF644607C27615719EfCb1ED2DB90f9CF | 0.0.6797835 |
+| Cap                                    | 0x0940DFda3CBF3D3b37C79eCBd922734819D380b0 | 0.0.6797836 |
+| Control List                           | 0xc11f837d48bbc6662B5483e40bDec3A50Dfd2862 | 0.0.6797838 |
+| Kyc                                    | 0x83df167Edb7f292c6a558a6cC0a4654a923CCD71 | 0.0.6797841 |
+| SsiManagement                          | 0x7cFA924C5bE7378D015CE89f076534d4aB54108D | 0.0.6797842 |
+| Pause                                  | 0xdCa4A3D8153cFE0C0a03a9b6AaFb81d82049cb6a | 0.0.6797843 |
+| ERC20                                  | 0xB098a9422228C8F3F9d77FAe0bAEfCB60ebB3986 | 0.0.6797856 |
+| ERC1410Read                            | 0x596201A594738258Ee2b0F83738FF0b1802C8aaD | 0.0.6797859 |
+| ERC1410Management                      | 0x6Cf4D3cBdD2e298f9Bfcda3C8478b9611077587e | 0.0.6797862 |
+| ERC1410TokenHolder                     | 0x6523A10B8Aa962c4E0338D277134f6e74C5dAC80 | 0.0.6797866 |
+| ERC1594                                | 0xE8A7C957F33c1a6dEE65A5c557Bbf94107669Cc0 | 0.0.6797871 |
+| ERC1643                                | 0xcaCF63220fFD174A284a83246891dEA9015Cd089 | 0.0.6797873 |
+| ERC1644                                | 0xD4fdF7Df2c82302F4d437DF4eb0A7398CabF0F44 | 0.0.6797879 |
+| Snapshots                              | 0x81416a39391afA2B4CA46D8C54A922aEfE45D15d | 0.0.6797882 |
+| Diamond Facet                          | 0xac000bd33Be69BF129063af7D7Aa7EA05f6f28E5 | 0.0.6797887 |
+| Equity                                 | 0xF8D4dC21F4Ee6e44E993855241d291414cc54A6A | 0.0.6797892 |
+| Bond                                   | 0x66c452053349a11461f51fCa3713293ea5ED4760 | 0.0.6797895 |
+| Scheduled Snapshots                    | 0x400C49ee24C4CC024eC92FB778648366f9B1AC49 | 0.0.6797896 |
+| Scheduled Balance Adjustments          | 0xc8DeB5d7eB772d80ac2153664996aac2c371DdC5 | 0.0.6797898 |
+| Scheduled Tasks                        | 0x2e0970a8078154a1f30bb55BEED0b83C53A55B55 | 0.0.6797899 |
+| Corporate Actions                      | 0x0D5CeF872EC39bE0F05cC8a8225722599a47E334 | 0.0.6797901 |
+| Lock                                   | 0x500ef05B572F28a8c6Aa9e8E9BEDE21873fE00Da | 0.0.6797846 |
+| Hold Read Facet                        | 0x95D79B8c326E743234c6FD217301bebeB2b13159 | 0.0.6797847 |
+| Hold Management Facet                  | 0x46F132F87D8f06FB8280F7fE7c1122A08C027E31 | 0.0.6797849 |
+| Hold TokenHolder Facet                 | 0xE0495CdaDF78480329aF0AD1C23489552754E11e | 0.0.6797852 |
+| Transfer and Lock                      | 0x3C47b48F0EbC2205Bc972474c7e799D04a126229 | 0.0.6797904 |
+| Adjust Balances                        | 0xE72C2B1685315987c1bB26139f547c3990aFd201 | 0.0.6797907 |
+| Clearing Action Facet                  | 0xEa89c00213BEEAB4E1A983f918046924D32C913C | 0.0.6797922 |
+| Clearing Transfer Facet                | 0x71Cc31cbF1284e10c785F6157BFEFF894252cbdB | 0.0.6797911 |
+| Clearing Redeem Facet                  | 0x611D96762aD0240161569D4c677625BdfEE593Fb | 0.0.6797914 |
+| Clearing Hold Creation Facet           | 0x4396F5B347FC42b31e81b5Df1b9B9303a3e5E077 | 0.0.6797919 |
+| Clearing Read Facet                    | 0xd8Ec6d8C6Dc008d796F552A873f71689B733F2cB | 0.0.6797920 |
+| External Pause Management Facet        | 0xBea0088Ad580d63180AB05eaFbe58A06BC7d03d6 | 0.0.6797924 |
+| External Control List Management Facet | 0x4c334d3b795F138aD4767873Ed4E77EbF6672d01 | 0.0.6797926 |
+| External Kyc List Management Facet     | 0x754797640e052eDc4Cd2dD86040a9EF3c9769Af5 | 0.0.6797929 |
+| Protected Partitions                   | 0xD20489d428B7f8F13ED5A0B3cE3B9562B4267c8D | 0.0.6797908 |
+| ERC3643 Facet                          | 0x34aeaaa62cc4bA5D24E4fa374711126D1C432Fdb | 0.0.6797933 |
+| ERC3643 Batch Facet                    | 0x3D104f59d44BD8D6D333416C2d0cc8Ee0450561C | 0.0.6797942 |
+| Freeze                                 | 0x05FA46A125847a3d6fF9a348bC95e42Cddb9067C | 0.0.6797946 |
+| ERC20Permit                            | 0xE99a559cDD666c0c6F4f92eb738991D237481475 | 0.0.6797867 |
 
 # 🔐 Role Definitions by Layer
 

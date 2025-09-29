@@ -1112,7 +1112,7 @@ describe('Clearing', () => {
         new ClearingCreateHoldByPartitionCommand(
           clearingCreateHoldByPartitionRequest.securityId,
           clearingCreateHoldByPartitionRequest.partitionId,
-          clearingCreateHoldByPartitionRequest.escrow,
+          clearingCreateHoldByPartitionRequest.escrowId,
           clearingCreateHoldByPartitionRequest.amount,
           clearingCreateHoldByPartitionRequest.targetId,
           clearingCreateHoldByPartitionRequest.clearingExpirationDate,
@@ -1139,7 +1139,7 @@ describe('Clearing', () => {
         new ClearingCreateHoldByPartitionCommand(
           clearingCreateHoldByPartitionRequest.securityId,
           clearingCreateHoldByPartitionRequest.partitionId,
-          clearingCreateHoldByPartitionRequest.escrow,
+          clearingCreateHoldByPartitionRequest.escrowId,
           clearingCreateHoldByPartitionRequest.amount,
           clearingCreateHoldByPartitionRequest.targetId,
           clearingCreateHoldByPartitionRequest.clearingExpirationDate,
@@ -1184,10 +1184,10 @@ describe('Clearing', () => {
       ).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrow is invalid', async () => {
+    it('should throw error if escrowId is invalid', async () => {
       const invalidRequest = new ClearingCreateHoldByPartitionRequest({
         ...ClearingCreateHoldByPartitionRequestFixture.create({
-          escrow: 'invalid',
+          escrowId: 'invalid',
         }),
       });
 
@@ -1233,7 +1233,7 @@ describe('Clearing', () => {
         new ClearingCreateHoldFromByPartitionCommand(
           clearingCreateHoldFromByPartitionRequest.securityId,
           clearingCreateHoldFromByPartitionRequest.partitionId,
-          clearingCreateHoldFromByPartitionRequest.escrow,
+          clearingCreateHoldFromByPartitionRequest.escrowId,
           clearingCreateHoldFromByPartitionRequest.amount,
           clearingCreateHoldFromByPartitionRequest.sourceId,
           clearingCreateHoldFromByPartitionRequest.targetId,
@@ -1261,7 +1261,7 @@ describe('Clearing', () => {
         new ClearingCreateHoldFromByPartitionCommand(
           clearingCreateHoldFromByPartitionRequest.securityId,
           clearingCreateHoldFromByPartitionRequest.partitionId,
-          clearingCreateHoldFromByPartitionRequest.escrow,
+          clearingCreateHoldFromByPartitionRequest.escrowId,
           clearingCreateHoldFromByPartitionRequest.amount,
           clearingCreateHoldFromByPartitionRequest.sourceId,
           clearingCreateHoldFromByPartitionRequest.targetId,
@@ -1307,10 +1307,10 @@ describe('Clearing', () => {
       ).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrow is invalid', async () => {
+    it('should throw error if escrowId is invalid', async () => {
       const invalidRequest = new ClearingCreateHoldFromByPartitionRequest({
         ...ClearingCreateHoldFromByPartitionRequestFixture.create({
-          escrow: 'invalid',
+          escrowId: 'invalid',
         }),
       });
 
@@ -1368,7 +1368,7 @@ describe('Clearing', () => {
         new ProtectedClearingCreateHoldByPartitionCommand(
           protectedClearingCreateHoldByPartitionRequest.securityId,
           protectedClearingCreateHoldByPartitionRequest.partitionId,
-          protectedClearingCreateHoldByPartitionRequest.escrow,
+          protectedClearingCreateHoldByPartitionRequest.escrowId,
           protectedClearingCreateHoldByPartitionRequest.amount,
           protectedClearingCreateHoldByPartitionRequest.sourceId,
           protectedClearingCreateHoldByPartitionRequest.targetId,
@@ -1399,7 +1399,7 @@ describe('Clearing', () => {
         new ProtectedClearingCreateHoldByPartitionCommand(
           protectedClearingCreateHoldByPartitionRequest.securityId,
           protectedClearingCreateHoldByPartitionRequest.partitionId,
-          protectedClearingCreateHoldByPartitionRequest.escrow,
+          protectedClearingCreateHoldByPartitionRequest.escrowId,
           protectedClearingCreateHoldByPartitionRequest.amount,
           protectedClearingCreateHoldByPartitionRequest.sourceId,
           protectedClearingCreateHoldByPartitionRequest.targetId,
@@ -1448,10 +1448,10 @@ describe('Clearing', () => {
       ).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrow is invalid', async () => {
+    it('should throw error if escrowId is invalid', async () => {
       const invalidRequest = new ProtectedClearingCreateHoldByPartitionRequest({
         ...ProtectedClearingCreateHoldByPartitionRequestFixture.create({
-          escrow: 'invalid',
+          escrowId: 'invalid',
         }),
       });
 
@@ -1732,7 +1732,7 @@ describe('Clearing', () => {
           ),
           data: expectedResponse.payload.data,
           operatorData: expectedResponse.payload.operatorData,
-          holdEscrow: expectedResponse.payload.holdEscrow,
+          holdEscrowId: expectedResponse.payload.holdEscrowId,
           holdExpirationDate: new Date(
             expectedResponse.payload.holdExpirationTimestamp * ONE_THOUSAND,
           ),
@@ -2122,7 +2122,7 @@ describe('Clearing', () => {
         new OperatorClearingCreateHoldByPartitionCommand(
           operatorClearingCreateHoldByPartitionRequest.securityId,
           operatorClearingCreateHoldByPartitionRequest.partitionId,
-          operatorClearingCreateHoldByPartitionRequest.escrow,
+          operatorClearingCreateHoldByPartitionRequest.escrowId,
           operatorClearingCreateHoldByPartitionRequest.amount,
           operatorClearingCreateHoldByPartitionRequest.sourceId,
           operatorClearingCreateHoldByPartitionRequest.targetId,
@@ -2150,7 +2150,7 @@ describe('Clearing', () => {
         new OperatorClearingCreateHoldByPartitionCommand(
           operatorClearingCreateHoldByPartitionRequest.securityId,
           operatorClearingCreateHoldByPartitionRequest.partitionId,
-          operatorClearingCreateHoldByPartitionRequest.escrow,
+          operatorClearingCreateHoldByPartitionRequest.escrowId,
           operatorClearingCreateHoldByPartitionRequest.amount,
           operatorClearingCreateHoldByPartitionRequest.sourceId,
           operatorClearingCreateHoldByPartitionRequest.targetId,
@@ -2196,10 +2196,10 @@ describe('Clearing', () => {
       ).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrow is invalid', async () => {
+    it('should throw error if escrowId is invalid', async () => {
       const invalidRequest = new OperatorClearingCreateHoldByPartitionRequest({
         ...OperatorClearingCreateHoldByPartitionRequestFixture.create({
-          escrow: 'invalid',
+          escrowId: 'invalid',
         }),
       });
 

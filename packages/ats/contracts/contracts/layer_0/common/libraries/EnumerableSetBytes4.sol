@@ -1,6 +1,5 @@
-pragma solidity 0.8.18;
-
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
 
 library EnumerableSetBytes4 {
     struct Set {
@@ -87,7 +86,6 @@ library EnumerableSetBytes4 {
         bytes4[] memory store = _values(set._inner);
         bytes4[] memory result;
 
-        /// @solidity memory-safe-assembly
         // solhint-disable-next-line no-inline-assembly
         assembly {
             result := store

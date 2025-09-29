@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AssetHeader Basic Rendering should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-1tchtwa"
+  >
+    <p
+      class="css-ezdfd9"
+    >
+      Import Asset
+    </p>
+    <div
+      class="css-k008qs"
+    >
+      <button
+        class="chakra-button css-1145i8e"
+        type="button"
+      >
+        Import Asset
+      </button>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

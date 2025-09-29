@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WizardConfiguration Basic Rendering should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="css-16hl5oj"
+  >
+    <div
+      class="css-1qzog8y"
+    >
+      <div
+        aria-label="Progress"
+        class="chakra-stepper css-47o937"
+        data-orientation="horizontal"
+      >
+        <div
+          class="chakra-step css-9fgisr"
+          content="[object Object]"
+          data-orientation="horizontal"
+          data-status="active"
+        >
+          <div
+            class="chakra-step__indicator css-ae2ufg"
+            data-status="active"
+          >
+            <div
+              class="chakra-step__number css-1brar58"
+              data-status="active"
+            >
+              1
+            </div>
+          </div>
+          <div
+            class="css-cimg9i"
+          >
+            <h3
+              class="chakra-step__title css-gryw16"
+              data-status="active"
+            >
+              Details
+            </h3>
+          </div>
+          <div
+            class="chakra-step__separator css-14zkmre"
+            data-orientation="horizontal"
+            data-status="active"
+            role="separator"
+          />
+        </div>
+        <div
+          class="chakra-step css-9fgisr"
+          content="[object Object]"
+          data-orientation="horizontal"
+          data-status="incomplete"
+        >
+          <div
+            class="chakra-step__indicator css-ae2ufg"
+            data-status="incomplete"
+          >
+            <div
+              class="chakra-step__number css-1brar58"
+              data-status="incomplete"
+            >
+              2
+            </div>
+          </div>
+          <div
+            class="css-cimg9i"
+          >
+            <h3
+              class="chakra-step__title css-gryw16"
+              data-status="incomplete"
+            >
+              Review
+            </h3>
+          </div>
+        </div>
+      </div>
+      <div
+        data-testid="step-asset-details"
+      >
+        <button>
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

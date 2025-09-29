@@ -204,11 +204,9 @@
 */
 
 import { BondDetails } from '../bond/BondDetails';
-import { CouponDetails } from '../bond/CouponDetails';
 import { CastDividendType } from '../equity/DividendType';
 import { EquityDetails } from '../equity/EquityDetails';
 import { BondDetailsData } from '../factory/BondDetailsData';
-import { CouponDetailsData } from '../factory/CouponDetailsData';
 import { EquityDetailsData } from '../factory/EquityDetailsData';
 import { FactoryRegulationData } from '../factory/FactorySecurityToken';
 import { Rbac } from '../factory/Rbac';
@@ -299,13 +297,5 @@ export class SecurityDataBuilder {
       bondInfo.startingDate.toString(),
       bondInfo.maturityDate.toString(),
     );
-  }
-
-  static buildCouponDetails(couponInfo: CouponDetails): CouponDetailsData {
-    return {
-      couponFrequency: couponInfo.couponFrequency.toString(),
-      couponRate: couponInfo.couponRate.toString(),
-      firstCouponDate: couponInfo.firstCouponDate.toString(),
-    };
   }
 }

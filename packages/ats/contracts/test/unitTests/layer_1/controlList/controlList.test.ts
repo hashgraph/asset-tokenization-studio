@@ -331,22 +331,16 @@ describe('Control List Tests', () => {
     })
 
     it('GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non role)
-        controlListFacet = controlListFacet.connect(signer_C)
-
         // add to list fails
         await expect(
-            controlListFacet.addToControlList(account_D)
+            controlListFacet.connect(signer_C).addToControlList(account_D)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
     it('GIVEN an account without controlList role WHEN removeFromControlList THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non role)
-        controlListFacet = controlListFacet.connect(signer_C)
-
         // remove From list fails
         await expect(
-            controlListFacet.removeFromControlList(account_D)
+            controlListFacet.connect(signer_C).removeFromControlList(account_D)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
@@ -361,12 +355,9 @@ describe('Control List Tests', () => {
             account_C
         )
 
-        // Using account C (with role)
-        controlListFacet = controlListFacet.connect(signer_C)
-
         // add to list fails
         await expect(
-            controlListFacet.addToControlList(account_D)
+            controlListFacet.connect(signer_C).addToControlList(account_D)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
@@ -381,22 +372,17 @@ describe('Control List Tests', () => {
             account_C
         )
 
-        // Using account C (with role)
-        controlListFacet = controlListFacet.connect(signer_C)
-
         // remove from list fails
         await expect(
-            controlListFacet.removeFromControlList(account_D)
+            controlListFacet.connect(signer_C).removeFromControlList(account_D)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN an account with controlList role WHEN addToControlList and removeFromControlList THEN transaction succeeds', async () => {
         // ADD TO LIST ------------------------------------------------------------------
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_C)
-        // Using account C (with role)
-        controlListFacet = controlListFacet.connect(signer_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(CONTROL_LIST_ROLE, account_C)
 
         // check that D and E are not in the list
         let check_D = await controlListFacet.isInControlList(account_D)
@@ -405,10 +391,14 @@ describe('Control List Tests', () => {
         expect(check_E).to.equal(false)
 
         // add to list
-        await expect(controlListFacet.addToControlList(account_D))
+        await expect(
+            controlListFacet.connect(signer_C).addToControlList(account_D)
+        )
             .to.emit(controlListFacet, 'AddedToControlList')
             .withArgs(account_C, account_D)
-        await expect(controlListFacet.addToControlList(account_E))
+        await expect(
+            controlListFacet.connect(signer_C).addToControlList(account_E)
+        )
             .to.emit(controlListFacet, 'AddedToControlList')
             .withArgs(account_C, account_E)
 
@@ -431,7 +421,9 @@ describe('Control List Tests', () => {
 
         // REMOVE FROM LIST ------------------------------------------------------------------
         // remove From list
-        await expect(controlListFacet.removeFromControlList(account_D))
+        await expect(
+            controlListFacet.connect(signer_C).removeFromControlList(account_D)
+        )
             .to.emit(controlListFacet, 'RemovedFromControlList')
             .withArgs(account_C, account_D)
 

@@ -267,10 +267,12 @@ export interface BondDetailsData {
     maturityDate: number
 }
 
-export interface CouponDetailsData {
-    couponFrequency: number
-    couponRate: number
-    firstCouponDate: number
+export interface CouponData {
+    recordDate: number
+    executionDate: number
+    rate: number
+    rateDecimals: number
+    period: number
 }
 
 export interface SecurityData {
@@ -301,7 +303,8 @@ export interface EquityData {
 export interface BondData {
     security: SecurityData
     bondDetails: BondDetailsData
-    couponDetails: CouponDetailsData
+    proceedRecipients: string[]
+    proceedRecipientsData: string[]
 }
 
 export interface AdditionalSecurityData {
@@ -500,9 +503,6 @@ export async function setBondData({
     nominalValue,
     startingDate,
     maturityDate,
-    couponFrequency,
-    couponRate,
-    firstCouponDate,
     init_rbacs,
     addAdmin = true,
     businessLogicResolver,
@@ -511,6 +511,8 @@ export async function setBondData({
     externalKycLists,
     compliance,
     identityRegistry,
+    proceedRecipientsList,
+    proceedRecipientsListData,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -529,9 +531,6 @@ export async function setBondData({
     nominalValue: number
     startingDate: number
     maturityDate: number
-    couponFrequency: number
-    couponRate: number
-    firstCouponDate: number
     init_rbacs?: Rbac[]
     addAdmin: boolean
     businessLogicResolver: string
@@ -540,6 +539,8 @@ export async function setBondData({
     externalKycLists?: string[]
     compliance?: string
     identityRegistry?: string
+    proceedRecipientsList?: string[]
+    proceedRecipientsListData?: string[]
 }) {
     let rbacs: Rbac[] = []
 
@@ -594,16 +595,14 @@ export async function setBondData({
         maturityDate: maturityDate,
     }
 
-    const couponDetails: CouponDetailsData = {
-        couponFrequency: couponFrequency,
-        couponRate: couponRate,
-        firstCouponDate: firstCouponDate,
-    }
+    const proceedRecipients = proceedRecipientsList ?? []
+    const proceedRecipientsData = proceedRecipientsListData ?? []
 
     const bondData: BondData = {
         security,
         bondDetails,
-        couponDetails,
+        proceedRecipients,
+        proceedRecipientsData,
     }
 
     return bondData
@@ -753,9 +752,6 @@ export async function deployBondFromFactory({
     nominalValue,
     startingDate,
     maturityDate,
-    couponFrequency,
-    couponRate,
-    firstCouponDate,
     regulationType,
     regulationSubType,
     countriesControlListType,
@@ -767,6 +763,8 @@ export async function deployBondFromFactory({
     businessLogicResolver,
     compliance,
     identityRegistry,
+    proceedRecipientsList,
+    proceedRecipientsListData,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -785,9 +783,6 @@ export async function deployBondFromFactory({
     nominalValue: number
     startingDate: number
     maturityDate: number
-    couponFrequency: number
-    couponRate: number
-    firstCouponDate: number
     regulationType: number
     regulationSubType: number
     countriesControlListType: boolean
@@ -799,6 +794,8 @@ export async function deployBondFromFactory({
     businessLogicResolver: string
     compliance?: string
     identityRegistry?: string
+    proceedRecipientsList?: string[]
+    proceedRecipientsListData?: string[]
 }) {
     const bondData = await setBondData({
         adminAccount,
@@ -818,14 +815,13 @@ export async function deployBondFromFactory({
         nominalValue,
         startingDate,
         maturityDate,
-        couponFrequency,
-        couponRate,
-        firstCouponDate,
         init_rbacs,
         addAdmin,
         businessLogicResolver,
         compliance,
         identityRegistry,
+        proceedRecipientsList,
+        proceedRecipientsListData,
     })
 
     const factoryRegulationData = await setFactoryRegulationData(

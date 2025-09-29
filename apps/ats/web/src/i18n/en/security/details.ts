@@ -219,6 +219,7 @@ import clearingOperations from './clearingOperations';
 import externalPause from './externalPause';
 import externalControl from './externalControl';
 import externalKYC from './externalKYC';
+import proceedRecipients from './proceedRecipients';
 
 export default {
   header: {
@@ -249,6 +250,7 @@ export default {
     externalPause: 'External Pause',
     externalKYCList: 'External KYC',
     freeze: 'Freeze',
+    proceedRecipients: 'Proceed Recipients',
   },
   actions: {
     redeem: 'Redeem',
@@ -309,6 +311,7 @@ export default {
   externalPause,
   externalControl,
   externalKYC,
+  proceedRecipients,
   benefits: {
     dividends: 'Dividends',
     balanceAdjustments: 'Balance Adjustments',
@@ -336,6 +339,35 @@ export default {
           'Maturity date has been updated successfully',
         error: 'Error: ',
         updateMaturityDateFailed: 'Update maturity date failed',
+      },
+    },
+    updateCompliance: {
+      toast: {
+        title: 'Confirmation',
+        subtitle: 'Are you sure you want to change the compliance?',
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Confirm',
+      },
+      messages: {
+        success: 'Success: ',
+        updateComplianceSuccessful: 'Compliance has been updated successfully',
+        error: 'Error: ',
+        updateComplianceFailed: 'Update compliance failed',
+      },
+    },
+    updateIdentityRegistry: {
+      toast: {
+        title: 'Confirmation',
+        subtitle: 'Are you sure you want to change the identity registry?',
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Confirm',
+      },
+      messages: {
+        success: 'Success: ',
+        updateIdentityRegistrySuccessful:
+          'Identity registry has been updated successfully',
+        error: 'Error: ',
+        updateIdentityRegistryFailed: 'Update identity registry failed',
       },
     },
   },

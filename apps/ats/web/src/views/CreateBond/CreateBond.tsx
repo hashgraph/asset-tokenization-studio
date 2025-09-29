@@ -216,10 +216,10 @@ import { User } from '../../utils/constants';
 import { useUserStore } from '../../store/userStore';
 import { StepConfiguration } from './Components/StepConfiguration';
 import { StepReview } from './Components/StepReview';
-import { StepCoupon } from './Components/StepCoupon';
 import { StepRegulation } from '../CreateSecurityCommons/StepRegulation';
 import { StepExternalManagement } from '../CreateSecurityCommons/StepExternalManagement';
 import { StepERC3643 } from '../CreateSecurityCommons/StepERC3643';
+import { StepProceedRecipients } from './Components/StepProceedRecipients';
 
 export const CreateBond = () => {
   const { t } = useTranslation('security', { keyPrefix: 'createBond' });
@@ -255,8 +255,8 @@ export const CreateBond = () => {
       content: <StepConfiguration />,
     },
     {
-      title: t('header.coupon'),
-      content: <StepCoupon />,
+      title: t('stepProceedRecipients.title'),
+      content: <StepProceedRecipients />,
     },
     {
       title: t('stepERC3643.title'),

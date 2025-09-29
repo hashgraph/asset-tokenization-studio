@@ -413,26 +413,30 @@ describe('ERC20 Tests', () => {
         })
 
         it('GIVEN a initialized ERC20 WHEN running any state changing method THEN transaction fails with NotAllowedInMultiPartitionMode', async () => {
-            erc20Facet = erc20Facet.connect(signer_A)
-
             await expect(
-                erc20Facet.approve(account_E, amount)
+                erc20Facet.connect(signer_A).approve(account_E, amount)
             ).to.be.rejectedWith('NotAllowedInMultiPartitionMode')
 
             await expect(
-                erc20Facet.transfer(account_E, amount)
+                erc20Facet.connect(signer_A).transfer(account_E, amount)
             ).to.be.rejectedWith('NotAllowedInMultiPartitionMode')
 
             await expect(
-                erc20Facet.transferFrom(account_C, account_E, amount)
+                erc20Facet
+                    .connect(signer_A)
+                    .transferFrom(account_C, account_E, amount)
             ).to.be.rejectedWith('NotAllowedInMultiPartitionMode')
 
             await expect(
-                erc20Facet.increaseAllowance(account_C, amount)
+                erc20Facet
+                    .connect(signer_A)
+                    .increaseAllowance(account_C, amount)
             ).to.be.rejectedWith('NotAllowedInMultiPartitionMode')
 
             await expect(
-                erc20Facet.decreaseAllowance(account_C, amount)
+                erc20Facet
+                    .connect(signer_A)
+                    .decreaseAllowance(account_C, amount)
             ).to.be.rejectedWith('NotAllowedInMultiPartitionMode')
         })
     })

@@ -1,0 +1,110 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepAssetDetails Component Basic rendering should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-1rjrglo"
+  >
+    <div
+      class="chakra-stack css-snrvey"
+    >
+      <p
+        class="css-xme99"
+      >
+        Asset Details
+      </p>
+      <p
+        class="css-12352u4"
+      >
+        Enter the asset details
+      </p>
+    </div>
+    <p
+      class="css-12352u4"
+    >
+      Please provide the asset ID to import the asset
+    </p>
+    <div
+      class="chakra-stack css-1y91oo5"
+    >
+      <div
+        class="chakra-stack css-1ca75dp"
+      >
+        <p
+          class="css-1bsgmhw"
+        >
+          Asset ID
+        </p>
+        <div
+          class="chakra-stack css-7mjhjv"
+        >
+          <div
+            class="chakra-form-control css-1kxonj9"
+            role="group"
+          >
+            <label
+              class="css-mimi7r"
+              for="assetId"
+            >
+              <div
+                class="chakra-input__group css-pwmwmr"
+                data-group="true"
+              >
+                <input
+                  class="chakra-input css-1mb26sp"
+                  data-testid="assetId"
+                  id="assetId"
+                  name="assetId"
+                  placeholder="Enter Asset ID"
+                  value=""
+                />
+              </div>
+            </label>
+          </div>
+          <button
+            aria-label="fetch-button"
+            class="chakra-button css-nu76vj"
+            disabled=""
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="chakra-icon css-kpbtv0"
+              fill="currentColor"
+              focusable="false"
+              height="1em"
+              viewBox="0 0 256 256"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M208,152H48a16,16,0,0,0-16,16v24a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V168A16,16,0,0,0,208,152Zm0,40H48V168H208ZM48.24,136H207.76a16.18,16.18,0,0,0,14.93-9.76,15.59,15.59,0,0,0-3.1-17.12L145.86,31.61a24.76,24.76,0,0,0-35.72,0L36.41,109.12h0a15.59,15.59,0,0,0-3.1,17.12A16.18,16.18,0,0,0,48.24,136Zm73.49-93.36a8.77,8.77,0,0,1,12.54,0L207.85,120H48.14Z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="chakra-stack css-dumf62"
+    >
+      <button
+        class="chakra-button css-vueqt9"
+        type="button"
+      >
+        Cancel
+      </button>
+      <button
+        class="chakra-button css-1145i8e"
+        type="button"
+      >
+        Next Step
+      </button>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

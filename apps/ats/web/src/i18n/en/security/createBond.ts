@@ -293,6 +293,20 @@ export default {
     totalCoupons: 'Total coupons',
   },
 
+  stepProceedRecipients: {
+    title: 'Proceed Recipients',
+    subtitle: 'Add proceed recipients',
+    mandatoryFields: '*Mandatory fields',
+    address: 'Address',
+    addressPlaceholder: '0.0.1234567',
+    data: 'Data',
+    dataPlaceholder: '0x',
+    invalidHederaId: 'Invalid Hedera ID',
+    actions: 'Actions',
+    invalidHexFormat: 'Invalid hex format',
+    addProceedRecipient: 'Add proceed recipient',
+  },
+
   stepERC3643: {
     title: 'ERC3643',
     subtitle: 'Add ERC3643 configurations',

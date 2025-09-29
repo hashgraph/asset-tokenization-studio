@@ -219,14 +219,14 @@ import { GetMaxSupplyByPartitionQuery } from '@query/security/cap/getMaxSupplyBy
 import { GetTotalSupplyByPartitionQuery } from '@query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQuery';
 import { IsOperatorQuery } from '@query/security/operator/isOperator/IsOperatorQuery';
 import { IsOperatorForPartitionQuery } from '@query/security/operator/isOperatorForPartition/IsOperatorForPartitionQuery';
+import GetAccountBalanceRequest from '@port/in/request/account/GetAccountBalanceRequest';
+import SetMaxSupplyRequest from '@port/in/request/security/operations/cap/SetMaxSupplyRequest';
+import GetMaxSupplyRequest from '@port/in/request/security/operations/cap/GetMaxSupplyRequest';
 
 export const BalanceOfQueryFixture = createFixture<BalanceOfQuery>((query) => {
   query.securityId.as(() => new HederaId(HederaIdPropsFixture.create().value));
   query.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
 });
-import GetAccountBalanceRequest from '@port/in/request/account/GetAccountBalanceRequest';
-import SetMaxSupplyRequest from '@port/in/request/security/operations/cap/SetMaxSupplyRequest';
-import GetMaxSupplyRequest from '@port/in/request/security/operations/cap/GetMaxSupplyRequest';
 
 export const GetSecurityDetailsRequestFixture =
   createFixture<GetSecurityDetailsRequest>((request) => {

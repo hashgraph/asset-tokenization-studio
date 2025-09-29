@@ -223,8 +223,6 @@ import {
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import { Security } from '@domain/context/security/Security';
-import { AccountPropsFixture } from '@test/fixtures/account/AccountFixture';
-import Account from '@domain/context/account/Account';
 import { RedeemAtMaturityByPartitionCommandFixture } from '@test/fixtures/bond/BondFixture';
 import { RedeemAtMaturityByPartitionCommandError } from './error/RedeemAtMaturityByPartitionCommandError';
 import { ErrorCode } from '@core/error/BaseError';
@@ -244,7 +242,6 @@ describe('RedeemAtMaturityByPartitionCommandHandler', () => {
   const transactionId = TransactionIdFixture.create().id;
   const errorMsg = ErrorMsgFixture.create().msg;
   const security = new Security(SecurityPropsFixture.create());
-  const account = new Account(AccountPropsFixture.create());
 
   beforeEach(() => {
     handler = new RedeemAtMaturityByPartitionCommandHandler(
@@ -286,7 +283,6 @@ describe('RedeemAtMaturityByPartitionCommandHandler', () => {
       it('should successfully redeem at maturity by partition', async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
-        accountServiceMock.getCurrentAccount.mockReturnValue(account);
         securityServiceMock.get.mockResolvedValue(security);
 
         transactionServiceMock
@@ -327,7 +323,6 @@ describe('RedeemAtMaturityByPartitionCommandHandler', () => {
           command.sourceId,
           command.amount,
           command.partitionId,
-          account.id.toString(),
         );
 
         expect(

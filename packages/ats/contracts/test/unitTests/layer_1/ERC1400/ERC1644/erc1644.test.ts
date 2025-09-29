@@ -211,9 +211,7 @@ import {
     type ResolverProxy,
     type ERC1644,
     type Pause,
-    type ERC1594,
     type AccessControl,
-    type Equity,
     type IERC1410,
     IFactory,
     BusinessLogicResolver,
@@ -261,10 +259,8 @@ describe('ERC1644 Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let erc1644Facet: ERC1644
-    let erc1594Facet: ERC1594
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let equityFacet: Equity
     let erc1410Facet: IERC1410
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
@@ -366,13 +362,6 @@ describe('ERC1644 Tests', () => {
                 diamond.address
             )
 
-            erc1594Facet = await ethers.getContractAt(
-                'ERC1594',
-                diamond.address
-            )
-
-            equityFacet = await ethers.getContractAt('Equity', diamond.address)
-
             pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
             erc1410Facet = await ethers.getContractAt(
@@ -411,71 +400,59 @@ describe('ERC1644 Tests', () => {
                 )
             })
             it('GIVEN a paused Token WHEN controllerTransfer THEN transaction fails with TokenIsPaused', async () => {
-                // Using account C (with role)
-                erc1644Facet = erc1644Facet.connect(signer_C)
-
                 // controller transfer fails
                 await expect(
-                    erc1644Facet.controllerTransfer(
-                        account_D,
-                        account_E,
-                        amount,
-                        '0x',
-                        '0x'
-                    )
+                    erc1644Facet
+                        .connect(signer_C)
+                        .controllerTransfer(
+                            account_D,
+                            account_E,
+                            amount,
+                            '0x',
+                            '0x'
+                        )
                 ).to.be.revertedWithCustomError(erc1644Facet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused Token WHEN controllerRedeem THEN transaction fails with TokenIsPaused', async () => {
-                // Using account C (with role)
-                erc1644Facet = erc1644Facet.connect(signer_C)
-
                 // remove document
                 await expect(
-                    erc1644Facet.controllerRedeem(account_D, amount, '0x', '0x')
+                    erc1644Facet
+                        .connect(signer_C)
+                        .controllerRedeem(account_D, amount, '0x', '0x')
                 ).to.be.revertedWithCustomError(erc1644Facet, 'TokenIsPaused')
             })
         })
 
         describe('AccessControl', () => {
             it('GIVEN an account without admin role WHEN finalizeControllable THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc1644Facet = erc1644Facet.connect(signer_C)
-
                 // controller finalize fails
                 await expect(
-                    erc1644Facet.finalizeControllable()
+                    erc1644Facet.connect(signer_C).finalizeControllable()
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
             it('GIVEN an account without controller role WHEN controllerTransfer THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc1644Facet = erc1644Facet.connect(signer_C)
-
                 // controller transfer fails
                 await expect(
-                    erc1644Facet.controllerTransfer(
-                        account_D,
-                        account_E,
-                        amount,
-                        data,
-                        operatorData
-                    )
+                    erc1644Facet
+                        .connect(signer_C)
+                        .controllerTransfer(
+                            account_D,
+                            account_E,
+                            amount,
+                            data,
+                            operatorData
+                        )
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
 
             it('GIVEN an account without controller role WHEN controllerRedeem THEN transaction fails with AccountHasNoRole', async () => {
-                // Using account C (non role)
-                erc1644Facet = erc1644Facet.connect(signer_C)
-
                 // controller redeem fails
                 await expect(
-                    erc1644Facet.controllerRedeem(
-                        account_D,
-                        amount,
-                        data,
-                        operatorData
-                    )
+                    erc1644Facet
+                        .connect(signer_C)
+                        .controllerRedeem(account_D, amount, data, operatorData)
                 ).to.be.rejectedWith('AccountHasNoRole')
             })
         })
@@ -592,16 +569,15 @@ describe('ERC1644 Tests', () => {
 
         describe('finalizeControllable', () => {
             beforeEach(async () => {
-                // Using account C (non role)
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-
-                // controller finalize fails
-                erc1644Facet = erc1644Facet.connect(signer_A)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-
-                await expect(erc1644Facet.finalizeControllable())
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CONTROLLER_ROLE, account_A)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ISSUER_ROLE, account_C)
+                await expect(
+                    erc1644Facet.connect(signer_A).finalizeControllable()
+                )
                     .to.emit(erc1644Facet, 'FinalizedControllerFeature')
                     .withArgs(account_A)
             })
@@ -725,31 +701,21 @@ describe('ERC1644 Tests', () => {
                 diamond.address
             )
 
-            erc1594Facet = await ethers.getContractAt(
-                'ERC1594',
-                diamond.address
-            )
-
-            equityFacet = await ethers.getContractAt('Equity', diamond.address)
-
             pauseFacet = await ethers.getContractAt('Pause', diamond.address)
         })
 
         describe('NotAllowedInMultiPartitionMode', () => {
             beforeEach(async () => {
                 // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C)
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-                await accessControlFacet.grantRole(
-                    CORPORATE_ACTION_ROLE,
-                    account_C
-                )
-                // Using account C (with role)
-                erc1644Facet = erc1644Facet.connect(signer_C)
-                erc1594Facet = erc1594Facet.connect(signer_C)
-                equityFacet = equityFacet.connect(signer_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CONTROLLER_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(ISSUER_ROLE, account_C)
+                await accessControlFacet
+                    .connect(signer_A)
+                    .grantRole(CORPORATE_ACTION_ROLE, account_C)
             })
 
             it('GIVEN an account with controller role WHEN controllerTransfer THEN NotAllowedInMultiPartitionMode', async () => {

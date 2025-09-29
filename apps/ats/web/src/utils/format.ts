@@ -207,7 +207,7 @@ import _capitalize from 'lodash/capitalize';
 import _formatDate from 'date-fns/format';
 import { TimeUnit } from './types';
 import i18n from '../i18n';
-import { LOCALE } from './constants';
+import { LOCALE, TIME_PERIODS_S } from './constants';
 
 export const formatAddressAccount = (address: string) => `${_capitalize(
   address.slice(0, 2),
@@ -290,6 +290,57 @@ export const formatPeriod = ({
 }) => {
   const unit = i18n.t(`timeUnit.${timeUnit}`, { count: amount });
   return `${amount} ${unit}`;
+};
+
+/**
+ * Formats a period in seconds to human-readable format
+ */
+export const formatCouponPeriod = (periodInSeconds: number): string => {
+  if (periodInSeconds >= TIME_PERIODS_S.YEAR) {
+    const years = Math.floor(periodInSeconds / TIME_PERIODS_S.YEAR);
+    return `${years} ${years === 1 ? 'Year' : 'Years'}`;
+  }
+  if (periodInSeconds >= TIME_PERIODS_S.QUARTER) {
+    const quarters = Math.floor(periodInSeconds / TIME_PERIODS_S.QUARTER);
+    return `${quarters} ${quarters === 1 ? 'Quarter' : 'Quarters'}`;
+  }
+  if (periodInSeconds >= TIME_PERIODS_S.MONTH) {
+    const months = Math.floor(periodInSeconds / TIME_PERIODS_S.MONTH);
+    return `${months} ${months === 1 ? 'Month' : 'Months'}`;
+  }
+  if (periodInSeconds >= TIME_PERIODS_S.WEEK) {
+    const weeks = Math.floor(periodInSeconds / TIME_PERIODS_S.WEEK);
+    return `${weeks} ${weeks === 1 ? 'Week' : 'Weeks'}`;
+  }
+  if (periodInSeconds >= TIME_PERIODS_S.DAY) {
+    const days = Math.floor(periodInSeconds / TIME_PERIODS_S.DAY);
+    return `${days} ${days === 1 ? 'Day' : 'Days'}`;
+  }
+  return `${periodInSeconds} Seconds`;
+};
+
+/**
+ * Validates if a period is within acceptable bounds
+ * Period is REQUIRED for all coupon operations
+ */
+export const validateCouponPeriod = (
+  periodInSeconds: number,
+  maturityDate?: Date,
+): string | true => {
+  // Period is required - cannot be null or undefined
+  if (!periodInSeconds || periodInSeconds < 0) {
+    return 'Coupon period is required and must be greater or equal to 0';
+  }
+
+  if (maturityDate) {
+    const timeToMaturity = Math.floor(
+      (maturityDate.getTime() - Date.now()) / 1000,
+    );
+    if (periodInSeconds > timeToMaturity) {
+      return 'Period cannot exceed bond maturity date';
+    }
+  }
+  return true;
 };
 
 //TODO: remove?

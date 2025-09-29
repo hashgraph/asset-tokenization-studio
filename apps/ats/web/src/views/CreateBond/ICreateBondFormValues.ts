@@ -218,12 +218,6 @@ export interface ICreateBondFormValues {
   totalAmount: string;
   startingDate: string;
   maturityDate: string;
-  couponType: number;
-  couponFrequency: string;
-  couponRate: number;
-  firstCouponDate: string;
-  lastCouponDate: string;
-  totalCoupons: number;
   regulationType: number;
   regulationSubType: number;
   countriesListType: number;
@@ -234,4 +228,6 @@ export interface ICreateBondFormValues {
   internalKycActivated: boolean;
   complianceId?: string;
   identityRegistryId?: string;
+  proceedRecipientsIds?: string[];
+  proceedRecipientsData?: string[];
 }

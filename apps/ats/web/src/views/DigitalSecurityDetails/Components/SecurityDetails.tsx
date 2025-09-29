@@ -209,7 +209,11 @@ import { useSecurityStore } from '../../../store/securityStore';
 import { useParams } from 'react-router-dom';
 import { toNumber } from '../../../utils/format';
 import { useGetCompliance } from '../../../hooks/queries/useCompliance';
-import { ComplianceRequest } from '@hashgraph/asset-tokenization-sdk';
+import {
+  ComplianceRequest,
+  IdentityRegistryRequest,
+} from '@hashgraph/asset-tokenization-sdk';
+import { useGetIdentityRegistry } from '../../../hooks/queries/useIdentityRegistry';
 
 interface SecurityDetailsProps extends Omit<DefinitionListProps, 'items'> {}
 
@@ -220,6 +224,15 @@ export const SecurityDetails = (props: SecurityDetailsProps) => {
 
   const { data: compliance } = useGetCompliance(
     new ComplianceRequest({
+      securityId: id!,
+    }),
+    {
+      enabled: !!id,
+    },
+  );
+
+  const { data: identityRegistry } = useGetIdentityRegistry(
+    new IdentityRegistryRequest({
       securityId: id!,
     }),
     {
@@ -275,6 +288,14 @@ export const SecurityDetails = (props: SecurityDetailsProps) => {
               {
                 title: tProperties('compliance'),
                 description: compliance ?? '',
+              },
+            ]
+          : []),
+        ...(identityRegistry
+          ? [
+              {
+                title: tProperties('identityRegistry'),
+                description: identityRegistry ?? '',
               },
             ]
           : []),

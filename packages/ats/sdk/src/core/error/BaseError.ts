@@ -273,6 +273,14 @@ export enum ErrorCode {
   NotIssuable = '20035',
   InvalidSupply = '20036',
   AddressRecovered = '20037',
+  ZeroAddressNotAllowed = '20038',
+  AccountBlocked = '20039',
+  ComplianceNotAllowed = '20040',
+  InvalidKycStatus = '20041',
+  WalletRecovered = '20042',
+  AddressNotVerified = '20043',
+  AccountIsProceedRecipient = '20044',
+  AccountIsNotProceedRecipient = '20045',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',
