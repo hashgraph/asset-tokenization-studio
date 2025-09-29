@@ -7,8 +7,12 @@ import { useParams } from 'react-router-dom';
 import { createColumnHelper } from '@tanstack/table-core';
 import { Table, Text } from 'io-bricks-ui';
 import { useTranslation } from 'react-i18next';
-import { COUPONS_FACTOR, DATE_TIME_FORMAT } from '../../../../utils/constants';
-import { formatDate } from '../../../../utils/format';
+import { DATE_TIME_FORMAT } from '../../../../utils/constants';
+import {
+  formatDate,
+  formatCouponPeriod,
+  formatNumberLocale,
+} from '../../../../utils/format';
 
 export const CouponsList = () => {
   const { id } = useParams();
@@ -46,7 +50,13 @@ export const CouponsList = () => {
     }),
     columnHelper.accessor('rate', {
       header: t('columns.rate'),
-      cell: (row) => `${parseInt(row.getValue()) / COUPONS_FACTOR}%`,
+      cell: (row) =>
+        `${formatNumberLocale(row.getValue(), row.row.original.rateDecimals ?? 0)}%`,
+      enableSorting: false,
+    }),
+    columnHelper.accessor('period', {
+      header: t('columns.period'),
+      cell: (row) => formatCouponPeriod(row.getValue()),
       enableSorting: false,
     }),
     columnHelper.accessor('snapshotId', {

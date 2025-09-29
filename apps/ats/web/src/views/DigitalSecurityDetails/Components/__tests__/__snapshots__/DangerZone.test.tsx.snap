@@ -30,7 +30,6 @@ exports[`DangerZone Admin has pauser role should render correctly: pauserRole 1`
           data-testid="pauser-button"
         >
           <input
-            aria-disabled="false"
             class="chakra-switch__input"
             style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
             type="checkbox"

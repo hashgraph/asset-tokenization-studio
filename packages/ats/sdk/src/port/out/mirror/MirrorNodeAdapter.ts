@@ -378,9 +378,7 @@ export class MirrorNodeAdapter {
     }
   }
 
-  public async getContractInfo(
-    contractId: string,
-  ): Promise<ContractViewModel> {
+  public async getContractInfo(contractId: string): Promise<ContractViewModel> {
     try {
       const url = `${this.mirrorNodeConfig.baseUrl}contracts/${contractId}`;
       LogService.logTrace('Getting contract info -> ', url);

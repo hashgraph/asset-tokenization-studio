@@ -319,4 +319,14 @@ export const rolesList: TRole[] = [
     value: SecurityRole._INTERNAL_KYC_MANAGER_ROLE,
     allowedSecurities: ['BOND', 'EQUITY'],
   },
+  {
+    label: 'trexOwner',
+    value: SecurityRole._TREX_OWNER_ROLE,
+    allowedSecurities: ['BOND', 'EQUITY'],
+  },
+  {
+    label: 'proceedRecipientManager',
+    value: SecurityRole._PROCEED_RECIPIENT_MANAGER_ROLE,
+    allowedSecurities: ['BOND'],
+  },
 ];

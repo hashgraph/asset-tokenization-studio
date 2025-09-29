@@ -258,8 +258,8 @@ export class GetClearingCreateHoldForByPartitionQueryHandler
         security.decimals,
       );
 
-      clearing.holdEscrow = (
-        await this.accountService.getAccountInfo(clearing.holdEscrow)
+      clearing.holdEscrowId = (
+        await this.accountService.getAccountInfo(clearing.holdEscrowId)
       ).id.toString();
 
       clearing.holdTo = (

@@ -217,8 +217,6 @@ import { ErrorCode } from '@core/error/BaseError';
 import SecurityService from '@service/security/SecurityService';
 import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import { Security } from '@domain/context/security/Security';
-import Account from '@domain/context/account/Account';
-import { AccountPropsFixture } from '@test/fixtures/shared/DataFixture';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import { RedeemCommandFixture } from '@test/fixtures/redeem/RedeemFixture';
@@ -243,7 +241,6 @@ describe('ProtectedRedeemFromByPartitionCommandHandler', () => {
   const transactionId = TransactionIdFixture.create().id;
   const errorMsg = ErrorMsgFixture.create().msg;
   const security = new Security(SecurityPropsFixture.create());
-  const account = new Account(AccountPropsFixture.create());
 
   beforeEach(() => {
     handler = new ProtectedRedeemFromByPartitionCommandHandler(
@@ -285,7 +282,6 @@ describe('ProtectedRedeemFromByPartitionCommandHandler', () => {
       it('should successfully protected redeem tokens', async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
-        accountServiceMock.getCurrentAccount.mockReturnValue(account);
         securityServiceMock.get.mockResolvedValue(security);
 
         transactionServiceMock
@@ -326,7 +322,6 @@ describe('ProtectedRedeemFromByPartitionCommandHandler', () => {
           command.sourceId,
           command.amount,
           command.partitionId,
-          account.id.toString(),
         );
 
         expect(

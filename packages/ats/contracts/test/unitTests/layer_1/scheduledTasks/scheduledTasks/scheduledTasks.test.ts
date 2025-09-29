@@ -213,14 +213,14 @@ import {
     type Pause,
     type AccessControl,
     TimeTravel,
-    ScheduledTasks,
+    ScheduledCrossOrderedTasks,
     type IERC1410,
     BusinessLogicResolver,
     IFactory,
     AccessControl__factory,
     EquityUSA__factory,
     Pause__factory,
-    ScheduledTasks__factory,
+    ScheduledCrossOrderedTasks__factory,
     TimeTravel__factory,
     Kyc,
     SsiManagement,
@@ -264,7 +264,7 @@ describe('Scheduled Tasks Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let equityFacet: EquityUSA
-    let scheduledTasksFacet: ScheduledTasks
+    let scheduledTasksFacet: ScheduledCrossOrderedTasks
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: IERC1410
@@ -317,7 +317,7 @@ describe('Scheduled Tasks Tests', () => {
             signer_A
         )
         equityFacet = EquityUSA__factory.connect(diamond.address, signer_A)
-        scheduledTasksFacet = ScheduledTasks__factory.connect(
+        scheduledTasksFacet = ScheduledCrossOrderedTasks__factory.connect(
             diamond.address,
             signer_A
         )
@@ -391,36 +391,33 @@ describe('Scheduled Tasks Tests', () => {
 
     it('GIVEN a paused Token WHEN triggerTasks THEN transaction fails with TokenIsPaused', async () => {
         // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-        await pauseFacet.pause()
-
-        // Using account C (with role)
-        scheduledTasksFacet = scheduledTasksFacet.connect(signer_C)
+        await pauseFacet.connect(signer_B).pause()
 
         // trigger scheduled snapshots
         await expect(
-            scheduledTasksFacet.triggerPendingScheduledTasks()
+            scheduledTasksFacet
+                .connect(signer_C)
+                .triggerPendingScheduledCrossOrderedTasks()
         ).to.be.rejectedWith('TokenIsPaused')
         await expect(
-            scheduledTasksFacet.triggerScheduledTasks(1)
+            scheduledTasksFacet
+                .connect(signer_C)
+                .triggerScheduledCrossOrderedTasks(1)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN a token WHEN triggerTasks THEN transaction succeeds', async () => {
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+        await accessControlFacet
+            .connect(signer_A)
+            .grantRole(CORPORATE_ACTION_ROLE, account_C)
 
-        erc1410Facet = erc1410Facet.connect(signer_B)
-        await erc1410Facet.issueByPartition({
+        await erc1410Facet.connect(signer_B).issueByPartition({
             partition: _PARTITION_ID_1,
             tokenHolder: account_A,
             value: INITIAL_AMOUNT,
             data: '0x',
         })
-
-        // Using account C (with role)
-        equityFacet = equityFacet.connect(signer_C)
 
         // set dividend
         const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
@@ -443,8 +440,8 @@ describe('Scheduled Tasks Tests', () => {
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
         }
-        await equityFacet.setDividends(dividendData_2)
-        await equityFacet.setDividends(dividendData_1)
+        await equityFacet.connect(signer_C).setDividends(dividendData_2)
+        await equityFacet.connect(signer_C).setDividends(dividendData_1)
 
         const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp(
             '2030-01-01T00:00:16Z'
@@ -468,14 +465,19 @@ describe('Scheduled Tasks Tests', () => {
             decimals: balanceAdjustmentsDecimals_2,
         }
 
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+        await equityFacet
+            .connect(signer_C)
+            .setScheduledBalanceAdjustment(balanceAdjustmentData_2)
+        await equityFacet
+            .connect(signer_C)
+            .setScheduledBalanceAdjustment(balanceAdjustmentData_1)
 
         // check schedled tasks
-        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
 
-        let scheduledTasksCount = await scheduledTasksFacet.scheduledTaskCount()
-        let scheduledTasks = await scheduledTasksFacet.getScheduledTasks(0, 100)
+        let scheduledTasksCount =
+            await scheduledTasksFacet.scheduledCrossOrderedTaskCount()
+        let scheduledTasks =
+            await scheduledTasksFacet.getScheduledCrossOrderedTasks(0, 100)
 
         expect(scheduledTasksCount).to.equal(4)
         expect(scheduledTasks.length).to.equal(scheduledTasksCount)
@@ -497,8 +499,6 @@ describe('Scheduled Tasks Tests', () => {
         expect(scheduledTasks[3].data).to.equal(SNAPSHOT_TASK_TYPE)
 
         // AFTER FIRST SCHEDULED TASKS ------------------------------------------------------------------
-        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
-
         await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_1 + 1
         )
@@ -518,11 +518,15 @@ describe('Scheduled Tasks Tests', () => {
         expect(BalanceOf_A_Dividend_1.decimals).to.equal(DECIMALS_INIT)
 
         // triggering from the queue
-        await scheduledTasksFacet.triggerPendingScheduledTasks()
+        await scheduledTasksFacet
+            .connect(signer_A)
+            .triggerPendingScheduledCrossOrderedTasks()
 
-        scheduledTasksCount = await scheduledTasksFacet.scheduledTaskCount()
+        scheduledTasksCount =
+            await scheduledTasksFacet.scheduledCrossOrderedTaskCount()
 
-        scheduledTasks = await scheduledTasksFacet.getScheduledTasks(0, 100)
+        scheduledTasks =
+            await scheduledTasksFacet.getScheduledCrossOrderedTasks(0, 100)
 
         expect(scheduledTasksCount).to.equal(2)
         expect(scheduledTasks.length).to.equal(scheduledTasksCount)
@@ -550,11 +554,15 @@ describe('Scheduled Tasks Tests', () => {
         )
 
         // triggering from the queue
-        await scheduledTasksFacet.triggerScheduledTasks(100)
+        await scheduledTasksFacet
+            .connect(signer_A)
+            .triggerScheduledCrossOrderedTasks(100)
 
-        scheduledTasksCount = await scheduledTasksFacet.scheduledTaskCount()
+        scheduledTasksCount =
+            await scheduledTasksFacet.scheduledCrossOrderedTaskCount()
 
-        scheduledTasks = await scheduledTasksFacet.getScheduledTasks(0, 100)
+        scheduledTasks =
+            await scheduledTasksFacet.getScheduledCrossOrderedTasks(0, 100)
 
         expect(scheduledTasksCount).to.equal(0)
         expect(scheduledTasks.length).to.equal(scheduledTasksCount)

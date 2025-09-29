@@ -218,7 +218,6 @@ import TransactionService from '@service/transaction/TransactionService';
 import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { BondDetails } from '@domain/context/bond/BondDetails';
-import { CouponDetails } from '@domain/context/bond/CouponDetails';
 import BigDecimal from '@domain/context/shared/BigDecimal';
 import ContractService from '@service/contract/ContractService';
 import { CreateBondCommandError } from './error/CreateBondCommandError';
@@ -253,19 +252,18 @@ export class CreateBondCommandHandler
         nominalValue,
         startingDate,
         maturityDate,
-        couponFrequency,
-        couponRate,
-        firstCouponDate,
         factory,
         resolver,
         configId,
         configVersion,
         diamondOwnerAccount,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-        compliance,
-        identityRegistry,
+        externalPausesIds,
+        externalControlListsIds,
+        externalKycListsIds,
+        complianceId,
+        identityRegistryId,
+        proceedRecipientIds,
+        proceedRecipientsData,
       } = command;
 
       //TODO: Boy scout: remove request validations and adjust test
@@ -305,17 +303,27 @@ export class CreateBondCommandHandler
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,
       ] = await Promise.all([
-        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
-        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
-        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
+        this.contractService.getEvmAddressesFromHederaIds(externalPausesIds),
+        this.contractService.getEvmAddressesFromHederaIds(
+          externalControlListsIds,
+        ),
+        this.contractService.getEvmAddressesFromHederaIds(externalKycListsIds),
       ]);
 
-      const complianceEvmAddress = compliance
-        ? await this.contractService.getContractEvmAddress(compliance)
+      let proceedRecipientsEvmAddresses: EvmAddress[] = [];
+      if (proceedRecipientIds)
+        proceedRecipientsEvmAddresses = await Promise.all(
+          proceedRecipientIds.map(
+            async (id) => await this.accountService.getAccountEvmAddress(id),
+          ),
+        );
+
+      const complianceEvmAddress = complianceId
+        ? await this.contractService.getContractEvmAddress(complianceId)
         : new EvmAddress(EVM_ZERO_ADDRESS);
 
-      const identityRegistryAddress = identityRegistry
-        ? await this.contractService.getContractEvmAddress(identityRegistry)
+      const identityRegistryAddress = identityRegistryId
+        ? await this.contractService.getContractEvmAddress(identityRegistryId)
         : new EvmAddress(EVM_ZERO_ADDRESS);
 
       const handler = this.transactionService.getHandler();
@@ -327,16 +335,9 @@ export class CreateBondCommandHandler
         parseInt(maturityDate),
       );
 
-      const couponInfo = new CouponDetails(
-        parseInt(couponFrequency),
-        BigDecimal.fromString(couponRate),
-        parseInt(firstCouponDate),
-      );
-
       res = await handler.createBond(
         new Security(security),
         bondInfo,
-        couponInfo,
         factoryEvmAddress,
         resolverEvmAddress,
         configId,
@@ -347,6 +348,8 @@ export class CreateBondCommandHandler
         externalControlListsEvmAddresses,
         externalKycListsEvmAddresses,
         diamondOwnerAccountEvmAddress,
+        proceedRecipientsEvmAddresses,
+        proceedRecipientsData,
         factory.toString(),
       );
 

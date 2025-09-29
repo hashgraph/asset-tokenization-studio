@@ -1,7 +1,7 @@
 import { Divider, HStack, VStack } from '@chakra-ui/react';
-import { Text, Toggle } from 'io-bricks-ui';
+import { Spinner, Text, Toggle } from 'io-bricks-ui';
 import { useRolesStore } from '../../../store/rolesStore';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { hasRole } from '../../../utils/helpers';
 import { SecurityRole } from '../../../utils/SecurityRole';
 import { useParams } from 'react-router-dom';
@@ -53,48 +53,51 @@ export const DangerZone = () => {
     [accountRoles],
   );
 
-  const { data: isPaused, refetch } = useGetIsPaused(
-    new PauseRequest({ securityId: id }),
-  );
+  const {
+    data: isPaused,
+    refetch,
+    isLoading: isPausedLoading,
+  } = useGetIsPaused(new PauseRequest({ securityId: id }));
 
-  const { data: isClearingActivated, refetch: refetchIsClearingActivated } =
-    useGetIsClearingActivated(
-      new IsClearingActivatedRequest({ securityId: id }),
-    );
+  const {
+    data: isClearingActivated,
+    refetch: refetchIsClearingActivated,
+    isLoading: isClearingActivatedLoading,
+  } = useGetIsClearingActivated(
+    new IsClearingActivatedRequest({ securityId: id }),
+  );
 
   const {
     data: isInternalKycActivated,
     refetch: refetchIsInternalKycActivated,
+    isLoading: isInternalKycActivatedLoading,
   } = useGetIsInternalKycActivated(
     new IsInternalKycActivatedRequest({ securityId: id }),
-    {
-      retry: false,
-    },
   );
 
-  const { mutate: pauseSecurity, isLoading: isPauseLoading } = usePauseSecurity(
+  const { mutate: pauseSecurity, isPending: isPauseLoading } = usePauseSecurity(
     { onSettled: () => refetch() },
   );
 
-  const { mutate: unpauseSecurity, isLoading: isUnpauseLoading } =
+  const { mutate: unpauseSecurity, isPending: isUnpauseLoading } =
     useUnpauseSecurity({ onSettled: () => refetch() });
 
-  const { mutate: activateClearing, isLoading: isActivateClearingLoading } =
+  const { mutate: activateClearing, isPending: isActivateClearingLoading } =
     useActivateClearing({ onSettled: () => refetchIsClearingActivated() });
 
-  const { mutate: deactivateClearing, isLoading: isDeactivateClearingLoading } =
+  const { mutate: deactivateClearing, isPending: isDeactivateClearingLoading } =
     useDeactivateClearing({ onSettled: () => refetchIsClearingActivated() });
 
   const {
     mutate: activateInternalKyc,
-    isLoading: isActivateInternalKycLoading,
+    isPending: isActivateInternalKycLoading,
   } = useActivateInternalKyc({
     onSettled: () => refetchIsInternalKycActivated(),
   });
 
   const {
     mutate: deactivateInternalKyc,
-    isLoading: isDeactivateInternalKycLoading,
+    isPending: isDeactivateInternalKycLoading,
   } = useDeactivateInternalKyc({
     onSettled: () => refetchIsInternalKycActivated(),
   });
@@ -136,6 +139,8 @@ export const DangerZone = () => {
     }
   };
 
+  console.log('isInternalKycActivated', isInternalKycActivated);
+
   return (
     <VStack w={'full'} layerStyle="container" align="start" gap={8} py={8}>
       {hasPauserRole && (
@@ -148,12 +153,15 @@ export const DangerZone = () => {
               {tButtons('dangerZone.pauseSecurityTokenDescription')}
             </Text>
           </VStack>
-          <Toggle
-            data-testid="pauser-button"
-            size={'lg'}
-            defaultChecked={isPaused}
-            onChange={handlePauseToggle}
-            isDisabled={isPauseLoading || isUnpauseLoading}
+          <LoadingToggle
+            isLoading={isPausedLoading || isPauseLoading || isUnpauseLoading}
+            toggleProps={{
+              'data-testid': 'pauser-button',
+              size: 'lg',
+              defaultChecked: isPaused,
+              onChange: handlePauseToggle,
+              isDisabled: isPauseLoading || isUnpauseLoading,
+            }}
           />
         </HStack>
       )}
@@ -168,16 +176,22 @@ export const DangerZone = () => {
               {tButtons('dangerZone.clearingModeDescription')}
             </Text>
           </VStack>
-          <Toggle
-            data-testid="pauser-button"
-            size={'lg'}
-            defaultChecked={isClearingActivated}
-            onChange={handleClearingModeToggle}
-            isDisabled={
+          <LoadingToggle
+            isLoading={
+              isClearingActivatedLoading ||
               isActivateClearingLoading ||
-              isDeactivateClearingLoading ||
-              isPaused
+              isDeactivateClearingLoading
             }
+            toggleProps={{
+              'data-testid': 'clearing-button',
+              size: 'lg',
+              defaultChecked: isClearingActivated,
+              onChange: handleClearingModeToggle,
+              isDisabled:
+                isActivateClearingLoading ||
+                isDeactivateClearingLoading ||
+                isPaused,
+            }}
           />
         </HStack>
       )}
@@ -194,19 +208,36 @@ export const DangerZone = () => {
               {tButtons('dangerZone.internalKYCManagerDescription')}
             </Text>
           </VStack>
-          <Toggle
-            data-testid="internal-kyc-manager-button"
-            size={'lg'}
-            defaultChecked={isInternalKycActivated}
-            onChange={handleInternalKYCManagerToggle}
-            isDisabled={
+          <LoadingToggle
+            isLoading={
+              isInternalKycActivatedLoading ||
               isActivateInternalKycLoading ||
-              isDeactivateInternalKycLoading ||
-              isPaused
+              isDeactivateInternalKycLoading
             }
+            toggleProps={{
+              'data-testid': 'internal-kyc-manager-button',
+              size: 'lg',
+              defaultChecked: isInternalKycActivated,
+              onChange: handleInternalKYCManagerToggle,
+              isDisabled: isPaused,
+            }}
           />
         </HStack>
       )}
     </VStack>
   );
+};
+
+const LoadingToggle = ({
+  isLoading,
+  toggleProps,
+}: {
+  isLoading: boolean;
+  toggleProps: React.ComponentProps<typeof Toggle>;
+}) => {
+  if (isLoading) {
+    return <Spinner data-testid="spinner-toggle" />;
+  }
+
+  return <Toggle {...toggleProps} />;
 };

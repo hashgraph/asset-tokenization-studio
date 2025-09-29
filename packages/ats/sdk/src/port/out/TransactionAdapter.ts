@@ -213,7 +213,6 @@ import LogService from '@service/log/LogService';
 import { Security } from '@domain/context/security/Security';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { BondDetails } from '@domain/context/bond/BondDetails';
-import { CouponDetails } from '@domain/context/bond/CouponDetails';
 import { EquityDetails } from '@domain/context/equity/EquityDetails';
 import HWCSettings from '@core/settings/walletConnect/HWCSettings';
 import { ContractId } from '@hashgraph/sdk';
@@ -271,7 +270,6 @@ interface ITransactionAdapter {
   createBond(
     security: Security,
     bondDetails: BondDetails,
-    couponDetails: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
@@ -282,6 +280,8 @@ interface ITransactionAdapter {
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
@@ -381,6 +381,7 @@ interface ITransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    period: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setDocument(
@@ -561,7 +562,7 @@ interface IHoldTransactionAdapter {
   createHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
@@ -570,7 +571,7 @@ interface IHoldTransactionAdapter {
   createHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -580,7 +581,7 @@ interface IHoldTransactionAdapter {
   controllerCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -591,7 +592,7 @@ interface IHoldTransactionAdapter {
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
@@ -760,7 +761,7 @@ interface IClearingAdapter {
   clearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -770,7 +771,7 @@ interface IClearingAdapter {
   clearingCreateHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -782,7 +783,7 @@ interface IClearingAdapter {
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -795,7 +796,7 @@ interface IClearingAdapter {
   operatorClearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1048,6 +1049,26 @@ interface IAgent {
   ): Promise<TransactionResponse>;
 }
 
+interface IProceedRecipients {
+  addProceedRecipient(
+    security: EvmAddress,
+    proceedRecipient: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeProceedRecipient(
+    security: EvmAddress,
+    proceedRecipient: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  updateProceedRecipientData(
+    security: EvmAddress,
+    proceedRecipient: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     WalletAdapter,
@@ -1070,7 +1091,8 @@ export default abstract class TransactionAdapter
     IIdentityRegistryTransactionAdapter,
     IFreezeAdapter,
     IBatchAdapter,
-    IAgent
+    IAgent,
+    IProceedRecipients
 {
   abstract triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1130,7 +1152,6 @@ export default abstract class TransactionAdapter
   abstract createBond(
     security: Security,
     bondDetails: BondDetails,
-    couponDetails: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
@@ -1141,6 +1162,8 @@ export default abstract class TransactionAdapter
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
   abstract grantRole(
@@ -1269,6 +1292,7 @@ export default abstract class TransactionAdapter
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    period: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   abstract setVotingRights(
@@ -1391,7 +1415,7 @@ export default abstract class TransactionAdapter
   abstract createHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
@@ -1400,7 +1424,7 @@ export default abstract class TransactionAdapter
   abstract createHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1410,7 +1434,7 @@ export default abstract class TransactionAdapter
   abstract controllerCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1421,7 +1445,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     expirationDate: BigDecimal,
@@ -1573,7 +1597,7 @@ export default abstract class TransactionAdapter
   abstract clearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -1583,7 +1607,7 @@ export default abstract class TransactionAdapter
   abstract clearingCreateHoldFromByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1595,7 +1619,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     partitionId: string,
     amount: BigDecimal,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
@@ -1608,7 +1632,7 @@ export default abstract class TransactionAdapter
   abstract operatorClearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrow: EvmAddress,
+    escrowId: EvmAddress,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1835,6 +1859,80 @@ export default abstract class TransactionAdapter
     partitionId: string,
     sourceId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract createTrexSuiteBond(
+    salt: string,
+    owner: string,
+    irs: string,
+    onchainId: string,
+    irAgents: string[],
+    tokenAgents: string[],
+    compliancesModules: string[],
+    complianceSettings: string[],
+    claimTopics: number[],
+    issuers: string[],
+    issuerClaims: number[][],
+    security: Security,
+    bondDetails: BondDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    diamondOwnerAccount: EvmAddress,
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract createTrexSuiteEquity(
+    salt: string,
+    owner: string,
+    irs: string,
+    onchainId: string,
+    irAgents: string[],
+    tokenAgents: string[],
+    compliancesModules: string[],
+    complianceSettings: string[],
+    claimTopics: number[],
+    issuers: string[],
+    issuerClaims: number[][],
+    security: Security,
+    equityDetails: EquityDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    diamondOwnerAccount: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract addProceedRecipient(
+    security: EvmAddress,
+    proceedRecipient: EvmAddress,
+    data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract removeProceedRecipient(
+    security: EvmAddress,
+    proceedRecipient: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract updateProceedRecipientData(
+    security: EvmAddress,
+    proceedRecipient: EvmAddress,
+    data: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }

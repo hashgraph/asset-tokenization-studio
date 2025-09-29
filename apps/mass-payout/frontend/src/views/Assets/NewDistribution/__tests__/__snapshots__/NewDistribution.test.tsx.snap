@@ -1,0 +1,417 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NewDistribution Component Basic rendering should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-s41pwm"
+  >
+    <nav
+      aria-label="breadcrumb"
+      class="chakra-breadcrumb css-1y2eexs"
+      data-testid="breadcrumb-desktop"
+    >
+      <ol
+        class="chakra-breadcrumb__list css-70qvj9"
+      >
+        <li
+          class="chakra-breadcrumb__list-item css-1kcfkoc"
+        >
+          <a
+            class="chakra-breadcrumb__link css-zqoicl"
+            href="/assets"
+          >
+            Asset list
+          </a>
+          <span
+            class="css-ouj2o6"
+            role="presentation"
+          >
+            <svg
+              class="chakra-icon css-kpbtv0"
+              fill="currentColor"
+              focusable="false"
+              height="1em"
+              viewBox="0 0 256 256"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"
+              />
+            </svg>
+          </span>
+        </li>
+        <li
+          class="chakra-breadcrumb__list-item css-1kcfkoc"
+        >
+          <span
+            aria-current="page"
+            class="chakra-breadcrumb__link css-zqoicl"
+          >
+            New Distribution
+          </span>
+        </li>
+      </ol>
+    </nav>
+    <div
+      class="chakra-stack css-1d0c3h9"
+    >
+      <div
+        class="css-fgr5nb"
+        data-testid="go-back-button"
+      >
+        <button
+          aria-label="Go back"
+          class="chakra-button css-j1h3f5"
+          data-testid="go-back-button-button"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="chakra-icon css-kpbtv0"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="0 0 256 256"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M224,128a8,8,0,0,1-8,8H59.31l58.35,58.34a8,8,0,0,1-11.32,11.32l-72-72a8,8,0,0,1,0-11.32l72-72a8,8,0,0,1,11.32,11.32L59.31,120H216A8,8,0,0,1,224,128Z"
+            />
+          </svg>
+        </button>
+        <p
+          class="css-1nqy6ok"
+          data-testid="go-back-button-label"
+        >
+          New Distribution
+        </p>
+      </div>
+      <p
+        class="css-14fvdqs"
+      >
+        Configure your payment details
+      </p>
+    </div>
+    <div
+      class="css-1xrzhfl"
+    >
+      <div
+        class="chakra-stack css-15m19e2"
+      >
+        <div
+          class="chakra-stack css-snrvey"
+        >
+          <p
+            class="css-1mk5tlk"
+          >
+            Payment Configuration
+          </p>
+          <p
+            class="css-jneyc"
+          >
+            Please provide the payment configuration details
+          </p>
+        </div>
+        <div
+          class="chakra-stack css-os8y5p"
+        >
+          <div
+            class="chakra-stack css-1d0c3h9"
+          >
+            <p
+              class="css-1bsgmhw"
+            >
+              Asset ID
+            </p>
+            <p
+              class="css-wrkltu"
+            >
+              0.0.890123
+            </p>
+          </div>
+          <div
+            class="chakra-stack css-1d0c3h9"
+          >
+            <p
+              class="css-1bsgmhw"
+            >
+              Asset Name
+            </p>
+            <p
+              class="css-wrkltu"
+            >
+              Test Asset
+            </p>
+          </div>
+          <div
+            class="chakra-stack css-1d0c3h9"
+          >
+            <p
+              class="css-1bsgmhw"
+            >
+              Asset Type
+            </p>
+            <p
+              class="css-wrkltu"
+            >
+              Bond
+            </p>
+          </div>
+          <div
+            class="chakra-stack css-xtejj8"
+          >
+            <div
+              class="chakra-form-control css-1kxonj9"
+              role="group"
+            >
+              <label
+                class="chakra-form__label css-31pxj9"
+                for="distributionType"
+                id="field-:r1:-label"
+              >
+                <span
+                  class="css-1e9661m"
+                  id="label"
+                >
+                  Select Distribution Type
+                </span>
+                <div
+                  class="css-kjafn5"
+                >
+                  <span
+                    class="css-1f43avz-a11yText-A11yText"
+                    id="react-select-2-live-region"
+                  />
+                  <span
+                    aria-atomic="false"
+                    aria-live="polite"
+                    aria-relevant="additions text"
+                    class="css-1f43avz-a11yText-A11yText"
+                  />
+                  <div
+                    class="css-1pjmt4t"
+                  >
+                    <div
+                      class="css-1fordco"
+                    >
+                      <div
+                        class="css-1puyje9"
+                        id="react-select-2-placeholder"
+                      >
+                        Select...
+                      </div>
+                      <input
+                        aria-autocomplete="list"
+                        aria-describedby="react-select-2-placeholder"
+                        aria-expanded="false"
+                        aria-haspopup="true"
+                        aria-readonly="true"
+                        class="css-1czm0f-dummyInput-DummyInput"
+                        id="distributionType"
+                        inputmode="none"
+                        role="combobox"
+                        tabindex="0"
+                        value=""
+                      />
+                    </div>
+                    <div
+                      class="css-hfbj6y"
+                    >
+                      <div
+                        class="css-sppt3c"
+                      >
+                        <div
+                          class="css-amv3mm"
+                        >
+                          <svg
+                            class="chakra-icon css-1bnjyrz"
+                            fill="currentColor"
+                            focusable="false"
+                            height="1em"
+                            viewBox="0 0 256 256"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <input
+                    name="distributionType"
+                    type="hidden"
+                    value=""
+                  />
+                </div>
+              </label>
+            </div>
+          </div>
+          <div
+            class="chakra-form-control css-1kxonj9"
+            role="group"
+          >
+            <label
+              class="css-mimi7r"
+              for="concept"
+            >
+              <span
+                class="css-1e9661m"
+                id="label"
+              >
+                Concept
+              </span>
+              <div
+                class="chakra-input__group css-pwmwmr"
+                data-group="true"
+              >
+                <input
+                  class="chakra-input css-1mb26sp"
+                  data-testid="concept"
+                  id="concept"
+                  name="concept"
+                  placeholder="Enter payment concept"
+                  value=""
+                />
+              </div>
+            </label>
+          </div>
+          <div
+            class="chakra-stack css-1ca75dp"
+          >
+            <p
+              class="css-1bsgmhw"
+            >
+              Payment Type
+            </p>
+            <div
+              class="chakra-form-control css-1kxonj9"
+              role="group"
+            >
+              <div
+                class="chakra-radio-group css-1811skr"
+                role="radiogroup"
+              >
+                <label
+                  class="chakra-radio css-1c75yry"
+                  data-checked=""
+                >
+                  <input
+                    checked=""
+                    class="chakra-radio__input"
+                    id="radio-:r6:"
+                    name="amountType"
+                    style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+                    type="radio"
+                    value="fixed"
+                  />
+                  <span
+                    aria-hidden="true"
+                    class="chakra-radio__control css-1fxgf2i"
+                    data-checked=""
+                  />
+                  <span
+                    class="chakra-radio__label css-1ngpyuv"
+                    data-checked=""
+                  >
+                    Fixed Amount
+                  </span>
+                </label>
+                <label
+                  class="chakra-radio css-1c75yry"
+                >
+                  <input
+                    class="chakra-radio__input"
+                    id="radio-:r7:"
+                    name="amountType"
+                    style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+                    type="radio"
+                    value="percentage"
+                  />
+                  <span
+                    aria-hidden="true"
+                    class="chakra-radio__control css-1fxgf2i"
+                  />
+                  <span
+                    class="chakra-radio__label css-1ngpyuv"
+                  >
+                    Percentage
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div
+            class="chakra-stack css-1ca75dp"
+          >
+            <div
+              class="chakra-form-control css-1kxonj9"
+              role="group"
+            >
+              <label
+                class="css-mimi7r"
+              >
+                <span
+                  class="css-1e9661m"
+                  id="label"
+                >
+                  Amount*
+                </span>
+                <div
+                  class="chakra-input__group css-pwmwmr"
+                  data-group="true"
+                >
+                  <div
+                    class="chakra-input__left-element css-irrpsr"
+                  >
+                    <p
+                      class="css-0"
+                    >
+                      $
+                    </p>
+                  </div>
+                  <input
+                    class="chakra-input css-1xn4b4z"
+                    data-testid="amount"
+                    id="field-:r8:"
+                    inputmode="numeric"
+                    name="amount"
+                    placeholder="0.00"
+                    type="text"
+                    value=""
+                  />
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div
+          class="chakra-stack css-16c6exx"
+        >
+          <button
+            class="chakra-button css-vueqt9"
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            class="chakra-button css-1145i8e"
+            disabled=""
+            type="button"
+          >
+            Create Distribution
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
