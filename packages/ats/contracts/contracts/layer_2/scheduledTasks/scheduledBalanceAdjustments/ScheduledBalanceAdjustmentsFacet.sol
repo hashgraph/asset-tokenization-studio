@@ -32,12 +32,18 @@ contract ScheduledBalanceAdjustmentsFacet is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_ = new bytes4[](4);
         staticFunctionSelectors_[selectorIndex++] = this
             .scheduledBalanceAdjustmentCount
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getScheduledBalanceAdjustments
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .setScheduledBalanceAdjustment
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getScheduledBalanceAdjustment
             .selector;
     }
 

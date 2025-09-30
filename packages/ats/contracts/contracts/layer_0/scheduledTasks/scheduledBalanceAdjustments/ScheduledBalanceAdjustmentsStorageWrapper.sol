@@ -13,15 +13,76 @@ import {
 import {
     _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-import {IEquity} from '../../../layer_2/interfaces/equity/IEquity.sol';
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
 } from '../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol';
+import {
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE
+} from '../../../layer_2/constants/values.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
     ScheduledSnapshotsStorageWrapper
 {
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    function _setScheduledBalanceAdjustment(
+        IScheduledBalanceAdjustments.ScheduledBalanceAdjustment
+            calldata _newBalanceAdjustment
+    )
+        internal
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 balanceAdjustmentID_
+        )
+    {
+        bytes memory data = abi.encode(_newBalanceAdjustment);
+
+        (
+            success_,
+            corporateActionId_,
+            balanceAdjustmentID_
+        ) = _addCorporateAction(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, data);
+
+        _initBalanceAdjustment(success_, corporateActionId_, data);
+    }
+
+    function _initBalanceAdjustment(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) internal {
+        if (!_success) {
+            revert IScheduledBalanceAdjustments
+                .BalanceAdjustmentCreationFailed();
+        }
+
+        IScheduledBalanceAdjustments.ScheduledBalanceAdjustment
+            memory newBalanceAdjustment = abi.decode(
+                _data,
+                (IScheduledBalanceAdjustments.ScheduledBalanceAdjustment)
+            );
+
+        _addScheduledCrossOrderedTask(
+            newBalanceAdjustment.executionDate,
+            abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
+        );
+        _addScheduledBalanceAdjustment(
+            newBalanceAdjustment.executionDate,
+            abi.encode(_actionId)
+        );
+    }
+
+    function _addScheduledCrossOrderedTask(
+        uint256 _newScheduledTimestamp,
+        bytes memory _newData
+    ) internal virtual;
+
     function _addScheduledBalanceAdjustment(
         uint256 _newScheduledTimestamp,
         bytes memory _newData
@@ -57,10 +118,10 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
             abi.decode(data, (bytes32))
         );
         if (balanceAdjustmentData.length == 0) return;
-        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi
-            .decode(
+        IScheduledBalanceAdjustments.ScheduledBalanceAdjustment
+            memory balanceAdjustment = abi.decode(
                 balanceAdjustmentData,
-                (IEquity.ScheduledBalanceAdjustment)
+                (IScheduledBalanceAdjustments.ScheduledBalanceAdjustment)
             );
         _adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
@@ -121,16 +182,43 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
                     actionId
                 );
 
-                IEquity.ScheduledBalanceAdjustment
+                IScheduledBalanceAdjustments.ScheduledBalanceAdjustment
                     memory balanceAdjustment = abi.decode(
                         balanceAdjustmentData,
-                        (IEquity.ScheduledBalanceAdjustment)
+                        (
+                            IScheduledBalanceAdjustments
+                                .ScheduledBalanceAdjustment
+                        )
                     );
                 pendingABAF_ *= balanceAdjustment.factor;
                 pendingDecimals_ += balanceAdjustment.decimals;
             } else {
                 break;
             }
+        }
+    }
+
+    function _getScheduledBalanceAdjusment(
+        uint256 _balanceAdjustmentID
+    )
+        internal
+        view
+        returns (
+            IScheduledBalanceAdjustments.ScheduledBalanceAdjustment
+                memory balanceAdjustment_
+        )
+    {
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE]
+            .at(_balanceAdjustmentID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (balanceAdjustment_) = abi.decode(
+                data,
+                (IScheduledBalanceAdjustments.ScheduledBalanceAdjustment)
+            );
         }
     }
 

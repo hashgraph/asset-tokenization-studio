@@ -109,49 +109,6 @@ abstract contract EquityStorageWrapper is
         _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
     }
 
-    function _setScheduledBalanceAdjustment(
-        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    )
-        internal
-        returns (
-            bool success_,
-            bytes32 corporateActionId_,
-            uint256 balanceAdjustmentID_
-        )
-    {
-        bytes memory data = abi.encode(_newBalanceAdjustment);
-
-        (
-            success_,
-            corporateActionId_,
-            balanceAdjustmentID_
-        ) = _addCorporateAction(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, data);
-
-        _initBalanceAdjustment(success_, corporateActionId_, data);
-    }
-
-    function _initBalanceAdjustment(
-        bool _success,
-        bytes32 _actionId,
-        bytes memory _data
-    ) internal {
-        if (!_success) {
-            revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
-        }
-
-        IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
-            .decode(_data, (IEquity.ScheduledBalanceAdjustment));
-
-        _addScheduledCrossOrderedTask(
-            newBalanceAdjustment.executionDate,
-            abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
-        );
-        _addScheduledBalanceAdjustment(
-            newBalanceAdjustment.executionDate,
-            abi.encode(_actionId)
-        );
-    }
-
     function _getEquityDetails()
         internal
         view
@@ -355,38 +312,6 @@ abstract contract EquityStorageWrapper is
             return _totalTokenHoldersAt(registeredVoting.snapshotId);
 
         return _getTotalTokenHolders();
-    }
-
-    function _getScheduledBalanceAdjusment(
-        uint256 _balanceAdjustmentID
-    )
-        internal
-        view
-        returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
-    {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE]
-            .at(_balanceAdjustmentID - 1);
-
-        (, bytes memory data) = _getCorporateAction(actionId);
-
-        if (data.length > 0) {
-            (balanceAdjustment_) = abi.decode(
-                data,
-                (IEquity.ScheduledBalanceAdjustment)
-            );
-        }
-    }
-
-    function _getScheduledBalanceAdjustmentsCount()
-        internal
-        view
-        returns (uint256 balanceAdjustmentCount_)
-    {
-        return
-            _getCorporateActionCountByType(
-                BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-            );
     }
 
     function _getSnapshotBalanceForIfDateReached(

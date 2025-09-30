@@ -256,10 +256,7 @@ export default class CreateConfigurationsForDeployedContractsCommand extends Bas
             deployedContractList.proceedRecipientsFacet.address,
         ]
         this.bondUsaAddress = bondUsaFacet.address
-        this.excludeBondAddresses = [
-            deployedContractList.adjustBalancesFacet.address,
-            deployedContractList.scheduledBalanceAdjustmentsFacet.address,
-        ]
+        this.excludeBondAddresses = []
     }
 
     get commonFacetAddressList(): string[] {

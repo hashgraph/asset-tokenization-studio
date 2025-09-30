@@ -59,12 +59,6 @@ interface TRexIEquity {
         bool recordDateReached;
     }
 
-    struct ScheduledBalanceAdjustment {
-        uint256 executionDate;
-        uint256 factor;
-        uint8 decimals;
-    }
-
     /**
      * @notice Sets a new dividend
      * @dev Can only be called by an account with the corporate actions role
@@ -80,14 +74,6 @@ interface TRexIEquity {
     function setVoting(
         Voting calldata _newVoting
     ) external returns (bool success_, uint256 voteID_);
-
-    /**
-     * @notice Sets a new scheduled balance adjustment
-     * @dev The task is added to the queue and executed when the execution date is reached
-     */
-    function setScheduledBalanceAdjustment(
-        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    ) external returns (bool success_, uint256 balanceAdjustmentID_);
 
     function getEquityDetails()
         external
@@ -170,22 +156,4 @@ interface TRexIEquity {
     function getTotalVotingHolders(
         uint256 _voteID
     ) external view returns (uint256);
-
-    /**
-     * @notice Returns the details of a previously scheduled balance adjustment
-     */
-    function getScheduledBalanceAdjustment(
-        uint256 _balanceAdjustmentID
-    )
-        external
-        view
-        returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
-
-    /**
-     * @notice Returns the total number of scheduled balance adjustments
-     */
-    function getScheduledBalanceAdjustmentCount()
-        external
-        view
-        returns (uint256 balanceAdjustmentCount_);
 }

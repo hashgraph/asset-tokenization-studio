@@ -27,7 +27,7 @@ contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](20);
+        staticFunctionSelectors_ = new bytes4[](17);
         staticFunctionSelectors_[selectorIndex++] = this
             ._initialize_equityUSA
             .selector;
@@ -48,15 +48,7 @@ contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this
             .getVotingCount
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setScheduledBalanceAdjustment
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getScheduledBalanceAdjustment
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getScheduledBalanceAdjustmentCount
-            .selector;
+
         staticFunctionSelectors_[selectorIndex++] = this
             .getSecurityRegulationData
             .selector;

@@ -25,7 +25,7 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is
     function _addScheduledCrossOrderedTask(
         uint256 _newScheduledTimestamp,
         bytes memory _newData
-    ) internal {
+    ) internal override {
         ScheduledTasksLib.addScheduledTask(
             _scheduledCrossOrderedTaskStorage(),
             _newScheduledTimestamp,
