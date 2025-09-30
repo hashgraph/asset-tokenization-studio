@@ -7,10 +7,8 @@ import {
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
     SNAPSHOT_RESULT_ID,
-    SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE
+    SNAPSHOT_TASK_TYPE
 } from '../../layer_2/constants/values.sol';
 import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
 import {
