@@ -300,7 +300,7 @@ describe('CreateTrexSuiteBondCommandHandler', () => {
           .mockResolvedValueOnce([externalPauseEvmAddress])
           .mockResolvedValueOnce([externalControlEvmAddress])
           .mockResolvedValueOnce([externalKycEvmAddress])
-          .mockResolvedValueOnce([evmAddress]); // beneficiaries
+          .mockResolvedValueOnce([evmAddress]); // proceedRecipients
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
 
         transactionServiceMock
@@ -371,7 +371,7 @@ describe('CreateTrexSuiteBondCommandHandler', () => {
           evmAddress,
           evmAddress,
           [evmAddress],
-          command.beneficiariesData,
+          command.proceedRecipientsData,
           [externalPauseEvmAddress],
           [externalControlEvmAddress],
           [externalKycEvmAddress],

@@ -56,8 +56,8 @@ interface TRexIFactory {
         SecurityData security;
         IBondRead.BondDetailsData bondDetails;
         IBondRead.InterestRateTypes interestRateType;
-        address[] beneficiaries;
-        bytes[] beneficiariesData;
+        address[] proceedRecipients;
+        bytes[] proceedRecipientsData;
     }
 
     event EquityDeployed(

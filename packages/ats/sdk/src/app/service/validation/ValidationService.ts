@@ -268,9 +268,9 @@ import { IsInternalKycActivatedQuery } from '@query/security/kyc/isInternalKycAc
 import { IsExternallyGrantedQuery } from '@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQuery';
 import { GetTokenBySaltQuery } from '@query/factory/trex/getTokenBySalt/GetTokenBySaltQuery';
 import { InvalidTrexTokenSalt } from '@domain/context/factory/error/InvalidTrexTokenSalt';
-import { IsBeneficiaryQuery } from '@query/security/beneficiary/isBeneficiary/IsBeneficiaryQuery';
-import { AccountIsNotBeneficiary } from '@domain/context/security/error/operations/AccountIsNotBeneficiary';
-import { AccountIsBeneficiary } from '@domain/context/security/error/operations/AccountIsBeneficiary';
+import { IsProceedRecipientQuery } from '@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery';
+import { AccountIsNotProceedRecipient } from '@domain/context/security/error/operations/AccountIsNotProceedRecipient';
+import { AccountIsProceedRecipient } from '@domain/context/security/error/operations/AccountIsProceedRecipient';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -768,34 +768,34 @@ export default class ValidationService extends Service {
     return kycResult.payload === kycStatus;
   }
 
-  async checkIsBeneficiary(
+  async checkIsProceedRecipient(
     securityId: string,
-    beneficiary: string,
+    proceedRecipient: string,
   ): Promise<boolean> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = (
       await this.queryBus.execute(
-        new IsBeneficiaryQuery(securityId, beneficiary),
+        new IsProceedRecipientQuery(securityId, proceedRecipient),
       )
     ).payload;
     if (!res) {
-      throw new AccountIsNotBeneficiary(securityId, beneficiary);
+      throw new AccountIsNotProceedRecipient(securityId, proceedRecipient);
     }
 
     return res;
   }
-  async checkIsNotBeneficiary(
+  async checkIsNotProceedRecipient(
     securityId: string,
-    beneficiary: string,
+    proceedRecipient: string,
   ): Promise<boolean> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = (
       await this.queryBus.execute(
-        new IsBeneficiaryQuery(securityId, beneficiary),
+        new IsProceedRecipientQuery(securityId, proceedRecipient),
       )
     ).payload;
     if (res) {
-      throw new AccountIsBeneficiary(securityId, beneficiary);
+      throw new AccountIsProceedRecipient(securityId, proceedRecipient);
     }
 
     return !res;

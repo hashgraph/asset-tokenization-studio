@@ -219,7 +219,7 @@ import clearingOperations from './clearingOperations';
 import externalPause from './externalPause';
 import externalControl from './externalControl';
 import externalKYC from './externalKYC';
-import beneficiaries from './beneficiaries';
+import proceedRecipients from './proceedRecipients';
 
 export default {
   header: {
@@ -250,7 +250,7 @@ export default {
     externalPause: 'External Pause',
     externalKYCList: 'External KYC',
     freeze: 'Freeze',
-    beneficiaries: 'Beneficiaries',
+    proceedRecipients: 'Proceed Recipients',
   },
   actions: {
     redeem: 'Redeem',
@@ -311,7 +311,7 @@ export default {
   externalPause,
   externalControl,
   externalKYC,
-  beneficiaries,
+  proceedRecipients,
   benefits: {
     dividends: 'Dividends',
     balanceAdjustments: 'Balance Adjustments',

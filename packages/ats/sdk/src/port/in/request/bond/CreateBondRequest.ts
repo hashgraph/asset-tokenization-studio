@@ -263,10 +263,10 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   configVersion: number;
 
   @OptionalField()
-  beneficiariesIds?: string[];
+  proceedRecipientIds?: string[];
 
   @OptionalField()
-  beneficiariesData?: string[];
+  proceedRecipientsData?: string[];
 
   interestRateType: number;
 
@@ -300,8 +300,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion,
     complianceId,
     identityRegistryId,
-    beneficiariesIds,
-    beneficiariesData,
+    proceedRecipientIds,
+    proceedRecipientsData,
     interestRateType,
   }: {
     name: string;
@@ -333,8 +333,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     configVersion: number;
     complianceId?: string;
     identityRegistryId?: string;
-    beneficiariesIds?: string[];
-    beneficiariesData?: string[];
+    proceedRecipientIds?: string[];
+    proceedRecipientsData?: string[];
     interestRateType: number;
   }) {
     super({
@@ -400,20 +400,20 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
       complianceId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       identityRegistryId:
         FormatValidation.checkHederaIdFormatOrEvmAddress(true),
-      beneficiariesIds: (val) => {
+      proceedRecipientIds: (val) => {
         return FormatValidation.checkHederaIdOrEvmAddressArray(
           val ?? [],
-          'beneficiariesIds',
+          'proceedRecipientIds',
           true,
         );
       },
 
-      beneficiariesData: (val) => {
+      proceedRecipientsData: (val) => {
         const validation = FormatValidation.checkBytesFormat();
-        if (val?.length != this.beneficiariesIds?.length) {
+        if (val?.length != this.proceedRecipientIds?.length) {
           return [
             new InvalidValue(
-              `The list of beneficiariesIds and beneficiariesData must have equal length.`,
+              `The list of proceedRecipientIds and proceedRecipientsData must have equal length.`,
             ),
           ];
         }
@@ -457,8 +457,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.configVersion = configVersion;
     this.complianceId = complianceId;
     this.identityRegistryId = identityRegistryId;
-    this.beneficiariesIds = beneficiariesIds;
-    this.beneficiariesData = beneficiariesData;
+    this.proceedRecipientIds = proceedRecipientIds;
+    this.proceedRecipientsData = proceedRecipientsData;
     this.interestRateType = interestRateType;
   }
 }

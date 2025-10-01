@@ -418,7 +418,7 @@ describe('CreateBondCommandHandler', () => {
           [externalKycEvmAddress],
           evmAddress,
           [evmAddress],
-          command.beneficiariesData,
+          command.proceedRecipientsData,
           command.factory?.toString(),
         );
         expect(

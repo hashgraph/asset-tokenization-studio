@@ -278,7 +278,7 @@ import {
   TransferAndLockFacet__factory,
   ERC1410TokenHolderFacet__factory,
   TREXFactoryAts__factory,
-  BeneficiariesFacet__factory,
+  ProceedRecipientsFacet__factory,
   ERC1410IssuerFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { Resolvers } from '@domain/context/factory/Resolvers';
@@ -424,8 +424,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
-    beneficiaries: EvmAddress[] = [],
-    beneficiariesData: string[] = [],
+    proceedRecipients: EvmAddress[] = [],
+    proceedRecipientsData: string[] = [],
   ): Promise<TransactionResponse> {
     return this.createSecurity(
       securityInfo,
@@ -445,8 +445,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           security,
           details.bondDetails,
           CastInterestRateType.toNumber(bondInfo.interestRateType),
-          beneficiaries.map((addr) => addr.toString()),
-          beneficiariesData.map((data) => (data == '' ? '0x' : data)),
+          proceedRecipients.map((addr) => addr.toString()),
+          proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
         ),
       'deployBond',
       GAS.CREATE_BOND_ST,
@@ -3164,8 +3164,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     compliance: EvmAddress,
     identityRegistryAddress: EvmAddress,
     diamondOwnerAccount: EvmAddress,
-    beneficiaries: EvmAddress[] = [],
-    beneficiariesData: string[] = [],
+    proceedRecipients: EvmAddress[] = [],
+    proceedRecipientsData: string[] = [],
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -3192,8 +3192,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       compliance,
       identityRegistryAddress,
       diamondOwnerAccount,
-      beneficiaries,
-      beneficiariesData,
+      proceedRecipients,
+      proceedRecipientsData,
       externalPauses,
       externalControlLists,
       externalKycLists,
@@ -3277,8 +3277,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     compliance: EvmAddress,
     identityRegistryAddress: EvmAddress,
     diamondOwnerAccount: EvmAddress,
-    beneficiariesId: EvmAddress[],
-    beneficiariesData: string[],
+    proceedRecipientsId: EvmAddress[],
+    proceedRecipientsData: string[],
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -3307,8 +3307,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       tokenData = {
         security: securityData,
         bondDetails: SecurityDataBuilder.buildBondDetails(details.bondDetails),
-        beneficiaries: beneficiariesId.map((addr) => addr.toString()),
-        beneficiariesData: beneficiariesData.map((data) =>
+        proceedRecipients: proceedRecipientsId.map((addr) => addr.toString()),
+        proceedRecipientsData: proceedRecipientsData.map((data) =>
           data == '' ? '0x' : data,
         ),
       } as FactoryBondToken;
@@ -3372,61 +3372,61 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     }
   }
 
-  addBeneficiary(
+  addProceedRecipient(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     data: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Adding beneficiary ${beneficiary.toString()} to security ${security.toString()}`,
+      `Adding proceed recipient ${proceedRecipient.toString()} to security ${security.toString()}`,
     );
     return this.executeTransaction(
-      BeneficiariesFacet__factory.connect(
+      ProceedRecipientsFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
-      'addBeneficiary',
-      [beneficiary.toString(), data],
-      GAS.ADD_BENEFICIARY,
+      'addProceedRecipient',
+      [proceedRecipient.toString(), data],
+      GAS.ADD_PROCEED_RECIPIENT,
     );
   }
 
-  removeBeneficiary(
+  removeProceedRecipient(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Removing beneficiary ${beneficiary.toString()} from security ${security.toString()}`,
+      `Removing proceed recipient ${proceedRecipient.toString()} from security ${security.toString()}`,
     );
     return this.executeTransaction(
-      BeneficiariesFacet__factory.connect(
+      ProceedRecipientsFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
-      'removeBeneficiary',
-      [beneficiary.toString()],
-      GAS.REMOVE_BENEFICIARY,
+      'removeProceedRecipient',
+      [proceedRecipient.toString()],
+      GAS.REMOVE_PROCEED_RECIPIENT,
     );
   }
 
-  updateBeneficiaryData(
+  updateProceedRecipientData(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     data: string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Updating beneficiary ${beneficiary.toString()} for security ${security.toString()}`,
+      `Updating proceed recipient ${proceedRecipient.toString()} for security ${security.toString()}`,
     );
     return this.executeTransaction(
-      BeneficiariesFacet__factory.connect(
+      ProceedRecipientsFacet__factory.connect(
         security.toString(),
         this.getSignerOrProvider(),
       ),
-      'updateBeneficiaryData',
-      [beneficiary.toString(), data],
-      GAS.UPDATE_BENEFICIARY,
+      'updateProceedRecipientData',
+      [proceedRecipient.toString(), data],
+      GAS.UPDATE_PROCEED_RECIPIENT,
     );
   }
 }

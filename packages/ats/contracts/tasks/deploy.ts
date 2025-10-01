@@ -303,7 +303,7 @@ task(
             clearingHoldCreationFacet,
             clearingReadFacet,
             externalPauseManagementFacet,
-            beneficiariesFacet,
+            proceedRecipientsFacet,
             externalControlListManagementFacet,
             externalKycListManagementFacet,
             protectedPartitionsFacet,
@@ -369,7 +369,7 @@ task(
             'Clearing Redeem Facet': clearingRedeemFacet.address,
             'Clearing Hold Creation Facet': clearingHoldCreationFacet.address,
             'Clearing Read Facet': clearingReadFacet.address,
-            'Beneficiaries Facet': beneficiariesFacet.address,
+            'Proceed Recipients Facet': proceedRecipientsFacet.address,
             'External Pause Management Facet':
                 externalPauseManagementFacet.address,
             'External Control List Management Facet':

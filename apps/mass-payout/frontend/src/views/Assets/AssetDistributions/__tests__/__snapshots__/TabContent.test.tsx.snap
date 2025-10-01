@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TabContent Basic Rendering should match snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="css-tyijdu"
+  >
+    <div
+      data-color="neutral.900"
+      data-testid="text"
+      data-text-style="ElementsSemiboldLG"
+    >
+      upcoming title
+    </div>
+    <div
+      data-testid="filter-controls"
+    >
+      Filter Controls - object - function
+    </div>
+    <div
+      class="css-tyijdu"
+    >
+      <div
+        data-loading="false"
+        data-name="asset-distributions-upcoming"
+        data-testid="table"
+      >
+        <div
+          data-testid="table-columns"
+        >
+          3 columns
+        </div>
+        <div
+          data-testid="table-data"
+        >
+          3 rows
+        </div>
+        <div
+          data-testid="table-total-elements"
+        >
+          3
+        </div>
+        <div
+          data-testid="table-total-pages"
+        >
+          1
+        </div>
+        <div
+          data-testid="table-row-0"
+          style="cursor: pointer;"
+        >
+          Row 0: 1 - SCHEDULED
+        </div>
+        <div
+          data-testid="table-row-1"
+          style="cursor: pointer;"
+        >
+          Row 1: 2 - IN_PROGRESS
+        </div>
+        <div
+          data-testid="table-row-2"
+          style="cursor: pointer;"
+        >
+          Row 2: 3 - COMPLETED
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

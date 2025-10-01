@@ -311,7 +311,7 @@ function buildEmptyEnvironment(): Environment {
             externalControlListManagementFacet: {} as IStaticFunctionSelectors,
             externalKycListManagementFacet: {} as IStaticFunctionSelectors,
             freezeFacet: {} as IStaticFunctionSelectors,
-            beneficiariesFacet: {} as IStaticFunctionSelectors,
+            proceedRecipientsFacet: {} as IStaticFunctionSelectors,
             ERC3643Management: {} as IStaticFunctionSelectors,
             ERC3643Operations: {} as IStaticFunctionSelectors,
             ERC3643Read: {} as IStaticFunctionSelectors,

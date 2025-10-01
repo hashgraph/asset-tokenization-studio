@@ -261,10 +261,10 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
   identityRegistryId?: string;
 
   @OptionalField()
-  beneficiariesIds?: string[];
+  proceedRecipientIds?: string[];
 
   @OptionalField()
-  beneficiariesData?: string[];
+  proceedRecipientsData?: string[];
 
   currency: string;
   numberOfUnits: string;
@@ -322,8 +322,8 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     configVersion,
     complianceId,
     identityRegistryId,
-    beneficiariesIds,
-    beneficiariesData,
+    proceedRecipientIds,
+    proceedRecipientsData,
     interestRateType,
   }: {
     salt: string;
@@ -367,8 +367,8 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     configVersion: number;
     complianceId?: string;
     identityRegistryId?: string;
-    beneficiariesIds?: string[];
-    beneficiariesData?: string[];
+    proceedRecipientIds?: string[];
+    proceedRecipientsData?: string[];
     interestRateType: number;
   }) {
     super({
@@ -435,19 +435,19 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
       identityRegistryId:
         FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       claimTopics: FormatValidation.checkArrayNumber(),
-      beneficiariesIds: (val) => {
+      proceedRecipientIds: (val) => {
         return FormatValidation.checkHederaIdOrEvmAddressArray(
           val ?? [],
-          'beneficiariesIds',
+          'proceedRecipientIds',
           true,
         );
       },
-      beneficiariesData: (val) => {
+      proceedRecipientsData: (val) => {
         const validation = FormatValidation.checkBytesFormat();
-        if (val?.length != this.beneficiariesIds?.length) {
+        if (val?.length != this.proceedRecipientIds?.length) {
           return [
             new InvalidValue(
-              `The list of beneficiariesIds and beneficiariesData must have equal length.`,
+              `The list of proceedRecipientIds and proceedRecipientsData must have equal length.`,
             ),
           ];
         }
@@ -504,8 +504,8 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     this.configVersion = configVersion;
     this.complianceId = complianceId;
     this.identityRegistryId = identityRegistryId;
-    this.beneficiariesIds = beneficiariesIds;
-    this.beneficiariesData = beneficiariesData;
+    this.proceedRecipientIds = proceedRecipientIds;
+    this.proceedRecipientsData = proceedRecipientsData;
     this.interestRateType = interestRateType;
   }
 }

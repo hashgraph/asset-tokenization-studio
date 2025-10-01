@@ -266,7 +266,7 @@ export const CONTRACT_NAMES = [
     'ClearingTransferFacet',
     'ClearingReadFacet',
     'ClearingActionsFacet',
-    'BeneficiariesFacet',
+    'ProceedRecipientsFacet',
     'ExternalPauseManagementFacet',
     'ExternalControlListManagementFacet',
     'ExternalKycListManagementFacet',

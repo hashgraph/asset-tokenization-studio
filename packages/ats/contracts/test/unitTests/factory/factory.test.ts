@@ -277,10 +277,6 @@ describe('Factory Tests', () => {
     const nominalValue = 100
     let startingDate = 999
     let maturityDate = 999
-    const couponFrequency = TIME_PERIODS_S.DAY
-    const couponRate = 1000
-    const couponRateDecimals = 3
-    let firstCouponDate = 999
     const numberOfCoupon = 30
 
     const regulationType = RegulationType.REG_D
@@ -704,10 +700,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                couponRateDecimals,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: ADDRESS_ZERO,
@@ -745,10 +737,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                couponRateDecimals,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -790,10 +778,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                couponRateDecimals,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: false,
                 businessLogicResolver: businessLogicResolver.address,
@@ -833,10 +817,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                couponRateDecimals,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -860,8 +840,6 @@ describe('Factory Tests', () => {
             bondData.bondDetails.startingDate = currentTimeInSeconds - 10000
             bondData.bondDetails.maturityDate =
                 bondData.bondDetails.startingDate + 10
-            bondData.couponDetails.firstCouponDate =
-                bondData.bondDetails.startingDate + 1
 
             await expect(
                 factory.deployBond(bondData, factoryRegulationData)
@@ -872,9 +850,7 @@ describe('Factory Tests', () => {
             const currentTimeInSeconds =
                 Math.floor(new Date().getTime() / 1000) + 1
             startingDate = currentTimeInSeconds + 10000
-            maturityDate = startingDate + numberOfCoupon * couponFrequency
-            firstCouponDate = startingDate + 1
-
+            maturityDate = startingDate + numberOfCoupon * TIME_PERIODS_S.DAY
             const bondData = await setBondData({
                 adminAccount: account_A,
                 isWhiteList: isWhitelist,
@@ -892,10 +868,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                couponRateDecimals,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -994,10 +966,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                couponRateDecimals,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -1038,10 +1006,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                couponRateDecimals,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -1069,7 +1033,6 @@ describe('Factory Tests', () => {
                 Math.floor(new Date().getTime() / 1000) + 1
             startingDate = currentTimeInSeconds + 10000
             maturityDate = startingDate + 30
-            firstCouponDate = 0
 
             const bondData = await setBondData({
                 adminAccount: account_A,
@@ -1088,10 +1051,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency,
-                couponRate,
-                couponRateDecimals,
-                firstCouponDate,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,

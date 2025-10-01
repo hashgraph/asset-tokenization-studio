@@ -43,6 +43,11 @@ export default [
       '**/example/**',
       '**/src_old/**',
       '**/package.json',
+      // TODO: REMOVE mass-payout ignore lines
+      //  Temporally ignore mass-payout related files
+      '**/mass-payout/**',
+      'apps/mass-payout/**',
+      'packages/mass-payout/**',
     ],
   },
 
@@ -209,14 +214,136 @@ export default [
     },
   },
 
-  // Mass payout packages (if they exist)
+  // Mass payout packages
   {
     files: [
-      'packages/mass-payout/**/*.{ts,tsx}',
-      'apps/mass-payout/**/*.{ts,tsx}',
+      'apps/mass-payout/backend/**/*.test.ts',
+      'apps/mass-payout/backend/**/*.spec.ts',
+      'apps/mass-payout/backend/test/**/*.ts',
+      'apps/mass-payout/backend/**/*.e2e.spec.ts',
+      'apps/mass-payout/backend/**/e2e/**/*.ts',
+      'packages/mass-payout/**/*.test.ts',
+      'packages/mass-payout/**/*.spec.ts',
     ],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.es2020,
+        ...globals.jest,
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeAll: 'readonly',
+        beforeEach: 'readonly',
+        afterAll: 'readonly',
+        afterEach: 'readonly',
+      },
+    },
+    plugins: {
+      jest,
+    },
     rules: {
-      // Add any mass-payout specific rules here if needed
+      ...jest.configs.recommended.rules,
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      'no-unused-expressions': 'off',
+    },
+  },
+
+  // Mass payout frontend React files (non-test)
+  {
+    files: ['apps/mass-payout/frontend/**/*.{ts,tsx,js,jsx}'],
+    ignores: [
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      '**/__tests__/**/*',
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      'react-refresh/only-export-components': 'off',
+      '@typescript-eslint/ban-ts-comment': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-non-null-asserted-optional-chain': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+    },
+  },
+
+  // Mass payout frontend test files
+  {
+    files: [
+      'apps/mass-payout/frontend/**/*.test.ts',
+      'apps/mass-payout/frontend/**/*.test.tsx',
+      'apps/mass-payout/frontend/**/*.spec.ts',
+      'apps/mass-payout/frontend/**/*.spec.tsx',
+      'apps/mass-payout/frontend/**/__tests__/**/*.{ts,tsx,js,jsx}',
+      'apps/mass-payout/frontend/src/**/__tests__/**/*.{ts,tsx}',
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.jest,
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeAll: 'readonly',
+        beforeEach: 'readonly',
+        afterAll: 'readonly',
+        afterEach: 'readonly',
+        jest: 'readonly',
+        document: 'readonly',
+        window: 'readonly',
+      },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    plugins: {
+      jest,
+      'react-hooks': reactHooks,
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+    rules: {
+      ...jest.configs.recommended.rules,
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
+      'no-unused-expressions': 'off',
+      'react-hooks/rules-of-hooks': 'off',
     },
   },
 ];

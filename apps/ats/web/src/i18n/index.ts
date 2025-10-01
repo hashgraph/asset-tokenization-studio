@@ -215,8 +215,8 @@ declare module 'i18next' {
 }
 
 i18n
-  .use(initReactI18next)
   .use(LanguageDetector)
+  .use(initReactI18next)
   .init({
     defaultNS: 'globals',
     detection: {
