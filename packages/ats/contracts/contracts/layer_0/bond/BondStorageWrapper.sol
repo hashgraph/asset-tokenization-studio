@@ -7,8 +7,7 @@ import {
 import {
     COUPON_CORPORATE_ACTION_TYPE,
     SNAPSHOT_RESULT_ID,
-    SNAPSHOT_TASK_TYPE,
-    COUPON_LISTING_TASK_TYPE
+    SNAPSHOT_TASK_TYPE
 } from '../constants/values.sol';
 import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
 import {
@@ -32,7 +31,6 @@ abstract contract BondStorageWrapper is
         IBondRead.BondDetailsData bondDetail;
         bool initialized;
         uint256[] counponsOrderedListByIds;
-        IBondRead.InterestRateTypes interestRateType;
     }
 
     /**
@@ -48,8 +46,7 @@ abstract contract BondStorageWrapper is
 
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_bond(
-        IBondRead.BondDetailsData calldata _bondDetailsData,
-        IBondRead.InterestRateTypes _interestRateType
+        IBondRead.BondDetailsData calldata _bondDetailsData
     )
         internal
         validateDates(
@@ -61,7 +58,6 @@ abstract contract BondStorageWrapper is
         BondDataStorage storage bondStorage = _bondStorage();
         bondStorage.initialized = true;
         _storeBondDetails(_bondDetailsData);
-        _setInterestRateType(_interestRateType);
     }
 
     function _storeBondDetails(
@@ -70,15 +66,9 @@ abstract contract BondStorageWrapper is
         _bondStorage().bondDetail = _bondDetails;
     }
 
-    function _setInterestRateType(
-        IBondRead.InterestRateTypes _interestRateType
-    ) internal {
-        _bondStorage().interestRateType = _interestRateType;
-    }
-
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
-    ) internal returns (bytes32 corporateActionId_, uint256 couponID_) {
+    ) internal virtual returns (bytes32 corporateActionId_, uint256 couponID_) {
         bytes memory data = abi.encode(_newCoupon);
 
         (corporateActionId_, couponID_) = _addCorporateAction(
@@ -86,38 +76,22 @@ abstract contract BondStorageWrapper is
             data
         );
 
-        _initCoupon(corporateActionId_, data);
+        _initCoupon(corporateActionId_, _newCoupon);
     }
 
-    function _initCoupon(bytes32 _actionId, bytes memory _data) internal {
+    function _initCoupon(
+        bytes32 _actionId,
+        IBondRead.Coupon memory _newCoupon
+    ) internal virtual {
         if (_actionId == bytes32(0)) {
             revert IBondStorageWrapper.CouponCreationFailed();
         }
 
-        IBondRead.Coupon memory newCoupon = abi.decode(
-            _data,
-            (IBondRead.Coupon)
-        );
-
         _addScheduledCrossOrderedTask(
-            newCoupon.recordDate,
+            _newCoupon.recordDate,
             abi.encode(SNAPSHOT_TASK_TYPE)
         );
-        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
-
-        if (
-            _getInterestRateType() ==
-            IBondRead.InterestRateTypes.KPI_BASED_PER_COUPON
-        ) {
-            _addScheduledCrossOrderedTask(
-                newCoupon.fixingDate,
-                abi.encode(COUPON_LISTING_TASK_TYPE)
-            );
-            _addScheduledCouponListing(
-                newCoupon.fixingDate,
-                abi.encode(_actionId)
-            );
-        }
+        _addScheduledSnapshot(_newCoupon.recordDate, abi.encode(_actionId));
     }
 
     /**
@@ -132,7 +106,9 @@ abstract contract BondStorageWrapper is
         return true;
     }
 
-    function _addToCouponsOrderedList(uint256 _couponID) internal override {
+    function _addToCouponsOrderedList(
+        uint256 _couponID
+    ) internal virtual override {
         _bondStorage().counponsOrderedListByIds.push(_couponID);
     }
 
@@ -180,14 +156,6 @@ abstract contract BondStorageWrapper is
 
     function _getMaturityDate() internal view returns (uint256 maturityDate_) {
         return _bondStorage().bondDetail.maturityDate;
-    }
-
-    function _getInterestRateType()
-        internal
-        view
-        returns (IBondRead.InterestRateTypes interestRateType_)
-    {
-        return _bondStorage().interestRateType;
     }
 
     function _getCoupon(

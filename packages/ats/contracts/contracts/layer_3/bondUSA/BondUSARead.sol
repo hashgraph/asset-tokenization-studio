@@ -30,9 +30,6 @@ contract BondUSARead is BondRead, Security {
         staticFunctionSelectors_[selectorIndex++] = this
             .getBondDetails
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getInterestRateType
-            .selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this

@@ -29,3 +29,9 @@ bytes32 constant _BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0x2bbe9fb018f1e7dd12b444215
 
 // keccak256('security.token.standard.proceedRecipients.resolverKey');
 bytes32 constant _PROCEED_RECIPIENTS_RESOLVER_KEY = 0x87f4b676bf89cd24a01a78fd8e7fb2102c2f6d034be73d16402f7297e0ae625b;
+
+// keccak256('security.token.standard.fixedRate.resolverKey');
+bytes32 constant _FIXED_RATE_RESOLVER_KEY = 0x2871e1c37f7423765d88b16528db7e80ad8e2bae5ab5d55e26659840c1d6b504;
+
+// keccak256('security.token.standard.kpiLinkedRate.resolverKey');
+bytes32 constant _KPI_LINKED_RATE_RESOLVER_KEY = 0x92999bd0329d03e46274ce7743ebe0060df95286df4fa7b354937b7d21757d22;

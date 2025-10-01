@@ -60,6 +60,13 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         );
     }
 
+    function _updateCorporateActionData(
+        bytes32 _actionId,
+        bytes memory _newData
+    ) internal {
+        _corporateActionsStorage().actionsData[_actionId].data = _newData;
+    }
+
     function _updateCorporateActionResult(
         bytes32 actionId,
         uint256 resultId,

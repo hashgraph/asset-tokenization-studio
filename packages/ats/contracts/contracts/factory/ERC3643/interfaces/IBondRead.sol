@@ -2,12 +2,6 @@
 pragma solidity ^0.8.17;
 
 interface TRexIBondRead {
-    enum InterestRateTypes {
-        FIXED_FOR_ALL_COUPONS,
-        FIXED_PER_COUPON,
-        KPI_BASED_PER_COUPON
-    }
-
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;
@@ -43,11 +37,6 @@ interface TRexIBondRead {
         external
         view
         returns (BondDetailsData memory bondDetailsData_);
-
-    function getInterestRateType()
-        external
-        view
-        returns (InterestRateTypes interestRateType_);
 
     /**
      * @notice Retrieves a registered coupon by its ID
