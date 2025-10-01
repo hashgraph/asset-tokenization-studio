@@ -8,5 +8,4 @@ import {
 // solhint-disable no-empty-blocks
 abstract contract CommonFixedInterestRate is
     BondStorageWrapperFixedInterestRate
-{
-}
+{}

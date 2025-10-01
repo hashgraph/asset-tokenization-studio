@@ -26,7 +26,7 @@ contract BondUSARead is BondRead, Security {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](13);
+        staticFunctionSelectors_ = new bytes4[](12);
         staticFunctionSelectors_[selectorIndex++] = this
             .getBondDetails
             .selector;
