@@ -273,10 +273,7 @@ const numberOfUnits = 1000
 let startingDate = 0
 const numberOfCoupons = 50
 const frequency = TIME_PERIODS_S.DAY
-const rate = 100
-const rateDecimals = 2
 let maturityDate = 0
-let firstCouponDate = 0
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
@@ -454,10 +451,6 @@ describe('Bond Tests', () => {
             nominalValue: 100,
             startingDate,
             maturityDate,
-            couponFrequency: frequency,
-            couponRate: rate,
-            couponRateDecimals: rateDecimals,
-            firstCouponDate,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_C,
             countriesControlListType,
@@ -496,7 +489,6 @@ describe('Bond Tests', () => {
     beforeEach(async () => {
         startingDate = dateToUnixTimestamp(`2030-01-01T00:00:35Z`)
         maturityDate = startingDate + numberOfCoupons * frequency
-        firstCouponDate = startingDate + 1
         couponRecordDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:01:00Z`)
         couponExecutionDateInSeconds =
             dateToUnixTimestamp(`2030-01-01T00:10:00Z`)
@@ -1298,10 +1290,6 @@ describe('Bond Tests', () => {
                 nominalValue: 100,
                 startingDate,
                 maturityDate,
-                couponFrequency: frequency,
-                couponRate: rate,
-                couponRateDecimals: rateDecimals,
-                firstCouponDate,
                 regulationType: RegulationType.REG_D,
                 regulationSubType: RegulationSubType.REG_D_506_C,
                 countriesControlListType,

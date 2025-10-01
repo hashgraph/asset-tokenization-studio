@@ -280,8 +280,8 @@ interface ITransactionAdapter {
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
-    beneficiaries?: EvmAddress[],
-    beneficiariesData?: string[],
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
@@ -1049,21 +1049,21 @@ interface IAgent {
   ): Promise<TransactionResponse>;
 }
 
-interface IBeneficiaries {
-  addBeneficiary(
+interface IProceedRecipients {
+  addProceedRecipient(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     data: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  removeBeneficiary(
+  removeProceedRecipient(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  updateBeneficiaryData(
+  updateProceedRecipientData(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     data: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -1092,7 +1092,7 @@ export default abstract class TransactionAdapter
     IFreezeAdapter,
     IBatchAdapter,
     IAgent,
-    IBeneficiaries
+    IProceedRecipients
 {
   abstract triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1162,8 +1162,8 @@ export default abstract class TransactionAdapter
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
-    beneficiaries?: EvmAddress[],
-    beneficiariesData?: string[],
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
   abstract grantRole(
@@ -1883,8 +1883,8 @@ export default abstract class TransactionAdapter
     compliance: EvmAddress,
     identityRegistryAddress: EvmAddress,
     diamondOwnerAccount: EvmAddress,
-    beneficiaries?: EvmAddress[],
-    beneficiariesData?: string[],
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -1918,20 +1918,20 @@ export default abstract class TransactionAdapter
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
-  abstract addBeneficiary(
+  abstract addProceedRecipient(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     data: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  abstract removeBeneficiary(
+  abstract removeProceedRecipient(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  abstract updateBeneficiaryData(
+  abstract updateProceedRecipientData(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     data: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;

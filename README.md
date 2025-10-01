@@ -6,337 +6,206 @@
 
 </div>
 
-### Table of Contents
+## Introduction
 
-- **[Development manifesto](#development-manifesto)**<br>
-- **[Prerequisites](#prerequisites)**<br>
-- **[Installation](#installation)**<br>
-- **[Workspace Overview](#workspace-overview)**<br>
-- **[Build](#build)**<br>
-- **[Setting Up the Environment](#setting-up-the-environment)**<br>
-  - **[Required Environment Variables](#required-environment-variables)**<br>
-  - **[Optional Environment Variables (Hedera Wallet Connect)](#optional-environment-variables-hedera-wallet-connect)**<br>
-  - **[Steps to set up the `.env` file](#steps-to-set-up-the-env-file)**<br>
-- **[Run](#run)**<br>
-- **[Support](#support)**<br>
-- **[Contributing](#contributing)**<br>
-- **[Code of conduct](#code-of-conduct)**<br>
-- **[License](#license)**<br>
+The **Asset Tokenization Studio (ATS) Monorepo** provides a unified environment to design, deploy, and operate tokenized financial assets on the **Hedera network**, as well as to manage **large-scale payout distributions**.
 
-# Description
+It brings together two complementary suites:
 
-Asset Tokenization Studio (ATS) is a suite designed to enable the creation, management, and trading of security tokens on the Hedera network.
+- **Asset Tokenization Studio (ATS):** Tools for creating, managing, and interacting with **security tokens** (equities and bonds) that comply with enterprise-grade standards.
+- **Scheduler Payment Distribution (Mass Payout):** Infrastructure to execute **batch payments** (e.g., dividends, bond coupons, recurring obligations) efficiently across thousands of accounts.
 
-The ATS facilitates the tokenization of traditional financial assets (equities and bonds) onto the Hedera distributed ledger, providing a framework for:
+This monorepo is structured with **npm workspaces** and is designed for scalability, modularity, and enterprise adoption.
 
-- Creating and deploying security tokens
-- Managing token lifecycles
-- Implementing compliance and regulatory requirements
-- Enabling secure token transfers and operations
-
-## Monorepo Structure
-
-The project is organized as a monorepo using npm workspaces:
-
-```
-├── packages/                    # Core packages
-│   ├── ats/
-│   │   ├── contracts/          # Smart contracts deployed on Hedera
-│   │   └── sdk/                # TypeScript SDK for contract interaction
-│   └── mass-payout/            # Mass payout functionality
-├── apps/                       # Applications
-│   ├── ats/
-│   │   └── web/                # React web application
-│   └── mass-payout/            # Mass payout app
-└── package.json               # Root workspace configuration
-```
-
-The ATS consists of three primary components that work together to provide a complete tokenization solution:
-
-- **Smart Contracts** (`packages/ats/contracts`) - The on-chain components deployed on the Hedera network
-- **SDK** (`packages/ats/sdk`) - A software development kit that provides programmatic access to the contracts
-- **Web Application** (`apps/ats/web`) - A user interface for interacting with the tokenized assets
-
-The standard ERC for security tokens used in the smart contracts is ERC1400.
-
-Version 1.15.0 introduces partial compatibility with the ERC-3643 (TREX) standard; full support will follow in upcoming releases.
-
-# Development manifesto
-
-The development of the project follows enterprise-grade practices for software development. Using DDD, hexagonal architecture, and the CQS pattern, all within an agile methodology.
-
-## Domain driven design
-
-By using DDD (Domain-Driven Design), we aim to create a shared language among all members of the project team, which allows us to focus our development efforts on thoroughly understanding the processes and rules of the domain. This helps to bring benefits such as increased efficiency and improved communication.
-
-## Token Standards Support
-
-The Asset Tokenization Studio supports multiple security token standards:
-
-- **ERC1400**: Core security token standard with partition-based token management
-- **ERC3643 (T-REX)**: Advanced compliance framework with identity registry, compliance modules, and sophisticated freeze capabilities
-
-# Prerequisites
-
-Ensure the following tools are installed:
-
-- **Node:** v20.19.4 (LTS: Iron) or newer
-- **NPM :** v10.8.2 or newer
-
-# Installation
-
-This project uses npm workspaces for dependency management. In a terminal at the root directory:
-
-```bash
-npm ci
-```
-
-This will install all dependencies for all workspaces and automatically set up the links between packages.
-
-You can now start developing in any of the workspace modules.
-
-# Workspace Overview
-
-This monorepo uses npm workspaces to manage dependencies and build processes across multiple packages and applications.
-
-## Available Workspace Commands
-
-### ATS (Asset Tokenization Studio)
-
-```bash
-# Build commands
-npm run ats:build                # Build all ATS components
-npm run ats:contracts:build      # Build smart contracts only
-npm run ats:sdk:build           # Build SDK only
-npm run ats:web:build           # Build web app only
-
-# Test commands
-npm run ats:test                # Test all ATS components
-npm run ats:contracts:test      # Test contracts only
-npm run ats:sdk:test           # Test SDK only
-npm run ats:web:test           # Test web app only
-npm run ats:test:ci            # Run CI tests
-
-# Development commands
-npm run ats:start              # Build contracts/SDK and start web dev server
-npm run ats:web:dev           # Start web dev server only
-
-# Publishing (for maintainers)
-npm run ats:publish           # Publish contracts and SDK to npm
-```
-
-### Mass Payout (Placeholder)
-
-```bash
-npm run mass-payout:build     # Build mass payout components
-npm run mass-payout:test      # Test mass payout components
-npm run mass-payout:dev       # Start mass payout development
-```
-
-### Utility Commands
-
-```bash
-npm run clean:deps            # Remove all node_modules and lock files
-npm run lint                  # Lint all code using centralized configuration
-npm run format                # Format all code using centralized Prettier config
-```
-
-## Workspace Dependencies
-
-The workspaces have the following dependency relationships:
-
-```
-packages/ats/contracts  →  (standalone)
-packages/ats/sdk       →  depends on contracts
-apps/ats/web          →  depends on SDK (and transitively contracts)
-```
-
-When you run workspace commands, npm automatically handles building dependencies in the correct order.
-
-# Build
-
-The project uses workspace-aware build commands. When making modifications to any module, rebuild the dependencies in the following order:
-
-```bash
-# Build all ATS components (recommended)
-npm run ats:build
-
-# Or build individual components:
-npm run ats:contracts:build  # 1st - Smart contracts
-npm run ats:sdk:build        # 2nd - SDK (depends on contracts)
-npm run ats:web:build        # 3rd - Web app (depends on SDK)
-
-# Mass Payout (when available)
-npm run mass-payout:build
-```
-
-# Setting Up the Environment
-
-To run the project, you'll need to configure environment variables in the `.env` file. Below are the required and optional variables, along with their descriptions.
-
-## Required Environment Variables
-
-### _General Settings_
-
-- **`REACT_APP_EQUITY_CONFIG_ID`**: Configuration Id for Equities.
-- **`REACT_APP_EQUITY_CONFIG_VERSION`**: Equity Version.
-- **`REACT_APP_BOND_CONFIG_ID`**: configuration Id for Bonds.
-- **`REACT_APP_BOND_CONFIG_VERSION`**: Bond Version.
-- **`REACT_APP_SHOW_DISCLAIMER`**: Set this value to `"true"` to show a disclaimer in the application.
-
-### _Network Configuration_
-
-- **`REACT_APP_MIRROR_NODE`**: The URL of the Hedera Mirror Node API used to query historical data from the Hedera testnet. Example: `https://testnet.mirrornode.hedera.com/api/v1/`
-- **`REACT_APP_RPC_NODE`**: The RPC node URL used to communicate with the Hedera testnet. Example: `https://testnet.hashio.io/api`
-- **`REACT_APP_RPC_RESOLVER`**: The Hedera testnet account ID for the resolver. Example: `0.0.6797832`
-- **`REACT_APP_RPC_FACTORY`**: The Hedera testnet account ID for the factory. Example: `0.0.6797955`
-
-## Optional Environment Variables (Hedera Wallet Connect)
-
-These variables are only required if you are integrating Hedera Wallet Connect for decentralized application (dApp) interactions. If not needed, they can be omitted.
-
-- **`REACT_APP_PROJECT_ID`**: Project ID for Wallet Connect integration. You can obtain it from the [WalletConnect website](https://walletconnect.com/).
-- **`REACT_APP_DAPP_NAME`**: The name of your dApp as displayed in Wallet Connect.
-- **`REACT_APP_DAPP_DESCRIPTION`**: A description of your dApp, typically displayed in Wallet Connect.
-- **`REACT_APP_DAPP_URL`**: The URL of your dApp that will be referenced in Wallet Connect.
-- **`REACT_APP_DAPP_ICONS`**: An array of URLs pointing to icons for the dApp, typically used in Wallet Connect interfaces. Example: `['https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg']`
-
-## Steps to set up the `.env` file:
-
-1. Navigate to the `apps/ats/web` directory.
-2. Copy the `.env.sample` file to create a new `.env` file:
-
-   ```bash
-   cp .env.sample .env
-   ```
-
-3. Open the `.env` file in your preferred text editor.
-4. Replace the placeholder values with your actual environment settings. For example:
-
-   ```bash
-   REACT_APP_EQUITY_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000001'
-   REACT_APP_EQUITY_CONFIG_VERSION="0"
-   REACT_APP_BOND_CONFIG_ID="0x0000000000000000000000000000000000000000000000000000000000000002"
-   REACT_APP_BOND_CONFIG_VERSION="0"
-   REACT_APP_SHOW_DISCLAIMER="true"
-
-   REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
-   REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
-   REACT_APP_RPC_RESOLVER='0.0.6797832'
-   REACT_APP_RPC_FACTORY='0.0.6797955'
-
-   REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
-   REACT_APP_DAPP_NAME="Asset Tokenization Studio"
-   REACT_APP_DAPP_DESCRIPTION="Asset Tokenization Studio. Built on Hedera Hashgraph."
-   REACT_APP_DAPP_URL="https://wc.ats.com/"
-   REACT_APP_DAPP_ICONS='["https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg"]'
-   ```
-
-5. Save the file and proceed with running the application.
-
-## Critical Setup Recommendation for Optimal Performance
-
-For the best experience, we strongly recommend installing the [hiero-json-rpc-relay](https://github.com/hiero-ledger/hiero-json-rpc-relay/tree/main) on your local machine. The hashio API (`REACT_APP_RPC_NODE="https://testnet.hashio.io/api"`) has rate limits that may cause errors during operations. By setting up the relay locally, you can replace the `REACT_APP_RPC_NODE` environment variable with a local endpoint (e.g., `REACT_APP_RPC_NODE="http://localhost:7546"`) to ensure stable and uninterrupted performance.
+---
 
 ## Key Features
 
-### ERC3643 Compliance Framework
+- **Tokenization Framework**
+  - Security tokens compliant with **ERC-1400** and partial support for **ERC-3643 (T-REX)**.
+  - Modular **diamond pattern architecture** for upgradeability.
+  - Identity registry, compliance modules, and granular freeze controls.
+  - Role-based access control with administrative and operational roles.
 
-The platform now includes comprehensive ERC3643 (T-REX) support featuring:
+- **Mass Payout Framework**
+  - Batch operations optimized for large-scale distributions.
+  - Supports both **HBAR** and **HTS tokens**.
+  - Lifecycle cash flow management for recurring obligations.
+  - Gas-optimized operations and proxy-based upgradeable contracts.
 
-- **Identity Registry**: Manage investor identities and compliance status
-- **Compliance Module**: Configurable compliance rules and restrictions
-- **Advanced Freeze Capabilities**: Partial token freezing and address-level freeze controls
-- **Agent Management**: Dedicated agent roles for compliance operations
-- **Batch Operations**: Efficient batch transfers, mints, burns, and freeze operations
-- **Recovery Address**: Account recovery mechanisms for lost access scenarios
+- **Enterprise Development Practices**
+  - **Domain-Driven Design (DDD)**, **Hexagonal Architecture**, and **CQS pattern**.
+  - Separation of concerns across smart contracts, SDKs, frontends, and backends.
+  - Strong CI/CD workflows with conditional builds and tests for each module.
+  - Custodian integration at the SDK level (Dfns, Fireblocks, AWS KMS).
 
-### Enhanced Token Operations
+## Monorepo Structure
 
-- **Forced Transfers**: Controller-initiated transfers for regulatory compliance
-- **Batch Processing**: Multiple operations in single transactions for gas efficiency
-- **Granular Freeze Controls**: Freeze specific amounts or entire addresses
-- **Token Metadata Management**: On-chain token name, symbol, and metadata updates
+```
+├── packages/
+│ ├── ats/
+│ │ ├── contracts # Solidity smart contracts for ATS
+│ │ └── sdk # TypeScript SDK for ATS contracts
+│ └── mass-payout/
+│ ├── contracts # Solidity smart contracts for payout flows
+│ └── sdk # TypeScript SDK for payout flows
+├── apps/
+│ ├── ats/
+│ │ └── web # Frontend dApp for Asset Tokenization Studio
+│ └── mass-payout/
+│ ├── backend # API backend for payout orchestration
+│ └── frontend # Admin panel for managing payouts
+└── package.json # Workspace configuration and root scripts
+```
 
-## Custodian Integration
+## Architecture
 
-The ATS project utilizes a `custodians` library to facilitate interactions with various external custody providers.
+### High-Level Overview
 
-The integration with custodian services is **available at the SDK level only**, that means that the current implementation does not support direct dApp integration workflows and is limited to SDK tests right now. You can use your custodian providers using the .env file ([.env.sample](./sdk/.env.sample)).
+```mermaid
+flowchart TD
+    subgraph Users
+        U1[Investor]
+        U2[Issuer]
+        U3[Admin]
+    end
 
-At the time the integration was first built, the SDKs provided by Dfns and Fireblocks did not yet support direct dApp integration workflows. Consequently, the current implementation focuses solely on SDK-based operations.
+    subgraph ATS
+        W[Web App React]
+        S[SDK TypeScript]
+        C[Smart Contracts ERC-1400 / ERC-3643]
+    end
 
-### Supported Custodians and SDK Versions
+    subgraph MassPayout
+        F[Frontend Admin Panel]
+        B[Backend API NestJS + PostgreSQL]
+        MP[Mass Payout Contracts]
+    end
 
-The following custody providers are supported through their respective SDKs within the ATS `custodians` library:
+    subgraph Hedera
+        H1[(Mirror Node)]
+        H2[(RPC Node)]
+    end
 
-- **Dfns:** SDK Version `0.1.0-beta.5`
-- **Fireblocks:** SDK Version `5.11.0`
-- **AWS KMS:** AWS SDK Version `3.624.0`
+    U1 <--> W
+    U2 <--> W
+    U3 <--> F
 
-For further details or assistance regarding the custodian integration, please consult the relevant source code within the SDK or reach out to the development team. [Custodians Library](https://github.com/hashgraph/hedera-custodians-library)
+    W <--> S
+    F <--> B
+    S <--> C
+    B <--> MP
 
-# Run
+    C <--> H1
+    C <--> H2
+    MP <--> H1
+    MP <--> H2
+```
 
-To run the application locally:
+## Installation & Setup
 
-- Clone the repository
-- Install dependencies as described in the _Installation_ section: `npm ci`
-- Create a ".env" file in the `apps/ats/web` directory (using the ".env.sample" file as a template)
-- Run the application using one of these commands:
+### Prerequisites
 
-  ```bash
-  # Start the full ATS application (builds contracts & SDK, then starts web dev server)
-  npm start
-  # or
-  npm run ats:start
+- Node.js
+  - ATS requires v20.19.4 or newer
+  - Mass Payout backend requires v24.0.0 or newer
+- npm v10.9.0 or newer
+- PostgreSQL (for the Mass Payout backend)
 
-  # For development of the web app only (assumes contracts & SDK are already built)
-  npm run ats:web:dev
-  ```
+### Quick Setup
 
-- Open a browser and navigate to the URL displayed in the terminal (by default: _http://localhost:5173_)
+From the monorepo root:
+
+```bash
+
+# Install all dependencies
+npm ci
+```
+
+```bash
+# Build all packages and applications
+npm run setup
+```
+
+This command will compile contracts, build SDKs, and set up web and backend environments.
+
+### Environment Configuration
+
+Each application has its own .env configuration file.
+
+- ATS Web App: apps/ats/web/.env.local
+  Defines Hedera endpoints, resolver and factory IDs, and WalletConnect settings.
+
+- Mass Payout Backend: apps/mass-payout/backend/.env
+  Includes PostgreSQL connection and runtime configuration.
+
+- Mass Payout Frontend: apps/mass-payout/frontend/.env
+  Requires VITE_API_URL and VITE_PORT.
+
+Sample files are provided (.env.sample or .env.example) in each module.
 
 ## Development Workflows
 
-### Full Development Setup
+### ATS
 
 ```bash
-# Option 1: Quick setup (install dependencies and build all ATS components)
-npm run ats:setup      # Install dependencies and build all ATS components
-npm run ats:web:dev    # Start web development server
-
-# Option 2: Step by step
-npm ci                 # Install all dependencies
-npm run ats:build      # Build contracts and SDK
-npm run ats:web:dev    # Start web development server
+npm run ats:build       # Build contracts, SDK, and web app
+npm run ats:start       # Start web app (with contracts & SDK built)
+npm run ats:test        # Run tests for all ATS modules
 ```
 
-### Running Tests
+- Contracts (packages/ats/contracts) → Solidity, Hardhat, diamond pattern
+- SDK (packages/ats/sdk) → TypeScript SDK for client and web integration
+- Web App (apps/ats/web) → React 18 frontend for asset management
+
+### Mass Payout
 
 ```bash
-# Test all ATS components
+npm run mass-payout:build         # Build contracts, SDK, backend, and frontend
+npm run mass-payout:backend:dev   # Start backend in dev mode
+npm run mass-payout:frontend:dev  # Start frontend in dev mode
+npm run mass-payout:test          # Run all payout-related tests
+```
+
+- Contracts (packages/mass-payout/contracts) → Solidity payout contracts
+- SDK (packages/mass-payout/sdk) → TypeScript SDK for payout execution
+- Backend (apps/mass-payout/backend) → API with PostgreSQL
+- Frontend (apps/mass-payout/frontend) → Admin panel in React + Chakra UI
+
+## Testing
+
+Run tests for all modules:
+
+```bash
 npm run ats:test
-
-# Test individual components
-npm run ats:contracts:test
-npm run ats:sdk:test
-npm run ats:web:test
-
-# CI testing
-npm run ats:test:ci
+npm run mass-payout:test
 ```
 
-### Clean and Rebuild
+Each submodule provides additional test options (unit, e2e, coverage).
 
-```bash
-# Clean all build artifacts
-npm run ats:clean
+## Architecture Highlights
 
-# Clean dependencies (nuclear option)
-npm run clean:deps
-npm ci
-```
+### Smart Contracts
+
+- Diamond pattern with modular facets (ERC-1400, ERC-3643, Hold, Clearing)
+- Role-based access control with fine-grained permissions
+
+### SDKs
+
+- TypeScript APIs for deploying and managing securities, payouts, compliance, and lifecycle events
+- Batch operations for minting, burning, freezing, and payouts
+
+### Applications
+
+- **ATS Web**: dApp for asset issuance and management
+- **Mass Payout Backend**: Orchestrates scheduled payouts
+- **Mass Payout Frontend**: Admin dashboard for payout monitoring
+
+### Integrations
+
+- Hedera Mirror Node and RPC Node
+- WalletConnect for dApp integration
+- Custodian libraries: Dfns, Fireblocks, AWS KMS
 
 ## Continuous Integration
 
@@ -348,28 +217,28 @@ The project uses separate GitHub Actions workflows for different components:
 
 Tests are automatically triggered only when relevant files are modified, improving CI efficiency.
 
-# Support
+## Support
 
 If you have a question on how to use the product, please see our
 [support guide](https://github.com/hashgraph/.github/blob/main/SUPPORT.md).
 
-# Contributing
+## Contributing
 
 Contributions are welcome. Please see the
 [contributing guide](https://github.com/hashgraph/.github/blob/main/CONTRIBUTING.md)
 to see how you can get involved.
 
-# Code of conduct
+## Code of conduct
 
 This project is governed by the
 [Contributor Covenant Code of Conduct](https://github.com/hashgraph/.github/blob/main/CODE_OF_CONDUCT.md). By
 participating, you are expected to uphold this code of conduct. Please report unacceptable behavior
 to [oss@hedera.com](mailto:oss@hedera.com).
 
-# License
+## License
 
 [Apache License 2.0](LICENSE)
 
-# 🔐 Security
+## Security
 
 Please do not file a public ticket mentioning the vulnerability. Refer to the security policy defined in the [SECURITY.md](https://github.com/hashgraph/assettokenization-studio/blob/main/SECURITY.md).

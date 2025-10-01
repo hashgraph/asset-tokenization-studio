@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Landing /> should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="css-1b1tnqm"
+  >
+    <div
+      class="chakra-stack css-1rsw6tr"
+    >
+      <h1
+        class="chakra-heading css-122icaa"
+      >
+        app.title
+      </h1>
+      <p
+        class="chakra-text css-mcpu91"
+      >
+        app.description
+      </p>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

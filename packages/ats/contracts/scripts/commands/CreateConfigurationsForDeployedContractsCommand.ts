@@ -253,7 +253,7 @@ export default class CreateConfigurationsForDeployedContractsCommand extends Bas
         this.equityUsaAddress = equityUsaFacet.address
         this.excludeEquityAddresses = [
             deployedContractList.bondUsaRead.address,
-            deployedContractList.beneficiariesFacet.address,
+            deployedContractList.proceedRecipientsFacet.address,
             deployedContractList.scheduledCouponListingFacet.address,
         ]
         this.bondUsaAddress = bondUsaFacet.address

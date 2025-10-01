@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyDistributionsState Basic Rendering should match snapshot 1`] = `
+<DocumentFragment>
+  <div
+    data-align-items="center"
+    data-display="flex"
+    data-flex="1"
+    data-justify-content="center"
+    data-min-height="200px"
+    data-testid="box"
+  >
+    <p
+      data-color="neutral.500"
+      data-testid="text"
+      data-text-align="center"
+      data-text-style="ElementsRegularMD"
+    >
+      No distributions available yet
+    </p>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

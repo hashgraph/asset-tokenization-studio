@@ -372,13 +372,13 @@ import {
   GetVotingHoldersRequest,
   SetComplianceRequest,
   SetIdentityRegistryRequest,
-  AddBeneficiaryRequest,
-  RemoveBeneficiaryRequest,
-  UpdateBeneficiaryDataRequest,
-  GetBeneficiariesCountRequest,
-  GetBeneficiariesRequest,
-  IsBeneficiaryRequest,
-  GetBeneficiaryDataRequest,
+  AddProceedRecipientRequest,
+  RemoveProceedRecipientRequest,
+  UpdateProceedRecipientDataRequest,
+  GetProceedRecipientsCountRequest,
+  GetProceedRecipientsRequest,
+  IsProceedRecipientRequest,
+  GetProceedRecipientDataRequest,
 } from '@hashgraph/asset-tokenization-sdk';
 
 export class SDKService {
@@ -572,53 +572,53 @@ export class SDKService {
     return await Security.setIdentityRegistry(req);
   }
 
-  // Beneficiaries
-  public static async getBeneficiariesCount(
-    req: GetBeneficiariesCountRequest,
+  // Proceed Recipients
+  public static async getProceedRecipientsCount(
+    req: GetProceedRecipientsCountRequest,
   ): Promise<number> {
-    const request = await Bond.getBeneficiariesCount(req);
+    const request = await Bond.getProceedRecipientsCount(req);
     return request.payload;
   }
 
-  public static async getBeneficiaries(
-    req: GetBeneficiariesRequest,
+  public static async getProceedRecipients(
+    req: GetProceedRecipientsRequest,
   ): Promise<string[]> {
-    const request = await Bond.getBeneficiaries(req);
+    const request = await Bond.getProceedRecipients(req);
     return request.payload;
   }
 
-  public static async getBeneficiaryData(
-    req: GetBeneficiaryDataRequest,
+  public static async getProceedRecipientData(
+    req: GetProceedRecipientDataRequest,
   ): Promise<string> {
-    const request = await Bond.getBeneficiaryData(req);
+    const request = await Bond.getProceedRecipientData(req);
     return request.payload;
   }
 
-  public static async isBeneficiary(
-    req: IsBeneficiaryRequest,
+  public static async isProceedRecipient(
+    req: IsProceedRecipientRequest,
   ): Promise<boolean> {
-    const request = await Bond.isBeneficiary(req);
+    const request = await Bond.isProceedRecipient(req);
     return request.payload;
   }
 
-  public static async addBeneficiary(
-    req: AddBeneficiaryRequest,
+  public static async addProceedRecipient(
+    req: AddProceedRecipientRequest,
   ): Promise<boolean> {
-    const response = await Bond.addBeneficiary(req);
+    const response = await Bond.addProceedRecipient(req);
     return response.payload;
   }
 
-  public static async removeBeneficiary(
-    req: RemoveBeneficiaryRequest,
+  public static async removeProceedRecipient(
+    req: RemoveProceedRecipientRequest,
   ): Promise<boolean> {
-    const response = await Bond.removeBeneficiary(req);
+    const response = await Bond.removeProceedRecipient(req);
     return response.payload;
   }
 
-  public static async updateBeneficiaryData(
-    req: UpdateBeneficiaryDataRequest,
+  public static async updateProceedRecipientData(
+    req: UpdateProceedRecipientDataRequest,
   ): Promise<boolean> {
-    const response = await Bond.updateBeneficiaryData(req);
+    const response = await Bond.updateProceedRecipientData(req);
     return response.payload;
   }
 

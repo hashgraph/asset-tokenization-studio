@@ -251,7 +251,7 @@ import {
   ERC3643OperationsFacet__factory,
   ERC3643BatchFacet__factory,
   TREXFactoryAts__factory,
-  BeneficiariesFacet__factory,
+  ProceedRecipientsFacet__factory,
   ERC1410IssuerFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { _PARTITION_ID_1, EVM_ZERO_ADDRESS, GAS } from '@core/Constants';
@@ -549,8 +549,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
     diamondOwnerAccount?: EvmAddress,
-    beneficiaries: EvmAddress[] = [],
-    beneficiariesData: string[] = [],
+    proceedRecipients: EvmAddress[] = [],
+    proceedRecipientsData: string[] = [],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
     try {
@@ -614,8 +614,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       const securityTokenToCreate = new FactoryBondToken(
         security,
         bondDetails,
-        beneficiaries.map((addr) => addr.toString()),
-        beneficiariesData.map((data) => (data == '' ? '0x' : data)),
+        proceedRecipients.map((addr) => addr.toString()),
+        proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
       );
 
       const additionalSecurityData: AdditionalSecurityData = {
@@ -1289,7 +1289,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Triggering pending scheduled snapshots for ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ScheduledCrossOrderedTasksFacet__factory().attach(security.toString()),
+      new ScheduledCrossOrderedTasksFacet__factory().attach(
+        security.toString(),
+      ),
       'triggerPendingScheduledCrossOrderedTasks',
       securityId,
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
@@ -1306,7 +1308,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Triggering up to ${max.toString()} pending scheduled snapshots for ${security.toString()}`,
     );
     return this.executeWithArgs(
-      new ScheduledCrossOrderedTasksFacet__factory().attach(security.toString()),
+      new ScheduledCrossOrderedTasksFacet__factory().attach(
+        security.toString(),
+      ),
       'triggerScheduledCrossOrderedTasks',
       securityId,
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
@@ -3187,8 +3191,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     compliance: EvmAddress,
     identityRegistryAddress: EvmAddress,
     diamondOwnerAccount: EvmAddress,
-    beneficiaries: EvmAddress[] = [],
-    beneficiariesData: string[] = [],
+    proceedRecipients: EvmAddress[] = [],
+    proceedRecipientsData: string[] = [],
     externalPauses?: EvmAddress[],
     externalControlLists?: EvmAddress[],
     externalKycLists?: EvmAddress[],
@@ -3253,8 +3257,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const securityTokenToCreate = new FactoryBondToken(
       securityData,
       bondDetailsData,
-      beneficiaries.map((b) => b.toString()),
-      beneficiariesData.map((data) => (data == '' ? '0x' : data)),
+      proceedRecipients.map((b) => b.toString()),
+      proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
     );
 
     const additionalSecurityData: AdditionalSecurityData = {
@@ -3454,55 +3458,55 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     }
   }
 
-  addBeneficiary(
+  addProceedRecipient(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     data: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Adding beneficiary: ${beneficiary} to security: ${security}`,
+      `Adding proceedRecipient: ${proceedRecipient} to security: ${security}`,
     );
 
     return this.executeWithArgs(
-      new BeneficiariesFacet__factory().attach(security.toString()),
-      'addBeneficiary',
+      new ProceedRecipientsFacet__factory().attach(security.toString()),
+      'addProceedRecipient',
       securityId!,
-      GAS.ADD_BENEFICIARY,
-      [beneficiary.toString(), data],
+      GAS.ADD_PROCEED_RECIPIENT,
+      [proceedRecipient.toString(), data],
     );
   }
-  removeBeneficiary(
+  removeProceedRecipient(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Removing beneficiary: ${beneficiary} from security: ${security}`,
+      `Removing proceedRecipient: ${proceedRecipient} from security: ${security}`,
     );
     return this.executeWithArgs(
-      new BeneficiariesFacet__factory().attach(security.toString()),
-      'removeBeneficiary',
+      new ProceedRecipientsFacet__factory().attach(security.toString()),
+      'removeProceedRecipient',
       securityId!,
-      GAS.REMOVE_BENEFICIARY,
-      [beneficiary.toString()],
+      GAS.REMOVE_PROCEED_RECIPIENT,
+      [proceedRecipient.toString()],
     );
   }
-  updateBeneficiaryData(
+  updateProceedRecipientData(
     security: EvmAddress,
-    beneficiary: EvmAddress,
+    proceedRecipient: EvmAddress,
     data: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
-      `Updating beneficiary: ${beneficiary} data in security: ${security}`,
+      `Updating proceedRecipient: ${proceedRecipient} data in security: ${security}`,
     );
     return this.executeWithArgs(
-      new BeneficiariesFacet__factory().attach(security.toString()),
-      'updateBeneficiaryData',
+      new ProceedRecipientsFacet__factory().attach(security.toString()),
+      'updateProceedRecipientData',
       securityId!,
-      GAS.UPDATE_BENEFICIARY,
-      [beneficiary.toString(), data],
+      GAS.UPDATE_PROCEED_RECIPIENT,
+      [proceedRecipient.toString(), data],
     );
   }
 

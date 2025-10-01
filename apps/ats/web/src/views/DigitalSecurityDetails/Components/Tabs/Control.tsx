@@ -10,12 +10,12 @@ import { ExternalControl } from '../ExternalControl/ExternalControl';
 import { ExternalKYC } from '../ExternalKYC/ExternalKYC';
 import { AdminControlActionsButtons } from '../AdminControlActionsButtons';
 import { Tabs } from 'io-bricks-ui';
-import { Beneficiaries } from '../Beneficiaries/Beneficiaries';
+import { ProceedRecipients } from '../ProceedRecipients/ProceedRecipients';
 
 interface ControlTabProps {
   details: SecurityViewModel;
   config: {
-    showBeneficiaries: boolean;
+    showProceedRecipients: boolean;
     showControlList: boolean;
     showKYC: boolean;
     showSSIManager: boolean;
@@ -32,8 +32,11 @@ export const ControlTab = ({ details, config }: ControlTabProps) => {
   const tabs = useMemo(() => {
     const tabs = [];
 
-    if (config.showBeneficiaries) {
-      tabs.push({ content: <Beneficiaries />, header: tTabs('beneficiaries') });
+    if (config.showProceedRecipients) {
+      tabs.push({
+        content: <ProceedRecipients />,
+        header: tTabs('proceedRecipients'),
+      });
     }
     if (config.showControlList) {
       tabs.push({
