@@ -73,7 +73,7 @@ jobs:
             exit 1
           fi
 
-          echo "✅ Found $MP_PACKAGES_TO_BUMP Mass Payout package(s) ready for release"
+          echo "✅ Found ${MP_PACKAGES_TO_BUMP} Mass Payout package(s) ready for release"
 
           # Show which packages will be bumped
           echo "📦 Mass Payout packages to be released:"
@@ -134,8 +134,8 @@ jobs:
           echo "📦 Creating Mass Payout release: $TAG_NAME"
 
           # Create and push tag
-          git tag "$TAG_NAME"
-          git push origin "$TAG_NAME"
+          git tag "${TAG_NAME}"
+          git push origin "${TAG_NAME}"
 
           # Generate release notes from Mass Payout package changelogs
           RELEASE_NOTES=""

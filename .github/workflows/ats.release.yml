@@ -134,8 +134,8 @@ jobs:
           echo "📦 Creating ATS release: $TAG_NAME"
 
           # Create and push tag
-          git tag "$TAG_NAME"
-          git push origin "$TAG_NAME"
+          git tag "${TAG_NAME}"
+          git push origin "${TAG_NAME}"
 
           # Generate release notes from ATS package changelogs
           RELEASE_NOTES=""
