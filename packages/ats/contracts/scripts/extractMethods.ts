@@ -344,4 +344,4 @@ export function main() {
     console.log(`✅ Methods extracted to ${OUTPUT_FILE}`)
 }
 
-main()
+// main()
