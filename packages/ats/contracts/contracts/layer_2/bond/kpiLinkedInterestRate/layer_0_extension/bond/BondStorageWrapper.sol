@@ -64,21 +64,23 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
         KpiLinkedRateDataStorage
             memory kpiLinkedRateStorage = _kpiLinkedRateStorage();
 
-        if (kpiLinkedRateStorage.kpiOracle == address(0)) {
+        IBondRead.Coupon memory coupon = _getCoupon(_couponID).coupon;
+
+        if (coupon.fixingDate < kpiLinkedRateStorage.startPeriod) {
             _updateCouponRate(
                 _couponID,
-                kpiLinkedRateStorage.baseRate,
+                coupon,
+                kpiLinkedRateStorage.startRate,
                 kpiLinkedRateStorage.rateDecimals
             );
             return;
         }
 
-        uint256 timestamp = _blockTimestamp();
-
-        if (timestamp < kpiLinkedRateStorage.startPeriod) {
+        if (kpiLinkedRateStorage.kpiOracle == address(0)) {
             _updateCouponRate(
                 _couponID,
-                kpiLinkedRateStorage.startRate,
+                coupon,
+                kpiLinkedRateStorage.baseRate,
                 kpiLinkedRateStorage.rateDecimals
             );
             return;
@@ -88,8 +90,8 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
             kpiLinkedRateStorage.kpiOracle.functionStaticCall(
                 abi.encodeWithSelector(
                     IKpi.getKpiData.selector,
-                    timestamp - kpiLinkedRateStorage.reportPeriod,
-                    timestamp
+                    coupon.fixingDate - kpiLinkedRateStorage.reportPeriod,
+                    coupon.fixingDate
                 ),
                 IKpiLinkedRate.KpiOracleCalledFailed.selector
             ),
@@ -106,6 +108,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
 
             _updateCouponRate(
                 _couponID,
+                coupon,
                 rate,
                 kpiLinkedRateStorage.rateDecimals
             );
@@ -136,23 +139,28 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
                     kpiLinkedRateStorage.baseRate) * impactDeltaRate);
         }
 
-        _updateCouponRate(_couponID, rate, kpiLinkedRateStorage.rateDecimals);
+        _updateCouponRate(
+            _couponID,
+            coupon,
+            rate,
+            kpiLinkedRateStorage.rateDecimals
+        );
     }
 
     function _updateCouponRate(
         uint256 _couponID,
+        IBondRead.Coupon memory _coupon,
         uint256 _rate,
         uint8 _rateDecimals
     ) internal virtual {
-        IBondRead.Coupon memory coupon = _getCoupon(_couponID).coupon;
         bytes32 actionId = _corporateActionsStorage()
             .actionsByType[COUPON_CORPORATE_ACTION_TYPE]
             .at(_couponID - 1);
 
-        coupon.rate = _rate;
-        coupon.rateDecimals = _rateDecimals;
+        _coupon.rate = _rate;
+        _coupon.rateDecimals = _rateDecimals;
 
-        _updateCorporateActionData(actionId, abi.encode(coupon));
+        _updateCorporateActionData(actionId, abi.encode(_coupon));
     }
 
     function _previousRate() internal view returns (uint256) {
