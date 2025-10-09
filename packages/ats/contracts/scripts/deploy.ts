@@ -1239,6 +1239,8 @@ export async function deployContractWithFactory<
     let proxyAddress: string | undefined
     let proxyAdminAddress: string | undefined
     const txResponseList: ContractTransaction[] = []
+    // delay to prevent errors in RPC from too many calls
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
     if (deployedContract?.address) {
         implementationContract = factory.attach(deployedContract.address) as C
@@ -1326,6 +1328,8 @@ export async function deployContract({
     args,
 }: DeployContractCommand): Promise<DeployContractResult> {
     console.log(`Deploying ${name}. please wait...`)
+    // delay to prevent errors in RPC from too many calls
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
     const contractFactory = await ethers.getContractFactory(name, signer)
     const contract = await contractFactory.deploy(...args)

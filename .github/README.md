@@ -316,13 +316,13 @@ sequenceDiagram
 
 ```bash
 # Development
-npm run changeset                 # Create changeset
+npm run changeset                # Create changeset
 npm run changeset:status         # Check pending changes
 npm run ats:test                 # Run ATS tests
 npm run mass-payout:test         # Run MP tests
 
 # Preview releases
-npm run release:preview          # Show all pending releases
+npm run release:preview         # Show all pending releases
 npm run release:ats             # Preview ATS release (local)
 npm run release:mp              # Preview MP release (local)
 ```

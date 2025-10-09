@@ -35,7 +35,6 @@ jobs:
 
       - name: Fetch develop branch
         run: |
-          # Ensure we have the develop branch for changesets comparison
           git fetch origin develop:develop || git fetch origin main:develop || true
           git branch -a
 
@@ -47,7 +46,6 @@ jobs:
       - name: Check for bypass labels
         id: bypass
         run: |
-          # Check if PR has bypass labels
           LABELS=$(gh pr view ${{ github.event.number }} --json labels --jq '.labels[].name' || echo "")
 
           if echo "$LABELS" | grep -E "(no-changeset|docs-only|hotfix|chore)" > /dev/null; then
@@ -61,15 +59,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Install dependencies
-        if: steps.bypass.outputs.bypass == 'false'
+        if: ${{ steps.bypass.outputs.bypass == 'false' }}
         run: npm ci
 
       - name: Check changeset status
-        if: steps.bypass.outputs.bypass == 'false'
+        if: ${{ steps.bypass.outputs.bypass == 'false' }}
         run: |
           echo "🔍 Checking for NEW changesets in this PR..."
 
-          # Get changeset files that are NEW in this PR (not in develop)
           NEW_CHANGESETS=$(git diff develop...HEAD --name-only --diff-filter=A | grep "^\.changeset/.*\.md$" | grep -v "README.md" || true)
           NEW_CHANGESET_COUNT=$(echo "$NEW_CHANGESETS" | grep -c "\.md$" || echo "0")
 
@@ -110,7 +107,7 @@ jobs:
           fi
 
       - name: Success summary
-        if: always()
+        if: ${{ always() }}
         run: |
           if [ "${{ steps.bypass.outputs.bypass }}" = "true" ]; then
             echo "✅ Changeset check bypassed due to label"

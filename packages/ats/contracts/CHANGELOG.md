@@ -40,3 +40,4 @@
 
 - No autoexecute extract methods script
 - Remove duplicate logs in deploy script
+- Add a 2 seconds wait between deploying smart contracts and adding configurations during deploy script.

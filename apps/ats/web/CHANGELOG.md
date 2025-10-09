@@ -39,5 +39,6 @@
 ### Patch Changes
 
 - Display proceed recipients' data in text format in ats web
+- Add REACT_APP_NETWORK to .env to be able to select testnet, previewnet or mainnet
 - Updated dependencies
   - @hashgraph/asset-tokenization-sdk@1.17.0

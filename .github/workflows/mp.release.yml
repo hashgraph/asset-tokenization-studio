@@ -57,11 +57,9 @@ jobs:
       - name: Validate Mass Payout changesets exist
         id: validate
         run: |
-          # Use changeset status with JSON output to detect Mass Payout packages with changes
           echo "📋 Getting changeset status..."
           npx changeset status --output=changeset-status.json
 
-          # Parse JSON to check if Mass Payout packages have pending changes
           MP_PACKAGES_TO_BUMP=$(jq -r '.releases[] | select(.name | test("@hashgraph/mass-payout")) | .name' changeset-status.json | wc -l)
 
           echo "mp-packages-to-bump=$MP_PACKAGES_TO_BUMP" >> $GITHUB_OUTPUT
@@ -75,12 +73,11 @@ jobs:
 
           echo "✅ Found ${MP_PACKAGES_TO_BUMP} Mass Payout package(s) ready for release"
 
-          # Show which packages will be bumped
           echo "📦 Mass Payout packages to be released:"
           jq -r '.releases[] | select(.name | test("@hashgraph/mass-payout")) | "  - \(.name) (\(.oldVersion) → \(.newVersion))"' changeset-status.json
 
       - name: Preview Mass Payout release
-        if: inputs.release-type == 'preview'
+        if: ${{ inputs.release-type == 'preview' }}
         run: |
           echo "🔍 PREVIEW MODE - What would be released for Mass Payout packages:"
           echo ""
@@ -97,10 +94,8 @@ jobs:
         run: |
           echo "🚀 Releasing Mass Payout packages only (ignoring ATS packages)"
 
-          # Run changeset version with ignore flag for ATS packages
           npx changeset version --ignore "@hashgraph/asset-tokenization-*"
 
-          # Check if any files were changed
           if [[ -n "$(git status --porcelain)" ]]; then
             echo "✅ Version bump completed for Mass Payout packages"
           else
@@ -109,15 +104,10 @@ jobs:
           fi
 
       - name: Commit version changes
-        if: inputs.release-type == 'release'
+        if: ${{ inputs.release-type == 'release' }}
         run: |
-          # GitHub Actions bot automatically handles git config for branch protection bypass
-          # When using GITHUB_TOKEN, GitHub automatically configures the correct identity
-
-          # Add all changed files
           git add .
 
-          # Commit with DCO sign-off using GitHub Actions bot identity
           if git commit --signoff -m "chore: release Mass Payout packages"; then
             echo "✅ Version changes committed"
           else
@@ -125,19 +115,16 @@ jobs:
           fi
 
       - name: Create Mass Payout release
-        if: inputs.release-type == 'release'
+        if: ${{ inputs.release-type == 'release' }}
         run: |
-          # Get the current Mass Payout version
           MP_VERSION=$(node -p "require('./packages/mass-payout/core/package.json').version" 2>/dev/null || echo "1.0.0")
           TAG_NAME="v${MP_VERSION}-mp"
 
           echo "📦 Creating Mass Payout release: $TAG_NAME"
 
-          # Create and push tag
           git tag "${TAG_NAME}"
           git push origin "${TAG_NAME}"
 
-          # Generate release notes from Mass Payout package changelogs
           RELEASE_NOTES=""
           for package_dir in packages/mass-payout/*/; do
             if [ -d "$package_dir" ]; then
@@ -146,20 +133,17 @@ jobs:
               if [ -f "$CHANGELOG_FILE" ]; then
                 echo "📋 Including changelog from $package_name"
                 RELEASE_NOTES="$RELEASE_NOTES\n\n## @hashgraph/mass-payout-${package_name}\n"
-                # Get the latest version section from changelog
                 sed -n "/^## $MP_VERSION/,/^## /p" "$CHANGELOG_FILE" | head -n -1 >> release-notes.md
               fi
             fi
           done
 
-          # If no specific changelog found, create a basic release note
           if [ ! -f release-notes.md ] || [ ! -s release-notes.md ]; then
             echo "Mass Payout release v${MP_VERSION}" > release-notes.md
             echo "" >> release-notes.md
             echo "See individual package changelogs for detailed changes." >> release-notes.md
           fi
 
-          # Create GitHub release
           gh release create "$TAG_NAME" \
             --title "Mass Payout Release v${MP_VERSION}" \
             --notes-file release-notes.md \
@@ -171,23 +155,23 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Release Summary
-        if: always()
+        if: ${{ always() }}
         run: |
           if [ "${{ inputs.release-type }}" = "preview" ]; then
-            echo "## 🔍 Mass Payout Release Preview Completed" >> $GITHUB_STEP_SUMMARY
-            echo "Preview mode was selected. No actual release was created." >> $GITHUB_STEP_SUMMARY
+            echo "## 🔍 Mass Payout Release Preview Completed" >> "${GITHUB_STEP_SUMMARY}"
+            echo "Preview mode was selected. No actual release was created." >> "${GITHUB_STEP_SUMMARY}"
           elif [ "${{ job.status }}" = "success" ]; then
             MP_VERSION=$(node -p "require('./packages/mass-payout/core/package.json').version" 2>/dev/null || echo "unknown")
-            echo "## ✅ Mass Payout Release v${MP_VERSION} Completed Successfully" >> $GITHUB_STEP_SUMMARY
-            echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
-            echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
-            echo "| Mass Payout Packages | ✅ Released |" >> $GITHUB_STEP_SUMMARY
-            echo "| GitHub Release | ✅ Created |" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
-            echo "- NPM publishing will be triggered automatically via mp.publish.yml" >> $GITHUB_STEP_SUMMARY
-            echo "- ATS packages were ignored and remain available for separate release" >> $GITHUB_STEP_SUMMARY
+            echo "## ✅ Mass Payout Release v${MP_VERSION} Completed Successfully" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| Package | Status |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| --- | --- |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| Mass Payout Packages | ✅ Released |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| GitHub Release | ✅ Created |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "" >> "${GITHUB_STEP_SUMMARY}"
+            echo "**Next Steps:**" >> "${GITHUB_STEP_SUMMARY}"
+            echo "- NPM publishing will be triggered automatically via mp.publish.yml" >> "${GITHUB_STEP_SUMMARY}"
+            echo "- ATS packages were ignored and remain available for separate release" >> "${GITHUB_STEP_SUMMARY}"
           else
-            echo "## ❌ Mass Payout Release Failed" >> $GITHUB_STEP_SUMMARY
-            echo "Check the logs above for details on what went wrong." >> $GITHUB_STEP_SUMMARY
+            echo "## ❌ Mass Payout Release Failed" >> "${GITHUB_STEP_SUMMARY}"
+            echo "Check the logs above for details on what went wrong." >> "${GITHUB_STEP_SUMMARY}"
           fi
