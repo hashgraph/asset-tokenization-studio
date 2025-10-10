@@ -222,3 +222,9 @@ export * from './businessLogicResolver'
 export * from './compile'
 
 export * from './selector'
+
+// * Deploy Complete System (New modular deployment)
+// NOTE: deploySystem imports workflows that use @typechain, which creates circular
+// dependency during hardhat config loading. These are meant to be run as scripts,
+// not as hardhat tasks, so we don't export them here.
+// export * from './deploySystem'

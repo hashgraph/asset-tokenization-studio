@@ -1,0 +1,134 @@
+// SPDX-License-Identifier: Apache-2.0
+
+/**
+ * Naming utilities for contract variants and naming conventions.
+ *
+ * This module provides utilities for working with contract name variants,
+ * particularly TimeTravel test variants.
+ *
+ * @module core/utils/naming
+ */
+
+import { getFacetDefinition } from '@scripts/infrastructure'
+
+/**
+ * Get the TimeTravel variant name for a contract.
+ *
+ * TimeTravel variants are test versions of contracts that include
+ * time manipulation capabilities for testing time-dependent logic.
+ *
+ * @param contractName - Base contract name (e.g., 'AccessControlFacet')
+ * @returns TimeTravel variant name (e.g., 'AccessControlFacetTimeTravel')
+ *
+ * @example
+ * ```typescript
+ * const testVariant = getTimeTravelVariant('AccessControlFacet')
+ * // Returns: 'AccessControlFacetTimeTravel'
+ * ```
+ */
+export function getTimeTravelVariant(contractName: string): string {
+    return `${contractName}TimeTravel`
+}
+
+/**
+ * Check if a contract has a TimeTravel variant available.
+ *
+ * CONVENTION-BASED (2025-10-03): All facets are assumed to have TimeTravel
+ * variants for testing. Returns false only for infrastructure contracts
+ * (ProxyAdmin, TransparentUpgradeableProxy, etc.) that aren't in the registry.
+ *
+ * @param contractName - Base contract name
+ * @returns true if contract is a facet, false for infrastructure
+ *
+ * @example
+ * ```typescript
+ * hasTimeTravelVariant('AccessControlFacet') // true - facet
+ * hasTimeTravelVariant('ProxyAdmin') // false - infrastructure
+ * ```
+ */
+export function hasTimeTravelVariant(contractName: string): boolean {
+    // Check if contract is in facet registry
+    // If yes, assume it has TimeTravel variant
+    // If no, it's infrastructure (no TimeTravel)
+    const facet = getFacetDefinition(contractName)
+    return facet !== undefined
+}
+
+/**
+ * Resolve contract name based on deployment options.
+ *
+ * Returns the appropriate contract name variant (standard or TimeTravel)
+ * based on whether TimeTravel mode is enabled and the contract supports it.
+ *
+ * @param contractName - Base contract name
+ * @param useTimeTravel - Whether to use TimeTravel variant
+ * @returns Resolved contract name (TimeTravel variant if applicable, otherwise base name)
+ *
+ * @example
+ * ```typescript
+ * // Testing mode
+ * const name = resolveContractName('AccessControlFacet', true)
+ * // Returns: 'AccessControlFacetTimeTravel'
+ *
+ * // Production mode
+ * const name = resolveContractName('AccessControlFacet', false)
+ * // Returns: 'AccessControlFacet'
+ *
+ * // Contract without TimeTravel support
+ * const name = resolveContractName('ProxyAdmin', true)
+ * // Returns: 'ProxyAdmin' (no TimeTravel variant exists)
+ * ```
+ */
+export function resolveContractName(
+    contractName: string,
+    useTimeTravel: boolean = false
+): string {
+    if (!useTimeTravel) {
+        return contractName
+    }
+
+    if (hasTimeTravelVariant(contractName)) {
+        return getTimeTravelVariant(contractName)
+    }
+
+    return contractName
+}
+
+/**
+ * Extract base contract name from a TimeTravel variant name.
+ *
+ * @param contractName - Contract name (potentially TimeTravel variant)
+ * @returns Base contract name without 'TimeTravel' suffix
+ *
+ * @example
+ * ```typescript
+ * const baseName = getBaseContractName('AccessControlFacetTimeTravel')
+ * // Returns: 'AccessControlFacet'
+ *
+ * const baseName = getBaseContractName('AccessControlFacet')
+ * // Returns: 'AccessControlFacet' (unchanged)
+ * ```
+ */
+export function getBaseContractName(contractName: string): string {
+    const suffix = 'TimeTravel'
+    if (contractName.endsWith(suffix)) {
+        return contractName.slice(0, -suffix.length)
+    }
+    return contractName
+}
+
+/**
+ * Check if a contract name is a TimeTravel variant.
+ *
+ * @param contractName - Contract name to check
+ * @returns true if name ends with 'TimeTravel', false otherwise
+ *
+ * @example
+ * ```typescript
+ * isTimeTravelVariant('AccessControlFacetTimeTravel') // true
+ * isTimeTravelVariant('AccessControlFacet') // false
+ * ```
+ */
+export function isTimeTravelVariant(contractName: string): boolean {
+    return contractName.endsWith('TimeTravel')
+}
