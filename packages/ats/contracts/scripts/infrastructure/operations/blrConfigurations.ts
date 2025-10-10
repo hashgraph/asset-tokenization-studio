@@ -14,6 +14,7 @@
 
 import { Overrides } from 'ethers'
 import {
+    DEFAULT_TRANSACTION_TIMEOUT,
     DeploymentProvider,
     OperationResult,
     validateAddress,
@@ -192,7 +193,11 @@ export async function createBlrConfiguration(
 
         info(`Configuration transaction sent: ${tx.hash}`)
 
-        const receipt = await waitForTransaction(tx, 1, 120000)
+        const receipt = await waitForTransaction(
+            tx,
+            1,
+            DEFAULT_TRANSACTION_TIMEOUT
+        )
 
         const gasUsed = formatGasUsage(receipt, tx.gasLimit)
         debug(gasUsed)

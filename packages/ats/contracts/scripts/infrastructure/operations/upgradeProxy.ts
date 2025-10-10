@@ -11,6 +11,7 @@
 
 import { Overrides } from 'ethers'
 import {
+    DEFAULT_TRANSACTION_TIMEOUT,
     DeploymentProvider,
     UpgradeProxyOptions,
     UpgradeProxyResult,
@@ -191,7 +192,11 @@ export async function upgradeProxy(
 
         info(`Upgrade transaction sent: ${upgradeTx.hash}`)
 
-        const receipt = await waitForTransaction(upgradeTx, 1, 120000)
+        const receipt = await waitForTransaction(
+            upgradeTx,
+            1,
+            DEFAULT_TRANSACTION_TIMEOUT
+        )
 
         const gasUsed = formatGasUsage(receipt, upgradeTx.gasLimit)
         debug(gasUsed)

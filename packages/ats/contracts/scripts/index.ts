@@ -49,6 +49,7 @@ export * from './infrastructure/operations/verifyDeployment'
 export * from './infrastructure/operations/blrDeployment'
 export * from './infrastructure/operations/proxyAdminDeployment'
 export * from './infrastructure/operations/facetDeployment'
+export * from './infrastructure/operations/deployResolverProxy'
 
 // Infrastructure utilities
 export * from './infrastructure/utils/validation'

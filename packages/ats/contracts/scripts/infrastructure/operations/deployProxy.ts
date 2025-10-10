@@ -11,6 +11,7 @@
 
 import { Contract, Overrides } from 'ethers'
 import {
+    DEFAULT_TRANSACTION_TIMEOUT,
     DeployProxyOptions,
     DeployProxyResult,
     DeploymentProvider,
@@ -200,7 +201,7 @@ export async function deployProxy(
         const proxyReceipt = await waitForTransaction(
             proxy.deployTransaction,
             1,
-            120000
+            DEFAULT_TRANSACTION_TIMEOUT
         )
 
         receipts.proxy = proxyReceipt

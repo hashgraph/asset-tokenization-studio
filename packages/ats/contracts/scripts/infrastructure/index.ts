@@ -165,6 +165,13 @@ export {
     type DeployFacetsResult,
 } from './operations/facetDeployment'
 
+export {
+    deployResolverProxy,
+    type DeployResolverProxyOptions,
+    type DeployResolverProxyResult,
+    type ResolverProxyRbac,
+} from './operations/deployResolverProxy'
+
 // ============================================================================
 // Utilities
 // ============================================================================

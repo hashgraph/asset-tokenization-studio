@@ -11,6 +11,7 @@
 
 import { Overrides } from 'ethers'
 import {
+    DEFAULT_TRANSACTION_TIMEOUT,
     DeploymentProvider,
     DeploymentResult,
     debug,
@@ -114,7 +115,7 @@ export async function deployContract(
         const receipt = await waitForTransaction(
             contract.deployTransaction,
             confirmations,
-            120000 // 2 minute timeout
+            DEFAULT_TRANSACTION_TIMEOUT
         )
 
         // Validate deployment
