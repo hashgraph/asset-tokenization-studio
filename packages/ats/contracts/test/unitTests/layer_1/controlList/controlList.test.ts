@@ -204,210 +204,154 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
-import {
-    type ResolverProxy,
-    type ControlList,
-    type Pause,
-    AccessControl,
-    IFactory,
-    BusinessLogicResolver,
-} from '@typechain'
-import {
-    CONTROL_LIST_ROLE,
-    PAUSER_ROLE,
-    MAX_UINT256,
-    deployEquityFromFactory,
-    Rbac,
-    RegulationSubType,
-    RegulationType,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-} from '@scripts'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
+import { ControlListFacet__factory, PauseFacet__factory } from '@typechain'
+import { ATS_ROLES, CURRENCIES } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { deployEquityTokenFixture } from '../../../fixtures'
 
 describe('Control List Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
-    let signer_D: SignerWithAddress
-    let signer_E: SignerWithAddress
+    async function deployEquityWithControlListFixture() {
+        const base = await deployEquityTokenFixture({
+            currency: CURRENCIES.USD,
+            isControllable: true,
+        })
+        const { deployer, user1, diamond, accessControlFacet } = base
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
-    let account_D: string
-    let account_E: string
+        const controlListFacet = ControlListFacet__factory.connect(
+            diamond.address,
+            deployer
+        )
+        const pauseFacet = PauseFacet__factory.connect(
+            diamond.address,
+            deployer
+        )
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let controlListFacet: ControlList
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
+        await accessControlFacet.grantRole(ATS_ROLES.PAUSER, user1.address)
+
+        return {
+            ...base,
+            controlListFacet,
+            pauseFacet,
+        }
+    }
 
     before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
-            await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-        account_D = signer_D.address
-        account_E = signer_E.address
-
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: false,
-            })
-        )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    beforeEach(async () => {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause]
-
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: true,
-            isMultiPartition: false,
-            name: 'TEST_AccessControl',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_C,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            businessLogicResolver: businessLogicResolver.address,
-            factory: factory,
-        })
-
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
-        )
-
-        controlListFacet = await ethers.getContractAt(
-            'ControlList',
-            diamond.address
-        )
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+        await loadFixture(deployEquityWithControlListFixture)
     })
 
     it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
+        const { controlListFacet } = await loadFixture(
+            deployEquityWithControlListFixture
+        )
         await expect(
             controlListFacet.initialize_ControlList(true)
         ).to.be.rejectedWith('AlreadyInitialized')
     })
 
     it('GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole', async () => {
-        // add to list fails
+        const { controlListFacet, user2, user3 } = await loadFixture(
+            deployEquityWithControlListFixture
+        )
         await expect(
-            controlListFacet.connect(signer_C).addToControlList(account_D)
+            controlListFacet.connect(user2).addToControlList(user3.address)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
     it('GIVEN an account without controlList role WHEN removeFromControlList THEN transaction fails with AccountHasNoRole', async () => {
-        // remove From list fails
+        const { controlListFacet, user2, user3 } = await loadFixture(
+            deployEquityWithControlListFixture
+        )
         await expect(
-            controlListFacet.connect(signer_C).removeFromControlList(account_D)
+            controlListFacet.connect(user2).removeFromControlList(user3.address)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
     it('GIVEN a paused Token WHEN addToControlList THEN transaction fails with TokenIsPaused', async () => {
-        // Granting Role to account C and Pause
+        const {
+            controlListFacet,
+            accessControlFacet,
+            pauseFacet,
+            deployer,
+            user1,
+            user2,
+            user3,
+        } = await loadFixture(deployEquityWithControlListFixture)
+
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            CONTROL_LIST_ROLE,
-            signer_A,
-            signer_B,
-            account_C
+            ATS_ROLES.CONTROL_LIST,
+            deployer,
+            user1,
+            user2.address
         )
 
-        // add to list fails
         await expect(
-            controlListFacet.connect(signer_C).addToControlList(account_D)
+            controlListFacet.connect(user2).addToControlList(user3.address)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN a paused Token WHEN removeFromControlList THEN transaction fails with TokenIsPaused', async () => {
-        // Granting Role to account C and Pause
+        const {
+            controlListFacet,
+            accessControlFacet,
+            pauseFacet,
+            deployer,
+            user1,
+            user2,
+            user3,
+        } = await loadFixture(deployEquityWithControlListFixture)
+
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            CONTROL_LIST_ROLE,
-            signer_A,
-            signer_B,
-            account_C
+            ATS_ROLES.CONTROL_LIST,
+            deployer,
+            user1,
+            user2.address
         )
 
-        // remove from list fails
         await expect(
-            controlListFacet.connect(signer_C).removeFromControlList(account_D)
+            controlListFacet.connect(user2).removeFromControlList(user3.address)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN an account with controlList role WHEN addToControlList and removeFromControlList THEN transaction succeeds', async () => {
-        // ADD TO LIST ------------------------------------------------------------------
+        const {
+            controlListFacet,
+            accessControlFacet,
+            deployer,
+            user1,
+            user2,
+            user3,
+        } = await loadFixture(deployEquityWithControlListFixture)
+
         await accessControlFacet
-            .connect(signer_A)
-            .grantRole(CONTROL_LIST_ROLE, account_C)
+            .connect(deployer)
+            .grantRole(ATS_ROLES.CONTROL_LIST, user1.address)
 
-        // check that D and E are not in the list
-        let check_D = await controlListFacet.isInControlList(account_D)
-        expect(check_D).to.equal(false)
-        let check_E = await controlListFacet.isInControlList(account_E)
-        expect(check_E).to.equal(false)
+        let check_user2 = await controlListFacet.isInControlList(user2.address)
+        expect(check_user2).to.equal(false)
+        let check_user3 = await controlListFacet.isInControlList(user3.address)
+        expect(check_user3).to.equal(false)
 
-        // add to list
         await expect(
-            controlListFacet.connect(signer_C).addToControlList(account_D)
+            controlListFacet.connect(user1).addToControlList(user2.address)
         )
             .to.emit(controlListFacet, 'AddedToControlList')
-            .withArgs(account_C, account_D)
+            .withArgs(user1.address, user2.address)
         await expect(
-            controlListFacet.connect(signer_C).addToControlList(account_E)
+            controlListFacet.connect(user1).addToControlList(user3.address)
         )
             .to.emit(controlListFacet, 'AddedToControlList')
-            .withArgs(account_C, account_E)
+            .withArgs(user1.address, user3.address)
 
-        // check that D and E are in the list
-        check_D = await controlListFacet.isInControlList(account_D)
-        expect(check_D).to.equal(true)
-        check_E = await controlListFacet.isInControlList(account_E)
-        expect(check_E).to.equal(true)
-        // check list members
+        check_user2 = await controlListFacet.isInControlList(user2.address)
+        expect(check_user2).to.equal(true)
+        check_user3 = await controlListFacet.isInControlList(user3.address)
+        expect(check_user3).to.equal(true)
+
         let listCount = await controlListFacet.getControlListCount()
         let listMembers = await controlListFacet.getControlListMembers(
             0,
@@ -416,30 +360,31 @@ describe('Control List Tests', () => {
 
         expect(listCount).to.equal(2)
         expect(listMembers.length).to.equal(listCount)
-        expect(listMembers[0].toUpperCase()).to.equal(account_D.toUpperCase())
-        expect(listMembers[1].toUpperCase()).to.equal(account_E.toUpperCase())
+        expect(listMembers[0].toUpperCase()).to.equal(
+            user2.address.toUpperCase()
+        )
+        expect(listMembers[1].toUpperCase()).to.equal(
+            user3.address.toUpperCase()
+        )
 
-        // REMOVE FROM LIST ------------------------------------------------------------------
-        // remove From list
         await expect(
-            controlListFacet.connect(signer_C).removeFromControlList(account_D)
+            controlListFacet.connect(user1).removeFromControlList(user2.address)
         )
             .to.emit(controlListFacet, 'RemovedFromControlList')
-            .withArgs(account_C, account_D)
+            .withArgs(user1.address, user2.address)
 
-        // check that D is not in the list
-        check_D = await controlListFacet.isInControlList(account_D)
-        expect(check_D).to.equal(false)
+        check_user2 = await controlListFacet.isInControlList(user2.address)
+        expect(check_user2).to.equal(false)
 
-        // check list members
         listCount = await controlListFacet.getControlListCount()
         listMembers = await controlListFacet.getControlListMembers(0, listCount)
 
         expect(listCount).to.equal(1)
         expect(listMembers.length).to.equal(listCount)
-        expect(listMembers[0].toUpperCase()).to.equal(account_E.toUpperCase())
+        expect(listMembers[0].toUpperCase()).to.equal(
+            user3.address.toUpperCase()
+        )
 
-        // CHECK LIST TYPE ------------------------------------------------------------------
         const listType = await controlListFacet.getControlListType()
         expect(listType).to.equal(false)
     })

@@ -253,24 +253,29 @@ const config: HardhatUserConfig = {
             blockGasLimit: 30_000_000,
             hardfork: 'cancun',
         },
-        local: {
-            url: Configuration.endpoints.local.jsonRpc,
-            accounts: Configuration.privateKeys.local,
+        localhost: {
+            url: Configuration.endpoints.localhost.jsonRpc,
+            accounts: Configuration.privateKeys.localhost,
             timeout: 60_000,
         },
-        previewnet: {
-            url: Configuration.endpoints.previewnet.jsonRpc,
-            accounts: Configuration.privateKeys.previewnet,
+        'hedera-local': {
+            url: Configuration.endpoints['hedera-local'].jsonRpc,
+            accounts: Configuration.privateKeys['hedera-local'],
+            timeout: 60_000,
+        },
+        'hedera-previewnet': {
+            url: Configuration.endpoints['hedera-previewnet'].jsonRpc,
+            accounts: Configuration.privateKeys['hedera-previewnet'],
             timeout: 120_000,
         },
-        testnet: {
-            url: Configuration.endpoints.testnet.jsonRpc,
-            accounts: Configuration.privateKeys.testnet,
+        'hedera-testnet': {
+            url: Configuration.endpoints['hedera-testnet'].jsonRpc,
+            accounts: Configuration.privateKeys['hedera-testnet'],
             timeout: 120_000,
         },
-        mainnet: {
-            url: Configuration.endpoints.mainnet.jsonRpc,
-            accounts: Configuration.privateKeys.mainnet,
+        'hedera-mainnet': {
+            url: Configuration.endpoints['hedera-mainnet'].jsonRpc,
+            accounts: Configuration.privateKeys['hedera-mainnet'],
             timeout: 120_000,
         },
     },

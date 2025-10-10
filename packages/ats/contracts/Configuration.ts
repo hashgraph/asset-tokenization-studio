@@ -209,14 +209,64 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const EMPTY_STRING = ''
+const NETWORK_ENV_PREFIX_SEPARATOR_REGEX = /-/g
+
+// ============================================================================
+// DEPRECATION NOTICE
+// ============================================================================
+/**
+ * @deprecated Configuration.ts is being phased out in favor of modular
+ * scripts/core modules. For new code, use:
+ * - scripts/core/constants.ts for network constants and defaults
+ * - scripts/core/config.ts for network configuration
+ * - scripts/core/registry.ts for contract metadata
+ *
+ * This file will continue to work for backward compatibility but will be
+ * marked as legacy in future releases.
+ */
+
+/**
+ * Supported networks for ATS contract deployment.
+ *
+ * Network Types:
+ * - hardhat: Hardhat's in-memory test network (ephemeral, no persistence)
+ * - localhost: Generic local Ethereum node (e.g., Hardhat node, Ganache, Anvil)
+ * - hedera-local: Local Hedera node running in Docker
+ * - hedera-previewnet: Hedera previewnet (public test network)
+ * - hedera-testnet: Hedera testnet (primary test network)
+ * - hedera-mainnet: Hedera mainnet (production network)
+ */
 export const NETWORKS = [
     'hardhat',
-    'local',
-    'previewnet',
-    'testnet',
-    'mainnet',
+    'localhost',
+    'hedera-local',
+    'hedera-previewnet',
+    'hedera-testnet',
+    'hedera-mainnet',
 ] as const
 export type Network = (typeof NETWORKS)[number]
+
+/**
+ * Normalizes network identifiers to environment variable prefixes.
+ *
+ * Converts network names like `hedera-testnet` to `HEDERA_TESTNET` so they
+ * map to valid environment variable keys (e.g. `HEDERA_TESTNET_PRIVATE_KEY_0`).
+ */
+const formatNetworkEnvPrefix = (network: Network): string =>
+    network.toUpperCase().replace(NETWORK_ENV_PREFIX_SEPARATOR_REGEX, '_')
+
+/**
+ * Backward compatibility aliases for network names.
+ * Maps old network names to new standardized names.
+ *
+ * @deprecated Old network names. Use new names from NETWORKS instead.
+ */
+export const NETWORK_ALIASES: Record<string, Network> = {
+    local: 'localhost',
+    previewnet: 'hedera-previewnet',
+    testnet: 'hedera-testnet',
+    mainnet: 'hedera-mainnet',
+}
 
 export const DEPLOY_TYPES = ['proxy', 'direct'] as const
 export type DeployType = (typeof DEPLOY_TYPES)[number]
@@ -359,8 +409,9 @@ export default class Configuration {
     public static get privateKeys(): Record<Network, string[]> {
         return NETWORKS.reduce(
             (result, network) => {
+                const envPrefix = formatNetworkEnvPrefix(network)
                 result[network] = Configuration._getEnvironmentVariableList({
-                    name: `${network.toUpperCase()}_PRIVATE_KEY_#`,
+                    name: `${envPrefix}_PRIVATE_KEY_#`,
                 })
                 return result
             },
@@ -373,18 +424,26 @@ export default class Configuration {
             (result, network) => {
                 result[network] = {
                     jsonRpc: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_JSON_RPC_ENDPOINT`,
+                        name: `${network.toUpperCase().replace(/-/g, '_')}_JSON_RPC_ENDPOINT`,
                         defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:7546'
-                                : `https://${network}.hash.io/api`,
+                            network === 'localhost'
+                                ? 'http://127.0.0.1:8545'
+                                : network === 'hedera-local'
+                                  ? 'http://127.0.0.1:7546'
+                                  : network === 'hardhat'
+                                    ? ''
+                                    : `https://${network.replace('hedera-', '')}.hashio.io/api`,
                     }),
                     mirror: Configuration._getEnvironmentVariable({
-                        name: `${network.toUpperCase()}_MIRROR_NODE_ENDPOINT`,
+                        name: `${network.toUpperCase().replace(/-/g, '_')}_MIRROR_NODE_ENDPOINT`,
                         defaultValue:
-                            network === 'local'
-                                ? 'http://localhost:5551'
-                                : `https://${network}.mirrornode.hedera.com`,
+                            network === 'localhost'
+                                ? ''
+                                : network === 'hedera-local'
+                                  ? 'http://127.0.0.1:5600'
+                                  : network === 'hardhat'
+                                    ? ''
+                                    : `https://${network.replace('hedera-', '')}.mirrornode.hedera.com`,
                     }),
                 }
                 return result

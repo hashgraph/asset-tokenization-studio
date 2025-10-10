@@ -3,21 +3,33 @@
         "target": "ES2022",
         "module": "commonjs",
         "declaration": true,
+        "sourceMap": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "allowSyntheticDefaultImports": true,
-        "skipLibCheck": true, // Skip type checking all .d.ts files.
+        "skipLibCheck": true,
         "importHelpers": true,
         "alwaysStrict": true,
         "strict": true,
         "outDir": "./build",
         "resolveJsonModule": true,
+        "baseUrl": ".",
         "paths": {
-            "@configuration": ["./Configuration"],
-            "@typechain": ["./typechain-types/*", "./typechain-types/index.ts"],
-            "@scripts": ["./scripts/index"],
+            "@configuration": ["./Configuration.ts"],
+            "@typechain": ["./typechain-types/index.ts"],
+            "@typechain/*": ["./typechain-types/*"],
+            "@scripts": ["./scripts/index.ts"],
+            "@scripts/*": ["./scripts/*"],
+            "@scripts/infrastructure": ["./scripts/infrastructure/index.ts"],
+            "@scripts/infrastructure/*": ["./scripts/infrastructure/*"],
+            "@scripts/domain": ["./scripts/domain/index.ts"],
+            "@scripts/domain/*": ["./scripts/domain/*"],
             "@tasks": ["./tasks/index.ts"],
-            "@test": ["./test/index.ts"]
+            "@tasks/*": ["./tasks/*"],
+            "@test": ["./test/index.ts"],
+            "@test/*": ["./test/*"]
         }
-    }
+    },
+    "include": ["scripts/**/*", "Configuration.ts", "typechain-types/**/*"],
+    "exclude": ["node_modules", "test", "hardhat.config.ts", "tasks"]
 }

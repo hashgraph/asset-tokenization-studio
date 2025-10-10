@@ -47,4 +47,7 @@ typechain-types
 #Slither
 Slither/*
 
-
+# Deployment files - ignore local/test networks
+deployments/hardhat_*.json
+deployments/localhost_*.json
+deployments/local_*.json
