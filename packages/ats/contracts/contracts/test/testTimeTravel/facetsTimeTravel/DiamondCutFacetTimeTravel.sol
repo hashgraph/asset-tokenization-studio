@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
-// Contract copy-pasted form OZ and extended
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ERC3643ReadFacet} from '../../../layer_1/ERC3643/ERC3643ReadFacet.sol';
+import {
+    DiamondCutFacet
+} from '../../../resolver/resolverProxy/facets/DiamondCutFacet.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract ERC3643ReadTimeTravel is ERC3643ReadFacet, TimeTravelStorageWrapper {
+contract DiamondCutFacetTimeTravel is
+    DiamondCutFacet,
+    TimeTravelStorageWrapper
+{
     function _blockTimestamp()
         internal
         view

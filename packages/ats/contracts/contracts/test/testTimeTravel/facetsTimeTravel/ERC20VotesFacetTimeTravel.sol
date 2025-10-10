@@ -4,15 +4,15 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {
-    ERC3643ManagementFacet
-} from '../../../layer_1/ERC3643/ERC3643ManagementFacet.sol';
+    ERC20VotesFacet
+} from '../../../layer_1/ERC1400/ERC20Votes/ERC20VotesFacet.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract ERC3643ManagementTimeTravel is
-    ERC3643ManagementFacet,
+contract ERC20VotesFacetTimeTravel is
+    ERC20VotesFacet,
     TimeTravelStorageWrapper
 {
     function _blockTimestamp()

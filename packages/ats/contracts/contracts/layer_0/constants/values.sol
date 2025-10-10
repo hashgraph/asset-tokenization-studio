@@ -7,7 +7,8 @@ address constant ZERO_ADDRESS = address(0);
 bytes32 constant EMPTY_BYTES32 = bytes32(0);
 bytes constant EMPTY_BYTES = bytes('');
 
-// TODO: align naming
+// Default partition identifier (bytes32(1))
+// Used as the default partition for ERC1410 token operations when no specific partition is specified
 bytes32 constant _DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
 uint256 constant SNAPSHOT_RESULT_ID = 0;
 

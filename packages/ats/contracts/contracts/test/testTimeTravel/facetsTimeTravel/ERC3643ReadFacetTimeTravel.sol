@@ -3,13 +3,16 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ERC20Votes} from '../../../layer_1/ERC1400/ERC20Votes/ERC20Votes.sol';
+import {ERC3643ReadFacet} from '../../../layer_1/ERC3643/ERC3643ReadFacet.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract ERC20VotesTimeTravel is ERC20Votes, TimeTravelStorageWrapper {
+contract ERC3643ReadFacetTimeTravel is
+    ERC3643ReadFacet,
+    TimeTravelStorageWrapper
+{
     function _blockTimestamp()
         internal
         view
