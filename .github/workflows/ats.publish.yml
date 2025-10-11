@@ -9,11 +9,6 @@ on:
         required: false
         type: boolean
         default: false
-      ref:
-        description: 'Branch/tag/commit to publish from'
-        required: false
-        type: string
-        default: 'main'
 
   # Release published trigger (GitHub release creation) - only for ATS releases (tags ending with -ats)
   release:
@@ -33,7 +28,7 @@ jobs:
     name: Publish ATS Contracts
     runs-on: token-studio-linux-large
     # Only run if manual trigger OR release tag contains 'ats'/'ATS'
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, 'ats') || contains(github.ref_name, 'ATS')
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, 'ats') || contains(github.ref_name, 'ATS') }}
 
     steps:
       - name: Harden Runner
@@ -71,11 +66,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           DRY_RUN: ${{ inputs.dry-run-enabled }}
+        working-directory: packages/ats/contracts
         run: |
-          echo "DRY_RUN is set to: '${DRY_RUN}'"
-
-          cd packages/ats/contracts
-
           PUBLISH_ARGS=("--access=restricted")
           if [[ "${DRY_RUN}" == "true" ]]; then
             PUBLISH_ARGS+=("--dry-run")
@@ -129,11 +121,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           DRY_RUN: ${{ inputs.dry-run-enabled }}
+        working-directory: packages/ats/sdk
         run: |
-          echo "DRY_RUN is set to: '${DRY_RUN}'"
-
-          cd packages/ats/sdk
-
           PUBLISH_ARGS=("--access=restricted")
           if [[ "${DRY_RUN}" == "true" ]]; then
             PUBLISH_ARGS+=("--dry-run")

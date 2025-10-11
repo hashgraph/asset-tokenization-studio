@@ -45,9 +45,10 @@ jobs:
 
       - name: Check for bypass labels
         id: bypass
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           LABELS=$(gh pr view ${{ github.event.number }} --json labels --jq '.labels[].name' || echo "")
-
           if echo "$LABELS" | grep -E "(no-changeset|docs-only|hotfix|chore)" > /dev/null; then
             echo "bypass=true" >> $GITHUB_OUTPUT
             echo "✅ Found bypass label. Skipping changeset check."
@@ -55,8 +56,6 @@ jobs:
             echo "bypass=false" >> $GITHUB_OUTPUT
             echo "🔍 No bypass labels found. Changeset check required."
           fi
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: Install dependencies
         if: ${{ steps.bypass.outputs.bypass == 'false' }}
@@ -79,7 +78,7 @@ jobs:
             echo "$NEW_CHANGESETS"
           fi
 
-          if [ "$NEW_CHANGESET_COUNT" -gt 0 ]; then
+          if [[ "${NEW_CHANGESET_COUNT}" -gt 0 ]]; then
             echo "✅ Changeset validation passed - found NEW changeset files in PR"
           else
             echo ""

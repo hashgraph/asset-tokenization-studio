@@ -26,12 +26,11 @@ jobs:
     name: Create ATS Release
     runs-on: token-studio-linux-large
     # Only allow authorized teams to trigger releases per CODEOWNERS
-    if: >
-      github.event_name == 'workflow_dispatch' && (
-        contains(fromJSON('["platform-ci", "platform-ci-committers", "release-engineering-managers", "developer-advocates", "iobuilders-hedera"]'),
-                 github.actor) ||
-        contains(github.actor, 'hashgraph')
-      )
+    if: ${{ github.event_name == 'workflow_dispatch' && (
+      contains(fromJSON('["platform-ci", "platform-ci-committers", "release-engineering-managers", "developer-advocates", "iobuilders-hedera"]'),
+      github.actor) ||
+      contains(github.actor, 'hashgraph')
+      ) }}
 
     steps:
       - name: Harden Runner
@@ -108,42 +107,35 @@ jobs:
         run: |
           git add .
 
-          if git commit --signoff -m "chore: release ATS packages"; then
+          if git commit --signoff -S -m "chore: release ATS packages"; then
             echo "✅ Version changes committed"
           else
             echo "ℹ️ No changes to commit"
           fi
 
       - name: Create ATS release
+        id: create-release-tag
         if: ${{ inputs.release-type == 'release' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ATS_VERSION=$(node -p "require('./packages/ats/contracts/package.json').version")
           TAG_NAME="v${ATS_VERSION}-ats"
-
-          echo "📦 Creating ATS release: $TAG_NAME"
-
+          echo "📦 Creating ATS release tag: $TAG_NAME"
           git tag "${TAG_NAME}"
           git push origin "${TAG_NAME}"
 
-          RELEASE_NOTES=""
-          for package in contracts sdk; do
-            CHANGELOG_FILE="packages/ats/${package}/CHANGELOG.md"
-            if [ -f "$CHANGELOG_FILE" ]; then
-              echo "📋 Including changelog from $package"
-              RELEASE_NOTES="$RELEASE_NOTES\n\n## @hashgraph/asset-tokenization-${package}\n"
-              sed -n "/^## $ATS_VERSION/,/^## /p" "$CHANGELOG_FILE" | head -n -1 >> release-notes.md
-            fi
-          done
+          echo "tag-name=${TAG_NAME}" >> "${GITHUB_OUTPUT}"
 
-          gh release create "$TAG_NAME" \
-            --title "ATS Release v${ATS_VERSION}" \
-            --notes-file release-notes.md \
-            --target main
-
-          echo "✅ GitHub release created: $TAG_NAME"
-          echo "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/$TAG_NAME"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create github release
+        if: ${{ inputs.release-type == 'release' }}
+        uses: step-security/release-action@03a57407052f15d1537fd5469a6fbbc536aba326 # v1.20.0
+        with:
+          tag: ${{ steps.create-release-tag.outputs.tag-name }}
+          prerelease: false
+          draft: false
+          generateReleaseNotes: true
+          skipIfReleaseExists: true
 
       - name: Release Summary
         if: always()

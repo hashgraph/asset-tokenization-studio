@@ -58,11 +58,13 @@ sequenceDiagram
 
 4. **Commit with DCO and Signature compliance**:
 
-   ```bash
-   git add .
-   git commit --signoff -S -m "feat: your commit message"
-   git push origin feature/your-feature-name
-   ```
+Commit messages should comply with the [conventional commits standard](https://www.conventionalcommits.org/en/v1.0.0/)
+
+```bash
+git add .
+git commit --signoff -S -m "feat: your commit message"
+git push origin feature/your-feature-name
+```
 
 5. **Open PR to develop branch** - automated checks will run
 

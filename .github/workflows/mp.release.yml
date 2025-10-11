@@ -26,12 +26,11 @@ jobs:
     name: Create Mass Payout Release
     runs-on: token-studio-linux-large
     # Only allow authorized teams to trigger releases per CODEOWNERS
-    if: >
-      github.event_name == 'workflow_dispatch' && (
-        contains(fromJSON('["platform-ci", "platform-ci-committers", "release-engineering-managers", "developer-advocates", "iobuilders-hedera"]'),
-                 github.actor) ||
-        contains(github.actor, 'hashgraph')
-      )
+    if: ${{ github.event_name == 'workflow_dispatch' && (
+      contains(fromJSON('["platform-ci", "platform-ci-committers", "release-engineering-managers", "developer-advocates", "iobuilders-hedera"]'),
+      github.actor) ||
+      contains(github.actor, 'hashgraph')
+      ) }}
 
     steps:
       - name: Harden Runner
@@ -108,51 +107,35 @@ jobs:
         run: |
           git add .
 
-          if git commit --signoff -m "chore: release Mass Payout packages"; then
+          if git commit --signoff -S -m "chore: release Mass Payout packages"; then
             echo "✅ Version changes committed"
           else
             echo "ℹ️ No changes to commit"
           fi
 
       - name: Create Mass Payout release
+        id: create-mp-release-tag
         if: ${{ inputs.release-type == 'release' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           MP_VERSION=$(node -p "require('./packages/mass-payout/core/package.json').version" 2>/dev/null || echo "1.0.0")
           TAG_NAME="v${MP_VERSION}-mp"
-
           echo "📦 Creating Mass Payout release: $TAG_NAME"
-
-          git tag "${TAG_NAME}"
+          git tag -s -a "${TAG_NAME}" -m "Creating Mass Payout Release with tag: ${TAG_NAME}"
           git push origin "${TAG_NAME}"
 
-          RELEASE_NOTES=""
-          for package_dir in packages/mass-payout/*/; do
-            if [ -d "$package_dir" ]; then
-              package_name=$(basename "$package_dir")
-              CHANGELOG_FILE="${package_dir}CHANGELOG.md"
-              if [ -f "$CHANGELOG_FILE" ]; then
-                echo "📋 Including changelog from $package_name"
-                RELEASE_NOTES="$RELEASE_NOTES\n\n## @hashgraph/mass-payout-${package_name}\n"
-                sed -n "/^## $MP_VERSION/,/^## /p" "$CHANGELOG_FILE" | head -n -1 >> release-notes.md
-              fi
-            fi
-          done
+          echo "release-tag=${TAG_NAME}" >> "${GITHUB_OUTPUT}"
 
-          if [ ! -f release-notes.md ] || [ ! -s release-notes.md ]; then
-            echo "Mass Payout release v${MP_VERSION}" > release-notes.md
-            echo "" >> release-notes.md
-            echo "See individual package changelogs for detailed changes." >> release-notes.md
-          fi
-
-          gh release create "$TAG_NAME" \
-            --title "Mass Payout Release v${MP_VERSION}" \
-            --notes-file release-notes.md \
-            --target main
-
-          echo "✅ GitHub release created: $TAG_NAME"
-          echo "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/$TAG_NAME"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create github release
+        if: ${{ inputs.release-type == 'release' }}
+        uses: step-security/release-action@03a57407052f15d1537fd5469a6fbbc536aba326 # v1.20.0
+        with:
+          tag: ${{ steps.create-mp-release-tag.outputs.release-tag }}
+          prerelease: false
+          draft: false
+          generateReleaseNotes: true
+          skipIfReleaseExists: true
 
       - name: Release Summary
         if: ${{ always() }}

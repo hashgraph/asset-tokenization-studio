@@ -9,11 +9,6 @@ on:
         required: false
         type: boolean
         default: false
-      ref:
-        description: 'Branch/tag/commit to publish from'
-        required: false
-        type: string
-        default: 'main'
 
   # Release published trigger (GitHub release creation) - only for Mass Payout releases (tags ending with -mp)
   release:
@@ -72,8 +67,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           DRY_RUN: ${{ inputs.dry-run-enabled }}
         run: |
-          echo "DRY_RUN is set to: '${DRY_RUN}'"
-
           for package_dir in packages/mass-payout/*/; do
             if [ -d "$package_dir" ] && [ -f "${package_dir}package.json" ]; then
               package_name=$(basename "$package_dir")
