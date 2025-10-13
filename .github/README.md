@@ -11,6 +11,28 @@ The repository uses **Changesets** for version management with independent relea
 
 All development happens on the `develop` branch with automated testing, changeset validation, and manual release controls by authorized teams.
 
+## How to test github workflows locally
+
+To be able to test github workflows locally you can use act, a github actions simulator [act homepage](https://nektosact.com/introduction.html)
+
+### Install act
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+```
+
+### Run workflow
+
+Substitute \<workflow\> for the workflow you want to test (ats.pubilsh, mp.release, ...)
+
+```bash
+./bin/act workflow_dispatch \
+  -W .github/workflows/<workflow>.yml \
+  --input dry-run-enabled=true \
+  -s NPM_TOKEN=fake_token \
+  -P token-studio-linux-large=catthehacker/ubuntu:act-latest
+```
+
 ## Developer Workflow
 
 ### Daily Development Process
