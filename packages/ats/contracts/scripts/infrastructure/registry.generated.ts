@@ -9,8 +9,8 @@
  * To regenerate: npm run generate:registry
  * To customize: Edit registry.overrides.ts
  *
- * Generated: 2025-10-10T07:37:24.528Z
- * Facets: 47
+ * Generated: 2025-10-13T14:21:29.661Z
+ * Facets: 49
  * Infrastructure: 2
  *
  * @module infrastructure/registry.generated
@@ -24,7 +24,7 @@ import {
 /**
  * Registry of all facet contracts.
  *
- * Total facets: 47
+ * Total facets: 49
  */
 export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     AccessControlFacet: {
@@ -39,6 +39,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     BondUSAFacet: {
         name: 'BondUSAFacet',
+        description: 'Jurisdiction-specific - asset-specific features',
+    },
+
+    BondUSAReadFacet: {
+        name: 'BondUSAReadFacet',
         description: 'Jurisdiction-specific - asset-specific features',
     },
 
@@ -254,6 +259,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     SsiManagementFacet: {
         name: 'SsiManagementFacet',
+        description: 'Core functionality - core token functionality',
+    },
+
+    TimeTravelFacet: {
+        name: 'TimeTravelFacet',
         description: 'Core functionality - core token functionality',
     },
 

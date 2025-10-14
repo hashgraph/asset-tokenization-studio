@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {BondUSARead} from '../../../layer_3/bondUSA/BondUSARead.sol';
+import {BondUSAReadFacet} from '../../../layer_3/bondUSA/BondUSAReadFacet.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract BondUSAReadTimeTravel is BondUSARead, TimeTravelStorageWrapper {
+contract BondUSAReadFacetTimeTravel is
+    BondUSAReadFacet,
+    TimeTravelStorageWrapper
+{
     function _blockTimestamp()
         internal
         view

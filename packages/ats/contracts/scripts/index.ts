@@ -56,6 +56,7 @@ export * from './infrastructure/utils/validation'
 export * from './infrastructure/utils/transaction'
 export * from './infrastructure/utils/logging'
 export * from './infrastructure/utils/naming'
+export * from './infrastructure/utils/time'
 
 // ========================================
 // Domain (ATS-Specific)
@@ -74,7 +75,7 @@ export * from './domain/bond/createConfiguration'
 export * from './domain/factory/deploy'
 
 // Token deployment from factory
-export * from './domain/factory/deployToken'
+export * from './domain/factory/deployEquityToken'
 
 // ========================================
 // Workflows

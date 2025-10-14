@@ -39,6 +39,7 @@ export async function deployAtsInfrastructureFixture(useTimeTravel = true) {
     const provider = new HardhatProvider()
     const signers = await ethers.getSigners()
     const [deployer, user1, user2, user3] = signers
+    const unknownSigner = signers.at(-1)!
 
     // Deploy complete system using new scripts
     const deployment = await deployCompleteSystem(provider, 'hardhat', {
@@ -70,6 +71,7 @@ export async function deployAtsInfrastructureFixture(useTimeTravel = true) {
         user1,
         user2,
         user3,
+        unknownSigner,
 
         // Core infrastructure
         factory,

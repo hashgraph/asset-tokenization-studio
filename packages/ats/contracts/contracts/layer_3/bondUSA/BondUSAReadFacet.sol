@@ -9,7 +9,7 @@ import {
 import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
 import {ISecurity} from '../interfaces/ISecurity.sol';
 
-contract BondUSARead is BondRead, Security {
+contract BondUSAReadFacet is BondRead, Security {
     function getStaticResolverKey()
         external
         pure

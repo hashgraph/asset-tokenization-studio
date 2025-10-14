@@ -28,10 +28,6 @@ export {
     TEST_AMOUNTS,
 } from './tokens/common.fixture'
 
-// Feature-specific fixtures
-export { deployEquityWithExternalPauseFixture } from './features/pause.fixture'
-export { deployEquityWithControlListFixture } from './features/controlList.fixture'
-
 // T-REX fixtures (legacy support)
 export {
     deployIdentityProxy,

@@ -514,3 +514,7 @@ export function err<E extends string>(
 ): OperationResult<never, E> {
     return { success: false, error, message, details }
 }
+
+export type DeepPartial<T> = {
+    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+}

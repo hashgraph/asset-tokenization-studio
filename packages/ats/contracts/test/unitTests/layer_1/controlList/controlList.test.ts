@@ -206,16 +206,13 @@
 import { expect } from 'chai'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ControlListFacet__factory, PauseFacet__factory } from '@typechain'
-import { ATS_ROLES, CURRENCIES } from '@scripts'
-import { grantRoleAndPauseToken } from '../../../common'
-import { deployEquityTokenFixture } from '../../../fixtures'
+import { ATS_ROLES } from '@scripts'
+import { deployEquityTokenFixture } from '@test/fixtures'
+import { grantRoleAndPauseToken } from '@test/common'
 
 describe('Control List Tests', () => {
     async function deployEquityWithControlListFixture() {
-        const base = await deployEquityTokenFixture({
-            currency: CURRENCIES.USD,
-            isControllable: true,
-        })
+        const base = await deployEquityTokenFixture()
         const { deployer, user1, diamond, accessControlFacet } = base
 
         const controlListFacet = ControlListFacet__factory.connect(

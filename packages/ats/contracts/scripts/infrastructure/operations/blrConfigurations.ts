@@ -457,12 +457,12 @@ export async function createConfiguration(
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
     const {
         configurationId,
-        facetNames,
         facetAddresses,
         useTimeTravel = false,
         gasLimit,
     } = options
 
+    let facetNames = [...options.facetNames]
     // Import utilities needed for operation
     const { resolveContractName } = await import('../utils/naming')
     const { getFacetDefinition } = await import('../registry')
@@ -479,7 +479,9 @@ export async function createConfiguration(
             'At least one facet is required for configuration'
         )
     }
-
+    if (useTimeTravel) {
+        facetNames.push('TimeTravelFacet')
+    }
     try {
         const blrAddress = blrContract.address
 

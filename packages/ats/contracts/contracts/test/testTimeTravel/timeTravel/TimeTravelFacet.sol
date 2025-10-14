@@ -7,7 +7,7 @@ import {
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ITimeTravel} from '../interfaces/ITimeTravel.sol';
 
-contract TimeTravel is
+contract TimeTravelFacet is
     IStaticFunctionSelectors,
     ITimeTravel,
     TimeTravelStorageWrapper

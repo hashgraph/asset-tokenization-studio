@@ -6,6 +6,8 @@
  * Provides utility functions and types used across multiple token fixtures.
  */
 
+import { ATS_ROLES, AtsRoleHash, AtsRoleName } from '@scripts'
+import { AccessControlFacet } from '@typechain'
 import { ethers } from 'hardhat'
 
 /**
@@ -31,3 +33,23 @@ export const TEST_AMOUNTS = {
     MEDIUM: ethers.utils.parseUnits('1000', 6),
     LARGE: ethers.utils.parseUnits('10000', 6),
 } as const
+
+export async function executeRbac(
+    accessControlFacet: AccessControlFacet,
+    rbac: {
+        role: AtsRoleName | AtsRoleHash
+        members: string[]
+    }[]
+) {
+    await Promise.all(
+        rbac.map(async (r) => {
+            const roleHash =
+                ATS_ROLES[r.role as AtsRoleName] || (r.role as AtsRoleHash)
+            await Promise.all(
+                r.members.map(async (m) => {
+                    return accessControlFacet.grantRole(roleHash, m)
+                })
+            )
+        })
+    )
+}

@@ -34,4 +34,4 @@ export * from './bond/createConfiguration'
 export * from './factory/deploy'
 
 // Token deployment from factory
-export * from './factory/deployToken'
+export * from './factory/deployEquityToken'

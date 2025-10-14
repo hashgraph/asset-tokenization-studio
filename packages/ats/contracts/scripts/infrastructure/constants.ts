@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
+import { ethers } from 'ethers'
+
 /**
  * Constants for ATS deployment system.
  *
@@ -167,7 +169,7 @@ export const GAS_LIMIT = {
     businessLogicResolver: {
         getStaticResolverKey: 60_000,
         registerBusinessLogics: 7_800_000,
-        createConfiguration: 25_000_000,
+        createConfiguration: 26_000_000,
     },
 } as const
 
@@ -228,3 +230,31 @@ export const DEPLOYMENT_OUTPUT_DIR = './deployments'
  * Deployment output file naming pattern.
  */
 export const DEPLOYMENT_OUTPUT_PATTERN = '{network}_{timestamp}.json'
+
+// * Time periods (in seconds and milliseconds)
+export const TIME_PERIODS_S = {
+    SECOND: 1,
+    MINUTE: 60,
+    HOUR: 60 * 60,
+    DAY: 24 * 60 * 60,
+    WEEK: 7 * 24 * 60 * 60,
+    MONTH: 30 * 24 * 60 * 60,
+    QUARTER: 90 * 24 * 60 * 60,
+    YEAR: 365 * 24 * 60 * 60,
+}
+
+export const TIME_PERIODS_MS = {
+    SECOND: TIME_PERIODS_S.SECOND * 1000,
+    MINUTE: TIME_PERIODS_S.MINUTE * 1000,
+    HOUR: TIME_PERIODS_S.HOUR * 1000,
+    DAY: TIME_PERIODS_S.DAY * 1000,
+    WEEK: TIME_PERIODS_S.WEEK * 1000,
+    MONTH: TIME_PERIODS_S.MONTH * 1000,
+    QUARTER: TIME_PERIODS_S.QUARTER * 1000,
+    YEAR: TIME_PERIODS_S.YEAR * 1000,
+}
+
+export const ZERO = ethers.constants.Zero
+export const ADDRESS_ZERO = ethers.constants.AddressZero
+export const EMPTY_HEX_BYTES = '0x'
+export const EMPTY_STRING = ''

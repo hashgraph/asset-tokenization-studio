@@ -30,7 +30,7 @@ import { BOND_CONFIG_ID } from '@scripts/domain'
  * Updated to match origin/develop feature parity (all facets registered).
  */
 const BOND_FACETS = [
-    // Core Functionality (12) - same as equity
+    // Core Functionality
     'AccessControlFacet',
     'CapFacet',
     'ControlListFacet',
@@ -44,7 +44,7 @@ const BOND_FACETS = [
     'PauseFacet',
     'SnapshotsFacet',
 
-    // ERC Standards (13) - same as equity
+    // ERC Standards
     'ERC1410IssuerFacet',
     'ERC1410ManagementFacet',
     'ERC1410ReadFacet',
@@ -59,7 +59,7 @@ const BOND_FACETS = [
     'ERC3643OperationsFacet',
     'ERC3643ReadFacet',
 
-    // Clearing & Settlement (8) - same as equity
+    // Clearing & Settlement
     'ClearingActionsFacet',
     'ClearingHoldCreationFacet',
     'ClearingReadFacet',
@@ -69,12 +69,12 @@ const BOND_FACETS = [
     'HoldReadFacet',
     'HoldTokenHolderFacet',
 
-    // External Management (3) - same as equity
+    // External Management
     'ExternalControlListManagementFacet',
     'ExternalKycListManagementFacet',
     'ExternalPauseManagementFacet',
 
-    // Advanced Features (9) - same as equity
+    // Advanced Features
     'AdjustBalancesFacet',
     'LockFacet',
     'ProceedRecipientsFacet',
@@ -85,8 +85,9 @@ const BOND_FACETS = [
     'SsiManagementFacet',
     'TransferAndLockFacet',
 
-    // Jurisdiction-Specific Bond (1) - BondUSAFacet ONLY
+    // Jurisdiction-Specific
     'BondUSAFacet',
+    'BondUSAReadFacet',
 ] as const
 
 /**

@@ -37,16 +37,24 @@ export function getTimeTravelVariant(contractName: string): string {
  * variants for testing. Returns false only for infrastructure contracts
  * (ProxyAdmin, TransparentUpgradeableProxy, etc.) that aren't in the registry.
  *
+ * Invariant: If the contractName is 'TimeTravelFacet', it does not have a TimeTravel variant.
+ *
  * @param contractName - Base contract name
- * @returns true if contract is a facet, false for infrastructure
+ * @returns true if contract is a facet, false for infrastructure or 'TimeTravelFacet'
  *
  * @example
  * ```typescript
  * hasTimeTravelVariant('AccessControlFacet') // true - facet
  * hasTimeTravelVariant('ProxyAdmin') // false - infrastructure
+ * hasTimeTravelVariant('TimeTravelFacet') // false - invariant
  * ```
  */
 export function hasTimeTravelVariant(contractName: string): boolean {
+    // Invariant: 'TimeTravelFacet' never has a TimeTravel variant
+    if (contractName === 'TimeTravelFacet') {
+        return false
+    }
+
     // Check if contract is in facet registry
     // If yes, assume it has TimeTravel variant
     // If no, it's infrastructure (no TimeTravel)

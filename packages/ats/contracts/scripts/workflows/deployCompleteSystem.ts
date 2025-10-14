@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Complete ATS system deployment workflow.
  *
@@ -227,8 +225,15 @@ export async function deployCompleteSystem(
         // STEP 3: Deploy all facets
         // ========================================
         info('\n📦 Step 3/7: Deploying all facets...')
-        const allFacetNames = getAllFacets().map((f) => f.name)
+        let allFacetNames = getAllFacets().map((f) => f.name)
         info(`   Found ${allFacetNames.length} facets in registry`)
+
+        if (!useTimeTravel) {
+            allFacetNames = allFacetNames.filter(
+                (name) => name !== 'TimeTravelFacet'
+            )
+            info('   TimeTravelFacet removed from deployment list')
+        }
 
         const facetsResult = await deployFacets(provider, {
             facetNames: allFacetNames,
