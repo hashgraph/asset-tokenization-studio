@@ -49,8 +49,6 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Create .npmrc file
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cat << 'EOF' > .npmrc
           //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
@@ -71,11 +69,11 @@ jobs:
           DRY_RUN: ${{ inputs.dry-run-enabled }}
         run: |
           for package_dir in packages/mass-payout/*/; do
-            if [ -d "$package_dir" ] && [ -f "${package_dir}package.json" ]; then
-              package_name=$(basename "$package_dir")
-              echo "📦 Processing Mass Payout package: $package_name"
+            if [ -d "${package_dir}" ] && [ -f "${package_dir}package.json" ]; then
+              package_name=$(basename "${package_dir}")
+              echo "📦 Processing Mass Payout package: ${package_name}"
 
-              cd "$package_dir"
+              cd "${package_dir}"
 
               if ! node -p "require('./package.json').private || false" | grep -q "true"; then
                 PUBLISH_ARGS=("--access=restricted")
@@ -84,9 +82,13 @@ jobs:
                   echo "🔍 DRY RUN MODE: Would publish @hashgraph/mass-payout-${package_name}"
                 fi
 
-                npm publish "${PUBLISH_ARGS[@]}"
+                if ! npm publish "${PUBLISH_ARGS[@]}"; then
+                  echo "❌ Failed to publish package: ${package_name}"
+                  echo "📋 Package info:" && cat package.json | jq '.name, .version'
+                  exit 1
+                fi
               else
-                echo "⏭️  Skipping private package: $package_name"
+                echo "⏭️  Skipping private package: ${package_name}"
               fi
 
               cd - > /dev/null

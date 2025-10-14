@@ -61,9 +61,9 @@ jobs:
 
           MP_PACKAGES_TO_BUMP=$(jq -r '.releases[] | select(.name | test("@hashgraph/mass-payout")) | .name' changeset-status.json | wc -l)
 
-          echo "mp-packages-to-bump=$MP_PACKAGES_TO_BUMP" >> $GITHUB_OUTPUT
+          echo "mp-packages-to-bump=${MP_PACKAGES_TO_BUMP}" >> "${GITHUB_OUTPUT}"
 
-          if [ "$MP_PACKAGES_TO_BUMP" -eq 0 ]; then
+          if [ "${MP_PACKAGES_TO_BUMP}" -eq 0 ]; then
             echo "❌ No Mass Payout packages found to be bumped"
             echo "📋 Current changeset status:"
             npx changeset status
@@ -89,7 +89,7 @@ jobs:
           echo "To proceed with actual release, run this workflow with 'release' option."
 
       - name: Version Mass Payout packages
-        if: inputs.release-type == 'release'
+        if: ${{ inputs.release-type == 'release' }}
         run: |
           echo "🚀 Releasing Mass Payout packages only (ignoring ATS packages)"
 
@@ -121,7 +121,7 @@ jobs:
         run: |
           MP_VERSION=$(node -p "require('./packages/mass-payout/core/package.json').version" 2>/dev/null || echo "1.0.0")
           TAG_NAME="v${MP_VERSION}-mp"
-          echo "📦 Creating Mass Payout release: $TAG_NAME"
+          echo "📦 Creating Mass Payout release: ${TAG_NAME}"
           git tag -s -a "${TAG_NAME}" -m "Creating Mass Payout Release with tag: ${TAG_NAME}"
           git push origin "${TAG_NAME}"
 

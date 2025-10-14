@@ -49,8 +49,6 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Create .npmrc file
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         working-directory: packages/ats/contracts
         run: |
           cat << 'EOF' > .npmrc
@@ -75,7 +73,11 @@ jobs:
             echo "🔍 DRY RUN MODE: Would publish @hashgraph/asset-tokenization-contracts"
           fi
 
-          npm publish "${PUBLISH_ARGS[@]}"
+          if ! npm publish "${PUBLISH_ARGS[@]}"; then
+            echo "❌ Failed to publish package: ${package_name}"
+            echo "📋 Package info:" && cat package.json | jq '.name, .version'
+            exit 1
+          fi
 
   sdk:
     name: Publish ATS SDK
@@ -103,8 +105,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Create .npmrc file
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        working-directory: packages/ats/sdk
         run: |
           cat << 'EOF' > .npmrc
           //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
@@ -130,7 +131,11 @@ jobs:
             echo "🔍 DRY RUN MODE: Would publish @hashgraph/asset-tokenization-sdk"
           fi
 
-          npm publish "${PUBLISH_ARGS[@]}"
+          if ! npm publish "${PUBLISH_ARGS[@]}"; then
+            echo "❌ Failed to publish package: ${package_name}"
+            echo "📋 Package info:" && cat package.json | jq '.name, .version'
+            exit 1
+          fi
 
   # Summary job to report results
   summary:

@@ -61,16 +61,16 @@ jobs:
 
           ATS_PACKAGES_TO_BUMP=$(jq -r '.releases[] | select(.name | test("@hashgraph/asset-tokenization-")) | .name' changeset-status.json | wc -l)
 
-          echo "ats-packages-to-bump=$ATS_PACKAGES_TO_BUMP" >> $GITHUB_OUTPUT
+          echo "ats-packages-to-bump=${ATS_PACKAGES_TO_BUMP}" >> "${GITHUB_OUTPUT}"
 
-          if [ "$ATS_PACKAGES_TO_BUMP" -eq 0 ]; then
+          if [ "${ATS_PACKAGES_TO_BUMP}" -eq 0 ]; then
             echo "❌ No ATS packages found to be bumped"
             echo "📋 Current changeset status:"
             npx changeset status
             exit 1
           fi
 
-          echo "✅ Found $ATS_PACKAGES_TO_BUMP ATS package(s) ready for release"
+          echo "✅ Found ${ATS_PACKAGES_TO_BUMP} ATS package(s) ready for release"
 
           echo "📦 ATS packages to be released:"
           jq -r '.releases[] | select(.name | test("@hashgraph/asset-tokenization-")) | "  - \(.name) (\(.oldVersion) → \(.newVersion))"' changeset-status.json
@@ -121,7 +121,7 @@ jobs:
         run: |
           ATS_VERSION=$(node -p "require('./packages/ats/contracts/package.json').version")
           TAG_NAME="v${ATS_VERSION}-ats"
-          echo "📦 Creating ATS release tag: $TAG_NAME"
+          echo "📦 Creating ATS release tag: ${TAG_NAME}"
           git tag "${TAG_NAME}"
           git push origin "${TAG_NAME}"
 
