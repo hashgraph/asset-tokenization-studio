@@ -80,3 +80,8 @@ export interface FactoryRegulationDataParams {
     /** Additional security information */
     info: string
 }
+
+export enum SecurityType {
+    BOND = 0,
+    EQUITY = 1,
+}

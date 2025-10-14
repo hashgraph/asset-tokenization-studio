@@ -29,10 +29,8 @@ import {
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     DividendRight,
-    EquityDetailsDataParams,
     FactoryRegulationDataParams,
 } from '@scripts/domain/factory/types'
-import { DEFAULT_BOND_PARAMS } from './bond.fixture'
 
 /**
  * Default equity token parameters.
@@ -44,6 +42,7 @@ export const DEFAULT_EQUITY_PARAMS = {
     arePartitionsProtected: false,
     clearingActive: false,
     internalKycActivated: true,
+    erc20VotesActivated: false,
     isMultiPartition: false,
     name: 'TEST_Token',
     symbol: 'TEST',
@@ -109,7 +108,7 @@ export async function deployEquityTokenFixture(
         decimals:
             equityDataParams?.securityData?.decimals ??
             DEFAULT_EQUITY_PARAMS.decimals,
-        isin: isinGenerator(),
+        isin: equityDataParams?.securityData?.isin ?? isinGenerator(),
         clearingActive:
             equityDataParams?.securityData?.clearingActive ??
             DEFAULT_EQUITY_PARAMS.clearingActive,
@@ -130,7 +129,9 @@ export async function deployEquityTokenFixture(
                 ?.externalKycLists as string[]) ??
                 DEFAULT_EQUITY_PARAMS.externalKycLists),
         ],
-        erc20VotesActivated: false,
+        erc20VotesActivated:
+            equityDataParams?.securityData?.erc20VotesActivated ??
+            DEFAULT_EQUITY_PARAMS.erc20VotesActivated,
         compliance: ethers.constants.AddressZero,
         identityRegistry: ethers.constants.AddressZero,
     }

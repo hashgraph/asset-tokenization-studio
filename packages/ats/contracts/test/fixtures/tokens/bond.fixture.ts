@@ -20,7 +20,6 @@ import {
     deployBondFromFactory,
 } from '@scripts/domain/factory/deployBondToken'
 import { FactoryRegulationDataParams } from '@scripts/domain/factory/types'
-import { bond, proceedRecipients } from '@typechain/contracts/layer_0'
 
 /**
  * Default bond token parameters.
@@ -36,7 +35,7 @@ export const DEFAULT_BOND_PARAMS = {
     name: 'TEST_Token',
     symbol: 'TEST',
     decimals: 6,
-
+    erc20VotesActivated: false,
     currency: CURRENCIES.USD,
     maxSupply: ethers.constants.MaxUint256,
     nominalValue: 100,
@@ -98,7 +97,7 @@ export async function deployBondTokenFixture(
         decimals:
             bondDataParams?.securityData?.decimals ??
             DEFAULT_BOND_PARAMS.decimals,
-        isin: isinGenerator(),
+        isin: bondDataParams?.securityData?.isin ?? isinGenerator(),
         clearingActive:
             bondDataParams?.securityData?.clearingActive ??
             DEFAULT_BOND_PARAMS.clearingActive,
@@ -118,7 +117,9 @@ export async function deployBondTokenFixture(
             ...((bondDataParams?.securityData?.externalKycLists as string[]) ??
                 DEFAULT_BOND_PARAMS.externalKycLists),
         ],
-        erc20VotesActivated: false,
+        erc20VotesActivated:
+            bondDataParams?.securityData?.erc20VotesActivated ??
+            DEFAULT_BOND_PARAMS.erc20VotesActivated,
         compliance: ethers.constants.AddressZero,
         identityRegistry: ethers.constants.AddressZero,
     }

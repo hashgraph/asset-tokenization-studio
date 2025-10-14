@@ -5,7 +5,6 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     ResolverProxy,
     BondUSA,
-    BondUSARead,
     AccessControl,
     Pause,
     Lock,
@@ -18,6 +17,7 @@ import {
     ProtectedPartitions,
     FreezeFacet,
     ClearingTransferFacet,
+    BondUSAReadFacet,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -67,7 +67,7 @@ describe('Bond Tests', () => {
     let signer_D: SignerWithAddress
 
     let bondFacet: BondUSA
-    let bondReadFacet: BondUSARead
+    let bondReadFacet: BondUSAReadFacet
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock

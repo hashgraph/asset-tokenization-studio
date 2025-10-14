@@ -51,8 +51,8 @@ describe('Adjust Balances Tests', () => {
         })
         diamond = base.diamond
         signer_A = base.deployer
-        signer_B = base.user2
-        signer_C = base.user3
+        signer_B = base.user1
+        signer_C = base.user2
         await executeRbac(base.accessControlFacet, [
             {
                 role: ATS_ROLES.PAUSER,
