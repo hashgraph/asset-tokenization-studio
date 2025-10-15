@@ -87,18 +87,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         description: 'Core functionality - core token functionality',
     },
 
-    DiamondCutFacet: {
-        name: 'DiamondCutFacet',
-        description: 'Core functionality - core token functionality',
-    },
-
     DiamondFacet: {
         name: 'DiamondFacet',
-        description: 'Core functionality - core token functionality',
-    },
-
-    DiamondLoupeFacet: {
-        name: 'DiamondLoupeFacet',
         description: 'Core functionality - core token functionality',
     },
 

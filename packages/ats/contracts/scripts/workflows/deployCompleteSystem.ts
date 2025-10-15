@@ -109,6 +109,25 @@ export interface DeploymentOutput {
         gasUsed: string
         success: boolean
     }
+
+    /** Convenience helpers for testing */
+    helpers: {
+        /** Get only equity-specific facets for testing */
+        getEquityFacets(): Array<{
+            name: string
+            address: string
+            contractId?: string
+            key: string
+        }>
+
+        /** Get only bond-specific facets for testing */
+        getBondFacets(): Array<{
+            name: string
+            address: string
+            contractId?: string
+            key: string
+        }>
+    }
 }
 
 /**
@@ -120,6 +139,12 @@ export interface DeployCompleteSystemOptions {
 
     /** Whether to save deployment output to file */
     saveOutput?: boolean
+
+    /** Whether to deploy facets in partial batches to avoid gas limits */
+    partialBatchDeploy?: boolean
+
+    /** Batch size for partial deployments */
+    batchSize?: number
 
     /** Path to save deployment output (default: deployments/{network}-{timestamp}.json) */
     outputPath?: string
@@ -164,6 +189,12 @@ export interface DeployCompleteSystemOptions {
  * info(`Factory Proxy: ${output.infrastructure.factory.proxy}`)
  * info(`Equity Config Version: ${output.configurations.equity.version}`)
  * info(`Bond Config Version: ${output.configurations.bond.version}`)
+ *
+ * // For testing - get only equity or bond facets
+ * const equityFacets = output.helpers.getEquityFacets()
+ * const bondFacets = output.helpers.getBondFacets()
+ * info(`Equity facets for testing: ${equityFacets.length}`)
+ * info(`Bond facets for testing: ${bondFacets.length}`)
  * ```
  */
 export async function deployCompleteSystem(
@@ -171,7 +202,13 @@ export async function deployCompleteSystem(
     network: string,
     options: DeployCompleteSystemOptions = {}
 ): Promise<DeploymentOutput> {
-    const { useTimeTravel = false, saveOutput = true, outputPath } = options
+    const {
+        useTimeTravel = false,
+        saveOutput = true,
+        partialBatchDeploy = false,
+        batchSize = 2,
+        outputPath,
+    } = options
 
     const startTime = Date.now()
     const signer = await provider.getSigner()
@@ -300,7 +337,9 @@ export async function deployCompleteSystem(
         const equityConfig = await createEquityConfiguration(
             blrContract,
             facetAddresses,
-            useTimeTravel
+            useTimeTravel,
+            partialBatchDeploy,
+            batchSize
         )
 
         if (!equityConfig.success) {
@@ -321,7 +360,9 @@ export async function deployCompleteSystem(
         const bondConfig = await createBondConfiguration(
             blrContract,
             facetAddresses,
-            useTimeTravel
+            useTimeTravel,
+            partialBatchDeploy,
+            batchSize
         )
 
         if (!bondConfig.success) {
@@ -436,6 +477,25 @@ export async function deployCompleteSystem(
                 deploymentTime: endTime - startTime,
                 gasUsed: totalGasUsed.toString(),
                 success: true,
+            },
+
+            helpers: {
+                getEquityFacets() {
+                    const equityKeys = new Set(
+                        equityConfig.data.facetKeys.map((f) => f.key)
+                    )
+                    return output.facets.filter((facet) =>
+                        equityKeys.has(facet.key)
+                    )
+                },
+                getBondFacets() {
+                    const bondKeys = new Set(
+                        bondConfig.data.facetKeys.map((f) => f.key)
+                    )
+                    return output.facets.filter((facet) =>
+                        bondKeys.has(facet.key)
+                    )
+                },
             },
         }
 

@@ -30,9 +30,13 @@ import type { IFactory, BusinessLogicResolver, ProxyAdmin } from '@typechain'
  * Deploys: ProxyAdmin, BLR, Factory, all Facets, Equity & Bond configurations
  *
  * @param useTimeTravel - Use TimeTravel facet variants (default: true for tests)
- * @returns Complete deployment output + test utilities
+ * @returns Complete deployment output + test utilities including separated equity/bond facet addresses
  */
-export async function deployAtsInfrastructureFixture(useTimeTravel = true) {
+export async function deployAtsInfrastructureFixture(
+    useTimeTravel = true,
+    partialBatchDeploy = false,
+    batchSize = 2
+) {
     // Configure logger to SILENT for tests (suppress all deployment logs)
     configureLogger({ level: LogLevel.SILENT })
 
@@ -45,6 +49,8 @@ export async function deployAtsInfrastructureFixture(useTimeTravel = true) {
     const deployment = await deployCompleteSystem(provider, 'hardhat', {
         useTimeTravel,
         saveOutput: false, // Don't save deployment files during tests
+        partialBatchDeploy,
+        batchSize,
     })
 
     // Get typed contract instances
@@ -83,10 +89,24 @@ export async function deployAtsInfrastructureFixture(useTimeTravel = true) {
         // Deployment metadata
         deployment,
 
-        // Facet addresses (useful for verification)
-        facetAddresses: deployment.facets.reduce(
+        // Facet keys (useful for verification)
+        facetKeys: deployment.facets.reduce(
             (acc, f) => {
-                acc[f.name] = f.address
+                acc[f.name] = f.key
+                return acc
+            },
+            {} as Record<string, string>
+        ),
+        equityFacetKeys: deployment.helpers.getEquityFacets().reduce(
+            (acc, f) => {
+                acc[f.name] = f.key
+                return acc
+            },
+            {} as Record<string, string>
+        ),
+        bondFacetKeys: deployment.helpers.getBondFacets().reduce(
+            (acc, f) => {
+                acc[f.name] = f.key
                 return acc
             },
             {} as Record<string, string>

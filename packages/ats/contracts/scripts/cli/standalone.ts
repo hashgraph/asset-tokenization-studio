@@ -32,11 +32,19 @@ async function main() {
     // Get network from environment
     const network = process.env.NETWORK || 'hedera-testnet'
     const useTimeTravel = process.env.USE_TIMETRAVEL === 'true'
+    const partialBatchDeploy = process.env.PARTIAL_BATCH_DEPLOY === 'true'
+    const batchSize = process.env.BATCH_SIZE
+        ? parseInt(process.env.BATCH_SIZE)
+        : 2
 
     console.log(`🚀 Starting ATS deployment (standalone mode)`)
     console.log('='.repeat(60))
     console.log(`📡 Network: ${network}`)
     console.log(`⏰ TimeTravel: ${useTimeTravel ? 'enabled' : 'disabled'}`)
+    console.log(
+        `📦 PartialBatchDeploy: ${partialBatchDeploy ? 'enabled' : 'disabled'}`
+    )
+    console.log(`🔢 Batch Size: ${batchSize}`)
     console.log('='.repeat(60))
 
     // Validate network configuration
@@ -56,6 +64,8 @@ async function main() {
         // Deploy complete system
         const output = await deployCompleteSystem(provider, network, {
             useTimeTravel,
+            partialBatchDeploy,
+            batchSize,
             saveOutput: true,
         })
 

@@ -14,9 +14,9 @@
 
 import { Contract } from 'ethers'
 import {
-    createConfiguration,
     ConfigurationData,
     ConfigurationError,
+    createBatchConfiguration,
     OperationResult,
 } from '@scripts/infrastructure'
 import { BOND_CONFIG_ID } from '@scripts/domain'
@@ -134,12 +134,16 @@ const BOND_FACETS = [
 export async function createBondConfiguration(
     blrContract: Contract,
     facetAddresses: Record<string, string>,
-    useTimeTravel: boolean = false
+    useTimeTravel: boolean = false,
+    partialBatchDeploy: boolean = false,
+    batchSize: number = 2
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-    return createConfiguration(blrContract, {
+    return createBatchConfiguration(blrContract, {
         configurationId: BOND_CONFIG_ID,
         facetNames: BOND_FACETS,
         facetAddresses,
         useTimeTravel,
+        partialBatchDeploy,
+        batchSize,
     })
 }

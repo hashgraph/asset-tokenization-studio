@@ -14,10 +14,10 @@
 
 import { Contract } from 'ethers'
 import {
-    createConfiguration,
     ConfigurationData,
     ConfigurationError,
     OperationResult,
+    createBatchConfiguration,
 } from '@scripts/infrastructure'
 import { EQUITY_CONFIG_ID } from '@scripts/domain'
 
@@ -134,12 +134,16 @@ const EQUITY_FACETS = [
 export async function createEquityConfiguration(
     blrContract: Contract,
     facetAddresses: Record<string, string>,
-    useTimeTravel: boolean = false
+    useTimeTravel: boolean = false,
+    partialBatchDeploy: boolean = false,
+    batchSize: number = 2
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-    return createConfiguration(blrContract, {
+    return createBatchConfiguration(blrContract, {
         configurationId: EQUITY_CONFIG_ID,
         facetNames: EQUITY_FACETS,
         facetAddresses,
         useTimeTravel,
+        partialBatchDeploy,
+        batchSize,
     })
 }

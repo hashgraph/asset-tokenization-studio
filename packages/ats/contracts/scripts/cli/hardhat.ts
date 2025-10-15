@@ -54,10 +54,20 @@ async function main() {
     // Check for TimeTravel mode from environment
     const useTimeTravel = process.env.USE_TIME_TRAVEL === 'true'
 
+    // Check for PartialBatchDeploy mode from environment
+    const partialBatchDeploy = process.env.PARTIAL_BATCH_DEPLOY === 'true'
+
+    // Get batch size from environment or default to 2
+    const batchSize = process.env.BATCH_SIZE
+        ? parseInt(process.env.BATCH_SIZE)
+        : 2
+
     try {
         // Deploy complete system
         const output = await deployCompleteSystem(provider, networkName, {
             useTimeTravel,
+            partialBatchDeploy,
+            batchSize,
             saveOutput: true,
         })
 

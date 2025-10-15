@@ -131,7 +131,7 @@ export {
 } from './operations/registerFacets'
 
 export {
-    createConfiguration,
+    createBatchConfiguration,
     createBlrConfiguration,
     configurationExists,
     getConfigurationVersion,
