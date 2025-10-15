@@ -46,7 +46,7 @@ export const DEFAULT_BOND_PARAMS = {
     info: 'Test token for unit tests',
     proceedRecipients: [] as string[],
     proceedRecipientsData: [] as string[],
-    startingDate: Math.floor(Date.now() / 1000),
+    startingDate: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
     externalPauses: [],
     externalControlLists: [],
     externalKycLists: [],
@@ -65,14 +65,14 @@ export async function deployBondTokenFixture(
     bondDataParams?: DeepPartial<DeployBondFromFactoryParams>,
     regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>
 ) {
-    const infrastructure = await loadFixture(deployAtsInfrastructureFixture)
+    const infrastructure = await deployAtsInfrastructureFixture()
     const { factory, blr, deployer } = infrastructure
 
     const maturityDate =
         bondDataParams?.bondDetails?.maturityDate ??
         (bondDataParams?.bondDetails?.startingDate
-            ? bondDataParams.bondDetails.startingDate * 1 * TIME_PERIODS_S.YEAR
-            : DEFAULT_BOND_PARAMS.startingDate * 1 * TIME_PERIODS_S.YEAR)
+            ? bondDataParams.bondDetails.startingDate + TIME_PERIODS_S.YEAR
+            : DEFAULT_BOND_PARAMS.startingDate + TIME_PERIODS_S.YEAR)
 
     const securityData = {
         arePartitionsProtected:

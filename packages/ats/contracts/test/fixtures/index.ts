@@ -21,6 +21,11 @@ export {
     DEFAULT_EQUITY_PARAMS,
 } from './tokens/equity.fixture'
 
+export {
+    deployBondTokenFixture,
+    DEFAULT_BOND_PARAMS,
+} from './tokens/bond.fixture'
+
 // Common token utilities
 export {
     MAX_UINT256,

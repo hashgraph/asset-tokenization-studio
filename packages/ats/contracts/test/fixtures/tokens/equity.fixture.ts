@@ -81,7 +81,7 @@ export async function deployEquityTokenFixture(
     equityDataParams?: DeepPartial<DeployEquityFromFactoryParams>,
     regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>
 ) {
-    const infrastructure = await loadFixture(deployAtsInfrastructureFixture)
+    const infrastructure = await deployAtsInfrastructureFixture()
     const { factory, blr, deployer } = infrastructure
     const securityData = {
         arePartitionsProtected:
@@ -132,7 +132,9 @@ export async function deployEquityTokenFixture(
         erc20VotesActivated:
             equityDataParams?.securityData?.erc20VotesActivated ??
             DEFAULT_EQUITY_PARAMS.erc20VotesActivated,
-        compliance: ethers.constants.AddressZero,
+        compliance:
+            equityDataParams?.securityData?.compliance ??
+            ethers.constants.AddressZero,
         identityRegistry: ethers.constants.AddressZero,
     }
     const equityDetails = {

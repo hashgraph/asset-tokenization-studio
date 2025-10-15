@@ -206,7 +206,6 @@
 import { expect } from 'chai'
 import { ethers, network } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Pause,
@@ -217,7 +216,6 @@ import {
     TransferAndLock,
     ERC20,
     ControlList,
-    IFactory,
     BusinessLogicResolver,
     Kyc,
     SsiManagement,
@@ -226,38 +224,21 @@ import {
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
-    PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
-    deployEquityFromFactory,
-    Rbac,
-    RegulationSubType,
-    RegulationType,
-    WILD_CARD_ROLE,
-    DeployAtsFullInfrastructureCommand,
-    deployAtsFullInfrastructure,
-    LOCKER_ROLE,
-    PROTECTED_PARTITIONS_ROLE,
-    ISSUER_ROLE,
-    CONTROL_LIST_ROLE,
-    PAUSER_ROLE,
-    MAX_UINT256,
-    SSI_MANAGER_ROLE,
-    KYC_ROLE,
-    CLEARING_ROLE,
-    CLEARING_VALIDATOR_ROLE,
     ZERO,
     EMPTY_STRING,
     ADDRESS_ZERO,
-    deployContract,
-    DeployContractCommand,
+    ATS_ROLES,
 } from '@scripts'
 import { Contract } from 'ethers'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
+import { deployEquityTokenFixture, MAX_UINT256 } from '@test/fixtures'
+import { executeRbac } from '@test/fixtures/tokens/common.fixture'
 
 const amount = 1
 
 const packedData = ethers.utils.defaultAbiCoder.encode(
     ['bytes32', 'bytes32'],
-    [PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION]
+    [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT, DEFAULT_PARTITION]
 )
 const packedDataWithoutPrefix = packedData.slice(2)
 
@@ -442,11 +423,6 @@ describe('ProtectedPartitions Tests', () => {
     let signer_B: SignerWithAddress
     let signer_C: SignerWithAddress
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
-
-    let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let protectedPartitionsFacet: ProtectedPartitions
     let pauseFacet: Pause
@@ -466,6 +442,7 @@ describe('ProtectedPartitions Tests', () => {
     let clearingOperationFrom: ClearingOperationFromData
     let protectedClearingOperation: ProtectedClearingOperationData
     let complianceMock: ComplianceMock
+    let complianceMockAddress: string
 
     async function grant_WILD_CARD_ROLE_and_issue_tokens(
         wildCard_Account: string,
@@ -474,7 +451,10 @@ describe('ProtectedPartitions Tests', () => {
         issue_Partition: string
     ) {
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(WILD_CARD_ROLE, wildCard_Account)
+        await accessControlFacet.grantRole(
+            ATS_ROLES.WILD_CARD,
+            wildCard_Account
+        )
 
         erc1410Facet = erc1410Facet.connect(signer_B)
 
@@ -558,20 +538,41 @@ describe('ProtectedPartitions Tests', () => {
     }
 
     async function grantKyc() {
-        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address)
         await kycFacet
             .connect(signer_B)
-            .grantKyc(account_A, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
+            .grantKyc(
+                signer_A.address,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                signer_A.address
+            )
         await kycFacet
             .connect(signer_B)
-            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
+            .grantKyc(
+                signer_B.address,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                signer_A.address
+            )
         await kycFacet
             .connect(signer_B)
-            .grantKyc(account_C, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
+            .grantKyc(
+                signer_C.address,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                signer_A.address
+            )
     }
 
     async function setProtected() {
-        await setFacets(diamond_ProtectedPartitions.address)
+        await setFacets(
+            diamond_ProtectedPartitions.address,
+            complianceMockAddress
+        )
         domain.chainId = await network.provider.send('eth_chainId')
         domain.verifyingContract = diamond_ProtectedPartitions.address
         await grantKyc()
@@ -582,147 +583,88 @@ describe('ProtectedPartitions Tests', () => {
         await grantKyc()
     }
 
-    function set_initRbacs(): Rbac[] {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const rbacControlList: Rbac = {
-            role: CONTROL_LIST_ROLE,
-            members: [account_B],
-        }
-        const rbacIssuer: Rbac = {
-            role: ISSUER_ROLE,
-            members: [account_B],
-        }
-        const rbacProtectedPartitions: Rbac = {
-            role: PROTECTED_PARTITIONS_ROLE,
-            members: [account_B],
-        }
-        const rbacProtectedPartitions_1: Rbac = {
-            role: ProtectedPartitionRole_1,
-            members: [account_B],
-        }
-        const rbacLocker: Rbac = {
-            role: LOCKER_ROLE,
-            members: [account_B],
-        }
-        const rbacKYC: Rbac = {
-            role: KYC_ROLE,
-            members: [account_B],
-        }
-        const rbacSSI: Rbac = {
-            role: SSI_MANAGER_ROLE,
-            members: [account_A],
-        }
-        const rbacClearing: Rbac = {
-            role: CLEARING_ROLE,
-            members: [account_A],
-        }
-        const rbacClearingValidator: Rbac = {
-            role: CLEARING_VALIDATOR_ROLE,
-            members: [account_A],
-        }
-
+    function set_initRbacs(): any[] {
         return [
-            rbacPause,
-            rbacControlList,
-            rbacIssuer,
-            rbacProtectedPartitions,
-            rbacProtectedPartitions_1,
-            rbacLocker,
-            rbacKYC,
-            rbacSSI,
-            rbacClearing,
-            rbacClearingValidator,
+            {
+                role: ATS_ROLES.PAUSER,
+                members: [signer_B.address],
+            },
+            {
+                role: ATS_ROLES.CONTROL_LIST,
+                members: [signer_B.address],
+            },
+            {
+                role: ATS_ROLES.ISSUER,
+                members: [signer_B.address],
+            },
+            {
+                role: ATS_ROLES.PROTECTED_PARTITIONS,
+                members: [signer_B.address],
+            },
+            {
+                role: ProtectedPartitionRole_1,
+                members: [signer_B.address],
+            },
+            {
+                role: ATS_ROLES.LOCKER,
+                members: [signer_B.address],
+            },
+            {
+                role: ATS_ROLES.KYC,
+                members: [signer_B.address],
+            },
+            {
+                role: ATS_ROLES.SSI_MANAGER,
+                members: [signer_A.address],
+            },
+            {
+                role: ATS_ROLES.CLEARING,
+                members: [signer_A.address],
+            },
+            {
+                role: ATS_ROLES.CLEARING_VALIDATOR,
+                members: [signer_A.address],
+            },
         ]
     }
 
     async function deploySecurityFixtureUnprotectedPartitions() {
-        const init_rbacs: Rbac[] = set_initRbacs()
-
-        diamond_UnprotectedPartitions = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: true,
-            isMultiPartition: false,
-            name: 'TEST_ProtectedPartitions',
-            symbol: 'TPP',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_S,
-            regulationSubType: RegulationSubType.NONE,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-        })
+        const base = await deployEquityTokenFixture()
+        diamond_UnprotectedPartitions = base.diamond
+        signer_A = base.deployer
+        signer_B = base.user2
+        signer_C = base.user3
+        businessLogicResolver = base.blr
+        await executeRbac(base.accessControlFacet, set_initRbacs())
 
         await setFacets(diamond_UnprotectedPartitions.address)
     }
 
     async function deploySecurityFixtureProtectedPartitions() {
-        const init_rbacs: Rbac[] = set_initRbacs()
+        const ComplianceMockFactory = await ethers.getContractFactory(
+            'ComplianceMock',
+            signer_A
+        )
+        const complianceMockInstance = await ComplianceMockFactory.deploy(
+            true,
+            false
+        )
+        await complianceMockInstance.deployed()
+        complianceMockAddress = complianceMockInstance.address
 
-        const complianceMockAddress = (
-            await deployContract(
-                new DeployContractCommand({
-                    name: 'ComplianceMock',
-                    signer: signer_A,
-                    args: [true, false],
-                })
-            )
-        ).address
-
-        diamond_ProtectedPartitions = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: true,
-            clearingActive: false,
-            internalKycActivated: true,
-            isMultiPartition: false,
-            name: 'TEST_ProtectedPartitions',
-            symbol: 'TPP',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_S,
-            regulationSubType: RegulationSubType.NONE,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-            compliance: complianceMockAddress,
+        const base = await deployEquityTokenFixture({
+            securityData: {
+                arePartitionsProtected: true,
+                compliance: complianceMockAddress,
+            },
         })
+
+        diamond_ProtectedPartitions = base.diamond
+        signer_A = base.deployer
+        signer_B = base.user2
+        signer_C = base.user3
+        businessLogicResolver = base.blr
+        await executeRbac(base.accessControlFacet, set_initRbacs())
 
         await setFacets(
             diamond_ProtectedPartitions.address,
@@ -733,53 +675,37 @@ describe('ProtectedPartitions Tests', () => {
     before(async () => {
         // mute | mock console.log
         console.log = () => {}
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: false,
-                timeTravelEnabled: true,
-            })
-        )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
 
     beforeEach(async () => {
-        await loadFixture(deploySecurityFixtureProtectedPartitions)
         await loadFixture(deploySecurityFixtureUnprotectedPartitions)
+        await loadFixture(deploySecurityFixtureProtectedPartitions)
 
         const expirationTimestamp = MAX_UINT256
 
         hold = {
             amount: 1,
-            expirationTimestamp: expirationTimestamp,
-            escrow: account_B,
+            expirationTimestamp: BigInt(expirationTimestamp.toString()),
+            escrow: signer_B.address,
             to: ADDRESS_ZERO,
             data: '0x1234',
         }
 
         protectedHold = {
             hold: hold,
-            deadline: MAX_UINT256,
+            deadline: BigInt(MAX_UINT256.toString()),
             nonce: 1,
         }
 
         basicTransferInfo = {
-            to: account_B,
+            to: signer_B.address,
             value: amount,
         }
 
         operatorTransferData = {
             partition: DEFAULT_PARTITION,
-            from: account_A,
-            to: account_B,
+            from: signer_A.address,
+            to: signer_B.address,
             value: amount,
             data: '0x1234',
             operatorData: '0x1234',
@@ -787,20 +713,20 @@ describe('ProtectedPartitions Tests', () => {
 
         clearingOperation = {
             partition: DEFAULT_PARTITION,
-            expirationTimestamp: expirationTimestamp,
+            expirationTimestamp: BigInt(expirationTimestamp.toString()),
             data: '0x1234',
         }
 
         clearingOperationFrom = {
             clearingOperation: clearingOperation,
-            from: account_A,
+            from: signer_A.address,
             operatorData: '0x1234',
         }
 
         protectedClearingOperation = {
             clearingOperation: clearingOperation,
-            from: account_A,
-            deadline: MAX_UINT256,
+            from: signer_A.address,
+            deadline: BigInt(MAX_UINT256.toString()),
             nonce: 1,
         }
     })
@@ -817,8 +743,8 @@ describe('ProtectedPartitions Tests', () => {
             await setProtected()
 
             await grant_WILD_CARD_ROLE_and_issue_tokens(
-                account_B,
-                account_B,
+                signer_B.address,
+                signer_B.address,
                 amount,
                 DEFAULT_PARTITION
             )
@@ -828,8 +754,8 @@ describe('ProtectedPartitions Tests', () => {
             await expect(
                 erc1410Facet.protectedTransferFromByPartition(
                     DEFAULT_PARTITION,
-                    account_A,
-                    account_B,
+                    signer_A.address,
+                    signer_B.address,
                     amount,
                     MAX_UINT256,
                     1,
@@ -841,8 +767,8 @@ describe('ProtectedPartitions Tests', () => {
         it('GIVEN a security with clearing active WHEN performing a protected transfer THEN transaction fails with ClearingIsActivated', async () => {
             await setProtected()
             await grant_WILD_CARD_ROLE_and_issue_tokens(
-                account_B,
-                account_B,
+                signer_B.address,
+                signer_B.address,
                 amount,
                 DEFAULT_PARTITION
             )
@@ -851,8 +777,8 @@ describe('ProtectedPartitions Tests', () => {
             await expect(
                 erc1410Facet.protectedTransferFromByPartition(
                     DEFAULT_PARTITION,
-                    account_A,
-                    account_B,
+                    signer_A.address,
+                    signer_B.address,
                     amount,
                     MAX_UINT256,
                     1,
@@ -870,8 +796,8 @@ describe('ProtectedPartitions Tests', () => {
             await expect(
                 erc1410Facet.protectedTransferFromByPartition(
                     DEFAULT_PARTITION,
-                    account_A,
-                    account_B,
+                    signer_A.address,
+                    signer_B.address,
                     amount,
                     MAX_UINT256,
                     1,
@@ -883,15 +809,17 @@ describe('ProtectedPartitions Tests', () => {
         it('GIVEN a blacklisted account WHEN performing a protected transfer from it THEN transaction fails with AccountIsBlocked', async () => {
             await setProtected()
 
-            await controlListFacet.connect(signer_B).addToControlList(account_A)
+            await controlListFacet
+                .connect(signer_B)
+                .addToControlList(signer_A.address)
 
             await expect(
                 erc1410Facet
                     .connect(signer_B)
                     .protectedTransferFromByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
-                        account_B,
+                        signer_A.address,
+                        signer_B.address,
                         amount,
                         MAX_UINT256,
                         1,
@@ -906,15 +834,17 @@ describe('ProtectedPartitions Tests', () => {
         it('GIVEN a blacklisted account WHEN performing a protected transfer to it THEN transaction fails with AccountIsBlocked', async () => {
             await setProtected()
 
-            await controlListFacet.connect(signer_B).addToControlList(account_B)
+            await controlListFacet
+                .connect(signer_B)
+                .addToControlList(signer_B.address)
 
             await expect(
                 erc1410Facet
                     .connect(signer_B)
                     .protectedTransferFromByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
-                        account_B,
+                        signer_A.address,
+                        signer_B.address,
                         amount,
                         MAX_UINT256,
                         1,
@@ -929,15 +859,15 @@ describe('ProtectedPartitions Tests', () => {
         it('GIVEN a non kyc account WHEN performing a protected transfer from or to THEN transaction fails with InvalidKycStatus', async () => {
             await setProtected()
 
-            await kycFacet.connect(signer_B).revokeKyc(account_A)
+            await kycFacet.connect(signer_B).revokeKyc(signer_A.address)
 
             await expect(
                 erc1410Facet
                     .connect(signer_B)
                     .protectedTransferFromByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
-                        account_B,
+                        signer_A.address,
+                        signer_B.address,
                         amount,
                         MAX_UINT256,
                         1,
@@ -950,8 +880,8 @@ describe('ProtectedPartitions Tests', () => {
                     .connect(signer_B)
                     .protectedTransferFromByPartition(
                         DEFAULT_PARTITION,
-                        account_B,
-                        account_A,
+                        signer_B.address,
+                        signer_A.address,
                         amount,
                         MAX_UINT256,
                         1,
@@ -965,8 +895,8 @@ describe('ProtectedPartitions Tests', () => {
         it('GIVEN a paused security role WHEN performing a protected redeem THEN transaction fails with Paused', async () => {
             await setProtected()
             await grant_WILD_CARD_ROLE_and_issue_tokens(
-                account_B,
-                account_B,
+                signer_B.address,
+                signer_B.address,
                 amount,
                 DEFAULT_PARTITION
             )
@@ -975,7 +905,7 @@ describe('ProtectedPartitions Tests', () => {
             await expect(
                 erc1410Facet.protectedRedeemFromByPartition(
                     DEFAULT_PARTITION,
-                    account_A,
+                    signer_A.address,
                     amount,
                     MAX_UINT256,
                     1,
@@ -987,8 +917,8 @@ describe('ProtectedPartitions Tests', () => {
         it('GIVEN a security with clearing active WHEN performing a protected redeem THEN transaction fails with ClearingIsActivated', async () => {
             await setProtected()
             await grant_WILD_CARD_ROLE_and_issue_tokens(
-                account_B,
-                account_B,
+                signer_B.address,
+                signer_B.address,
                 amount,
                 DEFAULT_PARTITION
             )
@@ -997,7 +927,7 @@ describe('ProtectedPartitions Tests', () => {
             await expect(
                 erc1410Facet.protectedRedeemFromByPartition(
                     DEFAULT_PARTITION,
-                    account_A,
+                    signer_A.address,
                     amount,
                     MAX_UINT256,
                     1,
@@ -1015,7 +945,7 @@ describe('ProtectedPartitions Tests', () => {
             await expect(
                 erc1410Facet.protectedRedeemFromByPartition(
                     DEFAULT_PARTITION,
-                    account_A,
+                    signer_A.address,
                     amount,
                     MAX_UINT256,
                     1,
@@ -1027,14 +957,16 @@ describe('ProtectedPartitions Tests', () => {
         it('GIVEN a blacklisted account WHEN performing a protected redeem from it THEN transaction fails with AccountIsBlocked', async () => {
             await setProtected()
 
-            await controlListFacet.connect(signer_B).addToControlList(account_A)
+            await controlListFacet
+                .connect(signer_B)
+                .addToControlList(signer_A.address)
 
             await expect(
                 erc1410Facet
                     .connect(signer_B)
                     .protectedRedeemFromByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
+                        signer_A.address,
                         amount,
                         MAX_UINT256,
                         1,
@@ -1045,14 +977,14 @@ describe('ProtectedPartitions Tests', () => {
 
         it('GIVEN a non kyc account WHEN performing a protected redeem from THEN transaction fails with InvalidKycStatus', async () => {
             await setProtected()
-            await kycFacet.connect(signer_B).revokeKyc(account_A)
+            await kycFacet.connect(signer_B).revokeKyc(signer_A.address)
 
             await expect(
                 erc1410Facet
                     .connect(signer_B)
                     .protectedRedeemFromByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
+                        signer_A.address,
                         amount,
                         MAX_UINT256,
                         1,
@@ -1071,7 +1003,7 @@ describe('ProtectedPartitions Tests', () => {
             await expect(
                 holdFacet.protectedCreateHoldByPartition(
                     DEFAULT_PARTITION,
-                    account_A,
+                    signer_A.address,
                     protectedHold,
                     '0x1234'
                 )
@@ -1086,7 +1018,7 @@ describe('ProtectedPartitions Tests', () => {
             await expect(
                 holdFacet.protectedCreateHoldByPartition(
                     DEFAULT_PARTITION,
-                    account_A,
+                    signer_A.address,
                     protectedHold,
                     '0x1234'
                 )
@@ -1099,7 +1031,7 @@ describe('ProtectedPartitions Tests', () => {
             await expect(
                 holdFacet.protectedCreateHoldByPartition(
                     DEFAULT_PARTITION,
-                    account_A,
+                    signer_A.address,
                     protectedHold,
                     '0x1234'
                 )
@@ -1127,7 +1059,7 @@ describe('ProtectedPartitions Tests', () => {
             await expect(
                 holdFacet.protectedCreateHoldByPartition(
                     DEFAULT_PARTITION,
-                    account_A,
+                    signer_A.address,
                     protectedHold,
                     '0x1234'
                 )
@@ -1144,7 +1076,7 @@ describe('ProtectedPartitions Tests', () => {
                     .connect(signer_B)
                     .protectedCreateHoldByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
+                        signer_A.address,
                         protectedHold,
                         '0x1234'
                     )
@@ -1188,6 +1120,7 @@ describe('ProtectedPartitions Tests', () => {
 
     describe('Unprotected Partitions', () => {
         beforeEach(async () => {
+            await loadFixture(deploySecurityFixtureUnprotectedPartitions)
             await setUnProtected()
         })
 
@@ -1214,8 +1147,8 @@ describe('ProtectedPartitions Tests', () => {
                     .connect(signer_B)
                     .protectedTransferFromByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
-                        account_B,
+                        signer_A.address,
+                        signer_B.address,
                         amount,
                         1,
                         0,
@@ -1230,7 +1163,7 @@ describe('ProtectedPartitions Tests', () => {
                     .connect(signer_B)
                     .protectedRedeemFromByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
+                        signer_A.address,
                         amount,
                         1,
                         0,
@@ -1245,7 +1178,7 @@ describe('ProtectedPartitions Tests', () => {
                     .connect(signer_B)
                     .protectedCreateHoldByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
+                        signer_A.address,
                         protectedHold,
                         '0x1234'
                     )
@@ -1288,7 +1221,7 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a protected token WHEN performing an ERC1410 operator transfer By partition THEN transaction fails with PartitionsAreProtectedAndNoRole', async () => {
                 await erc1410Facet.authorizeOperatorByPartition(
                     DEFAULT_PARTITION,
-                    account_C
+                    signer_C.address
                 )
 
                 await expect(
@@ -1300,15 +1233,19 @@ describe('ProtectedPartitions Tests', () => {
 
             it('GIVEN a protected token WHEN performing a ERC1594 transfer with Data THEN transaction fails with PartitionsAreProtectedAndNoRole', async () => {
                 await expect(
-                    erc1594Facet.transferWithData(account_B, amount, '0x1234')
+                    erc1594Facet.transferWithData(
+                        signer_B.address,
+                        amount,
+                        '0x1234'
+                    )
                 ).to.be.rejectedWith('PartitionsAreProtectedAndNoRole')
             })
 
             it('GIVEN a protected token WHEN performing a ERC1594 transfer From with Data THEN transaction fails with PartitionsAreProtectedAndNoRole', async () => {
                 await expect(
                     erc1594Facet.transferFromWithData(
-                        account_A,
-                        account_B,
+                        signer_A.address,
+                        signer_B.address,
                         amount,
                         '0x1234'
                     )
@@ -1317,13 +1254,17 @@ describe('ProtectedPartitions Tests', () => {
 
             it('GIVEN a protected token WHEN performing a ERC20 transfer THEN transaction fails with PartitionsAreProtectedAndNoRole', async () => {
                 await expect(
-                    erc20Facet.transfer(account_B, amount)
+                    erc20Facet.transfer(signer_B.address, amount)
                 ).to.be.rejectedWith('PartitionsAreProtectedAndNoRole')
             })
 
             it('GIVEN a protected token WHEN performing a ERC20 transfer From THEN transaction fails with PartitionsAreProtectedAndNoRole', async () => {
                 await expect(
-                    erc20Facet.transferFrom(account_A, account_B, amount)
+                    erc20Facet.transferFrom(
+                        signer_A.address,
+                        signer_B.address,
+                        amount
+                    )
                 ).to.be.rejectedWith('PartitionsAreProtectedAndNoRole')
             })
 
@@ -1333,7 +1274,7 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .transferAndLockByPartition(
                             DEFAULT_PARTITION,
-                            account_B,
+                            signer_B.address,
                             amount,
                             '0x1234',
                             MAX_UINT256
@@ -1346,7 +1287,7 @@ describe('ProtectedPartitions Tests', () => {
                     transferAndLockFacet
                         .connect(signer_B)
                         .transferAndLock(
-                            account_B,
+                            signer_B.address,
                             amount,
                             '0x1234',
                             MAX_UINT256
@@ -1357,7 +1298,7 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a wrong deadline WHEN performing a protected transfer THEN transaction fails with ExpiredDeadline', async () => {
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -1367,8 +1308,8 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedTransferFromByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
-                            account_B,
+                            signer_A.address,
+                            signer_B.address,
                             amount,
                             1,
                             1,
@@ -1380,7 +1321,7 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a wrong signature length WHEN performing a protected transfer THEN transaction fails with WrongSignatureLength', async () => {
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -1389,8 +1330,8 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedTransferFromByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
-                            account_B,
+                            signer_A.address,
+                            signer_B.address,
                             amount,
                             MAX_UINT256,
                             1,
@@ -1402,7 +1343,7 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a wrong signature WHEN performing a protected transfer THEN transaction fails with WrongSignature', async () => {
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -1411,8 +1352,8 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedTransferFromByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
-                            account_B,
+                            signer_A.address,
+                            signer_B.address,
                             amount,
                             MAX_UINT256,
                             1,
@@ -1424,7 +1365,7 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a wrong nounce WHEN performing a protected transfer THEN transaction fails with WrongNounce', async () => {
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -1435,8 +1376,8 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedTransferFromByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
-                            account_B,
+                            signer_A.address,
+                            signer_B.address,
                             amount,
                             deadline,
                             0,
@@ -1447,13 +1388,13 @@ describe('ProtectedPartitions Tests', () => {
 
             it('GIVEN a protected token and a WILD CARD account WHEN performing a ERC1410 transfer By partition THEN transaction succeeds', async () => {
                 await grant_WILD_CARD_ROLE_and_issue_tokens(
-                    account_B,
-                    account_B,
+                    signer_B.address,
+                    signer_B.address,
                     amount,
                     DEFAULT_PARTITION
                 )
 
-                basicTransferInfo.to = account_C
+                basicTransferInfo.to = signer_C.address
 
                 await erc1410Facet.transferByPartition(
                     DEFAULT_PARTITION,
@@ -1464,15 +1405,18 @@ describe('ProtectedPartitions Tests', () => {
 
             it('GIVEN a protected token and a WILD CARD account WHEN performing an ERC1410 operator transfer By partition THEN transaction succeeds', async () => {
                 await grant_WILD_CARD_ROLE_and_issue_tokens(
-                    account_C,
-                    account_A,
+                    signer_C.address,
+                    signer_A.address,
                     amount,
                     DEFAULT_PARTITION
                 )
 
                 await erc1410Facet
                     .connect(signer_A)
-                    .authorizeOperatorByPartition(DEFAULT_PARTITION, account_C)
+                    .authorizeOperatorByPartition(
+                        DEFAULT_PARTITION,
+                        signer_C.address
+                    )
 
                 await erc1410Facet
                     .connect(signer_C)
@@ -1481,36 +1425,40 @@ describe('ProtectedPartitions Tests', () => {
 
             it('GIVEN a protected token and a WILD CARD account WHEN performing a ERC1594 transfer with Data THEN transaction succeeds', async () => {
                 await grant_WILD_CARD_ROLE_and_issue_tokens(
-                    account_A,
-                    account_A,
+                    signer_A.address,
+                    signer_A.address,
                     amount,
                     DEFAULT_PARTITION
                 )
 
-                await erc1594Facet.transferWithData(account_B, amount, '0x1234')
+                await erc1594Facet.transferWithData(
+                    signer_B.address,
+                    amount,
+                    '0x1234'
+                )
             })
 
             it('GIVEN a protected token and a WILD CARD account WHEN performing a ERC1594 transfer From with Data THEN transaction succeeds', async () => {
                 await grant_WILD_CARD_ROLE_and_issue_tokens(
-                    account_C,
-                    account_A,
+                    signer_C.address,
+                    signer_A.address,
                     amount,
                     DEFAULT_PARTITION
                 )
                 console.log(
-                    `wild card account: ${account_C} ${await businessLogicResolver.hasRole(
-                        WILD_CARD_ROLE,
-                        account_C
+                    `wild card account: ${signer_C.address} ${await businessLogicResolver.hasRole(
+                        ATS_ROLES.WILD_CARD,
+                        signer_C.address
                     )}`
                 )
 
-                await erc20Facet.approve(account_C, amount)
+                await erc20Facet.approve(signer_C.address, amount)
 
                 await erc1594Facet
                     .connect(signer_C)
                     .transferFromWithData(
-                        account_A,
-                        account_B,
+                        signer_A.address,
+                        signer_B.address,
                         amount,
                         '0x1234'
                     )
@@ -1518,34 +1466,34 @@ describe('ProtectedPartitions Tests', () => {
 
             it('GIVEN a protected token and a WILD CARD account WHEN performing a ERC20 transfer THEN transaction succeeds', async () => {
                 await grant_WILD_CARD_ROLE_and_issue_tokens(
-                    account_A,
-                    account_A,
+                    signer_A.address,
+                    signer_A.address,
                     amount,
                     DEFAULT_PARTITION
                 )
 
-                await erc20Facet.transfer(account_B, amount)
+                await erc20Facet.transfer(signer_B.address, amount)
             })
 
             it('GIVEN a protected token and a WILD CARD account WHEN performing a ERC20 transfer From THEN transaction succeeds', async () => {
                 await grant_WILD_CARD_ROLE_and_issue_tokens(
-                    account_C,
-                    account_A,
+                    signer_C.address,
+                    signer_A.address,
                     amount,
                     DEFAULT_PARTITION
                 )
 
-                await erc20Facet.approve(account_C, amount)
+                await erc20Facet.approve(signer_C.address, amount)
 
                 await erc20Facet
                     .connect(signer_C)
-                    .transferFrom(account_A, account_B, amount)
+                    .transferFrom(signer_A.address, signer_B.address, amount)
             })
 
             it('GIVEN a protected token and a WILD CARD account WHEN performing a transferAndLock By Partition THEN transaction succeeds', async () => {
                 await grant_WILD_CARD_ROLE_and_issue_tokens(
-                    account_B,
-                    account_B,
+                    signer_B.address,
+                    signer_B.address,
                     amount,
                     DEFAULT_PARTITION
                 )
@@ -1554,7 +1502,7 @@ describe('ProtectedPartitions Tests', () => {
                     .connect(signer_B)
                     .transferAndLockByPartition(
                         DEFAULT_PARTITION,
-                        account_C,
+                        signer_C.address,
                         amount,
                         '0x1234',
                         MAX_UINT256
@@ -1563,15 +1511,20 @@ describe('ProtectedPartitions Tests', () => {
 
             it('GIVEN a protected token and a WILD CARD account WHEN performing a transferAndLock THEN transaction succeeds', async () => {
                 await grant_WILD_CARD_ROLE_and_issue_tokens(
-                    account_B,
-                    account_B,
+                    signer_B.address,
+                    signer_B.address,
                     amount,
                     DEFAULT_PARTITION
                 )
 
                 await transferAndLockFacet
                     .connect(signer_B)
-                    .transferAndLock(account_C, amount, '0x1234', MAX_UINT256)
+                    .transferAndLock(
+                        signer_C.address,
+                        amount,
+                        '0x1234',
+                        MAX_UINT256
+                    )
             })
 
             it('GIVEN a correct signature WHEN performing a protected transfer THEN transaction succeeds', async () => {
@@ -1579,8 +1532,8 @@ describe('ProtectedPartitions Tests', () => {
 
                 const message = {
                     _partition: DEFAULT_PARTITION,
-                    _from: account_A,
-                    _to: account_B,
+                    _from: signer_A.address,
+                    _to: signer_B.address,
                     _amount: amount,
                     _deadline: deadline,
                     _nounce: 1,
@@ -1603,7 +1556,7 @@ describe('ProtectedPartitions Tests', () => {
 
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -1612,8 +1565,8 @@ describe('ProtectedPartitions Tests', () => {
                     .connect(signer_B)
                     .protectedTransferFromByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
-                        account_B,
+                        signer_A.address,
+                        signer_B.address,
                         amount,
                         deadline,
                         1,
@@ -1636,7 +1589,7 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a protected token WHEN performing an ERC1410 operator redeem By partition THEN transaction fails with PartitionsAreProtected', async () => {
                 await erc1410Facet.authorizeOperatorByPartition(
                     DEFAULT_PARTITION,
-                    account_C
+                    signer_C.address
                 )
 
                 await expect(
@@ -1644,7 +1597,7 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_C)
                         .operatorRedeemByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
+                            signer_A.address,
                             amount,
                             '0x1234',
                             '0x1234'
@@ -1660,14 +1613,14 @@ describe('ProtectedPartitions Tests', () => {
 
             it('GIVEN a protected token WHEN performing a ERC1594 redeem From with Data THEN transaction fails with PartitionsAreProtected', async () => {
                 await expect(
-                    erc1594Facet.redeemFrom(account_B, amount, '0x1234')
+                    erc1594Facet.redeemFrom(signer_B.address, amount, '0x1234')
                 ).to.be.rejectedWith('PartitionsAreProtected')
             })
 
             it('GIVEN a wrong deadline WHEN performing a protected redeem THEN transaction fails with ExpiredDeadline', async () => {
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -1676,7 +1629,7 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedRedeemFromByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
+                            signer_A.address,
                             amount,
                             1,
                             0,
@@ -1688,7 +1641,7 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a wrong signature length WHEN performing a protected redeem THEN transaction fails with WrongSignatureLength', async () => {
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -1697,7 +1650,7 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedRedeemFromByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
+                            signer_A.address,
                             amount,
                             MAX_UINT256,
                             1,
@@ -1709,7 +1662,7 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a wrong signature WHEN performing a protected redeem THEN transaction fails with WrongSignature', async () => {
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -1718,7 +1671,7 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedRedeemFromByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
+                            signer_A.address,
                             amount,
                             MAX_UINT256,
                             1,
@@ -1730,7 +1683,7 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a wrong nounce WHEN performing a protected redeem THEN transaction fails with WrongNounce', async () => {
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -1741,7 +1694,7 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedRedeemFromByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
+                            signer_A.address,
                             amount,
                             deadline,
                             0,
@@ -1755,7 +1708,7 @@ describe('ProtectedPartitions Tests', () => {
 
                 const message = {
                     _partition: DEFAULT_PARTITION,
-                    _from: account_A,
+                    _from: signer_A.address,
                     _amount: amount,
                     _deadline: deadline,
                     _nounce: 1,
@@ -1778,7 +1731,7 @@ describe('ProtectedPartitions Tests', () => {
 
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -1787,7 +1740,7 @@ describe('ProtectedPartitions Tests', () => {
                     .connect(signer_B)
                     .protectedRedeemFromByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
+                        signer_A.address,
                         amount,
                         deadline,
                         1,
@@ -1809,7 +1762,7 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .createHoldFromByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
+                            signer_A.address,
                             hold,
                             '0x'
                         )
@@ -1819,20 +1772,22 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a protected token WHEN performing a operatorCreateHoldByPartition THEN transaction fails with PartitionsAreProtected', async () => {
                 await erc1410Facet
                     .connect(signer_A)
-                    .authorizeOperator(account_B)
+                    .authorizeOperator(signer_B.address)
 
                 await expect(
                     holdFacet
                         .connect(signer_B)
                         .operatorCreateHoldByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
+                            signer_A.address,
                             hold,
                             '0x'
                         )
                 ).to.be.rejectedWith('PartitionsAreProtected')
 
-                await erc1410Facet.connect(signer_A).revokeOperator(account_B)
+                await erc1410Facet
+                    .connect(signer_A)
+                    .revokeOperator(signer_B.address)
             })
 
             it('GIVEN a wrong deadline WHEN performing a protected hold THEN transaction fails with ExpiredDeadline', async () => {
@@ -1843,7 +1798,7 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedCreateHoldByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
+                            signer_A.address,
                             protectedHold,
                             '0x1234'
                         )
@@ -1856,7 +1811,7 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedCreateHoldByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
+                            signer_A.address,
                             protectedHold,
                             '0x12'
                         )
@@ -1869,7 +1824,7 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedCreateHoldByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
+                            signer_A.address,
                             protectedHold,
                             '0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344'
                         )
@@ -1884,7 +1839,7 @@ describe('ProtectedPartitions Tests', () => {
                         .connect(signer_B)
                         .protectedCreateHoldByPartition(
                             DEFAULT_PARTITION,
-                            account_A,
+                            signer_A.address,
                             protectedHold,
                             '0x1234'
                         )
@@ -1894,7 +1849,7 @@ describe('ProtectedPartitions Tests', () => {
             it('GIVEN a correct signature WHEN performing a protected hold THEN transaction succeeds', async () => {
                 const message = {
                     _partition: DEFAULT_PARTITION,
-                    _from: account_A,
+                    _from: signer_A.address,
                     _protectedHold: protectedHold,
                 }
 
@@ -1915,7 +1870,7 @@ describe('ProtectedPartitions Tests', () => {
 
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: protectedHold.hold.amount,
                     data: '0x',
                 })
@@ -1924,7 +1879,7 @@ describe('ProtectedPartitions Tests', () => {
                     .connect(signer_B)
                     .protectedCreateHoldByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
+                        signer_A.address,
                         protectedHold,
                         signature
                     )
@@ -1942,7 +1897,7 @@ describe('ProtectedPartitions Tests', () => {
                         .clearingTransferByPartition(
                             clearingOperation,
                             amount,
-                            account_C
+                            signer_C.address
                         )
                 ).to.be.rejectedWith('PartitionsAreProtected')
                 await expect(
@@ -1951,17 +1906,17 @@ describe('ProtectedPartitions Tests', () => {
                         .clearingTransferFromByPartition(
                             clearingOperationFrom,
                             amount,
-                            account_C
+                            signer_C.address
                         )
                 ).to.be.rejectedWith('PartitionsAreProtected')
-                await erc1410Facet.authorizeOperator(account_B)
+                await erc1410Facet.authorizeOperator(signer_B.address)
                 await expect(
                     clearingFacet
                         .connect(signer_B)
                         .operatorClearingTransferByPartition(
                             clearingOperationFrom,
                             amount,
-                            account_C
+                            signer_C.address
                         )
                 ).to.be.rejectedWith('PartitionsAreProtected')
                 // CLEARING CREATE HOLD
@@ -2019,7 +1974,7 @@ describe('ProtectedPartitions Tests', () => {
                         .protectedClearingTransferByPartition(
                             protectedClearingOperation,
                             amount,
-                            account_C,
+                            signer_C.address,
                             '0x1234'
                         )
                 ).to.be.rejectedWith('ExpiredDeadline')
@@ -2053,7 +2008,7 @@ describe('ProtectedPartitions Tests', () => {
                         .protectedClearingTransferByPartition(
                             protectedClearingOperation,
                             amount,
-                            account_C,
+                            signer_C.address,
                             '0x1234'
                         )
                 ).to.be.rejectedWith('WrongSignatureLength')
@@ -2087,7 +2042,7 @@ describe('ProtectedPartitions Tests', () => {
                         .protectedClearingTransferByPartition(
                             protectedClearingOperation,
                             amount,
-                            account_C,
+                            signer_C.address,
                             '0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344'
                         )
                 ).to.be.rejectedWith('WrongSignature')
@@ -2123,7 +2078,7 @@ describe('ProtectedPartitions Tests', () => {
                         .protectedClearingTransferByPartition(
                             protectedClearingOperation,
                             amount,
-                            account_C,
+                            signer_C.address,
                             '0x1234'
                         )
                 ).to.be.rejectedWith('WrongNounce')
@@ -2154,7 +2109,7 @@ describe('ProtectedPartitions Tests', () => {
                 const message = {
                     _protectedClearingOperation: protectedClearingOperation,
                     _amount: amount,
-                    _to: account_C,
+                    _to: signer_C.address,
                 }
                 // Sign the message hash
                 const signature = await signer_A._signTypedData(
@@ -2164,7 +2119,7 @@ describe('ProtectedPartitions Tests', () => {
                 )
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -2173,7 +2128,7 @@ describe('ProtectedPartitions Tests', () => {
                     .protectedClearingTransferByPartition(
                         protectedClearingOperation,
                         amount,
-                        account_C,
+                        signer_C.address,
                         signature
                     )
                 // HOLDS
@@ -2190,7 +2145,7 @@ describe('ProtectedPartitions Tests', () => {
                 )
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -2215,7 +2170,7 @@ describe('ProtectedPartitions Tests', () => {
                 )
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -2236,7 +2191,7 @@ describe('ProtectedPartitions Tests', () => {
                 const message = {
                     _protectedClearingOperation: protectedClearingOperation,
                     _amount: amount,
-                    _to: account_C,
+                    _to: signer_C.address,
                 }
                 // Sign the message hash
                 const signature = await signer_A._signTypedData(
@@ -2246,7 +2201,7 @@ describe('ProtectedPartitions Tests', () => {
                 )
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -2255,12 +2210,12 @@ describe('ProtectedPartitions Tests', () => {
                     .protectedClearingTransferByPartition(
                         protectedClearingOperation,
                         amount,
-                        account_C,
+                        signer_C.address,
                         signature
                     )
                 const clearingIdentifier = {
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     clearingId: 1,
                     clearingOperationType: 0,
                 }
@@ -2275,8 +2230,8 @@ describe('ProtectedPartitions Tests', () => {
 
                 const message = {
                     _partition: DEFAULT_PARTITION,
-                    _from: account_A,
-                    _to: account_B,
+                    _from: signer_A.address,
+                    _to: signer_B.address,
                     _amount: amount,
                     _deadline: deadline,
                     _nounce: 1,
@@ -2290,7 +2245,7 @@ describe('ProtectedPartitions Tests', () => {
 
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
-                    tokenHolder: account_A,
+                    tokenHolder: signer_A.address,
                     value: amount,
                     data: '0x',
                 })
@@ -2299,8 +2254,8 @@ describe('ProtectedPartitions Tests', () => {
                     .connect(signer_B)
                     .protectedTransferFromByPartition(
                         DEFAULT_PARTITION,
-                        account_A,
-                        account_B,
+                        signer_A.address,
+                        signer_B.address,
                         amount,
                         deadline,
                         1,

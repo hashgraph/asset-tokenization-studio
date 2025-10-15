@@ -98,10 +98,6 @@ export const ATS_ROLES = {
         '0x0e625647b832ec7d4146c12550c31c065b71e0a698095568fd8320dd2aa72e75',
     FREEZE_MANAGER:
         '0xd0e5294c1fc630933e135c5b668c5d577576754d33964d700bbbcdbfd7e1361b',
-    BALANCE_ADJUSTMENT_TASK_TYPE:
-        '0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d',
-    SNAPSHOT_TASK_TYPE:
-        '0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c',
     KYC_MANAGER:
         '0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449',
     INTERNAL_KYC_MANAGER:
@@ -117,6 +113,21 @@ export const ATS_ROLES = {
 
 export type AtsRoleName = keyof typeof ATS_ROLES
 export type AtsRoleHash = (typeof ATS_ROLES)[AtsRoleName]
+
+// ============================================================================
+// ATS Task Types (for scheduled tasks, balance adjustments, etc.)
+// ============================================================================
+
+export const ATS_TASK = {
+    SNAPSHOT:
+        '0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c',
+    BALANCE_ADJUSTMENT:
+        '0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d',
+} as const
+
+export type AtsTaskType = keyof typeof ATS_TASK
+export type AtsTaskHash = (typeof ATS_TASK)[AtsTaskType]
+
 // ============================================================================
 // Regulation Enums (ATS Compliance)
 // ============================================================================

@@ -1,117 +1,62 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
-    BusinessLogicResolver,
     ProceedRecipients,
-    ProceedRecipients__factory,
-    IFactory,
     ResolverProxy,
     AccessControl,
-    AccessControlFacet__factory,
     Pause,
-    PauseFacet__factory,
 } from '@typechain'
-import {
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    deployBondFromFactory,
-    GAS_LIMIT,
-    PROCEED_RECIPIENT_MANAGER_ROLE,
-    RegulationSubType,
-    RegulationType,
-    PAUSER_ROLE,
-} from '@scripts'
+import { GAS_LIMIT, ATS_ROLES } from '@scripts'
+import { deployBondTokenFixture } from '@test/fixtures'
 
 const PROCEED_RECIPIENT_1 = '0x1234567890123456789012345678901234567890'
 const PROCEED_RECIPIENT_1_DATA = '0xabcdef'
 const PROCEED_RECIPIENT_2 = '0x2345678901234567890123456789012345678901'
 const PROCEED_RECIPIENT_2_DATA = '0x88888888'
-const numberOfUnits = 1000
-let startingDate = 999999999999990
-let maturityDate = 999999999999999
-const countriesControlListType = true
-const listOfCountries = 'ES,FR,CH'
-const info = 'info'
 
 describe('Proceed Recipients Tests', () => {
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
-    let account_A: string
 
     let diamond: ResolverProxy
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
     let proceedRecipientsFacet: ProceedRecipients
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
-    before(async () => {
-        ;[signer_A, signer_B] = await ethers.getSigners()
-        account_A = signer_A.address
-
-        const { ...deployedContracts } = await deployAtsFullInfrastructure(
-            await DeployAtsFullInfrastructureCommand.newInstance({
-                signer: signer_A,
-                useDeployed: false,
-                useEnvironment: false,
-                timeTravelEnabled: true,
-            })
-        )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
     beforeEach(async () => {
-        // Deploy a fresh diamond proxy (implicitly initialized)
-        diamond = await deployBondFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            internalKycActivated: false,
-            isMultiPartition: false,
-            name: 'TEST_ProceedRecipients',
-            symbol: 'TB',
-            decimals: 6,
-            isin: isinGenerator(),
-            currency: '0x455552',
-            numberOfUnits,
-            nominalValue: 100,
-            startingDate,
-            maturityDate,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_C,
-            countriesControlListType,
-            listOfCountries,
-            info,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-            proceedRecipientsList: [PROCEED_RECIPIENT_2],
-            proceedRecipientsListData: [PROCEED_RECIPIENT_2_DATA],
+        const base = await deployBondTokenFixture({
+            proceedRecipients: [PROCEED_RECIPIENT_2],
+            proceedRecipientsData: [PROCEED_RECIPIENT_2_DATA],
         })
 
-        proceedRecipientsFacet = ProceedRecipients__factory.connect(
+        diamond = base.diamond
+        signer_A = base.deployer
+        signer_B = base.user2
+
+        proceedRecipientsFacet = await ethers.getContractAt(
+            'ProceedRecipients',
             diamond.address,
             signer_A
         )
 
-        accessControlFacet = AccessControlFacet__factory.connect(
+        accessControlFacet = await ethers.getContractAt(
+            'AccessControlFacet',
             diamond.address,
             signer_A
         )
-
-        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
+        pauseFacet = await ethers.getContractAt(
+            'Pause',
+            diamond.address,
+            signer_A
+        )
 
         await accessControlFacet.grantRole(
-            PROCEED_RECIPIENT_MANAGER_ROLE,
-            account_A
+            ATS_ROLES.PROCEED_RECIPIENT_MANAGER,
+            signer_A.address
         )
 
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_A)
+        await accessControlFacet.grantRole(ATS_ROLES.PAUSER, signer_A.address)
     })
 
     describe('Initialization Tests', () => {
