@@ -10,6 +10,7 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { ATS_ROLES } from '@scripts'
 import { assertObject } from '../../common'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 describe('ResolverProxy Tests', () => {
     const CONFIG_ID =
@@ -24,9 +25,8 @@ describe('ResolverProxy Tests', () => {
     let pauseImpl: PauseFacet
     let signer_A: SignerWithAddress
 
-    let account_A: string
-
     async function deployContracts() {
+        ;[signer_A] = await ethers.getSigners()
         resolver = await deployResolver()
 
         diamondFacet = await (
@@ -127,11 +127,8 @@ describe('ResolverProxy Tests', () => {
     }
 
     beforeEach(async () => {
-        ;[signer_A] = await ethers.getSigners()
-        account_A = signer_A.address
-
         //await loadFixture(deployContracts)
-        await deployContracts()
+        await loadFixture(deployContracts)
     })
 
     it('GIVEN deployed facets WHEN deploy a new resolverProxy with correct configuration THEN a new resolverProxy proxy was deployed', async () => {
@@ -197,7 +194,7 @@ describe('ResolverProxy Tests', () => {
 
         const GRANT_ROLE_SIGNATURE = '0x2f2ff15d'
         await expect(
-            accessControl.grantRole(ATS_ROLES.DEFAULT_ADMIN, account_A)
+            accessControl.grantRole(ATS_ROLES.DEFAULT_ADMIN, signer_A.address)
         )
             .to.be.revertedWithCustomError(resolverProxy, 'FunctionNotFound')
             .withArgs(GRANT_ROLE_SIGNATURE)
@@ -310,7 +307,7 @@ describe('ResolverProxy Tests', () => {
         const rbac = [
             {
                 role: ATS_ROLES.DEFAULT_ADMIN,
-                members: [account_A],
+                members: [signer_A.address],
             },
         ]
 
@@ -347,7 +344,7 @@ describe('ResolverProxy Tests', () => {
         const rbac = [
             {
                 role: ATS_ROLES.DEFAULT_ADMIN,
-                members: [account_A],
+                members: [signer_A.address],
             },
         ]
 
@@ -427,7 +424,7 @@ describe('ResolverProxy Tests', () => {
         const rbac = [
             {
                 role: ATS_ROLES.DEFAULT_ADMIN,
-                members: [account_A],
+                members: [signer_A.address],
             },
         ]
 
@@ -465,7 +462,7 @@ describe('ResolverProxy Tests', () => {
         const rbac = [
             {
                 role: ATS_ROLES.DEFAULT_ADMIN,
-                members: [account_A],
+                members: [signer_A.address],
             },
         ]
 
@@ -549,7 +546,7 @@ describe('ResolverProxy Tests', () => {
         const rbac = [
             {
                 role: ATS_ROLES.DEFAULT_ADMIN,
-                members: [account_A],
+                members: [signer_A.address],
             },
         ]
 
@@ -593,7 +590,7 @@ describe('ResolverProxy Tests', () => {
         const rbac = [
             {
                 role: ATS_ROLES.DEFAULT_ADMIN,
-                members: [account_A],
+                members: [signer_A.address],
             },
         ]
 

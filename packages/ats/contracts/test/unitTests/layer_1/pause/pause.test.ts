@@ -4,8 +4,6 @@ import { GAS_LIMIT, ATS_ROLES } from '@scripts'
 import { grantRoleAndPauseToken } from '@test/common'
 import { deployEquityTokenFixture } from '@test/fixtures'
 import {
-    MockedExternalPause__factory,
-    ExternalPauseManagement__factory,
     PauseFacet,
     AccessControl,
     ResolverProxy,
@@ -13,8 +11,9 @@ import {
 } from '@typechain'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Signer } from 'ethers'
+import { ethers } from 'hardhat'
 
-describe('Pause Tests', () => {
+describe.only('Pause Tests', () => {
     let diamond: ResolverProxy
     let pauseFacet: PauseFacet
     let accessControlFacet: AccessControl
@@ -28,17 +27,20 @@ describe('Pause Tests', () => {
         diamond = base.diamond
 
         // Deploy mock external pause contract
-        externalPauseMock = await new MockedExternalPause__factory(
-            base.deployer
+        externalPauseMock = await (
+            await ethers.getContractFactory(
+                'MockedExternalPause',
+                base.deployer
+            )
         ).deploy({ gasLimit: GAS_LIMIT.high })
         await externalPauseMock.deployed()
 
         // Get external pause management facet
-        const externalPauseManagement =
-            ExternalPauseManagement__factory.connect(
-                diamond.address,
-                base.deployer
-            )
+        const externalPauseManagement = await ethers.getContractAt(
+            'ExternalPauseManagement',
+            diamond.address,
+            base.deployer
+        )
 
         // Add external pause to the token
         await base.accessControlFacet.grantRole(

@@ -1,56 +1,53 @@
-import { ethers } from 'hardhat'
-import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { deployAtsInfrastructureFixture } from '../infrastructure.fixture'
-import {
-    RegulationType,
-    RegulationSubType,
-    CURRENCIES,
-    DeepPartial,
-    TIME_PERIODS_S,
-} from '../../../scripts'
+import { CURRENCIES, DeepPartial, TIME_PERIODS_S } from '../../../scripts'
 import {
     AccessControlFacet__factory,
     PauseFacet__factory,
     KycFacet__factory,
     ControlListFacet__factory,
+    TimeTravelFacet__factory,
 } from '@typechain'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     DeployBondFromFactoryParams,
     deployBondFromFactory,
 } from '@scripts/domain/factory/deployBondToken'
-import { FactoryRegulationDataParams } from '@scripts/domain/factory/types'
+import {
+    BondDetailsDataParams,
+    FactoryRegulationDataParams,
+} from '@scripts/domain/factory/types'
+import { getRegulationData, getSecurityData } from './common.fixture'
+import { ethers } from 'hardhat'
 
 /**
  * Default bond token parameters.
  * Override by passing custom params to fixture functions.
  */
 export const DEFAULT_BOND_PARAMS = {
-    isWhiteList: false,
-    isControllable: true,
-    arePartitionsProtected: false,
-    clearingActive: false,
-    internalKycActivated: true,
-    isMultiPartition: false,
-    name: 'TEST_Token',
-    symbol: 'TEST',
-    decimals: 6,
-    erc20VotesActivated: false,
     currency: CURRENCIES.USD,
-    maxSupply: ethers.constants.MaxUint256,
     nominalValue: 100,
-    regulationType: RegulationType.REG_S,
-    regulationSubType: RegulationSubType.NONE,
-    countriesControlListType: true,
-    listOfCountries: 'US,GB,CH',
-    info: 'Test token for unit tests',
     proceedRecipients: [] as string[],
     proceedRecipientsData: [] as string[],
-    startingDate: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
-    externalPauses: [],
-    externalControlLists: [],
-    externalKycLists: [],
+    startingDate: async () => {
+        return (await ethers.provider.getBlock('latest')).timestamp + 3600 //block.timestamp + 1 hour
+    },
 } as const
+
+export async function getBondDetails(
+    params?: DeepPartial<BondDetailsDataParams>
+) {
+    const maturityDate =
+        params?.maturityDate ??
+        (params?.startingDate
+            ? params.startingDate + TIME_PERIODS_S.YEAR
+            : (await DEFAULT_BOND_PARAMS.startingDate()) + TIME_PERIODS_S.YEAR)
+    return {
+        currency: params?.currency ?? DEFAULT_BOND_PARAMS.currency,
+        nominalValue: params?.nominalValue ?? DEFAULT_BOND_PARAMS.nominalValue,
+        startingDate:
+            params?.startingDate ?? (await DEFAULT_BOND_PARAMS.startingDate()),
+        maturityDate: maturityDate,
+    }
+}
 
 /**
  * Fixture: Deploy ATS infrastructure + single Bond token
@@ -61,80 +58,19 @@ export const DEFAULT_BOND_PARAMS = {
  * @param tokenParams - Optional custom token parameters (merged with defaults)
  * @returns Infrastructure + deployed bond token + connected facets
  */
-export async function deployBondTokenFixture(
-    bondDataParams?: DeepPartial<DeployBondFromFactoryParams>,
+export async function deployBondTokenFixture({
+    bondDataParams,
+    regulationTypeParams,
+}: {
+    bondDataParams?: DeepPartial<DeployBondFromFactoryParams>
     regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>
-) {
+} = {}) {
     const infrastructure = await deployAtsInfrastructureFixture()
     const { factory, blr, deployer } = infrastructure
 
-    const maturityDate =
-        bondDataParams?.bondDetails?.maturityDate ??
-        (bondDataParams?.bondDetails?.startingDate
-            ? bondDataParams.bondDetails.startingDate + TIME_PERIODS_S.YEAR
-            : DEFAULT_BOND_PARAMS.startingDate + TIME_PERIODS_S.YEAR)
+    const securityData = getSecurityData(blr, bondDataParams?.securityData)
+    const bondDetails = await getBondDetails(bondDataParams?.bondDetails)
 
-    const securityData = {
-        arePartitionsProtected:
-            bondDataParams?.securityData?.arePartitionsProtected ??
-            DEFAULT_BOND_PARAMS.arePartitionsProtected,
-        isMultiPartition:
-            bondDataParams?.securityData?.isMultiPartition ??
-            DEFAULT_BOND_PARAMS.isMultiPartition,
-        businessLogicResolver: blr.address,
-        isControllable:
-            bondDataParams?.securityData?.isControllable ??
-            DEFAULT_BOND_PARAMS.isControllable,
-        isWhiteList:
-            bondDataParams?.securityData?.isWhiteList ??
-            DEFAULT_BOND_PARAMS.isWhiteList,
-        maxSupply:
-            bondDataParams?.securityData?.maxSupply ??
-            DEFAULT_BOND_PARAMS.maxSupply,
-        name: bondDataParams?.securityData?.name ?? DEFAULT_BOND_PARAMS.name,
-        symbol:
-            bondDataParams?.securityData?.symbol ?? DEFAULT_BOND_PARAMS.symbol,
-        decimals:
-            bondDataParams?.securityData?.decimals ??
-            DEFAULT_BOND_PARAMS.decimals,
-        isin: bondDataParams?.securityData?.isin ?? isinGenerator(),
-        clearingActive:
-            bondDataParams?.securityData?.clearingActive ??
-            DEFAULT_BOND_PARAMS.clearingActive,
-        internalKycActivated:
-            bondDataParams?.securityData?.internalKycActivated ??
-            DEFAULT_BOND_PARAMS.internalKycActivated,
-        externalPauses: [
-            ...((bondDataParams?.securityData?.externalPauses as string[]) ??
-                DEFAULT_BOND_PARAMS.externalPauses),
-        ],
-        externalControlLists: [
-            ...((bondDataParams?.securityData
-                ?.externalControlLists as string[]) ??
-                DEFAULT_BOND_PARAMS.externalControlLists),
-        ],
-        externalKycLists: [
-            ...((bondDataParams?.securityData?.externalKycLists as string[]) ??
-                DEFAULT_BOND_PARAMS.externalKycLists),
-        ],
-        erc20VotesActivated:
-            bondDataParams?.securityData?.erc20VotesActivated ??
-            DEFAULT_BOND_PARAMS.erc20VotesActivated,
-        compliance: ethers.constants.AddressZero,
-        identityRegistry: ethers.constants.AddressZero,
-    }
-    const bondDetails = {
-        currency:
-            bondDataParams?.bondDetails?.currency ??
-            DEFAULT_BOND_PARAMS.currency,
-        nominalValue:
-            bondDataParams?.bondDetails?.nominalValue ??
-            DEFAULT_BOND_PARAMS.nominalValue,
-        startingDate:
-            bondDataParams?.bondDetails?.startingDate ??
-            DEFAULT_BOND_PARAMS.startingDate,
-        maturityDate: maturityDate,
-    }
     const diamond = await deployBondFromFactory(
         {
             adminAccount: deployer.address,
@@ -150,21 +86,7 @@ export async function deployBondTokenFixture(
                     DEFAULT_BOND_PARAMS.proceedRecipientsData),
             ],
         },
-        {
-            regulationType:
-                regulationTypeParams?.regulationType ??
-                DEFAULT_BOND_PARAMS.regulationType,
-            regulationSubType:
-                regulationTypeParams?.regulationSubType ??
-                DEFAULT_BOND_PARAMS.regulationSubType,
-            countriesControlListType:
-                regulationTypeParams?.countriesControlListType ??
-                DEFAULT_BOND_PARAMS.countriesControlListType,
-            listOfCountries:
-                regulationTypeParams?.listOfCountries ??
-                DEFAULT_BOND_PARAMS.listOfCountries,
-            info: regulationTypeParams?.info ?? DEFAULT_BOND_PARAMS.info,
-        }
+        getRegulationData(regulationTypeParams)
     )
 
     // Connect commonly used facets to diamond

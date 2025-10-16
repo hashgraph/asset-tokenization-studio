@@ -1,4 +1,4 @@
-//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ethers } from 'hardhat'
 import { expect } from 'chai'
 import { AccessControl, Pause, BusinessLogicResolver } from '@typechain'
@@ -9,8 +9,6 @@ describe('BusinessLogicResolver', () => {
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
     let signer_C: SignerWithAddress
-
-    let account_B: string
 
     let businessLogicResolver: BusinessLogicResolver
     let accessControl: AccessControl
@@ -46,6 +44,7 @@ describe('BusinessLogicResolver', () => {
     ]
 
     async function deployBusinessLogicResolverFixture() {
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         businessLogicResolver = await (
             await ethers.getContractFactory('BusinessLogicResolver', signer_A)
         ).deploy()
@@ -56,7 +55,7 @@ describe('BusinessLogicResolver', () => {
             businessLogicResolver.address,
             signer_A
         )
-        await accessControl.grantRole(ATS_ROLES.PAUSER, account_B)
+        await accessControl.grantRole(ATS_ROLES.PAUSER, signer_B.address)
 
         pause = await ethers.getContractAt(
             'Pause',
@@ -65,12 +64,7 @@ describe('BusinessLogicResolver', () => {
     }
 
     beforeEach(async () => {
-        //await loadFixture(deployBusinessLogicResolverFixture)
-
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_B = signer_B.address
-
-        await deployBusinessLogicResolverFixture()
+        await loadFixture(deployBusinessLogicResolverFixture)
     })
 
     it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {

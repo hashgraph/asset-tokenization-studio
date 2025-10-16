@@ -100,7 +100,7 @@ let clearingOperation: ClearingOperation
 let clearingOperationFrom: ClearingOperationFrom
 let hold: Hold
 
-describe('Clearing Tests', () => {
+describe.only('Clearing Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -258,9 +258,11 @@ describe('Clearing Tests', () => {
 
     async function deploySecurityFixtureMultiPartition() {
         const base = await deployEquityTokenFixture({
-            securityData: {
-                isMultiPartition: true,
-                clearingActive: true,
+            equityDataParams: {
+                securityData: {
+                    isMultiPartition: true,
+                    clearingActive: true,
+                },
             },
         })
         diamond = base.diamond
@@ -310,9 +312,11 @@ describe('Clearing Tests', () => {
 
     async function deploySecurityFixtureSinglePartition() {
         const base = await deployEquityTokenFixture({
-            securityData: {
-                isMultiPartition: false,
-                clearingActive: true,
+            equityDataParams: {
+                securityData: {
+                    isMultiPartition: false,
+                    clearingActive: true,
+                },
             },
         })
         diamond = base.diamond

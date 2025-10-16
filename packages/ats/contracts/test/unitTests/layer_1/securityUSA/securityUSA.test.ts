@@ -32,15 +32,16 @@ describe('Security USA Tests', () => {
 
     describe('equity USA', () => {
         it('Given regulation type REG_S and subtype NONE WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            const base = await deployEquityTokenFixture(
-                {},
-                {
+            const base = await deployEquityTokenFixture({
+                regulationTypeParams: {
                     regulationType: RegulationType.REG_S,
                     regulationSubType: RegulationSubType.NONE,
-                    listOfCountries: listOfCountries,
-                    info: info,
-                }
-            )
+                    additionalSecurityData: {
+                        listOfCountries: listOfCountries,
+                        info: info,
+                    },
+                },
+            })
             const diamond = base.diamond
             signer_B = base.user2
 
@@ -85,15 +86,16 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_B WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            const base = await deployEquityTokenFixture(
-                {},
-                {
+            const base = await deployEquityTokenFixture({
+                regulationTypeParams: {
                     regulationType: RegulationType.REG_D,
                     regulationSubType: RegulationSubType.REG_D_506_B,
-                    listOfCountries: listOfCountries,
-                    info: info,
-                }
-            )
+                    additionalSecurityData: {
+                        listOfCountries: listOfCountries,
+                        info: info,
+                    },
+                },
+            })
 
             const diamond = base.diamond
             signer_B = base.user2
@@ -140,15 +142,16 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_C WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            const base = await deployEquityTokenFixture(
-                {},
-                {
+            const base = await deployEquityTokenFixture({
+                regulationTypeParams: {
                     regulationType: RegulationType.REG_D,
                     regulationSubType: RegulationSubType.REG_D_506_C,
-                    listOfCountries: listOfCountries,
-                    info: info,
-                }
-            )
+                    additionalSecurityData: {
+                        listOfCountries: listOfCountries,
+                        info: info,
+                    },
+                },
+            })
             const diamond = base.diamond
             signer_B = base.user2
 
@@ -196,15 +199,16 @@ describe('Security USA Tests', () => {
 
     describe('bond USA', () => {
         it('Given regulation type REG_S and subtype NONE WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            const base = await deployEquityTokenFixture(
-                {},
-                {
+            const base = await deployEquityTokenFixture({
+                regulationTypeParams: {
                     regulationType: RegulationType.REG_S,
                     regulationSubType: RegulationSubType.NONE,
-                    listOfCountries: listOfCountries,
-                    info: info,
-                }
-            )
+                    additionalSecurityData: {
+                        listOfCountries: listOfCountries,
+                        info: info,
+                    },
+                },
+            })
             const diamond = base.diamond
             signer_B = base.user2
 
@@ -249,15 +253,16 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_B WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            const base = await deployEquityTokenFixture(
-                {},
-                {
+            const base = await deployEquityTokenFixture({
+                regulationTypeParams: {
                     regulationType: RegulationType.REG_D,
                     regulationSubType: RegulationSubType.REG_D_506_B,
-                    listOfCountries: listOfCountries,
-                    info: info,
-                }
-            )
+                    additionalSecurityData: {
+                        listOfCountries: listOfCountries,
+                        info: info,
+                    },
+                },
+            })
             const diamond = base.diamond
             signer_B = base.user2
 
@@ -301,15 +306,16 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_C WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            const base = await deployEquityTokenFixture(
-                {},
-                {
+            const base = await deployEquityTokenFixture({
+                regulationTypeParams: {
                     regulationType: RegulationType.REG_D,
                     regulationSubType: RegulationSubType.REG_D_506_C,
-                    listOfCountries: listOfCountries,
-                    info: info,
-                }
-            )
+                    additionalSecurityData: {
+                        listOfCountries: listOfCountries,
+                        info: info,
+                    },
+                },
+            })
             const diamond = base.diamond
             signer_B = base.user2
 

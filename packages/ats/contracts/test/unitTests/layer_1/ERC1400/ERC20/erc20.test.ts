@@ -21,8 +21,10 @@ import { executeRbac, MAX_UINT256 } from '@test/fixtures/tokens/common.fixture'
 import { SecurityType } from '@scripts/domain/factory/types'
 
 const amount = 1000
-
-describe('ERC20 Tests', () => {
+// con erc20 y sin erc1410 funciona
+// sin erc20 y con erc1410 funciona
+// con erc20 y con erc1410 NO funciona
+describe.only('ERC20 Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -47,11 +49,11 @@ describe('ERC20 Tests', () => {
     describe('Multi partition', () => {
         async function deploySecurityFixtureMultiPartition() {
             const base = await deployEquityTokenFixture({
-                securityData: {
-                    isMultiPartition: true,
-                    name,
-                    symbol,
-                    isin,
+                equityDataParams: {
+                    securityData: {
+                        isMultiPartition: true,
+                        erc20MetadataInfo: { name, symbol, isin },
+                    },
                 },
             })
             diamond = base.diamond

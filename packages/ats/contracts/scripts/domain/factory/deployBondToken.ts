@@ -2,10 +2,11 @@ import { ethers } from 'ethers'
 import type { IFactory, ResolverProxy } from '@typechain'
 import { ResolverProxy__factory } from '@typechain'
 import { GAS_LIMIT } from '@scripts/infrastructure'
-import { BOND_CONFIG_ID } from '@scripts/domain'
+import { ATS_ROLES, BOND_CONFIG_ID } from '@scripts/domain'
 import {
     BondDetailsDataParams,
     FactoryRegulationDataParams,
+    Rbac,
     SecurityDataParams,
 } from './types'
 
@@ -72,15 +73,13 @@ export async function deployBondFromFactory(
         proceedRecipientsData,
     } = bondDataParams
 
-    // Get default admin role (bytes32(0))
-    const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero
-
     // Build RBAC array with admin
-    const rbacs = [
+    const rbacs: Rbac[] = [
         {
-            role: DEFAULT_ADMIN_ROLE,
+            role: ATS_ROLES.DEFAULT_ADMIN,
             members: [adminAccount],
         },
+        ...securityDataParams.rbacs,
     ]
 
     // Build resolver proxy configuration
@@ -93,28 +92,26 @@ export async function deployBondFromFactory(
     const securityData = {
         arePartitionsProtected: securityDataParams.arePartitionsProtected,
         isMultiPartition: securityDataParams.isMultiPartition,
-        resolver: securityDataParams.businessLogicResolver,
+        resolver: securityDataParams.resolver,
         resolverProxyConfiguration,
         rbacs,
         isControllable: securityDataParams.isControllable,
         isWhiteList: securityDataParams.isWhiteList,
         maxSupply: securityDataParams.maxSupply,
         erc20MetadataInfo: {
-            name: securityDataParams.name,
-            symbol: securityDataParams.symbol,
-            isin: securityDataParams.isin,
-            decimals: securityDataParams.decimals,
+            name: securityDataParams.erc20MetadataInfo.name,
+            symbol: securityDataParams.erc20MetadataInfo.symbol,
+            isin: securityDataParams.erc20MetadataInfo.isin,
+            decimals: securityDataParams.erc20MetadataInfo.decimals,
         },
         clearingActive: securityDataParams.clearingActive,
         internalKycActivated: securityDataParams.internalKycActivated,
-        erc20VotesActivated: securityDataParams.erc20VotesActivated || false,
-        externalPauses: securityDataParams.externalPauses || [],
-        externalControlLists: securityDataParams.externalControlLists || [],
-        externalKycLists: securityDataParams.externalKycLists || [],
-        compliance:
-            securityDataParams.compliance || ethers.constants.AddressZero,
-        identityRegistry:
-            securityDataParams.identityRegistry || ethers.constants.AddressZero,
+        erc20VotesActivated: securityDataParams.erc20VotesActivated,
+        externalPauses: securityDataParams.externalPauses,
+        externalControlLists: securityDataParams.externalControlLists,
+        externalKycLists: securityDataParams.externalKycLists,
+        compliance: securityDataParams.compliance,
+        identityRegistry: securityDataParams.identityRegistry,
     }
 
     // Build bond details structure
@@ -130,8 +127,8 @@ export async function deployBondFromFactory(
     const bondData = {
         security: securityData,
         bondDetails,
-        proceedRecipients: proceedRecipients || [],
-        proceedRecipientsData: proceedRecipientsData || [],
+        proceedRecipients: proceedRecipients,
+        proceedRecipientsData: proceedRecipientsData,
     }
 
     // Build regulation data
@@ -140,9 +137,11 @@ export async function deployBondFromFactory(
         regulationSubType: regulationTypeParams.regulationSubType,
         additionalSecurityData: {
             countriesControlListType:
-                regulationTypeParams.countriesControlListType,
-            listOfCountries: regulationTypeParams.listOfCountries,
-            info: regulationTypeParams.info,
+                regulationTypeParams.additionalSecurityData
+                    .countriesControlListType,
+            listOfCountries:
+                regulationTypeParams.additionalSecurityData.listOfCountries,
+            info: regulationTypeParams.additionalSecurityData.info,
         },
     }
 

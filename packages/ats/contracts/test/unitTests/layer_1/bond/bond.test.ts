@@ -59,7 +59,7 @@ let couponData = {
     period: couponPeriod,
 }
 
-describe('Bond Tests', () => {
+describe.only('Bond Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -84,12 +84,14 @@ describe('Bond Tests', () => {
 
     async function deploySecurityFixture(isMultiPartition = false) {
         const base = await deployBondTokenFixture({
-            securityData: {
-                isMultiPartition,
-            },
-            bondDetails: {
-                startingDate: startingDate,
-                maturityDate: maturityDate,
+            bondDataParams: {
+                securityData: {
+                    isMultiPartition,
+                },
+                bondDetails: {
+                    startingDate: startingDate,
+                    maturityDate: maturityDate,
+                },
             },
         })
         diamond = base.diamond

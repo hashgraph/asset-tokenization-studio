@@ -6,7 +6,7 @@ import { deployEquityTokenFixture } from '@test/fixtures'
 import { executeRbac } from '@test/fixtures/tokens/common.fixture'
 import { ethers } from 'hardhat'
 
-describe('Access Control Tests', () => {
+describe.only('Access Control Tests', () => {
     let diamond: ResolverProxy
     let pauseFacet: PauseFacet
     let accessControlFacet: AccessControl

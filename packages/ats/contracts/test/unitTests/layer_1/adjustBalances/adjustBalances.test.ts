@@ -27,7 +27,7 @@ const adjustFactor = 253
 const adjustDecimals = 2
 const EMPTY_VC_ID = ''
 
-describe('Adjust Balances Tests', () => {
+describe.only('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -45,8 +45,10 @@ describe('Adjust Balances Tests', () => {
 
     async function deploySecurityFixtureMultiPartition() {
         const base = await deployEquityTokenFixture({
-            securityData: {
-                isMultiPartition: true,
+            equityDataParams: {
+                securityData: {
+                    isMultiPartition: true,
+                },
             },
         })
         diamond = base.diamond
@@ -100,10 +102,6 @@ describe('Adjust Balances Tests', () => {
             diamond.address
         )
     }
-
-    // afterEach(async () => {
-    //     await timeTravelFacet.resetSystemTimestamp()
-    // })
 
     beforeEach(async () => {
         await loadFixture(deploySecurityFixtureMultiPartition)

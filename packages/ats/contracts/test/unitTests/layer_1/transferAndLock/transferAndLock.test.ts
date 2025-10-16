@@ -107,8 +107,10 @@ describe('Transfer and lock Tests', () => {
 
     async function deploySecurityFixtureMultiPartition() {
         const base = await deployEquityTokenFixture({
-            securityData: {
-                isMultiPartition: true,
+            equityDataParams: {
+                securityData: {
+                    isMultiPartition: true,
+                },
             },
         })
         diamond = base.diamond

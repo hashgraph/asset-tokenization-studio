@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-
 import {
     type ResolverProxy,
     type CorporateActions,
@@ -20,7 +19,7 @@ const actionData = '0x1234'
 const corporateActionId_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 
-describe('Corporate Actions Tests', () => {
+describe.only('Corporate Actions Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

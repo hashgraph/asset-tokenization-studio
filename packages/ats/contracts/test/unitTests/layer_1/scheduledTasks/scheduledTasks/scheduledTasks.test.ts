@@ -124,10 +124,6 @@ describe('Scheduled Tasks Tests', () => {
         await loadFixture(deploySecurityFixtureSinglePartition)
     })
 
-    afterEach(async () => {
-        await timeTravelFacet.resetSystemTimestamp()
-    })
-
     it('GIVEN a paused Token WHEN triggerTasks THEN transaction fails with TokenIsPaused', async () => {
         // Pausing the token
         await pauseFacet.connect(signer_B).pause()

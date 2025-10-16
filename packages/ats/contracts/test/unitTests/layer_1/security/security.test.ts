@@ -5,6 +5,7 @@ import { type ResolverProxy, type Security, IERC1410 } from '@typechain'
 import { ATS_ROLES } from '@scripts'
 import { executeRbac } from '@test/fixtures/tokens/common.fixture'
 import { deployEquityTokenFixture } from '@test/fixtures'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -20,11 +21,13 @@ describe('Security Tests', () => {
     let securityFacet: Security
     let erc1410Facet: IERC1410
 
-    beforeEach(async () => {
+    async function deploySecurityFixture() {
         const base = await deployEquityTokenFixture({
-            securityData: {
-                isMultiPartition: true,
-                internalKycActivated: false,
+            equityDataParams: {
+                securityData: {
+                    isMultiPartition: true,
+                    internalKycActivated: false,
+                },
             },
         })
         diamond = base.diamond
@@ -41,6 +44,10 @@ describe('Security Tests', () => {
 
         securityFacet = await ethers.getContractAt('Security', diamond.address)
         erc1410Facet = await ethers.getContractAt('IERC1410', diamond.address)
+    }
+
+    beforeEach(async () => {
+        await loadFixture(deploySecurityFixture)
     })
 
     describe('security', () => {

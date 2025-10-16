@@ -95,11 +95,11 @@ export async function deployFullSuiteFixture() {
         .connect(deployer)
         .addAndUseTREXVersion(versionStruct, contractsStruct)
 
-    const trexFactory = await ethers.deployContract(
-        'TREXFactory',
-        [trexImplementationAuthority.address, identityFactory.address],
-        deployer
-    )
+    const trexFactory = await (
+        await ethers.getContractFactory('TREXFactory', deployer)
+    ).deploy(trexImplementationAuthority.address, identityFactory.address)
+    await trexFactory.deployed()
+
     await identityFactory.connect(deployer).addTokenFactory(trexFactory.address)
 
     const claimTopicsRegistry = await ethers

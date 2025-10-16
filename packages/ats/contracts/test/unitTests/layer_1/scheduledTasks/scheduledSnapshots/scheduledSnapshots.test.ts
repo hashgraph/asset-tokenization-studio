@@ -75,10 +75,6 @@ describe('Scheduled Snapshots Tests', () => {
         await loadFixture(deploySecurityFixtureSinglePartition)
     })
 
-    afterEach(async () => {
-        timeTravelFacet.resetSystemTimestamp()
-    })
-
     it('GIVEN a token WHEN triggerSnapshots THEN transaction succeeds', async () => {
         await accessControlFacet
             .connect(signer_A)

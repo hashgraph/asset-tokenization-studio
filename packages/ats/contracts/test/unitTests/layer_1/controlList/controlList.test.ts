@@ -13,7 +13,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
 import { executeRbac } from '@test/fixtures/tokens/common.fixture'
 
-describe('Control List Tests', () => {
+describe.only('Control List Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

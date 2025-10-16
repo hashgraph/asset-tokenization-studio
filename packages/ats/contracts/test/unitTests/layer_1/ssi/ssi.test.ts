@@ -1,14 +1,12 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { takeSnapshot } from '@nomicfoundation/hardhat-network-helpers'
-import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import {
     type ResolverProxy,
     Pause,
     SsiManagement,
     MockedT3RevocationRegistry,
-    MockedT3RevocationRegistry__factory,
 } from '@typechain'
 import { ATS_ROLES } from '@scripts'
 import { deployEquityTokenFixture } from '@test/fixtures'
@@ -24,9 +22,7 @@ describe('SSI Tests', () => {
     let ssiManagementFacet: SsiManagement
     let revocationList: MockedT3RevocationRegistry
 
-    let snapshot: SnapshotRestorer
-
-    beforeEach(async () => {
+    async function deploySecurityFixture() {
         const base = await deployEquityTokenFixture()
         diamond = base.diamond
         signer_A = base.deployer
@@ -53,18 +49,17 @@ describe('SSI Tests', () => {
             diamond.address,
             signer_C
         )
-        snapshot = await takeSnapshot()
-        const revocationListDeployed =
-            await new MockedT3RevocationRegistry__factory(signer_A).deploy()
-        revocationList = await ethers.getContractAt(
-            'MockedT3RevocationRegistry',
-            revocationListDeployed.address,
-            signer_C
-        )
-    })
+        revocationList = await (
+            await ethers.getContractFactory(
+                'MockedT3RevocationRegistry',
+                signer_C
+            )
+        ).deploy()
+        await revocationList.deployed()
+    }
 
-    after(async () => {
-        await snapshot.restore()
+    beforeEach(async () => {
+        await loadFixture(deploySecurityFixture)
     })
 
     describe('Paused', () => {

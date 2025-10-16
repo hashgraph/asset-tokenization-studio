@@ -9,13 +9,14 @@ import {
 } from '@typechain'
 import { GAS_LIMIT, ATS_ROLES } from '@scripts'
 import { deployBondTokenFixture } from '@test/fixtures'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const PROCEED_RECIPIENT_1 = '0x1234567890123456789012345678901234567890'
 const PROCEED_RECIPIENT_1_DATA = '0xabcdef'
 const PROCEED_RECIPIENT_2 = '0x2345678901234567890123456789012345678901'
 const PROCEED_RECIPIENT_2_DATA = '0x88888888'
 
-describe('Proceed Recipients Tests', () => {
+describe.only('Proceed Recipients Tests', () => {
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
 
@@ -24,10 +25,12 @@ describe('Proceed Recipients Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
-    beforeEach(async () => {
+    async function deploySecurityFixtureR() {
         const base = await deployBondTokenFixture({
-            proceedRecipients: [PROCEED_RECIPIENT_2],
-            proceedRecipientsData: [PROCEED_RECIPIENT_2_DATA],
+            bondDataParams: {
+                proceedRecipients: [PROCEED_RECIPIENT_2],
+                proceedRecipientsData: [PROCEED_RECIPIENT_2_DATA],
+            },
         })
 
         diamond = base.diamond
@@ -57,6 +60,10 @@ describe('Proceed Recipients Tests', () => {
         )
 
         await accessControlFacet.grantRole(ATS_ROLES.PAUSER, signer_A.address)
+    }
+
+    beforeEach(async () => {
+        await loadFixture(deploySecurityFixtureR)
     })
 
     describe('Initialization Tests', () => {

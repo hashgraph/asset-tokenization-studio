@@ -1,4 +1,9 @@
 import { ethers } from 'ethers'
+import { AtsRoleName, AtsRoleHash } from '../constants'
+export interface Rbac {
+    role: AtsRoleName | AtsRoleHash
+    members: string[]
+}
 
 export interface SecurityDataParams {
     /** Protect partitions from unauthorized access */
@@ -6,24 +11,24 @@ export interface SecurityDataParams {
     /** Enable multi-partition support */
     isMultiPartition: boolean
     /** BusinessLogicResolver address */
-    businessLogicResolver: string
+    resolver: string
     /** Enable controllable transfers */
     isControllable: boolean
     /** Enable whitelist mode */
     isWhiteList: boolean
     /** Maximum supply of tokens */
     maxSupply: ethers.BigNumberish
-
-    /** ERC20 metadata information */
-    /** Token name */
-    name: string
-    /** Token symbol */
-    symbol: string
-    /** Token decimals */
-    decimals: number
-    /** ISIN identifier */
-    isin: string
-
+    erc20MetadataInfo: {
+        /** ERC20 metadata information */
+        /** Token name */
+        name: string
+        /** Token symbol */
+        symbol: string
+        /** Token decimals */
+        decimals: number
+        /** ISIN identifier */
+        isin: string
+    }
     /** Enable clearing functionality */
     clearingActive: boolean
     /** Activate internal KYC */
@@ -40,6 +45,12 @@ export interface SecurityDataParams {
     compliance: string
     /** Identity registry contract address */
     identityRegistry: string
+    resolverProxyConfiguration: {
+        key: string
+        version: number
+    }
+    /** RBAC roles and their assigned addresses */
+    rbacs: Rbac[]
 }
 
 export interface BondDetailsDataParams {
@@ -73,12 +84,15 @@ export interface FactoryRegulationDataParams {
     regulationType: number
     /** Regulation sub-type */
     regulationSubType: number
-    /** Countries control list type (true = whitelist, false = blacklist) */
-    countriesControlListType: boolean
-    /** Comma-separated country codes */
-    listOfCountries: string
-    /** Additional security information */
-    info: string
+
+    additionalSecurityData: {
+        /** Countries control list type (true = whitelist, false = blacklist) */
+        countriesControlListType: boolean
+        /** Comma-separated country codes */
+        listOfCountries: string
+        /** Additional security information */
+        info: string
+    }
 }
 
 export enum SecurityType {

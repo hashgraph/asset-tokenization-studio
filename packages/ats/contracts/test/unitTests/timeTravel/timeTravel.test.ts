@@ -3,6 +3,7 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { ResolverProxy, TimeTravelFacet } from '@typechain'
 import { deployEquityTokenFixture } from '@test/fixtures'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { dateToUnixTimestamp } from '@scripts'
 
 describe('Time Travel Tests', () => {
@@ -23,11 +24,7 @@ describe('Time Travel Tests', () => {
     }
 
     beforeEach(async () => {
-        await setupEnvironment()
-    })
-
-    afterEach(async () => {
-        await timeTravelFacet.resetSystemTimestamp()
+        await loadFixture(setupEnvironment)
     })
 
     it('GIVEN succesful deployment THEN chainId is hardhat network id', async () => {

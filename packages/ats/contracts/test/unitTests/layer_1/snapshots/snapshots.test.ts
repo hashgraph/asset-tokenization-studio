@@ -61,8 +61,10 @@ describe('Snapshots Tests', () => {
 
     async function deploySecurityFixtureMultiPartition() {
         const base = await deployEquityTokenFixture({
-            securityData: {
-                isMultiPartition: true,
+            equityDataParams: {
+                securityData: {
+                    isMultiPartition: true,
+                },
             },
         })
         diamond = base.diamond
@@ -128,10 +130,6 @@ describe('Snapshots Tests', () => {
 
     beforeEach(async () => {
         await loadFixture(deploySecurityFixtureMultiPartition)
-    })
-
-    afterEach(async () => {
-        timeTravelFacet.resetSystemTimestamp()
     })
 
     it('GIVEN an account without snapshot role WHEN takeSnapshot THEN transaction fails with AccountHasNoRole', async () => {

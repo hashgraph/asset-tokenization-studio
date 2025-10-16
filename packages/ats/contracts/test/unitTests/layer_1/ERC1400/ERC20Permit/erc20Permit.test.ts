@@ -14,7 +14,7 @@ import { deployEquityTokenFixture } from '@test/fixtures'
 
 import { executeRbac } from '@test/fixtures/tokens/common.fixture'
 
-describe('ERC20Permit Tests', () => {
+describe.only('ERC20Permit Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -323,7 +323,9 @@ describe('ERC20Permit Tests', () => {
     describe('Multi Partition', () => {
         it('GIVEN a new diamond contract with multi-partition enabled WHEN permit is called THEN the transaction fails with NotAllowedInMultiPartitionMode', async () => {
             const base = await deployEquityTokenFixture({
-                securityData: { isMultiPartition: true },
+                equityDataParams: {
+                    securityData: { isMultiPartition: true },
+                },
             })
 
             await expect(

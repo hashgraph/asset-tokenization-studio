@@ -34,7 +34,7 @@ interface Adjustment {
     decimals: number
 }
 
-describe('Cap Tests', () => {
+describe.only('Cap Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -52,9 +52,11 @@ describe('Cap Tests', () => {
 
     async function deploySecurityFixtureMultiPartition() {
         const base = await deployEquityTokenFixture({
-            securityData: {
-                isMultiPartition: true,
-                maxSupply: maxSupply * 2,
+            equityDataParams: {
+                securityData: {
+                    isMultiPartition: true,
+                    maxSupply: maxSupply * 2,
+                },
             },
         })
         diamond = base.diamond
@@ -135,9 +137,11 @@ describe('Cap Tests', () => {
     it('GIVEN setting 0 to max supply WHEN trying to initialize THEN transaction fails', async () => {
         await expect(
             deployEquityTokenFixture({
-                securityData: {
-                    isMultiPartition: true,
-                    maxSupply: 0,
+                equityDataParams: {
+                    securityData: {
+                        isMultiPartition: true,
+                        maxSupply: 0,
+                    },
                 },
             })
         ).to.be.rejectedWith('NewMaxSupplyCannotBeZero')

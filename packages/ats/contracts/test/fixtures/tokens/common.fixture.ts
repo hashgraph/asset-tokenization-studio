@@ -1,23 +1,24 @@
-// SPDX-License-Identifier: Apache-2.0
-
-/**
- * Common token utilities and shared fixture helpers.
- *
- * Provides utility functions and types used across multiple token fixtures.
- */
-
-import { ATS_ROLES, AtsRoleHash, AtsRoleName } from '@scripts'
-import { AccessControlFacet } from '@typechain'
+import {
+    ATS_ROLES,
+    AtsRoleHash,
+    AtsRoleName,
+    DeepPartial,
+    EQUITY_CONFIG_ID,
+    RegulationSubType,
+    RegulationType,
+} from '@scripts'
+import {
+    FactoryRegulationDataParams,
+    Rbac,
+    SecurityDataParams,
+} from '@scripts/domain/factory/types'
+import { AccessControlFacet, BusinessLogicResolver } from '@typechain'
 import { ethers } from 'hardhat'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { resolverProxy } from '@typechain/contracts/resolver'
 
-/**
- * Common constants for token testing
- */
 export const MAX_UINT256 = ethers.constants.MaxUint256
 
-/**
- * Test partition identifiers
- */
 export const TEST_PARTITIONS = {
     DEFAULT: ethers.utils.formatBytes32String('default'),
     PARTITION_1: ethers.utils.formatBytes32String('partition1'),
@@ -25,9 +26,6 @@ export const TEST_PARTITIONS = {
     PARTITION_3: ethers.utils.formatBytes32String('partition3'),
 } as const
 
-/**
- * Common test amounts
- */
 export const TEST_AMOUNTS = {
     SMALL: ethers.utils.parseUnits('100', 6),
     MEDIUM: ethers.utils.parseUnits('1000', 6),
@@ -36,10 +34,7 @@ export const TEST_AMOUNTS = {
 
 export async function executeRbac(
     accessControlFacet: AccessControlFacet,
-    rbac: {
-        role: AtsRoleName | AtsRoleHash
-        members: string[]
-    }[]
+    rbac: Rbac[]
 ) {
     await Promise.all(
         rbac.map(async (r) => {
@@ -52,4 +47,112 @@ export async function executeRbac(
             )
         })
     )
+}
+
+export const DEFAULT_SECURITY_PARAMS = {
+    isWhiteList: false,
+    isControllable: true,
+    arePartitionsProtected: false,
+    isMultiPartition: false,
+    maxSupply: ethers.constants.MaxUint256,
+    name: 'TEST_Security',
+    symbol: 'TEST',
+    decimals: 6,
+    clearingActive: false,
+    internalKycActivated: true,
+    externalPauses: [],
+    externalControlLists: [],
+    externalKycLists: [],
+    erc20VotesActivated: false,
+    compliance: ethers.constants.AddressZero,
+    identityRegistry: ethers.constants.AddressZero,
+    rbacs: [],
+}
+
+export function getSecurityData(
+    blr: BusinessLogicResolver,
+    params?: DeepPartial<SecurityDataParams>
+): SecurityDataParams {
+    return {
+        arePartitionsProtected:
+            params?.arePartitionsProtected ??
+            DEFAULT_SECURITY_PARAMS.arePartitionsProtected,
+        isMultiPartition:
+            params?.isMultiPartition ??
+            DEFAULT_SECURITY_PARAMS.isMultiPartition,
+        resolver: blr.address,
+        rbacs: (params?.rbacs as Rbac[]) ?? DEFAULT_SECURITY_PARAMS.rbacs,
+        isControllable:
+            params?.isControllable ?? DEFAULT_SECURITY_PARAMS.isControllable,
+        isWhiteList: params?.isWhiteList ?? DEFAULT_SECURITY_PARAMS.isWhiteList,
+        maxSupply: params?.maxSupply ?? DEFAULT_SECURITY_PARAMS.maxSupply,
+        erc20MetadataInfo: {
+            name:
+                params?.erc20MetadataInfo?.name ?? DEFAULT_SECURITY_PARAMS.name,
+            symbol:
+                params?.erc20MetadataInfo?.symbol ??
+                DEFAULT_SECURITY_PARAMS.symbol,
+            decimals:
+                params?.erc20MetadataInfo?.decimals ??
+                DEFAULT_SECURITY_PARAMS.decimals,
+            isin: params?.erc20MetadataInfo?.isin ?? isinGenerator(),
+        },
+        clearingActive:
+            params?.clearingActive ?? DEFAULT_SECURITY_PARAMS.clearingActive,
+        internalKycActivated:
+            params?.internalKycActivated ??
+            DEFAULT_SECURITY_PARAMS.internalKycActivated,
+        externalPauses: [
+            ...((params?.externalPauses as string[]) ??
+                DEFAULT_SECURITY_PARAMS.externalPauses),
+        ],
+        externalControlLists:
+            (params?.externalControlLists as string[]) ??
+            DEFAULT_SECURITY_PARAMS.externalControlLists,
+        externalKycLists:
+            (params?.externalKycLists as string[]) ??
+            DEFAULT_SECURITY_PARAMS.externalKycLists,
+        erc20VotesActivated:
+            params?.erc20VotesActivated ??
+            DEFAULT_SECURITY_PARAMS.erc20VotesActivated,
+        compliance: params?.compliance ?? DEFAULT_SECURITY_PARAMS.compliance,
+        identityRegistry:
+            params?.identityRegistry ??
+            DEFAULT_SECURITY_PARAMS.identityRegistry,
+        resolverProxyConfiguration: {
+            key: ethers.utils.hexlify([]),
+            version: 1,
+        },
+    }
+}
+
+export const DEFAULT_REGULATION_PARAMS = {
+    regulationType: RegulationType.REG_S,
+    regulationSubType: RegulationSubType.NONE,
+    countriesControlListType: true,
+    listOfCountries: 'US,GB,CH',
+    info: 'Test token for unit tests',
+}
+
+export function getRegulationData(
+    params?: DeepPartial<FactoryRegulationDataParams>
+) {
+    return {
+        regulationType:
+            params?.regulationType ?? DEFAULT_REGULATION_PARAMS.regulationType,
+        regulationSubType:
+            params?.regulationSubType ??
+            DEFAULT_REGULATION_PARAMS.regulationSubType,
+        additionalSecurityData: {
+            countriesControlListType:
+                params?.additionalSecurityData?.countriesControlListType ??
+                DEFAULT_REGULATION_PARAMS.countriesControlListType,
+            listOfCountries:
+                params?.additionalSecurityData?.listOfCountries ??
+                DEFAULT_REGULATION_PARAMS.listOfCountries,
+            info:
+                params?.additionalSecurityData?.info ??
+                DEFAULT_REGULATION_PARAMS.info,
+        },
+    }
 }
