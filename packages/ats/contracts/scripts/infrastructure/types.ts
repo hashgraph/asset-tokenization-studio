@@ -134,6 +134,52 @@ export interface FacetDefinition {
 }
 
 /**
+ * Registry provider interface for dependency injection.
+ *
+ * Allows downstream projects to provide their own registry implementation
+ * (e.g., combining ATS facets with custom facets).
+ *
+ * @example
+ * ```typescript
+ * // Downstream project with custom facets
+ * const customRegistry: RegistryProvider = {
+ *   getFacetDefinition: (name) => {
+ *     // Try custom facets first
+ *     const custom = myCustomFacets[name]
+ *     if (custom) return custom
+ *
+ *     // Fall back to ATS registry
+ *     return getFacetDefinition(name)
+ *   },
+ *   getAllFacets: () => {
+ *     // Combine ATS and custom facets
+ *     return [...getAllFacets(), ...Object.values(myCustomFacets)]
+ *   }
+ * }
+ *
+ * // Use custom registry
+ * await deployFacets(provider, {
+ *   facetNames: ['AccessControlFacet', 'MyCustomFacet'],
+ *   registry: customRegistry
+ * })
+ * ```
+ */
+export interface RegistryProvider {
+    /**
+     * Get facet definition by name.
+     * @param name - Facet name
+     * @returns Facet definition or undefined if not found
+     */
+    getFacetDefinition(name: string): FacetDefinition | undefined
+
+    /**
+     * Get all facets in the registry.
+     * @returns Array of all facet definitions
+     */
+    getAllFacets(): FacetDefinition[]
+}
+
+/**
  * Generic contract definition (non-facet contracts like Factory, BLR).
  *
  * NOTE: Simplified along with FacetDefinition. Infrastructure contracts

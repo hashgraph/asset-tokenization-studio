@@ -1,6 +1,7 @@
 import {
     DeploymentProvider,
     DeploymentResult,
+    RegistryProvider,
     deployContract,
     getAllFacets,
     getFacetDefinition,
@@ -33,6 +34,13 @@ export interface DeployFacetsOptions {
 
     /** Network */
     network?: string
+
+    /**
+     * Custom registry provider (optional).
+     * If not provided, uses the default ATS registry.
+     * Allows downstream projects to inject their own registry with custom facets.
+     */
+    registry?: RegistryProvider
 }
 
 /**
@@ -78,7 +86,12 @@ export async function deployFacets(
     provider: DeploymentProvider,
     options: DeployFacetsOptions = {}
 ): Promise<DeployFacetsResult> {
-    const { facetNames, useTimeTravel = false, network: _network } = options
+    const {
+        facetNames,
+        useTimeTravel = false,
+        network: _network,
+        registry,
+    } = options
 
     section('Deploying Facets')
 
@@ -86,27 +99,40 @@ export async function deployFacets(
     const failed = new Map<string, string>()
     const skipped = new Map<string, string>()
 
+    // Use custom registry or default ATS registry
+    const registryGetFacet = registry
+        ? registry.getFacetDefinition.bind(registry)
+        : getFacetDefinition
+    const registryGetAll = registry
+        ? registry.getAllFacets.bind(registry)
+        : getAllFacets
+
     try {
         // Determine which facets to deploy
         let facetsToDeployDefs
 
         if (facetNames && facetNames.length > 0) {
-            // Deploy specific facets
-            facetsToDeployDefs = facetNames
-                .map((name) => getFacetDefinition(name))
-                .filter((def) => def !== undefined)
-
-            const missingFacets = facetNames.filter(
-                (name) => !getFacetDefinition(name)
-            )
-            if (missingFacets.length > 0) {
-                warn(
-                    `Facets not found in registry: ${missingFacets.join(', ')}`
-                )
+            // Deploy specific facets (including external facets not in registry)
+            facetsToDeployDefs = []
+            for (const name of facetNames) {
+                const def = registryGetFacet(name)
+                if (!def) {
+                    // External facet not in registry - warn but continue
+                    warn(
+                        `${name} not found in registry, deploying anyway (external facet)`
+                    )
+                    facetsToDeployDefs.push({
+                        name,
+                        description: 'External facet (not in registry)',
+                    })
+                } else {
+                    // Registry facet
+                    facetsToDeployDefs.push(def)
+                }
             }
         } else {
             // Deploy all facets
-            facetsToDeployDefs = getAllFacets()
+            facetsToDeployDefs = registryGetAll()
             info('Deploying all facets')
         }
 

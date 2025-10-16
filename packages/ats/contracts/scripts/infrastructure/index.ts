@@ -31,6 +31,7 @@
 
 export type {
     DeploymentProvider,
+    RegistryProvider,
     FacetDefinition,
     ContractDefinition,
     NetworkConfig,

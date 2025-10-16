@@ -84,3 +84,30 @@ export * from './domain/factory/deployEquityToken'
 // Complete deployment workflows
 export * from './workflows/deployCompleteSystem'
 export * from './workflows/deployWithExistingBlr'
+
+// ========================================
+// Registry Generation Tools (for extending ATS)
+// ========================================
+
+// Registry generation
+export * from './tools/generators/registryGenerator'
+
+// Contract scanning
+export * from './tools/scanner/contractFinder'
+export * from './tools/scanner/metadataExtractor'
+
+// Utilities
+export * from './tools/utils/fileUtils'
+
+// Solidity utilities (selective export to avoid conflicts with infrastructure/utils/naming)
+export {
+    extractContractNames,
+    extractRoles,
+    extractImports,
+    isFacetName,
+    getBaseName,
+    extractSolidityVersion,
+    implementsInterface,
+    extractInheritance,
+    // Note: isTimeTravelVariant already exported from infrastructure/utils/naming
+} from './tools/utils/solidityUtils'

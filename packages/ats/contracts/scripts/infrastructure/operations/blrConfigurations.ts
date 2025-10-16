@@ -620,7 +620,7 @@ export async function createBatchConfiguration(
 
     const { resolveContractName } = await import('../utils/naming')
     const { getFacetDefinition } = await import('../registry')
-    const { info } = await import('../utils/logging')
+    const { info, warn } = await import('../utils/logging')
     const { ethers } = await import('ethers')
     const { ok, err } = await import('../types')
 
@@ -670,10 +670,14 @@ export async function createBatchConfiguration(
                     )
                     return false
                 }
+
+                // Check registry (informational only, not restrictive)
                 const definition = getFacetDefinition(facet.facetName)
                 if (!definition) {
-                    info(`Skipping ${facet.facetName} - not in registry`, {})
-                    return false
+                    warn(
+                        `${facet.facetName} not found in ATS registry, configuring anyway (external facet)`
+                    )
+                    // Continue instead of filtering out - allow external facets
                 }
 
                 return true
