@@ -16,7 +16,7 @@ const PROCEED_RECIPIENT_1_DATA = '0xabcdef'
 const PROCEED_RECIPIENT_2 = '0x2345678901234567890123456789012345678901'
 const PROCEED_RECIPIENT_2_DATA = '0x88888888'
 
-describe.only('Proceed Recipients Tests', () => {
+describe('Proceed Recipients Tests', () => {
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
 

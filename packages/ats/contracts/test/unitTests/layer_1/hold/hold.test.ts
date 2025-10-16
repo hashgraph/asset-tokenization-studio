@@ -60,7 +60,7 @@ enum ThirdPartyType {
     CLEARING,
 }
 
-describe.only('Hold Tests', () => {
+describe('Hold Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

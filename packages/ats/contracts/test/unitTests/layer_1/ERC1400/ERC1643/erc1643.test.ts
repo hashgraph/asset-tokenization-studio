@@ -24,7 +24,7 @@ const documentURI_2 = 'https://whatever2.com'
 const documentHASH_2 =
     '0x000000000000000000000000000000000000000000000000000000000002cc32'
 
-describe.only('ERC1643 Tests', () => {
+describe('ERC1643 Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

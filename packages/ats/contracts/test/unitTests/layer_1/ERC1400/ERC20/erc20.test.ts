@@ -24,7 +24,7 @@ const amount = 1000
 // con erc20 y sin erc1410 funciona
 // sin erc20 y con erc1410 funciona
 // con erc20 y con erc1410 NO funciona
-describe.only('ERC20 Tests', () => {
+describe('ERC20 Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

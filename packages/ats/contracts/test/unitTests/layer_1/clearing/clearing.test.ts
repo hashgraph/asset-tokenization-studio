@@ -100,7 +100,7 @@ let clearingOperation: ClearingOperation
 let clearingOperationFrom: ClearingOperationFrom
 let hold: Hold
 
-describe.only('Clearing Tests', () => {
+describe('Clearing Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

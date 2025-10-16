@@ -85,7 +85,7 @@ interface BalanceAdjustedValues {
     metadata?: any
 }
 
-describe.only('ERC1410 Tests', () => {
+describe('ERC1410 Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

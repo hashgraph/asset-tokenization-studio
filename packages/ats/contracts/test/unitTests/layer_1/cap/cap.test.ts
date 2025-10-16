@@ -34,7 +34,7 @@ interface Adjustment {
     decimals: number
 }
 
-describe.only('Cap Tests', () => {
+describe('Cap Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

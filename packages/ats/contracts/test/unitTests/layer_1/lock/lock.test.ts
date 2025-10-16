@@ -41,7 +41,7 @@ const balanceOf_B_Original = [20 * _AMOUNT, 200 * _AMOUNT]
 const adjustFactor = 253
 const adjustDecimals = 2
 
-describe.only('Lock Tests', () => {
+describe('Lock Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

@@ -334,7 +334,7 @@ describe('Factory Tests', () => {
                 security: getSecurityData(businessLogicResolver, {
                     rbacs: init_rbacs,
                 }),
-                bondDetails: getBondDetails(),
+                bondDetails: await await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -357,7 +357,7 @@ describe('Factory Tests', () => {
                     erc20MetadataInfo: { isin: 'invalid_isin' },
                     rbacs: init_rbacs,
                 }),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -380,7 +380,7 @@ describe('Factory Tests', () => {
         it('GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails', async () => {
             const bondData = {
                 security: getSecurityData(businessLogicResolver),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -401,7 +401,7 @@ describe('Factory Tests', () => {
                 security: getSecurityData(businessLogicResolver, {
                     rbacs: init_rbacs,
                 }),
-                bondDetails: getBondDetails({
+                bondDetails: await getBondDetails({
                     maturityDate: Math.floor(Date.now() / 1000),
                 }),
                 proceedRecipients: [],
@@ -434,7 +434,7 @@ describe('Factory Tests', () => {
                 security: getSecurityData(businessLogicResolver, {
                     rbacs: init_rbacs,
                 }),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -527,7 +527,7 @@ describe('Factory Tests', () => {
                 security: getSecurityData(businessLogicResolver, {
                     rbacs: init_rbacs,
                 }),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -559,7 +559,7 @@ describe('Factory Tests', () => {
                 security: getSecurityData(businessLogicResolver, {
                     rbacs: init_rbacs,
                 }),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }

@@ -59,7 +59,7 @@ let couponData = {
     period: couponPeriod,
 }
 
-describe.only('Bond Tests', () => {
+describe('Bond Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

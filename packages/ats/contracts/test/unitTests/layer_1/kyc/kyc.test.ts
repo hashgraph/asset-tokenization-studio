@@ -20,7 +20,7 @@ const _VALID_FROM = 0
 const _VALID_TO = 99999999999999
 const _VC_ID = 'VC_24'
 
-describe.only('Kyc Tests', () => {
+describe('Kyc Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

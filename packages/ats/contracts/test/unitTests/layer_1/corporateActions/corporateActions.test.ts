@@ -19,7 +19,7 @@ const actionData = '0x1234'
 const corporateActionId_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 
-describe.only('Corporate Actions Tests', () => {
+describe('Corporate Actions Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

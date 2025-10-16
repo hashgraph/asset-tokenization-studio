@@ -14,7 +14,7 @@ import { deployEquityTokenFixture } from '@test/fixtures'
 
 import { executeRbac } from '@test/fixtures/tokens/common.fixture'
 
-describe.only('ERC20Permit Tests', () => {
+describe('ERC20Permit Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

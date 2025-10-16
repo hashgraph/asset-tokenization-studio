@@ -55,7 +55,7 @@ const EMPTY_VC_ID = EMPTY_STRING
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
 const onchainId = ethers.Wallet.createRandom().address
 
-describe.only('ERC3643 Tests', () => {
+describe('ERC3643 Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

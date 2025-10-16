@@ -10,7 +10,7 @@ import {
 } from '@typechain'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
-describe.only('ExternalKycList Management Tests', () => {
+describe('ExternalKycList Management Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

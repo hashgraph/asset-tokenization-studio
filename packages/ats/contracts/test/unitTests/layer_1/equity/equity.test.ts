@@ -58,7 +58,7 @@ let balanceAdjustmentData = {
 const number_Of_Shares = 100000n
 const EMPTY_VC_ID = EMPTY_STRING
 
-describe.only('Equity Tests', () => {
+describe('Equity Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

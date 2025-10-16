@@ -11,7 +11,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { deployEquityTokenFixture } from '@test/fixtures'
 import { ATS_ROLES, GAS_LIMIT } from '@scripts'
 
-describe.only('ExternalControlList Management Tests', () => {
+describe('ExternalControlList Management Tests', () => {
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
 

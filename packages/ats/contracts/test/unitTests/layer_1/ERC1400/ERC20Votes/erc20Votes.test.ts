@@ -18,7 +18,7 @@ import { TimeTravel } from '@typechain/contracts/test/testTimeTravel/timeTravel/
 
 const amount = 1000
 
-describe.only('ERC20Votes Tests', () => {
+describe('ERC20Votes Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

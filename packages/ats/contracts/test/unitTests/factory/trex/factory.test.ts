@@ -456,7 +456,7 @@ describe('TREX Factory Tests', () => {
         it('GIVEN a consumed salt WHEN reusing it THEN transaction reverts with token already deployed', async () => {
             const bondData = {
                 security: getSecurityData(businessLogicResolver),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -492,7 +492,7 @@ describe('TREX Factory Tests', () => {
         it('GIVEN an invalid claim pattern THEN transaction reverts with claim pattern not valid', async () => {
             const bondData = {
                 security: getSecurityData(businessLogicResolver),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -521,7 +521,7 @@ describe('TREX Factory Tests', () => {
         it('GIVEN max claim issuers exceeded THEN transaction reverts with max 5 claim issuers at deployment', async () => {
             const bondData = {
                 security: getSecurityData(businessLogicResolver),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -556,7 +556,7 @@ describe('TREX Factory Tests', () => {
         it('GIVEN max claim topics exceeded THEN transaction reverts with max 5 claim topics at deployment', async () => {
             const bondData = {
                 security: getSecurityData(businessLogicResolver),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -587,7 +587,7 @@ describe('TREX Factory Tests', () => {
         it('GIVEN max ir agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
             const bondData = {
                 security: getSecurityData(businessLogicResolver),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -619,7 +619,7 @@ describe('TREX Factory Tests', () => {
         it('GIVEN max token agents exceeded THEN transaction reverts with max 5 agents at deployment', async () => {
             const bondData = {
                 security: getSecurityData(businessLogicResolver),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -651,7 +651,7 @@ describe('TREX Factory Tests', () => {
         it('GIVEN max modules actions exceeded THEN transaction reverts with max 30 module actions at deployment', async () => {
             const bondData = {
                 security: getSecurityData(businessLogicResolver),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -685,7 +685,7 @@ describe('TREX Factory Tests', () => {
                 security: getSecurityData(businessLogicResolver, {
                     rbacs: init_rbacs,
                 }),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }
@@ -743,7 +743,7 @@ describe('TREX Factory Tests', () => {
         it('GIVEN correct data WHEN fetching deployed suite by salt THEN suite details are returned', async () => {
             const bondData = {
                 security: getSecurityData(businessLogicResolver),
-                bondDetails: getBondDetails(),
+                bondDetails: await getBondDetails(),
                 proceedRecipients: [],
                 proceedRecipientsData: [],
             }

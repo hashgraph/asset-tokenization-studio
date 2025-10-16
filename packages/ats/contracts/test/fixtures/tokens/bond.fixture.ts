@@ -16,7 +16,7 @@ import {
     FactoryRegulationDataParams,
 } from '@scripts/domain/factory/types'
 import { getRegulationData, getSecurityData } from './common.fixture'
-import { ethers } from 'hardhat'
+import { getDltTimestamp } from '@test/common'
 
 /**
  * Default bond token parameters.
@@ -28,7 +28,7 @@ export const DEFAULT_BOND_PARAMS = {
     proceedRecipients: [] as string[],
     proceedRecipientsData: [] as string[],
     startingDate: async () => {
-        return (await ethers.provider.getBlock('latest')).timestamp + 3600 //block.timestamp + 1 hour
+        return (await getDltTimestamp()) + 3600 //block.timestamp + 1 hour
     },
 } as const
 

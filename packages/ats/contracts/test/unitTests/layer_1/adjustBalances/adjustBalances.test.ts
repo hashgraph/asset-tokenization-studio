@@ -27,7 +27,7 @@ const adjustFactor = 253
 const adjustDecimals = 2
 const EMPTY_VC_ID = ''
 
-describe.only('Adjust Balances Tests', () => {
+describe('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

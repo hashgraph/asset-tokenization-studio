@@ -13,7 +13,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Signer } from 'ethers'
 import { ethers } from 'hardhat'
 
-describe.only('Pause Tests', () => {
+describe('Pause Tests', () => {
     let diamond: ResolverProxy
     let pauseFacet: PauseFacet
     let accessControlFacet: AccessControl

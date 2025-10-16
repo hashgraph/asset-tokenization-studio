@@ -30,7 +30,7 @@ const DATA = '0x1234'
 const MAX_SUPPLY = 10000000
 const EMPTY_VC_ID = EMPTY_STRING
 
-describe.only('ERC1594 Tests', () => {
+describe('ERC1594 Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress

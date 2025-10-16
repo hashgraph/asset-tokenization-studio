@@ -10,7 +10,7 @@ import {
     MockedExternalPause,
 } from '@typechain'
 
-describe.only('ExternalPause Tests', () => {
+describe('ExternalPause Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
