@@ -15,6 +15,7 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+// Infrastructure layer - generic blockchain operations
 import {
     HardhatProvider,
     deployContract,
@@ -22,9 +23,14 @@ import {
     registerFacets,
     createBatchConfiguration,
     deployFacets,
-    EQUITY_CONFIG_ID,
     getFacetDefinition,
-} from '../../scripts/core'
+} from '@scripts/infrastructure'
+
+// Domain layer - ATS-specific business logic
+import { EQUITY_CONFIG_ID } from '@scripts/domain'
+
+// Test helpers
+import { TEST_SIZES } from '@test/helpers/constants'
 
 describe('External Facet Extensibility - Integration Tests', () => {
     let provider: HardhatProvider
@@ -72,7 +78,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
 
             // Should succeed despite being in registry
             expect(registerResult.success).to.be.true
-            expect(registerResult.registered.length).to.equal(1)
+            expect(registerResult.registered.length).to.equal(TEST_SIZES.SINGLE)
             expect(registerResult.registered[0]).to.equal('PauseFacet')
         })
 
@@ -99,7 +105,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             expect(registerResult.success).to.be.true
-            expect(registerResult.registered.length).to.equal(3)
+            expect(registerResult.registered.length).to.equal(TEST_SIZES.TRIPLE)
             expect(registerResult.failed.length).to.equal(0)
         })
     })
@@ -113,7 +119,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             expect(result.success).to.be.true
-            expect(result.deployed.size).to.equal(2)
+            expect(result.deployed.size).to.equal(TEST_SIZES.DUAL)
             expect(result.failed.size).to.equal(0)
 
             // Verify both facets were deployed
@@ -129,7 +135,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             expect(result.success).to.be.true
-            expect(result.deployed.size).to.equal(1)
+            expect(result.deployed.size).to.equal(TEST_SIZES.SINGLE)
             expect(result.failed.size).to.equal(0)
             expect(result.deployed.has('FreezeFacet')).to.be.true
         })
@@ -184,10 +190,12 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             // Should succeed (this is the key test!)
-            expect(configResult.ok).to.be.true
-            if (configResult.ok) {
-                expect(configResult.value.facetKeys.length).to.equal(1)
-                expect(configResult.value.facetKeys[0].facetName).to.equal(
+            expect(configResult.success).to.be.true
+            if (configResult.success) {
+                expect(configResult.data.facetKeys.length).to.equal(
+                    TEST_SIZES.SINGLE
+                )
+                expect(configResult.data.facetKeys[0].facetName).to.equal(
                     'PauseFacet'
                 )
             }
@@ -230,11 +238,13 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             // All facets should be included
-            expect(configResult.ok).to.be.true
-            if (configResult.ok) {
-                expect(configResult.value.facetKeys.length).to.equal(3)
+            expect(configResult.success).to.be.true
+            if (configResult.success) {
+                expect(configResult.data.facetKeys.length).to.equal(
+                    TEST_SIZES.TRIPLE
+                )
 
-                const facetNames = configResult.value.facetKeys.map(
+                const facetNames = configResult.data.facetKeys.map(
                     (f: { facetName: string }) => f.facetName
                 )
                 expect(facetNames).to.include('AccessControlFacet')
@@ -273,9 +283,11 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             // Should work fine
-            expect(configResult.ok).to.be.true
-            if (configResult.ok) {
-                expect(configResult.value.facetKeys.length).to.equal(2)
+            expect(configResult.success).to.be.true
+            if (configResult.success) {
+                expect(configResult.data.facetKeys.length).to.equal(
+                    TEST_SIZES.DUAL
+                )
             }
         })
     })
@@ -316,7 +328,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             expect(registerResult.success).to.be.true
-            expect(registerResult.registered.length).to.equal(3)
+            expect(registerResult.registered.length).to.equal(TEST_SIZES.TRIPLE)
 
             // Step 5: Create configuration with all facets
             const configResult = await createBatchConfiguration(blrContract, {
@@ -330,15 +342,17 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             // Verify configuration succeeded with all facets
-            expect(configResult.ok).to.be.true
-            if (configResult.ok) {
-                expect(configResult.value.facetKeys.length).to.equal(3)
-                expect(configResult.value.configurationId).to.equal(
+            expect(configResult.success).to.be.true
+            if (configResult.success) {
+                expect(configResult.data.facetKeys.length).to.equal(
+                    TEST_SIZES.TRIPLE
+                )
+                expect(configResult.data.configurationId).to.equal(
                     EQUITY_CONFIG_ID
                 )
 
                 // Verify external facet is included
-                const externalFacet = configResult.value.facetKeys.find(
+                const externalFacet = configResult.data.facetKeys.find(
                     (f: { facetName: string }) => f.facetName === 'PauseFacet'
                 )
                 expect(externalFacet).to.exist
@@ -379,11 +393,13 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             // Should succeed with only the 2 deployed facets
-            expect(configResult.ok).to.be.true
-            if (configResult.ok) {
-                expect(configResult.value.facetKeys.length).to.equal(2)
+            expect(configResult.success).to.be.true
+            if (configResult.success) {
+                expect(configResult.data.facetKeys.length).to.equal(
+                    TEST_SIZES.DUAL
+                )
 
-                const facetNames = configResult.value.facetKeys.map(
+                const facetNames = configResult.data.facetKeys.map(
                     (f: { facetName: string }) => f.facetName
                 )
                 expect(facetNames).to.include('AccessControlFacet')
@@ -422,10 +438,12 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             // Both operations should succeed - this is the core consistency test
-            expect(configResult.ok).to.be.true
-            if (configResult.ok) {
-                expect(configResult.value.facetKeys.length).to.equal(1)
-                expect(configResult.value.facetKeys[0].facetName).to.equal(
+            expect(configResult.success).to.be.true
+            if (configResult.success) {
+                expect(configResult.data.facetKeys.length).to.equal(
+                    TEST_SIZES.SINGLE
+                )
+                expect(configResult.data.facetKeys[0].facetName).to.equal(
                     'PauseFacet'
                 )
             }
@@ -444,9 +462,9 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             // Should fail with appropriate error
-            expect(configResult.ok).to.be.false
-            if (!configResult.ok) {
-                expect(configResult.error.code).to.equal('FACET_NOT_FOUND')
+            expect(configResult.success).to.be.false
+            if (!configResult.success) {
+                expect(configResult.error).to.equal('FACET_NOT_FOUND')
             }
         })
 
@@ -458,9 +476,9 @@ describe('External Facet Extensibility - Integration Tests', () => {
             })
 
             // Should fail with empty facet list error
-            expect(configResult.ok).to.be.false
-            if (!configResult.ok) {
-                expect(configResult.error.code).to.equal('EMPTY_FACET_LIST')
+            expect(configResult.success).to.be.false
+            if (!configResult.success) {
+                expect(configResult.error).to.equal('EMPTY_FACET_LIST')
             }
         })
     })

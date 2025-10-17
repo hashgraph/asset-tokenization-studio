@@ -81,6 +81,7 @@
         "test:factory": "npx hardhat test test/unitTests/factory/factory.test.ts",
         "test:trexFactory": "npx hardhat test test/unitTests/factory/trex/factory.test.ts",
         "test:resolver": "npx hardhat test test/unitTests/resolver/BusinessLogicResolver.test.ts",
+        "test:integration": "npx hardhat test test/integration/*.test.ts",
         "size": "npx hardhat size-contracts",
         "keccak256": "npx hardhat keccak256",
         "hash": "npm run keccak256",

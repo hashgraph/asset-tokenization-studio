@@ -11,13 +11,13 @@ import {
     ScheduledCrossOrderedTasks,
     Kyc,
     SsiManagement,
+    TimeTravelFacet as TimeTravel,
 } from '@typechain'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ATS_ROLES, dateToUnixTimestamp } from '@scripts'
 import { deployEquityTokenFixture, MAX_UINT256 } from '@test/fixtures'
 import { executeRbac } from '@test/fixtures/tokens/common.fixture'
-import { TimeTravel } from '@typechain/contracts/test/testTimeTravel/timeTravel/TimeTravel'
 
 const amount = 1
 const balanceOf_B_Original = [20 * amount, 200 * amount]

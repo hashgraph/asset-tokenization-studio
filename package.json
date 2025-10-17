@@ -72,6 +72,7 @@
     "ats:contracts:build": "npm run build --workspace=packages/ats/contracts",
     "ats:contracts:compile": "npm run compile --workspace=packages/ats/contracts",
     "ats:contracts:test": "npm run test --workspace=packages/ats/contracts",
+    "ats:contracts:test:integration": "npm run test:integration --workspace=packages/ats/contracts",
     "ats:contracts:test:ci": "npm run test:ci --workspace=packages/ats/contracts --if-present || npm run test --workspace=packages/ats/contracts",
     "ats:contracts:clean": "npm run clean --workspace=packages/ats/contracts",
     "ats:contracts:publish": "npm run publish --workspace=packages/ats/contracts",

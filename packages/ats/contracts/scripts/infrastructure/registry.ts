@@ -102,3 +102,17 @@ export function hasFacet(name: string): boolean {
 export function hasContract(name: string): boolean {
     return name in CONTRACT_REGISTRY
 }
+
+/**
+ * Total number of facets in the registry.
+ *
+ * This value is computed dynamically from the registry.
+ * Useful for tests that verify the registry contents.
+ *
+ * @example
+ * ```typescript
+ * const allFacets = getAllFacets()
+ * expect(allFacets.length).to.equal(FACET_REGISTRY_COUNT)
+ * ```
+ */
+export const FACET_REGISTRY_COUNT = Object.keys(FACET_REGISTRY).length

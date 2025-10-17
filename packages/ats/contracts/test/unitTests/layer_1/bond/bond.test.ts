@@ -18,6 +18,7 @@ import {
     FreezeFacet,
     ClearingTransferFacet,
     BondUSAReadFacet,
+    TimeTravelFacet as TimeTravel,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -33,7 +34,6 @@ import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { deployBondTokenFixture } from '@test/fixtures/tokens/bond.fixture'
 import { executeRbac, MAX_UINT256 } from '@test/fixtures/tokens/common.fixture'
-import { TimeTravel } from '@typechain/contracts/test/testTimeTravel/timeTravel/TimeTravel'
 
 const numberOfUnits = 1000
 let startingDate = 0

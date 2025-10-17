@@ -87,6 +87,7 @@ export {
     getAllContracts,
     hasFacet,
     hasContract,
+    FACET_REGISTRY_COUNT,
 } from './registry'
 
 // ============================================================================
@@ -130,6 +131,11 @@ export {
     type RegisterFacetsOptions,
     type RegisterFacetsResult,
 } from './operations/registerFacets'
+
+export {
+    registerAdditionalFacets,
+    type RegisterAdditionalFacetsOptions,
+} from './operations/registerAdditionalFacets'
 
 export {
     createBatchConfiguration,
@@ -197,4 +203,10 @@ export {
     table,
 } from './utils/logging'
 
-export { resolveContractName } from './utils/naming'
+export {
+    resolveContractName,
+    getTimeTravelVariant,
+    hasTimeTravelVariant,
+    getBaseContractName,
+    isTimeTravelVariant,
+} from './utils/naming'

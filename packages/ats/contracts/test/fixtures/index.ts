@@ -15,9 +15,6 @@ export { deployAtsInfrastructureFixture } from './infrastructure.fixture'
 // Token fixtures
 export {
     deployEquityTokenFixture,
-    deployEquityMultiPartitionFixture,
-    deployEquityProtectedPartitionsFixture,
-    deployEquityClearingFixture,
     DEFAULT_EQUITY_PARAMS,
 } from './tokens/equity.fixture'
 

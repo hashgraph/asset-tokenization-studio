@@ -15,11 +15,15 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+// Infrastructure layer - generic blockchain operations
 import {
     HardhatProvider,
     deployContract,
     deployProxy,
     registerFacets,
+    deployBlr,
+    deployProxyAdmin,
+    deployFacets,
     getTimeTravelVariant,
     hasTimeTravelVariant,
     resolveContractName,
@@ -30,9 +34,18 @@ import {
     FACET_REGISTRY,
     getFacetDefinition,
     getAllFacets,
+    FACET_REGISTRY_COUNT,
+} from '@scripts/infrastructure'
+
+// Domain layer - ATS-specific business logic
+import {
+    deployFactory,
     EQUITY_CONFIG_ID,
     BOND_CONFIG_ID,
-} from '../../scripts/core'
+} from '@scripts/domain'
+
+// Test helpers
+import { TEST_SIZES, BLR_VERSIONS } from '@test/helpers/constants'
 
 describe('Phase 1 Deployment System - Integration Tests', () => {
     let provider: HardhatProvider
@@ -157,7 +170,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
 
         it('should return all facets', () => {
             const allFacets = getAllFacets()
-            expect(allFacets.length).to.equal(46) // Registry contains 46 facets
+            expect(allFacets.length).to.equal(FACET_REGISTRY_COUNT)
 
             // Verify each facet has required fields
             allFacets.forEach((facet) => {
@@ -305,7 +318,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
 
             expect(registerResult.success).to.be.true
             expect(registerResult.blrAddress).to.equal(blrResult.proxyAddress)
-            expect(registerResult.registered.length).to.equal(2)
+            expect(registerResult.registered.length).to.equal(TEST_SIZES.DUAL)
             expect(registerResult.transactionHash).to.exist
         })
 
@@ -333,8 +346,100 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
             })
 
             expect(registerResult.success).to.be.true
-            expect(registerResult.registered.length).to.equal(1)
+            expect(registerResult.registered.length).to.equal(TEST_SIZES.SINGLE)
             expect(registerResult.registered[0]).to.equal('PauseFacet')
+        })
+    })
+
+    describe('Domain Operations', () => {
+        it('should deploy BLR with proxy and initialization', async () => {
+            const result = await deployBlr(provider, {})
+
+            expect(result.success).to.be.true
+            expect(result.blrAddress).to.match(/^0x[a-fA-F0-9]{40}$/)
+            expect(result.implementationAddress).to.match(/^0x[a-fA-F0-9]{40}$/)
+            expect(result.proxyAdminAddress).to.match(/^0x[a-fA-F0-9]{40}$/)
+
+            // Verify BLR is initialized
+            const blrFactory = await provider.getFactory(
+                'BusinessLogicResolver'
+            )
+            const blr = blrFactory.attach(result.blrAddress)
+
+            // Should not revert when calling initialized functions
+            const version = await blr.getLatestVersion()
+            expect(version).to.equal(BLR_VERSIONS.INITIAL)
+        })
+
+        it('should deploy ProxyAdmin', async () => {
+            const result = await deployProxyAdmin(provider)
+
+            expect(result.success).to.be.true
+            expect(result.proxyAdminAddress).to.match(/^0x[a-fA-F0-9]{40}$/)
+            expect(result.deploymentResult.success).to.be.true
+            expect(result.deploymentResult.address).to.equal(
+                result.proxyAdminAddress
+            )
+            expect(result.deploymentResult.transactionHash).to.exist
+            expect(result.deploymentResult.blockNumber).to.be.greaterThan(0)
+        })
+
+        it('should deploy Factory with BLR reference', async () => {
+            // First deploy BLR
+            const blrResult = await deployBlr(provider, {})
+            expect(blrResult.success).to.be.true
+
+            // Deploy Factory with BLR reference
+            const factoryResult = await deployFactory(provider, {
+                blrAddress: blrResult.blrAddress,
+                proxyAdminAddress: blrResult.proxyAdminAddress,
+            })
+
+            expect(factoryResult.success).to.be.true
+            expect(factoryResult.factoryAddress).to.match(/^0x[a-fA-F0-9]{40}$/)
+            expect(factoryResult.implementationAddress).to.match(
+                /^0x[a-fA-F0-9]{40}$/
+            )
+            expect(factoryResult.proxyAdminAddress).to.equal(
+                blrResult.proxyAdminAddress
+            )
+
+            // Verify Factory deployment was successful (Factory doesn't have a getter for BLR address)
+            expect(factoryResult.factoryAddress).to.not.equal(
+                ethers.constants.AddressZero
+            )
+        })
+
+        it('should deploy multiple facets in batch', async () => {
+            const facetNames = [
+                'AccessControlFacet',
+                'KycFacet',
+                'PauseFacet',
+                'FreezeFacet',
+                'LockFacet',
+                'CapFacet',
+                'ControlListFacet',
+                'SnapshotsFacet',
+                'ERC20Facet',
+                'DiamondFacet',
+            ]
+
+            const result = await deployFacets(provider, {
+                facetNames,
+                useTimeTravel: false,
+            })
+
+            expect(result.success).to.be.true
+            expect(result.deployed.size).to.equal(TEST_SIZES.MEDIUM_BATCH)
+            expect(result.failed.size).to.equal(0)
+            expect(result.skipped.size).to.equal(0)
+
+            // Verify all facets were deployed
+            facetNames.forEach((name) => {
+                expect(result.deployed.has(name)).to.be.true
+                const deploymentResult = result.deployed.get(name)!
+                expect(deploymentResult.address).to.match(/^0x[a-fA-F0-9]{40}$/)
+            })
         })
     })
 
@@ -381,7 +486,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
                 facets: facetResults,
             })
             expect(registerResult.success).to.be.true
-            expect(registerResult.registered.length).to.equal(3)
+            expect(registerResult.registered.length).to.equal(TEST_SIZES.TRIPLE)
 
             // Step 5: Deploy Factory
             const factoryResult = await deployProxy(provider, {
@@ -424,7 +529,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
             })
 
             expect(registerResult.success).to.be.true
-            expect(registerResult.registered.length).to.equal(2)
+            expect(registerResult.registered.length).to.equal(TEST_SIZES.DUAL)
         })
     })
 
@@ -463,7 +568,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
             })
 
             expect(registerResult.success).to.be.true
-            expect(registerResult.registered.length).to.equal(0)
+            expect(registerResult.registered.length).to.equal(0) // Empty registration
         })
     })
 })

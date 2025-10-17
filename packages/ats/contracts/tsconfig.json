@@ -30,6 +30,11 @@
             "@test/*": ["./test/*"]
         }
     },
-    "include": ["scripts/**/*", "Configuration.ts", "typechain-types/**/*"],
-    "exclude": ["node_modules", "test", "hardhat.config.ts", "tasks"]
+    "include": [
+        "scripts/**/*",
+        "Configuration.ts",
+        "typechain-types/**/*",
+        "test/**/*"
+    ],
+    "exclude": ["node_modules", "tasks"]
 }

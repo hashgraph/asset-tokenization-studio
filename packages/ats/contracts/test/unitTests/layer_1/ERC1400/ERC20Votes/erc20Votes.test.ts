@@ -8,13 +8,13 @@ import {
     AdjustBalances,
     ERC20Votes,
     EquityUSA,
+    TimeTravelFacet as TimeTravel,
 } from '@typechain'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { deployEquityTokenFixture } from '@test/fixtures'
 
 import { executeRbac } from '@test/fixtures/tokens/common.fixture'
 import { ATS_ROLES, DEFAULT_PARTITION } from '@scripts'
-import { TimeTravel } from '@typechain/contracts/test/testTimeTravel/timeTravel/TimeTravel'
 
 const amount = 1000
 
