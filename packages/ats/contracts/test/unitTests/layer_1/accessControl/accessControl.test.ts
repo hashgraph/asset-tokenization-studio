@@ -5,6 +5,7 @@ import { ATS_ROLES } from '@scripts'
 import { deployEquityTokenFixture } from '@test/fixtures'
 import { executeRbac } from '@test/fixtures/tokens/common.fixture'
 import { ethers } from 'hardhat'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 describe('Access Control Tests', () => {
     let diamond: ResolverProxy
@@ -15,7 +16,7 @@ describe('Access Control Tests', () => {
     let signer_C: SignerWithAddress
     let unknownSigner: SignerWithAddress
 
-    beforeEach(async () => {
+    async function deployFixture() {
         const base = await deployEquityTokenFixture()
         diamond = base.diamond
         await executeRbac(base.accessControlFacet, [
@@ -34,6 +35,10 @@ describe('Access Control Tests', () => {
         signer_B = base.user1
         signer_C = base.user2
         unknownSigner = base.unknownSigner
+    }
+
+    beforeEach(async () => {
+        await loadFixture(deployFixture)
     })
 
     it('GIVEN an account without administrative role WHEN grantRole THEN transaction fails with AccountHasNoRole', async () => {
