@@ -210,3 +210,9 @@ export {
     getBaseContractName,
     isTimeTravelVariant,
 } from './utils/naming'
+
+export {
+    fetchHederaContractId,
+    getMirrorNodeUrl,
+    isHederaNetwork,
+} from './utils/hedera'

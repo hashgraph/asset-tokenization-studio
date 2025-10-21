@@ -20,6 +20,7 @@ import {
     deployProxyAdmin,
     getAllFacets,
     validateAddress,
+    fetchHederaContractId,
 } from '@scripts/infrastructure'
 import {
     deployFactory,
@@ -544,55 +545,6 @@ export async function deployWithExistingBlr(
 
         throw error
     }
-}
-
-/**
- * Fetch Hedera Contract ID from mirror node.
- *
- * @param network - Network name
- * @param evmAddress - EVM address (0x...)
- * @returns Hedera Contract ID (0.0.xxxxx) or undefined
- */
-async function fetchHederaContractId(
-    network: string,
-    evmAddress: string
-): Promise<string | undefined> {
-    try {
-        const mirrorNodeUrl = getMirrorNodeUrl(network)
-        const response = await fetch(
-            `${mirrorNodeUrl}/api/v1/contracts/${evmAddress}`
-        )
-
-        if (!response.ok) {
-            return undefined
-        }
-
-        const data = await response.json()
-        return data.contract_id
-    } catch {
-        return undefined
-    }
-}
-
-/**
- * Get mirror node URL for network.
- *
- * @param network - Network name
- * @returns Mirror node base URL
- */
-function getMirrorNodeUrl(network: string): string {
-    const lowerNetwork = network.toLowerCase()
-
-    if (lowerNetwork.includes('mainnet')) {
-        return 'https://mainnet-public.mirrornode.hedera.com'
-    } else if (lowerNetwork.includes('testnet')) {
-        return 'https://testnet.mirrornode.hedera.com'
-    } else if (lowerNetwork.includes('previewnet')) {
-        return 'https://previewnet.mirrornode.hedera.com'
-    }
-
-    // Default to testnet
-    return 'https://testnet.mirrornode.hedera.com'
 }
 
 /**

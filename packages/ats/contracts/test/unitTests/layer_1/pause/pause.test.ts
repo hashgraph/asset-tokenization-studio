@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { GAS_LIMIT, ATS_ROLES } from '@scripts'
 import { grantRoleAndPauseToken } from '@test/common'
 import { deployEquityTokenFixture } from '@test/fixtures'
@@ -9,7 +10,6 @@ import {
     ResolverProxy,
     MockedExternalPause,
 } from '@typechain'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Signer } from 'ethers'
 import { ethers } from 'hardhat'
 

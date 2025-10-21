@@ -13,7 +13,26 @@ import {
     extractImports,
     extractInheritance,
     extractSolidityVersion,
+    extractFacetResolverKeyImport,
+    extractPublicMethods,
+    extractAllMethods,
+    extractPublicMethodsWithInheritance,
+    extractEvents,
+    extractEventsWithInheritance,
+    extractErrors,
+    extractErrorsWithInheritance,
+    type RoleDefinition,
 } from '../utils/solidityUtils'
+import {
+    loadABI,
+    extractMethodsFromABI,
+    validateAndMerge,
+} from '../utils/abiValidator'
+import {
+    MethodDefinition,
+    EventDefinition,
+    ErrorDefinition,
+} from '../../infrastructure/types'
 
 /**
  * Extracted contract metadata.
@@ -37,8 +56,23 @@ export interface ContractMetadata {
     /** Whether TimeTravel variant exists */
     hasTimeTravel: boolean
 
-    /** Extracted role definitions */
-    roles: string[]
+    /** Extracted role definitions with values */
+    roles: RoleDefinition[]
+
+    /** Resolver key imported or defined by this facet (if applicable) */
+    resolverKey?: {
+        name: string
+        value: string
+    }
+
+    /** Public and external methods with signatures and selectors */
+    methods: MethodDefinition[]
+
+    /** Events emitted by this contract */
+    events: EventDefinition[]
+
+    /** Custom errors defined in this contract */
+    errors: ErrorDefinition[]
 
     /** Import paths */
     imports: string[]
@@ -61,11 +95,15 @@ export interface ContractMetadata {
  *
  * @param contract - Contract file information
  * @param hasTimeTravel - Whether TimeTravel variant exists
+ * @param allResolverKeys - Optional map of all resolver keys (name -> value)
+ * @param allContracts - Optional map of all contracts (for inheritance method extraction)
  * @returns Extracted metadata
  */
 export function extractMetadata(
     contract: ContractFile,
-    hasTimeTravel: boolean
+    hasTimeTravel: boolean,
+    allResolverKeys?: Map<string, string>,
+    allContracts?: Map<string, ContractFile>
 ): ContractMetadata {
     const name = contract.primaryContract
     const layer = detectLayer(contract)
@@ -77,6 +115,72 @@ export function extractMetadata(
     const upgradeable = detectUpgradeable(contract)
     const description = generateDescription(name, category, layer)
 
+    // Extract methods based on contract type:
+    // - Facets: Extract from entire inheritance chain (excluding static methods)
+    // - StorageWrappers: Extract ALL methods (internal/private/public)
+    // - Other contracts: Extract only public/external methods
+    let methods: MethodDefinition[]
+    if (name.endsWith('Facet') && allContracts) {
+        methods = extractPublicMethodsWithInheritance(
+            contract.source,
+            name,
+            allContracts
+        )
+    } else if (name.endsWith('StorageWrapper')) {
+        methods = extractAllMethods(contract.source)
+    } else {
+        methods = extractPublicMethods(contract.source)
+    }
+
+    // Validate methods against ABI if available
+    // This provides 100% accurate signatures from compiled artifacts
+    const contractsDir = path.dirname(contract.filePath)
+    const abi = loadABI(name, contractsDir)
+    if (abi) {
+        const abiMethods = extractMethodsFromABI(abi)
+        methods = validateAndMerge(methods, abiMethods, name)
+    }
+
+    // Extract events based on contract type:
+    // - Facets: Extract from entire inheritance chain
+    // - Other contracts: Extract only from current contract
+    let events: EventDefinition[]
+    if (name.endsWith('Facet') && allContracts) {
+        events = extractEventsWithInheritance(
+            contract.source,
+            name,
+            allContracts
+        )
+    } else {
+        events = extractEvents(contract.source)
+    }
+
+    // Extract errors based on contract type:
+    // - Facets: Extract from entire inheritance chain
+    // - Other contracts: Extract only from current contract
+    let errors: ErrorDefinition[]
+    if (name.endsWith('Facet') && allContracts) {
+        errors = extractErrorsWithInheritance(
+            contract.source,
+            name,
+            allContracts
+        )
+    } else {
+        errors = extractErrors(contract.source)
+    }
+
+    // Extract resolver key for facets
+    let resolverKey: { name: string; value: string } | undefined
+    if (name.endsWith('Facet')) {
+        const keyName = extractFacetResolverKeyImport(contract.source)
+        if (keyName && allResolverKeys) {
+            const keyValue = allResolverKeys.get(keyName)
+            if (keyValue) {
+                resolverKey = { name: keyName, value: keyValue }
+            }
+        }
+    }
+
     return {
         name,
         contractName: name,
@@ -85,6 +189,10 @@ export function extractMetadata(
         category,
         hasTimeTravel,
         roles,
+        resolverKey,
+        methods,
+        events,
+        errors,
         imports,
         inheritance,
         solidityVersion,

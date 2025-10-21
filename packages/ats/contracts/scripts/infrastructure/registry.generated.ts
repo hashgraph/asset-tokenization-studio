@@ -9,7 +9,7 @@
  * To regenerate: npm run generate:registry
  * To customize: Edit registry.overrides.ts
  *
- * Generated: 2025-10-13T14:21:29.661Z
+ * Generated: 2025-10-21T09:43:31.766Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -19,277 +19,5114 @@
 import {
     FacetDefinition,
     ContractDefinition,
+    StorageWrapperDefinition,
 } from '@scripts/infrastructure/types'
 
 /**
  * Registry of all facet contracts.
- *
- * Total facets: 49
  */
 export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     AccessControlFacet: {
         name: 'AccessControlFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_ACCESS_CONTROL_RESOLVER_KEY',
+            value: '0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6',
+        },
+        inheritance: ['AccessControl', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'applyRoles',
+                signature: 'applyRoles(bytes32[],bool[],address)',
+                selector: '0xfcfffeec',
+            },
+            {
+                name: 'getRoleCountFor',
+                signature: 'getRoleCountFor(address)',
+                selector: '0x8fa9b4fe',
+            },
+            {
+                name: 'getRoleMemberCount',
+                signature: 'getRoleMemberCount(bytes32)',
+                selector: '0xca15c873',
+            },
+            {
+                name: 'getRoleMembers',
+                signature: 'getRoleMembers(bytes32,uint256,uint256)',
+                selector: '0x2a861f57',
+            },
+            {
+                name: 'getRolesFor',
+                signature: 'getRolesFor(address,uint256,uint256)',
+                selector: '0xa28cf9a9',
+            },
+            {
+                name: 'grantRole',
+                signature: 'grantRole(bytes32,address)',
+                selector: '0x2f2ff15d',
+            },
+            {
+                name: 'hasRole',
+                signature: 'hasRole(bytes32,address)',
+                selector: '0x91d14854',
+            },
+            {
+                name: 'renounceRole',
+                signature: 'renounceRole(bytes32)',
+                selector: '0x8bb9c5bf',
+            },
+            {
+                name: 'revokeRole',
+                signature: 'revokeRole(bytes32,address)',
+                selector: '0xd547741f',
+            },
+        ],
+        events: [
+            {
+                name: 'RoleGranted',
+                signature: 'RoleGranted(address,address,bytes32)',
+                topic0: '0x03b5d550f3da9dfe316fa35cbecc4cee6d2febeaeee1432f30504bd9ce3780a8',
+            },
+            {
+                name: 'RoleRenounced',
+                signature: 'RoleRenounced(address,bytes32)',
+                topic0: '0x77aa8a1aed5eadc41a8f14bcf15358ebcf49ff5263b7887e215b4b3915a10a8f',
+            },
+            {
+                name: 'RoleRevoked',
+                signature: 'RoleRevoked(address,address,bytes32)',
+                topic0: '0xd1c3e214f7584ab57912c23f3cead20e310547c9823c8bc891ba162e35622734',
+            },
+            {
+                name: 'RolesApplied',
+                signature: 'RolesApplied(bytes32[],bool[],address)',
+                topic0: '0x4267fc5085e309828a2ec01d2d3a5ad76fa27eee7beada466b9cd88872fea422',
+            },
+        ],
+        errors: [
+            {
+                name: 'AccountAssignedToRole',
+                signature: 'AccountAssignedToRole(bytes32,address)',
+                selector: '0xa6006e94',
+            },
+            {
+                name: 'AccountNotAssignedToRole',
+                signature: 'AccountNotAssignedToRole(bytes32,address)',
+                selector: '0x3ad9a7ae',
+            },
+            {
+                name: 'RolesNotApplied',
+                signature: 'RolesNotApplied(bytes32[],bool[],address)',
+                selector: '0xaa4b6234',
+            },
+        ],
     },
 
     AdjustBalancesFacet: {
         name: 'AdjustBalancesFacet',
         description: 'Business logic - core token functionality',
+        resolverKey: {
+            name: '_BALANCE_ADJUSTMENTS_RESOLVER_KEY',
+            value: '0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8',
+        },
+        inheritance: ['AdjustBalances', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'adjustBalances',
+                signature: 'adjustBalances(uint256,uint8)',
+                selector: '0xe2d77e44',
+            },
+        ],
     },
 
     BondUSAFacet: {
         name: 'BondUSAFacet',
         description: 'Jurisdiction-specific - asset-specific features',
+        resolverKey: {
+            name: '_BOND_RESOLVER_KEY',
+            value: '0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef',
+        },
+        inheritance: ['BondUSA', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: '_initialize_bondUSA',
+                signature:
+                    '_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)',
+                selector: '0x653458ea',
+            },
+            {
+                name: 'redeemAtMaturityByPartition',
+                signature:
+                    'redeemAtMaturityByPartition(address,bytes32,uint256)',
+                selector: '0x8a647211',
+            },
+            {
+                name: 'setCoupon',
+                signature: 'setCoupon(IBondRead.Coupon)',
+                selector: '0x94218ed1',
+            },
+            {
+                name: 'updateMaturityDate',
+                signature: 'updateMaturityDate(uint256)',
+                selector: '0xc7a6ca35',
+            },
+        ],
     },
 
     BondUSAReadFacet: {
         name: 'BondUSAReadFacet',
         description: 'Jurisdiction-specific - asset-specific features',
+        resolverKey: {
+            name: '_BOND_READ_RESOLVER_KEY',
+            value: '0xe7ca0b805514da05524faf33d2d9d9432bf1dfa53096073a7267041cfdfb6d68',
+        },
+        inheritance: ['BondRead', 'Security'],
+        methods: [
+            {
+                name: 'getBondDetails',
+                signature: 'getBondDetails()',
+                selector: '0x4ce02414',
+            },
+            {
+                name: 'getCoupon',
+                signature: 'getCoupon(uint256)',
+                selector: '0x936e3169',
+            },
+            {
+                name: 'getCouponCount',
+                signature: 'getCouponCount()',
+                selector: '0x468bb240',
+            },
+            {
+                name: 'getCouponFor',
+                signature: 'getCouponFor(uint256,address)',
+                selector: '0xbba7b56d',
+            },
+            {
+                name: 'getCouponHolders',
+                signature: 'getCouponHolders(uint256,uint256,uint256)',
+                selector: '0xa92e8371',
+            },
+            {
+                name: 'getSecurityHolders',
+                signature: 'getSecurityHolders(uint256,uint256)',
+                selector: '0x81438d2f',
+            },
+            {
+                name: 'getSecurityRegulationData',
+                signature: 'getSecurityRegulationData()',
+                selector: '0x8fda5afe',
+            },
+            {
+                name: 'getTotalCouponHolders',
+                signature: 'getTotalCouponHolders(uint256)',
+                selector: '0xec116ae3',
+            },
+            {
+                name: 'getTotalSecurityHolders',
+                signature: 'getTotalSecurityHolders()',
+                selector: '0xbd007c8f',
+            },
+        ],
     },
 
     CapFacet: {
         name: 'CapFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_CAP_RESOLVER_KEY',
+            value: '0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b',
+        },
+        inheritance: ['Cap', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'getMaxSupply',
+                signature: 'getMaxSupply()',
+                selector: '0x4c0f38c2',
+            },
+            {
+                name: 'getMaxSupplyByPartition',
+                signature: 'getMaxSupplyByPartition(bytes32)',
+                selector: '0x79f3653f',
+            },
+            {
+                name: 'initialize_Cap',
+                signature: 'initialize_Cap(uint256,PartitionCap[])',
+                selector: '0x91aa5bcb',
+            },
+            {
+                name: 'setMaxSupply',
+                signature: 'setMaxSupply(uint256)',
+                selector: '0x6f8b44b0',
+            },
+            {
+                name: 'setMaxSupplyByPartition',
+                signature: 'setMaxSupplyByPartition(bytes32,uint256)',
+                selector: '0x99b69647',
+            },
+        ],
     },
 
     ClearingActionsFacet: {
         name: 'ClearingActionsFacet',
         description: 'Core functionality - clearing and settlement operations',
+        resolverKey: {
+            name: '_CLEARING_ACTIONS_RESOLVER_KEY',
+            value: '0x5472dfc5c92ad7a8651518ea7d3854d3b6494e5bcaa19f91cd61bf93bf6f2a74',
+        },
+        inheritance: ['ClearingActions', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'activateClearing',
+                signature: 'activateClearing()',
+                selector: '0xab2d18a9',
+            },
+            {
+                name: 'approveClearingOperationByPartition',
+                signature:
+                    'approveClearingOperationByPartition(IClearing.ClearingOperationIdentifier)',
+                selector: '0xd4f8a256',
+            },
+            {
+                name: 'cancelClearingOperationByPartition',
+                signature:
+                    'cancelClearingOperationByPartition(IClearing.ClearingOperationIdentifier)',
+                selector: '0x41a35702',
+            },
+            {
+                name: 'deactivateClearing',
+                signature: 'deactivateClearing()',
+                selector: '0x65c21860',
+            },
+            {
+                name: 'initializeClearing',
+                signature: 'initializeClearing(bool)',
+                selector: '0x86a0b46a',
+            },
+            {
+                name: 'isClearingActivated',
+                signature: 'isClearingActivated()',
+                selector: '0x4b4d8990',
+            },
+            {
+                name: 'reclaimClearingOperationByPartition',
+                signature:
+                    'reclaimClearingOperationByPartition(IClearing.ClearingOperationIdentifier)',
+                selector: '0x5b4fda23',
+            },
+        ],
+        events: [
+            {
+                name: 'ClearingActivated',
+                signature: 'ClearingActivated(address)',
+                topic0: '0x569080e4e18c204a1d28f09348d781d7cfb170428b2fd33e1f9b7df132674e15',
+            },
+            {
+                name: 'ClearingDeactivated',
+                signature: 'ClearingDeactivated(address)',
+                topic0: '0xdb053585e5b33d19247ef59f5b465bcbb9774e6e5ce23932a7e3ffe829cd80a1',
+            },
+            {
+                name: 'ClearingOperationApproved',
+                signature:
+                    'ClearingOperationApproved(address,address,bytes32,uint256,IClearing.ClearingOperationType)',
+                topic0: '0xa354a2e4470100aac8b04cd5b7573db08c1ccb8fe0da2166760fc9eb37b14342',
+            },
+            {
+                name: 'ClearingOperationCanceled',
+                signature:
+                    'ClearingOperationCanceled(address,address,bytes32,uint256,IClearing.ClearingOperationType)',
+                topic0: '0x730f579c3f3d2d652106a07acfb467c6ad517dde94018569f5a1def7c0c4a0ad',
+            },
+            {
+                name: 'ClearingOperationReclaimed',
+                signature:
+                    'ClearingOperationReclaimed(address,address,bytes32,uint256,IClearing.ClearingOperationType)',
+                topic0: '0x0732b59e2bff7ce1143581074f475d0ac1c2f9f702f6380def68b47959e48f7a',
+            },
+        ],
     },
 
     ClearingHoldCreationFacet: {
         name: 'ClearingHoldCreationFacet',
         description: 'Core functionality - clearing and settlement operations',
+        resolverKey: {
+            name: '_CLEARING_HOLDCREATION_RESOLVER_KEY',
+            value: '0x44f99a141c434fac20d69e7511932ee344d5b37b61851976c83a5df4ca468152',
+        },
+        inheritance: ['ClearingHoldCreation', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'clearingCreateHoldByPartition',
+                signature:
+                    'clearingCreateHoldByPartition(ClearingOperation,Hold)',
+                selector: '0x05a3c905',
+            },
+            {
+                name: 'clearingCreateHoldFromByPartition',
+                signature:
+                    'clearingCreateHoldFromByPartition(ClearingOperationFrom,Hold)',
+                selector: '0xa30c2f61',
+            },
+            {
+                name: 'getClearingCreateHoldForByPartition',
+                signature:
+                    'getClearingCreateHoldForByPartition(bytes32,address,uint256)',
+                selector: '0x190eb09b',
+            },
+            {
+                name: 'operatorClearingCreateHoldByPartition',
+                signature:
+                    'operatorClearingCreateHoldByPartition(ClearingOperationFrom,Hold)',
+                selector: '0xdf3a3dbd',
+            },
+            {
+                name: 'protectedClearingCreateHoldByPartition',
+                signature:
+                    'protectedClearingCreateHoldByPartition(ProtectedClearingOperation,Hold,bytes)',
+                selector: '0x7a9efadf',
+            },
+        ],
     },
 
     ClearingReadFacet: {
         name: 'ClearingReadFacet',
         description: 'Core functionality - clearing and settlement operations',
+        resolverKey: {
+            name: '_CLEARING_READ_RESOLVER_KEY',
+            value: '0xebb2e29bdf4edaf4ca66a3f9b7735087f9d0474d56d856e53c94ef00596c0b1e',
+        },
+        inheritance: ['ClearingRead', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'getClearedAmountFor',
+                signature: 'getClearedAmountFor(address)',
+                selector: '0x46f8bc94',
+            },
+            {
+                name: 'getClearedAmountForByPartition',
+                signature: 'getClearedAmountForByPartition(bytes32,address)',
+                selector: '0xfed5a7d4',
+            },
+            {
+                name: 'getClearingCountForByPartition',
+                signature:
+                    'getClearingCountForByPartition(bytes32,address,ClearingOperationType)',
+                selector: '0xe62b11d9',
+            },
+            {
+                name: 'getClearingsIdForByPartition',
+                signature:
+                    'getClearingsIdForByPartition(bytes32,address,ClearingOperationType,uint256,uint256)',
+                selector: '0x88cab4f2',
+            },
+            {
+                name: 'getClearingThirdParty',
+                signature:
+                    'getClearingThirdParty(bytes32,address,ClearingOperationType,uint256)',
+                selector: '0x6a452e1d',
+            },
+        ],
     },
 
     ClearingRedeemFacet: {
         name: 'ClearingRedeemFacet',
         description: 'Core functionality - clearing and settlement operations',
+        resolverKey: {
+            name: '_CLEARING_REDEEM_RESOLVER_KEY',
+            value: '0xb341e7aa749da43976c189209de51ccdf838af9f964cd27340b914d5b2aeba97',
+        },
+        inheritance: ['ClearingRedeem', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'clearingRedeemByPartition',
+                signature:
+                    'clearingRedeemByPartition(ClearingOperation,uint256)',
+                selector: '0x6fd29928',
+            },
+            {
+                name: 'clearingRedeemFromByPartition',
+                signature:
+                    'clearingRedeemFromByPartition(ClearingOperationFrom,uint256)',
+                selector: '0x695c46eb',
+            },
+            {
+                name: 'getClearingRedeemForByPartition',
+                signature:
+                    'getClearingRedeemForByPartition(bytes32,address,uint256)',
+                selector: '0x4ac3d940',
+            },
+            {
+                name: 'operatorClearingRedeemByPartition',
+                signature:
+                    'operatorClearingRedeemByPartition(ClearingOperationFrom,uint256)',
+                selector: '0xf5d203e9',
+            },
+            {
+                name: 'protectedClearingRedeemByPartition',
+                signature:
+                    'protectedClearingRedeemByPartition(ProtectedClearingOperation,uint256,bytes)',
+                selector: '0x33826bc1',
+            },
+        ],
     },
 
     ClearingTransferFacet: {
         name: 'ClearingTransferFacet',
         description: 'Core functionality - clearing and settlement operations',
+        resolverKey: {
+            name: '_CLEARING_TRANSFER_RESOLVER_KEY',
+            value: '0x7399d03db62430bec60ca2c3eacf98b1b7e2253f17593ef7a226d759442e0928',
+        },
+        inheritance: ['ClearingTransfer', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'clearingTransferByPartition',
+                signature:
+                    'clearingTransferByPartition(ClearingOperation,uint256,address)',
+                selector: '0x104fad9b',
+            },
+            {
+                name: 'clearingTransferFromByPartition',
+                signature:
+                    'clearingTransferFromByPartition(ClearingOperationFrom,uint256,address)',
+                selector: '0x8aaad9e1',
+            },
+            {
+                name: 'getClearingTransferForByPartition',
+                signature:
+                    'getClearingTransferForByPartition(bytes32,address,uint256)',
+                selector: '0x6f438552',
+            },
+            {
+                name: 'operatorClearingTransferByPartition',
+                signature:
+                    'operatorClearingTransferByPartition(ClearingOperationFrom,uint256,address)',
+                selector: '0xb403da58',
+            },
+            {
+                name: 'protectedClearingTransferByPartition',
+                signature:
+                    'protectedClearingTransferByPartition(ProtectedClearingOperation,uint256,address,bytes)',
+                selector: '0x1b4edef0',
+            },
+        ],
     },
 
     ControlListFacet: {
         name: 'ControlListFacet',
         description: 'Core functionality - compliance and regulatory features',
+        resolverKey: {
+            name: '_CONTROL_LIST_RESOLVER_KEY',
+            value: '0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c',
+        },
+        inheritance: ['ControlList', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'addToControlList',
+                signature: 'addToControlList(address)',
+                selector: '0xe8204966',
+            },
+            {
+                name: 'getControlListCount',
+                signature: 'getControlListCount()',
+                selector: '0x6b5d2ea5',
+            },
+            {
+                name: 'getControlListMembers',
+                signature: 'getControlListMembers(uint256,uint256)',
+                selector: '0xcad7e56b',
+            },
+            {
+                name: 'getControlListType',
+                signature: 'getControlListType()',
+                selector: '0x1d46c292',
+            },
+            {
+                name: 'initialize_ControlList',
+                signature: 'initialize_ControlList(bool)',
+                selector: '0xf88bd9f2',
+            },
+            {
+                name: 'isInControlList',
+                signature: 'isInControlList(address)',
+                selector: '0xfd5b071b',
+            },
+            {
+                name: 'removeFromControlList',
+                signature: 'removeFromControlList(address)',
+                selector: '0x47b52d3b',
+            },
+        ],
+        events: [
+            {
+                name: 'AddedToControlList',
+                signature: 'AddedToControlList(address,address)',
+                topic0: '0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621',
+            },
+            {
+                name: 'RemovedFromControlList',
+                signature: 'RemovedFromControlList(address,address)',
+                topic0: '0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37',
+            },
+        ],
+        errors: [
+            {
+                name: 'ListedAccount',
+                signature: 'ListedAccount(address)',
+                selector: '0x1a4a04ba',
+            },
+            {
+                name: 'UnlistedAccount',
+                signature: 'UnlistedAccount(address)',
+                selector: '0x4c463ddc',
+            },
+        ],
     },
 
     CorporateActionsFacet: {
         name: 'CorporateActionsFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_CORPORATE_ACTIONS_RESOLVER_KEY',
+            value: '0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077',
+        },
+        inheritance: ['CorporateActions', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'addCorporateAction',
+                signature: 'addCorporateAction(bytes32,bytes)',
+                selector: '0xd9e4d92c',
+            },
+            {
+                name: 'getCorporateAction',
+                signature: 'getCorporateAction(bytes32)',
+                selector: '0x911181da',
+            },
+            {
+                name: 'getCorporateActionCount',
+                signature: 'getCorporateActionCount()',
+                selector: '0x8859794c',
+            },
+            {
+                name: 'getCorporateActionCountByType',
+                signature: 'getCorporateActionCountByType(bytes32)',
+                selector: '0x539b4e0b',
+            },
+            {
+                name: 'getCorporateActionIds',
+                signature: 'getCorporateActionIds(uint256,uint256)',
+                selector: '0x1b56ea1e',
+            },
+            {
+                name: 'getCorporateActionIdsByType',
+                signature:
+                    'getCorporateActionIdsByType(bytes32,uint256,uint256)',
+                selector: '0xe73bbddb',
+            },
+        ],
+        events: [
+            {
+                name: 'CorporateActionAdded',
+                signature:
+                    'CorporateActionAdded(address,bytes32,bytes32,uint256,bytes)',
+                topic0: '0x5874a7cfb402f641e9d5e7fe4da2993095f1d4d397e7291daa27fd6c29dd3f1a',
+            },
+        ],
+        errors: [
+            {
+                name: 'DuplicatedCorporateAction',
+                signature: 'DuplicatedCorporateAction(bytes32,bytes)',
+                selector: '0x3266e9e3',
+            },
+        ],
+    },
+
+    DiamondCutFacet: {
+        name: 'DiamondCutFacet',
+        description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_DIAMOND_CUT_RESOLVER_KEY',
+            value: '0xb66fc45b2670ed2c4ce03061121e6c8e53bce06e161f95afad8e57671b64fca8',
+        },
+        inheritance: ['IDiamondCut', 'ResolverProxyUnstructured'],
+        methods: [
+            {
+                name: 'getConfigInfo',
+                signature: 'getConfigInfo()',
+                selector: '0x78a1bf05',
+            },
+            {
+                name: 'updateConfig',
+                signature: 'updateConfig(bytes32,uint256)',
+                selector: '0x0b3bad61',
+            },
+            {
+                name: 'updateConfigVersion',
+                signature: 'updateConfigVersion(uint256)',
+                selector: '0x002eeb22',
+            },
+            {
+                name: 'updateResolver',
+                signature:
+                    'updateResolver(IBusinessLogicResolver,bytes32,uint256)',
+                selector: '0x9ed84e40',
+            },
+        ],
+        events: [
+            {
+                name: 'PartitionsProtected',
+                signature: 'PartitionsProtected(address)',
+                topic0: '0x990fbe2c0a8b93cc7974d7ab6416266441112d61fa0989af94a79de43dda48ff',
+            },
+            {
+                name: 'PartitionsUnProtected',
+                signature: 'PartitionsUnProtected(address)',
+                topic0: '0xd556aabec0a33d5b3b9b8c739af1745b14ba2abecc20c3c080fd4ac6143e8525',
+            },
+            {
+                name: 'ProtectedRedeemFrom',
+                signature:
+                    'ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)',
+                topic0: '0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b',
+            },
+            {
+                name: 'ProtectedTransferFrom',
+                signature:
+                    'ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)',
+                topic0: '0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c',
+            },
+            {
+                name: 'RoleAdminChanged',
+                signature: 'RoleAdminChanged(bytes32,bytes32,bytes32)',
+                topic0: '0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff',
+            },
+            {
+                name: 'TokenPaused',
+                signature: 'TokenPaused(address)',
+                topic0: '0xf017c0de579727a3cd3ee18077ee8b4c43bf21892985952d1d5a0d52f983502d',
+            },
+            {
+                name: 'TokenUnpaused',
+                signature: 'TokenUnpaused(address)',
+                topic0: '0xf38578ed892ce2ce655ca8ae03c73464ad74915a1331a9b4085e637534daeedf',
+            },
+        ],
+        errors: [
+            {
+                name: 'AccountHasNoRole',
+                signature: 'AccountHasNoRole(address,bytes32)',
+                selector: '0xa1180aad',
+            },
+            {
+                name: 'AccountHasNoRoles',
+                signature: 'AccountHasNoRoles(address,bytes32[])',
+                selector: '0x90e55392',
+            },
+            {
+                name: 'AccountIsBlocked',
+                signature: 'AccountIsBlocked(address)',
+                selector: '0x796c1f0d',
+            },
+            {
+                name: 'AllBusinessLogicKeysMustBeenInformed',
+                signature: 'AllBusinessLogicKeysMustBeenInformed()',
+                selector: '0x7d1960b7',
+            },
+            {
+                name: 'BusinessLogicKeyDuplicated',
+                signature: 'BusinessLogicKeyDuplicated(bytes32)',
+                selector: '0x193c9b12',
+            },
+            {
+                name: 'BusinessLogicNotActive',
+                signature: 'BusinessLogicNotActive(bytes32)',
+                selector: '0x4649536d',
+            },
+            {
+                name: 'BusinessLogicVersionDoesNotExist',
+                signature: 'BusinessLogicVersionDoesNotExist(uint256)',
+                selector: '0x0f5ce4d0',
+            },
+            {
+                name: 'ExpirationNotReached',
+                signature: 'ExpirationNotReached()',
+                selector: '0x92899bcd',
+            },
+            {
+                name: 'PartitionsAreProtectedAndNoRole',
+                signature: 'PartitionsAreProtectedAndNoRole(address,bytes32)',
+                selector: '0x55347310',
+            },
+            {
+                name: 'PartitionsAreUnProtected',
+                signature: 'PartitionsAreUnProtected()',
+                selector: '0x05681565',
+            },
+            {
+                name: 'RolesAndActivesLengthMismatch',
+                signature: 'RolesAndActivesLengthMismatch(uint256,uint256)',
+                selector: '0x365ff1a4',
+            },
+            {
+                name: 'TokenIsPaused',
+                signature: 'TokenIsPaused()',
+                selector: '0x649815a5',
+            },
+            {
+                name: 'TokenIsUnpaused',
+                signature: 'TokenIsUnpaused()',
+                selector: '0x72058d69',
+            },
+            {
+                name: 'WrongSignature',
+                signature: 'WrongSignature()',
+                selector: '0x356a4418',
+            },
+            {
+                name: 'ZeroKeyNotValidForBusinessLogic',
+                signature: 'ZeroKeyNotValidForBusinessLogic()',
+                selector: '0x7da728b1',
+            },
+        ],
     },
 
     DiamondFacet: {
         name: 'DiamondFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_DIAMOND_RESOLVER_KEY',
+            value: '0x1b5212ea37fb29e99afa2812a5d7d7e662a477424d3de1a18cc3871a2ee94d78',
+        },
+        inheritance: ['IDiamond', 'DiamondCutFacet', 'DiamondLoupeFacet'],
+        methods: [
+            {
+                name: 'getConfigInfo',
+                signature: 'getConfigInfo()',
+                selector: '0x78a1bf05',
+            },
+            {
+                name: 'getFacet',
+                signature: 'getFacet(bytes32)',
+                selector: '0xe317d12f',
+            },
+            {
+                name: 'getFacetAddress',
+                signature: 'getFacetAddress(bytes4)',
+                selector: '0x7a070c2d',
+            },
+            {
+                name: 'getFacetAddresses',
+                signature: 'getFacetAddresses()',
+                selector: '0x3bed2f49',
+            },
+            {
+                name: 'getFacetAddressesByPage',
+                signature: 'getFacetAddressesByPage(uint256,uint256)',
+                selector: '0x9fea53e7',
+            },
+            {
+                name: 'getFacetIdBySelector',
+                signature: 'getFacetIdBySelector(bytes4)',
+                selector: '0xb3fd6894',
+            },
+            {
+                name: 'getFacetIds',
+                signature: 'getFacetIds()',
+                selector: '0xcd25d535',
+            },
+            {
+                name: 'getFacetIdsByPage',
+                signature: 'getFacetIdsByPage(uint256,uint256)',
+                selector: '0x20202e6d',
+            },
+            {
+                name: 'getFacets',
+                signature: 'getFacets()',
+                selector: '0x662ea47d',
+            },
+            {
+                name: 'getFacetsByPage',
+                signature: 'getFacetsByPage(uint256,uint256)',
+                selector: '0xbf02c5b9',
+            },
+            {
+                name: 'getFacetSelectors',
+                signature: 'getFacetSelectors(bytes32)',
+                selector: '0x8214de3e',
+            },
+            {
+                name: 'getFacetSelectorsByPage',
+                signature: 'getFacetSelectorsByPage(bytes32,uint256,uint256)',
+                selector: '0x39a9e956',
+            },
+            {
+                name: 'getFacetSelectorsLength',
+                signature: 'getFacetSelectorsLength(bytes32)',
+                selector: '0xca1f70ec',
+            },
+            {
+                name: 'getFacetsLength',
+                signature: 'getFacetsLength()',
+                selector: '0x430720f9',
+            },
+            {
+                name: 'supportsInterface',
+                signature: 'supportsInterface(bytes4)',
+                selector: '0x01ffc9a7',
+            },
+            {
+                name: 'updateConfig',
+                signature: 'updateConfig(bytes32,uint256)',
+                selector: '0x0b3bad61',
+            },
+            {
+                name: 'updateConfigVersion',
+                signature: 'updateConfigVersion(uint256)',
+                selector: '0x002eeb22',
+            },
+            {
+                name: 'updateResolver',
+                signature:
+                    'updateResolver(IBusinessLogicResolver,bytes32,uint256)',
+                selector: '0x9ed84e40',
+            },
+        ],
+        events: [
+            {
+                name: 'PartitionsProtected',
+                signature: 'PartitionsProtected(address)',
+                topic0: '0x990fbe2c0a8b93cc7974d7ab6416266441112d61fa0989af94a79de43dda48ff',
+            },
+            {
+                name: 'PartitionsUnProtected',
+                signature: 'PartitionsUnProtected(address)',
+                topic0: '0xd556aabec0a33d5b3b9b8c739af1745b14ba2abecc20c3c080fd4ac6143e8525',
+            },
+            {
+                name: 'ProtectedRedeemFrom',
+                signature:
+                    'ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)',
+                topic0: '0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b',
+            },
+            {
+                name: 'ProtectedTransferFrom',
+                signature:
+                    'ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)',
+                topic0: '0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c',
+            },
+            {
+                name: 'RoleAdminChanged',
+                signature: 'RoleAdminChanged(bytes32,bytes32,bytes32)',
+                topic0: '0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff',
+            },
+            {
+                name: 'TokenPaused',
+                signature: 'TokenPaused(address)',
+                topic0: '0xf017c0de579727a3cd3ee18077ee8b4c43bf21892985952d1d5a0d52f983502d',
+            },
+            {
+                name: 'TokenUnpaused',
+                signature: 'TokenUnpaused(address)',
+                topic0: '0xf38578ed892ce2ce655ca8ae03c73464ad74915a1331a9b4085e637534daeedf',
+            },
+        ],
+        errors: [
+            {
+                name: 'AccountHasNoRole',
+                signature: 'AccountHasNoRole(address,bytes32)',
+                selector: '0xa1180aad',
+            },
+            {
+                name: 'AccountHasNoRoles',
+                signature: 'AccountHasNoRoles(address,bytes32[])',
+                selector: '0x90e55392',
+            },
+            {
+                name: 'AccountIsBlocked',
+                signature: 'AccountIsBlocked(address)',
+                selector: '0x796c1f0d',
+            },
+            {
+                name: 'AllBusinessLogicKeysMustBeenInformed',
+                signature: 'AllBusinessLogicKeysMustBeenInformed()',
+                selector: '0x7d1960b7',
+            },
+            {
+                name: 'BusinessLogicKeyDuplicated',
+                signature: 'BusinessLogicKeyDuplicated(bytes32)',
+                selector: '0x193c9b12',
+            },
+            {
+                name: 'BusinessLogicNotActive',
+                signature: 'BusinessLogicNotActive(bytes32)',
+                selector: '0x4649536d',
+            },
+            {
+                name: 'BusinessLogicVersionDoesNotExist',
+                signature: 'BusinessLogicVersionDoesNotExist(uint256)',
+                selector: '0x0f5ce4d0',
+            },
+            {
+                name: 'ExpirationNotReached',
+                signature: 'ExpirationNotReached()',
+                selector: '0x92899bcd',
+            },
+            {
+                name: 'PartitionsAreProtectedAndNoRole',
+                signature: 'PartitionsAreProtectedAndNoRole(address,bytes32)',
+                selector: '0x55347310',
+            },
+            {
+                name: 'PartitionsAreUnProtected',
+                signature: 'PartitionsAreUnProtected()',
+                selector: '0x05681565',
+            },
+            {
+                name: 'RolesAndActivesLengthMismatch',
+                signature: 'RolesAndActivesLengthMismatch(uint256,uint256)',
+                selector: '0x365ff1a4',
+            },
+            {
+                name: 'TokenIsPaused',
+                signature: 'TokenIsPaused()',
+                selector: '0x649815a5',
+            },
+            {
+                name: 'TokenIsUnpaused',
+                signature: 'TokenIsUnpaused()',
+                selector: '0x72058d69',
+            },
+            {
+                name: 'WrongSignature',
+                signature: 'WrongSignature()',
+                selector: '0x356a4418',
+            },
+            {
+                name: 'ZeroKeyNotValidForBusinessLogic',
+                signature: 'ZeroKeyNotValidForBusinessLogic()',
+                selector: '0x7da728b1',
+            },
+        ],
+    },
+
+    DiamondLoupeFacet: {
+        name: 'DiamondLoupeFacet',
+        description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_DIAMOND_LOUPE_RESOLVER_KEY',
+            value: '0x086a1dd0b9bfa39267d1de30445a8edeb3a1f50c8a0a82c91f9dee3608e83567',
+        },
+        inheritance: ['IDiamondLoupe', 'IERC165', 'ResolverProxyUnstructured'],
+        methods: [
+            {
+                name: 'getFacet',
+                signature: 'getFacet(bytes32)',
+                selector: '0xe317d12f',
+            },
+            {
+                name: 'getFacetAddress',
+                signature: 'getFacetAddress(bytes4)',
+                selector: '0x7a070c2d',
+            },
+            {
+                name: 'getFacetAddresses',
+                signature: 'getFacetAddresses()',
+                selector: '0x3bed2f49',
+            },
+            {
+                name: 'getFacetAddressesByPage',
+                signature: 'getFacetAddressesByPage(uint256,uint256)',
+                selector: '0x9fea53e7',
+            },
+            {
+                name: 'getFacetIdBySelector',
+                signature: 'getFacetIdBySelector(bytes4)',
+                selector: '0xb3fd6894',
+            },
+            {
+                name: 'getFacetIds',
+                signature: 'getFacetIds()',
+                selector: '0xcd25d535',
+            },
+            {
+                name: 'getFacetIdsByPage',
+                signature: 'getFacetIdsByPage(uint256,uint256)',
+                selector: '0x20202e6d',
+            },
+            {
+                name: 'getFacets',
+                signature: 'getFacets()',
+                selector: '0x662ea47d',
+            },
+            {
+                name: 'getFacetsByPage',
+                signature: 'getFacetsByPage(uint256,uint256)',
+                selector: '0xbf02c5b9',
+            },
+            {
+                name: 'getFacetSelectors',
+                signature: 'getFacetSelectors(bytes32)',
+                selector: '0x8214de3e',
+            },
+            {
+                name: 'getFacetSelectorsByPage',
+                signature: 'getFacetSelectorsByPage(bytes32,uint256,uint256)',
+                selector: '0x39a9e956',
+            },
+            {
+                name: 'getFacetSelectorsLength',
+                signature: 'getFacetSelectorsLength(bytes32)',
+                selector: '0xca1f70ec',
+            },
+            {
+                name: 'getFacetsLength',
+                signature: 'getFacetsLength()',
+                selector: '0x430720f9',
+            },
+            {
+                name: 'supportsInterface',
+                signature: 'supportsInterface(bytes4)',
+                selector: '0x01ffc9a7',
+            },
+        ],
+        events: [
+            {
+                name: 'PartitionsProtected',
+                signature: 'PartitionsProtected(address)',
+                topic0: '0x990fbe2c0a8b93cc7974d7ab6416266441112d61fa0989af94a79de43dda48ff',
+            },
+            {
+                name: 'PartitionsUnProtected',
+                signature: 'PartitionsUnProtected(address)',
+                topic0: '0xd556aabec0a33d5b3b9b8c739af1745b14ba2abecc20c3c080fd4ac6143e8525',
+            },
+            {
+                name: 'ProtectedRedeemFrom',
+                signature:
+                    'ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)',
+                topic0: '0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b',
+            },
+            {
+                name: 'ProtectedTransferFrom',
+                signature:
+                    'ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)',
+                topic0: '0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c',
+            },
+            {
+                name: 'RoleAdminChanged',
+                signature: 'RoleAdminChanged(bytes32,bytes32,bytes32)',
+                topic0: '0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff',
+            },
+            {
+                name: 'TokenPaused',
+                signature: 'TokenPaused(address)',
+                topic0: '0xf017c0de579727a3cd3ee18077ee8b4c43bf21892985952d1d5a0d52f983502d',
+            },
+            {
+                name: 'TokenUnpaused',
+                signature: 'TokenUnpaused(address)',
+                topic0: '0xf38578ed892ce2ce655ca8ae03c73464ad74915a1331a9b4085e637534daeedf',
+            },
+        ],
+        errors: [
+            {
+                name: 'AccountHasNoRole',
+                signature: 'AccountHasNoRole(address,bytes32)',
+                selector: '0xa1180aad',
+            },
+            {
+                name: 'AccountHasNoRoles',
+                signature: 'AccountHasNoRoles(address,bytes32[])',
+                selector: '0x90e55392',
+            },
+            {
+                name: 'AccountIsBlocked',
+                signature: 'AccountIsBlocked(address)',
+                selector: '0x796c1f0d',
+            },
+            {
+                name: 'AllBusinessLogicKeysMustBeenInformed',
+                signature: 'AllBusinessLogicKeysMustBeenInformed()',
+                selector: '0x7d1960b7',
+            },
+            {
+                name: 'BusinessLogicKeyDuplicated',
+                signature: 'BusinessLogicKeyDuplicated(bytes32)',
+                selector: '0x193c9b12',
+            },
+            {
+                name: 'BusinessLogicNotActive',
+                signature: 'BusinessLogicNotActive(bytes32)',
+                selector: '0x4649536d',
+            },
+            {
+                name: 'BusinessLogicVersionDoesNotExist',
+                signature: 'BusinessLogicVersionDoesNotExist(uint256)',
+                selector: '0x0f5ce4d0',
+            },
+            {
+                name: 'ExpirationNotReached',
+                signature: 'ExpirationNotReached()',
+                selector: '0x92899bcd',
+            },
+            {
+                name: 'PartitionsAreProtectedAndNoRole',
+                signature: 'PartitionsAreProtectedAndNoRole(address,bytes32)',
+                selector: '0x55347310',
+            },
+            {
+                name: 'PartitionsAreUnProtected',
+                signature: 'PartitionsAreUnProtected()',
+                selector: '0x05681565',
+            },
+            {
+                name: 'RolesAndActivesLengthMismatch',
+                signature: 'RolesAndActivesLengthMismatch(uint256,uint256)',
+                selector: '0x365ff1a4',
+            },
+            {
+                name: 'TokenIsPaused',
+                signature: 'TokenIsPaused()',
+                selector: '0x649815a5',
+            },
+            {
+                name: 'TokenIsUnpaused',
+                signature: 'TokenIsUnpaused()',
+                selector: '0x72058d69',
+            },
+            {
+                name: 'WrongSignature',
+                signature: 'WrongSignature()',
+                selector: '0x356a4418',
+            },
+            {
+                name: 'ZeroKeyNotValidForBusinessLogic',
+                signature: 'ZeroKeyNotValidForBusinessLogic()',
+                selector: '0x7da728b1',
+            },
+        ],
     },
 
     EquityUSAFacet: {
         name: 'EquityUSAFacet',
         description: 'Jurisdiction-specific - asset-specific features',
+        resolverKey: {
+            name: '_EQUITY_RESOLVER_KEY',
+            value: '0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810',
+        },
+        inheritance: ['EquityUSA', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: '_initialize_equityUSA',
+                signature:
+                    '_initialize_equityUSA(EquityDetailsData,RegulationData,AdditionalSecurityData)',
+                selector: '0xd0299703',
+            },
+            {
+                name: 'getDividendHolders',
+                signature: 'getDividendHolders(uint256,uint256,uint256)',
+                selector: '0xeba3918e',
+            },
+            {
+                name: 'getDividends',
+                signature: 'getDividends(uint256)',
+                selector: '0x3837ac88',
+            },
+            {
+                name: 'getDividendsCount',
+                signature: 'getDividendsCount()',
+                selector: '0x9e676952',
+            },
+            {
+                name: 'getDividendsFor',
+                signature: 'getDividendsFor(uint256,address)',
+                selector: '0x323e22da',
+            },
+            {
+                name: 'getEquityDetails',
+                signature: 'getEquityDetails()',
+                selector: '0xefcdcad8',
+            },
+            {
+                name: 'getScheduledBalanceAdjustment',
+                signature: 'getScheduledBalanceAdjustment(uint256)',
+                selector: '0x3d5338e8',
+            },
+            {
+                name: 'getScheduledBalanceAdjustmentCount',
+                signature: 'getScheduledBalanceAdjustmentCount()',
+                selector: '0x7c62c7fc',
+            },
+            {
+                name: 'getSecurityHolders',
+                signature: 'getSecurityHolders(uint256,uint256)',
+                selector: '0x81438d2f',
+            },
+            {
+                name: 'getSecurityRegulationData',
+                signature: 'getSecurityRegulationData()',
+                selector: '0x8fda5afe',
+            },
+            {
+                name: 'getTotalDividendHolders',
+                signature: 'getTotalDividendHolders(uint256)',
+                selector: '0xd61a022b',
+            },
+            {
+                name: 'getTotalSecurityHolders',
+                signature: 'getTotalSecurityHolders()',
+                selector: '0xbd007c8f',
+            },
+            {
+                name: 'getTotalVotingHolders',
+                signature: 'getTotalVotingHolders(uint256)',
+                selector: '0x92c51818',
+            },
+            {
+                name: 'getVoting',
+                signature: 'getVoting(uint256)',
+                selector: '0x3afc7282',
+            },
+            {
+                name: 'getVotingCount',
+                signature: 'getVotingCount()',
+                selector: '0x9c2aab5e',
+            },
+            {
+                name: 'getVotingFor',
+                signature: 'getVotingFor(uint256,address)',
+                selector: '0x7633eccf',
+            },
+            {
+                name: 'getVotingHolders',
+                signature: 'getVotingHolders(uint256,uint256,uint256)',
+                selector: '0x009f64ac',
+            },
+            {
+                name: 'setDividends',
+                signature: 'setDividends(Dividend)',
+                selector: '0xa6817476',
+            },
+            {
+                name: 'setScheduledBalanceAdjustment',
+                signature:
+                    'setScheduledBalanceAdjustment(ScheduledBalanceAdjustment)',
+                selector: '0x50ebcebf',
+            },
+            {
+                name: 'setVoting',
+                signature: 'setVoting(Voting)',
+                selector: '0x99f97b27',
+            },
+        ],
     },
 
     ERC1410IssuerFacet: {
         name: 'ERC1410IssuerFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_ERC1410_ISSUER_RESOLVER_KEY',
+            value: '0x6e82b75f32c9647cc00b4c3eabbef5a82677f3e91d5d196eb4dd6a0365941344',
+        },
+        inheritance: ['IStaticFunctionSelectors', 'ERC1410Issuer'],
+        methods: [
+            {
+                name: 'issueByPartition',
+                signature: 'issueByPartition(IssueData)',
+                selector: '0x10e8a062',
+            },
+        ],
     },
 
     ERC1410ManagementFacet: {
         name: 'ERC1410ManagementFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_ERC1410_MANAGEMENT_RESOLVER_KEY',
+            value: '0x232f8686795d3f197681faf0d8db05655e759f62d709d56b97e5d9cfff29dbf5',
+        },
+        inheritance: ['IStaticFunctionSelectors', 'ERC1410Management'],
+        methods: [
+            {
+                name: 'controllerRedeemByPartition',
+                signature:
+                    'controllerRedeemByPartition(bytes32,address,uint256,bytes,bytes)',
+                selector: '0xb84777cc',
+            },
+            {
+                name: 'controllerTransferByPartition',
+                signature:
+                    'controllerTransferByPartition(bytes32,address,address,uint256,bytes,bytes)',
+                selector: '0xfb78befa',
+            },
+            {
+                name: 'initialize_ERC1410',
+                signature: 'initialize_ERC1410(bool)',
+                selector: '0x7b1df196',
+            },
+            {
+                name: 'operatorRedeemByPartition',
+                signature:
+                    'operatorRedeemByPartition(bytes32,address,uint256,bytes,bytes)',
+                selector: '0x13d557bc',
+            },
+            {
+                name: 'operatorTransferByPartition',
+                signature: 'operatorTransferByPartition(OperatorTransferData)',
+                selector: '0x53a6a0a2',
+            },
+            {
+                name: 'protectedRedeemFromByPartition',
+                signature:
+                    'protectedRedeemFromByPartition(bytes32,address,uint256,uint256,uint256,bytes)',
+                selector: '0xc98d9723',
+            },
+            {
+                name: 'protectedTransferFromByPartition',
+                signature:
+                    'protectedTransferFromByPartition(bytes32,address,address,uint256,uint256,uint256,bytes)',
+                selector: '0x12e41c0a',
+            },
+        ],
     },
 
     ERC1410ReadFacet: {
         name: 'ERC1410ReadFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_ERC1410_READ_RESOLVER_KEY',
+            value: '0x5eb2734b83ea80c3eb63463a6192b30ab2526cb7a073f0abfda1a404c92ae497',
+        },
+        inheritance: ['IStaticFunctionSelectors', 'ERC1410Read'],
+        methods: [
+            {
+                name: 'balanceOf',
+                signature: 'balanceOf(address)',
+                selector: '0x70a08231',
+            },
+            {
+                name: 'balanceOfAt',
+                signature: 'balanceOfAt(address,uint256)',
+                selector: '0x4ee2cd7e',
+            },
+            {
+                name: 'balanceOfByPartition',
+                signature: 'balanceOfByPartition(bytes32,address)',
+                selector: '0x30e82803',
+            },
+            {
+                name: 'canRedeemByPartition',
+                signature:
+                    'canRedeemByPartition(address,bytes32,uint256,bytes,bytes)',
+                selector: '0x7b7322c4',
+            },
+            {
+                name: 'canTransferByPartition',
+                signature:
+                    'canTransferByPartition(address,address,bytes32,uint256,bytes,bytes)',
+                selector: '0xa7b518b1',
+            },
+            {
+                name: 'isMultiPartition',
+                signature: 'isMultiPartition()',
+                selector: '0xbd09cc54',
+            },
+            {
+                name: 'isOperator',
+                signature: 'isOperator(address,address)',
+                selector: '0xb6363cf2',
+            },
+            {
+                name: 'isOperatorForPartition',
+                signature: 'isOperatorForPartition(bytes32,address,address)',
+                selector: '0x6d77cad6',
+            },
+            {
+                name: 'partitionsOf',
+                signature: 'partitionsOf(address)',
+                selector: '0x740ab8f4',
+            },
+            {
+                name: 'totalSupply',
+                signature: 'totalSupply()',
+                selector: '0x18160ddd',
+            },
+            {
+                name: 'totalSupplyByPartition',
+                signature: 'totalSupplyByPartition(bytes32)',
+                selector: '0xa26734dc',
+            },
+        ],
     },
 
     ERC1410TokenHolderFacet: {
         name: 'ERC1410TokenHolderFacet',
         description: 'Core functionality - clearing and settlement operations',
+        resolverKey: {
+            name: '_ERC1410_TOKEN_HOLDER_RESOLVER_KEY',
+            value: '0x0466bf860d23f1ecbc25f364735e0dc3830d236f09182599831730ddd2792caa',
+        },
+        inheritance: ['IStaticFunctionSelectors', 'ERC1410TokenHolder'],
+        methods: [
+            {
+                name: 'authorizeOperator',
+                signature: 'authorizeOperator(address)',
+                selector: '0x959b8c3f',
+            },
+            {
+                name: 'authorizeOperatorByPartition',
+                signature: 'authorizeOperatorByPartition(bytes32,address)',
+                selector: '0x103ef9e1',
+            },
+            {
+                name: 'redeemByPartition',
+                signature: 'redeemByPartition(bytes32,uint256,bytes)',
+                selector: '0x62eb0068',
+            },
+            {
+                name: 'revokeOperator',
+                signature: 'revokeOperator(address)',
+                selector: '0xfad8b32a',
+            },
+            {
+                name: 'revokeOperatorByPartition',
+                signature: 'revokeOperatorByPartition(bytes32,address)',
+                selector: '0x168ecec5',
+            },
+            {
+                name: 'transferByPartition',
+                signature:
+                    'transferByPartition(bytes32,BasicTransferInfo,bytes)',
+                selector: '0xbb4f2f08',
+            },
+            {
+                name: 'triggerAndSyncAll',
+                signature: 'triggerAndSyncAll(bytes32,address,address)',
+                selector: '0x6afb79db',
+            },
+        ],
     },
 
     ERC1594Facet: {
         name: 'ERC1594Facet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_ERC1594_RESOLVER_KEY',
+            value: '0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f',
+        },
+        inheritance: ['ERC1594', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'canTransfer',
+                signature: 'canTransfer(address,uint256,bytes)',
+                selector: '0x1badb25c',
+            },
+            {
+                name: 'canTransferFrom',
+                signature: 'canTransferFrom(address,address,uint256,bytes)',
+                selector: '0x122eb575',
+            },
+            {
+                name: 'initialize_ERC1594',
+                signature: 'initialize_ERC1594()',
+                selector: '0x9be12cea',
+            },
+            {
+                name: 'isIssuable',
+                signature: 'isIssuable()',
+                selector: '0x2f1cae85',
+            },
+            {
+                name: 'issue',
+                signature: 'issue(address,uint256,bytes)',
+                selector: '0xbb3acde9',
+            },
+            {
+                name: 'redeem',
+                signature: 'redeem(uint256,bytes)',
+                selector: '0xe77c646d',
+            },
+            {
+                name: 'redeemFrom',
+                signature: 'redeemFrom(address,uint256,bytes)',
+                selector: '0x9675193c',
+            },
+            {
+                name: 'transferFromWithData',
+                signature:
+                    'transferFromWithData(address,address,uint256,bytes)',
+                selector: '0xee532f31',
+            },
+            {
+                name: 'transferWithData',
+                signature: 'transferWithData(address,uint256,bytes)',
+                selector: '0x2535f762',
+            },
+        ],
     },
 
     ERC1643Facet: {
         name: 'ERC1643Facet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_ERC1643_RESOLVER_KEY',
+            value: '0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625',
+        },
+        inheritance: ['ERC1643', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'getAllDocuments',
+                signature: 'getAllDocuments()',
+                selector: '0x9fa5f50b',
+            },
+            {
+                name: 'getDocument',
+                signature: 'getDocument(bytes32)',
+                selector: '0xb10d6b41',
+            },
+            {
+                name: 'removeDocument',
+                signature: 'removeDocument(bytes32)',
+                selector: '0xc3501848',
+            },
+            {
+                name: 'setDocument',
+                signature: 'setDocument(bytes32,string,bytes32)',
+                selector: '0x010648ca',
+            },
+        ],
+        events: [
+            {
+                name: 'DocumentRemoved',
+                signature: 'DocumentRemoved(bytes32,string,bytes32)',
+                topic0: '0x3d9bba27d3e360d8c80645beed7e991454a8271bf6f269a24f7782be0f0d0654',
+            },
+            {
+                name: 'DocumentUpdated',
+                signature: 'DocumentUpdated(bytes32,string,bytes32)',
+                topic0: '0xb4c22d60cd550a815744f04e3ff5278bf19684565ee00e2b084041b6024bd6f6',
+            },
+        ],
+        errors: [
+            {
+                name: 'DocumentDoesNotExist',
+                signature: 'DocumentDoesNotExist(bytes32)',
+                selector: '0xc2e54650',
+            },
+            {
+                name: 'EmptyHASH',
+                signature: 'EmptyHASH()',
+                selector: '0x402e72be',
+            },
+            {
+                name: 'EmptyName',
+                signature: 'EmptyName()',
+                selector: '0x2ef13105',
+            },
+            {
+                name: 'EmptyURI',
+                signature: 'EmptyURI()',
+                selector: '0xd07b00d6',
+            },
+        ],
     },
 
     ERC1644Facet: {
         name: 'ERC1644Facet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_ERC1644_RESOLVER_KEY',
+            value: '0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d',
+        },
+        inheritance: ['ERC1644', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'controllerRedeem',
+                signature: 'controllerRedeem(address,uint256,bytes,bytes)',
+                selector: '0x2bc6acc3',
+            },
+            {
+                name: 'controllerTransfer',
+                signature:
+                    'controllerTransfer(address,address,uint256,bytes,bytes)',
+                selector: '0xf282527a',
+            },
+            {
+                name: 'finalizeControllable',
+                signature: 'finalizeControllable()',
+                selector: '0xa213934f',
+            },
+            {
+                name: 'initialize_ERC1644',
+                signature: 'initialize_ERC1644(bool)',
+                selector: '0xaa4ea38e',
+            },
+            {
+                name: 'isControllable',
+                signature: 'isControllable()',
+                selector: '0x4c783bf5',
+            },
+        ],
     },
 
     ERC20Facet: {
         name: 'ERC20Facet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_ERC20_RESOLVER_KEY',
+            value: '0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5',
+        },
+        inheritance: ['ERC20', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'allowance',
+                signature: 'allowance(address,address)',
+                selector: '0xdd62ed3e',
+            },
+            {
+                name: 'approve',
+                signature: 'approve(address,uint256)',
+                selector: '0x095ea7b3',
+            },
+            {
+                name: 'decimals',
+                signature: 'decimals()',
+                selector: '0x313ce567',
+            },
+            {
+                name: 'decimalsAt',
+                signature: 'decimalsAt(uint256)',
+                selector: '0x771918ca',
+            },
+            {
+                name: 'decreaseAllowance',
+                signature: 'decreaseAllowance(address,uint256)',
+                selector: '0xa457c2d7',
+            },
+            {
+                name: 'getERC20Metadata',
+                signature: 'getERC20Metadata()',
+                selector: '0x8e649195',
+            },
+            {
+                name: 'increaseAllowance',
+                signature: 'increaseAllowance(address,uint256)',
+                selector: '0x39509351',
+            },
+            {
+                name: 'initialize_ERC20',
+                signature: 'initialize_ERC20(ERC20Metadata)',
+                selector: '0xab0de864',
+            },
+            {
+                name: 'name',
+                signature: 'name()',
+                selector: '0x06fdde03',
+            },
+            {
+                name: 'symbol',
+                signature: 'symbol()',
+                selector: '0x95d89b41',
+            },
+            {
+                name: 'transfer',
+                signature: 'transfer(address,uint256)',
+                selector: '0xa9059cbb',
+            },
+            {
+                name: 'transferFrom',
+                signature: 'transferFrom(address,address,uint256)',
+                selector: '0x23b872dd',
+            },
+        ],
     },
 
     ERC20PermitFacet: {
         name: 'ERC20PermitFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_ERC20PERMIT_RESOLVER_KEY',
+            value: '0xef05f0313623d32145212ed45620c8b2c8c294b3d6955cf26f3d1b0569fbc1fa',
+        },
+        inheritance: ['ERC20Permit', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'DOMAIN_SEPARATOR',
+                signature: 'DOMAIN_SEPARATOR()',
+                selector: '0x3644e515',
+            },
+            {
+                name: 'initialize_ERC20Permit',
+                signature: 'initialize_ERC20Permit()',
+                selector: '0x70d162dc',
+            },
+            {
+                name: 'nonces',
+                signature: 'nonces(address)',
+                selector: '0x7ecebe00',
+            },
+            {
+                name: 'permit',
+                signature:
+                    'permit(address,address,uint256,uint256,uint8,bytes32,bytes32)',
+                selector: '0xd505accf',
+            },
+        ],
+        errors: [
+            {
+                name: 'ERC2612ExpiredSignature',
+                signature: 'ERC2612ExpiredSignature(uint256)',
+                selector: '0x62791302',
+            },
+            {
+                name: 'ERC2612InvalidSigner',
+                signature: 'ERC2612InvalidSigner(address,address)',
+                selector: '0x4b800e46',
+            },
+        ],
     },
 
     ERC20VotesFacet: {
         name: 'ERC20VotesFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_ERC20VOTES_RESOLVER_KEY',
+            value: '0x5cbfbaa435e19a43530a00ac685c9b5252862a94af2053667ded44642a0d9f4c',
+        },
+        inheritance: ['ERC20Votes', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'checkpoints',
+                signature: 'checkpoints(address,uint256)',
+                selector: '0x0cdfebfa',
+            },
+            {
+                name: 'clock',
+                signature: 'clock()',
+                selector: '0x91ddadf4',
+            },
+            {
+                name: 'CLOCK_MODE',
+                signature: 'CLOCK_MODE()',
+                selector: '0x4bf5d7e9',
+            },
+            {
+                name: 'delegate',
+                signature: 'delegate(address)',
+                selector: '0x5c19a95c',
+            },
+            {
+                name: 'delegates',
+                signature: 'delegates(address)',
+                selector: '0x587cde1e',
+            },
+            {
+                name: 'getPastTotalSupply',
+                signature: 'getPastTotalSupply(uint256)',
+                selector: '0x8e539e8c',
+            },
+            {
+                name: 'getPastVotes',
+                signature: 'getPastVotes(address,uint256)',
+                selector: '0x3a46b1a8',
+            },
+            {
+                name: 'getVotes',
+                signature: 'getVotes(address)',
+                selector: '0x9ab24eb0',
+            },
+            {
+                name: 'initialize_ERC20Votes',
+                signature: 'initialize_ERC20Votes(bool)',
+                selector: '0x65fa0b29',
+            },
+            {
+                name: 'isActivated',
+                signature: 'isActivated()',
+                selector: '0x4a8c1fb4',
+            },
+            {
+                name: 'numCheckpoints',
+                signature: 'numCheckpoints(address)',
+                selector: '0x6fcfff45',
+            },
+        ],
+        errors: [
+            {
+                name: 'AbafChangeForBlockForbidden',
+                signature: 'AbafChangeForBlockForbidden(uint256)',
+                selector: '0x5a2afdff',
+            },
+        ],
     },
 
     ERC3643BatchFacet: {
         name: 'ERC3643BatchFacet',
         description: 'Core functionality - compliance and regulatory features',
+        resolverKey: {
+            name: '_ERC3643_BATCH_RESOLVER_KEY',
+            value: '0x9e671b494908a7523ee4e531ae7b7076b84f1c675d31346a9697f0ff4695f249',
+        },
+        inheritance: ['ERC3643Batch', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'batchBurn',
+                signature: 'batchBurn(address[],uint256[])',
+                selector: '0x4a6cc677',
+            },
+            {
+                name: 'batchForcedTransfer',
+                signature: 'batchForcedTransfer(address[],address[],uint256[])',
+                selector: '0x42a47abc',
+            },
+            {
+                name: 'batchMint',
+                signature: 'batchMint(address[],uint256[])',
+                selector: '0x68573107',
+            },
+            {
+                name: 'batchTransfer',
+                signature: 'batchTransfer(address[],uint256[])',
+                selector: '0x88d695b2',
+            },
+        ],
     },
 
     ERC3643ManagementFacet: {
         name: 'ERC3643ManagementFacet',
         description: 'Core functionality - compliance and regulatory features',
+        resolverKey: {
+            name: '_ERC3643_MANAGEMENT_RESOLVER_KEY',
+            value: '0x06d7f1ffc912a9e44e5d742aa1c1eff596d0fabf91a1d0fb1c3ac0fba01f1773',
+        },
+        inheritance: ['IStaticFunctionSelectors', 'ERC3643Management'],
+        methods: [
+            {
+                name: 'addAgent',
+                signature: 'addAgent(address)',
+                selector: '0x84e79842',
+            },
+            {
+                name: 'initialize_ERC3643',
+                signature: 'initialize_ERC3643(address,address)',
+                selector: '0xc047bb6c',
+            },
+            {
+                name: 'recoveryAddress',
+                signature: 'recoveryAddress(address,address,address)',
+                selector: '0x9285948a',
+            },
+            {
+                name: 'removeAgent',
+                signature: 'removeAgent(address)',
+                selector: '0x97a6278e',
+            },
+            {
+                name: 'setCompliance',
+                signature: 'setCompliance(address)',
+                selector: '0xf8981789',
+            },
+            {
+                name: 'setIdentityRegistry',
+                signature: 'setIdentityRegistry(address)',
+                selector: '0xcbf3f861',
+            },
+            {
+                name: 'setName',
+                signature: 'setName(string)',
+                selector: '0xc47f0027',
+            },
+            {
+                name: 'setOnchainID',
+                signature: 'setOnchainID(address)',
+                selector: '0x3d1ddc5b',
+            },
+            {
+                name: 'setSymbol',
+                signature: 'setSymbol(string)',
+                selector: '0xb84c8246',
+            },
+        ],
+        events: [
+            {
+                name: 'AgentAdded',
+                signature: 'AgentAdded(address)',
+                topic0: '0xf68e73cec97f2d70aa641fb26e87a4383686e2efacb648f2165aeb02ac562ec5',
+            },
+            {
+                name: 'AgentRemoved',
+                signature: 'AgentRemoved(address)',
+                topic0: '0xed9c8ad8d5a0a66898ea49d2956929c93ae2e8bd50281b2ed897c5d1a6737e0b',
+            },
+            {
+                name: 'IdentityRegistryAdded',
+                signature: 'IdentityRegistryAdded(address)',
+                topic0: '0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c',
+            },
+            {
+                name: 'RecoverySuccess',
+                signature: 'RecoverySuccess(address,address,address)',
+                topic0: '0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0',
+            },
+            {
+                name: 'UpdatedTokenInformation',
+                signature:
+                    'UpdatedTokenInformation(string,string,uint8,string,address)',
+                topic0: '0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1',
+            },
+        ],
+        errors: [
+            {
+                name: 'AddressNotVerified',
+                signature: 'AddressNotVerified()',
+                selector: '0x209d2853',
+            },
+            {
+                name: 'CannotRecoverWallet',
+                signature: 'CannotRecoverWallet()',
+                selector: '0x505389ae',
+            },
+            {
+                name: 'ComplianceCallFailed',
+                signature: 'ComplianceCallFailed()',
+                selector: '0x67fba102',
+            },
+            {
+                name: 'ComplianceNotAllowed',
+                signature: 'ComplianceNotAllowed()',
+                selector: '0x66eb1b54',
+            },
+            {
+                name: 'IdentityRegistryCallFailed',
+                signature: 'IdentityRegistryCallFailed()',
+                selector: '0xad87849e',
+            },
+            {
+                name: 'InputAmountsArrayLengthMismatch',
+                signature: 'InputAmountsArrayLengthMismatch()',
+                selector: '0x64f13710',
+            },
+            {
+                name: 'InputBoolArrayLengthMismatch',
+                signature: 'InputBoolArrayLengthMismatch()',
+                selector: '0x07ac0eb9',
+            },
+            {
+                name: 'WalletRecovered',
+                signature: 'WalletRecovered()',
+                selector: '0xf9f9bcf9',
+            },
+        ],
     },
 
     ERC3643OperationsFacet: {
         name: 'ERC3643OperationsFacet',
         description: 'Core functionality - compliance and regulatory features',
+        resolverKey: {
+            name: '_ERC3643_OPERATIONS_RESOLVER_KEY',
+            value: '0x39de33e56c92afe3cd7ece00d0ff8a0df512878690719e48c17d5b54604d2de2',
+        },
+        inheritance: ['IStaticFunctionSelectors', 'ERC3643Operations'],
+        methods: [
+            {
+                name: 'burn',
+                signature: 'burn(address,uint256)',
+                selector: '0x9dc29fac',
+            },
+            {
+                name: 'forcedTransfer',
+                signature: 'forcedTransfer(address,address,uint256)',
+                selector: '0x9fc1d0e7',
+            },
+            {
+                name: 'mint',
+                signature: 'mint(address,uint256)',
+                selector: '0x40c10f19',
+            },
+        ],
     },
 
     ERC3643ReadFacet: {
         name: 'ERC3643ReadFacet',
         description: 'Core functionality - compliance and regulatory features',
+        resolverKey: {
+            name: '_ERC3643_READ_RESOLVER_KEY',
+            value: '0xf1a7f92f11da0b048b6417201459d4e1eaef0e112e0d58d5bd6ee4481e5394c7',
+        },
+        inheritance: ['IStaticFunctionSelectors', 'ERC3643Read'],
+        methods: [
+            {
+                name: 'compliance',
+                signature: 'compliance()',
+                selector: '0x6290865d',
+            },
+            {
+                name: 'identityRegistry',
+                signature: 'identityRegistry()',
+                selector: '0x134e18f4',
+            },
+            {
+                name: 'isAddressRecovered',
+                signature: 'isAddressRecovered(address)',
+                selector: '0x1b997ec2',
+            },
+            {
+                name: 'isAgent',
+                signature: 'isAgent(address)',
+                selector: '0x1ffbb064',
+            },
+            {
+                name: 'onchainID',
+                signature: 'onchainID()',
+                selector: '0xaba63705',
+            },
+            {
+                name: 'version',
+                signature: 'version()',
+                selector: '0x54fd4d50',
+            },
+        ],
     },
 
     ExternalControlListManagementFacet: {
         name: 'ExternalControlListManagementFacet',
         description: 'Core functionality - compliance and regulatory features',
+        resolverKey: {
+            name: '_CONTROL_LIST_MANAGEMENT_RESOLVER_KEY',
+            value: '0xb28d59e89fa116cebe06d8de737191b637a49d95f7d8d947d47ac000463e7c71',
+        },
+        inheritance: [
+            'ExternalControlListManagement',
+            'IStaticFunctionSelectors',
+        ],
+        methods: [
+            {
+                name: 'addExternalControlList',
+                signature: 'addExternalControlList(address)',
+                selector: '0x995e4649',
+            },
+            {
+                name: 'getExternalControlListsCount',
+                signature: 'getExternalControlListsCount()',
+                selector: '0x9bec4167',
+            },
+            {
+                name: 'getExternalControlListsMembers',
+                signature: 'getExternalControlListsMembers(uint256,uint256)',
+                selector: '0xc4aa9df3',
+            },
+            {
+                name: 'initialize_ExternalControlLists',
+                signature: 'initialize_ExternalControlLists(address[])',
+                selector: '0x0a0a114f',
+            },
+            {
+                name: 'isExternalControlList',
+                signature: 'isExternalControlList(address)',
+                selector: '0x07c44711',
+            },
+            {
+                name: 'removeExternalControlList',
+                signature: 'removeExternalControlList(address)',
+                selector: '0xb8913387',
+            },
+            {
+                name: 'updateExternalControlLists',
+                signature: 'updateExternalControlLists(address[],bool[])',
+                selector: '0x0ba2b922',
+            },
+        ],
+        events: [
+            {
+                name: 'AddedToExternalControlLists',
+                signature: 'AddedToExternalControlLists(address,address)',
+                topic0: '0x3d65de474cd161ee7f82f178e1edc66856cbd5f71f6fb8da9149d8c4b8af24cb',
+            },
+            {
+                name: 'ExternalControlListsUpdated',
+                signature:
+                    'ExternalControlListsUpdated(address,address[],bool[])',
+                topic0: '0xf33492ee91b93cacfde1a1273fb2fe62ca266ca3e8abd548ea55c38559e0d27d',
+            },
+            {
+                name: 'RemovedFromExternalControlLists',
+                signature: 'RemovedFromExternalControlLists(address,address)',
+                topic0: '0xe4058444c388a9cf0c802f605695e3600e235e37a4af77aab2bb582e214e453d',
+            },
+        ],
+        errors: [
+            {
+                name: 'ExternalControlListsNotUpdated',
+                signature: 'ExternalControlListsNotUpdated(address[],bool[])',
+                selector: '0xbd29da3f',
+            },
+            {
+                name: 'ListedControlList',
+                signature: 'ListedControlList(address)',
+                selector: '0x67a1e319',
+            },
+            {
+                name: 'UnlistedControlList',
+                signature: 'UnlistedControlList(address)',
+                selector: '0x6b4e1917',
+            },
+        ],
     },
 
     ExternalKycListManagementFacet: {
         name: 'ExternalKycListManagementFacet',
         description: 'Core functionality - compliance and regulatory features',
+        resolverKey: {
+            name: '_KYC_MANAGEMENT_RESOLVER_KEY',
+            value: '0x8676785f4d841823214e8ee8c497b3336a210be7559f5571c590249f6203e821',
+        },
+        inheritance: ['ExternalKycListManagement', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'addExternalKycList',
+                signature: 'addExternalKycList(address)',
+                selector: '0x7570e044',
+            },
+            {
+                name: 'getExternalKycListsCount',
+                signature: 'getExternalKycListsCount()',
+                selector: '0xd17e889e',
+            },
+            {
+                name: 'getExternalKycListsMembers',
+                signature: 'getExternalKycListsMembers(uint256,uint256)',
+                selector: '0x999a2459',
+            },
+            {
+                name: 'initialize_ExternalKycLists',
+                signature: 'initialize_ExternalKycLists(address[])',
+                selector: '0x3ac7fadc',
+            },
+            {
+                name: 'isExternalKycList',
+                signature: 'isExternalKycList(address)',
+                selector: '0x20991e17',
+            },
+            {
+                name: 'isExternallyGranted',
+                signature: 'isExternallyGranted(address,IKyc.KycStatus)',
+                selector: '0xd3567130',
+            },
+            {
+                name: 'removeExternalKycList',
+                signature: 'removeExternalKycList(address)',
+                selector: '0x16c94d54',
+            },
+            {
+                name: 'updateExternalKycLists',
+                signature: 'updateExternalKycLists(address[],bool[])',
+                selector: '0xc391576d',
+            },
+        ],
+        events: [
+            {
+                name: 'AddedToExternalKycLists',
+                signature: 'AddedToExternalKycLists(address,address)',
+                topic0: '0xbcae4970725fd3096fd0bf87438db521acff164a7290d244ac387de859944b3a',
+            },
+            {
+                name: 'ExternalKycListsUpdated',
+                signature: 'ExternalKycListsUpdated(address,address[],bool[])',
+                topic0: '0xd601f143a291315a9f9c93550bb5299d09b105676ef1a06edcd38df1a9390fbc',
+            },
+            {
+                name: 'RemovedFromExternalKycLists',
+                signature: 'RemovedFromExternalKycLists(address,address)',
+                topic0: '0xf5b81cc6909f27c20ccf2b32d6f34bc169fc165d0d4ea1db1c5f392fca56765f',
+            },
+        ],
+        errors: [
+            {
+                name: 'ExternalKycListsNotUpdated',
+                signature: 'ExternalKycListsNotUpdated(address[],bool[])',
+                selector: '0x8a85ec02',
+            },
+            {
+                name: 'ListedKycList',
+                signature: 'ListedKycList(address)',
+                selector: '0x91c6b79d',
+            },
+            {
+                name: 'UnlistedKycList',
+                signature: 'UnlistedKycList(address)',
+                selector: '0xf5cc4d79',
+            },
+        ],
     },
 
     ExternalPauseManagementFacet: {
         name: 'ExternalPauseManagementFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_PAUSE_MANAGEMENT_RESOLVER_KEY',
+            value: '0xadd2e196c17b4f607e327e46341eedbbbc3dce86ac90ceb3e7244b0a5f8590ac',
+        },
+        inheritance: ['ExternalPauseManagement', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'addExternalPause',
+                signature: 'addExternalPause(address)',
+                selector: '0xd438cff1',
+            },
+            {
+                name: 'getExternalPausesCount',
+                signature: 'getExternalPausesCount()',
+                selector: '0x1e2bc3a6',
+            },
+            {
+                name: 'getExternalPausesMembers',
+                signature: 'getExternalPausesMembers(uint256,uint256)',
+                selector: '0x5b175a35',
+            },
+            {
+                name: 'initialize_ExternalPauses',
+                signature: 'initialize_ExternalPauses(address[])',
+                selector: '0x8f88d0d5',
+            },
+            {
+                name: 'isExternalPause',
+                signature: 'isExternalPause(address)',
+                selector: '0xe26e35be',
+            },
+            {
+                name: 'removeExternalPause',
+                signature: 'removeExternalPause(address)',
+                selector: '0x9648d912',
+            },
+            {
+                name: 'updateExternalPauses',
+                signature: 'updateExternalPauses(address[],bool[])',
+                selector: '0x361d714a',
+            },
+        ],
+        events: [
+            {
+                name: 'AddedToExternalPauses',
+                signature: 'AddedToExternalPauses(address,address)',
+                topic0: '0x3e5aaed9f36a606341d49642168dd1094c2394f06760d24cb81c89d0a8210c0b',
+            },
+            {
+                name: 'ExternalPausesUpdated',
+                signature: 'ExternalPausesUpdated(address,address[],bool[])',
+                topic0: '0x75a050d52d69209d464c91f8503b1f3e0aa6bb70550a3884bc19c53c25882878',
+            },
+            {
+                name: 'RemovedFromExternalPauses',
+                signature: 'RemovedFromExternalPauses(address,address)',
+                topic0: '0x3c9c4b708af23d4bd4eb63d45714a3f61f17ae8f0ece3a182c38d15667b965c8',
+            },
+        ],
+        errors: [
+            {
+                name: 'ExternalPausesNotUpdated',
+                signature: 'ExternalPausesNotUpdated(address[],bool[])',
+                selector: '0x2d931b36',
+            },
+            {
+                name: 'ListedPause',
+                signature: 'ListedPause(address)',
+                selector: '0x267b9ec9',
+            },
+            {
+                name: 'UnlistedPause',
+                signature: 'UnlistedPause(address)',
+                selector: '0x3281637c',
+            },
+        ],
     },
 
     FreezeFacet: {
         name: 'FreezeFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_FREEZE_RESOLVER_KEY',
+            value: '0x49f765e7155d979a148049c2a0ebed5e028b11799061897a255f99314f0bd3f1',
+        },
+        inheritance: ['Freeze', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'batchFreezePartialTokens',
+                signature: 'batchFreezePartialTokens(address[],uint256[])',
+                selector: '0xfc7e5fa8',
+            },
+            {
+                name: 'batchSetAddressFrozen',
+                signature: 'batchSetAddressFrozen(address[],bool[])',
+                selector: '0x1a7af379',
+            },
+            {
+                name: 'batchUnfreezePartialTokens',
+                signature: 'batchUnfreezePartialTokens(address[],uint256[])',
+                selector: '0x4710362d',
+            },
+            {
+                name: 'freezePartialTokens',
+                signature: 'freezePartialTokens(address,uint256)',
+                selector: '0x125c4a33',
+            },
+            {
+                name: 'getFrozenTokens',
+                signature: 'getFrozenTokens(address)',
+                selector: '0x158b1a57',
+            },
+            {
+                name: 'setAddressFrozen',
+                signature: 'setAddressFrozen(address,bool)',
+                selector: '0xc69c09cf',
+            },
+            {
+                name: 'unfreezePartialTokens',
+                signature: 'unfreezePartialTokens(address,uint256)',
+                selector: '0x1fe56f7d',
+            },
+        ],
+        events: [
+            {
+                name: 'AddressFrozen',
+                signature: 'AddressFrozen(address,bool,address)',
+                topic0: '0x7fa523c84ab8d7fc5b72f08b9e46dbbf10c39e119a075b3e317002d14bc9f436',
+            },
+            {
+                name: 'TokensFrozen',
+                signature: 'TokensFrozen(address,uint256,bytes32)',
+                topic0: '0xd736f88140588a48bf2ce0d40c8ed9eea7d10162e5667cf5054c78ac9a28b2e2',
+            },
+            {
+                name: 'TokensUnfrozen',
+                signature: 'TokensUnfrozen(address,uint256,bytes32)',
+                topic0: '0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d',
+            },
+        ],
     },
 
     HoldManagementFacet: {
         name: 'HoldManagementFacet',
         description: 'Core functionality - clearing and settlement operations',
+        resolverKey: {
+            name: '_HOLD_MANAGEMENT_RESOLVER_KEY',
+            value: '0xaab5a0e0978ad146ca8dc61d16bab0212224eadf68bd08e3c66600ee4f59c12a',
+        },
+        inheritance: ['IStaticFunctionSelectors', 'HoldManagement'],
+        methods: [
+            {
+                name: 'controllerCreateHoldByPartition',
+                signature:
+                    'controllerCreateHoldByPartition(bytes32,address,Hold,bytes)',
+                selector: '0xd601e2f8',
+            },
+            {
+                name: 'operatorCreateHoldByPartition',
+                signature:
+                    'operatorCreateHoldByPartition(bytes32,address,Hold,bytes)',
+                selector: '0x049e5d89',
+            },
+            {
+                name: 'protectedCreateHoldByPartition',
+                signature:
+                    'protectedCreateHoldByPartition(bytes32,address,ProtectedHold,bytes)',
+                selector: '0xfea5ee4c',
+            },
+        ],
+        events: [
+            {
+                name: 'ControllerHeldByPartition',
+                signature:
+                    'ControllerHeldByPartition(address,address,bytes32,uint256,Hold,bytes)',
+                topic0: '0xf6f3741306d730c309f18e6262f05de4790259d916f67334766f2f71dbf00b11',
+            },
+            {
+                name: 'OperatorHeldByPartition',
+                signature:
+                    'OperatorHeldByPartition(address,address,bytes32,uint256,Hold,bytes)',
+                topic0: '0xecb0a532842468318362280a5b81ec910b4d495202a817fc545fd2b7628559e4',
+            },
+            {
+                name: 'ProtectedHeldByPartition',
+                signature:
+                    'ProtectedHeldByPartition(address,address,bytes32,uint256,Hold,bytes)',
+                topic0: '0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58',
+            },
+        ],
     },
 
     HoldReadFacet: {
         name: 'HoldReadFacet',
         description: 'Core functionality - clearing and settlement operations',
+        resolverKey: {
+            name: '_HOLD_READ_RESOLVER_KEY',
+            value: '0xd8a2714462c01975a075ccd4be2588934afd8074afef746fac089b757b803851',
+        },
+        inheritance: ['IStaticFunctionSelectors', 'HoldRead'],
+        methods: [
+            {
+                name: 'getHeldAmountFor',
+                signature: 'getHeldAmountFor(address)',
+                selector: '0x8493aabb',
+            },
+            {
+                name: 'getHeldAmountForByPartition',
+                signature: 'getHeldAmountForByPartition(bytes32,address)',
+                selector: '0x4d60fdc5',
+            },
+            {
+                name: 'getHoldCountForByPartition',
+                signature: 'getHoldCountForByPartition(bytes32,address)',
+                selector: '0xcecb3899',
+            },
+            {
+                name: 'getHoldForByPartition',
+                signature: 'getHoldForByPartition(HoldIdentifier)',
+                selector: '0x4fa0b1f2',
+            },
+            {
+                name: 'getHoldsIdForByPartition',
+                signature:
+                    'getHoldsIdForByPartition(bytes32,address,uint256,uint256)',
+                selector: '0xeb89899d',
+            },
+            {
+                name: 'getHoldThirdParty',
+                signature: 'getHoldThirdParty(HoldIdentifier)',
+                selector: '0x1c771f2b',
+            },
+        ],
     },
 
     HoldTokenHolderFacet: {
         name: 'HoldTokenHolderFacet',
         description: 'Core functionality - clearing and settlement operations',
+        resolverKey: {
+            name: '_HOLD_TOKEN_HOLDER_RESOLVER_KEY',
+            value: '0x87b17a3ce9a86872f21469d26f005543a22ef5729998559f4ad433d5c4253f3e',
+        },
+        inheritance: ['IStaticFunctionSelectors', 'HoldTokenHolder'],
+        methods: [
+            {
+                name: 'createHoldByPartition',
+                signature: 'createHoldByPartition(bytes32,Hold)',
+                selector: '0xae4bcf8a',
+            },
+            {
+                name: 'createHoldFromByPartition',
+                signature:
+                    'createHoldFromByPartition(bytes32,address,Hold,bytes)',
+                selector: '0x30b2e862',
+            },
+            {
+                name: 'executeHoldByPartition',
+                signature:
+                    'executeHoldByPartition(HoldIdentifier,address,uint256)',
+                selector: '0x37034df4',
+            },
+            {
+                name: 'reclaimHoldByPartition',
+                signature: 'reclaimHoldByPartition(HoldIdentifier)',
+                selector: '0x8e302e47',
+            },
+            {
+                name: 'releaseHoldByPartition',
+                signature: 'releaseHoldByPartition(HoldIdentifier,uint256)',
+                selector: '0x2dc66830',
+            },
+        ],
+        events: [
+            {
+                name: 'HeldByPartition',
+                signature:
+                    'HeldByPartition(address,address,bytes32,uint256,Hold,bytes)',
+                topic0: '0x8aaecda291be1880bb8f1b74d739076b63e172f3758535440d4781002a135663',
+            },
+            {
+                name: 'HeldFromByPartition',
+                signature:
+                    'HeldFromByPartition(address,address,bytes32,uint256,Hold,bytes)',
+                topic0: '0x89e7674560e6cad671bf2d392a62a88b25b960e62476504e038081c3aabe7ece',
+            },
+            {
+                name: 'HoldByPartitionExecuted',
+                signature:
+                    'HoldByPartitionExecuted(address,bytes32,uint256,uint256,address)',
+                topic0: '0x4fb20409d1b2a56fa4c5b29c11d9b1e148649db67860c5648a8a86f35edf8582',
+            },
+            {
+                name: 'HoldByPartitionReclaimed',
+                signature:
+                    'HoldByPartitionReclaimed(address,address,bytes32,uint256,uint256)',
+                topic0: '0xee0ec155026031ca64823d8fbf00832ff3f96c7da0994432ddc1a32c72022a09',
+            },
+            {
+                name: 'HoldByPartitionReleased',
+                signature:
+                    'HoldByPartitionReleased(address,bytes32,uint256,uint256)',
+                topic0: '0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e',
+            },
+        ],
     },
 
     KycFacet: {
         name: 'KycFacet',
         description: 'Core functionality - compliance and regulatory features',
+        resolverKey: {
+            name: '_KYC_RESOLVER_KEY',
+            value: '0xf516a0f6b4726244ae916c590cd26c2b593d7d448e46e43714fb9f9435c46e32',
+        },
+        inheritance: ['Kyc', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'activateInternalKyc',
+                signature: 'activateInternalKyc()',
+                selector: '0xfbb08f50',
+            },
+            {
+                name: 'deactivateInternalKyc',
+                signature: 'deactivateInternalKyc()',
+                selector: '0x4a5df31d',
+            },
+            {
+                name: 'getKycAccountsCount',
+                signature: 'getKycAccountsCount(KycStatus)',
+                selector: '0x73106fa0',
+            },
+            {
+                name: 'getKycAccountsData',
+                signature: 'getKycAccountsData(KycStatus,uint256,uint256)',
+                selector: '0xabe354e6',
+            },
+            {
+                name: 'getKycFor',
+                signature: 'getKycFor(address)',
+                selector: '0x41322840',
+            },
+            {
+                name: 'getKycStatusFor',
+                signature: 'getKycStatusFor(address)',
+                selector: '0xe788a736',
+            },
+            {
+                name: 'grantKyc',
+                signature: 'grantKyc(address,string,uint256,uint256,address)',
+                selector: '0x81bea54d',
+            },
+            {
+                name: 'initializeInternalKyc',
+                signature: 'initializeInternalKyc(bool)',
+                selector: '0xdf353624',
+            },
+            {
+                name: 'isInternalKycActivated',
+                signature: 'isInternalKycActivated()',
+                selector: '0x90b6c798',
+            },
+            {
+                name: 'revokeKyc',
+                signature: 'revokeKyc(address)',
+                selector: '0x12283191',
+            },
+        ],
+        events: [
+            {
+                name: 'InternalKycStatusUpdated',
+                signature: 'InternalKycStatusUpdated(address,bool)',
+                topic0: '0xa9f463ccc72d9e8aa9a317345756d652481f06b5ddf8aa4057f38086024a168c',
+            },
+            {
+                name: 'KycGranted',
+                signature: 'KycGranted(address,address)',
+                topic0: '0x0cc42ba172587888529a0b89cc75bd6914b337cf10757fd80e3246330e55ad94',
+            },
+            {
+                name: 'KycRevoked',
+                signature: 'KycRevoked(address,address)',
+                topic0: '0x5d9279616441228548cfb67f31b7b9b131fd30de1b3c54a6dd0062a74ce638a6',
+            },
+        ],
+        errors: [
+            {
+                name: 'InvalidDates',
+                signature: 'InvalidDates()',
+                selector: '0xd937486c',
+            },
+            {
+                name: 'InvalidKycStatus',
+                signature: 'InvalidKycStatus()',
+                selector: '0xfc855b1b',
+            },
+            {
+                name: 'InvalidZeroAddress',
+                signature: 'InvalidZeroAddress()',
+                selector: '0xf6b2911f',
+            },
+            {
+                name: 'KycIsNotGranted',
+                signature: 'KycIsNotGranted()',
+                selector: '0xd5209e15',
+            },
+        ],
     },
 
     LockFacet: {
         name: 'LockFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_LOCK_RESOLVER_KEY',
+            value: '0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9',
+        },
+        inheritance: ['Lock', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'getLockCountFor',
+                signature: 'getLockCountFor(address)',
+                selector: '0x4f131ba4',
+            },
+            {
+                name: 'getLockCountForByPartition',
+                signature: 'getLockCountForByPartition(bytes32,address)',
+                selector: '0x3b193d92',
+            },
+            {
+                name: 'getLockedAmountFor',
+                signature: 'getLockedAmountFor(address)',
+                selector: '0x36e74467',
+            },
+            {
+                name: 'getLockedAmountForByPartition',
+                signature: 'getLockedAmountForByPartition(bytes32,address)',
+                selector: '0x6e1c55ba',
+            },
+            {
+                name: 'getLockFor',
+                signature: 'getLockFor(address,uint256)',
+                selector: '0x6f14b024',
+            },
+            {
+                name: 'getLockForByPartition',
+                signature: 'getLockForByPartition(bytes32,address,uint256)',
+                selector: '0xa9acfccb',
+            },
+            {
+                name: 'getLocksIdFor',
+                signature: 'getLocksIdFor(address,uint256,uint256)',
+                selector: '0xd2d2b9fc',
+            },
+            {
+                name: 'getLocksIdForByPartition',
+                signature:
+                    'getLocksIdForByPartition(bytes32,address,uint256,uint256)',
+                selector: '0x3ea8b59d',
+            },
+            {
+                name: 'lock',
+                signature: 'lock(uint256,address,uint256)',
+                selector: '0xcf27cfc4',
+            },
+            {
+                name: 'lockByPartition',
+                signature: 'lockByPartition(bytes32,uint256,address,uint256)',
+                selector: '0x7a87884e',
+            },
+            {
+                name: 'release',
+                signature: 'release(uint256,address)',
+                selector: '0x8124fea6',
+            },
+            {
+                name: 'releaseByPartition',
+                signature: 'releaseByPartition(bytes32,uint256,address)',
+                selector: '0xdc6a3e75',
+            },
+        ],
+        events: [
+            {
+                name: 'LockByPartitionReleased',
+                signature:
+                    'LockByPartitionReleased(address,address,bytes32,uint256)',
+                topic0: '0x6b9cdd97822563ef24ac6b58b361df36a653662e434bb96e40fa50ae5c9de688',
+            },
+            {
+                name: 'LockedByPartition',
+                signature:
+                    'LockedByPartition(address,address,bytes32,uint256,uint256,uint256)',
+                topic0: '0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152',
+            },
+        ],
     },
 
     PauseFacet: {
         name: 'PauseFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_PAUSE_RESOLVER_KEY',
+            value: '0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c',
+        },
+        inheritance: ['Pause', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'isPaused',
+                signature: 'isPaused()',
+                selector: '0xb187bd26',
+            },
+            {
+                name: 'pause',
+                signature: 'pause()',
+                selector: '0x8456cb59',
+            },
+            {
+                name: 'unpause',
+                signature: 'unpause()',
+                selector: '0x3f4ba83a',
+            },
+        ],
     },
 
     ProceedRecipientsFacet: {
         name: 'ProceedRecipientsFacet',
         description: 'Business logic - core token functionality',
+        resolverKey: {
+            name: '_PROCEED_RECIPIENTS_RESOLVER_KEY',
+            value: '0x87f4b676bf89cd24a01a78fd8e7fb2102c2f6d034be73d16402f7297e0ae625b',
+        },
+        inheritance: ['ProceedRecipients', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'addProceedRecipient',
+                signature: 'addProceedRecipient(address,bytes)',
+                selector: '0x298f6222',
+            },
+            {
+                name: 'getProceedRecipientData',
+                signature: 'getProceedRecipientData(address)',
+                selector: '0x94c39122',
+            },
+            {
+                name: 'getProceedRecipients',
+                signature: 'getProceedRecipients(uint256,uint256)',
+                selector: '0x0a4f7d71',
+            },
+            {
+                name: 'getProceedRecipientsCount',
+                signature: 'getProceedRecipientsCount()',
+                selector: '0x03db0e0d',
+            },
+            {
+                name: 'initialize_ProceedRecipients',
+                signature: 'initialize_ProceedRecipients(address[],bytes[])',
+                selector: '0x9005379e',
+            },
+            {
+                name: 'isProceedRecipient',
+                signature: 'isProceedRecipient(address)',
+                selector: '0xb9b6def1',
+            },
+            {
+                name: 'removeProceedRecipient',
+                signature: 'removeProceedRecipient(address)',
+                selector: '0x1f9810c8',
+            },
+            {
+                name: 'updateProceedRecipientData',
+                signature: 'updateProceedRecipientData(address,bytes)',
+                selector: '0x654141cf',
+            },
+        ],
+        events: [
+            {
+                name: 'ProceedRecipientAdded',
+                signature: 'ProceedRecipientAdded(address,address,bytes)',
+                topic0: '0x95ea4c59332446575a504e49eab7549792d2378816950a0b6efb509e4df77b95',
+            },
+            {
+                name: 'ProceedRecipientDataUpdated',
+                signature: 'ProceedRecipientDataUpdated(address,address,bytes)',
+                topic0: '0xd3ca7f6e7e6927a35494a3d41bf1b250b7388cb459b84f19db41a7069a70f109',
+            },
+            {
+                name: 'ProceedRecipientRemoved',
+                signature: 'ProceedRecipientRemoved(address,address)',
+                topic0: '0x63204e4d4571f38dab60d621fa9e61d1a9430f6fe93627d35474eba0f7ca86e6',
+            },
+        ],
+        errors: [
+            {
+                name: 'ProceedRecipientAlreadyExists',
+                signature: 'ProceedRecipientAlreadyExists(address)',
+                selector: '0xb7fd3b5b',
+            },
+            {
+                name: 'ProceedRecipientNotFound',
+                signature: 'ProceedRecipientNotFound(address)',
+                selector: '0x664dc89c',
+            },
+        ],
     },
 
     ProtectedPartitionsFacet: {
         name: 'ProtectedPartitionsFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_PROTECTED_PARTITIONS_RESOLVER_KEY',
+            value: '0x6d65d2938c05a4d952aff0845c1baa5bea04d4544db74f8b3b26004d1d58d58f',
+        },
+        inheritance: ['ProtectedPartitions', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'arePartitionsProtected',
+                signature: 'arePartitionsProtected()',
+                selector: '0xa151c19f',
+            },
+            {
+                name: 'calculateRoleForPartition',
+                signature: 'calculateRoleForPartition(bytes32)',
+                selector: '0xcb4da6fc',
+            },
+            {
+                name: 'getNounceFor',
+                signature: 'getNounceFor(address)',
+                selector: '0x9f6b67c2',
+            },
+            {
+                name: 'initialize_ProtectedPartitions',
+                signature: 'initialize_ProtectedPartitions(bool)',
+                selector: '0x90c032cc',
+            },
+            {
+                name: 'protectPartitions',
+                signature: 'protectPartitions()',
+                selector: '0x6c5fde55',
+            },
+            {
+                name: 'unprotectPartitions',
+                signature: 'unprotectPartitions()',
+                selector: '0x1277b323',
+            },
+        ],
     },
 
     ScheduledBalanceAdjustmentsFacet: {
         name: 'ScheduledBalanceAdjustmentsFacet',
         description: 'Business logic - core token functionality',
+        resolverKey: {
+            name: '_SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY',
+            value: '0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0',
+        },
+        inheritance: [
+            'ScheduledBalanceAdjustments',
+            'IStaticFunctionSelectors',
+        ],
+        methods: [
+            {
+                name: 'getScheduledBalanceAdjustments',
+                signature: 'getScheduledBalanceAdjustments(uint256,uint256)',
+                selector: '0xcb884d41',
+            },
+            {
+                name: 'scheduledBalanceAdjustmentCount',
+                signature: 'scheduledBalanceAdjustmentCount()',
+                selector: '0x2de241e3',
+            },
+        ],
     },
 
     ScheduledCrossOrderedTasksFacet: {
         name: 'ScheduledCrossOrderedTasksFacet',
         description: 'Business logic - core token functionality',
+        resolverKey: {
+            name: '_SCHEDULED_TASKS_RESOLVER_KEY',
+            value: '0xa4934195ab83f1497ce5fc99b68d0f41694716bcfba5f232aa6c8e0d4d504f08',
+        },
+        inheritance: ['ScheduledCrossOrderedTasks', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'getScheduledCrossOrderedTasks',
+                signature: 'getScheduledCrossOrderedTasks(uint256,uint256)',
+                selector: '0x72ed9041',
+            },
+            {
+                name: 'scheduledCrossOrderedTaskCount',
+                signature: 'scheduledCrossOrderedTaskCount()',
+                selector: '0x46883133',
+            },
+            {
+                name: 'triggerPendingScheduledCrossOrderedTasks',
+                signature: 'triggerPendingScheduledCrossOrderedTasks()',
+                selector: '0x32194dbb',
+            },
+            {
+                name: 'triggerScheduledCrossOrderedTasks',
+                signature: 'triggerScheduledCrossOrderedTasks(uint256)',
+                selector: '0x5be4a143',
+            },
+        ],
     },
 
     ScheduledSnapshotsFacet: {
         name: 'ScheduledSnapshotsFacet',
         description: 'Business logic - core token functionality',
+        resolverKey: {
+            name: '_SCHEDULED_SNAPSHOTS_RESOLVER_KEY',
+            value: '0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793',
+        },
+        inheritance: ['ScheduledSnapshots', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'getScheduledSnapshots',
+                signature: 'getScheduledSnapshots(uint256,uint256)',
+                selector: '0xca21c53a',
+            },
+            {
+                name: 'scheduledSnapshotCount',
+                signature: 'scheduledSnapshotCount()',
+                selector: '0xa19e91fe',
+            },
+        ],
     },
 
     SnapshotsFacet: {
         name: 'SnapshotsFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_SNAPSHOTS_RESOLVER_KEY',
+            value: '0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf',
+        },
+        inheritance: ['Snapshots', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'balanceOfAtSnapshot',
+                signature: 'balanceOfAtSnapshot(uint256,address)',
+                selector: '0x8e00ae2e',
+            },
+            {
+                name: 'balanceOfAtSnapshotByPartition',
+                signature:
+                    'balanceOfAtSnapshotByPartition(bytes32,uint256,address)',
+                selector: '0xe002bcdf',
+            },
+            {
+                name: 'clearedBalanceOfAtSnapshot',
+                signature: 'clearedBalanceOfAtSnapshot(uint256,address)',
+                selector: '0x2bc16e9b',
+            },
+            {
+                name: 'clearedBalanceOfAtSnapshotByPartition',
+                signature:
+                    'clearedBalanceOfAtSnapshotByPartition(bytes32,uint256,address)',
+                selector: '0x386e1405',
+            },
+            {
+                name: 'decimalsAtSnapshot',
+                signature: 'decimalsAtSnapshot(uint256)',
+                selector: '0x69ed346f',
+            },
+            {
+                name: 'getTokenHoldersAtSnapshot',
+                signature: 'getTokenHoldersAtSnapshot(uint256,uint256,uint256)',
+                selector: '0xd22a73df',
+            },
+            {
+                name: 'getTotalTokenHoldersAtSnapshot',
+                signature: 'getTotalTokenHoldersAtSnapshot(uint256)',
+                selector: '0x867126e1',
+            },
+            {
+                name: 'heldBalanceOfAtSnapshot',
+                signature: 'heldBalanceOfAtSnapshot(uint256,address)',
+                selector: '0xb52e39aa',
+            },
+            {
+                name: 'heldBalanceOfAtSnapshotByPartition',
+                signature:
+                    'heldBalanceOfAtSnapshotByPartition(bytes32,uint256,address)',
+                selector: '0x977a3a71',
+            },
+            {
+                name: 'lockedBalanceOfAtSnapshot',
+                signature: 'lockedBalanceOfAtSnapshot(uint256,address)',
+                selector: '0xd9e6f164',
+            },
+            {
+                name: 'lockedBalanceOfAtSnapshotByPartition',
+                signature:
+                    'lockedBalanceOfAtSnapshotByPartition(bytes32,uint256,address)',
+                selector: '0x4a13f5d0',
+            },
+            {
+                name: 'partitionsOfAtSnapshot',
+                signature: 'partitionsOfAtSnapshot(uint256,address)',
+                selector: '0x09e84301',
+            },
+            {
+                name: 'takeSnapshot',
+                signature: 'takeSnapshot()',
+                selector: '0xb3d3d37e',
+            },
+            {
+                name: 'totalSupplyAtSnapshot',
+                signature: 'totalSupplyAtSnapshot(uint256)',
+                selector: '0xda35f8f6',
+            },
+            {
+                name: 'totalSupplyAtSnapshotByPartition',
+                signature: 'totalSupplyAtSnapshotByPartition(bytes32,uint256)',
+                selector: '0x9657ddb9',
+            },
+        ],
     },
 
     SsiManagementFacet: {
         name: 'SsiManagementFacet',
         description: 'Core functionality - core token functionality',
+        resolverKey: {
+            name: '_SSI_MANAGEMENT_RESOLVER_KEY',
+            value: '0x46df6aaf3742e0cbad136a74fb679b686e087dcc3a3d92d1c4ce2f3ef1b508a0',
+        },
+        inheritance: ['SsiManagement', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'addIssuer',
+                signature: 'addIssuer(address)',
+                selector: '0x20694db0',
+            },
+            {
+                name: 'getIssuerListCount',
+                signature: 'getIssuerListCount()',
+                selector: '0x600b2940',
+            },
+            {
+                name: 'getIssuerListMembers',
+                signature: 'getIssuerListMembers(uint256,uint256)',
+                selector: '0x25ab0545',
+            },
+            {
+                name: 'getRevocationRegistryAddress',
+                signature: 'getRevocationRegistryAddress()',
+                selector: '0x12023976',
+            },
+            {
+                name: 'isIssuer',
+                signature: 'isIssuer(address)',
+                selector: '0x877b9a67',
+            },
+            {
+                name: 'removeIssuer',
+                signature: 'removeIssuer(address)',
+                selector: '0x47bc7093',
+            },
+            {
+                name: 'setRevocationRegistryAddress',
+                signature: 'setRevocationRegistryAddress(address)',
+                selector: '0xbb3daeaf',
+            },
+        ],
+        events: [
+            {
+                name: 'AddedToIssuerList',
+                signature: 'AddedToIssuerList(address,address)',
+                topic0: '0xed6cc767c5020f64eb4771044d11fede90f485f88204a7f6d62fb608e5615ca8',
+            },
+            {
+                name: 'RemovedFromIssuerList',
+                signature: 'RemovedFromIssuerList(address,address)',
+                topic0: '0x98978a12ff5bdb777720d9d8bb2cdad050bdfbc2c467144649b14cdc45df52ba',
+            },
+            {
+                name: 'RevocationRegistryUpdated',
+                signature: 'RevocationRegistryUpdated(address,address)',
+                topic0: '0x9b205171467d972c41c09cf31cce60bcca69d24714df66590528a49e9d9dcef7',
+            },
+        ],
+        errors: [
+            {
+                name: 'AccountIsNotIssuer',
+                signature: 'AccountIsNotIssuer(address)',
+                selector: '0xcd324f53',
+            },
+            {
+                name: 'ListedIssuer',
+                signature: 'ListedIssuer(address)',
+                selector: '0xcb2beece',
+            },
+            {
+                name: 'UnlistedIssuer',
+                signature: 'UnlistedIssuer(address)',
+                selector: '0xd1243a92',
+            },
+        ],
     },
 
     TimeTravelFacet: {
         name: 'TimeTravelFacet',
         description: 'Core functionality - core token functionality',
+        inheritance: [
+            'IStaticFunctionSelectors',
+            'ITimeTravel',
+            'TimeTravelStorageWrapper',
+        ],
+        methods: [
+            {
+                name: 'blockTimestamp',
+                signature: 'blockTimestamp()',
+                selector: '0xadb61832',
+            },
+            {
+                name: 'changeSystemBlocknumber',
+                signature: 'changeSystemBlocknumber(uint256)',
+                selector: '0x4dd6b375',
+            },
+            {
+                name: 'changeSystemTimestamp',
+                signature: 'changeSystemTimestamp(uint256)',
+                selector: '0xc0f0f67e',
+            },
+            {
+                name: 'checkBlockChainid',
+                signature: 'checkBlockChainid(uint256)',
+                selector: '0xd939398c',
+            },
+            {
+                name: 'resetSystemBlocknumber',
+                signature: 'resetSystemBlocknumber()',
+                selector: '0x64b677a4',
+            },
+            {
+                name: 'resetSystemTimestamp',
+                signature: 'resetSystemTimestamp()',
+                selector: '0x8f145250',
+            },
+        ],
+        events: [
+            {
+                name: 'SystemBlocknumberChanged',
+                signature: 'SystemBlocknumberChanged(uint256,uint256)',
+                topic0: '0x96395610c0c23ab4b071bdeae9633f3d54760b0c64cc38868c72e80d6543b987',
+            },
+            {
+                name: 'SystemBlocknumberReset',
+                signature: 'SystemBlocknumberReset()',
+                topic0: '0x5e1c9b0e188d9a34c3abf05ea5456e54965689aff2ae15b6f1f549dd116e927f',
+            },
+            {
+                name: 'SystemTimestampChanged',
+                signature: 'SystemTimestampChanged(uint256,uint256)',
+                topic0: '0x42ae45afbacb5d1779b65d1bf0fe5ed8ea40e9dd166cc8b80bcb3fa2daf222a1',
+            },
+            {
+                name: 'SystemTimestampReset',
+                signature: 'SystemTimestampReset()',
+                topic0: '0x93e7a31ca0d8810d390d6a3fc6ad83d230a5677c142d9aea7331a87794d11c11',
+            },
+        ],
+        errors: [
+            {
+                name: 'ExpirationNotReached',
+                signature: 'ExpirationNotReached()',
+                selector: '0x92899bcd',
+            },
+            {
+                name: 'InvalidBlocknumber',
+                signature: 'InvalidBlocknumber(uint256)',
+                selector: '0x769a518c',
+            },
+            {
+                name: 'InvalidTimestamp',
+                signature: 'InvalidTimestamp(uint256)',
+                selector: '0x25c20828',
+            },
+            {
+                name: 'WrongChainId',
+                signature: 'WrongChainId()',
+                selector: '0x5f87bc00',
+            },
+        ],
     },
 
     TransferAndLockFacet: {
         name: 'TransferAndLockFacet',
         description: 'Jurisdiction-specific - asset-specific features',
+        resolverKey: {
+            name: '_TRANSFER_AND_LOCK_RESOLVER_KEY',
+            value: '0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08',
+        },
+        inheritance: ['TransferAndLock', 'IStaticFunctionSelectors'],
+        methods: [
+            {
+                name: 'protectedTransferAndLock',
+                signature:
+                    'protectedTransferAndLock(TransferAndLockStruct,uint256,uint256,bytes)',
+                selector: '0xaf33faac',
+            },
+            {
+                name: 'protectedTransferAndLockByPartition',
+                signature:
+                    'protectedTransferAndLockByPartition(bytes32,TransferAndLockStruct,uint256,uint256,bytes)',
+                selector: '0xbd2951ce',
+            },
+            {
+                name: 'transferAndLock',
+                signature: 'transferAndLock(address,uint256,bytes,uint256)',
+                selector: '0x0e92b90b',
+            },
+            {
+                name: 'transferAndLockByPartition',
+                signature:
+                    'transferAndLockByPartition(bytes32,address,uint256,bytes,uint256)',
+                selector: '0x3bd407b9',
+            },
+        ],
     },
 }
 
 /**
+ * Total number of facets in the registry.
+ */
+export const TOTAL_FACETS = 49 as const
+
+/**
  * Registry of non-facet infrastructure contracts.
- *
- * Total contracts: 2
  */
 export const CONTRACT_REGISTRY: Record<string, ContractDefinition> = {
     BusinessLogicResolver: {
         name: 'BusinessLogicResolver',
         description: 'Infrastructure - core token functionality',
+        inheritance: ['IBusinessLogicResolver', 'DiamondCutManager'],
+        methods: [
+            {
+                name: 'addSelectorsToBlacklist',
+                signature: 'addSelectorsToBlacklist(bytes32,bytes4[])',
+                selector: '0xe87c5d71',
+            },
+            {
+                name: 'getBusinessLogicCount',
+                signature: 'getBusinessLogicCount()',
+                selector: '0x8373989d',
+            },
+            {
+                name: 'getBusinessLogicKeys',
+                signature: 'getBusinessLogicKeys(uint256,uint256)',
+                selector: '0xe7e936ee',
+            },
+            {
+                name: 'getLatestVersion',
+                signature: 'getLatestVersion()',
+                selector: '0x0e6d1de9',
+            },
+            {
+                name: 'getSelectorsBlacklist',
+                signature: 'getSelectorsBlacklist(bytes32,uint256,uint256)',
+                selector: '0xbf3af9ea',
+            },
+            {
+                name: 'getVersionStatus',
+                signature: 'getVersionStatus(uint256)',
+                selector: '0x65b24dfc',
+            },
+            {
+                name: 'initialize_BusinessLogicResolver',
+                signature: 'initialize_BusinessLogicResolver()',
+                selector: '0xb86ffa1a',
+            },
+            {
+                name: 'registerBusinessLogics',
+                signature:
+                    'registerBusinessLogics(BusinessLogicRegistryData[])',
+                selector: '0x6302f4c4',
+            },
+            {
+                name: 'removeSelectorsFromBlacklist',
+                signature: 'removeSelectorsFromBlacklist(bytes32,bytes4[])',
+                selector: '0xcccae751',
+            },
+            {
+                name: 'resolveBusinessLogicByVersion',
+                signature: 'resolveBusinessLogicByVersion(bytes32,uint256)',
+                selector: '0x9f77ad81',
+            },
+            {
+                name: 'resolveLatestBusinessLogic',
+                signature: 'resolveLatestBusinessLogic(bytes32)',
+                selector: '0xbbced3bb',
+            },
+        ],
+        errors: [
+            {
+                name: 'Unimplemented',
+                signature: 'Unimplemented()',
+                selector: '0x6e128399',
+            },
+        ],
     },
 
     Factory: {
         name: 'Factory',
         description: 'Infrastructure - core token functionality',
+        inheritance: ['IFactory', 'LocalContext'],
+        methods: [
+            {
+                name: 'deployBond',
+                signature: 'deployBond(BondData,FactoryRegulationData)',
+                selector: '0x5010503b',
+            },
+            {
+                name: 'deployEquity',
+                signature: 'deployEquity(EquityData,FactoryRegulationData)',
+                selector: '0x7c03575b',
+            },
+            {
+                name: 'getAppliedRegulationData',
+                signature:
+                    'getAppliedRegulationData(RegulationType,RegulationSubType)',
+                selector: '0x7a0191e3',
+            },
+        ],
     },
 }
 
 /**
- * Common role identifiers.
+ * Total number of infrastructure contracts in the registry.
+ */
+export const TOTAL_CONTRACTS = 2 as const
+
+/**
+ * Registry of storage wrapper contracts.
+ *
+ * StorageWrappers provide internal storage and helper methods for facets.
+ * They are abstract contracts inherited by facets, not deployed directly.
+ */
+export const STORAGE_WRAPPER_REGISTRY: Record<
+    string,
+    StorageWrapperDefinition
+> = {
+    AccessControlStorageWrapper: {
+        name: 'AccessControlStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: [
+            'IAccessControlStorageWrapper',
+            'LocalContext',
+            'BusinessLogicResolverWrapper',
+        ],
+        methods: [
+            {
+                name: '_applyRoles',
+                signature: '_applyRoles(bytes32[],bool[],address)',
+                selector: '0xb4628c56',
+            },
+            {
+                name: '_checkAnyRole',
+                signature: '_checkAnyRole(bytes32[],address)',
+                selector: '0xe066fd1b',
+            },
+            {
+                name: '_checkRole',
+                signature: '_checkRole(bytes32,address)',
+                selector: '0x5b7b2c38',
+            },
+            {
+                name: '_checkSameRolesAndActivesLength',
+                signature: '_checkSameRolesAndActivesLength(uint256,uint256)',
+                selector: '0x61b5dd02',
+            },
+            {
+                name: '_getRoleAdmin',
+                signature: '_getRoleAdmin(bytes32)',
+                selector: '0x2ec227cd',
+            },
+            {
+                name: '_getRoleCountFor',
+                signature: '_getRoleCountFor(address)',
+                selector: '0x2044d9ad',
+            },
+            {
+                name: '_getRoleMemberCount',
+                signature: '_getRoleMemberCount(bytes32)',
+                selector: '0xa313bee3',
+            },
+            {
+                name: '_getRoleMembers',
+                signature: '_getRoleMembers(bytes32,uint256,uint256)',
+                selector: '0xd8d2aeb8',
+            },
+            {
+                name: '_getRolesFor',
+                signature: '_getRolesFor(address,uint256,uint256)',
+                selector: '0x9984117f',
+            },
+            {
+                name: '_grant',
+                signature: '_grant(RoleDataStorage,bytes32,address)',
+                selector: '0xea3bbdd8',
+            },
+            {
+                name: '_grantRole',
+                signature: '_grantRole(bytes32,address)',
+                selector: '0xce2cc1d0',
+            },
+            {
+                name: '_has',
+                signature: '_has(RoleDataStorage,bytes32,address)',
+                selector: '0xd74566ee',
+            },
+            {
+                name: '_hasAnyRole',
+                signature: '_hasAnyRole(bytes32[],address)',
+                selector: '0x27adf61d',
+            },
+            {
+                name: '_hasRole',
+                signature: '_hasRole(bytes32,address)',
+                selector: '0x1cd1731c',
+            },
+            {
+                name: '_remove',
+                signature: '_remove(RoleDataStorage,bytes32,address)',
+                selector: '0xe4e0818e',
+            },
+            {
+                name: '_revokeRole',
+                signature: '_revokeRole(bytes32,address)',
+                selector: '0x2c95bd23',
+            },
+            {
+                name: '_rolesStorage',
+                signature: '_rolesStorage()',
+                selector: '0xd7b699df',
+            },
+        ],
+    },
+
+    BondStorageWrapper: {
+        name: 'BondStorageWrapper',
+        description: 'Infrastructure - asset-specific features',
+        inheritance: ['IBondStorageWrapper', 'ERC20PermitStorageWrapper'],
+        methods: [
+            {
+                name: '_bondStorage',
+                signature: '_bondStorage()',
+                selector: '0x64ccfd52',
+            },
+            {
+                name: '_checkMaturityDate',
+                signature: '_checkMaturityDate(uint256)',
+                selector: '0xb9a83231',
+            },
+            {
+                name: '_getBondDetails',
+                signature: '_getBondDetails()',
+                selector: '0xdfa65894',
+            },
+            {
+                name: '_getCoupon',
+                signature: '_getCoupon(uint256)',
+                selector: '0x39b68379',
+            },
+            {
+                name: '_getCouponCount',
+                signature: '_getCouponCount()',
+                selector: '0x293fbc5a',
+            },
+            {
+                name: '_getCouponFor',
+                signature: '_getCouponFor(uint256,address)',
+                selector: '0x2abd54cf',
+            },
+            {
+                name: '_getCouponHolders',
+                signature: '_getCouponHolders(uint256,uint256,uint256)',
+                selector: '0xb2962e11',
+            },
+            {
+                name: '_getMaturityDate',
+                signature: '_getMaturityDate()',
+                selector: '0xa1522f44',
+            },
+            {
+                name: '_getTotalCouponHolders',
+                signature: '_getTotalCouponHolders(uint256)',
+                selector: '0xfba7a1ab',
+            },
+            {
+                name: '_initCoupon',
+                signature: '_initCoupon(bool,bytes32,bytes)',
+                selector: '0x744faa4f',
+            },
+            {
+                name: '_setCoupon',
+                signature: '_setCoupon(IBondRead.Coupon)',
+                selector: '0xf9d474a4',
+            },
+            {
+                name: '_setMaturityDate',
+                signature: '_setMaturityDate(uint256)',
+                selector: '0x1c73e162',
+            },
+            {
+                name: '_storeBondDetails',
+                signature: '_storeBondDetails(IBondRead.BondDetailsData)',
+                selector: '0x9b11f1cd',
+            },
+        ],
+    },
+
+    ControlListStorageWrapper: {
+        name: 'ControlListStorageWrapper',
+        description: 'Infrastructure - compliance and regulatory features',
+        inheritance: [
+            'IControlListStorageWrapper',
+            'ExternalControlListManagementStorageWrapper',
+        ],
+        methods: [
+            {
+                name: '_addToControlList',
+                signature: '_addToControlList(address)',
+                selector: '0xa5908e16',
+            },
+            {
+                name: '_checkControlList',
+                signature: '_checkControlList(address)',
+                selector: '0xaf8bea2e',
+            },
+            {
+                name: '_controlListStorage',
+                signature: '_controlListStorage()',
+                selector: '0xa58e5348',
+            },
+            {
+                name: '_getControlListCount',
+                signature: '_getControlListCount()',
+                selector: '0xa9577198',
+            },
+            {
+                name: '_getControlListMembers',
+                signature: '_getControlListMembers(uint256,uint256)',
+                selector: '0x2591bd58',
+            },
+            {
+                name: '_getControlListType',
+                signature: '_getControlListType()',
+                selector: '0x5831dfcf',
+            },
+            {
+                name: '_isAbleToAccess',
+                signature: '_isAbleToAccess(address)',
+                selector: '0xff55072e',
+            },
+            {
+                name: '_isInControlList',
+                signature: '_isInControlList(address)',
+                selector: '0xcb2e0d1b',
+            },
+            {
+                name: '_removeFromControlList',
+                signature: '_removeFromControlList(address)',
+                selector: '0x00f0016e',
+            },
+        ],
+    },
+
+    CorporateActionsStorageWrapper: {
+        name: 'CorporateActionsStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['ClearingStorageWrapper1'],
+        methods: [
+            {
+                name: '_addCorporateAction',
+                signature: '_addCorporateAction(bytes32,bytes)',
+                selector: '0xb2a57bb4',
+            },
+            {
+                name: '_checkDates',
+                signature: '_checkDates(uint256,uint256)',
+                selector: '0x970b0e20',
+            },
+            {
+                name: '_checkMatchingActionType',
+                signature: '_checkMatchingActionType(bytes32,uint256)',
+                selector: '0xdc6505eb',
+            },
+            {
+                name: '_corporateActionsStorage',
+                signature: '_corporateActionsStorage()',
+                selector: '0x327c5438',
+            },
+            {
+                name: '_getCorporateAction',
+                signature: '_getCorporateAction(bytes32)',
+                selector: '0x7905b020',
+            },
+            {
+                name: '_getCorporateActionCount',
+                signature: '_getCorporateActionCount()',
+                selector: '0x284c2e17',
+            },
+            {
+                name: '_getCorporateActionCountByType',
+                signature: '_getCorporateActionCountByType(bytes32)',
+                selector: '0xcdef9970',
+            },
+            {
+                name: '_getCorporateActionData',
+                signature: '_getCorporateActionData(bytes32)',
+                selector: '0x1b957d68',
+            },
+            {
+                name: '_getCorporateActionIds',
+                signature: '_getCorporateActionIds(uint256,uint256)',
+                selector: '0x27b71643',
+            },
+            {
+                name: '_getCorporateActionIdsByType',
+                signature:
+                    '_getCorporateActionIdsByType(bytes32,uint256,uint256)',
+                selector: '0x4875409d',
+            },
+            {
+                name: '_getCorporateActionResult',
+                signature: '_getCorporateActionResult(bytes32,uint256)',
+                selector: '0x1ec609e1',
+            },
+            {
+                name: '_getCorporateActionResultCount',
+                signature: '_getCorporateActionResultCount(bytes32)',
+                selector: '0x136c8ba2',
+            },
+            {
+                name: '_getUintResultAt',
+                signature: '_getUintResultAt(bytes32,uint256)',
+                selector: '0xcef779ad',
+            },
+            {
+                name: '_updateCorporateActionResult',
+                signature:
+                    '_updateCorporateActionResult(bytes32,uint256,bytes)',
+                selector: '0x626cff9a',
+            },
+        ],
+    },
+
+    EquityStorageWrapper: {
+        name: 'EquityStorageWrapper',
+        description: 'Infrastructure - asset-specific features',
+        inheritance: ['IEquityStorageWrapper', 'BondStorageWrapper'],
+        methods: [
+            {
+                name: '_equityStorage',
+                signature: '_equityStorage()',
+                selector: '0xd722ce84',
+            },
+            {
+                name: '_getDividendHolders',
+                signature: '_getDividendHolders(uint256,uint256,uint256)',
+                selector: '0x64527984',
+            },
+            {
+                name: '_getDividends',
+                signature: '_getDividends(uint256)',
+                selector: '0x7aa532eb',
+            },
+            {
+                name: '_getDividendsCount',
+                signature: '_getDividendsCount()',
+                selector: '0xd55edb1c',
+            },
+            {
+                name: '_getDividendsFor',
+                signature: '_getDividendsFor(uint256,address)',
+                selector: '0x5a1270c7',
+            },
+            {
+                name: '_getEquityDetails',
+                signature: '_getEquityDetails()',
+                selector: '0x3571999f',
+            },
+            {
+                name: '_getScheduledBalanceAdjusment',
+                signature: '_getScheduledBalanceAdjusment(uint256)',
+                selector: '0xb2106163',
+            },
+            {
+                name: '_getScheduledBalanceAdjustmentsCount',
+                signature: '_getScheduledBalanceAdjustmentsCount()',
+                selector: '0xa1387389',
+            },
+            {
+                name: '_getSnapshotBalanceForIfDateReached',
+                signature:
+                    '_getSnapshotBalanceForIfDateReached(uint256,uint256,address)',
+                selector: '0x7c51c4f3',
+            },
+            {
+                name: '_getTotalDividendHolders',
+                signature: '_getTotalDividendHolders(uint256)',
+                selector: '0x21ec1ebd',
+            },
+            {
+                name: '_getTotalVotingHolders',
+                signature: '_getTotalVotingHolders(uint256)',
+                selector: '0xafc8970d',
+            },
+            {
+                name: '_getVoting',
+                signature: '_getVoting(uint256)',
+                selector: '0x5be81dd8',
+            },
+            {
+                name: '_getVotingCount',
+                signature: '_getVotingCount()',
+                selector: '0x76255491',
+            },
+            {
+                name: '_getVotingFor',
+                signature: '_getVotingFor(uint256,address)',
+                selector: '0xe43142ce',
+            },
+            {
+                name: '_getVotingHolders',
+                signature: '_getVotingHolders(uint256,uint256,uint256)',
+                selector: '0x60b33e03',
+            },
+            {
+                name: '_initBalanceAdjustment',
+                signature: '_initBalanceAdjustment(bool,bytes32,bytes)',
+                selector: '0x4910464f',
+            },
+            {
+                name: '_initDividend',
+                signature: '_initDividend(bool,bytes32,bytes)',
+                selector: '0x89c22cef',
+            },
+            {
+                name: '_initVotingRights',
+                signature: '_initVotingRights(bool,bytes32,bytes)',
+                selector: '0xdd9c8705',
+            },
+            {
+                name: '_setDividends',
+                signature: '_setDividends(IEquity.Dividend)',
+                selector: '0x1433fb7c',
+            },
+            {
+                name: '_setScheduledBalanceAdjustment',
+                signature:
+                    '_setScheduledBalanceAdjustment(IEquity.ScheduledBalanceAdjustment)',
+                selector: '0x417ebf51',
+            },
+            {
+                name: '_setVoting',
+                signature: '_setVoting(IEquity.Voting)',
+                selector: '0xfb29cb04',
+            },
+            {
+                name: '_storeEquityDetails',
+                signature: '_storeEquityDetails(IEquity.EquityDetailsData)',
+                selector: '0xd2a1d568',
+            },
+        ],
+    },
+
+    ERC1410BasicStorageWrapper: {
+        name: 'ERC1410BasicStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['IERC1410StorageWrapper', 'ERC20StorageWrapper1'],
+        methods: [
+            {
+                name: '_addPartitionTo',
+                signature: '_addPartitionTo(uint256,address,bytes32)',
+                selector: '0x3c1a5e22',
+            },
+            {
+                name: '_afterTokenTransfer',
+                signature:
+                    '_afterTokenTransfer(bytes32,address,address,uint256)',
+                selector: '0x91823775',
+            },
+            {
+                name: '_beforeTokenTransfer',
+                signature:
+                    '_beforeTokenTransfer(bytes32,address,address,uint256)',
+                selector: '0x594330fa',
+            },
+            {
+                name: '_transferByPartition',
+                signature:
+                    '_transferByPartition(address,BasicTransferInfo,bytes32,bytes,address,bytes)',
+                selector: '0xf860e9b7',
+            },
+        ],
+    },
+
+    ERC1410OperatorStorageWrapper: {
+        name: 'ERC1410OperatorStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['ERC1410BasicStorageWrapper'],
+        methods: [
+            {
+                name: '_authorizeOperator',
+                signature: '_authorizeOperator(address)',
+                selector: '0x8f08a5cf',
+            },
+            {
+                name: '_authorizeOperatorByPartition',
+                signature: '_authorizeOperatorByPartition(bytes32,address)',
+                selector: '0x0bc9aef3',
+            },
+            {
+                name: '_checkOperator',
+                signature: '_checkOperator(bytes32,address)',
+                selector: '0x9a6711de',
+            },
+            {
+                name: '_erc1410operatorStorage',
+                signature: '_erc1410operatorStorage()',
+                selector: '0xc6152c9c',
+            },
+            {
+                name: '_isAuthorized',
+                signature: '_isAuthorized(bytes32,address,address)',
+                selector: '0x4fdbb54c',
+            },
+            {
+                name: '_isOperator',
+                signature: '_isOperator(address,address)',
+                selector: '0x4602b470',
+            },
+            {
+                name: '_isOperatorForPartition',
+                signature: '_isOperatorForPartition(bytes32,address,address)',
+                selector: '0xb14e7bc1',
+            },
+            {
+                name: '_operatorTransferByPartition',
+                signature: '_operatorTransferByPartition(OperatorTransferData)',
+                selector: '0x19659369',
+            },
+            {
+                name: '_revokeOperator',
+                signature: '_revokeOperator(address)',
+                selector: '0x14baa953',
+            },
+            {
+                name: '_revokeOperatorByPartition',
+                signature: '_revokeOperatorByPartition(bytes32,address)',
+                selector: '0x0c90ed1c',
+            },
+        ],
+    },
+
+    ERC1410ProtectedPartitionsStorageWrapper: {
+        name: 'ERC1410ProtectedPartitionsStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['ERC1644StorageWrapper'],
+        methods: [
+            {
+                name: '_protectedRedeemFromByPartition',
+                signature:
+                    '_protectedRedeemFromByPartition(bytes32,address,uint256,uint256,uint256,bytes)',
+                selector: '0x6d27f455',
+            },
+            {
+                name: '_protectedTransferFromByPartition',
+                signature:
+                    '_protectedTransferFromByPartition(bytes32,address,address,uint256,uint256,uint256,bytes)',
+                selector: '0xfac1472b',
+            },
+        ],
+    },
+
+    ERC1410StandardStorageWrapper: {
+        name: 'ERC1410StandardStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['ERC1410OperatorStorageWrapper'],
+        methods: [
+            {
+                name: '_addPartitionTo',
+                signature: '_addPartitionTo(uint256,address,bytes32)',
+                selector: '0x3c1a5e22',
+            },
+            {
+                name: '_adjustTotalAndMaxSupplyForPartition',
+                signature: '_adjustTotalAndMaxSupplyForPartition(bytes32)',
+                selector: '0xa631f0c2',
+            },
+            {
+                name: '_balanceOfAdjusted',
+                signature: '_balanceOfAdjusted(address)',
+                selector: '0x908e04a4',
+            },
+            {
+                name: '_balanceOfAdjustedAt',
+                signature: '_balanceOfAdjustedAt(address,uint256)',
+                selector: '0x3f7cb27c',
+            },
+            {
+                name: '_balanceOfByPartitionAdjusted',
+                signature: '_balanceOfByPartitionAdjusted(bytes32,address)',
+                selector: '0x77e986ce',
+            },
+            {
+                name: '_balanceOfByPartitionAdjustedAt',
+                signature:
+                    '_balanceOfByPartitionAdjustedAt(bytes32,address,uint256)',
+                selector: '0xc589a51a',
+            },
+            {
+                name: '_beforeTokenTransfer',
+                signature:
+                    '_beforeTokenTransfer(bytes32,address,address,uint256)',
+                selector: '0x594330fa',
+            },
+            {
+                name: '_getLabafByUserAndPartition',
+                signature: '_getLabafByUserAndPartition(bytes32,address)',
+                selector: '0xde03ae12',
+            },
+            {
+                name: '_getTotalBalance',
+                signature: '_getTotalBalance(address)',
+                selector: '0xc5930def',
+            },
+            {
+                name: '_getTotalBalanceForAdjustedAt',
+                signature: '_getTotalBalanceForAdjustedAt(address,uint256)',
+                selector: '0xd215b5a7',
+            },
+            {
+                name: '_getTotalBalanceForByPartitionAdjusted',
+                signature:
+                    '_getTotalBalanceForByPartitionAdjusted(bytes32,address)',
+                selector: '0xb56339d6',
+            },
+            {
+                name: '_increaseTotalSupplyByPartition',
+                signature: '_increaseTotalSupplyByPartition(bytes32,uint256)',
+                selector: '0x27709fb8',
+            },
+            {
+                name: '_issueByPartition',
+                signature: '_issueByPartition(IssueData)',
+                selector: '0x7223b2bb',
+            },
+            {
+                name: '_redeemByPartition',
+                signature:
+                    '_redeemByPartition(bytes32,address,address,uint256,bytes,bytes)',
+                selector: '0x625b8e60',
+            },
+            {
+                name: '_reduceTotalSupplyByPartition',
+                signature: '_reduceTotalSupplyByPartition(bytes32,uint256)',
+                selector: '0xd763680b',
+            },
+            {
+                name: '_syncBalanceAdjustments',
+                signature: '_syncBalanceAdjustments(bytes32,address,address)',
+                selector: '0xea18fc33',
+            },
+            {
+                name: '_totalSupplyAdjusted',
+                signature: '_totalSupplyAdjusted()',
+                selector: '0xe20eacdd',
+            },
+            {
+                name: '_totalSupplyAdjustedAt',
+                signature: '_totalSupplyAdjustedAt(uint256)',
+                selector: '0xd38c22d8',
+            },
+            {
+                name: '_totalSupplyByPartitionAdjusted',
+                signature: '_totalSupplyByPartitionAdjusted(bytes32)',
+                selector: '0xa047058c',
+            },
+            {
+                name: '_triggerAndSyncAll',
+                signature: '_triggerAndSyncAll(bytes32,address,address)',
+                selector: '0x46db8b21',
+            },
+            {
+                name: '_updateAccountSnapshot',
+                signature: '_updateAccountSnapshot(address,bytes32)',
+                selector: '0x79f34fd4',
+            },
+            {
+                name: '_updateTokenHolderSnapshot',
+                signature: '_updateTokenHolderSnapshot(address)',
+                selector: '0xec13fe0b',
+            },
+            {
+                name: '_updateTotalSupplySnapshot',
+                signature: '_updateTotalSupplySnapshot(bytes32)',
+                selector: '0x5b18f4fe',
+            },
+            {
+                name: '_updateTotalTokenHolderSnapshot',
+                signature: '_updateTotalTokenHolderSnapshot()',
+                selector: '0x329e21f0',
+            },
+            {
+                name: '_validateParams',
+                signature: '_validateParams(bytes32,uint256)',
+                selector: '0x3e969ef5',
+            },
+        ],
+    },
+
+    ERC1594StorageWrapper: {
+        name: 'ERC1594StorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['IERC1594StorageWrapper', 'CapStorageWrapper2'],
+        methods: [
+            {
+                name: '_businessLogicChecks',
+                signature: '_businessLogicChecks(bool,address,uint256,bytes32)',
+                selector: '0x2fc94919',
+            },
+            {
+                name: '_checkCanRedeemFromByPartition',
+                signature:
+                    '_checkCanRedeemFromByPartition(address,bytes32,uint256,bytes,bytes)',
+                selector: '0xa1db13d8',
+            },
+            {
+                name: '_checkCanTransferFromByPartition',
+                signature:
+                    '_checkCanTransferFromByPartition(address,address,bytes32,uint256,bytes,bytes)',
+                selector: '0x0273a79a',
+            },
+            {
+                name: '_checkCompliance',
+                signature: '_checkCompliance(address,address,bool)',
+                selector: '0x5f8ec698',
+            },
+            {
+                name: '_checkIdentity',
+                signature: '_checkIdentity(address,address)',
+                selector: '0xeb15dcae',
+            },
+            {
+                name: '_checkIssuable',
+                signature: '_checkIssuable()',
+                selector: '0xcde079d2',
+            },
+            {
+                name: '_erc1594Storage',
+                signature: '_erc1594Storage()',
+                selector: '0xcc0d2667',
+            },
+            {
+                name: '_genericChecks',
+                signature: '_genericChecks()',
+                selector: '0x9b52cf7c',
+            },
+            {
+                name: '_initialize_ERC1594',
+                signature: '_initialize_ERC1594()',
+                selector: '0xc8386725',
+            },
+            {
+                name: '_isAbleToRedeemFromByPartition',
+                signature:
+                    '_isAbleToRedeemFromByPartition(address,bytes32,uint256,bytes,bytes)',
+                selector: '0x68779803',
+            },
+            {
+                name: '_isAbleToTransferFromByPartition',
+                signature:
+                    '_isAbleToTransferFromByPartition(address,address,bytes32,uint256,bytes,bytes)',
+                selector: '0xaab4383b',
+            },
+            {
+                name: '_isCompliant',
+                signature: '_isCompliant(address,address,uint256,bool)',
+                selector: '0xde080ce4',
+            },
+            {
+                name: '_isIdentified',
+                signature: '_isIdentified(address,address)',
+                selector: '0x159f48b4',
+            },
+            {
+                name: '_isIssuable',
+                signature: '_isIssuable()',
+                selector: '0x367e587b',
+            },
+            {
+                name: '_issue',
+                signature: '_issue(address,uint256,bytes)',
+                selector: '0x7d452eec',
+            },
+            {
+                name: '_redeem',
+                signature: '_redeem(uint256,bytes)',
+                selector: '0x9a228bbc',
+            },
+            {
+                name: '_redeemFrom',
+                signature: '_redeemFrom(address,uint256,bytes)',
+                selector: '0x32f262eb',
+            },
+        ],
+    },
+
+    ERC1644StorageWrapper: {
+        name: 'ERC1644StorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['IERC1644StorageWrapper', 'ERC3643StorageWrapper2'],
+        methods: [
+            {
+                name: '_checkControllable',
+                signature: '_checkControllable()',
+                selector: '0xb41746a6',
+            },
+            {
+                name: '_controllerRedeem',
+                signature: '_controllerRedeem(address,uint256,bytes,bytes)',
+                selector: '0x225dd841',
+            },
+            {
+                name: '_controllerTransfer',
+                signature:
+                    '_controllerTransfer(address,address,uint256,bytes,bytes)',
+                selector: '0x51673fb4',
+            },
+            {
+                name: '_erc1644Storage',
+                signature: '_erc1644Storage()',
+                selector: '0xf6a4c594',
+            },
+            {
+                name: '_finalizeControllable',
+                signature: '_finalizeControllable()',
+                selector: '0x1153e570',
+            },
+            {
+                name: '_isControllable',
+                signature: '_isControllable()',
+                selector: '0x5ad249fc',
+            },
+        ],
+    },
+
+    ERC20PermitStorageWrapper: {
+        name: 'ERC20PermitStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['ERC20VotesStorageWrapper'],
+        methods: [
+            {
+                name: '_DOMAIN_SEPARATOR',
+                signature: '_DOMAIN_SEPARATOR()',
+                selector: '0xdc0c81b5',
+            },
+            {
+                name: '_erc20PermitStorage',
+                signature: '_erc20PermitStorage()',
+                selector: '0x027c0b9a',
+            },
+            {
+                name: '_permit',
+                signature:
+                    '_permit(address,address,uint256,uint256,uint8,bytes32,bytes32)',
+                selector: '0x2997f119',
+            },
+        ],
+    },
+
+    ERC20VotesStorageWrapper: {
+        name: 'ERC20VotesStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['ERC1594StorageWrapper'],
+        methods: [
+            {
+                name: '_add',
+                signature: '_add(uint256,uint256)',
+                selector: '0x3d0316c3',
+            },
+            {
+                name: '_afterTokenTransfer',
+                signature:
+                    '_afterTokenTransfer(bytes32,address,address,uint256)',
+                selector: '0x91823775',
+            },
+            {
+                name: '_calculateFactorBetween',
+                signature: '_calculateFactorBetween(uint256,uint256)',
+                selector: '0x0a26c25f',
+            },
+            {
+                name: '_checkpoints',
+                signature: '_checkpoints(address,uint256)',
+                selector: '0x9d654e74',
+            },
+            {
+                name: '_checkpointsLookup',
+                signature:
+                    '_checkpointsLookup(IERC20Votes.Checkpoint[],uint256)',
+                selector: '0x86a272a4',
+            },
+            {
+                name: '_clock',
+                signature: '_clock()',
+                selector: '0x32bdbe3f',
+            },
+            {
+                name: '_CLOCK_MODE',
+                signature: '_CLOCK_MODE()',
+                selector: '0xc980d5f5',
+            },
+            {
+                name: '_delegate',
+                signature: '_delegate(address)',
+                selector: '0xf13101e9',
+            },
+            {
+                name: '_delegates',
+                signature: '_delegates(address)',
+                selector: '0x42239927',
+            },
+            {
+                name: '_erc20VotesStorage',
+                signature: '_erc20VotesStorage()',
+                selector: '0x199208ad',
+            },
+            {
+                name: '_getPastTotalSupply',
+                signature: '_getPastTotalSupply(uint256)',
+                selector: '0x1fba5479',
+            },
+            {
+                name: '_getPastVotes',
+                signature: '_getPastVotes(address,uint256)',
+                selector: '0x58317e59',
+            },
+            {
+                name: '_getVotes',
+                signature: '_getVotes(address)',
+                selector: '0xc6c66a0a',
+            },
+            {
+                name: '_getVotesAdjusted',
+                signature:
+                    '_getVotesAdjusted(uint256,IERC20Votes.Checkpoint[])',
+                selector: '0x7ee325f3',
+            },
+            {
+                name: '_hashTypedDataV4',
+                signature: '_hashTypedDataV4(bytes32)',
+                selector: '0xc8f1ecd8',
+            },
+            {
+                name: '_isActivated',
+                signature: '_isActivated()',
+                selector: '0x717cc228',
+            },
+            {
+                name: '_moveVotingPower',
+                signature: '_moveVotingPower(address,address,uint256)',
+                selector: '0x82851b84',
+            },
+            {
+                name: '_numCheckpoints',
+                signature: '_numCheckpoints(address)',
+                selector: '0x51bc76cc',
+            },
+            {
+                name: '_setActivate',
+                signature: '_setActivate(bool)',
+                selector: '0xdbd6e830',
+            },
+            {
+                name: '_subtract',
+                signature: '_subtract(uint256,uint256)',
+                selector: '0x880bf496',
+            },
+            {
+                name: '_takeAbafCheckpoint',
+                signature: '_takeAbafCheckpoint()',
+                selector: '0x3910625e',
+            },
+            {
+                name: '_writeCheckpoint',
+                signature:
+                    '_writeCheckpoint(IERC20Votes.Checkpoint[],function(uint256,uint256)',
+                selector: '0xade2877a',
+            },
+        ],
+        events: [
+            {
+                name: 'DelegateChanged',
+                signature: 'DelegateChanged(address,address,address)',
+                topic0: '0x3134e8a2e6d97e929a7e54011ea5485d7d196dd5f0ba4d4ef95803e8e3fc257f',
+            },
+            {
+                name: 'DelegateVotesChanged',
+                signature: 'DelegateVotesChanged(address,uint256,uint256)',
+                topic0: '0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724',
+            },
+        ],
+    },
+
+    ExternalControlListManagementStorageWrapper: {
+        name: 'ExternalControlListManagementStorageWrapper',
+        description: 'Infrastructure - compliance and regulatory features',
+        inheritance: ['ProtectedPartitionsStorageWrapper'],
+        methods: [
+            {
+                name: '_isExternallyAuthorized',
+                signature: '_isExternallyAuthorized(address)',
+                selector: '0x68daeeac',
+            },
+        ],
+    },
+
+    ExternalKycListManagementStorageWrapper: {
+        name: 'ExternalKycListManagementStorageWrapper',
+        description: 'Infrastructure - compliance and regulatory features',
+        inheritance: ['ExternalListManagementStorageWrapper'],
+        methods: [
+            {
+                name: '_isExternallyGranted',
+                signature: '_isExternallyGranted(address,IKyc.KycStatus)',
+                selector: '0x94f4bbd4',
+            },
+        ],
+    },
+
+    ExternalListManagementStorageWrapper: {
+        name: 'ExternalListManagementStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['SsiManagementStorageWrapper'],
+        methods: [
+            {
+                name: '_addExternalList',
+                signature: '_addExternalList(bytes32,address)',
+                selector: '0x7b548517',
+            },
+            {
+                name: '_externalListStorage',
+                signature: '_externalListStorage(bytes32)',
+                selector: '0x4c938df7',
+            },
+            {
+                name: '_getExternalListsCount',
+                signature: '_getExternalListsCount(bytes32)',
+                selector: '0x91794627',
+            },
+            {
+                name: '_getExternalListsMembers',
+                signature: '_getExternalListsMembers(bytes32,uint256,uint256)',
+                selector: '0x0d7b7d12',
+            },
+            {
+                name: '_isExternalList',
+                signature: '_isExternalList(bytes32,address)',
+                selector: '0x3d8252dd',
+            },
+            {
+                name: '_removeExternalList',
+                signature: '_removeExternalList(bytes32,address)',
+                selector: '0x2787a016',
+            },
+            {
+                name: '_updateExternalLists',
+                signature: '_updateExternalLists(bytes32,address[],bool[])',
+                selector: '0x7b9dc6c3',
+            },
+        ],
+    },
+
+    ExternalPauseManagementStorageWrapper: {
+        name: 'ExternalPauseManagementStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['ControlListStorageWrapper'],
+        methods: [
+            {
+                name: '_isExternallyPaused',
+                signature: '_isExternallyPaused()',
+                selector: '0xb654e4bc',
+            },
+        ],
+    },
+
+    KycStorageWrapper: {
+        name: 'KycStorageWrapper',
+        description: 'Infrastructure - compliance and regulatory features',
+        inheritance: ['ExternalKycListManagementStorageWrapper'],
+        methods: [
+            {
+                name: '_checkValidDates',
+                signature: '_checkValidDates(uint256,uint256)',
+                selector: '0xfbf50be9',
+            },
+            {
+                name: '_checkValidKycStatus',
+                signature: '_checkValidKycStatus(IKyc.KycStatus,address)',
+                selector: '0x76481097',
+            },
+            {
+                name: '_getKycAccountsCount',
+                signature: '_getKycAccountsCount(IKyc.KycStatus)',
+                selector: '0x26f8e0eb',
+            },
+            {
+                name: '_getKycAccountsData',
+                signature:
+                    '_getKycAccountsData(IKyc.KycStatus,uint256,uint256)',
+                selector: '0xcb518137',
+            },
+            {
+                name: '_getKycFor',
+                signature: '_getKycFor(address)',
+                selector: '0xd996d468',
+            },
+            {
+                name: '_getKycStatusFor',
+                signature: '_getKycStatusFor(address)',
+                selector: '0x9fe699ed',
+            },
+            {
+                name: '_grantKyc',
+                signature: '_grantKyc(address,string,uint256,uint256,address)',
+                selector: '0x9de277f6',
+            },
+            {
+                name: '_isInternalKycActivated',
+                signature: '_isInternalKycActivated()',
+                selector: '0x38166e5e',
+            },
+            {
+                name: '_kycStorage',
+                signature: '_kycStorage()',
+                selector: '0xa3dafeee',
+            },
+            {
+                name: '_revokeKyc',
+                signature: '_revokeKyc(address)',
+                selector: '0x8d603d1e',
+            },
+            {
+                name: '_setInternalKyc',
+                signature: '_setInternalKyc(bool)',
+                selector: '0x648def8f',
+            },
+            {
+                name: '_verifyKycStatus',
+                signature: '_verifyKycStatus(IKyc.KycStatus,address)',
+                selector: '0x8b2c4e12',
+            },
+        ],
+    },
+
+    PauseStorageWrapper: {
+        name: 'PauseStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: [
+            'IPauseStorageWrapper',
+            'ExternalPauseManagementStorageWrapper',
+        ],
+        methods: [
+            {
+                name: '_checkPaused',
+                signature: '_checkPaused()',
+                selector: '0x4bd325e4',
+            },
+            {
+                name: '_checkUnpaused',
+                signature: '_checkUnpaused()',
+                selector: '0x8482eff5',
+            },
+            {
+                name: '_isPaused',
+                signature: '_isPaused()',
+                selector: '0xe2684f08',
+            },
+            {
+                name: '_pauseStorage',
+                signature: '_pauseStorage()',
+                selector: '0x7719d6c5',
+            },
+            {
+                name: '_setPause',
+                signature: '_setPause(bool)',
+                selector: '0x69cc2731',
+            },
+        ],
+    },
+
+    ProceedRecipientsStorageWrapper: {
+        name: 'ProceedRecipientsStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['TotalBalancesStorageWrapper'],
+        methods: [
+            {
+                name: '_addProceedRecipient',
+                signature: '_addProceedRecipient(address,bytes)',
+                selector: '0x9fd61d20',
+            },
+            {
+                name: '_getProceedRecipientData',
+                signature: '_getProceedRecipientData(address)',
+                selector: '0x36ec9fbe',
+            },
+            {
+                name: '_proceedRecipientsDataStorage',
+                signature: '_proceedRecipientsDataStorage()',
+                selector: '0xd6abf4ee',
+            },
+            {
+                name: '_removeProceedRecipient',
+                signature: '_removeProceedRecipient(address)',
+                selector: '0x8761abcc',
+            },
+            {
+                name: '_removeProceedRecipientData',
+                signature: '_removeProceedRecipientData(address)',
+                selector: '0x7d31cdb5',
+            },
+            {
+                name: '_setProceedRecipientData',
+                signature: '_setProceedRecipientData(address,bytes)',
+                selector: '0x2792769b',
+            },
+        ],
+    },
+
+    ProtectedPartitionsStorageWrapper: {
+        name: 'ProtectedPartitionsStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: [
+            'IProtectedPartitionsStorageWrapper',
+            'KycStorageWrapper',
+        ],
+        methods: [
+            {
+                name: '_arePartitionsProtected',
+                signature: '_arePartitionsProtected()',
+                selector: '0xce391cb1',
+            },
+            {
+                name: '_calculateRoleForPartition',
+                signature: '_calculateRoleForPartition(bytes32)',
+                selector: '0x0f56b295',
+            },
+            {
+                name: '_checkClearingCreateHoldSignature',
+                signature:
+                    '_checkClearingCreateHoldSignature(IClearing.ProtectedClearingOperation,Hold,bytes)',
+                selector: '0xd99754cc',
+            },
+            {
+                name: '_checkClearingRedeemSignature',
+                signature:
+                    '_checkClearingRedeemSignature(IClearing.ProtectedClearingOperation,uint256,bytes)',
+                selector: '0x2bd0774c',
+            },
+            {
+                name: '_checkClearingTransferSignature',
+                signature:
+                    '_checkClearingTransferSignature(IClearing.ProtectedClearingOperation,uint256,address,bytes)',
+                selector: '0x8f85bed1',
+            },
+            {
+                name: '_checkCreateHoldSignature',
+                signature:
+                    '_checkCreateHoldSignature(bytes32,address,ProtectedHold,bytes)',
+                selector: '0x4ede2067',
+            },
+            {
+                name: '_checkProtectedPartitions',
+                signature: '_checkProtectedPartitions()',
+                selector: '0xed6f719a',
+            },
+            {
+                name: '_checkRedeemSignature',
+                signature:
+                    '_checkRedeemSignature(bytes32,address,uint256,uint256,uint256,bytes)',
+                selector: '0x2546b4b4',
+            },
+            {
+                name: '_checkRoleForPartition',
+                signature: '_checkRoleForPartition(bytes32,address)',
+                selector: '0x67323be5',
+            },
+            {
+                name: '_checkTransferSignature',
+                signature:
+                    '_checkTransferSignature(bytes32,address,address,uint256,uint256,uint256,bytes)',
+                selector: '0x6ee3d1e2',
+            },
+            {
+                name: '_checkValidPartition',
+                signature: '_checkValidPartition(bytes32)',
+                selector: '0x836740a4',
+            },
+            {
+                name: '_getNounceFor',
+                signature: '_getNounceFor(address)',
+                selector: '0x795a18cb',
+            },
+            {
+                name: '_isClearingCreateHoldSignatureValid',
+                signature:
+                    '_isClearingCreateHoldSignatureValid(IClearing.ProtectedClearingOperation,Hold,bytes)',
+                selector: '0xc2b1c4f2',
+            },
+            {
+                name: '_isClearingRedeemSignatureValid',
+                signature:
+                    '_isClearingRedeemSignatureValid(IClearing.ProtectedClearingOperation,uint256,bytes)',
+                selector: '0xdf96c66c',
+            },
+            {
+                name: '_isClearingTransferSignatureValid',
+                signature:
+                    '_isClearingTransferSignatureValid(IClearing.ProtectedClearingOperation,address,uint256,bytes)',
+                selector: '0xd5d548fb',
+            },
+            {
+                name: '_isCreateHoldSignatureValid',
+                signature:
+                    '_isCreateHoldSignatureValid(bytes32,address,ProtectedHold,bytes)',
+                selector: '0x8797484a',
+            },
+            {
+                name: '_isRedeemSignatureValid',
+                signature:
+                    '_isRedeemSignatureValid(bytes32,address,uint256,uint256,uint256,bytes)',
+                selector: '0x21058b93',
+            },
+            {
+                name: '_isTransferSignatureValid',
+                signature:
+                    '_isTransferSignatureValid(bytes32,address,address,uint256,uint256,uint256,bytes)',
+                selector: '0x30a87935',
+            },
+            {
+                name: '_protectedPartitionsRole',
+                signature: '_protectedPartitionsRole(bytes32)',
+                selector: '0xde41fe7d',
+            },
+            {
+                name: '_protectedPartitionsStorage',
+                signature: '_protectedPartitionsStorage()',
+                selector: '0x00840cb7',
+            },
+            {
+                name: '_setNounce',
+                signature: '_setNounce(uint256,address)',
+                selector: '0x17f2f955',
+            },
+            {
+                name: '_setProtectedPartitions',
+                signature: '_setProtectedPartitions(bool)',
+                selector: '0x9259c0a2',
+            },
+        ],
+    },
+
+    ScheduledBalanceAdjustmentsStorageWrapper: {
+        name: 'ScheduledBalanceAdjustmentsStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['ScheduledSnapshotsStorageWrapper'],
+        methods: [
+            {
+                name: '_addScheduledBalanceAdjustment',
+                signature: '_addScheduledBalanceAdjustment(uint256,bytes)',
+                selector: '0xefa50553',
+            },
+            {
+                name: '_adjustBalances',
+                signature: '_adjustBalances(uint256,uint8)',
+                selector: '0x0b95889f',
+            },
+            {
+                name: '_getPendingScheduledBalanceAdjustmentsAt',
+                signature: '_getPendingScheduledBalanceAdjustmentsAt(uint256)',
+                selector: '0xd94bb76b',
+            },
+            {
+                name: '_getScheduledBalanceAdjustmentCount',
+                signature: '_getScheduledBalanceAdjustmentCount()',
+                selector: '0xaf3b3395',
+            },
+            {
+                name: '_getScheduledBalanceAdjustments',
+                signature: '_getScheduledBalanceAdjustments(uint256,uint256)',
+                selector: '0x1457b0a6',
+            },
+            {
+                name: '_onScheduledBalanceAdjustmentTriggered',
+                signature:
+                    '_onScheduledBalanceAdjustmentTriggered(uint256,uint256,ScheduledTask)',
+                selector: '0x5a7f6a32',
+            },
+            {
+                name: '_scheduledBalanceAdjustmentStorage',
+                signature: '_scheduledBalanceAdjustmentStorage()',
+                selector: '0xd4961ce3',
+            },
+            {
+                name: '_triggerScheduledBalanceAdjustments',
+                signature: '_triggerScheduledBalanceAdjustments(uint256)',
+                selector: '0x7e38bedb',
+            },
+        ],
+    },
+
+    ScheduledCrossOrderedTasksStorageWrapper: {
+        name: 'ScheduledCrossOrderedTasksStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['ScheduledBalanceAdjustmentsStorageWrapper'],
+        methods: [
+            {
+                name: '_addScheduledCrossOrderedTask',
+                signature: '_addScheduledCrossOrderedTask(uint256,bytes)',
+                selector: '0x4bf21cbc',
+            },
+            {
+                name: '_getScheduledCrossOrderedTaskCount',
+                signature: '_getScheduledCrossOrderedTaskCount()',
+                selector: '0x0fbff5da',
+            },
+            {
+                name: '_getScheduledCrossOrderedTasks',
+                signature: '_getScheduledCrossOrderedTasks(uint256,uint256)',
+                selector: '0xe7c080ed',
+            },
+            {
+                name: '_onScheduledCrossOrderedTaskTriggered',
+                signature:
+                    '_onScheduledCrossOrderedTaskTriggered(uint256,uint256,ScheduledTask)',
+                selector: '0xc9ad94ce',
+            },
+            {
+                name: '_scheduledCrossOrderedTaskStorage',
+                signature: '_scheduledCrossOrderedTaskStorage()',
+                selector: '0xe62b4b77',
+            },
+            {
+                name: '_triggerScheduledCrossOrderedTasks',
+                signature: '_triggerScheduledCrossOrderedTasks(uint256)',
+                selector: '0xa3608e20',
+            },
+        ],
+    },
+
+    ScheduledSnapshotsStorageWrapper: {
+        name: 'ScheduledSnapshotsStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['ScheduledTasksCommon'],
+        methods: [
+            {
+                name: '_addScheduledSnapshot',
+                signature: '_addScheduledSnapshot(uint256,bytes)',
+                selector: '0xc8e13c78',
+            },
+            {
+                name: '_getScheduledSnapshotCount',
+                signature: '_getScheduledSnapshotCount()',
+                selector: '0xe76117a8',
+            },
+            {
+                name: '_getScheduledSnapshots',
+                signature: '_getScheduledSnapshots(uint256,uint256)',
+                selector: '0x5bd160e9',
+            },
+            {
+                name: '_onScheduledSnapshotTriggered',
+                signature:
+                    '_onScheduledSnapshotTriggered(uint256,uint256,ScheduledTask)',
+                selector: '0x437c47f7',
+            },
+            {
+                name: '_scheduledSnapshotStorage',
+                signature: '_scheduledSnapshotStorage()',
+                selector: '0x3b412ed0',
+            },
+            {
+                name: '_triggerScheduledSnapshots',
+                signature: '_triggerScheduledSnapshots(uint256)',
+                selector: '0x1e79f595',
+            },
+        ],
+    },
+
+    SecurityStorageWrapper: {
+        name: 'SecurityStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['EquityStorageWrapper'],
+        methods: [
+            {
+                name: '_getSecurityRegulationData',
+                signature: '_getSecurityRegulationData()',
+                selector: '0x6e000fa6',
+            },
+            {
+                name: '_initializeSecurity',
+                signature:
+                    '_initializeSecurity(RegulationData,AdditionalSecurityData)',
+                selector: '0x8d93918e',
+            },
+            {
+                name: '_securityStorage',
+                signature: '_securityStorage()',
+                selector: '0x641844e3',
+            },
+            {
+                name: '_storeRegulationData',
+                signature:
+                    '_storeRegulationData(RegulationData,AdditionalSecurityData)',
+                selector: '0x2012644c',
+            },
+        ],
+    },
+
+    SsiManagementStorageWrapper: {
+        name: 'SsiManagementStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['AccessControlStorageWrapper'],
+        methods: [
+            {
+                name: '_addIssuer',
+                signature: '_addIssuer(address)',
+                selector: '0x498ce1f3',
+            },
+            {
+                name: '_checkIssuer',
+                signature: '_checkIssuer(address)',
+                selector: '0x3eeb8f18',
+            },
+            {
+                name: '_getIssuerListCount',
+                signature: '_getIssuerListCount()',
+                selector: '0x3020266b',
+            },
+            {
+                name: '_getIssuerListMembers',
+                signature: '_getIssuerListMembers(uint256,uint256)',
+                selector: '0xf197fdd3',
+            },
+            {
+                name: '_getRevocationRegistryAddress',
+                signature: '_getRevocationRegistryAddress()',
+                selector: '0x83ae00db',
+            },
+            {
+                name: '_isIssuer',
+                signature: '_isIssuer(address)',
+                selector: '0x8ca488a6',
+            },
+            {
+                name: '_removeIssuer',
+                signature: '_removeIssuer(address)',
+                selector: '0xed85057a',
+            },
+            {
+                name: '_setRevocationRegistryAddress',
+                signature: '_setRevocationRegistryAddress(address)',
+                selector: '0x1b44629a',
+            },
+            {
+                name: '_ssiManagementStorage',
+                signature: '_ssiManagementStorage()',
+                selector: '0xf5bb6aff',
+            },
+        ],
+    },
+
+    TimeTravelStorageWrapper: {
+        name: 'TimeTravelStorageWrapper',
+        description: 'Core functionality - core token functionality',
+        inheritance: ['ITimeTravelStorageWrapper', 'LocalContext'],
+        methods: [
+            {
+                name: '_blockNumber',
+                signature: '_blockNumber()',
+                selector: '0xd7e0e975',
+            },
+            {
+                name: '_blockTimestamp',
+                signature: '_blockTimestamp()',
+                selector: '0xc63aa3e7',
+            },
+            {
+                name: '_changeSystemBlocknumber',
+                signature: '_changeSystemBlocknumber(uint256)',
+                selector: '0xcd07760e',
+            },
+            {
+                name: '_changeSystemTimestamp',
+                signature: '_changeSystemTimestamp(uint256)',
+                selector: '0x03af8af9',
+            },
+            {
+                name: '_checkBlockChainid',
+                signature: '_checkBlockChainid(uint256)',
+                selector: '0x7f3ceeb8',
+            },
+            {
+                name: '_resetSystemBlocknumber',
+                signature: '_resetSystemBlocknumber()',
+                selector: '0xc329fd29',
+            },
+            {
+                name: '_resetSystemTimestamp',
+                signature: '_resetSystemTimestamp()',
+                selector: '0x7cb0f2d8',
+            },
+        ],
+    },
+
+    TotalBalancesStorageWrapper: {
+        name: 'TotalBalancesStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: ['PauseStorageWrapper'],
+        methods: [
+            {
+                name: '_getTotalBalance',
+                signature: '_getTotalBalance(address)',
+                selector: '0xc5930def',
+            },
+            {
+                name: '_getTotalBalanceForAdjustedAt',
+                signature: '_getTotalBalanceForAdjustedAt(address,uint256)',
+                selector: '0xd215b5a7',
+            },
+            {
+                name: '_getTotalBalanceForByPartitionAdjusted',
+                signature:
+                    '_getTotalBalanceForByPartitionAdjusted(bytes32,address)',
+                selector: '0xb56339d6',
+            },
+            {
+                name: '_getTotalBalanceOfAtSnapshot',
+                signature: '_getTotalBalanceOfAtSnapshot(uint256,address)',
+                selector: '0xc18cf802',
+            },
+            {
+                name: '_getTotalBalanceOfAtSnapshotByPartition',
+                signature:
+                    '_getTotalBalanceOfAtSnapshotByPartition(bytes32,uint256,address)',
+                selector: '0x64eaa333',
+            },
+        ],
+    },
+
+    TransferAndLockStorageWrapper: {
+        name: 'TransferAndLockStorageWrapper',
+        description: 'Infrastructure - core token functionality',
+        inheritance: [
+            'ITransferAndLockStorageWrapper',
+            'SecurityStorageWrapper',
+        ],
+        methods: [
+            {
+                name: '_checkTransferAndLockByPartitionSignature',
+                signature:
+                    '_checkTransferAndLockByPartitionSignature(bytes32,ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)',
+                selector: '0xa89ed8df',
+            },
+            {
+                name: '_checkTransferAndLockSignature',
+                signature:
+                    '_checkTransferAndLockSignature(ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)',
+                selector: '0x8a1708d9',
+            },
+            {
+                name: '_isTransferAndLockByPartitionSignatureValid',
+                signature:
+                    '_isTransferAndLockByPartitionSignatureValid(bytes32,ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)',
+                selector: '0x8b429f59',
+            },
+            {
+                name: '_isTransferAndLockSignatureValid',
+                signature:
+                    '_isTransferAndLockSignatureValid(ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)',
+                selector: '0x6274de2d',
+            },
+            {
+                name: '_protectedTransferAndLock',
+                signature:
+                    '_protectedTransferAndLock(ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)',
+                selector: '0x108b43ed',
+            },
+            {
+                name: '_protectedTransferAndLockByPartition',
+                signature:
+                    '_protectedTransferAndLockByPartition(bytes32,ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)',
+                selector: '0x472a5931',
+            },
+        ],
+    },
+}
+
+/**
+ * Total number of storage wrapper contracts in the registry.
+ */
+export const TOTAL_STORAGE_WRAPPERS = 29 as const
+
+/**
+ * All role identifiers extracted from contracts.
  */
 export const ROLES = {
-    DEFAULT_ADMIN_ROLE:
-        '0x0000000000000000000000000000000000000000000000000000000000000000',
-    CONTROLLER_ROLE: 'CONTROLLER_ROLE',
-    ISSUER_ROLE: 'ISSUER_ROLE',
-    CORPORATE_ACTION_ROLE: 'CORPORATE_ACTION_ROLE',
-    KYC_ROLE: 'KYC_ROLE',
-    PAUSE_ROLE: 'PAUSE_ROLE',
-    CONTROL_LIST_ROLE: 'CONTROL_LIST_ROLE',
+    _ADJUSTMENT_BALANCE_ROLE:
+        '0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9',
+    _AGENT_ROLE:
+        '0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6',
+    _BOND_MANAGER_ROLE:
+        '0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d',
+    _CAP_ROLE:
+        '0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571',
+    _CLEARING_ROLE:
+        '0x2292383e7bb988fb281e5195ab88da11e62fec74cf43e8685cff613d6b906450',
+    _CLEARING_VALIDATOR_ROLE:
+        '0x7b688898673e16c47810f5da9ce1262a3d7d022dfe27c8ff9305371cd435c619',
+    _CONTROL_LIST_MANAGER_ROLE:
+        '0x0e625647b832ec7d4146c12550c31c065b71e0a698095568fd8320dd2aa72e75',
+    _CONTROL_LIST_ROLE:
+        '0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3',
+    _CONTROLLER_ROLE:
+        '0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f',
+    _CORPORATE_ACTION_ROLE:
+        '0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6',
+    _DEFAULT_ADMIN_ROLE: '0x00',
+    _DOCUMENTER_ROLE:
+        '0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41',
+    _FREEZE_MANAGER_ROLE:
+        '0xd0e5294c1fc630933e135c5b668c5d577576754d33964d700bbbcdbfd7e1361b',
+    _INTERNAL_KYC_MANAGER_ROLE:
+        '0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e',
+    _ISSUER_ROLE:
+        '0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842',
+    _KYC_MANAGER_ROLE:
+        '0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449',
+    _KYC_ROLE:
+        '0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d',
+    _LOCKER_ROLE:
+        '0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88',
+    _MATURITY_REDEEMER_ROLE:
+        '0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c',
+    _PAUSE_MANAGER_ROLE:
+        '0xbc36fbd776e95c4811506a63b650c876b4159cb152d827a5f717968b67c69b84',
+    _PAUSER_ROLE:
+        '0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb',
+    _PROCEED_RECIPIENT_MANAGER_ROLE:
+        '0xebc53fe99fea28c7aa9476a714959af5b931f34a8a8734365ec63113198d512f',
+    _PROTECTED_PARTITIONS_PARTICIPANT_ROLE:
+        '0xdaba153046c65d49da6a7597abc24374aa681e3eee7004426ca6185b3927a3f5',
+    _PROTECTED_PARTITIONS_ROLE:
+        '0x8e359333991af626d1f6087d9bc57221ef1207a053860aaa78b7609c2c8f96b6',
+    _SNAPSHOT_ROLE:
+        '0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da',
+    _SSI_MANAGER_ROLE:
+        '0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0',
+    _TREX_OWNER_ROLE:
+        '0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f910aa17b627f801a6aafab7',
+    _WILD_CARD_ROLE:
+        '0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46',
 } as const
+
+/**
+ * Total number of unique roles in the registry.
+ */
+export const TOTAL_ROLES = 28 as const

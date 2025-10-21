@@ -25,6 +25,7 @@ import {
     info,
     warn,
     error as logError,
+    fetchHederaContractId,
 } from '@scripts/infrastructure'
 import {
     deployFactory,
@@ -545,73 +546,6 @@ export async function deployCompleteSystem(
 
         throw error
     }
-}
-
-/**
- * Fetch Hedera Contract ID from mirror node.
- *
- * @param network - Network name
- * @param evmAddress - EVM address (0x...)
- * @returns Hedera Contract ID (0.0.xxxxx) or undefined
- */
-async function fetchHederaContractId(
-    network: string,
-    evmAddress: string
-): Promise<string | undefined> {
-    try {
-        const mirrorNodeUrl = getMirrorNodeUrl(network)
-        const response = await fetch(
-            `${mirrorNodeUrl}/api/v1/contracts/${evmAddress}`
-        )
-
-        if (!response.ok) {
-            return undefined
-        }
-
-        const data = await response.json()
-        return data.contract_id
-    } catch {
-        return undefined
-    }
-}
-
-/**
- * Get mirror node URL for network.
- *
- * Uses getNetworkConfig to read from Configuration.ts/.env with fallback to defaults.
- *
- * @param network - Network name
- * @returns Mirror node base URL
- */
-function getMirrorNodeUrl(network: string): string {
-    try {
-        // Import here to avoid circular dependency during config loading
-        const { getNetworkConfig } = require('../core/config')
-        const config = getNetworkConfig(network)
-
-        if (config.mirrorNodeUrl) {
-            return config.mirrorNodeUrl
-        }
-    } catch (error) {
-        // Fall through to defaults if config not available
-        const msg = error instanceof Error ? error.message : String(error)
-        warn(`Could not read mirror node URL from config: ${msg}`)
-    }
-
-    // Fallback to hardcoded defaults
-    const lowerNetwork = network.toLowerCase()
-    if (lowerNetwork.includes('mainnet')) {
-        return 'https://mainnet-public.mirrornode.hedera.com'
-    }
-    if (lowerNetwork.includes('testnet')) {
-        return 'https://testnet.mirrornode.hedera.com'
-    }
-    if (lowerNetwork.includes('previewnet')) {
-        return 'https://previewnet.mirrornode.hedera.com'
-    }
-
-    // Default to testnet
-    return 'https://testnet.mirrornode.hedera.com'
 }
 
 /**

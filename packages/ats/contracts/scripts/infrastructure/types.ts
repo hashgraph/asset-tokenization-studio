@@ -108,6 +108,84 @@ export interface DeploymentProvider {
 }
 
 /**
+ * Method definition with full signature and selector.
+ *
+ * Used to represent contract methods with complete type information
+ * for ABI generation, debugging, and documentation.
+ *
+ * @example
+ * ```typescript
+ * {
+ *   name: "grantRole",
+ *   signature: "grantRole(bytes32,address)",
+ *   selector: "0x2f2ff15d"
+ * }
+ * ```
+ */
+export interface MethodDefinition {
+    /** Method name (e.g., "grantRole") */
+    name: string
+
+    /** Full canonical signature (e.g., "grantRole(bytes32,address)") */
+    signature: string
+
+    /** 4-byte function selector (e.g., "0x2f2ff15d") - keccak256(signature).slice(0, 10) */
+    selector: string
+}
+
+/**
+ * Event definition with full signature and topic0 hash.
+ *
+ * Events are emitted by contracts to log state changes and are indexed for
+ * efficient filtering and querying.
+ *
+ * @example
+ * ```typescript
+ * {
+ *   name: "RoleGranted",
+ *   signature: "RoleGranted(bytes32,address,address)",
+ *   topic0: "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d"
+ * }
+ * ```
+ */
+export interface EventDefinition {
+    /** Event name (e.g., "RoleGranted") */
+    name: string
+
+    /** Full canonical signature (e.g., "RoleGranted(bytes32,address,address)") */
+    signature: string
+
+    /** Topic0 hash (full 32-byte keccak256) for event filtering (e.g., "0x2f8788117e7eff1d...") */
+    topic0: string
+}
+
+/**
+ * Error definition with full signature and selector.
+ *
+ * Custom errors (Solidity 0.8.4+) provide gas-efficient error handling with
+ * typed parameters.
+ *
+ * @example
+ * ```typescript
+ * {
+ *   name: "InsufficientBalance",
+ *   signature: "InsufficientBalance(uint256,uint256)",
+ *   selector: "0xcf479181"
+ * }
+ * ```
+ */
+export interface ErrorDefinition {
+    /** Error name (e.g., "InsufficientBalance") */
+    name: string
+
+    /** Full canonical signature (e.g., "InsufficientBalance(uint256,uint256)") */
+    signature: string
+
+    /** 4-byte error selector (e.g., "0xcf479181") - keccak256(signature).slice(0, 10) */
+    selector: string
+}
+
+/**
  * Metadata definition for a facet contract.
  *
  * SIMPLIFIED DESIGN (2025-10-03):
@@ -131,6 +209,29 @@ export interface FacetDefinition {
 
     /** Human-readable description for documentation and developer experience */
     description?: string
+
+    /** Resolver key imported or defined by this facet */
+    resolverKey?: {
+        /** Resolver key name (e.g., _ACCESS_CONTROL_RESOLVER_KEY) */
+        name: string
+        /** Resolver key bytes32 value (e.g., 0x011768a41...) */
+        value: string
+    }
+
+    /** Number of roles defined in this facet */
+    roleCount?: number
+
+    /** Inheritance chain (parent contracts/interfaces) */
+    inheritance?: string[]
+
+    /** Public and external methods available in this facet */
+    methods?: MethodDefinition[]
+
+    /** Events emitted by this facet */
+    events?: EventDefinition[]
+
+    /** Custom errors defined in this facet */
+    errors?: ErrorDefinition[]
 }
 
 /**
@@ -192,6 +293,44 @@ export interface ContractDefinition {
 
     /** Human-readable description */
     description?: string
+
+    /** Inheritance chain (parent contracts/interfaces) */
+    inheritance?: string[]
+
+    /** Public and external methods available in this contract */
+    methods?: MethodDefinition[]
+
+    /** Events emitted by this contract */
+    events?: EventDefinition[]
+
+    /** Custom errors defined in this contract */
+    errors?: ErrorDefinition[]
+}
+
+/**
+ * Storage wrapper contract definition.
+ *
+ * StorageWrappers are abstract contracts that provide storage and internal methods
+ * for facets. They are not deployed directly but inherited by facets.
+ */
+export interface StorageWrapperDefinition {
+    /** Storage wrapper name */
+    name: string
+
+    /** Human-readable description */
+    description?: string
+
+    /** Inheritance chain (parent contracts/interfaces) */
+    inheritance?: string[]
+
+    /** All methods (internal, private, public) in this storage wrapper */
+    methods: MethodDefinition[]
+
+    /** Events emitted by this storage wrapper */
+    events?: EventDefinition[]
+
+    /** Custom errors defined in this storage wrapper */
+    errors?: ErrorDefinition[]
 }
 
 /**
