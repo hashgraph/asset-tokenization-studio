@@ -226,9 +226,6 @@ export async function deployCompleteSystem(
     let totalGasUsed = 0
 
     try {
-        // ========================================
-        // STEP 1: Deploy ProxyAdmin
-        // ========================================
         info('\n📋 Step 1/7: Deploying ProxyAdmin...')
         const proxyAdminResult = await deployProxyAdmin(provider)
 
@@ -243,9 +240,6 @@ export async function deployCompleteSystem(
         )
         info(`✅ ProxyAdmin: ${proxyAdminResult.proxyAdminAddress}`)
 
-        // ========================================
-        // STEP 2: Deploy BusinessLogicResolver
-        // ========================================
         info('\n🔷 Step 2/7: Deploying BusinessLogicResolver...')
         const blrResult = await deployBlr(provider, {
             proxyAdminAddress: proxyAdminResult.proxyAdminAddress,
@@ -259,9 +253,6 @@ export async function deployCompleteSystem(
         info(`✅ BLR Implementation: ${blrResult.implementationAddress}`)
         info(`✅ BLR Proxy: ${blrResult.blrAddress}`)
 
-        // ========================================
-        // STEP 3: Deploy all facets
-        // ========================================
         info('\n📦 Step 3/7: Deploying all facets...')
         let allFacetNames = getAllFacets().map((f) => f.name)
         info(`   Found ${allFacetNames.length} facets in registry`)
@@ -291,9 +282,6 @@ export async function deployCompleteSystem(
 
         info(`✅ Deployed ${facetsResult.deployed.size} facets successfully`)
 
-        // ========================================
-        // STEP 4: Register facets in BLR
-        // ========================================
         info('\n📝 Step 4/7: Registering facets in BLR...')
 
         const facetAddresses: Record<string, string> = {}
@@ -323,9 +311,6 @@ export async function deployCompleteSystem(
             )
         }
 
-        // ========================================
-        // STEP 5: Create Equity Configuration
-        // ========================================
         info('\n💼 Step 5/7: Creating Equity configuration...')
 
         // Get BLR contract instance
@@ -353,9 +338,6 @@ export async function deployCompleteSystem(
         info(`✅ Equity Version: ${equityConfig.data.version}`)
         info(`✅ Equity Facets: ${equityConfig.data.facetKeys.length}`)
 
-        // ========================================
-        // STEP 6: Create Bond Configuration
-        // ========================================
         info('\n🏦 Step 6/7: Creating Bond configuration...')
 
         const bondConfig = await createBondConfiguration(
@@ -376,9 +358,6 @@ export async function deployCompleteSystem(
         info(`✅ Bond Version: ${bondConfig.data.version}`)
         info(`✅ Bond Facets: ${bondConfig.data.facetKeys.length}`)
 
-        // ========================================
-        // STEP 7: Deploy Factory
-        // ========================================
         info('\n🏭 Step 7/7: Deploying Factory...')
         const factoryResult = await deployFactory(provider, {
             blrAddress: blrResult.blrAddress,
@@ -395,9 +374,6 @@ export async function deployCompleteSystem(
         )
         info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`)
 
-        // ========================================
-        // Build comprehensive output
-        // ========================================
         const endTime = Date.now()
 
         // Get Hedera Contract IDs if on Hedera network
@@ -500,9 +476,6 @@ export async function deployCompleteSystem(
             },
         }
 
-        // ========================================
-        // Save output to file
-        // ========================================
         if (saveOutput) {
             // Generate human-readable timestamp: network_yyyy-mm-dd_hh-mm-ss.json
             const now = new Date()
@@ -521,9 +494,6 @@ export async function deployCompleteSystem(
             info(`\n💾 Deployment output saved: ${finalOutputPath}`)
         }
 
-        // ========================================
-        // Print summary
-        // ========================================
         info('\n' + '═'.repeat(60))
         info('✨ DEPLOYMENT COMPLETE')
         info('═'.repeat(60))

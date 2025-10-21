@@ -2,13 +2,14 @@ import { ethers } from 'ethers'
 import type { IFactory, ResolverProxy } from '@typechain'
 import { ResolverProxy__factory } from '@typechain'
 import { GAS_LIMIT } from '@scripts/infrastructure'
-import { ATS_ROLES, BOND_CONFIG_ID } from '@scripts/domain'
 import {
+    ATS_ROLES,
+    BOND_CONFIG_ID,
     BondDetailsDataParams,
     FactoryRegulationDataParams,
     Rbac,
     SecurityDataParams,
-} from './types'
+} from '@scripts/domain'
 
 // ============================================================================
 // Types

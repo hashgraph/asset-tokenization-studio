@@ -21,6 +21,10 @@ import {
     getAllFacets,
     validateAddress,
     fetchHederaContractId,
+    success,
+    info,
+    warn,
+    error as logError,
 } from '@scripts/infrastructure'
 import {
     deployFactory,
@@ -31,7 +35,7 @@ import type { DeploymentProvider } from '@scripts/infrastructure'
 
 import { promises as fs } from 'fs'
 import { dirname } from 'path'
-import { BusinessLogicResolver__factory } from '../../typechain-types'
+import { BusinessLogicResolver__factory } from '@typechain'
 
 /**
  * Deployment output structure (compatible with deployCompleteSystem).
@@ -200,31 +204,28 @@ export async function deployWithExistingBlr(
     const signer = await provider.getSigner()
     const deployer = await signer.getAddress()
 
-    console.log('🌟 ATS Deployment with Existing BLR')
-    console.log('═'.repeat(60))
-    console.log(`📡 Network: ${network}`)
-    console.log(`👤 Deployer: ${deployer}`)
-    console.log(`🔷 BLR Address: ${blrAddress}`)
-    console.log(`🔄 TimeTravel: ${useTimeTravel ? 'Enabled' : 'Disabled'}`)
-    console.log('═'.repeat(60))
+    info('🌟 ATS Deployment with Existing BLR')
+    info('═'.repeat(60))
+    info(`📡 Network: ${network}`)
+    info(`👤 Deployer: ${deployer}`)
+    info(`🔷 BLR Address: ${blrAddress}`)
+    info(`🔄 TimeTravel: ${useTimeTravel ? 'Enabled' : 'Disabled'}`)
+    info('═'.repeat(60))
 
     // Track total gas used
     let totalGasUsed = 0
     const skippedSteps: string[] = []
 
     try {
-        // ========================================
-        // STEP 1: Deploy or use existing ProxyAdmin
-        // ========================================
         let proxyAdminAddress: string
 
         if (existingProxyAdminAddress) {
-            console.log('\n📋 Step 1/5: Using existing ProxyAdmin...')
+            info('\n📋 Step 1/5: Using existing ProxyAdmin...')
             validateAddress(existingProxyAdminAddress, 'ProxyAdmin address')
             proxyAdminAddress = existingProxyAdminAddress
-            console.log(`✅ ProxyAdmin: ${proxyAdminAddress}`)
+            info(`✅ ProxyAdmin: ${proxyAdminAddress}`)
         } else {
-            console.log('\n📋 Step 1/5: Deploying ProxyAdmin...')
+            info('\n📋 Step 1/5: Deploying ProxyAdmin...')
             const proxyAdminResult = await deployProxyAdmin(provider)
 
             if (!proxyAdminResult.success) {
@@ -237,26 +238,20 @@ export async function deployWithExistingBlr(
                 proxyAdminResult.deploymentResult.gasUsed?.toString() || '0'
             )
             proxyAdminAddress = proxyAdminResult.proxyAdminAddress
-            console.log(`✅ ProxyAdmin: ${proxyAdminAddress}`)
+            info(`✅ ProxyAdmin: ${proxyAdminAddress}`)
         }
 
-        // ========================================
-        // STEP 2: BLR (SKIPPED - using existing)
-        // ========================================
-        console.log('\n🔷 Step 2/5: Using existing BLR...')
-        console.log(`✅ BLR Proxy: ${blrAddress}`)
+        info('\n🔷 Step 2/5: Using existing BLR...')
+        info(`✅ BLR Proxy: ${blrAddress}`)
         skippedSteps.push('BLR deployment')
 
-        // ========================================
-        // STEP 3: Deploy facets (optional)
-        // ========================================
         let facetsResult: Awaited<ReturnType<typeof deployFacets>> | undefined
         const facetAddresses: Record<string, string> = {}
 
         if (shouldDeployFacets) {
-            console.log('\n📦 Step 3/5: Deploying all facets...')
+            info('\n📦 Step 3/5: Deploying all facets...')
             const allFacetNames = getAllFacets().map((f) => f.name)
-            console.log(`   Found ${allFacetNames.length} facets in registry`)
+            info(`   Found ${allFacetNames.length} facets in registry`)
 
             facetsResult = await deployFacets(provider, {
                 facetNames: allFacetNames,
@@ -281,17 +276,14 @@ export async function deployWithExistingBlr(
                 }
             })
 
-            console.log(
+            info(
                 `✅ Deployed ${facetsResult.deployed.size} facets successfully`
             )
         } else {
-            console.log('\n📦 Step 3/5: Skipping facet deployment...')
+            info('\n📦 Step 3/5: Skipping facet deployment...')
             skippedSteps.push('Facet deployment')
         }
 
-        // ========================================
-        // STEP 4: Create configurations (optional)
-        // ========================================
         let equityConfig:
             | Awaited<ReturnType<typeof createEquityConfiguration>>
             | undefined
@@ -301,7 +293,7 @@ export async function deployWithExistingBlr(
 
         if (shouldCreateConfigurations) {
             if (Object.keys(facetAddresses).length === 0) {
-                console.log(
+                info(
                     '\n⚠️  Step 4/5: Skipping configurations (no facets deployed)...'
                 )
                 skippedSteps.push('Equity configuration', 'Bond configuration')
@@ -314,7 +306,7 @@ export async function deployWithExistingBlr(
                 )
 
                 // Create Equity Configuration
-                console.log('\n💼 Step 4a/5: Creating Equity configuration...')
+                info('\n💼 Step 4a/5: Creating Equity configuration...')
 
                 equityConfig = await createEquityConfiguration(
                     blrContract,
@@ -328,16 +320,14 @@ export async function deployWithExistingBlr(
                     )
                 }
 
-                console.log(
+                info(
                     `✅ Equity Config ID: ${equityConfig.data.configurationId}`
                 )
-                console.log(`✅ Equity Version: ${equityConfig.data.version}`)
-                console.log(
-                    `✅ Equity Facets: ${equityConfig.data.facetKeys.length}`
-                )
+                info(`✅ Equity Version: ${equityConfig.data.version}`)
+                info(`✅ Equity Facets: ${equityConfig.data.facetKeys.length}`)
 
                 // Create Bond Configuration
-                console.log('\n🏦 Step 4b/5: Creating Bond configuration...')
+                info('\n🏦 Step 4b/5: Creating Bond configuration...')
 
                 bondConfig = await createBondConfiguration(
                     blrContract,
@@ -351,26 +341,19 @@ export async function deployWithExistingBlr(
                     )
                 }
 
-                console.log(
-                    `✅ Bond Config ID: ${bondConfig.data.configurationId}`
-                )
-                console.log(`✅ Bond Version: ${bondConfig.data.version}`)
-                console.log(
-                    `✅ Bond Facets: ${bondConfig.data.facetKeys.length}`
-                )
+                info(`✅ Bond Config ID: ${bondConfig.data.configurationId}`)
+                info(`✅ Bond Version: ${bondConfig.data.version}`)
+                info(`✅ Bond Facets: ${bondConfig.data.facetKeys.length}`)
             }
         } else {
-            console.log('\n💼 Step 4/5: Skipping configurations...')
+            info('\n💼 Step 4/5: Skipping configurations...')
             skippedSteps.push('Equity configuration', 'Bond configuration')
         }
 
-        // ========================================
-        // STEP 5: Deploy Factory (optional)
-        // ========================================
         let factoryResult: Awaited<ReturnType<typeof deployFactory>> | undefined
 
         if (shouldDeployFactory) {
-            console.log('\n🏭 Step 5/5: Deploying Factory...')
+            info('\n🏭 Step 5/5: Deploying Factory...')
             factoryResult = await deployFactory(provider, {
                 blrAddress,
                 proxyAdminAddress,
@@ -382,18 +365,15 @@ export async function deployWithExistingBlr(
                 )
             }
 
-            console.log(
+            info(
                 `✅ Factory Implementation: ${factoryResult.implementationAddress}`
             )
-            console.log(`✅ Factory Proxy: ${factoryResult.factoryAddress}`)
+            info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`)
         } else {
-            console.log('\n🏭 Step 5/5: Skipping Factory deployment...')
+            info('\n🏭 Step 5/5: Skipping Factory deployment...')
             skippedSteps.push('Factory deployment')
         }
 
-        // ========================================
-        // Build comprehensive output
-        // ========================================
         const endTime = Date.now()
 
         // Get Hedera Contract IDs if on Hedera network
@@ -505,43 +485,37 @@ export async function deployWithExistingBlr(
             },
         }
 
-        // ========================================
-        // Save output to file
-        // ========================================
         if (saveOutput) {
             const finalOutputPath =
                 outputPath ||
                 `deployments/${network}-external-blr-${Date.now()}.json`
 
             await saveDeploymentOutput(output, finalOutputPath)
-            console.log(`\n💾 Deployment output saved: ${finalOutputPath}`)
+            info(`\n💾 Deployment output saved: ${finalOutputPath}`)
         }
 
-        // ========================================
-        // Print summary
-        // ========================================
-        console.log('\n' + '═'.repeat(60))
-        console.log('✨ DEPLOYMENT COMPLETE')
-        console.log('═'.repeat(60))
-        console.log(
+        info('\n' + '═'.repeat(60))
+        info('✨ DEPLOYMENT COMPLETE')
+        info('═'.repeat(60))
+        info(
             `⏱️  Total time: ${(output.summary.deploymentTime / 1000).toFixed(2)}s`
         )
-        console.log(`⛽ Total gas: ${output.summary.gasUsed}`)
-        console.log(`📦 Facets deployed: ${output.summary.totalFacets}`)
-        console.log(
+        info(`⛽ Total gas: ${output.summary.gasUsed}`)
+        info(`📦 Facets deployed: ${output.summary.totalFacets}`)
+        info(
             `⚙️  Configurations created: ${output.summary.totalConfigurations}`
         )
         if (skippedSteps.length > 0) {
-            console.log(`⏭️  Skipped steps: ${skippedSteps.join(', ')}`)
+            info(`⏭️  Skipped steps: ${skippedSteps.join(', ')}`)
         }
-        console.log('═'.repeat(60))
+        info('═'.repeat(60))
 
         return output
     } catch (error) {
         const errorMessage =
             error instanceof Error ? error.message : String(error)
 
-        console.error('\n❌ Deployment failed:', errorMessage)
+        logError('\n❌ Deployment failed:', errorMessage)
 
         throw error
     }
@@ -565,8 +539,8 @@ async function saveDeploymentOutput(
         // Write JSON file with pretty formatting
         await fs.writeFile(filePath, JSON.stringify(output, null, 2), 'utf-8')
 
-        console.log(`💾 Deployment output saved to ${filePath}`)
+        success('Deployment output saved', { path: filePath })
     } catch (error) {
-        console.warn(`Warning: Could not save deployment output: ${error}`)
+        warn(`Warning: Could not save deployment output: ${error}`)
     }
 }

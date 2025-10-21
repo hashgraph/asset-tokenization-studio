@@ -30,8 +30,9 @@ export * from './equity/createConfiguration'
 // Bond configuration
 export * from './bond/createConfiguration'
 
-// Factory deployment
+// Factory deployment and types
 export * from './factory/deploy'
+export * from './factory/types'
 
 // Token deployment from factory
 export * from './factory/deployEquityToken'

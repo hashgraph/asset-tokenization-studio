@@ -15,8 +15,8 @@
  */
 
 import { z } from 'zod'
-import Configuration, { NETWORK_ALIASES } from '../../Configuration'
-import type { Endpoints } from '../../Configuration'
+import Configuration, { NETWORK_ALIASES } from '@configuration'
+import type { Endpoints } from '@configuration'
 import type { NetworkConfig } from '@scripts/infrastructure/types'
 import { CHAIN_IDS } from '@scripts/infrastructure/constants'
 
