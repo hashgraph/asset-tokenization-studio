@@ -67,8 +67,11 @@ export interface RoleDefinition {
  * Extract role definitions from Solidity code.
  *
  * Matches patterns like:
- * - bytes32 public constant _ROLE_NAME = 0x...;
+ * - bytes32 public constant ROLE_NAME = 0x...;
  * - bytes32 constant _ROLE_NAME = keccak256("...");
+ *
+ * Supports both with and without underscore prefix (underscore is incorrectly
+ * used in ATS for public constants - will be removed in future).
  *
  * @param source - Solidity source code
  * @returns Array of role definitions with names and values
@@ -76,13 +79,15 @@ export interface RoleDefinition {
  * @example
  * ```typescript
  * const roles = extractRoles(source)
- * // [{name: '_ISSUER_ROLE', value: '0x4be32e8...'}]
+ * // [{name: 'ISSUER_ROLE', value: '0x4be32e8...'}]
+ * // [{name: '_ISSUER_ROLE', value: '0x4be32e8...'}] (legacy ATS)
  * ```
  */
 export function extractRoles(source: string): RoleDefinition[] {
-    // Match: bytes32 [public] constant _ROLE_NAME = value;
+    // Match: bytes32 [public] constant [_]ROLE_NAME = value;
+    // Underscore prefix is optional (legacy ATS uses it incorrectly)
     const roleRegex =
-        /bytes32\s+(?:public\s+)?constant\s+(_\w+_ROLE)\s*=\s*([^;]+);/g
+        /bytes32\s+(?:public\s+)?constant\s+(_?\w+_ROLE)\s*=\s*([^;]+);/g
     const roles: RoleDefinition[] = []
 
     let match
@@ -111,7 +116,11 @@ export interface ResolverKeyDefinition {
  * Extract resolver key definitions from Solidity code.
  *
  * Matches patterns like:
- * - bytes32 constant _FACET_NAME_RESOLVER_KEY = 0x...;
+ * - bytes32 constant FACET_NAME_RESOLVER_KEY = 0x...;
+ * - bytes32 constant _FACET_NAME_RESOLVER_KEY = 0x...; (legacy)
+ *
+ * Supports both with and without underscore prefix (underscore is incorrectly
+ * used in ATS for public constants - will be removed in future).
  *
  * @param source - Solidity source code
  * @returns Array of resolver key definitions with names and values
@@ -119,13 +128,15 @@ export interface ResolverKeyDefinition {
  * @example
  * ```typescript
  * const keys = extractResolverKeys(source)
- * // [{name: '_ACCESS_CONTROL_RESOLVER_KEY', value: '0x011768a41...'}]
+ * // [{name: 'ACCESS_CONTROL_RESOLVER_KEY', value: '0x011768a41...'}]
+ * // [{name: '_ACCESS_CONTROL_RESOLVER_KEY', value: '0x011768a41...'}] (legacy ATS)
  * ```
  */
 export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
-    // Match: bytes32 [public] constant _RESOLVER_KEY_NAME = value;
+    // Match: bytes32 [public] constant [_]RESOLVER_KEY_NAME = value;
+    // Underscore prefix is optional (legacy ATS uses it incorrectly)
     const keyRegex =
-        /bytes32\s+(?:public\s+)?constant\s+(_\w+_RESOLVER_KEY)\s*=\s*([^;]+);/g
+        /bytes32\s+(?:public\s+)?constant\s+(_?\w+_RESOLVER_KEY)\s*=\s*([^;]+);/g
     const keys: ResolverKeyDefinition[] = []
 
     let match
@@ -137,6 +148,86 @@ export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
     }
 
     return keys
+}
+
+/**
+ * Extract description from contract natspec comments.
+ *
+ * Extracts the description from contract-level natspec documentation.
+ * Priority order: @notice > @title
+ *
+ * @param source - Solidity source code
+ * @param contractName - Contract name to locate the correct natspec block
+ * @returns Description string or undefined if no natspec found
+ *
+ * @example
+ * ```typescript
+ * const source = `
+ * /**
+ *  * @title FactorySuiteFacet
+ *  * @notice Atomic deployment of Bond, Treasury, and KPI contract suites
+ *  *\/
+ * contract FactorySuiteFacet { }
+ * `
+ * const desc = extractNatspecDescription(source, 'FactorySuiteFacet')
+ * // Returns: "Atomic deployment of Bond, Treasury, and KPI contract suites"
+ * ```
+ */
+export function extractNatspecDescription(
+    source: string,
+    contractName: string
+): string | undefined {
+    // Find contract declaration with optional abstract/interface keywords
+    const contractDecl = new RegExp(
+        `(?:abstract\\s+)?(?:contract|interface|library)\\s+${contractName}\\b`,
+        'g'
+    )
+
+    const contractMatch = contractDecl.exec(source)
+    if (!contractMatch) {
+        return undefined
+    }
+
+    // Extract everything before the contract declaration
+    const beforeContract = source.substring(0, contractMatch.index)
+
+    // Find the last natspec comment block (/** ... */) before the contract
+    // This regex matches multiline comments that start with /**
+    const natspecRegex = /\/\*\*([\s\S]*?)\*\//g
+    let lastNatspec: RegExpExecArray | null = null
+    let match: RegExpExecArray | null
+
+    while ((match = natspecRegex.exec(beforeContract)) !== null) {
+        lastNatspec = match
+    }
+
+    if (!lastNatspec) {
+        return undefined
+    }
+
+    const natspecContent = lastNatspec[1]
+
+    // Try to extract @notice first (priority)
+    const noticeMatch = /@notice\s+([^\n@]+)/i.exec(natspecContent)
+    if (noticeMatch) {
+        return noticeMatch[1]
+            .trim()
+            .replace(/\s*\*\s*/g, ' ') // Remove asterisks from multi-line comments
+            .replace(/\s+/g, ' ') // Normalize whitespace
+            .trim()
+    }
+
+    // Fallback to @title if @notice not found
+    const titleMatch = /@title\s+([^\n@]+)/i.exec(natspecContent)
+    if (titleMatch) {
+        return titleMatch[1]
+            .trim()
+            .replace(/\s*\*\s*/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+    }
+
+    return undefined
 }
 
 /**

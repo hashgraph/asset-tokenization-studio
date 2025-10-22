@@ -9,7 +9,7 @@
  * To regenerate: npm run generate:registry
  * To customize: Edit registry.overrides.ts
  *
- * Generated: 2025-10-21T09:43:31.766Z
+ * Generated: 2025-10-22T13:02:21.639Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -28,7 +28,6 @@ import {
 export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     AccessControlFacet: {
         name: 'AccessControlFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_ACCESS_CONTROL_RESOLVER_KEY',
             value: '0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6',
@@ -124,7 +123,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     AdjustBalancesFacet: {
         name: 'AdjustBalancesFacet',
-        description: 'Business logic - core token functionality',
         resolverKey: {
             name: '_BALANCE_ADJUSTMENTS_RESOLVER_KEY',
             value: '0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8',
@@ -141,7 +139,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     BondUSAFacet: {
         name: 'BondUSAFacet',
-        description: 'Jurisdiction-specific - asset-specific features',
         resolverKey: {
             name: '_BOND_RESOLVER_KEY',
             value: '0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef',
@@ -175,7 +172,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     BondUSAReadFacet: {
         name: 'BondUSAReadFacet',
-        description: 'Jurisdiction-specific - asset-specific features',
         resolverKey: {
             name: '_BOND_READ_RESOLVER_KEY',
             value: '0xe7ca0b805514da05524faf33d2d9d9432bf1dfa53096073a7267041cfdfb6d68',
@@ -232,7 +228,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     CapFacet: {
         name: 'CapFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_CAP_RESOLVER_KEY',
             value: '0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b',
@@ -269,7 +264,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ClearingActionsFacet: {
         name: 'ClearingActionsFacet',
-        description: 'Core functionality - clearing and settlement operations',
         resolverKey: {
             name: '_CLEARING_ACTIONS_RESOLVER_KEY',
             value: '0x5472dfc5c92ad7a8651518ea7d3854d3b6494e5bcaa19f91cd61bf93bf6f2a74',
@@ -349,7 +343,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ClearingHoldCreationFacet: {
         name: 'ClearingHoldCreationFacet',
-        description: 'Core functionality - clearing and settlement operations',
         resolverKey: {
             name: '_CLEARING_HOLDCREATION_RESOLVER_KEY',
             value: '0x44f99a141c434fac20d69e7511932ee344d5b37b61851976c83a5df4ca468152',
@@ -391,7 +384,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ClearingReadFacet: {
         name: 'ClearingReadFacet',
-        description: 'Core functionality - clearing and settlement operations',
         resolverKey: {
             name: '_CLEARING_READ_RESOLVER_KEY',
             value: '0xebb2e29bdf4edaf4ca66a3f9b7735087f9d0474d56d856e53c94ef00596c0b1e',
@@ -431,7 +423,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ClearingRedeemFacet: {
         name: 'ClearingRedeemFacet',
-        description: 'Core functionality - clearing and settlement operations',
         resolverKey: {
             name: '_CLEARING_REDEEM_RESOLVER_KEY',
             value: '0xb341e7aa749da43976c189209de51ccdf838af9f964cd27340b914d5b2aeba97',
@@ -473,7 +464,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ClearingTransferFacet: {
         name: 'ClearingTransferFacet',
-        description: 'Core functionality - clearing and settlement operations',
         resolverKey: {
             name: '_CLEARING_TRANSFER_RESOLVER_KEY',
             value: '0x7399d03db62430bec60ca2c3eacf98b1b7e2253f17593ef7a226d759442e0928',
@@ -515,7 +505,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ControlListFacet: {
         name: 'ControlListFacet',
-        description: 'Core functionality - compliance and regulatory features',
         resolverKey: {
             name: '_CONTROL_LIST_RESOLVER_KEY',
             value: '0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c',
@@ -586,7 +575,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     CorporateActionsFacet: {
         name: 'CorporateActionsFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_CORPORATE_ACTIONS_RESOLVER_KEY',
             value: '0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077',
@@ -644,7 +632,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     DiamondCutFacet: {
         name: 'DiamondCutFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_DIAMOND_CUT_RESOLVER_KEY',
             value: '0xb66fc45b2670ed2c4ce03061121e6c8e53bce06e161f95afad8e57671b64fca8',
@@ -793,7 +780,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     DiamondFacet: {
         name: 'DiamondFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_DIAMOND_RESOLVER_KEY',
             value: '0x1b5212ea37fb29e99afa2812a5d7d7e662a477424d3de1a18cc3871a2ee94d78',
@@ -1012,7 +998,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     DiamondLoupeFacet: {
         name: 'DiamondLoupeFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_DIAMOND_LOUPE_RESOLVER_KEY',
             value: '0x086a1dd0b9bfa39267d1de30445a8edeb3a1f50c8a0a82c91f9dee3608e83567',
@@ -1210,7 +1195,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     EquityUSAFacet: {
         name: 'EquityUSAFacet',
-        description: 'Jurisdiction-specific - asset-specific features',
         resolverKey: {
             name: '_EQUITY_RESOLVER_KEY',
             value: '0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810',
@@ -1324,7 +1308,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC1410IssuerFacet: {
         name: 'ERC1410IssuerFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_ERC1410_ISSUER_RESOLVER_KEY',
             value: '0x6e82b75f32c9647cc00b4c3eabbef5a82677f3e91d5d196eb4dd6a0365941344',
@@ -1341,7 +1324,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC1410ManagementFacet: {
         name: 'ERC1410ManagementFacet',
-        description: 'Core functionality - core token functionality',
+        description:
+            'Facet implementing privileged ERC1410 operations including controller transfers, operator actions,',
         resolverKey: {
             name: '_ERC1410_MANAGEMENT_RESOLVER_KEY',
             value: '0x232f8686795d3f197681faf0d8db05655e759f62d709d56b97e5d9cfff29dbf5',
@@ -1393,7 +1377,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC1410ReadFacet: {
         name: 'ERC1410ReadFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_ERC1410_READ_RESOLVER_KEY',
             value: '0x5eb2734b83ea80c3eb63463a6192b30ab2526cb7a073f0abfda1a404c92ae497',
@@ -1462,7 +1445,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC1410TokenHolderFacet: {
         name: 'ERC1410TokenHolderFacet',
-        description: 'Core functionality - clearing and settlement operations',
         resolverKey: {
             name: '_ERC1410_TOKEN_HOLDER_RESOLVER_KEY',
             value: '0x0466bf860d23f1ecbc25f364735e0dc3830d236f09182599831730ddd2792caa',
@@ -1510,7 +1492,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC1594Facet: {
         name: 'ERC1594Facet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_ERC1594_RESOLVER_KEY',
             value: '0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f',
@@ -1568,7 +1549,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC1643Facet: {
         name: 'ERC1643Facet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_ERC1643_RESOLVER_KEY',
             value: '0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625',
@@ -1634,7 +1614,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC1644Facet: {
         name: 'ERC1644Facet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_ERC1644_RESOLVER_KEY',
             value: '0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d',
@@ -1672,7 +1651,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC20Facet: {
         name: 'ERC20Facet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_ERC20_RESOLVER_KEY',
             value: '0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5',
@@ -1744,7 +1722,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC20PermitFacet: {
         name: 'ERC20PermitFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_ERC20PERMIT_RESOLVER_KEY',
             value: '0xef05f0313623d32145212ed45620c8b2c8c294b3d6955cf26f3d1b0569fbc1fa',
@@ -1789,7 +1766,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC20VotesFacet: {
         name: 'ERC20VotesFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_ERC20VOTES_RESOLVER_KEY',
             value: '0x5cbfbaa435e19a43530a00ac685c9b5252862a94af2053667ded44642a0d9f4c',
@@ -1863,7 +1839,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC3643BatchFacet: {
         name: 'ERC3643BatchFacet',
-        description: 'Core functionality - compliance and regulatory features',
         resolverKey: {
             name: '_ERC3643_BATCH_RESOLVER_KEY',
             value: '0x9e671b494908a7523ee4e531ae7b7076b84f1c675d31346a9697f0ff4695f249',
@@ -1895,7 +1870,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC3643ManagementFacet: {
         name: 'ERC3643ManagementFacet',
-        description: 'Core functionality - compliance and regulatory features',
         resolverKey: {
             name: '_ERC3643_MANAGEMENT_RESOLVER_KEY',
             value: '0x06d7f1ffc912a9e44e5d742aa1c1eff596d0fabf91a1d0fb1c3ac0fba01f1773',
@@ -2022,7 +1996,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC3643OperationsFacet: {
         name: 'ERC3643OperationsFacet',
-        description: 'Core functionality - compliance and regulatory features',
         resolverKey: {
             name: '_ERC3643_OPERATIONS_RESOLVER_KEY',
             value: '0x39de33e56c92afe3cd7ece00d0ff8a0df512878690719e48c17d5b54604d2de2',
@@ -2049,7 +2022,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ERC3643ReadFacet: {
         name: 'ERC3643ReadFacet',
-        description: 'Core functionality - compliance and regulatory features',
         resolverKey: {
             name: '_ERC3643_READ_RESOLVER_KEY',
             value: '0xf1a7f92f11da0b048b6417201459d4e1eaef0e112e0d58d5bd6ee4481e5394c7',
@@ -2091,7 +2063,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ExternalControlListManagementFacet: {
         name: 'ExternalControlListManagementFacet',
-        description: 'Core functionality - compliance and regulatory features',
         resolverKey: {
             name: '_CONTROL_LIST_MANAGEMENT_RESOLVER_KEY',
             value: '0xb28d59e89fa116cebe06d8de737191b637a49d95f7d8d947d47ac000463e7c71',
@@ -2176,7 +2147,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ExternalKycListManagementFacet: {
         name: 'ExternalKycListManagementFacet',
-        description: 'Core functionality - compliance and regulatory features',
         resolverKey: {
             name: '_KYC_MANAGEMENT_RESOLVER_KEY',
             value: '0x8676785f4d841823214e8ee8c497b3336a210be7559f5571c590249f6203e821',
@@ -2262,7 +2232,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ExternalPauseManagementFacet: {
         name: 'ExternalPauseManagementFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_PAUSE_MANAGEMENT_RESOLVER_KEY',
             value: '0xadd2e196c17b4f607e327e46341eedbbbc3dce86ac90ceb3e7244b0a5f8590ac',
@@ -2343,7 +2312,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     FreezeFacet: {
         name: 'FreezeFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_FREEZE_RESOLVER_KEY',
             value: '0x49f765e7155d979a148049c2a0ebed5e028b11799061897a255f99314f0bd3f1',
@@ -2407,7 +2375,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     HoldManagementFacet: {
         name: 'HoldManagementFacet',
-        description: 'Core functionality - clearing and settlement operations',
         resolverKey: {
             name: '_HOLD_MANAGEMENT_RESOLVER_KEY',
             value: '0xaab5a0e0978ad146ca8dc61d16bab0212224eadf68bd08e3c66600ee4f59c12a',
@@ -2457,7 +2424,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     HoldReadFacet: {
         name: 'HoldReadFacet',
-        description: 'Core functionality - clearing and settlement operations',
         resolverKey: {
             name: '_HOLD_READ_RESOLVER_KEY',
             value: '0xd8a2714462c01975a075ccd4be2588934afd8074afef746fac089b757b803851',
@@ -2500,7 +2466,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     HoldTokenHolderFacet: {
         name: 'HoldTokenHolderFacet',
-        description: 'Core functionality - clearing and settlement operations',
         resolverKey: {
             name: '_HOLD_TOKEN_HOLDER_RESOLVER_KEY',
             value: '0x87b17a3ce9a86872f21469d26f005543a22ef5729998559f4ad433d5c4253f3e',
@@ -2571,7 +2536,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     KycFacet: {
         name: 'KycFacet',
-        description: 'Core functionality - compliance and regulatory features',
         resolverKey: {
             name: '_KYC_RESOLVER_KEY',
             value: '0xf516a0f6b4726244ae916c590cd26c2b593d7d448e46e43714fb9f9435c46e32',
@@ -2672,7 +2636,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     LockFacet: {
         name: 'LockFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_LOCK_RESOLVER_KEY',
             value: '0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9',
@@ -2759,7 +2722,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     PauseFacet: {
         name: 'PauseFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_PAUSE_RESOLVER_KEY',
             value: '0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c',
@@ -2786,7 +2748,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ProceedRecipientsFacet: {
         name: 'ProceedRecipientsFacet',
-        description: 'Business logic - core token functionality',
         resolverKey: {
             name: '_PROCEED_RECIPIENTS_RESOLVER_KEY',
             value: '0x87f4b676bf89cd24a01a78fd8e7fb2102c2f6d034be73d16402f7297e0ae625b',
@@ -2867,7 +2828,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ProtectedPartitionsFacet: {
         name: 'ProtectedPartitionsFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_PROTECTED_PARTITIONS_RESOLVER_KEY',
             value: '0x6d65d2938c05a4d952aff0845c1baa5bea04d4544db74f8b3b26004d1d58d58f',
@@ -2909,7 +2869,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ScheduledBalanceAdjustmentsFacet: {
         name: 'ScheduledBalanceAdjustmentsFacet',
-        description: 'Business logic - core token functionality',
         resolverKey: {
             name: '_SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY',
             value: '0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0',
@@ -2934,7 +2893,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ScheduledCrossOrderedTasksFacet: {
         name: 'ScheduledCrossOrderedTasksFacet',
-        description: 'Business logic - core token functionality',
         resolverKey: {
             name: '_SCHEDULED_TASKS_RESOLVER_KEY',
             value: '0xa4934195ab83f1497ce5fc99b68d0f41694716bcfba5f232aa6c8e0d4d504f08',
@@ -2966,7 +2924,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     ScheduledSnapshotsFacet: {
         name: 'ScheduledSnapshotsFacet',
-        description: 'Business logic - core token functionality',
         resolverKey: {
             name: '_SCHEDULED_SNAPSHOTS_RESOLVER_KEY',
             value: '0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793',
@@ -2988,7 +2945,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     SnapshotsFacet: {
         name: 'SnapshotsFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_SNAPSHOTS_RESOLVER_KEY',
             value: '0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf',
@@ -3079,7 +3035,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     SsiManagementFacet: {
         name: 'SsiManagementFacet',
-        description: 'Core functionality - core token functionality',
         resolverKey: {
             name: '_SSI_MANAGEMENT_RESOLVER_KEY',
             value: '0x46df6aaf3742e0cbad136a74fb679b686e087dcc3a3d92d1c4ce2f3ef1b508a0',
@@ -3160,7 +3115,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     TimeTravelFacet: {
         name: 'TimeTravelFacet',
-        description: 'Core functionality - core token functionality',
         inheritance: [
             'IStaticFunctionSelectors',
             'ITimeTravel',
@@ -3246,7 +3200,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     TransferAndLockFacet: {
         name: 'TransferAndLockFacet',
-        description: 'Jurisdiction-specific - asset-specific features',
         resolverKey: {
             name: '_TRANSFER_AND_LOCK_RESOLVER_KEY',
             value: '0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08',
@@ -3291,7 +3244,6 @@ export const TOTAL_FACETS = 49 as const
 export const CONTRACT_REGISTRY: Record<string, ContractDefinition> = {
     BusinessLogicResolver: {
         name: 'BusinessLogicResolver',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['IBusinessLogicResolver', 'DiamondCutManager'],
         methods: [
             {
@@ -3362,7 +3314,6 @@ export const CONTRACT_REGISTRY: Record<string, ContractDefinition> = {
 
     Factory: {
         name: 'Factory',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['IFactory', 'LocalContext'],
         methods: [
             {
@@ -3402,7 +3353,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 > = {
     AccessControlStorageWrapper: {
         name: 'AccessControlStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: [
             'IAccessControlStorageWrapper',
             'LocalContext',
@@ -3499,7 +3449,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     BondStorageWrapper: {
         name: 'BondStorageWrapper',
-        description: 'Infrastructure - asset-specific features',
         inheritance: ['IBondStorageWrapper', 'ERC20PermitStorageWrapper'],
         methods: [
             {
@@ -3572,7 +3521,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ControlListStorageWrapper: {
         name: 'ControlListStorageWrapper',
-        description: 'Infrastructure - compliance and regulatory features',
         inheritance: [
             'IControlListStorageWrapper',
             'ExternalControlListManagementStorageWrapper',
@@ -3628,7 +3576,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     CorporateActionsStorageWrapper: {
         name: 'CorporateActionsStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['ClearingStorageWrapper1'],
         methods: [
             {
@@ -3708,7 +3655,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     EquityStorageWrapper: {
         name: 'EquityStorageWrapper',
-        description: 'Infrastructure - asset-specific features',
         inheritance: ['IEquityStorageWrapper', 'BondStorageWrapper'],
         methods: [
             {
@@ -3828,7 +3774,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ERC1410BasicStorageWrapper: {
         name: 'ERC1410BasicStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['IERC1410StorageWrapper', 'ERC20StorageWrapper1'],
         methods: [
             {
@@ -3859,7 +3804,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ERC1410OperatorStorageWrapper: {
         name: 'ERC1410OperatorStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['ERC1410BasicStorageWrapper'],
         methods: [
             {
@@ -3917,7 +3861,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ERC1410ProtectedPartitionsStorageWrapper: {
         name: 'ERC1410ProtectedPartitionsStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['ERC1644StorageWrapper'],
         methods: [
             {
@@ -3937,7 +3880,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ERC1410StandardStorageWrapper: {
         name: 'ERC1410StandardStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['ERC1410OperatorStorageWrapper'],
         methods: [
             {
@@ -4074,7 +4016,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ERC1594StorageWrapper: {
         name: 'ERC1594StorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['IERC1594StorageWrapper', 'CapStorageWrapper2'],
         methods: [
             {
@@ -4171,7 +4112,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ERC1644StorageWrapper: {
         name: 'ERC1644StorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['IERC1644StorageWrapper', 'ERC3643StorageWrapper2'],
         methods: [
             {
@@ -4210,7 +4150,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ERC20PermitStorageWrapper: {
         name: 'ERC20PermitStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['ERC20VotesStorageWrapper'],
         methods: [
             {
@@ -4234,7 +4173,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ERC20VotesStorageWrapper: {
         name: 'ERC20VotesStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['ERC1594StorageWrapper'],
         methods: [
             {
@@ -4368,7 +4306,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ExternalControlListManagementStorageWrapper: {
         name: 'ExternalControlListManagementStorageWrapper',
-        description: 'Infrastructure - compliance and regulatory features',
         inheritance: ['ProtectedPartitionsStorageWrapper'],
         methods: [
             {
@@ -4381,7 +4318,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ExternalKycListManagementStorageWrapper: {
         name: 'ExternalKycListManagementStorageWrapper',
-        description: 'Infrastructure - compliance and regulatory features',
         inheritance: ['ExternalListManagementStorageWrapper'],
         methods: [
             {
@@ -4394,7 +4330,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ExternalListManagementStorageWrapper: {
         name: 'ExternalListManagementStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['SsiManagementStorageWrapper'],
         methods: [
             {
@@ -4437,7 +4372,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ExternalPauseManagementStorageWrapper: {
         name: 'ExternalPauseManagementStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['ControlListStorageWrapper'],
         methods: [
             {
@@ -4450,7 +4384,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     KycStorageWrapper: {
         name: 'KycStorageWrapper',
-        description: 'Infrastructure - compliance and regulatory features',
         inheritance: ['ExternalKycListManagementStorageWrapper'],
         methods: [
             {
@@ -4519,7 +4452,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     PauseStorageWrapper: {
         name: 'PauseStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: [
             'IPauseStorageWrapper',
             'ExternalPauseManagementStorageWrapper',
@@ -4555,7 +4487,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ProceedRecipientsStorageWrapper: {
         name: 'ProceedRecipientsStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['TotalBalancesStorageWrapper'],
         methods: [
             {
@@ -4593,7 +4524,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ProtectedPartitionsStorageWrapper: {
         name: 'ProtectedPartitionsStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: [
             'IProtectedPartitionsStorageWrapper',
             'KycStorageWrapper',
@@ -4726,7 +4656,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ScheduledBalanceAdjustmentsStorageWrapper: {
         name: 'ScheduledBalanceAdjustmentsStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['ScheduledSnapshotsStorageWrapper'],
         methods: [
             {
@@ -4775,7 +4704,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ScheduledCrossOrderedTasksStorageWrapper: {
         name: 'ScheduledCrossOrderedTasksStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['ScheduledBalanceAdjustmentsStorageWrapper'],
         methods: [
             {
@@ -4814,7 +4742,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     ScheduledSnapshotsStorageWrapper: {
         name: 'ScheduledSnapshotsStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['ScheduledTasksCommon'],
         methods: [
             {
@@ -4853,7 +4780,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     SecurityStorageWrapper: {
         name: 'SecurityStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['EquityStorageWrapper'],
         methods: [
             {
@@ -4883,7 +4809,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     SsiManagementStorageWrapper: {
         name: 'SsiManagementStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['AccessControlStorageWrapper'],
         methods: [
             {
@@ -4936,7 +4861,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     TimeTravelStorageWrapper: {
         name: 'TimeTravelStorageWrapper',
-        description: 'Core functionality - core token functionality',
         inheritance: ['ITimeTravelStorageWrapper', 'LocalContext'],
         methods: [
             {
@@ -4979,7 +4903,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     TotalBalancesStorageWrapper: {
         name: 'TotalBalancesStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: ['PauseStorageWrapper'],
         methods: [
             {
@@ -5014,7 +4937,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
 
     TransferAndLockStorageWrapper: {
         name: 'TransferAndLockStorageWrapper',
-        description: 'Infrastructure - core token functionality',
         inheritance: [
             'ITransferAndLockStorageWrapper',
             'SecurityStorageWrapper',

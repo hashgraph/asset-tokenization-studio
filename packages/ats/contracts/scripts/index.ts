@@ -104,6 +104,8 @@ export * from './tools/utils/fileUtils'
 export {
     extractContractNames,
     extractRoles,
+    extractResolverKeys,
+    extractNatspecDescription,
     extractImports,
     isFacetName,
     getBaseName,

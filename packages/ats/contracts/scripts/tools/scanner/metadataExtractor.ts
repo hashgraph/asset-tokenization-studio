@@ -21,6 +21,7 @@ import {
     extractEventsWithInheritance,
     extractErrors,
     extractErrorsWithInheritance,
+    extractNatspecDescription,
     type RoleDefinition,
 } from '../utils/solidityUtils'
 import {
@@ -86,8 +87,8 @@ export interface ContractMetadata {
     /** Whether this is upgradeable (uses proxy pattern) */
     upgradeable: boolean
 
-    /** Auto-generated description */
-    description: string
+    /** Description extracted from natspec (@notice or @title), undefined if not found */
+    description?: string
 }
 
 /**
@@ -113,7 +114,7 @@ export function extractMetadata(
     const inheritance = extractInheritance(contract.source, name)
     const solidityVersion = extractSolidityVersion(contract.source)
     const upgradeable = detectUpgradeable(contract)
-    const description = generateDescription(name, category, layer)
+    const description = generateDescription(contract.source, name)
 
     // Extract methods based on contract type:
     // - Facets: Extract from entire inheritance chain (excluding static methods)
@@ -344,37 +345,17 @@ function detectUpgradeable(contract: ContractFile): boolean {
 }
 
 /**
- * Generate automatic description.
+ * Generate description from natspec comments.
  *
+ * Extracts description from contract natspec (@notice or @title).
+ * Returns undefined if no natspec documentation found.
+ *
+ * @param source - Solidity source code
  * @param name - Contract name
- * @param category - Category
- * @param layer - Layer
- * @returns Auto-generated description
+ * @returns Description from natspec or undefined
  */
-function generateDescription(
-    name: string,
-    category: string,
-    layer: number
-): string {
-    const layerDescriptions: Record<number, string> = {
-        0: 'Infrastructure',
-        1: 'Core functionality',
-        2: 'Business logic',
-        3: 'Jurisdiction-specific',
-    }
-
-    const categoryDescriptions: Record<string, string> = {
-        core: 'core token functionality',
-        compliance: 'compliance and regulatory features',
-        clearing: 'clearing and settlement operations',
-        asset: 'asset-specific features',
-        test: 'testing utilities',
-    }
-
-    const layerDesc = layerDescriptions[layer] || 'Layer ' + layer
-    const categoryDesc = categoryDescriptions[category] || category
-
-    return `${layerDesc} - ${categoryDesc}`
+function generateDescription(source: string, name: string): string | undefined {
+    return extractNatspecDescription(source, name)
 }
 
 /**

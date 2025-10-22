@@ -14,6 +14,11 @@ task(
         await hre.run('erc3643-clone-interfaces')
         const PATTERN = `${hre.config.typechain.outDir}/**/*.ts`
         patchTypeChainFiles(PATTERN)
+
+        // Generate registry after successful compilation
+        // This ensures the registry always reflects the latest contract state
+        // Use --silent flag to minimize output during compilation
+        await hre.run('generate-registry', { silent: true })
     }
 )
 

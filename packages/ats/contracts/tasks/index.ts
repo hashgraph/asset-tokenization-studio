@@ -223,6 +223,8 @@ export * from './compile'
 
 export * from './selector'
 
+export * from './generateRegistry'
+
 // * Deploy Complete System (New modular deployment)
 // NOTE: deploySystem imports workflows that use @typechain, which creates circular
 // dependency during hardhat config loading. These are meant to be run as scripts,

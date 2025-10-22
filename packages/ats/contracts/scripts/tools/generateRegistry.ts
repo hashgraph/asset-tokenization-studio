@@ -35,6 +35,8 @@ import {
     success,
     warn,
     table,
+    configureLogger,
+    LogLevel,
 } from '../infrastructure/utils/logging'
 
 /**
@@ -80,6 +82,19 @@ function parseArgs(): CliOptions {
  */
 async function main(): Promise<void> {
     const options = parseArgs()
+
+    // Configure logger based on environment variable or CLI flags
+    const logLevelStr =
+        process.env.LOG_LEVEL || (options.verbose ? 'DEBUG' : 'INFO')
+    const logLevelMap: Record<string, LogLevel> = {
+        DEBUG: LogLevel.DEBUG,
+        INFO: LogLevel.INFO,
+        WARN: LogLevel.WARN,
+        ERROR: LogLevel.ERROR,
+        SILENT: LogLevel.SILENT,
+    }
+    const logLevel = logLevelMap[logLevelStr.toUpperCase()] || LogLevel.INFO
+    configureLogger({ level: logLevel })
 
     section('ATS Registry Generation Tool')
     info(`Scanning: ${path.join(__dirname, '../../contracts')}`)
@@ -349,29 +364,31 @@ async function main(): Promise<void> {
     const warnings: string[] = []
 
     // Check for facets without resolver keys
-    if (facetsWithoutResolverKeys.length > 0) {
+    // Exclude TimeTravelFacet (meta-facet that doesn't need a resolver key)
+    const missingResolverKeys = facetsWithoutResolverKeys.filter(
+        (f) => f.name !== 'TimeTravelFacet'
+    )
+    if (missingResolverKeys.length > 0) {
         warnings.push(
-            `${facetsWithoutResolverKeys.length} facets missing resolver keys: ${facetsWithoutResolverKeys.map((f) => f.name).join(', ')}`
+            `${missingResolverKeys.length} facets missing resolver keys: ${missingResolverKeys.map((f) => f.name).join(', ')}`
         )
     }
 
     // Check for facets without TimeTravel
-    const withoutTimeTravel = facetMetadata.filter((f) => !f.hasTimeTravel)
+    // Exclude TimeTravelFacet (can't have a TimeTravel variant of itself)
+    const withoutTimeTravel = facetMetadata.filter(
+        (f) => !f.hasTimeTravel && f.name !== 'TimeTravelFacet'
+    )
     if (withoutTimeTravel.length > 0 && withoutTimeTravel.length < 10) {
         warnings.push(
             `${withoutTimeTravel.length} facets don't have TimeTravel variants: ${withoutTimeTravel.map((f) => f.name).join(', ')}`
         )
     }
 
-    // Check for uncategorized
-    const uncategorized = facetMetadata.filter(
-        (f) => f.category === 'core' && !f.name.includes('ERC')
-    )
-    if (uncategorized.length > 5) {
-        warnings.push(
-            `Many facets categorized as 'core' - review categorization logic`
-        )
-    }
+    // NOTE: We intentionally removed the "Many facets categorized as 'core'" warning
+    // because "core" is a valid category for fundamental token operations
+    // (ERC standards, AccessControl, Pause, Diamond, etc.). Having 28/49 facets
+    // as "core" is expected and correct for a comprehensive token system.
 
     if (warnings.length > 0) {
         section('Warnings')

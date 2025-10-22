@@ -234,9 +234,12 @@ function generateFacetEntry(facet: ContractMetadata): string {
             ? `\n        errors: ${formatErrors(facet.errors, 8)},`
             : ''
 
+    const descriptionLine = facet.description
+        ? `\n        description: '${facet.description}',`
+        : ''
+
     return `    ${facet.name}: {
-        name: '${facet.name}',
-        description: '${facet.description}',${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}
+        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}
     }`
 }
 
@@ -297,9 +300,12 @@ function generateContractEntry(contract: ContractMetadata): string {
             ? `\n        errors: ${formatErrors(contract.errors, 8)},`
             : ''
 
+    const descriptionLine = contract.description
+        ? `\n        description: '${contract.description}',`
+        : ''
+
     return `    ${contract.name}: {
-        name: '${contract.name}',
-        description: '${contract.description}',${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}
+        name: '${contract.name}',${descriptionLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}
     }`
 }
 
@@ -358,9 +364,12 @@ function generateStorageWrapperEntry(wrapper: ContractMetadata): string {
             ? `,\n        errors: ${formatErrors(wrapper.errors, 8)}`
             : ''
 
+    const descriptionLine = wrapper.description
+        ? `\n        description: '${wrapper.description}',`
+        : ''
+
     return `    ${wrapper.name}: {
-        name: '${wrapper.name}',
-        description: '${wrapper.description}',${inheritanceLine}
+        name: '${wrapper.name}',${descriptionLine}${inheritanceLine}
         methods: ${formatMethods(wrapper.methods, 8)}${eventsLine}${errorsLine}
     }`
 }
