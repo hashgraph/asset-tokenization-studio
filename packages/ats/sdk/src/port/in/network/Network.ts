@@ -230,7 +230,7 @@ import ValidatedRequest from '@core/validation/ValidatedArgs';
 
 import { MirrorNode } from '@domain/context/network/MirrorNode';
 import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
-import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
+import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.old';
 import { DFNSTransactionAdapter } from '@port/out/hs/hts/custodial/DFNSTransactionAdapter';
 import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
 import { FireblocksTransactionAdapter } from '@port/out/hs/hts/custodial/FireblocksTransactionAdapter';

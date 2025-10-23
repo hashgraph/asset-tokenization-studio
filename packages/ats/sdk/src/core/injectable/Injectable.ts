@@ -220,7 +220,7 @@ import { NetworkProps } from '@service/network/NetworkService';
 import TransactionAdapter from '@port/out/TransactionAdapter';
 import { RuntimeError } from '../error/RuntimeError';
 import { SDK } from '@port/in/Common';
-import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
+import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.old';
 import { DFNSTransactionAdapter } from '@port/out/hs/hts/custodial/DFNSTransactionAdapter';
 import { FireblocksTransactionAdapter } from '@port/out/hs/hts/custodial/FireblocksTransactionAdapter';
 import { AWSKMSTransactionAdapter } from '@port/out/hs/hts/custodial/AWSKMSTransactionAdapter';

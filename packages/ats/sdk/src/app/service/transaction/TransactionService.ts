@@ -211,7 +211,7 @@ import Service from '@service/Service';
 import { SupportedWallets } from '@domain/context/network/Wallet';
 import { InvalidWalletTypeError } from '@domain/context/network/error/InvalidWalletAccountTypeError';
 import LogService from '@service/log/LogService';
-import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
+import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.old';
 import { DFNSTransactionAdapter } from '@port/out/hs/hts/custodial/DFNSTransactionAdapter';
 import { FireblocksTransactionAdapter } from '@port/out/hs/hts/custodial/FireblocksTransactionAdapter';
 import { AWSKMSTransactionAdapter } from '@port/out/hs/hts/custodial/AWSKMSTransactionAdapter';

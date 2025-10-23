@@ -204,7 +204,7 @@
 */
 
 import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
-import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
+import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.old';
 import { DFNSTransactionAdapter } from '@port/out/hs/hts/custodial/DFNSTransactionAdapter';
 import { FireblocksTransactionAdapter } from '@port/out/hs/hts/custodial/FireblocksTransactionAdapter';
 import { AWSKMSTransactionAdapter } from '@port/out/hs/hts/custodial/AWSKMSTransactionAdapter';
