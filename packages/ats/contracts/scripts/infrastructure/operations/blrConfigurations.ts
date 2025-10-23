@@ -624,8 +624,7 @@ export async function createBatchConfiguration(
     let facetNames = [...options.facetNames]
 
     const { resolveContractName } = await import('@scripts/infrastructure')
-    const { info, warn } = await import('@scripts/infrastructure')
-    const { ethers } = await import('ethers')
+    const { info } = await import('@scripts/infrastructure')
     const { ok, err } = await import('@scripts/infrastructure')
 
     if (facetNames.length === 0) {
@@ -657,12 +656,36 @@ export async function createBatchConfiguration(
                 )
                 const address = facetAddresses[contractName]
 
+                // Get resolver key from registry (defined in contract constants)
+                let key: string
+                if (registry) {
+                    const definition = registry.getFacetDefinition(facetName)
+                    if (!definition) {
+                        throw new Error(
+                            `Facet ${facetName} not found in registry. ` +
+                                `All facets must be in the registry to get their resolver keys.`
+                        )
+                    }
+                    if (
+                        !definition.resolverKey ||
+                        !definition.resolverKey.value
+                    ) {
+                        throw new Error(
+                            `Facet ${facetName} found in registry but missing resolverKey.value.`
+                        )
+                    }
+                    key = definition.resolverKey.value
+                } else {
+                    throw new Error(
+                        `Registry is required to get resolver keys for facets. ` +
+                            `Cannot dynamically generate resolver keys - they are contract constants.`
+                    )
+                }
+
                 return {
                     facetName,
                     contractName,
-                    key: ethers.utils.keccak256(
-                        ethers.utils.toUtf8Bytes(facetName)
-                    ),
+                    key,
                     address,
                 }
             })
@@ -673,19 +696,6 @@ export async function createBatchConfiguration(
                         {}
                     )
                     return false
-                }
-
-                // Check registry if provided (informational only, not restrictive)
-                if (registry) {
-                    const definition = registry.getFacetDefinition(
-                        facet.facetName
-                    )
-                    if (!definition) {
-                        warn(
-                            `${facet.facetName} not found in registry, configuring anyway (external facet)`
-                        )
-                        // Continue instead of filtering out - allow external facets
-                    }
                 }
 
                 return true

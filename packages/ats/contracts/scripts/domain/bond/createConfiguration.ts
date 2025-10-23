@@ -36,22 +36,23 @@ const atsRegistry = {
 }
 
 /**
- * Bond-specific facets list (43 facets total).
+ * Bond-specific facets list (41 facets total).
  *
  * This is an explicit positive list of all facets required for bond tokens.
  * Includes all common facets plus BondUSAFacet (NOT EquityUSAFacet).
  *
+ * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
+ * so we only include DiamondFacet to avoid selector collisions.
+ *
  * Updated to match origin/develop feature parity (all facets registered).
  */
 const BOND_FACETS = [
-    // Core Functionality
+    // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
     'AccessControlFacet',
     'CapFacet',
     'ControlListFacet',
     'CorporateActionsFacet',
-    'DiamondCutFacet',
-    'DiamondFacet',
-    'DiamondLoupeFacet',
+    'DiamondFacet', // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
     'ERC20Facet',
     'FreezeFacet',
     'KycFacet',

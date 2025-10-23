@@ -4,6 +4,7 @@ import {
     AtsRoleName,
     DeepPartial,
     EQUITY_CONFIG_ID,
+    BOND_CONFIG_ID,
     RegulationSubType,
     RegulationType,
 } from '@scripts'
@@ -120,8 +121,8 @@ export function getSecurityData(
             params?.identityRegistry ??
             DEFAULT_SECURITY_PARAMS.identityRegistry,
         resolverProxyConfiguration: {
-            key: ethers.utils.hexlify([]),
-            version: 1,
+            key: params?.resolverProxyConfiguration?.key ?? EQUITY_CONFIG_ID,
+            version: params?.resolverProxyConfiguration?.version ?? 1,
         },
     }
 }

@@ -9,10 +9,11 @@
  * @module core/operations/registerFacets
  */
 
-import { Overrides, ethers } from 'ethers'
+import { Overrides } from 'ethers'
 import {
     DEFAULT_TRANSACTION_TIMEOUT,
     DeploymentProvider,
+    RegistryProvider,
     debug,
     error as logError,
     extractRevertReason,
@@ -43,6 +44,9 @@ export interface RegisterFacetsOptions {
 
     /** Whether to verify facets exist before registration */
     verify?: boolean
+
+    /** Optional registry provider to get resolver keys from contracts */
+    registry?: RegistryProvider
 }
 
 /**
@@ -108,6 +112,7 @@ export async function registerFacets(
         network: _network,
         overrides = {},
         verify = true,
+        registry,
     } = options
 
     const registered: string[] = []
@@ -192,14 +197,36 @@ export async function registerFacets(
         info(`Registering ${facetNames.length} facets...`)
 
         // Prepare BusinessLogicRegistryData array
-        // Use keccak256 hash of base facet name as the key (supports names > 31 bytes)
-        // Strip "TimeTravel" suffix if present to get canonical facet name
+        // Get resolver keys from registry (contract constants), not generated from name
         const businessLogics = facetNames.map((name, index) => {
+            // Strip "TimeTravel" suffix if present to get canonical facet name
             const baseName = name.replace(/TimeTravel$/, '')
+
+            // Get resolver key from registry
+            let businessLogicKey: string
+            if (registry) {
+                const definition = registry.getFacetDefinition(baseName)
+                if (!definition) {
+                    throw new Error(
+                        `Facet ${baseName} not found in registry. ` +
+                            `All facets must be in the registry to get their resolver keys.`
+                    )
+                }
+                if (!definition.resolverKey || !definition.resolverKey.value) {
+                    throw new Error(
+                        `Facet ${baseName} found in registry but missing resolverKey.value.`
+                    )
+                }
+                businessLogicKey = definition.resolverKey.value
+            } else {
+                throw new Error(
+                    `Registry is required to get resolver keys for facets. ` +
+                        `Cannot dynamically generate resolver keys - they are contract constants.`
+                )
+            }
+
             return {
-                businessLogicKey: ethers.utils.keccak256(
-                    ethers.utils.toUtf8Bytes(baseName)
-                ),
+                businessLogicKey,
                 businessLogicAddress: facetAddresses[index],
             }
         })

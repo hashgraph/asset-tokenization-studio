@@ -308,6 +308,7 @@ export async function deployCompleteSystem(
         const registerResult = await registerFacets(provider, {
             blrAddress: blrResult.blrAddress,
             facets: facetAddresses,
+            registry: atsRegistry,
         })
 
         if (!registerResult.success) {

@@ -101,6 +101,29 @@ function formatErrors(errors: ErrorDefinition[], indent: number = 8): string {
 }
 
 /**
+ * Normalize role value to proper bytes32 format.
+ *
+ * Ensures role values are proper 66-character hex strings (0x + 64 hex chars).
+ * Solidity allows shorthand like `0x00` for bytes32(0), but TypeScript/ethers.js
+ * requires the full format.
+ *
+ * @param value - Role value from Solidity (may be shorthand like '0x00')
+ * @returns Normalized bytes32 string (66 characters)
+ *
+ * @example
+ * normalizeRoleValue('0x00') // '0x0000000000000000000000000000000000000000000000000000000000000000'
+ * normalizeRoleValue('0x1234') // '0x0000000000000000000000000000000000000000000000000000000000001234'
+ */
+function normalizeRoleValue(value: string): string {
+    // Remove '0x' prefix if present
+    const hexValue = value.startsWith('0x') ? value.slice(2) : value
+    // Pad to 64 characters (32 bytes)
+    const paddedValue = hexValue.padStart(64, '0')
+    // Return with '0x' prefix
+    return `0x${paddedValue}`
+}
+
+/**
  * Generate complete registry TypeScript code.
  *
  * @param facets - Array of facet metadata
@@ -253,10 +276,10 @@ function generateFacetEntry(facet: ContractMetadata): string {
 }
 
 /**
- * Generate CONTRACT_REGISTRY constant.
+ * Generate INFRASTRUCTURE_CONTRACTS constant.
  *
  * @param infrastructure - Array of infrastructure contract metadata
- * @returns TypeScript code for CONTRACT_REGISTRY
+ * @returns TypeScript code for INFRASTRUCTURE_CONTRACTS
  */
 function generateContractRegistry(infrastructure: ContractMetadata[]): string {
     const sortedContracts = [...infrastructure].sort((a, b) =>
@@ -268,16 +291,17 @@ function generateContractRegistry(infrastructure: ContractMetadata[]): string {
     )
 
     return `/**
- * Registry of non-facet infrastructure contracts.
+ * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
+ * These are core system contracts that are not Diamond facets.
  */
-export const CONTRACT_REGISTRY: Record<string, ContractDefinition> = {
+export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
 ${entries.join(',\n\n')}
 }
 
 /**
  * Total number of infrastructure contracts in the registry.
  */
-export const TOTAL_CONTRACTS = ${infrastructure.length} as const`
+export const TOTAL_INFRASTRUCTURE_CONTRACTS = ${infrastructure.length} as const`
 }
 
 /**
@@ -442,7 +466,7 @@ export const ROLES = {} as const`
     }
 
     const roleEntries = sortedRoles
-        .map(([name, value]) => `    ${name}: '${value}'`)
+        .map(([name, value]) => `    ${name}: '${normalizeRoleValue(value)}'`)
         .join(',\n')
 
     return `/**

@@ -191,7 +191,7 @@ export const DEFAULT_PARTITION =
  * These are generic contracts that are part of the infrastructure layer.
  * Domain-specific contracts (like Factory) are defined in domain/constants.ts.
  */
-export const INFRASTRUCTURE_CONTRACTS = {
+export const INFRASTRUCTURE_CONTRACT_NAMES = {
     PROXY_ADMIN: 'ProxyAdmin',
     BUSINESS_LOGIC_RESOLVER: 'BusinessLogicResolver',
 } as const

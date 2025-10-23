@@ -36,22 +36,23 @@ const atsRegistry = {
 }
 
 /**
- * Equity-specific facets list (43 facets total).
+ * Equity-specific facets list (41 facets total).
  *
  * This is an explicit positive list of all facets required for equity tokens.
  * Includes all common facets plus EquityUSAFacet.
  *
+ * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
+ * so we only include DiamondFacet to avoid selector collisions.
+ *
  * Based on origin/develop configuration where equity uses ALL common facets.
  */
 const EQUITY_FACETS = [
-    // Core Functionality (12)
+    // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
     'AccessControlFacet',
     'CapFacet',
     'ControlListFacet',
     'CorporateActionsFacet',
-    'DiamondCutFacet',
-    'DiamondFacet',
-    'DiamondLoupeFacet',
+    'DiamondFacet', // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
     'ERC20Facet',
     'FreezeFacet',
     'KycFacet',

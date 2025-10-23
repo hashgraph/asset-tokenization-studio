@@ -41,7 +41,7 @@
 // Re-export auto-generated registries and constants
 export {
     FACET_REGISTRY,
-    CONTRACT_REGISTRY,
+    INFRASTRUCTURE_CONTRACTS,
     STORAGE_WRAPPER_REGISTRY,
     ROLES,
 } from './atsRegistry.data'
@@ -49,7 +49,7 @@ export {
 import { createRegistryHelpers } from '../infrastructure/registryFactory'
 import {
     FACET_REGISTRY,
-    CONTRACT_REGISTRY,
+    INFRASTRUCTURE_CONTRACTS,
     STORAGE_WRAPPER_REGISTRY,
 } from './atsRegistry.data'
 
@@ -73,6 +73,6 @@ export const {
     STORAGE_WRAPPER_REGISTRY_COUNT,
 } = createRegistryHelpers(
     FACET_REGISTRY,
-    CONTRACT_REGISTRY,
+    INFRASTRUCTURE_CONTRACTS,
     STORAGE_WRAPPER_REGISTRY
 )

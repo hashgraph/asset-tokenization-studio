@@ -13,6 +13,17 @@ import {
 import { ATS_ROLES, BOND_CONFIG_ID, EQUITY_CONFIG_ID } from '@scripts'
 import { deployAtsInfrastructureFixture } from '@test'
 
+// Test-specific configuration IDs for negative test cases
+// These are separate from EQUITY_CONFIG_ID/BOND_CONFIG_ID to avoid conflicts
+const TEST_CONFIG_IDS = {
+    PAUSE_TEST:
+        '0x0000000000000000000000000000000000000000000000000000000000000003',
+    PAUSE_BATCH_TEST:
+        '0x0000000000000000000000000000000000000000000000000000000000000004',
+    BLACKLIST_TEST:
+        '0x0000000000000000000000000000000000000000000000000000000000000005',
+}
+
 describe('DiamondCutManager', () => {
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -61,16 +72,22 @@ describe('DiamondCutManager', () => {
         if (isPaused) {
             await pause.connect(signer_B).unpause()
         }
-        // Clean up blacklisted selectors for EQUITY_CONFIG_ID
-        try {
-            // Try to remove the pause() selector that might have been blacklisted
-            const pauseSelector = '0x8456cb59'
-            await businessLogicResolver.removeSelectorsFromBlacklist(
-                EQUITY_CONFIG_ID,
-                [pauseSelector]
-            )
-        } catch (error) {
-            // Ignore errors if selector wasn't blacklisted - contract may be in different state
+        // Clean up blacklisted selectors for all test config IDs
+        const pauseSelector = '0x8456cb59'
+        const configIdsToCleanup = [
+            EQUITY_CONFIG_ID,
+            TEST_CONFIG_IDS.BLACKLIST_TEST,
+        ]
+
+        for (const configId of configIdsToCleanup) {
+            try {
+                await businessLogicResolver.removeSelectorsFromBlacklist(
+                    configId,
+                    [pauseSelector]
+                )
+            } catch (error) {
+                // Ignore errors if selector wasn't blacklisted - contract may be in different state
+            }
         }
     })
 
@@ -438,7 +455,10 @@ describe('DiamondCutManager', () => {
         await expect(
             diamondCutManager
                 .connect(signer_A)
-                .createConfiguration(EQUITY_CONFIG_ID, facetConfigurations)
+                .createConfiguration(
+                    TEST_CONFIG_IDS.PAUSE_TEST,
+                    facetConfigurations
+                )
         ).to.be.rejectedWith('TokenIsPaused')
 
         await pause.connect(signer_B).unpause()
@@ -611,7 +631,7 @@ describe('DiamondCutManager', () => {
             diamondCutManager
                 .connect(signer_A)
                 .createBatchConfiguration(
-                    EQUITY_CONFIG_ID,
+                    TEST_CONFIG_IDS.PAUSE_BATCH_TEST,
                     facetConfigurations,
                     false
                 )
@@ -673,7 +693,7 @@ describe('DiamondCutManager', () => {
         const blackListedSelectors = ['0x8456cb59'] // pause() selector
 
         await businessLogicResolver.addSelectorsToBlacklist(
-            EQUITY_CONFIG_ID,
+            TEST_CONFIG_IDS.BLACKLIST_TEST,
             blackListedSelectors
         )
 
@@ -689,7 +709,10 @@ describe('DiamondCutManager', () => {
         await expect(
             diamondCutManager
                 .connect(signer_A)
-                .createConfiguration(EQUITY_CONFIG_ID, facetConfigurations)
+                .createConfiguration(
+                    TEST_CONFIG_IDS.BLACKLIST_TEST,
+                    facetConfigurations
+                )
         )
             .to.be.revertedWithCustomError(
                 diamondCutManager,

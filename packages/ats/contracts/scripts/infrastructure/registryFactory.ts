@@ -23,7 +23,7 @@
  * import { createRegistryHelpers } from '@hashgraph/asset-tokenization-contracts/scripts'
  * import {
  *     FACET_REGISTRY,
- *     CONTRACT_REGISTRY,
+ *     INFRASTRUCTURE_CONTRACTS,
  *     STORAGE_WRAPPER_REGISTRY
  * } from './generated/myRegistry.data'
  *
@@ -33,7 +33,7 @@
  *     hasFacet,
  *     getStorageWrapperDefinition,
  *     getAllStorageWrappers,
- * } = createRegistryHelpers(FACET_REGISTRY, CONTRACT_REGISTRY, STORAGE_WRAPPER_REGISTRY)
+ * } = createRegistryHelpers(FACET_REGISTRY, INFRASTRUCTURE_CONTRACTS, STORAGE_WRAPPER_REGISTRY)
  * ```
  */
 
@@ -67,7 +67,7 @@ import type {
  * import { createRegistryHelpers } from '@hashgraph/asset-tokenization-contracts/scripts'
  * import {
  *     FACET_REGISTRY,
- *     CONTRACT_REGISTRY,
+ *     INFRASTRUCTURE_CONTRACTS,
  *     STORAGE_WRAPPER_REGISTRY
  * } from './registry.data'
  *
@@ -82,7 +82,7 @@ import type {
  *     getAllStorageWrappers,
  *     hasStorageWrapper,
  *     FACET_REGISTRY_COUNT,
- * } = createRegistryHelpers(FACET_REGISTRY, CONTRACT_REGISTRY, STORAGE_WRAPPER_REGISTRY)
+ * } = createRegistryHelpers(FACET_REGISTRY, INFRASTRUCTURE_CONTRACTS, STORAGE_WRAPPER_REGISTRY)
  * ```
  */
 export function createRegistryHelpers<

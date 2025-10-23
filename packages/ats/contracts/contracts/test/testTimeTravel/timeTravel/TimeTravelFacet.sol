@@ -6,6 +6,7 @@ import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ITimeTravel} from '../interfaces/ITimeTravel.sol';
+import {_TIME_TRAVEL_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 contract TimeTravelFacet is
     IStaticFunctionSelectors,

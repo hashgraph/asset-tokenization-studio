@@ -1,5 +1,10 @@
 import { deployAtsInfrastructureFixture } from '../infrastructure.fixture'
-import { CURRENCIES, DeepPartial, TIME_PERIODS_S } from '../../../scripts'
+import {
+    CURRENCIES,
+    DeepPartial,
+    TIME_PERIODS_S,
+    BOND_CONFIG_ID,
+} from '../../../scripts'
 import {
     AccessControlFacet__factory,
     PauseFacet__factory,
@@ -68,7 +73,13 @@ export async function deployBondTokenFixture({
     const infrastructure = await deployAtsInfrastructureFixture()
     const { factory, blr, deployer } = infrastructure
 
-    const securityData = getSecurityData(blr, bondDataParams?.securityData)
+    const securityData = getSecurityData(blr, {
+        ...bondDataParams?.securityData,
+        resolverProxyConfiguration: {
+            key: BOND_CONFIG_ID,
+            version: 1,
+        },
+    })
     const bondDetails = await getBondDetails(bondDataParams?.bondDetails)
 
     const diamond = await deployBondFromFactory(

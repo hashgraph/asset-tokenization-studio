@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-10-23T09:11:51.808Z
+ * Generated: 2025-10-23T12:34:18.043Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -3116,6 +3116,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
     TimeTravelFacet: {
         name: 'TimeTravelFacet',
+        resolverKey: {
+            name: '_TIME_TRAVEL_RESOLVER_KEY',
+            value: '0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8',
+        },
         inheritance: [
             'IStaticFunctionSelectors',
             'ITimeTravel',
@@ -3240,9 +3244,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 export const TOTAL_FACETS = 49 as const
 
 /**
- * Registry of non-facet infrastructure contracts.
+ * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
+ * These are core system contracts that are not Diamond facets.
  */
-export const CONTRACT_REGISTRY: Record<string, ContractDefinition> = {
+export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
     BusinessLogicResolver: {
         name: 'BusinessLogicResolver',
         inheritance: ['IBusinessLogicResolver', 'DiamondCutManager'],
@@ -3340,7 +3345,7 @@ export const CONTRACT_REGISTRY: Record<string, ContractDefinition> = {
 /**
  * Total number of infrastructure contracts in the registry.
  */
-export const TOTAL_CONTRACTS = 2 as const
+export const TOTAL_INFRASTRUCTURE_CONTRACTS = 2 as const
 
 /**
  * Registry of storage wrapper contracts.
@@ -5012,7 +5017,8 @@ export const ROLES = {
         '0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f',
     _CORPORATE_ACTION_ROLE:
         '0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6',
-    _DEFAULT_ADMIN_ROLE: '0x00',
+    _DEFAULT_ADMIN_ROLE:
+        '0x0000000000000000000000000000000000000000000000000000000000000000',
     _DOCUMENTER_ROLE:
         '0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41',
     _FREEZE_MANAGER_ROLE:

@@ -84,6 +84,16 @@ async function main(): Promise<void> {
             outputPath: options.output,
             facetsOnly: options.facetsOnly,
             logLevel: logLevelStr as any,
+            // Override excludePaths to include testTimeTravel but exclude other test folders
+            excludePaths: [
+                '**/test/**',
+                '!**/test/testTimeTravel/**', // Include testTimeTravel (negation pattern)
+                '**/tests/**',
+                '**/mocks/**',
+                '**/mock/**',
+                '**/*.t.sol',
+                '**/*.s.sol',
+            ],
         },
         !options.dryRun // Write file unless dry run
     )
