@@ -17,6 +17,7 @@ import {
     DEFAULT_TRANSACTION_TIMEOUT,
     DeploymentProvider,
     OperationResult,
+    RegistryProvider,
     validateAddress,
     validateBytes32,
     extractRevertReason,
@@ -515,7 +516,7 @@ export async function sendBatchConfiguration(
 
     try {
         // Import GAS_LIMIT constants
-        const { GAS_LIMIT } = await import('../constants')
+        const { GAS_LIMIT } = await import('@scripts/infrastructure')
 
         const txResponse = await blrContract.createBatchConfiguration(
             configId,
@@ -605,6 +606,9 @@ export async function createBatchConfiguration(
 
         /** Optional gas limit override */
         gasLimit?: number
+
+        /** Optional registry provider for facet validation */
+        registry?: RegistryProvider
     }
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
     const {
@@ -614,15 +618,15 @@ export async function createBatchConfiguration(
         batchSize = 2,
         useTimeTravel = false,
         gasLimit,
+        registry,
     } = options
 
     let facetNames = [...options.facetNames]
 
-    const { resolveContractName } = await import('../utils/naming')
-    const { getFacetDefinition } = await import('../registry')
-    const { info, warn } = await import('../utils/logging')
+    const { resolveContractName } = await import('@scripts/infrastructure')
+    const { info, warn } = await import('@scripts/infrastructure')
     const { ethers } = await import('ethers')
-    const { ok, err } = await import('../types')
+    const { ok, err } = await import('@scripts/infrastructure')
 
     if (facetNames.length === 0) {
         return err(
@@ -671,13 +675,17 @@ export async function createBatchConfiguration(
                     return false
                 }
 
-                // Check registry (informational only, not restrictive)
-                const definition = getFacetDefinition(facet.facetName)
-                if (!definition) {
-                    warn(
-                        `${facet.facetName} not found in ATS registry, configuring anyway (external facet)`
+                // Check registry if provided (informational only, not restrictive)
+                if (registry) {
+                    const definition = registry.getFacetDefinition(
+                        facet.facetName
                     )
-                    // Continue instead of filtering out - allow external facets
+                    if (!definition) {
+                        warn(
+                            `${facet.facetName} not found in registry, configuring anyway (external facet)`
+                        )
+                        // Continue instead of filtering out - allow external facets
+                    }
                 }
 
                 return true

@@ -194,7 +194,10 @@ describe('ResolverProxy Tests', () => {
 
         const GRANT_ROLE_SIGNATURE = '0x2f2ff15d'
         await expect(
-            accessControl.grantRole(ATS_ROLES.DEFAULT_ADMIN, signer_A.address)
+            accessControl.grantRole(
+                ATS_ROLES._DEFAULT_ADMIN_ROLE,
+                signer_A.address
+            )
         )
             .to.be.revertedWithCustomError(resolverProxy, 'FunctionNotFound')
             .withArgs(GRANT_ROLE_SIGNATURE)
@@ -306,7 +309,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: ATS_ROLES.DEFAULT_ADMIN,
+                role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
                 members: [signer_A.address],
             },
         ]
@@ -343,7 +346,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: ATS_ROLES.DEFAULT_ADMIN,
+                role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
                 members: [signer_A.address],
             },
         ]
@@ -423,7 +426,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: ATS_ROLES.DEFAULT_ADMIN,
+                role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
                 members: [signer_A.address],
             },
         ]
@@ -461,7 +464,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: ATS_ROLES.DEFAULT_ADMIN,
+                role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
                 members: [signer_A.address],
             },
         ]
@@ -545,7 +548,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: ATS_ROLES.DEFAULT_ADMIN,
+                role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
                 members: [signer_A.address],
             },
         ]
@@ -589,7 +592,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: ATS_ROLES.DEFAULT_ADMIN,
+                role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
                 members: [signer_A.address],
             },
         ]

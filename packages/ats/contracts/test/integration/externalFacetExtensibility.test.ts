@@ -23,14 +23,13 @@ import {
     registerFacets,
     createBatchConfiguration,
     deployFacets,
-    getFacetDefinition,
 } from '@scripts/infrastructure'
 
 // Domain layer - ATS-specific business logic
-import { EQUITY_CONFIG_ID } from '@scripts/domain'
+import { EQUITY_CONFIG_ID, getFacetDefinition } from '@scripts/domain'
 
 // Test helpers
-import { TEST_SIZES } from '@test/helpers/constants'
+import { TEST_SIZES } from '@test'
 
 describe('External Facet Extensibility - Integration Tests', () => {
     let provider: HardhatProvider

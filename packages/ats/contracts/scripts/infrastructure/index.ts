@@ -34,6 +34,7 @@ export type {
     RegistryProvider,
     FacetDefinition,
     ContractDefinition,
+    StorageWrapperDefinition,
     NetworkConfig,
     DeploymentResult,
     DeployProxyOptions,
@@ -74,21 +75,10 @@ export {
 export type { Network } from './constants'
 
 // ============================================================================
-// Registry
+// Registry Factory
 // ============================================================================
 
-export {
-    FACET_REGISTRY,
-    CONTRACT_REGISTRY,
-    ROLES,
-    getFacetDefinition,
-    getContractDefinition,
-    getAllFacets,
-    getAllContracts,
-    hasFacet,
-    hasContract,
-    FACET_REGISTRY_COUNT,
-} from './registry'
+export { createRegistryHelpers } from './registryFactory'
 
 // ============================================================================
 // Configuration
@@ -179,6 +169,14 @@ export {
     type ResolverProxyRbac,
 } from './operations/deployResolverProxy'
 
+export {
+    generateRegistryPipeline,
+    DEFAULT_REGISTRY_CONFIG,
+    type RegistryGenerationConfig,
+    type RegistryGenerationStats,
+    type RegistryGenerationResult,
+} from './operations/generateRegistryPipeline'
+
 // ============================================================================
 // Utilities
 // ============================================================================
@@ -216,3 +214,5 @@ export {
     getMirrorNodeUrl,
     isHederaNetwork,
 } from './utils/hedera'
+
+export { getSelector } from './utils/selector'

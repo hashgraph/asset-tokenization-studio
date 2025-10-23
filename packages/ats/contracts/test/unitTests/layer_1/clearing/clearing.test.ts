@@ -27,8 +27,8 @@ import {
     dateToUnixTimestamp,
     ATS_ROLES,
 } from '@scripts'
-import { deployEquityTokenFixture, MAX_UINT256 } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture, MAX_UINT256 } from '@test'
+import { executeRbac } from '@test'
 
 const _DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -274,35 +274,35 @@ describe('Clearing Tests', () => {
 
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.ISSUER,
+                role: ATS_ROLES._ISSUER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.CONTROLLER,
+                role: ATS_ROLES._CONTROLLER_ROLE,
                 members: [signer_C.address],
             },
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_D.address],
             },
             {
-                role: ATS_ROLES.CONTROL_LIST,
+                role: ATS_ROLES._CONTROL_LIST_ROLE,
                 members: [signer_E.address],
             },
             {
-                role: ATS_ROLES.KYC,
+                role: ATS_ROLES._KYC_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.CLEARING,
+                role: ATS_ROLES._CLEARING_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.CLEARING_VALIDATOR,
+                role: ATS_ROLES._CLEARING_VALIDATOR_ROLE,
                 members: [signer_A.address],
             },
         ])
@@ -328,35 +328,35 @@ describe('Clearing Tests', () => {
 
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.ISSUER,
+                role: ATS_ROLES._ISSUER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.CONTROLLER,
+                role: ATS_ROLES._CONTROLLER_ROLE,
                 members: [signer_C.address],
             },
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_D.address],
             },
             {
-                role: ATS_ROLES.CONTROL_LIST,
+                role: ATS_ROLES._CONTROL_LIST_ROLE,
                 members: [signer_E.address],
             },
             {
-                role: ATS_ROLES.KYC,
+                role: ATS_ROLES._KYC_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.CLEARING,
+                role: ATS_ROLES._CLEARING_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.CLEARING_VALIDATOR,
+                role: ATS_ROLES._CLEARING_VALIDATOR_ROLE,
                 members: [signer_A.address],
             },
         ])
@@ -3068,10 +3068,16 @@ describe('Clearing Tests', () => {
             async function setPreBalanceAdjustment() {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ADJUSTMENT_BALANCE, signer_C.address)
+                    .grantRole(
+                        ATS_ROLES._ADJUSTMENT_BALANCE_ROLE,
+                        signer_C.address
+                    )
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_A.address)
+                    .grantRole(
+                        ATS_ROLES._CORPORATE_ACTION_ROLE,
+                        signer_A.address
+                    )
             }
 
             it('GIVEN a clearing WHEN adjustBalances THEN clearing amount gets updated succeeds', async () => {

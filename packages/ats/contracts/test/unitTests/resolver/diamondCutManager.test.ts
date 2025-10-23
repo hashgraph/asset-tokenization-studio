@@ -11,7 +11,7 @@ import {
     IDiamondLoupe,
 } from '@typechain'
 import { ATS_ROLES, BOND_CONFIG_ID, EQUITY_CONFIG_ID } from '@scripts'
-import { deployAtsInfrastructureFixture } from '@test/fixtures'
+import { deployAtsInfrastructureFixture } from '@test'
 
 describe('DiamondCutManager', () => {
     let signer_A: SignerWithAddress
@@ -38,7 +38,7 @@ describe('DiamondCutManager', () => {
             businessLogicResolver.address,
             signer_A
         )
-        await accessControl.grantRole(ATS_ROLES.PAUSER, signer_B.address)
+        await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address)
 
         pause = await ethers.getContractAt(
             'Pause',
@@ -498,7 +498,10 @@ describe('DiamondCutManager', () => {
             batchBusinessLogicResolver.address,
             signer_A
         )
-        await batchAccessControl.grantRole(ATS_ROLES.PAUSER, signer_B.address)
+        await batchAccessControl.grantRole(
+            ATS_ROLES._PAUSER_ROLE,
+            signer_B.address
+        )
 
         const batchDiamondCutManager = await ethers.getContractAt(
             'DiamondCutManager',

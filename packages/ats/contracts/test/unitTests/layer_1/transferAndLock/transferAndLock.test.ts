@@ -12,8 +12,8 @@ import {
 } from '@typechain'
 import { ZERO, EMPTY_STRING, ATS_ROLES } from '@scripts'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture, MAX_UINT256 } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture, MAX_UINT256 } from '@test'
+import { executeRbac } from '@test'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'
@@ -43,23 +43,23 @@ describe('Transfer and lock Tests', () => {
     function set_initRbacs(): any[] {
         return [
             {
-                role: ATS_ROLES.ISSUER,
+                role: ATS_ROLES._ISSUER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.LOCKER,
+                role: ATS_ROLES._LOCKER_ROLE,
                 members: [signer_C.address],
             },
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_D.address],
             },
             {
-                role: ATS_ROLES.KYC,
+                role: ATS_ROLES._KYC_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_A.address],
             },
         ]

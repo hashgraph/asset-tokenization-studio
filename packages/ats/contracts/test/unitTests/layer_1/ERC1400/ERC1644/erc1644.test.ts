@@ -12,8 +12,8 @@ import {
 } from '@typechain'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { grantRoleAndPauseToken } from '../../../../common'
-import { deployEquityTokenFixture } from '@test/fixtures'
-import { executeRbac, MAX_UINT256 } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture } from '@test'
+import { executeRbac, MAX_UINT256 } from '@test'
 import { EMPTY_STRING, ZERO, DEFAULT_PARTITION, ATS_ROLES } from '@scripts'
 
 const amount = 1
@@ -47,23 +47,23 @@ describe('ERC1644 Tests', () => {
 
             await executeRbac(base.accessControlFacet, [
                 {
-                    role: ATS_ROLES.PAUSER,
+                    role: ATS_ROLES._PAUSER_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.ISSUER,
+                    role: ATS_ROLES._ISSUER_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.CONTROLLER,
+                    role: ATS_ROLES._CONTROLLER_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.KYC,
+                    role: ATS_ROLES._KYC_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.SSI_MANAGER,
+                    role: ATS_ROLES._SSI_MANAGER_ROLE,
                     members: [signer_A.address],
                 },
             ])
@@ -113,7 +113,7 @@ describe('ERC1644 Tests', () => {
                 await grantRoleAndPauseToken(
                     accessControlFacet,
                     pauseFacet,
-                    ATS_ROLES.CONTROLLER,
+                    ATS_ROLES._CONTROLLER_ROLE,
                     signer_A,
                     signer_B,
                     signer_C.address
@@ -302,10 +302,10 @@ describe('ERC1644 Tests', () => {
             beforeEach(async () => {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CONTROLLER, signer_A.address)
+                    .grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address)
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                    .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
                 await expect(
                     erc1644Facet.connect(signer_A).finalizeControllable()
                 )
@@ -374,7 +374,7 @@ describe('ERC1644 Tests', () => {
 
             await executeRbac(base.accessControlFacet, [
                 {
-                    role: ATS_ROLES.PAUSER,
+                    role: ATS_ROLES._PAUSER_ROLE,
                     members: [signer_B.address],
                 },
             ])
@@ -401,13 +401,16 @@ describe('ERC1644 Tests', () => {
                 // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CONTROLLER, signer_C.address)
+                    .grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_C.address)
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                    .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                    .grantRole(
+                        ATS_ROLES._CORPORATE_ACTION_ROLE,
+                        signer_C.address
+                    )
             })
 
             it('GIVEN an account with controller role WHEN controllerTransfer THEN NotAllowedInMultiPartitionMode', async () => {

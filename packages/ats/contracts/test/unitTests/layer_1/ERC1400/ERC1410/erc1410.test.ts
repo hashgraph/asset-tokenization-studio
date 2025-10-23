@@ -23,8 +23,8 @@ import {
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ClearingActionsFacet } from '@typechain'
-import { deployEquityTokenFixture } from '@test/fixtures'
-import { executeRbac, MAX_UINT256 } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture } from '@test'
+import { executeRbac, MAX_UINT256 } from '@test'
 import {
     ZERO,
     EMPTY_STRING,
@@ -120,19 +120,19 @@ describe('ERC1410 Tests', () => {
     async function grantRolesToAccounts() {
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.ADJUSTMENT_BALANCE, signer_C.address)
+            .grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_C.address)
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.CAP, signer_A.address)
+            .grantRole(ATS_ROLES._CAP_ROLE, signer_A.address)
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.CONTROLLER, signer_A.address)
+            .grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address)
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.LOCKER, signer_A.address)
+            .grantRole(ATS_ROLES._LOCKER_ROLE, signer_A.address)
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.KYC, signer_A.address)
+            .grantRole(ATS_ROLES._KYC_ROLE, signer_A.address)
     }
 
     async function grantKycToAccounts() {
@@ -491,7 +491,10 @@ describe('ERC1410 Tests', () => {
             'TimeTravelFacet',
             diamond.address
         )
-        await accessControlFacet.grantRole(ATS_ROLES.ISSUER, signer_A.address)
+        await accessControlFacet.grantRole(
+            ATS_ROLES._ISSUER_ROLE,
+            signer_A.address
+        )
         await ssiManagementFacet.addIssuer(signer_E.address)
 
         await kycFacet.grantKyc(
@@ -533,23 +536,23 @@ describe('ERC1410 Tests', () => {
 
     function set_initRbacs() {
         const rbacPause = {
-            role: ATS_ROLES.PAUSER,
+            role: ATS_ROLES._PAUSER_ROLE,
             members: [signer_B.address],
         }
         const corporateActionPause = {
-            role: ATS_ROLES.CORPORATE_ACTION,
+            role: ATS_ROLES._CORPORATE_ACTION_ROLE,
             members: [signer_B.address],
         }
         const rbacKyc = {
-            role: ATS_ROLES.KYC,
+            role: ATS_ROLES._KYC_ROLE,
             members: [signer_B.address],
         }
         const rbacSsi = {
-            role: ATS_ROLES.SSI_MANAGER,
+            role: ATS_ROLES._SSI_MANAGER_ROLE,
             members: [signer_A.address],
         }
         const rbacClearingRole = {
-            role: ATS_ROLES.CLEARING,
+            role: ATS_ROLES._CLEARING_ROLE,
             members: [signer_A.address],
         }
         return [
@@ -915,7 +918,7 @@ describe('ERC1410 Tests', () => {
             // Blacklisting accounts
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CONTROL_LIST, signer_A.address)
+                .grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address)
             await controlList
                 .connect(signer_A)
                 .addToControlList(signer_C.address)
@@ -1137,10 +1140,10 @@ describe('ERC1410 Tests', () => {
 
             await accessControlFacet
                 .attach(newFixtureToken.diamond.address)
-                .grantRole(ATS_ROLES.SSI_MANAGER, signer_A.address)
+                .grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address)
             await accessControlFacet
                 .attach(newFixtureToken.diamond.address)
-                .grantRole(ATS_ROLES.KYC, signer_A.address)
+                .grantRole(ATS_ROLES._KYC_ROLE, signer_A.address)
             await ssiManagementFacet
                 .attach(newFixtureToken.diamond.address)
                 .connect(signer_A)
@@ -1160,7 +1163,7 @@ describe('ERC1410 Tests', () => {
             await accessControlFacet
                 .attach(newFixtureToken.diamond.address)
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_A.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address)
 
             // issue fails
             await expect(
@@ -1228,7 +1231,7 @@ describe('ERC1410 Tests', () => {
             // Blacklisting accounts
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CONTROL_LIST, signer_A.address)
+                .grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address)
             await controlList
                 .connect(signer_A)
                 .addToControlList(signer_C.address)
@@ -1534,7 +1537,7 @@ describe('ERC1410 Tests', () => {
             // Granting Role to account C
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
             // scheduling 2 snapshots
             const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
                 '2030-01-01T00:00:08Z'
@@ -1760,7 +1763,7 @@ describe('ERC1410 Tests', () => {
         it('GIVEN an account WHEN issue more than max supply THEN transaction fails with MaxSupplyReached or MaxSupplyReachedForPartition', async () => {
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CAP, signer_A.address)
+                .grantRole(ATS_ROLES._CAP_ROLE, signer_A.address)
 
             await capFacet
                 .connect(signer_A)
@@ -1799,7 +1802,7 @@ describe('ERC1410 Tests', () => {
             // Granting Role to account C
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
 
             // scheduling 2 snapshots
             const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
@@ -1875,7 +1878,7 @@ describe('ERC1410 Tests', () => {
             // Set Max supplies to test
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CAP, signer_A.address)
+                .grantRole(ATS_ROLES._CAP_ROLE, signer_A.address)
 
             await capFacet
                 .connect(signer_A)
@@ -1917,7 +1920,7 @@ describe('ERC1410 Tests', () => {
             // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
 
             // scheduling 2 snapshots
             const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
@@ -2111,19 +2114,19 @@ describe('ERC1410 Tests', () => {
             await accessControlFacet
                 .attach(newTokenFixture.diamond.address)
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_A.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address)
             await accessControlFacet
                 .attach(newTokenFixture.diamond.address)
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CONTROL_LIST, signer_A.address)
+                .grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address)
             await accessControlFacet
                 .attach(newTokenFixture.diamond.address)
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.SSI_MANAGER, signer_A.address)
+                .grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address)
             await accessControlFacet
                 .attach(newTokenFixture.diamond.address)
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.KYC, signer_B.address)
+                .grantRole(ATS_ROLES._KYC_ROLE, signer_B.address)
 
             await ssiManagementFacet
                 .attach(newTokenFixture.diamond.address)
@@ -2164,7 +2167,7 @@ describe('ERC1410 Tests', () => {
 
         it('GIVEN an account without controller role WHEN controllerTransfer THEN transaction fails with AccountHasNoRole', async () => {
             await accessControlFacet.grantRole(
-                ATS_ROLES.ISSUER,
+                ATS_ROLES._ISSUER_ROLE,
                 signer_C.address
             )
             const balanceOf_D_Original = 4 * amount
@@ -2205,7 +2208,7 @@ describe('ERC1410 Tests', () => {
 
         it('GIVEN an account without controller role WHEN controllerRedeem THEN transaction fails with AccountHasNoRole', async () => {
             await accessControlFacet.grantRole(
-                ATS_ROLES.ISSUER,
+                ATS_ROLES._ISSUER_ROLE,
                 signer_C.address
             )
             const balanceOf_D_Original = 4 * amount
@@ -2248,7 +2251,7 @@ describe('ERC1410 Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                ATS_ROLES.CONTROLLER,
+                ATS_ROLES._CONTROLLER_ROLE,
                 signer_A,
                 signer_B,
                 signer_C.address
@@ -2274,7 +2277,7 @@ describe('ERC1410 Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                ATS_ROLES.CONTROLLER,
+                ATS_ROLES._CONTROLLER_ROLE,
                 signer_A,
                 signer_B,
                 signer_C.address
@@ -2299,13 +2302,13 @@ describe('ERC1410 Tests', () => {
 
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CONTROLLER, signer_C.address)
+                .grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
 
             // issueing 2 tokens to account D
             const balanceOf_D_Original = 4 * amount
@@ -2522,15 +2525,15 @@ describe('ERC1410 Tests', () => {
                     await accessControlFacet
                         .connect(signer_A)
                         .grantRole(
-                            ATS_ROLES.ADJUSTMENT_BALANCE,
+                            ATS_ROLES._ADJUSTMENT_BALANCE_ROLE,
                             signer_C.address
                         )
                     await accessControlFacet
                         .connect(signer_A)
-                        .grantRole(ATS_ROLES.CAP, signer_A.address)
+                        .grantRole(ATS_ROLES._CAP_ROLE, signer_A.address)
                     await accessControlFacet
                         .connect(signer_A)
-                        .grantRole(ATS_ROLES.KYC, signer_A.address)
+                        .grantRole(ATS_ROLES._KYC_ROLE, signer_A.address)
 
                     await grantKycToAccounts()
 
@@ -2983,13 +2986,16 @@ describe('ERC1410 Tests', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 Issue succeeds', async () => {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ADJUSTMENT_BALANCE, signer_C.address)
+                    .grantRole(
+                        ATS_ROLES._ADJUSTMENT_BALANCE_ROLE,
+                        signer_C.address
+                    )
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CAP, signer_A.address)
+                    .grantRole(ATS_ROLES._CAP_ROLE, signer_A.address)
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.KYC, signer_A.address)
+                    .grantRole(ATS_ROLES._KYC_ROLE, signer_A.address)
 
                 await grantKycToAccounts()
 
@@ -3040,13 +3046,16 @@ describe('ERC1410 Tests', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 Issue with max supply succeeds', async () => {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ADJUSTMENT_BALANCE, signer_C.address)
+                    .grantRole(
+                        ATS_ROLES._ADJUSTMENT_BALANCE_ROLE,
+                        signer_C.address
+                    )
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CAP, signer_A.address)
+                    .grantRole(ATS_ROLES._CAP_ROLE, signer_A.address)
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.KYC, signer_A.address)
+                    .grantRole(ATS_ROLES._KYC_ROLE, signer_A.address)
 
                 await grantKycToAccounts()
 

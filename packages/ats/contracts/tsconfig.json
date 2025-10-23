@@ -19,15 +19,10 @@
             "@typechain": ["./typechain-types/index.ts"],
             "@typechain/*": ["./typechain-types/*"],
             "@scripts": ["./scripts/index.ts"],
-            "@scripts/*": ["./scripts/*"],
             "@scripts/infrastructure": ["./scripts/infrastructure/index.ts"],
-            "@scripts/infrastructure/*": ["./scripts/infrastructure/*"],
             "@scripts/domain": ["./scripts/domain/index.ts"],
-            "@scripts/domain/*": ["./scripts/domain/*"],
             "@tasks": ["./tasks/index.ts"],
-            "@tasks/*": ["./tasks/*"],
-            "@test": ["./test/index.ts"],
-            "@test/*": ["./test/*"]
+            "@test": ["./test/index.ts"]
         }
     },
     "include": [

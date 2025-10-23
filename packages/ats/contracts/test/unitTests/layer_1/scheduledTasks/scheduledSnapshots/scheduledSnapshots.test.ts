@@ -11,8 +11,8 @@ import {
 } from '@typechain'
 import { dateToUnixTimestamp, ATS_ROLES } from '@scripts'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture } from '@test'
+import { executeRbac } from '@test'
 
 describe('Scheduled Snapshots Tests', () => {
     let diamond: ResolverProxy
@@ -35,7 +35,7 @@ describe('Scheduled Snapshots Tests', () => {
 
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_B.address],
             },
         ])
@@ -78,7 +78,7 @@ describe('Scheduled Snapshots Tests', () => {
     it('GIVEN a token WHEN triggerSnapshots THEN transaction succeeds', async () => {
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+            .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
 
         // set dividend
         const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(

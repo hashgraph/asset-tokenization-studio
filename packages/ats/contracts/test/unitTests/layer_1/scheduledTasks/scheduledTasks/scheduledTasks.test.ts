@@ -20,8 +20,8 @@ import {
     ATS_TASK,
 } from '@scripts'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture, MAX_UINT256 } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture, MAX_UINT256 } from '@test'
+import { executeRbac } from '@test'
 
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -52,19 +52,19 @@ describe('Scheduled Tasks Tests', () => {
 
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.ISSUER,
+                role: ATS_ROLES._ISSUER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.KYC,
+                role: ATS_ROLES._KYC_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_A.address],
             },
         ])
@@ -145,7 +145,7 @@ describe('Scheduled Tasks Tests', () => {
         // Granting Role to account C
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+            .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
 
         await erc1410Facet.connect(signer_B).issueByPartition({
             partition: _PARTITION_ID_1,

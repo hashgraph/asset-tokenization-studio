@@ -3,7 +3,7 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ATS_ROLES, GAS_LIMIT } from '@scripts'
-import { deployEquityTokenFixture } from '@test/fixtures'
+import { deployEquityTokenFixture } from '@test'
 import {
     ResolverProxy,
     ExternalPauseManagement,
@@ -39,7 +39,7 @@ describe('ExternalPause Tests', () => {
         )
 
         await base.accessControlFacet.grantRole(
-            ATS_ROLES.PAUSE_MANAGER,
+            ATS_ROLES._PAUSE_MANAGER_ROLE,
             signer_A.address
         )
 
@@ -451,7 +451,7 @@ describe('ExternalPause Tests', () => {
     })
 
     describe('Access Control Tests', () => {
-        it('GIVEN an account without ATS_ROLES.PAUSE_MANAGER WHEN adding an external pause THEN it reverts with AccessControl', async () => {
+        it('GIVEN an account without ATS_ROLES._PAUSE_MANAGER_ROLE WHEN adding an external pause THEN it reverts with AccessControl', async () => {
             const newPause = externalPauseMock3.address
             await expect(
                 externalPauseManagement
@@ -460,7 +460,7 @@ describe('ExternalPause Tests', () => {
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
-        it('GIVEN an account with ATS_ROLES.PAUSE_MANAGER WHEN adding an external pause THEN it succeeds', async () => {
+        it('GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN adding an external pause THEN it succeeds', async () => {
             const newPause = externalPauseMock3.address
             expect(await externalPauseManagement.isExternalPause(newPause)).to
                 .be.false
@@ -475,7 +475,7 @@ describe('ExternalPause Tests', () => {
                 .be.true
         })
 
-        it('GIVEN an account without ATS_ROLES.PAUSE_MANAGER WHEN removing an external pause THEN it reverts with AccessControl', async () => {
+        it('GIVEN an account without ATS_ROLES._PAUSE_MANAGER_ROLE WHEN removing an external pause THEN it reverts with AccessControl', async () => {
             expect(
                 await externalPauseManagement.isExternalPause(
                     externalPauseMock1.address
@@ -491,7 +491,7 @@ describe('ExternalPause Tests', () => {
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
-        it('GIVEN an account with ATS_ROLES.PAUSE_MANAGER WHEN removing an external pause THEN it succeeds', async () => {
+        it('GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN removing an external pause THEN it succeeds', async () => {
             expect(
                 await externalPauseManagement.isExternalPause(
                     externalPauseMock1.address
@@ -512,7 +512,7 @@ describe('ExternalPause Tests', () => {
             ).to.be.false
         })
 
-        it('GIVEN an account without ATS_ROLES.PAUSE_MANAGER WHEN updating external pauses THEN it reverts with AccessControl', async () => {
+        it('GIVEN an account without ATS_ROLES._PAUSE_MANAGER_ROLE WHEN updating external pauses THEN it reverts with AccessControl', async () => {
             const pauses = [externalPauseMock1.address]
             const actives = [false]
             expect(
@@ -529,7 +529,7 @@ describe('ExternalPause Tests', () => {
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
-        it('GIVEN an account with ATS_ROLES.PAUSE_MANAGER WHEN updating external pauses THEN it succeeds', async () => {
+        it('GIVEN an account with ATS_ROLES._PAUSE_MANAGER_ROLE WHEN updating external pauses THEN it succeeds', async () => {
             expect(
                 await externalPauseManagement.isExternalPause(
                     externalPauseMock1.address

@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { GAS_LIMIT, ATS_ROLES } from '@scripts'
-import { grantRoleAndPauseToken } from '@test/common'
-import { deployEquityTokenFixture } from '@test/fixtures'
+import { grantRoleAndPauseToken } from '@test'
+import { deployEquityTokenFixture } from '@test'
 import {
     PauseFacet,
     AccessControl,
@@ -44,11 +44,11 @@ describe('Pause Tests', () => {
 
         // Add external pause to the token
         await base.accessControlFacet.grantRole(
-            ATS_ROLES.PAUSER,
+            ATS_ROLES._PAUSER_ROLE,
             base.deployer.address
         )
         await base.accessControlFacet.grantRole(
-            ATS_ROLES.PAUSE_MANAGER,
+            ATS_ROLES._PAUSE_MANAGER_ROLE,
             base.deployer.address
         )
         await externalPauseManagement.addExternalPause(
@@ -86,7 +86,7 @@ describe('Pause Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            ATS_ROLES.PAUSER,
+            ATS_ROLES._PAUSER_ROLE,
             deployer,
             unknownSigner,
             await unknownSigner.getAddress()
@@ -101,7 +101,7 @@ describe('Pause Tests', () => {
     it('GIVEN an unpause Token WHEN unpause THEN transaction fails with TokenIsUnpaused', async () => {
         await accessControlFacet
             .connect(deployer)
-            .grantRole(ATS_ROLES.PAUSER, await unknownSigner.getAddress())
+            .grantRole(ATS_ROLES._PAUSER_ROLE, await unknownSigner.getAddress())
 
         // unpause fails
         await expect(
@@ -113,7 +113,7 @@ describe('Pause Tests', () => {
         // Granting Role
         await accessControlFacet
             .connect(deployer)
-            .grantRole(ATS_ROLES.PAUSER, await unknownSigner.getAddress())
+            .grantRole(ATS_ROLES._PAUSER_ROLE, await unknownSigner.getAddress())
 
         // PAUSE
         await expect(pauseFacet.connect(unknownSigner).pause())

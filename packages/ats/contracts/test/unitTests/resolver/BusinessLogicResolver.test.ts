@@ -55,7 +55,7 @@ describe('BusinessLogicResolver', () => {
             businessLogicResolver.address,
             signer_A
         )
-        await accessControl.grantRole(ATS_ROLES.PAUSER, signer_B.address)
+        await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address)
 
         pause = await ethers.getContractAt(
             'Pause',

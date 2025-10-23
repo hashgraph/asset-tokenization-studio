@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture } from '@test/fixtures'
-import { executeRbac, MAX_UINT256 } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture } from '@test'
+import { executeRbac, MAX_UINT256 } from '@test'
 import {
     EMPTY_STRING,
     ATS_ROLES,
@@ -93,35 +93,35 @@ describe('Hold Tests', () => {
     function set_initRbacs() {
         return [
             {
-                role: ATS_ROLES.ISSUER,
+                role: ATS_ROLES._ISSUER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_D.address],
             },
             {
-                role: ATS_ROLES.KYC,
+                role: ATS_ROLES._KYC_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.CLEARING,
+                role: ATS_ROLES._CLEARING_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.CORPORATE_ACTION,
+                role: ATS_ROLES._CORPORATE_ACTION_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.CONTROL_LIST,
+                role: ATS_ROLES._CONTROL_LIST_ROLE,
                 members: [signer_E.address],
             },
             {
-                role: ATS_ROLES.CONTROLLER,
+                role: ATS_ROLES._CONTROLLER_ROLE,
                 members: [signer_C.address],
             },
         ]
@@ -1432,16 +1432,19 @@ describe('Hold Tests', () => {
             async function setPreBalanceAdjustment() {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ADJUSTMENT_BALANCE, signer_C.address)
+                    .grantRole(
+                        ATS_ROLES._ADJUSTMENT_BALANCE_ROLE,
+                        signer_C.address
+                    )
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ISSUER, signer_A.address)
+                    .grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address)
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CAP, signer_A.address)
+                    .grantRole(ATS_ROLES._CAP_ROLE, signer_A.address)
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CONTROLLER, signer_A.address)
+                    .grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address)
 
                 await capFacet
                     .connect(signer_A)

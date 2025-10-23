@@ -16,13 +16,22 @@
  *   BOND_CONFIG_ID,
  *   deployFactory,
  *   createEquityConfiguration,
- *   createBondConfiguration
+ *   createBondConfiguration,
+ *   FACET_REGISTRY,
+ *   ROLES,
+ *   getFacetDefinition
  * } from '@scripts/domain'
  * ```
  */
 
-// Domain constants
+// Domain registry data (auto-generated) - MUST be first, others depend on it
+export * from './atsRegistry.data'
+
+// Domain constants (depends on ROLES from registry.data)
 export * from './constants'
+
+// Domain registry (ATS-specific contract registry helpers)
+export * from './atsRegistry'
 
 // Equity configuration
 export * from './equity/createConfiguration'
@@ -36,3 +45,4 @@ export * from './factory/types'
 
 // Token deployment from factory
 export * from './factory/deployEquityToken'
+export * from './factory/deployBondToken'

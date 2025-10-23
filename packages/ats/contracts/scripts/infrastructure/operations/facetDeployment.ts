@@ -1,17 +1,16 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import {
     DeploymentProvider,
     DeploymentResult,
     RegistryProvider,
     deployContract,
-    getAllFacets,
-    getFacetDefinition,
     info,
     resolveContractName,
     section,
     success,
     warn,
 } from '@scripts/infrastructure'
-// SPDX-License-Identifier: Apache-2.0
 
 /**
  * Facet deployment module.
@@ -99,40 +98,47 @@ export async function deployFacets(
     const failed = new Map<string, string>()
     const skipped = new Map<string, string>()
 
-    // Use custom registry or default ATS registry
-    const registryGetFacet = registry
-        ? registry.getFacetDefinition.bind(registry)
-        : getFacetDefinition
-    const registryGetAll = registry
-        ? registry.getAllFacets.bind(registry)
-        : getAllFacets
-
     try {
         // Determine which facets to deploy
         let facetsToDeployDefs
 
         if (facetNames && facetNames.length > 0) {
-            // Deploy specific facets (including external facets not in registry)
-            facetsToDeployDefs = []
-            for (const name of facetNames) {
-                const def = registryGetFacet(name)
-                if (!def) {
-                    // External facet not in registry - warn but continue
-                    warn(
-                        `${name} not found in registry, deploying anyway (external facet)`
-                    )
-                    facetsToDeployDefs.push({
-                        name,
-                        description: 'External facet (not in registry)',
-                    })
-                } else {
-                    // Registry facet
-                    facetsToDeployDefs.push(def)
+            // Deploy specific facets
+            if (registry) {
+                // With registry: look up facet definitions
+                facetsToDeployDefs = []
+                for (const name of facetNames) {
+                    const def = registry.getFacetDefinition(name)
+                    if (!def) {
+                        // External facet not in registry - warn but continue
+                        warn(
+                            `${name} not found in registry, deploying anyway (external facet)`
+                        )
+                        facetsToDeployDefs.push({
+                            name,
+                            description: 'External facet (not in registry)',
+                        })
+                    } else {
+                        // Registry facet
+                        facetsToDeployDefs.push(def)
+                    }
                 }
+            } else {
+                // Without registry: deploy facets by name only (no metadata)
+                facetsToDeployDefs = facetNames.map((name) => ({
+                    name,
+                    description: 'Facet (no registry provided)',
+                }))
             }
         } else {
-            // Deploy all facets
-            facetsToDeployDefs = registryGetAll()
+            // Deploy all facets - requires registry
+            if (!registry) {
+                throw new Error(
+                    'Registry is required when facetNames is not specified. ' +
+                        'Either provide facetNames or inject a RegistryProvider.'
+                )
+            }
+            facetsToDeployDefs = registry.getAllFacets()
             info('Deploying all facets')
         }
 

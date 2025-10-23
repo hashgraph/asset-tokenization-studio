@@ -7,11 +7,11 @@ import {
     ResolverProxy,
 } from '@typechain'
 import { ATS_ROLES } from '@scripts'
-import { deployEquityTokenFixture } from '@test/fixtures'
-import { grantRoleAndPauseToken } from '@test/common'
+import { deployEquityTokenFixture } from '@test'
+import { grantRoleAndPauseToken } from '@test'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers } from 'hardhat'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { executeRbac } from '@test'
 
 describe('Control List Tests', () => {
     let diamond: ResolverProxy
@@ -49,7 +49,7 @@ describe('Control List Tests', () => {
         )
 
         await executeRbac(base.accessControlFacet, [
-            { role: ATS_ROLES.PAUSER, members: [signer_B.address] },
+            { role: ATS_ROLES._PAUSER_ROLE, members: [signer_B.address] },
         ])
     }
 
@@ -83,7 +83,7 @@ describe('Control List Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            ATS_ROLES.CONTROL_LIST,
+            ATS_ROLES._CONTROL_LIST_ROLE,
             signer_A,
             signer_B,
             signer_C.address
@@ -100,7 +100,7 @@ describe('Control List Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            ATS_ROLES.CONTROL_LIST,
+            ATS_ROLES._CONTROL_LIST_ROLE,
             signer_A,
             signer_B,
             signer_C.address
@@ -116,7 +116,7 @@ describe('Control List Tests', () => {
     it('GIVEN an account with controlList role WHEN addToControlList and removeFromControlList THEN transaction succeeds', async () => {
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.CONTROL_LIST, signer_B.address)
+            .grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_B.address)
 
         let check_signer_B = await controlListFacet.isInControlList(
             signer_B.address

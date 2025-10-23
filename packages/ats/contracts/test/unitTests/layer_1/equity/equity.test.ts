@@ -27,8 +27,8 @@ import {
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture, MAX_UINT256 } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture, MAX_UINT256 } from '@test'
+import { executeRbac } from '@test'
 
 let dividendsRecordDateInSeconds = 0
 let dividendsExecutionDateInSeconds = 0
@@ -86,15 +86,15 @@ describe('Equity Tests', () => {
 
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.KYC,
+                role: ATS_ROLES._KYC_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_A.address],
             },
         ])
@@ -209,7 +209,7 @@ describe('Equity Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                ATS_ROLES.CORPORATE_ACTION,
+                ATS_ROLES._CORPORATE_ACTION_ROLE,
                 signer_A,
                 signer_B,
                 signer_C.address
@@ -228,7 +228,7 @@ describe('Equity Tests', () => {
             // Granting Role to account C
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
 
             // set dividend
             const wrongDividendData_1 = {
@@ -258,7 +258,7 @@ describe('Equity Tests', () => {
             // Granting Role to account C
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
 
             // set dividend
             await expect(
@@ -320,13 +320,13 @@ describe('Equity Tests', () => {
             // Granting Role to account C
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.LOCKER, signer_C.address)
+                .grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
 
             // issue and lock
             const TotalAmount = number_Of_Shares
@@ -384,10 +384,10 @@ describe('Equity Tests', () => {
             // Granting Role to account C
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
 
             // issue and hold
             const TotalAmount = number_Of_Shares
@@ -449,23 +449,23 @@ describe('Equity Tests', () => {
 
         it('GIVEN scheduled dividends WHEN record date is reached AND scheduled balance adjustments is set after record date THEN dividends are paid without adjusted balance', async () => {
             await accessControlFacet.grantRole(
-                ATS_ROLES.CORPORATE_ACTION,
+                ATS_ROLES._CORPORATE_ACTION_ROLE,
                 signer_C.address
             )
             await accessControlFacet.grantRole(
-                ATS_ROLES.ISSUER,
+                ATS_ROLES._ISSUER_ROLE,
                 signer_C.address
             )
             await accessControlFacet.grantRole(
-                ATS_ROLES.LOCKER,
+                ATS_ROLES._LOCKER_ROLE,
                 signer_C.address
             )
             await accessControlFacet.grantRole(
-                ATS_ROLES.CLEARING,
+                ATS_ROLES._CLEARING_ROLE,
                 signer_C.address
             )
             await accessControlFacet.grantRole(
-                ATS_ROLES.FREEZE_MANAGER,
+                ATS_ROLES._FREEZE_MANAGER_ROLE,
                 signer_C.address
             )
 
@@ -549,7 +549,7 @@ describe('Equity Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                ATS_ROLES.CORPORATE_ACTION,
+                ATS_ROLES._CORPORATE_ACTION_ROLE,
                 signer_A,
                 signer_B,
                 signer_C.address
@@ -565,7 +565,7 @@ describe('Equity Tests', () => {
             // Granting Role to account C
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
 
             // set dividend
             await expect(equityFacet.connect(signer_C).setVoting(votingData))
@@ -612,13 +612,13 @@ describe('Equity Tests', () => {
             // Granting Role to account C
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.LOCKER, signer_C.address)
+                .grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
 
             // issue and lock
             const TotalAmount = number_Of_Shares
@@ -682,7 +682,7 @@ describe('Equity Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                ATS_ROLES.CORPORATE_ACTION,
+                ATS_ROLES._CORPORATE_ACTION_ROLE,
                 signer_A,
                 signer_B,
                 signer_C.address
@@ -700,7 +700,7 @@ describe('Equity Tests', () => {
             // Granting Role to account C
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
 
             // set dividend
             await expect(

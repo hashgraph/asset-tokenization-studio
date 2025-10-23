@@ -32,8 +32,8 @@ import {
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployBondTokenFixture } from '@test/fixtures/tokens/bond.fixture'
-import { executeRbac, MAX_UINT256 } from '@test/fixtures/tokens/common.fixture'
+import { deployBondTokenFixture } from '@test'
+import { executeRbac, MAX_UINT256 } from '@test'
 
 const numberOfUnits = 1000
 let startingDate = 0
@@ -101,33 +101,36 @@ describe('Bond Tests', () => {
         signer_D = base.user3
 
         await executeRbac(base.accessControlFacet, [
-            { role: ATS_ROLES.FREEZE_MANAGER, members: [signer_A.address] },
             {
-                role: ATS_ROLES.PAUSER,
-                members: [signer_B.address],
-            },
-            {
-                role: ATS_ROLES.KYC,
-                members: [signer_B.address],
-            },
-            {
-                role: ATS_ROLES.MATURITY_REDEEMER,
+                role: ATS_ROLES._FREEZE_MANAGER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._PAUSER_ROLE,
+                members: [signer_B.address],
+            },
+            {
+                role: ATS_ROLES._KYC_ROLE,
+                members: [signer_B.address],
+            },
+            {
+                role: ATS_ROLES._MATURITY_REDEEMER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.CONTROL_LIST,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
+                members: [signer_A.address],
+            },
+            {
+                role: ATS_ROLES._CONTROL_LIST_ROLE,
                 members: [signer_D.address],
             },
             {
-                role: ATS_ROLES.CLEARING,
+                role: ATS_ROLES._CLEARING_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.PROTECTED_PARTITIONS,
+                role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
                 members: [signer_A.address],
             },
         ])
@@ -320,7 +323,7 @@ describe('Bond Tests', () => {
                 await grantRoleAndPauseToken(
                     accessControlFacet,
                     pauseFacet,
-                    ATS_ROLES.CORPORATE_ACTION,
+                    ATS_ROLES._CORPORATE_ACTION_ROLE,
                     signer_A,
                     signer_B,
                     signer_C.address
@@ -362,7 +365,7 @@ describe('Bond Tests', () => {
             it('GIVEN all conditions are met WHEN redeeming at maturity THEN transaction succeeds and emits RedeemedByPartition', async () => {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                    .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
 
                 await erc1410Facet.connect(signer_C).issueByPartition({
                     partition: DEFAULT_PARTITION,
@@ -405,7 +408,7 @@ describe('Bond Tests', () => {
                 await grantRoleAndPauseToken(
                     accessControlFacet,
                     pauseFacet,
-                    ATS_ROLES.CORPORATE_ACTION,
+                    ATS_ROLES._CORPORATE_ACTION_ROLE,
                     signer_A,
                     signer_B,
                     signer_C.address
@@ -420,7 +423,10 @@ describe('Bond Tests', () => {
             it('GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails', async () => {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                    .grantRole(
+                        ATS_ROLES._CORPORATE_ACTION_ROLE,
+                        signer_C.address
+                    )
                 // set coupon
                 const wrongcouponData_1 = {
                     recordDate: couponExecutionDateInSeconds.toString(),
@@ -451,7 +457,7 @@ describe('Bond Tests', () => {
 
             it('GIVEN an account with corporateActions role WHEN setCoupon with period THEN period is stored correctly', async () => {
                 await accessControlFacet.grantRole(
-                    ATS_ROLES.CORPORATE_ACTION,
+                    ATS_ROLES._CORPORATE_ACTION_ROLE,
                     signer_C.address
                 )
 
@@ -497,7 +503,7 @@ describe('Bond Tests', () => {
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(
-                    ATS_ROLES.CORPORATE_ACTION,
+                    ATS_ROLES._CORPORATE_ACTION_ROLE,
                     signer_C.address
                 )
                 // Using account C (with role)
@@ -529,7 +535,10 @@ describe('Bond Tests', () => {
             it('GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds', async () => {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                    .grantRole(
+                        ATS_ROLES._CORPORATE_ACTION_ROLE,
+                        signer_C.address
+                    )
 
                 // set coupon
                 await expect(bondFacet.connect(signer_C).setCoupon(couponData))
@@ -589,13 +598,16 @@ describe('Bond Tests', () => {
             it('GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds', async () => {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                    .grantRole(
+                        ATS_ROLES._CORPORATE_ACTION_ROLE,
+                        signer_C.address
+                    )
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.LOCKER, signer_C.address)
+                    .grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address)
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                    .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
 
                 // issue and lock
                 const TotalAmount = numberOfUnits
@@ -632,7 +644,7 @@ describe('Bond Tests', () => {
                 )
                 await accessControlFacet
                     .connect(signer_A)
-                    .revokeRole(ATS_ROLES.ISSUER, signer_C.address)
+                    .revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
 
                 const couponFor = await bondReadFacet.getCouponFor(
                     1,
@@ -656,10 +668,13 @@ describe('Bond Tests', () => {
             it('GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds', async () => {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                    .grantRole(
+                        ATS_ROLES._CORPORATE_ACTION_ROLE,
+                        signer_C.address
+                    )
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                    .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
 
                 // issue and hold
                 const TotalAmount = numberOfUnits
@@ -702,7 +717,7 @@ describe('Bond Tests', () => {
                 )
                 await accessControlFacet
                     .connect(signer_A)
-                    .revokeRole(ATS_ROLES.ISSUER, signer_C.address)
+                    .revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
 
                 const couponFor = await bondReadFacet.getCouponFor(
                     1,
@@ -728,7 +743,7 @@ describe('Bond Tests', () => {
                 // Granting Role to account C
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.BOND_MANAGER, signer_C.address)
+                    .grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address)
                 // Get maturity date
                 const maturityDateBefore = (
                     await bondReadFacet.getBondDetails()
@@ -761,7 +776,7 @@ describe('Bond Tests', () => {
                 // Granting Role to account C
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.BOND_MANAGER, signer_C.address)
+                    .grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address)
                 // Get maturity date
                 const maturityDateBefore = (
                     await bondReadFacet.getBondDetails()
@@ -818,7 +833,7 @@ describe('Bond Tests', () => {
                 await grantRoleAndPauseToken(
                     accessControlFacet,
                     pauseFacet,
-                    ATS_ROLES.BOND_MANAGER,
+                    ATS_ROLES._BOND_MANAGER_ROLE,
                     signer_A,
                     signer_B,
                     signer_C.address
@@ -848,13 +863,16 @@ describe('Bond Tests', () => {
             it('Given a coupon and account with normal, cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct', async () => {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                    .grantRole(
+                        ATS_ROLES._CORPORATE_ACTION_ROLE,
+                        signer_C.address
+                    )
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.LOCKER, signer_C.address)
+                    .grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address)
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                    .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
 
                 const totalAmount = numberOfUnits
                 const lockedAmount = totalAmount / 5
@@ -928,7 +946,7 @@ describe('Bond Tests', () => {
                     couponRecordDateInSeconds + 1
                 )
                 await accessControlFacet.revokeRole(
-                    ATS_ROLES.ISSUER,
+                    ATS_ROLES._ISSUER_ROLE,
                     signer_C.address
                 )
 
@@ -947,7 +965,7 @@ describe('Bond Tests', () => {
             await deploySecurityFixture(true)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
             await erc1410Facet.connect(signer_C).issueByPartition({
                 partition: _PARTITION_ID,
                 tokenHolder: signer_A.address,

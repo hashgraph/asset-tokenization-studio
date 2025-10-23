@@ -25,14 +25,14 @@ import {
 } from '@scripts'
 import { Contract } from 'ethers'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture, MAX_UINT256 } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture, MAX_UINT256 } from '@test'
+import { executeRbac } from '@test'
 
 const amount = 1
 
 const packedData = ethers.utils.defaultAbiCoder.encode(
     ['bytes32', 'bytes32'],
-    [ATS_ROLES.PROTECTED_PARTITIONS_PARTICIPANT, DEFAULT_PARTITION]
+    [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION]
 )
 const packedDataWithoutPrefix = packedData.slice(2)
 
@@ -245,7 +245,7 @@ describe('ProtectedPartitions Tests', () => {
     ) {
         accessControlFacet = accessControlFacet.connect(signer_A)
         await accessControlFacet.grantRole(
-            ATS_ROLES.WILD_CARD,
+            ATS_ROLES._WILD_CARD_ROLE,
             wildCard_Account
         )
 
@@ -379,19 +379,19 @@ describe('ProtectedPartitions Tests', () => {
     function set_initRbacs(): any[] {
         return [
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.CONTROL_LIST,
+                role: ATS_ROLES._CONTROL_LIST_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.ISSUER,
+                role: ATS_ROLES._ISSUER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.PROTECTED_PARTITIONS,
+                role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
                 members: [signer_B.address],
             },
             {
@@ -399,23 +399,23 @@ describe('ProtectedPartitions Tests', () => {
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.LOCKER,
+                role: ATS_ROLES._LOCKER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.KYC,
+                role: ATS_ROLES._KYC_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.CLEARING,
+                role: ATS_ROLES._CLEARING_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.CLEARING_VALIDATOR,
+                role: ATS_ROLES._CLEARING_VALIDATOR_ROLE,
                 members: [signer_A.address],
             },
         ]

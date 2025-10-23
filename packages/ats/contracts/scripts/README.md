@@ -6,14 +6,15 @@
 
 1. [Overview](#overview)
 2. [Architecture](#architecture)
-3. [Domain Separation](#domain-separation)
-4. [Import Standards](#import-standards)
-5. [Quick Start](#quick-start)
-6. [Usage Modes](#usage-modes)
-7. [Directory Structure](#directory-structure)
-8. [Examples](#examples)
-9. [API Reference](#api-reference)
-10. [Troubleshooting](#troubleshooting)
+3. [Registry System](#registry-system)
+4. [Domain Separation](#domain-separation)
+5. [Import Standards](#import-standards)
+6. [Quick Start](#quick-start)
+7. [Usage Modes](#usage-modes)
+8. [Directory Structure](#directory-structure)
+9. [Examples](#examples)
+10. [API Reference](#api-reference)
+11. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -64,91 +65,231 @@ await deployCompleteSystem(provider, 'testnet', options)
 
 ---
 
+## Registry System
+
+The registry system provides **type-safe access to contract metadata** extracted from Solidity source files. It automatically generates TypeScript definitions for facets, contracts, storage wrappers, roles, and more.
+
+### What It Does
+
+- **Auto-generates** metadata from Solidity contracts (methods, events, errors, natspec)
+- **Type-safe helpers** for querying facets, contracts, and storage wrappers
+- **Categorization** by layer (0-3) and category (core, compliance, clearing, etc.)
+- **Role detection** from Solidity constants
+- **Resolver keys** for BusinessLogicResolver configuration
+- **Reusable** - downstream projects can generate their own registries
+
+### How It Works
+
+```bash
+# Regenerate registry from contracts/ directory
+npm run generate:registry
+
+# Output: scripts/domain/atsRegistry.data.ts (auto-generated, do not edit)
+```
+
+**What gets generated:**
+
+```typescript
+export const FACET_REGISTRY = {
+    AccessControlFacet: {
+        name: 'AccessControlFacet',
+        layer: 1,
+        category: 'core',
+        methods: ['grantRole', 'revokeRole', ...],
+        events: ['RoleGranted', 'RoleRevoked', ...],
+        errors: ['AccessControlUnauthorizedAccount', ...],
+        hasTimeTravel: false,
+        resolverKey: undefined,
+    },
+    // ... 50+ facets
+}
+
+export const STORAGE_WRAPPER_REGISTRY = {
+    AccessControlStorageWrapper: {
+        name: 'AccessControlStorageWrapper',
+        methods: ['hasRole', 'getRoleAdmin', ...],
+    },
+    // ... 29 storage wrappers
+}
+
+export const ROLES = {
+    DEFAULT_ADMIN_ROLE: '0x0000000000000000000000000000000000000000000000000000000000000000',
+    _PAUSER_ROLE: '0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a',
+    // ... all role constants
+}
+```
+
+### Using the Registry
+
+**Query facets:**
+
+```typescript
+import { getFacetDefinition, getAllFacets, hasFacet } from '@scripts/domain'
+
+// Get specific facet
+const facet = getFacetDefinition('AccessControlFacet')
+console.log(facet.methods) // ['grantRole', 'revokeRole', ...]
+console.log(facet.events) // ['RoleGranted', 'RoleRevoked', ...]
+console.log(facet.layer) // 1
+console.log(facet.category) // 'core'
+
+// Check if facet exists
+if (hasFacet('KycFacet')) {
+    // ...
+}
+
+// Get all facets
+const allFacets = getAllFacets()
+console.log(`Total facets: ${allFacets.length}`)
+```
+
+**Query storage wrappers:**
+
+```typescript
+import {
+    getStorageWrapperDefinition,
+    getAllStorageWrappers,
+    hasStorageWrapper,
+} from '@scripts/domain'
+
+// Get specific storage wrapper
+const wrapper = getStorageWrapperDefinition('AccessControlStorageWrapper')
+console.log(wrapper.methods) // ['hasRole', 'getRoleAdmin', ...]
+
+// Get all storage wrappers
+const allWrappers = getAllStorageWrappers()
+console.log(`Total wrappers: ${allWrappers.length}`)
+```
+
+**Access roles:**
+
+```typescript
+import { ROLES } from '@scripts/domain'
+
+console.log(ROLES._PAUSER_ROLE) // bytes32 value
+console.log(ROLES.CORPORATE_ACTION_ROLE) // bytes32 value
+```
+
+### Downstream Projects
+
+External projects can generate their own registries from their contracts using the **registry generation pipeline**:
+
+```typescript
+import { generateRegistryPipeline } from '@hashgraph/asset-tokenization-contracts/scripts'
+
+// Generate registry for your contracts
+const result = await generateRegistryPipeline({
+    contractsPath: './contracts',
+    outputPath: './generated/myRegistry.data.ts',
+    includeStorageWrappers: true,
+    includeTimeTravel: true,
+    logLevel: 'INFO',
+})
+
+console.log(`Generated registry with ${result.stats.facetCount} facets`)
+```
+
+**Then create helpers for your registry:**
+
+```typescript
+import { createRegistryHelpers } from '@hashgraph/asset-tokenization-contracts/scripts'
+import {
+    FACET_REGISTRY,
+    CONTRACT_REGISTRY,
+    STORAGE_WRAPPER_REGISTRY,
+} from './generated/myRegistry.data'
+
+// Create type-safe helpers
+export const {
+    getFacetDefinition,
+    getAllFacets,
+    hasFacet,
+    getStorageWrapperDefinition,
+    getAllStorageWrappers,
+} = createRegistryHelpers(
+    FACET_REGISTRY,
+    CONTRACT_REGISTRY,
+    STORAGE_WRAPPER_REGISTRY
+)
+```
+
+**Result**: ~20 lines of code vs ~300 lines of manual implementation (93% reduction).
+
+### Registry Files
+
+- **`atsRegistry.data.ts`** - Auto-generated registry data (do not edit manually)
+- **`atsRegistry.ts`** - ATS-specific registry wrapper with helpers
+- **`registryFactory.ts`** - Generic factory for creating registry helpers
+- **`generateRegistryPipeline.ts`** - Reusable pipeline for generating registries
+
+---
+
 ## Domain Separation
 
-The scripts folder maintains **strict separation** between generic infrastructure and ATS-specific business logic through self-documenting folder names.
+Scripts maintain **strict separation** between generic infrastructure and ATS-specific business logic.
 
 ### Infrastructure Layer (`infrastructure/`)
 
-**Purpose**: Generic, reusable deployment infrastructure for **any** smart contract project
+**Generic, reusable tools** for ANY smart contract project (could be extracted to `@generic/solidity-tools`)
 
-**Characteristics**:
+**Rules**:
 
-- ✅ Works for ANY smart contract project (not just ATS)
-- ✅ No knowledge of ATS concepts (equities, bonds, Factory, compliance)
-- ✅ No knowledge of specific facets beyond the registry
+- ✅ Zero knowledge of ATS concepts (equities, bonds, Factory)
+- ✅ Works for DAOs, NFTs, DeFi, etc. without modification
 - ❌ **NEVER** imports from `domain/` or `workflows/`
 
-**Contains**:
-
-- Operations: `deployContract`, `deployProxy`, `upgradeProxy`, `deployBlr`, `deployFacets`
-- Providers: `HardhatProvider`, `StandaloneProvider`
-- Configuration: Network config, gas constants, deployment settings
-- Utilities: Logging, validation, transaction helpers
-- Registry: Auto-generated facet and contract registry
+**Contains**: Providers, deployment operations, network config, utilities, auto-generated registry
 
 **Example**:
 
 ```typescript
-import {
-    DeploymentProvider,
-    deployContract,
-    deployProxy,
-    GAS_LIMIT,
-    info,
-    validateAddress,
-} from '@scripts/infrastructure'
+import { DeploymentProvider, deployProxy, info } from '@scripts/infrastructure'
 ```
 
 ### Domain Layer (`domain/`)
 
-**Purpose**: ATS-specific business logic and domain concepts
+**ATS-specific business logic** (equities, bonds, security tokens, regulations)
 
-**Characteristics**:
+**Rules**:
 
-- ✅ Contains ALL ATS-specific logic
-- ✅ Knows about equities, bonds, Factory, compliance, regulations
+- ✅ All ATS-specific logic lives here
 - ✅ CAN import from `infrastructure/`
-- ❌ Should NOT be considered reusable for other projects
+- ❌ NOT reusable for other projects
 
-**Structure**:
-
-```
-domain/
-├── constants.ts              # ATS constants (roles, regulations, currencies)
-├── equity/
-│   └── createConfiguration.ts
-├── bond/
-│   └── createConfiguration.ts
-└── factory/
-    ├── deploy.ts
-    └── deployToken.ts
-```
+**Contains**: Equity/bond configs, Factory deployment, ATS constants (roles, regulations, currencies)
 
 **Example**:
 
 ```typescript
 import {
     EQUITY_CONFIG_ID,
-    BOND_CONFIG_ID,
     ATS_ROLES,
-    RegulationType,
-    CURRENCIES,
     createEquityConfiguration,
-    createBondConfiguration,
-    deployFactory,
 } from '@scripts/domain'
 ```
 
-### Decision Guide
+### Decision Checklist
 
-**When adding new code**: "Could this be used for **other** smart contract projects?"
+**Ask**: "Would an NFT or DAO project use this unchanged?"
 
-- **YES** → `infrastructure/`
-    - Examples: deploying proxies, gas utilities, logging
-- **NO** → `domain/`
-    - Examples: equity facets, bond coupons, ATS compliance
-- **Unsure** → Start in `domain/` (easier to promote later)
+| Answer     | Location          | Examples                                               |
+| ---------- | ----------------- | ------------------------------------------------------ |
+| **YES**    | `infrastructure/` | Deploy proxy, gas utilities, logging, validation       |
+| **NO**     | `domain/`         | Equity facets, bond coupons, compliance rules, Factory |
+| **Unsure** | `domain/`         | Start here, refactor later if generic pattern emerges  |
+
+**Tests**:
+
+1. **Name Test**: Mentions "equity", "bond", "Factory"? → Domain
+2. **Replacement Test**: Works if you replace "equity" with "NFT"? → Infrastructure
+3. **Extraction Test**: Could live in `@generic/solidity-deployment-tools`? → Infrastructure
+4. **Reuse Test**: Would a DeFi protocol use this? → Infrastructure
+
+**Red Flags**:
+
+- 🚩 Infrastructure importing from domain
+- 🚩 Domain implementing generic blockchain operations
+- 🚩 Hardcoded ATS facet names in infrastructure
 
 ---
 
@@ -351,8 +492,7 @@ scripts/
 │   ├── types.ts                # Shared type definitions
 │   ├── constants.ts            # Infrastructure constants
 │   ├── config.ts               # Network configuration
-│   ├── registry.ts             # Contract metadata
-│   ├── registry.generated.ts   # Auto-generated registry
+│   ├── registryFactory.ts      # Registry helpers factory
 │   │
 │   ├── providers/              # Framework adapters
 │   │   ├── index.ts
@@ -368,7 +508,8 @@ scripts/
 │   │   ├── facetDeployment.ts
 │   │   ├── proxyAdminDeployment.ts
 │   │   ├── registerFacets.ts
-│   │   └── verifyDeployment.ts
+│   │   ├── verifyDeployment.ts
+│   │   └── generateRegistryPipeline.ts  # Registry generation pipeline
 │   │
 │   └── utils/                  # Generic utilities
 │       ├── validation.ts
@@ -379,6 +520,8 @@ scripts/
 ├── domain/                      # ATS-specific business logic
 │   ├── index.ts                # Public API exports
 │   ├── constants.ts            # ATS constants (roles, regulations, etc.)
+│   ├── atsRegistry.ts          # ATS registry with helpers
+│   ├── atsRegistry.data.ts     # Auto-generated registry data
 │   │
 │   ├── equity/                 # Equity token logic
 │   │   └── createConfiguration.ts
@@ -396,12 +539,14 @@ scripts/
 │
 ├── cli/                         # Command-line entry points
 │   ├── hardhat.ts              # Hardhat-based deployment CLI
-│
 │   └── standalone.ts           # Standalone deployment CLI
-│   ├── hardhat.ts              # Hardhat-based deployment CLI
 │
 ├── tools/                       # Code generation tools
+│   ├── generateRegistry.ts     # Registry generation CLI
+│   ├── scanner/
+│   │   └── metadataExtractor.ts  # Extract metadata from Solidity
 │   └── generators/
+│       └── registryGenerator.ts  # Generate TypeScript registry code
 │
 └── index.ts                     # Root exports
 ```

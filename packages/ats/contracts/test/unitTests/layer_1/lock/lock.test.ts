@@ -16,11 +16,11 @@ import {
     TimeTravelFacet,
 } from '@typechain'
 
-import { deployEquityTokenFixture } from '@test/fixtures'
+import { deployEquityTokenFixture } from '@test'
 
-import { executeRbac, MAX_UINT256 } from '@test/fixtures/tokens/common.fixture'
+import { executeRbac, MAX_UINT256 } from '@test'
 import { EMPTY_STRING, ATS_ROLES, ZERO, dateToUnixTimestamp } from '@scripts'
-import { Rbac } from '@scripts/domain/factory/types'
+import { Rbac } from '@scripts/domain'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'
@@ -65,27 +65,27 @@ describe('Lock Tests', () => {
 
     function set_initRbacs(): Rbac[] {
         const rbacIssuer: Rbac = {
-            role: ATS_ROLES.ISSUER,
+            role: ATS_ROLES._ISSUER_ROLE,
             members: [signer_B.address],
         }
         const rbacLocker: Rbac = {
-            role: ATS_ROLES.LOCKER,
+            role: ATS_ROLES._LOCKER_ROLE,
             members: [signer_C.address],
         }
         const rbacPausable: Rbac = {
-            role: ATS_ROLES.PAUSER,
+            role: ATS_ROLES._PAUSER_ROLE,
             members: [signer_D.address],
         }
         const rbacKYC: Rbac = {
-            role: ATS_ROLES.KYC,
+            role: ATS_ROLES._KYC_ROLE,
             members: [signer_B.address],
         }
         const rbacSSI: Rbac = {
-            role: ATS_ROLES.SSI_MANAGER,
+            role: ATS_ROLES._SSI_MANAGER_ROLE,
             members: [signer_A.address],
         }
         const rbacCorporateAction: Rbac = {
-            role: ATS_ROLES.CORPORATE_ACTION,
+            role: ATS_ROLES._CORPORATE_ACTION_ROLE,
             members: [signer_B.address],
         }
         return [
@@ -565,23 +565,23 @@ describe('Lock Tests', () => {
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(
-                    ATS_ROLES.ADJUSTMENT_BALANCE,
+                    ATS_ROLES._ADJUSTMENT_BALANCE_ROLE,
                     signer_C.address
                 )
                 await accessControlFacet.grantRole(
-                    ATS_ROLES.ISSUER,
+                    ATS_ROLES._ISSUER_ROLE,
                     signer_A.address
                 )
                 await accessControlFacet.grantRole(
-                    ATS_ROLES.CAP,
+                    ATS_ROLES._CAP_ROLE,
                     signer_A.address
                 )
                 await accessControlFacet.grantRole(
-                    ATS_ROLES.CONTROLLER,
+                    ATS_ROLES._CONTROLLER_ROLE,
                     signer_A.address
                 )
                 await accessControlFacet.grantRole(
-                    ATS_ROLES.LOCKER,
+                    ATS_ROLES._LOCKER_ROLE,
                     signer_A.address
                 )
 

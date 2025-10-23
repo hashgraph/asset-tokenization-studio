@@ -31,10 +31,6 @@ import {
     isTimeTravelVariant,
     validateAddress,
     validateBytes32,
-    FACET_REGISTRY,
-    getFacetDefinition,
-    getAllFacets,
-    FACET_REGISTRY_COUNT,
 } from '@scripts/infrastructure'
 
 // Domain layer - ATS-specific business logic
@@ -42,10 +38,14 @@ import {
     deployFactory,
     EQUITY_CONFIG_ID,
     BOND_CONFIG_ID,
+    FACET_REGISTRY,
+    getFacetDefinition,
+    getAllFacets,
+    FACET_REGISTRY_COUNT,
 } from '@scripts/domain'
 
 // Test helpers
-import { TEST_SIZES, BLR_VERSIONS } from '@test/helpers/constants'
+import { TEST_SIZES, BLR_VERSIONS } from '@test'
 
 describe('Phase 1 Deployment System - Integration Tests', () => {
     let provider: HardhatProvider
@@ -160,12 +160,12 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
             const accessControl = getFacetDefinition('AccessControlFacet')!
             expect(accessControl).to.exist
             expect(accessControl.name).to.equal('AccessControlFacet')
-            expect(accessControl.description).to.exist
+            // Description is optional (only present if natspec @notice or @title exists)
 
             const kyc = getFacetDefinition('KycFacet')!
             expect(kyc).to.exist
             expect(kyc.name).to.equal('KycFacet')
-            expect(kyc.description).to.exist
+            // Description is optional (only present if natspec @notice or @title exists)
         })
 
         it('should return all facets', () => {
@@ -175,7 +175,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
             // Verify each facet has required fields
             allFacets.forEach((facet) => {
                 expect(facet.name).to.exist
-                expect(facet.description).to.exist
+                // Description is optional - only present if facet has natspec comments
             })
         })
 

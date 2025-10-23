@@ -73,7 +73,7 @@ export async function deployEquityFromFactory(
     // Build RBAC array with admin
     const rbacs: Rbac[] = [
         {
-            role: ATS_ROLES.DEFAULT_ADMIN,
+            role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
             members: [adminAccount],
         },
         ...securityDataParams.rbacs,

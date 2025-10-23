@@ -16,9 +16,9 @@ import {
 } from '@typechain'
 import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from '@scripts'
 import { assertObject } from '../../../../common'
-import { deployEquityTokenFixture } from '@test/fixtures'
-import { executeRbac, MAX_UINT256 } from '@test/fixtures/tokens/common.fixture'
-import { SecurityType } from '@scripts/domain/factory/types'
+import { deployEquityTokenFixture } from '@test'
+import { executeRbac, MAX_UINT256 } from '@test'
+import { SecurityType } from '@scripts/domain'
 
 const amount = 1000
 // con erc20 y sin erc1410 funciona
@@ -64,15 +64,15 @@ describe('ERC20 Tests', () => {
 
             await executeRbac(base.accessControlFacet, [
                 {
-                    role: ATS_ROLES.PAUSER,
+                    role: ATS_ROLES._PAUSER_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.CONTROL_LIST,
+                    role: ATS_ROLES._CONTROL_LIST_ROLE,
                     members: [signer_A.address],
                 },
                 {
-                    role: ATS_ROLES.CLEARING,
+                    role: ATS_ROLES._CLEARING_ROLE,
                     members: [signer_A.address],
                 },
             ])
@@ -187,27 +187,27 @@ describe('ERC20 Tests', () => {
 
             await executeRbac(base.accessControlFacet, [
                 {
-                    role: ATS_ROLES.ISSUER,
+                    role: ATS_ROLES._ISSUER_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.KYC,
+                    role: ATS_ROLES._KYC_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.SSI_MANAGER,
+                    role: ATS_ROLES._SSI_MANAGER_ROLE,
                     members: [signer_A.address],
                 },
                 {
-                    role: ATS_ROLES.PAUSER,
+                    role: ATS_ROLES._PAUSER_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.CLEARING,
+                    role: ATS_ROLES._CLEARING_ROLE,
                     members: [signer_A.address],
                 },
                 {
-                    role: ATS_ROLES.CONTROL_LIST,
+                    role: ATS_ROLES._CONTROL_LIST_ROLE,
                     members: [signer_A.address],
                 },
             ])

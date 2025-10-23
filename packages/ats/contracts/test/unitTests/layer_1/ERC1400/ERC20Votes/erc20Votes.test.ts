@@ -11,9 +11,9 @@ import {
     TimeTravelFacet as TimeTravel,
 } from '@typechain'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture } from '@test/fixtures'
+import { deployEquityTokenFixture } from '@test'
 
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { executeRbac } from '@test'
 import { ATS_ROLES, DEFAULT_PARTITION } from '@scripts'
 
 const amount = 1000
@@ -79,19 +79,19 @@ describe('ERC20Votes Tests', () => {
         signer_D = base.user3
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.ADJUSTMENT_BALANCE,
+                role: ATS_ROLES._ADJUSTMENT_BALANCE_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.CORPORATE_ACTION,
+                role: ATS_ROLES._CORPORATE_ACTION_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.ISSUER,
+                role: ATS_ROLES._ISSUER_ROLE,
                 members: [signer_A.address],
             },
         ])

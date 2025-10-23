@@ -9,8 +9,6 @@
  * @module core/utils/naming
  */
 
-import { getFacetDefinition } from '@scripts/infrastructure'
-
 /**
  * Get the TimeTravel variant name for a contract.
  *
@@ -33,20 +31,21 @@ export function getTimeTravelVariant(contractName: string): string {
 /**
  * Check if a contract has a TimeTravel variant available.
  *
- * CONVENTION-BASED (2025-10-03): All facets are assumed to have TimeTravel
- * variants for testing. Returns false only for infrastructure contracts
- * (ProxyAdmin, TransparentUpgradeableProxy, etc.) that aren't in the registry.
+ * CONVENTION-BASED: Uses naming convention to determine if a contract
+ * has a TimeTravel variant. Contracts ending with 'Facet' are assumed
+ * to have TimeTravel variants, while infrastructure contracts don't.
  *
- * Invariant: If the contractName is 'TimeTravelFacet', it does not have a TimeTravel variant.
+ * Invariant: 'TimeTravelFacet' never has a TimeTravel variant.
  *
  * @param contractName - Base contract name
- * @returns true if contract is a facet, false for infrastructure or 'TimeTravelFacet'
+ * @returns true if contract name ends with 'Facet' (except 'TimeTravelFacet'), false otherwise
  *
  * @example
  * ```typescript
- * hasTimeTravelVariant('AccessControlFacet') // true - facet
+ * hasTimeTravelVariant('AccessControlFacet') // true - ends with 'Facet'
  * hasTimeTravelVariant('ProxyAdmin') // false - infrastructure
  * hasTimeTravelVariant('TimeTravelFacet') // false - invariant
+ * hasTimeTravelVariant('BusinessLogicResolver') // false - doesn't end with 'Facet'
  * ```
  */
 export function hasTimeTravelVariant(contractName: string): boolean {
@@ -55,11 +54,10 @@ export function hasTimeTravelVariant(contractName: string): boolean {
         return false
     }
 
-    // Check if contract is in facet registry
-    // If yes, assume it has TimeTravel variant
-    // If no, it's infrastructure (no TimeTravel)
-    const facet = getFacetDefinition(contractName)
-    return facet !== undefined
+    // Convention: Contracts ending with 'Facet' have TimeTravel variants
+    // Infrastructure contracts (ProxyAdmin, TransparentUpgradeableProxy, etc.)
+    // don't follow this naming pattern
+    return contractName.endsWith('Facet')
 }
 
 /**

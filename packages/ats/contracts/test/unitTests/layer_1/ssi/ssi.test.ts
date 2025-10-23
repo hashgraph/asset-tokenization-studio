@@ -9,8 +9,8 @@ import {
     MockedT3RevocationRegistry,
 } from '@typechain'
 import { ATS_ROLES } from '@scripts'
-import { deployEquityTokenFixture } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture } from '@test'
+import { executeRbac } from '@test'
 
 describe('SSI Tests', () => {
     let diamond: ResolverProxy
@@ -31,11 +31,11 @@ describe('SSI Tests', () => {
 
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_C.address],
             },
         ])

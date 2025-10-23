@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { ATS_ROLES, GAS_LIMIT } from '@scripts'
-import { deployEquityTokenFixture } from '@test/fixtures'
+import { deployEquityTokenFixture } from '@test'
 import {
     ResolverProxy,
     ExternalKycListManagement,
@@ -37,7 +37,7 @@ describe('ExternalKycList Management Tests', () => {
             signer_A
         )
         await base.accessControlFacet.grantRole(
-            ATS_ROLES.KYC_MANAGER,
+            ATS_ROLES._KYC_MANAGER_ROLE,
             signer_A.address
         )
 
@@ -443,7 +443,7 @@ describe('ExternalKycList Management Tests', () => {
     })
 
     describe('Access Control Tests', () => {
-        it('GIVEN an account without ATS_ROLES.KYC_MANAGER WHEN adding an external kyc list THEN it reverts with AccessControl', async () => {
+        it('GIVEN an account without ATS_ROLES._KYC_MANAGER_ROLE WHEN adding an external kyc list THEN it reverts with AccessControl', async () => {
             const newKycList = externalKycListMock3.address
             await expect(
                 externalKycListManagement
@@ -454,7 +454,7 @@ describe('ExternalKycList Management Tests', () => {
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
-        it('GIVEN an account with ATS_ROLES.KYC_MANAGER WHEN adding an external kyc list THEN it succeeds', async () => {
+        it('GIVEN an account with ATS_ROLES._KYC_MANAGER_ROLE WHEN adding an external kyc list THEN it succeeds', async () => {
             const newKycList = externalKycListMock3.address
             expect(
                 await externalKycListManagement.isExternalKycList(newKycList)
@@ -471,7 +471,7 @@ describe('ExternalKycList Management Tests', () => {
             ).to.be.true
         })
 
-        it('GIVEN an account without ATS_ROLES.KYC_MANAGER WHEN removing an external kyc list THEN it reverts with AccessControl', async () => {
+        it('GIVEN an account without ATS_ROLES._KYC_MANAGER_ROLE WHEN removing an external kyc list THEN it reverts with AccessControl', async () => {
             expect(
                 await externalKycListManagement.isExternalKycList(
                     externalKycListMock1.address
@@ -486,7 +486,7 @@ describe('ExternalKycList Management Tests', () => {
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
-        it('GIVEN an account with ATS_ROLES.KYC_MANAGER WHEN removing an external kyc list THEN it succeeds', async () => {
+        it('GIVEN an account with ATS_ROLES._KYC_MANAGER_ROLE WHEN removing an external kyc list THEN it succeeds', async () => {
             expect(
                 await externalKycListManagement.isExternalKycList(
                     externalKycListMock1.address
@@ -510,7 +510,7 @@ describe('ExternalKycList Management Tests', () => {
             ).to.be.false
         })
 
-        it('GIVEN an account without ATS_ROLES.KYC_MANAGER WHEN updating external kyc lists THEN it reverts with AccessControl', async () => {
+        it('GIVEN an account without ATS_ROLES._KYC_MANAGER_ROLE WHEN updating external kyc lists THEN it reverts with AccessControl', async () => {
             const kycLists = [externalKycListMock1.address]
             const actives = [false]
             expect(
@@ -527,7 +527,7 @@ describe('ExternalKycList Management Tests', () => {
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
-        it('GIVEN an account with ATS_ROLES.KYC_MANAGER WHEN updating external kyc lists THEN it succeeds', async () => {
+        it('GIVEN an account with ATS_ROLES._KYC_MANAGER_ROLE WHEN updating external kyc lists THEN it succeeds', async () => {
             expect(
                 await externalKycListManagement.isExternalKycList(
                     externalKycListMock1.address

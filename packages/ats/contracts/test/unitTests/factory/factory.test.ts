@@ -10,12 +10,9 @@ import {
     type Factory,
 } from '@typechain'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployAtsInfrastructureFixture } from '@test/fixtures'
-import {
-    getRegulationData,
-    getSecurityData,
-} from '@test/fixtures/tokens/common.fixture'
-import { getEquityDetails } from '@test/fixtures/tokens/equity.fixture'
+import { deployAtsInfrastructureFixture } from '@test'
+import { getRegulationData, getSecurityData } from '@test'
+import { getEquityDetails } from '@test'
 import {
     RegulationType,
     RegulationSubType,
@@ -25,8 +22,8 @@ import {
     ATS_ROLES,
     BOND_CONFIG_ID,
 } from '@scripts'
-import { Rbac, SecurityType } from '@scripts/domain/factory/types'
-import { getBondDetails } from '@test/fixtures/tokens/bond.fixture'
+import { Rbac, SecurityType } from '@scripts/domain'
+import { getBondDetails } from '@test'
 
 describe('Factory Tests', () => {
     let signer_A: SignerWithAddress
@@ -47,15 +44,15 @@ describe('Factory Tests', () => {
     let erc20Facet: ERC20
 
     const listOfRoles = [
-        ATS_ROLES.DEFAULT_ADMIN,
-        ATS_ROLES.CONTROL_LIST,
-        ATS_ROLES.CORPORATE_ACTION,
-        ATS_ROLES.ISSUER,
-        ATS_ROLES.DOCUMENTER,
-        ATS_ROLES.CONTROLLER,
-        ATS_ROLES.PAUSER,
-        ATS_ROLES.SNAPSHOT,
-        ATS_ROLES.LOCKER,
+        ATS_ROLES._DEFAULT_ADMIN_ROLE,
+        ATS_ROLES._CONTROL_LIST_ROLE,
+        ATS_ROLES._CORPORATE_ACTION_ROLE,
+        ATS_ROLES._ISSUER_ROLE,
+        ATS_ROLES._DOCUMENTER_ROLE,
+        ATS_ROLES._CONTROLLER_ROLE,
+        ATS_ROLES._PAUSER_ROLE,
+        ATS_ROLES._SNAPSHOT_ROLE,
+        ATS_ROLES._LOCKER_ROLE,
     ]
     let listOfMembers: string[]
 

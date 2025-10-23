@@ -13,8 +13,8 @@ import {
     SsiManagement,
     ClearingActionsFacet,
 } from '@typechain'
-import { deployEquityTokenFixture } from '@test/fixtures'
-import { executeRbac, MAX_UINT256 } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture } from '@test'
+import { executeRbac, MAX_UINT256 } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import {
     EMPTY_STRING,
@@ -23,7 +23,7 @@ import {
     DEFAULT_PARTITION,
     ATS_ROLES,
 } from '@scripts'
-import { getSelector } from '@scripts/infrastructure/utils/selector'
+import { getSelector } from '@scripts/infrastructure'
 const AMOUNT = 1000
 const BALANCE_OF_C_ORIGINAL = 2 * AMOUNT
 const DATA = '0x1234'
@@ -65,15 +65,15 @@ describe('ERC1594 Tests', () => {
 
             await executeRbac(base.accessControlFacet, [
                 {
-                    role: ATS_ROLES.PAUSER,
+                    role: ATS_ROLES._PAUSER_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.CLEARING,
+                    role: ATS_ROLES._CLEARING_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.KYC,
+                    role: ATS_ROLES._KYC_ROLE,
                     members: [signer_B.address],
                 },
             ])
@@ -107,7 +107,7 @@ describe('ERC1594 Tests', () => {
 
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(
-                ATS_ROLES.ISSUER,
+                ATS_ROLES._ISSUER_ROLE,
                 signer_A.address
             )
         }
@@ -261,23 +261,23 @@ describe('ERC1594 Tests', () => {
             signer_E = base.user4
             await executeRbac(base.accessControlFacet, [
                 {
-                    role: ATS_ROLES.PAUSER,
+                    role: ATS_ROLES._PAUSER_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.ISSUER,
+                    role: ATS_ROLES._ISSUER_ROLE,
                     members: [signer_C.address],
                 },
                 {
-                    role: ATS_ROLES.KYC,
+                    role: ATS_ROLES._KYC_ROLE,
                     members: [signer_B.address],
                 },
                 {
-                    role: ATS_ROLES.SSI_MANAGER,
+                    role: ATS_ROLES._SSI_MANAGER_ROLE,
                     members: [signer_A.address],
                 },
                 {
-                    role: ATS_ROLES.CLEARING,
+                    role: ATS_ROLES._CLEARING_ROLE,
                     members: [signer_B.address],
                 },
             ])
@@ -324,7 +324,7 @@ describe('ERC1594 Tests', () => {
 
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(
-                ATS_ROLES.ISSUER,
+                ATS_ROLES._ISSUER_ROLE,
                 signer_A.address
             )
             await ssiManagementFacet.addIssuer(signer_E.address)
@@ -369,7 +369,7 @@ describe('ERC1594 Tests', () => {
 
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CONTROL_LIST, signer_A.address)
+                    .grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address)
                 await controlList
                     .connect(signer_A)
                     .addToControlList(signer_C.address)
@@ -456,15 +456,15 @@ describe('ERC1594 Tests', () => {
                 await accessControlFacet
                     .attach(newTokenFixture.diamond.address)
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.ISSUER, signer_A.address)
+                    .grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address)
                 await accessControlFacet
                     .attach(newTokenFixture.diamond.address)
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.KYC, signer_B.address)
+                    .grantRole(ATS_ROLES._KYC_ROLE, signer_B.address)
                 await accessControlFacet
                     .attach(newTokenFixture.diamond.address)
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.SSI_MANAGER, signer_A.address)
+                    .grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address)
 
                 await ssiManagementFacet
                     .attach(newTokenFixture.diamond.address)
@@ -498,7 +498,7 @@ describe('ERC1594 Tests', () => {
                 // Blacklisting accounts
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CONTROL_LIST, signer_A.address)
+                    .grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address)
                 await controlList
                     .connect(signer_A)
                     .addToControlList(signer_C.address)
@@ -723,7 +723,7 @@ describe('ERC1594 Tests', () => {
                 // Blacklisting accounts
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CONTROL_LIST, signer_A.address)
+                    .grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address)
                 await controlList
                     .connect(signer_A)
                     .addToControlList(signer_C.address)

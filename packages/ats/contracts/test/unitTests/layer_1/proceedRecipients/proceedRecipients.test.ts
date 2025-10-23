@@ -8,7 +8,7 @@ import {
     Pause,
 } from '@typechain'
 import { GAS_LIMIT, ATS_ROLES } from '@scripts'
-import { deployBondTokenFixture } from '@test/fixtures'
+import { deployBondTokenFixture } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const PROCEED_RECIPIENT_1 = '0x1234567890123456789012345678901234567890'
@@ -55,11 +55,14 @@ describe('Proceed Recipients Tests', () => {
         )
 
         await accessControlFacet.grantRole(
-            ATS_ROLES.PROCEED_RECIPIENT_MANAGER,
+            ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE,
             signer_A.address
         )
 
-        await accessControlFacet.grantRole(ATS_ROLES.PAUSER, signer_A.address)
+        await accessControlFacet.grantRole(
+            ATS_ROLES._PAUSER_ROLE,
+            signer_A.address
+        )
     }
 
     beforeEach(async () => {

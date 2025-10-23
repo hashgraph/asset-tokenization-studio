@@ -11,7 +11,7 @@ import {
     FactoryRegulationDataParams,
     Rbac,
     SecurityDataParams,
-} from '@scripts/domain/factory/types'
+} from '@scripts/domain'
 import { AccessControlFacet, BusinessLogicResolver } from '@typechain'
 import { ethers } from 'hardhat'
 import { isinGenerator } from '@thomaschaplin/isin-generator'

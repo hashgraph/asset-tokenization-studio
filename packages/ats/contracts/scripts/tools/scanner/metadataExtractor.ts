@@ -212,7 +212,7 @@ export function extractMetadata(
  * @param contract - Contract file
  * @returns Detected layer (0-3)
  */
-function detectLayer(contract: ContractFile): number {
+export function detectLayer(contract: ContractFile): number {
     const pathParts = contract.relativePath.split(path.sep)
 
     // Look for layer_N in path
@@ -265,7 +265,7 @@ function detectLayer(contract: ContractFile): number {
  * @param layer - Detected layer
  * @returns Category string
  */
-function detectCategory(contract: ContractFile, layer: number): string {
+export function detectCategory(contract: ContractFile, layer: number): string {
     const name = contract.primaryContract
     const pathLower = contract.relativePath.toLowerCase()
 
@@ -354,7 +354,10 @@ function detectUpgradeable(contract: ContractFile): boolean {
  * @param name - Contract name
  * @returns Description from natspec or undefined
  */
-function generateDescription(source: string, name: string): string | undefined {
+export function generateDescription(
+    source: string,
+    name: string
+): string | undefined {
     return extractNatspecDescription(source, name)
 }
 

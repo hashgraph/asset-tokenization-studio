@@ -28,7 +28,7 @@ import {
 } from '@scripts/infrastructure'
 
 // Test helpers
-import { TEST_SIZES, BLR_VERSIONS } from '@test/helpers/constants'
+import { TEST_SIZES, BLR_VERSIONS } from '@test'
 
 describe('registerAdditionalFacets - Integration Tests', () => {
     let provider: HardhatProvider

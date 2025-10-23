@@ -23,8 +23,8 @@ import {
 } from '@scripts'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture, MAX_UINT256 } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture, MAX_UINT256 } from '@test'
+import { executeRbac } from '@test'
 
 const amount = 1000
 const balanceOf_C_Original = 2 * amount
@@ -106,23 +106,23 @@ describe('Snapshots Tests', () => {
     function set_initRbacs(): any[] {
         return [
             {
-                role: ATS_ROLES.ISSUER,
+                role: ATS_ROLES._ISSUER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.LOCKER,
+                role: ATS_ROLES._LOCKER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.KYC,
+                role: ATS_ROLES._KYC_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_A.address],
             },
         ]
@@ -144,7 +144,7 @@ describe('Snapshots Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            ATS_ROLES.SNAPSHOT,
+            ATS_ROLES._SNAPSHOT_ROLE,
             signer_A,
             signer_B,
             signer_C.address
@@ -207,10 +207,10 @@ describe('Snapshots Tests', () => {
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds', async () => {
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.SNAPSHOT, signer_C.address)
+            .grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address)
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.ISSUER, signer_A.address)
+            .grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address)
 
         await ssiManagementFacet.addIssuer(signer_A.address)
         await kycFacet.grantKyc(
@@ -681,13 +681,13 @@ describe('Snapshots Tests', () => {
         it('GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds', async () => {
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.SNAPSHOT, signer_A.address)
+                .grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_A.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_A.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address)
 
             await ssiManagementFacet.addIssuer(signer_A.address)
             await kycFacet.grantKyc(

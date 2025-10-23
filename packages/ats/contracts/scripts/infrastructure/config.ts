@@ -17,8 +17,13 @@
 import { z } from 'zod'
 import Configuration, { NETWORK_ALIASES } from '@configuration'
 import type { Endpoints } from '@configuration'
-import type { NetworkConfig } from '@scripts/infrastructure/types'
-import { CHAIN_IDS } from '@scripts/infrastructure/constants'
+
+// IMPORTANT: Use relative imports for intra-layer dependencies
+// Infrastructure files should import from each other using relative paths,
+// NOT '@scripts/infrastructure', to avoid circular dependency issues.
+// The @scripts/infrastructure alias points to index.ts, which exports from this file.
+import type { NetworkConfig } from './types'
+import { CHAIN_IDS } from './constants'
 
 /**
  * Zod schema for network configuration.

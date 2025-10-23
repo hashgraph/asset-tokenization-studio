@@ -18,7 +18,6 @@
 import {
     deployFacets,
     deployProxyAdmin,
-    getAllFacets,
     validateAddress,
     fetchHederaContractId,
     success,
@@ -27,11 +26,25 @@ import {
     error as logError,
 } from '@scripts/infrastructure'
 import {
+    getAllFacets,
+    getFacetDefinition,
+    getAllContracts,
+    getContractDefinition,
+} from '@scripts/domain'
+import {
     deployFactory,
     createEquityConfiguration,
     createBondConfiguration,
 } from '@scripts/domain'
 import type { DeploymentProvider } from '@scripts/infrastructure'
+
+// ATS Registry Provider for infrastructure operations
+const atsRegistry = {
+    getFacetDefinition,
+    getContractDefinition,
+    getAllFacets,
+    getAllContracts,
+}
 
 import { promises as fs } from 'fs'
 import { dirname } from 'path'
@@ -256,6 +269,7 @@ export async function deployWithExistingBlr(
             facetsResult = await deployFacets(provider, {
                 facetNames: allFacetNames,
                 useTimeTravel,
+                registry: atsRegistry,
             })
 
             if (!facetsResult.success) {

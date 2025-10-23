@@ -28,7 +28,7 @@ import {
     DividendRight,
     EquityDetailsDataParams,
     FactoryRegulationDataParams,
-} from '@scripts/domain/factory/types'
+} from '@scripts/domain'
 import { getRegulationData, getSecurityData } from './common.fixture'
 
 /**

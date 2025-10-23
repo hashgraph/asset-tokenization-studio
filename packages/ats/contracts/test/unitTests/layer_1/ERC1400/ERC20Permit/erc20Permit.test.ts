@@ -10,9 +10,9 @@ import {
     ControlList,
 } from '@typechain'
 import { ADDRESS_ZERO, ATS_ROLES } from '@scripts'
-import { deployEquityTokenFixture } from '@test/fixtures'
+import { deployEquityTokenFixture } from '@test'
 
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { executeRbac } from '@test'
 
 describe('ERC20Permit Tests', () => {
     let diamond: ResolverProxy
@@ -38,7 +38,7 @@ describe('ERC20Permit Tests', () => {
 
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_A.address],
             },
         ])
@@ -146,7 +146,7 @@ describe('ERC20Permit Tests', () => {
                 // Blacklisting accounts
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CONTROL_LIST, signer_A.address)
+                    .grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address)
                 await controlList
                     .connect(signer_A)
                     .addToControlList(signer_C.address)
@@ -170,7 +170,7 @@ describe('ERC20Permit Tests', () => {
             it('GIVEN a blocked spender account WHEN permit is called THEN the transaction fails with AccountIsBlocked', async () => {
                 await accessControlFacet
                     .connect(signer_A)
-                    .grantRole(ATS_ROLES.CONTROL_LIST, signer_A.address)
+                    .grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address)
                 await controlList
                     .connect(signer_A)
                     .addToControlList(signer_C.address)

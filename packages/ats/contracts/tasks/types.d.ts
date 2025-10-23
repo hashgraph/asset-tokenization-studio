@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Global type definitions for Hardhat test environment.
+ * Global type definitions for Hardhat tasks environment.
  *
  * This file ensures that TypeScript recognizes the type extensions
- * provided by Hardhat plugins, even when hardhat.config.ts is excluded
- * from compilation or in monorepo setups.
+ * provided by Hardhat plugins when working with tasks.
  *
  * The triple-slash directives load type definitions from:
  * - @nomiclabs/hardhat-ethers: Adds ethers to HardhatRuntimeEnvironment

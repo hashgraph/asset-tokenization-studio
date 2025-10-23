@@ -19,7 +19,21 @@ import {
     OperationResult,
     createBatchConfiguration,
 } from '@scripts/infrastructure'
-import { EQUITY_CONFIG_ID } from '@scripts/domain'
+import {
+    EQUITY_CONFIG_ID,
+    getAllFacets,
+    getFacetDefinition,
+    getAllContracts,
+    getContractDefinition,
+} from '@scripts/domain'
+
+// ATS Registry Provider for validation
+const atsRegistry = {
+    getFacetDefinition,
+    getContractDefinition,
+    getAllFacets,
+    getAllContracts,
+}
 
 /**
  * Equity-specific facets list (43 facets total).
@@ -145,5 +159,6 @@ export async function createEquityConfiguration(
         useTimeTravel,
         partialBatchDeploy,
         batchSize,
+        registry: atsRegistry,
     })
 }

@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture } from '@test'
+import { executeRbac } from '@test'
 import { ATS_ROLES, ADDRESS_ZERO } from '@scripts'
 import {
     ResolverProxy,
@@ -47,23 +47,23 @@ describe('Kyc Tests', () => {
 
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.KYC,
+                role: ATS_ROLES._KYC_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.INTERNAL_KYC_MANAGER,
+                role: ATS_ROLES._INTERNAL_KYC_MANAGER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.KYC_MANAGER,
+                role: ATS_ROLES._KYC_MANAGER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_C.address],
             },
         ])
@@ -158,13 +158,13 @@ describe('Kyc Tests', () => {
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
-        it('GIVEN an account without ATS_ROLES.INTERNAL_KYC_MANAGER WHEN activating internal kyc THEN it reverts with AccountHasNoRole', async () => {
+        it('GIVEN an account without ATS_ROLES._INTERNAL_KYC_MANAGER_ROLE WHEN activating internal kyc THEN it reverts with AccountHasNoRole', async () => {
             await expect(
                 kycFacet.connect(signer_C).activateInternalKyc()
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
-        it('GIVEN an account without ATS_ROLES.INTERNAL_KYC_MANAGER WHEN deactivating internal kyc THEN it reverts with AccountHasNoRole', async () => {
+        it('GIVEN an account without ATS_ROLES._INTERNAL_KYC_MANAGER_ROLE WHEN deactivating internal kyc THEN it reverts with AccountHasNoRole', async () => {
             await expect(
                 kycFacet.connect(signer_C).deactivateInternalKyc()
             ).to.be.rejectedWith('AccountHasNoRole')

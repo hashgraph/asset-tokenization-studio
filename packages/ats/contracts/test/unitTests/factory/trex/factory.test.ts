@@ -12,20 +12,17 @@ import {
 
 import { deployFullSuiteFixture } from './fixtures/deploy-full-suite.fixture'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployAtsInfrastructureFixture } from '@test/fixtures'
+import { deployAtsInfrastructureFixture } from '@test'
 import {
     ADDRESS_ZERO,
     EQUITY_CONFIG_ID,
     BOND_CONFIG_ID,
     ATS_ROLES,
 } from '@scripts'
-import { Rbac } from '@scripts/domain/factory/types'
-import {
-    getSecurityData,
-    getRegulationData,
-} from '@test/fixtures/tokens/common.fixture'
-import { getEquityDetails } from '@test/fixtures/tokens/equity.fixture'
-import { getBondDetails } from '@test/fixtures/tokens/bond.fixture'
+import { Rbac } from '@scripts/domain'
+import { getSecurityData, getRegulationData } from '@test'
+import { getEquityDetails } from '@test'
+import { getBondDetails } from '@test'
 
 describe('TREX Factory Tests', () => {
     let deployer: SignerWithAddress
@@ -65,7 +62,7 @@ describe('TREX Factory Tests', () => {
 
         init_rbacs = [
             {
-                role: ATS_ROLES.DEFAULT_ADMIN,
+                role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
                 members: [deployer.address],
             },
         ]
@@ -413,13 +410,13 @@ describe('TREX Factory Tests', () => {
             )
             expect(
                 await accessControlFacet.hasRole(
-                    ATS_ROLES.TREX_OWNER,
+                    ATS_ROLES._TREX_OWNER_ROLE,
                     deployer.address
                 )
             ).to.be.true
             expect(
                 await accessControlFacet.hasRole(
-                    ATS_ROLES.DEFAULT_ADMIN,
+                    ATS_ROLES._DEFAULT_ADMIN_ROLE,
                     deployer.address
                 )
             ).to.be.true
@@ -728,13 +725,13 @@ describe('TREX Factory Tests', () => {
             )
             expect(
                 await accessControlFacet.hasRole(
-                    ATS_ROLES.TREX_OWNER,
+                    ATS_ROLES._TREX_OWNER_ROLE,
                     deployer.address
                 )
             ).to.be.true
             expect(
                 await accessControlFacet.hasRole(
-                    ATS_ROLES.DEFAULT_ADMIN,
+                    ATS_ROLES._DEFAULT_ADMIN_ROLE,
                     deployer.address
                 )
             ).to.be.true

@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { ResolverProxy, TimeTravelFacet } from '@typechain'
-import { deployEquityTokenFixture } from '@test/fixtures'
+import { deployEquityTokenFixture } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { dateToUnixTimestamp } from '@scripts'
 

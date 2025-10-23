@@ -17,7 +17,6 @@ import {
     error as logError,
     extractRevertReason,
     formatGasUsage,
-    getFacetDefinition,
     info,
     section,
     success,
@@ -163,14 +162,6 @@ export async function registerFacets(
                         failed.push(facetName)
                         continue
                     }
-                }
-
-                // Check if facet is in registry
-                const facetDef = getFacetDefinition(facetName)
-                if (!facetDef) {
-                    warn(
-                        `${facetName} not found in registry, registering anyway`
-                    )
                 }
 
                 debug(`${facetName}: ${facetAddress}`)

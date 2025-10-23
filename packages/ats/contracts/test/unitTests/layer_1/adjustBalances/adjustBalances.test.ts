@@ -16,8 +16,8 @@ import {
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ATS_ROLES, dateToUnixTimestamp } from '@scripts'
-import { deployEquityTokenFixture, MAX_UINT256 } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture, MAX_UINT256 } from '@test'
+import { executeRbac } from '@test'
 
 const amount = 1
 const balanceOf_B_Original = [20 * amount, 200 * amount]
@@ -57,15 +57,15 @@ describe('Adjust Balances Tests', () => {
         signer_C = base.user2
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.KYC,
+                role: ATS_ROLES._KYC_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_A.address],
             },
         ])
@@ -121,7 +121,7 @@ describe('Adjust Balances Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            ATS_ROLES.ADJUSTMENT_BALANCE,
+            ATS_ROLES._ADJUSTMENT_BALANCE_ROLE,
             signer_A,
             signer_B,
             signer_C.address
@@ -138,7 +138,7 @@ describe('Adjust Balances Tests', () => {
     it('GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero', async () => {
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.ADJUSTMENT_BALANCE, signer_C.address)
+            .grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_C.address)
 
         // adjustBalances fails
         await expect(
@@ -151,13 +151,13 @@ describe('Adjust Balances Tests', () => {
     it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.ADJUSTMENT_BALANCE, signer_A.address)
+            .grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address)
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.ISSUER, signer_A.address)
+            .grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address)
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_A.address)
+            .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address)
 
         await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address)
         await kycFacet

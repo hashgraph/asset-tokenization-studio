@@ -16,11 +16,13 @@ export { deployAtsInfrastructureFixture } from './infrastructure.fixture'
 export {
     deployEquityTokenFixture,
     DEFAULT_EQUITY_PARAMS,
+    getEquityDetails,
 } from './tokens/equity.fixture'
 
 export {
     deployBondTokenFixture,
     DEFAULT_BOND_PARAMS,
+    getBondDetails,
 } from './tokens/bond.fixture'
 
 // Common token utilities
@@ -28,6 +30,9 @@ export {
     MAX_UINT256,
     TEST_PARTITIONS,
     TEST_AMOUNTS,
+    executeRbac,
+    getSecurityData,
+    getRegulationData,
 } from './tokens/common.fixture'
 
 // T-REX fixtures (legacy support)

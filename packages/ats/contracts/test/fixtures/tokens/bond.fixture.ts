@@ -10,13 +10,13 @@ import {
 import {
     DeployBondFromFactoryParams,
     deployBondFromFactory,
-} from '@scripts/domain/factory/deployBondToken'
+} from '@scripts/domain'
 import {
     BondDetailsDataParams,
     FactoryRegulationDataParams,
-} from '@scripts/domain/factory/types'
+} from '@scripts/domain'
 import { getRegulationData, getSecurityData } from './common.fixture'
-import { getDltTimestamp } from '@test/common'
+import { getDltTimestamp } from '@test'
 
 /**
  * Default bond token parameters.

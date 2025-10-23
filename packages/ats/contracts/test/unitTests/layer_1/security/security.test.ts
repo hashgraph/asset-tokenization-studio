@@ -3,8 +3,8 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { type ResolverProxy, type Security, IERC1410 } from '@typechain'
 import { ATS_ROLES } from '@scripts'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
-import { deployEquityTokenFixture } from '@test/fixtures'
+import { executeRbac } from '@test'
+import { deployEquityTokenFixture } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const _PARTITION_ID_1 =
@@ -37,7 +37,7 @@ describe('Security Tests', () => {
 
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.ISSUER,
+                role: ATS_ROLES._ISSUER_ROLE,
                 members: [signer_A.address],
             },
         ])

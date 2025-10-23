@@ -9,8 +9,8 @@ import {
 } from '@typechain'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { grantRoleAndPauseToken } from '../../../../common'
-import { deployEquityTokenFixture } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture } from '@test'
+import { executeRbac } from '@test'
 import { ATS_ROLES } from '@scripts'
 
 const documentName_1 =
@@ -42,7 +42,7 @@ describe('ERC1643 Tests', () => {
         signer_C = base.user2
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_B.address],
             },
         ])
@@ -82,7 +82,7 @@ describe('ERC1643 Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            ATS_ROLES.DOCUMENTER,
+            ATS_ROLES._DOCUMENTER_ROLE,
             signer_A,
             signer_B,
             signer_C.address
@@ -101,7 +101,7 @@ describe('ERC1643 Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            ATS_ROLES.DOCUMENTER,
+            ATS_ROLES._DOCUMENTER_ROLE,
             signer_A,
             signer_B,
             signer_C.address
@@ -116,7 +116,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document with no name WHEN setDocument THEN transaction fails with EmptyName', async () => {
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.DOCUMENTER, signer_C.address)
+            .grantRole(ATS_ROLES._DOCUMENTER_ROLE, signer_C.address)
 
         // add document fails
         await expect(
@@ -133,7 +133,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document with no URI WHEN setDocument THEN transaction fails with EmptyURI', async () => {
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.DOCUMENTER, signer_C.address)
+            .grantRole(ATS_ROLES._DOCUMENTER_ROLE, signer_C.address)
         // add document fails
         await expect(
             erc1643Facet
@@ -145,7 +145,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document with no HASH WHEN setDocument THEN transaction fails with EmptyHASH', async () => {
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.DOCUMENTER, signer_C.address)
+            .grantRole(ATS_ROLES._DOCUMENTER_ROLE, signer_C.address)
 
         // add document fails
         await expect(
@@ -162,7 +162,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document that does not exist WHEN removeDocument THEN transaction fails with DocumentDoesNotExist', async () => {
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.DOCUMENTER, signer_C.address)
+            .grantRole(ATS_ROLES._DOCUMENTER_ROLE, signer_C.address)
 
         // add document fails
         await expect(
@@ -174,7 +174,7 @@ describe('ERC1643 Tests', () => {
         // ADD TO LIST ------------------------------------------------------------------
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.DOCUMENTER, signer_C.address)
+            .grantRole(ATS_ROLES._DOCUMENTER_ROLE, signer_C.address)
 
         // check that Document not in the list
         let documents = await erc1643Facet.getAllDocuments()

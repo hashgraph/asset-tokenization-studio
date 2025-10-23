@@ -19,7 +19,21 @@ import {
     createBatchConfiguration,
     OperationResult,
 } from '@scripts/infrastructure'
-import { BOND_CONFIG_ID } from '@scripts/domain'
+import {
+    BOND_CONFIG_ID,
+    getAllFacets,
+    getFacetDefinition,
+    getAllContracts,
+    getContractDefinition,
+} from '@scripts/domain'
+
+// ATS Registry Provider for validation
+const atsRegistry = {
+    getFacetDefinition,
+    getContractDefinition,
+    getAllFacets,
+    getAllContracts,
+}
 
 /**
  * Bond-specific facets list (43 facets total).
@@ -145,5 +159,6 @@ export async function createBondConfiguration(
         useTimeTravel,
         partialBatchDeploy,
         batchSize,
+        registry: atsRegistry,
     })
 }

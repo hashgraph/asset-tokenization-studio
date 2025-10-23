@@ -8,7 +8,7 @@ import {
     ResolverProxy,
 } from '@typechain'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture } from '@test/fixtures'
+import { deployEquityTokenFixture } from '@test'
 import { ATS_ROLES, GAS_LIMIT } from '@scripts'
 
 describe('ExternalControlList Management Tests', () => {
@@ -41,7 +41,7 @@ describe('ExternalControlList Management Tests', () => {
 
         // Grant _CONTROL_LIST_MANAGER_ROLE to signer_A
         await base.accessControlFacet.grantRole(
-            ATS_ROLES.CONTROL_LIST_MANAGER,
+            ATS_ROLES._CONTROL_LIST_MANAGER_ROLE,
             signer_A.address
         )
 

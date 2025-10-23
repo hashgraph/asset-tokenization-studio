@@ -3,7 +3,7 @@ import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { type BondUSAReadFacet } from '@typechain'
 import { RegulationType, RegulationSubType, TIME_PERIODS_S } from '@scripts'
-import { deployEquityTokenFixture } from '@test/fixtures'
+import { deployEquityTokenFixture } from '@test'
 
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'

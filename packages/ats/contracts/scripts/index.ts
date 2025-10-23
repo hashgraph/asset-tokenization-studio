@@ -34,7 +34,7 @@
 
 // Infrastructure types and core
 export * from './infrastructure/types'
-export * from './infrastructure/registry'
+export * from './infrastructure/registryFactory'
 export * from './infrastructure/config'
 export * from './infrastructure/providers'
 export * from './infrastructure/constants'
@@ -51,6 +51,7 @@ export * from './infrastructure/operations/blrDeployment'
 export * from './infrastructure/operations/proxyAdminDeployment'
 export * from './infrastructure/operations/facetDeployment'
 export * from './infrastructure/operations/deployResolverProxy'
+export * from './infrastructure/operations/generateRegistryPipeline'
 
 // Infrastructure utilities
 export * from './infrastructure/utils/validation'
@@ -65,6 +66,9 @@ export * from './infrastructure/utils/time'
 
 // Domain constants
 export * from './domain/constants'
+
+// Domain registry (ATS-specific contract registry with helpers)
+export * from './domain/atsRegistry'
 
 // Equity configuration
 export * from './domain/equity/createConfiguration'

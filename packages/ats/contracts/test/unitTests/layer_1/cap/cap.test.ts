@@ -15,8 +15,8 @@ import {
 } from '@typechain'
 import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from '@scripts'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture, MAX_UINT256 } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture, MAX_UINT256 } from '@test'
+import { executeRbac } from '@test'
 
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -66,19 +66,19 @@ describe('Cap Tests', () => {
 
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.KYC,
+                role: ATS_ROLES._KYC_ROLE,
                 members: [signer_B.address],
             },
             {
-                role: ATS_ROLES.SSI_MANAGER,
+                role: ATS_ROLES._SSI_MANAGER_ROLE,
                 members: [signer_A.address],
             },
             {
-                role: ATS_ROLES.CAP,
+                role: ATS_ROLES._CAP_ROLE,
                 members: [signer_A.address],
             },
         ])
@@ -201,7 +201,7 @@ describe('Cap Tests', () => {
         it('GIVEN a token WHEN setMaxSupply to 0 THEN transaction fails with NewMaxSupplyCannotBeZero', async () => {
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CAP, signer_C.address)
+                .grantRole(ATS_ROLES._CAP_ROLE, signer_C.address)
 
             // add to list fails
             await expect(
@@ -214,10 +214,10 @@ describe('Cap Tests', () => {
         it('GIVEN a token WHEN setMaxSupply a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow', async () => {
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CAP, signer_C.address)
+                .grantRole(ATS_ROLES._CAP_ROLE, signer_C.address)
 
             await erc1410Facet.connect(signer_C).issueByPartition({
                 partition: _PARTITION_ID_1,
@@ -235,10 +235,10 @@ describe('Cap Tests', () => {
         it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow', async () => {
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CAP, signer_C.address)
+                .grantRole(ATS_ROLES._CAP_ROLE, signer_C.address)
 
             await erc1410Facet.connect(signer_C).issueByPartition({
                 partition: _PARTITION_ID_1,
@@ -263,10 +263,10 @@ describe('Cap Tests', () => {
         it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyByPartitionTooHigh', async () => {
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CAP, signer_C.address)
+                .grantRole(ATS_ROLES._CAP_ROLE, signer_C.address)
 
             // add to list fails
             await expect(
@@ -281,7 +281,7 @@ describe('Cap Tests', () => {
         it('GIVEN a token WHEN setMaxSupply THEN transaction succeeds', async () => {
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CAP, signer_C.address)
+                .grantRole(ATS_ROLES._CAP_ROLE, signer_C.address)
 
             await expect(capFacet.connect(signer_C).setMaxSupply(maxSupply * 4))
                 .to.emit(capFacet, 'MaxSupplySet')
@@ -295,7 +295,7 @@ describe('Cap Tests', () => {
         it('GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds', async () => {
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CAP, signer_C.address)
+                .grantRole(ATS_ROLES._CAP_ROLE, signer_C.address)
 
             await expect(
                 capFacet
@@ -373,16 +373,16 @@ describe('Cap Tests', () => {
         async function setPreBalanceAdjustment() {
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CAP, signer_C.address)
+                .grantRole(ATS_ROLES._CAP_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+                .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.SNAPSHOT, signer_A.address)
+                .grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address)
             await accessControlFacet
                 .connect(signer_A)
-                .grantRole(ATS_ROLES.ISSUER, signer_C.address)
+                .grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address)
 
             await capFacet.connect(signer_C).setMaxSupply(maxSupply)
             await capFacet

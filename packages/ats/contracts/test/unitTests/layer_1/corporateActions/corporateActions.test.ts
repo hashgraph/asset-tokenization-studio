@@ -10,8 +10,8 @@ import {
 import { ATS_ROLES } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployEquityTokenFixture } from '@test/fixtures'
-import { executeRbac } from '@test/fixtures/tokens/common.fixture'
+import { deployEquityTokenFixture } from '@test'
+import { executeRbac } from '@test'
 
 const actionType =
     '0x000000000000000000000000000000000000000000000000000000000000aa23'
@@ -37,7 +37,7 @@ describe('Corporate Actions Tests', () => {
         signer_C = base.user2
         await executeRbac(base.accessControlFacet, [
             {
-                role: ATS_ROLES.PAUSER,
+                role: ATS_ROLES._PAUSER_ROLE,
                 members: [signer_B.address],
             },
         ])
@@ -77,7 +77,7 @@ describe('Corporate Actions Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            ATS_ROLES.CORPORATE_ACTION,
+            ATS_ROLES._CORPORATE_ACTION_ROLE,
             signer_A,
             signer_B,
             signer_C.address
@@ -94,7 +94,7 @@ describe('Corporate Actions Tests', () => {
     it('GIVEN an account with corporateActions role WHEN addCorporateAction THEN transaction succeeds', async () => {
         await accessControlFacet
             .connect(signer_A)
-            .grantRole(ATS_ROLES.CORPORATE_ACTION, signer_C.address)
+            .grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address)
         // add to list
         await corporateActionsFacet
             .connect(signer_C)
