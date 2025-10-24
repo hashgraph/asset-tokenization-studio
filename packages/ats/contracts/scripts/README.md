@@ -1,20 +1,34 @@
 # ATS Contracts Deployment Scripts
 
-**Last Updated**: 2025-01-09
+**Last Updated**: 2025-01-24
+
+---
+
+**🚀 Quick Start for Developers**
+
+Looking to add a facet or create a new asset type? Check out the **[Developer Guide](DEVELOPER_GUIDE.md)** for step-by-step instructions:
+
+- **[How to Add/Remove a Facet from Existing Asset](DEVELOPER_GUIDE.md#scenario-1-addremove-facet-from-existing-asset)**
+- **[How to Create a New Asset Type (Configuration ID)](DEVELOPER_GUIDE.md#scenario-2-create-new-asset-type-configuration-id)**
+
+This README provides comprehensive reference documentation for the deployment system architecture and APIs.
+
+---
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Architecture](#architecture)
-3. [Registry System](#registry-system)
-4. [Domain Separation](#domain-separation)
-5. [Import Standards](#import-standards)
-6. [Quick Start](#quick-start)
-7. [Usage Modes](#usage-modes)
-8. [Directory Structure](#directory-structure)
-9. [Examples](#examples)
-10. [API Reference](#api-reference)
-11. [Troubleshooting](#troubleshooting)
+1. **[Developer Guide](DEVELOPER_GUIDE.md)** - Common development tasks (add facets, create assets)
+2. [Overview](#overview)
+3. [Architecture](#architecture)
+4. [Registry System](#registry-system)
+5. [Domain Separation](#domain-separation)
+6. [Import Standards](#import-standards)
+7. [Quick Start](#quick-start)
+8. [Usage Modes](#usage-modes)
+9. [Directory Structure](#directory-structure)
+10. [Examples](#examples)
+11. [API Reference](#api-reference)
+12. [Troubleshooting](#troubleshooting)
 
 ---
 
