@@ -26,7 +26,7 @@ import {
 } from '@scripts/infrastructure'
 
 // Domain layer - ATS-specific business logic
-import { EQUITY_CONFIG_ID, getFacetDefinition } from '@scripts/domain'
+import { EQUITY_CONFIG_ID, atsRegistry } from '@scripts/domain'
 
 // Test helpers
 import { TEST_SIZES } from '@test'
@@ -54,6 +54,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
     })
 
     describe('External Facet Registration', () => {
+        // ATS Registry provider for tests
         it('should register an external facet (not in ATS registry) with warning', async () => {
             // Deploy PauseFacet as if it were an external facet
             // (even though it's in the registry, we'll treat it as external for testing)
@@ -64,7 +65,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
             expect(externalFacetResult.success).to.be.true
 
             // Verify it exists in registry (for reference)
-            const definition = getFacetDefinition('PauseFacet')
+            const definition = atsRegistry.getFacetDefinition('PauseFacet')
             expect(definition).to.exist
 
             // Register the facet - should warn but succeed
@@ -73,6 +74,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                 facets: {
                     PauseFacet: externalFacetResult.address!,
                 },
+                registries: [atsRegistry],
             })
 
             // Should succeed despite being in registry
@@ -101,6 +103,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                     PauseFacet: pauseResult.address!,
                     KycFacet: kycResult.address!,
                 },
+                registries: [atsRegistry],
             })
 
             expect(registerResult.success).to.be.true
@@ -110,6 +113,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
     })
 
     describe('External Facet Deployment', () => {
+        // ATS Registry provider for tests
         it('should deploy external facets (not in ATS registry) with warning', async () => {
             // Deploy specific facets including an external one
             // PauseFacet is in the registry, but we're testing the code path
@@ -164,6 +168,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
     })
 
     describe('External Facet Configuration', () => {
+        // ATS Registry provider for tests
         it('should configure external facet (not in ATS registry) with warning', async () => {
             // Deploy and register a facet
             const pauseFacetResult = await deployContract(provider, {
@@ -175,6 +180,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                 facets: {
                     PauseFacet: pauseFacetResult.address!,
                 },
+                registries: [atsRegistry],
             })
 
             // Create configuration with external facet
@@ -186,6 +192,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                 facetAddresses: {
                     PauseFacet: pauseFacetResult.address!,
                 },
+                registry: atsRegistry,
             })
 
             // Should succeed (this is the key test!)
@@ -222,6 +229,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                     KycFacet: kycResult.address!,
                     PauseFacet: pauseResult.address!,
                 },
+                registries: [atsRegistry],
             })
 
             // Create mixed configuration
@@ -234,6 +242,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                     KycFacet: kycResult.address!,
                     PauseFacet: pauseResult.address!,
                 },
+                registry: atsRegistry,
             })
 
             // All facets should be included
@@ -268,6 +277,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                     PauseFacet: pauseResult.address!,
                     FreezeFacet: freezeResult.address!,
                 },
+                registries: [atsRegistry],
             })
 
             // Create configuration with only external facets
@@ -279,6 +289,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                     PauseFacet: pauseResult.address!,
                     FreezeFacet: freezeResult.address!,
                 },
+                registry: atsRegistry,
             })
 
             // Should work fine
@@ -292,6 +303,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
     })
 
     describe('End-to-End External Facet Workflow', () => {
+        // ATS Registry provider for tests
         it('should complete full deployment with external facets', async () => {
             // Step 1: Deploy ProxyAdmin
             const proxyAdminResult = await deployContract(provider, {
@@ -324,6 +336,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                     KycFacet: kycResult.address!,
                     PauseFacet: customFacetResult.address!, // External facet
                 },
+                registries: [atsRegistry],
             })
 
             expect(registerResult.success).to.be.true
@@ -338,6 +351,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                     KycFacet: kycResult.address!,
                     PauseFacet: customFacetResult.address!,
                 },
+                registry: atsRegistry,
             })
 
             // Verify configuration succeeded with all facets
@@ -377,6 +391,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                     AccessControlFacet: accessControlResult.address!,
                     PauseFacet: pauseResult.address!,
                 },
+                registries: [atsRegistry],
             })
 
             // Try to create configuration with some facets not deployed
@@ -389,6 +404,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                     // KycFacet intentionally not provided
                     PauseFacet: pauseResult.address!,
                 },
+                registry: atsRegistry,
             })
 
             // Should succeed with only the 2 deployed facets
@@ -409,6 +425,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
     })
 
     describe('Consistency with registerFacets Behavior', () => {
+        // ATS Registry provider for tests
         it('should have aligned behavior between registerFacets and createBatchConfiguration', async () => {
             // Deploy an external facet
             const externalFacetResult = await deployContract(provider, {
@@ -421,6 +438,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                 facets: {
                     PauseFacet: externalFacetResult.address!,
                 },
+                registries: [atsRegistry],
             })
 
             expect(registerResult.success).to.be.true
@@ -434,6 +452,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                 facetAddresses: {
                     PauseFacet: externalFacetResult.address!,
                 },
+                registry: atsRegistry,
             })
 
             // Both operations should succeed - this is the core consistency test
@@ -450,6 +469,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
     })
 
     describe('Error Handling', () => {
+        // ATS Registry provider for tests
         it('should fail when no facets have deployed addresses', async () => {
             const configResult = await createBatchConfiguration(blrContract, {
                 configurationId:
@@ -458,12 +478,15 @@ describe('External Facet Extensibility - Integration Tests', () => {
                 facetAddresses: {
                     // No address provided
                 },
+                registry: atsRegistry,
             })
 
             // Should fail with appropriate error
             expect(configResult.success).to.be.false
             if (!configResult.success) {
-                expect(configResult.error).to.equal('FACET_NOT_FOUND')
+                expect(configResult.error).to.equal('TRANSACTION_FAILED')
+                // Error message should mention the facet was not found in registry
+                expect(configResult.message).to.include('not found in registry')
             }
         })
 
@@ -472,6 +495,7 @@ describe('External Facet Extensibility - Integration Tests', () => {
                 configurationId: ethers.utils.formatBytes32String('NO_FACETS'),
                 facetNames: [],
                 facetAddresses: {},
+                registry: atsRegistry,
             })
 
             // Should fail with empty facet list error

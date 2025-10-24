@@ -35,6 +35,7 @@
 // Infrastructure types and core
 export * from './infrastructure/types'
 export * from './infrastructure/registryFactory'
+export * from './infrastructure/combineRegistries'
 export * from './infrastructure/config'
 export * from './infrastructure/providers'
 export * from './infrastructure/constants'

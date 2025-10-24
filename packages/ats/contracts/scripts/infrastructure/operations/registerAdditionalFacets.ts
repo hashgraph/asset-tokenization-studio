@@ -28,6 +28,8 @@ import {
     waitForTransaction,
     warn,
     DEFAULT_TRANSACTION_TIMEOUT,
+    type RegistryProvider,
+    combineRegistries,
 } from '@scripts/infrastructure'
 import type { RegisterFacetsResult } from './registerFacets'
 
@@ -52,6 +54,9 @@ export interface RegisterAdditionalFacetsOptions {
 
     /** Maximum number of existing facets to query (default: 1000) */
     maxExistingFacets?: number
+
+    /** Registry provider(s) for looking up facet resolver keys */
+    registries?: RegistryProvider[]
 }
 
 /**
@@ -105,6 +110,7 @@ export async function registerAdditionalFacets(
         overrides = {},
         allowOverwrite = false,
         maxExistingFacets = 1000,
+        registries = [],
     } = options
 
     const registered: string[] = []
@@ -112,6 +118,18 @@ export async function registerAdditionalFacets(
 
     try {
         section(`Registering Additional Facets in BLR`)
+
+        // Resolve registry (combine if multiple)
+        let registry: RegistryProvider | undefined
+        if (registries.length === 0) {
+            warn(
+                'No registries provided. Will generate facet keys from names (not recommended).'
+            )
+        } else if (registries.length === 1) {
+            registry = registries[0]
+        } else {
+            registry = combineRegistries(...registries)
+        }
 
         // Validate BLR address
         validateAddress(blrAddress, 'BusinessLogicResolver address')
@@ -211,11 +229,39 @@ export async function registerAdditionalFacets(
                     continue
                 }
 
-                // Generate facet key (same as BLR: keccak256(baseName))
+                // Get facet key from registry (contract constants) or generate from name
                 const baseName = facetName.replace(/TimeTravel$/, '')
-                const facetKey = ethers.utils.keccak256(
-                    ethers.utils.toUtf8Bytes(baseName)
-                )
+                let facetKey: string
+
+                if (registry) {
+                    // Get resolver key from registry (preferred method)
+                    const definition = registry.getFacetDefinition(baseName)
+                    if (!definition) {
+                        warn(
+                            `   ⚠️  ${facetName}: Not found in registry, will generate key from name`
+                        )
+                        facetKey = ethers.utils.keccak256(
+                            ethers.utils.toUtf8Bytes(baseName)
+                        )
+                    } else if (
+                        !definition.resolverKey ||
+                        !definition.resolverKey.value
+                    ) {
+                        warn(
+                            `   ⚠️  ${facetName}: Registry entry missing resolverKey, will generate key from name`
+                        )
+                        facetKey = ethers.utils.keccak256(
+                            ethers.utils.toUtf8Bytes(baseName)
+                        )
+                    } else {
+                        facetKey = definition.resolverKey.value
+                    }
+                } else {
+                    // Fallback: Generate key from name (not recommended)
+                    facetKey = ethers.utils.keccak256(
+                        ethers.utils.toUtf8Bytes(baseName)
+                    )
+                }
 
                 // Check for conflicts with existing facets
                 if (existingFacetsMap.has(facetKey)) {

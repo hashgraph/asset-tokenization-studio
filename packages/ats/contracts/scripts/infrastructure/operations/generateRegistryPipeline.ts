@@ -85,6 +85,22 @@ export interface RegistryGenerationConfig {
 
     /** Only generate facets, skip infrastructure contracts (default: false) */
     facetsOnly?: boolean
+
+    /**
+     * Include mock contracts in registry generation.
+     * When enabled, scans mockContractPaths for contracts and includes them
+     * in a separate MOCK_CONTRACTS registry.
+     * @default false
+     */
+    includeMocksInRegistry?: boolean
+
+    /**
+     * Glob patterns to find mock contracts.
+     * Only used if includeMocksInRegistry=true.
+     * Mock contracts should follow standard patterns (use constants files for resolver keys).
+     * @default ['**\/mocks/**\/*.sol', '**\/test/**\/*Mock*.sol']
+     */
+    mockContractPaths?: string[]
 }
 
 /**
@@ -99,6 +115,9 @@ export interface RegistryGenerationStats {
 
     /** Total number of storage wrappers in registry */
     totalStorageWrappers: number
+
+    /** Total number of mock contracts in registry */
+    totalMocks: number
 
     /** Total number of unique roles found */
     totalRoles: number
@@ -146,8 +165,11 @@ export interface RegistryGenerationResult {
  * Default configuration for registry generation.
  */
 export const DEFAULT_REGISTRY_CONFIG: Required<
-    Omit<RegistryGenerationConfig, 'categoryDetector' | 'layerDetector'>
-> = {
+    Omit<
+        RegistryGenerationConfig,
+        'categoryDetector' | 'layerDetector' | 'mockContractPaths'
+    >
+> & { mockContractPaths: string[] } = {
     contractsPath: './contracts',
     includePaths: ['**/*.sol'],
     excludePaths: [
@@ -170,6 +192,12 @@ export const DEFAULT_REGISTRY_CONFIG: Required<
     moduleName: '@scripts/infrastructure',
     logLevel: 'INFO',
     facetsOnly: false,
+    includeMocksInRegistry: false,
+    mockContractPaths: [
+        '**/mocks/**/*.sol',
+        '**/test/**/*Mock*.sol',
+        '**/test/**/*mock*.sol',
+    ],
 }
 
 /**
@@ -436,6 +464,40 @@ export async function generateRegistryPipeline(
         info('Step 5.5: Skipping Storage Wrapper extraction (disabled)')
     }
 
+    // Step 5.6: Extract mock contracts metadata (if enabled)
+    let mockMetadata: ContractMetadata[] = []
+
+    if (fullConfig.includeMocksInRegistry) {
+        info('Step 5.6: Extracting mock contracts metadata...')
+
+        // Use already-categorized test contracts
+        // These were properly categorized in Step 2 (categorizeContracts)
+        // which now checks for test/mock BEFORE checking for facets
+        const mockContracts = categorized.test
+
+        info(`  Found ${mockContracts.length} mock/test contract files`)
+
+        // Extract metadata for mock contracts
+        mockMetadata = mockContracts.map((contract) =>
+            extractMetadata(contract, false, allResolverKeys, contractsMap)
+        )
+
+        info(`  Extracted metadata for ${mockMetadata.length} mock contracts`)
+
+        // Warn about mocks without resolver keys (may be intentional)
+        const missingKeys = mockMetadata.filter((m) => !m.resolverKey)
+        if (missingKeys.length > 0) {
+            warn(
+                `${missingKeys.length} mock contracts without resolver keys: ${missingKeys.map((m) => m.name).join(', ')}`
+            )
+            warnings.push(
+                `Mock contracts without resolver keys: ${missingKeys.map((m) => m.name).join(', ')}`
+            )
+        }
+    } else {
+        info('Step 5.6: Skipping mock contract extraction (disabled)')
+    }
+
     // Step 6: Scan standalone constant files for roles
     info('Step 6: Scanning standalone role constants...')
 
@@ -480,6 +542,7 @@ export async function generateRegistryPipeline(
         infrastructureMetadata,
         allRoles,
         storageWrapperMetadata,
+        mockMetadata,
         fullConfig.moduleName
     )
     info(`  Generated ${registryCode.split('\n').length} lines of code`)
@@ -491,6 +554,7 @@ export async function generateRegistryPipeline(
     const summaryTable: string[][] = [
         ['Total facets', summary.totalFacets.toString()],
         ['Total infrastructure', summary.totalInfrastructure.toString()],
+        ['Total mocks', mockMetadata.length.toString()],
         ['With TimeTravel', summary.withTimeTravel.toString()],
         ['With roles', summary.withRoles.toString()],
     ]
@@ -562,6 +626,7 @@ export async function generateRegistryPipeline(
             totalFacets: facetMetadata.length,
             totalInfrastructure: infrastructureMetadata.length,
             totalStorageWrappers: storageWrapperMetadata.length,
+            totalMocks: mockMetadata.length,
             totalRoles: allRoles.size,
             totalResolverKeys: allResolverKeys.size,
             withTimeTravel,

@@ -215,12 +215,94 @@ export const {
 
 **Result**: ~20 lines of code vs ~300 lines of manual implementation (93% reduction).
 
+### Multi-Registry Support
+
+**New in v1.17.0**: Combine multiple registries for projects using ATS facets + custom facets.
+
+When deploying systems that mix ATS facets with your own custom facets, you need to provide resolver keys for ALL facets. The `combineRegistries` utility merges multiple registry providers automatically.
+
+#### Basic Usage
+
+```typescript
+import {
+    registerFacets,
+    combineRegistries,
+} from '@hashgraph/asset-tokenization-contracts/scripts'
+import {
+    atsRegistry, // Pre-configured ATS registry provider
+} from '@hashgraph/asset-tokenization-contracts/scripts/domain'
+
+// Your custom registry provider
+import {
+    getFacetDefinition as getCustomFacet,
+    getAllFacets as getAllCustomFacets,
+} from './myRegistry'
+const customRegistry = {
+    getFacetDefinition: getCustomFacet,
+    getAllFacets: getAllCustomFacets,
+}
+
+// Register facets from both registries
+await registerFacets(provider, {
+    blrAddress: '0x123...',
+    facets: {
+        AccessControlFacet: '0xabc...', // From ATS
+        CustomComplianceFacet: '0xdef...', // From your registry
+    },
+    registries: [atsRegistry, customRegistry], // Automatically combined
+})
+```
+
+#### Manual Registry Combination
+
+For more control over conflict resolution:
+
+```typescript
+import { combineRegistries } from '@hashgraph/asset-tokenization-contracts/scripts'
+
+// Strict mode - throw on conflicts
+const combined = combineRegistries(
+    atsRegistry,
+    customRegistry,
+    { onConflict: 'error' }
+)
+
+// Use combined registry
+await registerFacets(provider, {
+    blrAddress: '0x123...',
+    facets: { ... },
+    registries: [combined]
+})
+```
+
+#### Conflict Resolution Strategies
+
+| Strategy           | Behavior                                           |
+| ------------------ | -------------------------------------------------- |
+| `'warn'` (default) | Log warning, use last registry's definition        |
+| `'error'`          | Throw error if facet exists in multiple registries |
+| `'first'`          | Use first registry's definition, ignore subsequent |
+| `'last'`           | Use last registry's definition, overwrite previous |
+
+#### Detecting Conflicts
+
+```typescript
+import { getRegistryConflicts } from '@hashgraph/asset-tokenization-contracts/scripts'
+
+const conflicts = getRegistryConflicts(atsRegistry, customRegistry)
+if (conflicts.length > 0) {
+    console.warn('Conflicting facets:', conflicts)
+    // Handle conflicts before combining
+}
+```
+
 ### Registry Files
 
 - **`atsRegistry.data.ts`** - Auto-generated registry data (do not edit manually)
 - **`atsRegistry.ts`** - ATS-specific registry wrapper with helpers
 - **`registryFactory.ts`** - Generic factory for creating registry helpers
 - **`generateRegistryPipeline.ts`** - Reusable pipeline for generating registries
+- **`combineRegistries.ts`** - Multi-registry merging utilities (v1.17.0+)
 
 ---
 

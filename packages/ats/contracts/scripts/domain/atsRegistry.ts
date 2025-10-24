@@ -76,3 +76,39 @@ export const {
     INFRASTRUCTURE_CONTRACTS,
     STORAGE_WRAPPER_REGISTRY
 )
+
+// Import RegistryProvider type for type annotation
+import type { RegistryProvider } from '../infrastructure/types'
+
+/**
+ * ATS Registry Provider.
+ *
+ * Pre-configured registry provider implementing the RegistryProvider interface.
+ * Use this when you need to pass a registry to infrastructure operations like
+ * registerFacets, registerAdditionalFacets, or createBatchConfiguration.
+ *
+ * This is the canonical ATS registry that downstream projects should combine
+ * with their custom registries using combineRegistries().
+ *
+ * @example
+ * ```typescript
+ * // Use directly in operations
+ * import { atsRegistry, registerFacets } from '@hashgraph/asset-tokenization-contracts/scripts'
+ *
+ * await registerFacets(provider, {
+ *     blrAddress,
+ *     facets: deployedFacets,
+ *     registries: [atsRegistry]
+ * })
+ *
+ * // Combine with custom registry
+ * import { atsRegistry, combineRegistries } from '@hashgraph/asset-tokenization-contracts/scripts'
+ * import { customRegistry } from './myRegistry'
+ *
+ * const combined = combineRegistries(atsRegistry, customRegistry)
+ * ```
+ */
+export const atsRegistry: RegistryProvider = {
+    getFacetDefinition,
+    getAllFacets,
+}

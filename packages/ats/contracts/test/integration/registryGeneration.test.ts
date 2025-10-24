@@ -59,7 +59,7 @@ describe('Registry Generation Pipeline - Integration Tests', () => {
             expect(result.code).to.include('SPDX-License-Identifier')
             expect(result.code).to.include('AUTO-GENERATED')
             expect(result.code).to.include('FACET_REGISTRY')
-            expect(result.code).to.include('CONTRACT_REGISTRY')
+            expect(result.code).to.include('INFRASTRUCTURE_CONTRACTS')
             expect(result.code).to.include('STORAGE_WRAPPER_REGISTRY')
             expect(result.code).to.include('export const ROLES')
             expect(result.code).to.include('@scripts/infrastructure')
@@ -286,6 +286,166 @@ contract MyContract {}
             expect(excludes).to.include('**/*.t.sol')
             expect(excludes).to.include('**/*.s.sol')
         })
+    })
+
+    describe('Mock Contracts Registry', () => {
+        it('should generate registry without mocks by default', async () => {
+            const result = await generateRegistryPipeline(
+                {
+                    contractsPath,
+                    logLevel: 'SILENT',
+                },
+                false
+            )
+
+            // Mocks disabled by default
+            expect(result.stats.totalMocks).to.equal(0)
+            expect(result.code).to.not.include('MOCK_CONTRACTS')
+        }).timeout(30000)
+
+        it('should include mocks when enabled', async () => {
+            const result = await generateRegistryPipeline(
+                {
+                    contractsPath,
+                    includeMocksInRegistry: true,
+                    mockContractPaths: [
+                        '**/mocks/**/*.sol',
+                        '**/test/**/*Mock*.sol',
+                    ],
+                    logLevel: 'SILENT',
+                },
+                false
+            )
+
+            // Should find mock contracts
+            expect(result.stats.totalMocks).to.be.greaterThan(0)
+            expect(result.code).to.include('MOCK_CONTRACTS')
+            expect(result.code).to.include('Record<string, ContractDefinition>')
+            expect(result.code).to.include('TOTAL_MOCKS')
+            expect(result.code).to.include('These contracts are test utilities')
+        }).timeout(30000)
+
+        it('should handle mock contracts without resolver keys', async () => {
+            const result = await generateRegistryPipeline(
+                {
+                    contractsPath,
+                    includeMocksInRegistry: true,
+                    mockContractPaths: ['**/mocks/**/*.sol'],
+                    logLevel: 'SILENT',
+                },
+                false
+            )
+
+            // Should succeed even if mocks don't have resolver keys
+            expect(result.stats.totalMocks).to.be.greaterThan(0)
+
+            // May have warnings about missing keys
+            const mockWarnings = result.warnings.filter((w) =>
+                w.includes('mock')
+            )
+            expect(mockWarnings).to.be.an('array')
+        }).timeout(30000)
+
+        it('should use custom mock contract paths', async () => {
+            const result = await generateRegistryPipeline(
+                {
+                    contractsPath,
+                    includeMocksInRegistry: true,
+                    mockContractPaths: ['**/mocks/MockedExternalKycList.sol'], // Specific file
+                    logLevel: 'SILENT',
+                },
+                false
+            )
+
+            // Should find at least the specified mock
+            expect(result.stats.totalMocks).to.be.greaterThanOrEqual(1)
+            expect(result.code).to.include('MockedExternalKycList')
+        }).timeout(30000)
+
+        it('should generate valid TypeScript for mock registry', async () => {
+            const result = await generateRegistryPipeline(
+                {
+                    contractsPath,
+                    includeMocksInRegistry: true,
+                    logLevel: 'SILENT',
+                },
+                false
+            )
+
+            // Check TypeScript structure for mocks
+            if (result.stats.totalMocks > 0) {
+                expect(result.code).to.include(
+                    'export const MOCK_CONTRACTS: Record<string, FacetDefinition>'
+                )
+                expect(result.code).to.include(
+                    'export const TOTAL_MOCKS = ' +
+                        result.stats.totalMocks +
+                        ' as const'
+                )
+
+                // Should have proper structure
+                expect(result.code).to.match(/MOCK_CONTRACTS.*=.*{/s)
+                expect(result.code).to.match(/name:.*,/s)
+                expect(result.code).to.match(/methods:.*\[/s)
+            }
+        }).timeout(30000)
+
+        it('should include mock count in header when mocks present', async () => {
+            const result = await generateRegistryPipeline(
+                {
+                    contractsPath,
+                    includeMocksInRegistry: true,
+                    logLevel: 'SILENT',
+                },
+                false
+            )
+
+            if (result.stats.totalMocks > 0) {
+                // Header should mention mocks
+                expect(result.code).to.match(
+                    /\* Mocks: \d+/,
+                    'Header should include mock count'
+                )
+            }
+        }).timeout(30000)
+
+        it('should categorize mock facets as mocks, not production facets', async () => {
+            // This test ensures MockXxxFacet contracts in /mocks/ directory
+            // are categorized as mocks, not as production facets
+            const result = await generateRegistryPipeline(
+                {
+                    contractsPath,
+                    includeMocksInRegistry: true,
+                    mockContractPaths: ['**/mocks/**/*.sol'],
+                    logLevel: 'SILENT',
+                },
+                false
+            )
+
+            // Verify mocks were found
+            expect(result.stats.totalMocks).to.be.greaterThan(0)
+
+            // Check that MockedExternalKycList is in MOCK_CONTRACTS
+            expect(result.code).to.include('MOCK_CONTRACTS')
+            expect(result.code).to.match(
+                /MOCK_CONTRACTS.*MockedExternalKycList/s,
+                'MockedExternalKycList should be in MOCK_CONTRACTS'
+            )
+
+            // Verify mock contracts don't appear in FACET_REGISTRY
+            // Extract FACET_REGISTRY section
+            const facetRegistryMatch = result.code.match(
+                /export const FACET_REGISTRY.*?(?=export const (?:INFRASTRUCTURE|STORAGE|MOCK|ROLES|TOTAL))/s
+            )
+            if (facetRegistryMatch) {
+                const facetRegistry = facetRegistryMatch[0]
+                // Should NOT contain mocked contracts
+                expect(facetRegistry).to.not.include('MockedExternalKycList')
+                expect(facetRegistry).to.not.include('MockedBlacklist')
+                expect(facetRegistry).to.not.include('MockedExternalPause')
+                expect(facetRegistry).to.not.include('MockedWhitelist')
+            }
+        }).timeout(30000)
     })
 
     describe('Real-world Usage Scenarios', () => {

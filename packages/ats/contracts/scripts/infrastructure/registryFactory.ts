@@ -92,10 +92,15 @@ export function createRegistryHelpers<
         string,
         StorageWrapperDefinition
     > = Record<string, never>,
+    TMockRegistry extends Record<string, FacetDefinition> = Record<
+        string,
+        never
+    >,
 >(
     facetRegistry: TFacetRegistry,
     contractRegistry: TContractRegistry,
-    storageWrapperRegistry?: TStorageWrapperRegistry
+    storageWrapperRegistry?: TStorageWrapperRegistry,
+    mockRegistry?: TMockRegistry
 ) {
     return {
         /**
@@ -205,6 +210,42 @@ export function createRegistryHelpers<
             return storageWrapperRegistry
                 ? Object.keys(storageWrapperRegistry).length
                 : 0
+        },
+
+        /**
+         * Get mock contract definition by name.
+         *
+         * @param name - Mock contract name (e.g., 'MockedExternalKycList')
+         * @returns FacetDefinition if found, undefined otherwise
+         */
+        getMockDefinition(name: string): FacetDefinition | undefined {
+            return mockRegistry?.[name]
+        },
+
+        /**
+         * Get all mock contracts.
+         *
+         * @returns Array of all FacetDefinitions for mocks
+         */
+        getAllMocks(): FacetDefinition[] {
+            return mockRegistry ? Object.values(mockRegistry) : []
+        },
+
+        /**
+         * Check if a mock contract exists in the registry.
+         *
+         * @param name - Mock contract name to check
+         * @returns true if mock exists, false otherwise
+         */
+        hasMock(name: string): boolean {
+            return mockRegistry ? name in mockRegistry : false
+        },
+
+        /**
+         * Total number of mock contracts in the registry.
+         */
+        get MOCK_CONTRACTS_COUNT(): number {
+            return mockRegistry ? Object.keys(mockRegistry).length : 0
         },
     }
 }

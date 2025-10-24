@@ -39,9 +39,8 @@ import {
     EQUITY_CONFIG_ID,
     BOND_CONFIG_ID,
     FACET_REGISTRY,
-    getFacetDefinition,
-    getAllFacets,
     FACET_REGISTRY_COUNT,
+    atsRegistry,
 } from '@scripts/domain'
 
 // Test helpers
@@ -58,6 +57,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
     })
 
     describe('Utilities - Naming', () => {
+        // ATS Registry provider for tests
         it('should generate TimeTravel variant names correctly', () => {
             expect(getTimeTravelVariant('AccessControlFacet')).to.equal(
                 'AccessControlFacetTimeTravel'
@@ -115,6 +115,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
     })
 
     describe('Utilities - Validation', () => {
+        // ATS Registry provider for tests
         it('should validate correct Ethereum addresses', () => {
             expect(() =>
                 validateAddress(deployer.address, 'deployer')
@@ -148,6 +149,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
     })
 
     describe('Registry', () => {
+        // ATS Registry provider for tests
         it('should contain expected Phase 1 facets', () => {
             expect(FACET_REGISTRY).to.have.property('AccessControlFacet')
             expect(FACET_REGISTRY).to.have.property('KycFacet')
@@ -157,19 +159,20 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
         })
 
         it('should have correct facet metadata', () => {
-            const accessControl = getFacetDefinition('AccessControlFacet')!
+            const accessControl =
+                atsRegistry.getFacetDefinition('AccessControlFacet')!
             expect(accessControl).to.exist
             expect(accessControl.name).to.equal('AccessControlFacet')
             // Description is optional (only present if natspec @notice or @title exists)
 
-            const kyc = getFacetDefinition('KycFacet')!
+            const kyc = atsRegistry.getFacetDefinition('KycFacet')!
             expect(kyc).to.exist
             expect(kyc.name).to.equal('KycFacet')
             // Description is optional (only present if natspec @notice or @title exists)
         })
 
         it('should return all facets', () => {
-            const allFacets = getAllFacets()
+            const allFacets = atsRegistry.getAllFacets()
             expect(allFacets.length).to.equal(FACET_REGISTRY_COUNT)
 
             // Verify each facet has required fields
@@ -180,16 +183,19 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
         })
 
         it('should get specific facet by name', () => {
-            const accessControl = getFacetDefinition('AccessControlFacet')
+            const accessControl =
+                atsRegistry.getFacetDefinition('AccessControlFacet')
             expect(accessControl).to.exist
             expect(accessControl!.name).to.equal('AccessControlFacet')
 
-            const nonExistent = getFacetDefinition('NonExistentFacet')
+            const nonExistent =
+                atsRegistry.getFacetDefinition('NonExistentFacet')
             expect(nonExistent).to.be.undefined
         })
     })
 
     describe('Atomic Operations - deployContract', () => {
+        // ATS Registry provider for tests
         it('should deploy a simple contract successfully', async () => {
             const result = await deployContract(provider, {
                 contractName: 'ProxyAdmin',
@@ -237,6 +243,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
     })
 
     describe('Atomic Operations - deployProxy', () => {
+        // ATS Registry provider for tests
         it('should deploy complete proxy setup (implementation, proxy, proxyAdmin)', async () => {
             const result = await deployProxy(provider, {
                 implementationContract: 'BusinessLogicResolver',
@@ -286,6 +293,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
     })
 
     describe('Atomic Operations - registerFacets', () => {
+        // ATS Registry provider for tests
         it('should register multiple facets in BLR', async () => {
             // Deploy BLR
             const blrResult = await deployProxy(provider, {
@@ -314,6 +322,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
                     AccessControlFacet: facet1.address!,
                     KycFacet: facet2.address!,
                 },
+                registries: [atsRegistry],
             })
 
             expect(registerResult.success).to.be.true
@@ -343,6 +352,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
                 facets: {
                     PauseFacet: facetResult.address!,
                 },
+                registries: [atsRegistry],
             })
 
             expect(registerResult.success).to.be.true
@@ -352,6 +362,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
     })
 
     describe('Domain Operations', () => {
+        // ATS Registry provider for tests
         it('should deploy BLR with proxy and initialization', async () => {
             const result = await deployBlr(provider, {})
 
@@ -444,6 +455,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
     })
 
     describe('Complete Workflow', () => {
+        // ATS Registry provider for tests
         it('should execute basic deployment pipeline', async () => {
             // Step 1: Deploy ProxyAdmin
             const proxyAdminResult = await deployContract(provider, {
@@ -484,6 +496,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
             const registerResult = await registerFacets(provider, {
                 blrAddress: blrResult.proxyAddress,
                 facets: facetResults,
+                registries: [atsRegistry],
             })
             expect(registerResult.success).to.be.true
             expect(registerResult.registered.length).to.equal(TEST_SIZES.TRIPLE)
@@ -526,6 +539,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
             const registerResult = await registerFacets(provider, {
                 blrAddress: blrResult.proxyAddress,
                 facets: facetResults,
+                registries: [atsRegistry],
             })
 
             expect(registerResult.success).to.be.true
@@ -534,6 +548,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
     })
 
     describe('Error Handling', () => {
+        // ATS Registry provider for tests
         it('should provide clear error messages for deployment failures', async () => {
             const result = await deployContract(provider, {
                 contractName: 'ContractThatDoesNotExist',
@@ -565,6 +580,7 @@ describe('Phase 1 Deployment System - Integration Tests', () => {
             const registerResult = await registerFacets(provider, {
                 blrAddress: blrResult.proxyAddress,
                 facets: {},
+                registries: [atsRegistry],
             })
 
             expect(registerResult.success).to.be.true

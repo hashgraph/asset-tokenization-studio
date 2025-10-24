@@ -27,6 +27,9 @@ import {
     registerAdditionalFacets,
 } from '@scripts/infrastructure'
 
+// Domain layer - ATS-specific registry and helpers
+import { atsRegistry, getFacetDefinition } from '@scripts/domain'
+
 // Test helpers
 import { TEST_SIZES, BLR_VERSIONS } from '@test'
 
@@ -55,6 +58,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
     })
 
     describe('Query and Merge', () => {
+        // ATS Registry provider for tests
         it('should query existing facets from BLR and merge with new ones', async () => {
             // Step 1: Register initial set of 3 facets
             const accessControl = await deployContract(provider, {
@@ -74,6 +78,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                     KycFacet: kyc.address!,
                     PauseFacet: pause.address!,
                 },
+                registries: [atsRegistry],
             })
 
             // Verify initial state: 3 facets registered
@@ -94,6 +99,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                     FreezeFacet: freeze.address!,
                     LockFacet: lock.address!,
                 },
+                registries: [atsRegistry],
             })
 
             // Verify success
@@ -133,6 +139,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                     AccessControlFacet: accessControl.address!,
                     KycFacet: kyc.address!,
                 },
+                registries: [atsRegistry],
             })
 
             expect(result.success).to.be.true
@@ -150,6 +157,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             await registerFacets(provider, {
                 blrAddress,
                 facets: { AccessControlFacet: facet1.address! },
+                registries: [atsRegistry],
             })
 
             // Get initial version
@@ -163,6 +171,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             const result = await registerAdditionalFacets(provider, {
                 blrAddress,
                 newFacets: { KycFacet: facet2.address! },
+                registries: [atsRegistry],
             })
 
             expect(result.success).to.be.true
@@ -186,6 +195,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                     AccessControlFacet: facet1.address!,
                     KycFacet: facet2.address!,
                 },
+                registries: [atsRegistry],
             })
 
             let count = await blrContract.getBusinessLogicCount()
@@ -204,6 +214,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                     PauseFacet: facet3.address!,
                     FreezeFacet: facet4.address!,
                 },
+                registries: [atsRegistry],
             })
 
             count = await blrContract.getBusinessLogicCount()
@@ -216,6 +227,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             await registerAdditionalFacets(provider, {
                 blrAddress,
                 newFacets: { LockFacet: facet5.address! },
+                registries: [atsRegistry],
             })
 
             count = await blrContract.getBusinessLogicCount()
@@ -245,7 +257,11 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                 facets[name] = result.address!
             }
 
-            await registerFacets(provider, { blrAddress, facets })
+            await registerFacets(provider, {
+                blrAddress,
+                facets,
+                registries: [atsRegistry],
+            })
 
             // Verify 10 facets registered
             const initialCount = await blrContract.getBusinessLogicCount()
@@ -265,6 +281,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                     ERC1410ReadFacet: erc1410.address!,
                     ERC1594Facet: erc1594.address!,
                 },
+                registries: [atsRegistry],
             })
 
             expect(result.success).to.be.true
@@ -275,6 +292,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
     })
 
     describe('Conflict Detection', () => {
+        // ATS Registry provider for tests
         it('should detect conflicts (same facet name, different address)', async () => {
             // Register facet at address A
             const facetA = await deployContract(provider, {
@@ -283,6 +301,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             await registerFacets(provider, {
                 blrAddress,
                 facets: { AccessControlFacet: facetA.address! },
+                registries: [atsRegistry],
             })
 
             // Deploy different instance at address B
@@ -295,6 +314,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                 blrAddress,
                 newFacets: { AccessControlFacet: facetB.address! },
                 allowOverwrite: false,
+                registries: [atsRegistry],
             })
 
             // Should fail with conflict error
@@ -312,6 +332,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             await registerFacets(provider, {
                 blrAddress,
                 facets: { KycFacet: facet1.address! },
+                registries: [atsRegistry],
             })
 
             // Deploy new version
@@ -323,6 +344,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             const result = await registerAdditionalFacets(provider, {
                 blrAddress,
                 newFacets: { KycFacet: facet2.address! },
+                registries: [atsRegistry],
             })
 
             expect(result.success).to.be.false
@@ -337,6 +359,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             await registerFacets(provider, {
                 blrAddress,
                 facets: { PauseFacet: facet1.address! },
+                registries: [atsRegistry],
             })
 
             // Deploy new version
@@ -349,6 +372,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                 blrAddress,
                 newFacets: { PauseFacet: facet2.address! },
                 allowOverwrite: true,
+                registries: [atsRegistry],
             })
 
             // Should succeed
@@ -360,9 +384,8 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             expect(count).to.equal(TEST_SIZES.SINGLE)
 
             // Verify facet resolves to new address
-            const facetKey = ethers.utils.keccak256(
-                ethers.utils.toUtf8Bytes('PauseFacet')
-            )
+            const facetDefinition = getFacetDefinition('PauseFacet')
+            const facetKey = facetDefinition!.resolverKey!.value
             const resolvedAddress =
                 await blrContract.resolveLatestBusinessLogic(facetKey)
             expect(resolvedAddress).to.equal(facet2.address)
@@ -376,6 +399,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             await registerFacets(provider, {
                 blrAddress,
                 facets: { FreezeFacet: facet.address! },
+                registries: [atsRegistry],
             })
 
             const initialCount = await blrContract.getBusinessLogicCount()
@@ -384,6 +408,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             const result = await registerAdditionalFacets(provider, {
                 blrAddress,
                 newFacets: { FreezeFacet: facet.address! },
+                registries: [atsRegistry],
             })
 
             // Should succeed but not add duplicate
@@ -400,6 +425,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
     })
 
     describe('Error Handling', () => {
+        // ATS Registry provider for tests
         it('should fail if new facet address is invalid', async () => {
             const result = await registerAdditionalFacets(provider, {
                 blrAddress,
@@ -449,6 +475,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             await registerFacets(provider, {
                 blrAddress,
                 facets: { LockFacet: facet1.address! },
+                registries: [atsRegistry],
             })
 
             // Try to register different address for same facet
@@ -462,6 +489,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                     LockFacet: facet2.address!,
                 },
                 allowOverwrite: false,
+                registries: [atsRegistry],
             })
 
             expect(result.success).to.be.false
@@ -473,6 +501,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
     })
 
     describe('Integration with Existing Workflows', () => {
+        // ATS Registry provider for tests
         it('should work correctly after initial registerFacets call', async () => {
             // Use standard registerFacets first
             const facets1 = ['AccessControlFacet', 'KycFacet', 'PauseFacet']
@@ -488,6 +517,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             await registerFacets(provider, {
                 blrAddress,
                 facets: addresses1,
+                registries: [atsRegistry],
             })
 
             // Then use registerAdditionalFacets to extend
@@ -504,6 +534,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             const result = await registerAdditionalFacets(provider, {
                 blrAddress,
                 newFacets: addresses2,
+                registries: [atsRegistry],
             })
 
             expect(result.success).to.be.true
@@ -532,6 +563,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                     KycFacet: kyc.address!,
                     PauseFacet: pause.address!,
                 },
+                registries: [atsRegistry],
             })
 
             // Add more facets
@@ -548,6 +580,7 @@ describe('registerAdditionalFacets - Integration Tests', () => {
                     FreezeFacet: freeze.address!,
                     LockFacet: lock.address!,
                 },
+                registries: [atsRegistry],
             })
 
             expect(addResult.success).to.be.true
@@ -562,9 +595,8 @@ describe('registerAdditionalFacets - Integration Tests', () => {
             ]
 
             for (const name of facetNames) {
-                const key = ethers.utils.keccak256(
-                    ethers.utils.toUtf8Bytes(name)
-                )
+                const facetDefinition = getFacetDefinition(name)
+                const key = facetDefinition!.resolverKey!.value
                 const address =
                     await blrContract.resolveLatestBusinessLogic(key)
                 expect(address).to.not.equal(ethers.constants.AddressZero)

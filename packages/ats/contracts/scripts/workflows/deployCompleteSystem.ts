@@ -27,25 +27,12 @@ import {
     fetchHederaContractId,
 } from '@scripts/infrastructure'
 import {
-    getAllFacets,
-    getFacetDefinition,
-    getAllContracts,
-    getContractDefinition,
-} from '@scripts/domain'
-import {
+    atsRegistry,
     deployFactory,
     createEquityConfiguration,
     createBondConfiguration,
 } from '@scripts/domain'
 import type { DeploymentProvider } from '@scripts/infrastructure'
-
-// ATS Registry Provider for infrastructure operations
-const atsRegistry = {
-    getFacetDefinition,
-    getContractDefinition,
-    getAllFacets,
-    getAllContracts,
-}
 
 import { promises as fs } from 'fs'
 import { dirname } from 'path'
@@ -267,7 +254,7 @@ export async function deployCompleteSystem(
         info(`✅ BLR Proxy: ${blrResult.blrAddress}`)
 
         info('\n📦 Step 3/7: Deploying all facets...')
-        let allFacetNames = getAllFacets().map((f) => f.name)
+        let allFacetNames = atsRegistry.getAllFacets().map((f) => f.name)
         info(`   Found ${allFacetNames.length} facets in registry`)
 
         if (!useTimeTravel) {
@@ -280,7 +267,7 @@ export async function deployCompleteSystem(
         const facetsResult = await deployFacets(provider, {
             facetNames: allFacetNames,
             useTimeTravel,
-            registry: atsRegistry,
+            registries: [atsRegistry],
         })
 
         if (!facetsResult.success) {
@@ -308,7 +295,7 @@ export async function deployCompleteSystem(
         const registerResult = await registerFacets(provider, {
             blrAddress: blrResult.blrAddress,
             facets: facetAddresses,
-            registry: atsRegistry,
+            registries: [atsRegistry],
         })
 
         if (!registerResult.success) {

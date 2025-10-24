@@ -130,6 +130,7 @@ function normalizeRoleValue(value: string): string {
  * @param infrastructure - Array of infrastructure contract metadata
  * @param allRoles - Optional map of all roles (from contracts and standalone files)
  * @param storageWrappers - Optional array of storage wrapper metadata
+ * @param mocks - Optional array of mock contract metadata
  * @param moduleName - Optional module name for imports (default: '@scripts/infrastructure')
  * @returns TypeScript source code
  */
@@ -138,11 +139,13 @@ export function generateRegistry(
     infrastructure: ContractMetadata[],
     allRoles?: Map<string, string>,
     storageWrappers?: ContractMetadata[],
+    mocks?: ContractMetadata[],
     moduleName: string = '@scripts/infrastructure'
 ): string {
     const header = generateHeader(
         facets.length,
         infrastructure.length,
+        mocks?.length ?? 0,
         moduleName
     )
     const facetRegistry = generateFacetRegistry(facets)
@@ -150,11 +153,16 @@ export function generateRegistry(
     const storageWrapperRegistry = storageWrappers
         ? generateStorageWrapperRegistry(storageWrappers)
         : ''
+    const mockRegistry =
+        mocks && mocks.length > 0 ? generateMockRegistry(mocks) : ''
     const constants = generateConstants(facets, infrastructure, allRoles)
 
     const registries = [header, facetRegistry, contractRegistry]
     if (storageWrapperRegistry) {
         registries.push(storageWrapperRegistry)
+    }
+    if (mockRegistry) {
+        registries.push(mockRegistry)
     }
     registries.push(constants)
 
@@ -166,14 +174,17 @@ export function generateRegistry(
  *
  * @param facetCount - Number of facets
  * @param infrastructureCount - Number of infrastructure contracts
+ * @param mockCount - Number of mock contracts
  * @param moduleName - Module name for imports
  * @returns Header code
  */
 function generateHeader(
     facetCount: number,
     infrastructureCount: number,
+    mockCount: number,
     moduleName: string = '@scripts/infrastructure'
 ): string {
+    const mockLine = mockCount > 0 ? `\n * Mocks: ${mockCount}` : ''
     return `// SPDX-License-Identifier: Apache-2.0
 
 /**
@@ -188,7 +199,7 @@ function generateHeader(
  *
  * Generated: ${new Date().toISOString()}
  * Facets: ${facetCount}
- * Infrastructure: ${infrastructureCount}
+ * Infrastructure: ${infrastructureCount}${mockLine}
  *
  * @module domain/atsRegistry.data
  */
@@ -404,6 +415,75 @@ function generateStorageWrapperEntry(wrapper: ContractMetadata): string {
     return `    ${wrapper.name}: {
         name: '${wrapper.name}',${descriptionLine}${inheritanceLine}
         methods: ${formatMethods(wrapper.methods, 8)}${eventsLine}${errorsLine}
+    }`
+}
+
+/**
+ * Generate MOCK_CONTRACTS registry constant.
+ *
+ * Mock contracts are test/mock utilities for downstream projects.
+ * Uses FacetDefinition to support resolver keys for mock facets.
+ *
+ * @param mocks - Array of mock contract metadata
+ * @returns TypeScript code for MOCK_CONTRACTS
+ */
+function generateMockRegistry(mocks: ContractMetadata[]): string {
+    const sortedMocks = [...mocks].sort((a, b) => a.name.localeCompare(b.name))
+
+    const entries = sortedMocks.map((mock) => generateMockEntry(mock))
+
+    return `/**
+ * Registry of mock/test contracts.
+ *
+ * These contracts are test utilities for downstream projects.
+ * Uses FacetDefinition to support resolver keys for mock facets.
+ * Not intended for production deployment.
+ */
+export const MOCK_CONTRACTS: Record<string, FacetDefinition> = {
+${entries.join(',\n\n')}
+}
+
+/**
+ * Total number of mock contracts in the registry.
+ */
+export const TOTAL_MOCKS = ${mocks.length} as const`
+}
+
+/**
+ * Generate single mock contract registry entry.
+ *
+ * Uses FacetDefinition format to support resolver keys for mock facets.
+ *
+ * @param mock - Mock contract metadata
+ * @returns TypeScript object literal
+ */
+function generateMockEntry(mock: ContractMetadata): string {
+    const resolverKeyLine = mock.resolverKey
+        ? `\n        resolverKey: {\n            name: '${mock.resolverKey.name}',\n            value: '${mock.resolverKey.value}'\n        },`
+        : ''
+
+    const inheritanceLine =
+        mock.inheritance.length > 0
+            ? `\n        inheritance: ${JSON.stringify(mock.inheritance)},`
+            : ''
+
+    const eventsLine =
+        mock.events.length > 0
+            ? `,\n        events: ${formatEvents(mock.events, 8)}`
+            : ''
+
+    const errorsLine =
+        mock.errors.length > 0
+            ? `,\n        errors: ${formatErrors(mock.errors, 8)}`
+            : ''
+
+    const descriptionLine = mock.description
+        ? `\n        description: '${mock.description}',`
+        : ''
+
+    return `    ${mock.name}: {
+        name: '${mock.name}',${descriptionLine}${resolverKeyLine}${inheritanceLine}
+        methods: ${formatMethods(mock.methods, 8)}${eventsLine}${errorsLine}
     }`
 }
 

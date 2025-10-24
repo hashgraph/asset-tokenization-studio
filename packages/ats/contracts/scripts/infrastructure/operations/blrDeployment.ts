@@ -4,6 +4,7 @@ import {
     DeploymentProvider,
     FacetConfiguration,
     RegisterFacetsResult,
+    RegistryProvider,
     createBlrConfiguration,
     deployProxy,
     error as logError,
@@ -157,6 +158,9 @@ export interface DeployBlrWithFacetsOptions extends DeployBlrOptions {
     /** Deployed facets to register (facet name -> address) */
     facets: Record<string, string>
 
+    /** Registry providers for facet registration */
+    registries: RegistryProvider[]
+
     /** Configurations to create (optional) */
     configurations?: {
         configurationId: string
@@ -201,7 +205,7 @@ export async function deployBlrWithFacets(
     provider: DeploymentProvider,
     options: DeployBlrWithFacetsOptions
 ): Promise<DeployBlrWithFacetsResult> {
-    const { facets, configurations, ...blrOptions } = options
+    const { facets, registries, configurations, ...blrOptions } = options
 
     section('Deploying BLR with Facets')
 
@@ -222,6 +226,7 @@ export async function deployBlrWithFacets(
             registrationResult = await registerFacets(provider, {
                 blrAddress: blrResult.blrAddress,
                 facets,
+                registries,
             })
 
             if (!registrationResult.success) {

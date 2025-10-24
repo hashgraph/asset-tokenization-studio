@@ -134,6 +134,13 @@ export function categorizeContracts(
     for (const contract of contracts) {
         const name = contract.primaryContract
 
+        // Test/Mock contracts (CHECK FIRST before facets!)
+        // This ensures MockTreasuryFacet goes to test category, not facets
+        if (isTestContract(contract)) {
+            result.test.push(contract)
+            continue
+        }
+
         // TimeTravel variants
         if (isTimeTravelVariant(name)) {
             result.timeTravelFacets.push(contract)
@@ -149,12 +156,6 @@ export function categorizeContracts(
         // Infrastructure
         if (isInfrastructure(name)) {
             result.infrastructure.push(contract)
-            continue
-        }
-
-        // Test/Mock contracts
-        if (isTestContract(contract)) {
-            result.test.push(contract)
             continue
         }
 

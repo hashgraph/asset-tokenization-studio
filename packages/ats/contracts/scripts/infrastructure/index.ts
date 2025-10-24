@@ -79,6 +79,12 @@ export type { Network } from './constants'
 // ============================================================================
 
 export { createRegistryHelpers } from './registryFactory'
+export {
+    combineRegistries,
+    getRegistryConflicts,
+    type ConflictStrategy,
+    type CombineRegistriesOptions,
+} from './combineRegistries'
 
 // ============================================================================
 // Configuration

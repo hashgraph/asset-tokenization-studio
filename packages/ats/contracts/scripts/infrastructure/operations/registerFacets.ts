@@ -25,6 +25,34 @@ import {
     waitForTransaction,
     warn,
 } from '@scripts/infrastructure'
+import { combineRegistries } from '../combineRegistries'
+
+/**
+ * Resolve registry from registries array.
+ *
+ * Combines multiple registries automatically using combineRegistries utility.
+ *
+ * @param registries - Array of registry providers
+ * @returns Resolved registry provider
+ * @throws Error if no registries provided
+ *
+ * @internal
+ */
+function resolveRegistry(registries: RegistryProvider[]): RegistryProvider {
+    if (!registries || registries.length === 0) {
+        throw new Error(
+            'No registries provided. Specify "registries" parameter. ' +
+                'Registry is required to get resolver keys for facets.'
+        )
+    }
+
+    if (registries.length === 1) {
+        return registries[0]
+    }
+
+    // Combine multiple registries
+    return combineRegistries(...registries)
+}
 
 /**
  * Options for registering facets in BLR.
@@ -45,8 +73,14 @@ export interface RegisterFacetsOptions {
     /** Whether to verify facets exist before registration */
     verify?: boolean
 
-    /** Optional registry provider to get resolver keys from contracts */
-    registry?: RegistryProvider
+    /**
+     * Registry providers to get resolver keys from contracts.
+     * For single registry, pass an array with one element.
+     * For multiple registries (e.g., ATS + custom), pass array with multiple elements.
+     * Automatically combines registries using combineRegistries utility.
+     * @see combineRegistries for conflict resolution options
+     */
+    registries: RegistryProvider[]
 }
 
 /**
@@ -84,12 +118,16 @@ export interface RegisterFacetsResult {
  * This operation registers deployed facet contracts with the BLR,
  * making them available for use in diamond pattern upgrades.
  *
+ * **Multi-Registry Support:**
+ * Downstream projects can combine ATS facets with custom facets by passing
+ * multiple registries in the `registries` array.
+ *
  * @param provider - Deployment provider
  * @param options - Registration options
  * @returns Registration result
  * @throws Error if registration fails
  *
- * @example
+ * @example Single registry
  * ```typescript
  * const result = await registerFacets(provider, {
  *   blrAddress: '0x123...',
@@ -97,9 +135,25 @@ export interface RegisterFacetsResult {
  *     'AccessControlFacet': '0xabc...',
  *     'KycFacet': '0xdef...',
  *     'PauseFacet': '0x789...'
- *   }
+ *   },
+ *   registries: [atsRegistry]
  * })
  * console.log(`Registered ${result.registered.length} facets`)
+ * ```
+ *
+ * @example Multiple registries (ATS + custom)
+ * ```typescript
+ * import { atsRegistry } from '@hashgraph/asset-tokenization-contracts/scripts'
+ * import { customRegistry } from './myRegistry'
+ *
+ * const result = await registerFacets(provider, {
+ *   blrAddress: '0x123...',
+ *   facets: {
+ *     'AccessControlFacet': '0xabc...',  // From ATS
+ *     'CustomFacet': '0xdef...'          // From custom registry
+ *   },
+ *   registries: [atsRegistry, customRegistry]
+ * })
  * ```
  */
 export async function registerFacets(
@@ -112,7 +166,7 @@ export async function registerFacets(
         network: _network,
         overrides = {},
         verify = true,
-        registry,
+        registries,
     } = options
 
     const registered: string[] = []
@@ -120,6 +174,9 @@ export async function registerFacets(
 
     try {
         section(`Registering Facets in BLR`)
+
+        // Resolve registry (combine if multiple)
+        const registry = resolveRegistry(registries)
 
         // Validate BLR address
         validateAddress(blrAddress, 'BusinessLogicResolver address')
@@ -203,30 +260,21 @@ export async function registerFacets(
             const baseName = name.replace(/TimeTravel$/, '')
 
             // Get resolver key from registry
-            let businessLogicKey: string
-            if (registry) {
-                const definition = registry.getFacetDefinition(baseName)
-                if (!definition) {
-                    throw new Error(
-                        `Facet ${baseName} not found in registry. ` +
-                            `All facets must be in the registry to get their resolver keys.`
-                    )
-                }
-                if (!definition.resolverKey || !definition.resolverKey.value) {
-                    throw new Error(
-                        `Facet ${baseName} found in registry but missing resolverKey.value.`
-                    )
-                }
-                businessLogicKey = definition.resolverKey.value
-            } else {
+            const definition = registry.getFacetDefinition(baseName)
+            if (!definition) {
                 throw new Error(
-                    `Registry is required to get resolver keys for facets. ` +
-                        `Cannot dynamically generate resolver keys - they are contract constants.`
+                    `Facet ${baseName} not found in registry. ` +
+                        `All facets must be in the registry to get their resolver keys.`
+                )
+            }
+            if (!definition.resolverKey || !definition.resolverKey.value) {
+                throw new Error(
+                    `Facet ${baseName} found in registry but missing resolverKey.value.`
                 )
             }
 
             return {
-                businessLogicKey,
+                businessLogicKey: definition.resolverKey.value,
                 businessLogicAddress: facetAddresses[index],
             }
         })
@@ -292,6 +340,7 @@ export async function registerFacets(
  * @param blrAddress - BLR address
  * @param facetName - Facet name
  * @param facetAddress - Facet deployed address
+ * @param registries - Registry providers
  * @param overrides - Transaction overrides
  * @returns Registration result
  *
@@ -301,7 +350,8 @@ export async function registerFacets(
  *   provider,
  *   '0x123...',
  *   'AccessControlFacet',
- *   '0xabc...'
+ *   '0xabc...',
+ *   [atsRegistry]
  * )
  * ```
  */
@@ -310,11 +360,13 @@ export async function registerFacet(
     blrAddress: string,
     facetName: string,
     facetAddress: string,
+    registries: RegistryProvider[],
     overrides: Overrides = {}
 ): Promise<RegisterFacetsResult> {
     return registerFacets(provider, {
         blrAddress,
         facets: { [facetName]: facetAddress },
+        registries,
         overrides,
     })
 }

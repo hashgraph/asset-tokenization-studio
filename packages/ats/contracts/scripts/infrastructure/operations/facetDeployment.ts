@@ -4,6 +4,7 @@ import {
     DeploymentProvider,
     DeploymentResult,
     RegistryProvider,
+    combineRegistries,
     deployContract,
     info,
     resolveContractName,
@@ -35,11 +36,12 @@ export interface DeployFacetsOptions {
     network?: string
 
     /**
-     * Custom registry provider (optional).
+     * Custom registry provider(s) (optional).
      * If not provided, uses the default ATS registry.
-     * Allows downstream projects to inject their own registry with custom facets.
+     * Allows downstream projects to inject their own registries with custom facets.
+     * Multiple registries are combined using combineRegistries().
      */
-    registry?: RegistryProvider
+    registries?: RegistryProvider[]
 }
 
 /**
@@ -79,6 +81,12 @@ export interface DeployFacetsResult {
  *   facetNames: ['AccessControlFacet', 'KycFacet'],
  *   useTimeTravel: true
  * })
+ *
+ * // Deploy with custom registries (downstream project with custom facets)
+ * const result = await deployFacets(provider, {
+ *   facetNames: ['AccessControlFacet', 'MyCustomFacet'],
+ *   registries: [atsRegistry, myCustomRegistry]
+ * })
  * ```
  */
 export async function deployFacets(
@@ -89,7 +97,7 @@ export async function deployFacets(
         facetNames,
         useTimeTravel = false,
         network: _network,
-        registry,
+        registries = [],
     } = options
 
     section('Deploying Facets')
@@ -99,6 +107,16 @@ export async function deployFacets(
     const skipped = new Map<string, string>()
 
     try {
+        // Resolve registry (combine if multiple)
+        let registry: RegistryProvider | undefined
+        if (registries.length === 0) {
+            registry = undefined
+        } else if (registries.length === 1) {
+            registry = registries[0]
+        } else {
+            registry = combineRegistries(...registries)
+        }
+
         // Determine which facets to deploy
         let facetsToDeployDefs
 
@@ -135,7 +153,7 @@ export async function deployFacets(
             if (!registry) {
                 throw new Error(
                     'Registry is required when facetNames is not specified. ' +
-                        'Either provide facetNames or inject a RegistryProvider.'
+                        'Either provide facetNames or inject a RegistryProvider via registries parameter.'
                 )
             }
             facetsToDeployDefs = registry.getAllFacets()
