@@ -7,7 +7,8 @@
     "files": [
         "build/",
         "contracts/",
-        "!build/**/*.map"
+        "!build/**/*.map",
+        "artifacts/"
     ],
     "exports": {
         ".": {
@@ -28,6 +29,12 @@
             "require": "./build/scripts/index.js",
             "default": "./build/scripts/index.js"
         },
+        "./scripts/*": {
+            "types": "./build/scripts/*.d.ts",
+            "import": "./build/scripts/*.js",
+            "require": "./build/scripts/*.js",
+            "default": "./build/scripts/*.js"
+        },
         "./config": {
             "types": "./build/Configuration.d.ts",
             "import": "./build/Configuration.js",
@@ -35,7 +42,8 @@
             "default": "./build/Configuration.js"
         },
         "./contracts/*": "./contracts/*",
-        "./package.json": "./package.json"
+        "./package.json": "./package.json",
+        "./artifacts/*": "./artifacts/*"
     },
     "keywords": [
         "hedera",
@@ -90,9 +98,13 @@
         "slither:summary": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18 && solc-select use 0.8.18 && slither . --print human-summary --solc-remaps @=node_modules/@\"",
         "slither:storageLayout": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18 && solc-select use 0.8.18 && slither . --print variable-order --solc-remaps @=node_modules/@\"",
         "slither:inheritance": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18 && solc-select use 0.8.18 && slither . --print inheritance --solc-remaps @=node_modules/@\"",
-        "prepack": "npm run compile:force",
+        "prepack": "npm run build",
         "doc": "npx hardhat dodoc",
         "extractMethods": "npx -y tsx scripts/extractMethods.ts"
+    },
+    "dependencies": {
+        "zod": "^3.22.4",
+        "ethers": "^5.8.0"
     },
     "devDependencies": {
         "@hashgraph/sdk": "2.64.5",
@@ -111,7 +123,6 @@
         "@types/jest": "^29.5.14",
         "chai": "^4.4.0",
         "dotenv": "^16.0.3",
-        "ethers": "^5.8.0",
         "glob": "^11.0.3",
         "hardhat": "^v2.26.3",
         "hardhat-abi-exporter": "^2.11.0",
@@ -122,8 +133,7 @@
         "ts-node": "^10.9.1",
         "tsc-alias": "^1.8.16",
         "tsconfig-paths": "^4.2.0",
-        "typescript": "^5.8.2",
-        "zod": "^3.22.4"
+        "typescript": "^5.8.2"
     },
     "overrides": {
         "@typechain/ethers-v5": "10.2.1",

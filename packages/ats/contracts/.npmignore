@@ -22,7 +22,6 @@ tasks/
 
 # Build artifacts (not in build/ output)
 cache/
-artifacts/
 coverage/
 coverage.json
 gas-report.txt

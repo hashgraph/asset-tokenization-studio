@@ -4,7 +4,6 @@ import {
     AtsRoleName,
     DeepPartial,
     EQUITY_CONFIG_ID,
-    BOND_CONFIG_ID,
     RegulationSubType,
     RegulationType,
 } from '@scripts'
@@ -16,7 +15,6 @@ import {
 import { AccessControlFacet, BusinessLogicResolver } from '@typechain'
 import { ethers } from 'hardhat'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
-import { resolverProxy } from '@typechain/contracts/resolver'
 
 export const MAX_UINT256 = ethers.constants.MaxUint256
 

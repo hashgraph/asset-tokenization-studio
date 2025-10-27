@@ -21,9 +21,7 @@ import {
     PauseFacet__factory,
     KycFacet__factory,
     ControlListFacet__factory,
-    TimeTravelFacet__factory,
 } from '@typechain'
-
 import {
     DividendRight,
     EquityDetailsDataParams,
