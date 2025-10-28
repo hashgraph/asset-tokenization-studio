@@ -244,7 +244,7 @@ import {
     Lock__factory,
     Lock,
     TransferAndLock,
-} from '@typechain'
+} from '@contract-types'
 import { Wallet } from 'ethers'
 import { getClient, toEvmAddress } from '@scripts/utils'
 import { toHashgraphKey } from '@scripts/deploy'

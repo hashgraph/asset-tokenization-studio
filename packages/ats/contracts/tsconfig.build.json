@@ -1,0 +1,24 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "sourceMap": false
+    },
+    "include": [
+        "scripts/**/*",
+        "Configuration.ts",
+        "typechain-types/**/*",
+        "test/fixtures/**/*",
+        "test/helpers/**/*",
+        "test/common.ts",
+        "test/index.ts",
+        "test/types.d.ts",
+        "test/isin-generator.d.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "test/demo/**/*",
+        "test/integration/**/*",
+        "test/unitTests/**/*",
+        "tasks"
+    ]
+}

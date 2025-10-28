@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
-import type { IFactory, ResolverProxy } from '@typechain'
-import { ResolverProxy__factory } from '@typechain'
+import type { IFactory, ResolverProxy } from '@contract-types'
+import { ResolverProxy__factory } from '@contract-types'
 import { GAS_LIMIT } from '@scripts/infrastructure'
 import {
     ATS_ROLES,

@@ -114,7 +114,7 @@ console.log(`Registered: ${result.registered}`)
 Now create a new configuration version with the updated facet list:
 
 ```typescript
-import { BusinessLogicResolver__factory } from '@typechain'
+import { BusinessLogicResolver__factory } from '@contract-types'
 import { createEquityConfiguration } from '@scripts/domain'
 
 // Connect to BLR
@@ -353,7 +353,7 @@ const result = await registerFacets(provider, {
 Create the first version of your fund configuration:
 
 ```typescript
-import { BusinessLogicResolver__factory } from '@typechain'
+import { BusinessLogicResolver__factory } from '@contract-types'
 import { createFundConfiguration } from '@scripts/domain'
 
 const signer = await provider.getSigner()

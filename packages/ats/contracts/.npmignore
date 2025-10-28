@@ -6,6 +6,11 @@ test/
 *.spec.js
 __tests__/
 
+# Compiled test cases (exclude from distribution)
+build/test/demo/
+build/test/integration/
+build/test/unitTests/
+
 # Development files
 .env
 .env.*
@@ -27,6 +32,9 @@ coverage.json
 gas-report.txt
 slither.db.json
 .nyc_output/
+
+# Exclude massive build-info artifacts (saves ~95MB)
+artifacts/build-info/
 
 # Git
 .git/

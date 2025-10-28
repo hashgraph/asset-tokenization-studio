@@ -11,7 +11,7 @@ import {
     type IERC1410,
     Kyc,
     SsiManagement,
-} from '@typechain'
+} from '@contract-types'
 import {
     ZERO,
     EMPTY_STRING,

@@ -12,7 +12,7 @@ import {
     Kyc,
     SsiManagement,
     ClearingActionsFacet,
-} from '@typechain'
+} from '@contract-types'
 import { deployEquityTokenFixture } from '@test'
 import { executeRbac, MAX_UINT256 } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'

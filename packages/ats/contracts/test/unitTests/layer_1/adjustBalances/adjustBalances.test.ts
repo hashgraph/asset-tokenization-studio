@@ -12,7 +12,7 @@ import {
     Kyc,
     SsiManagement,
     TimeTravelFacet as TimeTravel,
-} from '@typechain'
+} from '@contract-types'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ATS_ROLES, dateToUnixTimestamp } from '@scripts'

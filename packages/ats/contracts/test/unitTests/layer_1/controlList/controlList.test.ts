@@ -5,7 +5,7 @@ import {
     ControlListFacet,
     PauseFacet,
     ResolverProxy,
-} from '@typechain'
+} from '@contract-types'
 import { ATS_ROLES } from '@scripts'
 import { deployEquityTokenFixture } from '@test'
 import { grantRoleAndPauseToken } from '@test'

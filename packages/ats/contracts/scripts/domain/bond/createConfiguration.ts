@@ -108,7 +108,7 @@ const BOND_FACETS = [
  *
  * @example
  * ```typescript
- * import { BusinessLogicResolver__factory } from '@typechain'
+ * import { BusinessLogicResolver__factory } from '@contract-types'
  *
  * // Get BLR contract instance
  * const blr = BusinessLogicResolver__factory.connect('0x1234...', signer)

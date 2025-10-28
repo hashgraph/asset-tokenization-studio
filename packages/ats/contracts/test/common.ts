@@ -1,4 +1,4 @@
-import { type Pause, type AccessControl } from '@typechain'
+import { type Pause, type AccessControl } from '@contract-types'
 import { expect } from 'chai'
 import { Signer } from 'ethers'
 import { ethers } from 'hardhat'

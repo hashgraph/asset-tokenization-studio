@@ -22,7 +22,11 @@ import {
     configureLogger,
     LogLevel,
 } from '../../scripts'
-import type { IFactory, BusinessLogicResolver, ProxyAdmin } from '@typechain'
+import type {
+    IFactory,
+    BusinessLogicResolver,
+    ProxyAdmin,
+} from '@contract-types'
 
 /**
  * Fixture: Deploy complete ATS infrastructure

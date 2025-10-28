@@ -12,7 +12,7 @@ import {
     Equity,
     Snapshots,
     TimeTravelFacet,
-} from '@typechain'
+} from '@contract-types'
 import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from '@scripts'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { deployEquityTokenFixture, MAX_UINT256 } from '@test'

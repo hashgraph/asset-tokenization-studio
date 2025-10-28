@@ -566,7 +566,7 @@ export async function sendBatchConfiguration(
  *
  * @example
  * ```typescript
- * import { BusinessLogicResolver__factory } from '@typechain'
+ * import { BusinessLogicResolver__factory } from '@contract-types'
  *
  * const blr = BusinessLogicResolver__factory.connect(blrAddress, signer)
  *

@@ -6,7 +6,7 @@ import {
     MockedWhitelist,
     MockedBlacklist,
     ResolverProxy,
-} from '@typechain'
+} from '@contract-types'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { deployEquityTokenFixture } from '@test'
 import { ATS_ROLES, GAS_LIMIT } from '@scripts'

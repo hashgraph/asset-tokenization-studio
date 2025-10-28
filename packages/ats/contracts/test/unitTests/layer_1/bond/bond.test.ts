@@ -19,7 +19,7 @@ import {
     ClearingTransferFacet,
     BondUSAReadFacet,
     TimeTravelFacet as TimeTravel,
-} from '@typechain'
+} from '@contract-types'
 import {
     DEFAULT_PARTITION,
     dateToUnixTimestamp,

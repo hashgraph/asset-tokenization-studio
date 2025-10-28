@@ -7,7 +7,7 @@ import {
     ResolverProxy,
     ExternalKycListManagement,
     MockedExternalKycList,
-} from '@typechain'
+} from '@contract-types'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 describe('ExternalKycList Management Tests', () => {

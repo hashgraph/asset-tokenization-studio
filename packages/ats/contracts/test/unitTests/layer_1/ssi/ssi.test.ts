@@ -7,7 +7,7 @@ import {
     Pause,
     SsiManagement,
     MockedT3RevocationRegistry,
-} from '@typechain'
+} from '@contract-types'
 import { ATS_ROLES } from '@scripts'
 import { deployEquityTokenFixture } from '@test'
 import { executeRbac } from '@test'

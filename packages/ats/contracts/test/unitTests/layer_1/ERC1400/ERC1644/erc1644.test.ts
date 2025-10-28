@@ -9,7 +9,7 @@ import {
     type IERC1410,
     SsiManagement,
     Kyc,
-} from '@typechain'
+} from '@contract-types'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { grantRoleAndPauseToken } from '../../../../common'
 import { deployEquityTokenFixture } from '@test'

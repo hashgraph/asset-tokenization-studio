@@ -6,7 +6,7 @@ import {
     type CorporateActions,
     type Pause,
     type AccessControl,
-} from '@typechain'
+} from '@contract-types'
 import { ATS_ROLES } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'

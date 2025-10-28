@@ -8,7 +8,7 @@ import {
     type AccessControl,
     ScheduledCrossOrderedTasks,
     TimeTravelFacet,
-} from '@typechain'
+} from '@contract-types'
 import { dateToUnixTimestamp, ATS_ROLES } from '@scripts'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { deployEquityTokenFixture } from '@test'

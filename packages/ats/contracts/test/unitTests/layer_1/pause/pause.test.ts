@@ -9,7 +9,7 @@ import {
     AccessControl,
     ResolverProxy,
     MockedExternalPause,
-} from '@typechain'
+} from '@contract-types'
 import { Signer } from 'ethers'
 import { ethers } from 'hardhat'
 

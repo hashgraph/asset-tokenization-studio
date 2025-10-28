@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ethers } from 'hardhat'
 import { expect } from 'chai'
-import { AccessControl, Pause, BusinessLogicResolver } from '@typechain'
+import { AccessControl, Pause, BusinessLogicResolver } from '@contract-types'
 import { EQUITY_CONFIG_ID, ATS_ROLES } from '@scripts'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 

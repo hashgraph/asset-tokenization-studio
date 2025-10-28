@@ -16,7 +16,7 @@ import { DeploymentProvider, debug } from '@scripts/infrastructure'
 import {
     ProxyAdmin__factory,
     TransparentUpgradeableProxy__factory,
-} from '@typechain'
+} from '@contract-types'
 
 // Dynamically import hardhat ethers to avoid compile-time dependency
 const getHardhatEthers = (): any => {

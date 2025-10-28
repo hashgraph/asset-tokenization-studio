@@ -5,45 +5,35 @@
     "main": "./build/typechain-types/index.js",
     "types": "./build/typechain-types/index.d.ts",
     "files": [
-        "build/",
+        "artifacts/",
         "contracts/",
-        "!build/**/*.map",
-        "artifacts/"
+        "typechain-types/",
+        "scripts/",
+        "build/",
+        "!artifacts/build-info/",
+        "!build/**/*.map"
     ],
     "exports": {
         ".": {
             "types": "./build/typechain-types/index.d.ts",
-            "import": "./build/typechain-types/index.js",
-            "require": "./build/typechain-types/index.js",
-            "default": "./build/typechain-types/index.js"
+            "require": "./build/typechain-types/index.js"
         },
-        "./typechain": {
-            "types": "./build/typechain-types/index.d.ts",
-            "import": "./build/typechain-types/index.js",
-            "require": "./build/typechain-types/index.js",
-            "default": "./build/typechain-types/index.js"
-        },
+        "./artifacts/*": "./artifacts/*",
+        "./contracts/*": "./contracts/*",
+        "./scripts/": "./scripts/index.ts",
         "./scripts": {
             "types": "./build/scripts/index.d.ts",
-            "import": "./build/scripts/index.js",
-            "require": "./build/scripts/index.js",
-            "default": "./build/scripts/index.js"
+            "require": "./build/scripts/index.js"
         },
-        "./scripts/*": {
-            "types": "./build/scripts/*.d.ts",
-            "import": "./build/scripts/*.js",
-            "require": "./build/scripts/*.js",
-            "default": "./build/scripts/*.js"
+        "./typechain-types": {
+            "types": "./build/typechain-types/index.d.ts",
+            "require": "./build/typechain-types/index.js"
         },
-        "./config": {
-            "types": "./build/Configuration.d.ts",
-            "import": "./build/Configuration.js",
-            "require": "./build/Configuration.js",
-            "default": "./build/Configuration.js"
+        "./test": {
+            "types": "./build/test/index.d.ts",
+            "require": "./build/test/index.js"
         },
-        "./contracts/*": "./contracts/*",
-        "./package.json": "./package.json",
-        "./artifacts/*": "./artifacts/*"
+        "./package.json": "./package.json"
     },
     "keywords": [
         "hedera",
@@ -54,7 +44,7 @@
     "author": "",
     "license": "Apache-2.0",
     "scripts": {
-        "build": "node -e \"const fs=require('fs'); fs.rmSync('build',{recursive:true,force:true})\" && npm run compile && npx tsc -p tsconfig.json && npx tsc-alias -p tsconfig.json",
+        "build": "node -e \"const fs=require('fs'); fs.rmSync('build',{recursive:true,force:true})\" && npm run compile && npx tsc -p tsconfig.build.json && npx tsc-alias -p tsconfig.build.json",
         "test": "npx hardhat test",
         "clean": "npm run clean:build",
         "clean:build": "node -e \"const fs=require('fs'); ['dist','build','artifacts','cache','typechain-types','coverage','.nyc_output'].forEach(d=>fs.rmSync(d,{recursive:true,force:true}))\"",

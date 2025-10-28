@@ -35,7 +35,7 @@ import type { DeploymentProvider } from '@scripts/infrastructure'
 
 import { promises as fs } from 'fs'
 import { dirname } from 'path'
-import { BusinessLogicResolver__factory } from '@typechain'
+import { BusinessLogicResolver__factory } from '@contract-types'
 
 /**
  * Deployment output structure (compatible with deployCompleteSystem).

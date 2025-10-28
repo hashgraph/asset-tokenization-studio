@@ -14,7 +14,7 @@ import {
     Cap,
     Equity,
     TimeTravelFacet,
-} from '@typechain'
+} from '@contract-types'
 
 import { deployEquityTokenFixture } from '@test'
 

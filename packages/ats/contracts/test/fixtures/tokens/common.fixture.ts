@@ -12,7 +12,7 @@ import {
     Rbac,
     SecurityDataParams,
 } from '@scripts/domain'
-import { AccessControlFacet, BusinessLogicResolver } from '@typechain'
+import { AccessControlFacet, BusinessLogicResolver } from '@contract-types'
 import { ethers } from 'hardhat'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 

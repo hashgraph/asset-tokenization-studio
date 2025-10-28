@@ -16,8 +16,7 @@
         "baseUrl": ".",
         "paths": {
             "@configuration": ["./Configuration.ts"],
-            "@typechain": ["./typechain-types/index.ts"],
-            "@typechain/*": ["./typechain-types/*"],
+            "@contract-types": ["./typechain-types/index.ts"],
             "@scripts": ["./scripts/index.ts"],
             "@scripts/infrastructure": ["./scripts/infrastructure/index.ts"],
             "@scripts/domain": ["./scripts/domain/index.ts"],

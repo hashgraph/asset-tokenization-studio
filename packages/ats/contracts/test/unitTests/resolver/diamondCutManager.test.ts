@@ -9,7 +9,7 @@ import {
     DiamondCutManager,
     IDiamondCutManager,
     IDiamondLoupe,
-} from '@typechain'
+} from '@contract-types'
 import { ATS_ROLES, BOND_CONFIG_ID, EQUITY_CONFIG_ID } from '@scripts'
 import { deployAtsInfrastructureFixture } from '@test'
 

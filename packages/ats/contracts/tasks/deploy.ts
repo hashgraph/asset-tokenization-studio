@@ -212,7 +212,7 @@ import {
     GetSignerResult,
 } from './Arguments'
 import * as fs from 'fs'
-import { TREXImplementationAuthority } from '@typechain'
+import { TREXImplementationAuthority } from '@contract-types'
 
 task(
     'deployAll',

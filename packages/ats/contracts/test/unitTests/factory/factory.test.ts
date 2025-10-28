@@ -8,7 +8,7 @@ import {
     type ERC1644,
     type ERC20,
     type Factory,
-} from '@typechain'
+} from '@contract-types'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { deployAtsInfrastructureFixture } from '@test'
 import { getRegulationData, getSecurityData } from '@test'

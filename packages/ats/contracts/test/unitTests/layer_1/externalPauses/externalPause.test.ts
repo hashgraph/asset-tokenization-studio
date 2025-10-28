@@ -8,7 +8,7 @@ import {
     ResolverProxy,
     ExternalPauseManagement,
     MockedExternalPause,
-} from '@typechain'
+} from '@contract-types'
 
 describe('ExternalPause Tests', () => {
     let diamond: ResolverProxy
@@ -70,12 +70,16 @@ describe('ExternalPause Tests', () => {
 
         await externalPauseManagement.addExternalPause(
             externalPauseMock1.address,
-            { gasLimit: GAS_LIMIT.default }
+            {
+                gasLimit: GAS_LIMIT.default,
+            }
         )
 
         await externalPauseManagement.addExternalPause(
             externalPauseMock2.address,
-            { gasLimit: GAS_LIMIT.default }
+            {
+                gasLimit: GAS_LIMIT.default,
+            }
         )
     }
 
@@ -113,7 +117,9 @@ describe('ExternalPause Tests', () => {
             await expect(
                 externalPauseManagement.addExternalPause(
                     externalPauseMock1.address,
-                    { gasLimit: GAS_LIMIT.default }
+                    {
+                        gasLimit: GAS_LIMIT.default,
+                    }
                 )
             ).to.be.revertedWithCustomError(
                 externalPauseManagement,
@@ -398,7 +404,9 @@ describe('ExternalPause Tests', () => {
             await expect(
                 externalPauseManagement.addExternalPause(
                     externalPauseMock3.address,
-                    { gasLimit: GAS_LIMIT.default }
+                    {
+                        gasLimit: GAS_LIMIT.default,
+                    }
                 )
             ).to.be.revertedWithCustomError(
                 externalPauseManagement,
@@ -431,7 +439,9 @@ describe('ExternalPause Tests', () => {
             await expect(
                 externalPauseManagement.addExternalPause(
                     externalPauseMock3.address,
-                    { gasLimit: GAS_LIMIT.default }
+                    {
+                        gasLimit: GAS_LIMIT.default,
+                    }
                 )
             ).to.not.be.reverted
             await expect(

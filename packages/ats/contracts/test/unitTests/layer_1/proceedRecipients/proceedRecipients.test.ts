@@ -6,7 +6,7 @@ import {
     ResolverProxy,
     AccessControl,
     Pause,
-} from '@typechain'
+} from '@contract-types'
 import { GAS_LIMIT, ATS_ROLES } from '@scripts'
 import { deployBondTokenFixture } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'

@@ -15,7 +15,7 @@ import {
     SsiManagement,
     IHold,
     ComplianceMock,
-} from '@typechain'
+} from '@contract-types'
 import {
     DEFAULT_PARTITION,
     ZERO,

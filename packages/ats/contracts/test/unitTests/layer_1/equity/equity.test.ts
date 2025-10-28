@@ -15,7 +15,7 @@ import {
     ClearingTransferFacet,
     FreezeFacet,
     TimeTravelFacet,
-} from '@typechain'
+} from '@contract-types'
 import {
     DEFAULT_PARTITION,
     ADDRESS_ZERO,

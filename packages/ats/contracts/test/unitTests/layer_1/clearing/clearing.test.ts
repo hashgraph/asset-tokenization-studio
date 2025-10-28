@@ -18,7 +18,7 @@ import {
     AccessControl,
     AdjustBalances,
     Equity,
-} from '@typechain'
+} from '@contract-types'
 import {
     ADDRESS_ZERO,
     ZERO,

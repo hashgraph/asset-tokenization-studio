@@ -8,7 +8,7 @@ import {
     AccessControl,
     ERC20,
     Factory,
-} from '@typechain'
+} from '@contract-types'
 
 import { deployFullSuiteFixture } from './fixtures/deploy-full-suite.fixture'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'

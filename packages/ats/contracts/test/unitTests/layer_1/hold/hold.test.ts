@@ -28,7 +28,7 @@ import {
     Cap,
     AdjustBalances,
     Lock,
-} from '@typechain'
+} from '@contract-types'
 
 const _DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'

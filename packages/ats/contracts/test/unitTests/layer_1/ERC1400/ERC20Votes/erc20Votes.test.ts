@@ -9,7 +9,7 @@ import {
     ERC20Votes,
     EquityUSA,
     TimeTravelFacet as TimeTravel,
-} from '@typechain'
+} from '@contract-types'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { deployEquityTokenFixture } from '@test'
 

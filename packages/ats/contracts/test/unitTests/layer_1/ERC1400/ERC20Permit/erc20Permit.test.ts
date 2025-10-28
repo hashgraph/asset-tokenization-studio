@@ -8,7 +8,7 @@ import {
     ERC20,
     AccessControl,
     ControlList,
-} from '@typechain'
+} from '@contract-types'
 import { ADDRESS_ZERO, ATS_ROLES } from '@scripts'
 import { deployEquityTokenFixture } from '@test'
 

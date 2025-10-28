@@ -21,7 +21,7 @@ import {
     PauseFacet__factory,
     KycFacet__factory,
     ControlListFacet__factory,
-} from '@typechain'
+} from '@contract-types'
 import {
     DividendRight,
     EquityDetailsDataParams,

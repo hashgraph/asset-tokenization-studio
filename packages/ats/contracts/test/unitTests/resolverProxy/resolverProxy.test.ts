@@ -6,7 +6,7 @@ import {
     type PauseFacet,
     DiamondFacet,
     DiamondLoupeFacet,
-} from '@typechain'
+} from '@contract-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { ATS_ROLES } from '@scripts'
 import { assertObject } from '../../common'

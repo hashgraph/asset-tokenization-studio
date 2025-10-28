@@ -1,6 +1,10 @@
 import { expect } from 'chai'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { type ResolverProxy, type AccessControl, PauseFacet } from '@typechain'
+import {
+    type ResolverProxy,
+    type AccessControl,
+    PauseFacet,
+} from '@contract-types'
 import { ATS_ROLES } from '@scripts'
 import { deployEquityTokenFixture } from '@test'
 import { executeRbac } from '@test'

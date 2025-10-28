@@ -13,7 +13,7 @@ import {
     Kyc,
     SsiManagement,
     ClearingActionsFacet,
-} from '@typechain'
+} from '@contract-types'
 import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from '@scripts'
 import { assertObject } from '../../../../common'
 import { deployEquityTokenFixture } from '@test'

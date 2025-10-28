@@ -19,10 +19,10 @@ import {
     IClearing,
     ISnapshots,
     TimeTravelFacet,
-} from '@typechain'
+} from '@contract-types'
 import { grantRoleAndPauseToken } from '@test'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ClearingActionsFacet } from '@typechain'
+import { ClearingActionsFacet } from '@contract-types'
 import { deployEquityTokenFixture } from '@test'
 import { executeRbac, MAX_UINT256 } from '@test'
 import {

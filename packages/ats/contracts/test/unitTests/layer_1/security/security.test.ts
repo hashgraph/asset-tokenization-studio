@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { type ResolverProxy, type Security, IERC1410 } from '@typechain'
+import { type ResolverProxy, type Security, IERC1410 } from '@contract-types'
 import { ATS_ROLES } from '@scripts'
 import { executeRbac } from '@test'
 import { deployEquityTokenFixture } from '@test'

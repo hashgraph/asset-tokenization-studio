@@ -23,7 +23,7 @@ import { Interface, id } from 'ethers/lib/utils'
  *
  * @example
  * ```typescript
- * import { ERC1410Facet__factory } from '@typechain'
+ * import { ERC1410Facet__factory } from '@contract-types'
  *
  * // Get 4-byte selector for transfer function
  * const selector4 = getSelector(ERC1410Facet__factory, 'transfer', true)

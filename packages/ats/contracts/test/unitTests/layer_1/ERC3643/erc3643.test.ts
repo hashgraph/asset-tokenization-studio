@@ -26,7 +26,7 @@ import {
     IdentityRegistryMock,
     IERC3643,
     TimeTravelFacet,
-} from '@typechain'
+} from '@contract-types'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { Contract } from 'ethers'
 import { deployEquityTokenFixture } from '@test'

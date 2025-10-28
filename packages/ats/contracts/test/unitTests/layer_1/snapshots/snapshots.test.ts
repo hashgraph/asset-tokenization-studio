@@ -13,7 +13,7 @@ import {
     Kyc,
     Equity,
     TimeTravelFacet,
-} from '@typechain'
+} from '@contract-types'
 import {
     ZERO,
     EMPTY_STRING,
