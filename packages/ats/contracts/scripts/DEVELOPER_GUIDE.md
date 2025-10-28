@@ -1,6 +1,6 @@
 # Developer Guide: ATS Contracts Scripts
 
-**Last Updated**: 2025-01-24
+**Last Updated**: 2025-01-28
 
 This guide provides practical, step-by-step instructions for the most common development tasks when working with ATS contract deployment scripts.
 
@@ -17,6 +17,8 @@ This guide provides practical, step-by-step instructions for the most common dev
 
 **Use Case**: You need to add a new facet to an existing asset (Equity or Bond) or remove one.
 
+> **Note**: We'll use **Equity** as our example asset throughout this guide. The same process applies to Bond or any other asset type.
+
 ### Prerequisites
 
 - Facet contract must exist in [contracts/](../contracts/) directory
@@ -25,9 +27,7 @@ This guide provides practical, step-by-step instructions for the most common dev
 
 ### Step 1: Modify the Facet List
 
-Edit the appropriate configuration file and add/remove the facet from the array:
-
-**For Equity**: [domain/equity/createConfiguration.ts](domain/equity/createConfiguration.ts#L35-L91)
+Edit [domain/equity/createConfiguration.ts](domain/equity/createConfiguration.ts#L35-L91) and add/remove the facet from the array:
 
 ```typescript
 const EQUITY_FACETS = [
@@ -41,22 +41,14 @@ const EQUITY_FACETS = [
 ] as const
 ```
 
-**For Bond**: [domain/bond/createConfiguration.ts](domain/bond/createConfiguration.ts#L35-L92)
-
-```typescript
-const BOND_FACETS = [
-    // Core Functionality
-    'AccessControlFacet',
-    'CapFacet',
-    // ... existing facets ...
-
-    'NewFacet', // <-- ADD YOUR FACET HERE
-] as const
-```
-
+**To Add**: Insert the facet name in the appropriate section of the array.
 **To Remove**: Simply delete the facet name from the array.
 
+> For Bond assets, edit [domain/bond/createConfiguration.ts](domain/bond/createConfiguration.ts#L35-L92) instead.
+
 ### Step 2: Regenerate the Registry
+
+**⚠️ Skip this step** if you're just adding an existing facet to a different configuration.
 
 If you added a **new facet contract** (not just adding existing facet to configuration), regenerate the registry:
 
@@ -71,11 +63,11 @@ This updates [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts) with:
 - Resolver keys (from contract constants)
 - Function selectors
 
-**Skip this step** if you're just adding an existing facet to a different configuration.
-
 ### Step 3: Deploy the Facet (if new)
 
-If this is a **new facet** that hasn't been deployed yet:
+**⚠️ Skip this step** if the facet is already deployed.
+
+If this is a **new facet** that hasn't been deployed yet, use the `deployFacets()` infrastructure operation:
 
 ```typescript
 import { HardhatProvider, deployFacets } from '@scripts/infrastructure'
@@ -92,11 +84,9 @@ const result = await deployFacets(provider, {
 console.log(`NewFacet deployed at: ${result.deployed.get('NewFacet')?.address}`)
 ```
 
-**Skip this step** if the facet is already deployed.
-
 ### Step 4: Register Facet in BusinessLogicResolver
 
-Register the facet in BLR so it can be used in configurations:
+Register the facet in BLR so it can be used in configurations, using the `registerFacets()` infrastructure operation:
 
 ```typescript
 import { HardhatProvider, registerFacets } from '@scripts/infrastructure'

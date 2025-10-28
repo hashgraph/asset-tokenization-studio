@@ -1,6 +1,6 @@
 # ATS Contracts Deployment Scripts
 
-**Last Updated**: 2025-01-24
+**Last Updated**: 2025-01-28
 
 ---
 
@@ -12,6 +12,27 @@ Looking to add a facet or create a new asset type? Check out the **[Developer Gu
 - **[How to Create a New Asset Type (Configuration ID)](DEVELOPER_GUIDE.md#scenario-2-create-new-asset-type-configuration-id)**
 
 This README provides comprehensive reference documentation for the deployment system architecture and APIs.
+
+---
+
+## ⚠️ Important Warnings
+
+**Before deploying:**
+
+- **🔴 Network flag required**: Must explicitly specify `--network <name>` when using Hardhat deployment
+- **🔴 Double dash required**: Use `--` before network flag when using npm scripts (e.g., `npm run deploy:hardhat -- --network hedera-testnet`)
+- **🔴 Environment setup**: Real networks require `.env` configuration (RPC endpoint + private key)
+- **🔴 Gas costs**: Full deployment costs ~$20-50 on testnet, ensure sufficient balance
+- **🔴 Time commitment**: Real network deployments take 5-10 minutes due to transaction confirmations
+
+**Quick Command Reference:**
+
+| Command                                              | Use Case                 | Requirements                |
+| ---------------------------------------------------- | ------------------------ | --------------------------- |
+| `npm run deploy:hardhat -- --network hardhat`        | In-memory testing        | Hardhat project             |
+| `npm run deploy:hardhat -- --network hedera-testnet` | Testnet deployment       | Hardhat + `.env`            |
+| `npm run deploy:standalone`                          | Standalone deployment    | Compiled artifacts + `.env` |
+| `npm run generate:registry`                          | Update contract metadata | Contracts compiled          |
 
 ---
 
@@ -447,135 +468,100 @@ import type { DeploymentResult } from '@scripts/infrastructure'
 
 ## Quick Start
 
-### Scenario 1: Deploy from Hardhat Project
+> **Note**: We'll use Hardhat deployment as the primary example. For standalone deployment (no Hardhat runtime), see [Usage Modes](#usage-modes).
 
-**What you need**: Hardhat project with ATS contracts
+### Step 1: Setup Environment
 
-**Setup `.env`** (from contracts directory):
+**From contracts directory** (`packages/ats/contracts/`):
 
 ```bash
 cp .env.sample .env
 ```
 
-**For hardhat network** (in-memory test network):
+**For in-memory testing** (hardhat network):
 
-- No `.env` network configuration needed
-- Uses Hardhat's built-in accounts automatically
+- No `.env` configuration needed
+- Uses Hardhat's built-in accounts
 
-**For real networks** (testnet, mainnet, etc.), edit `.env`:
+**For real networks** (testnet/mainnet), edit `.env`:
 
 ```bash
-# Network endpoint (local RPC relay recommended for better performance)
-HEDERA_TESTNET_JSON_RPC_ENDPOINT='http://127.0.0.1:7546'  # Local relay
-# OR use public endpoint (may have rate limits)
-# HEDERA_TESTNET_JSON_RPC_ENDPOINT='https://testnet.hashio.io/api'
-
+# Network endpoint
+HEDERA_TESTNET_JSON_RPC_ENDPOINT='https://testnet.hashio.io/api'
 HEDERA_TESTNET_MIRROR_NODE_ENDPOINT='https://testnet.mirrornode.hedera.com'
 
 # Deployer private key (hex format with 0x prefix)
 HEDERA_TESTNET_PRIVATE_KEY_0='0x...'
 
-# Optional: Enable TimeTravel mode (for testing only)
+# Optional: TimeTravel mode (testing only)
 USE_TIME_TRAVEL=false
 ```
 
-**Deploy**:
+### Step 2: Deploy
 
 ```bash
-# From contracts directory (packages/ats/contracts/)
-
-# Deploy to hardhat (in-memory test network):
+# In-memory test network (fast, no .env needed)
 npm run deploy:hardhat -- --network hardhat
 
-# Deploy to hedera-testnet (MUST specify network):
+# Testnet (requires .env configuration)
 npm run deploy:hardhat -- --network hedera-testnet
 
-# Deploy to other networks:
+# Other networks
 npm run deploy:hardhat -- --network hedera-mainnet
 npm run deploy:hardhat -- --network hedera-previewnet
 ```
 
-**Important**:
+### Step 3: Verify Deployment
 
-- **Network flag required**: Must explicitly specify `--network <name>` (defaults to `hardhat.config.ts` setting otherwise)
-- **Double dash**: The `--` before `--network` is required for npm to pass arguments to the script
-- Uses HardhatProvider (requires Hardhat runtime)
-- Deploys complete ATS system (ProxyAdmin, BLR, Factory, Facets, Configurations)
-- Saves output to `deployments/{network}_{timestamp}.json`
-- Real network deployments take 5-10 minutes due to transaction confirmations
+Check the output file in `deployments/{network}_{timestamp}.json`:
 
----
-
-### Scenario 2: Deploy Standalone (Non-Interactive)
-
-**What you need**: Compiled contracts (artifacts folder) but NO Hardhat runtime required
-
-**Setup `.env`** (same as Scenario 1):
-
-```bash
-cp .env.sample .env
-# Edit with network endpoint and private key
+```json
+{
+    "infrastructure": {
+        "blr": { "proxy": "0x..." },
+        "factory": { "proxy": "0x..." }
+    },
+    "configurations": {
+        "equity": { "version": 1, "facetCount": 43 },
+        "bond": { "version": 1, "facetCount": 43 }
+    }
+}
 ```
 
-**Deploy**:
+**What gets deployed**:
 
-```bash
-# From contracts directory
-npm run deploy:standalone
-
-# Or with environment variables
-NETWORK=hedera-testnet npm run deploy:standalone
-```
-
-**What happens**:
-
-- Uses StandaloneProvider (~3x faster startup than Hardhat)
-- Network from NETWORK env var (defaults to hedera-testnet)
-- Deploys complete ATS system
-- Works from any project (no Hardhat dependency)
+- ProxyAdmin (upgradeable proxy management)
+- BusinessLogicResolver (facet configuration manager)
+- Factory (token deployment)
+- All facets (43 for Equity, 43 for Bond)
+- Equity & Bond configurations
 
 ---
 
 ## Usage Modes
 
-The deployment system supports two modes (see [Quick Start](#quick-start) for detailed scenarios):
+The deployment system supports three modes:
 
-### 1. Hardhat Mode (`npm run deploy`)
+| Mode           | Entry Point                            | Provider           | Use Case                                  | Command                                      |
+| -------------- | -------------------------------------- | ------------------ | ----------------------------------------- | -------------------------------------------- |
+| **Hardhat**    | [cli/hardhat.ts](cli/hardhat.ts)       | HardhatProvider    | Hardhat project deployment                | `npm run deploy:hardhat -- --network <name>` |
+| **Standalone** | [cli/standalone.ts](cli/standalone.ts) | StandaloneProvider | No Hardhat dependency, ~3x faster startup | `npm run deploy:standalone`                  |
+| **Module**     | Import in your code                    | Either provider    | Custom scripts, programmatic deployment   | See example below                            |
 
-- **Entry Point**: [scripts/cli/hardhat.ts](cli/hardhat.ts)
-- **Provider**: HardhatProvider (requires Hardhat runtime)
-- **Use Case**: Deploying from within Hardhat project with automatic network detection
-- **Command**: `npm run deploy` or `npx hardhat run scripts/cli/hardhat.ts --network <network>`
+### Import as Module
 
-### 2. Standalone Mode (`npm run deploy:standalone`)
-
-- **Entry Point**: [scripts/cli/standalone.ts](cli/standalone.ts)
-- **Provider**: StandaloneProvider (no Hardhat dependency)
-- **Use Case**: Non-interactive deployment from any project (~3x faster startup)
-- **Command**: `npm run deploy:standalone` or `NETWORK=hedera-testnet npm run deploy:standalone`
-
-### 3. Import as Module
-
-Import deployment functions in your own scripts:
+Use deployment functions in your own scripts:
 
 ```typescript
-// For Hardhat projects
-import { HardhatProvider } from './scripts/core/providers'
-import { deployCompleteSystem } from './scripts/workflows/deployCompleteSystem'
+import { HardhatProvider, deployCompleteSystem } from '@scripts/infrastructure'
 
 const provider = new HardhatProvider()
 const output = await deployCompleteSystem(provider, 'hedera-testnet', {
     useTimeTravel: false,
 })
-
-// For non-Hardhat projects
-import { StandaloneProvider } from './scripts/core/providers'
-
-const provider = new StandaloneProvider({
-    rpcUrl: process.env.RPC_URL!,
-    privateKey: process.env.PRIVATE_KEY!,
-})
 ```
+
+> For non-Hardhat projects, use `StandaloneProvider` instead. See [Examples](#examples) for details.
 
 ---
 
@@ -716,11 +702,21 @@ const output = await deployCompleteSystem(provider, network, {
 
 ## Examples
 
-### Example 1: Deploy from Hardhat
+> **Note**: Examples use HardhatProvider. For StandaloneProvider, replace with:
+>
+> ```typescript
+> const provider = new StandaloneProvider({
+>     rpcUrl: 'https://testnet.hashio.io/api',
+>     privateKey: process.env.PRIVATE_KEY!,
+> })
+> ```
+
+### Complete System Deployment
+
+Deploy entire ATS infrastructure (ProxyAdmin, BLR, Factory, all facets, configurations):
 
 ```typescript
-import { HardhatProvider } from '@scripts/infrastructure'
-import { deployCompleteSystem } from '@scripts'
+import { HardhatProvider, deployCompleteSystem } from '@scripts/infrastructure'
 
 async function main() {
     const provider = new HardhatProvider()
@@ -732,39 +728,16 @@ async function main() {
 
     console.log(`BLR: ${output.infrastructure.blr.proxy}`)
     console.log(`Factory: ${output.infrastructure.factory.proxy}`)
+    console.log(`Equity config v${output.configurations.equity.version}`)
+    console.log(`Bond config v${output.configurations.bond.version}`)
 }
 
 main().catch(console.error)
 ```
 
-### Example 2: Deploy from Non-Hardhat Project
+### Individual Component Deployment
 
-```typescript
-import {
-    StandaloneProvider,
-    deployCompleteSystem,
-} from '@hashgraph/asset-tokenization-contracts/scripts'
-
-async function main() {
-    const provider = new StandaloneProvider({
-        rpcUrl: 'https://testnet.hashio.io/api',
-        privateKey: process.env.PRIVATE_KEY!,
-    })
-
-    const output = await deployCompleteSystem(provider, 'hedera-testnet', {
-        useTimeTravel: false,
-        saveOutput: true,
-    })
-
-    console.log(
-        `Deployment complete: ${output.summary.totalContracts} contracts`
-    )
-}
-
-main().catch(console.error)
-```
-
-### Example 3: Deploy Individual Components
+Deploy specific components when you need granular control:
 
 ```typescript
 import {
@@ -776,15 +749,15 @@ import {
 async function main() {
     const provider = new HardhatProvider()
 
-    // Deploy facets
+    // Deploy specific facets
     const facetsResult = await deployFacets(provider, {
         facetNames: ['AccessControlFacet', 'KycFacet'],
         useTimeTravel: false,
     })
 
-    // Deploy BLR
+    // Deploy BusinessLogicResolver
     const blrResult = await deployBlr(provider, {
-        proxyAdminAddress: '0x...', // optional
+        proxyAdminAddress: '0x...', // optional, creates new if omitted
     })
 
     console.log(`Deployed ${facetsResult.deployed.size} facets`)

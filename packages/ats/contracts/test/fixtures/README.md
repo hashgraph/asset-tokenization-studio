@@ -1,6 +1,29 @@
 # ATS Test Fixtures
 
+**Last Updated**: 2025-01-28
+
 Modern, modular test fixtures for Asset Tokenization Studio contracts.
+
+## Quick Decision Guide
+
+**Which fixture should I use?**
+
+| I need to test...          | Use this fixture                         | Why                            |
+| -------------------------- | ---------------------------------------- | ------------------------------ |
+| BLR, Factory, ProxyAdmin   | `deployAtsInfrastructureFixture`         | Infrastructure only, no tokens |
+| Standard equity token      | `deployEquityTokenFixture`               | Most common, single partition  |
+| Partition operations       | `deployEquityMultiPartitionFixture`      | ERC1410, transferByPartition   |
+| External pause integration | `deployEquityWithExternalPauseFixture`   | Pause mock + roles             |
+| Control list operations    | `deployEquityWithControlListFixture`     | Control list roles             |
+| Protected partitions       | `deployEquityProtectedPartitionsFixture` | Partition restrictions         |
+| Clearing & holds           | `deployEquityClearingFixture`            | Clearing operations            |
+
+**Key Guidelines:**
+
+- **📦 Use `loadFixture`** from `@nomicfoundation/hardhat-network-helpers` for all fixtures
+- **🔄 Extend base fixtures** inline for test-specific setup (see Pattern 4)
+- **🎯 Choose minimal fixture** - don't load more than you need
+- **📝 Import from root** - `import { ... } from '../fixtures'` (not subfolder imports)
 
 ## Overview
 
@@ -323,16 +346,14 @@ const token = await deployEquityTokenFixture({
 
 ## Migration Guide
 
-### From Inline Fixtures
+> **Note**: If you have existing tests with inline deployment logic, consider migrating to these fixtures for better maintainability.
 
-**Old pattern:**
+**Before** (inline fixture with 50+ lines):
 
 ```typescript
 describe('My Tests', () => {
     async function deploySecurityFixtureMultiPartition() {
-        // 50 lines of deployment logic
-        diamond = await deployEquityFromFactory({ ... })
-        // More setup
+        // 50 lines of deployment logic...
     }
 
     it('test', async () => {
@@ -341,7 +362,7 @@ describe('My Tests', () => {
 })
 ```
 
-**New pattern:**
+**After** (use shared fixture):
 
 ```typescript
 import { deployEquityMultiPartitionFixture } from '../fixtures'
@@ -353,15 +374,7 @@ describe('My Tests', () => {
 })
 ```
 
-### From Old Fixture Structure
-
-**Old import:**
-
-```typescript
-import { deployEquityTokenFixture } from '../fixtures'
-```
-
-**Still works!** The new structure maintains backward compatibility via `index.ts` exports.
+**Backward compatibility**: Old imports via `index.ts` still work - no breaking changes.
 
 ## Adding New Fixtures
 
