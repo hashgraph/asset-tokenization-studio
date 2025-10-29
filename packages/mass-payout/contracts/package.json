@@ -63,9 +63,9 @@
     "ws": "8.18.0"
   },
   "engines": {
-    "node": ">=22.16.0"
+    "node": "22.16.0"
   },
   "resolutions": {
-    "ethers": "^5.8.0"
+    "ethers": "5.8.0"
   }
 }

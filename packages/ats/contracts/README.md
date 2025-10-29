@@ -106,6 +106,8 @@ npx npx hardhat deployAll --network <testnet, previewnet or mainnet>
 
 # Available tasks
 
+## Deploy tasks
+
 ### deployAll
 
 Deploys the full infrastructure (factory, resolver, facets, and initialized contracts) in a single execution.
@@ -138,17 +140,7 @@ Deploys a specific contract.
 npx hardhat deploy --contractName ERC20
 ```
 
-### keccak256
-
-Calculates and prints the Keccak-256 hash of a given string.
-
-**Parameters:**
-
-- `input` (required): The string to be hashed.
-
-```bash
-npx hardhat keccak256 "ADMIN_ROLE"
-```
+## BLR tasks
 
 ### getConfigurationInfo
 
@@ -194,6 +186,8 @@ Registers or updates the addresses of a list of business logic implementation co
 npx hardhat updateBusinessLogicKeys <resolverAddress> <allFacetsAddressList> --network <network-name>
 ```
 
+## Traspatent upgradeable proxy tasks:
+
 ### updateProxyImplementation
 
 Upgrades the implementation address for a given transparent proxy contract. This task executes the upgrade by calling the `upgrade` function on the associated `ProxyAdmin` contract. The signer executing this task must be the owner of the `ProxyAdmin` contract.
@@ -224,6 +218,33 @@ Retrieves key configuration details from a `ProxyAdmin` contract. It fetches the
 
 ```bash
 npx hardhat getProxyAdminConfig <proxyAdminAddress> <proxyAddress> --network <networkName>
+```
+
+## Utils tasks
+
+### keccak256
+
+Calculates and prints the Keccak-256 hash of a given string.
+
+**Parameters:**
+
+- `input` (required): The string to be hashed.
+
+```bash
+npx hardhat keccak256 "ADMIN_ROLE"
+```
+
+### createVC
+
+Generates a .vc file for an address that you can use to add to KYC
+
+**Parameters:**
+
+- `holder` (required): The hexadecimal address.
+- `privatekeyprivatekey` (required): The hexadecimal private key of the previous address.
+
+```bash
+npx hardhat createVC --holder <a hexadecimal address> --privatekey <the hexadecimal private key of the previous address>
 ```
 
 # Test
