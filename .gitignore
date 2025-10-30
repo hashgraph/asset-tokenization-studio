@@ -140,3 +140,6 @@ CLAUDE.md
 
 # Extracted methods from contracts
 contracts/extracted-methods.txt
+
+# bin files
+bin/
