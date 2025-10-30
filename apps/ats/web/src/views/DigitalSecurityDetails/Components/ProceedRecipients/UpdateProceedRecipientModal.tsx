@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useUpdateProceedRecipient } from '../../../../hooks/mutations/useProceedRecipients';
 import { UpdateProceedRecipientDataRequest } from '@hashgraph/asset-tokenization-sdk';
-import { isValidHex } from '../../../../utils/rules';
+import { textToHex } from '../../../../utils/format';
 
 interface FormValues {
   address: string;
@@ -60,7 +60,7 @@ export const UpdateProceedRecipientModal = ({
     const request = new UpdateProceedRecipientDataRequest({
       securityId,
       proceedRecipientId,
-      data: values.data ?? '',
+      data: values.data ? textToHex(values.data) : '',
     });
 
     updateProceedRecipientMutation(request, {
@@ -98,14 +98,7 @@ export const UpdateProceedRecipientModal = ({
               control={control}
               id="data"
               label={tUpdate('form.data.label')}
-              placeholder={tUpdate('form.data.placeholder')}
               isRequired={false}
-              rules={{
-                validate: (value: string) =>
-                  !value ||
-                  isValidHex(value) ||
-                  tUpdate('form.data.invalidHexFormat'),
-              }}
             />
           </VStack>
         </ModalBody>

@@ -298,8 +298,22 @@ describe(HolderTypeOrmRepository.name, () => {
       const savedHolders = await holderRepository.saveHolders(holders)
 
       expect(savedHolders).toHaveLength(2)
-      expect(savedHolders).toContainEqual(holder1)
-      expect(savedHolders).toContainEqual(holder2)
+
+      const savedHolder1 = savedHolders.find((h) => h.id === holder1.id)
+      const savedHolder2 = savedHolders.find((h) => h.id === holder2.id)
+
+      expect(savedHolder1).toMatchObject({
+        id: holder1.id,
+        holderEvmAddress: holder1.holderEvmAddress,
+        holderHederaAddress: holder1.holderHederaAddress,
+        status: holder1.status,
+      })
+      expect(savedHolder2).toMatchObject({
+        id: holder2.id,
+        holderEvmAddress: holder2.holderEvmAddress,
+        holderHederaAddress: holder2.holderHederaAddress,
+        status: holder2.status,
+      })
     })
 
     it("should throw HolderRepositoryError when saving multiple holders fails", async () => {

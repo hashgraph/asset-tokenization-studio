@@ -14,9 +14,10 @@ import { Button, InputController } from 'io-bricks-ui';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { isValidHederaId, isValidHex, required } from '../../../../utils/rules';
+import { isValidHederaId, required } from '../../../../utils/rules';
 import { useAddProceedRecipient } from '../../../../hooks/mutations/useProceedRecipients';
 import { AddProceedRecipientRequest } from '@hashgraph/asset-tokenization-sdk';
+import { textToHex } from '../../../../utils/format';
 
 interface FormValues {
   address: string;
@@ -53,7 +54,7 @@ export const AddProceedRecipientModal = ({
     const request = new AddProceedRecipientRequest({
       securityId,
       proceedRecipientId: values.address,
-      data: values.data ?? '',
+      data: values.data ? textToHex(values.data) : '',
     });
 
     addProceedRecipientMutation(request, {
@@ -96,13 +97,6 @@ export const AddProceedRecipientModal = ({
               control={control}
               id="data"
               label={tCreate('form.data.label')}
-              placeholder={tCreate('form.data.placeholder')}
-              rules={{
-                validate: (value: string) =>
-                  !value ||
-                  isValidHex(value) ||
-                  tCreate('form.data.invalidHexFormat'),
-              }}
             />
           </VStack>
         </ModalBody>

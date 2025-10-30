@@ -62,8 +62,6 @@ This monorepo is structured with **npm workspaces** and is designed for scalabil
 
 ### High-Level Overview
 
-![Architecture Overview](./docs/images/architecture.png)
-
 ```mermaid
 flowchart TD
     subgraph Users

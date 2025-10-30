@@ -220,7 +220,7 @@ import { useFormContext, useFormState, useForm } from 'react-hook-form';
 import { FormStepContainer } from '../../../components/FormStepContainer';
 import { Trash } from '@phosphor-icons/react';
 import { createColumnHelper } from '@tanstack/table-core';
-import { isValidHederaId, isValidHex, required } from '../../../utils/rules';
+import { isValidHederaId, required } from '../../../utils/rules';
 
 interface IProceedRecipient {
   address: string;
@@ -363,18 +363,7 @@ export const StepProceedRecipients = () => {
         <Text textStyle="BodyTextRegularSM">
           {t('stepProceedRecipients.data')}
         </Text>
-        <InputController
-          control={localControl}
-          id="data"
-          name="data"
-          placeholder={t('stepProceedRecipients.dataPlaceholder')}
-          rules={{
-            validate: (value: string) =>
-              !value ||
-              isValidHex(value) ||
-              t('stepProceedRecipients.invalidHexFormat'),
-          }}
-        />
+        <InputController control={localControl} id="data" name="data" />
       </Stack>
       <Stack w="full" align="end" justifyContent={'flex-end'}>
         <Button

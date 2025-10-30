@@ -66,6 +66,14 @@ The Asset Tokenization Studio has been restructured into a proper npm workspaces
 | Test web       | `cd web && npm test`       | `npm run ats:web:test`       |
 | Test all       | Manual in each directory   | `npm run ats:test`           |
 
+### Version Management Commands
+
+| Task                    | Old Command                | New Command                                       |
+| ----------------------- | -------------------------- | ------------------------------------------------- |
+| Update package versions | `./changeVersion.sh 1.0.0` | `npm run changeset` → `npm run changeset:version` |
+| Publish packages        | Manual npm publish         | `npm run changeset:publish`                       |
+| Build and publish       | Multiple manual steps      | `npm run release`                                 |
+
 ### Environment Setup
 
 **Before:**
@@ -122,6 +130,8 @@ If you have custom scripts or CI/CD configurations, update them to use the new w
 3. **Better CI/CD**: Path-based test triggers and conditional publishing
 4. **Scalability**: Ready for additional packages (e.g., mass-payout)
 5. **Consistent Tooling**: Centralized linting and formatting configurations ensure code quality consistency across all packages
+6. **Modern Version Management**: Changesets provide automated semantic versioning, changelog generation, and release management
+7. **Enterprise-Grade Releases**: Automated release workflows with proper audit trails and documentation
 
 ## Troubleshooting
 
@@ -141,6 +151,19 @@ npm run ats:web:build
 
 **Issue**: Environment variables not working
 **Solution**: Check that your `.env` file is in `apps/ats/web/.env`
+
+**Issue**: Version management with old script
+**Solution**: The `changeVersion.sh` script has been replaced by Changesets:
+
+```bash
+# Old way (deprecated)
+./changeVersion.sh 1.0.0
+
+# New way
+npm run changeset              # Create changeset for changes
+npm run changeset:version      # Update package versions
+npm run release               # Build and publish
+```
 
 ### Getting Help
 

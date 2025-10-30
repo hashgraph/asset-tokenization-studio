@@ -2,9 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {
-    IScheduledSnapshots
-} from '../../../layer_2/interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol';
-import {
     ScheduledTasksLib
 } from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
 import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';

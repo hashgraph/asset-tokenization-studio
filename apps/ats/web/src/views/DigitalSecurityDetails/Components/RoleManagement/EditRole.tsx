@@ -297,13 +297,19 @@ export const EditRole = () => {
         alignItems="flex-start"
         justifyContent="flex-start"
         gap={4}
-        w={TITLE_WIDTH}
+        w={{ base: '100%', md: TITLE_WIDTH }}
         minW={COLUMN_WIDTH}
+        maxW="100%"
       >
         <Text textStyle="HeadingMediumLG">{t('title')}</Text>
         <Text textStyle="BodyTextRegularMD">{t('subtitle')}</Text>
       </VStack>
-      <HStack gap={`${COLUMNS_GAP}px`} justify="center" align="flex-start">
+      <HStack
+        gap={`${COLUMNS_GAP}px`}
+        justify="center"
+        align="flex-start"
+        maxW="100%"
+      >
         <VStack gap={10}>
           <VStack w={COLUMN_MAX_WIDTH} gap={4}>
             {/* SEARCH FORM  */}
