@@ -9,17 +9,15 @@
  * @module core/operations/deployContract
  */
 
-import { Overrides } from 'ethers'
+import { ContractFactory, Overrides, providers } from 'ethers'
 import {
     DEFAULT_TRANSACTION_TIMEOUT,
-    DeploymentProvider,
     DeploymentResult,
     debug,
     error as logError,
     estimateGasLimit,
     extractRevertReason,
     formatGasUsage,
-    getGasPrice,
     info,
     success,
     validateAddress,
@@ -28,46 +26,57 @@ import {
 
 /**
  * Options for deploying a contract.
+ *
+ * NOTE: contractName removed - factory already knows the contract name.
  */
 export interface DeployContractOptions {
-    contractName: string
     args?: unknown[]
     overrides?: Overrides
     confirmations?: number
-    gasMultiplier?: number
     silent?: boolean
 }
 
 /**
- * Deploy a single contract.
+ * Deploy a single contract using a ContractFactory.
  *
- * @param provider - Deployment provider
+ * Refactored to take ContractFactory directly instead of provider + name.
+ * Use with TypeChain factories or ethers.getContractFactory().
+ *
+ * @param factory - Contract factory (from TypeChain or ethers)
  * @param options - Deployment options
  * @returns Deployment result with contract instance
- * @throws Error if deployment fails
  *
  * @example
  * ```typescript
- * const result = await deployContract(provider, {
- *   contractName: 'AccessControlFacet',
+ * // With TypeChain
+ * import { AccessControlFacet__factory } from '@contract-types'
+ *
+ * const factory = new AccessControlFacet__factory(signer)
+ * const result = await deployContract(factory, {
  *   confirmations: 2,
- *   gasMultiplier: 1.2
+ *   overrides: { gasLimit: 5000000 }
  * })
  * console.log(`Deployed at: ${result.address}`)
+ *
+ * // With Hardhat ethers
+ * const factory = await ethers.getContractFactory('AccessControlFacet', signer)
+ * const result = await deployContract(factory, { confirmations: 1 })
  * ```
  */
 export async function deployContract(
-    provider: DeploymentProvider,
-    options: DeployContractOptions
+    factory: ContractFactory,
+    options: DeployContractOptions = {}
 ): Promise<DeploymentResult> {
     const {
-        contractName,
         args = [],
         overrides = {},
         confirmations = 1,
-        gasMultiplier = 1.0,
         silent = false,
     } = options
+
+    // Get contract name from factory for logging
+    const contractName =
+        factory.constructor.name.replace('__factory', '') || 'Contract'
 
     try {
         if (!silent) {
@@ -77,19 +86,8 @@ export async function deployContract(
             }
         }
 
-        // Get contract factory
-        const factory = await provider.getFactory(contractName)
-
-        // Prepare overrides with gas price if needed
+        // Prepare deployment overrides
         const deployOverrides: Overrides = { ...overrides }
-        if (gasMultiplier !== 1.0 && !deployOverrides.gasPrice) {
-            const ethProvider = provider.getProvider()
-            const gasPrice = await getGasPrice(ethProvider, gasMultiplier)
-            deployOverrides.gasPrice = gasPrice
-            debug(
-                `Using gas price: ${gasPrice.toString()} (${gasMultiplier}x multiplier)`
-            )
-        }
 
         // Estimate gas if not provided
         if (!deployOverrides.gasLimit) {
@@ -105,7 +103,7 @@ export async function deployContract(
         }
 
         // Deploy contract
-        const contract = await provider.deploy(factory, args, deployOverrides)
+        const contract = await factory.deploy(...args, deployOverrides)
 
         if (!silent) {
             info(`Transaction sent: ${contract.deployTransaction.hash}`)
@@ -155,101 +153,44 @@ export async function deployContract(
 /**
  * Deploy multiple contracts in sequence.
  *
- * @param provider - Deployment provider
- * @param contracts - Array of deployment options
- * @returns Map of contract names to deployment results
+ * REMOVED: This function is no longer needed with direct factory usage.
+ * Use a simple loop with your factories instead:
  *
  * @example
  * ```typescript
- * const results = await deployContracts(provider, [
- *   { contractName: 'AccessControlFacet' },
- *   { contractName: 'KycFacet' },
- *   { contractName: 'PauseFacet' }
- * ])
- *
- * for (const [name, result] of results) {
- *   if (result.success) {
- *     console.log(`${name}: ${result.address}`)
- *   }
+ * const results = new Map()
+ * for (const factory of factories) {
+ *   const result = await deployContract(factory)
+ *   results.set(factory.constructor.name, result)
  * }
  * ```
- */
-export async function deployContracts(
-    provider: DeploymentProvider,
-    contracts: DeployContractOptions[]
-): Promise<Map<string, DeploymentResult>> {
-    const results = new Map<string, DeploymentResult>()
-
-    for (const options of contracts) {
-        const result = await deployContract(provider, options)
-        results.set(options.contractName, result)
-
-        // Stop on first failure
-        if (!result.success) {
-            logError(`Deployment failed at ${options.contractName}, stopping`)
-            break
-        }
-    }
-
-    return results
-}
-
-/**
- * Deploy contracts with custom names (for contracts with different deployment names).
  *
- * @param provider - Deployment provider
- * @param contracts - Array of contracts with custom identifiers
- * @returns Map of identifiers to deployment results
- *
- * @example
- * ```typescript
- * const results = await deployContractsWithNames(provider, [
- *   { id: 'facet1', contractName: 'AccessControlFacet' },
- *   { id: 'facet2', contractName: 'AccessControlFacet' } // Deploy same contract twice
- * ])
- * ```
+ * @deprecated Use direct loop with factories
  */
-export async function deployContractsWithNames(
-    provider: DeploymentProvider,
-    contracts: Array<{ id: string } & DeployContractOptions>
-): Promise<Map<string, DeploymentResult>> {
-    const results = new Map<string, DeploymentResult>()
-
-    for (const { id, ...options } of contracts) {
-        const result = await deployContract(provider, options)
-        results.set(id, result)
-
-        if (!result.success) {
-            logError(`Deployment failed at ${id}, stopping`)
-            break
-        }
-    }
-
-    return results
-}
 
 /**
  * Verify a deployed contract exists at an address.
  *
- * @param provider - Deployment provider
+ * @param provider - ethers.js Provider
  * @param address - Contract address to verify
  * @param contractName - Expected contract name (optional, for logging)
  * @returns true if contract exists (has code)
  *
  * @example
  * ```typescript
+ * import { ethers } from 'ethers'
+ * const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
  * const exists = await verifyDeployedContract(provider, '0x123...', 'AccessControlFacet')
  * ```
  */
 export async function verifyDeployedContract(
-    provider: DeploymentProvider,
+    provider: providers.Provider,
     address: string,
     contractName?: string
 ): Promise<boolean> {
     try {
         validateAddress(address, 'contract address')
-        const ethProvider = provider.getProvider()
-        const code = await ethProvider.getCode(address)
+        const code = await provider.getCode(address)
 
         const exists = code !== '0x'
         if (contractName) {

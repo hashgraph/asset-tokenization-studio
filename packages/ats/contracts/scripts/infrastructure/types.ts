@@ -14,7 +14,7 @@
  * Guidelines for type placement:
  * - Put types HERE if:
  *   • Used by 3+ different files
- *   • Core infrastructure or interfaces (e.g., DeploymentProvider)
+ *   • Core infrastructure interfaces
  *   • Rarely changes
  *   • Fundamental to the architecture
  *
@@ -34,78 +34,11 @@ import {
     Contract,
     ContractFactory,
     Signer,
+    Wallet,
     Overrides,
     ContractReceipt,
     providers,
 } from 'ethers'
-
-/**
- * Framework-agnostic deployment provider interface.
- * Allows scripts to work with any Ethereum provider (Hardhat, Ethers, Viem, etc.)
- */
-export interface DeploymentProvider {
-    /**
-     * Get a signer for transactions
-     * @returns Promise resolving to a Signer instance
-     */
-    getSigner(): Promise<Signer>
-
-    /**
-     * Get a contract factory by name
-     * @param contractName - Name of the contract (e.g., 'AccessControlFacet')
-     * @returns Promise resolving to a ContractFactory
-     */
-    getFactory(contractName: string): Promise<ContractFactory>
-
-    /**
-     * Deploy a contract
-     * @param factory - Contract factory
-     * @param args - Constructor arguments
-     * @param overrides - Transaction overrides (gas, gasPrice, etc.)
-     * @returns Promise resolving to deployed Contract instance
-     */
-    deploy(
-        factory: ContractFactory,
-        args?: any[],
-        overrides?: Overrides
-    ): Promise<Contract>
-
-    /**
-     * Deploy a TransparentUpgradeableProxy
-     * @param implementationAddress - Address of implementation contract
-     * @param proxyAdminAddress - Address of ProxyAdmin
-     * @param initData - Initialization data (encoded function call)
-     * @param overrides - Transaction overrides
-     * @returns Promise resolving to deployed proxy Contract
-     */
-    deployProxy(
-        implementationAddress: string,
-        proxyAdminAddress: string,
-        initData: string,
-        overrides?: Overrides
-    ): Promise<Contract>
-
-    /**
-     * Upgrade a proxy implementation
-     * @param proxyAddress - Address of the proxy to upgrade
-     * @param newImplementationAddress - Address of new implementation
-     * @param proxyAdminAddress - Address of ProxyAdmin
-     * @param overrides - Transaction overrides
-     * @returns Promise resolving when upgrade is complete
-     */
-    upgradeProxy(
-        proxyAddress: string,
-        newImplementationAddress: string,
-        proxyAdminAddress: string,
-        overrides?: Overrides
-    ): Promise<void>
-
-    /**
-     * Get provider for read operations
-     * @returns Provider instance for reading blockchain state
-     */
-    getProvider(): providers.Provider
-}
 
 /**
  * Method definition with full signature and selector.
@@ -232,6 +165,9 @@ export interface FacetDefinition {
 
     /** Custom errors defined in this facet */
     errors?: ErrorDefinition[]
+
+    /** TypeChain factory constructor function for creating contract instances */
+    factory?: (signer: Signer, useTimeTravel?: boolean) => ContractFactory
 }
 
 /**
@@ -392,93 +328,72 @@ export interface DeploymentResult {
 }
 
 /**
- * Options for deploying a proxy
+ * NOTE: DeployProxyOptions and DeployProxyResult are now defined in
+ * scripts/infrastructure/operations/deployProxy.ts to keep them close to
+ * the implementation. Import from there if needed.
  */
-export interface DeployProxyOptions {
-    /** Contract name for implementation */
-    implementationContract: string
-
-    /** Constructor args for implementation */
-    implementationArgs?: any[]
-
-    /** Address of implementation (if already deployed) */
-    implementationAddress?: string
-
-    /** Address of existing ProxyAdmin (if reusing) */
-    proxyAdminAddress?: string
-
-    /** Initialization data (encoded function call) */
-    initData?: string
-
-    /** Network to deploy to */
-    network?: string
-
-    /** Transaction overrides */
-    overrides?: Overrides
-
-    /** Whether to verify contracts after deployment */
-    verify?: boolean
-}
 
 /**
- * Result of deploying a proxy
+ * Options for upgrading a transparent proxy to a new implementation.
+ *
+ * **Two Upgrade Patterns:**
+ *
+ * 1. Deploy and Upgrade (provide newImplementationFactory):
+ *    - Deploys new implementation contract
+ *    - Then upgrades proxy to point to it
+ *
+ * 2. Upgrade to Existing (provide newImplementationAddress):
+ *    - Uses already-deployed implementation
+ *    - Useful for "prepare then upgrade" pattern (deploy, test, then upgrade)
+ *
+ * **Must provide EITHER newImplementationFactory OR newImplementationAddress** (not both).
+ *
+ * @template F - Type of the factory (for type inference)
  */
-export interface DeployProxyResult {
-    /** Implementation contract instance */
-    implementation: Contract
-
-    /** Implementation address */
-    implementationAddress: string
-
-    /** Proxy contract instance */
-    proxy: Contract
-
-    /** Proxy address */
+export interface UpgradeProxyOptions<
+    F extends ContractFactory = ContractFactory,
+> {
+    /** Address of the proxy contract to upgrade */
     proxyAddress: string
 
-    /** ProxyAdmin contract instance */
-    proxyAdmin: Contract
+    /**
+     * Factory for new implementation contract (Pattern 1: Deploy and Upgrade).
+     * If provided, will deploy a new implementation before upgrading.
+     * Mutually exclusive with newImplementationAddress.
+     */
+    newImplementationFactory?: F
 
-    /** ProxyAdmin address */
-    proxyAdminAddress: string
+    /**
+     * Constructor arguments for new implementation deployment.
+     * Only used when newImplementationFactory is provided.
+     * These are passed to the implementation contract's constructor.
+     */
+    newImplementationArgs?: unknown[]
 
-    /** Deployment transaction receipts */
-    receipts: {
-        implementation?: ContractReceipt
-        proxy?: ContractReceipt
-        proxyAdmin?: ContractReceipt
-    }
-}
-
-/**
- * Options for upgrading a proxy
- */
-export interface UpgradeProxyOptions {
-    /** Proxy address to upgrade */
-    proxyAddress: string
-
-    /** New implementation contract name */
-    newImplementationContract: string
-
-    /** Constructor args for new implementation */
-    newImplementationArgs?: any[]
-
-    /** Address of new implementation (if already deployed) */
+    /**
+     * Address of existing implementation contract (Pattern 2: Upgrade to Existing).
+     * If provided, skips deployment and upgrades to this address.
+     * Mutually exclusive with newImplementationFactory.
+     */
     newImplementationAddress?: string
 
-    /** ProxyAdmin address (optional, will be read from proxy if not provided) */
-    proxyAdminAddress?: string
-
-    /** Initialization data to call after upgrade */
+    /**
+     * ABI-encoded initialization calldata for upgradeAndCall.
+     * If provided, calls upgradeAndCall() instead of upgrade(),
+     * executing this function on the proxy after upgrade.
+     * Use this to reinitialize state in the new implementation.
+     * Example: `interface.encodeFunctionData('initializeV2', [param])`
+     */
     initData?: string
 
-    /** Network */
-    network?: string
-
-    /** Transaction overrides */
+    /** Transaction overrides (gas limit, gas price, etc.) */
     overrides?: Overrides
 
-    /** Whether to verify upgrade succeeded */
+    /**
+     * Whether to verify contracts exist before/after upgrade.
+     * Requires ProxyAdmin to be connected to a provider.
+     * Default: true
+     */
     verify?: boolean
 }
 
@@ -702,4 +617,102 @@ export function err<E extends string>(
 
 export type DeepPartial<T> = {
     [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+}
+
+// ============================================================================
+// Signer Creation Utilities
+// ============================================================================
+
+/**
+ * Options for creating a signer from configuration.
+ */
+export interface SignerOptions {
+    /** JSON-RPC endpoint URL */
+    rpcUrl: string
+
+    /** Private key (with or without 0x prefix) */
+    privateKey: string
+
+    /** Chain ID (optional) */
+    chainId?: number
+}
+
+/**
+ * Create a signer from explicit configuration.
+ *
+ * Use this in standalone scripts (CI/CD, production deployments) where you
+ * want to create a signer directly without Hardhat.
+ *
+ * @param options - Signer configuration
+ * @returns Ethers.js Signer instance
+ *
+ * @example
+ * ```typescript
+ * import { createSigner } from '@scripts/infrastructure'
+ *
+ * const signer = createSigner({
+ *     rpcUrl: 'https://testnet.hashio.io/api',
+ *     privateKey: process.env.PRIVATE_KEY!
+ * })
+ *
+ * const result = await deployBlr(signer, options)
+ * ```
+ */
+export function createSigner(options: SignerOptions): Signer {
+    const { rpcUrl, privateKey, chainId } = options
+
+    // Normalize private key (add 0x prefix if missing)
+    const normalizedKey = privateKey.startsWith('0x')
+        ? privateKey
+        : `0x${privateKey}`
+
+    const provider = new providers.JsonRpcProvider(rpcUrl, chainId)
+    return new Wallet(normalizedKey, provider)
+}
+
+/**
+ * Create a signer from environment variables.
+ *
+ * Reads configuration from standard environment variables:
+ * - RPC_URL: JSON-RPC endpoint
+ * - PRIVATE_KEY: Private key for signing transactions
+ * - CHAIN_ID (optional): Network chain ID
+ *
+ * @returns Ethers.js Signer instance
+ * @throws Error if required environment variables are missing
+ *
+ * @example
+ * ```typescript
+ * import { createSignerFromEnv } from '@scripts/infrastructure'
+ *
+ * // Set in environment:
+ * // export RPC_URL=https://testnet.hashio.io/api
+ * // export PRIVATE_KEY=0x...
+ *
+ * const signer = createSignerFromEnv()
+ * const result = await deployCompleteSystem(signer, 'testnet')
+ * ```
+ */
+export function createSignerFromEnv(): Signer {
+    const rpcUrl = process.env.RPC_URL
+    const privateKey = process.env.PRIVATE_KEY
+    const chainId = process.env.CHAIN_ID
+        ? parseInt(process.env.CHAIN_ID, 10)
+        : undefined
+
+    if (!rpcUrl) {
+        throw new Error(
+            'RPC_URL environment variable required. ' +
+                'Set it to your JSON-RPC endpoint URL.'
+        )
+    }
+
+    if (!privateKey) {
+        throw new Error(
+            'PRIVATE_KEY environment variable required. ' +
+                'Set it to your private key for signing transactions.'
+        )
+    }
+
+    return createSigner({ rpcUrl, privateKey, chainId })
 }

@@ -10,9 +10,9 @@
  */
 
 import { Overrides } from 'ethers'
+import { BusinessLogicResolver } from '@contract-types'
 import {
     DEFAULT_TRANSACTION_TIMEOUT,
-    DeploymentProvider,
     RegistryProvider,
     debug,
     error as logError,
@@ -58,14 +58,8 @@ function resolveRegistry(registries: RegistryProvider[]): RegistryProvider {
  * Options for registering facets in BLR.
  */
 export interface RegisterFacetsOptions {
-    /** Address of BusinessLogicResolver */
-    blrAddress: string
-
     /** Facets to register (facet name -> deployed address) */
     facets: Record<string, string>
-
-    /** Network */
-    network?: string
 
     /** Transaction overrides */
     overrides?: Overrides
@@ -122,15 +116,18 @@ export interface RegisterFacetsResult {
  * Downstream projects can combine ATS facets with custom facets by passing
  * multiple registries in the `registries` array.
  *
- * @param provider - Deployment provider
+ * @param blr - Typed BusinessLogicResolver contract instance
  * @param options - Registration options
  * @returns Registration result
  * @throws Error if registration fails
  *
  * @example Single registry
  * ```typescript
- * const result = await registerFacets(provider, {
- *   blrAddress: '0x123...',
+ * import { BusinessLogicResolver__factory } from '@contract-types'
+ *
+ * const blr = BusinessLogicResolver__factory.connect('0x123...', signer)
+ *
+ * const result = await registerFacets(blr, {
  *   facets: {
  *     'AccessControlFacet': '0xabc...',
  *     'KycFacet': '0xdef...',
@@ -143,11 +140,13 @@ export interface RegisterFacetsResult {
  *
  * @example Multiple registries (ATS + custom)
  * ```typescript
+ * import { BusinessLogicResolver__factory } from '@contract-types'
  * import { atsRegistry } from '@hashgraph/asset-tokenization-contracts/scripts'
  * import { customRegistry } from './myRegistry'
  *
- * const result = await registerFacets(provider, {
- *   blrAddress: '0x123...',
+ * const blr = BusinessLogicResolver__factory.connect('0x123...', signer)
+ *
+ * const result = await registerFacets(blr, {
  *   facets: {
  *     'AccessControlFacet': '0xabc...',  // From ATS
  *     'CustomFacet': '0xdef...'          // From custom registry
@@ -157,23 +156,29 @@ export interface RegisterFacetsResult {
  * ```
  */
 export async function registerFacets(
-    provider: DeploymentProvider,
+    blr: BusinessLogicResolver,
     options: RegisterFacetsOptions
 ): Promise<RegisterFacetsResult> {
-    const {
-        blrAddress,
-        facets,
-        network: _network,
-        overrides = {},
-        verify = true,
-        registries,
-    } = options
+    const { facets, overrides = {}, verify = true, registries } = options
+
+    // Get BLR address from contract instance
+    const blrAddress = blr.address
 
     const registered: string[] = []
     const failed: string[] = []
 
     try {
         section(`Registering Facets in BLR`)
+
+        // Get provider from BLR contract
+        if (!blr.provider) {
+            throw new Error(
+                'BusinessLogicResolver must be connected to a signer with a provider. ' +
+                    'Use BusinessLogicResolver__factory.connect(address, signer) where signer has a provider.'
+            )
+        }
+
+        const provider = blr.provider
 
         // Resolve registry (combine if multiple)
         const registry = resolveRegistry(registries)
@@ -182,8 +187,7 @@ export async function registerFacets(
         validateAddress(blrAddress, 'BusinessLogicResolver address')
 
         if (verify) {
-            const ethProvider = provider.getProvider()
-            const blrCode = await ethProvider.getCode(blrAddress)
+            const blrCode = await provider.getCode(blrAddress)
             if (blrCode === '0x') {
                 throw new Error(
                     `No contract found at BLR address ${blrAddress}`
@@ -205,18 +209,13 @@ export async function registerFacets(
             }
         }
 
-        // Get BLR contract instance
-        const blrFactory = await provider.getFactory('BusinessLogicResolver')
-        const blr = blrFactory.attach(blrAddress)
-
         // Validate all facets before registering
         for (const [facetName, facetAddress] of Object.entries(facets)) {
             try {
                 validateAddress(facetAddress, `${facetName} address`)
 
                 if (verify) {
-                    const ethProvider = provider.getProvider()
-                    const facetCode = await ethProvider.getCode(facetAddress)
+                    const facetCode = await provider.getCode(facetAddress)
                     if (facetCode === '0x') {
                         warn(
                             `No contract found at ${facetName} address ${facetAddress}`
@@ -336,8 +335,7 @@ export async function registerFacets(
  *
  * Convenience function for registering one facet at a time.
  *
- * @param provider - Deployment provider
- * @param blrAddress - BLR address
+ * @param blr - Typed BusinessLogicResolver contract instance
  * @param facetName - Facet name
  * @param facetAddress - Facet deployed address
  * @param registries - Registry providers
@@ -346,9 +344,12 @@ export async function registerFacets(
  *
  * @example
  * ```typescript
+ * import { BusinessLogicResolver__factory } from '@contract-types'
+ *
+ * const blr = BusinessLogicResolver__factory.connect('0x123...', signer)
+ *
  * const result = await registerFacet(
- *   provider,
- *   '0x123...',
+ *   blr,
  *   'AccessControlFacet',
  *   '0xabc...',
  *   [atsRegistry]
@@ -356,151 +357,15 @@ export async function registerFacets(
  * ```
  */
 export async function registerFacet(
-    provider: DeploymentProvider,
-    blrAddress: string,
+    blr: BusinessLogicResolver,
     facetName: string,
     facetAddress: string,
     registries: RegistryProvider[],
     overrides: Overrides = {}
 ): Promise<RegisterFacetsResult> {
-    return registerFacets(provider, {
-        blrAddress,
+    return registerFacets(blr, {
         facets: { [facetName]: facetAddress },
         registries,
         overrides,
     })
-}
-
-/**
- * Check if a facet is already registered in BLR.
- *
- * @param provider - Deployment provider
- * @param blrAddress - BLR address
- * @param facetName - Facet name to check
- * @returns true if facet is registered
- *
- * @example
- * ```typescript
- * const isRegistered = await isFacetRegistered(
- *   provider,
- *   '0x123...',
- *   'AccessControlFacet'
- * )
- * ```
- */
-export async function isFacetRegistered(
-    provider: DeploymentProvider,
-    blrAddress: string,
-    facetName: string
-): Promise<boolean> {
-    try {
-        validateAddress(blrAddress, 'BLR address')
-
-        const blrFactory = await provider.getFactory('BusinessLogicResolver')
-        const blr = blrFactory.attach(blrAddress)
-
-        const facetAddress = await blr.getFacetAddress(facetName)
-
-        // Registered facets have non-zero addresses
-        return facetAddress !== '0x0000000000000000000000000000000000000000'
-    } catch (err) {
-        debug(`Error checking facet registration: ${extractRevertReason(err)}`)
-        return false
-    }
-}
-
-/**
- * Get the address of a registered facet from BLR.
- *
- * @param provider - Deployment provider
- * @param blrAddress - BLR address
- * @param facetName - Facet name
- * @returns Facet address or null if not registered
- *
- * @example
- * ```typescript
- * const address = await getRegisteredFacetAddress(
- *   provider,
- *   '0x123...',
- *   'AccessControlFacet'
- * )
- * if (address) {
- *   console.log(`AccessControlFacet is at ${address}`)
- * }
- * ```
- */
-export async function getRegisteredFacetAddress(
-    provider: DeploymentProvider,
-    blrAddress: string,
-    facetName: string
-): Promise<string | null> {
-    try {
-        validateAddress(blrAddress, 'BLR address')
-
-        const blrFactory = await provider.getFactory('BusinessLogicResolver')
-        const blr = blrFactory.attach(blrAddress)
-
-        const facetAddress = await blr.getFacetAddress(facetName)
-
-        if (facetAddress === '0x0000000000000000000000000000000000000000') {
-            return null
-        }
-
-        return facetAddress
-    } catch (err) {
-        logError(`Error getting facet address: ${extractRevertReason(err)}`)
-        return null
-    }
-}
-
-/**
- * List all registered facets in BLR.
- *
- * @param provider - Deployment provider
- * @param blrAddress - BLR address
- * @returns Map of facet names to addresses
- *
- * @example
- * ```typescript
- * const facets = await listRegisteredFacets(provider, '0x123...')
- * for (const [name, address] of facets) {
- *   console.log(`${name}: ${address}`)
- * }
- * ```
- */
-export async function listRegisteredFacets(
-    provider: DeploymentProvider,
-    blrAddress: string
-): Promise<Map<string, string>> {
-    const facets = new Map<string, string>()
-
-    try {
-        validateAddress(blrAddress, 'BLR address')
-
-        const blrFactory = await provider.getFactory('BusinessLogicResolver')
-        const blr = blrFactory.attach(blrAddress)
-
-        // Try to get registered facets list (if BLR exposes this)
-        try {
-            const facetNames = await blr.getRegisteredFacets()
-
-            for (const facetName of facetNames) {
-                const facetAddress = await blr.getFacetAddress(facetName)
-                if (
-                    facetAddress !==
-                    '0x0000000000000000000000000000000000000000'
-                ) {
-                    facets.set(facetName, facetAddress)
-                }
-            }
-        } catch {
-            // If BLR doesn't have getRegisteredFacets(), return empty
-            debug('BLR does not expose getRegisteredFacets() method')
-        }
-
-        return facets
-    } catch (err) {
-        logError(`Error listing facets: ${extractRevertReason(err)}`)
-        return facets
-    }
 }

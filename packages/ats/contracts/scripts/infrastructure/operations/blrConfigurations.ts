@@ -12,18 +12,15 @@
  * @module core/operations/blrConfigurations
  */
 
-import { Overrides } from 'ethers'
+import { BusinessLogicResolver } from '@contract-types'
 import {
     DEFAULT_TRANSACTION_TIMEOUT,
-    DeploymentProvider,
     OperationResult,
     RegistryProvider,
-    validateAddress,
     validateBytes32,
     extractRevertReason,
     info,
     success,
-    section,
     debug,
     error as logError,
     formatGasUsage,
@@ -54,33 +51,9 @@ export interface BatchFacetConfiguration {
 }
 
 /**
- * Options for creating a BLR configuration.
- */
-export interface CreateBlrConfigurationOptions {
-    /** Address of BusinessLogicResolver */
-    blrAddress: string
-
-    /** Configuration ID (bytes32, any config ID) */
-    configurationId: string
-
-    /** Facet configurations for this config */
-    facets: FacetConfiguration[]
-
-    /** Whether this is the final batch (for batch creation) */
-    isFinalBatch?: boolean
-
-    /** Network */
-    network?: string
-
-    /** Transaction overrides */
-    overrides?: Overrides
-
-    /** Whether to verify BLR exists before configuration */
-    verify?: boolean
-}
-
-/**
  * Result of BLR configuration.
+ *
+ * Used by the deployBlrWithFacets workflow helper.
  */
 export interface CreateBlrConfigurationResult {
     /** Whether configuration succeeded */
@@ -112,193 +85,32 @@ export interface CreateBlrConfigurationResult {
 }
 
 /**
- * Create a configuration in BLR (generic operation).
- *
- * This operation defines which facets and function selectors are used
- * for a specific configuration ID. Works with any configuration ID, not
- * limited to equity or bond.
- *
- * @param provider - Deployment provider
- * @param options - Configuration options
- * @returns Configuration result
- *
- * @example
- * ```typescript
- * // Can be used with any configuration ID
- * const result = await createBlrConfiguration(provider, {
- *   blrAddress: '0x123...',
- *   configurationId: '0x00...01', // Any bytes32 config ID
- *   facets: [
- *     {
- *       facetName: 'AccessControlFacet',
- *       selectors: ['0x12345678', '0x9abcdef0']
- *     },
- *     {
- *       facetName: 'KycFacet',
- *       selectors: ['0xabcdef12']
- *     }
- *   ]
- * })
- * console.log(`Created configuration version ${result.version}`)
- * ```
- */
-export async function createBlrConfiguration(
-    provider: DeploymentProvider,
-    options: CreateBlrConfigurationOptions
-): Promise<CreateBlrConfigurationResult> {
-    const {
-        blrAddress,
-        configurationId,
-        facets,
-        isFinalBatch = true,
-        network: _network,
-        overrides = {},
-        verify = true,
-    } = options
-
-    try {
-        section(`Configuring BLR`)
-
-        // Validate inputs
-        validateAddress(blrAddress, 'BusinessLogicResolver address')
-        validateBytes32(configurationId, 'configuration ID')
-
-        if (facets.length === 0) {
-            throw new Error('At least one facet configuration is required')
-        }
-
-        if (verify) {
-            const ethProvider = provider.getProvider()
-            const blrCode = await ethProvider.getCode(blrAddress)
-            if (blrCode === '0x') {
-                throw new Error(
-                    `No contract found at BLR address ${blrAddress}`
-                )
-            }
-        }
-
-        info(`BLR Address: ${blrAddress}`)
-        info(`Configuration ID: ${configurationId}`)
-        info(`Facets: ${facets.length}`)
-        info(`Is final batch: ${isFinalBatch}`)
-
-        // Get BLR contract instance
-        const blrFactory = await provider.getFactory('BusinessLogicResolver')
-        const blr = blrFactory.attach(blrAddress)
-
-        // Prepare configuration data
-        const facetConfigs = facets.map((f) => ({
-            facetName: f.facetName,
-            selectors: f.selectors,
-        }))
-
-        debug(`Facet configurations: ${JSON.stringify(facetConfigs, null, 2)}`)
-
-        // Create batch configuration
-        info('Creating configuration...')
-
-        const tx = await blr.createBatchConfiguration(
-            configurationId,
-            facetConfigs,
-            isFinalBatch,
-            overrides
-        )
-
-        info(`Configuration transaction sent: ${tx.hash}`)
-
-        const receipt = await waitForTransaction(
-            tx,
-            1,
-            DEFAULT_TRANSACTION_TIMEOUT
-        )
-
-        const gasUsed = formatGasUsage(receipt, tx.gasLimit)
-        debug(gasUsed)
-
-        // Try to get the version from events
-        let version: number | undefined
-
-        try {
-            // Parse ConfigurationCreated event to get version
-            const iface = blr.interface
-            const configCreatedTopic = iface.getEventTopic(
-                'ConfigurationCreated'
-            )
-
-            const configLog = receipt.logs.find(
-                (log) => log.topics[0] === configCreatedTopic
-            )
-
-            if (configLog) {
-                const parsedLog = iface.parseLog(configLog)
-                version = parsedLog.args.version?.toNumber()
-            }
-        } catch {
-            debug('Could not parse configuration version from events')
-        }
-
-        success(`Configuration created successfully`)
-        if (version !== undefined) {
-            info(`  Version: ${version}`)
-        }
-        info(`  Configuration ID: ${configurationId}`)
-        info(`  Facets: ${facets.length}`)
-
-        return {
-            success: true,
-            blrAddress,
-            configurationId,
-            version,
-            facetCount: facets.length,
-            transactionHash: receipt.transactionHash,
-            blockNumber: receipt.blockNumber,
-            gasUsed: receipt.gasUsed.toNumber(),
-        }
-    } catch (err) {
-        const errorMessage = extractRevertReason(err)
-        logError(`BLR configuration failed: ${errorMessage}`)
-
-        return {
-            success: false,
-            blrAddress,
-            configurationId,
-            facetCount: facets.length,
-            error: errorMessage,
-        }
-    }
-}
-
-/**
  * Get the latest configuration version for a configuration ID.
  *
- * @param provider - Deployment provider
- * @param blrAddress - BLR address
+ * Uses the correct contract method `getLatestVersionByConfiguration` from IDiamondCutManager.
+ *
+ * @param blr - Typed BusinessLogicResolver contract instance
  * @param configurationId - Configuration ID
  * @returns Latest version number
  *
  * @example
  * ```typescript
- * const version = await getConfigurationVersion(
- *   provider,
- *   '0x123...',
- *   '0x00...01' // Any config ID
- * )
+ * import { BusinessLogicResolver__factory } from '@contract-types'
+ *
+ * const blr = BusinessLogicResolver__factory.connect('0x123...', signer)
+ * const version = await getConfigurationVersion(blr, '0x00...01')
  * console.log(`Latest config version: ${version}`)
  * ```
  */
 export async function getConfigurationVersion(
-    provider: DeploymentProvider,
-    blrAddress: string,
+    blr: BusinessLogicResolver,
     configurationId: string
 ): Promise<number> {
     try {
-        validateAddress(blrAddress, 'BLR address')
         validateBytes32(configurationId, 'configuration ID')
 
-        const blrFactory = await provider.getFactory('BusinessLogicResolver')
-        const blr = blrFactory.attach(blrAddress)
-
-        const version = await blr.getConfigurationVersion(configurationId)
+        const version =
+            await blr.getLatestVersionByConfiguration(configurationId)
         return version.toNumber()
     } catch (err) {
         logError(
@@ -311,31 +123,24 @@ export async function getConfigurationVersion(
 /**
  * Check if a configuration exists in BLR.
  *
- * @param provider - Deployment provider
- * @param blrAddress - BLR address
+ * @param blr - Typed BusinessLogicResolver contract instance
  * @param configurationId - Configuration ID
  * @returns true if configuration exists
  *
  * @example
  * ```typescript
- * const exists = await configurationExists(
- *   provider,
- *   '0x123...',
- *   '0x00...01' // Any config ID
- * )
+ * import { BusinessLogicResolver__factory } from '@contract-types'
+ *
+ * const blr = BusinessLogicResolver__factory.connect('0x123...', signer)
+ * const exists = await configurationExists(blr, '0x00...01')
  * ```
  */
 export async function configurationExists(
-    provider: DeploymentProvider,
-    blrAddress: string,
+    blr: BusinessLogicResolver,
     configurationId: string
 ): Promise<boolean> {
     try {
-        const version = await getConfigurationVersion(
-            provider,
-            blrAddress,
-            configurationId
-        )
+        const version = await getConfigurationVersion(blr, configurationId)
         return version > 0
     } catch {
         return false
@@ -623,7 +428,6 @@ export async function createBatchConfiguration(
 
     let facetNames = [...options.facetNames]
 
-    const { resolveContractName } = await import('@scripts/infrastructure')
     const { info } = await import('@scripts/infrastructure')
     const { ok, err } = await import('@scripts/infrastructure')
 
@@ -650,13 +454,21 @@ export async function createBatchConfiguration(
         })
         const facetKeys = facetNames
             .map((facetName) => {
-                const contractName = resolveContractName(
-                    facetName,
+                // When useTimeTravel=true, facets are deployed as TimeTravel variants
+                // So facetAddresses keys are like 'AccessControlFacetTimeTravel'
+                // But facetName in EQUITY_FACETS is still 'AccessControlFacet' (base name)
+                // We need to resolve to match what was actually deployed
+                const contractName =
+                    facetName.endsWith('Facet') &&
+                    facetName !== 'TimeTravelFacet' &&
                     useTimeTravel
-                )
+                        ? `${facetName}TimeTravel`
+                        : facetName
+
                 const address = facetAddresses[contractName]
 
                 // Get resolver key from registry (defined in contract constants)
+                // Always use BASE facet name for registry lookup
                 let key: string
                 if (registry) {
                     const definition = registry.getFacetDefinition(facetName)
@@ -721,6 +533,7 @@ export async function createBatchConfiguration(
         info('Retrieved latest version from BLR', { version })
 
         const facetIdList = facetKeys.map((f) => f.key)
+        // All facets registered in a batch get the same version from registerBusinessLogics
         const facetVersionList = new Array(facetKeys.length).fill(version)
 
         info('Processing facets in batches', {

@@ -1,6 +1,6 @@
 # ATS Contracts Deployment Scripts
 
-**Last Updated**: 2025-01-28
+**Last Updated**: 2025-11-04
 
 ---
 
@@ -70,32 +70,37 @@ The ATS deployment scripts provide a **framework-agnostic, modular system** for 
 
 ## Architecture
 
-### Provider Pattern
+### Signer-Based API with TypeChain
 
-The system uses a **DeploymentProvider** interface to abstract framework-specific code:
+The system uses **ethers.js Signer** directly with **TypeChain factories** for type-safe contract deployment:
 
 ```typescript
-interface DeploymentProvider {
-  getSigner(): Promise<Signer>
-  getFactory(contractName: string): Promise<ContractFactory>
-  deploy(factory: ContractFactory, args?: any[], overrides?: Overrides): Promise<Contract>
-  deployProxy(...): Promise<Contract>
-  upgradeProxy(...): Promise<void>
-  getProvider(): providers.Provider
-}
+import { Signer } from 'ethers'
+import { Factory__factory, BusinessLogicResolver__factory } from '@contract-types'
+
+// Get signer from Hardhat or ethers.js
+const [signer] = await ethers.getSigners() // Hardhat
+// or
+const signer = new ethers.Wallet(privateKey, provider) // Standalone
+
+// Deploy using TypeChain factories
+const factory = await new Factory__factory(signer).deploy(...)
+const blr = BusinessLogicResolver__factory.connect(address, signer)
 ```
 
-**Implementations**:
+**Key Benefits**:
 
-- `HardhatProvider`: Uses Hardhat's ethers integration (requires Hardhat runtime)
-- `StandaloneProvider`: Uses plain ethers.js (no Hardhat dependency)
+- **Direct ethers.js**: No custom abstractions, uses standard ethers patterns
+- **TypeChain Integration**: Full type safety with auto-generated contract wrappers
+- **Framework Agnostic**: Works with any ethers.js Signer (Hardhat, Wallet, Hardware wallet, etc.)
+- **Simpler**: Fewer layers, easier debugging, standard ethers patterns
 
 **Usage**:
 
 ```typescript
-// Caller always provides provider explicitly
-const provider = new HardhatProvider()
-await deployCompleteSystem(provider, 'testnet', options)
+// Caller provides signer directly
+const [signer] = await ethers.getSigners()
+await deployCompleteSystem(signer, 'testnet', options)
 ```
 
 ---
@@ -360,7 +365,8 @@ Scripts maintain **strict separation** between generic infrastructure and ATS-sp
 **Example**:
 
 ```typescript
-import { DeploymentProvider, deployProxy, info } from '@scripts/infrastructure'
+import { Signer } from 'ethers'
+import { deployProxy, info } from '@scripts/infrastructure'
 ```
 
 ### Domain Layer (`domain/`)
@@ -420,11 +426,8 @@ All imports use `@scripts` path aliases through index files for consistency and 
 
 ```typescript
 // ✅ CORRECT
-import {
-    DeploymentProvider,
-    deployContract,
-    info,
-} from '@scripts/infrastructure'
+import { Signer } from 'ethers'
+import { deployContract, info } from '@scripts/infrastructure'
 
 import { EQUITY_CONFIG_ID, createEquityConfiguration } from '@scripts/domain'
 
@@ -444,10 +447,10 @@ import { deployContract } from '@scripts/infrastructure/operations/deployContrac
 
 ```typescript
 // 1. External
-import { Contract, Overrides } from 'ethers'
+import { Contract, Overrides, Signer } from 'ethers'
 
 // 2. Infrastructure
-import { DeploymentProvider, deployProxy, info } from '@scripts/infrastructure'
+import { deployProxy, info } from '@scripts/infrastructure'
 
 // 3. Domain
 import { EQUITY_CONFIG_ID, createEquityConfiguration } from '@scripts/domain'
@@ -542,26 +545,30 @@ Check the output file in `deployments/{network}_{timestamp}.json`:
 
 The deployment system supports three modes:
 
-| Mode           | Entry Point                            | Provider           | Use Case                                  | Command                                      |
-| -------------- | -------------------------------------- | ------------------ | ----------------------------------------- | -------------------------------------------- |
-| **Hardhat**    | [cli/hardhat.ts](cli/hardhat.ts)       | HardhatProvider    | Hardhat project deployment                | `npm run deploy:hardhat -- --network <name>` |
-| **Standalone** | [cli/standalone.ts](cli/standalone.ts) | StandaloneProvider | No Hardhat dependency, ~3x faster startup | `npm run deploy:standalone`                  |
-| **Module**     | Import in your code                    | Either provider    | Custom scripts, programmatic deployment   | See example below                            |
+| Mode           | Entry Point                            | Signer Source         | Use Case                                  | Command                                      |
+| -------------- | -------------------------------------- | --------------------- | ----------------------------------------- | -------------------------------------------- |
+| **Hardhat**    | [cli/hardhat.ts](cli/hardhat.ts)       | `ethers.getSigners()` | Hardhat project deployment                | `npm run deploy:hardhat -- --network <name>` |
+| **Standalone** | [cli/standalone.ts](cli/standalone.ts) | `ethers.Wallet`       | No Hardhat dependency, ~3x faster startup | `npm run deploy:standalone`                  |
+| **Module**     | Import in your code                    | Any ethers.js Signer  | Custom scripts, programmatic deployment   | See example below                            |
 
 ### Import as Module
 
 Use deployment functions in your own scripts:
 
 ```typescript
-import { HardhatProvider, deployCompleteSystem } from '@scripts/infrastructure'
+import { ethers } from 'ethers'
+import { deployCompleteSystem } from '@scripts/infrastructure'
 
-const provider = new HardhatProvider()
-const output = await deployCompleteSystem(provider, 'hedera-testnet', {
+// Hardhat context
+const [signer] = await ethers.getSigners()
+
+// or Standalone
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
+
+const output = await deployCompleteSystem(signer, 'hedera-testnet', {
     useTimeTravel: false,
 })
 ```
-
-> For non-Hardhat projects, use `StandaloneProvider` instead. See [Examples](#examples) for details.
 
 ---
 
@@ -666,8 +673,10 @@ const provider = new StandaloneProvider({
 Configuration modules accept **contract instances** instead of addresses:
 
 ```typescript
-// Get BLR contract instance
-const signer = await provider.getSigner()
+import { BusinessLogicResolver__factory } from '@contract-types'
+
+// Get BLR contract instance using TypeChain
+const [signer] = await ethers.getSigners()
 const blrContract = BusinessLogicResolver__factory.connect(blrAddress, signer)
 
 // Pass instance to configuration module
@@ -702,26 +711,22 @@ const output = await deployCompleteSystem(provider, network, {
 
 ## Examples
 
-> **Note**: Examples use HardhatProvider. For StandaloneProvider, replace with:
->
-> ```typescript
-> const provider = new StandaloneProvider({
->     rpcUrl: 'https://testnet.hashio.io/api',
->     privateKey: process.env.PRIVATE_KEY!,
-> })
-> ```
-
 ### Complete System Deployment
 
 Deploy entire ATS infrastructure (ProxyAdmin, BLR, Factory, all facets, configurations):
 
 ```typescript
-import { HardhatProvider, deployCompleteSystem } from '@scripts/infrastructure'
+import { ethers } from 'ethers'
+import { deployCompleteSystem } from '@scripts/infrastructure'
 
 async function main() {
-    const provider = new HardhatProvider()
+    // Get signer from Hardhat
+    const [signer] = await ethers.getSigners()
 
-    const output = await deployCompleteSystem(provider, 'hedera-testnet', {
+    // or use Wallet for standalone
+    // const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
+
+    const output = await deployCompleteSystem(signer, 'hedera-testnet', {
         useTimeTravel: false,
         saveOutput: true,
     })
@@ -740,23 +745,20 @@ main().catch(console.error)
 Deploy specific components when you need granular control:
 
 ```typescript
-import {
-    HardhatProvider,
-    deployFacets,
-    deployBlr,
-} from '@scripts/infrastructure'
+import { ethers } from 'ethers'
+import { deployFacets, deployBlr } from '@scripts/infrastructure'
 
 async function main() {
-    const provider = new HardhatProvider()
+    const [signer] = await ethers.getSigners()
 
     // Deploy specific facets
-    const facetsResult = await deployFacets(provider, {
+    const facetsResult = await deployFacets(signer, {
         facetNames: ['AccessControlFacet', 'KycFacet'],
         useTimeTravel: false,
     })
 
     // Deploy BusinessLogicResolver
-    const blrResult = await deployBlr(provider, {
+    const blrResult = await deployBlr(signer, {
         proxyAdminAddress: '0x...', // optional, creates new if omitted
     })
 
@@ -771,48 +773,50 @@ main().catch(console.error)
 
 ## API Reference
 
-### Providers
+### Signers
 
-#### HardhatProvider
+The deployment system uses standard **ethers.js Signer** instances. You can obtain signers from:
+
+**Hardhat Context**:
 
 ```typescript
-class HardhatProvider implements DeploymentProvider {
-    async getSigner(): Promise<Signer>
-    async getFactory(contractName: string): Promise<ContractFactory>
-    async deploy(
-        factory: ContractFactory,
-        args?: any[],
-        overrides?: Overrides
-    ): Promise<Contract>
-    async deployProxy(
-        impl: string,
-        admin: string,
-        initData: string,
-        overrides?: Overrides
-    ): Promise<Contract>
-    async upgradeProxy(
-        proxy: string,
-        newImpl: string,
-        admin: string,
-        overrides?: Overrides
-    ): Promise<void>
-    getProvider(): providers.Provider
-}
+import { ethers } from 'hardhat'
+const [signer] = await ethers.getSigners()
 ```
 
-#### StandaloneProvider
+**Standalone (Wallet)**:
 
 ```typescript
-interface StandaloneProviderConfig {
-    rpcUrl: string
-    privateKey: string
-    artifactsPath?: string // defaults to './artifacts'
-}
+import { ethers } from 'ethers'
+const provider = new ethers.providers.JsonRpcProvider(
+    'https://testnet.hashio.io/api'
+)
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
+```
 
-class StandaloneProvider implements DeploymentProvider {
-    constructor(config: StandaloneProviderConfig)
-    // ... same methods as HardhatProvider
-}
+**Hardware Wallets**:
+
+```typescript
+import { LedgerSigner } from '@ethersproject/hardware-wallets'
+const signer = new LedgerSigner(provider)
+```
+
+### TypeChain Factories
+
+All contract deployments use TypeChain-generated factories for type safety:
+
+```typescript
+import {
+    Factory__factory,
+    BusinessLogicResolver__factory,
+    AccessControlFacet__factory
+} from '@contract-types'
+
+// Deploy new contract
+const factory = await new Factory__factory(signer).deploy(...)
+
+// Connect to existing contract
+const blr = BusinessLogicResolver__factory.connect(address, signer)
 ```
 
 ### Workflows
@@ -821,7 +825,7 @@ class StandaloneProvider implements DeploymentProvider {
 
 ```typescript
 async function deployCompleteSystem(
-    provider: DeploymentProvider,
+    signer: Signer,
     network: string,
     options: DeployCompleteSystemOptions = {}
 ): Promise<DeploymentOutput>
@@ -837,7 +841,7 @@ interface DeployCompleteSystemOptions {
 
 ```typescript
 async function deployWithExistingBlr(
-    provider: DeploymentProvider,
+    signer: Signer,
     network: string,
     blrAddress: string,
     options: DeployWithExistingBlrOptions = {}
@@ -854,13 +858,13 @@ interface DeployWithExistingBlrOptions {
 }
 ```
 
-### Modules
+### Operations
 
 #### deployFacets
 
 ```typescript
 async function deployFacets(
-    provider: DeploymentProvider,
+    signer: Signer,
     options: DeployFacetsOptions
 ): Promise<DeployFacetsResult>
 ```
@@ -869,7 +873,7 @@ async function deployFacets(
 
 ```typescript
 async function deployBlr(
-    provider: DeploymentProvider,
+    signer: Signer,
     options?: { proxyAdminAddress?: string }
 ): Promise<DeployBlrResult>
 ```
@@ -878,26 +882,24 @@ async function deployBlr(
 
 ```typescript
 async function createEquityConfiguration(
-    provider: DeploymentProvider,
-    options: {
-        blrContract: Contract // BLR contract instance
-        facetAddresses: Record<string, string>
-        useTimeTravel?: boolean
-    }
-): Promise<CreateEquityConfigurationResult>
+    blrContract: Contract, // BLR contract instance
+    facetAddresses: Record<string, string>,
+    useTimeTravel?: boolean,
+    partialBatchDeploy?: boolean,
+    batchSize?: number
+): Promise<OperationResult<ConfigurationData, ConfigurationError>>
 ```
 
 #### createBondConfiguration
 
 ```typescript
 async function createBondConfiguration(
-    provider: DeploymentProvider,
-    options: {
-        blrContract: Contract // BLR contract instance
-        facetAddresses: Record<string, string>
-        useTimeTravel?: boolean
-    }
-): Promise<CreateBondConfigurationResult>
+    blrContract: Contract, // BLR contract instance
+    facetAddresses: Record<string, string>,
+    useTimeTravel?: boolean,
+    partialBatchDeploy?: boolean,
+    batchSize?: number
+): Promise<OperationResult<ConfigurationData, ConfigurationError>>
 ```
 
 ---
@@ -906,16 +908,18 @@ async function createBondConfiguration(
 
 ### "Cannot find module 'hardhat'"
 
-This means you're trying to use HardhatProvider from a non-Hardhat project. Use StandaloneProvider instead:
+This means you're trying to use Hardhat's `ethers.getSigners()` from a non-Hardhat project. Use `ethers.Wallet` instead:
 
 ```typescript
-// Instead of:
-const provider = new HardhatProvider() // ❌ Requires Hardhat
+// Instead of (Hardhat-specific):
+const [signer] = await ethers.getSigners() // ❌ Requires Hardhat
 
-// Use:
-const provider = new StandaloneProvider({
-    /* config */
-}) // ✅
+// Use (Standalone):
+import { ethers } from 'ethers'
+const provider = new ethers.providers.JsonRpcProvider(
+    'https://testnet.hashio.io/api'
+)
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider) // ✅
 ```
 
 ### "Module '@typechain' not found"
@@ -928,19 +932,18 @@ npm run compile
 
 ### "No signers available"
 
-For HardhatProvider, ensure you're running in Hardhat context:
+**In Hardhat context**, ensure you're running in Hardhat context:
 
 ```bash
 npx hardhat run scripts/cli/hardhat.ts
 ```
 
-For StandaloneProvider, provide a valid private key:
+**In Standalone context**, provide a valid private key:
 
 ```typescript
-const provider = new StandaloneProvider({
-    rpcUrl: '...',
-    privateKey: process.env.PRIVATE_KEY!, // Must be valid hex private key
-})
+import { ethers } from 'ethers'
+const provider = new ethers.providers.JsonRpcProvider('...')
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider) // Must be valid hex private key
 ```
 
 ### "UNPREDICTABLE_GAS_LIMIT" or Gas Estimation Failures

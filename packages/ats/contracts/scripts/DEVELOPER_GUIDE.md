@@ -1,6 +1,6 @@
 # Developer Guide: ATS Contracts Scripts
 
-**Last Updated**: 2025-01-28
+**Last Updated**: 2025-11-04
 
 This guide provides practical, step-by-step instructions for the most common development tasks when working with ATS contract deployment scripts.
 
@@ -70,12 +70,13 @@ This updates [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts) with:
 If this is a **new facet** that hasn't been deployed yet, use the `deployFacets()` infrastructure operation:
 
 ```typescript
-import { HardhatProvider, deployFacets } from '@scripts/infrastructure'
+import { ethers } from 'ethers'
+import { deployFacets } from '@scripts/infrastructure'
 
-const provider = new HardhatProvider()
+const [signer] = await ethers.getSigners()
 
 // Deploy single facet
-const result = await deployFacets(provider, {
+const result = await deployFacets(signer, {
     facetNames: ['NewFacet'],
     useTimeTravel: false,
     network: 'hedera-testnet',
@@ -89,15 +90,19 @@ console.log(`NewFacet deployed at: ${result.deployed.get('NewFacet')?.address}`)
 Register the facet in BLR so it can be used in configurations, using the `registerFacets()` infrastructure operation:
 
 ```typescript
-import { HardhatProvider, registerFacets } from '@scripts/infrastructure'
+import { ethers } from 'ethers'
+import { registerFacets } from '@scripts/infrastructure'
 import { atsRegistry } from '@scripts/domain'
+import { BusinessLogicResolver__factory } from '@contract-types'
 
-const provider = new HardhatProvider()
+const [signer] = await ethers.getSigners()
 const blrAddress = '0x...' // Your BLR address
 
+// Connect to BLR
+const blr = BusinessLogicResolver__factory.connect(blrAddress, signer)
+
 // Register facet
-const result = await registerFacets(provider, {
-    blrAddress,
+const result = await registerFacets(blr, {
     facets: {
         NewFacet: '0x...', // Deployed facet address
     },
@@ -114,11 +119,14 @@ console.log(`Registered: ${result.registered}`)
 Now create a new configuration version with the updated facet list:
 
 ```typescript
+import { ethers } from 'ethers'
 import { BusinessLogicResolver__factory } from '@contract-types'
 import { createEquityConfiguration } from '@scripts/domain'
 
+const [signer] = await ethers.getSigners()
+const blrAddress = '0x...' // Your BLR address
+
 // Connect to BLR
-const signer = await provider.getSigner()
 const blr = BusinessLogicResolver__factory.connect(blrAddress, signer)
 
 // Get all deployed facet addresses (including the new one)
@@ -306,11 +314,12 @@ export { FUND_CONFIG_ID } from './constants'
 If you have fund-specific facets, deploy them:
 
 ```typescript
-import { HardhatProvider, deployFacets } from '@scripts/infrastructure'
+import { ethers } from 'ethers'
+import { deployFacets } from '@scripts/infrastructure'
 
-const provider = new HardhatProvider()
+const [signer] = await ethers.getSigners()
 
-const result = await deployFacets(provider, {
+const result = await deployFacets(signer, {
     facetNames: ['FundManagementFacet', 'FundUSAFacet'],
     useTimeTravel: false,
     network: 'hedera-testnet',
@@ -327,11 +336,16 @@ console.log('Fund facets deployed:', {
 Register both common facets and fund-specific facets:
 
 ```typescript
+import { ethers } from 'ethers'
 import { registerFacets } from '@scripts/infrastructure'
 import { atsRegistry } from '@scripts/domain'
+import { BusinessLogicResolver__factory } from '@contract-types'
 
-const result = await registerFacets(provider, {
-    blrAddress: '0x...',
+const [signer] = await ethers.getSigners()
+const blrAddress = '0x...'
+const blr = BusinessLogicResolver__factory.connect(blrAddress, signer)
+
+const result = await registerFacets(blr, {
     facets: {
         // Common facets (may already be registered)
         AccessControlFacet: '0x...',
@@ -353,10 +367,12 @@ const result = await registerFacets(provider, {
 Create the first version of your fund configuration:
 
 ```typescript
+import { ethers } from 'ethers'
 import { BusinessLogicResolver__factory } from '@contract-types'
 import { createFundConfiguration } from '@scripts/domain'
 
-const signer = await provider.getSigner()
+const [signer] = await ethers.getSigners()
+const blrAddress = '0x...'
 const blr = BusinessLogicResolver__factory.connect(blrAddress, signer)
 
 const facetAddresses = {

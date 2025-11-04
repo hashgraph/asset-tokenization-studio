@@ -9,8 +9,9 @@
  * @module domain/factory/deploy
  */
 
+import { Signer } from 'ethers'
+import { Factory__factory } from '@contract-types'
 import {
-    DeploymentProvider,
     DeployProxyResult,
     deployProxy,
     info,
@@ -31,9 +32,6 @@ export interface DeployFactoryOptions {
 
     /** Whether to initialize after deployment */
     initialize?: boolean
-
-    /** Network */
-    network?: string
 }
 
 /**
@@ -68,13 +66,16 @@ export interface DeployFactoryResult {
  * This module handles the complete deployment of Factory contract
  * including proxy setup and optional initialization.
  *
- * @param provider - Deployment provider
+ * @param signer - Ethers.js signer for deploying contracts
  * @param options - Deployment options
  * @returns Deployment result
  *
  * @example
  * ```typescript
- * const result = await deployFactory(provider, {
+ * import { ethers } from 'ethers'
+ *
+ * const signer = provider.getSigner()
+ * const result = await deployFactory(signer, {
  *   blrAddress: '0x123...',
  *   initialize: true
  * })
@@ -82,10 +83,10 @@ export interface DeployFactoryResult {
  * ```
  */
 export async function deployFactory(
-    provider: DeploymentProvider,
+    signer: Signer,
     options: DeployFactoryOptions = {}
 ): Promise<DeployFactoryResult> {
-    const { proxyAdminAddress, network: _network } = options
+    const { proxyAdminAddress } = options
 
     section('Deploying Factory')
 
@@ -93,8 +94,11 @@ export async function deployFactory(
         // Deploy Factory with proxy
         info('Deploying Factory implementation and proxy...')
 
-        const proxyResult = await deployProxy(provider, {
-            implementationContract: 'Factory',
+        // Create factory for implementation deployment
+        const implementationFactory = new Factory__factory(signer)
+
+        const proxyResult = await deployProxy(signer, {
+            implementationFactory,
             implementationArgs: [],
             proxyAdminAddress,
             initData: '0x', // Factory is stateless, no initialization needed
@@ -135,26 +139,29 @@ export async function deployFactory(
  * Convenience function for deploying Factory using an already deployed
  * ProxyAdmin (e.g., shared with BLR).
  *
- * @param provider - Deployment provider
+ * @param signer - Ethers.js signer for deploying contracts
  * @param blrAddress - BLR address for initialization
  * @param proxyAdminAddress - Existing ProxyAdmin address
  * @returns Deployment result
  *
  * @example
  * ```typescript
+ * import { ethers } from 'ethers'
+ *
+ * const signer = provider.getSigner()
  * const result = await deployFactoryWithProxyAdmin(
- *   provider,
+ *   signer,
  *   '0xBLR...',
  *   '0xProxyAdmin...'
  * )
  * ```
  */
 export async function deployFactoryWithProxyAdmin(
-    provider: DeploymentProvider,
+    signer: Signer,
     blrAddress: string,
     proxyAdminAddress: string
 ): Promise<DeployFactoryResult> {
-    return deployFactory(provider, {
+    return deployFactory(signer, {
         blrAddress,
         proxyAdminAddress,
         initialize: true,

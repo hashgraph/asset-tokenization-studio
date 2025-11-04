@@ -16,12 +16,12 @@
  */
 
 import { ethers } from 'hardhat'
+import { deployCompleteSystem, configureLogger, LogLevel } from '../../scripts'
 import {
-    HardhatProvider,
-    deployCompleteSystem,
-    configureLogger,
-    LogLevel,
-} from '../../scripts'
+    Factory__factory,
+    BusinessLogicResolver__factory,
+    ProxyAdmin__factory,
+} from '@contract-types'
 import type {
     IFactory,
     BusinessLogicResolver,
@@ -44,38 +44,37 @@ export async function deployAtsInfrastructureFixture(
     // Configure logger to SILENT for tests (suppress all deployment logs)
     configureLogger({ level: LogLevel.SILENT })
 
-    const provider = new HardhatProvider()
+    // Get signers from Hardhat
     const signers = await ethers.getSigners()
     const [deployer, user1, user2, user3, user4, user5] = signers
     const unknownSigner = signers.at(-1)!
 
-    // Deploy complete system using new scripts
-    const deployment = await deployCompleteSystem(provider, 'hardhat', {
+    // Deploy complete system using new scripts with signer
+    const deployment = await deployCompleteSystem(deployer, 'hardhat', {
         useTimeTravel,
         saveOutput: false, // Don't save deployment files during tests
         partialBatchDeploy,
         batchSize,
     })
 
-    // Get typed contract instances
-    const factoryFactory = await provider.getFactory('Factory')
-    const factory = factoryFactory.attach(
-        deployment.infrastructure.factory.proxy
+    // Get typed contract instances using TypeChain factories
+    const factory = Factory__factory.connect(
+        deployment.infrastructure.factory.proxy,
+        deployer
     ) as IFactory
 
-    const blrFactory = await provider.getFactory('BusinessLogicResolver')
-    const blr = blrFactory.attach(
-        deployment.infrastructure.blr.proxy
+    const blr = BusinessLogicResolver__factory.connect(
+        deployment.infrastructure.blr.proxy,
+        deployer
     ) as BusinessLogicResolver
 
-    const proxyAdminFactory = await provider.getFactory('ProxyAdmin')
-    const proxyAdmin = proxyAdminFactory.attach(
-        deployment.infrastructure.proxyAdmin.address
+    const proxyAdmin = ProxyAdmin__factory.connect(
+        deployment.infrastructure.proxyAdmin.address,
+        deployer
     ) as ProxyAdmin
 
     return {
-        // Provider & signers
-        provider,
+        // Signers
         signers,
         deployer,
         user1,

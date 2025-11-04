@@ -1,7 +1,16 @@
+// SPDX-License-Identifier: Apache-2.0
+
+/**
+ * ProxyAdmin deployment module.
+ *
+ * High-level operation for deploying ProxyAdmin using TypeChain.
+ *
+ * @module core/operations/proxyAdminDeployment
+ */
+
+import { Overrides, Signer } from 'ethers'
+import { ProxyAdmin, ProxyAdmin__factory } from '@contract-types'
 import {
-    DeploymentProvider,
-    DeploymentResult,
-    deployContract,
     error as logError,
     extractRevertReason,
     getProxyAdmin,
@@ -10,85 +19,45 @@ import {
     success,
     validateAddress,
 } from '@scripts/infrastructure'
-// SPDX-License-Identifier: Apache-2.0
-
-/**
- * ProxyAdmin deployment module.
- *
- * High-level operation for deploying ProxyAdmin and managing proxy ownership.
- *
- * @module core/operations/proxyAdminDeployment
- */
-
-/**
- * Options for deploying ProxyAdmin.
- */
-export interface DeployProxyAdminOptions {
-    /** Network */
-    network?: string
-}
-
-/**
- * Result of deploying ProxyAdmin.
- */
-export interface DeployProxyAdminResult {
-    /** Whether deployment succeeded */
-    success: boolean
-
-    /** Deployment result */
-    deploymentResult: DeploymentResult
-
-    /** ProxyAdmin address */
-    proxyAdminAddress: string
-
-    /** Error message (only if success=false) */
-    error?: string
-}
 
 /**
  * Deploy ProxyAdmin contract.
  *
- * This module handles the deployment of a ProxyAdmin that can be shared
- * across multiple transparent proxies.
+ * Returns typed ProxyAdmin contract instance for proxy management.
  *
- * @param provider - Deployment provider
- * @param options - Deployment options
- * @returns Deployment result
+ * @param signer - Ethers.js signer
+ * @param overrides - Optional transaction overrides
+ * @returns Typed ProxyAdmin contract instance
  *
  * @example
  * ```typescript
- * const result = await deployProxyAdmin(provider)
- * console.log(`ProxyAdmin deployed at ${result.proxyAdminAddress}`)
+ * import { ethers } from 'hardhat'
+ * import { deployProxyAdmin } from '@scripts/infrastructure'
+ *
+ * const signer = (await ethers.getSigners())[0]
+ * const proxyAdmin = await deployProxyAdmin(signer)
+ *
+ * console.log(`ProxyAdmin: ${proxyAdmin.address}`)
  * ```
  */
 export async function deployProxyAdmin(
-    provider: DeploymentProvider,
-    options: DeployProxyAdminOptions = {}
-): Promise<DeployProxyAdminResult> {
-    const { network: _network } = options
-
+    signer: Signer,
+    overrides?: Overrides
+): Promise<ProxyAdmin> {
     section('Deploying ProxyAdmin')
 
     try {
         info('Deploying ProxyAdmin...')
 
-        const result = await deployContract(provider, {
-            contractName: 'ProxyAdmin',
-            confirmations: 1,
-        })
-
-        if (!result.success || !result.address) {
-            throw new Error(result.error || 'ProxyAdmin deployment failed')
-        }
+        const proxyAdmin = await new ProxyAdmin__factory(signer).deploy(
+            overrides || {}
+        )
+        await proxyAdmin.deployed()
 
         success('ProxyAdmin deployment complete')
-        info(`  ProxyAdmin: ${result.address}`)
+        info(`  ProxyAdmin: ${proxyAdmin.address}`)
 
-        return {
-            success: true,
-            deploymentResult: result,
-            proxyAdminAddress: result.address,
-        }
+        return proxyAdmin
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err)
         logError(`ProxyAdmin deployment failed: ${errorMessage}`)
@@ -98,55 +67,39 @@ export async function deployProxyAdmin(
 }
 
 /**
- * Options for transferring proxy admin ownership.
- */
-export interface TransferProxyAdminOptions {
-    /** ProxyAdmin address */
-    proxyAdminAddress: string
-
-    /** Proxy address whose admin to transfer */
-    proxyAddress: string
-
-    /** New admin address */
-    newAdmin: string
-}
-
-/**
  * Transfer proxy admin ownership.
  *
  * Changes the admin of a proxy to a new address. This is useful when
  * consolidating multiple proxies under a single ProxyAdmin.
  *
- * @param provider - Deployment provider
- * @param options - Transfer options
+ * @param proxyAdmin - Typed ProxyAdmin contract
+ * @param proxyAddress - Proxy address whose admin to transfer
+ * @param newAdmin - New admin address
+ * @param overrides - Optional transaction overrides
  * @returns true if transfer succeeded
  *
  * @example
  * ```typescript
- * await transferProxyAdmin(provider, {
- *   proxyAdminAddress: '0x123...',
- *   proxyAddress: '0x456...',
- *   newAdmin: '0x789...'
- * })
+ * await transferProxyAdmin(proxyAdmin, '0x456...', '0x789...')
  * ```
  */
 export async function transferProxyAdmin(
-    provider: DeploymentProvider,
-    options: TransferProxyAdminOptions
+    proxyAdmin: ProxyAdmin,
+    proxyAddress: string,
+    newAdmin: string,
+    overrides?: Overrides
 ): Promise<boolean> {
-    const { proxyAdminAddress, proxyAddress, newAdmin } = options
-
     try {
         info('Transferring proxy admin...')
 
-        validateAddress(proxyAdminAddress, 'ProxyAdmin address')
         validateAddress(proxyAddress, 'proxy address')
         validateAddress(newAdmin, 'new admin address')
 
-        const proxyAdminFactory = await provider.getFactory('ProxyAdmin')
-        const proxyAdmin = proxyAdminFactory.attach(proxyAdminAddress)
-
-        const tx = await proxyAdmin.changeProxyAdmin(proxyAddress, newAdmin)
+        const tx = await proxyAdmin.changeProxyAdmin(
+            proxyAddress,
+            newAdmin,
+            overrides || {}
+        )
         await tx.wait()
 
         success('Proxy admin transferred')
@@ -162,64 +115,29 @@ export async function transferProxyAdmin(
 }
 
 /**
- * Get the owner of a ProxyAdmin.
- *
- * @param provider - Deployment provider
- * @param proxyAdminAddress - ProxyAdmin address
- * @returns Owner address
- *
- * @example
- * ```typescript
- * const owner = await getProxyAdminOwner(provider, '0x123...')
- * console.log(`ProxyAdmin owner: ${owner}`)
- * ```
- */
-export async function getProxyAdminOwner(
-    provider: DeploymentProvider,
-    proxyAdminAddress: string
-): Promise<string> {
-    try {
-        validateAddress(proxyAdminAddress, 'ProxyAdmin address')
-
-        const proxyAdminFactory = await provider.getFactory('ProxyAdmin')
-        const proxyAdmin = proxyAdminFactory.attach(proxyAdminAddress)
-
-        const owner = await proxyAdmin.owner()
-        return owner
-    } catch (err) {
-        const errorMessage = extractRevertReason(err)
-        throw new Error(`Failed to get ProxyAdmin owner: ${errorMessage}`)
-    }
-}
-
-/**
  * Transfer ownership of a ProxyAdmin.
  *
- * @param provider - Deployment provider
- * @param proxyAdminAddress - ProxyAdmin address
+ * @param proxyAdmin - Typed ProxyAdmin contract
  * @param newOwner - New owner address
+ * @param overrides - Optional transaction overrides
  * @returns true if transfer succeeded
  *
  * @example
  * ```typescript
- * await transferProxyAdminOwnership(provider, '0x123...', '0x456...')
+ * await transferProxyAdminOwnership(proxyAdmin, '0x456...')
  * ```
  */
 export async function transferProxyAdminOwnership(
-    provider: DeploymentProvider,
-    proxyAdminAddress: string,
-    newOwner: string
+    proxyAdmin: ProxyAdmin,
+    newOwner: string,
+    overrides?: Overrides
 ): Promise<boolean> {
     try {
         info('Transferring ProxyAdmin ownership...')
 
-        validateAddress(proxyAdminAddress, 'ProxyAdmin address')
         validateAddress(newOwner, 'new owner address')
 
-        const proxyAdminFactory = await provider.getFactory('ProxyAdmin')
-        const proxyAdmin = proxyAdminFactory.attach(proxyAdminAddress)
-
-        const tx = await proxyAdmin.transferOwnership(newOwner)
+        const tx = await proxyAdmin.transferOwnership(newOwner, overrides || {})
         await tx.wait()
 
         success('ProxyAdmin ownership transferred')
@@ -236,53 +154,34 @@ export async function transferProxyAdminOwnership(
 /**
  * Verify ProxyAdmin controls a proxy.
  *
- * @param provider - Deployment provider
- * @param proxyAdminAddress - ProxyAdmin address
+ * @param proxyAdmin - Typed ProxyAdmin contract
  * @param proxyAddress - Proxy address
+ * @param signer - Signer to read proxy admin (needed for getProxyAdmin call)
  * @returns true if ProxyAdmin controls the proxy
  *
  * @example
  * ```typescript
  * const controls = await verifyProxyAdminControls(
- *   provider,
- *   '0xProxyAdmin...',
- *   '0xProxy...'
+ *   proxyAdmin,
+ *   '0xProxy...',
+ *   signer
  * )
  * ```
  */
 export async function verifyProxyAdminControls(
-    provider: DeploymentProvider,
-    proxyAdminAddress: string,
-    proxyAddress: string
+    proxyAdmin: ProxyAdmin,
+    proxyAddress: string,
+    signer: Signer
 ): Promise<boolean> {
     try {
-        validateAddress(proxyAdminAddress, 'ProxyAdmin address')
         validateAddress(proxyAddress, 'proxy address')
 
-        const actualAdmin = await getProxyAdmin(provider, proxyAddress)
+        const actualAdmin = await getProxyAdmin(signer.provider!, proxyAddress)
 
-        return actualAdmin.toLowerCase() === proxyAdminAddress.toLowerCase()
+        return actualAdmin.toLowerCase() === proxyAdmin.address.toLowerCase()
     } catch (err) {
         const errorMessage = extractRevertReason(err)
         logError(`Verification failed: ${errorMessage}`)
         return false
-    }
-}
-
-/**
- * Get deployment summary for ProxyAdmin.
- *
- * @param result - Deployment result
- * @returns Summary object
- */
-export function getProxyAdminDeploymentSummary(
-    result: DeployProxyAdminResult
-): {
-    proxyAdminAddress: string
-    gasUsed: number | undefined
-} {
-    return {
-        proxyAdminAddress: result.proxyAdminAddress,
-        gasUsed: result.deploymentResult.gasUsed,
     }
 }

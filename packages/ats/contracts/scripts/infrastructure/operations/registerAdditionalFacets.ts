@@ -14,9 +14,8 @@
  * @module infrastructure/operations/registerAdditionalFacets
  */
 
-import { Overrides, ethers } from 'ethers'
+import { Overrides, ethers, Signer } from 'ethers'
 import {
-    DeploymentProvider,
     debug,
     error as logError,
     extractRevertReason,
@@ -31,6 +30,7 @@ import {
     type RegistryProvider,
     combineRegistries,
 } from '@scripts/infrastructure'
+import { BusinessLogicResolver__factory } from '@contract-types'
 import type { RegisterFacetsResult } from './registerFacets'
 
 /**
@@ -100,7 +100,7 @@ interface FacetEntry {
  * ```
  */
 export async function registerAdditionalFacets(
-    provider: DeploymentProvider,
+    signer: Signer,
     options: RegisterAdditionalFacetsOptions
 ): Promise<RegisterFacetsResult> {
     const {
@@ -148,13 +148,11 @@ export async function registerAdditionalFacets(
             }
         }
 
-        // Get BLR contract instance
-        const blrFactory = await provider.getFactory('BusinessLogicResolver')
-        const blr = blrFactory.attach(blrAddress)
+        // Get BLR contract instance using TypeChain
+        const blr = BusinessLogicResolver__factory.connect(blrAddress, signer)
 
         // Verify BLR contract exists
-        const ethProvider = provider.getProvider()
-        const blrCode = await ethProvider.getCode(blrAddress)
+        const blrCode = await signer.provider!.getCode(blrAddress)
         if (blrCode === '0x') {
             throw new Error(`No contract found at BLR address ${blrAddress}`)
         }
@@ -167,7 +165,8 @@ export async function registerAdditionalFacets(
         const existingFacetsMap = new Map<string, FacetEntry>()
 
         // Get total count of registered facets
-        const facetCount = await blr.getBusinessLogicCount()
+        const facetCountBN = await blr.getBusinessLogicCount()
+        const facetCount = facetCountBN.toNumber()
         info(`   Found ${facetCount} existing facets in BLR`)
 
         if (facetCount > maxExistingFacets) {
@@ -220,7 +219,7 @@ export async function registerAdditionalFacets(
                 validateAddress(facetAddress, `${facetName} address`)
 
                 // Verify facet contract exists
-                const facetCode = await ethProvider.getCode(facetAddress)
+                const facetCode = await signer.provider!.getCode(facetAddress)
                 if (facetCode === '0x') {
                     warn(
                         `   ✗ ${facetName}: No contract at address ${facetAddress}`

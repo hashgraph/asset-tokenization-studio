@@ -15,6 +15,7 @@
  * @module workflows/deployCompleteSystem
  */
 
+import { Signer, ContractFactory } from 'ethers'
 import {
     deployProxyAdmin,
     deployBlr,
@@ -32,7 +33,6 @@ import {
     createEquityConfiguration,
     createBondConfiguration,
 } from '@scripts/domain'
-import type { DeploymentProvider } from '@scripts/infrastructure'
 
 import { promises as fs } from 'fs'
 import { dirname } from 'path'
@@ -165,23 +165,21 @@ export interface DeployCompleteSystemOptions {
  *
  * Returns comprehensive deployment output with all addresses, keys, versions, and IDs.
  *
- * @param provider - Deployment provider (HardhatProvider or StandaloneProvider)
+ * @param signer - Ethers.js signer for deploying contracts
  * @param network - Network name (testnet, mainnet, etc.)
  * @param options - Deployment options
  * @returns Promise resolving to complete deployment output
  *
  * @example
  * ```typescript
- * import { StandaloneProvider } from './infrastructure/providers'
+ * import { ethers } from 'ethers'
  *
- * // Create provider
- * const provider = new StandaloneProvider({
- *     rpcUrl: 'https://testnet.hashio.io/api',
- *     privateKey: process.env.PRIVATE_KEY!
- * })
+ * // Create signer
+ * const provider = new ethers.providers.JsonRpcProvider('https://testnet.hashio.io/api')
+ * const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
  *
  * // Deploy complete system to testnet
- * const output = await deployCompleteSystem(provider, 'hedera-testnet', {
+ * const output = await deployCompleteSystem(signer, 'hedera-testnet', {
  *     useTimeTravel: false,
  *     saveOutput: true
  * })
@@ -199,7 +197,7 @@ export interface DeployCompleteSystemOptions {
  * ```
  */
 export async function deployCompleteSystem(
-    provider: DeploymentProvider,
+    signer: Signer,
     network: string,
     options: DeployCompleteSystemOptions = {}
 ): Promise<DeploymentOutput> {
@@ -212,7 +210,6 @@ export async function deployCompleteSystem(
     } = options
 
     const startTime = Date.now()
-    const signer = await provider.getSigner()
     const deployer = await signer.getAddress()
 
     info('🌟 ATS Complete System Deployment')
@@ -227,22 +224,13 @@ export async function deployCompleteSystem(
 
     try {
         info('\n📋 Step 1/7: Deploying ProxyAdmin...')
-        const proxyAdminResult = await deployProxyAdmin(provider)
+        const proxyAdmin = await deployProxyAdmin(signer)
 
-        if (!proxyAdminResult.success) {
-            throw new Error(
-                `ProxyAdmin deployment failed: ${proxyAdminResult.error}`
-            )
-        }
-
-        totalGasUsed += parseInt(
-            proxyAdminResult.deploymentResult.gasUsed?.toString() || '0'
-        )
-        info(`✅ ProxyAdmin: ${proxyAdminResult.proxyAdminAddress}`)
+        info(`✅ ProxyAdmin: ${proxyAdmin.address}`)
 
         info('\n🔷 Step 2/7: Deploying BusinessLogicResolver...')
-        const blrResult = await deployBlr(provider, {
-            proxyAdminAddress: proxyAdminResult.proxyAdminAddress,
+        const blrResult = await deployBlr(signer, {
+            proxyAdminAddress: proxyAdmin.address,
         })
 
         if (!blrResult.success) {
@@ -254,21 +242,33 @@ export async function deployCompleteSystem(
         info(`✅ BLR Proxy: ${blrResult.blrAddress}`)
 
         info('\n📦 Step 3/7: Deploying all facets...')
-        let allFacetNames = atsRegistry.getAllFacets().map((f) => f.name)
-        info(`   Found ${allFacetNames.length} facets in registry`)
+        let allFacets = atsRegistry.getAllFacets()
+        info(`   Found ${allFacets.length} facets in registry`)
 
         if (!useTimeTravel) {
-            allFacetNames = allFacetNames.filter(
-                (name) => name !== 'TimeTravelFacet'
-            )
+            allFacets = allFacets.filter((f) => f.name !== 'TimeTravelFacet')
             info('   TimeTravelFacet removed from deployment list')
         }
 
-        const facetsResult = await deployFacets(provider, {
-            facetNames: allFacetNames,
-            useTimeTravel,
-            registries: [atsRegistry],
-        })
+        // Create factories from registry
+        // The factory method accepts useTimeTravel parameter and returns the appropriate variant
+        const facetFactories: Record<string, ContractFactory> = {}
+        for (const facet of allFacets) {
+            if (!facet.factory) {
+                throw new Error(`No factory found for facet: ${facet.name}`)
+            }
+
+            // Get factory (regular or TimeTravel variant based on useTimeTravel flag)
+            const factory = facet.factory(signer, useTimeTravel)
+            // Use the actual contract name from the factory
+            const contractName = factory.constructor.name.replace(
+                '__factory',
+                ''
+            )
+            facetFactories[contractName] = factory
+        }
+
+        const facetsResult = await deployFacets(facetFactories)
 
         if (!facetsResult.success) {
             throw new Error('Facet deployment had failures')
@@ -292,8 +292,13 @@ export async function deployCompleteSystem(
             }
         })
 
-        const registerResult = await registerFacets(provider, {
-            blrAddress: blrResult.blrAddress,
+        // Get BLR contract instance
+        const blrContract = BusinessLogicResolver__factory.connect(
+            blrResult.blrAddress,
+            signer
+        )
+
+        const registerResult = await registerFacets(blrContract, {
             facets: facetAddresses,
             registries: [atsRegistry],
         })
@@ -314,13 +319,6 @@ export async function deployCompleteSystem(
         }
 
         info('\n💼 Step 5/7: Creating Equity configuration...')
-
-        // Get BLR contract instance
-        const signer = await provider.getSigner()
-        const blrContract = BusinessLogicResolver__factory.connect(
-            blrResult.blrAddress,
-            signer
-        )
 
         const equityConfig = await createEquityConfiguration(
             blrContract,
@@ -361,9 +359,8 @@ export async function deployCompleteSystem(
         info(`✅ Bond Facets: ${bondConfig.data.facetKeys.length}`)
 
         info('\n🏭 Step 7/7: Deploying Factory...')
-        const factoryResult = await deployFactory(provider, {
-            blrAddress: blrResult.blrAddress,
-            proxyAdminAddress: proxyAdminResult.proxyAdminAddress,
+        const factoryResult = await deployFactory(signer, {
+            proxyAdminAddress: proxyAdmin.address,
         })
 
         if (!factoryResult.success) {
@@ -392,10 +389,8 @@ export async function deployCompleteSystem(
 
             infrastructure: {
                 proxyAdmin: {
-                    address: proxyAdminResult.proxyAdminAddress,
-                    contractId: await getContractId(
-                        proxyAdminResult.proxyAdminAddress
-                    ),
+                    address: proxyAdmin.address,
+                    contractId: await getContractId(proxyAdmin.address),
                 },
                 blr: {
                     implementation: blrResult.implementationAddress,

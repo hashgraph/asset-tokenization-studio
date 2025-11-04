@@ -23,7 +23,7 @@
  * // Import types
  * import type {
  *   DeploymentOutput,
- *   DeploymentProvider
+ *   DeploymentResult
  * } from '@hashgraph/asset-tokenization-contracts/scripts'
  * ```
  */
@@ -37,7 +37,6 @@ export * from './infrastructure/types'
 export * from './infrastructure/registryFactory'
 export * from './infrastructure/combineRegistries'
 export * from './infrastructure/config'
-export * from './infrastructure/providers'
 export * from './infrastructure/constants'
 
 // Infrastructure operations
@@ -47,7 +46,6 @@ export * from './infrastructure/operations/upgradeProxy'
 export * from './infrastructure/operations/registerFacets'
 export * from './infrastructure/operations/registerAdditionalFacets'
 export * from './infrastructure/operations/blrConfigurations'
-export * from './infrastructure/operations/verifyDeployment'
 export * from './infrastructure/operations/blrDeployment'
 export * from './infrastructure/operations/proxyAdminDeployment'
 export * from './infrastructure/operations/facetDeployment'

@@ -15,6 +15,7 @@
  * @module workflows/deployWithExistingBlr
  */
 
+import { Signer, ContractFactory } from 'ethers'
 import {
     deployFacets,
     deployProxyAdmin,
@@ -31,7 +32,6 @@ import {
     createEquityConfiguration,
     createBondConfiguration,
 } from '@scripts/domain'
-import type { DeploymentProvider } from '@scripts/infrastructure'
 
 import { promises as fs } from 'fs'
 import { dirname } from 'path'
@@ -148,7 +148,7 @@ export interface DeployWithExistingBlrOptions {
  * 3. Creating Bond configuration (optional)
  * 4. Deploying Factory (optional)
  *
- * @param provider - Deployment provider (HardhatProvider or StandaloneProvider)
+ * @param signer - Ethers.js signer for deploying contracts
  * @param network - Network name (testnet, mainnet, etc.)
  * @param blrAddress - Address of existing BusinessLogicResolver
  * @param options - Deployment options
@@ -156,17 +156,15 @@ export interface DeployWithExistingBlrOptions {
  *
  * @example
  * ```typescript
- * import { StandaloneProvider } from './infrastructure/providers'
+ * import { ethers } from 'ethers'
  *
- * // Create provider
- * const provider = new StandaloneProvider({
- *     rpcUrl: 'https://testnet.hashio.io/api',
- *     privateKey: process.env.PRIVATE_KEY!
- * })
+ * // Create signer
+ * const provider = new ethers.providers.JsonRpcProvider('https://testnet.hashio.io/api')
+ * const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
  *
  * // Deploy facets and Factory against existing BLR
  * const output = await deployWithExistingBlr(
- *     provider,
+ *     signer,
  *     'hedera-testnet',
  *     '0x123...BLR...',
  *     {
@@ -182,7 +180,7 @@ export interface DeployWithExistingBlrOptions {
  * ```
  */
 export async function deployWithExistingBlr(
-    provider: DeploymentProvider,
+    signer: Signer,
     network: string,
     blrAddress: string,
     options: DeployWithExistingBlrOptions = {}
@@ -201,7 +199,6 @@ export async function deployWithExistingBlr(
     validateAddress(blrAddress, 'BLR address')
 
     const startTime = Date.now()
-    const signer = await provider.getSigner()
     const deployer = await signer.getAddress()
 
     info('🌟 ATS Deployment with Existing BLR')
@@ -226,18 +223,9 @@ export async function deployWithExistingBlr(
             info(`✅ ProxyAdmin: ${proxyAdminAddress}`)
         } else {
             info('\n📋 Step 1/5: Deploying ProxyAdmin...')
-            const proxyAdminResult = await deployProxyAdmin(provider)
+            const proxyAdmin = await deployProxyAdmin(signer)
 
-            if (!proxyAdminResult.success) {
-                throw new Error(
-                    `ProxyAdmin deployment failed: ${proxyAdminResult.error}`
-                )
-            }
-
-            totalGasUsed += parseInt(
-                proxyAdminResult.deploymentResult.gasUsed?.toString() || '0'
-            )
-            proxyAdminAddress = proxyAdminResult.proxyAdminAddress
+            proxyAdminAddress = proxyAdmin.address
             info(`✅ ProxyAdmin: ${proxyAdminAddress}`)
         }
 
@@ -250,14 +238,25 @@ export async function deployWithExistingBlr(
 
         if (shouldDeployFacets) {
             info('\n📦 Step 3/5: Deploying all facets...')
-            const allFacetNames = atsRegistry.getAllFacets().map((f) => f.name)
-            info(`   Found ${allFacetNames.length} facets in registry`)
+            let allFacets = atsRegistry.getAllFacets()
+            info(`   Found ${allFacets.length} facets in registry`)
 
-            facetsResult = await deployFacets(provider, {
-                facetNames: allFacetNames,
-                useTimeTravel,
-                registries: [atsRegistry],
-            })
+            if (!useTimeTravel) {
+                allFacets = allFacets.filter(
+                    (f) => f.name !== 'TimeTravelFacet'
+                )
+            }
+
+            // Create factories from registry
+            const facetFactories: Record<string, ContractFactory> = {}
+            for (const facet of allFacets) {
+                if (!facet.factory) {
+                    throw new Error(`No factory found for facet: ${facet.name}`)
+                }
+                facetFactories[facet.name] = facet.factory(signer)
+            }
+
+            facetsResult = await deployFacets(facetFactories)
 
             if (!facetsResult.success) {
                 throw new Error('Facet deployment had failures')
@@ -300,7 +299,6 @@ export async function deployWithExistingBlr(
                 skippedSteps.push('Equity configuration', 'Bond configuration')
             } else {
                 // Get BLR contract instance
-                const signer = await provider.getSigner()
                 const blrContract = BusinessLogicResolver__factory.connect(
                     blrAddress,
                     signer
@@ -355,8 +353,7 @@ export async function deployWithExistingBlr(
 
         if (shouldDeployFactory) {
             info('\n🏭 Step 5/5: Deploying Factory...')
-            factoryResult = await deployFactory(provider, {
-                blrAddress,
+            factoryResult = await deployFactory(signer, {
                 proxyAdminAddress,
             })
 

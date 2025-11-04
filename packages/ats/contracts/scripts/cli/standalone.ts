@@ -5,10 +5,11 @@
  * Standalone CLI entry point for ATS deployment.
  *
  * This script provides a non-interactive command-line interface for deploying
- * the complete ATS system using StandaloneProvider without requiring Hardhat.
+ * the complete ATS system using plain ethers.js without requiring Hardhat.
  *
  * Configuration via environment variables:
  *   NETWORK - Target network name (default: hedera-testnet)
+ *   {NETWORK}_PRIVATE_KEY_0 - Private key for deployer account
  *   USE_TIMETRAVEL - Enable TimeTravel mode (default: false)
  *
  * Usage:
@@ -20,10 +21,8 @@
  */
 
 import { deployCompleteSystem } from '../workflows/deployCompleteSystem'
-import {
-    createStandaloneProviderFromEnv,
-    getAllNetworks,
-} from '@scripts/infrastructure'
+import { getAllNetworks, getNetworkConfig } from '@scripts/infrastructure'
+import { Wallet, providers } from 'ethers'
 
 /**
  * Main deployment function for standalone environment.
@@ -58,11 +57,28 @@ async function main() {
     }
 
     try {
-        // Create standalone provider from environment
-        const provider = createStandaloneProviderFromEnv()
+        // Get network configuration
+        const networkConfig = getNetworkConfig(network)
+
+        // Get private key from environment
+        const networkPrefix = network.toUpperCase().replace(/-/g, '_')
+        const privateKey = process.env[`${networkPrefix}_PRIVATE_KEY_0`]
+
+        if (!privateKey) {
+            console.error(
+                `❌ Missing private key for network '${network}'. Set ${networkPrefix}_PRIVATE_KEY_0 environment variable.`
+            )
+            process.exit(1)
+        }
+
+        // Create provider and signer
+        const provider = new providers.JsonRpcProvider(networkConfig.jsonRpcUrl)
+        const signer = new Wallet(privateKey, provider)
+
+        console.log(`👤 Deployer: ${await signer.getAddress()}`)
 
         // Deploy complete system
-        const output = await deployCompleteSystem(provider, network, {
+        const output = await deployCompleteSystem(signer, network, {
             useTimeTravel,
             partialBatchDeploy,
             batchSize,

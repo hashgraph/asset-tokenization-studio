@@ -1,28 +1,24 @@
-import {
-    CreateBlrConfigurationResult,
-    DeployProxyResult,
-    DeploymentProvider,
-    FacetConfiguration,
-    RegisterFacetsResult,
-    RegistryProvider,
-    createBlrConfiguration,
-    deployProxy,
-    error as logError,
-    info,
-    registerFacets,
-    section,
-    success,
-} from '@scripts/infrastructure'
 // SPDX-License-Identifier: Apache-2.0
 
 /**
  * BLR deployment module.
  *
  * High-level operation for deploying and configuring BusinessLogicResolver
- * with proxy, facets, and configurations.
+ * with proxy, facets, and configurations using TypeChain.
  *
  * @module core/operations/blrDeployment
  */
+
+import { Signer } from 'ethers'
+import { BusinessLogicResolver__factory } from '@contract-types'
+import {
+    DeployProxyResult,
+    deployProxy,
+    error as logError,
+    info,
+    section,
+    success,
+} from '@scripts/infrastructure'
 
 /**
  * Options for deploying BLR.
@@ -33,9 +29,6 @@ export interface DeployBlrOptions {
 
     /** Whether to initialize after deployment */
     initialize?: boolean
-
-    /** Network */
-    network?: string
 }
 
 /**
@@ -70,23 +63,26 @@ export interface DeployBlrResult {
  * This module handles the complete deployment of BusinessLogicResolver
  * including proxy setup and optional initialization.
  *
- * @param provider - Deployment provider
+ * @param signer - Ethers.js signer
  * @param options - Deployment options
  * @returns Deployment result
  *
  * @example
  * ```typescript
- * const result = await deployBlr(provider, {
+ * import { ethers } from 'hardhat'
+ *
+ * const signer = (await ethers.getSigners())[0]
+ * const result = await deployBlr(signer, {
  *   initialize: true
  * })
  * console.log(`BLR deployed at ${result.blrAddress}`)
  * ```
  */
 export async function deployBlr(
-    provider: DeploymentProvider,
+    signer: Signer,
     options: DeployBlrOptions = {}
 ): Promise<DeployBlrResult> {
-    const { proxyAdminAddress, initialize = true, network: _network } = options
+    const { proxyAdminAddress, initialize = true } = options
 
     section('Deploying BusinessLogicResolver')
 
@@ -94,8 +90,11 @@ export async function deployBlr(
         // Deploy BLR with proxy
         info('Deploying BLR implementation and proxy...')
 
-        const proxyResult = await deployProxy(provider, {
-            implementationContract: 'BusinessLogicResolver',
+        // Create factory for implementation deployment
+        const implementationFactory = new BusinessLogicResolver__factory(signer)
+
+        const proxyResult = await deployProxy(signer, {
+            implementationFactory,
             implementationArgs: [],
             proxyAdminAddress,
             initData: '0x', // Will initialize separately if requested
@@ -112,10 +111,10 @@ export async function deployBlr(
             info('Initializing BLR...')
 
             try {
-                const blrFactory = await provider.getFactory(
-                    'BusinessLogicResolver'
+                const blr = BusinessLogicResolver__factory.connect(
+                    blrAddress,
+                    signer
                 )
-                const blr = blrFactory.attach(blrAddress)
 
                 const initTx = await blr.initialize_BusinessLogicResolver()
                 await initTx.wait()
@@ -148,157 +147,5 @@ export async function deployBlr(
         logError(`BLR deployment failed: ${errorMessage}`)
 
         throw new Error(`BLR deployment failed: ${errorMessage}`)
-    }
-}
-
-/**
- * Options for deploying and configuring BLR with facets.
- */
-export interface DeployBlrWithFacetsOptions extends DeployBlrOptions {
-    /** Deployed facets to register (facet name -> address) */
-    facets: Record<string, string>
-
-    /** Registry providers for facet registration */
-    registries: RegistryProvider[]
-
-    /** Configurations to create (optional) */
-    configurations?: {
-        configurationId: string
-        facets: FacetConfiguration[]
-    }[]
-}
-
-/**
- * Result of deploying BLR with facets.
- */
-export interface DeployBlrWithFacetsResult extends DeployBlrResult {
-    /** Facet registration result */
-    registrationResult?: RegisterFacetsResult
-
-    /** Configuration results */
-    configurationResults?: CreateBlrConfigurationResult[]
-}
-
-/**
- * Deploy BLR and register facets.
- *
- * This is a complete workflow that deploys BLR, initializes it, and
- * registers facets in one operation.
- *
- * @param provider - Deployment provider
- * @param options - Deployment options
- * @returns Deployment result
- *
- * @example
- * ```typescript
- * const result = await deployBlrWithFacets(provider, {
- *   facets: {
- *     'AccessControlFacet': '0x123...',
- *     'KycFacet': '0x456...',
- *     'PauseFacet': '0x789...'
- *   },
- *   initialize: true
- * })
- * ```
- */
-export async function deployBlrWithFacets(
-    provider: DeploymentProvider,
-    options: DeployBlrWithFacetsOptions
-): Promise<DeployBlrWithFacetsResult> {
-    const { facets, registries, configurations, ...blrOptions } = options
-
-    section('Deploying BLR with Facets')
-
-    try {
-        // Deploy BLR
-        const blrResult = await deployBlr(provider, blrOptions)
-
-        if (!blrResult.success) {
-            throw new Error('BLR deployment failed')
-        }
-
-        let registrationResult: RegisterFacetsResult | undefined
-
-        // Register facets if provided
-        if (Object.keys(facets).length > 0) {
-            info('\nRegistering facets...')
-
-            registrationResult = await registerFacets(provider, {
-                blrAddress: blrResult.blrAddress,
-                facets,
-                registries,
-            })
-
-            if (!registrationResult.success) {
-                logError('Facet registration failed')
-            } else {
-                success(
-                    `Registered ${registrationResult.registered.length} facets`
-                )
-            }
-        }
-
-        const configurationResults: CreateBlrConfigurationResult[] = []
-
-        // Create configurations if provided
-        if (configurations && configurations.length > 0) {
-            info('\nCreating configurations...')
-
-            for (const config of configurations) {
-                const configResult = await createBlrConfiguration(provider, {
-                    blrAddress: blrResult.blrAddress,
-                    configurationId: config.configurationId,
-                    facets: config.facets,
-                })
-
-                configurationResults.push(configResult)
-
-                if (configResult.success) {
-                    success(`Created configuration ${config.configurationId}`)
-                } else {
-                    logError(
-                        `Failed to create configuration ${config.configurationId}`
-                    )
-                }
-            }
-        }
-
-        return {
-            ...blrResult,
-            registrationResult,
-            configurationResults:
-                configurationResults.length > 0
-                    ? configurationResults
-                    : undefined,
-        }
-    } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err)
-        throw new Error(`BLR with facets deployment failed: ${errorMessage}`)
-    }
-}
-
-/**
- * Get BLR deployment summary.
- *
- * @param result - Deployment result
- * @returns Summary object
- */
-export function getBlrDeploymentSummary(result: DeployBlrWithFacetsResult): {
-    blrAddress: string
-    implementationAddress: string
-    proxyAdminAddress: string
-    initialized: boolean
-    facetsRegistered: number
-    facetsFailed: number
-    configurationsCreated: number
-} {
-    return {
-        blrAddress: result.blrAddress,
-        implementationAddress: result.implementationAddress,
-        proxyAdminAddress: result.proxyAdminAddress,
-        initialized: result.initialized,
-        facetsRegistered: result.registrationResult?.registered.length || 0,
-        facetsFailed: result.registrationResult?.failed.length || 0,
-        configurationsCreated: result.configurationResults?.length || 0,
     }
 }

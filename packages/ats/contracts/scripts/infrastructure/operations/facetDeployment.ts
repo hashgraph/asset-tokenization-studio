@@ -1,18 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    DeploymentProvider,
-    DeploymentResult,
-    RegistryProvider,
-    combineRegistries,
-    deployContract,
-    info,
-    resolveContractName,
-    section,
-    success,
-    warn,
-} from '@scripts/infrastructure'
-
 /**
  * Facet deployment module.
  *
@@ -22,26 +9,30 @@ import {
  * @module core/operations/facetDeployment
  */
 
+import { ContractFactory, Overrides } from 'ethers'
+import {
+    DeploymentResult,
+    deployContract,
+    info,
+    section,
+    success,
+    warn,
+} from '@scripts/infrastructure'
+
 /**
- * Options for deploying facets.
+ * Options for deploying facets (all optional).
  */
 export interface DeployFacetsOptions {
-    /** Specific facet names to deploy (if not provided, deploys all facets) */
-    facetNames?: string[]
-
-    /** Whether to deploy TimeTravel variants instead of regular facets */
-    useTimeTravel?: boolean
-
-    /** Network */
-    network?: string
+    /**
+     * Number of confirmations to wait for each deployment.
+     * Default: 1
+     */
+    confirmations?: number
 
     /**
-     * Custom registry provider(s) (optional).
-     * If not provided, uses the default ATS registry.
-     * Allows downstream projects to inject their own registries with custom facets.
-     * Multiple registries are combined using combineRegistries().
+     * Transaction overrides for all deployments.
      */
-    registries?: RegistryProvider[]
+    overrides?: Overrides
 }
 
 /**
@@ -62,43 +53,52 @@ export interface DeployFacetsResult {
 }
 
 /**
- * Deploy multiple facets.
+ * Deploy multiple facets using provided ContractFactory instances.
  *
- * This module orchestrates the deployment of multiple facets with support
- * for filtering, layer ordering, and dependency management.
+ * This operation takes a map of facet names to their ContractFactory instances
+ * and deploys each facet. Follows the factory-first pattern established in
+ * deployContract.ts.
  *
- * @param provider - Deployment provider
- * @param options - Deployment options
+ * **Note**: Factories already have signers connected. The signer from each
+ * factory will be used for deployment.
+ *
+ * @param facetFactories - Map of facet name to ContractFactory (with signer already connected)
+ * @param options - Optional deployment configuration
  * @returns Deployment results
  *
  * @example
  * ```typescript
- * // Deploy all facets
- * const result = await deployFacets(provider)
+ * import { ethers } from 'ethers'
+ * import {
+ *   AccessControlFacet__factory,
+ *   KycFacet__factory,
+ *   PauseFacet__factory,
+ * } from '@contract-types'
  *
- * // Deploy specific facets with TimeTravel variants
- * const result = await deployFacets(provider, {
- *   facetNames: ['AccessControlFacet', 'KycFacet'],
- *   useTimeTravel: true
+ * const signer = provider.getSigner()
+ *
+ * // Create factories for facets to deploy (signer already connected)
+ * const facetFactories = {
+ *   'AccessControlFacet': new AccessControlFacet__factory(signer),
+ *   'KycFacet': new KycFacet__factory(signer),
+ *   'PauseFacet': new PauseFacet__factory(signer),
+ * }
+ *
+ * // Deploy all facets with optional configuration
+ * const result = await deployFacets(facetFactories, {
+ *   confirmations: 2,
+ *   overrides: { gasLimit: 5000000 }
  * })
  *
- * // Deploy with custom registries (downstream project with custom facets)
- * const result = await deployFacets(provider, {
- *   facetNames: ['AccessControlFacet', 'MyCustomFacet'],
- *   registries: [atsRegistry, myCustomRegistry]
- * })
+ * console.log(`Deployed ${result.deployed.size} facets`)
+ * console.log(`Failed ${result.failed.size} facets`)
  * ```
  */
 export async function deployFacets(
-    provider: DeploymentProvider,
+    facetFactories: Record<string, ContractFactory>,
     options: DeployFacetsOptions = {}
 ): Promise<DeployFacetsResult> {
-    const {
-        facetNames,
-        useTimeTravel = false,
-        network: _network,
-        registries = [],
-    } = options
+    const { confirmations = 1, overrides = {} } = options
 
     section('Deploying Facets')
 
@@ -107,60 +107,9 @@ export async function deployFacets(
     const skipped = new Map<string, string>()
 
     try {
-        // Resolve registry (combine if multiple)
-        let registry: RegistryProvider | undefined
-        if (registries.length === 0) {
-            registry = undefined
-        } else if (registries.length === 1) {
-            registry = registries[0]
-        } else {
-            registry = combineRegistries(...registries)
-        }
+        const facetNames = Object.keys(facetFactories)
 
-        // Determine which facets to deploy
-        let facetsToDeployDefs
-
-        if (facetNames && facetNames.length > 0) {
-            // Deploy specific facets
-            if (registry) {
-                // With registry: look up facet definitions
-                facetsToDeployDefs = []
-                for (const name of facetNames) {
-                    const def = registry.getFacetDefinition(name)
-                    if (!def) {
-                        // External facet not in registry - warn but continue
-                        warn(
-                            `${name} not found in registry, deploying anyway (external facet)`
-                        )
-                        facetsToDeployDefs.push({
-                            name,
-                            description: 'External facet (not in registry)',
-                        })
-                    } else {
-                        // Registry facet
-                        facetsToDeployDefs.push(def)
-                    }
-                }
-            } else {
-                // Without registry: deploy facets by name only (no metadata)
-                facetsToDeployDefs = facetNames.map((name) => ({
-                    name,
-                    description: 'Facet (no registry provided)',
-                }))
-            }
-        } else {
-            // Deploy all facets - requires registry
-            if (!registry) {
-                throw new Error(
-                    'Registry is required when facetNames is not specified. ' +
-                        'Either provide facetNames or inject a RegistryProvider via registries parameter.'
-                )
-            }
-            facetsToDeployDefs = registry.getAllFacets()
-            info('Deploying all facets')
-        }
-
-        if (facetsToDeployDefs.length === 0) {
+        if (facetNames.length === 0) {
             warn('No facets to deploy')
             return {
                 success: true,
@@ -170,27 +119,30 @@ export async function deployFacets(
             }
         }
 
-        info(`Total facets to deploy: ${facetsToDeployDefs.length}`)
+        info(`Total facets to deploy: ${facetNames.length}`)
 
-        // Deploy each facet
-        for (const facetDef of facetsToDeployDefs) {
-            const facetName = facetDef.name
+        // Deploy each facet using its factory
+        for (const facetName of facetNames) {
+            const factory = facetFactories[facetName]
 
-            // Determine contract name (regular or TimeTravel variant)
-            const contractName = resolveContractName(facetName, useTimeTravel)
+            try {
+                info(`Deploying ${facetName}...`)
 
-            // Deploy facet
-            info(`Deploying ${facetName} (${contractName})...`)
+                // Deploy using the factory (signer already connected to factory)
+                const result = await deployContract(factory, {
+                    confirmations,
+                    overrides,
+                })
 
-            const result = await deployContract(provider, {
-                contractName,
-                confirmations: 1,
-            })
-
-            if (result.success && result.address) {
-                deployed.set(contractName, result)
-            } else {
-                failed.set(contractName, result.error || 'Unknown error')
+                if (result.success && result.address) {
+                    deployed.set(facetName, result)
+                } else {
+                    failed.set(facetName, result.error || 'Unknown error')
+                }
+            } catch (err) {
+                const errorMessage =
+                    err instanceof Error ? err.message : String(err)
+                failed.set(facetName, `Failed to deploy: ${errorMessage}`)
             }
         }
 

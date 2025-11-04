@@ -146,7 +146,8 @@ export function generateRegistry(
         facets.length,
         infrastructure.length,
         mocks?.length ?? 0,
-        moduleName
+        moduleName,
+        facets
     )
     const facetRegistry = generateFacetRegistry(facets)
     const contractRegistry = generateContractRegistry(infrastructure)
@@ -182,9 +183,29 @@ function generateHeader(
     facetCount: number,
     infrastructureCount: number,
     mockCount: number,
-    moduleName: string = '@scripts/infrastructure'
+    moduleName: string = '@scripts/infrastructure',
+    facets: ContractMetadata[] = []
 ): string {
     const mockLine = mockCount > 0 ? `\n * Mocks: ${mockCount}` : ''
+
+    // Sort facet names alphabetically for deterministic output
+    const sortedFacetNames = [...facets].map((f) => f.name).sort()
+
+    // Generate TypeChain factory imports
+    // Include both regular and TimeTravel variants where applicable
+    const factoryImports: string[] = []
+    for (const name of sortedFacetNames) {
+        factoryImports.push(`    ${name}__factory`)
+
+        // Check if this facet should have a TimeTravel variant
+        // (ends with 'Facet' and is not 'TimeTravelFacet')
+        if (name !== 'TimeTravelFacet' && name.endsWith('Facet')) {
+            factoryImports.push(`    ${name}TimeTravel__factory`)
+        }
+    }
+
+    const factoryImportsStr = factoryImports.join(',\n')
+
     return `// SPDX-License-Identifier: Apache-2.0
 
 /**
@@ -208,7 +229,10 @@ import {
     FacetDefinition,
     ContractDefinition,
     StorageWrapperDefinition,
-} from '${moduleName}'`
+} from '${moduleName}'
+import {
+${factoryImportsStr}
+} from '@contract-types'`
 }
 
 /**
@@ -281,8 +305,19 @@ function generateFacetEntry(facet: ContractMetadata): string {
         ? `\n        description: '${facet.description}',`
         : ''
 
+    // Add TypeChain factory reference with TimeTravel support
+    // Check if facet should have TimeTravel variant (ends with 'Facet' and is not 'TimeTravelFacet')
+    const hasTimeTravel =
+        facet.name !== 'TimeTravelFacet' && facet.name.endsWith('Facet')
+
+    const factoryLine = hasTimeTravel
+        ? `\n        factory: (signer, useTimeTravel = false) => useTimeTravel 
+            ? new ${facet.name}TimeTravel__factory(signer)
+            : new ${facet.name}__factory(signer),`
+        : `\n        factory: (signer) => new ${facet.name}__factory(signer),`
+
     return `    ${facet.name}: {
-        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}
+        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}
     }`
 }
 

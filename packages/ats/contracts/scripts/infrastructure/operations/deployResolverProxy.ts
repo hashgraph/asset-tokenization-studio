@@ -10,10 +10,9 @@
  * @module infrastructure/operations/deployResolverProxy
  */
 
-import { Contract, ContractReceipt, Overrides } from 'ethers'
+import { Contract, ContractReceipt, Overrides, Signer } from 'ethers'
 import {
     DEFAULT_TRANSACTION_TIMEOUT,
-    DeploymentProvider,
     debug,
     error as logError,
     formatGasUsage,
@@ -121,7 +120,7 @@ export interface DeployResolverProxyResult {
  * ```
  */
 export async function deployResolverProxy(
-    provider: DeploymentProvider,
+    signer: Signer,
     options: DeployResolverProxyOptions
 ): Promise<DeployResolverProxyResult> {
     const {
@@ -144,8 +143,9 @@ export async function deployResolverProxy(
 
         validateAddress(blrAddress, 'BLR address')
 
-        // Get ResolverProxy factory
-        const ResolverProxyFactory = await provider.getFactory('ResolverProxy')
+        // Get ResolverProxy factory from TypeChain
+        const { ResolverProxy__factory } = await import('@contract-types')
+        const ResolverProxyFactory = new ResolverProxy__factory(signer)
 
         // Deploy ResolverProxy
         info('Deploying ResolverProxy contract...')

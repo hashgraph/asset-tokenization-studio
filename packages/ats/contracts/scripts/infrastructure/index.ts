@@ -13,12 +13,10 @@
  * ```typescript
  * // Import from infrastructure layer
  * import {
- *   HardhatProvider,
- *   StandaloneProvider,
  *   deployContract,
  *   deployProxy,
  *   deployFacets,
- *   FACET_REGISTRY,
+ *   getNetworkConfig,
  *   info,
  *   validateAddress
  * } from '@scripts/infrastructure'
@@ -30,23 +28,21 @@
 // ============================================================================
 
 export type {
-    DeploymentProvider,
     RegistryProvider,
     FacetDefinition,
     ContractDefinition,
     StorageWrapperDefinition,
     NetworkConfig,
     DeploymentResult,
-    DeployProxyOptions,
-    DeployProxyResult,
     UpgradeProxyOptions,
     UpgradeProxyResult,
     CreateConfigOptions,
     CreateConfigResult,
     OperationResult,
+    SignerOptions,
 } from './types'
 
-export { ok, err } from './types'
+export { ok, err, createSigner, createSignerFromEnv } from './types'
 
 // ============================================================================
 // Constants
@@ -93,16 +89,6 @@ export {
 export { getNetworkConfig, getAllNetworks } from './config'
 
 // ============================================================================
-// Providers
-// ============================================================================
-
-export {
-    HardhatProvider,
-    StandaloneProvider,
-    createStandaloneProviderFromEnv,
-} from './providers'
-
-// ============================================================================
 // Operations
 // ============================================================================
 
@@ -114,16 +100,19 @@ export type { DeployContractOptions } from './operations/deployContract'
 
 export {
     deployProxy,
+    deployMultipleProxies,
     getProxyImplementation,
     getProxyAdmin,
+} from './operations/deployProxy'
+export type {
+    DeployProxyOptions,
+    DeployProxyResult,
 } from './operations/deployProxy'
 
 export { upgradeProxy } from './operations/upgradeProxy'
 
 export {
     registerFacets,
-    isFacetRegistered,
-    getRegisteredFacetAddress,
     type RegisterFacetsOptions,
     type RegisterFacetsResult,
 } from './operations/registerFacets'
@@ -135,20 +124,13 @@ export {
 
 export {
     createBatchConfiguration,
-    createBlrConfiguration,
-    configurationExists,
-    getConfigurationVersion,
+    createBlrConfiguration, // Deprecated - use createBatchConfiguration instead
     type FacetConfiguration,
     type CreateBlrConfigurationOptions,
     type CreateBlrConfigurationResult,
     type ConfigurationData,
     type ConfigurationError,
 } from './operations/blrConfigurations'
-
-export {
-    verifyDeployment,
-    type VerifyDeploymentOptions,
-} from './operations/verifyDeployment'
 
 export {
     deployBlr,
@@ -158,8 +140,9 @@ export {
 
 export {
     deployProxyAdmin,
-    type DeployProxyAdminOptions,
-    type DeployProxyAdminResult,
+    transferProxyAdmin,
+    transferProxyAdminOwnership,
+    verifyProxyAdminControls,
 } from './operations/proxyAdminDeployment'
 
 export {

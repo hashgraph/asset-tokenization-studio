@@ -5,8 +5,8 @@
  * Hardhat CLI entry point for ATS deployment.
  *
  * This script provides a command-line interface for deploying the complete
- * ATS system from within a Hardhat project. It uses HardhatProvider and reads
- * configuration from the Hardhat runtime environment.
+ * ATS system from within a Hardhat project. It reads configuration from the
+ * Hardhat runtime environment and uses Hardhat's ethers integration.
  *
  * Usage (from within Hardhat project):
  *   npx ts-node scripts/cli/hardhat.ts
@@ -17,11 +17,7 @@
  */
 
 import { deployCompleteSystem } from '../workflows/deployCompleteSystem'
-import {
-    HardhatProvider,
-    getNetworkConfig,
-    getAllNetworks,
-} from '@scripts/infrastructure'
+import { getNetworkConfig, getAllNetworks } from '@scripts/infrastructure'
 
 /**
  * Main deployment function for Hardhat environment.
@@ -48,8 +44,14 @@ async function main() {
     const networkConfig = getNetworkConfig(networkName)
     console.log(`📡 RPC URL: ${networkConfig.jsonRpcUrl}`)
 
-    // Create Hardhat provider
-    const provider = new HardhatProvider()
+    // Get signer from Hardhat runtime
+    const signers = await hre.ethers.getSigners()
+    if (signers.length === 0) {
+        console.error('❌ No signers available from Hardhat')
+        process.exit(1)
+    }
+    const signer = signers[0]
+    console.log(`👤 Deployer: ${await signer.getAddress()}`)
 
     // Check for TimeTravel mode from environment
     const useTimeTravel = process.env.USE_TIME_TRAVEL === 'true'
@@ -64,7 +66,7 @@ async function main() {
 
     try {
         // Deploy complete system
-        const output = await deployCompleteSystem(provider, networkName, {
+        const output = await deployCompleteSystem(signer, networkName, {
             useTimeTravel,
             partialBatchDeploy,
             batchSize,

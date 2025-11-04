@@ -4,19 +4,30 @@
  * Deploy proxy operation.
  *
  * Atomic operation for deploying transparent upgradeable proxies with
- * implementation contracts and ProxyAdmin.
+ * implementation contracts and ProxyAdmin using TypeChain.
  *
  * @module core/operations/deployProxy
  */
 
-import { Contract, Overrides } from 'ethers'
+import {
+    Contract,
+    ContractFactory,
+    ContractReceipt,
+    Overrides,
+    Signer,
+    providers,
+} from 'ethers'
+import {
+    ProxyAdmin,
+    ProxyAdmin__factory,
+    TransparentUpgradeableProxy,
+    TransparentUpgradeableProxy__factory,
+} from '@contract-types'
 import {
     DEFAULT_TRANSACTION_TIMEOUT,
-    DeployProxyOptions,
-    DeployProxyResult,
-    DeploymentProvider,
     debug,
     deployContract,
+    deployProxyAdmin,
     error as logError,
     extractRevertReason,
     formatGasUsage,
@@ -29,6 +40,50 @@ import {
 } from '@scripts/infrastructure'
 
 /**
+ * Options for deploying a transparent upgradeable proxy.
+ */
+export interface DeployProxyOptions {
+    /** Implementation contract factory (from TypeChain or ethers) */
+    implementationFactory: ContractFactory
+    /** Constructor arguments for implementation */
+    implementationArgs?: unknown[]
+    /** Optional existing implementation address (skips deployment) */
+    implementationAddress?: string
+    /** Optional existing ProxyAdmin address (skips deployment) */
+    proxyAdminAddress?: string
+    /** Initialization data to pass to proxy */
+    initData?: string
+    /** Transaction overrides */
+    overrides?: Overrides
+    /** Verify existing contracts have code */
+    verify?: boolean
+}
+
+/**
+ * Result of proxy deployment.
+ */
+export interface DeployProxyResult {
+    /** Implementation contract instance */
+    implementation: Contract
+    /** Implementation address */
+    implementationAddress: string
+    /** Proxy contract instance (typed as TransparentUpgradeableProxy) */
+    proxy: TransparentUpgradeableProxy
+    /** Proxy address */
+    proxyAddress: string
+    /** ProxyAdmin contract instance (typed) */
+    proxyAdmin: ProxyAdmin
+    /** ProxyAdmin address */
+    proxyAdminAddress: string
+    /** Transaction receipts */
+    receipts: {
+        implementation?: ContractReceipt
+        proxyAdmin?: ContractReceipt
+        proxy?: ContractReceipt
+    }
+}
+
+/**
  * Deploy a transparent upgradeable proxy with implementation and ProxyAdmin.
  *
  * This operation handles three deployments:
@@ -36,41 +91,51 @@ import {
  * 2. ProxyAdmin contract (or uses existing address)
  * 3. TransparentUpgradeableProxy pointing to implementation
  *
- * @param provider - Deployment provider
+ * @param signer - Ethers.js signer
  * @param options - Proxy deployment options
  * @returns Deployment result with all contract instances
  * @throws Error if any deployment fails
  *
  * @example
  * ```typescript
- * const result = await deployProxy(provider, {
- *   implementationContract: 'BusinessLogicResolver',
+ * import { ethers } from 'hardhat'
+ * import { BusinessLogicResolver__factory } from '@contract-types'
+ *
+ * const signer = (await ethers.getSigners())[0]
+ * const factory = BusinessLogicResolver__factory.connect(signer)
+ *
+ * const result = await deployProxy(signer, {
+ *   implementationFactory: factory,
  *   implementationArgs: [],
  *   initData: '0x',
- *   confirmations: 2
  * })
+ *
  * console.log(`Proxy: ${result.proxyAddress}`)
  * console.log(`Implementation: ${result.implementationAddress}`)
  * console.log(`ProxyAdmin: ${result.proxyAdminAddress}`)
  * ```
  */
 export async function deployProxy(
-    provider: DeploymentProvider,
+    signer: Signer,
     options: DeployProxyOptions
 ): Promise<DeployProxyResult> {
     const {
-        implementationContract,
+        implementationFactory,
         implementationArgs = [],
         implementationAddress: existingImplAddress,
         proxyAdminAddress: existingProxyAdminAddress,
         initData = '0x',
-        network: _network,
         overrides = {},
         verify = false,
     } = options
 
     const deployOverrides: Overrides = { ...overrides }
     const receipts: DeployProxyResult['receipts'] = {}
+
+    // Get contract name from factory for logging
+    const implementationContract =
+        implementationFactory.constructor.name.replace('__factory', '') ||
+        'Contract'
 
     try {
         section(`Deploying Proxy for ${implementationContract}`)
@@ -85,7 +150,7 @@ export async function deployProxy(
 
             if (verify) {
                 const exists = await verifyDeployedContract(
-                    provider,
+                    signer.provider!,
                     implementationAddress,
                     implementationContract
                 )
@@ -96,12 +161,10 @@ export async function deployProxy(
                 }
             }
 
-            const factory = await provider.getFactory(implementationContract)
-            implementation = factory.attach(implementationAddress)
+            implementation = implementationFactory.attach(implementationAddress)
         } else {
             info(`Deploying implementation: ${implementationContract}`)
-            const implResult = await deployContract(provider, {
-                contractName: implementationContract,
+            const implResult = await deployContract(implementationFactory, {
                 args: implementationArgs,
                 overrides: deployOverrides,
             })
@@ -120,9 +183,8 @@ export async function deployProxy(
             implementationAddress = implResult.address
 
             if (implResult.transactionHash) {
-                const ethProvider = provider.getProvider()
                 receipts.implementation =
-                    await ethProvider.getTransactionReceipt(
+                    await signer.provider!.getTransactionReceipt(
                         implResult.transactionHash
                     )
             }
@@ -132,7 +194,7 @@ export async function deployProxy(
 
         // Step 2: Deploy or verify ProxyAdmin
         let proxyAdminAddress: string
-        let proxyAdmin: Contract
+        let proxyAdmin: ProxyAdmin
 
         if (existingProxyAdminAddress) {
             info(`Using existing ProxyAdmin at ${existingProxyAdminAddress}`)
@@ -140,7 +202,7 @@ export async function deployProxy(
 
             if (verify) {
                 const exists = await verifyDeployedContract(
-                    provider,
+                    signer.provider!,
                     proxyAdminAddress,
                     'ProxyAdmin'
                 )
@@ -151,33 +213,18 @@ export async function deployProxy(
                 }
             }
 
-            const factory = await provider.getFactory('ProxyAdmin')
-            proxyAdmin = factory.attach(proxyAdminAddress)
+            proxyAdmin = ProxyAdmin__factory.connect(proxyAdminAddress, signer)
         } else {
             info('Deploying ProxyAdmin')
-            const adminResult = await deployContract(provider, {
-                contractName: 'ProxyAdmin',
-                overrides: deployOverrides,
-            })
+            proxyAdmin = await deployProxyAdmin(signer, deployOverrides)
+            proxyAdminAddress = proxyAdmin.address
 
-            if (
-                !adminResult.success ||
-                !adminResult.contract ||
-                !adminResult.address
-            ) {
-                throw new Error(
-                    `ProxyAdmin deployment failed: ${adminResult.error || 'Unknown error'}`
-                )
-            }
-
-            proxyAdmin = adminResult.contract
-            proxyAdminAddress = adminResult.address
-
-            if (adminResult.transactionHash) {
-                const ethProvider = provider.getProvider()
-                receipts.proxyAdmin = await ethProvider.getTransactionReceipt(
-                    adminResult.transactionHash
-                )
+            // Get receipt if available
+            if (proxyAdmin.deployTransaction) {
+                receipts.proxyAdmin =
+                    await signer.provider!.getTransactionReceipt(
+                        proxyAdmin.deployTransaction.hash
+                    )
             }
         }
 
@@ -189,12 +236,16 @@ export async function deployProxy(
         debug(`ProxyAdmin: ${proxyAdminAddress}`)
         debug(`Init data: ${initData}`)
 
-        const proxy = await provider.deployProxy(
+        const proxy = await new TransparentUpgradeableProxy__factory(
+            signer
+        ).deploy(
             implementationAddress,
             proxyAdminAddress,
             initData,
             deployOverrides
         )
+
+        await proxy.deployed()
 
         info(`Proxy transaction sent: ${proxy.deployTransaction.hash}`)
 
@@ -240,21 +291,24 @@ export async function deployProxy(
  * Deploys one ProxyAdmin and multiple proxies, reusing the ProxyAdmin
  * for all proxies to save gas and simplify management.
  *
- * @param provider - Deployment provider
+ * @param signer - Ethers.js signer
  * @param proxies - Array of proxy deployment options (without proxyAdminAddress)
  * @param sharedProxyAdminAddress - Optional existing ProxyAdmin to reuse
  * @returns Array of deployment results
  *
  * @example
  * ```typescript
- * const results = await deployMultipleProxies(provider, [
- *   { implementationContract: 'BusinessLogicResolver', initData: '0x' },
- *   { implementationContract: 'Factory', initData: '0x' }
+ * import { BusinessLogicResolver__factory, Factory__factory } from '@contract-types'
+ *
+ * const signer = (await ethers.getSigners())[0]
+ * const results = await deployMultipleProxies(signer, [
+ *   { implementationFactory: BusinessLogicResolver__factory.connect(signer), initData: '0x' },
+ *   { implementationFactory: Factory__factory.connect(signer), initData: '0x' }
  * ])
  * ```
  */
 export async function deployMultipleProxies(
-    provider: DeploymentProvider,
+    signer: Signer,
     proxies: Omit<DeployProxyOptions, 'proxyAdminAddress'>[],
     sharedProxyAdminAddress?: string
 ): Promise<DeployProxyResult[]> {
@@ -268,23 +322,14 @@ export async function deployMultipleProxies(
         proxyAdminAddress = sharedProxyAdminAddress
     } else {
         info('Deploying shared ProxyAdmin for all proxies')
-        const adminResult = await deployContract(provider, {
-            contractName: 'ProxyAdmin',
-        })
-
-        if (!adminResult.success || !adminResult.address) {
-            throw new Error(
-                `Shared ProxyAdmin deployment failed: ${adminResult.error || 'Unknown error'}`
-            )
-        }
-
-        proxyAdminAddress = adminResult.address
+        const proxyAdmin = await deployProxyAdmin(signer)
+        proxyAdminAddress = proxyAdmin.address
         success(`Shared ProxyAdmin deployed at ${proxyAdminAddress}`)
     }
 
     // Deploy all proxies with shared ProxyAdmin
     for (const proxyOptions of proxies) {
-        const result = await deployProxy(provider, {
+        const result = await deployProxy(signer, {
             ...proxyOptions,
             proxyAdminAddress,
         })
@@ -297,31 +342,30 @@ export async function deployMultipleProxies(
 /**
  * Get the implementation address from a deployed proxy.
  *
- * @param provider - Deployment provider
+ * @param provider - Ethers.js provider
  * @param proxyAddress - Address of the proxy
  * @returns Implementation address
  *
  * @example
  * ```typescript
+ * const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
  * const implAddress = await getProxyImplementation(provider, '0x123...')
  * console.log(`Current implementation: ${implAddress}`)
  * ```
  */
 export async function getProxyImplementation(
-    provider: DeploymentProvider,
+    provider: providers.Provider,
     proxyAddress: string
 ): Promise<string> {
     try {
         validateAddress(proxyAddress, 'proxy address')
-
-        const ethProvider = provider.getProvider()
 
         // Read implementation from EIP-1967 storage slot
         // keccak256("eip1967.proxy.implementation") - 1
         const implSlot =
             '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'
 
-        const implBytes = await ethProvider.getStorageAt(proxyAddress, implSlot)
+        const implBytes = await provider.getStorageAt(proxyAddress, implSlot)
 
         // Convert bytes32 to address (take last 20 bytes)
         const implementationAddress = '0x' + implBytes.slice(-40)
@@ -344,34 +388,30 @@ export async function getProxyImplementation(
 /**
  * Get the ProxyAdmin address from a deployed proxy.
  *
- * @param provider - Deployment provider
+ * @param provider - Ethers.js provider
  * @param proxyAddress - Address of the proxy
  * @returns ProxyAdmin address
  *
  * @example
  * ```typescript
+ * const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
  * const adminAddress = await getProxyAdmin(provider, '0x123...')
  * console.log(`ProxyAdmin: ${adminAddress}`)
  * ```
  */
 export async function getProxyAdmin(
-    provider: DeploymentProvider,
+    provider: providers.Provider,
     proxyAddress: string
 ): Promise<string> {
     try {
         validateAddress(proxyAddress, 'proxy address')
-
-        const ethProvider = provider.getProvider()
 
         // Read admin from EIP-1967 storage slot
         // keccak256("eip1967.proxy.admin") - 1
         const adminSlot =
             '0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103'
 
-        const adminBytes = await ethProvider.getStorageAt(
-            proxyAddress,
-            adminSlot
-        )
+        const adminBytes = await provider.getStorageAt(proxyAddress, adminSlot)
 
         // Convert bytes32 to address (take last 20 bytes)
         const proxyAdminAddress = '0x' + adminBytes.slice(-40)
