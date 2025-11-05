@@ -15,89 +15,35 @@ import {
 
 /**
  * Format methods array for registry output.
- *
- * Produces readable, formatted TypeScript code with proper indentation.
+ * Prettier will handle final formatting.
  *
  * @param methods - Array of method definitions
- * @param indent - Indentation level (number of spaces)
- * @returns Formatted methods array string
+ * @returns Methods array as JavaScript object
  */
-function formatMethods(
-    methods: MethodDefinition[],
-    indent: number = 8
-): string {
-    if (methods.length === 0) {
-        return '[]'
-    }
-
-    const indentStr = ' '.repeat(indent)
-    const itemIndent = ' '.repeat(indent + 4)
-    const propIndent = ' '.repeat(indent + 8)
-
-    const formattedMethods = methods
-        .map(
-            (m) =>
-                `${itemIndent}{\n${propIndent}name: '${m.name}',\n${propIndent}signature: '${m.signature}',\n${propIndent}selector: '${m.selector}'\n${itemIndent}}`
-        )
-        .join(',\n')
-
-    return `[\n${formattedMethods}\n${indentStr}]`
+function formatMethods(methods: MethodDefinition[]): string {
+    return JSON.stringify(methods)
 }
 
 /**
  * Format events array for registry output.
- *
- * Produces readable, formatted TypeScript code with proper indentation.
+ * Prettier will handle final formatting.
  *
  * @param events - Array of event definitions
- * @param indent - Indentation level (number of spaces)
- * @returns Formatted events array string
+ * @returns Events array as JavaScript object
  */
-function formatEvents(events: EventDefinition[], indent: number = 8): string {
-    if (events.length === 0) {
-        return '[]'
-    }
-
-    const indentStr = ' '.repeat(indent)
-    const itemIndent = ' '.repeat(indent + 4)
-    const propIndent = ' '.repeat(indent + 8)
-
-    const formattedEvents = events
-        .map(
-            (e) =>
-                `${itemIndent}{\n${propIndent}name: '${e.name}',\n${propIndent}signature: '${e.signature}',\n${propIndent}topic0: '${e.topic0}'\n${itemIndent}}`
-        )
-        .join(',\n')
-
-    return `[\n${formattedEvents}\n${indentStr}]`
+function formatEvents(events: EventDefinition[]): string {
+    return JSON.stringify(events)
 }
 
 /**
  * Format errors array for registry output.
- *
- * Produces readable, formatted TypeScript code with proper indentation.
+ * Prettier will handle final formatting.
  *
  * @param errors - Array of error definitions
- * @param indent - Indentation level (number of spaces)
- * @returns Formatted errors array string
+ * @returns Errors array as JavaScript object
  */
-function formatErrors(errors: ErrorDefinition[], indent: number = 8): string {
-    if (errors.length === 0) {
-        return '[]'
-    }
-
-    const indentStr = ' '.repeat(indent)
-    const itemIndent = ' '.repeat(indent + 4)
-    const propIndent = ' '.repeat(indent + 8)
-
-    const formattedErrors = errors
-        .map(
-            (e) =>
-                `${itemIndent}{\n${propIndent}name: '${e.name}',\n${propIndent}signature: '${e.signature}',\n${propIndent}selector: '${e.selector}'\n${itemIndent}}`
-        )
-        .join(',\n')
-
-    return `[\n${formattedErrors}\n${indentStr}]`
+function formatErrors(errors: ErrorDefinition[]): string {
+    return JSON.stringify(errors)
 }
 
 /**
@@ -132,6 +78,7 @@ function normalizeRoleValue(value: string): string {
  * @param storageWrappers - Optional array of storage wrapper metadata
  * @param mocks - Optional array of mock contract metadata
  * @param moduleName - Optional module name for imports (default: '@scripts/infrastructure')
+ * @param typechainModuleName - Optional TypeChain factory import path (default: '@contract-types')
  * @returns TypeScript source code
  */
 export function generateRegistry(
@@ -140,14 +87,17 @@ export function generateRegistry(
     allRoles?: Map<string, string>,
     storageWrappers?: ContractMetadata[],
     mocks?: ContractMetadata[],
-    moduleName: string = '@scripts/infrastructure'
+    moduleName: string = '@scripts/infrastructure',
+    typechainModuleName: string = '@contract-types'
 ): string {
     const header = generateHeader(
         facets.length,
         infrastructure.length,
         mocks?.length ?? 0,
         moduleName,
-        facets
+        facets,
+        typechainModuleName,
+        mocks
     )
     const facetRegistry = generateFacetRegistry(facets)
     const contractRegistry = generateContractRegistry(infrastructure)
@@ -177,6 +127,9 @@ export function generateRegistry(
  * @param infrastructureCount - Number of infrastructure contracts
  * @param mockCount - Number of mock contracts
  * @param moduleName - Module name for imports
+ * @param facets - Array of facet metadata for factory imports
+ * @param typechainModuleName - TypeChain factory import path
+ * @param mocks - Optional array of mock contract metadata for factory imports
  * @returns Header code
  */
 function generateHeader(
@@ -184,27 +137,37 @@ function generateHeader(
     infrastructureCount: number,
     mockCount: number,
     moduleName: string = '@scripts/infrastructure',
-    facets: ContractMetadata[] = []
+    facets: ContractMetadata[] = [],
+    typechainModuleName: string = '@contract-types',
+    mocks?: ContractMetadata[]
 ): string {
     const mockLine = mockCount > 0 ? `\n * Mocks: ${mockCount}` : ''
 
     // Sort facet names alphabetically for deterministic output
     const sortedFacetNames = [...facets].map((f) => f.name).sort()
 
-    // Generate TypeChain factory imports
+    // Generate TypeChain factory imports (Prettier will format)
     // Include both regular and TimeTravel variants where applicable
     const factoryImports: string[] = []
     for (const name of sortedFacetNames) {
-        factoryImports.push(`    ${name}__factory`)
+        factoryImports.push(`${name}__factory`)
 
         // Check if this facet should have a TimeTravel variant
         // (ends with 'Facet' and is not 'TimeTravelFacet')
         if (name !== 'TimeTravelFacet' && name.endsWith('Facet')) {
-            factoryImports.push(`    ${name}TimeTravel__factory`)
+            factoryImports.push(`${name}TimeTravel__factory`)
         }
     }
 
-    const factoryImportsStr = factoryImports.join(',\n')
+    // Include mock contract factory imports
+    if (mocks && mocks.length > 0) {
+        const sortedMockNames = [...mocks].map((m) => m.name).sort()
+        for (const name of sortedMockNames) {
+            factoryImports.push(`${name}__factory`)
+        }
+    }
+
+    const factoryImportsStr = factoryImports.join(', ')
 
     return `// SPDX-License-Identifier: Apache-2.0
 
@@ -225,14 +188,8 @@ function generateHeader(
  * @module domain/atsRegistry.data
  */
 
-import {
-    FacetDefinition,
-    ContractDefinition,
-    StorageWrapperDefinition,
-} from '${moduleName}'
-import {
-${factoryImportsStr}
-} from '@contract-types'`
+import { FacetDefinition, ContractDefinition, StorageWrapperDefinition } from '${moduleName}'
+import { ${factoryImportsStr} } from '${typechainModuleName}'`
 }
 
 /**
@@ -288,17 +245,17 @@ function generateFacetEntry(facet: ContractMetadata): string {
 
     const methodsLine =
         facet.methods.length > 0
-            ? `\n        methods: ${formatMethods(facet.methods, 8)},`
+            ? `\n        methods: ${formatMethods(facet.methods)},`
             : ''
 
     const eventsLine =
         facet.events.length > 0
-            ? `\n        events: ${formatEvents(facet.events, 8)},`
+            ? `\n        events: ${formatEvents(facet.events)},`
             : ''
 
     const errorsLine =
         facet.errors.length > 0
-            ? `\n        errors: ${formatErrors(facet.errors, 8)},`
+            ? `\n        errors: ${formatErrors(facet.errors)},`
             : ''
 
     const descriptionLine = facet.description
@@ -310,10 +267,9 @@ function generateFacetEntry(facet: ContractMetadata): string {
     const hasTimeTravel =
         facet.name !== 'TimeTravelFacet' && facet.name.endsWith('Facet')
 
+    // Prettier will format this properly
     const factoryLine = hasTimeTravel
-        ? `\n        factory: (signer, useTimeTravel = false) => useTimeTravel 
-            ? new ${facet.name}TimeTravel__factory(signer)
-            : new ${facet.name}__factory(signer),`
+        ? `\n        factory: (signer, useTimeTravel = false) => useTimeTravel ? new ${facet.name}TimeTravel__factory(signer) : new ${facet.name}__factory(signer),`
         : `\n        factory: (signer) => new ${facet.name}__factory(signer),`
 
     return `    ${facet.name}: {
@@ -366,17 +322,17 @@ function generateContractEntry(contract: ContractMetadata): string {
 
     const methodsLine =
         contract.methods.length > 0
-            ? `\n        methods: ${formatMethods(contract.methods, 8)},`
+            ? `\n        methods: ${formatMethods(contract.methods)},`
             : ''
 
     const eventsLine =
         contract.events.length > 0
-            ? `\n        events: ${formatEvents(contract.events, 8)},`
+            ? `\n        events: ${formatEvents(contract.events)},`
             : ''
 
     const errorsLine =
         contract.errors.length > 0
-            ? `\n        errors: ${formatErrors(contract.errors, 8)},`
+            ? `\n        errors: ${formatErrors(contract.errors)},`
             : ''
 
     const descriptionLine = contract.description
@@ -435,12 +391,12 @@ function generateStorageWrapperEntry(wrapper: ContractMetadata): string {
 
     const eventsLine =
         wrapper.events.length > 0
-            ? `,\n        events: ${formatEvents(wrapper.events, 8)}`
+            ? `,\n        events: ${formatEvents(wrapper.events)}`
             : ''
 
     const errorsLine =
         wrapper.errors.length > 0
-            ? `,\n        errors: ${formatErrors(wrapper.errors, 8)}`
+            ? `,\n        errors: ${formatErrors(wrapper.errors)}`
             : ''
 
     const descriptionLine = wrapper.description
@@ -449,7 +405,7 @@ function generateStorageWrapperEntry(wrapper: ContractMetadata): string {
 
     return `    ${wrapper.name}: {
         name: '${wrapper.name}',${descriptionLine}${inheritanceLine}
-        methods: ${formatMethods(wrapper.methods, 8)}${eventsLine}${errorsLine}
+        methods: ${formatMethods(wrapper.methods)}${eventsLine}${errorsLine}
     }`
 }
 
@@ -488,6 +444,7 @@ export const TOTAL_MOCKS = ${mocks.length} as const`
  * Generate single mock contract registry entry.
  *
  * Uses FacetDefinition format to support resolver keys for mock facets.
+ * Includes factory property for TypeChain factory instantiation.
  *
  * @param mock - Mock contract metadata
  * @returns TypeScript object literal
@@ -502,23 +459,30 @@ function generateMockEntry(mock: ContractMetadata): string {
             ? `\n        inheritance: ${JSON.stringify(mock.inheritance)},`
             : ''
 
+    const methodsLine =
+        mock.methods.length > 0
+            ? `\n        methods: ${formatMethods(mock.methods)},`
+            : ''
+
     const eventsLine =
         mock.events.length > 0
-            ? `,\n        events: ${formatEvents(mock.events, 8)}`
+            ? `\n        events: ${formatEvents(mock.events)},`
             : ''
 
     const errorsLine =
         mock.errors.length > 0
-            ? `,\n        errors: ${formatErrors(mock.errors, 8)}`
+            ? `\n        errors: ${formatErrors(mock.errors)},`
             : ''
 
     const descriptionLine = mock.description
         ? `\n        description: '${mock.description}',`
         : ''
 
+    // Add TypeChain factory reference (mocks don't have TimeTravel variants)
+    const factoryLine = `\n        factory: (signer) => new ${mock.name}__factory(signer),`
+
     return `    ${mock.name}: {
-        name: '${mock.name}',${descriptionLine}${resolverKeyLine}${inheritanceLine}
-        methods: ${formatMethods(mock.methods, 8)}${eventsLine}${errorsLine}
+        name: '${mock.name}',${descriptionLine}${resolverKeyLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}
     }`
 }
 

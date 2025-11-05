@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-04T14:53:08.622Z
+ * Generated: 2025-11-05T07:37:35.694Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -1889,16 +1889,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
                 signature: 'initialize_ERC20(ERC20Metadata)',
                 selector: '0xab0de864',
             },
-            {
-                name: 'name',
-                signature: 'name()',
-                selector: '0x06fdde03',
-            },
-            {
-                name: 'symbol',
-                signature: 'symbol()',
-                selector: '0x95d89b41',
-            },
+            { name: 'name', signature: 'name()', selector: '0x06fdde03' },
+            { name: 'symbol', signature: 'symbol()', selector: '0x95d89b41' },
             {
                 name: 'transfer',
                 signature: 'transfer(address,uint256)',
@@ -1977,11 +1969,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
                 signature: 'checkpoints(address,uint256)',
                 selector: '0x0cdfebfa',
             },
-            {
-                name: 'clock',
-                signature: 'clock()',
-                selector: '0x91ddadf4',
-            },
+            { name: 'clock', signature: 'clock()', selector: '0x91ddadf4' },
             {
                 name: 'CLOCK_MODE',
                 signature: 'CLOCK_MODE()',
@@ -2269,11 +2257,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
                 signature: 'onchainID()',
                 selector: '0xaba63705',
             },
-            {
-                name: 'version',
-                signature: 'version()',
-                selector: '0x54fd4d50',
-            },
+            { name: 'version', signature: 'version()', selector: '0x54fd4d50' },
         ],
         factory: (signer, useTimeTravel = false) =>
             useTimeTravel
@@ -2991,16 +2975,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
                 signature: 'isPaused()',
                 selector: '0xb187bd26',
             },
-            {
-                name: 'pause',
-                signature: 'pause()',
-                selector: '0x8456cb59',
-            },
-            {
-                name: 'unpause',
-                signature: 'unpause()',
-                selector: '0x3f4ba83a',
-            },
+            { name: 'pause', signature: 'pause()', selector: '0x8456cb59' },
+            { name: 'unpause', signature: 'unpause()', selector: '0x3f4ba83a' },
         ],
         factory: (signer, useTimeTravel = false) =>
             useTimeTravel
@@ -4504,11 +4480,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<
                     '_checkpointsLookup(IERC20Votes.Checkpoint[],uint256)',
                 selector: '0x86a272a4',
             },
-            {
-                name: '_clock',
-                signature: '_clock()',
-                selector: '0x32bdbe3f',
-            },
+            { name: '_clock', signature: '_clock()', selector: '0x32bdbe3f' },
             {
                 name: '_CLOCK_MODE',
                 signature: '_CLOCK_MODE()',

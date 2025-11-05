@@ -124,9 +124,7 @@ export {
 
 export {
     createBatchConfiguration,
-    createBlrConfiguration, // Deprecated - use createBatchConfiguration instead
     type FacetConfiguration,
-    type CreateBlrConfigurationOptions,
     type CreateBlrConfigurationResult,
     type ConfigurationData,
     type ConfigurationError,

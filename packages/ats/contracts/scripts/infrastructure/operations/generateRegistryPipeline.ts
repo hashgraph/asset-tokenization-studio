@@ -74,6 +74,9 @@ export interface RegistryGenerationConfig {
     /** Module name for imports in generated code (default: '@scripts/infrastructure') */
     moduleName?: string
 
+    /** TypeChain factory import path (default: '@contract-types') */
+    typechainModuleName?: string
+
     /** Logging level (default: 'INFO') */
     logLevel?: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'SILENT'
 
@@ -190,6 +193,7 @@ export const DEFAULT_REGISTRY_CONFIG: Required<
     extractNatspec: true,
     outputPath: './generated/registry.data.ts',
     moduleName: '@scripts/infrastructure',
+    typechainModuleName: '@contract-types',
     logLevel: 'INFO',
     facetsOnly: false,
     includeMocksInRegistry: false,
@@ -543,7 +547,8 @@ export async function generateRegistryPipeline(
         allRoles,
         storageWrapperMetadata,
         mockMetadata,
-        fullConfig.moduleName
+        fullConfig.moduleName,
+        fullConfig.typechainModuleName
     )
     info(`  Generated ${registryCode.split('\n').length} lines of code`)
 
@@ -586,10 +591,55 @@ export async function generateRegistryPipeline(
             ? fullConfig.outputPath
             : path.resolve(process.cwd(), fullConfig.outputPath)
 
-        writeToFileFn(resolvedOutputPath, registryCode)
+        // Format the generated code with Prettier first
+        let formattedCode = registryCode
+        try {
+            const prettier = await import('prettier')
+            const prettierConfig =
+                await prettier.resolveConfig(resolvedOutputPath)
+            formattedCode = await prettier.format(registryCode, {
+                ...prettierConfig,
+                parser: 'typescript',
+                filepath: resolvedOutputPath,
+            })
+        } catch (error) {
+            warn(`Could not apply Prettier formatting: ${error}`)
+        }
+
+        // Smart file writing: only write if content changed (excluding timestamp)
+        let shouldWrite = true
+        try {
+            const existingContent = readFile(resolvedOutputPath)
+
+            // Normalize content by removing timestamp line for comparison
+            const normalizeContent = (content: string) => {
+                return content.replace(
+                    /\n \* Generated: .*\n/,
+                    '\n * Generated: TIMESTAMP\n'
+                )
+            }
+
+            const normalizedExisting = normalizeContent(existingContent)
+            const normalizedNew = normalizeContent(formattedCode)
+
+            if (normalizedExisting === normalizedNew) {
+                shouldWrite = false
+                info(
+                    'Registry content unchanged - preserving existing file and timestamp'
+                )
+            }
+        } catch (error) {
+            // File doesn't exist or can't be read - write new file
+            shouldWrite = true
+        }
+
+        if (shouldWrite) {
+            writeToFileFn(resolvedOutputPath, formattedCode)
+            success('Registry generated successfully!')
+            info(`Written to: ${resolvedOutputPath}`)
+        }
+
         outputPath = resolvedOutputPath
-        success('Registry generated successfully!')
-        info(`Written to: ${outputPath}`)
     } else {
         info('Skipping file write (writeToFile = false)')
     }
