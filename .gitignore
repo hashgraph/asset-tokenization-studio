@@ -143,3 +143,13 @@ contracts/extracted-methods.txt
 
 # bin files
 bin/
+
+# Verifiable Credential files
+*.vc
+
+# Deployed contracts
+deployed-contracts*.json
+
+# Directories at root
+/contracts/
+/sdk/

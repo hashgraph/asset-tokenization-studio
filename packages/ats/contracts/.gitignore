@@ -47,4 +47,13 @@ typechain-types
 #Slither
 Slither/*
 
+# Contracts
+deployed-contracts*
 
+# Verifiable Credential files
+*.vc
+vc_*
+
+# Accidentally created directories
+/contracts/
+/sdk/
