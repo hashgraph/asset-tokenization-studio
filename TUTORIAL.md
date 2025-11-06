@@ -1,8 +1,15 @@
 # Asset Tokenization Studio - Complete Tutorial
 
-A comprehensive guide to using the Asset Tokenization Studio (ATS) for creating and managing tokenized securities on Hedera.
+> **A comprehensive guide to creating and managing tokenized securities on Hedera**
+
+Welcome to the Asset Tokenization Studio (ATS)! This tutorial will walk you through everything you need to know to create, deploy, and manage security tokens on the Hedera network.
 
 ---
+
+## Quick Links
+
+- **For a visual quick-start guide**: See the [Official ATS Documentation](https://docs.hedera.com/hedera/open-source-solutions/asset-tokenization-studio-ats/web-user-interface-ui) (with screenshots)
+- **Need help?** Check the [Troubleshooting](#10-troubleshooting) section
 
 ## Table of Contents
 
@@ -14,7 +21,8 @@ A comprehensive guide to using the Asset Tokenization Studio (ATS) for creating 
 6. [Managing Roles](#6-managing-roles)
 7. [KYC Management](#7-kyc-management-2-approaches)
 8. [Token Operations](#8-token-operations)
-9. [Troubleshooting](#9-troubleshooting)
+9. [Corporate Actions](#9-corporate-actions)
+10. [Troubleshooting](#10-troubleshooting)
 
 ---
 
@@ -22,40 +30,52 @@ A comprehensive guide to using the Asset Tokenization Studio (ATS) for creating 
 
 ### What You Need
 
-1. **Hedera Testnet Account**
-   - Create at [Hedera Portal](https://portal.hedera.com/)
-   - Fund with testnet HBAR (free from portal)
-   - Note your Account ID (e.g., `0.0.xxx`)
+Before you begin, make sure you have the following:
 
-2. **MetaMask Wallet**
-   - Install [MetaMask](https://metamask.io/)
-   - Create an ECDSA account on Hedera Portal
-   - Export private key from Hedera Portal
-   - Import to MetaMask
-   - Add Hedera Testnet network:
-     - Network Name: `Hedera Testnet`
-     - RPC URL: `https://testnet.hashio.io/api`
-     - Chain ID: `296` (or `0x128`)
-     - Currency: `HBAR`
-     - Block Explorer: `https://hashscan.io/testnet`
+#### Hedera Testnet Account
 
-3. **Development Environment**
-   ```bash
-   node >= 18.x
-   npm >= 9.x
-   ```
+- **Create account** at [Hedera Portal](https://portal.hedera.com/)
+- **Fund with testnet HBAR** (free from portal)
+- **Save your Account ID** (format: `0.0.xxx`)
+
+#### A Wallet (Metamask or HashPack via Wallet Connect)
+
+Follow these steps to set up MetaMask with Hedera:
+
+1. **Install** eg [MetaMask browser extension](https://metamask.io/)
+2. **Create an ECDSA account** on Hedera Portal
+3. **Export private key** from Hedera Portal
+4. **Import to MetaMask** using the private key
+5. **Add Hedera Testnet network** with these settings:
+
+   | Setting         | Value                           |
+   | --------------- | ------------------------------- |
+   | Network Name    | `Hedera Testnet`                |
+   | RPC URL         | `https://testnet.hashio.io/api` |
+   | Chain ID        | `296` (or `0x128`)              |
+   | Currency Symbol | `HBAR`                          |
+   | Block Explorer  | `https://hashscan.io/testnet`   |
+
+#### Development Environment
+
+```bash
+node >= 20.19.4
+npm >= 10.9.0
+```
+
+---
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone <repo-url>
+git clone https://github.com/hashgraph/asset-tokenization-studio.git
 cd asset-tokenization-studio
 
 # Install dependencies
 npm install
 
-# Navigate to contracts
+# Navigate to contracts directory
 cd packages/ats/contracts
 ```
 
@@ -63,9 +83,15 @@ cd packages/ats/contracts
 
 ## 2. Initial Configuration
 
+You'll need to configure two environment files: one for contracts and one for the web application.
+
 ### Configure Contract Environment
 
-Chose either mainnet, testnet, previewnet or loca (for 'solo' deployment). To do this, edit `packages/ats/contracts/.env`:
+Choose your network: **mainnet**, **testnet**, **previewnet**, or **local** (for 'solo' deployment).
+
+**Edit:** `packages/ats/contracts/.env`
+
+Example for Testnet:
 
 ```bash
 # Your private key (from Hedera Portal)
@@ -76,9 +102,41 @@ TESTNET_JSON_RPC_ENDPOINT='https://testnet.hashio.io/api'
 TESTNET_MIRROR_NODE_ENDPOINT='https://testnet.mirrornode.hedera.com'
 ```
 
-### Configure Web Application
+---
 
-Edit `apps/ats/web/.env`:
+## 3. Deploying Contracts
+
+### Deploy to Testnet
+
+Navigate to the contracts directory and deploy all necessary contracts:
+
+```bash
+cd packages/ats/contracts
+
+# Deploy all contracts
+npx hardhat deployAll --use-deployed false --network testnet
+```
+
+**What this does:**
+
+- Deploys Factory contract
+- Deploys Resolver contract
+- Deploys all facets (ERC20, KYC, Pause, etc.)
+- Creates `deployed-contracts.json` file
+
+This typically takes around 5-10 minutes on testnet.
+
+---
+
+### Update Web Configuration
+
+After deployment completes, you need to update the web app with your contract addresses.
+
+1. **Open** `packages/ats/contracts/deployed-contracts.json`
+2. **Find** these contract IDs:
+   - **Business Logic Resolver Proxy** → `contractId`
+   - **Factory** → `contractId`
+3. **Update** `apps/ats/web/.env`:
 
 ```bash
 # Network selection
@@ -88,46 +146,20 @@ REACT_APP_NETWORK='testnet'
 REACT_APP_MIRROR_NODE='https://testnet.mirrornode.hedera.com/api/v1/'
 REACT_APP_RPC_NODE='https://testnet.hashio.io/api'
 
-# Will be updated after deployment
-REACT_APP_RPC_RESOLVER='0.0.TO_BE_UPDATED'
-REACT_APP_RPC_FACTORY='0.0.TO_BE_UPDATED'
+# Update these values from deployed-contracts.json
+REACT_APP_RPC_RESOLVER='0.0.xxx'  # Business Logic Resolver Proxy contractId
+REACT_APP_RPC_FACTORY='0.0.xxx'   # Factory contractId
 
-# Config IDs (default)
+# Config IDs (default - no changes needed)
 REACT_APP_EQUITY_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000001'
 REACT_APP_EQUITY_CONFIG_VERSION='0'
 REACT_APP_BOND_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000002'
 REACT_APP_BOND_CONFIG_VERSION='0'
 ```
 
+> **⚠️ Important**: Use the **Factory** contract ID (NOT the Factory Proxy) and the **Resolver Proxy** contract ID.
+
 ---
-
-## 3. Deploying Contracts
-
-### Deploy to Testnet
-
-```bash
-cd packages/ats/contracts
-
-# Deploy all contracts
-npx hardhat deployAll --use-deployed false --network testnet
-```
-
-This will:
-
-- Deploy Factory contract
-- Deploy Resolver contract
-- Deploy all facets (ERC20, KYC, Pause, etc.)
-- Create `deployed-contracts.json` file
-
-### Update Web Configuration
-
-After deployment, check `deployed-contracts.json` and update `apps/ats/web/.env`:
-
-```bash
-# Find these in deployed-contracts.json
-REACT_APP_RPC_RESOLVER='0.0.xxx'  # Business Logic Resolver Proxy contractId
-REACT_APP_RPC_FACTORY='0.0.xxx'   # Factory contractId
-```
 
 ### Start the Web Application
 
@@ -136,251 +168,360 @@ cd apps/ats/web
 npm run dev
 ```
 
-Access at: `http://localhost:5173`
+**Access your app at:** `http://localhost:5173`
+
+You should now see the Asset Tokenization Studio interface.
 
 ---
 
 ## 4. Creating Your First Security Token
 
-### A. Connect Wallet
+This section walks you through creating both equity and bond tokens.
 
-1. Open the web app
-2. Click "Connect Metamask" or "Connect Wallet Connect"
+### A. Connect Your Wallet
 
-- If using Wallet Connect, chose HashPack in the Modal.
-- If using Metamask, ensure you're on Hedera Testnet in MetaMask
+1. **Open** the web app at `http://localhost:5173`
+2. **Click** one of the connection options:
+   - **"Connect Metamask"** - for MetaMask users
+   - **"Connect Wallet Connect"** - for other wallets (choose HashPack in the modal)
+3. **Ensure** you're on Hedera Testnet in MetaMask (Chain ID: 296)
+4. **Approve** the connection request
 
-3. Approve connection
+You should see your account address displayed in the top-right corner.
+
+---
 
 ### B. Create an Equity Token
 
-1. **Navigate**: Click "Create Security" → "Equity"
+Follow this step-by-step guide to create your first equity token.
 
-2. **Fill Basic Information, eg:**:
-   - **Name**: `My Company Stock`
-   - **Symbol**: `MCS`
-   - **Decimals**: `0` (whole shares) or `18` (fractional), use `6` as standard.
-   - **ISIN**: eg `US1234532117`
+#### Step 1: Navigate to Creation Page
 
-3. **Digital security permissions** (choose one or more):
-   - **Controllable**: Enables admin to force transfer/redeem tokens between any accounts
-     - Use case: Regulatory compliance, court orders, emergency recovery
-   - Grants `CONTROLLER_ROLE` the ability to move tokens without owner consent
-     - Example: Move tokens from compromised account to recovery address
-   - **Blocklist**: Deny-list approach - block specific accounts from holding/trading
-     - Use case: Sanctioned addresses, fraud prevention
-     - Accounts on blocklist cannot send or receive tokens
-     - More permissive: everyone allowed except blocked accounts
-   - **Approval List**: Allow-list approach - only approved accounts can hold/trade
-     - Use case: Highly regulated securities, private placements
-     - Only accounts on approval list can participate
-     - More restrictive: everyone blocked except approved accounts
+**Click:** "Create Security" → "Equity"
 
-       **Recommendation**: For most use cases, choose **Blocklist** for flexibility or **Approval List** for maximum control.
+#### Step 2: Basic Information
 
-4. **Digital security configuration**:
-   - **Clearing Mode** (Default: Unchecked)
-     - **What it does**: Enables two-step settlement requiring validator approval
-     - **How it works**:
-       1. User initiates transfer/redemption/hold → Operation created (pending)
-       2. Clearing Validator reviews operation → Approves or Cancels
-       3. If approved → Operation executes
-       4. If cancelled/expired → User can reclaim tokens
+Fill in the fundamental details of your equity token:
 
-   - **Internal KYC Activated**
-     - **What it does**: Simplified KYC system without external dependencies
-     - **How it works**:
-       - KYC managed directly within the token contract
-       - No need for External KYC List contracts
-       - SSI Manager grants/revokes KYC
-       - Requires VC files for compliance tracking
-     - **Impact**: KYC managed in token vs separate contract
+| Field        | Example Value      | Description                                                       |
+| ------------ | ------------------ | ----------------------------------------------------------------- |
+| **Name**     | `My Company Stock` | Full name of the token                                            |
+| **Symbol**   | `MCS`              | Ticker symbol (3-5 characters)                                    |
+| **Decimals** | `6`                | Standard is `6`, use `0` for whole shares, `18` for max precision |
+| **ISIN**     | `US1234532117`     | International Securities Identification Number                    |
 
-     **Note**: You can add Internal KYC later from the token's detail page.
+#### Step 3: Digital Security Permissions
 
-5. **Specific Details** (Equity-specific economic information):
-   - **Nominal Value**: Value of each token in the selected currency
-     - Example: `10.00` USD per share
-     - This is the face value of each equity token
+Choose the control mechanisms for your token (select one or more):
 
-   - **Currency**: Select currency for nominal value
-     - Options: USD, EUR, GBP, etc.
+<details>
+<summary><strong>Controllable</strong> - Admin control for compliance</summary>
 
-   - **Number of Shares**: Total maximum supply of equity
-     - Example: `1000000` (1M shares)
-     - This sets the supply cap
+**What it does:** Enables admin to force transfer/redeem tokens between any accounts
 
-   - **Total Value**: Auto-calculated
-     - `Number of Shares × Nominal Value`
-     - Example: 1M shares × $10 = $10M total value
+**Use cases:**
 
-   - **Rights and Privileges** (select applicable rights):
-     - ☐ **Voting Rights**: Holders can vote on governance
-     - ☐ **Information Rights**: Access to company information
-     - ☐ **Liquidation Rights**: Claims in liquidation
-     - ☐ **Preferred Dividends Rights**: Priority dividend payments
-     - ☐ **Common Dividends Rights**: Standard dividend payments
-     - ☐ **Conversion Rights**: Convert to other securities
-     - ☐ **Subscription Rights**: Pre-emptive purchase rights
-     - ☐ **Redemption Rights**: Can be redeemed by issuer
-     - ☐ **Put Rights**: Holder can force issuer to buy back
+- Regulatory compliance
+- Court orders
+- Emergency recovery
 
-   - **Dividend Type**:
-     - **None**: No dividends
-     - **Preferred**: Priority dividends
-     - **Common**: Standard dividends
+**Grants:** `CONTROLLER_ROLE` the ability to move tokens without owner consent
 
-6. **External Lists** (Optional - integrate existing external contracts):
+**Example:** Move tokens from compromised account to recovery address
 
-   **What are External Lists?**
-   External contracts that you've already deployed to manage KYC, Control, or Pause functionality across multiple tokens.
-   - **External KYC List** (Optional):
-     - Select previously deployed External KYC contracts
-     - Accounts KYC'd in those contracts are automatically KYC'd for this token
-     - Use case: Share KYC across multiple securities
-     - Can select multiple External KYC contracts
-     - **Recommendation**: ⚠️ Skip for now, set up later if needed
+</details>
 
-   - **External Control List** (Optional):
-     - Select External Control contracts (blocklist/approval list)
-     - Shares control rules across tokens
-     - Can select multiple External Control contracts
-     - **Recommendation**: ⚠️ Skip for now, set up later if needed
+<details>
+<summary><strong>🚫 Blocklist</strong> - Deny-list approach</summary>
 
-   - **External Pause List** (Optional):
-     - Select External Pause contracts
-     - Allows external contract to pause this token
-     - Use case: Emergency pause across multiple tokens
-     - **Recommendation**: ⚠️ Skip for now, set up later if needed
+**What it does:** Block specific accounts from holding/trading
 
-   **Note**: You can add External Lists later from the token's detail page.
+**Use cases:**
 
-7. **ERC3643** (Optional - T-REX standard compliance):
+- Sanctioned addresses
+- Fraud prevention
 
-   **What is ERC3643?**
-   T-REX (Token for Regulated EXchanges) is a standard for compliant security tokens with built-in compliance and identity management.
-   - **Compliance Contract ID** (Optional):
-     - Hedera account ID of compliance contract
-     - Handles transfer compliance rules
-     - Leave empty to use default compliance
-     - **Recommendation**: ⚠️ Skip for standard use cases
+**Behavior:**
 
-   - **Identity Registry Contract ID** (Optional):
-     - Hedera account ID of identity registry
-     - Manages on-chain identity verification
-     - Leave empty to use default identity management
-     - **Recommendation**: ⚠️ Skip for standard use cases
+- Accounts on blocklist cannot send or receive tokens
+- More permissive: everyone allowed except blocked accounts
+</details>
 
-   **When to use ERC3643:**
-   - ✅ Need ERC-3643 Token Standard
-   - ✅ Integrating with T-REX ecosystem
-   - ✅ Point to preconfigured registries
-   - ❌ Standard security token (use built-in features instead)
+<details>
+<summary><strong>✅ Approval List</strong> - Allow-list approach</summary>
 
-8. **Regulation** (Set regulatory framework):
+**What it does:** Only approved accounts can hold/trade
 
-   **Jurisdiction**: United States (default, more jurisdictions coming)
+**Use cases:**
 
-   **Select Regulation Type**:
-   - **Regulation S**: Offers made outside the United States
-     - International investors
-     - No SEC registration required
-     - Restrictions on U.S. resales
+- Highly regulated securities
+- Private placements
 
-   - **Regulation D**: Private placements in the United States
-     - **506(b)**: Up to 35 non-accredited investors
-       - No general solicitation
-       - Manual investor verification
-       - Unlimited accredited investors
-     - **506(c)**: Only accredited investors
-       - General solicitation allowed
-       - Must verify accredited status
-       - No investor limits
+**Behavior:**
 
-   **Country Lists**:
-   - **Authorization List** (Allow-list):
-     - Select countries whose investors ARE allowed
-     - Only these countries can invest
-     - Example: Select "United States" for U.S.-only offering
+- Only accounts on approval list can participate
+- More restrictive: everyone blocked except approved accounts
+</details>
 
-   - **Block List** (Deny-list):
-     - Select countries whose investors are NOT allowed
-     - All countries except these can invest
-     - Example: Block sanctioned countries
+---
 
-9. **Review & Create**:
-   - Review all details carefully
-   - ⚠️ **Cannot edit most fields after deployment!**
-   - Check regulation compliance
-   - Verify economic information (nominal value, shares)
-   - Confirm external lists (if any)
-   - Read and accept disclaimer
-   - Click "Create Equity"
-   - Sign transaction in wallet
-   - Wait for confirmation (~5-10 seconds on testnet)
+#### Step 4: Digital Security Configuration
 
-10. **Success!** You'll be redirected to your token's detail page
+<details>
+<summary><strong>Clearing Mode</strong> (Default: Unchecked)</summary>
+
+**What it does:** Enables two-step settlement requiring validator approval
+
+**How it works:**
+
+1. User initiates transfer/redemption/hold → Operation created (pending)
+2. Clearing Validator reviews operation → Approves or Cancels
+3. If approved → Operation executes
+4. If cancelled/expired → User can reclaim tokens
+</details>
+
+<details>
+<summary><strong>Internal KYC Activated</strong></summary>
+
+**What it does:** Simplified KYC system without external dependencies
+
+**How it works:**
+
+- KYC managed directly within the token contract
+- No need for External KYC List contracts
+- SSI Manager grants/revokes KYC
+- Requires VC files for compliance tracking
+
+**Impact:** KYC managed in token vs separate contract
+
+</details>
+
+> **📝 Note**: You can add Internal KYC later from the token's detail page.
+
+---
+
+#### Step 5: Specific Details (Equity Economic Information)
+
+Configure the economic parameters of your equity token:
+
+| Field                | Example   | Description                                               |
+| -------------------- | --------- | --------------------------------------------------------- |
+| **Nominal Value**    | `10.00`   | Value of each token in the selected currency (face value) |
+| **Currency**         | `USD`     | Currency for nominal value (USD, EUR, GBP, etc.)          |
+| **Number of Shares** | `1000000` | Total maximum supply of equity (sets the supply cap)      |
+| **Total Value**      | `$10M`    | Auto-calculated: `Number of Shares × Nominal Value`       |
+
+**Rights and Privileges** - Select applicable shareholder rights:
+
+- ☐ **Voting Rights** - Holders can vote on governance
+- ☐ **Information Rights** - Access to company information
+- ☐ **Liquidation Rights** - Claims in liquidation
+- ☐ **Preferred Dividends Rights** - Priority dividend payments
+- ☐ **Common Dividends Rights** - Standard dividend payments
+- ☐ **Conversion Rights** - Convert to other securities
+- ☐ **Subscription Rights** - Pre-emptive purchase rights
+- ☐ **Redemption Rights** - Can be redeemed by issuer
+- ☐ **Put Rights** - Holder can force issuer to buy back
+
+**Dividend Type:**
+
+- **None** - No dividends
+- **Preferred** - Priority dividends
+- **Common** - Standard dividends
+
+---
+
+#### Step 6: External Lists (Optional)
+
+> **What are External Lists?** External contracts that manage KYC, Control, or Pause functionality across multiple tokens.
+
+<details>
+<summary><strong>External KYC List</strong> (Optional)</summary>
+
+- Select previously deployed External KYC contracts
+- Accounts KYC'd in those contracts are automatically KYC'd for this token
+- **Use case:** Share KYC across multiple securities
+- Can select multiple External KYC contracts
+
+</details>
+
+<details>
+<summary><strong>🎛️ External Control List</strong> (Optional)</summary>
+
+- Select External Control contracts (blocklist/approval list)
+- Shares control rules across tokens
+- Can select multiple External Control contracts
+
+</details>
+
+<details>
+<summary><strong>⏸️ External Pause List</strong> (Optional)</summary>
+
+- Select External Pause contracts
+- Allows external contract to pause this token
+- **Use case:** Emergency pause across multiple tokens
+
+</details>
+
+> **📝 Note**: You can add External Lists later from the token's detail page.
+
+---
+
+#### Step 7: ERC3643 (Optional - T-REX Standard)
+
+> **What is ERC3643?** T-REX (Token for Regulated EXchanges) is a standard for compliant security tokens with built-in compliance and identity management.
+
+**Configuration Options:**
+
+| Field                             | Description                                                               | Recommendation                 |
+| --------------------------------- | ------------------------------------------------------------------------- | ------------------------------ |
+| **Compliance Contract ID**        | Hedera account ID of compliance contract that handles transfer rules      | ⚠️ Skip for standard use cases |
+| **Identity Registry Contract ID** | Hedera account ID of identity registry for on-chain identity verification | ⚠️ Skip for standard use cases |
+
+**When to use ERC3643:**
+
+- ✅ You need ERC-3643 Token Standard
+- ✅ You're integrating with T-REX ecosystem
+- ✅ You want to point to preconfigured registries
+- ❌ Standard security token (use built-in features instead)
+
+---
+
+#### Step 8: Regulation (Set Regulatory Framework)
+
+**Jurisdiction:** United States _(more jurisdictions coming soon)_
+
+**Select Regulation Type:**
+
+<details>
+<summary><strong>🌍 Regulation S</strong> - International offerings</summary>
+
+Offers made outside the United States
+
+- ✅ International investors
+- ✅ No SEC registration required
+- ⚠️ Restrictions on U.S. resales
+</details>
+
+<details>
+<summary><strong>🇺🇸 Regulation D 506(b)</strong> - Limited non-accredited investors</summary>
+
+Private placements in the United States
+
+- Up to 35 non-accredited investors
+- No general solicitation
+- Manual investor verification
+- Unlimited accredited investors
+</details>
+
+<details>
+<summary><strong>🇺🇸 Regulation D 506(c)</strong> - Accredited investors only</summary>
+
+Private placements in the United States
+
+- Only accredited investors
+- General solicitation allowed
+- Must verify accredited status
+- No investor limits
+</details>
+
+**Country Lists:**
+
+| List Type                           | Purpose                                          | Example                                       |
+| ----------------------------------- | ------------------------------------------------ | --------------------------------------------- |
+| **Authorization List** (Allow-list) | Select countries whose investors ARE allowed     | Select "United States" for U.S.-only offering |
+| **Block List** (Deny-list)          | Select countries whose investors are NOT allowed | Block sanctioned countries                    |
+
+---
+
+#### Step 9: Review & Create
+
+Before finalizing your token review all details carefully.
+
+1. Click **"Create Equity"**
+2. **Sign transaction** in your wallet
+3. **Wait for confirmation** (~5-10 seconds on testnet)
+
+---
+
+#### Step 10: Success!
+
+You'll be redirected to your token's detail page where you can manage your newly created security token.
+
+---
 
 ### C. Create a Bond Token
 
-Bonds follow a similar creation process to Equity, with some bond-specific sections:
+Bonds follow a similar creation process to Equity, with some bond-specific sections.
 
-**Steps 1-2**: Same as Equity (Basic Information, Digital Security Permissions & Configuration)
+#### Shared Steps
 
-**Bond-Specific Details**:
+**Steps 1-2:** Same as Equity
 
-- **Start Date**: When the bond begins accruing interest
-- Example: `2025-01-01`
-- Interest calculations start from this date
+- Basic Information
+- Digital Security Permissions
+- Digital Security Configuration
 
-- **Maturity Date**: When the bond expires and principal is due
-- Bondholders receive final payment on this date
-- Must be after Start Date
+#### Bond-Specific Configuration
 
-**Step 3: Proceed Recipients** (Bond-specific):
+**Start & Maturity Dates:**
 
-**What are Proceed Recipients?**
-Authorized accounts that receive the capital raised from bond sales. When investors buy your bonds, the funds are sent to these designated recipients.
+| Field             | Example      | Description                                                           |
+| ----------------- | ------------ | --------------------------------------------------------------------- |
+| **Start Date**    | `2025-01-01` | When the bond begins accruing interest                                |
+| **Maturity Date** | `2026-01-01` | When the bond expires and principal is due (must be after Start Date) |
 
-- **Why it's needed**:
-  - Ensures bond proceeds go to legitimate recipients
-  - Provides transparency about fund distribution
-  - Enables multiple recipients (e.g., issuer, underwriters, escrow)
+---
 
-- **How to configure**:
-  1. Click **"Add Proceed Recipient"**
+#### Proceed Recipients (Bond-Specific)
 
-  2. **Fill Form**:
-     - **Address**: Hedera Account ID that will receive funds
-       - Example: `0.0.xxx` (your treasury account)
-     - **Data**: Optional metadata (hex format)
-       - Example: `0x` (empty) or `0x1234abcd` (custom data)
+> **What are Proceed Recipients?** Authorized accounts that receive the capital raised from bond sales.
 
-  **Use Cases**:
-  - **Single Recipient**: Send all proceeds to company treasury
-  - **Multiple Recipients**: Split proceeds among stakeholders
-  - **Escrow Account**: Hold proceeds until conditions met
+**Why it's needed:**
 
-  **Important Notes**:
-  - ⚠️ At least one Proceed Recipient recommended
-  - Can be modified after deployment
-  - Only accounts with `PROCEED_RECIPIENT_MANAGER_ROLE` can modify
-  - Actual fund distribution requires integration with payment system
+- Ensures bond proceeds go to legitimate recipients
+- Provides transparency about fund distribution
+- Enables multiple recipients (issuer, underwriters, escrow)
 
-**Steps 7-10**: Same as Equity (External Lists, ERC3643, Regulation, Review & Create)
+**How to configure:**
+
+1. Click **"Add Proceed Recipient"**
+2. Fill in the form:
+
+| Field       | Example              | Description                                                             |
+| ----------- | -------------------- | ----------------------------------------------------------------------- |
+| **Address** | `0.0.xxx`            | Hedera Account ID that will receive funds (e.g., your treasury account) |
+| **Data**    | `0x` or `0x1234abcd` | Optional metadata in hex format                                         |
+
+**Use Cases:**
+
+- **Single Recipient:** Send all proceeds to company treasury
+- **Multiple Recipients:** Split proceeds among stakeholders
+- **Escrow Account:** Hold proceeds until conditions met
+
+---
+
+**Remaining Steps:** Same as Equity
+
+- Step 7: External Lists
+- Step 8: ERC3643
+- Step 9: Regulation
+- Step 10: Review & Create
 
 ---
 
 ## 5. Understanding Roles
+
+Roles define permissions and access control for your security token. Understanding these roles is crucial for proper token management.
 
 ### Core Roles in ATS
 
 | Role                               | Description         | Key Permissions                           |
 | ---------------------------------- | ------------------- | ----------------------------------------- |
 | **DEFAULT_ADMIN_ROLE**             | Super admin         | Grant/revoke any role, full control       |
-| **MINTER_ROLE**                    | Can mint tokens     | Issue new tokens to addresses             |
-| **BURNER_ROLE**                    | Can burn tokens     | Destroy tokens from addresses             |
-| **PAUSER_ROLE**                    | Emergency control   | Pause/unpause all operations              |
+| **MINTER_ROLE**                    | Token minter        | Issue new tokens to addresses             |
+| **BURNER_ROLE**                    | Token burner        | Destroy tokens from addresses             |
+| **PAUSER_ROLE**                    | ⏸Emergency control | Pause/unpause all operations              |
 | **KYC_ROLE**                       | KYC manager         | Grant/revoke KYC status                   |
 | **CONTROL_LIST_ROLE**              | Blacklist manager   | Add/remove from control list              |
 | **SNAPSHOT_ROLE**                  | Snapshot creator    | Create balance snapshots                  |
@@ -388,139 +529,172 @@ Authorized accounts that receive the capital raised from bond sales. When invest
 | **SSI_MANAGER_ROLE**               | SSI management      | Manage trusted issuers                    |
 | **INTERNAL_KYC_MANAGER_ROLE**      | Internal KYC toggle | Activate/deactivate internal KYC          |
 | **CLEARING_ROLE**                  | Clearing operations | Manage clearing mode                      |
-| **CLEARING_VALIDATOR_ROLE**        | Validate clearing   | Approve/cancel clearing ops               |
+| **CLEARING_VALIDATOR_ROLE**        | Validate clearing   | Approve/cancel clearing operations        |
 | **PROCEED_RECIPIENT_MANAGER_ROLE** | Proceed recipients  | Add/remove/update bond proceed recipients |
 
-### Role Hierarchy
+---
+
+### 📊 Role Hierarchy
 
 ```
-DEFAULT_ADMIN_ROLE (you, as creator)
-├─ Can grant any role to anyone
-├─ Full control over token
-└─ Cannot be revoked by others
+DEFAULT_ADMIN_ROLE (you, as token creator)
+├─ ✅ Can grant any role to anyone
+├─ ✅ Full control over token
+└─ 🔒 Cannot be revoked by others
 ```
 
-**Important**: As the token creator, you automatically have `DEFAULT_ADMIN_ROLE`.
+As the token creator, you automatically receive `DEFAULT_ADMIN_ROLE`.
 
 ---
 
 ## 6. Managing Roles
 
+Learn how to grant and revoke roles for your security token.
+
 ### View Current Roles
 
-1. Go to your token's detail page
-2. Click **"Roles"** tab
-3. See all accounts and their roles
-
-### Grant a Role to an Account
-
-1. **Navigate**: Token Detail → **Roles** tab
-2. Click **"Add Role"**
-3. **Fill Form**:
-   - **Account ID**: `0.0.1234567` (Hedera account to grant role)
-   - **Role**: Select from dropdown (e.g., `MINTER_ROLE`)
-4. Click **"Grant"**
-5. Sign transaction in MetaMask
-
-### Revoke a Role
-
-1. **Navigate**: Token Detail → **Roles** tab
-2. Find the account in the list
-3. Click **trash icon** next to the role
-4. Confirm revocation
-5. Sign transaction
-
-### Best Practices
-
-- **Don't give DEFAULT_ADMIN_ROLE** to others unless absolutely necessary
-- **Use specific roles** instead of admin (principle of least privilege)
-- **Grant KYC_ROLE** to team members who handle KYC
-- **Grant CORPORATE_ACTION_ROLE** to finance team for dividends
-- **Keep PAUSER_ROLE** for emergency situations
+1. Navigate to your token's detail page
+2. Click the **"Roles"** tab
+3. View all accounts and their assigned roles
 
 ---
 
-## 7. KYC Management (2 Approaches)
+### Grant a Role to an Account
 
-You have **three ways** to manage KYC. Choose based on your needs:
+**Steps:**
 
-### Approach 1: External KYC List
+1. **Navigate**: Token Detail → **Roles** tab
+2. Click **"Add Role"**
+3. **Fill in the form**:
 
-**Best for**: Quick testing, shared KYC across tokens
+   | Field          | Example       | Description                        |
+   | -------------- | ------------- | ---------------------------------- |
+   | **Account ID** | `0.0.1234567` | Hedera account to receive the role |
+   | **Role**       | `MINTER_ROLE` | Select from dropdown menu          |
+
+4. Click **"Grant"**
+5. **Sign transaction** in MetaMask
+
+---
+
+### Revoke a Role
+
+**Steps:**
+
+1. **Navigate**: Token Detail → **Roles** tab
+2. Find the account in the roles list
+3. Remove the role
+4. Confirm revocation in the modal
+5. **Sign transaction** in MetaMask
+
+---
+
+### Best Practices
+
+Follow these guidelines for secure role management:
+
+| Practice                         | Recommendation                                   |
+| -------------------------------- | ------------------------------------------------ |
+| **DEFAULT_ADMIN_ROLE**           | Don't give to others unless absolutely necessary |
+| **Principle of Least Privilege** | Use specific roles instead of admin              |
+| **KYC_ROLE**                     | Grant to team members who handle KYC             |
+| **CORPORATE_ACTION_ROLE**        | Grant to finance team for dividends              |
+| **PAUSER_ROLE**                  | Keep for emergency situations only               |
+
+---
+
+## 7. KYC Management
+
+Know Your Customer (KYC) is essential for regulatory compliance. ATS offers two flexible approaches for KYC management.
+
+### External KYC List
 
 #### Step 1: Create External KYC Contract
 
-1. Navigate to **"External KYC"** in main menu
+1. Navigate to **"External KYC"** in the main menu
 2. Click **"Create New External KYC"**
-3. Add Account ID (of yourself or other account)
-4. Note the contract ID (`0.0.xxx`)
+3. Add your Account ID (or another account's ID)
+4. **Save the contract ID** (format: `0.0.xxx`)
+
+---
 
 #### Step 2: Grant KYC to Accounts
 
-1. In External KYC page, select your contract
+1. In the External KYC page, select your contract
 2. Click **"Add Account"**
-3. Enter **Account ID of external KYC contract**: `0.0.xxx`
+3. Enter the **Account ID** of the account to KYC: `0.0.xxx`
 4. Click **"Grant KYC"**
-5. Sign transaction
+5. **Sign transaction** in your wallet
 
-**That's it!** No VC files, no complex setup.
+---
 
 #### Step 3: Link to Your Token
 
 1. Go to your token's detail page
-2. Navigate to **"External KYC" tab**
+2. Navigate to the **"External KYC"** tab
 3. Click **"Add External KYC"**
-4. Select your external KYC contract
+4. Select your external KYC contract from the dropdown
 5. Click **"Add"**
-6. Sign transaction
+6. **Sign transaction**
 
-Now any account KYC'd in that external contract is KYC'd for your token!
+> **🎉 Success!** Any account KYC'd in that external contract is now KYC'd for your token.
 
 ---
 
-### Approach 2: Internal KYC with VC Files
+### Internal KYC with VC Files
 
-**Best for**: Token-specific KYC, testing SSI features
+#### Step 1: Enable Internal KYC
 
-#### Step 1: Enable Internal KYC (if not already done during Token creation)
+If you didn't enable Internal KYC during token creation:
 
-1. Go to token detail → **"Danger Zone"**
+1. Go to token detail → **"Danger Zone"** tab
 2. Toggle **"Internal KYC"** to **Active**
+3. Sign the transaction
+
+---
 
 #### Step 2: Add Yourself as SSI Issuer
 
-**What is an SSI Manager/Issuer?**
+<details>
+<summary><strong>📚 What is an SSI Manager/Issuer?</strong></summary>
 
-The **SSI Manager** manages the list of **trusted issuers** - entities authorized to sign Verifiable Credentials (VCs) that your token will accept for KYC purposes. Think of it like a whitelist of "trusted KYC providers."
+The **SSI Manager** manages a list of **trusted issuers** - entities authorized to sign Verifiable Credentials (VCs) that your token accepts for KYC. Think of it as a whitelist of "trusted KYC providers."
+
+**Roles:**
 
 - **SSI Manager Role** (`SSI_MANAGER_ROLE`): Can add/remove trusted issuers
 - **Issuer**: An account that signs Verifiable Credentials
-  - Can be you (self-issued KYC)
-  - Can be a KYC service (Onfido, Jumio, etc.)
-  - Can be a financial institution (bank, broker)
-  - Can be a regulatory authority
 
-    **Why add yourself as an issuer?**
+**Who can be an issuer?**
 
-  - For testing/development, you can issue VCs to yourself and others
-  - Acts as your own "KYC authority"
-  - In production, you'd add legitimate KYC providers instead
+- You (self-issued KYC for testing)
+- KYC service providers (Onfido, Jumio, etc.)
+- Financial institutions (banks, brokers)
+- Regulatory authorities
 
-**How to add:**
+**Why add yourself as an issuer?**
 
-1. Make sure you have assigned yourself the SSI Role under 'Roles'
-2. Go to token detail → **"SSI Manager" tab**
+- For testing/development, you can issue VCs to yourself and others
+- Acts as your own "KYC authority"
+- In production, you'd add legitimate KYC providers instead
+</details>
+
+**How to add yourself as an issuer:**
+
+1. Ensure you have **SSI_MANAGER_ROLE** (assign under **'Roles'** tab)
+2. Go to token detail → **"SSI Manager"** tab
 3. Click **"Add Issuer"**
 4. Enter your **Hedera Account ID**: `0.0.xxx` (the account that will sign VCs)
-5. Click **"Add"**
+5. Click **"Add"** and sign transaction
 
-Now your account is authorized to issue Verifiable Credentials that this token will trust for KYC.
+---
 
 #### Step 3: Generate VC Files
 
-**What is a VC (Verifiable Credential)?**
+<details>
+<summary><strong>📚 What is a VC (Verifiable Credential)?</strong></summary>
 
-A **Verifiable Credential (VC)** is a cryptographically signed digital certificate that proves someone has been KYC'd. It's like a digital passport for identity verification.
+A **Verifiable Credential (VC)** is a cryptographically signed digital certificate that proves someone has been KYC'd. Think of it as a digital passport for identity verification.
 
 **VC File Structure:**
 
@@ -534,21 +708,12 @@ A **Verifiable Credential (VC)** is a cryptographically signed digital certifica
   "proof": {
     "proofValue": "0x123abc..." // Cryptographic signature
   },
-  "validFrom": "2025-01-01", // Valid period
-  "validUntil": "2026-12-31"
+  "validFrom": "2025-01-01", // Valid period start
+  "validUntil": "2026-12-31" // Valid period end
 }
 ```
 
-**Why use VC files?**
-
-- **Portable**: Same VC works across multiple tokens
-- **Privacy**: No need to store PII on-chain
-- **Verifiable**: Cryptographically signed, can't be forged
-- **Standard**: Based on W3C Verifiable Credentials standard
-
-**Generating VC Files:**
-
-For each user you want to KYC:
+**Generate VC files for each user:**
 
 ```bash
 cd packages/ats/contracts
@@ -558,7 +723,7 @@ npx hardhat createVC \
   --privatekey YOUR_PRIVATE_KEY
 ```
 
-**Example**:
+**Example:**
 
 ```bash
 npx hardhat createVC \
@@ -566,143 +731,198 @@ npx hardhat createVC \
   --privatekey 0x0caafdc84d59392c19xxxxxxxxxx
 ```
 
-This creates: `vc_64958c5a7eab82xxxxxxxx.vc` (in the `/contracts` directory)
+**Output:** Creates `vc_64958c5a7eab82xxxxxxxx.vc` in the `/contracts` directory
+
+---
 
 #### Step 4: Grant KYC via UI
 
-1. Go to token detail → **"KYC" tab**
+1. Go to token detail → **"KYC"** tab
 2. Click **"Add"** button
-3. **Fill Form**:
-   - **Account ID**: `0.0.1234567`
-   - **VC File**: Upload the `.vc` file you generated
+3. **Fill in the form**:
+
+   | Field          | Example       | Description                  |
+   | -------------- | ------------- | ---------------------------- |
+   | **Account ID** | `0.0.1234567` | Hedera account to grant KYC  |
+   | **VC File**    | Upload file   | The `.vc` file you generated |
+
 4. Click **"Create"**
-5. Sign transaction
+5. **Sign transaction**
+
+The account is now KYC'd for your token.
 
 ---
 
 ## 8. Token Operations
 
+Perform common operations on your security token.
+
 ### Minting Tokens
 
-**Requirement**: Must have `MINTER_ROLE`
+> **Requirement**: Must have `MINTER_ROLE`
 
-1. Token detail → Operations tab -> Click **"Mint"**
-2. **Fill Form**:
-   - **To Account**: `0.0.1234567`
-   - **Amount**: `1000`
+**Steps:**
+
+1. Token detail → **Operations** tab → Click **"Mint"**
+2. **Fill in the form**:
+
+   | Field          | Example       | Description                      |
+   | -------------- | ------------- | -------------------------------- |
+   | **To Account** | `0.0.1234567` | Hedera account to receive tokens |
+   | **Amount**     | `1000`        | Number of tokens to mint         |
+
 3. Click **"Mint"**
-4. Sign transaction
+4. **Sign transaction**
+
+---
 
 ### Force Transfer Tokens
 
-**Requirements**:
+> **Requirements**: Sender and receiver must be KYC'd, token not paused, must have `CONTROLLER_ROLE`
 
-- Sender must be KYC'd
-- Receiver must be KYC'd
-- Token not paused
+**Steps:**
 
-1. As a token holder, go to token page
-2. Operations tab -> Click **"Force Transfer"**
-3. **Fill Form**:
-   - **Source**: `0.0.xxx`
-   - **Destination**: `0.0.xxx`
-   - **Amount**: `100`
+1. Go to token detail page
+2. **Operations** tab → Click **"Force Transfer"**
+3. **Fill in the form**:
+
+   | Field           | Example   | Description                  |
+   | --------------- | --------- | ---------------------------- |
+   | **Source**      | `0.0.xxx` | Account to transfer from     |
+   | **Destination** | `0.0.xxx` | Account to transfer to       |
+   | **Amount**      | `100`     | Number of tokens to transfer |
+
 4. Click **"Transfer"**
-5. Sign transaction
+5. **Sign transaction**
+
+---
 
 ### Force Redeem Tokens
 
-1. As a token holder, go to token page
-2. Operations tab -> Click **"Force Redeem"**
-3. **Fill Form**:
-   - **Source**: `0.0.xxx`
-   - **Amount**: `100`
+> **Requirement**: Must have `CONTROLLER_ROLE`
+
+**Steps:**
+
+1. Go to token detail page
+2. **Operations** tab → Click **"Force Redeem"**
+3. **Fill in the form**:
+
+   | Field      | Example   | Description                   |
+   | ---------- | --------- | ----------------------------- |
+   | **Source** | `0.0.xxx` | Account to redeem tokens from |
+   | **Amount** | `100`     | Number of tokens to redeem    |
+
 4. Click **"Redeem"**
-5. Sign transaction
+5. **Sign transaction**
+
+---
 
 ### Pausing Operations
 
-**Requirement**: Must have `PAUSER_ROLE`
+> **Requirement**: Must have `PAUSER_ROLE`
 
-1. Token detail → **"Danger Zone"**
+**Emergency pause all token operations:**
+
+1. Token detail → **"Danger Zone"** tab
 2. Toggle **"Pause Security Token"** to **Active**
-3. All transfers/operations are now blocked
-4. Toggle back to **Inactive** to resume
+3. **Sign transaction**
+
+> **⚠️ Warning**: All transfers and operations are now blocked.
+
+**To resume operations:**
+
+1. Toggle back to **Inactive**
+2. **Sign transaction**
 
 ---
 
 ## 9. Corporate Actions
 
-1. Token detail → **"Corporate Actions" tab**
-2. See all dividends/coupons
-3. View status, dates, and amounts
-4. Check holders affected
+View and manage dividends and coupons for your security token.
+
+### View Corporate Actions
+
+1. Navigate to token detail → **"Corporate Actions"** tab
+2. **See all corporate actions** including:
+   - Dividends (for equity tokens)
+   - Coupons (for bond tokens)
+3. **View details** for each action:
+   - Status (pending, executed, cancelled)
+   - Payment dates
+   - Distribution amounts
+   - Number of holders affected
 
 ---
 
-## 10 Troubleshooting
+## 10. Troubleshooting
+
+Common issues and their solutions.
 
 ### Common Issues
 
+---
+
 #### "The selected Account in Metamask is not a Hedera account"
 
-**Problem**: MetaMask account not recognized as Hedera account
+**Problem:** MetaMask account not recognized as Hedera account
 
-**Solution**:
+**Solution:**
 
-1. Create ECDSA account on [Hedera Portal](https://portal.hedera.com/)
-2. Export private key
-3. Import to MetaMask
-4. Switch MetaMask to Hedera Testnet (Chain ID 296)
+1. Create an **ECDSA account** on [Hedera Portal](https://portal.hedera.com/)
+2. **Export private key** from Hedera Portal
+3. **Import to MetaMask** using the private key
+4. **Switch to Hedera Testnet** network (Chain ID: 296)
+
+---
 
 #### "Contract Not Found" or "Invalid Contract"
 
-**Problem**: Web app pointing to wrong contract addresses
+**Problem:** Web app pointing to wrong contract addresses
 
-**Solution**:
+**Solution:**
 
-1. Check `deployed-contracts.json` for correct addresses: Web App needs Factory Contract (NOT Proxy!) and Resolver Proxy Contract.
-2. Update `apps/ats/web/.env`:
+1. **Check** `packages/ats/contracts/deployed-contracts.json` for correct addresses
+   - Web app needs: **Factory Contract** (NOT Proxy!) and **Resolver Proxy Contract**
+2. **Update** `apps/ats/web/.env`:
    ```bash
    REACT_APP_RPC_RESOLVER='0.0.CORRECT_ID'
    REACT_APP_RPC_FACTORY='0.0.CORRECT_ID'
    ```
-3. Restart web app: `npm run dev`
-
-#### "Insufficient HBAR Balance"
-
-**Problem**: Not enough HBAR for gas fees
-
-**Solution**:
-
-1. Go to [Hedera Portal](https://portal.hedera.com/)
-2. Request testnet HBAR (free)
-3. Wait for funds to arrive (~1 minute)
-
-#### "KYC Not Granted" Error During Transfer
-
-**Problem**: Either sender or receiver not KYC'd
-
-**Solution**:
-
-1. Check KYC status in token's "KYC" tab
-2. Grant KYC to both parties
-3. Retry transfer
-
-#### Bond/Equity Creation Fails
-
-**Problem**: Multiple possible causes
-
-**Solutions**:
-
-- Ensure sufficient HBAR balance (>$10 HBAR recommended)
-- Check all required fields filled
-- Verify contract addresses in `.env` are correct
-- Check browser console for detailed errors
+3. **Restart** web app:
+   ```bash
+   cd apps/ats/web
+   npm run dev
+   ```
 
 ---
 
-## Quick Reference Commands
+#### "Insufficient HBAR Balance"
+
+**Problem:** Not enough HBAR for gas fees
+
+**Solution:**
+
+1. Go to [Hedera Portal](https://portal.hedera.com/)
+2. **Request testnet HBAR** (free)
+3. **Wait** for funds to arrive (~1 minute)
+
+---
+
+#### "KYC Not Granted" Error During Transfer
+
+**Problem:** Either sender or receiver not KYC'd
+
+**Solution:**
+
+1. **Check KYC status** in token's **"KYC"** tab
+2. **Grant KYC** to both sender and receiver
+3. **Retry transfer**
+
+---
+
+## 📌 Quick Reference Commands
+
+Handy commands for common tasks.
 
 ### Contract Deployment
 
@@ -711,11 +931,16 @@ cd packages/ats/contracts
 npx hardhat deployAll --use-deployed false --network testnet
 ```
 
+---
+
 ### Generate VC File
 
 ```bash
+cd packages/ats/contracts
 npx hardhat createVC --holder 0xUSER_ADDRESS --privatekey 0xYOUR_KEY
 ```
+
+---
 
 ### Start Web App
 
@@ -723,6 +948,8 @@ npx hardhat createVC --holder 0xUSER_ADDRESS --privatekey 0xYOUR_KEY
 cd apps/ats/web
 npm run dev
 ```
+
+---
 
 ### Check Deployed Contracts
 
@@ -733,4 +960,12 @@ cat deployed-contracts.json | jq
 
 ---
 
-_Last Updated: 2025-11-05_
+### Additional Resources
+
+- [Official ATS Documentation](https://docs.hedera.com/hedera/open-source-solutions/asset-tokenization-studio-ats/web-user-interface-ui)
+- [Hedera Portal](https://portal.hedera.com/)
+- [Hedera Testnet Explorer](https://hashscan.io/testnet)
+
+---
+
+_Last Updated: 2025-11-06_
