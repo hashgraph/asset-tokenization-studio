@@ -17,25 +17,21 @@ import {
     Signer,
     providers,
 } from 'ethers'
-import {
-    ProxyAdmin,
-    ProxyAdmin__factory,
-    TransparentUpgradeableProxy,
-    TransparentUpgradeableProxy__factory,
-} from '@contract-types'
+import { ProxyAdmin, TransparentUpgradeableProxy } from '@contract-types'
 import {
     DEFAULT_TRANSACTION_TIMEOUT,
     debug,
     deployContract,
     deployProxyAdmin,
+    deployTransparentProxy,
     error as logError,
     extractRevertReason,
     formatGasUsage,
+    GAS_LIMIT,
     info,
     section,
     success,
     validateAddress,
-    verifyDeployedContract,
     waitForTransaction,
 } from '@scripts/infrastructure'
 
@@ -47,16 +43,14 @@ export interface DeployProxyOptions {
     implementationFactory: ContractFactory
     /** Constructor arguments for implementation */
     implementationArgs?: unknown[]
-    /** Optional existing implementation address (skips deployment) */
-    implementationAddress?: string
-    /** Optional existing ProxyAdmin address (skips deployment) */
-    proxyAdminAddress?: string
+    /** Optional existing implementation contract instance (skips deployment) */
+    existingImplementation?: Contract
+    /** Optional existing ProxyAdmin contract instance (skips deployment) */
+    existingProxyAdmin?: ProxyAdmin
     /** Initialization data to pass to proxy */
     initData?: string
-    /** Transaction overrides */
+    /** Transaction overrides (applies only to implementation deployment) */
     overrides?: Overrides
-    /** Verify existing contracts have code */
-    verify?: boolean
 }
 
 /**
@@ -87,9 +81,14 @@ export interface DeployProxyResult {
  * Deploy a transparent upgradeable proxy with implementation and ProxyAdmin.
  *
  * This operation handles three deployments:
- * 1. Implementation contract (or uses existing address)
- * 2. ProxyAdmin contract (or uses existing address)
- * 3. TransparentUpgradeableProxy pointing to implementation
+ * 1. Implementation contract (or uses existing instance)
+ * 2. ProxyAdmin contract (or uses existing instance) - always uses GAS_LIMIT.default
+ * 3. TransparentUpgradeableProxy pointing to implementation - always uses GAS_LIMIT.default
+ *
+ * **Gas Limit Strategy**:
+ * - Implementation: Uses custom `overrides` parameter for complex contracts
+ * - ProxyAdmin: Always uses GAS_LIMIT.default (3M gas)
+ * - TransparentUpgradeableProxy: Always uses GAS_LIMIT.default (3M gas)
  *
  * @param signer - Ethers.js signer
  * @param options - Proxy deployment options
@@ -100,13 +99,24 @@ export interface DeployProxyResult {
  * ```typescript
  * import { ethers } from 'hardhat'
  * import { BusinessLogicResolver__factory } from '@contract-types'
+ * import { deployProxy } from '@scripts/infrastructure'
  *
  * const signer = (await ethers.getSigners())[0]
- * const factory = BusinessLogicResolver__factory.connect(signer)
+ * const factory = new BusinessLogicResolver__factory(signer)
  *
+ * // Deploy new proxy with all new contracts
  * const result = await deployProxy(signer, {
  *   implementationFactory: factory,
  *   implementationArgs: [],
+ *   initData: '0x',
+ *   overrides: { gasLimit: 10_000_000 } // Only affects implementation
+ * })
+ *
+ * // Reuse existing contracts
+ * const result2 = await deployProxy(signer, {
+ *   implementationFactory: factory,
+ *   existingImplementation: result.implementation,
+ *   existingProxyAdmin: result.proxyAdmin,
  *   initData: '0x',
  * })
  *
@@ -122,11 +132,10 @@ export async function deployProxy(
     const {
         implementationFactory,
         implementationArgs = [],
-        implementationAddress: existingImplAddress,
-        proxyAdminAddress: existingProxyAdminAddress,
+        existingImplementation,
+        existingProxyAdmin,
         initData = '0x',
         overrides = {},
-        verify = false,
     } = options
 
     const deployOverrides: Overrides = { ...overrides }
@@ -140,28 +149,14 @@ export async function deployProxy(
     try {
         section(`Deploying Proxy for ${implementationContract}`)
 
-        // Step 1: Deploy or verify implementation
+        // Step 1: Deploy or use existing implementation
         let implementationAddress: string
         let implementation: Contract
 
-        if (existingImplAddress) {
-            info(`Using existing implementation at ${existingImplAddress}`)
-            implementationAddress = existingImplAddress
-
-            if (verify) {
-                const exists = await verifyDeployedContract(
-                    signer.provider!,
-                    implementationAddress,
-                    implementationContract
-                )
-                if (!exists) {
-                    throw new Error(
-                        `No contract found at implementation address ${implementationAddress}`
-                    )
-                }
-            }
-
-            implementation = implementationFactory.attach(implementationAddress)
+        if (existingImplementation) {
+            implementation = existingImplementation
+            implementationAddress = implementation.address
+            info(`Using existing implementation at ${implementationAddress}`)
         } else {
             info(`Deploying implementation: ${implementationContract}`)
             const implResult = await deployContract(implementationFactory, {
@@ -192,31 +187,19 @@ export async function deployProxy(
 
         validateAddress(implementationAddress, 'implementation address')
 
-        // Step 2: Deploy or verify ProxyAdmin
+        // Step 2: Deploy or use existing ProxyAdmin
         let proxyAdminAddress: string
         let proxyAdmin: ProxyAdmin
 
-        if (existingProxyAdminAddress) {
-            info(`Using existing ProxyAdmin at ${existingProxyAdminAddress}`)
-            proxyAdminAddress = existingProxyAdminAddress
-
-            if (verify) {
-                const exists = await verifyDeployedContract(
-                    signer.provider!,
-                    proxyAdminAddress,
-                    'ProxyAdmin'
-                )
-                if (!exists) {
-                    throw new Error(
-                        `No contract found at ProxyAdmin address ${proxyAdminAddress}`
-                    )
-                }
-            }
-
-            proxyAdmin = ProxyAdmin__factory.connect(proxyAdminAddress, signer)
+        if (existingProxyAdmin) {
+            proxyAdmin = existingProxyAdmin
+            proxyAdminAddress = proxyAdmin.address
+            info(`Using existing ProxyAdmin at ${proxyAdminAddress}`)
         } else {
             info('Deploying ProxyAdmin')
-            proxyAdmin = await deployProxyAdmin(signer, deployOverrides)
+            proxyAdmin = await deployProxyAdmin(signer, {
+                gasLimit: GAS_LIMIT.default,
+            })
             proxyAdminAddress = proxyAdmin.address
 
             // Get receipt if available
@@ -231,38 +214,29 @@ export async function deployProxy(
         validateAddress(proxyAdminAddress, 'ProxyAdmin address')
 
         // Step 3: Deploy TransparentUpgradeableProxy
-        info('Deploying TransparentUpgradeableProxy')
-        debug(`Implementation: ${implementationAddress}`)
-        debug(`ProxyAdmin: ${proxyAdminAddress}`)
-        debug(`Init data: ${initData}`)
-
-        const proxy = await new TransparentUpgradeableProxy__factory(
-            signer
-        ).deploy(
+        const proxy = await deployTransparentProxy(
+            signer,
             implementationAddress,
             proxyAdminAddress,
-            initData,
-            deployOverrides
+            initData
         )
 
-        await proxy.deployed()
+        // Get receipt if available
+        if (proxy.deployTransaction) {
+            const proxyReceipt = await waitForTransaction(
+                proxy.deployTransaction,
+                1,
+                DEFAULT_TRANSACTION_TIMEOUT
+            )
 
-        info(`Proxy transaction sent: ${proxy.deployTransaction.hash}`)
+            receipts.proxy = proxyReceipt
 
-        const proxyReceipt = await waitForTransaction(
-            proxy.deployTransaction,
-            1,
-            DEFAULT_TRANSACTION_TIMEOUT
-        )
-
-        receipts.proxy = proxyReceipt
-        validateAddress(proxy.address, 'proxy address')
-
-        const gasUsed = formatGasUsage(
-            proxyReceipt,
-            proxy.deployTransaction.gasLimit
-        )
-        debug(gasUsed)
+            const gasUsed = formatGasUsage(
+                proxyReceipt,
+                proxy.deployTransaction.gasLimit
+            )
+            debug(gasUsed)
+        }
 
         success(`Proxy deployment complete`)
         info(`  Proxy:          ${proxy.address}`)
@@ -292,46 +266,48 @@ export async function deployProxy(
  * for all proxies to save gas and simplify management.
  *
  * @param signer - Ethers.js signer
- * @param proxies - Array of proxy deployment options (without proxyAdminAddress)
- * @param sharedProxyAdminAddress - Optional existing ProxyAdmin to reuse
+ * @param proxies - Array of proxy deployment options (without existingProxyAdmin)
+ * @param sharedProxyAdmin - Optional existing ProxyAdmin instance to reuse
  * @returns Array of deployment results
  *
  * @example
  * ```typescript
  * import { BusinessLogicResolver__factory, Factory__factory } from '@contract-types'
+ * import { deployMultipleProxies } from '@scripts/infrastructure'
  *
  * const signer = (await ethers.getSigners())[0]
  * const results = await deployMultipleProxies(signer, [
- *   { implementationFactory: BusinessLogicResolver__factory.connect(signer), initData: '0x' },
- *   { implementationFactory: Factory__factory.connect(signer), initData: '0x' }
+ *   { implementationFactory: new BusinessLogicResolver__factory(signer), initData: '0x' },
+ *   { implementationFactory: new Factory__factory(signer), initData: '0x' }
  * ])
  * ```
  */
 export async function deployMultipleProxies(
     signer: Signer,
-    proxies: Omit<DeployProxyOptions, 'proxyAdminAddress'>[],
-    sharedProxyAdminAddress?: string
+    proxies: Omit<DeployProxyOptions, 'existingProxyAdmin'>[],
+    sharedProxyAdmin?: ProxyAdmin
 ): Promise<DeployProxyResult[]> {
     const results: DeployProxyResult[] = []
 
-    // Deploy or get shared ProxyAdmin
-    let proxyAdminAddress: string
+    // Deploy or use shared ProxyAdmin
+    let proxyAdmin: ProxyAdmin
 
-    if (sharedProxyAdminAddress) {
-        info(`Using shared ProxyAdmin at ${sharedProxyAdminAddress}`)
-        proxyAdminAddress = sharedProxyAdminAddress
+    if (sharedProxyAdmin) {
+        proxyAdmin = sharedProxyAdmin
+        info(`Using shared ProxyAdmin at ${proxyAdmin.address}`)
     } else {
         info('Deploying shared ProxyAdmin for all proxies')
-        const proxyAdmin = await deployProxyAdmin(signer)
-        proxyAdminAddress = proxyAdmin.address
-        success(`Shared ProxyAdmin deployed at ${proxyAdminAddress}`)
+        proxyAdmin = await deployProxyAdmin(signer, {
+            gasLimit: GAS_LIMIT.default,
+        })
+        success(`Shared ProxyAdmin deployed at ${proxyAdmin.address}`)
     }
 
     // Deploy all proxies with shared ProxyAdmin
     for (const proxyOptions of proxies) {
         const result = await deployProxy(signer, {
             ...proxyOptions,
-            proxyAdminAddress,
+            existingProxyAdmin: proxyAdmin,
         })
         results.push(result)
     }

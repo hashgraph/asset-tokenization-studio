@@ -10,7 +10,7 @@
  */
 
 import { Signer } from 'ethers'
-import { Factory__factory } from '@contract-types'
+import { Factory__factory, ProxyAdmin } from '@contract-types'
 import {
     DeployProxyResult,
     deployProxy,
@@ -27,8 +27,8 @@ export interface DeployFactoryOptions {
     /** BLR address (required for Factory initialization) */
     blrAddress?: string
 
-    /** ProxyAdmin address (optional, will deploy new one if not provided) */
-    proxyAdminAddress?: string
+    /** Existing ProxyAdmin contract instance (optional, will deploy new one if not provided) */
+    existingProxyAdmin?: ProxyAdmin
 
     /** Whether to initialize after deployment */
     initialize?: boolean
@@ -86,7 +86,7 @@ export async function deployFactory(
     signer: Signer,
     options: DeployFactoryOptions = {}
 ): Promise<DeployFactoryResult> {
-    const { proxyAdminAddress } = options
+    const { existingProxyAdmin } = options
 
     section('Deploying Factory')
 
@@ -100,7 +100,7 @@ export async function deployFactory(
         const proxyResult = await deployProxy(signer, {
             implementationFactory,
             implementationArgs: [],
-            proxyAdminAddress,
+            existingProxyAdmin,
             initData: '0x', // Factory is stateless, no initialization needed
         })
 
@@ -141,29 +141,31 @@ export async function deployFactory(
  *
  * @param signer - Ethers.js signer for deploying contracts
  * @param blrAddress - BLR address for initialization
- * @param proxyAdminAddress - Existing ProxyAdmin address
+ * @param existingProxyAdmin - Existing ProxyAdmin contract instance
  * @returns Deployment result
  *
  * @example
  * ```typescript
  * import { ethers } from 'ethers'
+ * import { ProxyAdmin__factory } from '@contract-types'
  *
  * const signer = provider.getSigner()
+ * const proxyAdmin = ProxyAdmin__factory.connect('0xProxyAdmin...', signer)
  * const result = await deployFactoryWithProxyAdmin(
  *   signer,
  *   '0xBLR...',
- *   '0xProxyAdmin...'
+ *   proxyAdmin
  * )
  * ```
  */
 export async function deployFactoryWithProxyAdmin(
     signer: Signer,
     blrAddress: string,
-    proxyAdminAddress: string
+    existingProxyAdmin: ProxyAdmin
 ): Promise<DeployFactoryResult> {
     return deployFactory(signer, {
         blrAddress,
-        proxyAdminAddress,
+        existingProxyAdmin,
         initialize: true,
     })
 }

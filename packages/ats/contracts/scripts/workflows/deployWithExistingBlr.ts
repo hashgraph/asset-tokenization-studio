@@ -16,6 +16,7 @@
  */
 
 import { Signer, ContractFactory } from 'ethers'
+import { ProxyAdmin__factory } from '@contract-types'
 import {
     deployFacets,
     deployProxyAdmin,
@@ -214,19 +215,20 @@ export async function deployWithExistingBlr(
     const skippedSteps: string[] = []
 
     try {
-        let proxyAdminAddress: string
+        let proxyAdmin
 
         if (existingProxyAdminAddress) {
             info('\n📋 Step 1/5: Using existing ProxyAdmin...')
             validateAddress(existingProxyAdminAddress, 'ProxyAdmin address')
-            proxyAdminAddress = existingProxyAdminAddress
-            info(`✅ ProxyAdmin: ${proxyAdminAddress}`)
+            proxyAdmin = ProxyAdmin__factory.connect(
+                existingProxyAdminAddress,
+                signer
+            )
+            info(`✅ ProxyAdmin: ${proxyAdmin.address}`)
         } else {
             info('\n📋 Step 1/5: Deploying ProxyAdmin...')
-            const proxyAdmin = await deployProxyAdmin(signer)
-
-            proxyAdminAddress = proxyAdmin.address
-            info(`✅ ProxyAdmin: ${proxyAdminAddress}`)
+            proxyAdmin = await deployProxyAdmin(signer)
+            info(`✅ ProxyAdmin: ${proxyAdmin.address}`)
         }
 
         info('\n🔷 Step 2/5: Using existing BLR...')
@@ -354,7 +356,7 @@ export async function deployWithExistingBlr(
         if (shouldDeployFactory) {
             info('\n🏭 Step 5/5: Deploying Factory...')
             factoryResult = await deployFactory(signer, {
-                proxyAdminAddress,
+                existingProxyAdmin: proxyAdmin,
             })
 
             if (!factoryResult.success) {
@@ -388,8 +390,8 @@ export async function deployWithExistingBlr(
 
             infrastructure: {
                 proxyAdmin: {
-                    address: proxyAdminAddress,
-                    contractId: await getContractId(proxyAdminAddress),
+                    address: proxyAdmin.address,
+                    contractId: await getContractId(proxyAdmin.address),
                 },
                 blr: {
                     implementation: 'N/A (External BLR)',

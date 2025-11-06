@@ -9,7 +9,7 @@
  * @module core/operations/deployContract
  */
 
-import { ContractFactory, Overrides, providers } from 'ethers'
+import { ContractFactory, Overrides } from 'ethers'
 import {
     DEFAULT_TRANSACTION_TIMEOUT,
     DeploymentResult,
@@ -167,47 +167,3 @@ export async function deployContract(
  *
  * @deprecated Use direct loop with factories
  */
-
-/**
- * Verify a deployed contract exists at an address.
- *
- * @param provider - ethers.js Provider
- * @param address - Contract address to verify
- * @param contractName - Expected contract name (optional, for logging)
- * @returns true if contract exists (has code)
- *
- * @example
- * ```typescript
- * import { ethers } from 'ethers'
- * const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
- * const exists = await verifyDeployedContract(provider, '0x123...', 'AccessControlFacet')
- * ```
- */
-export async function verifyDeployedContract(
-    provider: providers.Provider,
-    address: string,
-    contractName?: string
-): Promise<boolean> {
-    try {
-        validateAddress(address, 'contract address')
-        const code = await provider.getCode(address)
-
-        const exists = code !== '0x'
-        if (contractName) {
-            if (exists) {
-                debug(`${contractName} verified at ${address}`)
-            } else {
-                logError(`No contract found at ${address} for ${contractName}`)
-            }
-        }
-
-        return exists
-    } catch (err) {
-        if (contractName) {
-            logError(
-                `Error verifying ${contractName} at ${address}: ${extractRevertReason(err)}`
-            )
-        }
-        return false
-    }
-}

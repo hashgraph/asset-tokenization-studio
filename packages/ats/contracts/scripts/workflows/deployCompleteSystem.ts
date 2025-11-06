@@ -230,7 +230,7 @@ export async function deployCompleteSystem(
 
         info('\n🔷 Step 2/7: Deploying BusinessLogicResolver...')
         const blrResult = await deployBlr(signer, {
-            proxyAdminAddress: proxyAdmin.address,
+            existingProxyAdmin: proxyAdmin,
         })
 
         if (!blrResult.success) {
@@ -360,7 +360,7 @@ export async function deployCompleteSystem(
 
         info('\n🏭 Step 7/7: Deploying Factory...')
         const factoryResult = await deployFactory(signer, {
-            proxyAdminAddress: proxyAdmin.address,
+            existingProxyAdmin: proxyAdmin,
         })
 
         if (!factoryResult.success) {

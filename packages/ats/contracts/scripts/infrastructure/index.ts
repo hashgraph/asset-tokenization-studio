@@ -92,10 +92,7 @@ export { getNetworkConfig, getAllNetworks } from './config'
 // Operations
 // ============================================================================
 
-export {
-    deployContract,
-    verifyDeployedContract,
-} from './operations/deployContract'
+export { deployContract } from './operations/deployContract'
 export type { DeployContractOptions } from './operations/deployContract'
 
 export {
@@ -108,6 +105,8 @@ export type {
     DeployProxyOptions,
     DeployProxyResult,
 } from './operations/deployProxy'
+
+export { deployTransparentProxy } from './operations/transparentProxyDeployment'
 
 export { upgradeProxy } from './operations/upgradeProxy'
 

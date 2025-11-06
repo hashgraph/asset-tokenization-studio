@@ -10,7 +10,7 @@
  */
 
 import { Signer } from 'ethers'
-import { BusinessLogicResolver__factory } from '@contract-types'
+import { BusinessLogicResolver__factory, ProxyAdmin } from '@contract-types'
 import {
     DeployProxyResult,
     deployProxy,
@@ -18,14 +18,15 @@ import {
     info,
     section,
     success,
+    GAS_LIMIT,
 } from '@scripts/infrastructure'
 
 /**
  * Options for deploying BLR.
  */
 export interface DeployBlrOptions {
-    /** ProxyAdmin address (optional, will deploy new one if not provided) */
-    proxyAdminAddress?: string
+    /** Existing ProxyAdmin contract instance (optional, will deploy new one if not provided) */
+    existingProxyAdmin?: ProxyAdmin
 
     /** Whether to initialize after deployment */
     initialize?: boolean
@@ -82,7 +83,7 @@ export async function deployBlr(
     signer: Signer,
     options: DeployBlrOptions = {}
 ): Promise<DeployBlrResult> {
-    const { proxyAdminAddress, initialize = true } = options
+    const { existingProxyAdmin, initialize = true } = options
 
     section('Deploying BusinessLogicResolver')
 
@@ -96,8 +97,11 @@ export async function deployBlr(
         const proxyResult = await deployProxy(signer, {
             implementationFactory,
             implementationArgs: [],
-            proxyAdminAddress,
-            initData: '0x', // Will initialize separately if requested
+            existingProxyAdmin,
+            initData: '0x',
+            overrides: {
+                gasLimit: GAS_LIMIT.high,
+            },
         })
 
         const blrAddress = proxyResult.proxyAddress
