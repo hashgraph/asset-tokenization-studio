@@ -113,8 +113,11 @@ Navigate to the contracts directory and deploy all necessary contracts:
 ```bash
 cd packages/ats/contracts
 
-# Deploy all contracts
+# For testing:
 npx hardhat deployAll --use-deployed false --network testnet
+
+# For mainnet:
+npx hardhat deployAll --use-deployed false --network mainnet
 ```
 
 **What this does:**
@@ -234,7 +237,7 @@ Choose the control mechanisms for your token (select one or more):
 <details>
 <summary><strong>🚫 Blocklist</strong> - Deny-list approach</summary>
 
-**What it does:** Block specific accounts from holding/trading
+**What it does:** Block specific countries from holding/trading
 
 **Use cases:**
 
@@ -244,13 +247,13 @@ Choose the control mechanisms for your token (select one or more):
 **Behavior:**
 
 - Accounts on blocklist cannot send or receive tokens
-- More permissive: everyone allowed except blocked accounts
+- More permissive: everyone allowed except blocked countries
 </details>
 
 <details>
 <summary><strong>✅ Approval List</strong> - Allow-list approach</summary>
 
-**What it does:** Only approved accounts can hold/trade
+**What it does:** Only approved countries can hold/trade
 
 **Use cases:**
 
@@ -259,8 +262,8 @@ Choose the control mechanisms for your token (select one or more):
 
 **Behavior:**
 
-- Only accounts on approval list can participate
-- More restrictive: everyone blocked except approved accounts
+- Only countries on approval list can participate
+- More restrictive: everyone blocked except approved countries
 </details>
 
 ---
