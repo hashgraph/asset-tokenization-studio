@@ -30,15 +30,7 @@
  * @module core/types
  */
 
-import {
-    Contract,
-    ContractFactory,
-    Signer,
-    Wallet,
-    Overrides,
-    ContractReceipt,
-    providers,
-} from 'ethers'
+import { Contract, ContractFactory, Signer, Wallet, Overrides, ContractReceipt, providers } from "ethers";
 
 /**
  * Method definition with full signature and selector.
@@ -56,14 +48,14 @@ import {
  * ```
  */
 export interface MethodDefinition {
-    /** Method name (e.g., "grantRole") */
-    name: string
+  /** Method name (e.g., "grantRole") */
+  name: string;
 
-    /** Full canonical signature (e.g., "grantRole(bytes32,address)") */
-    signature: string
+  /** Full canonical signature (e.g., "grantRole(bytes32,address)") */
+  signature: string;
 
-    /** 4-byte function selector (e.g., "0x2f2ff15d") - keccak256(signature).slice(0, 10) */
-    selector: string
+  /** 4-byte function selector (e.g., "0x2f2ff15d") - keccak256(signature).slice(0, 10) */
+  selector: string;
 }
 
 /**
@@ -82,14 +74,14 @@ export interface MethodDefinition {
  * ```
  */
 export interface EventDefinition {
-    /** Event name (e.g., "RoleGranted") */
-    name: string
+  /** Event name (e.g., "RoleGranted") */
+  name: string;
 
-    /** Full canonical signature (e.g., "RoleGranted(bytes32,address,address)") */
-    signature: string
+  /** Full canonical signature (e.g., "RoleGranted(bytes32,address,address)") */
+  signature: string;
 
-    /** Topic0 hash (full 32-byte keccak256) for event filtering (e.g., "0x2f8788117e7eff1d...") */
-    topic0: string
+  /** Topic0 hash (full 32-byte keccak256) for event filtering (e.g., "0x2f8788117e7eff1d...") */
+  topic0: string;
 }
 
 /**
@@ -108,14 +100,14 @@ export interface EventDefinition {
  * ```
  */
 export interface ErrorDefinition {
-    /** Error name (e.g., "InsufficientBalance") */
-    name: string
+  /** Error name (e.g., "InsufficientBalance") */
+  name: string;
 
-    /** Full canonical signature (e.g., "InsufficientBalance(uint256,uint256)") */
-    signature: string
+  /** Full canonical signature (e.g., "InsufficientBalance(uint256,uint256)") */
+  signature: string;
 
-    /** 4-byte error selector (e.g., "0xcf479181") - keccak256(signature).slice(0, 10) */
-    selector: string
+  /** 4-byte error selector (e.g., "0xcf479181") - keccak256(signature).slice(0, 10) */
+  selector: string;
 }
 
 /**
@@ -137,37 +129,37 @@ export interface ErrorDefinition {
  * Result: 76% smaller registry, zero confusion, identical functionality.
  */
 export interface FacetDefinition {
-    /** Facet name - used for registry key, factory lookup, and logging */
-    name: string
+  /** Facet name - used for registry key, factory lookup, and logging */
+  name: string;
 
-    /** Human-readable description for documentation and developer experience */
-    description?: string
+  /** Human-readable description for documentation and developer experience */
+  description?: string;
 
-    /** Resolver key imported or defined by this facet */
-    resolverKey?: {
-        /** Resolver key name (e.g., _ACCESS_CONTROL_RESOLVER_KEY) */
-        name: string
-        /** Resolver key bytes32 value (e.g., 0x011768a41...) */
-        value: string
-    }
+  /** Resolver key imported or defined by this facet */
+  resolverKey?: {
+    /** Resolver key name (e.g., _ACCESS_CONTROL_RESOLVER_KEY) */
+    name: string;
+    /** Resolver key bytes32 value (e.g., 0x011768a41...) */
+    value: string;
+  };
 
-    /** Number of roles defined in this facet */
-    roleCount?: number
+  /** Number of roles defined in this facet */
+  roleCount?: number;
 
-    /** Inheritance chain (parent contracts/interfaces) */
-    inheritance?: string[]
+  /** Inheritance chain (parent contracts/interfaces) */
+  inheritance?: string[];
 
-    /** Public and external methods available in this facet */
-    methods?: MethodDefinition[]
+  /** Public and external methods available in this facet */
+  methods?: MethodDefinition[];
 
-    /** Events emitted by this facet */
-    events?: EventDefinition[]
+  /** Events emitted by this facet */
+  events?: EventDefinition[];
 
-    /** Custom errors defined in this facet */
-    errors?: ErrorDefinition[]
+  /** Custom errors defined in this facet */
+  errors?: ErrorDefinition[];
 
-    /** TypeChain factory constructor function for creating contract instances */
-    factory?: (signer: Signer, useTimeTravel?: boolean) => ContractFactory
+  /** TypeChain factory constructor function for creating contract instances */
+  factory?: (signer: Signer, useTimeTravel?: boolean) => ContractFactory;
 }
 
 /**
@@ -202,18 +194,18 @@ export interface FacetDefinition {
  * ```
  */
 export interface RegistryProvider {
-    /**
-     * Get facet definition by name.
-     * @param name - Facet name
-     * @returns Facet definition or undefined if not found
-     */
-    getFacetDefinition(name: string): FacetDefinition | undefined
+  /**
+   * Get facet definition by name.
+   * @param name - Facet name
+   * @returns Facet definition or undefined if not found
+   */
+  getFacetDefinition(name: string): FacetDefinition | undefined;
 
-    /**
-     * Get all facets in the registry.
-     * @returns Array of all facet definitions
-     */
-    getAllFacets(): FacetDefinition[]
+  /**
+   * Get all facets in the registry.
+   * @returns Array of all facet definitions
+   */
+  getAllFacets(): FacetDefinition[];
 }
 
 /**
@@ -224,23 +216,23 @@ export interface RegistryProvider {
  * since deployment modules already know which contracts need proxies.
  */
 export interface ContractDefinition {
-    /** Contract name */
-    name: string
+  /** Contract name */
+  name: string;
 
-    /** Human-readable description */
-    description?: string
+  /** Human-readable description */
+  description?: string;
 
-    /** Inheritance chain (parent contracts/interfaces) */
-    inheritance?: string[]
+  /** Inheritance chain (parent contracts/interfaces) */
+  inheritance?: string[];
 
-    /** Public and external methods available in this contract */
-    methods?: MethodDefinition[]
+  /** Public and external methods available in this contract */
+  methods?: MethodDefinition[];
 
-    /** Events emitted by this contract */
-    events?: EventDefinition[]
+  /** Events emitted by this contract */
+  events?: EventDefinition[];
 
-    /** Custom errors defined in this contract */
-    errors?: ErrorDefinition[]
+  /** Custom errors defined in this contract */
+  errors?: ErrorDefinition[];
 }
 
 /**
@@ -250,49 +242,49 @@ export interface ContractDefinition {
  * for facets. They are not deployed directly but inherited by facets.
  */
 export interface StorageWrapperDefinition {
-    /** Storage wrapper name */
-    name: string
+  /** Storage wrapper name */
+  name: string;
 
-    /** Human-readable description */
-    description?: string
+  /** Human-readable description */
+  description?: string;
 
-    /** Inheritance chain (parent contracts/interfaces) */
-    inheritance?: string[]
+  /** Inheritance chain (parent contracts/interfaces) */
+  inheritance?: string[];
 
-    /** All methods (internal, private, public) in this storage wrapper */
-    methods: MethodDefinition[]
+  /** All methods (internal, private, public) in this storage wrapper */
+  methods: MethodDefinition[];
 
-    /** Events emitted by this storage wrapper */
-    events?: EventDefinition[]
+  /** Events emitted by this storage wrapper */
+  events?: EventDefinition[];
 
-    /** Custom errors defined in this storage wrapper */
-    errors?: ErrorDefinition[]
+  /** Custom errors defined in this storage wrapper */
+  errors?: ErrorDefinition[];
 }
 
 /**
  * Network configuration
  */
 export interface NetworkConfig {
-    /** Network name (e.g., 'testnet', 'mainnet') */
-    name: string
+  /** Network name (e.g., 'testnet', 'mainnet') */
+  name: string;
 
-    /** JSON-RPC endpoint URL */
-    jsonRpcUrl: string
+  /** JSON-RPC endpoint URL */
+  jsonRpcUrl: string;
 
-    /** Mirror node endpoint (Hedera-specific) */
-    mirrorNodeUrl?: string
+  /** Mirror node endpoint (Hedera-specific) */
+  mirrorNodeUrl?: string;
 
-    /** Chain ID */
-    chainId: number
+  /** Chain ID */
+  chainId: number;
 
-    /** Deployed contract addresses on this network */
-    addresses?: {
-        [contractName: string]: {
-            implementation?: string
-            proxy?: string
-            proxyAdmin?: string
-        }
-    }
+  /** Deployed contract addresses on this network */
+  addresses?: {
+    [contractName: string]: {
+      implementation?: string;
+      proxy?: string;
+      proxyAdmin?: string;
+    };
+  };
 }
 
 /**
@@ -305,26 +297,26 @@ export interface NetworkConfig {
  * This type is used across multiple operations.
  */
 export interface DeploymentResult {
-    /** Whether deployment succeeded */
-    success: boolean
+  /** Whether deployment succeeded */
+  success: boolean;
 
-    /** Deployed contract instance (only if success=true) */
-    contract?: Contract
+  /** Deployed contract instance (only if success=true) */
+  contract?: Contract;
 
-    /** Contract address (only if success=true) */
-    address?: string
+  /** Contract address (only if success=true) */
+  address?: string;
 
-    /** Deployment transaction hash (only if success=true) */
-    transactionHash?: string
+  /** Deployment transaction hash (only if success=true) */
+  transactionHash?: string;
 
-    /** Block number where contract was deployed (only if success=true) */
-    blockNumber?: number
+  /** Block number where contract was deployed (only if success=true) */
+  blockNumber?: number;
 
-    /** Gas used for deployment (only if success=true) */
-    gasUsed?: number
+  /** Gas used for deployment (only if success=true) */
+  gasUsed?: number;
 
-    /** Error message (only if success=false) */
-    error?: string
+  /** Error message (only if success=false) */
+  error?: string;
 }
 
 /**
@@ -350,83 +342,81 @@ export interface DeploymentResult {
  *
  * @template F - Type of the factory (for type inference)
  */
-export interface UpgradeProxyOptions<
-    F extends ContractFactory = ContractFactory,
-> {
-    /** Address of the proxy contract to upgrade */
-    proxyAddress: string
+export interface UpgradeProxyOptions<F extends ContractFactory = ContractFactory> {
+  /** Address of the proxy contract to upgrade */
+  proxyAddress: string;
 
-    /**
-     * Factory for new implementation contract (Pattern 1: Deploy and Upgrade).
-     * If provided, will deploy a new implementation before upgrading.
-     * Mutually exclusive with newImplementationAddress.
-     */
-    newImplementationFactory?: F
+  /**
+   * Factory for new implementation contract (Pattern 1: Deploy and Upgrade).
+   * If provided, will deploy a new implementation before upgrading.
+   * Mutually exclusive with newImplementationAddress.
+   */
+  newImplementationFactory?: F;
 
-    /**
-     * Constructor arguments for new implementation deployment.
-     * Only used when newImplementationFactory is provided.
-     * These are passed to the implementation contract's constructor.
-     */
-    newImplementationArgs?: unknown[]
+  /**
+   * Constructor arguments for new implementation deployment.
+   * Only used when newImplementationFactory is provided.
+   * These are passed to the implementation contract's constructor.
+   */
+  newImplementationArgs?: unknown[];
 
-    /**
-     * Address of existing implementation contract (Pattern 2: Upgrade to Existing).
-     * If provided, skips deployment and upgrades to this address.
-     * Mutually exclusive with newImplementationFactory.
-     */
-    newImplementationAddress?: string
+  /**
+   * Address of existing implementation contract (Pattern 2: Upgrade to Existing).
+   * If provided, skips deployment and upgrades to this address.
+   * Mutually exclusive with newImplementationFactory.
+   */
+  newImplementationAddress?: string;
 
-    /**
-     * ABI-encoded initialization calldata for upgradeAndCall.
-     * If provided, calls upgradeAndCall() instead of upgrade(),
-     * executing this function on the proxy after upgrade.
-     * Use this to reinitialize state in the new implementation.
-     * Example: `interface.encodeFunctionData('initializeV2', [param])`
-     */
-    initData?: string
+  /**
+   * ABI-encoded initialization calldata for upgradeAndCall.
+   * If provided, calls upgradeAndCall() instead of upgrade(),
+   * executing this function on the proxy after upgrade.
+   * Use this to reinitialize state in the new implementation.
+   * Example: `interface.encodeFunctionData('initializeV2', [param])`
+   */
+  initData?: string;
 
-    /** Transaction overrides (gas limit, gas price, etc.) */
-    overrides?: Overrides
+  /** Transaction overrides (gas limit, gas price, etc.) */
+  overrides?: Overrides;
 
-    /**
-     * Whether to verify contracts exist before/after upgrade.
-     * Requires ProxyAdmin to be connected to a provider.
-     * Default: true
-     */
-    verify?: boolean
+  /**
+   * Whether to verify contracts exist before/after upgrade.
+   * Requires ProxyAdmin to be connected to a provider.
+   * Default: true
+   */
+  verify?: boolean;
 }
 
 /**
  * Result of upgrading a proxy
  */
 export interface UpgradeProxyResult {
-    /** Whether upgrade succeeded */
-    success: boolean
+  /** Whether upgrade succeeded */
+  success: boolean;
 
-    /** Proxy address */
-    proxyAddress: string
+  /** Proxy address */
+  proxyAddress: string;
 
-    /** Old implementation address */
-    oldImplementation: string
+  /** Old implementation address */
+  oldImplementation: string;
 
-    /** New implementation address */
-    newImplementation: string
+  /** New implementation address */
+  newImplementation: string;
 
-    /** Transaction hash (only if success=true) */
-    transactionHash?: string
+  /** Transaction hash (only if success=true) */
+  transactionHash?: string;
 
-    /** Block number (only if success=true) */
-    blockNumber?: number
+  /** Block number (only if success=true) */
+  blockNumber?: number;
 
-    /** Gas used (only if success=true) */
-    gasUsed?: number
+  /** Gas used (only if success=true) */
+  gasUsed?: number;
 
-    /** Whether upgrade was actually performed (false if already at target implementation) */
-    upgraded: boolean
+  /** Whether upgrade was actually performed (false if already at target implementation) */
+  upgraded: boolean;
 
-    /** Error message (only if success=false) */
-    error?: string
+  /** Error message (only if success=false) */
+  error?: string;
 }
 
 /**
@@ -439,46 +429,46 @@ export interface UpgradeProxyResult {
  * Options for creating a configuration in BusinessLogicResolver
  */
 export interface CreateConfigOptions {
-    /** Address of BusinessLogicResolver */
-    blrAddress: string
+  /** Address of BusinessLogicResolver */
+  blrAddress: string;
 
-    /** Configuration ID (bytes32) */
-    configId: string
+  /** Configuration ID (bytes32) */
+  configId: string;
 
-    /** Facet IDs (in order) */
-    facetIds: string[]
+  /** Facet IDs (in order) */
+  facetIds: string[];
 
-    /** Facet versions (corresponding to facetIds) */
-    facetVersions: number[]
+  /** Facet versions (corresponding to facetIds) */
+  facetVersions: number[];
 
-    /** Network */
-    network?: string
+  /** Network */
+  network?: string;
 
-    /** Transaction overrides */
-    overrides?: Overrides
+  /** Transaction overrides */
+  overrides?: Overrides;
 }
 
 /**
  * Result of creating a configuration
  */
 export interface CreateConfigResult {
-    /** BLR address */
-    blrAddress: string
+  /** BLR address */
+  blrAddress: string;
 
-    /** Configuration ID */
-    configId: string
+  /** Configuration ID */
+  configId: string;
 
-    /** Configuration version number */
-    configVersion: number
+  /** Configuration version number */
+  configVersion: number;
 
-    /** Included facets */
-    facets: Array<{
-        id: string
-        version: number
-    }>
+  /** Included facets */
+  facets: Array<{
+    id: string;
+    version: number;
+  }>;
 
-    /** Creation transaction receipt */
-    receipt: ContractReceipt
+  /** Creation transaction receipt */
+  receipt: ContractReceipt;
 }
 
 /**
@@ -555,26 +545,26 @@ export interface CreateConfigResult {
  * ```
  */
 export type OperationResult<T, E extends string = string> =
-    | {
-          /** Operation succeeded */
-          success: true
+  | {
+      /** Operation succeeded */
+      success: true;
 
-          /** Success data */
-          data: T
-      }
-    | {
-          /** Operation failed */
-          success: false
+      /** Success data */
+      data: T;
+    }
+  | {
+      /** Operation failed */
+      success: false;
 
-          /** Error code (e.g., 'INVALID_INPUT', 'TRANSACTION_FAILED') */
-          error: E
+      /** Error code (e.g., 'INVALID_INPUT', 'TRANSACTION_FAILED') */
+      error: E;
 
-          /** Human-readable error message */
-          message: string
+      /** Human-readable error message */
+      message: string;
 
-          /** Optional error details (original error, context, etc.) */
-          details?: unknown
-      }
+      /** Optional error details (original error, context, etc.) */
+      details?: unknown;
+    };
 
 /**
  * Helper function to create a success result.
@@ -589,7 +579,7 @@ export type OperationResult<T, E extends string = string> =
  * ```
  */
 export function ok<T>(data: T): OperationResult<T, never> {
-    return { success: true, data }
+  return { success: true, data };
 }
 
 /**
@@ -607,17 +597,13 @@ export function ok<T>(data: T): OperationResult<T, never> {
  * return err('TRANSACTION_FAILED', revertReason, originalError)
  * ```
  */
-export function err<E extends string>(
-    error: E,
-    message: string,
-    details?: unknown
-): OperationResult<never, E> {
-    return { success: false, error, message, details }
+export function err<E extends string>(error: E, message: string, details?: unknown): OperationResult<never, E> {
+  return { success: false, error, message, details };
 }
 
 export type DeepPartial<T> = {
-    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
-}
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
 
 // ============================================================================
 // Signer Creation Utilities
@@ -627,14 +613,14 @@ export type DeepPartial<T> = {
  * Options for creating a signer from configuration.
  */
 export interface SignerOptions {
-    /** JSON-RPC endpoint URL */
-    rpcUrl: string
+  /** JSON-RPC endpoint URL */
+  rpcUrl: string;
 
-    /** Private key (with or without 0x prefix) */
-    privateKey: string
+  /** Private key (with or without 0x prefix) */
+  privateKey: string;
 
-    /** Chain ID (optional) */
-    chainId?: number
+  /** Chain ID (optional) */
+  chainId?: number;
 }
 
 /**
@@ -659,15 +645,13 @@ export interface SignerOptions {
  * ```
  */
 export function createSigner(options: SignerOptions): Signer {
-    const { rpcUrl, privateKey, chainId } = options
+  const { rpcUrl, privateKey, chainId } = options;
 
-    // Normalize private key (add 0x prefix if missing)
-    const normalizedKey = privateKey.startsWith('0x')
-        ? privateKey
-        : `0x${privateKey}`
+  // Normalize private key (add 0x prefix if missing)
+  const normalizedKey = privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`;
 
-    const provider = new providers.JsonRpcProvider(rpcUrl, chainId)
-    return new Wallet(normalizedKey, provider)
+  const provider = new providers.JsonRpcProvider(rpcUrl, chainId);
+  return new Wallet(normalizedKey, provider);
 }
 
 /**
@@ -694,25 +678,19 @@ export function createSigner(options: SignerOptions): Signer {
  * ```
  */
 export function createSignerFromEnv(): Signer {
-    const rpcUrl = process.env.RPC_URL
-    const privateKey = process.env.PRIVATE_KEY
-    const chainId = process.env.CHAIN_ID
-        ? parseInt(process.env.CHAIN_ID, 10)
-        : undefined
+  const rpcUrl = process.env.RPC_URL;
+  const privateKey = process.env.PRIVATE_KEY;
+  const chainId = process.env.CHAIN_ID ? parseInt(process.env.CHAIN_ID, 10) : undefined;
 
-    if (!rpcUrl) {
-        throw new Error(
-            'RPC_URL environment variable required. ' +
-                'Set it to your JSON-RPC endpoint URL.'
-        )
-    }
+  if (!rpcUrl) {
+    throw new Error("RPC_URL environment variable required. " + "Set it to your JSON-RPC endpoint URL.");
+  }
 
-    if (!privateKey) {
-        throw new Error(
-            'PRIVATE_KEY environment variable required. ' +
-                'Set it to your private key for signing transactions.'
-        )
-    }
+  if (!privateKey) {
+    throw new Error(
+      "PRIVATE_KEY environment variable required. " + "Set it to your private key for signing transactions.",
+    );
+  }
 
-    return createSigner({ rpcUrl, privateKey, chainId })
+  return createSigner({ rpcUrl, privateKey, chainId });
 }

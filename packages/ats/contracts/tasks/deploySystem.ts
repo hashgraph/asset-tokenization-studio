@@ -11,60 +11,48 @@
  * - npx hardhat deploy-system --network testnet --output custom-deployment.json
  */
 
-import { task } from 'hardhat/config'
-import { deployCompleteSystem } from '../scripts/workflows/deployCompleteSystem'
+import { task } from "hardhat/config";
+import { deployCompleteSystem } from "../scripts/workflows/deployCompleteSystem";
 
-task('deploy-system', 'Deploy complete ATS system using new modular scripts')
-    .addFlag('timetravel', 'Use TimeTravel variants for facets')
-    .addOptionalParam('output', 'Custom output file path for deployment data')
-    .setAction(async (args, hre) => {
-        console.log(`\n🎯 Deploying to network: ${hre.network.name}`)
-        console.log(
-            `🔄 TimeTravel: ${args.timetravel ? 'Enabled' : 'Disabled'}`
-        )
+task("deploy-system", "Deploy complete ATS system using new modular scripts")
+  .addFlag("timetravel", "Use TimeTravel variants for facets")
+  .addOptionalParam("output", "Custom output file path for deployment data")
+  .setAction(async (args, hre) => {
+    console.log(`\n🎯 Deploying to network: ${hre.network.name}`);
+    console.log(`🔄 TimeTravel: ${args.timetravel ? "Enabled" : "Disabled"}`);
 
-        if (args.output) {
-            console.log(`📄 Output: ${args.output}`)
-        }
+    if (args.output) {
+      console.log(`📄 Output: ${args.output}`);
+    }
 
-        try {
-            const result = await deployCompleteSystem(hre.network.name, {
-                useTimeTravel: args.timetravel,
-                saveOutput: true,
-                outputPath: args.output,
-            })
+    try {
+      const result = await deployCompleteSystem(hre.network.name, {
+        useTimeTravel: args.timetravel,
+        saveOutput: true,
+        outputPath: args.output,
+      });
 
-            console.log('\n📋 Deployment Summary:')
-            console.log('─'.repeat(60))
-            console.log(
-                `ProxyAdmin:     ${result.infrastructure.proxyAdmin.address}`
-            )
-            console.log(`BLR Proxy:      ${result.infrastructure.blr.proxy}`)
-            console.log(
-                `Factory Proxy:  ${result.infrastructure.factory.proxy}`
-            )
-            console.log(`Facets:         ${result.summary.totalFacets}`)
-            console.log(`Configurations: ${result.summary.totalConfigurations}`)
+      console.log("\n📋 Deployment Summary:");
+      console.log("─".repeat(60));
+      console.log(`ProxyAdmin:     ${result.infrastructure.proxyAdmin.address}`);
+      console.log(`BLR Proxy:      ${result.infrastructure.blr.proxy}`);
+      console.log(`Factory Proxy:  ${result.infrastructure.factory.proxy}`);
+      console.log(`Facets:         ${result.summary.totalFacets}`);
+      console.log(`Configurations: ${result.summary.totalConfigurations}`);
 
-            if (result.infrastructure.proxyAdmin.contractId) {
-                console.log('\n🆔 Hedera Contract IDs:')
-                console.log('─'.repeat(60))
-                console.log(
-                    `ProxyAdmin:     ${result.infrastructure.proxyAdmin.contractId}`
-                )
-                console.log(
-                    `BLR:            ${result.infrastructure.blr.contractId}`
-                )
-                console.log(
-                    `Factory:        ${result.infrastructure.factory.contractId}`
-                )
-            }
+      if (result.infrastructure.proxyAdmin.contractId) {
+        console.log("\n🆔 Hedera Contract IDs:");
+        console.log("─".repeat(60));
+        console.log(`ProxyAdmin:     ${result.infrastructure.proxyAdmin.contractId}`);
+        console.log(`BLR:            ${result.infrastructure.blr.contractId}`);
+        console.log(`Factory:        ${result.infrastructure.factory.contractId}`);
+      }
 
-            console.log('─'.repeat(60))
+      console.log("─".repeat(60));
 
-            return result
-        } catch (error) {
-            console.error('\n❌ Deployment failed:', error)
-            throw error
-        }
-    })
+      return result;
+    } catch (error) {
+      console.error("\n❌ Deployment failed:", error);
+      throw error;
+    }
+  });

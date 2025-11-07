@@ -39,19 +39,10 @@
  */
 
 // Re-export auto-generated registries and constants
-export {
-    FACET_REGISTRY,
-    INFRASTRUCTURE_CONTRACTS,
-    STORAGE_WRAPPER_REGISTRY,
-    ROLES,
-} from './atsRegistry.data'
+export { FACET_REGISTRY, INFRASTRUCTURE_CONTRACTS, STORAGE_WRAPPER_REGISTRY, ROLES } from "./atsRegistry.data";
 
-import { createRegistryHelpers } from '../infrastructure/registryFactory'
-import {
-    FACET_REGISTRY,
-    INFRASTRUCTURE_CONTRACTS,
-    STORAGE_WRAPPER_REGISTRY,
-} from './atsRegistry.data'
+import { createRegistryHelpers } from "../infrastructure/registryFactory";
+import { FACET_REGISTRY, INFRASTRUCTURE_CONTRACTS, STORAGE_WRAPPER_REGISTRY } from "./atsRegistry.data";
 
 /**
  * ATS-specific registry helpers.
@@ -60,25 +51,21 @@ import {
  * They are created using the generic factory pattern from infrastructure.
  */
 export const {
-    getFacetDefinition,
-    getContractDefinition,
-    getAllFacets,
-    getAllContracts,
-    hasFacet,
-    hasContract,
-    FACET_REGISTRY_COUNT,
-    getStorageWrapperDefinition,
-    getAllStorageWrappers,
-    hasStorageWrapper,
-    STORAGE_WRAPPER_REGISTRY_COUNT,
-} = createRegistryHelpers(
-    FACET_REGISTRY,
-    INFRASTRUCTURE_CONTRACTS,
-    STORAGE_WRAPPER_REGISTRY
-)
+  getFacetDefinition,
+  getContractDefinition,
+  getAllFacets,
+  getAllContracts,
+  hasFacet,
+  hasContract,
+  FACET_REGISTRY_COUNT,
+  getStorageWrapperDefinition,
+  getAllStorageWrappers,
+  hasStorageWrapper,
+  STORAGE_WRAPPER_REGISTRY_COUNT,
+} = createRegistryHelpers(FACET_REGISTRY, INFRASTRUCTURE_CONTRACTS, STORAGE_WRAPPER_REGISTRY);
 
 // Import RegistryProvider type for type annotation
-import type { RegistryProvider } from '../infrastructure/types'
+import type { RegistryProvider } from "../infrastructure/types";
 
 /**
  * ATS Registry Provider.
@@ -109,6 +96,6 @@ import type { RegistryProvider } from '../infrastructure/types'
  * ```
  */
 export const atsRegistry: RegistryProvider = {
-    getFacetDefinition,
-    getAllFacets,
-}
+  getFacetDefinition,
+  getAllFacets,
+};

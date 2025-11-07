@@ -9,10 +9,10 @@
  * @module tools/utils/abiValidator
  */
 
-import * as fs from 'fs'
-import * as path from 'path'
-import { MethodDefinition } from '../../infrastructure/types'
-import { calculateSelector } from './solidityUtils'
+import * as fs from "fs";
+import * as path from "path";
+import { MethodDefinition } from "../../infrastructure/types";
+import { calculateSelector } from "./solidityUtils";
 
 /**
  * Load compiled ABI from Hardhat artifacts.
@@ -21,55 +21,49 @@ import { calculateSelector } from './solidityUtils'
  * @param contractsDir - Root contracts directory
  * @returns ABI array or undefined if not found
  */
-export function loadABI(
-    contractName: string,
-    contractsDir: string
-): any[] | undefined {
-    // Hardhat artifacts path pattern:
-    // build/artifacts/contracts/.../ContractName.sol/ContractName.json
+export function loadABI(contractName: string, contractsDir: string): any[] | undefined {
+  // Hardhat artifacts path pattern:
+  // build/artifacts/contracts/.../ContractName.sol/ContractName.json
 
-    const artifactsDir = path.join(contractsDir, '../build/artifacts/contracts')
+  const artifactsDir = path.join(contractsDir, "../build/artifacts/contracts");
 
-    try {
-        // Search for artifact file recursively
-        const artifactPath = findArtifactPath(artifactsDir, contractName)
-        if (!artifactPath) {
-            return undefined
-        }
-
-        const artifact = JSON.parse(fs.readFileSync(artifactPath, 'utf8'))
-        return artifact.abi
-    } catch (error) {
-        return undefined
+  try {
+    // Search for artifact file recursively
+    const artifactPath = findArtifactPath(artifactsDir, contractName);
+    if (!artifactPath) {
+      return undefined;
     }
+
+    const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
+    return artifact.abi;
+  } catch (error) {
+    return undefined;
+  }
 }
 
 /**
  * Find artifact file path recursively.
  */
-function findArtifactPath(
-    dir: string,
-    contractName: string
-): string | undefined {
-    if (!fs.existsSync(dir)) {
-        return undefined
+function findArtifactPath(dir: string, contractName: string): string | undefined {
+  if (!fs.existsSync(dir)) {
+    return undefined;
+  }
+
+  const targetFile = `${contractName}.json`;
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      const found = findArtifactPath(fullPath, contractName);
+      if (found) return found;
+    } else if (entry.name === targetFile) {
+      return fullPath;
     }
+  }
 
-    const targetFile = `${contractName}.json`
-    const entries = fs.readdirSync(dir, { withFileTypes: true })
-
-    for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name)
-
-        if (entry.isDirectory()) {
-            const found = findArtifactPath(fullPath, contractName)
-            if (found) return found
-        } else if (entry.name === targetFile) {
-            return fullPath
-        }
-    }
-
-    return undefined
+  return undefined;
 }
 
 /**
@@ -78,26 +72,24 @@ function findArtifactPath(
  * @param abi - Contract ABI
  * @returns Map of method name to signature details
  */
-export function extractMethodsFromABI(
-    abi: any[]
-): Map<string, { signature: string; selector: string }> {
-    const methods = new Map<string, { signature: string; selector: string }>()
+export function extractMethodsFromABI(abi: any[]): Map<string, { signature: string; selector: string }> {
+  const methods = new Map<string, { signature: string; selector: string }>();
 
-    for (const item of abi) {
-        if (item.type === 'function') {
-            const name = item.name
-            const inputs = item.inputs || []
+  for (const item of abi) {
+    if (item.type === "function") {
+      const name = item.name;
+      const inputs = item.inputs || [];
 
-            // Build canonical signature
-            const types = inputs.map((input: any) => input.type)
-            const signature = `${name}(${types.join(',')})`
-            const selector = calculateSelector(signature)
+      // Build canonical signature
+      const types = inputs.map((input: any) => input.type);
+      const signature = `${name}(${types.join(",")})`;
+      const selector = calculateSelector(signature);
 
-            methods.set(name, { signature, selector })
-        }
+      methods.set(name, { signature, selector });
     }
+  }
 
-    return methods
+  return methods;
 }
 
 /**
@@ -114,39 +106,35 @@ export function extractMethodsFromABI(
  * @returns Validated method definitions
  */
 export function validateAndMerge(
-    regexMethods: MethodDefinition[],
-    abiMethods:
-        | Map<string, { signature: string; selector: string }>
-        | undefined,
-    contractName: string
+  regexMethods: MethodDefinition[],
+  abiMethods: Map<string, { signature: string; selector: string }> | undefined,
+  contractName: string,
 ): MethodDefinition[] {
-    // If no ABI, return regex results as-is
-    if (!abiMethods || abiMethods.size === 0) {
-        return regexMethods
+  // If no ABI, return regex results as-is
+  if (!abiMethods || abiMethods.size === 0) {
+    return regexMethods;
+  }
+
+  // Use ABI as source of truth
+  const result: MethodDefinition[] = [];
+  const regexMethodMap = new Map(regexMethods.map((m) => [m.name, m]));
+
+  for (const [name, abiMethod] of abiMethods.entries()) {
+    const regexMethod = regexMethodMap.get(name);
+
+    // Warn if signatures mismatch
+    if (regexMethod && regexMethod.signature !== abiMethod.signature) {
+      console.warn(`[ABI Validation] Signature mismatch for ${contractName}.${name}:`);
+      console.warn(`  Regex:  ${regexMethod.signature}`);
+      console.warn(`  ABI:    ${abiMethod.signature}`);
     }
 
-    // Use ABI as source of truth
-    const result: MethodDefinition[] = []
-    const regexMethodMap = new Map(regexMethods.map((m) => [m.name, m]))
+    result.push({
+      name,
+      signature: abiMethod.signature,
+      selector: abiMethod.selector,
+    });
+  }
 
-    for (const [name, abiMethod] of abiMethods.entries()) {
-        const regexMethod = regexMethodMap.get(name)
-
-        // Warn if signatures mismatch
-        if (regexMethod && regexMethod.signature !== abiMethod.signature) {
-            console.warn(
-                `[ABI Validation] Signature mismatch for ${contractName}.${name}:`
-            )
-            console.warn(`  Regex:  ${regexMethod.signature}`)
-            console.warn(`  ABI:    ${abiMethod.signature}`)
-        }
-
-        result.push({
-            name,
-            signature: abiMethod.signature,
-            selector: abiMethod.selector,
-        })
-    }
-
-    return result.sort((a, b) => a.name.localeCompare(b.name))
+  return result.sort((a, b) => a.name.localeCompare(b.name));
 }

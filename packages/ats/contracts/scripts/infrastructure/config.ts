@@ -14,38 +14,32 @@
  * @module core/config
  */
 
-import { z } from 'zod'
-import Configuration, { NETWORK_ALIASES } from '@configuration'
-import type { Endpoints } from '@configuration'
+import { z } from "zod";
+import Configuration, { NETWORK_ALIASES } from "@configuration";
+import type { Endpoints } from "@configuration";
 
 // IMPORTANT: Use relative imports for intra-layer dependencies
 // Infrastructure files should import from each other using relative paths,
 // NOT '@scripts/infrastructure', to avoid circular dependency issues.
 // The @scripts/infrastructure alias points to index.ts, which exports from this file.
-import type { NetworkConfig } from './types'
-import { CHAIN_IDS } from './constants'
+import type { NetworkConfig } from "./types";
+import { CHAIN_IDS } from "./constants";
 
 /**
  * Zod schema for network configuration.
  * Provides runtime validation with helpful error messages.
  */
 const NetworkConfigSchema = z.object({
-    name: z.string().min(1, 'Network name cannot be empty'),
-    jsonRpcUrl: z
-        .string()
-        .refine(
-            (url) => url === '' || z.string().url().safeParse(url).success,
-            'Invalid JSON-RPC URL format'
-        ),
-    mirrorNodeUrl: z
-        .string()
-        .refine(
-            (url) => url === '' || z.string().url().safeParse(url).success,
-            'Invalid mirror node URL format'
-        )
-        .optional(),
-    chainId: z.number().positive('Chain ID must be positive'),
-})
+  name: z.string().min(1, "Network name cannot be empty"),
+  jsonRpcUrl: z
+    .string()
+    .refine((url) => url === "" || z.string().url().safeParse(url).success, "Invalid JSON-RPC URL format"),
+  mirrorNodeUrl: z
+    .string()
+    .refine((url) => url === "" || z.string().url().safeParse(url).success, "Invalid mirror node URL format")
+    .optional(),
+  chainId: z.number().positive("Chain ID must be positive"),
+});
 
 /**
  * Get chain ID for a network.
@@ -54,7 +48,7 @@ const NetworkConfigSchema = z.object({
  * @returns Chain ID for the network
  */
 function getChainId(network: string): number {
-    return CHAIN_IDS[network] || 1337
+  return CHAIN_IDS[network] || 1337;
 }
 
 /**
@@ -87,51 +81,41 @@ function getChainId(network: string): number {
  * ```
  */
 export function getNetworkConfig(network: string): NetworkConfig {
-    // Resolve alias if provided (backward compatibility)
-    const resolvedNetwork = (NETWORK_ALIASES[network] || network) as string
+  // Resolve alias if provided (backward compatibility)
+  const resolvedNetwork = (NETWORK_ALIASES[network] || network) as string;
 
-    // Get endpoints from Configuration.ts (reads from .env)
-    const allEndpoints = Configuration.endpoints as Record<
-        string,
-        Endpoints | undefined
-    >
-    const endpoints = allEndpoints[resolvedNetwork]
+  // Get endpoints from Configuration.ts (reads from .env)
+  const allEndpoints = Configuration.endpoints as Record<string, Endpoints | undefined>;
+  const endpoints = allEndpoints[resolvedNetwork];
 
-    if (!endpoints) {
-        const available = Object.keys(Configuration.endpoints).join(', ')
-        const aliasInfo =
-            network !== resolvedNetwork
-                ? ` (resolved from alias '${network}')`
-                : ''
-        throw new Error(
-            `Network '${resolvedNetwork}'${aliasInfo} not configured. Available networks: ${available}`
-        )
+  if (!endpoints) {
+    const available = Object.keys(Configuration.endpoints).join(", ");
+    const aliasInfo = network !== resolvedNetwork ? ` (resolved from alias '${network}')` : "";
+    throw new Error(`Network '${resolvedNetwork}'${aliasInfo} not configured. Available networks: ${available}`);
+  }
+
+  // Construct config object
+  const config = {
+    name: resolvedNetwork,
+    jsonRpcUrl: endpoints.jsonRpc,
+    mirrorNodeUrl: endpoints.mirror || undefined,
+    chainId: getChainId(resolvedNetwork),
+  };
+
+  // Runtime validation with Zod
+  try {
+    return NetworkConfigSchema.parse(config);
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      const issues = err.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join(", ");
+      const envPrefix = resolvedNetwork.toUpperCase().replace(/-/g, "_");
+      throw new Error(
+        `Invalid network configuration for '${resolvedNetwork}': ${issues}. ` +
+          `Check ${envPrefix}_JSON_RPC_ENDPOINT and ${envPrefix}_MIRROR_NODE_ENDPOINT environment variables.`,
+      );
     }
-
-    // Construct config object
-    const config = {
-        name: resolvedNetwork,
-        jsonRpcUrl: endpoints.jsonRpc,
-        mirrorNodeUrl: endpoints.mirror || undefined,
-        chainId: getChainId(resolvedNetwork),
-    }
-
-    // Runtime validation with Zod
-    try {
-        return NetworkConfigSchema.parse(config)
-    } catch (err) {
-        if (err instanceof z.ZodError) {
-            const issues = err.issues
-                .map((i) => `${i.path.join('.')}: ${i.message}`)
-                .join(', ')
-            const envPrefix = resolvedNetwork.toUpperCase().replace(/-/g, '_')
-            throw new Error(
-                `Invalid network configuration for '${resolvedNetwork}': ${issues}. ` +
-                    `Check ${envPrefix}_JSON_RPC_ENDPOINT and ${envPrefix}_MIRROR_NODE_ENDPOINT environment variables.`
-            )
-        }
-        throw err
-    }
+    throw err;
+  }
 }
 
 /**
@@ -146,8 +130,8 @@ export function getNetworkConfig(network: string): NetworkConfig {
  * ```
  */
 export function getAllNetworks(): string[] {
-    // Get network names from Configuration.ts
-    return Object.keys(Configuration.endpoints)
+  // Get network names from Configuration.ts
+  return Object.keys(Configuration.endpoints);
 }
 
 /**
@@ -169,8 +153,8 @@ export function getAllNetworks(): string[] {
  * ```
  */
 export function hasNetwork(network: string): boolean {
-    const resolvedNetwork = NETWORK_ALIASES[network] || network
-    return resolvedNetwork in Configuration.endpoints
+  const resolvedNetwork = NETWORK_ALIASES[network] || network;
+  return resolvedNetwork in Configuration.endpoints;
 }
 
 /**
@@ -191,12 +175,9 @@ export function hasNetwork(network: string): boolean {
  * ```
  */
 export function getPrivateKeys(network: string): string[] {
-    const resolvedNetwork = NETWORK_ALIASES[network] || network
-    const allKeys = Configuration.privateKeys as Record<
-        string,
-        string[] | undefined
-    >
-    return allKeys[resolvedNetwork] || []
+  const resolvedNetwork = NETWORK_ALIASES[network] || network;
+  const allKeys = Configuration.privateKeys as Record<string, string[] | undefined>;
+  return allKeys[resolvedNetwork] || [];
 }
 
 /**
@@ -219,47 +200,47 @@ export function getPrivateKeys(network: string): string[] {
  * ```
  */
 export function getDeployedAddress(
-    contractName: string,
-    network: string,
-    type: 'implementation' | 'proxy' | 'proxyAdmin' = 'implementation'
+  contractName: string,
+  network: string,
+  type: "implementation" | "proxy" | "proxyAdmin" = "implementation",
 ): string | undefined {
-    const resolvedNetwork = NETWORK_ALIASES[network] || network
+  const resolvedNetwork = NETWORK_ALIASES[network] || network;
 
-    // Get contract config from Configuration.ts
-    const allContracts = Configuration.contracts as Record<
+  // Get contract config from Configuration.ts
+  const allContracts = Configuration.contracts as Record<
+    string,
+    {
+      addresses?: Record<
         string,
         {
-            addresses?: Record<
-                string,
-                {
-                    address: string
-                    proxyAddress?: string
-                    proxyAdminAddress?: string
-                }
-            >
+          address: string;
+          proxyAddress?: string;
+          proxyAdminAddress?: string;
         }
-    >
-
-    const contractConfig = allContracts[contractName]
-    if (!contractConfig?.addresses) {
-        return undefined
+      >;
     }
+  >;
 
-    const deployment = contractConfig.addresses[resolvedNetwork]
-    if (!deployment) {
-        return undefined
-    }
+  const contractConfig = allContracts[contractName];
+  if (!contractConfig?.addresses) {
+    return undefined;
+  }
 
-    // Return appropriate address based on type
-    switch (type) {
-        case 'proxy':
-            return deployment.proxyAddress
-        case 'proxyAdmin':
-            return deployment.proxyAdminAddress
-        case 'implementation':
-        default:
-            return deployment.address
-    }
+  const deployment = contractConfig.addresses[resolvedNetwork];
+  if (!deployment) {
+    return undefined;
+  }
+
+  // Return appropriate address based on type
+  switch (type) {
+    case "proxy":
+      return deployment.proxyAddress;
+    case "proxyAdmin":
+      return deployment.proxyAdminAddress;
+    case "implementation":
+    default:
+      return deployment.address;
+  }
 }
 
 /**
@@ -277,5 +258,5 @@ export function getDeployedAddress(
  * ```
  */
 export function isDeployed(contractName: string, network: string): boolean {
-    return getDeployedAddress(contractName, network) !== undefined
+  return getDeployedAddress(contractName, network) !== undefined;
 }

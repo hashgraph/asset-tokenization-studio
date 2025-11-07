@@ -69,17 +69,13 @@ interface IEquity {
      * @notice Sets a new dividend
      * @dev Can only be called by an account with the corporate actions role
      */
-    function setDividends(
-        Dividend calldata _newDividend
-    ) external returns (bool success_, uint256 dividendID_);
+    function setDividends(Dividend calldata _newDividend) external returns (bool success_, uint256 dividendID_);
 
     /**
      * @notice Sets a new voting
      * @dev Can only be called by an account with the corporate actions role
      */
-    function setVoting(
-        Voting calldata _newVoting
-    ) external returns (bool success_, uint256 voteID_);
+    function setVoting(Voting calldata _newVoting) external returns (bool success_, uint256 voteID_);
 
     /**
      * @notice Sets a new scheduled balance adjustment
@@ -89,19 +85,14 @@ interface IEquity {
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) external returns (bool success_, uint256 balanceAdjustmentID_);
 
-    function getEquityDetails()
-        external
-        view
-        returns (EquityDetailsData memory equityDetailsData_);
+    function getEquityDetails() external view returns (EquityDetailsData memory equityDetailsData_);
 
     /**
      * @dev returns the properties and related snapshots (if any) of a dividend.
      *
      * @param _dividendID The dividend Id
      */
-    function getDividends(
-        uint256 _dividendID
-    ) external view returns (RegisteredDividend memory registeredDividend_);
+    function getDividends(uint256 _dividendID) external view returns (RegisteredDividend memory registeredDividend_);
 
     /**
      * @dev returns the dividends for an account.
@@ -131,24 +122,17 @@ interface IEquity {
     /**
      * @notice Returns the total number of token holders for a given dividend
      */
-    function getTotalDividendHolders(
-        uint256 _dividendID
-    ) external view returns (uint256);
+    function getTotalDividendHolders(uint256 _dividendID) external view returns (uint256);
 
     /**
      * @notice Returns the details of a previously registered voting
      */
-    function getVoting(
-        uint256 _voteID
-    ) external view returns (RegisteredVoting memory registeredVoting_);
+    function getVoting(uint256 _voteID) external view returns (RegisteredVoting memory registeredVoting_);
 
     /**
      * @notice Returns the voting details for an account
      */
-    function getVotingFor(
-        uint256 _voteID,
-        address _account
-    ) external view returns (VotingFor memory votingFor_);
+    function getVotingFor(uint256 _voteID, address _account) external view returns (VotingFor memory votingFor_);
 
     /**
      * @notice Returns the total number of votings
@@ -167,25 +151,17 @@ interface IEquity {
     /**
      * @notice Returns the total number of token holders for a given voting
      */
-    function getTotalVotingHolders(
-        uint256 _voteID
-    ) external view returns (uint256);
+    function getTotalVotingHolders(uint256 _voteID) external view returns (uint256);
 
     /**
      * @notice Returns the details of a previously scheduled balance adjustment
      */
     function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    )
-        external
-        view
-        returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
+    ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
 
     /**
      * @notice Returns the total number of scheduled balance adjustments
      */
-    function getScheduledBalanceAdjustmentCount()
-        external
-        view
-        returns (uint256 balanceAdjustmentCount_);
+    function getScheduledBalanceAdjustmentCount() external view returns (uint256 balanceAdjustmentCount_);
 }

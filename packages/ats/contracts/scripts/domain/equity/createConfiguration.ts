@@ -12,14 +12,14 @@
  * @module domain/equity/createConfiguration
  */
 
-import { Contract } from 'ethers'
+import { Contract } from "ethers";
 import {
-    ConfigurationData,
-    ConfigurationError,
-    OperationResult,
-    createBatchConfiguration,
-} from '@scripts/infrastructure'
-import { EQUITY_CONFIG_ID, atsRegistry } from '@scripts/domain'
+  ConfigurationData,
+  ConfigurationError,
+  OperationResult,
+  createBatchConfiguration,
+} from "@scripts/infrastructure";
+import { EQUITY_CONFIG_ID, atsRegistry } from "@scripts/domain";
 
 /**
  * Equity-specific facets list (41 facets total).
@@ -33,62 +33,62 @@ import { EQUITY_CONFIG_ID, atsRegistry } from '@scripts/domain'
  * Based on origin/develop configuration where equity uses ALL common facets.
  */
 const EQUITY_FACETS = [
-    // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
-    'AccessControlFacet',
-    'CapFacet',
-    'ControlListFacet',
-    'CorporateActionsFacet',
-    'DiamondFacet', // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
-    'ERC20Facet',
-    'FreezeFacet',
-    'KycFacet',
-    'PauseFacet',
-    'SnapshotsFacet',
+  // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
+  "AccessControlFacet",
+  "CapFacet",
+  "ControlListFacet",
+  "CorporateActionsFacet",
+  "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
+  "ERC20Facet",
+  "FreezeFacet",
+  "KycFacet",
+  "PauseFacet",
+  "SnapshotsFacet",
 
-    // ERC Standards (13)
-    'ERC1410IssuerFacet',
-    'ERC1410ManagementFacet',
-    'ERC1410ReadFacet',
-    'ERC1410TokenHolderFacet',
-    'ERC1594Facet',
-    'ERC1643Facet',
-    'ERC1644Facet',
-    'ERC20PermitFacet',
-    'ERC20VotesFacet',
-    'ERC3643BatchFacet',
-    'ERC3643ManagementFacet',
-    'ERC3643OperationsFacet',
-    'ERC3643ReadFacet',
+  // ERC Standards (13)
+  "ERC1410IssuerFacet",
+  "ERC1410ManagementFacet",
+  "ERC1410ReadFacet",
+  "ERC1410TokenHolderFacet",
+  "ERC1594Facet",
+  "ERC1643Facet",
+  "ERC1644Facet",
+  "ERC20PermitFacet",
+  "ERC20VotesFacet",
+  "ERC3643BatchFacet",
+  "ERC3643ManagementFacet",
+  "ERC3643OperationsFacet",
+  "ERC3643ReadFacet",
 
-    // Clearing & Settlement (8)
-    'ClearingActionsFacet',
-    'ClearingHoldCreationFacet',
-    'ClearingReadFacet',
-    'ClearingRedeemFacet',
-    'ClearingTransferFacet',
-    'HoldManagementFacet',
-    'HoldReadFacet',
-    'HoldTokenHolderFacet',
+  // Clearing & Settlement (8)
+  "ClearingActionsFacet",
+  "ClearingHoldCreationFacet",
+  "ClearingReadFacet",
+  "ClearingRedeemFacet",
+  "ClearingTransferFacet",
+  "HoldManagementFacet",
+  "HoldReadFacet",
+  "HoldTokenHolderFacet",
 
-    // External Management (3)
-    'ExternalControlListManagementFacet',
-    'ExternalKycListManagementFacet',
-    'ExternalPauseManagementFacet',
+  // External Management (3)
+  "ExternalControlListManagementFacet",
+  "ExternalKycListManagementFacet",
+  "ExternalPauseManagementFacet",
 
-    // Advanced Features (9)
-    'AdjustBalancesFacet',
-    'LockFacet',
-    'ProceedRecipientsFacet',
-    'ProtectedPartitionsFacet',
-    'ScheduledBalanceAdjustmentsFacet',
-    'ScheduledCrossOrderedTasksFacet',
-    'ScheduledSnapshotsFacet',
-    'SsiManagementFacet',
-    'TransferAndLockFacet',
+  // Advanced Features (9)
+  "AdjustBalancesFacet",
+  "LockFacet",
+  "ProceedRecipientsFacet",
+  "ProtectedPartitionsFacet",
+  "ScheduledBalanceAdjustmentsFacet",
+  "ScheduledCrossOrderedTasksFacet",
+  "ScheduledSnapshotsFacet",
+  "SsiManagementFacet",
+  "TransferAndLockFacet",
 
-    // Jurisdiction-Specific (1)
-    'EquityUSAFacet',
-] as const
+  // Jurisdiction-Specific (1)
+  "EquityUSAFacet",
+] as const;
 
 /**
  * Create equity token configuration in BusinessLogicResolver.
@@ -133,19 +133,40 @@ const EQUITY_FACETS = [
  * ```
  */
 export async function createEquityConfiguration(
-    blrContract: Contract,
-    facetAddresses: Record<string, string>,
-    useTimeTravel: boolean = false,
-    partialBatchDeploy: boolean = false,
-    batchSize: number = 2
+  blrContract: Contract,
+  facetAddresses: Record<string, string>,
+  useTimeTravel: boolean = false,
+  partialBatchDeploy: boolean = false,
+  batchSize: number = 2,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-    return createBatchConfiguration(blrContract, {
-        configurationId: EQUITY_CONFIG_ID,
-        facetNames: EQUITY_FACETS,
-        facetAddresses,
-        useTimeTravel,
-        partialBatchDeploy,
-        batchSize,
-        registry: atsRegistry,
-    })
+  // Get facet names based on time travel mode
+  // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions
+  const baseFacets = useTimeTravel ? [...EQUITY_FACETS, "TimeTravelFacet"] : EQUITY_FACETS;
+
+  const facetNames = useTimeTravel
+    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
+    : baseFacets;
+
+  // Build facet data with resolver keys from registry
+  const facets = facetNames.map((name) => {
+    // Strip "TimeTravel" suffix to get base name for registry lookup
+    const baseName = name.replace(/TimeTravel$/, "");
+
+    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    if (!facetDef?.resolverKey?.value) {
+      throw new Error(`No resolver key found for facet: ${baseName}`);
+    }
+    return {
+      facetName: name,
+      resolverKey: facetDef.resolverKey.value,
+      address: facetAddresses[name],
+    };
+  });
+
+  return createBatchConfiguration(blrContract, {
+    configurationId: EQUITY_CONFIG_ID,
+    facets,
+    partialBatchDeploy,
+    batchSize,
+  });
 }

@@ -1,5 +1,5 @@
-import { task } from 'hardhat/config'
-import { execSync } from 'child_process'
+import { task } from "hardhat/config";
+import { execSync } from "child_process";
 
 /**
  * Hardhat task to generate the contract registry.
@@ -23,38 +23,31 @@ import { execSync } from 'child_process'
  *
  * @see scripts/tools/generateRegistry.ts for the underlying implementation
  */
-task(
-    'generate-registry',
-    'Generate contract registry from Solidity source files'
-)
-    .addFlag('silent', 'Minimal output (only show final result)')
-    .setAction(async (taskArgs, hre) => {
-        console.log('📋 Generating contract registry...')
+task("generate-registry", "Generate contract registry from Solidity source files")
+  .addFlag("silent", "Minimal output (only show final result)")
+  .setAction(async (taskArgs, hre) => {
+    console.log("📋 Generating contract registry...");
 
-        try {
-            // Execute the registry generation script
-            // Set LOG_LEVEL environment variable to control output verbosity
-            const env = {
-                ...process.env,
-                LOG_LEVEL: taskArgs.silent ? 'WARN' : 'INFO',
-            }
+    try {
+      // Execute the registry generation script
+      // Set LOG_LEVEL environment variable to control output verbosity
+      const env = {
+        ...process.env,
+        LOG_LEVEL: taskArgs.silent ? "WARN" : "INFO",
+      };
 
-            execSync('npm run generate:registry', {
-                stdio: 'inherit',
-                cwd: hre.config.paths.root,
-                env,
-            })
+      execSync("npm run generate:registry", {
+        stdio: "inherit",
+        cwd: hre.config.paths.root,
+        env,
+      });
 
-            console.log('✅ Registry generation completed successfully')
-        } catch (error) {
-            // If registry generation fails, log error but don't fail the build
-            // This allows compilation to succeed even if registry generation has issues
-            console.error('❌ Registry generation failed:', error.message)
-            console.error(
-                'Build will continue, but registry may be out of date.'
-            )
-            console.error(
-                'Run "npm run generate:registry" manually to diagnose.'
-            )
-        }
-    })
+      console.log("✅ Registry generation completed successfully");
+    } catch (error) {
+      // If registry generation fails, log error but don't fail the build
+      // This allows compilation to succeed even if registry generation has issues
+      console.error("❌ Registry generation failed:", error.message);
+      console.error("Build will continue, but registry may be out of date.");
+      console.error('Run "npm run generate:registry" manually to diagnose.');
+    }
+  });

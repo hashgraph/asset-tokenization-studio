@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.17;
 
-import {TRexIDiamondLoupe as IDiamondLoupe} from './IDiamondLoupe.sol';
+import { TRexIDiamondLoupe as IDiamondLoupe } from "./IDiamondLoupe.sol";
 
 /**
  * @title Resolver Proxy Manager
@@ -53,10 +53,7 @@ interface TRexIDiamondCutManager {
     error DuplicatedFacetInConfiguration(bytes32 facetId);
 
     /// @notice error that occurs when try to create a configuration and the configuration key doesn't exists
-    error ResolverProxyConfigurationNoRegistered(
-        bytes32 resolverProxyConfigurationId,
-        uint256 version
-    );
+    error ResolverProxyConfigurationNoRegistered(bytes32 resolverProxyConfigurationId, uint256 version);
 
     /// @notice error that occurs when try to add a selector and the selector is blacklisted
     error SelectorBlacklisted(bytes4 selector);
@@ -67,10 +64,7 @@ interface TRexIDiamondCutManager {
      * @param _facetConfigurations.id list of business logics to be registered.
      * @param _facetConfigurations.version list of versions of each _facetIds.
      */
-    function createConfiguration(
-        bytes32 _configurationId,
-        FacetConfiguration[] calldata _facetConfigurations
-    ) external;
+    function createConfiguration(bytes32 _configurationId, FacetConfiguration[] calldata _facetConfigurations) external;
 
     /**
      * @notice Create a new batch configuration to the latest version of all facets.
@@ -96,10 +90,7 @@ interface TRexIDiamondCutManager {
      * @param _configurationId the configuration key to be checked.
      * @param _version configured version in the resolverProxy.
      */
-    function checkResolverProxyConfigurationRegistered(
-        bytes32 _configurationId,
-        uint256 _version
-    ) external;
+    function checkResolverProxyConfigurationRegistered(bytes32 _configurationId, uint256 _version) external;
 
     /**
      * @notice Resolve the facet address knowing configuration, version and selector.
@@ -142,10 +133,7 @@ interface TRexIDiamondCutManager {
      * @notice Returns the length of configuration keys
      * @return configurationsLength_
      */
-    function getConfigurationsLength()
-        external
-        view
-        returns (uint256 configurationsLength_);
+    function getConfigurationsLength() external view returns (uint256 configurationsLength_);
 
     /**
      * @notice Returns a list of configuration keys
@@ -163,9 +151,7 @@ interface TRexIDiamondCutManager {
      * @param _configurationId key to be obtained.
      * @return latestVersion_ latest version registered of a resolverProxy configuration.
      */
-    function getLatestVersionByConfiguration(
-        bytes32 _configurationId
-    ) external view returns (uint256 latestVersion_);
+    function getLatestVersionByConfiguration(bytes32 _configurationId) external view returns (uint256 latestVersion_);
 
     function getFacetsLengthByConfigurationIdAndVersion(
         bytes32 _configurationId,

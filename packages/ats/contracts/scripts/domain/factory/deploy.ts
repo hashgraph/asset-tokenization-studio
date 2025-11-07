@@ -9,55 +9,48 @@
  * @module domain/factory/deploy
  */
 
-import { Signer } from 'ethers'
-import { Factory__factory, ProxyAdmin } from '@contract-types'
-import {
-    DeployProxyResult,
-    deployProxy,
-    info,
-    section,
-    success,
-    error as logError,
-} from '@scripts/infrastructure'
+import { Signer } from "ethers";
+import { Factory__factory, ProxyAdmin } from "@contract-types";
+import { DeployProxyResult, deployProxy, info, section, success, error as logError } from "@scripts/infrastructure";
 
 /**
  * Options for deploying Factory.
  */
 export interface DeployFactoryOptions {
-    /** BLR address (required for Factory initialization) */
-    blrAddress?: string
+  /** BLR address (required for Factory initialization) */
+  blrAddress?: string;
 
-    /** Existing ProxyAdmin contract instance (optional, will deploy new one if not provided) */
-    existingProxyAdmin?: ProxyAdmin
+  /** Existing ProxyAdmin contract instance (optional, will deploy new one if not provided) */
+  existingProxyAdmin?: ProxyAdmin;
 
-    /** Whether to initialize after deployment */
-    initialize?: boolean
+  /** Whether to initialize after deployment */
+  initialize?: boolean;
 }
 
 /**
  * Result of deploying Factory.
  */
 export interface DeployFactoryResult {
-    /** Whether deployment succeeded */
-    success: boolean
+  /** Whether deployment succeeded */
+  success: boolean;
 
-    /** Proxy deployment result */
-    proxyResult: DeployProxyResult
+  /** Proxy deployment result */
+  proxyResult: DeployProxyResult;
 
-    /** Factory proxy address */
-    factoryAddress: string
+  /** Factory proxy address */
+  factoryAddress: string;
 
-    /** Factory implementation address */
-    implementationAddress: string
+  /** Factory implementation address */
+  implementationAddress: string;
 
-    /** ProxyAdmin address */
-    proxyAdminAddress: string
+  /** ProxyAdmin address */
+  proxyAdminAddress: string;
 
-    /** Whether Factory was initialized */
-    initialized: boolean
+  /** Whether Factory was initialized */
+  initialized: boolean;
 
-    /** Error message (only if success=false) */
-    error?: string
+  /** Error message (only if success=false) */
+  error?: string;
 }
 
 /**
@@ -82,55 +75,52 @@ export interface DeployFactoryResult {
  * console.log(`Factory deployed at ${result.factoryAddress}`)
  * ```
  */
-export async function deployFactory(
-    signer: Signer,
-    options: DeployFactoryOptions = {}
-): Promise<DeployFactoryResult> {
-    const { existingProxyAdmin } = options
+export async function deployFactory(signer: Signer, options: DeployFactoryOptions = {}): Promise<DeployFactoryResult> {
+  const { existingProxyAdmin } = options;
 
-    section('Deploying Factory')
+  section("Deploying Factory");
 
-    try {
-        // Deploy Factory with proxy
-        info('Deploying Factory implementation and proxy...')
+  try {
+    // Deploy Factory with proxy
+    info("Deploying Factory implementation and proxy...");
 
-        // Create factory for implementation deployment
-        const implementationFactory = new Factory__factory(signer)
+    // Create factory for implementation deployment
+    const implementationFactory = new Factory__factory(signer);
 
-        const proxyResult = await deployProxy(signer, {
-            implementationFactory,
-            implementationArgs: [],
-            existingProxyAdmin,
-            initData: '0x', // Factory is stateless, no initialization needed
-        })
+    const proxyResult = await deployProxy(signer, {
+      implementationFactory,
+      implementationArgs: [],
+      existingProxyAdmin,
+      initData: "0x", // Factory is stateless, no initialization needed
+    });
 
-        const factoryAddress = proxyResult.proxyAddress
-        const implementationAddress = proxyResult.implementationAddress
-        const adminAddress = proxyResult.proxyAdminAddress
+    const factoryAddress = proxyResult.proxyAddress;
+    const implementationAddress = proxyResult.implementationAddress;
+    const adminAddress = proxyResult.proxyAdminAddress;
 
-        // Factory contract is stateless and doesn't require initialization
-        // The BLR address is passed as a parameter when deploying tokens
-        const initialized = false
+    // Factory contract is stateless and doesn't require initialization
+    // The BLR address is passed as a parameter when deploying tokens
+    const initialized = false;
 
-        success('Factory deployment complete')
-        info(`  Factory Proxy: ${factoryAddress}`)
-        info(`  Implementation: ${implementationAddress}`)
-        info(`  ProxyAdmin: ${adminAddress}`)
+    success("Factory deployment complete");
+    info(`  Factory Proxy: ${factoryAddress}`);
+    info(`  Implementation: ${implementationAddress}`);
+    info(`  ProxyAdmin: ${adminAddress}`);
 
-        return {
-            success: true,
-            proxyResult,
-            factoryAddress,
-            implementationAddress,
-            proxyAdminAddress: adminAddress,
-            initialized,
-        }
-    } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err)
-        logError(`Factory deployment failed: ${errorMessage}`)
+    return {
+      success: true,
+      proxyResult,
+      factoryAddress,
+      implementationAddress,
+      proxyAdminAddress: adminAddress,
+      initialized,
+    };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    logError(`Factory deployment failed: ${errorMessage}`);
 
-        throw new Error(`Factory deployment failed: ${errorMessage}`)
-    }
+    throw new Error(`Factory deployment failed: ${errorMessage}`);
+  }
 }
 
 /**
@@ -159,15 +149,15 @@ export async function deployFactory(
  * ```
  */
 export async function deployFactoryWithProxyAdmin(
-    signer: Signer,
-    blrAddress: string,
-    existingProxyAdmin: ProxyAdmin
+  signer: Signer,
+  blrAddress: string,
+  existingProxyAdmin: ProxyAdmin,
 ): Promise<DeployFactoryResult> {
-    return deployFactory(signer, {
-        blrAddress,
-        existingProxyAdmin,
-        initialize: true,
-    })
+  return deployFactory(signer, {
+    blrAddress,
+    existingProxyAdmin,
+    initialize: true,
+  });
 }
 
 /**
@@ -177,15 +167,15 @@ export async function deployFactoryWithProxyAdmin(
  * @returns Summary object
  */
 export function getFactoryDeploymentSummary(result: DeployFactoryResult): {
-    factoryAddress: string
-    implementationAddress: string
-    proxyAdminAddress: string
-    initialized: boolean
+  factoryAddress: string;
+  implementationAddress: string;
+  proxyAdminAddress: string;
+  initialized: boolean;
 } {
-    return {
-        factoryAddress: result.factoryAddress,
-        implementationAddress: result.implementationAddress,
-        proxyAdminAddress: result.proxyAdminAddress,
-        initialized: result.initialized,
-    }
+  return {
+    factoryAddress: result.factoryAddress,
+    implementationAddress: result.implementationAddress,
+    proxyAdminAddress: result.proxyAdminAddress,
+    initialized: result.initialized,
+  };
 }

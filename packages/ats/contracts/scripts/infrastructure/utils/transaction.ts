@@ -9,12 +9,7 @@
  * @module core/utils/transaction
  */
 
-import {
-    ContractTransaction,
-    ContractReceipt,
-    providers,
-    BigNumber,
-} from 'ethers'
+import { ContractTransaction, ContractReceipt, providers, BigNumber } from "ethers";
 
 /**
  * Wait for transaction confirmation with retry logic.
@@ -33,33 +28,24 @@ import {
  * ```
  */
 export async function waitForTransaction(
-    tx: ContractTransaction,
-    confirmations: number = 1,
-    timeout: number = 120000
+  tx: ContractTransaction,
+  confirmations: number = 1,
+  timeout: number = 120000,
 ): Promise<ContractReceipt> {
-    try {
-        const receipt = await Promise.race([
-            tx.wait(confirmations),
-            new Promise<never>((_, reject) =>
-                setTimeout(
-                    () => reject(new Error('Transaction timeout')),
-                    timeout
-                )
-            ),
-        ])
+  try {
+    const receipt = await Promise.race([
+      tx.wait(confirmations),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Transaction timeout")), timeout)),
+    ]);
 
-        if (!receipt || receipt.status === 0) {
-            throw new Error('Transaction failed')
-        }
-
-        return receipt
-    } catch (error) {
-        throw new Error(
-            `Transaction failed: ${
-                error instanceof Error ? error.message : String(error)
-            }`
-        )
+    if (!receipt || receipt.status === 0) {
+      throw new Error("Transaction failed");
     }
+
+    return receipt;
+  } catch (error) {
+    throw new Error(`Transaction failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 /**
@@ -75,21 +61,14 @@ export async function waitForTransaction(
  * const gasPrice = await getGasPrice(provider, 1.2) // 20% higher for faster tx
  * ```
  */
-export async function getGasPrice(
-    provider: providers.Provider,
-    multiplier: number = 1.0
-): Promise<BigNumber> {
-    try {
-        const gasPrice = await provider.getGasPrice()
-        const adjusted = gasPrice.mul(Math.floor(multiplier * 100)).div(100)
-        return adjusted
-    } catch (error) {
-        throw new Error(
-            `Failed to get gas price: ${
-                error instanceof Error ? error.message : String(error)
-            }`
-        )
-    }
+export async function getGasPrice(provider: providers.Provider, multiplier: number = 1.0): Promise<BigNumber> {
+  try {
+    const gasPrice = await provider.getGasPrice();
+    const adjusted = gasPrice.mul(Math.floor(multiplier * 100)).div(100);
+    return adjusted;
+  } catch (error) {
+    throw new Error(`Failed to get gas price: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 /**
@@ -105,15 +84,9 @@ export async function getGasPrice(
  * const gasLimit = estimateGasLimit(estimated, 1.3) // 30% buffer
  * ```
  */
-export function estimateGasLimit(
-    estimatedGas: BigNumber | number,
-    buffer: number = 1.2
-): number {
-    const gas =
-        typeof estimatedGas === 'number'
-            ? estimatedGas
-            : estimatedGas.toNumber()
-    return Math.floor(gas * buffer)
+export function estimateGasLimit(estimatedGas: BigNumber | number, buffer: number = 1.2): number {
+  const gas = typeof estimatedGas === "number" ? estimatedGas : estimatedGas.toNumber();
+  return Math.floor(gas * buffer);
 }
 
 /**
@@ -132,39 +105,34 @@ export function estimateGasLimit(
  * ```
  */
 export function extractRevertReason(error: unknown): string {
-    if (!error) {
-        return 'Unknown error'
-    }
+  if (!error) {
+    return "Unknown error";
+  }
 
-    // Handle ethers.js errors
-    if (
-        typeof error === 'object' &&
-        error !== null &&
-        'reason' in error &&
-        typeof error.reason === 'string'
-    ) {
-        return error.reason
-    }
+  // Handle ethers.js errors
+  if (typeof error === "object" && error !== null && "reason" in error && typeof error.reason === "string") {
+    return error.reason;
+  }
 
-    // Handle error with data property
-    if (
-        typeof error === 'object' &&
-        error !== null &&
-        'data' in error &&
-        typeof error.data === 'object' &&
-        error.data !== null &&
-        'message' in error.data &&
-        typeof error.data.message === 'string'
-    ) {
-        return error.data.message
-    }
+  // Handle error with data property
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "data" in error &&
+    typeof error.data === "object" &&
+    error.data !== null &&
+    "message" in error.data &&
+    typeof error.data.message === "string"
+  ) {
+    return error.data.message;
+  }
 
-    // Handle error with message property
-    if (error instanceof Error) {
-        return error.message
-    }
+  // Handle error with message property
+  if (error instanceof Error) {
+    return error.message;
+  }
 
-    return String(error)
+  return String(error);
 }
 
 /**
@@ -186,34 +154,27 @@ export function extractRevertReason(error: unknown): string {
  * ```
  */
 export async function retryTransaction<T>(
-    fn: () => Promise<T>,
-    maxRetries: number = 3,
-    baseDelay: number = 1000
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000,
 ): Promise<T> {
-    let lastError: Error | undefined
+  let lastError: Error | undefined;
 
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        try {
-            return await fn()
-        } catch (error) {
-            lastError =
-                error instanceof Error
-                    ? error
-                    : new Error(String(error || 'Unknown error'))
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error || "Unknown error"));
 
-            if (attempt < maxRetries) {
-                const delay = baseDelay * Math.pow(2, attempt)
-                await new Promise((resolve) => setTimeout(resolve, delay))
-                continue
-            }
-        }
+      if (attempt < maxRetries) {
+        const delay = baseDelay * Math.pow(2, attempt);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
     }
+  }
 
-    throw new Error(
-        `Transaction failed after ${maxRetries + 1} attempts: ${
-            lastError?.message || 'Unknown error'
-        }`
-    )
+  throw new Error(`Transaction failed after ${maxRetries + 1} attempts: ${lastError?.message || "Unknown error"}`);
 }
 
 /**
@@ -232,20 +193,17 @@ export async function retryTransaction<T>(
  * // "Gas used: 123,456 (12.35% of limit 1,000,000)"
  * ```
  */
-export function formatGasUsage(
-    receipt: ContractReceipt,
-    gasLimit?: BigNumber
-): string {
-    const gasUsed = receipt.gasUsed.toNumber()
+export function formatGasUsage(receipt: ContractReceipt, gasLimit?: BigNumber): string {
+  const gasUsed = receipt.gasUsed.toNumber();
 
-    if (!gasLimit) {
-        return `Gas used: ${gasUsed.toLocaleString()}`
-    }
+  if (!gasLimit) {
+    return `Gas used: ${gasUsed.toLocaleString()}`;
+  }
 
-    const limit = gasLimit.toNumber()
-    const percentage = ((gasUsed / limit) * 100).toFixed(2)
+  const limit = gasLimit.toNumber();
+  const percentage = ((gasUsed / limit) * 100).toFixed(2);
 
-    return `Gas used: ${gasUsed.toLocaleString()} (${percentage}% of limit ${limit.toLocaleString()})`
+  return `Gas used: ${gasUsed.toLocaleString()} (${percentage}% of limit ${limit.toLocaleString()})`;
 }
 
 /**
@@ -255,11 +213,8 @@ export function formatGasUsage(
  * @returns true if error is nonce-related
  */
 export function isNonceTooLowError(error: unknown): boolean {
-    const message = extractRevertReason(error).toLowerCase()
-    return (
-        message.includes('nonce') &&
-        (message.includes('too low') || message.includes('already used'))
-    )
+  const message = extractRevertReason(error).toLowerCase();
+  return message.includes("nonce") && (message.includes("too low") || message.includes("already used"));
 }
 
 /**
@@ -269,12 +224,12 @@ export function isNonceTooLowError(error: unknown): boolean {
  * @returns true if error is gas-related
  */
 export function isGasError(error: unknown): boolean {
-    const message = extractRevertReason(error).toLowerCase()
-    return (
-        message.includes('out of gas') ||
-        message.includes('gas required exceeds') ||
-        message.includes('insufficient funds for gas')
-    )
+  const message = extractRevertReason(error).toLowerCase();
+  return (
+    message.includes("out of gas") ||
+    message.includes("gas required exceeds") ||
+    message.includes("insufficient funds for gas")
+  );
 }
 
 /**
@@ -284,11 +239,11 @@ export function isGasError(error: unknown): boolean {
  * @returns true if error is network-related
  */
 export function isNetworkError(error: unknown): boolean {
-    const message = extractRevertReason(error).toLowerCase()
-    return (
-        message.includes('network') ||
-        message.includes('timeout') ||
-        message.includes('connection') ||
-        message.includes('econnrefused')
-    )
+  const message = extractRevertReason(error).toLowerCase();
+  return (
+    message.includes("network") ||
+    message.includes("timeout") ||
+    message.includes("connection") ||
+    message.includes("econnrefused")
+  );
 }

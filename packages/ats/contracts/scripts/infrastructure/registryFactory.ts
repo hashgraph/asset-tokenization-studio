@@ -41,11 +41,7 @@
 // Infrastructure files should import from each other using relative paths,
 // NOT '@scripts/infrastructure', to avoid circular dependency issues.
 // The @scripts/infrastructure alias points to index.ts, which exports from this file.
-import type {
-    FacetDefinition,
-    ContractDefinition,
-    StorageWrapperDefinition,
-} from './types'
+import type { FacetDefinition, ContractDefinition, StorageWrapperDefinition } from "./types";
 
 /**
  * Create registry helper functions for any contract registry.
@@ -86,166 +82,152 @@ import type {
  * ```
  */
 export function createRegistryHelpers<
-    TFacetRegistry extends Record<string, FacetDefinition>,
-    TContractRegistry extends Record<string, ContractDefinition>,
-    TStorageWrapperRegistry extends Record<
-        string,
-        StorageWrapperDefinition
-    > = Record<string, never>,
-    TMockRegistry extends Record<string, FacetDefinition> = Record<
-        string,
-        never
-    >,
+  TFacetRegistry extends Record<string, FacetDefinition>,
+  TContractRegistry extends Record<string, ContractDefinition>,
+  TStorageWrapperRegistry extends Record<string, StorageWrapperDefinition> = Record<string, never>,
+  TMockRegistry extends Record<string, FacetDefinition> = Record<string, never>,
 >(
-    facetRegistry: TFacetRegistry,
-    contractRegistry: TContractRegistry,
-    storageWrapperRegistry?: TStorageWrapperRegistry,
-    mockRegistry?: TMockRegistry
+  facetRegistry: TFacetRegistry,
+  contractRegistry: TContractRegistry,
+  storageWrapperRegistry?: TStorageWrapperRegistry,
+  mockRegistry?: TMockRegistry,
 ) {
-    return {
-        /**
-         * Get facet definition by name.
-         *
-         * @param name - Facet name (e.g., 'AccessControlFacet')
-         * @returns FacetDefinition if found, undefined otherwise
-         */
-        getFacetDefinition(name: string): FacetDefinition | undefined {
-            return facetRegistry[name]
-        },
+  return {
+    /**
+     * Get facet definition by name.
+     *
+     * @param name - Facet name (e.g., 'AccessControlFacet')
+     * @returns FacetDefinition if found, undefined otherwise
+     */
+    getFacetDefinition(name: string): FacetDefinition | undefined {
+      return facetRegistry[name];
+    },
 
-        /**
-         * Get contract definition by name.
-         *
-         * @param name - Contract name (e.g., 'BusinessLogicResolver')
-         * @returns ContractDefinition if found, undefined otherwise
-         */
-        getContractDefinition(name: string): ContractDefinition | undefined {
-            return contractRegistry[name]
-        },
+    /**
+     * Get contract definition by name.
+     *
+     * @param name - Contract name (e.g., 'BusinessLogicResolver')
+     * @returns ContractDefinition if found, undefined otherwise
+     */
+    getContractDefinition(name: string): ContractDefinition | undefined {
+      return contractRegistry[name];
+    },
 
-        /**
-         * Get all facets.
-         *
-         * @returns Array of all FacetDefinitions
-         */
-        getAllFacets(): FacetDefinition[] {
-            return Object.values(facetRegistry)
-        },
+    /**
+     * Get all facets.
+     *
+     * @returns Array of all FacetDefinitions
+     */
+    getAllFacets(): FacetDefinition[] {
+      return Object.values(facetRegistry);
+    },
 
-        /**
-         * Get all contracts.
-         *
-         * @returns Array of all ContractDefinitions
-         */
-        getAllContracts(): ContractDefinition[] {
-            return Object.values(contractRegistry)
-        },
+    /**
+     * Get all contracts.
+     *
+     * @returns Array of all ContractDefinitions
+     */
+    getAllContracts(): ContractDefinition[] {
+      return Object.values(contractRegistry);
+    },
 
-        /**
-         * Check if a facet exists in the registry.
-         *
-         * @param name - Facet name to check
-         * @returns true if facet exists, false otherwise
-         */
-        hasFacet(name: string): boolean {
-            return name in facetRegistry
-        },
+    /**
+     * Check if a facet exists in the registry.
+     *
+     * @param name - Facet name to check
+     * @returns true if facet exists, false otherwise
+     */
+    hasFacet(name: string): boolean {
+      return name in facetRegistry;
+    },
 
-        /**
-         * Check if a contract exists in the registry.
-         *
-         * @param name - Contract name to check
-         * @returns true if contract exists, false otherwise
-         */
-        hasContract(name: string): boolean {
-            return name in contractRegistry
-        },
+    /**
+     * Check if a contract exists in the registry.
+     *
+     * @param name - Contract name to check
+     * @returns true if contract exists, false otherwise
+     */
+    hasContract(name: string): boolean {
+      return name in contractRegistry;
+    },
 
-        /**
-         * Total number of facets in the registry.
-         */
-        get FACET_REGISTRY_COUNT(): number {
-            return Object.keys(facetRegistry).length
-        },
+    /**
+     * Total number of facets in the registry.
+     */
+    get FACET_REGISTRY_COUNT(): number {
+      return Object.keys(facetRegistry).length;
+    },
 
-        /**
-         * Get storage wrapper definition by name.
-         *
-         * @param name - Storage wrapper name (e.g., 'AccessControlStorageWrapper')
-         * @returns StorageWrapperDefinition if found, undefined otherwise
-         */
-        getStorageWrapperDefinition(
-            name: string
-        ): StorageWrapperDefinition | undefined {
-            return storageWrapperRegistry?.[name]
-        },
+    /**
+     * Get storage wrapper definition by name.
+     *
+     * @param name - Storage wrapper name (e.g., 'AccessControlStorageWrapper')
+     * @returns StorageWrapperDefinition if found, undefined otherwise
+     */
+    getStorageWrapperDefinition(name: string): StorageWrapperDefinition | undefined {
+      return storageWrapperRegistry?.[name];
+    },
 
-        /**
-         * Get all storage wrappers.
-         *
-         * @returns Array of all StorageWrapperDefinitions
-         */
-        getAllStorageWrappers(): StorageWrapperDefinition[] {
-            return storageWrapperRegistry
-                ? Object.values(storageWrapperRegistry)
-                : []
-        },
+    /**
+     * Get all storage wrappers.
+     *
+     * @returns Array of all StorageWrapperDefinitions
+     */
+    getAllStorageWrappers(): StorageWrapperDefinition[] {
+      return storageWrapperRegistry ? Object.values(storageWrapperRegistry) : [];
+    },
 
-        /**
-         * Check if a storage wrapper exists in the registry.
-         *
-         * @param name - Storage wrapper name to check
-         * @returns true if storage wrapper exists, false otherwise
-         */
-        hasStorageWrapper(name: string): boolean {
-            return storageWrapperRegistry
-                ? name in storageWrapperRegistry
-                : false
-        },
+    /**
+     * Check if a storage wrapper exists in the registry.
+     *
+     * @param name - Storage wrapper name to check
+     * @returns true if storage wrapper exists, false otherwise
+     */
+    hasStorageWrapper(name: string): boolean {
+      return storageWrapperRegistry ? name in storageWrapperRegistry : false;
+    },
 
-        /**
-         * Total number of storage wrappers in the registry.
-         */
-        get STORAGE_WRAPPER_REGISTRY_COUNT(): number {
-            return storageWrapperRegistry
-                ? Object.keys(storageWrapperRegistry).length
-                : 0
-        },
+    /**
+     * Total number of storage wrappers in the registry.
+     */
+    get STORAGE_WRAPPER_REGISTRY_COUNT(): number {
+      return storageWrapperRegistry ? Object.keys(storageWrapperRegistry).length : 0;
+    },
 
-        /**
-         * Get mock contract definition by name.
-         *
-         * @param name - Mock contract name (e.g., 'MockedExternalKycList')
-         * @returns FacetDefinition if found, undefined otherwise
-         */
-        getMockDefinition(name: string): FacetDefinition | undefined {
-            return mockRegistry?.[name]
-        },
+    /**
+     * Get mock contract definition by name.
+     *
+     * @param name - Mock contract name (e.g., 'MockedExternalKycList')
+     * @returns FacetDefinition if found, undefined otherwise
+     */
+    getMockDefinition(name: string): FacetDefinition | undefined {
+      return mockRegistry?.[name];
+    },
 
-        /**
-         * Get all mock contracts.
-         *
-         * @returns Array of all FacetDefinitions for mocks
-         */
-        getAllMocks(): FacetDefinition[] {
-            return mockRegistry ? Object.values(mockRegistry) : []
-        },
+    /**
+     * Get all mock contracts.
+     *
+     * @returns Array of all FacetDefinitions for mocks
+     */
+    getAllMocks(): FacetDefinition[] {
+      return mockRegistry ? Object.values(mockRegistry) : [];
+    },
 
-        /**
-         * Check if a mock contract exists in the registry.
-         *
-         * @param name - Mock contract name to check
-         * @returns true if mock exists, false otherwise
-         */
-        hasMock(name: string): boolean {
-            return mockRegistry ? name in mockRegistry : false
-        },
+    /**
+     * Check if a mock contract exists in the registry.
+     *
+     * @param name - Mock contract name to check
+     * @returns true if mock exists, false otherwise
+     */
+    hasMock(name: string): boolean {
+      return mockRegistry ? name in mockRegistry : false;
+    },
 
-        /**
-         * Total number of mock contracts in the registry.
-         */
-        get MOCK_CONTRACTS_COUNT(): number {
-            return mockRegistry ? Object.keys(mockRegistry).length : 0
-        },
-    }
+    /**
+     * Total number of mock contracts in the registry.
+     */
+    get MOCK_CONTRACTS_COUNT(): number {
+      return mockRegistry ? Object.keys(mockRegistry).length : 0;
+    },
+  };
 }

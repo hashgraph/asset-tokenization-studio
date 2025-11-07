@@ -25,24 +25,24 @@
  */
 
 // Domain registry data (auto-generated) - MUST be first, others depend on it
-export * from './atsRegistry.data'
+export * from "./atsRegistry.data";
 
 // Domain constants (depends on ROLES from registry.data)
-export * from './constants'
+export * from "./constants";
 
 // Domain registry (ATS-specific contract registry helpers)
-export * from './atsRegistry'
+export * from "./atsRegistry";
 
 // Equity configuration
-export * from './equity/createConfiguration'
+export * from "./equity/createConfiguration";
 
 // Bond configuration
-export * from './bond/createConfiguration'
+export * from "./bond/createConfiguration";
 
 // Factory deployment and types
-export * from './factory/deploy'
-export * from './factory/types'
+export * from "./factory/deploy";
+export * from "./factory/types";
 
 // Token deployment from factory
-export * from './factory/deployEquityToken'
-export * from './factory/deployBondToken'
+export * from "./factory/deployEquityToken";
+export * from "./factory/deployBondToken";

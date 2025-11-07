@@ -8,19 +8,9 @@
  * @module core/operations/transparentProxyDeployment
  */
 
-import { Signer } from 'ethers'
-import {
-    TransparentUpgradeableProxy,
-    TransparentUpgradeableProxy__factory,
-} from '@contract-types'
-import {
-    error as logError,
-    info,
-    section,
-    success,
-    validateAddress,
-    GAS_LIMIT,
-} from '@scripts/infrastructure'
+import { Signer } from "ethers";
+import { TransparentUpgradeableProxy, TransparentUpgradeableProxy__factory } from "@contract-types";
+import { error as logError, info, section, success, validateAddress, GAS_LIMIT } from "@scripts/infrastructure";
 
 /**
  * Deploy TransparentUpgradeableProxy contract.
@@ -51,41 +41,40 @@ import {
  * ```
  */
 export async function deployTransparentProxy(
-    signer: Signer,
-    implementationAddress: string,
-    proxyAdminAddress: string,
-    initData: string
+  signer: Signer,
+  implementationAddress: string,
+  proxyAdminAddress: string,
+  initData: string,
 ): Promise<TransparentUpgradeableProxy> {
-    section('Deploying TransparentUpgradeableProxy')
+  section("Deploying TransparentUpgradeableProxy");
 
-    try {
-        validateAddress(implementationAddress, 'implementation address')
-        validateAddress(proxyAdminAddress, 'proxy admin address')
+  try {
+    validateAddress(implementationAddress, "implementation address");
+    validateAddress(proxyAdminAddress, "proxy admin address");
 
-        info('Deploying TransparentUpgradeableProxy...')
-        info(`  Implementation: ${implementationAddress}`)
-        info(`  ProxyAdmin: ${proxyAdminAddress}`)
-        info(`  Init Data: ${initData}`)
+    info("Deploying TransparentUpgradeableProxy...");
+    info(`  Implementation: ${implementationAddress}`);
+    info(`  ProxyAdmin: ${proxyAdminAddress}`);
+    info(`  Init Data: ${initData}`);
 
-        const proxy = await new TransparentUpgradeableProxy__factory(
-            signer
-        ).deploy(implementationAddress, proxyAdminAddress, initData, {
-            gasLimit: GAS_LIMIT.default,
-        })
-        await proxy.deployed()
+    const proxy = await new TransparentUpgradeableProxy__factory(signer).deploy(
+      implementationAddress,
+      proxyAdminAddress,
+      initData,
+      {
+        gasLimit: GAS_LIMIT.default,
+      },
+    );
+    await proxy.deployed();
 
-        success('TransparentUpgradeableProxy deployment complete')
-        info(`  Proxy: ${proxy.address}`)
+    success("TransparentUpgradeableProxy deployment complete");
+    info(`  Proxy: ${proxy.address}`);
 
-        return proxy
-    } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err)
-        logError(
-            `TransparentUpgradeableProxy deployment failed: ${errorMessage}`
-        )
+    return proxy;
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    logError(`TransparentUpgradeableProxy deployment failed: ${errorMessage}`);
 
-        throw new Error(
-            `TransparentUpgradeableProxy deployment failed: ${errorMessage}`
-        )
-    }
+    throw new Error(`TransparentUpgradeableProxy deployment failed: ${errorMessage}`);
+  }
 }

@@ -6,12 +6,8 @@
  * @module tools/generators/registryGenerator
  */
 
-import { ContractMetadata } from '../scanner/metadataExtractor'
-import {
-    MethodDefinition,
-    EventDefinition,
-    ErrorDefinition,
-} from '../../infrastructure/types'
+import { ContractMetadata } from "../scanner/metadataExtractor";
+import { MethodDefinition, EventDefinition, ErrorDefinition } from "../../infrastructure/types";
 
 /**
  * Format methods array for registry output.
@@ -21,7 +17,7 @@ import {
  * @returns Methods array as JavaScript object
  */
 function formatMethods(methods: MethodDefinition[]): string {
-    return JSON.stringify(methods)
+  return JSON.stringify(methods);
 }
 
 /**
@@ -32,7 +28,7 @@ function formatMethods(methods: MethodDefinition[]): string {
  * @returns Events array as JavaScript object
  */
 function formatEvents(events: EventDefinition[]): string {
-    return JSON.stringify(events)
+  return JSON.stringify(events);
 }
 
 /**
@@ -43,7 +39,7 @@ function formatEvents(events: EventDefinition[]): string {
  * @returns Errors array as JavaScript object
  */
 function formatErrors(errors: ErrorDefinition[]): string {
-    return JSON.stringify(errors)
+  return JSON.stringify(errors);
 }
 
 /**
@@ -61,12 +57,12 @@ function formatErrors(errors: ErrorDefinition[]): string {
  * normalizeRoleValue('0x1234') // '0x0000000000000000000000000000000000000000000000000000000000001234'
  */
 function normalizeRoleValue(value: string): string {
-    // Remove '0x' prefix if present
-    const hexValue = value.startsWith('0x') ? value.slice(2) : value
-    // Pad to 64 characters (32 bytes)
-    const paddedValue = hexValue.padStart(64, '0')
-    // Return with '0x' prefix
-    return `0x${paddedValue}`
+  // Remove '0x' prefix if present
+  const hexValue = value.startsWith("0x") ? value.slice(2) : value;
+  // Pad to 64 characters (32 bytes)
+  const paddedValue = hexValue.padStart(64, "0");
+  // Return with '0x' prefix
+  return `0x${paddedValue}`;
 }
 
 /**
@@ -82,42 +78,39 @@ function normalizeRoleValue(value: string): string {
  * @returns TypeScript source code
  */
 export function generateRegistry(
-    facets: ContractMetadata[],
-    infrastructure: ContractMetadata[],
-    allRoles?: Map<string, string>,
-    storageWrappers?: ContractMetadata[],
-    mocks?: ContractMetadata[],
-    moduleName: string = '@scripts/infrastructure',
-    typechainModuleName: string = '@contract-types'
+  facets: ContractMetadata[],
+  infrastructure: ContractMetadata[],
+  allRoles?: Map<string, string>,
+  storageWrappers?: ContractMetadata[],
+  mocks?: ContractMetadata[],
+  moduleName: string = "@scripts/infrastructure",
+  typechainModuleName: string = "@contract-types",
 ): string {
-    const header = generateHeader(
-        facets.length,
-        infrastructure.length,
-        mocks?.length ?? 0,
-        moduleName,
-        facets,
-        typechainModuleName,
-        mocks
-    )
-    const facetRegistry = generateFacetRegistry(facets)
-    const contractRegistry = generateContractRegistry(infrastructure)
-    const storageWrapperRegistry = storageWrappers
-        ? generateStorageWrapperRegistry(storageWrappers)
-        : ''
-    const mockRegistry =
-        mocks && mocks.length > 0 ? generateMockRegistry(mocks) : ''
-    const constants = generateConstants(facets, infrastructure, allRoles)
+  const header = generateHeader(
+    facets.length,
+    infrastructure.length,
+    mocks?.length ?? 0,
+    moduleName,
+    facets,
+    typechainModuleName,
+    mocks,
+  );
+  const facetRegistry = generateFacetRegistry(facets);
+  const contractRegistry = generateContractRegistry(infrastructure);
+  const storageWrapperRegistry = storageWrappers ? generateStorageWrapperRegistry(storageWrappers) : "";
+  const mockRegistry = mocks && mocks.length > 0 ? generateMockRegistry(mocks) : "";
+  const constants = generateConstants(facets, infrastructure, allRoles);
 
-    const registries = [header, facetRegistry, contractRegistry]
-    if (storageWrapperRegistry) {
-        registries.push(storageWrapperRegistry)
-    }
-    if (mockRegistry) {
-        registries.push(mockRegistry)
-    }
-    registries.push(constants)
+  const registries = [header, facetRegistry, contractRegistry];
+  if (storageWrapperRegistry) {
+    registries.push(storageWrapperRegistry);
+  }
+  if (mockRegistry) {
+    registries.push(mockRegistry);
+  }
+  registries.push(constants);
 
-    return registries.join('\n\n') + '\n'
+  return registries.join("\n\n") + "\n";
 }
 
 /**
@@ -133,43 +126,43 @@ export function generateRegistry(
  * @returns Header code
  */
 function generateHeader(
-    facetCount: number,
-    infrastructureCount: number,
-    mockCount: number,
-    moduleName: string = '@scripts/infrastructure',
-    facets: ContractMetadata[] = [],
-    typechainModuleName: string = '@contract-types',
-    mocks?: ContractMetadata[]
+  facetCount: number,
+  infrastructureCount: number,
+  mockCount: number,
+  moduleName: string = "@scripts/infrastructure",
+  facets: ContractMetadata[] = [],
+  typechainModuleName: string = "@contract-types",
+  mocks?: ContractMetadata[],
 ): string {
-    const mockLine = mockCount > 0 ? `\n * Mocks: ${mockCount}` : ''
+  const mockLine = mockCount > 0 ? `\n * Mocks: ${mockCount}` : "";
 
-    // Sort facet names alphabetically for deterministic output
-    const sortedFacetNames = [...facets].map((f) => f.name).sort()
+  // Sort facet names alphabetically for deterministic output
+  const sortedFacetNames = [...facets].map((f) => f.name).sort();
 
-    // Generate TypeChain factory imports (Prettier will format)
-    // Include both regular and TimeTravel variants where applicable
-    const factoryImports: string[] = []
-    for (const name of sortedFacetNames) {
-        factoryImports.push(`${name}__factory`)
+  // Generate TypeChain factory imports (Prettier will format)
+  // Include both regular and TimeTravel variants where applicable
+  const factoryImports: string[] = [];
+  for (const name of sortedFacetNames) {
+    factoryImports.push(`${name}__factory`);
 
-        // Check if this facet should have a TimeTravel variant
-        // (ends with 'Facet' and is not 'TimeTravelFacet')
-        if (name !== 'TimeTravelFacet' && name.endsWith('Facet')) {
-            factoryImports.push(`${name}TimeTravel__factory`)
-        }
+    // Check if this facet should have a TimeTravel variant
+    // (ends with 'Facet' and is not 'TimeTravelFacet')
+    if (name !== "TimeTravelFacet" && name.endsWith("Facet")) {
+      factoryImports.push(`${name}TimeTravel__factory`);
     }
+  }
 
-    // Include mock contract factory imports
-    if (mocks && mocks.length > 0) {
-        const sortedMockNames = [...mocks].map((m) => m.name).sort()
-        for (const name of sortedMockNames) {
-            factoryImports.push(`${name}__factory`)
-        }
+  // Include mock contract factory imports
+  if (mocks && mocks.length > 0) {
+    const sortedMockNames = [...mocks].map((m) => m.name).sort();
+    for (const name of sortedMockNames) {
+      factoryImports.push(`${name}__factory`);
     }
+  }
 
-    const factoryImportsStr = factoryImports.join(', ')
+  const factoryImportsStr = factoryImports.join(", ");
 
-    return `// SPDX-License-Identifier: Apache-2.0
+  return `// SPDX-License-Identifier: Apache-2.0
 
 /**
  * AUTO-GENERATED Contract Registry Data
@@ -189,7 +182,7 @@ function generateHeader(
  */
 
 import { FacetDefinition, ContractDefinition, StorageWrapperDefinition } from '${moduleName}'
-import { ${factoryImportsStr} } from '${typechainModuleName}'`
+import { ${factoryImportsStr} } from '${typechainModuleName}'`;
 }
 
 /**
@@ -199,24 +192,22 @@ import { ${factoryImportsStr} } from '${typechainModuleName}'`
  * @returns TypeScript code for FACET_REGISTRY
  */
 function generateFacetRegistry(facets: ContractMetadata[]): string {
-    // Sort facets alphabetically for deterministic output
-    const sortedFacets = [...facets].sort((a, b) =>
-        a.name.localeCompare(b.name)
-    )
+  // Sort facets alphabetically for deterministic output
+  const sortedFacets = [...facets].sort((a, b) => a.name.localeCompare(b.name));
 
-    const entries = sortedFacets.map((facet) => generateFacetEntry(facet))
+  const entries = sortedFacets.map((facet) => generateFacetEntry(facet));
 
-    return `/**
+  return `/**
  * Registry of all facet contracts.
  */
 export const FACET_REGISTRY: Record<string, FacetDefinition> = {
-${entries.join(',\n\n')}
+${entries.join(",\n\n")}
 }
 
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = ${facets.length} as const`
+export const TOTAL_FACETS = ${facets.length} as const`;
 }
 
 /**
@@ -229,52 +220,35 @@ export const TOTAL_FACETS = ${facets.length} as const`
  * @returns TypeScript object literal
  */
 function generateFacetEntry(facet: ContractMetadata): string {
-    const resolverKeyLine = facet.resolverKey
-        ? `\n        resolverKey: {\n            name: '${facet.resolverKey.name}',\n            value: '${facet.resolverKey.value}'\n        },`
-        : ''
+  const resolverKeyLine = facet.resolverKey
+    ? `\n        resolverKey: {\n            name: '${facet.resolverKey.name}',\n            value: '${facet.resolverKey.value}'\n        },`
+    : "";
 
-    const rolesLine =
-        facet.roles.length > 0
-            ? `\n        roleCount: ${facet.roles.length},`
-            : ''
+  const rolesLine = facet.roles.length > 0 ? `\n        roleCount: ${facet.roles.length},` : "";
 
-    const inheritanceLine =
-        facet.inheritance.length > 0
-            ? `\n        inheritance: ${JSON.stringify(facet.inheritance)},`
-            : ''
+  const inheritanceLine =
+    facet.inheritance.length > 0 ? `\n        inheritance: ${JSON.stringify(facet.inheritance)},` : "";
 
-    const methodsLine =
-        facet.methods.length > 0
-            ? `\n        methods: ${formatMethods(facet.methods)},`
-            : ''
+  const methodsLine = facet.methods.length > 0 ? `\n        methods: ${formatMethods(facet.methods)},` : "";
 
-    const eventsLine =
-        facet.events.length > 0
-            ? `\n        events: ${formatEvents(facet.events)},`
-            : ''
+  const eventsLine = facet.events.length > 0 ? `\n        events: ${formatEvents(facet.events)},` : "";
 
-    const errorsLine =
-        facet.errors.length > 0
-            ? `\n        errors: ${formatErrors(facet.errors)},`
-            : ''
+  const errorsLine = facet.errors.length > 0 ? `\n        errors: ${formatErrors(facet.errors)},` : "";
 
-    const descriptionLine = facet.description
-        ? `\n        description: '${facet.description}',`
-        : ''
+  const descriptionLine = facet.description ? `\n        description: '${facet.description}',` : "";
 
-    // Add TypeChain factory reference with TimeTravel support
-    // Check if facet should have TimeTravel variant (ends with 'Facet' and is not 'TimeTravelFacet')
-    const hasTimeTravel =
-        facet.name !== 'TimeTravelFacet' && facet.name.endsWith('Facet')
+  // Add TypeChain factory reference with TimeTravel support
+  // Check if facet should have TimeTravel variant (ends with 'Facet' and is not 'TimeTravelFacet')
+  const hasTimeTravel = facet.name !== "TimeTravelFacet" && facet.name.endsWith("Facet");
 
-    // Prettier will format this properly
-    const factoryLine = hasTimeTravel
-        ? `\n        factory: (signer, useTimeTravel = false) => useTimeTravel ? new ${facet.name}TimeTravel__factory(signer) : new ${facet.name}__factory(signer),`
-        : `\n        factory: (signer) => new ${facet.name}__factory(signer),`
+  // Prettier will format this properly
+  const factoryLine = hasTimeTravel
+    ? `\n        factory: (signer, useTimeTravel = false) => useTimeTravel ? new ${facet.name}TimeTravel__factory(signer) : new ${facet.name}__factory(signer),`
+    : `\n        factory: (signer) => new ${facet.name}__factory(signer),`;
 
-    return `    ${facet.name}: {
+  return `    ${facet.name}: {
         name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}
-    }`
+    }`;
 }
 
 /**
@@ -284,26 +258,22 @@ function generateFacetEntry(facet: ContractMetadata): string {
  * @returns TypeScript code for INFRASTRUCTURE_CONTRACTS
  */
 function generateContractRegistry(infrastructure: ContractMetadata[]): string {
-    const sortedContracts = [...infrastructure].sort((a, b) =>
-        a.name.localeCompare(b.name)
-    )
+  const sortedContracts = [...infrastructure].sort((a, b) => a.name.localeCompare(b.name));
 
-    const entries = sortedContracts.map((contract) =>
-        generateContractEntry(contract)
-    )
+  const entries = sortedContracts.map((contract) => generateContractEntry(contract));
 
-    return `/**
+  return `/**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
  * These are core system contracts that are not Diamond facets.
  */
 export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
-${entries.join(',\n\n')}
+${entries.join(",\n\n")}
 }
 
 /**
  * Total number of infrastructure contracts in the registry.
  */
-export const TOTAL_INFRASTRUCTURE_CONTRACTS = ${infrastructure.length} as const`
+export const TOTAL_INFRASTRUCTURE_CONTRACTS = ${infrastructure.length} as const`;
 }
 
 /**
@@ -315,33 +285,20 @@ export const TOTAL_INFRASTRUCTURE_CONTRACTS = ${infrastructure.length} as const`
  * @returns TypeScript object literal
  */
 function generateContractEntry(contract: ContractMetadata): string {
-    const inheritanceLine =
-        contract.inheritance.length > 0
-            ? `\n        inheritance: ${JSON.stringify(contract.inheritance)},`
-            : ''
+  const inheritanceLine =
+    contract.inheritance.length > 0 ? `\n        inheritance: ${JSON.stringify(contract.inheritance)},` : "";
 
-    const methodsLine =
-        contract.methods.length > 0
-            ? `\n        methods: ${formatMethods(contract.methods)},`
-            : ''
+  const methodsLine = contract.methods.length > 0 ? `\n        methods: ${formatMethods(contract.methods)},` : "";
 
-    const eventsLine =
-        contract.events.length > 0
-            ? `\n        events: ${formatEvents(contract.events)},`
-            : ''
+  const eventsLine = contract.events.length > 0 ? `\n        events: ${formatEvents(contract.events)},` : "";
 
-    const errorsLine =
-        contract.errors.length > 0
-            ? `\n        errors: ${formatErrors(contract.errors)},`
-            : ''
+  const errorsLine = contract.errors.length > 0 ? `\n        errors: ${formatErrors(contract.errors)},` : "";
 
-    const descriptionLine = contract.description
-        ? `\n        description: '${contract.description}',`
-        : ''
+  const descriptionLine = contract.description ? `\n        description: '${contract.description}',` : "";
 
-    return `    ${contract.name}: {
+  return `    ${contract.name}: {
         name: '${contract.name}',${descriptionLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}
-    }`
+    }`;
 }
 
 /**
@@ -350,31 +307,25 @@ function generateContractEntry(contract: ContractMetadata): string {
  * @param storageWrappers - Array of storage wrapper metadata
  * @returns TypeScript code for STORAGE_WRAPPER_REGISTRY
  */
-function generateStorageWrapperRegistry(
-    storageWrappers: ContractMetadata[]
-): string {
-    const sortedWrappers = [...storageWrappers].sort((a, b) =>
-        a.name.localeCompare(b.name)
-    )
+function generateStorageWrapperRegistry(storageWrappers: ContractMetadata[]): string {
+  const sortedWrappers = [...storageWrappers].sort((a, b) => a.name.localeCompare(b.name));
 
-    const entries = sortedWrappers.map((wrapper) =>
-        generateStorageWrapperEntry(wrapper)
-    )
+  const entries = sortedWrappers.map((wrapper) => generateStorageWrapperEntry(wrapper));
 
-    return `/**
+  return `/**
  * Registry of storage wrapper contracts.
  *
  * StorageWrappers provide internal storage and helper methods for facets.
  * They are abstract contracts inherited by facets, not deployed directly.
  */
 export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> = {
-${entries.join(',\n\n')}
+${entries.join(",\n\n")}
 }
 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = ${storageWrappers.length} as const`
+export const TOTAL_STORAGE_WRAPPERS = ${storageWrappers.length} as const`;
 }
 
 /**
@@ -384,29 +335,19 @@ export const TOTAL_STORAGE_WRAPPERS = ${storageWrappers.length} as const`
  * @returns TypeScript object literal
  */
 function generateStorageWrapperEntry(wrapper: ContractMetadata): string {
-    const inheritanceLine =
-        wrapper.inheritance.length > 0
-            ? `\n        inheritance: ${JSON.stringify(wrapper.inheritance)},`
-            : ''
+  const inheritanceLine =
+    wrapper.inheritance.length > 0 ? `\n        inheritance: ${JSON.stringify(wrapper.inheritance)},` : "";
 
-    const eventsLine =
-        wrapper.events.length > 0
-            ? `,\n        events: ${formatEvents(wrapper.events)}`
-            : ''
+  const eventsLine = wrapper.events.length > 0 ? `,\n        events: ${formatEvents(wrapper.events)}` : "";
 
-    const errorsLine =
-        wrapper.errors.length > 0
-            ? `,\n        errors: ${formatErrors(wrapper.errors)}`
-            : ''
+  const errorsLine = wrapper.errors.length > 0 ? `,\n        errors: ${formatErrors(wrapper.errors)}` : "";
 
-    const descriptionLine = wrapper.description
-        ? `\n        description: '${wrapper.description}',`
-        : ''
+  const descriptionLine = wrapper.description ? `\n        description: '${wrapper.description}',` : "";
 
-    return `    ${wrapper.name}: {
+  return `    ${wrapper.name}: {
         name: '${wrapper.name}',${descriptionLine}${inheritanceLine}
         methods: ${formatMethods(wrapper.methods)}${eventsLine}${errorsLine}
-    }`
+    }`;
 }
 
 /**
@@ -419,11 +360,11 @@ function generateStorageWrapperEntry(wrapper: ContractMetadata): string {
  * @returns TypeScript code for MOCK_CONTRACTS
  */
 function generateMockRegistry(mocks: ContractMetadata[]): string {
-    const sortedMocks = [...mocks].sort((a, b) => a.name.localeCompare(b.name))
+  const sortedMocks = [...mocks].sort((a, b) => a.name.localeCompare(b.name));
 
-    const entries = sortedMocks.map((mock) => generateMockEntry(mock))
+  const entries = sortedMocks.map((mock) => generateMockEntry(mock));
 
-    return `/**
+  return `/**
  * Registry of mock/test contracts.
  *
  * These contracts are test utilities for downstream projects.
@@ -431,13 +372,13 @@ function generateMockRegistry(mocks: ContractMetadata[]): string {
  * Not intended for production deployment.
  */
 export const MOCK_CONTRACTS: Record<string, FacetDefinition> = {
-${entries.join(',\n\n')}
+${entries.join(",\n\n")}
 }
 
 /**
  * Total number of mock contracts in the registry.
  */
-export const TOTAL_MOCKS = ${mocks.length} as const`
+export const TOTAL_MOCKS = ${mocks.length} as const`;
 }
 
 /**
@@ -450,40 +391,27 @@ export const TOTAL_MOCKS = ${mocks.length} as const`
  * @returns TypeScript object literal
  */
 function generateMockEntry(mock: ContractMetadata): string {
-    const resolverKeyLine = mock.resolverKey
-        ? `\n        resolverKey: {\n            name: '${mock.resolverKey.name}',\n            value: '${mock.resolverKey.value}'\n        },`
-        : ''
+  const resolverKeyLine = mock.resolverKey
+    ? `\n        resolverKey: {\n            name: '${mock.resolverKey.name}',\n            value: '${mock.resolverKey.value}'\n        },`
+    : "";
 
-    const inheritanceLine =
-        mock.inheritance.length > 0
-            ? `\n        inheritance: ${JSON.stringify(mock.inheritance)},`
-            : ''
+  const inheritanceLine =
+    mock.inheritance.length > 0 ? `\n        inheritance: ${JSON.stringify(mock.inheritance)},` : "";
 
-    const methodsLine =
-        mock.methods.length > 0
-            ? `\n        methods: ${formatMethods(mock.methods)},`
-            : ''
+  const methodsLine = mock.methods.length > 0 ? `\n        methods: ${formatMethods(mock.methods)},` : "";
 
-    const eventsLine =
-        mock.events.length > 0
-            ? `\n        events: ${formatEvents(mock.events)},`
-            : ''
+  const eventsLine = mock.events.length > 0 ? `\n        events: ${formatEvents(mock.events)},` : "";
 
-    const errorsLine =
-        mock.errors.length > 0
-            ? `\n        errors: ${formatErrors(mock.errors)},`
-            : ''
+  const errorsLine = mock.errors.length > 0 ? `\n        errors: ${formatErrors(mock.errors)},` : "";
 
-    const descriptionLine = mock.description
-        ? `\n        description: '${mock.description}',`
-        : ''
+  const descriptionLine = mock.description ? `\n        description: '${mock.description}',` : "";
 
-    // Add TypeChain factory reference (mocks don't have TimeTravel variants)
-    const factoryLine = `\n        factory: (signer) => new ${mock.name}__factory(signer),`
+  // Add TypeChain factory reference (mocks don't have TimeTravel variants)
+  const factoryLine = `\n        factory: (signer) => new ${mock.name}__factory(signer),`;
 
-    return `    ${mock.name}: {
+  return `    ${mock.name}: {
         name: '${mock.name}',${descriptionLine}${resolverKeyLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}
-    }`
+    }`;
 }
 
 /**
@@ -511,44 +439,40 @@ function generateMockEntry(mock: ContractMetadata): string {
  * @returns TypeScript constants code
  */
 function generateConstants(
-    facets: ContractMetadata[],
-    infrastructure: ContractMetadata[],
-    allRoles?: Map<string, string>
+  facets: ContractMetadata[],
+  infrastructure: ContractMetadata[],
+  allRoles?: Map<string, string>,
 ): string {
-    // Use provided roles map or collect from contracts
-    // Map automatically deduplicates by role name (key)
-    const roleMap = allRoles || new Map<string, string>()
+  // Use provided roles map or collect from contracts
+  // Map automatically deduplicates by role name (key)
+  const roleMap = allRoles || new Map<string, string>();
 
-    // If no roles provided, collect from contracts
-    if (!allRoles) {
-        const allContracts = [...facets, ...infrastructure]
-        for (const contract of allContracts) {
-            for (const role of contract.roles) {
-                // Map.has() ensures deduplication - only first occurrence is stored
-                if (!roleMap.has(role.name)) {
-                    roleMap.set(role.name, role.value)
-                }
-            }
+  // If no roles provided, collect from contracts
+  if (!allRoles) {
+    const allContracts = [...facets, ...infrastructure];
+    for (const contract of allContracts) {
+      for (const role of contract.roles) {
+        // Map.has() ensures deduplication - only first occurrence is stored
+        if (!roleMap.has(role.name)) {
+          roleMap.set(role.name, role.value);
         }
+      }
     }
+  }
 
-    // Sort roles by name for deterministic output
-    const sortedRoles = Array.from(roleMap.entries()).sort((a, b) =>
-        a[0].localeCompare(b[0])
-    )
+  // Sort roles by name for deterministic output
+  const sortedRoles = Array.from(roleMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 
-    if (sortedRoles.length === 0) {
-        return `/**
+  if (sortedRoles.length === 0) {
+    return `/**
  * No roles found in contracts.
  */
-export const ROLES = {} as const`
-    }
+export const ROLES = {} as const`;
+  }
 
-    const roleEntries = sortedRoles
-        .map(([name, value]) => `    ${name}: '${normalizeRoleValue(value)}'`)
-        .join(',\n')
+  const roleEntries = sortedRoles.map(([name, value]) => `    ${name}: '${normalizeRoleValue(value)}'`).join(",\n");
 
-    return `/**
+  return `/**
  * All role identifiers extracted from contracts.
  */
 export const ROLES = {
@@ -558,7 +482,7 @@ ${roleEntries}
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = ${sortedRoles.length} as const`
+export const TOTAL_ROLES = ${sortedRoles.length} as const`;
 }
 
 /**
@@ -569,34 +493,34 @@ export const TOTAL_ROLES = ${sortedRoles.length} as const`
  * @returns Summary object
  */
 export function generateSummary(
-    facets: ContractMetadata[],
-    infrastructure: ContractMetadata[]
+  facets: ContractMetadata[],
+  infrastructure: ContractMetadata[],
 ): {
-    totalFacets: number
-    totalInfrastructure: number
-    byCategory: Record<string, number>
-    byLayer: Record<number, number>
-    withTimeTravel: number
-    withRoles: number
+  totalFacets: number;
+  totalInfrastructure: number;
+  byCategory: Record<string, number>;
+  byLayer: Record<number, number>;
+  withTimeTravel: number;
+  withRoles: number;
 } {
-    const byCategory: Record<string, number> = {}
-    const byLayer: Record<number, number> = {}
-    let withTimeTravel = 0
-    let withRoles = 0
+  const byCategory: Record<string, number> = {};
+  const byLayer: Record<number, number> = {};
+  let withTimeTravel = 0;
+  let withRoles = 0;
 
-    for (const facet of facets) {
-        byCategory[facet.category] = (byCategory[facet.category] || 0) + 1
-        byLayer[facet.layer] = (byLayer[facet.layer] || 0) + 1
-        if (facet.hasTimeTravel) withTimeTravel++
-        if (facet.roles.length > 0) withRoles++
-    }
+  for (const facet of facets) {
+    byCategory[facet.category] = (byCategory[facet.category] || 0) + 1;
+    byLayer[facet.layer] = (byLayer[facet.layer] || 0) + 1;
+    if (facet.hasTimeTravel) withTimeTravel++;
+    if (facet.roles.length > 0) withRoles++;
+  }
 
-    return {
-        totalFacets: facets.length,
-        totalInfrastructure: infrastructure.length,
-        byCategory,
-        byLayer,
-        withTimeTravel,
-        withRoles,
-    }
+  return {
+    totalFacets: facets.length,
+    totalInfrastructure: infrastructure.length,
+    byCategory,
+    byLayer,
+    withTimeTravel,
+    withRoles,
+  };
 }

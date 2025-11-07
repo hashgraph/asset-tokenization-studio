@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    BasicTransferInfo
-} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import { BasicTransferInfo } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
 
 /**
  * @title IERC1410TokenHolder
@@ -30,20 +28,12 @@ interface IERC1410TokenHolder {
      * @param _value The amount by which to decrease the balance
      * @param _data Additional data attached to the burning of tokens
      */
-    function redeemByPartition(
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function redeemByPartition(bytes32 _partition, uint256 _value, bytes calldata _data) external;
 
     /**
      * @notice Triggers any pending scheduled tasks and records user balance if needed
      */
-    function triggerAndSyncAll(
-        bytes32 _partition,
-        address _from,
-        address _to
-    ) external;
+    function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external;
 
     /**
      * @notice Authorises an operator for all partitions of `msg.sender`
@@ -62,18 +52,12 @@ interface IERC1410TokenHolder {
      * @param _partition The partition to which the operator is authorised
      * @param _operator An address which is being authorised
      */
-    function authorizeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    ) external;
+    function authorizeOperatorByPartition(bytes32 _partition, address _operator) external;
 
     /**
      * @notice Revokes authorisation of an operator previously given for a specified partition of `msg.sender`
      * @param _partition The partition to which the operator is de-authorised
      * @param _operator An address which is being de-authorised
      */
-    function revokeOperatorByPartition(
-        bytes32 _partition,
-        address _operator
-    ) external;
+    function revokeOperatorByPartition(bytes32 _partition, address _operator) external;
 }

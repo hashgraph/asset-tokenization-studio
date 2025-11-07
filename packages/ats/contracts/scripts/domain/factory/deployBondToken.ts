@@ -1,15 +1,15 @@
-import { ethers } from 'ethers'
-import type { IFactory, ResolverProxy } from '@contract-types'
-import { ResolverProxy__factory } from '@contract-types'
-import { GAS_LIMIT } from '@scripts/infrastructure'
+import { ethers } from "ethers";
+import type { IFactory, ResolverProxy } from "@contract-types";
+import { ResolverProxy__factory } from "@contract-types";
+import { GAS_LIMIT } from "@scripts/infrastructure";
 import {
-    ATS_ROLES,
-    BOND_CONFIG_ID,
-    BondDetailsDataParams,
-    FactoryRegulationDataParams,
-    Rbac,
-    SecurityDataParams,
-} from '@scripts/domain'
+  ATS_ROLES,
+  BOND_CONFIG_ID,
+  BondDetailsDataParams,
+  FactoryRegulationDataParams,
+  Rbac,
+  SecurityDataParams,
+} from "@scripts/domain";
 
 // ============================================================================
 // Types
@@ -19,13 +19,13 @@ import {
  * Parameters for deploying a bond token from the factory.
  */
 export interface DeployBondFromFactoryParams {
-    /** Admin account address */
-    adminAccount: string
-    factory: IFactory
-    securityData: SecurityDataParams
-    bondDetails: BondDetailsDataParams
-    proceedRecipients: string[]
-    proceedRecipientsData: string[]
+  /** Admin account address */
+  adminAccount: string;
+  factory: IFactory;
+  securityData: SecurityDataParams;
+  bondDetails: BondDetailsDataParams;
+  proceedRecipients: string[];
+  proceedRecipientsData: string[];
 }
 
 // ============================================================================
@@ -62,114 +62,108 @@ export interface DeployBondFromFactoryParams {
  * ```
  */
 export async function deployBondFromFactory(
-    bondDataParams: DeployBondFromFactoryParams,
-    regulationTypeParams: FactoryRegulationDataParams
+  bondDataParams: DeployBondFromFactoryParams,
+  regulationTypeParams: FactoryRegulationDataParams,
 ): Promise<ResolverProxy> {
-    const {
-        factory,
-        adminAccount,
-        securityData: securityDataParams,
-        bondDetails: bondDetailsParams,
-        proceedRecipients,
-        proceedRecipientsData,
-    } = bondDataParams
+  const {
+    factory,
+    adminAccount,
+    securityData: securityDataParams,
+    bondDetails: bondDetailsParams,
+    proceedRecipients,
+    proceedRecipientsData,
+  } = bondDataParams;
 
-    // Build RBAC array with admin
-    const rbacs: Rbac[] = [
-        {
-            role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
-            members: [adminAccount],
-        },
-        ...securityDataParams.rbacs,
-    ]
+  // Build RBAC array with admin
+  const rbacs: Rbac[] = [
+    {
+      role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+      members: [adminAccount],
+    },
+    ...securityDataParams.rbacs,
+  ];
 
-    // Build resolver proxy configuration
-    const resolverProxyConfiguration = {
-        key: BOND_CONFIG_ID,
-        version: 1,
-    }
+  // Build resolver proxy configuration
+  const resolverProxyConfiguration = {
+    key: BOND_CONFIG_ID,
+    version: 1,
+  };
 
-    // Build security data structure
-    const securityData = {
-        arePartitionsProtected: securityDataParams.arePartitionsProtected,
-        isMultiPartition: securityDataParams.isMultiPartition,
-        resolver: securityDataParams.resolver,
-        resolverProxyConfiguration,
-        rbacs,
-        isControllable: securityDataParams.isControllable,
-        isWhiteList: securityDataParams.isWhiteList,
-        maxSupply: securityDataParams.maxSupply,
-        erc20MetadataInfo: {
-            name: securityDataParams.erc20MetadataInfo.name,
-            symbol: securityDataParams.erc20MetadataInfo.symbol,
-            isin: securityDataParams.erc20MetadataInfo.isin,
-            decimals: securityDataParams.erc20MetadataInfo.decimals,
-        },
-        clearingActive: securityDataParams.clearingActive,
-        internalKycActivated: securityDataParams.internalKycActivated,
-        erc20VotesActivated: securityDataParams.erc20VotesActivated,
-        externalPauses: securityDataParams.externalPauses,
-        externalControlLists: securityDataParams.externalControlLists,
-        externalKycLists: securityDataParams.externalKycLists,
-        compliance: securityDataParams.compliance,
-        identityRegistry: securityDataParams.identityRegistry,
-    }
+  // Build security data structure
+  const securityData = {
+    arePartitionsProtected: securityDataParams.arePartitionsProtected,
+    isMultiPartition: securityDataParams.isMultiPartition,
+    resolver: securityDataParams.resolver,
+    resolverProxyConfiguration,
+    rbacs,
+    isControllable: securityDataParams.isControllable,
+    isWhiteList: securityDataParams.isWhiteList,
+    maxSupply: securityDataParams.maxSupply,
+    erc20MetadataInfo: {
+      name: securityDataParams.erc20MetadataInfo.name,
+      symbol: securityDataParams.erc20MetadataInfo.symbol,
+      isin: securityDataParams.erc20MetadataInfo.isin,
+      decimals: securityDataParams.erc20MetadataInfo.decimals,
+    },
+    clearingActive: securityDataParams.clearingActive,
+    internalKycActivated: securityDataParams.internalKycActivated,
+    erc20VotesActivated: securityDataParams.erc20VotesActivated,
+    externalPauses: securityDataParams.externalPauses,
+    externalControlLists: securityDataParams.externalControlLists,
+    externalKycLists: securityDataParams.externalKycLists,
+    compliance: securityDataParams.compliance,
+    identityRegistry: securityDataParams.identityRegistry,
+  };
 
-    // Build bond details structure
-    const bondDetails = {
-        currency: bondDetailsParams.currency,
-        nominalValue: bondDetailsParams.nominalValue,
-        startingDate:
-            bondDetailsParams.startingDate || Math.floor(Date.now() / 1000),
-        maturityDate: bondDetailsParams.maturityDate || 0,
-    }
+  // Build bond details structure
+  const bondDetails = {
+    currency: bondDetailsParams.currency,
+    nominalValue: bondDetailsParams.nominalValue,
+    startingDate: bondDetailsParams.startingDate || Math.floor(Date.now() / 1000),
+    maturityDate: bondDetailsParams.maturityDate || 0,
+  };
 
-    // Build bond data
-    const bondData = {
-        security: securityData,
-        bondDetails,
-        proceedRecipients: proceedRecipients,
-        proceedRecipientsData: proceedRecipientsData,
-    }
+  // Build bond data
+  const bondData = {
+    security: securityData,
+    bondDetails,
+    proceedRecipients: proceedRecipients,
+    proceedRecipientsData: proceedRecipientsData,
+  };
 
-    // Build regulation data
-    const factoryRegulationData = {
-        regulationType: regulationTypeParams.regulationType,
-        regulationSubType: regulationTypeParams.regulationSubType,
-        additionalSecurityData: {
-            countriesControlListType:
-                regulationTypeParams.additionalSecurityData
-                    .countriesControlListType,
-            listOfCountries:
-                regulationTypeParams.additionalSecurityData.listOfCountries,
-            info: regulationTypeParams.additionalSecurityData.info,
-        },
-    }
+  // Build regulation data
+  const factoryRegulationData = {
+    regulationType: regulationTypeParams.regulationType,
+    regulationSubType: regulationTypeParams.regulationSubType,
+    additionalSecurityData: {
+      countriesControlListType: regulationTypeParams.additionalSecurityData.countriesControlListType,
+      listOfCountries: regulationTypeParams.additionalSecurityData.listOfCountries,
+      info: regulationTypeParams.additionalSecurityData.info,
+    },
+  };
 
-    // Deploy bond token via factory
-    const tx = await factory.deployBond(bondData, factoryRegulationData, {
-        gasLimit: GAS_LIMIT.high,
-    })
-    const receipt = await tx.wait()
+  // Deploy bond token via factory
+  const tx = await factory.deployBond(bondData, factoryRegulationData, {
+    gasLimit: GAS_LIMIT.high,
+  });
+  const receipt = await tx.wait();
 
-    // Find BondDeployed event to get diamond address
-    const event = receipt.events?.find((e) => e.event === 'BondDeployed')
-    if (!event || !event.args) {
-        throw new Error(
-            `BondDeployed event not found in deployment transaction. Events: ${JSON.stringify(
-                receipt.events?.map((e) => e.event)
-            )}`
-        )
-    }
+  // Find BondDeployed event to get diamond address
+  const event = receipt.events?.find((e) => e.event === "BondDeployed");
+  if (!event || !event.args) {
+    throw new Error(
+      `BondDeployed event not found in deployment transaction. Events: ${JSON.stringify(
+        receipt.events?.map((e) => e.event),
+      )}`,
+    );
+  }
 
-    const diamondAddress = event.args.diamondProxyAddress || event.args[1]
+  const diamondAddress = event.args.diamondProxyAddress || event.args[1];
 
-    if (!diamondAddress || diamondAddress === ethers.constants.AddressZero) {
-        throw new Error(
-            `Invalid diamond address from event. Args: ${JSON.stringify(event.args)}`
-        )
-    }
+  if (!diamondAddress || diamondAddress === ethers.constants.AddressZero) {
+    throw new Error(`Invalid diamond address from event. Args: ${JSON.stringify(event.args)}`);
+  }
 
-    // Return diamond proxy as ResolverProxy contract
-    return ResolverProxy__factory.connect(diamondAddress, factory.signer)
+  // Return diamond proxy as ResolverProxy contract
+  return ResolverProxy__factory.connect(diamondAddress, factory.signer);
 }

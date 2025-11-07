@@ -52,17 +52,15 @@ fixtures/
 For tests that need core infrastructure but no tokens:
 
 ```typescript
-import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { deployAtsInfrastructureFixture } from '../fixtures'
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { deployAtsInfrastructureFixture } from "../fixtures";
 
-describe('BusinessLogicResolver Tests', () => {
-    it('should register facets', async () => {
-        const { blr, facetAddresses } = await loadFixture(
-            deployAtsInfrastructureFixture
-        )
-        // Test BLR functionality
-    })
-})
+describe("BusinessLogicResolver Tests", () => {
+  it("should register facets", async () => {
+    const { blr, facetAddresses } = await loadFixture(deployAtsInfrastructureFixture);
+    // Test BLR functionality
+  });
+});
 ```
 
 ### 2. Basic Token Testing
@@ -70,16 +68,14 @@ describe('BusinessLogicResolver Tests', () => {
 For tests needing a standard equity token:
 
 ```typescript
-import { deployEquityTokenFixture } from '../fixtures'
+import { deployEquityTokenFixture } from "../fixtures";
 
-describe('Token Tests', () => {
-    it('should transfer tokens', async () => {
-        const { diamond, deployer, user1 } = await loadFixture(
-            deployEquityTokenFixture
-        )
-        // Test token operations
-    })
-})
+describe("Token Tests", () => {
+  it("should transfer tokens", async () => {
+    const { diamond, deployer, user1 } = await loadFixture(deployEquityTokenFixture);
+    // Test token operations
+  });
+});
 ```
 
 ### 3. Feature-Specific Testing
@@ -87,16 +83,14 @@ describe('Token Tests', () => {
 For tests requiring specific feature configurations:
 
 ```typescript
-import { deployEquityWithExternalPauseFixture } from '../fixtures'
+import { deployEquityWithExternalPauseFixture } from "../fixtures";
 
-describe('Pause Tests', () => {
-    it('should pause via external contract', async () => {
-        const { pauseFacet, externalPauseMock } = await loadFixture(
-            deployEquityWithExternalPauseFixture
-        )
-        // Test pause functionality
-    })
-})
+describe("Pause Tests", () => {
+  it("should pause via external contract", async () => {
+    const { pauseFacet, externalPauseMock } = await loadFixture(deployEquityWithExternalPauseFixture);
+    // Test pause functionality
+  });
+});
 ```
 
 ### 4. Inline Fixture Extension
@@ -104,31 +98,28 @@ describe('Pause Tests', () => {
 Create test-specific fixtures by extending base fixtures:
 
 ```typescript
-import { deployEquityTokenFixture } from '../fixtures'
+import { deployEquityTokenFixture } from "../fixtures";
 
-describe('Custom Setup Tests', () => {
-    async function deployWithCustomSetup() {
-        const base = await deployEquityTokenFixture()
-        const { deployer, diamond, accessControlFacet } = base
+describe("Custom Setup Tests", () => {
+  async function deployWithCustomSetup() {
+    const base = await deployEquityTokenFixture();
+    const { deployer, diamond, accessControlFacet } = base;
 
-        // Custom setup
-        await accessControlFacet.grantRole(CUSTOM_ROLE, deployer.address)
-        const customFacet = CustomFacet__factory.connect(
-            diamond.address,
-            deployer
-        )
+    // Custom setup
+    await accessControlFacet.grantRole(CUSTOM_ROLE, deployer.address);
+    const customFacet = CustomFacet__factory.connect(diamond.address, deployer);
 
-        return {
-            ...base,
-            customFacet,
-        }
-    }
+    return {
+      ...base,
+      customFacet,
+    };
+  }
 
-    it('should work with custom setup', async () => {
-        const { customFacet } = await loadFixture(deployWithCustomSetup)
-        // Test custom functionality
-    })
-})
+  it("should work with custom setup", async () => {
+    const { customFacet } = await loadFixture(deployWithCustomSetup);
+    // Test custom functionality
+  });
+});
 ```
 
 ## Available Fixtures
@@ -249,34 +240,34 @@ Extends `deployFullSuiteFixture` with modular compliance contracts.
 ### Common Token Constants
 
 ```typescript
-import { MAX_UINT256, TEST_PARTITIONS, TEST_AMOUNTS } from '../fixtures'
+import { MAX_UINT256, TEST_PARTITIONS, TEST_AMOUNTS } from "../fixtures";
 
 // Maximum uint256 value
-MAX_UINT256
+MAX_UINT256;
 
 // Test partition identifiers
-TEST_PARTITIONS.DEFAULT
-TEST_PARTITIONS.PARTITION_1
-TEST_PARTITIONS.PARTITION_2
-TEST_PARTITIONS.PARTITION_3
+TEST_PARTITIONS.DEFAULT;
+TEST_PARTITIONS.PARTITION_1;
+TEST_PARTITIONS.PARTITION_2;
+TEST_PARTITIONS.PARTITION_3;
 
 // Common test amounts (6 decimals)
-TEST_AMOUNTS.SMALL // 100 tokens
-TEST_AMOUNTS.MEDIUM // 1,000 tokens
-TEST_AMOUNTS.LARGE // 10,000 tokens
+TEST_AMOUNTS.SMALL; // 100 tokens
+TEST_AMOUNTS.MEDIUM; // 1,000 tokens
+TEST_AMOUNTS.LARGE; // 10,000 tokens
 ```
 
 ### Default Equity Parameters
 
 ```typescript
-import { DEFAULT_EQUITY_PARAMS } from '../fixtures'
+import { DEFAULT_EQUITY_PARAMS } from "../fixtures";
 
 // Override specific parameters
 const myToken = await deployEquityTokenFixture({
-    ...DEFAULT_EQUITY_PARAMS,
-    name: 'MyToken',
-    isMultiPartition: true,
-})
+  ...DEFAULT_EQUITY_PARAMS,
+  name: "MyToken",
+  isMultiPartition: true,
+});
 ```
 
 ## Best Practices
@@ -287,10 +278,10 @@ Always use `loadFixture` to leverage Hardhat's snapshotting:
 
 ```typescript
 // ✅ Good - uses snapshot
-const { diamond } = await loadFixture(deployEquityTokenFixture)
+const { diamond } = await loadFixture(deployEquityTokenFixture);
 
 // ❌ Bad - deploys every time
-const { diamond } = await deployEquityTokenFixture()
+const { diamond } = await deployEquityTokenFixture();
 ```
 
 ### 2. Pre-load Fixtures in before()
@@ -298,16 +289,16 @@ const { diamond } = await deployEquityTokenFixture()
 For test suites using the same fixture, pre-load once:
 
 ```typescript
-describe('Token Tests', () => {
-    before(async () => {
-        await loadFixture(deployEquityTokenFixture)
-    })
+describe("Token Tests", () => {
+  before(async () => {
+    await loadFixture(deployEquityTokenFixture);
+  });
 
-    it('test 1', async () => {
-        const { diamond } = await loadFixture(deployEquityTokenFixture)
-        // Fast - uses snapshot
-    })
-})
+  it("test 1", async () => {
+    const { diamond } = await loadFixture(deployEquityTokenFixture);
+    // Fast - uses snapshot
+  });
+});
 ```
 
 ### 3. Extend, Don't Duplicate
@@ -317,15 +308,15 @@ Create test-specific fixtures by extending base fixtures:
 ```typescript
 // ✅ Good - reuses existing fixture
 async function myFixture() {
-    const base = await deployEquityTokenFixture()
-    // Add custom setup
-    return { ...base, customStuff }
+  const base = await deployEquityTokenFixture();
+  // Add custom setup
+  return { ...base, customStuff };
 }
 
 // ❌ Bad - duplicates deployment logic
 async function myFixture() {
-    const factory = await deploy('Factory')
-    // ... duplicate all deployment logic
+  const factory = await deploy("Factory");
+  // ... duplicate all deployment logic
 }
 ```
 
@@ -339,9 +330,9 @@ When overriding default parameters, document why:
 
 ```typescript
 const token = await deployEquityTokenFixture({
-    isMultiPartition: true, // Required for partition transfer tests
-    decimals: 18, // Testing high-decimal scenarios
-})
+  isMultiPartition: true, // Required for partition transfer tests
+  decimals: 18, // Testing high-decimal scenarios
+});
 ```
 
 ## Migration Guide
@@ -351,27 +342,27 @@ const token = await deployEquityTokenFixture({
 **Before** (inline fixture with 50+ lines):
 
 ```typescript
-describe('My Tests', () => {
-    async function deploySecurityFixtureMultiPartition() {
-        // 50 lines of deployment logic...
-    }
+describe("My Tests", () => {
+  async function deploySecurityFixtureMultiPartition() {
+    // 50 lines of deployment logic...
+  }
 
-    it('test', async () => {
-        await loadFixture(deploySecurityFixtureMultiPartition)
-    })
-})
+  it("test", async () => {
+    await loadFixture(deploySecurityFixtureMultiPartition);
+  });
+});
 ```
 
 **After** (use shared fixture):
 
 ```typescript
-import { deployEquityMultiPartitionFixture } from '../fixtures'
+import { deployEquityMultiPartitionFixture } from "../fixtures";
 
-describe('My Tests', () => {
-    it('test', async () => {
-        const { diamond } = await loadFixture(deployEquityMultiPartitionFixture)
-    })
-})
+describe("My Tests", () => {
+  it("test", async () => {
+    const { diamond } = await loadFixture(deployEquityMultiPartitionFixture);
+  });
+});
 ```
 
 **Backward compatibility**: Old imports via `index.ts` still work - no breaking changes.
@@ -381,36 +372,36 @@ describe('My Tests', () => {
 When adding new fixtures:
 
 1. **Choose the right location:**
-    - Infrastructure → `infrastructure.fixture.ts`
-    - Token variants → `tokens/*.fixture.ts`
-    - Feature-specific → `features/*.fixture.ts`
+   - Infrastructure → `infrastructure.fixture.ts`
+   - Token variants → `tokens/*.fixture.ts`
+   - Feature-specific → `features/*.fixture.ts`
 
 2. **Export from index.ts:**
 
-    ```typescript
-    export { myNewFixture } from './features/myFeature.fixture'
-    ```
+   ```typescript
+   export { myNewFixture } from "./features/myFeature.fixture";
+   ```
 
 3. **Document parameters and returns:**
 
-    ```typescript
-    /**
-     * Fixture: Brief description
-     *
-     * Detailed explanation of what this fixture provides.
-     *
-     * @param param1 - Description
-     * @returns Description of returned fields
-     */
-    export async function myFixture(param1: string) {
-        // Implementation
-    }
-    ```
+   ```typescript
+   /**
+    * Fixture: Brief description
+    *
+    * Detailed explanation of what this fixture provides.
+    *
+    * @param param1 - Description
+    * @returns Description of returned fields
+    */
+   export async function myFixture(param1: string) {
+     // Implementation
+   }
+   ```
 
 4. **Follow composition pattern:**
-    - Build on existing fixtures
-    - Use `loadFixture` internally
-    - Return spread of base + new fields
+   - Build on existing fixtures
+   - Use `loadFixture` internally
+   - Return spread of base + new fields
 
 5. **Update this README** with usage examples.
 

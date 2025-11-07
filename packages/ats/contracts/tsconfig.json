@@ -1,34 +1,29 @@
 {
-    "compilerOptions": {
-        "target": "ES2022",
-        "module": "commonjs",
-        "declaration": true,
-        "sourceMap": true,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "allowSyntheticDefaultImports": true,
-        "skipLibCheck": true,
-        "importHelpers": true,
-        "alwaysStrict": true,
-        "strict": true,
-        "outDir": "./build",
-        "resolveJsonModule": true,
-        "baseUrl": ".",
-        "paths": {
-            "@configuration": ["./Configuration.ts"],
-            "@contract-types": ["./typechain-types/index.ts"],
-            "@scripts": ["./scripts/index.ts"],
-            "@scripts/infrastructure": ["./scripts/infrastructure/index.ts"],
-            "@scripts/domain": ["./scripts/domain/index.ts"],
-            "@tasks": ["./tasks/index.ts"],
-            "@test": ["./test/index.ts"]
-        }
-    },
-    "include": [
-        "scripts/**/*",
-        "Configuration.ts",
-        "typechain-types/**/*",
-        "test/**/*"
-    ],
-    "exclude": ["node_modules", "tasks"]
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "declaration": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "importHelpers": true,
+    "alwaysStrict": true,
+    "strict": true,
+    "outDir": "./build",
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@configuration": ["./Configuration.ts"],
+      "@contract-types": ["./typechain-types/index.ts"],
+      "@scripts": ["./scripts/index.ts"],
+      "@scripts/infrastructure": ["./scripts/infrastructure/index.ts"],
+      "@scripts/domain": ["./scripts/domain/index.ts"],
+      "@tasks": ["./tasks/index.ts"],
+      "@test": ["./test/index.ts"]
+    }
+  },
+  "include": ["scripts/**/*", "Configuration.ts", "typechain-types/**/*", "test/**/*"],
+  "exclude": ["node_modules", "tasks"]
 }

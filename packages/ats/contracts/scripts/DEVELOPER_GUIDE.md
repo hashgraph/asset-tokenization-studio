@@ -31,14 +31,14 @@ Edit [domain/equity/createConfiguration.ts](domain/equity/createConfiguration.ts
 
 ```typescript
 const EQUITY_FACETS = [
-    // Core Functionality
-    'AccessControlFacet',
-    'CapFacet',
-    'ControlListFacet',
-    // ... existing facets ...
+  // Core Functionality
+  "AccessControlFacet",
+  "CapFacet",
+  "ControlListFacet",
+  // ... existing facets ...
 
-    'NewFacet', // <-- ADD YOUR FACET HERE
-] as const
+  "NewFacet", // <-- ADD YOUR FACET HERE
+] as const;
 ```
 
 **To Add**: Insert the facet name in the appropriate section of the array.
@@ -70,19 +70,19 @@ This updates [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts) with:
 If this is a **new facet** that hasn't been deployed yet, use the `deployFacets()` infrastructure operation:
 
 ```typescript
-import { ethers } from 'ethers'
-import { deployFacets } from '@scripts/infrastructure'
+import { ethers } from "ethers";
+import { deployFacets } from "@scripts/infrastructure";
 
-const [signer] = await ethers.getSigners()
+const [signer] = await ethers.getSigners();
 
 // Deploy single facet
 const result = await deployFacets(signer, {
-    facetNames: ['NewFacet'],
-    useTimeTravel: false,
-    network: 'hedera-testnet',
-})
+  facetNames: ["NewFacet"],
+  useTimeTravel: false,
+  network: "hedera-testnet",
+});
 
-console.log(`NewFacet deployed at: ${result.deployed.get('NewFacet')?.address}`)
+console.log(`NewFacet deployed at: ${result.deployed.get("NewFacet")?.address}`);
 ```
 
 ### Step 4: Register Facet in BusinessLogicResolver
@@ -90,26 +90,26 @@ console.log(`NewFacet deployed at: ${result.deployed.get('NewFacet')?.address}`)
 Register the facet in BLR so it can be used in configurations, using the `registerFacets()` infrastructure operation:
 
 ```typescript
-import { ethers } from 'ethers'
-import { registerFacets } from '@scripts/infrastructure'
-import { atsRegistry } from '@scripts/domain'
-import { BusinessLogicResolver__factory } from '@contract-types'
+import { ethers } from "ethers";
+import { registerFacets } from "@scripts/infrastructure";
+import { atsRegistry } from "@scripts/domain";
+import { BusinessLogicResolver__factory } from "@contract-types";
 
-const [signer] = await ethers.getSigners()
-const blrAddress = '0x...' // Your BLR address
+const [signer] = await ethers.getSigners();
+const blrAddress = "0x..."; // Your BLR address
 
 // Connect to BLR
-const blr = BusinessLogicResolver__factory.connect(blrAddress, signer)
+const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
 
 // Register facet
 const result = await registerFacets(blr, {
-    facets: {
-        NewFacet: '0x...', // Deployed facet address
-    },
-    registries: [atsRegistry], // Required for resolver keys
-})
+  facets: {
+    NewFacet: "0x...", // Deployed facet address
+  },
+  registries: [atsRegistry], // Required for resolver keys
+});
 
-console.log(`Registered: ${result.registered}`)
+console.log(`Registered: ${result.registered}`);
 ```
 
 **Important**: The registry is required because resolver keys are **contract constants** defined in Solidity, not generated from names.
@@ -119,34 +119,34 @@ console.log(`Registered: ${result.registered}`)
 Now create a new configuration version with the updated facet list:
 
 ```typescript
-import { ethers } from 'ethers'
-import { BusinessLogicResolver__factory } from '@contract-types'
-import { createEquityConfiguration } from '@scripts/domain'
+import { ethers } from "ethers";
+import { BusinessLogicResolver__factory } from "@contract-types";
+import { createEquityConfiguration } from "@scripts/domain";
 
-const [signer] = await ethers.getSigners()
-const blrAddress = '0x...' // Your BLR address
+const [signer] = await ethers.getSigners();
+const blrAddress = "0x..."; // Your BLR address
 
 // Connect to BLR
-const blr = BusinessLogicResolver__factory.connect(blrAddress, signer)
+const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
 
 // Get all deployed facet addresses (including the new one)
 const facetAddresses = {
-    AccessControlFacet: '0x...',
-    CapFacet: '0x...',
-    // ... all other facets ...
-    NewFacet: '0x...', // Include new facet
-}
+  AccessControlFacet: "0x...",
+  CapFacet: "0x...",
+  // ... all other facets ...
+  NewFacet: "0x...", // Include new facet
+};
 
 // Create configuration
 const result = await createEquityConfiguration(
-    blr,
-    facetAddresses,
-    false // useTimeTravel
-)
+  blr,
+  facetAddresses,
+  false, // useTimeTravel
+);
 
 if (result.success) {
-    console.log(`Configuration version: ${result.data.version}`)
-    console.log(`Facets registered: ${result.data.facetKeys.length}`)
+  console.log(`Configuration version: ${result.data.version}`);
+  console.log(`Facets registered: ${result.data.facetKeys.length}`);
 }
 ```
 
@@ -156,12 +156,12 @@ Check that the configuration was created successfully:
 
 ```typescript
 // Get latest configuration version
-const version = await blr.getConfigurationVersion(EQUITY_CONFIG_ID)
-console.log(`Latest equity config version: ${version}`)
+const version = await blr.getConfigurationVersion(EQUITY_CONFIG_ID);
+console.log(`Latest equity config version: ${version}`);
 
 // Verify facet is in configuration
-const configData = await blr.getConfiguration(EQUITY_CONFIG_ID, version)
-console.log(`Facets in config: ${configData.facetIds.length}`)
+const configData = await blr.getConfiguration(EQUITY_CONFIG_ID, version);
+console.log(`Facets in config: ${configData.facetIds.length}`);
 ```
 
 ### Removing a Facet
@@ -198,8 +198,7 @@ Add your new configuration ID to [domain/constants.ts](domain/constants.ts#L15-L
  * bytes32(uint256(3)) = 0x00...03
  * Used by BusinessLogicResolver to identify fund facet configuration.
  */
-export const FUND_CONFIG_ID =
-    '0x0000000000000000000000000000000000000000000000000000000000000003'
+export const FUND_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000003";
 ```
 
 **Naming Convention**: Use sequential numeric IDs:
@@ -227,14 +226,14 @@ Create a new directory and file: [domain/fund/createConfiguration.ts](domain/fun
  * @module domain/fund/createConfiguration
  */
 
-import { Contract } from 'ethers'
+import { Contract } from "ethers";
 import {
-    ConfigurationData,
-    ConfigurationError,
-    OperationResult,
-    createBatchConfiguration,
-} from '@scripts/infrastructure'
-import { FUND_CONFIG_ID, atsRegistry } from '@scripts/domain'
+  ConfigurationData,
+  ConfigurationError,
+  OperationResult,
+  createBatchConfiguration,
+} from "@scripts/infrastructure";
+import { FUND_CONFIG_ID, atsRegistry } from "@scripts/domain";
 
 /**
  * Fund-specific facets list.
@@ -243,32 +242,32 @@ import { FUND_CONFIG_ID, atsRegistry } from '@scripts/domain'
  * and add fund-specific ones.
  */
 const FUND_FACETS = [
-    // Core Functionality (required for most tokens)
-    'AccessControlFacet',
-    'CapFacet',
-    'ControlListFacet',
-    'DiamondFacet',
-    'ERC20Facet',
-    'FreezeFacet',
-    'KycFacet',
-    'PauseFacet',
-    'SnapshotsFacet',
+  // Core Functionality (required for most tokens)
+  "AccessControlFacet",
+  "CapFacet",
+  "ControlListFacet",
+  "DiamondFacet",
+  "ERC20Facet",
+  "FreezeFacet",
+  "KycFacet",
+  "PauseFacet",
+  "SnapshotsFacet",
 
-    // ERC Standards (choose what you need)
-    'ERC1410IssuerFacet',
-    'ERC1410ReadFacet',
-    'ERC1594Facet',
-    'ERC20PermitFacet',
+  // ERC Standards (choose what you need)
+  "ERC1410IssuerFacet",
+  "ERC1410ReadFacet",
+  "ERC1594Facet",
+  "ERC20PermitFacet",
 
-    // Compliance (if needed)
-    'ERC3643ManagementFacet',
-    'ERC3643OperationsFacet',
-    'ERC3643ReadFacet',
+  // Compliance (if needed)
+  "ERC3643ManagementFacet",
+  "ERC3643OperationsFacet",
+  "ERC3643ReadFacet",
 
-    // Fund-Specific (your custom facets)
-    'FundManagementFacet', // Custom facet for fund operations
-    'FundUSAFacet', // Jurisdiction-specific compliance
-] as const
+  // Fund-Specific (your custom facets)
+  "FundManagementFacet", // Custom facet for fund operations
+  "FundUSAFacet", // Jurisdiction-specific compliance
+] as const;
 
 /**
  * Create fund token configuration in BusinessLogicResolver.
@@ -281,21 +280,21 @@ const FUND_FACETS = [
  * @returns Promise resolving to operation result
  */
 export async function createFundConfiguration(
-    blrContract: Contract,
-    facetAddresses: Record<string, string>,
-    useTimeTravel: boolean = false,
-    partialBatchDeploy: boolean = false,
-    batchSize: number = 2
+  blrContract: Contract,
+  facetAddresses: Record<string, string>,
+  useTimeTravel: boolean = false,
+  partialBatchDeploy: boolean = false,
+  batchSize: number = 2,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-    return createBatchConfiguration(blrContract, {
-        configurationId: FUND_CONFIG_ID,
-        facetNames: FUND_FACETS,
-        facetAddresses,
-        useTimeTravel,
-        partialBatchDeploy,
-        batchSize,
-        registry: atsRegistry,
-    })
+  return createBatchConfiguration(blrContract, {
+    configurationId: FUND_CONFIG_ID,
+    facetNames: FUND_FACETS,
+    facetAddresses,
+    useTimeTravel,
+    partialBatchDeploy,
+    batchSize,
+    registry: atsRegistry,
+  });
 }
 ```
 
@@ -305,8 +304,8 @@ Add exports to [domain/index.ts](domain/index.ts):
 
 ```typescript
 // Fund configuration
-export { createFundConfiguration } from './fund/createConfiguration'
-export { FUND_CONFIG_ID } from './constants'
+export { createFundConfiguration } from "./fund/createConfiguration";
+export { FUND_CONFIG_ID } from "./constants";
 ```
 
 ### Step 4: Deploy Custom Facets (if any)
@@ -314,21 +313,21 @@ export { FUND_CONFIG_ID } from './constants'
 If you have fund-specific facets, deploy them:
 
 ```typescript
-import { ethers } from 'ethers'
-import { deployFacets } from '@scripts/infrastructure'
+import { ethers } from "ethers";
+import { deployFacets } from "@scripts/infrastructure";
 
-const [signer] = await ethers.getSigners()
+const [signer] = await ethers.getSigners();
 
 const result = await deployFacets(signer, {
-    facetNames: ['FundManagementFacet', 'FundUSAFacet'],
-    useTimeTravel: false,
-    network: 'hedera-testnet',
-})
+  facetNames: ["FundManagementFacet", "FundUSAFacet"],
+  useTimeTravel: false,
+  network: "hedera-testnet",
+});
 
-console.log('Fund facets deployed:', {
-    FundManagementFacet: result.deployed.get('FundManagementFacet')?.address,
-    FundUSAFacet: result.deployed.get('FundUSAFacet')?.address,
-})
+console.log("Fund facets deployed:", {
+  FundManagementFacet: result.deployed.get("FundManagementFacet")?.address,
+  FundUSAFacet: result.deployed.get("FundUSAFacet")?.address,
+});
 ```
 
 ### Step 5: Register All Facets
@@ -336,28 +335,28 @@ console.log('Fund facets deployed:', {
 Register both common facets and fund-specific facets:
 
 ```typescript
-import { ethers } from 'ethers'
-import { registerFacets } from '@scripts/infrastructure'
-import { atsRegistry } from '@scripts/domain'
-import { BusinessLogicResolver__factory } from '@contract-types'
+import { ethers } from "ethers";
+import { registerFacets } from "@scripts/infrastructure";
+import { atsRegistry } from "@scripts/domain";
+import { BusinessLogicResolver__factory } from "@contract-types";
 
-const [signer] = await ethers.getSigners()
-const blrAddress = '0x...'
-const blr = BusinessLogicResolver__factory.connect(blrAddress, signer)
+const [signer] = await ethers.getSigners();
+const blrAddress = "0x...";
+const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
 
 const result = await registerFacets(blr, {
-    facets: {
-        // Common facets (may already be registered)
-        AccessControlFacet: '0x...',
-        ERC20Facet: '0x...',
-        // ... all common facets ...
+  facets: {
+    // Common facets (may already be registered)
+    AccessControlFacet: "0x...",
+    ERC20Facet: "0x...",
+    // ... all common facets ...
 
-        // Fund-specific facets (newly deployed)
-        FundManagementFacet: '0x...',
-        FundUSAFacet: '0x...',
-    },
-    registries: [atsRegistry],
-})
+    // Fund-specific facets (newly deployed)
+    FundManagementFacet: "0x...",
+    FundUSAFacet: "0x...",
+  },
+  registries: [atsRegistry],
+});
 ```
 
 **Note**: Registering an already-registered facet is safe and will update to the new address.
@@ -367,33 +366,33 @@ const result = await registerFacets(blr, {
 Create the first version of your fund configuration:
 
 ```typescript
-import { ethers } from 'ethers'
-import { BusinessLogicResolver__factory } from '@contract-types'
-import { createFundConfiguration } from '@scripts/domain'
+import { ethers } from "ethers";
+import { BusinessLogicResolver__factory } from "@contract-types";
+import { createFundConfiguration } from "@scripts/domain";
 
-const [signer] = await ethers.getSigners()
-const blrAddress = '0x...'
-const blr = BusinessLogicResolver__factory.connect(blrAddress, signer)
+const [signer] = await ethers.getSigners();
+const blrAddress = "0x...";
+const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
 
 const facetAddresses = {
-    AccessControlFacet: '0x...',
-    ERC20Facet: '0x...',
-    // ... all facets from FUND_FACETS array ...
-    FundManagementFacet: '0x...',
-    FundUSAFacet: '0x...',
-}
+  AccessControlFacet: "0x...",
+  ERC20Facet: "0x...",
+  // ... all facets from FUND_FACETS array ...
+  FundManagementFacet: "0x...",
+  FundUSAFacet: "0x...",
+};
 
 const result = await createFundConfiguration(
-    blr,
-    facetAddresses,
-    false // useTimeTravel
-)
+  blr,
+  facetAddresses,
+  false, // useTimeTravel
+);
 
 if (result.success) {
-    console.log(`Fund configuration created!`)
-    console.log(`  Config ID: ${result.data.configurationId}`)
-    console.log(`  Version: ${result.data.version}`)
-    console.log(`  Facets: ${result.data.facetKeys.length}`)
+  console.log(`Fund configuration created!`);
+  console.log(`  Config ID: ${result.data.configurationId}`);
+  console.log(`  Version: ${result.data.version}`);
+  console.log(`  Facets: ${result.data.facetKeys.length}`);
 }
 ```
 
@@ -403,24 +402,20 @@ If you want to include your new asset in complete deployment workflows, update [
 
 ```typescript
 // Add after bond configuration
-section('Creating Fund Configuration')
-const fundConfigResult = await createFundConfiguration(
-    blrContract,
-    facetAddresses,
-    useTimeTravel
-)
+section("Creating Fund Configuration");
+const fundConfigResult = await createFundConfiguration(blrContract, facetAddresses, useTimeTravel);
 
 if (!fundConfigResult.success) {
-    throw new Error(`Fund configuration failed: ${fundConfigResult.error}`)
+  throw new Error(`Fund configuration failed: ${fundConfigResult.error}`);
 }
 
 // Add to output
 output.configurations.fund = {
-    configurationId: FUND_CONFIG_ID,
-    version: fundConfigResult.data.version,
-    facetCount: fundConfigResult.data.facetKeys.length,
-    facets: fundConfigResult.data.facetKeys.map((f) => f.facetName),
-}
+  configurationId: FUND_CONFIG_ID,
+  version: fundConfigResult.data.version,
+  facetCount: fundConfigResult.data.facetKeys.length,
+  facets: fundConfigResult.data.facetKeys.map((f) => f.facetName),
+};
 ```
 
 ### Step 8: Verify
@@ -429,18 +424,16 @@ Verify your new asset configuration:
 
 ```typescript
 // Get configuration version
-const version = await blr.getConfigurationVersion(FUND_CONFIG_ID)
-console.log(`Fund config version: ${version}`)
+const version = await blr.getConfigurationVersion(FUND_CONFIG_ID);
+console.log(`Fund config version: ${version}`);
 
 // Get configuration data
-const config = await blr.getConfiguration(FUND_CONFIG_ID, version)
-console.log(`Facets in fund config: ${config.facetIds.length}`)
+const config = await blr.getConfiguration(FUND_CONFIG_ID, version);
+console.log(`Facets in fund config: ${config.facetIds.length}`);
 
 // Verify specific facet
-const hasFundManagement = config.facetIds.includes(
-    ethers.utils.id('FundManagementFacet')
-)
-console.log(`Has FundManagementFacet: ${hasFundManagement}`)
+const hasFundManagement = config.facetIds.includes(ethers.utils.id("FundManagementFacet"));
+console.log(`Has FundManagementFacet: ${hasFundManagement}`);
 ```
 
 ### Quick Reference: File Checklist
@@ -501,57 +494,57 @@ npm run generate:registry
 
 ```typescript
 export const FACET_REGISTRY = {
-    AccessControlFacet: {
-        name: 'AccessControlFacet',
-        layer: 1,
-        category: 'core',
-        resolverKey: {
-            name: '_ACCESS_CONTROL_RESOLVER_KEY',
-            value: '0x011768a41cb4fe76...',
-        },
-        methods: [
-            {
-                name: 'grantRole',
-                signature: 'grantRole(bytes32,address)',
-                selector: '0x2f2ff15d',
-            },
-            // ...
-        ],
-        events: [
-            {
-                name: 'RoleGranted',
-                signature: 'RoleGranted(bytes32,address,address)',
-                topic0: '0x2f878...',
-            },
-        ],
-        errors: [
-            {
-                name: 'AccessControlUnauthorizedAccount',
-                signature: 'AccessControlUnauthorizedAccount(address,bytes32)',
-                selector: '0x6697b232',
-            },
-        ],
+  AccessControlFacet: {
+    name: "AccessControlFacet",
+    layer: 1,
+    category: "core",
+    resolverKey: {
+      name: "_ACCESS_CONTROL_RESOLVER_KEY",
+      value: "0x011768a41cb4fe76...",
     },
-}
+    methods: [
+      {
+        name: "grantRole",
+        signature: "grantRole(bytes32,address)",
+        selector: "0x2f2ff15d",
+      },
+      // ...
+    ],
+    events: [
+      {
+        name: "RoleGranted",
+        signature: "RoleGranted(bytes32,address,address)",
+        topic0: "0x2f878...",
+      },
+    ],
+    errors: [
+      {
+        name: "AccessControlUnauthorizedAccount",
+        signature: "AccessControlUnauthorizedAccount(address,bytes32)",
+        selector: "0x6697b232",
+      },
+    ],
+  },
+};
 ```
 
 ### Using the Registry
 
 ```typescript
-import { getFacetDefinition, getAllFacets, ROLES } from '@scripts/domain'
+import { getFacetDefinition, getAllFacets, ROLES } from "@scripts/domain";
 
 // Get specific facet
-const facet = getFacetDefinition('AccessControlFacet')
-console.log(facet.resolverKey.value) // Used for BLR registration
-console.log(facet.methods.length) // Number of functions
-console.log(facet.layer) // Architecture layer (0-3)
+const facet = getFacetDefinition("AccessControlFacet");
+console.log(facet.resolverKey.value); // Used for BLR registration
+console.log(facet.methods.length); // Number of functions
+console.log(facet.layer); // Architecture layer (0-3)
 
 // Get all facets
-const allFacets = getAllFacets()
-console.log(`Total facets: ${allFacets.length}`)
+const allFacets = getAllFacets();
+console.log(`Total facets: ${allFacets.length}`);
 
 // Access roles
-console.log(ROLES._PAUSER_ROLE) // bytes32 value from contracts
+console.log(ROLES._PAUSER_ROLE); // bytes32 value from contracts
 ```
 
 ### Registry in Operations
@@ -560,15 +553,15 @@ The infrastructure operations use the registry to get resolver keys:
 
 ```typescript
 // In registerFacets operation
-const definition = registry.getFacetDefinition('AccessControlFacet')
-const resolverKey = definition.resolverKey.value
+const definition = registry.getFacetDefinition("AccessControlFacet");
+const resolverKey = definition.resolverKey.value;
 
 await blr.registerBusinessLogics([
-    {
-        businessLogicKey: resolverKey, // From registry, not generated
-        businessLogicAddress: facetAddress,
-    },
-])
+  {
+    businessLogicKey: resolverKey, // From registry, not generated
+    businessLogicAddress: facetAddress,
+  },
+]);
 ```
 
 **Why Registry-Based Keys?**
@@ -622,11 +615,9 @@ This generates TypeChain types in `build/typechain/`.
 
 1. Check if resolver key exists in [contracts/layer_0/constants/resolverKeys.sol](../contracts/layer_0/constants/resolverKeys.sol)
 2. If missing, add it:
-    ```solidity
-    bytes32 constant _NEW_FACET_RESOLVER_KEY = keccak256(
-        'NewFacet resolver key'
-    );
-    ```
+   ```solidity
+   bytes32 constant _NEW_FACET_RESOLVER_KEY = keccak256("NewFacet resolver key");
+   ```
 3. Regenerate registry: `npm run generate:registry`
 
 ---
@@ -638,19 +629,19 @@ This generates TypeChain types in `build/typechain/`.
 **Solution**: The scripts already use explicit gas limits from [infrastructure/constants.ts](infrastructure/constants.ts):
 
 ```typescript
-GAS_LIMIT.businessLogicResolver.createConfiguration = 26_000_000
+GAS_LIMIT.businessLogicResolver.createConfiguration = 26_000_000;
 ```
 
 If you still hit issues with a custom configuration:
 
 ```typescript
 await createFundConfiguration(
-    blr,
-    facetAddresses,
-    false,
-    false,
-    2 // Smaller batch size (processes facets in smaller groups)
-)
+  blr,
+  facetAddresses,
+  false,
+  false,
+  2, // Smaller batch size (processes facets in smaller groups)
+);
 ```
 
 ---
@@ -662,18 +653,18 @@ await createFundConfiguration(
 **Solution**:
 
 1. Verify facets are deployed:
-    ```bash
-    # Check deployment output files
-    ls deployments/
-    ```
+   ```bash
+   # Check deployment output files
+   ls deployments/
+   ```
 2. Confirm addresses in your `facetAddresses` object are correct
 3. Deploy missing facets:
-    ```typescript
-    await deployFacets(provider, {
-        facetNames: ['MissingFacet'],
-        network: 'hedera-testnet',
-    })
-    ```
+   ```typescript
+   await deployFacets(provider, {
+     facetNames: ["MissingFacet"],
+     network: "hedera-testnet",
+   });
+   ```
 
 ---
 
@@ -684,17 +675,17 @@ await createFundConfiguration(
 **Solution**:
 
 1. Clean build artifacts:
-    ```bash
-    npx hardhat clean
-    ```
+   ```bash
+   npx hardhat clean
+   ```
 2. Recompile contracts:
-    ```bash
-    npm run compile
-    ```
+   ```bash
+   npm run compile
+   ```
 3. Regenerate registry:
-    ```bash
-    npm run generate:registry
-    ```
+   ```bash
+   npm run generate:registry
+   ```
 4. Verify timestamp at top of [domain/atsRegistry.data.ts](domain/atsRegistry.data.ts)
 
 ---
@@ -707,12 +698,12 @@ await createFundConfiguration(
 
 ```typescript
 await registerFacets(provider, {
-    blrAddress,
-    facets: {
-        AccessControlFacet: '0xNEW_ADDRESS', // Updates existing registration
-    },
-    registries: [atsRegistry],
-})
+  blrAddress,
+  facets: {
+    AccessControlFacet: "0xNEW_ADDRESS", // Updates existing registration
+  },
+  registries: [atsRegistry],
+});
 ```
 
 The latest registered address will be used for new configurations.

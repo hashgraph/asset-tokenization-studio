@@ -12,30 +12,29 @@
  * @module core/operations/blrConfigurations
  */
 
-import { BusinessLogicResolver } from '@contract-types'
+import { BusinessLogicResolver } from "@contract-types";
 import {
-    DEFAULT_TRANSACTION_TIMEOUT,
-    OperationResult,
-    RegistryProvider,
-    validateBytes32,
-    extractRevertReason,
-    info,
-    success,
-    debug,
-    error as logError,
-    formatGasUsage,
-    waitForTransaction,
-} from '@scripts/infrastructure'
+  DEFAULT_TRANSACTION_TIMEOUT,
+  OperationResult,
+  validateBytes32,
+  extractRevertReason,
+  info,
+  success,
+  debug,
+  error as logError,
+  formatGasUsage,
+  waitForTransaction,
+} from "@scripts/infrastructure";
 
 /**
  * Facet configuration for BLR.
  */
 export interface FacetConfiguration {
-    /** Facet name */
-    facetName: string
+  /** Facet name */
+  facetName: string;
 
-    /** Function selectors this facet handles */
-    selectors: string[]
+  /** Function selectors this facet handles */
+  selectors: string[];
 }
 
 /**
@@ -43,11 +42,11 @@ export interface FacetConfiguration {
  * This matches the IDiamondCutManager.FacetConfigurationStruct interface.
  */
 export interface BatchFacetConfiguration {
-    /** Facet ID (keccak256 hash of facet name) */
-    id: string
+  /** Facet ID (keccak256 hash of facet name) */
+  id: string;
 
-    /** Facet version */
-    version: number
+  /** Facet version */
+  version: number;
 }
 
 /**
@@ -56,32 +55,32 @@ export interface BatchFacetConfiguration {
  * Used by the deployBlrWithFacets workflow helper.
  */
 export interface CreateBlrConfigurationResult {
-    /** Whether configuration succeeded */
-    success: boolean
+  /** Whether configuration succeeded */
+  success: boolean;
 
-    /** BLR address */
-    blrAddress: string
+  /** BLR address */
+  blrAddress: string;
 
-    /** Configuration ID */
-    configurationId: string
+  /** Configuration ID */
+  configurationId: string;
 
-    /** Configuration version created */
-    version?: number
+  /** Configuration version created */
+  version?: number;
 
-    /** Number of facets configured */
-    facetCount: number
+  /** Number of facets configured */
+  facetCount: number;
 
-    /** Transaction hash (only if success=true) */
-    transactionHash?: string
+  /** Transaction hash (only if success=true) */
+  transactionHash?: string;
 
-    /** Block number (only if success=true) */
-    blockNumber?: number
+  /** Block number (only if success=true) */
+  blockNumber?: number;
 
-    /** Gas used (only if success=true) */
-    gasUsed?: number
+  /** Gas used (only if success=true) */
+  gasUsed?: number;
 
-    /** Error message (only if success=false) */
-    error?: string
+  /** Error message (only if success=false) */
+  error?: string;
 }
 
 /**
@@ -102,22 +101,16 @@ export interface CreateBlrConfigurationResult {
  * console.log(`Latest config version: ${version}`)
  * ```
  */
-export async function getConfigurationVersion(
-    blr: BusinessLogicResolver,
-    configurationId: string
-): Promise<number> {
-    try {
-        validateBytes32(configurationId, 'configuration ID')
+export async function getConfigurationVersion(blr: BusinessLogicResolver, configurationId: string): Promise<number> {
+  try {
+    validateBytes32(configurationId, "configuration ID");
 
-        const version =
-            await blr.getLatestVersionByConfiguration(configurationId)
-        return version.toNumber()
-    } catch (err) {
-        logError(
-            `Error getting configuration version: ${extractRevertReason(err)}`
-        )
-        throw err
-    }
+    const version = await blr.getLatestVersionByConfiguration(configurationId);
+    return version.toNumber();
+  } catch (err) {
+    logError(`Error getting configuration version: ${extractRevertReason(err)}`);
+    throw err;
+  }
 }
 
 /**
@@ -135,16 +128,13 @@ export async function getConfigurationVersion(
  * const exists = await configurationExists(blr, '0x00...01')
  * ```
  */
-export async function configurationExists(
-    blr: BusinessLogicResolver,
-    configurationId: string
-): Promise<boolean> {
-    try {
-        const version = await getConfigurationVersion(blr, configurationId)
-        return version > 0
-    } catch {
-        return false
-    }
+export async function configurationExists(blr: BusinessLogicResolver, configurationId: string): Promise<boolean> {
+  try {
+    const version = await getConfigurationVersion(blr, configurationId);
+    return version > 0;
+  } catch {
+    return false;
+  }
 }
 
 // ============================================================================
@@ -155,35 +145,35 @@ export async function configurationExists(
  * Error types for configuration operations.
  */
 export type ConfigurationError =
-    | 'EMPTY_FACET_LIST'
-    | 'INVALID_ADDRESS'
-    | 'INVALID_CONFIG_ID'
-    | 'FACET_NOT_FOUND'
-    | 'TRANSACTION_FAILED'
-    | 'EVENT_PARSE_FAILED'
+  | "EMPTY_FACET_LIST"
+  | "INVALID_ADDRESS"
+  | "INVALID_CONFIG_ID"
+  | "FACET_NOT_FOUND"
+  | "TRANSACTION_FAILED"
+  | "EVENT_PARSE_FAILED";
 
 /**
  * Configuration data returned on success.
  */
 export interface ConfigurationData {
-    /** Configuration ID */
-    configurationId: string
+  /** Configuration ID */
+  configurationId: string;
 
-    /** Configuration version */
-    version: number
+  /** Configuration version */
+  version: number;
 
-    /** Facet keys and addresses */
-    facetKeys: Array<{
-        facetName: string
-        key: string
-        address: string
-    }>
+  /** Facet keys and addresses */
+  facetKeys: Array<{
+    facetName: string;
+    key: string;
+    address: string;
+  }>;
 
-    /** Transaction hash */
-    transactionHash: string
+  /** Transaction hash */
+  transactionHash: string;
 
-    /** Block number */
-    blockNumber: number
+  /** Block number */
+  blockNumber: number;
 }
 
 // ============================================================================
@@ -197,14 +187,11 @@ export interface ConfigurationData {
  * @param facetVersionList - Array of facet versions
  * @returns Array of BatchFacetConfiguration objects
  */
-function createBatchFacetConfigurations(
-    facetIdList: string[],
-    facetVersionList: number[]
-): BatchFacetConfiguration[] {
-    return facetIdList.map((facetId, index) => ({
-        id: facetId,
-        version: facetVersionList[index],
-    }))
+function createBatchFacetConfigurations(facetIdList: string[], facetVersionList: number[]): BatchFacetConfiguration[] {
+  return facetIdList.map((facetId, index) => ({
+    id: facetId,
+    version: facetVersionList[index],
+  }));
 }
 
 /**
@@ -236,40 +223,29 @@ function createBatchFacetConfigurations(
  * ```
  */
 export async function processFacetLists(
-    configId: string,
-    facetIdList: string[],
-    facetVersionList: number[],
-    blrContract: Contract,
-    partialBatchDeploy: boolean,
-    batchSize: number,
-    gasLimit?: number
+  configId: string,
+  facetIdList: string[],
+  facetVersionList: number[],
+  blrContract: Contract,
+  partialBatchDeploy: boolean,
+  batchSize: number,
+  gasLimit?: number,
 ): Promise<void> {
-    if (facetIdList.length !== facetVersionList.length) {
-        throw new Error(
-            'facetIdList and facetVersionList must have the same length'
-        )
-    }
+  if (facetIdList.length !== facetVersionList.length) {
+    throw new Error("facetIdList and facetVersionList must have the same length");
+  }
 
-    const chunkSize = Math.ceil(facetIdList.length / batchSize)
+  const chunkSize = Math.ceil(facetIdList.length / batchSize);
 
-    for (let i = 0; i < facetIdList.length; i += chunkSize) {
-        const batchIds = facetIdList.slice(i, i + chunkSize)
-        const batchVersions = facetVersionList.slice(i, i + chunkSize)
-        const batch = createBatchFacetConfigurations(batchIds, batchVersions)
+  for (let i = 0; i < facetIdList.length; i += chunkSize) {
+    const batchIds = facetIdList.slice(i, i + chunkSize);
+    const batchVersions = facetVersionList.slice(i, i + chunkSize);
+    const batch = createBatchFacetConfigurations(batchIds, batchVersions);
 
-        const isLastBatch = partialBatchDeploy
-            ? false
-            : i + chunkSize >= facetIdList.length
+    const isLastBatch = partialBatchDeploy ? false : i + chunkSize >= facetIdList.length;
 
-        await sendBatchConfiguration(
-            configId,
-            batch,
-            isLastBatch,
-            blrContract,
-            partialBatchDeploy,
-            gasLimit
-        )
-    }
+    await sendBatchConfiguration(configId, batch, isLastBatch, blrContract, partialBatchDeploy, gasLimit);
+  }
 }
 
 /**
@@ -304,279 +280,207 @@ export async function processFacetLists(
  * ```
  */
 export async function sendBatchConfiguration(
-    configId: string,
-    configurations: BatchFacetConfiguration[],
-    isFinalBatch: boolean,
-    blrContract: Contract,
-    partialBatchDeploy: boolean,
-    gasLimit?: number
+  configId: string,
+  configurations: BatchFacetConfiguration[],
+  isFinalBatch: boolean,
+  blrContract: Contract,
+  partialBatchDeploy: boolean,
+  gasLimit?: number,
 ): Promise<void> {
-    // If this is a partial batch deploy, never mark as final batch
-    const finalBatch = partialBatchDeploy ? false : isFinalBatch
+  // If this is a partial batch deploy, never mark as final batch
+  const finalBatch = partialBatchDeploy ? false : isFinalBatch;
 
-    info(`Sending batch configuration for config ${configId}`)
-    info(`  Configurations: ${configurations.length}`)
-    info(`  Is final batch: ${finalBatch}`)
-    info(`  Partial batch deploy: ${partialBatchDeploy}`)
+  info(`Sending batch configuration for config ${configId}`);
+  info(`  Configurations: ${configurations.length}`);
+  info(`  Is final batch: ${finalBatch}`);
+  info(`  Partial batch deploy: ${partialBatchDeploy}`);
 
-    try {
-        // Import GAS_LIMIT constants
-        const { GAS_LIMIT } = await import('@scripts/infrastructure')
+  try {
+    // Import GAS_LIMIT constants
+    const { GAS_LIMIT } = await import("@scripts/infrastructure");
 
-        const txResponse = await blrContract.createBatchConfiguration(
-            configId,
-            configurations,
-            finalBatch,
-            {
-                gasLimit:
-                    gasLimit ||
-                    GAS_LIMIT.businessLogicResolver.createConfiguration,
-            }
-        )
+    const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
+      gasLimit: gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration,
+    });
 
-        info(`Batch configuration transaction sent: ${txResponse.hash}`)
+    info(`Batch configuration transaction sent: ${txResponse.hash}`);
 
-        // Wait for transaction confirmation
-        const receipt = await waitForTransaction(
-            txResponse,
-            1,
-            DEFAULT_TRANSACTION_TIMEOUT
-        )
+    // Wait for transaction confirmation
+    const receipt = await waitForTransaction(txResponse, 1, DEFAULT_TRANSACTION_TIMEOUT);
 
-        const gasUsed = formatGasUsage(receipt, txResponse.gasLimit)
-        debug(gasUsed)
+    const gasUsed = formatGasUsage(receipt, txResponse.gasLimit);
+    debug(gasUsed);
 
-        success(
-            `Batch configuration ${finalBatch ? '(final)' : '(partial)'} completed successfully`
-        )
-        info(`  Transaction: ${receipt.transactionHash}`)
-        info(`  Block: ${receipt.blockNumber}`)
-    } catch (err) {
-        const errorMessage = extractRevertReason(err)
-        logError(`Failed to send batch configuration: ${errorMessage}`)
-        throw err
-    }
+    success(`Batch configuration ${finalBatch ? "(final)" : "(partial)"} completed successfully`);
+    info(`  Transaction: ${receipt.transactionHash}`);
+    info(`  Block: ${receipt.blockNumber}`);
+  } catch (err) {
+    const errorMessage = extractRevertReason(err);
+    logError(`Failed to send batch configuration: ${errorMessage}`);
+    throw err;
+  }
 }
 
 /**
  * Create a batch configuration in BusinessLogicResolver with partial deployment support.
  *
- * This function is similar to createConfiguration but adds support for batch processing
- * and partial deployment scenarios. It automatically resolves facet names to IDs,
- * splits them into batches, and processes each batch with the specified partial deployment behavior.
+ * This function splits facets into batches and processes each batch with the specified
+ * partial deployment behavior.
+ *
+ * **Note:** Caller must provide facets with resolver keys already looked up from registry.
  *
  * @param blrContract - BusinessLogicResolver contract instance
- * @param options - Batch configuration options
+ * @param options - Batch configuration options (includes resolver keys)
  * @returns Operation result with configuration data or error
  *
  * @example
  * ```typescript
  * import { BusinessLogicResolver__factory } from '@contract-types'
+ * import { atsRegistry } from '@scripts/domain'
  *
  * const blr = BusinessLogicResolver__factory.connect(blrAddress, signer)
  *
- * // Create batch configuration with partial deployment
+ * // Caller looks up resolver keys from registry
+ * const facetsWithKeys = [
+ *   {
+ *     facetName: 'AccessControlFacet',
+ *     address: '0xabc...',
+ *     resolverKey: atsRegistry.getFacetDefinition('AccessControlFacet').resolverKey.value
+ *   },
+ *   {
+ *     facetName: 'KycFacet',
+ *     address: '0xdef...',
+ *     resolverKey: atsRegistry.getFacetDefinition('KycFacet').resolverKey.value
+ *   }
+ * ]
+ *
+ * // Create batch configuration
  * const result = await createBatchConfiguration(blr, {
  *   configurationId: '0x123...',
- *   facetNames: ['AccessControlFacet', 'KycFacet'],
- *   facetAddresses: {
- *     'AccessControlFacet': '0xabc...',
- *     'KycFacet': '0xdef...'
- *   },
- *   partialBatchDeploy: true, // All batches marked as non-final
- *   useTimeTravel: false
+ *   facets: facetsWithKeys,
+ *   partialBatchDeploy: true  // All batches marked as non-final
  * })
  * ```
  */
+/**
+ * Facet data for configuration creation.
+ */
+export interface FacetConfigurationData {
+  /** Base facet name (e.g., 'AccessControlFacet') */
+  facetName: string;
+
+  /** Resolver key (bytes32) for the facet */
+  resolverKey: string;
+
+  /** Deployed facet address */
+  address: string;
+}
+
 export async function createBatchConfiguration(
-    blrContract: Contract,
-    options: {
-        /** Configuration ID (bytes32) */
-        configurationId: string
+  blrContract: Contract,
+  options: {
+    /** Configuration ID (bytes32) */
+    configurationId: string;
 
-        /** Facet names to include in configuration */
-        facetNames: readonly string[]
+    /** Facets to include in configuration (with resolver keys) */
+    facets: FacetConfigurationData[];
 
-        /** Map of facet contract names to deployed addresses */
-        facetAddresses: Record<string, string>
+    /** Whether this is a partial batch deployment (all batches marked as non-final) */
+    partialBatchDeploy?: boolean;
 
-        /** Whether this is a partial batch deployment (all batches marked as non-final) */
-        partialBatchDeploy?: boolean
+    /** Batch size for partial deployments */
+    batchSize?: number;
 
-        /** Batch size for partial deployments */
-        batchSize?: number
-
-        /** Whether to use TimeTravel variants */
-        useTimeTravel?: boolean
-
-        /** Optional gas limit override */
-        gasLimit?: number
-
-        /** Optional registry provider for facet validation */
-        registry?: RegistryProvider
-    }
+    /** Optional gas limit override */
+    gasLimit?: number;
+  },
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-    const {
-        configurationId,
-        facetAddresses,
-        partialBatchDeploy = false,
-        batchSize = 2,
-        useTimeTravel = false,
-        gasLimit,
-        registry,
-    } = options
+  const { configurationId, facets, partialBatchDeploy = false, batchSize = 2, gasLimit } = options;
 
-    let facetNames = [...options.facetNames]
+  const { info } = await import("@scripts/infrastructure");
+  const { ok, err } = await import("@scripts/infrastructure");
 
-    const { info } = await import('@scripts/infrastructure')
-    const { ok, err } = await import('@scripts/infrastructure')
+  if (facets.length === 0) {
+    return err("EMPTY_FACET_LIST", "At least one facet is required for configuration");
+  }
 
-    if (facetNames.length === 0) {
-        return err(
-            'EMPTY_FACET_LIST',
-            'At least one facet is required for configuration'
-        )
+  try {
+    const blrAddress = blrContract.address;
+
+    info("Creating Batch BLR Configuration", {
+      blrAddress,
+      configurationId,
+      facetCount: facets.length,
+      partialBatchDeploy,
+    });
+
+    // Use provided facet data directly (resolver keys already included)
+    const facetKeys = facets.map((facet) => ({
+      facetName: facet.facetName,
+      key: facet.resolverKey,
+      address: facet.address,
+    }));
+
+    if (facetKeys.length === 0) {
+      return err("FACET_NOT_FOUND", "No valid facets found in provided addresses");
     }
 
-    if (useTimeTravel) {
-        facetNames.push('TimeTravelFacet')
-    }
+    info(`Resolved ${facetKeys.length} facets with addresses`, {});
 
-    try {
-        const blrAddress = blrContract.address
+    const latestVersion = await blrContract.getLatestVersion();
+    const version = latestVersion.toNumber();
 
-        info('Creating Batch BLR Configuration', {
-            blrAddress,
-            configurationId,
-            facetCount: facetNames.length,
-            partialBatchDeploy,
-            useTimeTravel,
-        })
-        const facetKeys = facetNames
-            .map((facetName) => {
-                // When useTimeTravel=true, facets are deployed as TimeTravel variants
-                // So facetAddresses keys are like 'AccessControlFacetTimeTravel'
-                // But facetName in EQUITY_FACETS is still 'AccessControlFacet' (base name)
-                // We need to resolve to match what was actually deployed
-                const contractName =
-                    facetName.endsWith('Facet') &&
-                    facetName !== 'TimeTravelFacet' &&
-                    useTimeTravel
-                        ? `${facetName}TimeTravel`
-                        : facetName
+    info("Retrieved latest version from BLR", { version });
 
-                const address = facetAddresses[contractName]
+    const facetIdList = facetKeys.map((f) => f.key);
+    // All facets registered in a batch get the same version from registerBusinessLogics
+    const facetVersionList = new Array(facetKeys.length).fill(version);
 
-                // Get resolver key from registry (defined in contract constants)
-                // Always use BASE facet name for registry lookup
-                let key: string
-                if (registry) {
-                    const definition = registry.getFacetDefinition(facetName)
-                    if (!definition) {
-                        throw new Error(
-                            `Facet ${facetName} not found in registry. ` +
-                                `All facets must be in the registry to get their resolver keys.`
-                        )
-                    }
-                    if (
-                        !definition.resolverKey ||
-                        !definition.resolverKey.value
-                    ) {
-                        throw new Error(
-                            `Facet ${facetName} found in registry but missing resolverKey.value.`
-                        )
-                    }
-                    key = definition.resolverKey.value
-                } else {
-                    throw new Error(
-                        `Registry is required to get resolver keys for facets. ` +
-                            `Cannot dynamically generate resolver keys - they are contract constants.`
-                    )
-                }
+    info("Processing facets in batches", {
+      facetCount: facetIdList.length,
+      partialBatchDeploy,
+    });
 
-                return {
-                    facetName,
-                    contractName,
-                    key,
-                    address,
-                }
-            })
-            .filter((facet) => {
-                if (!facet.address) {
-                    info(
-                        `Skipping ${facet.facetName} - not deployed or not available`,
-                        {}
-                    )
-                    return false
-                }
+    await processFacetLists(
+      configurationId,
+      facetIdList,
+      facetVersionList,
+      blrContract,
+      partialBatchDeploy,
+      batchSize,
+      gasLimit,
+    );
 
-                return true
-            })
-            .map(({ facetName, key, address }) => ({
-                facetName,
-                key,
-                address: address!,
-            }))
+    // Query the actual configuration-specific version after batch processing
+    const configVersion = await blrContract.getLatestVersionByConfiguration(configurationId);
+    const actualVersion = configVersion.toNumber();
 
-        if (facetKeys.length === 0) {
-            return err(
-                'FACET_NOT_FOUND',
-                'No valid facets found in provided addresses'
-            )
-        }
+    const { success: logSuccess } = await import("../utils/logging");
+    logSuccess("Batch configuration completed successfully", {
+      configurationId,
+      facets: facetKeys.length,
+      partialDeploy: partialBatchDeploy,
+      version: actualVersion,
+    });
 
-        info(`Resolved ${facetKeys.length} facets with addresses`, {})
+    return ok({
+      configurationId,
+      version: actualVersion,
+      facetKeys,
+      transactionHash: "",
+      blockNumber: 0,
+    });
+  } catch (error) {
+    const { error: logError } = await import("../utils/logging");
+    const errorMessage = error instanceof Error ? error.message : String(error);
 
-        const latestVersion = await blrContract.getLatestVersion()
-        const version = latestVersion.toNumber()
+    logError("Failed to create batch configuration", {
+      error: errorMessage,
+    });
 
-        info('Retrieved latest version from BLR', { version })
-
-        const facetIdList = facetKeys.map((f) => f.key)
-        // All facets registered in a batch get the same version from registerBusinessLogics
-        const facetVersionList = new Array(facetKeys.length).fill(version)
-
-        info('Processing facets in batches', {
-            facetCount: facetIdList.length,
-            partialBatchDeploy,
-        })
-
-        await processFacetLists(
-            configurationId,
-            facetIdList,
-            facetVersionList,
-            blrContract,
-            partialBatchDeploy,
-            batchSize,
-            gasLimit
-        )
-
-        const { success: logSuccess } = await import('../utils/logging')
-        logSuccess('Batch configuration completed successfully', {
-            configurationId,
-            facets: facetKeys.length,
-            partialDeploy: partialBatchDeploy,
-        })
-
-        return ok({
-            configurationId,
-            version,
-            facetKeys,
-            transactionHash: '',
-            blockNumber: 0,
-        })
-    } catch (error) {
-        const { error: logError } = await import('../utils/logging')
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
-
-        logError('Failed to create batch configuration', {
-            error: errorMessage,
-        })
-
-        return err('TRANSACTION_FAILED', errorMessage, error)
-    }
+    return err("TRANSACTION_FAILED", errorMessage, error);
+  }
 }
 
 // Re-export Contract type for convenience
-type Contract = import('ethers').Contract
+type Contract = import("ethers").Contract;

@@ -18,16 +18,8 @@ interface IERC1643 {
     }
 
     // Document Events
-    event DocumentRemoved(
-        bytes32 indexed name,
-        string uri,
-        bytes32 documentHash
-    );
-    event DocumentUpdated(
-        bytes32 indexed name,
-        string uri,
-        bytes32 documentHash
-    );
+    event DocumentRemoved(bytes32 indexed name, string uri, bytes32 documentHash);
+    event DocumentUpdated(bytes32 indexed name, string uri, bytes32 documentHash);
 
     error EmptyName();
     error EmptyURI();
@@ -41,11 +33,7 @@ interface IERC1643 {
      * @param _uri Off-chain uri of the document from where it is accessible to investors/advisors to read.
      * @param _documentHash hash (of the contents) of the document.
      */
-    function setDocument(
-        bytes32 _name,
-        string calldata _uri,
-        bytes32 _documentHash
-    ) external;
+    function setDocument(bytes32 _name, string calldata _uri, bytes32 _documentHash) external;
 
     /**
      * @notice Used to remove an existing document from the contract by giving the name of the document.
@@ -61,9 +49,7 @@ interface IERC1643 {
      * @return bytes32 The hash (of the contents) of the document.
      * @return uint256 the timestamp at which the document was last modified.
      */
-    function getDocument(
-        bytes32 _name
-    ) external view returns (string memory, bytes32, uint256);
+    function getDocument(bytes32 _name) external view returns (string memory, bytes32, uint256);
 
     /**
      * @notice Used to retrieve a full list of documents attached to the smart contract.

@@ -9,53 +9,53 @@
  * @module core/operations/blrDeployment
  */
 
-import { Signer } from 'ethers'
-import { BusinessLogicResolver__factory, ProxyAdmin } from '@contract-types'
+import { Signer } from "ethers";
+import { BusinessLogicResolver__factory, ProxyAdmin } from "@contract-types";
 import {
-    DeployProxyResult,
-    deployProxy,
-    error as logError,
-    info,
-    section,
-    success,
-    GAS_LIMIT,
-} from '@scripts/infrastructure'
+  DeployProxyResult,
+  deployProxy,
+  error as logError,
+  info,
+  section,
+  success,
+  GAS_LIMIT,
+} from "@scripts/infrastructure";
 
 /**
  * Options for deploying BLR.
  */
 export interface DeployBlrOptions {
-    /** Existing ProxyAdmin contract instance (optional, will deploy new one if not provided) */
-    existingProxyAdmin?: ProxyAdmin
+  /** Existing ProxyAdmin contract instance (optional, will deploy new one if not provided) */
+  existingProxyAdmin?: ProxyAdmin;
 
-    /** Whether to initialize after deployment */
-    initialize?: boolean
+  /** Whether to initialize after deployment */
+  initialize?: boolean;
 }
 
 /**
  * Result of deploying BLR.
  */
 export interface DeployBlrResult {
-    /** Whether deployment succeeded */
-    success: boolean
+  /** Whether deployment succeeded */
+  success: boolean;
 
-    /** Proxy deployment result */
-    proxyResult: DeployProxyResult
+  /** Proxy deployment result */
+  proxyResult: DeployProxyResult;
 
-    /** BLR proxy address */
-    blrAddress: string
+  /** BLR proxy address */
+  blrAddress: string;
 
-    /** BLR implementation address */
-    implementationAddress: string
+  /** BLR implementation address */
+  implementationAddress: string;
 
-    /** ProxyAdmin address */
-    proxyAdminAddress: string
+  /** ProxyAdmin address */
+  proxyAdminAddress: string;
 
-    /** Whether BLR was initialized */
-    initialized: boolean
+  /** Whether BLR was initialized */
+  initialized: boolean;
 
-    /** Error message (only if success=false) */
-    error?: string
+  /** Error message (only if success=false) */
+  error?: string;
 }
 
 /**
@@ -79,77 +79,72 @@ export interface DeployBlrResult {
  * console.log(`BLR deployed at ${result.blrAddress}`)
  * ```
  */
-export async function deployBlr(
-    signer: Signer,
-    options: DeployBlrOptions = {}
-): Promise<DeployBlrResult> {
-    const { existingProxyAdmin, initialize = true } = options
+export async function deployBlr(signer: Signer, options: DeployBlrOptions = {}): Promise<DeployBlrResult> {
+  const { existingProxyAdmin, initialize = true } = options;
 
-    section('Deploying BusinessLogicResolver')
+  section("Deploying BusinessLogicResolver");
 
-    try {
-        // Deploy BLR with proxy
-        info('Deploying BLR implementation and proxy...')
+  try {
+    // Deploy BLR with proxy
+    info("Deploying BLR implementation and proxy...");
 
-        // Create factory for implementation deployment
-        const implementationFactory = new BusinessLogicResolver__factory(signer)
+    // Create factory for implementation deployment
+    const implementationFactory = new BusinessLogicResolver__factory(signer);
 
-        const proxyResult = await deployProxy(signer, {
-            implementationFactory,
-            implementationArgs: [],
-            existingProxyAdmin,
-            initData: '0x',
-            overrides: {
-                gasLimit: GAS_LIMIT.high,
-            },
-        })
+    const proxyResult = await deployProxy(signer, {
+      implementationFactory,
+      implementationArgs: [],
+      existingProxyAdmin,
+      initData: "0x",
+      overrides: {
+        gasLimit: GAS_LIMIT.high,
+      },
+    });
 
-        const blrAddress = proxyResult.proxyAddress
-        const implementationAddress = proxyResult.implementationAddress
-        const adminAddress = proxyResult.proxyAdminAddress
+    const blrAddress = proxyResult.proxyAddress;
+    const implementationAddress = proxyResult.implementationAddress;
+    const adminAddress = proxyResult.proxyAdminAddress;
 
-        let initialized = false
+    let initialized = false;
 
-        // Initialize if requested
-        if (initialize) {
-            info('Initializing BLR...')
+    // Initialize if requested
+    if (initialize) {
+      info("Initializing BLR...");
 
-            try {
-                const blr = BusinessLogicResolver__factory.connect(
-                    blrAddress,
-                    signer
-                )
+      try {
+        const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
 
-                const initTx = await blr.initialize_BusinessLogicResolver()
-                await initTx.wait()
+        const initTx = await blr.initialize_BusinessLogicResolver({
+          gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
+        });
+        await initTx.wait();
 
-                initialized = true
-                success('BLR initialized')
-            } catch (err) {
-                const errorMsg =
-                    err instanceof Error ? err.message : String(err)
-                logError(`BLR initialization failed: ${errorMsg}`)
-                // Don't fail deployment if initialization fails
-            }
-        }
-
-        success('BLR deployment complete')
-        info(`  BLR Proxy: ${blrAddress}`)
-        info(`  Implementation: ${implementationAddress}`)
-        info(`  ProxyAdmin: ${adminAddress}`)
-
-        return {
-            success: true,
-            proxyResult,
-            blrAddress,
-            implementationAddress,
-            proxyAdminAddress: adminAddress,
-            initialized,
-        }
-    } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err)
-        logError(`BLR deployment failed: ${errorMessage}`)
-
-        throw new Error(`BLR deployment failed: ${errorMessage}`)
+        initialized = true;
+        success("BLR initialized");
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        logError(`BLR initialization failed: ${errorMsg}`);
+        // Don't fail deployment if initialization fails
+      }
     }
+
+    success("BLR deployment complete");
+    info(`  BLR Proxy: ${blrAddress}`);
+    info(`  Implementation: ${implementationAddress}`);
+    info(`  ProxyAdmin: ${adminAddress}`);
+
+    return {
+      success: true,
+      proxyResult,
+      blrAddress,
+      implementationAddress,
+      proxyAdminAddress: adminAddress,
+      initialized,
+    };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    logError(`BLR deployment failed: ${errorMessage}`);
+
+    throw new Error(`BLR deployment failed: ${errorMessage}`);
+  }
 }

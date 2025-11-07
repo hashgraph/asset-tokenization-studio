@@ -25,7 +25,7 @@
  * ```
  */
 export function getTimeTravelVariant(contractName: string): string {
-    return `${contractName}TimeTravel`
+  return `${contractName}TimeTravel`;
 }
 
 /**
@@ -49,15 +49,15 @@ export function getTimeTravelVariant(contractName: string): string {
  * ```
  */
 export function hasTimeTravelVariant(contractName: string): boolean {
-    // Invariant: 'TimeTravelFacet' never has a TimeTravel variant
-    if (contractName === 'TimeTravelFacet') {
-        return false
-    }
+  // Invariant: 'TimeTravelFacet' never has a TimeTravel variant
+  if (contractName === "TimeTravelFacet") {
+    return false;
+  }
 
-    // Convention: Contracts ending with 'Facet' have TimeTravel variants
-    // Infrastructure contracts (ProxyAdmin, TransparentUpgradeableProxy, etc.)
-    // don't follow this naming pattern
-    return contractName.endsWith('Facet')
+  // Convention: Contracts ending with 'Facet' have TimeTravel variants
+  // Infrastructure contracts (ProxyAdmin, TransparentUpgradeableProxy, etc.)
+  // don't follow this naming pattern
+  return contractName.endsWith("Facet");
 }
 
 /**
@@ -85,19 +85,16 @@ export function hasTimeTravelVariant(contractName: string): boolean {
  * // Returns: 'ProxyAdmin' (no TimeTravel variant exists)
  * ```
  */
-export function resolveContractName(
-    contractName: string,
-    useTimeTravel: boolean = false
-): string {
-    if (!useTimeTravel) {
-        return contractName
-    }
+export function resolveContractName(contractName: string, useTimeTravel: boolean = false): string {
+  if (!useTimeTravel) {
+    return contractName;
+  }
 
-    if (hasTimeTravelVariant(contractName)) {
-        return getTimeTravelVariant(contractName)
-    }
+  if (hasTimeTravelVariant(contractName)) {
+    return getTimeTravelVariant(contractName);
+  }
 
-    return contractName
+  return contractName;
 }
 
 /**
@@ -116,11 +113,11 @@ export function resolveContractName(
  * ```
  */
 export function getBaseContractName(contractName: string): string {
-    const suffix = 'TimeTravel'
-    if (contractName.endsWith(suffix)) {
-        return contractName.slice(0, -suffix.length)
-    }
-    return contractName
+  const suffix = "TimeTravel";
+  if (contractName.endsWith(suffix)) {
+    return contractName.slice(0, -suffix.length);
+  }
+  return contractName;
 }
 
 /**
@@ -136,5 +133,5 @@ export function getBaseContractName(contractName: string): string {
  * ```
  */
 export function isTimeTravelVariant(contractName: string): boolean {
-    return contractName.endsWith('TimeTravel')
+  return contractName.endsWith("TimeTravel");
 }

@@ -6,12 +6,8 @@
  * @module tools/utils/solidityUtils
  */
 
-import { utils } from 'ethers'
-import {
-    MethodDefinition,
-    EventDefinition,
-    ErrorDefinition,
-} from '../../infrastructure/types'
+import { utils } from "ethers";
+import { MethodDefinition, EventDefinition, ErrorDefinition } from "../../infrastructure/types";
 
 /**
  * Infrastructure base classes to exclude from event/error inheritance traversal.
@@ -20,16 +16,16 @@ import {
  * contribute their events/errors to individual facets during inheritance extraction.
  */
 const BASE_CLASSES_TO_EXCLUDE = new Set([
-    'Common',
-    'StorageWrapper',
-    'TransferAndLockStorageWrapper',
-    'ERC20StorageWrapper',
-    'CorporateActionStorageWrapper',
-    'BondStorageWrapper',
-    'EquityStorageWrapper',
-    'ComplianceStorageWrapper',
-    'ScheduledTaskStorageWrapper',
-])
+  "Common",
+  "StorageWrapper",
+  "TransferAndLockStorageWrapper",
+  "ERC20StorageWrapper",
+  "CorporateActionStorageWrapper",
+  "BondStorageWrapper",
+  "EquityStorageWrapper",
+  "ComplianceStorageWrapper",
+  "ScheduledTaskStorageWrapper",
+]);
 
 /**
  * Extract contract names from Solidity source code.
@@ -40,27 +36,26 @@ const BASE_CLASSES_TO_EXCLUDE = new Set([
  * @returns Array of contract names
  */
 export function extractContractNames(source: string): string[] {
-    const contractRegex =
-        /(?:abstract\s+)?(?:contract|interface|library)\s+(\w+)/g
-    const matches: string[] = []
+  const contractRegex = /(?:abstract\s+)?(?:contract|interface|library)\s+(\w+)/g;
+  const matches: string[] = [];
 
-    let match
-    while ((match = contractRegex.exec(source)) !== null) {
-        matches.push(match[1])
-    }
+  let match;
+  while ((match = contractRegex.exec(source)) !== null) {
+    matches.push(match[1]);
+  }
 
-    return matches
+  return matches;
 }
 
 /**
  * Role definition with name and value.
  */
 export interface RoleDefinition {
-    /** Role name (e.g., _ISSUER_ROLE) */
-    name: string
+  /** Role name (e.g., _ISSUER_ROLE) */
+  name: string;
 
-    /** bytes32 value (e.g., 0x4be32e8...) */
-    value: string
+  /** bytes32 value (e.g., 0x4be32e8...) */
+  value: string;
 }
 
 /**
@@ -84,32 +79,31 @@ export interface RoleDefinition {
  * ```
  */
 export function extractRoles(source: string): RoleDefinition[] {
-    // Match: bytes32 [public] constant [_]ROLE_NAME = value;
-    // Underscore prefix is optional (legacy ATS uses it incorrectly)
-    const roleRegex =
-        /bytes32\s+(?:public\s+)?constant\s+(_?\w+_ROLE)\s*=\s*([^;]+);/g
-    const roles: RoleDefinition[] = []
+  // Match: bytes32 [public] constant [_]ROLE_NAME = value;
+  // Underscore prefix is optional (legacy ATS uses it incorrectly)
+  const roleRegex = /bytes32\s+(?:public\s+)?constant\s+(_?\w+_ROLE)\s*=\s*([^;]+);/g;
+  const roles: RoleDefinition[] = [];
 
-    let match
-    while ((match = roleRegex.exec(source)) !== null) {
-        const name = match[1]
-        const value = match[2].trim()
+  let match;
+  while ((match = roleRegex.exec(source)) !== null) {
+    const name = match[1];
+    const value = match[2].trim();
 
-        roles.push({ name, value })
-    }
+    roles.push({ name, value });
+  }
 
-    return roles
+  return roles;
 }
 
 /**
  * Resolver key definition with name and value.
  */
 export interface ResolverKeyDefinition {
-    /** Resolver key name (e.g., _ACCESS_CONTROL_RESOLVER_KEY) */
-    name: string
+  /** Resolver key name (e.g., _ACCESS_CONTROL_RESOLVER_KEY) */
+  name: string;
 
-    /** bytes32 value (e.g., 0x011768a41...) */
-    value: string
+  /** bytes32 value (e.g., 0x011768a41...) */
+  value: string;
 }
 
 /**
@@ -133,21 +127,20 @@ export interface ResolverKeyDefinition {
  * ```
  */
 export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
-    // Match: bytes32 [public] constant [_]RESOLVER_KEY_NAME = value;
-    // Underscore prefix is optional (legacy ATS uses it incorrectly)
-    const keyRegex =
-        /bytes32\s+(?:public\s+)?constant\s+(_?\w+_RESOLVER_KEY)\s*=\s*([^;]+);/g
-    const keys: ResolverKeyDefinition[] = []
+  // Match: bytes32 [public] constant [_]RESOLVER_KEY_NAME = value;
+  // Underscore prefix is optional (legacy ATS uses it incorrectly)
+  const keyRegex = /bytes32\s+(?:public\s+)?constant\s+(_?\w+_RESOLVER_KEY)\s*=\s*([^;]+);/g;
+  const keys: ResolverKeyDefinition[] = [];
 
-    let match
-    while ((match = keyRegex.exec(source)) !== null) {
-        const name = match[1]
-        const value = match[2].trim()
+  let match;
+  while ((match = keyRegex.exec(source)) !== null) {
+    const name = match[1];
+    const value = match[2].trim();
 
-        keys.push({ name, value })
-    }
+    keys.push({ name, value });
+  }
 
-    return keys
+  return keys;
 }
 
 /**
@@ -173,61 +166,55 @@ export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
  * // Returns: "Atomic deployment of Bond, Treasury, and KPI contract suites"
  * ```
  */
-export function extractNatspecDescription(
-    source: string,
-    contractName: string
-): string | undefined {
-    // Find contract declaration with optional abstract/interface keywords
-    const contractDecl = new RegExp(
-        `(?:abstract\\s+)?(?:contract|interface|library)\\s+${contractName}\\b`,
-        'g'
-    )
+export function extractNatspecDescription(source: string, contractName: string): string | undefined {
+  // Find contract declaration with optional abstract/interface keywords
+  const contractDecl = new RegExp(`(?:abstract\\s+)?(?:contract|interface|library)\\s+${contractName}\\b`, "g");
 
-    const contractMatch = contractDecl.exec(source)
-    if (!contractMatch) {
-        return undefined
-    }
+  const contractMatch = contractDecl.exec(source);
+  if (!contractMatch) {
+    return undefined;
+  }
 
-    // Extract everything before the contract declaration
-    const beforeContract = source.substring(0, contractMatch.index)
+  // Extract everything before the contract declaration
+  const beforeContract = source.substring(0, contractMatch.index);
 
-    // Find the last natspec comment block (/** ... */) before the contract
-    // This regex matches multiline comments that start with /**
-    const natspecRegex = /\/\*\*([\s\S]*?)\*\//g
-    let lastNatspec: RegExpExecArray | null = null
-    let match: RegExpExecArray | null
+  // Find the last natspec comment block (/** ... */) before the contract
+  // This regex matches multiline comments that start with /**
+  const natspecRegex = /\/\*\*([\s\S]*?)\*\//g;
+  let lastNatspec: RegExpExecArray | null = null;
+  let match: RegExpExecArray | null;
 
-    while ((match = natspecRegex.exec(beforeContract)) !== null) {
-        lastNatspec = match
-    }
+  while ((match = natspecRegex.exec(beforeContract)) !== null) {
+    lastNatspec = match;
+  }
 
-    if (!lastNatspec) {
-        return undefined
-    }
+  if (!lastNatspec) {
+    return undefined;
+  }
 
-    const natspecContent = lastNatspec[1]
+  const natspecContent = lastNatspec[1];
 
-    // Try to extract @notice first (priority)
-    const noticeMatch = /@notice\s+([^\n@]+)/i.exec(natspecContent)
-    if (noticeMatch) {
-        return noticeMatch[1]
-            .trim()
-            .replace(/\s*\*\s*/g, ' ') // Remove asterisks from multi-line comments
-            .replace(/\s+/g, ' ') // Normalize whitespace
-            .trim()
-    }
+  // Try to extract @notice first (priority)
+  const noticeMatch = /@notice\s+([^\n@]+)/i.exec(natspecContent);
+  if (noticeMatch) {
+    return noticeMatch[1]
+      .trim()
+      .replace(/\s*\*\s*/g, " ") // Remove asterisks from multi-line comments
+      .replace(/\s+/g, " ") // Normalize whitespace
+      .trim();
+  }
 
-    // Fallback to @title if @notice not found
-    const titleMatch = /@title\s+([^\n@]+)/i.exec(natspecContent)
-    if (titleMatch) {
-        return titleMatch[1]
-            .trim()
-            .replace(/\s*\*\s*/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim()
-    }
+  // Fallback to @title if @notice not found
+  const titleMatch = /@title\s+([^\n@]+)/i.exec(natspecContent);
+  if (titleMatch) {
+    return titleMatch[1]
+      .trim()
+      .replace(/\s*\*\s*/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
 
-    return undefined
+  return undefined;
 }
 
 /**
@@ -246,30 +233,25 @@ export function extractNatspecDescription(
  * // Returns: '_ACCESS_CONTROL_RESOLVER_KEY'
  * ```
  */
-export function extractFacetResolverKeyImport(
-    source: string
-): string | undefined {
-    // First try: Match import statement
-    const importRegex =
-        /import\s+\{([^}]*_RESOLVER_KEY[^}]*)\}\s+from\s+["'][^"']+["']/g
+export function extractFacetResolverKeyImport(source: string): string | undefined {
+  // First try: Match import statement
+  const importRegex = /import\s+\{([^}]*_RESOLVER_KEY[^}]*)\}\s+from\s+["'][^"']+["']/g;
 
-    const match = importRegex.exec(source)
-    if (match) {
-        // Extract just the key name (might have whitespace or other imports)
-        const importedNames = match[1].split(',').map((s) => s.trim())
-        const keyName = importedNames.find((name) =>
-            name.endsWith('_RESOLVER_KEY')
-        )
-        if (keyName) return keyName
-    }
+  const match = importRegex.exec(source);
+  if (match) {
+    // Extract just the key name (might have whitespace or other imports)
+    const importedNames = match[1].split(",").map((s) => s.trim());
+    const keyName = importedNames.find((name) => name.endsWith("_RESOLVER_KEY"));
+    if (keyName) return keyName;
+  }
 
-    // Second try: Check for inline constant definition (e.g., TimeTravelFacet)
-    const inlineKeys = extractResolverKeys(source)
-    if (inlineKeys.length > 0) {
-        return inlineKeys[0].name
-    }
+  // Second try: Check for inline constant definition (e.g., TimeTravelFacet)
+  const inlineKeys = extractResolverKeys(source);
+  if (inlineKeys.length > 0) {
+    return inlineKeys[0].name;
+  }
 
-    return undefined
+  return undefined;
 }
 
 /**
@@ -281,15 +263,15 @@ export function extractFacetResolverKeyImport(
  * @returns Array of import paths
  */
 export function extractImports(source: string): string[] {
-    const importRegex = /import\s+["']([^"']+)["']/g
-    const imports: string[] = []
+  const importRegex = /import\s+["']([^"']+)["']/g;
+  const imports: string[] = [];
 
-    let match
-    while ((match = importRegex.exec(source)) !== null) {
-        imports.push(match[1])
-    }
+  let match;
+  while ((match = importRegex.exec(source)) !== null) {
+    imports.push(match[1]);
+  }
 
-    return imports
+  return imports;
 }
 
 /**
@@ -299,7 +281,7 @@ export function extractImports(source: string): string[] {
  * @returns true if name ends with 'Facet'
  */
 export function isFacetName(contractName: string): boolean {
-    return contractName.endsWith('Facet')
+  return contractName.endsWith("Facet");
 }
 
 /**
@@ -309,7 +291,7 @@ export function isFacetName(contractName: string): boolean {
  * @returns true if name ends with 'TimeTravel'
  */
 export function isTimeTravelVariant(contractName: string): boolean {
-    return contractName.endsWith('TimeTravel')
+  return contractName.endsWith("TimeTravel");
 }
 
 /**
@@ -319,10 +301,10 @@ export function isTimeTravelVariant(contractName: string): boolean {
  * @returns Base contract name without 'TimeTravel' suffix
  */
 export function getBaseName(contractName: string): string {
-    if (isTimeTravelVariant(contractName)) {
-        return contractName.replace(/TimeTravel$/, '')
-    }
-    return contractName
+  if (isTimeTravelVariant(contractName)) {
+    return contractName.replace(/TimeTravel$/, "");
+  }
+  return contractName;
 }
 
 /**
@@ -332,9 +314,9 @@ export function getBaseName(contractName: string): string {
  * @returns Solidity version or null
  */
 export function extractSolidityVersion(source: string): string | null {
-    const pragmaRegex = /pragma\s+solidity\s+([^;]+);/
-    const match = source.match(pragmaRegex)
-    return match ? match[1].trim() : null
+  const pragmaRegex = /pragma\s+solidity\s+([^;]+);/;
+  const match = source.match(pragmaRegex);
+  return match ? match[1].trim() : null;
 }
 
 /**
@@ -344,14 +326,9 @@ export function extractSolidityVersion(source: string): string | null {
  * @param interfaceName - Interface name to check
  * @returns true if contract implements interface
  */
-export function implementsInterface(
-    source: string,
-    interfaceName: string
-): boolean {
-    const implementsRegex = new RegExp(
-        `contract\\s+\\w+\\s+is\\s+[^{]*\\b${interfaceName}\\b`
-    )
-    return implementsRegex.test(source)
+export function implementsInterface(source: string, interfaceName: string): boolean {
+  const implementsRegex = new RegExp(`contract\\s+\\w+\\s+is\\s+[^{]*\\b${interfaceName}\\b`);
+  return implementsRegex.test(source);
 }
 
 /**
@@ -363,22 +340,19 @@ export function implementsInterface(
  * @param contractName - Contract name to find inheritance for
  * @returns Array of parent contract names
  */
-export function extractInheritance(
-    source: string,
-    contractName: string
-): string[] {
-    const regex = new RegExp(`contract\\s+${contractName}\\s+is\\s+([^{]+)`)
-    const match = source.match(regex)
+export function extractInheritance(source: string, contractName: string): string[] {
+  const regex = new RegExp(`contract\\s+${contractName}\\s+is\\s+([^{]+)`);
+  const match = source.match(regex);
 
-    if (!match) {
-        return []
-    }
+  if (!match) {
+    return [];
+  }
 
-    // Split by comma and clean up whitespace
-    return match[1]
-        .split(',')
-        .map((name) => name.trim())
-        .filter((name) => name.length > 0)
+  // Split by comma and clean up whitespace
+  return match[1]
+    .split(",")
+    .map((name) => name.trim())
+    .filter((name) => name.length > 0);
 }
 
 /**
@@ -397,47 +371,43 @@ export function extractInheritance(
  * ```
  */
 export function extractPublicMethods(source: string): MethodDefinition[] {
-    // Match: function name(...) external|public [view|pure|payable] [...]
-    // Exclude: constructor, receive, fallback
-    const functionRegex =
-        /function\s+(\w+)\s*\([^)]*\)\s+(?:external|public)(?:\s+(?:view|pure|payable|virtual|override|returns))*[^{;]*/g
+  // Match: function name(...) external|public [view|pure|payable] [...]
+  // Exclude: constructor, receive, fallback
+  const functionRegex =
+    /function\s+(\w+)\s*\([^)]*\)\s+(?:external|public)(?:\s+(?:view|pure|payable|virtual|override|returns))*[^{;]*/g;
 
-    const methods: MethodDefinition[] = []
-    const seen = new Set<string>()
+  const methods: MethodDefinition[] = [];
+  const seen = new Set<string>();
 
-    let match
-    while ((match = functionRegex.exec(source)) !== null) {
-        const methodName = match[1]
+  let match;
+  while ((match = functionRegex.exec(source)) !== null) {
+    const methodName = match[1];
 
-        // Exclude special functions
-        if (
-            methodName === 'constructor' ||
-            methodName === 'receive' ||
-            methodName === 'fallback'
-        ) {
-            continue
-        }
-
-        // Avoid duplicates (overloaded functions)
-        if (!seen.has(methodName)) {
-            // Extract full signature
-            const signature = extractFunctionSignature(source, methodName)
-            if (signature) {
-                const selector = calculateSelector(signature)
-                methods.push({ name: methodName, signature, selector })
-            } else {
-                // Fallback: signature extraction failed, use name-only
-                methods.push({
-                    name: methodName,
-                    signature: `${methodName}()`,
-                    selector: calculateSelector(`${methodName}()`),
-                })
-            }
-            seen.add(methodName)
-        }
+    // Exclude special functions
+    if (methodName === "constructor" || methodName === "receive" || methodName === "fallback") {
+      continue;
     }
 
-    return methods.sort((a, b) => a.name.localeCompare(b.name))
+    // Avoid duplicates (overloaded functions)
+    if (!seen.has(methodName)) {
+      // Extract full signature
+      const signature = extractFunctionSignature(source, methodName);
+      if (signature) {
+        const selector = calculateSelector(signature);
+        methods.push({ name: methodName, signature, selector });
+      } else {
+        // Fallback: signature extraction failed, use name-only
+        methods.push({
+          name: methodName,
+          signature: `${methodName}()`,
+          selector: calculateSelector(`${methodName}()`),
+        });
+      }
+      seen.add(methodName);
+    }
+  }
+
+  return methods.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
@@ -462,45 +432,41 @@ export function extractPublicMethods(source: string): MethodDefinition[] {
  * ```
  */
 export function extractAllMethods(source: string): MethodDefinition[] {
-    // Match: function name(...) [visibility] [modifiers] [...]
-    // Exclude: constructor, receive, fallback
-    const functionRegex = /function\s+(\w+)\s*\([^)]*\)/g
+  // Match: function name(...) [visibility] [modifiers] [...]
+  // Exclude: constructor, receive, fallback
+  const functionRegex = /function\s+(\w+)\s*\([^)]*\)/g;
 
-    const methods: MethodDefinition[] = []
-    const seen = new Set<string>()
+  const methods: MethodDefinition[] = [];
+  const seen = new Set<string>();
 
-    let match
-    while ((match = functionRegex.exec(source)) !== null) {
-        const methodName = match[1]
+  let match;
+  while ((match = functionRegex.exec(source)) !== null) {
+    const methodName = match[1];
 
-        // Exclude special functions
-        if (
-            methodName === 'constructor' ||
-            methodName === 'receive' ||
-            methodName === 'fallback'
-        ) {
-            continue
-        }
-
-        // Avoid duplicates (overloaded functions)
-        if (!seen.has(methodName)) {
-            const signature = extractFunctionSignature(source, methodName)
-            if (signature) {
-                const selector = calculateSelector(signature)
-                methods.push({ name: methodName, signature, selector })
-            } else {
-                // Fallback if signature extraction fails
-                methods.push({
-                    name: methodName,
-                    signature: `${methodName}()`,
-                    selector: calculateSelector(`${methodName}()`),
-                })
-            }
-            seen.add(methodName)
-        }
+    // Exclude special functions
+    if (methodName === "constructor" || methodName === "receive" || methodName === "fallback") {
+      continue;
     }
 
-    return methods.sort((a, b) => a.name.localeCompare(b.name))
+    // Avoid duplicates (overloaded functions)
+    if (!seen.has(methodName)) {
+      const signature = extractFunctionSignature(source, methodName);
+      if (signature) {
+        const selector = calculateSelector(signature);
+        methods.push({ name: methodName, signature, selector });
+      } else {
+        // Fallback if signature extraction fails
+        methods.push({
+          name: methodName,
+          signature: `${methodName}()`,
+          selector: calculateSelector(`${methodName}()`),
+        });
+      }
+      seen.add(methodName);
+    }
+  }
+
+  return methods.sort((a, b) => a.name.localeCompare(b.name));
 }
 /**
  * Extract public/external methods from a contract and its entire inheritance chain.
@@ -537,54 +503,52 @@ export function extractAllMethods(source: string): MethodDefinition[] {
  * ```
  */
 export function extractPublicMethodsWithInheritance(
-    contractSource: string,
-    contractName: string,
-    allContracts: Map<string, { source: string }>
+  contractSource: string,
+  contractName: string,
+  allContracts: Map<string, { source: string }>,
 ): MethodDefinition[] {
-    // Static methods to exclude (infrastructure, not business logic)
-    const STATIC_METHODS_TO_EXCLUDE = new Set([
-        'getStaticFunctionSelectors',
-        'getStaticInterfaceIds',
-        'getStaticResolverKey',
-    ])
+  // Static methods to exclude (infrastructure, not business logic)
+  const STATIC_METHODS_TO_EXCLUDE = new Set([
+    "getStaticFunctionSelectors",
+    "getStaticInterfaceIds",
+    "getStaticResolverKey",
+  ]);
 
-    const allMethods = new Map<string, MethodDefinition>()
-    const visited = new Set<string>()
+  const allMethods = new Map<string, MethodDefinition>();
+  const visited = new Set<string>();
 
-    function extractFromContract(source: string, name: string): void {
-        // Avoid circular references
-        if (visited.has(name)) {
-            return
-        }
-        visited.add(name)
+  function extractFromContract(source: string, name: string): void {
+    // Avoid circular references
+    if (visited.has(name)) {
+      return;
+    }
+    visited.add(name);
 
-        // Extract methods from current contract
-        const methods = extractPublicMethods(source)
-        for (const method of methods) {
-            if (!STATIC_METHODS_TO_EXCLUDE.has(method.name)) {
-                allMethods.set(method.name, method)
-            }
-        }
-
-        // Extract inheritance chain
-        const parents = extractInheritance(source, name)
-
-        // Recursively extract from parent contracts
-        for (const parentName of parents) {
-            const parentContract = allContracts.get(parentName)
-            if (parentContract) {
-                extractFromContract(parentContract.source, parentName)
-            }
-        }
+    // Extract methods from current contract
+    const methods = extractPublicMethods(source);
+    for (const method of methods) {
+      if (!STATIC_METHODS_TO_EXCLUDE.has(method.name)) {
+        allMethods.set(method.name, method);
+      }
     }
 
-    // Start extraction from the main contract
-    extractFromContract(contractSource, contractName)
+    // Extract inheritance chain
+    const parents = extractInheritance(source, name);
 
-    // Return sorted array for deterministic output
-    return Array.from(allMethods.values()).sort((a, b) =>
-        a.name.localeCompare(b.name)
-    )
+    // Recursively extract from parent contracts
+    for (const parentName of parents) {
+      const parentContract = allContracts.get(parentName);
+      if (parentContract) {
+        extractFromContract(parentContract.source, parentName);
+      }
+    }
+  }
+
+  // Start extraction from the main contract
+  extractFromContract(contractSource, contractName);
+
+  // Return sorted array for deterministic output
+  return Array.from(allMethods.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
@@ -605,20 +569,20 @@ export function extractPublicMethodsWithInheritance(
  * ```
  */
 export function normalizeType(type: string): string {
-    // Remove storage location keywords (calldata, memory, storage)
-    let normalized = type.replace(/\s+(calldata|memory|storage)\s*/, '').trim()
+  // Remove storage location keywords (calldata, memory, storage)
+  let normalized = type.replace(/\s+(calldata|memory|storage)\s*/, "").trim();
 
-    // Normalize uint to uint256
-    if (normalized === 'uint' || normalized.startsWith('uint[')) {
-        normalized = normalized.replace(/^uint/, 'uint256')
-    }
+  // Normalize uint to uint256
+  if (normalized === "uint" || normalized.startsWith("uint[")) {
+    normalized = normalized.replace(/^uint/, "uint256");
+  }
 
-    // Normalize int to int256
-    if (normalized === 'int' || normalized.startsWith('int[')) {
-        normalized = normalized.replace(/^int/, 'int256')
-    }
+  // Normalize int to int256
+  if (normalized === "int" || normalized.startsWith("int[")) {
+    normalized = normalized.replace(/^int/, "int256");
+  }
 
-    return normalized
+  return normalized;
 }
 
 /**
@@ -639,31 +603,31 @@ export function normalizeType(type: string): string {
  * ```
  */
 export function parseParameterTypes(params: string): string[] {
-    if (!params || params.trim() === '') {
-        return []
+  if (!params || params.trim() === "") {
+    return [];
+  }
+
+  // Split by comma, but be careful with nested structures
+  const paramList = params.split(",").map((p) => p.trim());
+  const types: string[] = [];
+
+  for (const param of paramList) {
+    // Extract type (first token before space or array bracket)
+    // Handles: "uint256 _value", "bytes32[]  _data", "address"
+    const match = param.match(/^([a-zA-Z0-9_]+(?:\[\])?)\s/);
+    if (match) {
+      const type = match[1];
+      types.push(normalizeType(type));
+    } else {
+      // Fallback: just the type with no parameter name
+      const typeOnly = param.split(/\s+/)[0];
+      if (typeOnly) {
+        types.push(normalizeType(typeOnly));
+      }
     }
+  }
 
-    // Split by comma, but be careful with nested structures
-    const paramList = params.split(',').map((p) => p.trim())
-    const types: string[] = []
-
-    for (const param of paramList) {
-        // Extract type (first token before space or array bracket)
-        // Handles: "uint256 _value", "bytes32[]  _data", "address"
-        const match = param.match(/^([a-zA-Z0-9_]+(?:\[\])?)\s/)
-        if (match) {
-            const type = match[1]
-            types.push(normalizeType(type))
-        } else {
-            // Fallback: just the type with no parameter name
-            const typeOnly = param.split(/\s+/)[0]
-            if (typeOnly) {
-                types.push(normalizeType(typeOnly))
-            }
-        }
-    }
-
-    return types
+  return types;
 }
 
 /**
@@ -681,8 +645,8 @@ export function parseParameterTypes(params: string): string[] {
  * ```
  */
 export function calculateSelector(signature: string): string {
-    const hash = utils.keccak256(utils.toUtf8Bytes(signature))
-    return hash.substring(0, 10) // '0x' + 8 hex chars = 4 bytes
+  const hash = utils.keccak256(utils.toUtf8Bytes(signature));
+  return hash.substring(0, 10); // '0x' + 8 hex chars = 4 bytes
 }
 
 /**
@@ -706,27 +670,24 @@ export function calculateSelector(signature: string): string {
  * // Returns: "grantRole(bytes32,address)"
  * ```
  */
-export function extractFunctionSignature(
-    source: string,
-    methodName: string
-): string | undefined {
-    // Match function declaration with parameters
-    // Handles multiline, various modifiers, return types
-    const functionRegex = new RegExp(
-        `function\\s+${methodName}\\s*\\(([^)]*)\\)`,
-        's' // dotall flag - allows . to match newlines
-    )
+export function extractFunctionSignature(source: string, methodName: string): string | undefined {
+  // Match function declaration with parameters
+  // Handles multiline, various modifiers, return types
+  const functionRegex = new RegExp(
+    `function\\s+${methodName}\\s*\\(([^)]*)\\)`,
+    "s", // dotall flag - allows . to match newlines
+  );
 
-    const match = source.match(functionRegex)
-    if (!match) {
-        return undefined
-    }
+  const match = source.match(functionRegex);
+  if (!match) {
+    return undefined;
+  }
 
-    const paramsString = match[1]
-    const types = parseParameterTypes(paramsString)
+  const paramsString = match[1];
+  const types = parseParameterTypes(paramsString);
 
-    // Build canonical signature: functionName(type1,type2,...)
-    return `${methodName}(${types.join(',')})`
+  // Build canonical signature: functionName(type1,type2,...)
+  return `${methodName}(${types.join(",")})`;
 }
 
 // ============================================================================
@@ -748,7 +709,7 @@ export function extractFunctionSignature(
  * ```
  */
 export function calculateTopic0(signature: string): string {
-    return utils.keccak256(utils.toUtf8Bytes(signature))
+  return utils.keccak256(utils.toUtf8Bytes(signature));
 }
 
 /**
@@ -769,24 +730,21 @@ export function calculateTopic0(signature: string): string {
  * // Returns: "Transfer(address,address,uint256)"
  * ```
  */
-export function extractEventSignature(
-    source: string,
-    eventName: string
-): string | undefined {
-    // Match event declaration with parameters
-    // Handles indexed keyword and multiline declarations
-    const eventRegex = new RegExp(`event\\s+${eventName}\\s*\\(([^)]*)\\)`, 's')
+export function extractEventSignature(source: string, eventName: string): string | undefined {
+  // Match event declaration with parameters
+  // Handles indexed keyword and multiline declarations
+  const eventRegex = new RegExp(`event\\s+${eventName}\\s*\\(([^)]*)\\)`, "s");
 
-    const match = source.match(eventRegex)
-    if (!match) {
-        return undefined
-    }
+  const match = source.match(eventRegex);
+  if (!match) {
+    return undefined;
+  }
 
-    // Remove "indexed" keywords and parse parameters
-    const paramsString = match[1].replace(/\s+indexed\s+/g, ' ')
-    const types = parseParameterTypes(paramsString)
+  // Remove "indexed" keywords and parse parameters
+  const paramsString = match[1].replace(/\s+indexed\s+/g, " ");
+  const types = parseParameterTypes(paramsString);
 
-    return `${eventName}(${types.join(',')})`
+  return `${eventName}(${types.join(",")})`;
 }
 
 /**
@@ -807,34 +765,34 @@ export function extractEventSignature(
  * ```
  */
 export function extractEvents(source: string): EventDefinition[] {
-    // Match: event EventName(...) [anonymous];
-    const eventRegex = /event\s+(\w+)\s*\([^)]*\)/g
+  // Match: event EventName(...) [anonymous];
+  const eventRegex = /event\s+(\w+)\s*\([^)]*\)/g;
 
-    const events: EventDefinition[] = []
-    const seen = new Set<string>()
+  const events: EventDefinition[] = [];
+  const seen = new Set<string>();
 
-    let match
-    while ((match = eventRegex.exec(source)) !== null) {
-        const eventName = match[1]
+  let match;
+  while ((match = eventRegex.exec(source)) !== null) {
+    const eventName = match[1];
 
-        if (!seen.has(eventName)) {
-            const signature = extractEventSignature(source, eventName)
-            if (signature) {
-                const topic0 = calculateTopic0(signature)
-                events.push({ name: eventName, signature, topic0 })
-            } else {
-                // Fallback if signature extraction fails
-                events.push({
-                    name: eventName,
-                    signature: `${eventName}()`,
-                    topic0: calculateTopic0(`${eventName}()`),
-                })
-            }
-            seen.add(eventName)
-        }
+    if (!seen.has(eventName)) {
+      const signature = extractEventSignature(source, eventName);
+      if (signature) {
+        const topic0 = calculateTopic0(signature);
+        events.push({ name: eventName, signature, topic0 });
+      } else {
+        // Fallback if signature extraction fails
+        events.push({
+          name: eventName,
+          signature: `${eventName}()`,
+          topic0: calculateTopic0(`${eventName}()`),
+        });
+      }
+      seen.add(eventName);
     }
+  }
 
-    return events.sort((a, b) => a.name.localeCompare(b.name))
+  return events.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
@@ -848,47 +806,45 @@ export function extractEvents(source: string): EventDefinition[] {
  * @returns Array of unique EventDefinition objects from contract and all parents
  */
 export function extractEventsWithInheritance(
-    contractSource: string,
-    contractName: string,
-    allContracts: Map<string, { source: string }>
+  contractSource: string,
+  contractName: string,
+  allContracts: Map<string, { source: string }>,
 ): EventDefinition[] {
-    const allEvents = new Map<string, EventDefinition>()
-    const visited = new Set<string>()
+  const allEvents = new Map<string, EventDefinition>();
+  const visited = new Set<string>();
 
-    function extractFromContract(source: string, name: string): void {
-        if (visited.has(name)) {
-            return
-        }
-        visited.add(name)
+  function extractFromContract(source: string, name: string): void {
+    if (visited.has(name)) {
+      return;
+    }
+    visited.add(name);
 
-        // Skip infrastructure base classes that aggregate all events
-        if (BASE_CLASSES_TO_EXCLUDE.has(name)) {
-            return
-        }
-
-        // Extract events from current contract
-        const events = extractEvents(source)
-        for (const event of events) {
-            allEvents.set(event.name, event)
-        }
-
-        // Extract inheritance chain
-        const parents = extractInheritance(source, name)
-
-        // Recursively extract from parent contracts
-        for (const parentName of parents) {
-            const parentContract = allContracts.get(parentName)
-            if (parentContract) {
-                extractFromContract(parentContract.source, parentName)
-            }
-        }
+    // Skip infrastructure base classes that aggregate all events
+    if (BASE_CLASSES_TO_EXCLUDE.has(name)) {
+      return;
     }
 
-    extractFromContract(contractSource, contractName)
+    // Extract events from current contract
+    const events = extractEvents(source);
+    for (const event of events) {
+      allEvents.set(event.name, event);
+    }
 
-    return Array.from(allEvents.values()).sort((a, b) =>
-        a.name.localeCompare(b.name)
-    )
+    // Extract inheritance chain
+    const parents = extractInheritance(source, name);
+
+    // Recursively extract from parent contracts
+    for (const parentName of parents) {
+      const parentContract = allContracts.get(parentName);
+      if (parentContract) {
+        extractFromContract(parentContract.source, parentName);
+      }
+    }
+  }
+
+  extractFromContract(contractSource, contractName);
+
+  return Array.from(allEvents.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 // ============================================================================
@@ -913,22 +869,19 @@ export function extractEventsWithInheritance(
  * // Returns: "InsufficientBalance(uint256,uint256)"
  * ```
  */
-export function extractErrorSignature(
-    source: string,
-    errorName: string
-): string | undefined {
-    // Match error declaration with parameters
-    const errorRegex = new RegExp(`error\\s+${errorName}\\s*\\(([^)]*)\\)`, 's')
+export function extractErrorSignature(source: string, errorName: string): string | undefined {
+  // Match error declaration with parameters
+  const errorRegex = new RegExp(`error\\s+${errorName}\\s*\\(([^)]*)\\)`, "s");
 
-    const match = source.match(errorRegex)
-    if (!match) {
-        return undefined
-    }
+  const match = source.match(errorRegex);
+  if (!match) {
+    return undefined;
+  }
 
-    const paramsString = match[1]
-    const types = parseParameterTypes(paramsString)
+  const paramsString = match[1];
+  const types = parseParameterTypes(paramsString);
 
-    return `${errorName}(${types.join(',')})`
+  return `${errorName}(${types.join(",")})`;
 }
 
 /**
@@ -949,34 +902,34 @@ export function extractErrorSignature(
  * ```
  */
 export function extractErrors(source: string): ErrorDefinition[] {
-    // Match: error ErrorName(...);
-    const errorRegex = /error\s+(\w+)\s*\([^)]*\)/g
+  // Match: error ErrorName(...);
+  const errorRegex = /error\s+(\w+)\s*\([^)]*\)/g;
 
-    const errors: ErrorDefinition[] = []
-    const seen = new Set<string>()
+  const errors: ErrorDefinition[] = [];
+  const seen = new Set<string>();
 
-    let match
-    while ((match = errorRegex.exec(source)) !== null) {
-        const errorName = match[1]
+  let match;
+  while ((match = errorRegex.exec(source)) !== null) {
+    const errorName = match[1];
 
-        if (!seen.has(errorName)) {
-            const signature = extractErrorSignature(source, errorName)
-            if (signature) {
-                const selector = calculateSelector(signature)
-                errors.push({ name: errorName, signature, selector })
-            } else {
-                // Fallback if signature extraction fails
-                errors.push({
-                    name: errorName,
-                    signature: `${errorName}()`,
-                    selector: calculateSelector(`${errorName}()`),
-                })
-            }
-            seen.add(errorName)
-        }
+    if (!seen.has(errorName)) {
+      const signature = extractErrorSignature(source, errorName);
+      if (signature) {
+        const selector = calculateSelector(signature);
+        errors.push({ name: errorName, signature, selector });
+      } else {
+        // Fallback if signature extraction fails
+        errors.push({
+          name: errorName,
+          signature: `${errorName}()`,
+          selector: calculateSelector(`${errorName}()`),
+        });
+      }
+      seen.add(errorName);
     }
+  }
 
-    return errors.sort((a, b) => a.name.localeCompare(b.name))
+  return errors.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
@@ -990,45 +943,43 @@ export function extractErrors(source: string): ErrorDefinition[] {
  * @returns Array of unique ErrorDefinition objects from contract and all parents
  */
 export function extractErrorsWithInheritance(
-    contractSource: string,
-    contractName: string,
-    allContracts: Map<string, { source: string }>
+  contractSource: string,
+  contractName: string,
+  allContracts: Map<string, { source: string }>,
 ): ErrorDefinition[] {
-    const allErrors = new Map<string, ErrorDefinition>()
-    const visited = new Set<string>()
+  const allErrors = new Map<string, ErrorDefinition>();
+  const visited = new Set<string>();
 
-    function extractFromContract(source: string, name: string): void {
-        if (visited.has(name)) {
-            return
-        }
-        visited.add(name)
+  function extractFromContract(source: string, name: string): void {
+    if (visited.has(name)) {
+      return;
+    }
+    visited.add(name);
 
-        // Skip infrastructure base classes that aggregate all errors
-        if (BASE_CLASSES_TO_EXCLUDE.has(name)) {
-            return
-        }
-
-        // Extract errors from current contract
-        const errors = extractErrors(source)
-        for (const error of errors) {
-            allErrors.set(error.name, error)
-        }
-
-        // Extract inheritance chain
-        const parents = extractInheritance(source, name)
-
-        // Recursively extract from parent contracts
-        for (const parentName of parents) {
-            const parentContract = allContracts.get(parentName)
-            if (parentContract) {
-                extractFromContract(parentContract.source, parentName)
-            }
-        }
+    // Skip infrastructure base classes that aggregate all errors
+    if (BASE_CLASSES_TO_EXCLUDE.has(name)) {
+      return;
     }
 
-    extractFromContract(contractSource, contractName)
+    // Extract errors from current contract
+    const errors = extractErrors(source);
+    for (const error of errors) {
+      allErrors.set(error.name, error);
+    }
 
-    return Array.from(allErrors.values()).sort((a, b) =>
-        a.name.localeCompare(b.name)
-    )
+    // Extract inheritance chain
+    const parents = extractInheritance(source, name);
+
+    // Recursively extract from parent contracts
+    for (const parentName of parents) {
+      const parentContract = allContracts.get(parentName);
+      if (parentContract) {
+        extractFromContract(parentContract.source, parentName);
+      }
+    }
+  }
+
+  extractFromContract(contractSource, contractName);
+
+  return Array.from(allErrors.values()).sort((a, b) => a.name.localeCompare(b.name));
 }

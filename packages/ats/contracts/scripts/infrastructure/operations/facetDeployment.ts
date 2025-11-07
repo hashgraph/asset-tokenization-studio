@@ -9,47 +9,40 @@
  * @module core/operations/facetDeployment
  */
 
-import { ContractFactory, Overrides } from 'ethers'
-import {
-    DeploymentResult,
-    deployContract,
-    info,
-    section,
-    success,
-    warn,
-} from '@scripts/infrastructure'
+import { ContractFactory, Overrides } from "ethers";
+import { DeploymentResult, deployContract, info, section, success, warn } from "@scripts/infrastructure";
 
 /**
  * Options for deploying facets (all optional).
  */
 export interface DeployFacetsOptions {
-    /**
-     * Number of confirmations to wait for each deployment.
-     * Default: 1
-     */
-    confirmations?: number
+  /**
+   * Number of confirmations to wait for each deployment.
+   * Default: 1
+   */
+  confirmations?: number;
 
-    /**
-     * Transaction overrides for all deployments.
-     */
-    overrides?: Overrides
+  /**
+   * Transaction overrides for all deployments.
+   */
+  overrides?: Overrides;
 }
 
 /**
  * Result of deploying facets.
  */
 export interface DeployFacetsResult {
-    /** Whether all deployments succeeded */
-    success: boolean
+  /** Whether all deployments succeeded */
+  success: boolean;
 
-    /** Successfully deployed facets (name -> result) */
-    deployed: Map<string, DeploymentResult>
+  /** Successfully deployed facets (name -> result) */
+  deployed: Map<string, DeploymentResult>;
 
-    /** Failed facets (name -> error) */
-    failed: Map<string, string>
+  /** Failed facets (name -> error) */
+  failed: Map<string, string>;
 
-    /** Skipped facets (name -> reason) */
-    skipped: Map<string, string>
+  /** Skipped facets (name -> reason) */
+  skipped: Map<string, string>;
 }
 
 /**
@@ -95,79 +88,74 @@ export interface DeployFacetsResult {
  * ```
  */
 export async function deployFacets(
-    facetFactories: Record<string, ContractFactory>,
-    options: DeployFacetsOptions = {}
+  facetFactories: Record<string, ContractFactory>,
+  options: DeployFacetsOptions = {},
 ): Promise<DeployFacetsResult> {
-    const { confirmations = 1, overrides = {} } = options
+  const { confirmations = 1, overrides = {} } = options;
 
-    section('Deploying Facets')
+  section("Deploying Facets");
 
-    const deployed = new Map<string, DeploymentResult>()
-    const failed = new Map<string, string>()
-    const skipped = new Map<string, string>()
+  const deployed = new Map<string, DeploymentResult>();
+  const failed = new Map<string, string>();
+  const skipped = new Map<string, string>();
 
-    try {
-        const facetNames = Object.keys(facetFactories)
+  try {
+    const facetNames = Object.keys(facetFactories);
 
-        if (facetNames.length === 0) {
-            warn('No facets to deploy')
-            return {
-                success: true,
-                deployed,
-                failed,
-                skipped,
-            }
-        }
-
-        info(`Total facets to deploy: ${facetNames.length}`)
-
-        // Deploy each facet using its factory
-        for (const facetName of facetNames) {
-            const factory = facetFactories[facetName]
-
-            try {
-                info(`Deploying ${facetName}...`)
-
-                // Deploy using the factory (signer already connected to factory)
-                const result = await deployContract(factory, {
-                    confirmations,
-                    overrides,
-                })
-
-                if (result.success && result.address) {
-                    deployed.set(facetName, result)
-                } else {
-                    failed.set(facetName, result.error || 'Unknown error')
-                }
-            } catch (err) {
-                const errorMessage =
-                    err instanceof Error ? err.message : String(err)
-                failed.set(facetName, `Failed to deploy: ${errorMessage}`)
-            }
-        }
-
-        const allSucceeded = failed.size === 0
-
-        if (allSucceeded) {
-            success(
-                `Successfully deployed ${deployed.size} facets${
-                    skipped.size > 0 ? ` (${skipped.size} skipped)` : ''
-                }`
-            )
-        } else {
-            warn(`Deployed ${deployed.size} facets, ${failed.size} failed`)
-        }
-
-        return {
-            success: allSucceeded,
-            deployed,
-            failed,
-            skipped,
-        }
-    } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err)
-        throw new Error(`Facet deployment failed: ${errorMessage}`)
+    if (facetNames.length === 0) {
+      warn("No facets to deploy");
+      return {
+        success: true,
+        deployed,
+        failed,
+        skipped,
+      };
     }
+
+    info(`Total facets to deploy: ${facetNames.length}`);
+
+    // Deploy each facet using its factory
+    for (const facetName of facetNames) {
+      const factory = facetFactories[facetName];
+
+      try {
+        info(`Deploying ${facetName}...`);
+
+        // Deploy using the factory (signer already connected to factory)
+        const result = await deployContract(factory, {
+          confirmations,
+          overrides,
+        });
+
+        if (result.success && result.address) {
+          deployed.set(facetName, result);
+        } else {
+          failed.set(facetName, result.error || "Unknown error");
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        failed.set(facetName, `Failed to deploy: ${errorMessage}`);
+      }
+    }
+
+    const allSucceeded = failed.size === 0;
+
+    if (allSucceeded) {
+      success(`Successfully deployed ${deployed.size} facets${skipped.size > 0 ? ` (${skipped.size} skipped)` : ""}`);
+    } else {
+      warn(`Deployed ${deployed.size} facets, ${failed.size} failed`);
+    }
+
+    return {
+      success: allSucceeded,
+      deployed,
+      failed,
+      skipped,
+    };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    throw new Error(`Facet deployment failed: ${errorMessage}`);
+  }
 }
 
 /**
@@ -177,19 +165,19 @@ export async function deployFacets(
  * @returns Summary object
  */
 export function getFacetDeploymentSummary(result: DeployFacetsResult): {
-    deployed: string[]
-    failed: string[]
-    skipped: string[]
-    addresses: Record<string, string>
+  deployed: string[];
+  failed: string[];
+  skipped: string[];
+  addresses: Record<string, string>;
 } {
-    return {
-        deployed: Array.from(result.deployed.keys()),
-        failed: Array.from(result.failed.keys()),
-        skipped: Array.from(result.skipped.keys()),
-        addresses: Object.fromEntries(
-            Array.from(result.deployed.entries())
-                .filter(([_, r]) => r.address)
-                .map(([name, r]) => [name, r.address!])
-        ),
-    }
+  return {
+    deployed: Array.from(result.deployed.keys()),
+    failed: Array.from(result.failed.keys()),
+    skipped: Array.from(result.skipped.keys()),
+    addresses: Object.fromEntries(
+      Array.from(result.deployed.entries())
+        .filter(([_, r]) => r.address)
+        .map(([name, r]) => [name, r.address!]),
+    ),
+  };
 }

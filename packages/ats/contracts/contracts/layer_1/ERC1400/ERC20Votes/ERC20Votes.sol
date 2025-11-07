@@ -2,12 +2,9 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity >=0.8.0 <0.9.0;
 
-import {Common} from '../../common/Common.sol';
-import {IERC20Votes} from '../../interfaces/ERC1400/IERC20Votes.sol';
-import {
-    _CONTRACT_NAME_ERC20VOTES,
-    _CONTRACT_VERSION_ERC20VOTES
-} from '../../constants/values.sol';
+import { Common } from "../../common/Common.sol";
+import { IERC20Votes } from "../../interfaces/ERC1400/IERC20Votes.sol";
+import { _CONTRACT_NAME_ERC20VOTES, _CONTRACT_VERSION_ERC20VOTES } from "../../constants/values.sol";
 
 abstract contract ERC20Votes is IERC20Votes, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -34,41 +31,27 @@ abstract contract ERC20Votes is IERC20Votes, Common {
         return _CLOCK_MODE();
     }
 
-    function getVotes(
-        address _account
-    ) external view override returns (uint256) {
+    function getVotes(address _account) external view override returns (uint256) {
         return _getVotes(_account);
     }
 
-    function getPastVotes(
-        address _account,
-        uint256 _timepoint
-    ) external view override returns (uint256) {
+    function getPastVotes(address _account, uint256 _timepoint) external view override returns (uint256) {
         return _getPastVotes(_account, _timepoint);
     }
 
-    function getPastTotalSupply(
-        uint256 _timepoint
-    ) external view override returns (uint256) {
+    function getPastTotalSupply(uint256 _timepoint) external view override returns (uint256) {
         return _getPastTotalSupply(_timepoint);
     }
 
-    function delegates(
-        address _account
-    ) external view override returns (address) {
+    function delegates(address _account) external view override returns (address) {
         return _delegates(_account);
     }
 
-    function checkpoints(
-        address _account,
-        uint256 _pos
-    ) external view override returns (Checkpoint memory) {
+    function checkpoints(address _account, uint256 _pos) external view override returns (Checkpoint memory) {
         return _checkpoints(_account, _pos);
     }
 
-    function numCheckpoints(
-        address _account
-    ) external view override returns (uint256) {
+    function numCheckpoints(address _account) external view override returns (uint256) {
         return _numCheckpoints(_account);
     }
 

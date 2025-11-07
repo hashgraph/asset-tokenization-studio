@@ -99,8 +99,8 @@ const blr = BusinessLogicResolver__factory.connect(address, signer)
 
 ```typescript
 // Caller provides signer directly
-const [signer] = await ethers.getSigners()
-await deployCompleteSystem(signer, 'testnet', options)
+const [signer] = await ethers.getSigners();
+await deployCompleteSystem(signer, "testnet", options);
 ```
 
 ---
@@ -164,50 +164,46 @@ export const ROLES = {
 **Query facets:**
 
 ```typescript
-import { getFacetDefinition, getAllFacets, hasFacet } from '@scripts/domain'
+import { getFacetDefinition, getAllFacets, hasFacet } from "@scripts/domain";
 
 // Get specific facet
-const facet = getFacetDefinition('AccessControlFacet')
-console.log(facet.methods) // ['grantRole', 'revokeRole', ...]
-console.log(facet.events) // ['RoleGranted', 'RoleRevoked', ...]
-console.log(facet.layer) // 1
-console.log(facet.category) // 'core'
+const facet = getFacetDefinition("AccessControlFacet");
+console.log(facet.methods); // ['grantRole', 'revokeRole', ...]
+console.log(facet.events); // ['RoleGranted', 'RoleRevoked', ...]
+console.log(facet.layer); // 1
+console.log(facet.category); // 'core'
 
 // Check if facet exists
-if (hasFacet('KycFacet')) {
-    // ...
+if (hasFacet("KycFacet")) {
+  // ...
 }
 
 // Get all facets
-const allFacets = getAllFacets()
-console.log(`Total facets: ${allFacets.length}`)
+const allFacets = getAllFacets();
+console.log(`Total facets: ${allFacets.length}`);
 ```
 
 **Query storage wrappers:**
 
 ```typescript
-import {
-    getStorageWrapperDefinition,
-    getAllStorageWrappers,
-    hasStorageWrapper,
-} from '@scripts/domain'
+import { getStorageWrapperDefinition, getAllStorageWrappers, hasStorageWrapper } from "@scripts/domain";
 
 // Get specific storage wrapper
-const wrapper = getStorageWrapperDefinition('AccessControlStorageWrapper')
-console.log(wrapper.methods) // ['hasRole', 'getRoleAdmin', ...]
+const wrapper = getStorageWrapperDefinition("AccessControlStorageWrapper");
+console.log(wrapper.methods); // ['hasRole', 'getRoleAdmin', ...]
 
 // Get all storage wrappers
-const allWrappers = getAllStorageWrappers()
-console.log(`Total wrappers: ${allWrappers.length}`)
+const allWrappers = getAllStorageWrappers();
+console.log(`Total wrappers: ${allWrappers.length}`);
 ```
 
 **Access roles:**
 
 ```typescript
-import { ROLES } from '@scripts/domain'
+import { ROLES } from "@scripts/domain";
 
-console.log(ROLES._PAUSER_ROLE) // bytes32 value
-console.log(ROLES.CORPORATE_ACTION_ROLE) // bytes32 value
+console.log(ROLES._PAUSER_ROLE); // bytes32 value
+console.log(ROLES.CORPORATE_ACTION_ROLE); // bytes32 value
 ```
 
 ### Downstream Projects
@@ -215,42 +211,29 @@ console.log(ROLES.CORPORATE_ACTION_ROLE) // bytes32 value
 External projects can generate their own registries from their contracts using the **registry generation pipeline**:
 
 ```typescript
-import { generateRegistryPipeline } from '@hashgraph/asset-tokenization-contracts/scripts'
+import { generateRegistryPipeline } from "@hashgraph/asset-tokenization-contracts/scripts";
 
 // Generate registry for your contracts
 const result = await generateRegistryPipeline({
-    contractsPath: './contracts',
-    outputPath: './generated/myRegistry.data.ts',
-    includeStorageWrappers: true,
-    includeTimeTravel: true,
-    logLevel: 'INFO',
-})
+  contractsPath: "./contracts",
+  outputPath: "./generated/myRegistry.data.ts",
+  includeStorageWrappers: true,
+  includeTimeTravel: true,
+  logLevel: "INFO",
+});
 
-console.log(`Generated registry with ${result.stats.facetCount} facets`)
+console.log(`Generated registry with ${result.stats.facetCount} facets`);
 ```
 
 **Then create helpers for your registry:**
 
 ```typescript
-import { createRegistryHelpers } from '@hashgraph/asset-tokenization-contracts/scripts'
-import {
-    FACET_REGISTRY,
-    CONTRACT_REGISTRY,
-    STORAGE_WRAPPER_REGISTRY,
-} from './generated/myRegistry.data'
+import { createRegistryHelpers } from "@hashgraph/asset-tokenization-contracts/scripts";
+import { FACET_REGISTRY, CONTRACT_REGISTRY, STORAGE_WRAPPER_REGISTRY } from "./generated/myRegistry.data";
 
 // Create type-safe helpers
-export const {
-    getFacetDefinition,
-    getAllFacets,
-    hasFacet,
-    getStorageWrapperDefinition,
-    getAllStorageWrappers,
-} = createRegistryHelpers(
-    FACET_REGISTRY,
-    CONTRACT_REGISTRY,
-    STORAGE_WRAPPER_REGISTRY
-)
+export const { getFacetDefinition, getAllFacets, hasFacet, getStorageWrapperDefinition, getAllStorageWrappers } =
+  createRegistryHelpers(FACET_REGISTRY, CONTRACT_REGISTRY, STORAGE_WRAPPER_REGISTRY);
 ```
 
 **Result**: ~20 lines of code vs ~300 lines of manual implementation (93% reduction).
@@ -264,33 +247,27 @@ When deploying systems that mix ATS facets with your own custom facets, you need
 #### Basic Usage
 
 ```typescript
+import { registerFacets, combineRegistries } from "@hashgraph/asset-tokenization-contracts/scripts";
 import {
-    registerFacets,
-    combineRegistries,
-} from '@hashgraph/asset-tokenization-contracts/scripts'
-import {
-    atsRegistry, // Pre-configured ATS registry provider
-} from '@hashgraph/asset-tokenization-contracts/scripts/domain'
+  atsRegistry, // Pre-configured ATS registry provider
+} from "@hashgraph/asset-tokenization-contracts/scripts/domain";
 
 // Your custom registry provider
-import {
-    getFacetDefinition as getCustomFacet,
-    getAllFacets as getAllCustomFacets,
-} from './myRegistry'
+import { getFacetDefinition as getCustomFacet, getAllFacets as getAllCustomFacets } from "./myRegistry";
 const customRegistry = {
-    getFacetDefinition: getCustomFacet,
-    getAllFacets: getAllCustomFacets,
-}
+  getFacetDefinition: getCustomFacet,
+  getAllFacets: getAllCustomFacets,
+};
 
 // Register facets from both registries
 await registerFacets(provider, {
-    blrAddress: '0x123...',
-    facets: {
-        AccessControlFacet: '0xabc...', // From ATS
-        CustomComplianceFacet: '0xdef...', // From your registry
-    },
-    registries: [atsRegistry, customRegistry], // Automatically combined
-})
+  blrAddress: "0x123...",
+  facets: {
+    AccessControlFacet: "0xabc...", // From ATS
+    CustomComplianceFacet: "0xdef...", // From your registry
+  },
+  registries: [atsRegistry, customRegistry], // Automatically combined
+});
 ```
 
 #### Manual Registry Combination
@@ -327,12 +304,12 @@ await registerFacets(provider, {
 #### Detecting Conflicts
 
 ```typescript
-import { getRegistryConflicts } from '@hashgraph/asset-tokenization-contracts/scripts'
+import { getRegistryConflicts } from "@hashgraph/asset-tokenization-contracts/scripts";
 
-const conflicts = getRegistryConflicts(atsRegistry, customRegistry)
+const conflicts = getRegistryConflicts(atsRegistry, customRegistry);
 if (conflicts.length > 0) {
-    console.warn('Conflicting facets:', conflicts)
-    // Handle conflicts before combining
+  console.warn("Conflicting facets:", conflicts);
+  // Handle conflicts before combining
 }
 ```
 
@@ -365,8 +342,8 @@ Scripts maintain **strict separation** between generic infrastructure and ATS-sp
 **Example**:
 
 ```typescript
-import { Signer } from 'ethers'
-import { deployProxy, info } from '@scripts/infrastructure'
+import { Signer } from "ethers";
+import { deployProxy, info } from "@scripts/infrastructure";
 ```
 
 ### Domain Layer (`domain/`)
@@ -384,11 +361,7 @@ import { deployProxy, info } from '@scripts/infrastructure'
 **Example**:
 
 ```typescript
-import {
-    EQUITY_CONFIG_ID,
-    ATS_ROLES,
-    createEquityConfiguration,
-} from '@scripts/domain'
+import { EQUITY_CONFIG_ID, ATS_ROLES, createEquityConfiguration } from "@scripts/domain";
 ```
 
 ### Decision Checklist
@@ -426,16 +399,16 @@ All imports use `@scripts` path aliases through index files for consistency and 
 
 ```typescript
 // ✅ CORRECT
-import { Signer } from 'ethers'
-import { deployContract, info } from '@scripts/infrastructure'
+import { Signer } from "ethers";
+import { deployContract, info } from "@scripts/infrastructure";
 
-import { EQUITY_CONFIG_ID, createEquityConfiguration } from '@scripts/domain'
+import { EQUITY_CONFIG_ID, createEquityConfiguration } from "@scripts/domain";
 
 // ❌ WRONG: Relative paths
-import { deployContract } from '../infrastructure/operations/deployContract'
+import { deployContract } from "../infrastructure/operations/deployContract";
 
 // ❌ WRONG: Full paths (bypasses index)
-import { deployContract } from '@scripts/infrastructure/operations/deployContract'
+import { deployContract } from "@scripts/infrastructure/operations/deployContract";
 ```
 
 ### Import Order
@@ -447,16 +420,16 @@ import { deployContract } from '@scripts/infrastructure/operations/deployContrac
 
 ```typescript
 // 1. External
-import { Contract, Overrides, Signer } from 'ethers'
+import { Contract, Overrides, Signer } from "ethers";
 
 // 2. Infrastructure
-import { deployProxy, info } from '@scripts/infrastructure'
+import { deployProxy, info } from "@scripts/infrastructure";
 
 // 3. Domain
-import { EQUITY_CONFIG_ID, createEquityConfiguration } from '@scripts/domain'
+import { EQUITY_CONFIG_ID, createEquityConfiguration } from "@scripts/domain";
 
 // 4. Types only
-import type { DeploymentResult } from '@scripts/infrastructure'
+import type { DeploymentResult } from "@scripts/infrastructure";
 ```
 
 ### Benefits
@@ -520,14 +493,14 @@ Check the output file in `deployments/{network}_{timestamp}.json`:
 
 ```json
 {
-    "infrastructure": {
-        "blr": { "proxy": "0x..." },
-        "factory": { "proxy": "0x..." }
-    },
-    "configurations": {
-        "equity": { "version": 1, "facetCount": 43 },
-        "bond": { "version": 1, "facetCount": 43 }
-    }
+  "infrastructure": {
+    "blr": { "proxy": "0x..." },
+    "factory": { "proxy": "0x..." }
+  },
+  "configurations": {
+    "equity": { "version": 1, "facetCount": 43 },
+    "bond": { "version": 1, "facetCount": 43 }
+  }
 }
 ```
 
@@ -556,18 +529,18 @@ The deployment system supports three modes:
 Use deployment functions in your own scripts:
 
 ```typescript
-import { ethers } from 'ethers'
-import { deployCompleteSystem } from '@scripts/infrastructure'
+import { ethers } from "ethers";
+import { deployCompleteSystem } from "@scripts/infrastructure";
 
 // Hardhat context
-const [signer] = await ethers.getSigners()
+const [signer] = await ethers.getSigners();
 
 // or Standalone
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 
-const output = await deployCompleteSystem(signer, 'hedera-testnet', {
-    useTimeTravel: false,
-})
+const output = await deployCompleteSystem(signer, "hedera-testnet", {
+  useTimeTravel: false,
+});
 ```
 
 ---
@@ -649,23 +622,23 @@ Providers abstract framework-specific deployment logic.
 **HardhatProvider** (Hardhat-dependent):
 
 ```typescript
-import { HardhatProvider } from './core/providers'
+import { HardhatProvider } from "./core/providers";
 
-const provider = new HardhatProvider()
-const signer = await provider.getSigner()
-const factory = await provider.getFactory('AccessControlFacet')
+const provider = new HardhatProvider();
+const signer = await provider.getSigner();
+const factory = await provider.getFactory("AccessControlFacet");
 ```
 
 **StandaloneProvider** (Framework-agnostic):
 
 ```typescript
-import { StandaloneProvider } from './core/providers'
+import { StandaloneProvider } from "./core/providers";
 
 const provider = new StandaloneProvider({
-    rpcUrl: 'https://testnet.hashio.io/api',
-    privateKey: '0x...',
-    artifactsPath: './artifacts', // optional
-})
+  rpcUrl: "https://testnet.hashio.io/api",
+  privateKey: "0x...",
+  artifactsPath: "./artifacts", // optional
+});
 ```
 
 ### 2. Contract Instance Pattern
@@ -694,12 +667,12 @@ await createEquityConfiguration(provider, {
 Complete deployment workflows that compose operations and modules:
 
 ```typescript
-import { deployCompleteSystem } from './workflows/deployCompleteSystem'
+import { deployCompleteSystem } from "./workflows/deployCompleteSystem";
 
 const output = await deployCompleteSystem(provider, network, {
-    useTimeTravel: false,
-    saveOutput: true,
-})
+  useTimeTravel: false,
+  saveOutput: true,
+});
 ```
 
 **Available Workflows**:
@@ -716,28 +689,28 @@ const output = await deployCompleteSystem(provider, network, {
 Deploy entire ATS infrastructure (ProxyAdmin, BLR, Factory, all facets, configurations):
 
 ```typescript
-import { ethers } from 'ethers'
-import { deployCompleteSystem } from '@scripts/infrastructure'
+import { ethers } from "ethers";
+import { deployCompleteSystem } from "@scripts/infrastructure";
 
 async function main() {
-    // Get signer from Hardhat
-    const [signer] = await ethers.getSigners()
+  // Get signer from Hardhat
+  const [signer] = await ethers.getSigners();
 
-    // or use Wallet for standalone
-    // const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
+  // or use Wallet for standalone
+  // const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
 
-    const output = await deployCompleteSystem(signer, 'hedera-testnet', {
-        useTimeTravel: false,
-        saveOutput: true,
-    })
+  const output = await deployCompleteSystem(signer, "hedera-testnet", {
+    useTimeTravel: false,
+    saveOutput: true,
+  });
 
-    console.log(`BLR: ${output.infrastructure.blr.proxy}`)
-    console.log(`Factory: ${output.infrastructure.factory.proxy}`)
-    console.log(`Equity config v${output.configurations.equity.version}`)
-    console.log(`Bond config v${output.configurations.bond.version}`)
+  console.log(`BLR: ${output.infrastructure.blr.proxy}`);
+  console.log(`Factory: ${output.infrastructure.factory.proxy}`);
+  console.log(`Equity config v${output.configurations.equity.version}`);
+  console.log(`Bond config v${output.configurations.bond.version}`);
 }
 
-main().catch(console.error)
+main().catch(console.error);
 ```
 
 ### Individual Component Deployment
@@ -745,28 +718,28 @@ main().catch(console.error)
 Deploy specific components when you need granular control:
 
 ```typescript
-import { ethers } from 'ethers'
-import { deployFacets, deployBlr } from '@scripts/infrastructure'
+import { ethers } from "ethers";
+import { deployFacets, deployBlr } from "@scripts/infrastructure";
 
 async function main() {
-    const [signer] = await ethers.getSigners()
+  const [signer] = await ethers.getSigners();
 
-    // Deploy specific facets
-    const facetsResult = await deployFacets(signer, {
-        facetNames: ['AccessControlFacet', 'KycFacet'],
-        useTimeTravel: false,
-    })
+  // Deploy specific facets
+  const facetsResult = await deployFacets(signer, {
+    facetNames: ["AccessControlFacet", "KycFacet"],
+    useTimeTravel: false,
+  });
 
-    // Deploy BusinessLogicResolver
-    const blrResult = await deployBlr(signer, {
-        proxyAdminAddress: '0x...', // optional, creates new if omitted
-    })
+  // Deploy BusinessLogicResolver
+  const blrResult = await deployBlr(signer, {
+    proxyAdminAddress: "0x...", // optional, creates new if omitted
+  });
 
-    console.log(`Deployed ${facetsResult.deployed.size} facets`)
-    console.log(`BLR: ${blrResult.blrAddress}`)
+  console.log(`Deployed ${facetsResult.deployed.size} facets`);
+  console.log(`BLR: ${blrResult.blrAddress}`);
 }
 
-main().catch(console.error)
+main().catch(console.error);
 ```
 
 ---
@@ -780,25 +753,23 @@ The deployment system uses standard **ethers.js Signer** instances. You can obta
 **Hardhat Context**:
 
 ```typescript
-import { ethers } from 'hardhat'
-const [signer] = await ethers.getSigners()
+import { ethers } from "hardhat";
+const [signer] = await ethers.getSigners();
 ```
 
 **Standalone (Wallet)**:
 
 ```typescript
-import { ethers } from 'ethers'
-const provider = new ethers.providers.JsonRpcProvider(
-    'https://testnet.hashio.io/api'
-)
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
+import { ethers } from "ethers";
+const provider = new ethers.providers.JsonRpcProvider("https://testnet.hashio.io/api");
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 ```
 
 **Hardware Wallets**:
 
 ```typescript
-import { LedgerSigner } from '@ethersproject/hardware-wallets'
-const signer = new LedgerSigner(provider)
+import { LedgerSigner } from "@ethersproject/hardware-wallets";
+const signer = new LedgerSigner(provider);
 ```
 
 ### TypeChain Factories
@@ -825,15 +796,15 @@ const blr = BusinessLogicResolver__factory.connect(address, signer)
 
 ```typescript
 async function deployCompleteSystem(
-    signer: Signer,
-    network: string,
-    options: DeployCompleteSystemOptions = {}
-): Promise<DeploymentOutput>
+  signer: Signer,
+  network: string,
+  options: DeployCompleteSystemOptions = {},
+): Promise<DeploymentOutput>;
 
 interface DeployCompleteSystemOptions {
-    useTimeTravel?: boolean
-    saveOutput?: boolean
-    outputPath?: string
+  useTimeTravel?: boolean;
+  saveOutput?: boolean;
+  outputPath?: string;
 }
 ```
 
@@ -841,20 +812,20 @@ interface DeployCompleteSystemOptions {
 
 ```typescript
 async function deployWithExistingBlr(
-    signer: Signer,
-    network: string,
-    blrAddress: string,
-    options: DeployWithExistingBlrOptions = {}
-): Promise<DeploymentWithExistingBlrOutput>
+  signer: Signer,
+  network: string,
+  blrAddress: string,
+  options: DeployWithExistingBlrOptions = {},
+): Promise<DeploymentWithExistingBlrOutput>;
 
 interface DeployWithExistingBlrOptions {
-    useTimeTravel?: boolean
-    saveOutput?: boolean
-    outputPath?: string
-    deployFacets?: boolean
-    deployFactory?: boolean
-    createConfigurations?: boolean
-    existingProxyAdminAddress?: string
+  useTimeTravel?: boolean;
+  saveOutput?: boolean;
+  outputPath?: string;
+  deployFacets?: boolean;
+  deployFactory?: boolean;
+  createConfigurations?: boolean;
+  existingProxyAdminAddress?: string;
 }
 ```
 
@@ -863,43 +834,37 @@ interface DeployWithExistingBlrOptions {
 #### deployFacets
 
 ```typescript
-async function deployFacets(
-    signer: Signer,
-    options: DeployFacetsOptions
-): Promise<DeployFacetsResult>
+async function deployFacets(signer: Signer, options: DeployFacetsOptions): Promise<DeployFacetsResult>;
 ```
 
 #### deployBlr
 
 ```typescript
-async function deployBlr(
-    signer: Signer,
-    options?: { proxyAdminAddress?: string }
-): Promise<DeployBlrResult>
+async function deployBlr(signer: Signer, options?: { proxyAdminAddress?: string }): Promise<DeployBlrResult>;
 ```
 
 #### createEquityConfiguration
 
 ```typescript
 async function createEquityConfiguration(
-    blrContract: Contract, // BLR contract instance
-    facetAddresses: Record<string, string>,
-    useTimeTravel?: boolean,
-    partialBatchDeploy?: boolean,
-    batchSize?: number
-): Promise<OperationResult<ConfigurationData, ConfigurationError>>
+  blrContract: Contract, // BLR contract instance
+  facetAddresses: Record<string, string>,
+  useTimeTravel?: boolean,
+  partialBatchDeploy?: boolean,
+  batchSize?: number,
+): Promise<OperationResult<ConfigurationData, ConfigurationError>>;
 ```
 
 #### createBondConfiguration
 
 ```typescript
 async function createBondConfiguration(
-    blrContract: Contract, // BLR contract instance
-    facetAddresses: Record<string, string>,
-    useTimeTravel?: boolean,
-    partialBatchDeploy?: boolean,
-    batchSize?: number
-): Promise<OperationResult<ConfigurationData, ConfigurationError>>
+  blrContract: Contract, // BLR contract instance
+  facetAddresses: Record<string, string>,
+  useTimeTravel?: boolean,
+  partialBatchDeploy?: boolean,
+  batchSize?: number,
+): Promise<OperationResult<ConfigurationData, ConfigurationError>>;
 ```
 
 ---
@@ -912,14 +877,12 @@ This means you're trying to use Hardhat's `ethers.getSigners()` from a non-Hardh
 
 ```typescript
 // Instead of (Hardhat-specific):
-const [signer] = await ethers.getSigners() // ❌ Requires Hardhat
+const [signer] = await ethers.getSigners(); // ❌ Requires Hardhat
 
 // Use (Standalone):
-import { ethers } from 'ethers'
-const provider = new ethers.providers.JsonRpcProvider(
-    'https://testnet.hashio.io/api'
-)
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider) // ✅
+import { ethers } from "ethers";
+const provider = new ethers.providers.JsonRpcProvider("https://testnet.hashio.io/api");
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider); // ✅
 ```
 
 ### "Module '@typechain' not found"
@@ -941,9 +904,9 @@ npx hardhat run scripts/cli/hardhat.ts
 **In Standalone context**, provide a valid private key:
 
 ```typescript
-import { ethers } from 'ethers'
-const provider = new ethers.providers.JsonRpcProvider('...')
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider) // Must be valid hex private key
+import { ethers } from "ethers";
+const provider = new ethers.providers.JsonRpcProvider("...");
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider); // Must be valid hex private key
 ```
 
 ### "UNPREDICTABLE_GAS_LIMIT" or Gas Estimation Failures
@@ -959,11 +922,11 @@ This error occurs when deploying complex transactions (like creating configurati
 If you encounter this in custom code:
 
 ```typescript
-import { GAS_LIMIT } from './core/constants'
+import { GAS_LIMIT } from "./core/constants";
 
 await contract.method(args, {
-    gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
-})
+  gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
+});
 ```
 
 ### Deployment Fails

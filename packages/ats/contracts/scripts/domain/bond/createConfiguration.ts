@@ -12,14 +12,14 @@
  * @module domain/bond/createConfiguration
  */
 
-import { Contract } from 'ethers'
+import { Contract } from "ethers";
 import {
-    ConfigurationData,
-    ConfigurationError,
-    createBatchConfiguration,
-    OperationResult,
-} from '@scripts/infrastructure'
-import { BOND_CONFIG_ID, atsRegistry } from '@scripts/domain'
+  ConfigurationData,
+  ConfigurationError,
+  createBatchConfiguration,
+  OperationResult,
+} from "@scripts/infrastructure";
+import { BOND_CONFIG_ID, atsRegistry } from "@scripts/domain";
 
 /**
  * Bond-specific facets list (41 facets total).
@@ -33,63 +33,63 @@ import { BOND_CONFIG_ID, atsRegistry } from '@scripts/domain'
  * Updated to match origin/develop feature parity (all facets registered).
  */
 const BOND_FACETS = [
-    // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
-    'AccessControlFacet',
-    'CapFacet',
-    'ControlListFacet',
-    'CorporateActionsFacet',
-    'DiamondFacet', // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
-    'ERC20Facet',
-    'FreezeFacet',
-    'KycFacet',
-    'PauseFacet',
-    'SnapshotsFacet',
+  // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
+  "AccessControlFacet",
+  "CapFacet",
+  "ControlListFacet",
+  "CorporateActionsFacet",
+  "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
+  "ERC20Facet",
+  "FreezeFacet",
+  "KycFacet",
+  "PauseFacet",
+  "SnapshotsFacet",
 
-    // ERC Standards
-    'ERC1410IssuerFacet',
-    'ERC1410ManagementFacet',
-    'ERC1410ReadFacet',
-    'ERC1410TokenHolderFacet',
-    'ERC1594Facet',
-    'ERC1643Facet',
-    'ERC1644Facet',
-    'ERC20PermitFacet',
-    'ERC20VotesFacet',
-    'ERC3643BatchFacet',
-    'ERC3643ManagementFacet',
-    'ERC3643OperationsFacet',
-    'ERC3643ReadFacet',
+  // ERC Standards
+  "ERC1410IssuerFacet",
+  "ERC1410ManagementFacet",
+  "ERC1410ReadFacet",
+  "ERC1410TokenHolderFacet",
+  "ERC1594Facet",
+  "ERC1643Facet",
+  "ERC1644Facet",
+  "ERC20PermitFacet",
+  "ERC20VotesFacet",
+  "ERC3643BatchFacet",
+  "ERC3643ManagementFacet",
+  "ERC3643OperationsFacet",
+  "ERC3643ReadFacet",
 
-    // Clearing & Settlement
-    'ClearingActionsFacet',
-    'ClearingHoldCreationFacet',
-    'ClearingReadFacet',
-    'ClearingRedeemFacet',
-    'ClearingTransferFacet',
-    'HoldManagementFacet',
-    'HoldReadFacet',
-    'HoldTokenHolderFacet',
+  // Clearing & Settlement
+  "ClearingActionsFacet",
+  "ClearingHoldCreationFacet",
+  "ClearingReadFacet",
+  "ClearingRedeemFacet",
+  "ClearingTransferFacet",
+  "HoldManagementFacet",
+  "HoldReadFacet",
+  "HoldTokenHolderFacet",
 
-    // External Management
-    'ExternalControlListManagementFacet',
-    'ExternalKycListManagementFacet',
-    'ExternalPauseManagementFacet',
+  // External Management
+  "ExternalControlListManagementFacet",
+  "ExternalKycListManagementFacet",
+  "ExternalPauseManagementFacet",
 
-    // Advanced Features
-    'AdjustBalancesFacet',
-    'LockFacet',
-    'ProceedRecipientsFacet',
-    'ProtectedPartitionsFacet',
-    'ScheduledBalanceAdjustmentsFacet',
-    'ScheduledCrossOrderedTasksFacet',
-    'ScheduledSnapshotsFacet',
-    'SsiManagementFacet',
-    'TransferAndLockFacet',
+  // Advanced Features
+  "AdjustBalancesFacet",
+  "LockFacet",
+  "ProceedRecipientsFacet",
+  "ProtectedPartitionsFacet",
+  "ScheduledBalanceAdjustmentsFacet",
+  "ScheduledCrossOrderedTasksFacet",
+  "ScheduledSnapshotsFacet",
+  "SsiManagementFacet",
+  "TransferAndLockFacet",
 
-    // Jurisdiction-Specific
-    'BondUSAFacet',
-    'BondUSAReadFacet',
-] as const
+  // Jurisdiction-Specific
+  "BondUSAFacet",
+  "BondUSAReadFacet",
+] as const;
 
 /**
  * Create bond token configuration in BusinessLogicResolver.
@@ -133,19 +133,40 @@ const BOND_FACETS = [
  * ```
  */
 export async function createBondConfiguration(
-    blrContract: Contract,
-    facetAddresses: Record<string, string>,
-    useTimeTravel: boolean = false,
-    partialBatchDeploy: boolean = false,
-    batchSize: number = 2
+  blrContract: Contract,
+  facetAddresses: Record<string, string>,
+  useTimeTravel: boolean = false,
+  partialBatchDeploy: boolean = false,
+  batchSize: number = 2,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-    return createBatchConfiguration(blrContract, {
-        configurationId: BOND_CONFIG_ID,
-        facetNames: BOND_FACETS,
-        facetAddresses,
-        useTimeTravel,
-        partialBatchDeploy,
-        batchSize,
-        registry: atsRegistry,
-    })
+  // Get facet names based on time travel mode
+  // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions
+  const baseFacets = useTimeTravel ? [...BOND_FACETS, "TimeTravelFacet"] : BOND_FACETS;
+
+  const facetNames = useTimeTravel
+    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
+    : baseFacets;
+
+  // Build facet data with resolver keys from registry
+  const facets = facetNames.map((name) => {
+    // Strip "TimeTravel" suffix to get base name for registry lookup
+    const baseName = name.replace(/TimeTravel$/, "");
+
+    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    if (!facetDef?.resolverKey?.value) {
+      throw new Error(`No resolver key found for facet: ${baseName}`);
+    }
+    return {
+      facetName: name,
+      resolverKey: facetDef.resolverKey.value,
+      address: facetAddresses[name],
+    };
+  });
+
+  return createBatchConfiguration(blrContract, {
+    configurationId: BOND_CONFIG_ID,
+    facets,
+    partialBatchDeploy,
+    batchSize,
+  });
 }

@@ -9,7 +9,7 @@
  * @module core/utils/validation
  */
 
-import { ethers } from 'ethers'
+import { ethers } from "ethers";
 
 /**
  * Check if a string is a valid Ethereum address.
@@ -25,11 +25,11 @@ import { ethers } from 'ethers'
  * ```
  */
 export function isValidAddress(address: string): boolean {
-    try {
-        return ethers.utils.isAddress(address)
-    } catch {
-        return false
-    }
+  try {
+    return ethers.utils.isAddress(address);
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -45,22 +45,22 @@ export function isValidAddress(address: string): boolean {
  * ```
  */
 export function isValidBytes32(value: string): boolean {
-    if (typeof value !== 'string') {
-        return false
-    }
+  if (typeof value !== "string") {
+    return false;
+  }
 
-    // Must start with 0x and be 66 characters long (0x + 64 hex chars)
-    if (!value.startsWith('0x') || value.length !== 66) {
-        return false
-    }
+  // Must start with 0x and be 66 characters long (0x + 64 hex chars)
+  if (!value.startsWith("0x") || value.length !== 66) {
+    return false;
+  }
 
-    // Must be valid hex
-    try {
-        ethers.utils.hexlify(value)
-        return true
-    } catch {
-        return false
-    }
+  // Must be valid hex
+  try {
+    ethers.utils.hexlify(value);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -78,20 +78,20 @@ export function isValidBytes32(value: string): boolean {
  * ```
  */
 export function isValidContractId(id: string): boolean {
-    if (typeof id !== 'string') {
-        return false
-    }
+  if (typeof id !== "string") {
+    return false;
+  }
 
-    const parts = id.split('.')
-    if (parts.length !== 3) {
-        return false
-    }
+  const parts = id.split(".");
+  if (parts.length !== 3) {
+    return false;
+  }
 
-    // Each part must be a non-negative integer
-    return parts.every((part) => {
-        const num = parseInt(part, 10)
-        return !isNaN(num) && num >= 0 && num.toString() === part
-    })
+  // Each part must be a non-negative integer
+  return parts.every((part) => {
+    const num = parseInt(part, 10);
+    return !isNaN(num) && num >= 0 && num.toString() === part;
+  });
 }
 
 /**
@@ -107,13 +107,13 @@ export function isValidContractId(id: string): boolean {
  * ```
  */
 export function validateFacetName(name: string): void {
-    if (!name || typeof name !== 'string') {
-        throw new Error('Facet name must be a non-empty string')
-    }
+  if (!name || typeof name !== "string") {
+    throw new Error("Facet name must be a non-empty string");
+  }
 
-    if (name.trim() !== name) {
-        throw new Error('Facet name cannot have leading/trailing whitespace')
-    }
+  if (name.trim() !== name) {
+    throw new Error("Facet name cannot have leading/trailing whitespace");
+  }
 }
 
 /**
@@ -129,13 +129,13 @@ export function validateFacetName(name: string): void {
  * ```
  */
 export function validateNetwork(network: string): void {
-    if (!network || typeof network !== 'string') {
-        throw new Error('Network must be a non-empty string')
-    }
+  if (!network || typeof network !== "string") {
+    throw new Error("Network must be a non-empty string");
+  }
 
-    if (network.trim() !== network) {
-        throw new Error('Network cannot have leading/trailing whitespace')
-    }
+  if (network.trim() !== network) {
+    throw new Error("Network cannot have leading/trailing whitespace");
+  }
 }
 
 /**
@@ -151,17 +151,14 @@ export function validateNetwork(network: string): void {
  * validateAddress('0xinvalid', 'proxy') // Throws error
  * ```
  */
-export function validateAddress(
-    address: string,
-    fieldName: string = 'address'
-): void {
-    if (!address) {
-        throw new Error(`${fieldName} is required`)
-    }
+export function validateAddress(address: string, fieldName: string = "address"): void {
+  if (!address) {
+    throw new Error(`${fieldName} is required`);
+  }
 
-    if (!isValidAddress(address)) {
-        throw new Error(`Invalid ${fieldName}: ${address}`)
-    }
+  if (!isValidAddress(address)) {
+    throw new Error(`Invalid ${fieldName}: ${address}`);
+  }
 }
 
 /**
@@ -171,19 +168,14 @@ export function validateAddress(
  * @param fieldName - Name of the field for error messages
  * @throws Error if bytes32 value is invalid
  */
-export function validateBytes32(
-    value: string,
-    fieldName: string = 'bytes32 value'
-): void {
-    if (!value) {
-        throw new Error(`${fieldName} is required`)
-    }
+export function validateBytes32(value: string, fieldName: string = "bytes32 value"): void {
+  if (!value) {
+    throw new Error(`${fieldName} is required`);
+  }
 
-    if (!isValidBytes32(value)) {
-        throw new Error(
-            `Invalid ${fieldName}: must be 66 characters (0x + 64 hex chars)`
-        )
-    }
+  if (!isValidBytes32(value)) {
+    throw new Error(`Invalid ${fieldName}: must be 66 characters (0x + 64 hex chars)`);
+  }
 }
 
 /**
@@ -193,19 +185,14 @@ export function validateBytes32(
  * @param fieldName - Name of the field for error messages
  * @throws Error if contract ID is invalid
  */
-export function validateContractId(
-    id: string,
-    fieldName: string = 'contract ID'
-): void {
-    if (!id) {
-        throw new Error(`${fieldName} is required`)
-    }
+export function validateContractId(id: string, fieldName: string = "contract ID"): void {
+  if (!id) {
+    throw new Error(`${fieldName} is required`);
+  }
 
-    if (!isValidContractId(id)) {
-        throw new Error(
-            `Invalid ${fieldName}: must be in format 'shard.realm.num' (e.g., '0.0.12345')`
-        )
-    }
+  if (!isValidContractId(id)) {
+    throw new Error(`Invalid ${fieldName}: must be in format 'shard.realm.num' (e.g., '0.0.12345')`);
+  }
 }
 
 /**
@@ -215,17 +202,14 @@ export function validateContractId(
  * @param fieldName - Name of the field for error messages
  * @throws Error if value is not a positive number
  */
-export function validatePositiveNumber(
-    value: number,
-    fieldName: string = 'value'
-): void {
-    if (typeof value !== 'number' || isNaN(value)) {
-        throw new Error(`${fieldName} must be a number`)
-    }
+export function validatePositiveNumber(value: number, fieldName: string = "value"): void {
+  if (typeof value !== "number" || isNaN(value)) {
+    throw new Error(`${fieldName} must be a number`);
+  }
 
-    if (value <= 0) {
-        throw new Error(`${fieldName} must be positive`)
-    }
+  if (value <= 0) {
+    throw new Error(`${fieldName} must be positive`);
+  }
 }
 
 /**
@@ -235,19 +219,16 @@ export function validatePositiveNumber(
  * @param fieldName - Name of the field for error messages
  * @throws Error if value is not a non-negative integer
  */
-export function validateNonNegativeInteger(
-    value: number,
-    fieldName: string = 'value'
-): void {
-    if (typeof value !== 'number' || isNaN(value)) {
-        throw new Error(`${fieldName} must be a number`)
-    }
+export function validateNonNegativeInteger(value: number, fieldName: string = "value"): void {
+  if (typeof value !== "number" || isNaN(value)) {
+    throw new Error(`${fieldName} must be a number`);
+  }
 
-    if (value < 0) {
-        throw new Error(`${fieldName} cannot be negative`)
-    }
+  if (value < 0) {
+    throw new Error(`${fieldName} cannot be negative`);
+  }
 
-    if (!Number.isInteger(value)) {
-        throw new Error(`${fieldName} must be an integer`)
-    }
+  if (!Number.isInteger(value)) {
+    throw new Error(`${fieldName} must be an integer`);
+  }
 }

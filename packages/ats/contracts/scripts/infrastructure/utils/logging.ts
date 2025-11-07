@@ -13,56 +13,56 @@
  * Log levels in ascending order of severity.
  */
 export enum LogLevel {
-    DEBUG = 0,
-    INFO = 1,
-    WARN = 2,
-    ERROR = 3,
-    SILENT = 4,
+  DEBUG = 0,
+  INFO = 1,
+  WARN = 2,
+  ERROR = 3,
+  SILENT = 4,
 }
 
 /**
  * ANSI color codes for terminal output.
  */
 const Colors = {
-    Reset: '\x1b[0m',
-    Bright: '\x1b[1m',
-    Dim: '\x1b[2m',
-    Red: '\x1b[31m',
-    Green: '\x1b[32m',
-    Yellow: '\x1b[33m',
-    Blue: '\x1b[34m',
-    Magenta: '\x1b[35m',
-    Cyan: '\x1b[36m',
-    White: '\x1b[37m',
-    Gray: '\x1b[90m',
-}
+  Reset: "\x1b[0m",
+  Bright: "\x1b[1m",
+  Dim: "\x1b[2m",
+  Red: "\x1b[31m",
+  Green: "\x1b[32m",
+  Yellow: "\x1b[33m",
+  Blue: "\x1b[34m",
+  Magenta: "\x1b[35m",
+  Cyan: "\x1b[36m",
+  White: "\x1b[37m",
+  Gray: "\x1b[90m",
+};
 
 /**
  * Logger configuration options.
  */
 export interface LoggerConfig {
-    level: LogLevel
-    colors: boolean
-    json: boolean
-    timestamp: boolean
-    prefix?: string
+  level: LogLevel;
+  colors: boolean;
+  json: boolean;
+  timestamp: boolean;
+  prefix?: string;
 }
 
 /**
  * Default logger configuration.
  */
 const DEFAULT_CONFIG: LoggerConfig = {
-    level: LogLevel.INFO,
-    colors: true,
-    json: false,
-    timestamp: false,
-    prefix: undefined,
-}
+  level: LogLevel.INFO,
+  colors: true,
+  json: false,
+  timestamp: false,
+  prefix: undefined,
+};
 
 /**
  * Global logger configuration.
  */
-let config: LoggerConfig = { ...DEFAULT_CONFIG }
+let config: LoggerConfig = { ...DEFAULT_CONFIG };
 
 /**
  * Configure the global logger.
@@ -75,7 +75,7 @@ let config: LoggerConfig = { ...DEFAULT_CONFIG }
  * ```
  */
 export function configureLogger(options: Partial<LoggerConfig>): void {
-    config = { ...config, ...options }
+  config = { ...config, ...options };
 }
 
 /**
@@ -84,14 +84,14 @@ export function configureLogger(options: Partial<LoggerConfig>): void {
  * @returns Current logger configuration
  */
 export function getLoggerConfig(): LoggerConfig {
-    return { ...config }
+  return { ...config };
 }
 
 /**
  * Reset logger to default configuration.
  */
 export function resetLogger(): void {
-    config = { ...DEFAULT_CONFIG }
+  config = { ...DEFAULT_CONFIG };
 }
 
 /**
@@ -103,33 +103,23 @@ export function resetLogger(): void {
  * @returns Formatted message string
  */
 function formatMessage(level: string, message: string, color: string): string {
-    const parts: string[] = []
+  const parts: string[] = [];
 
-    if (config.timestamp) {
-        const timestamp = new Date().toISOString()
-        parts.push(
-            config.colors
-                ? `${Colors.Gray}[${timestamp}]${Colors.Reset}`
-                : `[${timestamp}]`
-        )
-    }
+  if (config.timestamp) {
+    const timestamp = new Date().toISOString();
+    parts.push(config.colors ? `${Colors.Gray}[${timestamp}]${Colors.Reset}` : `[${timestamp}]`);
+  }
 
-    if (config.prefix) {
-        parts.push(
-            config.colors
-                ? `${Colors.Cyan}[${config.prefix}]${Colors.Reset}`
-                : `[${config.prefix}]`
-        )
-    }
+  if (config.prefix) {
+    parts.push(config.colors ? `${Colors.Cyan}[${config.prefix}]${Colors.Reset}` : `[${config.prefix}]`);
+  }
 
-    const levelStr = config.colors
-        ? `${color}[${level}]${Colors.Reset}`
-        : `[${level}]`
-    parts.push(levelStr)
+  const levelStr = config.colors ? `${color}[${level}]${Colors.Reset}` : `[${level}]`;
+  parts.push(levelStr);
 
-    parts.push(message)
+  parts.push(message);
 
-    return parts.join(' ')
+  return parts.join(" ");
 }
 
 /**
@@ -141,21 +131,21 @@ function formatMessage(level: string, message: string, color: string): string {
  * @returns JSON string
  */
 function formatJson(level: string, message: string, data?: unknown): string {
-    const entry: Record<string, unknown> = {
-        timestamp: new Date().toISOString(),
-        level,
-        message,
-    }
+  const entry: Record<string, unknown> = {
+    timestamp: new Date().toISOString(),
+    level,
+    message,
+  };
 
-    if (config.prefix) {
-        entry.prefix = config.prefix
-    }
+  if (config.prefix) {
+    entry.prefix = config.prefix;
+  }
 
-    if (data !== undefined) {
-        entry.data = data
-    }
+  if (data !== undefined) {
+    entry.data = data;
+  }
 
-    return JSON.stringify(entry)
+  return JSON.stringify(entry);
 }
 
 /**
@@ -170,13 +160,11 @@ function formatJson(level: string, message: string, data?: unknown): string {
  * ```
  */
 export function debug(message: string, data?: unknown): void {
-    if (config.level > LogLevel.DEBUG) return
+  if (config.level > LogLevel.DEBUG) return;
 
-    const output = config.json
-        ? formatJson('DEBUG', message, data)
-        : formatMessage('DEBUG', message, Colors.Gray)
+  const output = config.json ? formatJson("DEBUG", message, data) : formatMessage("DEBUG", message, Colors.Gray);
 
-    console.log(output)
+  console.log(output);
 }
 
 /**
@@ -191,13 +179,11 @@ export function debug(message: string, data?: unknown): void {
  * ```
  */
 export function info(message: string, data?: unknown): void {
-    if (config.level > LogLevel.INFO) return
+  if (config.level > LogLevel.INFO) return;
 
-    const output = config.json
-        ? formatJson('INFO', message, data)
-        : formatMessage('INFO', message, Colors.Blue)
+  const output = config.json ? formatJson("INFO", message, data) : formatMessage("INFO", message, Colors.Blue);
 
-    console.log(output)
+  console.log(output);
 }
 
 /**
@@ -212,13 +198,11 @@ export function info(message: string, data?: unknown): void {
  * ```
  */
 export function warn(message: string, data?: unknown): void {
-    if (config.level > LogLevel.WARN) return
+  if (config.level > LogLevel.WARN) return;
 
-    const output = config.json
-        ? formatJson('WARN', message, data)
-        : formatMessage('WARN', message, Colors.Yellow)
+  const output = config.json ? formatJson("WARN", message, data) : formatMessage("WARN", message, Colors.Yellow);
 
-    console.warn(output)
+  console.warn(output);
 }
 
 /**
@@ -233,13 +217,11 @@ export function warn(message: string, data?: unknown): void {
  * ```
  */
 export function error(message: string, data?: unknown): void {
-    if (config.level > LogLevel.ERROR) return
+  if (config.level > LogLevel.ERROR) return;
 
-    const output = config.json
-        ? formatJson('ERROR', message, data)
-        : formatMessage('ERROR', message, Colors.Red)
+  const output = config.json ? formatJson("ERROR", message, data) : formatMessage("ERROR", message, Colors.Red);
 
-    console.error(output)
+  console.error(output);
 }
 
 /**
@@ -254,13 +236,11 @@ export function error(message: string, data?: unknown): void {
  * ```
  */
 export function success(message: string, data?: unknown): void {
-    if (config.level > LogLevel.INFO) return
+  if (config.level > LogLevel.INFO) return;
 
-    const output = config.json
-        ? formatJson('SUCCESS', message, data)
-        : formatMessage('SUCCESS', message, Colors.Green)
+  const output = config.json ? formatJson("SUCCESS", message, data) : formatMessage("SUCCESS", message, Colors.Green);
 
-    console.log(output)
+  console.log(output);
 }
 
 /**
@@ -278,56 +258,54 @@ export function success(message: string, data?: unknown): void {
  * ```
  */
 export function createProgress(message: string): {
-    update: (msg: string) => void
-    done: (msg: string) => void
+  update: (msg: string) => void;
+  done: (msg: string) => void;
 } {
-    if (config.json || config.level > LogLevel.INFO) {
-        return {
-            update: () => {},
-            done: (msg: string) => info(msg),
-        }
-    }
-
-    let currentMessage = message
-    const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
-    let frameIndex = 0
-    let intervalId: ReturnType<typeof setInterval> | null = null
-
-    const render = () => {
-        if (!config.colors) {
-            process.stdout.write(`\r${currentMessage}`)
-            return
-        }
-
-        const spinner = spinnerFrames[frameIndex % spinnerFrames.length]
-        process.stdout.write(
-            `\r${Colors.Cyan}${spinner}${Colors.Reset} ${currentMessage}`
-        )
-        frameIndex++
-    }
-
-    // Start spinner
-    if (config.colors) {
-        intervalId = setInterval(render, 80)
-    } else {
-        render()
-    }
-
+  if (config.json || config.level > LogLevel.INFO) {
     return {
-        update: (msg: string) => {
-            currentMessage = msg
-            if (!intervalId) {
-                render()
-            }
-        },
-        done: (msg: string) => {
-            if (intervalId) {
-                clearInterval(intervalId)
-            }
-            process.stdout.write('\r\x1b[K')
-            success(msg)
-        },
+      update: () => {},
+      done: (msg: string) => info(msg),
+    };
+  }
+
+  let currentMessage = message;
+  const spinnerFrames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+  let frameIndex = 0;
+  let intervalId: ReturnType<typeof setInterval> | null = null;
+
+  const render = () => {
+    if (!config.colors) {
+      process.stdout.write(`\r${currentMessage}`);
+      return;
     }
+
+    const spinner = spinnerFrames[frameIndex % spinnerFrames.length];
+    process.stdout.write(`\r${Colors.Cyan}${spinner}${Colors.Reset} ${currentMessage}`);
+    frameIndex++;
+  };
+
+  // Start spinner
+  if (config.colors) {
+    intervalId = setInterval(render, 80);
+  } else {
+    render();
+  }
+
+  return {
+    update: (msg: string) => {
+      currentMessage = msg;
+      if (!intervalId) {
+        render();
+      }
+    },
+    done: (msg: string) => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+      process.stdout.write("\r\x1b[K");
+      success(msg);
+    },
+  };
 }
 
 /**
@@ -341,19 +319,19 @@ export function createProgress(message: string): {
  * ```
  */
 export function section(title: string): void {
-    if (config.level > LogLevel.INFO) return
+  if (config.level > LogLevel.INFO) return;
 
-    if (config.json) {
-        info(`=== ${title} ===`)
-        return
-    }
+  if (config.json) {
+    info(`=== ${title} ===`);
+    return;
+  }
 
-    const line = '='.repeat(Math.min(title.length + 4, 80))
-    const formatted = config.colors
-        ? `${Colors.Bright}${Colors.Cyan}${line}\n  ${title}\n${line}${Colors.Reset}`
-        : `${line}\n  ${title}\n${line}`
+  const line = "=".repeat(Math.min(title.length + 4, 80));
+  const formatted = config.colors
+    ? `${Colors.Bright}${Colors.Cyan}${line}\n  ${title}\n${line}${Colors.Reset}`
+    : `${line}\n  ${title}\n${line}`;
 
-    console.log(`\n${formatted}\n`)
+  console.log(`\n${formatted}\n`);
 }
 
 /**
@@ -374,40 +352,32 @@ export function section(title: string): void {
  * ```
  */
 export function table(headers: string[], rows: string[][]): void {
-    if (config.level > LogLevel.INFO) return
+  if (config.level > LogLevel.INFO) return;
 
-    if (config.json) {
-        const data = rows.map((row) =>
-            Object.fromEntries(headers.map((h, i) => [h, row[i]]))
-        )
-        info('Table data', data)
-        return
-    }
+  if (config.json) {
+    const data = rows.map((row) => Object.fromEntries(headers.map((h, i) => [h, row[i]])));
+    info("Table data", data);
+    return;
+  }
 
-    // Calculate column widths
-    const widths = headers.map((h, i) => {
-        const columnValues = [h, ...rows.map((r) => r[i] || '')]
-        return Math.max(...columnValues.map((v) => v.length))
-    })
+  // Calculate column widths
+  const widths = headers.map((h, i) => {
+    const columnValues = [h, ...rows.map((r) => r[i] || "")];
+    return Math.max(...columnValues.map((v) => v.length));
+  });
 
-    // Format header
-    const headerRow = headers.map((h, i) => h.padEnd(widths[i])).join(' | ')
-    const separator = widths.map((w) => '-'.repeat(w)).join('-+-')
+  // Format header
+  const headerRow = headers.map((h, i) => h.padEnd(widths[i])).join(" | ");
+  const separator = widths.map((w) => "-".repeat(w)).join("-+-");
 
-    console.log(
-        config.colors
-            ? `${Colors.Bright}${headerRow}${Colors.Reset}`
-            : headerRow
-    )
-    console.log(separator)
+  console.log(config.colors ? `${Colors.Bright}${headerRow}${Colors.Reset}` : headerRow);
+  console.log(separator);
 
-    // Format rows
-    rows.forEach((row) => {
-        const formattedRow = row
-            .map((cell, i) => (cell || '').padEnd(widths[i]))
-            .join(' | ')
-        console.log(formattedRow)
-    })
+  // Format rows
+  rows.forEach((row) => {
+    const formattedRow = row.map((cell, i) => (cell || "").padEnd(widths[i])).join(" | ");
+    console.log(formattedRow);
+  });
 
-    console.log()
+  console.log();
 }

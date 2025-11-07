@@ -8,17 +8,17 @@
  * @module core/operations/proxyAdminDeployment
  */
 
-import { Overrides, Signer } from 'ethers'
-import { ProxyAdmin, ProxyAdmin__factory } from '@contract-types'
+import { Overrides, Signer } from "ethers";
+import { ProxyAdmin, ProxyAdmin__factory } from "@contract-types";
 import {
-    error as logError,
-    extractRevertReason,
-    getProxyAdmin,
-    info,
-    section,
-    success,
-    validateAddress,
-} from '@scripts/infrastructure'
+  error as logError,
+  extractRevertReason,
+  getProxyAdmin,
+  info,
+  section,
+  success,
+  validateAddress,
+} from "@scripts/infrastructure";
 
 /**
  * Deploy ProxyAdmin contract.
@@ -40,30 +40,25 @@ import {
  * console.log(`ProxyAdmin: ${proxyAdmin.address}`)
  * ```
  */
-export async function deployProxyAdmin(
-    signer: Signer,
-    overrides?: Overrides
-): Promise<ProxyAdmin> {
-    section('Deploying ProxyAdmin')
+export async function deployProxyAdmin(signer: Signer, overrides?: Overrides): Promise<ProxyAdmin> {
+  section("Deploying ProxyAdmin");
 
-    try {
-        info('Deploying ProxyAdmin...')
+  try {
+    info("Deploying ProxyAdmin...");
 
-        const proxyAdmin = await new ProxyAdmin__factory(signer).deploy(
-            overrides || {}
-        )
-        await proxyAdmin.deployed()
+    const proxyAdmin = await new ProxyAdmin__factory(signer).deploy(overrides || {});
+    await proxyAdmin.deployed();
 
-        success('ProxyAdmin deployment complete')
-        info(`  ProxyAdmin: ${proxyAdmin.address}`)
+    success("ProxyAdmin deployment complete");
+    info(`  ProxyAdmin: ${proxyAdmin.address}`);
 
-        return proxyAdmin
-    } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err)
-        logError(`ProxyAdmin deployment failed: ${errorMessage}`)
+    return proxyAdmin;
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    logError(`ProxyAdmin deployment failed: ${errorMessage}`);
 
-        throw new Error(`ProxyAdmin deployment failed: ${errorMessage}`)
-    }
+    throw new Error(`ProxyAdmin deployment failed: ${errorMessage}`);
+  }
 }
 
 /**
@@ -84,34 +79,30 @@ export async function deployProxyAdmin(
  * ```
  */
 export async function transferProxyAdmin(
-    proxyAdmin: ProxyAdmin,
-    proxyAddress: string,
-    newAdmin: string,
-    overrides?: Overrides
+  proxyAdmin: ProxyAdmin,
+  proxyAddress: string,
+  newAdmin: string,
+  overrides?: Overrides,
 ): Promise<boolean> {
-    try {
-        info('Transferring proxy admin...')
+  try {
+    info("Transferring proxy admin...");
 
-        validateAddress(proxyAddress, 'proxy address')
-        validateAddress(newAdmin, 'new admin address')
+    validateAddress(proxyAddress, "proxy address");
+    validateAddress(newAdmin, "new admin address");
 
-        const tx = await proxyAdmin.changeProxyAdmin(
-            proxyAddress,
-            newAdmin,
-            overrides || {}
-        )
-        await tx.wait()
+    const tx = await proxyAdmin.changeProxyAdmin(proxyAddress, newAdmin, overrides || {});
+    await tx.wait();
 
-        success('Proxy admin transferred')
-        info(`  Proxy: ${proxyAddress}`)
-        info(`  New Admin: ${newAdmin}`)
+    success("Proxy admin transferred");
+    info(`  Proxy: ${proxyAddress}`);
+    info(`  New Admin: ${newAdmin}`);
 
-        return true
-    } catch (err) {
-        const errorMessage = extractRevertReason(err)
-        logError(`Transfer proxy admin failed: ${errorMessage}`)
-        return false
-    }
+    return true;
+  } catch (err) {
+    const errorMessage = extractRevertReason(err);
+    logError(`Transfer proxy admin failed: ${errorMessage}`);
+    return false;
+  }
 }
 
 /**
@@ -128,27 +119,27 @@ export async function transferProxyAdmin(
  * ```
  */
 export async function transferProxyAdminOwnership(
-    proxyAdmin: ProxyAdmin,
-    newOwner: string,
-    overrides?: Overrides
+  proxyAdmin: ProxyAdmin,
+  newOwner: string,
+  overrides?: Overrides,
 ): Promise<boolean> {
-    try {
-        info('Transferring ProxyAdmin ownership...')
+  try {
+    info("Transferring ProxyAdmin ownership...");
 
-        validateAddress(newOwner, 'new owner address')
+    validateAddress(newOwner, "new owner address");
 
-        const tx = await proxyAdmin.transferOwnership(newOwner, overrides || {})
-        await tx.wait()
+    const tx = await proxyAdmin.transferOwnership(newOwner, overrides || {});
+    await tx.wait();
 
-        success('ProxyAdmin ownership transferred')
-        info(`  New Owner: ${newOwner}`)
+    success("ProxyAdmin ownership transferred");
+    info(`  New Owner: ${newOwner}`);
 
-        return true
-    } catch (err) {
-        const errorMessage = extractRevertReason(err)
-        logError(`Transfer ownership failed: ${errorMessage}`)
-        return false
-    }
+    return true;
+  } catch (err) {
+    const errorMessage = extractRevertReason(err);
+    logError(`Transfer ownership failed: ${errorMessage}`);
+    return false;
+  }
 }
 
 /**
@@ -169,19 +160,19 @@ export async function transferProxyAdminOwnership(
  * ```
  */
 export async function verifyProxyAdminControls(
-    proxyAdmin: ProxyAdmin,
-    proxyAddress: string,
-    signer: Signer
+  proxyAdmin: ProxyAdmin,
+  proxyAddress: string,
+  signer: Signer,
 ): Promise<boolean> {
-    try {
-        validateAddress(proxyAddress, 'proxy address')
+  try {
+    validateAddress(proxyAddress, "proxy address");
 
-        const actualAdmin = await getProxyAdmin(signer.provider!, proxyAddress)
+    const actualAdmin = await getProxyAdmin(signer.provider!, proxyAddress);
 
-        return actualAdmin.toLowerCase() === proxyAdmin.address.toLowerCase()
-    } catch (err) {
-        const errorMessage = extractRevertReason(err)
-        logError(`Verification failed: ${errorMessage}`)
-        return false
-    }
+    return actualAdmin.toLowerCase() === proxyAdmin.address.toLowerCase();
+  } catch (err) {
+    const errorMessage = extractRevertReason(err);
+    logError(`Verification failed: ${errorMessage}`);
+    return false;
+  }
 }

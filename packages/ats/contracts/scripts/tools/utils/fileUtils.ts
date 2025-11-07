@@ -6,8 +6,8 @@
  * @module tools/utils/fileUtils
  */
 
-import * as fs from 'fs'
-import * as path from 'path'
+import * as fs from "fs";
+import * as path from "path";
 
 /**
  * Recursively find all files matching a pattern in a directory.
@@ -17,37 +17,37 @@ import * as path from 'path'
  * @returns Array of absolute file paths
  */
 export function findFiles(dir: string, pattern: RegExp): string[] {
-    const results: string[] = []
+  const results: string[] = [];
 
-    if (!fs.existsSync(dir)) {
-        return results
+  if (!fs.existsSync(dir)) {
+    return results;
+  }
+
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      // Skip node_modules, hidden directories, and build artifacts
+      if (
+        entry.name === "node_modules" ||
+        entry.name.startsWith(".") ||
+        entry.name === "artifacts" ||
+        entry.name === "cache" ||
+        entry.name === "typechain-types"
+      ) {
+        continue;
+      }
+
+      // Recursively search subdirectories
+      results.push(...findFiles(fullPath, pattern));
+    } else if (entry.isFile() && pattern.test(entry.name)) {
+      results.push(fullPath);
     }
+  }
 
-    const entries = fs.readdirSync(dir, { withFileTypes: true })
-
-    for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name)
-
-        if (entry.isDirectory()) {
-            // Skip node_modules, hidden directories, and build artifacts
-            if (
-                entry.name === 'node_modules' ||
-                entry.name.startsWith('.') ||
-                entry.name === 'artifacts' ||
-                entry.name === 'cache' ||
-                entry.name === 'typechain-types'
-            ) {
-                continue
-            }
-
-            // Recursively search subdirectories
-            results.push(...findFiles(fullPath, pattern))
-        } else if (entry.isFile() && pattern.test(entry.name)) {
-            results.push(fullPath)
-        }
-    }
-
-    return results
+  return results;
 }
 
 /**
@@ -57,7 +57,7 @@ export function findFiles(dir: string, pattern: RegExp): string[] {
  * @returns Array of .sol file paths
  */
 export function findSolidityFiles(contractsDir: string): string[] {
-    return findFiles(contractsDir, /\.sol$/)
+  return findFiles(contractsDir, /\.sol$/);
 }
 
 /**
@@ -67,7 +67,7 @@ export function findSolidityFiles(contractsDir: string): string[] {
  * @returns File contents as string
  */
 export function readFile(filePath: string): string {
-    return fs.readFileSync(filePath, 'utf-8')
+  return fs.readFileSync(filePath, "utf-8");
 }
 
 /**
@@ -77,11 +77,11 @@ export function readFile(filePath: string): string {
  * @param content - Content to write
  */
 export function writeFile(filePath: string, content: string): void {
-    const dir = path.dirname(filePath)
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true })
-    }
-    fs.writeFileSync(filePath, content, 'utf-8')
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  fs.writeFileSync(filePath, content, "utf-8");
 }
 
 /**
@@ -92,7 +92,7 @@ export function writeFile(filePath: string, content: string): void {
  * @returns Relative path
  */
 export function getRelativePath(fullPath: string, baseDir: string): string {
-    return path.relative(baseDir, fullPath)
+  return path.relative(baseDir, fullPath);
 }
 
 /**
@@ -104,11 +104,11 @@ export function getRelativePath(fullPath: string, baseDir: string): string {
  * @returns Directory name at level
  */
 export function getPathSegment(filePath: string, level: number): string {
-    const segments = filePath.split(path.sep).filter((s) => s.length > 0)
-    if (level >= segments.length) {
-        return ''
-    }
-    return segments[segments.length - 1 - level]
+  const segments = filePath.split(path.sep).filter((s) => s.length > 0);
+  if (level >= segments.length) {
+    return "";
+  }
+  return segments[segments.length - 1 - level];
 }
 
 /**
@@ -118,5 +118,5 @@ export function getPathSegment(filePath: string, level: number): string {
  * @returns true if file exists
  */
 export function fileExists(filePath: string): boolean {
-    return fs.existsSync(filePath)
+  return fs.existsSync(filePath);
 }
