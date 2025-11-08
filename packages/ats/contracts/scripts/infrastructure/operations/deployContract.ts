@@ -23,6 +23,7 @@ import {
   validateAddress,
   waitForTransaction,
 } from "@scripts/infrastructure";
+import { verifyContractCode, VerificationOptions } from "../utils/verification";
 
 /**
  * Options for deploying a contract.
@@ -34,6 +35,10 @@ export interface DeployContractOptions {
   overrides?: Overrides;
   confirmations?: number;
   silent?: boolean;
+  /** Enable post-deployment verification (default: true) */
+  verifyDeployment?: boolean;
+  /** Verification options for bytecode and interface checks */
+  verificationOptions?: VerificationOptions;
 }
 
 /**
@@ -67,7 +72,14 @@ export async function deployContract(
   factory: ContractFactory,
   options: DeployContractOptions = {},
 ): Promise<DeploymentResult> {
-  const { args = [], overrides = {}, confirmations = 1, silent = false } = options;
+  const {
+    args = [],
+    overrides = {},
+    confirmations = 1,
+    silent = false,
+    verifyDeployment = true,
+    verificationOptions = {},
+  } = options;
 
   // Get contract name from factory for logging
   const contractName = factory.constructor.name.replace("__factory", "") || "Contract";
@@ -106,6 +118,24 @@ export async function deployContract(
 
     // Validate deployment
     validateAddress(contract.address, "deployed contract address");
+
+    // Verify deployment (bytecode existence check)
+    if (verifyDeployment) {
+      const verificationResult = await verifyContractCode(factory.signer.provider!, contract.address, {
+        ...verificationOptions,
+        verbose: !silent,
+      });
+
+      if (!verificationResult.success) {
+        if (!silent) {
+          logError(`Deployment verification failed: ${verificationResult.error}`);
+        }
+        return {
+          success: false,
+          error: `Deployment verification failed: ${verificationResult.error}`,
+        };
+      }
+    }
 
     const gasUsed = formatGasUsage(receipt, contract.deployTransaction.gasLimit);
 

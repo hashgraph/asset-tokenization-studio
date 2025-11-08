@@ -144,6 +144,15 @@ export interface DeployCompleteSystemOptions {
 
   /** Path to save deployment output (default: deployments/{network}-{timestamp}.json) */
   outputPath?: string;
+
+  /** Number of confirmations to wait for each deployment (default: 2 for Hedera reliability) */
+  confirmations?: number;
+
+  /** Enable retry mechanism for failed deployments (default: true) */
+  enableRetry?: boolean;
+
+  /** Enable post-deployment bytecode verification (default: true) */
+  verifyDeployment?: boolean;
 }
 
 /**
@@ -196,7 +205,16 @@ export async function deployCompleteSystem(
   network: string,
   options: DeployCompleteSystemOptions = {},
 ): Promise<DeploymentOutput> {
-  const { useTimeTravel = false, saveOutput = true, partialBatchDeploy = false, batchSize = 2, outputPath } = options;
+  const {
+    useTimeTravel = false,
+    saveOutput = true,
+    partialBatchDeploy = false,
+    batchSize = 2,
+    outputPath,
+    confirmations = 2,
+    enableRetry = true,
+    verifyDeployment = true,
+  } = options;
 
   const startTime = Date.now();
   const deployer = await signer.getAddress();
@@ -206,6 +224,9 @@ export async function deployCompleteSystem(
   info(`📡 Network: ${network}`);
   info(`👤 Deployer: ${deployer}`);
   info(`🔄 TimeTravel: ${useTimeTravel ? "Enabled" : "Disabled"}`);
+  info(`⏱️  Confirmations: ${confirmations}`);
+  info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
+  info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
   info("═".repeat(60));
 
   // Track total gas used
@@ -254,7 +275,11 @@ export async function deployCompleteSystem(
       facetFactories[contractName] = factory;
     }
 
-    const facetsResult = await deployFacets(facetFactories);
+    const facetsResult = await deployFacets(facetFactories, {
+      confirmations,
+      enableRetry,
+      verifyDeployment,
+    });
 
     if (!facetsResult.success) {
       throw new Error("Facet deployment had failures");

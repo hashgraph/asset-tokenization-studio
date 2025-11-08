@@ -10,7 +10,16 @@
  */
 
 import { ContractFactory, Overrides } from "ethers";
-import { DeploymentResult, deployContract, info, section, success, warn } from "@scripts/infrastructure";
+import {
+  DeploymentResult,
+  deployContract,
+  info,
+  section,
+  success,
+  warn,
+  retryTransaction,
+  RetryOptions,
+} from "@scripts/infrastructure";
 
 /**
  * Options for deploying facets (all optional).
@@ -18,7 +27,7 @@ import { DeploymentResult, deployContract, info, section, success, warn } from "
 export interface DeployFacetsOptions {
   /**
    * Number of confirmations to wait for each deployment.
-   * Default: 1
+   * Default: 2 (increased for better reliability on Hedera)
    */
   confirmations?: number;
 
@@ -26,6 +35,24 @@ export interface DeployFacetsOptions {
    * Transaction overrides for all deployments.
    */
   overrides?: Overrides;
+
+  /**
+   * Enable retry mechanism for failed deployments.
+   * Default: true
+   */
+  enableRetry?: boolean;
+
+  /**
+   * Retry options for deployment failures.
+   * Uses Hedera-optimized defaults if not specified.
+   */
+  retryOptions?: RetryOptions;
+
+  /**
+   * Enable post-deployment verification (bytecode checks).
+   * Default: true
+   */
+  verifyDeployment?: boolean;
 }
 
 /**
@@ -91,7 +118,13 @@ export async function deployFacets(
   facetFactories: Record<string, ContractFactory>,
   options: DeployFacetsOptions = {},
 ): Promise<DeployFacetsResult> {
-  const { confirmations = 1, overrides = {} } = options;
+  const {
+    confirmations = 2, // Increased default for Hedera reliability
+    overrides = {},
+    enableRetry = true,
+    retryOptions = {},
+    verifyDeployment = true,
+  } = options;
 
   section("Deploying Facets");
 
@@ -115,26 +148,47 @@ export async function deployFacets(
     info(`Total facets to deploy: ${facetNames.length}`);
 
     // Deploy each facet using its factory
-    for (const facetName of facetNames) {
+    for (let i = 0; i < facetNames.length; i++) {
+      const facetName = facetNames[i];
       const factory = facetFactories[facetName];
+      const progress = `[${i + 1}/${facetNames.length}]`;
 
       try {
-        info(`Deploying ${facetName}...`);
+        info(`${progress} Deploying ${facetName}...`);
 
-        // Deploy using the factory (signer already connected to factory)
-        const result = await deployContract(factory, {
-          confirmations,
-          overrides,
-        });
+        // Deploy function that can be retried
+        // Convert Result pattern to Exception pattern for retry mechanism
+        const deployFacet = async (): Promise<DeploymentResult> => {
+          const result = await deployContract(factory, {
+            confirmations,
+            overrides,
+            verifyDeployment,
+          });
 
+          // Throw exception if deployment failed so retryTransaction can catch and retry
+          if (!result.success) {
+            throw new Error(result.error || "Deployment failed");
+          }
+
+          return result;
+        };
+
+        // Deploy with retry if enabled
+        // retryTransaction will catch exceptions and retry up to maxRetries times
+        const result = enableRetry ? await retryTransaction(deployFacet, retryOptions) : await deployFacet();
+
+        // If we get here, deployment succeeded (either first try or after retries)
         if (result.success && result.address) {
           deployed.set(facetName, result);
+          info(`${progress} ✓ ${facetName} deployed successfully`);
         } else {
+          // This should not happen now, but keep for safety
           failed.set(facetName, result.error || "Unknown error");
         }
       } catch (err) {
+        // Deployment failed after all retry attempts
         const errorMessage = err instanceof Error ? err.message : String(err);
-        failed.set(facetName, `Failed to deploy: ${errorMessage}`);
+        failed.set(facetName, `Failed after retries: ${errorMessage}`);
       }
     }
 

@@ -379,7 +379,11 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
         facetFactories[name] = await ethers.getContractFactory(name, deployer);
       }
 
-      const result = await deployFacets(facetFactories, {});
+      const result = await deployFacets(facetFactories, {
+        confirmations: 0, // No confirmations needed for Hardhat
+        enableRetry: false, // No retry needed for local network
+        verifyDeployment: false, // No verification needed for tests
+      });
 
       expect(result.success).to.be.true;
       expect(result.deployed.size).to.equal(TEST_SIZES.TRIPLE);

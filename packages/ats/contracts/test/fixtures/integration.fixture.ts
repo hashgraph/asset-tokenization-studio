@@ -27,6 +27,8 @@ export async function deployBlrFixture() {
   const implementationFactory = await ethers.getContractFactory("BusinessLogicResolver", deployer);
   const blrResult = await deployProxy(deployer, {
     implementationFactory,
+    confirmations: 0, // No confirmations needed for Hardhat
+    verifyDeployment: false, // No verification needed for tests
   });
 
   // Get contract instance and initialize
@@ -53,7 +55,10 @@ export async function registerCommonFacetsFixture() {
 
   for (const name of facetNames) {
     const factory = await ethers.getContractFactory(name, deployer);
-    const result = await deployContract(factory, {});
+    const result = await deployContract(factory, {
+      confirmations: 0, // No confirmations needed for Hardhat
+      verifyDeployment: false, // No verification needed for tests
+    });
     facetAddresses[name] = result.address!;
   }
 

@@ -1,6 +1,6 @@
 # ATS Contracts Deployment Scripts
 
-**Last Updated**: 2025-11-04
+**Last Updated**: 2025-11-07
 
 ---
 
@@ -805,8 +805,17 @@ interface DeployCompleteSystemOptions {
   useTimeTravel?: boolean;
   saveOutput?: boolean;
   outputPath?: string;
+  confirmations?: number; // Default: 2 (increased for Hedera reliability)
+  enableRetry?: boolean; // Default: true (automatic retry with exponential backoff)
+  verifyDeployment?: boolean; // Default: true (bytecode verification after deployment)
 }
 ```
+
+**Reliability Features (New)**:
+
+- **`confirmations`**: Number of block confirmations to wait for (default: 2 for better network stability on Hedera)
+- **`enableRetry`**: Automatically retry failed deployments up to 3 times with exponential backoff (2s → 4s → 8s delays, optimized for Hedera rate limits)
+- **`verifyDeployment`**: Verify bytecode exists on-chain after each deployment using `eth_getCode` (catches indexing delays)
 
 #### deployWithExistingBlr
 
@@ -937,6 +946,23 @@ await contract.method(args, {
 4. For network-related issues, verify RPC endpoint is accessible
 5. Check contract constructor arguments
 6. For real networks, expect 5-10 minutes deployment time
+
+**Hedera-Specific Issues**:
+
+- **Random facet deployment failures**: Now handled automatically with retry mechanism (3 attempts with exponential backoff)
+- **"No bytecode found" errors**: Verification now waits and retries if contract not yet indexed by network
+- **Rate limiting**: Longer delays (2-8 seconds) between retries specifically tuned for Hedera's rate limits
+- **Timing issues**: Default 2 confirmations per transaction ensures better reliability
+
+To customize retry behavior:
+
+```typescript
+const output = await deployCompleteSystem(signer, "hedera-testnet", {
+  confirmations: 3, // Increase confirmations for extra safety
+  enableRetry: true, // Enable automatic retries (default)
+  verifyDeployment: true, // Verify bytecode after each deployment (default)
+});
+```
 
 ---
 

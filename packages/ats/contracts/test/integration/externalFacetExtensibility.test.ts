@@ -145,7 +145,11 @@ describe("External Facet Extensibility - Integration Tests", () => {
           PauseFacet: new PauseFacet__factory(deployer),
           AccessControlFacet: new AccessControlFacet__factory(deployer),
         },
-        {},
+        {
+          confirmations: 0, // No confirmations needed for Hardhat
+          enableRetry: false, // No retry needed for local network
+          verifyDeployment: false, // No verification needed for tests
+        },
       );
 
       expect(result.success).to.be.true;
@@ -164,7 +168,11 @@ describe("External Facet Extensibility - Integration Tests", () => {
         {
           FreezeFacet: new FreezeFacet__factory(deployer),
         },
-        {},
+        {
+          confirmations: 0, // No confirmations needed for Hardhat
+          enableRetry: false, // No retry needed for local network
+          verifyDeployment: false, // No verification needed for tests
+        },
       );
 
       expect(result.success).to.be.true;
@@ -182,7 +190,11 @@ describe("External Facet Extensibility - Integration Tests", () => {
           PauseFacet: new PauseFacet__factory(deployer),
           FreezeFacet: new FreezeFacet__factory(deployer),
         },
-        {},
+        {
+          confirmations: 0, // No confirmations needed for Hardhat
+          enableRetry: false, // No retry needed for local network
+          verifyDeployment: false, // No verification needed for tests
+        },
       );
 
       expect(result.success).to.be.true;

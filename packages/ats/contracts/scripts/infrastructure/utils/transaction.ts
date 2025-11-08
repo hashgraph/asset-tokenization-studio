@@ -10,12 +10,20 @@
  */
 
 import { ContractTransaction, ContractReceipt, providers, BigNumber } from "ethers";
+import { DEFAULT_TRANSACTION_TIMEOUT } from "../constants";
+import { info, warn, debug } from "./logging";
+
+/**
+ * Default number of block confirmations to wait for transaction finality.
+ * Increased to 2 for better reliability on networks like Hedera testnet.
+ */
+export const DEFAULT_TRANSACTION_CONFIRMATIONS = 2;
 
 /**
  * Wait for transaction confirmation with retry logic.
  *
  * @param tx - Transaction to wait for
- * @param confirmations - Number of confirmations to wait for (default: 1)
+ * @param confirmations - Number of confirmations to wait for (default: 2)
  * @param timeout - Timeout in milliseconds (default: 120000 = 2 minutes)
  * @returns Promise resolving to ContractReceipt
  * @throws Error if transaction fails or times out
@@ -29,8 +37,8 @@ import { ContractTransaction, ContractReceipt, providers, BigNumber } from "ethe
  */
 export async function waitForTransaction(
   tx: ContractTransaction,
-  confirmations: number = 1,
-  timeout: number = 120000,
+  confirmations: number = DEFAULT_TRANSACTION_CONFIRMATIONS,
+  timeout: number = DEFAULT_TRANSACTION_TIMEOUT,
 ): Promise<ContractReceipt> {
   try {
     const receipt = await Promise.race([
@@ -136,11 +144,37 @@ export function extractRevertReason(error: unknown): string {
 }
 
 /**
+ * Options for retry transaction logic.
+ */
+export interface RetryOptions {
+  /** Maximum number of retry attempts (default: 3) */
+  maxRetries?: number;
+  /** Base delay in milliseconds for exponential backoff (default: 2000 for Hedera) */
+  baseDelay?: number;
+  /** Maximum delay cap in milliseconds (default: 16000) */
+  maxDelay?: number;
+  /** Whether to log retry attempts (default: true) */
+  logRetries?: boolean;
+}
+
+/**
+ * Default retry options optimized for Hedera network.
+ * Reduced from previous values for faster failure feedback (<2min worst-case).
+ * Old values: maxRetries: 3, baseDelay: 2000, maxDelay: 16000
+ */
+export const DEFAULT_RETRY_OPTIONS: Required<RetryOptions> = {
+  maxRetries: 2, // 3 total attempts
+  baseDelay: 1000, // 1 second base delay
+  maxDelay: 4000, // Cap at 4 seconds (delays: 1s → 2s → 4s)
+  logRetries: true,
+};
+
+/**
  * Retry a transaction function with exponential backoff.
+ * Optimized for Hedera network with longer delays and error-specific handling.
  *
  * @param fn - Async function that returns a transaction
- * @param maxRetries - Maximum number of retry attempts (default: 3)
- * @param baseDelay - Base delay in milliseconds for exponential backoff (default: 1000)
+ * @param options - Retry configuration options
  * @returns Promise resolving to transaction result
  * @throws Error if all retries fail
  *
@@ -148,33 +182,72 @@ export function extractRevertReason(error: unknown): string {
  * ```typescript
  * const tx = await retryTransaction(
  *   async () => contract.deploy(...args),
- *   3,
- *   2000
+ *   { maxRetries: 3, baseDelay: 2000 }
  * )
  * ```
  */
-export async function retryTransaction<T>(
-  fn: () => Promise<T>,
-  maxRetries: number = 3,
-  baseDelay: number = 1000,
-): Promise<T> {
+export async function retryTransaction<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
+  const { maxRetries, baseDelay, maxDelay, logRetries } = { ...DEFAULT_RETRY_OPTIONS, ...options };
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
+      if (attempt > 0 && logRetries) {
+        info(`Retry attempt ${attempt}/${maxRetries}...`);
+      }
       return await fn();
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error || "Unknown error"));
 
       if (attempt < maxRetries) {
-        const delay = baseDelay * Math.pow(2, attempt);
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        // Calculate exponential backoff delay with max cap
+        const exponentialDelay = baseDelay * Math.pow(2, attempt);
+        const delay = Math.min(exponentialDelay, maxDelay);
+
+        // Add extra delay for specific error types
+        const adjustedDelay = adjustDelayForErrorType(error, delay);
+
+        if (logRetries) {
+          warn(`Transaction failed: ${extractRevertReason(error)}`);
+          debug(`Waiting ${adjustedDelay}ms before retry...`);
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, adjustedDelay));
         continue;
       }
     }
   }
 
   throw new Error(`Transaction failed after ${maxRetries + 1} attempts: ${lastError?.message || "Unknown error"}`);
+}
+
+/**
+ * Adjust retry delay based on error type.
+ * Hedera rate limit errors benefit from longer delays.
+ *
+ * @param error - The error that occurred
+ * @param baseDelay - The calculated exponential backoff delay
+ * @returns Adjusted delay in milliseconds
+ */
+function adjustDelayForErrorType(error: unknown, baseDelay: number): number {
+  const message = extractRevertReason(error).toLowerCase();
+
+  // Hedera rate limit errors - add extra delay
+  if (message.includes("rate limit") || message.includes("too many requests")) {
+    return baseDelay * 1.5;
+  }
+
+  // Network errors - moderate delay increase
+  if (isNetworkError(error)) {
+    return baseDelay * 1.2;
+  }
+
+  // Gas errors - use base delay (retry quickly)
+  if (isGasError(error)) {
+    return baseDelay;
+  }
+
+  return baseDelay;
 }
 
 /**

@@ -16,7 +16,7 @@
  */
 
 import { ethers } from "hardhat";
-import { deployCompleteSystem, configureLogger, LogLevel } from "../../scripts";
+import { deploySystemWithNewBlr, configureLogger, LogLevel } from "../../scripts";
 import { Factory__factory, BusinessLogicResolver__factory, ProxyAdmin__factory } from "@contract-types";
 import type { IFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-types";
 
@@ -37,8 +37,9 @@ export async function deployAtsInfrastructureFixture(useTimeTravel = true, parti
   const [deployer, user1, user2, user3, user4, user5] = signers;
   const unknownSigner = signers.at(-1)!;
 
-  // Deploy complete system using new scripts with signer
-  const deployment = await deployCompleteSystem(deployer, "hardhat", {
+  // Deploy system with new BLR using new scripts with signer
+  // Network config automatically sets: confirmations=0, enableRetry=false, verifyDeployment=false for hardhat
+  const deployment = await deploySystemWithNewBlr(deployer, "hardhat", {
     useTimeTravel,
     saveOutput: false, // Don't save deployment files during tests
     partialBatchDeploy,

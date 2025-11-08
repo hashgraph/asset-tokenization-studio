@@ -117,8 +117,9 @@ export const DEFAULT_DEPLOYMENT_TIMEOUT = 60_000;
 
 /**
  * Default timeout for contract transactions (milliseconds).
+ * Reduced from 120s to 30s for faster failure feedback.
  */
-export const DEFAULT_TRANSACTION_TIMEOUT = 120_000;
+export const DEFAULT_TRANSACTION_TIMEOUT = 30_000;
 
 /**
  * Block confirmations to wait for deployment verification.

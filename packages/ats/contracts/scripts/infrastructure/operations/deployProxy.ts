@@ -44,6 +44,10 @@ export interface DeployProxyOptions {
   initData?: string;
   /** Transaction overrides (applies only to implementation deployment) */
   overrides?: Overrides;
+  /** Number of confirmations to wait for (default: 1) */
+  confirmations?: number;
+  /** Enable post-deployment verification (default: true) */
+  verifyDeployment?: boolean;
 }
 
 /**
@@ -126,6 +130,8 @@ export async function deployProxy(signer: Signer, options: DeployProxyOptions): 
     existingProxyAdmin,
     initData = "0x",
     overrides = {},
+    confirmations = 1,
+    verifyDeployment = true,
   } = options;
 
   const deployOverrides: Overrides = { ...overrides };
@@ -150,6 +156,8 @@ export async function deployProxy(signer: Signer, options: DeployProxyOptions): 
       const implResult = await deployContract(implementationFactory, {
         args: implementationArgs,
         overrides: deployOverrides,
+        confirmations,
+        verifyDeployment,
       });
 
       if (!implResult.success || !implResult.contract || !implResult.address) {
@@ -194,7 +202,11 @@ export async function deployProxy(signer: Signer, options: DeployProxyOptions): 
 
     // Get receipt if available
     if (proxy.deployTransaction) {
-      const proxyReceipt = await waitForTransaction(proxy.deployTransaction, 1, DEFAULT_TRANSACTION_TIMEOUT);
+      const proxyReceipt = await waitForTransaction(
+        proxy.deployTransaction,
+        confirmations,
+        DEFAULT_TRANSACTION_TIMEOUT,
+      );
 
       receipts.proxy = proxyReceipt;
 

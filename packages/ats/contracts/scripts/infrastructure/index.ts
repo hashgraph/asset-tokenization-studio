@@ -89,6 +89,9 @@ export {
 
 export { getNetworkConfig, getAllNetworks } from "./config";
 
+export { getDeploymentConfig, isLocalNetwork, DEPLOYMENT_CONFIGS } from "./networkConfig";
+export type { DeploymentConfig } from "./networkConfig";
+
 // ============================================================================
 // Operations
 // ============================================================================
@@ -147,13 +150,32 @@ export {
 
 export { validateAddress, validateBytes32 } from "./utils/validation";
 
+export { loadDeployment, findLatestDeployment, listDeploymentFiles } from "./utils/deploymentFiles";
+
 export {
   waitForTransaction,
   extractRevertReason,
   getGasPrice,
   estimateGasLimit,
   formatGasUsage,
+  retryTransaction,
+  isNonceTooLowError,
+  isGasError,
+  isNetworkError,
+  DEFAULT_TRANSACTION_CONFIRMATIONS,
+  DEFAULT_RETRY_OPTIONS,
 } from "./utils/transaction";
+
+export type { RetryOptions } from "./utils/transaction";
+
+export {
+  verifyContractCode,
+  verifyContractInterface,
+  verifyContract,
+  DEFAULT_VERIFICATION_OPTIONS,
+} from "./utils/verification";
+
+export type { VerificationOptions, VerificationResult } from "./utils/verification";
 
 export { info, success, error, warn, section, debug, table } from "./utils/logging";
 
