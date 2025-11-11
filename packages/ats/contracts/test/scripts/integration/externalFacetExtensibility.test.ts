@@ -89,7 +89,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
         {
           name: "PauseFacet",
           address: externalFacetResult.address!,
-          resolverKey: atsRegistry.getFacetDefinition("PauseFacet").resolverKey!.value,
+          resolverKey: atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value,
         },
       ];
       const registerResult = await registerFacets(blrContract, {
@@ -118,17 +118,17 @@ describe("External Facet Extensibility - Integration Tests", () => {
         {
           name: "AccessControlFacet",
           address: accessControlResult.address!,
-          resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet").resolverKey!.value,
+          resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet")!.resolverKey!.value,
         },
         {
           name: "PauseFacet",
           address: pauseResult.address!,
-          resolverKey: atsRegistry.getFacetDefinition("PauseFacet").resolverKey!.value,
+          resolverKey: atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value,
         },
         {
           name: "KycFacet",
           address: kycResult.address!,
-          resolverKey: atsRegistry.getFacetDefinition("KycFacet").resolverKey!.value,
+          resolverKey: atsRegistry.getFacetDefinition("KycFacet")!.resolverKey!.value,
         },
       ];
       const registerResult = await registerFacets(blrContract, {
@@ -242,7 +242,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             facetName: "PauseFacet",
             address: pauseFacetResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("PauseFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value,
           },
         ],
       });
@@ -296,17 +296,17 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             facetName: "AccessControlFacet",
             address: accessControlResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet")!.resolverKey!.value,
           },
           {
             facetName: "KycFacet",
             address: kycResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("KycFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("KycFacet")!.resolverKey!.value,
           },
           {
             facetName: "PauseFacet",
             address: pauseResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("PauseFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value,
           },
         ],
       });
@@ -355,12 +355,12 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             facetName: "PauseFacet",
             address: pauseResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("PauseFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value,
           },
           {
             facetName: "FreezeFacet",
             address: freezeResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("FreezeFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("FreezeFacet")!.resolverKey!.value,
           },
         ],
       });
@@ -428,17 +428,17 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             facetName: "AccessControlFacet",
             address: accessControlResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet")!.resolverKey!.value,
           },
           {
             facetName: "KycFacet",
             address: kycResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("KycFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("KycFacet")!.resolverKey!.value,
           },
           {
             facetName: "PauseFacet",
             address: customFacetResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("PauseFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value,
           },
         ],
       });
@@ -491,12 +491,12 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             facetName: "AccessControlFacet",
             address: accessControlResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet")!.resolverKey!.value,
           },
           {
             facetName: "PauseFacet",
             address: pauseResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("PauseFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value,
           },
         ],
       });
@@ -543,7 +543,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             facetName: "PauseFacet",
             address: externalFacetResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("PauseFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value,
           },
         ],
       });
@@ -568,7 +568,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             name: "AccessControlFacet",
             address: accessControlResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet")!.resolverKey!.value,
           },
         ],
       });
@@ -581,7 +581,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             facetName: "AccessControlFacet",
             address: accessControlResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet")!.resolverKey!.value,
           },
         ],
       });
@@ -609,7 +609,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             name: "KycFacet",
             address: kycResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("KycFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("KycFacet")!.resolverKey!.value,
           },
         ],
       });
@@ -622,7 +622,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             facetName: "KycFacet",
             address: kycResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("KycFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("KycFacet")!.resolverKey!.value,
           },
         ],
       });
@@ -656,12 +656,12 @@ describe("External Facet Extensibility - Integration Tests", () => {
         {
           name: "AccessControlFacet",
           address: accessControlResult.address!,
-          resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet").resolverKey!.value,
+          resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet")!.resolverKey!.value,
         },
         {
           name: "KycFacet",
           address: kycResult.address!,
-          resolverKey: atsRegistry.getFacetDefinition("KycFacet").resolverKey!.value,
+          resolverKey: atsRegistry.getFacetDefinition("KycFacet")!.resolverKey!.value,
         },
       ];
       await registerFacets(blrContract, {
@@ -676,7 +676,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             facetName: "AccessControlFacet",
             address: accessControlResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("AccessControlFacet")!.resolverKey!.value,
           },
         ],
       });
@@ -697,7 +697,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
           {
             facetName: "KycFacet",
             address: kycResult.address!,
-            resolverKey: atsRegistry.getFacetDefinition("KycFacet").resolverKey!.value,
+            resolverKey: atsRegistry.getFacetDefinition("KycFacet")!.resolverKey!.value,
           },
         ],
       });

@@ -217,3 +217,15 @@ export {
   formatDuration,
   formatTimestamp,
 } from "./checkpoint/utils";
+
+// Checkpoint converters for resumability
+export {
+  toDeploymentResult,
+  toDeployBlrResult,
+  toDeployFactoryResult,
+  toConfigurationData,
+  convertCheckpointFacets,
+  extractCheckpointResults,
+  isSuccess,
+  isFailure,
+} from "./checkpoint/converters";

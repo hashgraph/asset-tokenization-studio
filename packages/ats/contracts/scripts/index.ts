@@ -38,6 +38,7 @@ export * from "./infrastructure/registryFactory";
 export * from "./infrastructure/combineRegistries";
 export * from "./infrastructure/config";
 export * from "./infrastructure/constants";
+export * from "./infrastructure/networkConfig";
 
 // Infrastructure operations
 export * from "./infrastructure/operations/deployContract";
@@ -58,6 +59,36 @@ export * from "./infrastructure/utils/transaction";
 export * from "./infrastructure/utils/logging";
 export * from "./infrastructure/utils/naming";
 export * from "./infrastructure/utils/time";
+
+// Infrastructure checkpoint system (deployment resumability)
+export type {
+  DeploymentCheckpoint,
+  DeployedContract,
+  ConfigurationResult,
+  CheckpointStatus,
+  WorkflowType,
+  ResumeOptions,
+} from "./infrastructure/types/checkpoint";
+export { CheckpointManager } from "./infrastructure/checkpoint/CheckpointManager";
+export type { CreateCheckpointParams } from "./infrastructure/checkpoint/CheckpointManager";
+export {
+  checkpointToDeploymentOutput,
+  getStepName,
+  getTotalSteps,
+  formatCheckpointStatus,
+  formatDuration,
+  formatTimestamp,
+} from "./infrastructure/checkpoint/utils";
+export {
+  toDeploymentResult,
+  toDeployBlrResult,
+  toDeployFactoryResult,
+  toConfigurationData,
+  convertCheckpointFacets,
+  extractCheckpointResults,
+  isSuccess,
+  isFailure,
+} from "./infrastructure/checkpoint/converters";
 
 // ========================================
 // Domain (ATS-Specific)

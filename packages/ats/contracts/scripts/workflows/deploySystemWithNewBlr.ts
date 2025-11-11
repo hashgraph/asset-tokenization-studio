@@ -32,6 +32,10 @@ import {
   type ResumeOptions,
   formatCheckpointStatus,
   getStepName,
+  toDeployBlrResult,
+  toConfigurationData,
+  convertCheckpointFacets,
+  isSuccess,
 } from "@scripts/infrastructure";
 import { atsRegistry, deployFactory, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
 
@@ -307,10 +311,9 @@ export async function deploySystemWithNewBlr(
 
     if (checkpoint.steps.proxyAdmin && checkpoint.currentStep >= 0) {
       info("\n✓ Step 1/7: ProxyAdmin already deployed (resuming)");
-      proxyAdmin = {
-        address: checkpoint.steps.proxyAdmin.address,
-        contractId: checkpoint.steps.proxyAdmin.contractId,
-      };
+      // Reconstruct ProxyAdmin from checkpoint - need to reconnect to contract
+      const ProxyAdmin__factory = (await import("@contract-types")).ProxyAdmin__factory;
+      proxyAdmin = ProxyAdmin__factory.connect(checkpoint.steps.proxyAdmin.address, signer);
       info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
     } else {
       info("\n📋 Step 1/7: Deploying ProxyAdmin...");
@@ -318,10 +321,9 @@ export async function deploySystemWithNewBlr(
 
       info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
 
-      // Save checkpoint
+      // Save checkpoint (ProxyAdmin doesn't have contractId property)
       checkpoint.steps.proxyAdmin = {
         address: proxyAdmin.address,
-        contractId: proxyAdmin.contractId,
         txHash: "", // ProxyAdmin doesn't return tx hash currently
         deployedAt: new Date().toISOString(),
       };
@@ -334,11 +336,8 @@ export async function deploySystemWithNewBlr(
 
     if (checkpoint.steps.blr && checkpoint.currentStep >= 1) {
       info("\n✓ Step 2/7: BLR already deployed (resuming)");
-      blrResult = {
-        success: true,
-        implementationAddress: checkpoint.steps.blr.implementation,
-        blrAddress: checkpoint.steps.blr.proxy,
-      };
+      // Use converter to reconstruct full DeployBlrResult from checkpoint
+      blrResult = toDeployBlrResult(checkpoint.steps.blr, checkpoint.steps.proxyAdmin?.address);
       info(`✅ BLR Implementation: ${blrResult.implementationAddress}`);
       info(`✅ BLR Proxy: ${blrResult.blrAddress}`);
     } else {
@@ -372,11 +371,12 @@ export async function deploySystemWithNewBlr(
 
     if (checkpoint.steps.facets && checkpoint.currentStep >= 2) {
       info("\n✓ Step 3/7: All facets already deployed (resuming)");
-      // Reconstruct facetsResult from checkpoint
+      // Use converter to reconstruct facetsResult with proper DeploymentResult types
       facetsResult = {
         success: true,
-        deployed: checkpoint.steps.facets,
+        deployed: convertCheckpointFacets(checkpoint.steps.facets),
         failed: new Map(),
+        skipped: new Map(), // No facets were skipped on resume
       };
       info(`✅ Loaded ${facetsResult.deployed.size} facets from checkpoint`);
     } else {
@@ -433,8 +433,7 @@ export async function deploySystemWithNewBlr(
         facetsResult.deployed.forEach((deploymentResult, facetName) => {
           checkpoint.steps.facets!.set(facetName, {
             address: deploymentResult.address!,
-            contractId: deploymentResult.contractId,
-            txHash: deploymentResult.txHash || "",
+            txHash: deploymentResult.transactionHash || "",
             gasUsed: deploymentResult.gasUsed?.toString(),
             deployedAt: new Date().toISOString(),
           });
@@ -449,11 +448,12 @@ export async function deploySystemWithNewBlr(
         info(`✅ Deployed ${facetsResult.deployed.size} facets successfully`);
       } else {
         info("   All facets already deployed from previous checkpoint");
-        // Use existing facets from checkpoint
+        // Use converter to reconstruct existing facets from checkpoint
         facetsResult = {
           success: true,
-          deployed: checkpoint.steps.facets,
+          deployed: convertCheckpointFacets(checkpoint.steps.facets),
           failed: new Map(),
+          skipped: new Map(), // No facets were skipped
         };
       }
     }
@@ -528,15 +528,8 @@ export async function deploySystemWithNewBlr(
       info(`✅ Equity Version: ${equityConfigData.version}`);
       info(`✅ Equity Facets: ${equityConfigData.facetCount}`);
 
-      // Reconstruct result format (we'll need to fetch facetKeys from BLR in real scenario)
-      equityConfig = {
-        success: true,
-        data: {
-          configurationId: equityConfigData.configId,
-          version: equityConfigData.version,
-          facetKeys: [], // Will be filled from actual BLR query if needed
-        },
-      };
+      // Use converter to reconstruct full ConfigurationData from checkpoint
+      equityConfig = toConfigurationData(equityConfigData);
     } else {
       info("\n💼 Step 5/7: Creating Equity configuration...");
 
@@ -580,15 +573,8 @@ export async function deploySystemWithNewBlr(
       info(`✅ Bond Version: ${bondConfigData.version}`);
       info(`✅ Bond Facets: ${bondConfigData.facetCount}`);
 
-      // Reconstruct result format
-      bondConfig = {
-        success: true,
-        data: {
-          configurationId: bondConfigData.configId,
-          version: bondConfigData.version,
-          facetKeys: [], // Will be filled from actual BLR query if needed
-        },
-      };
+      // Use converter to reconstruct full ConfigurationData from checkpoint
+      bondConfig = toConfigurationData(bondConfigData);
     } else {
       info("\n🏦 Step 6/7: Creating Bond configuration...");
 
@@ -624,13 +610,26 @@ export async function deploySystemWithNewBlr(
 
     if (checkpoint.steps.factory && checkpoint.currentStep >= 6) {
       info("\n✓ Step 7/7: Factory already deployed (resuming)");
+      // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
+      const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || proxyAdmin.address;
       factoryResult = {
         success: true,
-        implementationAddress: checkpoint.steps.factory.implementation,
+        proxyResult: {
+          implementation: { address: checkpoint.steps.factory.implementation } as any,
+          implementationAddress: checkpoint.steps.factory.implementation,
+          proxy: { address: checkpoint.steps.factory.proxy } as any,
+          proxyAddress: checkpoint.steps.factory.proxy,
+          proxyAdmin: { address: proxyAdminAddr } as any,
+          proxyAdminAddress: proxyAdminAddr,
+          receipts: {},
+        },
         factoryAddress: checkpoint.steps.factory.proxy,
+        implementationAddress: checkpoint.steps.factory.implementation,
+        proxyAdminAddress: proxyAdminAddr,
+        initialized: true, // Assume initialized if checkpoint exists
       };
-      info(`✅ Factory Implementation: ${factoryResult.implementationAddress}`);
-      info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`);
+      info(`✅ Factory Implementation: ${checkpoint.steps.factory.implementation}`);
+      info(`✅ Factory Proxy: ${checkpoint.steps.factory.proxy}`);
     } else {
       info("\n🏭 Step 7/7: Deploying Factory...");
       factoryResult = await deployFactory(signer, {
@@ -690,9 +689,13 @@ export async function deploySystemWithNewBlr(
         Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
           const facetAddress = deploymentResult.address!;
 
-          // Find matching key from config
-          const equityFacet = equityConfig.data.facetKeys.find((ef) => ef.address === facetAddress);
-          const bondFacet = bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress);
+          // Find matching key from config (use type guard to access .data property)
+          const equityFacet = isSuccess(equityConfig)
+            ? equityConfig.data.facetKeys.find((ef) => ef.address === facetAddress)
+            : undefined;
+          const bondFacet = isSuccess(bondConfig)
+            ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+            : undefined;
 
           return {
             name: facetName,
@@ -704,18 +707,32 @@ export async function deploySystemWithNewBlr(
       ),
 
       configurations: {
-        equity: {
-          configId: equityConfig.data.configurationId,
-          version: equityConfig.data.version,
-          facetCount: equityConfig.data.facetKeys.length,
-          facets: equityConfig.data.facetKeys,
-        },
-        bond: {
-          configId: bondConfig.data.configurationId,
-          version: bondConfig.data.version,
-          facetCount: bondConfig.data.facetKeys.length,
-          facets: bondConfig.data.facetKeys,
-        },
+        equity: isSuccess(equityConfig)
+          ? {
+              configId: equityConfig.data.configurationId,
+              version: equityConfig.data.version,
+              facetCount: equityConfig.data.facetKeys.length,
+              facets: equityConfig.data.facetKeys,
+            }
+          : {
+              configId: "",
+              version: 0,
+              facetCount: 0,
+              facets: [],
+            },
+        bond: isSuccess(bondConfig)
+          ? {
+              configId: bondConfig.data.configurationId,
+              version: bondConfig.data.version,
+              facetCount: bondConfig.data.facetKeys.length,
+              facets: bondConfig.data.facetKeys,
+            }
+          : {
+              configId: "",
+              version: 0,
+              facetCount: 0,
+              facets: [],
+            },
       },
 
       summary: {
@@ -729,10 +746,14 @@ export async function deploySystemWithNewBlr(
 
       helpers: {
         getEquityFacets() {
+          // Use type guard to safely access .data property
+          if (!isSuccess(equityConfig)) return [];
           const equityKeys = new Set(equityConfig.data.facetKeys.map((f) => f.key));
           return output.facets.filter((facet) => equityKeys.has(facet.key));
         },
         getBondFacets() {
+          // Use type guard to safely access .data property
+          if (!isSuccess(bondConfig)) return [];
           const bondKeys = new Set(bondConfig.data.facetKeys.map((f) => f.key));
           return output.facets.filter((facet) => bondKeys.has(facet.key));
         },

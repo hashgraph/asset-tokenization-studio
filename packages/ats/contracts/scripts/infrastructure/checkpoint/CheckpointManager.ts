@@ -298,7 +298,8 @@ export class CheckpointManager {
    */
   private mapReviver(key: string, value: unknown): unknown {
     if (typeof value === "object" && value !== null && "__type" in value && value.__type === "Map") {
-      const mapValue = value as { __value: Array<[string, unknown]> };
+      // First cast to unknown, then to the expected type to handle the conversion safely
+      const mapValue = value as unknown as { __value: Array<[string, unknown]> };
       return new Map(mapValue.__value);
     }
     return value;

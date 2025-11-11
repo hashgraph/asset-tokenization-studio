@@ -27,11 +27,14 @@ import {
   info,
   warn,
   error as logError,
+  getDeploymentConfig,
   CheckpointManager,
   type DeploymentCheckpoint,
   type ResumeOptions,
   formatCheckpointStatus,
   getStepName,
+  toConfigurationData,
+  convertCheckpointFacets,
 } from "@scripts/infrastructure";
 import { atsRegistry, deployFactory, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
 
@@ -139,6 +142,15 @@ export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
 
   /** Existing ProxyAdmin address (optional, will deploy new one if not provided) */
   existingProxyAdminAddress?: string;
+
+  /** Number of confirmations to wait for each deployment (default: from network config) */
+  confirmations?: number;
+
+  /** Enable retry mechanism for failed deployments (default: from network config) */
+  enableRetry?: boolean;
+
+  /** Enable post-deployment bytecode verification (default: from network config) */
+  verifyDeployment?: boolean;
 }
 
 /**
@@ -188,6 +200,9 @@ export async function deploySystemWithExistingBlr(
   blrAddress: string,
   options: DeploySystemWithExistingBlrOptions = {},
 ): Promise<DeploymentWithExistingBlrOutput> {
+  // Get network-specific deployment configuration
+  const networkConfig = getDeploymentConfig(network);
+
   const {
     useTimeTravel = false,
     saveOutput = true,
@@ -196,6 +211,9 @@ export async function deploySystemWithExistingBlr(
     deployFactory: shouldDeployFactory = true,
     createConfigurations: shouldCreateConfigurations = true,
     existingProxyAdminAddress,
+    confirmations = networkConfig.confirmations,
+    enableRetry = networkConfig.retryOptions.maxRetries > 0,
+    verifyDeployment = networkConfig.verifyDeployment,
     resumeFrom,
     autoResume = true,
     ignoreCheckpoint = false,
@@ -214,6 +232,9 @@ export async function deploySystemWithExistingBlr(
   info(`👤 Deployer: ${deployer}`);
   info(`🔷 BLR Address: ${blrAddress}`);
   info(`🔄 TimeTravel: ${useTimeTravel ? "Enabled" : "Disabled"}`);
+  info(`⏱️  Confirmations: ${confirmations}`);
+  info(`🔁 Retry: ${enableRetry ? "Enabled" : "Disabled"}`);
+  info(`✅ Verification: ${verifyDeployment ? "Enabled" : "Disabled"}`);
   info("═".repeat(60));
 
   // Initialize checkpoint manager
@@ -280,10 +301,8 @@ export async function deploySystemWithExistingBlr(
 
     if (checkpoint.steps.proxyAdmin && checkpoint.currentStep >= 0) {
       info("\n✓ Step 1/6: ProxyAdmin already deployed (resuming)");
-      proxyAdmin = {
-        address: checkpoint.steps.proxyAdmin.address,
-        contractId: checkpoint.steps.proxyAdmin.contractId,
-      };
+      // Reconstruct ProxyAdmin from checkpoint - need to reconnect to contract
+      proxyAdmin = ProxyAdmin__factory.connect(checkpoint.steps.proxyAdmin.address, signer);
       info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
     } else if (existingProxyAdminAddress) {
       info("\n📋 Step 1/6: Using existing ProxyAdmin...");
@@ -304,10 +323,9 @@ export async function deploySystemWithExistingBlr(
       proxyAdmin = await deployProxyAdmin(signer);
       info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
 
-      // Save checkpoint
+      // Save checkpoint (ProxyAdmin doesn't have contractId property)
       checkpoint.steps.proxyAdmin = {
         address: proxyAdmin.address,
-        contractId: proxyAdmin.contractId,
         txHash: "",
         deployedAt: new Date().toISOString(),
       };
@@ -340,11 +358,12 @@ export async function deploySystemWithExistingBlr(
     if (shouldDeployFacets) {
       if (checkpoint.steps.facets && checkpoint.currentStep >= 1) {
         info("\n✓ Step 3/6: All facets already deployed (resuming)");
-        // Reconstruct facetsResult from checkpoint
+        // Use converter to reconstruct facetsResult with proper DeploymentResult types
         facetsResult = {
           success: true,
-          deployed: checkpoint.steps.facets,
+          deployed: convertCheckpointFacets(checkpoint.steps.facets),
           failed: new Map(),
+          skipped: new Map(), // No facets were skipped on resume
         };
 
         // Build facetAddresses map from checkpoint
@@ -392,7 +411,11 @@ export async function deploySystemWithExistingBlr(
         if (Object.keys(facetFactories).length > 0) {
           info(`   Deploying ${Object.keys(facetFactories).length} remaining facets...`);
 
-          facetsResult = await deployFacets(facetFactories);
+          facetsResult = await deployFacets(facetFactories, {
+            confirmations,
+            enableRetry,
+            verifyDeployment,
+          });
 
           if (!facetsResult.success) {
             throw new Error("Facet deployment had failures");
@@ -402,8 +425,7 @@ export async function deploySystemWithExistingBlr(
           facetsResult.deployed.forEach((deploymentResult, facetName) => {
             checkpoint.steps.facets!.set(facetName, {
               address: deploymentResult.address!,
-              contractId: deploymentResult.contractId,
-              txHash: deploymentResult.txHash || "",
+              txHash: deploymentResult.transactionHash || "",
               gasUsed: deploymentResult.gasUsed?.toString(),
               deployedAt: new Date().toISOString(),
             });
@@ -425,11 +447,12 @@ export async function deploySystemWithExistingBlr(
           info(`✅ Deployed ${facetsResult.deployed.size} facets successfully`);
         } else {
           info("   All facets already deployed from previous checkpoint");
-          // Use existing facets from checkpoint
+          // Use converter to reconstruct existing facets from checkpoint
           facetsResult = {
             success: true,
-            deployed: checkpoint.steps.facets,
+            deployed: convertCheckpointFacets(checkpoint.steps.facets),
             failed: new Map(),
+            skipped: new Map(), // No facets were skipped
           };
 
           // Build facetAddresses map from checkpoint
@@ -518,15 +541,8 @@ export async function deploySystemWithExistingBlr(
           info(`✅ Equity Version: ${equityConfigData.version}`);
           info(`✅ Equity Facets: ${equityConfigData.facetCount}`);
 
-          // Reconstruct result format
-          equityConfig = {
-            success: true,
-            data: {
-              configurationId: equityConfigData.configId,
-              version: equityConfigData.version,
-              facetKeys: [],
-            },
-          };
+          // Use converter to reconstruct full ConfigurationData from checkpoint
+          equityConfig = toConfigurationData(equityConfigData);
         } else {
           info("\n💼 Step 5a/6: Creating Equity configuration...");
 
@@ -562,15 +578,8 @@ export async function deploySystemWithExistingBlr(
           info(`✅ Bond Version: ${bondConfigData.version}`);
           info(`✅ Bond Facets: ${bondConfigData.facetCount}`);
 
-          // Reconstruct result format
-          bondConfig = {
-            success: true,
-            data: {
-              configurationId: bondConfigData.configId,
-              version: bondConfigData.version,
-              facetKeys: [],
-            },
-          };
+          // Use converter to reconstruct full ConfigurationData from checkpoint
+          bondConfig = toConfigurationData(bondConfigData);
         } else {
           info("\n🏦 Step 5b/6: Creating Bond configuration...");
 
@@ -606,13 +615,26 @@ export async function deploySystemWithExistingBlr(
     if (shouldDeployFactory) {
       if (checkpoint.steps.factory && checkpoint.currentStep >= 5) {
         info("\n✓ Step 6/6: Factory already deployed (resuming)");
+        // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
+        const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || proxyAdmin.address;
         factoryResult = {
           success: true,
-          implementationAddress: checkpoint.steps.factory.implementation,
+          proxyResult: {
+            implementation: { address: checkpoint.steps.factory.implementation } as any,
+            implementationAddress: checkpoint.steps.factory.implementation,
+            proxy: { address: checkpoint.steps.factory.proxy } as any,
+            proxyAddress: checkpoint.steps.factory.proxy,
+            proxyAdmin: { address: proxyAdminAddr } as any,
+            proxyAdminAddress: proxyAdminAddr,
+            receipts: {},
+          },
           factoryAddress: checkpoint.steps.factory.proxy,
+          implementationAddress: checkpoint.steps.factory.implementation,
+          proxyAdminAddress: proxyAdminAddr,
+          initialized: true, // Assume initialized if checkpoint exists
         };
-        info(`✅ Factory Implementation: ${factoryResult.implementationAddress}`);
-        info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`);
+        info(`✅ Factory Implementation: ${checkpoint.steps.factory.implementation}`);
+        info(`✅ Factory Proxy: ${checkpoint.steps.factory.proxy}`);
       } else {
         info("\n🏭 Step 6/6: Deploying Factory...");
         factoryResult = await deployFactory(signer, {
@@ -623,8 +645,10 @@ export async function deploySystemWithExistingBlr(
           throw new Error(`Factory deployment failed: ${factoryResult.error}`);
         }
 
-        info(`✅ Factory Implementation: ${factoryResult.implementationAddress}`);
-        info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`);
+        if (factoryResult) {
+          info(`✅ Factory Implementation: ${factoryResult.implementationAddress}`);
+          info(`✅ Factory Proxy: ${factoryResult.factoryAddress}`);
+        }
 
         // Save checkpoint
         checkpoint.steps.factory = {
