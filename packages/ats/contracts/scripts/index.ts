@@ -15,7 +15,7 @@
  *
  * // Import specific modules
  * import {
- *   deployCompleteSystem,
+ *   deploySystemWithNewBlr,
  *   deployFacets,
  *   createEquityConfiguration
  * } from '@hashgraph/asset-tokenization-contracts/scripts'
@@ -86,8 +86,8 @@ export * from "./domain/factory/deployEquityToken";
 // ========================================
 
 // Complete deployment workflows
-export * from "./workflows/deployCompleteSystem";
-export * from "./workflows/deployWithExistingBlr";
+export * from "./workflows/deploySystemWithNewBlr";
+export * from "./workflows/deploySystemWithExistingBlr";
 
 // ========================================
 // Registry Generation Tools (for extending ATS)

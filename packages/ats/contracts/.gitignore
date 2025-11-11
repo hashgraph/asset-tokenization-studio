@@ -51,3 +51,7 @@ Slither/*
 deployments/hardhat_*.json
 deployments/localhost_*.json
 deployments/local_*.json
+
+# Checkpoint files (deployment state tracking) - never commit
+deployments/.checkpoints/**/*
+deployments/.checkpoints/*.json

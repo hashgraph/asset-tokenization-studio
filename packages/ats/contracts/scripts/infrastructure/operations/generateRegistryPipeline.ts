@@ -511,27 +511,30 @@ export async function generateRegistryPipeline(
     table(["Layer", "Count"], layerTable);
   }
 
-  // Step 9: Write output (if requested)
+  // Step 9: Format the generated code with Prettier
+  let formattedCode = registryCode;
+  try {
+    const prettier = await import("prettier");
+    const resolvedOutputPath = path.isAbsolute(fullConfig.outputPath)
+      ? fullConfig.outputPath
+      : path.resolve(process.cwd(), fullConfig.outputPath);
+    const prettierConfig = await prettier.resolveConfig(resolvedOutputPath);
+    formattedCode = await prettier.format(registryCode, {
+      ...prettierConfig,
+      parser: "typescript",
+      filepath: resolvedOutputPath,
+    });
+  } catch (error) {
+    warn(`Could not apply Prettier formatting: ${error}`);
+  }
+
+  // Step 10: Write output (if requested)
   let outputPath: string | undefined;
 
   if (writeToFile) {
     const resolvedOutputPath = path.isAbsolute(fullConfig.outputPath)
       ? fullConfig.outputPath
       : path.resolve(process.cwd(), fullConfig.outputPath);
-
-    // Format the generated code with Prettier first
-    let formattedCode = registryCode;
-    try {
-      const prettier = await import("prettier");
-      const prettierConfig = await prettier.resolveConfig(resolvedOutputPath);
-      formattedCode = await prettier.format(registryCode, {
-        ...prettierConfig,
-        parser: "typescript",
-        filepath: resolvedOutputPath,
-      });
-    } catch (error) {
-      warn(`Could not apply Prettier formatting: ${error}`);
-    }
 
     // Smart file writing: only write if content changed (excluding timestamp)
     let shouldWrite = true;
@@ -585,7 +588,7 @@ export async function generateRegistryPipeline(
   success(`Done in ${durationMs}ms!`);
 
   return {
-    code: registryCode,
+    code: formattedCode,
     stats: {
       totalFacets: facetMetadata.length,
       totalInfrastructure: infrastructureMetadata.length,
@@ -597,7 +600,7 @@ export async function generateRegistryPipeline(
       withRoles: summary.withRoles,
       byCategory: summary.byCategory,
       byLayer: summary.byLayer,
-      generatedLines: registryCode.split("\n").length,
+      generatedLines: formattedCode.split("\n").length,
       durationMs,
     },
     outputPath,

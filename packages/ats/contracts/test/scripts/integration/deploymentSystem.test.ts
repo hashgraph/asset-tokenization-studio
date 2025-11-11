@@ -41,6 +41,8 @@ import {
   isTimeTravelVariant,
   validateAddress,
   validateBytes32,
+  configureLogger,
+  LogLevel,
 } from "@scripts/infrastructure";
 
 // Domain layer
@@ -59,6 +61,10 @@ import { TEST_SIZES, BLR_VERSIONS } from "@test";
 describe("Phase 1 Deployment System - Integration Tests", () => {
   let deployer: Signer;
   let user: Signer;
+
+  before(() => {
+    configureLogger({ level: LogLevel.SILENT });
+  });
 
   beforeEach(async () => {
     [deployer, user] = await ethers.getSigners();

@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { type ResolverProxy, type ERC1643, type Pause, AccessControl } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { grantRoleAndPauseToken } from "../../../../common";
+import { grantRoleAndPauseToken } from "../../../../../common";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
 import { ATS_ROLES } from "@scripts";

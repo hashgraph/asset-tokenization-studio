@@ -44,6 +44,16 @@ export type {
 
 export { ok, err, createSigner, createSignerFromEnv } from "./types";
 
+// Checkpoint types
+export type {
+  DeploymentCheckpoint,
+  DeployedContract,
+  ConfigurationResult,
+  CheckpointStatus,
+  WorkflowType,
+  ResumeOptions,
+} from "./types/checkpoint";
+
 // ============================================================================
 // Constants
 // ============================================================================
@@ -177,7 +187,8 @@ export {
 
 export type { VerificationOptions, VerificationResult } from "./utils/verification";
 
-export { info, success, error, warn, section, debug, table } from "./utils/logging";
+export { info, success, error, warn, section, debug, table, configureLogger, LogLevel } from "./utils/logging";
+export type { LoggerConfig } from "./utils/logging";
 
 export {
   resolveContractName,
@@ -190,3 +201,19 @@ export {
 export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./utils/hedera";
 
 export { getSelector } from "./utils/selector";
+
+// ============================================================================
+// Checkpoint System
+// ============================================================================
+
+export { CheckpointManager } from "./checkpoint/CheckpointManager";
+export type { CreateCheckpointParams } from "./checkpoint/CheckpointManager";
+
+export {
+  checkpointToDeploymentOutput,
+  getStepName,
+  getTotalSteps,
+  formatCheckpointStatus,
+  formatDuration,
+  formatTimestamp,
+} from "./checkpoint/utils";

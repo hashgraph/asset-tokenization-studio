@@ -12,7 +12,7 @@
  */
 
 import { task } from "hardhat/config";
-import { deployCompleteSystem } from "../scripts/workflows/deployCompleteSystem";
+import { deploySystemWithNewBlr } from "../scripts/workflows/deploySystemWithNewBlr";
 
 task("deploy-system", "Deploy complete ATS system using new modular scripts")
   .addFlag("timetravel", "Use TimeTravel variants for facets")
@@ -26,7 +26,7 @@ task("deploy-system", "Deploy complete ATS system using new modular scripts")
     }
 
     try {
-      const result = await deployCompleteSystem(hre.network.name, {
+      const result = await deploySystemWithNewBlr(hre.network.name, {
         useTimeTravel: args.timetravel,
         saveOutput: true,
         outputPath: args.output,

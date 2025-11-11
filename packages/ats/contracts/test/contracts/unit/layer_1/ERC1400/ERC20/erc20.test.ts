@@ -15,7 +15,7 @@ import {
   ClearingActionsFacet,
 } from "@contract-types";
 import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
-import { assertObject } from "../../../../common";
+import { assertObject } from "../../../../../common";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { SecurityType } from "@scripts/domain";

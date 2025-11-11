@@ -16,7 +16,7 @@
  * @module cli/hardhat
  */
 
-import { deployCompleteSystem } from "../workflows/deployCompleteSystem";
+import { deploySystemWithNewBlr } from "../workflows/deploySystemWithNewBlr";
 import { getNetworkConfig, getAllNetworks } from "@scripts/infrastructure";
 
 /**
@@ -61,8 +61,8 @@ async function main() {
   const batchSize = process.env.BATCH_SIZE ? parseInt(process.env.BATCH_SIZE) : 2;
 
   try {
-    // Deploy complete system
-    const output = await deployCompleteSystem(signer, networkName, {
+    // Deploy system with new BLR
+    const output = await deploySystemWithNewBlr(signer, networkName, {
       useTimeTravel,
       partialBatchDeploy,
       batchSize,

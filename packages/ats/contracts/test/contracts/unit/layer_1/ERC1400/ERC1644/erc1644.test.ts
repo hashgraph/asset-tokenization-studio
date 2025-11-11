@@ -11,7 +11,7 @@ import {
   Kyc,
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { grantRoleAndPauseToken } from "../../../../common";
+import { grantRoleAndPauseToken } from "../../../../../common";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
 import { EMPTY_STRING, ZERO, DEFAULT_PARTITION, ATS_ROLES } from "@scripts";

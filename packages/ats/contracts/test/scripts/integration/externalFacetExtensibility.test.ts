@@ -34,6 +34,8 @@ import {
   createBatchConfiguration,
   deployFacets,
   LATEST_VERSION,
+  configureLogger,
+  LogLevel,
 } from "@scripts/infrastructure";
 
 // Domain layer - ATS-specific business logic
@@ -46,6 +48,10 @@ describe("External Facet Extensibility - Integration Tests", () => {
   let deployer: Signer;
   let blrAddress: string;
   let blrContract: any;
+
+  before(() => {
+    configureLogger({ level: LogLevel.SILENT });
+  });
 
   beforeEach(async () => {
     [deployer] = await ethers.getSigners();
@@ -710,29 +716,60 @@ describe("External Facet Extensibility - Integration Tests", () => {
   describe("Error Handling", () => {
     // ATS Registry provider for tests
     it("should fail when resolver key lookup fails", async () => {
-      // Try to create a configuration without proper resolver key
-      // This test now expects an error during facet data preparation
-      let thrownError: Error | null = null;
-      try {
-        await createBatchConfiguration(blrContract, {
-          configurationId: ethers.utils.formatBytes32String("EMPTY_CONFIG"),
-          facets: [
-            {
-              facetName: "NonExistentFacet",
-              address: "0x1234567890123456789012345678901234567890",
-              resolverKey: "0x0000000000000000000000000000000000000000000000000000000000000000",
-            },
-          ],
-        });
-      } catch (error) {
-        thrownError = error as Error;
-      }
+      // Deploy a valid facet first
+      const pauseFacetFactory = new PauseFacet__factory(deployer);
+      const pauseFacetResult = await deployContract(pauseFacetFactory, {});
 
-      // Should throw during preparation or fail during transaction
-      expect(thrownError).to.exist;
+      // Register it so BLR is not empty
+      const facetsWithKeys = [
+        {
+          name: "PauseFacet",
+          address: pauseFacetResult.address!,
+          resolverKey: atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value,
+        },
+      ];
+      await registerFacets(blrContract, {
+        facets: facetsWithKeys,
+      });
+
+      // Try to create a configuration with a non-existent facet
+      // The resolverKey is 0x0, which will cause FacetIdNotRegistered error
+      const configResult = await createBatchConfiguration(blrContract, {
+        configurationId: ethers.utils.formatBytes32String("EMPTY_CONFIG"),
+        facets: [
+          {
+            facetName: "NonExistentFacet",
+            address: "0x1234567890123456789012345678901234567890",
+            resolverKey: "0x0000000000000000000000000000000000000000000000000000000000000000",
+          },
+        ],
+      });
+
+      // Should fail due to invalid resolver key
+      expect(configResult.success).to.be.false;
+      if (!configResult.success) {
+        // The error should indicate a facet issue
+        expect(configResult.error).to.exist;
+      }
     });
 
     it("should handle empty facet list gracefully", async () => {
+      // Deploy and register at least one facet so BLR is not empty
+      const pauseFacetFactory = new PauseFacet__factory(deployer);
+      const pauseFacetResult = await deployContract(pauseFacetFactory, {});
+
+      const facetsWithKeys = [
+        {
+          name: "PauseFacet",
+          address: pauseFacetResult.address!,
+          resolverKey: atsRegistry.getFacetDefinition("PauseFacet")!.resolverKey!.value,
+        },
+      ];
+      await registerFacets(blrContract, {
+        facets: facetsWithKeys,
+      });
+
+      // Now try to create a configuration with empty facet list
       const configResult = await createBatchConfiguration(blrContract, {
         configurationId: ethers.utils.formatBytes32String("NO_FACETS"),
         facets: [],

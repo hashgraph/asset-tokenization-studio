@@ -9,7 +9,7 @@ import {
 } from "@contract-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { ATS_ROLES } from "@scripts";
-import { assertObject } from "../../common";
+import { assertObject } from "../../../common";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("ResolverProxy Tests", () => {

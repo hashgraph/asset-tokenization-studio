@@ -21,6 +21,8 @@ import * as fs from "fs";
 import {
   generateRegistryPipeline,
   DEFAULT_REGISTRY_CONFIG,
+  configureLogger,
+  LogLevel,
   type RegistryGenerationConfig,
 } from "@scripts/infrastructure";
 
@@ -30,7 +32,11 @@ import { detectLayer, detectCategory, generateDescription } from "@scripts";
 import { pairTimeTravelVariants } from "@scripts";
 
 describe("Registry Generation Pipeline - Integration Tests", () => {
-  const contractsPath = path.join(__dirname, "../../contracts");
+  const contractsPath = path.join(__dirname, "../../../contracts");
+
+  before(() => {
+    configureLogger({ level: LogLevel.SILENT });
+  });
 
   describe("generateRegistryPipeline", () => {
     it("should generate registry with default configuration", async () => {

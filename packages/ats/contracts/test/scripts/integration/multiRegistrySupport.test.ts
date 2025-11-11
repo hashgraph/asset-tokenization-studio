@@ -24,6 +24,8 @@ import {
   deployProxy,
   combineRegistries,
   getRegistryConflicts,
+  configureLogger,
+  LogLevel,
   type RegistryProvider,
   type FacetDefinition,
 } from "@scripts/infrastructure";
@@ -144,6 +146,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
   };
 
   beforeEach(async () => {
+    configureLogger({ level: LogLevel.SILENT });
     [deployer] = await ethers.getSigners();
 
     // Deploy BLR for tests

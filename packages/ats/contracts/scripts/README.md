@@ -100,7 +100,7 @@ const blr = BusinessLogicResolver__factory.connect(address, signer)
 ```typescript
 // Caller provides signer directly
 const [signer] = await ethers.getSigners();
-await deployCompleteSystem(signer, "testnet", options);
+await deploySystemWithNewBlr(signer, "testnet", options);
 ```
 
 ---
@@ -530,7 +530,7 @@ Use deployment functions in your own scripts:
 
 ```typescript
 import { ethers } from "ethers";
-import { deployCompleteSystem } from "@scripts/infrastructure";
+import { deploySystemWithNewBlr } from "@scripts/infrastructure";
 
 // Hardhat context
 const [signer] = await ethers.getSigners();
@@ -538,7 +538,7 @@ const [signer] = await ethers.getSigners();
 // or Standalone
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 
-const output = await deployCompleteSystem(signer, "hedera-testnet", {
+const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
   useTimeTravel: false,
 });
 ```
@@ -596,8 +596,8 @@ scripts/
 │       └── deployToken.ts
 │
 ├── workflows/                   # End-to-end orchestration
-│   ├── deployCompleteSystem.ts
-│   └── deployWithExistingBlr.ts
+│   ├── deploySystemWithNewBlr.ts
+│   └── deploySystemWithExistingBlr.ts
 │
 ├── cli/                         # Command-line entry points
 │   ├── hardhat.ts              # Hardhat-based deployment CLI
@@ -667,9 +667,9 @@ await createEquityConfiguration(provider, {
 Complete deployment workflows that compose operations and modules:
 
 ```typescript
-import { deployCompleteSystem } from "./workflows/deployCompleteSystem";
+import { deploySystemWithNewBlr } from "./workflows/deploySystemWithNewBlr";
 
-const output = await deployCompleteSystem(provider, network, {
+const output = await deploySystemWithNewBlr(signer, network, {
   useTimeTravel: false,
   saveOutput: true,
 });
@@ -677,8 +677,8 @@ const output = await deployCompleteSystem(provider, network, {
 
 **Available Workflows**:
 
-- `deployCompleteSystem`: Deploy entire ATS infrastructure
-- `deployWithExistingBlr`: Deploy using existing BusinessLogicResolver
+- `deploySystemWithNewBlr`: Deploy entire ATS infrastructure with new BLR
+- `deploySystemWithExistingBlr`: Deploy using existing BusinessLogicResolver
 
 ---
 
@@ -690,7 +690,7 @@ Deploy entire ATS infrastructure (ProxyAdmin, BLR, Factory, all facets, configur
 
 ```typescript
 import { ethers } from "ethers";
-import { deployCompleteSystem } from "@scripts/infrastructure";
+import { deploySystemWithNewBlr } from "@scripts/infrastructure";
 
 async function main() {
   // Get signer from Hardhat
@@ -699,7 +699,7 @@ async function main() {
   // or use Wallet for standalone
   // const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider)
 
-  const output = await deployCompleteSystem(signer, "hedera-testnet", {
+  const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
     useTimeTravel: false,
     saveOutput: true,
   });
@@ -792,16 +792,16 @@ const blr = BusinessLogicResolver__factory.connect(address, signer)
 
 ### Workflows
 
-#### deployCompleteSystem
+#### deploySystemWithNewBlr
 
 ```typescript
-async function deployCompleteSystem(
+async function deploySystemWithNewBlr(
   signer: Signer,
   network: string,
-  options: DeployCompleteSystemOptions = {},
+  options: DeploySystemWithNewBlrOptions = {},
 ): Promise<DeploymentOutput>;
 
-interface DeployCompleteSystemOptions {
+interface DeploySystemWithNewBlrOptions {
   useTimeTravel?: boolean;
   saveOutput?: boolean;
   outputPath?: string;
@@ -817,17 +817,17 @@ interface DeployCompleteSystemOptions {
 - **`enableRetry`**: Automatically retry failed deployments up to 3 times with exponential backoff (2s → 4s → 8s delays, optimized for Hedera rate limits)
 - **`verifyDeployment`**: Verify bytecode exists on-chain after each deployment using `eth_getCode` (catches indexing delays)
 
-#### deployWithExistingBlr
+#### deploySystemWithExistingBlr
 
 ```typescript
-async function deployWithExistingBlr(
+async function deploySystemWithExistingBlr(
   signer: Signer,
   network: string,
   blrAddress: string,
-  options: DeployWithExistingBlrOptions = {},
+  options: DeploySystemWithExistingBlrOptions = {},
 ): Promise<DeploymentWithExistingBlrOutput>;
 
-interface DeployWithExistingBlrOptions {
+interface DeploySystemWithExistingBlrOptions {
   useTimeTravel?: boolean;
   saveOutput?: boolean;
   outputPath?: string;
@@ -957,7 +957,7 @@ await contract.method(args, {
 To customize retry behavior:
 
 ```typescript
-const output = await deployCompleteSystem(signer, "hedera-testnet", {
+const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
   confirmations: 3, // Increase confirmations for extra safety
   enableRetry: true, // Enable automatic retries (default)
   verifyDeployment: true, // Verify bytecode after each deployment (default)

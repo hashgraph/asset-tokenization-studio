@@ -44,6 +44,7 @@ export async function deployAtsInfrastructureFixture(useTimeTravel = true, parti
     saveOutput: false, // Don't save deployment files during tests
     partialBatchDeploy,
     batchSize,
+    ignoreCheckpoint: true, // Disable checkpoints for tests to prevent cross-worker contamination in parallel execution
   });
 
   // Get typed contract instances using TypeChain factories

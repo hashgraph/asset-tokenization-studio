@@ -20,7 +20,7 @@
  * @module cli/standalone
  */
 
-import { deployCompleteSystem } from "../workflows/deployCompleteSystem";
+import { deploySystemWithNewBlr } from "../workflows/deploySystemWithNewBlr";
 import { getAllNetworks, getNetworkConfig } from "@scripts/infrastructure";
 import { Wallet, providers } from "ethers";
 
@@ -71,8 +71,8 @@ async function main() {
 
     console.log(`👤 Deployer: ${await signer.getAddress()}`);
 
-    // Deploy complete system
-    const output = await deployCompleteSystem(signer, network, {
+    // Deploy system with new BLR
+    const output = await deploySystemWithNewBlr(signer, network, {
       useTimeTravel,
       partialBatchDeploy,
       batchSize,
