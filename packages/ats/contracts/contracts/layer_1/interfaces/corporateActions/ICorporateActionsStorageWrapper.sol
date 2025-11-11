@@ -9,12 +9,13 @@ struct ActionData {
     bytes32 actionType;
     bytes data;
     bytes[] results;
+    uint256 actionIndexByType;
 }
 
 struct CorporateActionDataStorage {
     EnumerableSet.Bytes32Set actions;
     mapping(bytes32 => ActionData) actionsData;
-    mapping(bytes32 => EnumerableSet.Bytes32Set) actionsByType;
+    mapping(bytes32 => bytes32[]) actionsByType;
 }
 
 interface ICorporateActionsStorageWrapper {

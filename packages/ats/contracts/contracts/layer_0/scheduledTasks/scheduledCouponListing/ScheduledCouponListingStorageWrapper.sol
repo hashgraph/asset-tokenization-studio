@@ -13,7 +13,7 @@ import {
 import {
     _SCHEDULED_COUPON_LISTING_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-import {IEquity} from '../../../layer_2/interfaces/equity/IEquity.sol';
+import {IBondRead} from '../../../layer_2/interfaces/bond/IBondRead.sol';
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
@@ -91,6 +91,45 @@ abstract contract ScheduledCouponListingStorageWrapper is
                 _pageIndex,
                 _pageLength
             );
+    }
+
+    function _getPendingScheduledCouponListingTotalAt(
+        uint256 _timestamp
+    ) internal view returns (uint256 total_) {
+        total_ = 0;
+
+        ScheduledTasksDataStorage
+            storage scheduledCouponListing = _scheduledCouponListingtorage();
+
+        uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(
+            scheduledCouponListing
+        );
+
+        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
+            uint256 pos = scheduledTaskCount - i;
+
+            ScheduledTask memory scheduledTask = ScheduledTasksLib
+                .getScheduledTasksByIndex(scheduledCouponListing, pos);
+
+            if (scheduledTask.scheduledTimestamp < _timestamp) {
+                total_ += 1;
+            } else {
+                break;
+            }
+        }
+    }
+
+    function _getScheduledCouponListingIdAtIndex(uint256 _index) internal view returns(uint256 couponID_){
+        ScheduledTask memory couponListing = ScheduledTasksLib.getScheduledTasksByIndex(
+                _scheduledCouponListingtorage(),
+                _index
+            );
+
+        bytes32 actionId = abi.decode(couponListing.data, (bytes32));
+
+        (,couponID_,) = _getCorporateAction(actionId);
+
+        
     }
 
     function _scheduledCouponListingtorage()

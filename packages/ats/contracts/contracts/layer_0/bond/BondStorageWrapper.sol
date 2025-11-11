@@ -115,8 +115,15 @@ abstract contract BondStorageWrapper is
     function _getCouponFromOrderedListAt(
         uint256 _pos
     ) internal view returns (uint256 couponID_) {
-        if (_pos >= _getCouponsOrderedListTotal()) return 0;
-        return _bondStorage().counponsOrderedListByIds[_pos];
+        if (_pos >= _getCouponsOrderedListTotalAdjusted()) return 0;
+
+        BondDataStorage storage bondStorage = _bondStorage();
+
+        if(_pos < bondStorage.counponsOrderedListByIds.length) return _bondStorage().counponsOrderedListByIds[_pos];
+
+        uint256 index = _getPendingScheduledCouponListingTotalAt(_blockTimestamp()) - 1 - (_pos - bondStorage.counponsOrderedListByIds.length);
+
+        return _getScheduledCouponListingIdAtIndex(index);
     }
 
     function _getCouponsOrderedList(
@@ -129,12 +136,20 @@ abstract contract BondStorageWrapper is
         );
 
         couponIDs_ = new uint256[](
-            LibCommon.getSize(start, end, _getCouponsOrderedListTotal())
+            LibCommon.getSize(start, end, _getCouponsOrderedListTotalAdjusted())
         );
 
         for (uint256 i = 0; i < couponIDs_.length; i++) {
             couponIDs_[i] = _getCouponFromOrderedListAt(start + i);
         }
+    }
+
+    function _getCouponsOrderedListTotalAdjusted()
+        internal
+        view
+        returns (uint256 total_)
+    {
+        return _getCouponsOrderedListTotal() + _getPendingScheduledCouponListingTotalAt(_blockTimestamp());
     }
 
     function _getCouponsOrderedListTotal()
@@ -167,9 +182,9 @@ abstract contract BondStorageWrapper is
     {
         bytes32 actionId = _corporateActionsStorage()
             .actionsByType[COUPON_CORPORATE_ACTION_TYPE]
-            .at(_couponID - 1);
+            [_couponID - 1];
 
-        (, bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
             (registeredCoupon_.coupon) = abi.decode(data, (IBondRead.Coupon));
