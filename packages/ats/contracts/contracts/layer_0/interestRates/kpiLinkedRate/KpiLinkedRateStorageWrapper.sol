@@ -22,6 +22,7 @@ contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         uint256 maxDeviationCap;
         uint256 baseLine;
         uint256 maxDeviationFloor;
+        uint256 adjustmentPrecision;
         uint8 impactDataDecimals;
         address kpiOracle;
         bool initialized;

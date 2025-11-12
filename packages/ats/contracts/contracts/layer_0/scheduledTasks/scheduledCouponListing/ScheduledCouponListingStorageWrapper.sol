@@ -119,17 +119,15 @@ abstract contract ScheduledCouponListingStorageWrapper is
         }
     }
 
-    function _getScheduledCouponListingIdAtIndex(uint256 _index) internal view returns(uint256 couponID_){
-        ScheduledTask memory couponListing = ScheduledTasksLib.getScheduledTasksByIndex(
-                _scheduledCouponListingtorage(),
-                _index
-            );
+    function _getScheduledCouponListingIdAtIndex(
+        uint256 _index
+    ) internal view returns (uint256 couponID_) {
+        ScheduledTask memory couponListing = ScheduledTasksLib
+            .getScheduledTasksByIndex(_scheduledCouponListingtorage(), _index);
 
         bytes32 actionId = abi.decode(couponListing.data, (bytes32));
 
-        (,couponID_,) = _getCorporateAction(actionId);
-
-        
+        (, couponID_, ) = _getCorporateAction(actionId);
     }
 
     function _scheduledCouponListingtorage()

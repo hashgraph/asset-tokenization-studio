@@ -117,11 +117,16 @@ abstract contract BondStorageWrapper is
     ) internal view returns (uint256 couponID_) {
         if (_pos >= _getCouponsOrderedListTotalAdjusted()) return 0;
 
-        BondDataStorage storage bondStorage = _bondStorage();
+        uint256 actualOrderedListLengthTotal = _getCouponsOrderedListTotal();
 
-        if(_pos < bondStorage.counponsOrderedListByIds.length) return _bondStorage().counponsOrderedListByIds[_pos];
+        if (_pos < actualOrderedListLengthTotal)
+            return _bondStorage().counponsOrderedListByIds[_pos];
 
-        uint256 index = _getPendingScheduledCouponListingTotalAt(_blockTimestamp()) - 1 - (_pos - bondStorage.counponsOrderedListByIds.length);
+        uint256 pendingIndexOffset = _pos - actualOrderedListLengthTotal;
+
+        uint256 index = _getScheduledCouponListingCount() -
+            1 -
+            pendingIndexOffset;
 
         return _getScheduledCouponListingIdAtIndex(index);
     }
@@ -149,7 +154,9 @@ abstract contract BondStorageWrapper is
         view
         returns (uint256 total_)
     {
-        return _getCouponsOrderedListTotal() + _getPendingScheduledCouponListingTotalAt(_blockTimestamp());
+        return
+            _getCouponsOrderedListTotal() +
+            _getPendingScheduledCouponListingTotalAt(_blockTimestamp());
     }
 
     function _getCouponsOrderedListTotal()
@@ -180,9 +187,9 @@ abstract contract BondStorageWrapper is
         view
         returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
     {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[COUPON_CORPORATE_ACTION_TYPE]
-            [_couponID - 1];
+        bytes32 actionId = _corporateActionsStorage().actionsByType[
+            COUPON_CORPORATE_ACTION_TYPE
+        ][_couponID - 1];
 
         (, , bytes memory data) = _getCorporateAction(actionId);
 
@@ -199,7 +206,7 @@ abstract contract BondStorageWrapper is
     function _getCouponFor(
         uint256 _couponID,
         address _account
-    ) internal view returns (IBondRead.CouponFor memory couponFor_) {
+    ) internal view virtual returns (IBondRead.CouponFor memory couponFor_) {
         IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(
             _couponID
         );

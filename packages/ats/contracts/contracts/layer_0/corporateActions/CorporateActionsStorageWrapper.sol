@@ -49,13 +49,11 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
             return (bytes32(0), 0);
         }
 
-        corporateActions_.actionsByType[_actionType].push(
-                corporateActionId_
-            );
+        corporateActions_.actionsByType[_actionType].push(corporateActionId_);
 
-        corporateActionIndexByType_ = _getCorporateActionCountByType(
-            _actionType
-        ) - 1;
+        corporateActionIndexByType_ =
+            _getCorporateActionCountByType(_actionType) -
+            1;
 
         corporateActions_
             .actionsData[corporateActionId_]
@@ -64,7 +62,6 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         corporateActions_
             .actionsData[corporateActionId_]
             .actionIndexByType = corporateActionIndexByType_;
-        
     }
 
     function _updateCorporateActionData(
@@ -101,14 +98,24 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
 
     function _getCorporateAction(
         bytes32 _corporateActionId
-    ) internal view returns (bytes32 actionType_, uint256 actionTypeIndex_, bytes memory data_) {
+    )
+        internal
+        view
+        returns (
+            bytes32 actionType_,
+            uint256 actionTypeIndex_,
+            bytes memory data_
+        )
+    {
         CorporateActionDataStorage
             storage corporateActions_ = _corporateActionsStorage();
         actionType_ = corporateActions_
             .actionsData[_corporateActionId]
             .actionType;
         data_ = corporateActions_.actionsData[_corporateActionId].data;
-        actionTypeIndex_ = corporateActions_.actionsData[_corporateActionId].actionIndexByType;
+        actionTypeIndex_ = corporateActions_
+            .actionsData[_corporateActionId]
+            .actionIndexByType;
     }
 
     function _getCorporateActionCount()
@@ -158,7 +165,9 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
             storage corporateActions = _corporateActionsStorage();
 
         for (uint256 i = 0; i < corporateActionIds_.length; i++) {
-            corporateActionIds_[i] = corporateActions.actionsByType[_actionType][start + i];
+            corporateActionIds_[i] = corporateActions.actionsByType[
+                _actionType
+            ][start + i];
         }
     }
 

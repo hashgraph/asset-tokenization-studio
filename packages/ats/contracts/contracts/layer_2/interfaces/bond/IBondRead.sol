@@ -17,6 +17,7 @@ interface IBondRead {
         uint256 fixingDate;
         uint256 rate;
         uint8 rateDecimals;
+        bool rateSet;
     }
 
     struct RegisteredCoupon {

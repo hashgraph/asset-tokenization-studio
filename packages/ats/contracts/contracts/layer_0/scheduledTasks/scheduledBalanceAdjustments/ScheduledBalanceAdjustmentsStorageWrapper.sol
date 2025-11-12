@@ -53,7 +53,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
         bytes memory data = _scheduledTask.data;
 
         if (data.length == 0) return;
-        (,, bytes memory balanceAdjustmentData) = _getCorporateAction(
+        (, , bytes memory balanceAdjustmentData) = _getCorporateAction(
             abi.decode(data, (bytes32))
         );
         if (balanceAdjustmentData.length == 0) return;

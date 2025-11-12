@@ -17,6 +17,7 @@ interface TRexIBondRead {
         uint256 fixingDate;
         uint256 rate;
         uint8 rateDecimals;
+        bool rateSet;
     }
 
     struct RegisteredCoupon {

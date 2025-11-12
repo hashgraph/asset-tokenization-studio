@@ -38,6 +38,23 @@ abstract contract BondKpiLinkedInterestRate is
         );
     }
 
+    function _getCouponFor(
+        uint256 _couponID,
+        address _account
+    )
+        internal
+        view
+        virtual
+        override(BondStorageWrapper, BondStorageWrapperKpiLinkedInterestRate)
+        returns (IBondRead.CouponFor memory couponFor_)
+    {
+        return
+            BondStorageWrapperKpiLinkedInterestRate._getCouponFor(
+                _couponID,
+                _account
+            );
+    }
+
     function _addToCouponsOrderedList(
         uint256 _couponID
     )

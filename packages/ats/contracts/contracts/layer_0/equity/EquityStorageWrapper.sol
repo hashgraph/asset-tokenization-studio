@@ -153,11 +153,11 @@ abstract contract EquityStorageWrapper is
         view
         returns (IEquity.RegisteredDividend memory registeredDividend_)
     {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[DIVIDEND_CORPORATE_ACTION_TYPE]
-            [_dividendID - 1];
+        bytes32 actionId = _corporateActionsStorage().actionsByType[
+            DIVIDEND_CORPORATE_ACTION_TYPE
+        ][_dividendID - 1];
 
-        (,, bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
             (registeredDividend_.dividend) = abi.decode(
@@ -255,11 +255,11 @@ abstract contract EquityStorageWrapper is
         view
         returns (IEquity.RegisteredVoting memory registeredVoting_)
     {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[VOTING_RIGHTS_CORPORATE_ACTION_TYPE]
-            [_voteID - 1];
+        bytes32 actionId = _corporateActionsStorage().actionsByType[
+            VOTING_RIGHTS_CORPORATE_ACTION_TYPE
+        ][_voteID - 1];
 
-        (,, bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
             (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
@@ -344,11 +344,11 @@ abstract contract EquityStorageWrapper is
         view
         returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
     {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE]
-            [_balanceAdjustmentID - 1];
+        bytes32 actionId = _corporateActionsStorage().actionsByType[
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
+        ][_balanceAdjustmentID - 1];
 
-        (,, bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
             (balanceAdjustment_) = abi.decode(

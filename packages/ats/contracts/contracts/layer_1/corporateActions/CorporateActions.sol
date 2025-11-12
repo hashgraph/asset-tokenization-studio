@@ -40,8 +40,19 @@ abstract contract CorporateActions is ICorporateActions, Common {
 
     function getCorporateAction(
         bytes32 _corporateActionId
-    ) external view override returns (bytes32 actionType_, uint256 actionTypeIndex_, bytes memory data_) {
-        (actionType_, actionTypeIndex_, data_) = _getCorporateAction(_corporateActionId);
+    )
+        external
+        view
+        override
+        returns (
+            bytes32 actionType_,
+            uint256 actionTypeIndex_,
+            bytes memory data_
+        )
+    {
+        (actionType_, actionTypeIndex_, data_) = _getCorporateAction(
+            _corporateActionId
+        );
     }
 
     function getCorporateActionCount()

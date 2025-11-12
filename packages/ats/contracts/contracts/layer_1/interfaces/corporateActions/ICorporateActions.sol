@@ -41,7 +41,14 @@ interface ICorporateActions {
      */
     function getCorporateAction(
         bytes32 _corporateActionId
-    ) external view returns (bytes32 actionType_, uint256 actionTypeIndex_, bytes memory data_);
+    )
+        external
+        view
+        returns (
+            bytes32 actionType_,
+            uint256 actionTypeIndex_,
+            bytes memory data_
+        );
 
     /**
      * @dev Returns the number of corporate actions the token currently has
