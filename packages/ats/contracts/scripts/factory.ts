@@ -303,7 +303,6 @@ export interface EquityData {
 export interface BondData {
     security: SecurityData
     bondDetails: BondDetailsData
-    interestRateType: number
     proceedRecipients: string[]
     proceedRecipientsData: string[]
 }
@@ -610,7 +609,6 @@ export async function setBondData({
     const bondData: BondData = {
         security,
         bondDetails,
-        interestRateType,
         proceedRecipients,
         proceedRecipientsData,
     }

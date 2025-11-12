@@ -402,7 +402,8 @@ describe('Corporate Actions Tests', () => {
         expect(corporateAction[0].toUpperCase()).to.equal(
             actionType.toUpperCase()
         )
-        expect(corporateAction[1].toUpperCase()).to.equal(
+        expect(corporateAction[1]).to.equal(1)
+        expect(corporateAction[2].toUpperCase()).to.equal(
             actionData.toUpperCase()
         )
     })

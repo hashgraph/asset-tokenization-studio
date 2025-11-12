@@ -16,12 +16,9 @@ abstract contract CorporateActions is ICorporateActions, Common {
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        returns (
-            bytes32 corporateActionId_,
-            uint256 corporateActionIndexByType_
-        )
+        returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)
     {
-        (corporateActionId_, corporateActionIndexByType_) = _addCorporateAction(
+        (corporateActionId_, corporateActionIdByType_) = _addCorporateAction(
             _actionType,
             _data
         );
@@ -33,7 +30,7 @@ abstract contract CorporateActions is ICorporateActions, Common {
             _msgSender(),
             _actionType,
             corporateActionId_,
-            corporateActionIndexByType_,
+            corporateActionIdByType_,
             _data
         );
     }
@@ -44,13 +41,9 @@ abstract contract CorporateActions is ICorporateActions, Common {
         external
         view
         override
-        returns (
-            bytes32 actionType_,
-            uint256 actionTypeIndex_,
-            bytes memory data_
-        )
+        returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_)
     {
-        (actionType_, actionTypeIndex_, data_) = _getCorporateAction(
+        (actionType_, actionTypeId_, data_) = _getCorporateAction(
             _corporateActionId
         );
     }

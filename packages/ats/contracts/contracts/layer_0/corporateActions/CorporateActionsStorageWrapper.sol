@@ -34,10 +34,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         bytes memory _data
     )
         internal
-        returns (
-            bytes32 corporateActionId_,
-            uint256 corporateActionIndexByType_
-        )
+        returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)
     {
         CorporateActionDataStorage
             storage corporateActions_ = _corporateActionsStorage();
@@ -51,9 +48,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
 
         corporateActions_.actionsByType[_actionType].push(corporateActionId_);
 
-        corporateActionIndexByType_ =
-            _getCorporateActionCountByType(_actionType) -
-            1;
+        corporateActionIdByType_ = _getCorporateActionCountByType(_actionType);
 
         corporateActions_
             .actionsData[corporateActionId_]
@@ -61,7 +56,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         corporateActions_.actionsData[corporateActionId_].data = _data;
         corporateActions_
             .actionsData[corporateActionId_]
-            .actionIndexByType = corporateActionIndexByType_;
+            .actionIdByType = corporateActionIdByType_;
     }
 
     function _updateCorporateActionData(
@@ -101,11 +96,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     )
         internal
         view
-        returns (
-            bytes32 actionType_,
-            uint256 actionTypeIndex_,
-            bytes memory data_
-        )
+        returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_)
     {
         CorporateActionDataStorage
             storage corporateActions_ = _corporateActionsStorage();
@@ -113,9 +104,9 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
             .actionsData[_corporateActionId]
             .actionType;
         data_ = corporateActions_.actionsData[_corporateActionId].data;
-        actionTypeIndex_ = corporateActions_
+        actionTypeId_ = corporateActions_
             .actionsData[_corporateActionId]
-            .actionIndexByType;
+            .actionIdByType;
     }
 
     function _getCorporateActionCount()

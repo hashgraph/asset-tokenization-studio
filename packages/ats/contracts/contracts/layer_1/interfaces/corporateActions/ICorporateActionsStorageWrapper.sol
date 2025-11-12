@@ -9,7 +9,7 @@ struct ActionData {
     bytes32 actionType;
     bytes data;
     bytes[] results;
-    uint256 actionIndexByType;
+    uint256 actionIdByType;
 }
 
 struct CorporateActionDataStorage {

@@ -8,14 +8,14 @@ interface ICorporateActions {
      * @param operator The caller of the function that emitted the event
      * @param actionType The corporate action's action type (used for classification)
      * @param corporateActionId The corporate action's unique Id
-     * @param corporateActionIndexByType The corporate action's index for its action type
+     * @param corporateActionIdByType The corporate action's id for its action type
      * @param data The corporate action's data (defining the corporate aciton itself)
      */
     event CorporateActionAdded(
         address indexed operator,
         bytes32 indexed actionType,
         bytes32 indexed corporateActionId,
-        uint256 corporateActionIndexByType,
+        uint256 corporateActionIdByType,
         bytes data
     );
 
@@ -26,10 +26,7 @@ interface ICorporateActions {
         bytes memory _data
     )
         external
-        returns (
-            bytes32 corporateActionId_,
-            uint256 corporateActionIndexByType_
-        );
+        returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_);
 
     /**
      * @dev Returns a corporate action info

@@ -84,6 +84,6 @@ abstract contract BondRead is IBondRead, IStaticFunctionSelectors, Common {
         view
         returns (uint256 total_)
     {
-        return _getCouponsOrderedListTotal();
+        return _getCouponsOrderedListTotalAdjusted();
     }
 }
