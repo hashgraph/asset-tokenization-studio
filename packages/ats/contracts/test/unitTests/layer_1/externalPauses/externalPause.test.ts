@@ -300,6 +300,7 @@ describe('ExternalPause Tests', () => {
             currency: '0x345678',
             numberOfShares: MAX_UINT256,
             nominalValue: 100,
+            nominalValueDecimals: 6,
             regulationType: RegulationType.REG_S,
             regulationSubType: RegulationSubType.NONE,
             countriesControlListType: true,

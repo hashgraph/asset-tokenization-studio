@@ -81,6 +81,7 @@ describe('Proceed Recipients Tests', () => {
             currency: '0x455552',
             numberOfUnits,
             nominalValue: 100,
+            nominalValueDecimals: 0,
             startingDate,
             maturityDate,
             regulationType: RegulationType.REG_D,

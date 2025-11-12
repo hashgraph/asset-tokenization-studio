@@ -258,11 +258,13 @@ export interface EquityDetailsData {
     dividendRight: DividendType
     currency: string
     nominalValue: number
+    nominalValueDecimals: number
 }
 
 export interface BondDetailsData {
     currency: string
     nominalValue: number
+    nominalValueDecimals: number
     startingDate: number
     maturityDate: number
 }
@@ -377,6 +379,7 @@ export async function setEquityData({
     currency,
     numberOfShares,
     nominalValue,
+    nominalValueDecimals,
     init_rbacs,
     addAdmin = true,
     businessLogicResolver,
@@ -409,6 +412,7 @@ export async function setEquityData({
     currency: string
     numberOfShares: bigint
     nominalValue: number
+    nominalValueDecimals: number
     init_rbacs?: Rbac[]
     addAdmin?: boolean
     businessLogicResolver: string
@@ -475,6 +479,7 @@ export async function setEquityData({
         dividendRight: dividendRight,
         currency: currency,
         nominalValue: nominalValue,
+        nominalValueDecimals: nominalValueDecimals,
     }
 
     const equityData: EquityData = {
@@ -501,6 +506,7 @@ export async function setBondData({
     currency,
     numberOfUnits,
     nominalValue,
+    nominalValueDecimals,
     startingDate,
     maturityDate,
     init_rbacs,
@@ -529,6 +535,7 @@ export async function setBondData({
     currency: string
     numberOfUnits: bigint
     nominalValue: number
+    nominalValueDecimals: number
     startingDate: number
     maturityDate: number
     init_rbacs?: Rbac[]
@@ -591,6 +598,7 @@ export async function setBondData({
     const bondDetails: BondDetailsData = {
         currency: currency, // EUR
         nominalValue: nominalValue,
+        nominalValueDecimals: nominalValueDecimals,
         startingDate: startingDate,
         maturityDate: maturityDate,
     }
@@ -634,6 +642,7 @@ export async function deployEquityFromFactory({
     currency,
     numberOfShares,
     nominalValue,
+    nominalValueDecimals,
     regulationType,
     regulationSubType,
     countriesControlListType,
@@ -669,6 +678,7 @@ export async function deployEquityFromFactory({
     currency: string
     numberOfShares: bigint
     nominalValue: number
+    nominalValueDecimals: number
     regulationType: number
     regulationSubType: number
     countriesControlListType: boolean
@@ -703,6 +713,7 @@ export async function deployEquityFromFactory({
         currency,
         numberOfShares,
         nominalValue,
+        nominalValueDecimals,
         init_rbacs,
         addAdmin,
         businessLogicResolver,
@@ -750,6 +761,7 @@ export async function deployBondFromFactory({
     currency,
     numberOfUnits,
     nominalValue,
+    nominalValueDecimals,
     startingDate,
     maturityDate,
     regulationType,
@@ -781,6 +793,7 @@ export async function deployBondFromFactory({
     currency: string
     numberOfUnits: number
     nominalValue: number
+    nominalValueDecimals: number
     startingDate: number
     maturityDate: number
     regulationType: number
@@ -813,6 +826,7 @@ export async function deployBondFromFactory({
         currency,
         numberOfUnits: BigInt(numberOfUnits),
         nominalValue,
+        nominalValueDecimals,
         startingDate,
         maturityDate,
         init_rbacs,

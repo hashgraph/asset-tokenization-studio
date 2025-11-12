@@ -273,7 +273,8 @@ describe('Factory Tests', () => {
 
     const currency = '0x455552'
     const numberOfUnits = BigInt(1000)
-    const nominalValue = 100
+    const nominalValue = 10000
+    const nominalValueDecimals = 2
     let startingDate = 999
     let maturityDate = 999
     const numberOfCoupon = 30
@@ -375,6 +376,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfShares,
                 nominalValue,
+                nominalValueDecimals,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: ADDRESS_ZERO,
@@ -417,6 +419,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfShares,
                 nominalValue,
+                nominalValueDecimals,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -465,6 +468,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfShares,
                 nominalValue,
+                nominalValueDecimals,
                 init_rbacs,
                 addAdmin: false,
                 businessLogicResolver: businessLogicResolver.address,
@@ -507,6 +511,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfShares,
                 nominalValue,
+                nominalValueDecimals,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -554,6 +559,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfShares,
                 nominalValue,
+                nominalValueDecimals,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -601,6 +607,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfShares,
                 nominalValue,
+                nominalValueDecimals,
                 init_rbacs,
                 addAdmin: true,
                 businessLogicResolver: businessLogicResolver.address,
@@ -671,6 +678,9 @@ describe('Factory Tests', () => {
             expect(equityMetadata.dividendRight).to.equal(dividendRight)
             expect(equityMetadata.currency).to.equal(currency)
             expect(equityMetadata.nominalValue).to.equal(nominalValue)
+            expect(equityMetadata.nominalValueDecimals).to.equal(
+                nominalValueDecimals
+            )
 
             const capFacet = await ethers.getContractAt('Cap', equityAddress)
 
@@ -696,6 +706,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfUnits,
                 nominalValue,
+                nominalValueDecimals,
                 startingDate,
                 maturityDate,
                 init_rbacs,
@@ -732,6 +743,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfUnits,
                 nominalValue,
+                nominalValueDecimals,
                 startingDate,
                 maturityDate,
                 init_rbacs,
@@ -772,6 +784,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfUnits,
                 nominalValue,
+                nominalValueDecimals,
                 startingDate,
                 maturityDate,
                 init_rbacs,
@@ -810,6 +823,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfUnits,
                 nominalValue,
+                nominalValueDecimals,
                 startingDate,
                 maturityDate,
                 init_rbacs,
@@ -860,6 +874,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfUnits,
                 nominalValue,
+                nominalValueDecimals,
                 startingDate,
                 maturityDate,
                 init_rbacs,
@@ -931,6 +946,9 @@ describe('Factory Tests', () => {
             expect(bondDetails.nominalValue).to.be.deep.equal(
                 bondData.bondDetails.nominalValue
             )
+            expect(bondDetails.nominalValueDecimals).to.be.deep.equal(
+                bondData.bondDetails.nominalValueDecimals
+            )
             expect(bondDetails.startingDate).to.be.deep.equal(
                 bondData.bondDetails.startingDate
             )
@@ -957,6 +975,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfUnits,
                 nominalValue,
+                nominalValueDecimals,
                 startingDate,
                 maturityDate,
                 init_rbacs,
@@ -996,6 +1015,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfUnits,
                 nominalValue,
+                nominalValueDecimals,
                 startingDate,
                 maturityDate,
                 init_rbacs,
@@ -1040,6 +1060,7 @@ describe('Factory Tests', () => {
                 currency,
                 numberOfUnits,
                 nominalValue,
+                nominalValueDecimals,
                 startingDate,
                 maturityDate,
                 init_rbacs,
@@ -1110,6 +1131,9 @@ describe('Factory Tests', () => {
             )
             expect(bondDetails.nominalValue).to.be.deep.equal(
                 bondData.bondDetails.nominalValue
+            )
+            expect(bondDetails.nominalValueDecimals).to.be.deep.equal(
+                bondData.bondDetails.nominalValueDecimals
             )
             expect(bondDetails.startingDate).to.be.deep.equal(
                 bondData.bondDetails.startingDate

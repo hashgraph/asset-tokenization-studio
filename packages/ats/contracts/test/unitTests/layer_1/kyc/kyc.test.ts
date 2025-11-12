@@ -388,6 +388,7 @@ describe('Kyc Tests', () => {
             currency: '0x345678',
             numberOfShares: MAX_UINT256,
             nominalValue: 100,
+            nominalValueDecimals: 0,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_B,
             countriesControlListType: true,

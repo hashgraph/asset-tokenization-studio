@@ -299,6 +299,7 @@ describe('Adjust Balances Tests', () => {
             currency: '0x345678',
             numberOfShares: BigInt(maxSupply_Original),
             nominalValue: 100,
+            nominalValueDecimals: 1,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_B,
             countriesControlListType: true,

@@ -401,6 +401,7 @@ describe('Equity Tests', () => {
             currency: '0x345678',
             numberOfShares: number_Of_Shares,
             nominalValue: 100,
+            nominalValueDecimals: 9,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_B,
             countriesControlListType,
