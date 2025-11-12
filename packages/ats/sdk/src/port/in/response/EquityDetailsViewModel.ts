@@ -216,4 +216,5 @@ export default interface EquityDetailsViewModel extends QueryResponse {
   dividendRight: number;
   currency: string;
   nominalValue: string;
+  nominalValueDecimals: number;
 }

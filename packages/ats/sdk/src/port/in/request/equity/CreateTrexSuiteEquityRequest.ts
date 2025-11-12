@@ -269,6 +269,7 @@ export default class CreateTrexSuiteEquityRequest extends ValidatedRequest<Creat
   currency: string;
   numberOfShares: string;
   nominalValue: string;
+  nominalValueDecimals: number;
   regulationType: number;
   regulationSubType: number;
   isCountryControlListWhiteList: boolean;
@@ -316,6 +317,7 @@ export default class CreateTrexSuiteEquityRequest extends ValidatedRequest<Creat
     currency,
     numberOfShares,
     nominalValue,
+    nominalValueDecimals,
     regulationType,
     regulationSubType,
     isCountryControlListWhiteList,
@@ -364,6 +366,7 @@ export default class CreateTrexSuiteEquityRequest extends ValidatedRequest<Creat
     currency: string;
     numberOfShares: string;
     nominalValue: string;
+    nominalValueDecimals: number;
     regulationType: number;
     regulationSubType: number;
     isCountryControlListWhiteList: boolean;
@@ -467,6 +470,7 @@ export default class CreateTrexSuiteEquityRequest extends ValidatedRequest<Creat
     this.currency = currency;
     this.numberOfShares = numberOfShares;
     this.nominalValue = nominalValue;
+    this.nominalValueDecimals = nominalValueDecimals;
     this.regulationType = regulationType;
     this.regulationSubType = regulationSubType;
     this.isCountryControlListWhiteList = isCountryControlListWhiteList;

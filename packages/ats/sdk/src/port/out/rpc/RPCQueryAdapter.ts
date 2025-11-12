@@ -669,6 +669,7 @@ export class RPCQueryAdapter {
       CastDividendType.fromNumber(res.dividendRight),
       res.currency,
       new BigDecimal(res.nominalValue.toString()),
+      res.nominalValueDecimals
     );
   }
 
@@ -685,6 +686,7 @@ export class RPCQueryAdapter {
     return new BondDetails(
       res.currency,
       new BigDecimal(res.nominalValue.toString()),
+      res.nominalValueDecimals,
       res.startingDate.toNumber(),
       res.maturityDate.toNumber(),
     );
