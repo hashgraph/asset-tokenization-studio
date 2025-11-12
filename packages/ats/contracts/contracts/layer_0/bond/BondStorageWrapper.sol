@@ -187,9 +187,10 @@ abstract contract BondStorageWrapper is
         view
         returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
     {
-        bytes32 actionId = _corporateActionsStorage().actionsByType[
-            COUPON_CORPORATE_ACTION_TYPE
-        ][_couponID - 1];
+        bytes32 actionId = _getCorporateActionIdByTypeIndex(
+            COUPON_CORPORATE_ACTION_TYPE,
+            _couponID - 1
+        );
 
         (, , bytes memory data) = _getCorporateAction(actionId);
 

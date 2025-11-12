@@ -171,9 +171,10 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
         uint256 _rate,
         uint8 _rateDecimals
     ) internal virtual {
-        bytes32 actionId = _corporateActionsStorage().actionsByType[
-            COUPON_CORPORATE_ACTION_TYPE
-        ][_couponID - 1];
+        bytes32 actionId = _getCorporateActionIdByTypeIndex(
+            COUPON_CORPORATE_ACTION_TYPE,
+            _couponID - 1
+        );
 
         _coupon.rate = _rate;
         _coupon.rateDecimals = _rateDecimals;

@@ -143,6 +143,14 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         return _corporateActionsStorage().actionsByType[_actionType].length;
     }
 
+    function _getCorporateActionIdByTypeIndex(
+        bytes32 _actionType,
+        uint256 _typeIndex
+    ) internal view returns (bytes32 corporateActionId_) {
+        return
+            _corporateActionsStorage().actionsByType[_actionType][_typeIndex];
+    }
+
     function _getCorporateActionIdsByType(
         bytes32 _actionType,
         uint256 _pageIndex,
