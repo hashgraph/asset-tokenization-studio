@@ -33,6 +33,12 @@ interface IBondRead {
         uint8 decimals;
         bool recordDateReached;
     }
+
+    struct CouponAmountFor {
+        uint256 numerator;
+        uint256 denominator;
+        bool recordDateReached;
+    }
     /**
      * @notice Retrieves the bond details
      */
@@ -63,7 +69,7 @@ interface IBondRead {
     function getCouponAmountFor(
         uint256 _couponID,
         address _account
-    ) external view returns (uint256 numerator_, uint256 denominator_);
+    ) external view returns (CouponAmountFor memory couponAmountFor_);
 
     /**
      * @notice Retrieves the total number of coupons set for the bond

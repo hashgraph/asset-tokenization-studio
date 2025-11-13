@@ -51,7 +51,7 @@ abstract contract BondRead is IBondRead, IStaticFunctionSelectors, Common {
         view
         override
         onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
-        returns (uint256 numerator_, uint256 denominator_)
+        returns (CouponAmountFor memory couponAmountFor_)
     {
         return _getCouponAmountFor(_couponID, _account);
     }

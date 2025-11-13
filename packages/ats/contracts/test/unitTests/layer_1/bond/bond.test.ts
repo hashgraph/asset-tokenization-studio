@@ -285,6 +285,7 @@ const couponRate = 50
 const couponRateDecimals = 1
 const couponPeriod = TIME_PERIODS_S.WEEK
 const EMPTY_VC_ID = EMPTY_STRING
+const YEAR_SECONDS = 365 * 24 * 60 * 60
 
 let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
@@ -460,7 +461,7 @@ describe('Bond Tests', () => {
 
     before(async () => {
         // mute | mock console.log
-        console.log = () => {}
+        //console.log = () => {}
         ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
@@ -819,6 +820,10 @@ describe('Bond Tests', () => {
                 const listCount = await bondReadFacet.getCouponCount()
                 const coupon = await bondReadFacet.getCoupon(1)
                 const couponFor = await bondReadFacet.getCouponFor(1, account_A)
+                const couponAmountFor = await bondReadFacet.getCouponAmountFor(
+                    1,
+                    account_A
+                )
                 const couponTotalHolders =
                     await bondReadFacet.getTotalCouponHolders(1)
                 const couponHolders = await bondReadFacet.getCouponHolders(
@@ -847,6 +852,11 @@ describe('Bond Tests', () => {
                 expect(couponFor.recordDateReached).to.equal(false)
                 expect(couponTotalHolders).to.equal(0)
                 expect(couponHolders.length).to.equal(couponTotalHolders)
+                expect(couponAmountFor.recordDateReached).to.equal(
+                    couponFor.recordDateReached
+                )
+                expect(couponAmountFor.numerator).to.equal(0)
+                expect(couponAmountFor.denominator).to.equal(0)
             })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds', async () => {
@@ -898,6 +908,11 @@ describe('Bond Tests', () => {
                     .revokeRole(ISSUER_ROLE, account_C)
 
                 const couponFor = await bondReadFacet.getCouponFor(1, account_A)
+                const couponAmountFor = await bondReadFacet.getCouponAmountFor(
+                    1,
+                    account_A
+                )
+                const bondDetails = await bondReadFacet.getBondDetails()
                 const couponTotalHolders =
                     await bondReadFacet.getTotalCouponHolders(1)
                 const couponHolders = await bondReadFacet.getCouponHolders(
@@ -911,6 +926,23 @@ describe('Bond Tests', () => {
                 expect(couponTotalHolders).to.equal(1)
                 expect(couponHolders.length).to.equal(couponTotalHolders)
                 expect(couponHolders).to.have.members([account_A])
+                expect(couponAmountFor.recordDateReached).to.equal(
+                    couponFor.recordDateReached
+                )
+                expect(couponAmountFor.numerator).to.equal(
+                    couponFor.tokenBalance
+                        .mul(bondDetails.nominalValue)
+                        .mul(couponFor.rate)
+                        .mul(couponFor.period)
+                )
+                expect(couponAmountFor.denominator).to.equal(
+                    BigNumber.from(
+                        10 **
+                            (couponFor.decimals +
+                                bondDetails.nominalValueDecimals +
+                                couponFor.rateDecimals)
+                    ).mul(YEAR_SECONDS)
+                )
             })
 
             it('GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds', async () => {
@@ -965,6 +997,11 @@ describe('Bond Tests', () => {
                     .revokeRole(ISSUER_ROLE, account_C)
 
                 const couponFor = await bondReadFacet.getCouponFor(1, account_A)
+                const couponAmountFor = await bondReadFacet.getCouponAmountFor(
+                    1,
+                    account_A
+                )
+                const bondDetails = await bondReadFacet.getBondDetails()
                 const couponTotalHolders =
                     await bondReadFacet.getTotalCouponHolders(1)
                 const couponHolders = await bondReadFacet.getCouponHolders(
@@ -978,6 +1015,23 @@ describe('Bond Tests', () => {
                 expect(couponTotalHolders).to.equal(1)
                 expect(couponHolders.length).to.equal(couponTotalHolders)
                 expect(couponHolders).to.have.members([account_A])
+                expect(couponAmountFor.recordDateReached).to.equal(
+                    couponFor.recordDateReached
+                )
+                expect(couponAmountFor.numerator).to.equal(
+                    couponFor.tokenBalance
+                        .mul(bondDetails.nominalValue)
+                        .mul(couponFor.rate)
+                        .mul(couponFor.period)
+                )
+                expect(couponAmountFor.denominator).to.equal(
+                    BigNumber.from(
+                        10 **
+                            (couponFor.decimals +
+                                bondDetails.nominalValueDecimals +
+                                couponFor.rateDecimals)
+                    ).mul(YEAR_SECONDS)
+                )
             })
 
             it('GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds', async () => {
@@ -1171,8 +1225,15 @@ describe('Bond Tests', () => {
 
                 // --- Pre: before record date -> tokenBalance should be 0 and not reached
                 const before = await bondReadFacet.getCouponFor(1, account_A)
+                const couponAmountForBefore =
+                    await bondReadFacet.getCouponAmountFor(1, account_A)
                 expect(before.recordDateReached).to.equal(false)
                 expect(before.tokenBalance).to.equal(0)
+                expect(couponAmountForBefore.recordDateReached).to.equal(
+                    before.recordDateReached
+                )
+                expect(couponAmountForBefore.numerator).to.equal(0)
+                expect(couponAmountForBefore.denominator).to.equal(0)
 
                 // Forward time to record date
                 await timeTravelFacet.changeSystemTimestamp(
@@ -1182,8 +1243,28 @@ describe('Bond Tests', () => {
 
                 // --- Post: after record date -> tokenBalance should be sum of balances
                 const couponFor = await bondReadFacet.getCouponFor(1, account_A)
+                const couponAmountForAfter =
+                    await bondReadFacet.getCouponAmountFor(1, account_A)
+                const bondDetails = await bondReadFacet.getBondDetails()
                 expect(couponFor.recordDateReached).to.equal(true)
                 expect(couponFor.tokenBalance).to.equal(totalAmount) // normal+cleared+held+locked+frozen
+                expect(couponAmountForAfter.recordDateReached).to.equal(
+                    couponFor.recordDateReached
+                )
+                expect(couponAmountForAfter.numerator).to.equal(
+                    couponFor.tokenBalance
+                        .mul(bondDetails.nominalValue)
+                        .mul(couponFor.rate)
+                        .mul(couponFor.period)
+                )
+                expect(couponAmountForAfter.denominator).to.equal(
+                    BigNumber.from(
+                        10 **
+                            (couponFor.decimals +
+                                bondDetails.nominalValueDecimals +
+                                couponFor.rateDecimals)
+                    ).mul(YEAR_SECONDS)
+                )
             })
         })
     })

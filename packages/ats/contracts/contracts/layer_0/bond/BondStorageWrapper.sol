@@ -163,19 +163,28 @@ abstract contract BondStorageWrapper is
     function _getCouponAmountFor(
         uint256 _couponID,
         address _account
-    ) internal view returns (uint256 numerator_, uint256 denominator_) {
+    )
+        internal
+        view
+        returns (IBondRead.CouponAmountFor memory couponAmountFor_)
+    {
         IBondRead.CouponFor memory couponFor = _getCouponFor(
             _couponID,
             _account
         );
+
+        if (!couponFor.recordDateReached) return couponAmountFor_;
+
         IBondRead.BondDetailsData memory bondDetails = _getBondDetails();
 
-        numerator_ =
+        couponAmountFor_.recordDateReached = true;
+
+        couponAmountFor_.numerator =
             couponFor.tokenBalance *
             bondDetails.nominalValue *
             couponFor.rate *
             couponFor.period;
-        denominator_ =
+        couponAmountFor_.denominator =
             10 **
                 (couponFor.decimals +
                     bondDetails.nominalValueDecimals +
