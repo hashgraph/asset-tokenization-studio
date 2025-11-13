@@ -20,6 +20,7 @@ import {
   GetProceedRecipientsCountRequest,
   GetProceedRecipientDataRequest,
   GetProceedRecipientsRequest,
+  GetPrincipalForRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
@@ -52,6 +53,7 @@ import {
   GetProceedRecipientsCountRequestFixture,
   GetProceedRecipientDataRequestFixture,
   GetProceedRecipientsRequestFixture,
+  GetPrincipalForRequestFixture,
 } from '@test/fixtures/bond/BondFixture';
 import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import { Security } from '@domain/context/security/Security';
@@ -68,6 +70,7 @@ import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
 import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
 import { BigNumber } from 'ethers';
 import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetPrincipalForQuery } from '@query/bond/get/getPrincipalFor/GetPrincipalForQuery';
 import { GetCouponAmountForQuery } from '@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery';
 import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
 import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
@@ -101,6 +104,7 @@ describe('Bond', () => {
   let getCouponHoldersRequest: GetCouponHoldersRequest;
   let getTotalCouponHoldersRequest: GetTotalCouponHoldersRequest;
   let createTrexSuiteBondRequest: CreateTrexSuiteBondRequest;
+  let getPrincipalForRequest: GetPrincipalForRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -818,6 +822,88 @@ describe('Bond', () => {
 
       await expect(
         BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getPrincipalFor', () => {
+    beforeEach(() => {
+      getPrincipalForRequest = new GetPrincipalForRequest(
+        GetPrincipalForRequestFixture.create(),
+      );
+    });
+    it('should get principal for successfully', async () => {
+      const expectedResponse = {
+        numerator: '10',
+        denominator: '4',
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.getPrincipalFor(getPrincipalForRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetPrincipalForRequest',
+        getPrincipalForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetPrincipalForQuery(
+          getPrincipalForRequest.targetId,
+          getPrincipalForRequest.securityId,
+        ),
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          numerator: expectedResponse.numerator,
+          denominator: expectedResponse.denominator,
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.getPrincipalFor(getPrincipalForRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetPrincipalForRequest',
+        getPrincipalForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetPrincipalForQuery(
+          getPrincipalForRequest.targetId,
+          getPrincipalForRequest.securityId,
+        ),
+      );
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      getPrincipalForRequest = new GetPrincipalForRequest({
+        ...GetPrincipalForRequestFixture.create(),
+        targetId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getPrincipalFor(getPrincipalForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getPrincipalForRequest = new GetPrincipalForRequest({
+        ...GetPrincipalForRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getPrincipalFor(getPrincipalForRequest),
       ).rejects.toThrow(ValidationError);
     });
   });

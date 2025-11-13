@@ -291,6 +291,7 @@ import {
 } from '@domain/context/security/Clearing';
 import { HoldDetails } from '@domain/context/security/Hold';
 import { CouponAmountFor } from '@domain/context/bond/CouponAmountFor';
+import {PrincipalFor} from '@domain/context/bond/PrincipalFor';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -859,6 +860,23 @@ export class RPCQueryAdapter {
       couponAmountFor.numerator.toString(),
       couponAmountFor.denominator.toString(),
       couponAmountFor.recordDateReached
+    );
+  }
+
+  async getPrincipalFor(
+    address: EvmAddress,
+    target: EvmAddress,
+  ): Promise<PrincipalFor> {
+    LogService.logTrace(`Getting Principal for`);
+
+    const principalFor = await this.connect(
+      BondRead__factory,
+      address.toString(),
+    ).getPrincipalFor(target.toString());
+
+    return new PrincipalFor(
+      principalFor.numerator.toString(),
+      principalFor.denominator.toString(),
     );
   }
 

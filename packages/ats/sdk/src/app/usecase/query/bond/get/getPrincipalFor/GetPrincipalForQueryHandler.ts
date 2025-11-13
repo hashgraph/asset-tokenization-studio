@@ -203,60 +203,51 @@
 
 */
 
-import AccountViewModel from './AccountViewModel';
-import BalanceViewModel from './BalanceViewModel';
-import ContractViewModel from './ContractViewModel';
-import DividendsForViewModel from './DividendsForViewModel';
-import DividendsViewModel from './DividendsViewModel';
-import CouponForViewModel from './CouponForViewModel';
-import CouponAmountForViewModel from './CouponAmountForViewModel';
-import PrincipalForViewModel from './PrincipalForViewModel';
-import CouponViewModel from './CouponViewModel';
-import SecurityViewModel from './SecurityViewModel';
-import TransactionResultViewModel from './TransactionResultViewModel';
-import BondDetailsViewModel from './BondDetailsViewModel';
-import EquityDetailsViewModel from './EquityDetailsViewModel';
-import CouponDetailsViewModel from './CouponDetailsViewModel';
-import MaxSupplyViewModel from './MaxSupplyViewModel';
-import VotingRightsForViewModel from './VotingRightsForViewModel';
-import VotingRightsViewModel from './VotingRightsViewModel';
-import RegulationViewModel from './RegulationViewModel';
-import LockViewModel from './LockViewModel';
-import ConfigInfoViewModel from './ConfigInfoViewModel';
-import ScheduledBalanceAdjustmentViewModel from './ScheduledBalanceAdjustmentViewModel';
-import HoldViewModel from './HoldViewModel';
-import KycViewModel from './KycViewModel';
-import KycAccountDataViewModel from './KycAccountDataViewModel';
-import ClearingCreateHoldViewModel from './ClearingCreateHoldViewModel';
-import ClearingRedeemViewModel from './ClearingRedeemViewModel';
-import ClearingTransferViewModel from './ClearingTransferViewModel';
+import { IQueryHandler } from '@core/query/QueryHandler';
+import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
+import { lazyInject } from '@core/decorator/LazyInjectDecorator';
+import {
+  GetPrincipalForQuery,
+  GetPrincipalForQueryResponse,
+} from './GetPrincipalForQuery';
+import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import AccountService from '@service/account/AccountService';
+import { GetPrincipalForQueryError } from './error/GetPrincipalForQueryError';
 
-export {
-  AccountViewModel,
-  BalanceViewModel,
-  ContractViewModel,
-  DividendsForViewModel,
-  DividendsViewModel,
-  CouponForViewModel,
-  CouponAmountForViewModel,
-  PrincipalForViewModel,
-  CouponViewModel,
-  SecurityViewModel,
-  TransactionResultViewModel,
-  BondDetailsViewModel,
-  EquityDetailsViewModel,
-  CouponDetailsViewModel,
-  MaxSupplyViewModel,
-  VotingRightsForViewModel,
-  VotingRightsViewModel,
-  RegulationViewModel,
-  LockViewModel,
-  ConfigInfoViewModel,
-  ScheduledBalanceAdjustmentViewModel,
-  HoldViewModel,
-  KycViewModel,
-  KycAccountDataViewModel,
-  ClearingCreateHoldViewModel,
-  ClearingRedeemViewModel,
-  ClearingTransferViewModel,
-};
+@QueryHandler(GetPrincipalForQuery)
+export class GetPrincipalForQueryHandler
+  implements IQueryHandler<GetPrincipalForQuery>
+{
+  constructor(
+    @lazyInject(RPCQueryAdapter)
+    private readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
+    @lazyInject(ContractService)
+    private readonly contractService: ContractService,
+  ) {}
+
+  async execute(
+    query: GetPrincipalForQuery,
+  ): Promise<GetPrincipalForQueryResponse> {
+    try {
+      const { targetId, securityId } = query;
+
+      const securityEvmAddress: EvmAddress =
+        await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress =
+        await this.accountService.getAccountEvmAddress(targetId);
+
+      const res = await this.queryAdapter.getPrincipalFor(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
+
+      return new GetPrincipalForQueryResponse(res.numerator, res.denominator);
+    } catch (error) {
+      throw new GetPrincipalForQueryError(error as Error);
+    }
+  }
+}

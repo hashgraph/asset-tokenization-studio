@@ -17,6 +17,7 @@ import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
 import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
 import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
 import { GetCouponAmountForQuery } from '@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery';
+import { GetPrincipalForQuery } from '@query/bond/get/getPrincipalFor/GetPrincipalForQuery';
 import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
 import { HederaId } from '@domain/context/shared/HederaId';
 import CreateBondRequest from '@port/in/request/bond/CreateBondRequest';
@@ -30,6 +31,7 @@ import { faker } from '@faker-js/faker/.';
 import GetBondDetailsRequest from '@port/in/request/bond/GetBondDetailsRequest';
 import SetCouponRequest from '@port/in/request/bond/SetCouponRequest';
 import GetCouponForRequest from '@port/in/request/bond/GetCouponForRequest';
+import GetPrincipalForRequest from '@port/in/request/bond/GetPrincipalForRequest';
 import GetCouponRequest from '@port/in/request/bond/GetCouponRequest';
 import GetAllCouponsRequest from '@port/in/request/bond/GetAllCouponsRequest';
 import UpdateMaturityDateRequest from '@port/in/request/bond/UpdateMaturityDateRequest';
@@ -231,6 +233,13 @@ export const GetCouponAmountForQueryFixture =
     query.couponId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   });
 
+export const GetPrincipalForQueryFixture = createFixture<GetPrincipalForQuery>(
+  (query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+  },
+);
+
 export const GetBondDetailsQueryFixture = createFixture<GetBondDetailsQuery>(
   (query) => {
     query.bondId.as(() => new HederaId(HederaIdPropsFixture.create().value));
@@ -397,6 +406,12 @@ export const GetCouponForRequestFixture = createFixture<GetCouponForRequest>(
     request.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
   },
 );
+
+export const GetPrincipalForRequestFixture =
+  createFixture<GetPrincipalForRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
 
 export const GetCouponRequestFixture = createFixture<GetCouponRequest>(
   (request) => {
