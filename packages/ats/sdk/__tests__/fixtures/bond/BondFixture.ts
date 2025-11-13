@@ -16,6 +16,7 @@ import { BondDetails } from '@domain/context/bond/BondDetails';
 import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
 import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
 import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetCouponAmountForQuery } from '@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery';
 import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
 import { HederaId } from '@domain/context/shared/HederaId';
 import CreateBondRequest from '@port/in/request/bond/CreateBondRequest';
@@ -222,6 +223,13 @@ export const GetCouponForQueryFixture = createFixture<GetCouponForQuery>(
     query.couponId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   },
 );
+
+export const GetCouponAmountForQueryFixture =
+  createFixture<GetCouponAmountForQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+    query.couponId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
 
 export const GetBondDetailsQueryFixture = createFixture<GetBondDetailsQuery>(
   (query) => {

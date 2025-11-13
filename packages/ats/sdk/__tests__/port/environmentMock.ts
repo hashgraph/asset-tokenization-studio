@@ -961,6 +961,22 @@ jest.mock('@port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
+  singletonInstance.getCouponAmountFor = jest.fn(
+    async (address: EvmAddress, target: EvmAddress, coupon: number) => {
+      const couponsBalances = couponsFor.get(coupon);
+
+      const numerator = BigNumber.from(5);
+      const denominator = BigNumber.from(3);
+      const recordDateReached = true;
+
+      return {
+        numerator,
+        denominator,
+        recordDateReached,
+      };
+    },
+  );
+
   singletonInstance.getCoupon = jest.fn(
     async (address: EvmAddress, coupon: number) => {
       if (coupon > coupons.length) return undefined;

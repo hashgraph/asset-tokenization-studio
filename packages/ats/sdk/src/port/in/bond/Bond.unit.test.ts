@@ -68,6 +68,7 @@ import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
 import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
 import { BigNumber } from 'ethers';
 import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetCouponAmountForQuery } from '@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery';
 import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
 import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
@@ -719,6 +720,97 @@ describe('Bond', () => {
       await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(
         ValidationError,
       );
+    });
+  });
+
+  describe('getCouponAmountFor', () => {
+    getCouponForRequest = new GetCouponForRequest(
+      GetCouponForRequestFixture.create(),
+    );
+    it('should get coupon for successfully', async () => {
+      const expectedResponse = {
+        payload: new BigDecimal(BigNumber.from(10)),
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.getCouponAmountFor(getCouponForRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetCouponAmountForRequest',
+        getCouponForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetCouponAmountForQuery(
+          getCouponForRequest.targetId,
+          getCouponForRequest.securityId,
+          getCouponForRequest.couponId,
+        ),
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          value: expectedResponse.payload.toString(),
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetCouponForRequest',
+        getCouponForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetCouponAmountForQuery(
+          getCouponForRequest.targetId,
+          getCouponForRequest.securityId,
+          getCouponForRequest.couponId,
+        ),
+      );
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      getCouponForRequest = new GetCouponForRequest({
+        ...GetCouponForRequestFixture.create(),
+        targetId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getCouponForRequest = new GetCouponForRequest({
+        ...GetCouponForRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if couponId is invalid', async () => {
+      getCouponForRequest = new GetCouponForRequest({
+        ...GetCouponForRequestFixture.create(),
+        couponId: 0,
+      });
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow(ValidationError);
     });
   });
 

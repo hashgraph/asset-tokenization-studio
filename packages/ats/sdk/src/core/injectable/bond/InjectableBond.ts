@@ -205,6 +205,7 @@
 
 import { TOKENS } from '../Tokens';
 import { GetCouponForQueryHandler } from '@query/bond/coupons/getCouponFor/GetCouponForQueryHandler';
+import { GetCouponAmountForQueryHandler } from '@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQueryHandler';
 import { GetCouponQueryHandler } from '@query/bond/coupons/getCoupon/GetCouponQueryHandler';
 import { GetCouponCountQueryHandler } from '@query/bond/coupons/getCouponCount/GetCouponCountQueryHandler';
 import { UpdateMaturityDateCommandHandler } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommandHandler';
@@ -238,6 +239,10 @@ export const QUERY_HANDLERS_BOND = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetCouponForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetCouponAmountForQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
