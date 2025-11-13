@@ -43,6 +43,19 @@ abstract contract BondRead is IBondRead, IStaticFunctionSelectors, Common {
         return _getCouponFor(_couponID, _account);
     }
 
+    function getCouponAmountFor(
+        uint256 _couponID,
+        address _account
+    )
+        external
+        view
+        override
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
+        returns (uint256 numerator_, uint256 denominator_)
+    {
+        return _getCouponAmountFor(_couponID, _account);
+    }
+
     function getCouponCount()
         external
         view

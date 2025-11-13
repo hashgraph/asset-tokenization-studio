@@ -160,6 +160,29 @@ abstract contract BondStorageWrapper is
         }
     }
 
+    function _getCouponAmountFor(
+        uint256 _couponID,
+        address _account
+    ) internal view returns (uint256 numerator_, uint256 denominator_) {
+        IBondRead.CouponFor memory couponFor = _getCouponFor(
+            _couponID,
+            _account
+        );
+        IBondRead.BondDetailsData memory bondDetails = _getBondDetails();
+
+        numerator_ =
+            couponFor.tokenBalance *
+            bondDetails.nominalValue *
+            couponFor.rate *
+            couponFor.period;
+        denominator_ =
+            10 **
+                (couponFor.decimals +
+                    bondDetails.nominalValueDecimals +
+                    couponFor.rateDecimals) *
+            365 days;
+    }
+
     function _getCouponCount() internal view returns (uint256 couponCount_) {
         return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }

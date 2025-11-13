@@ -58,6 +58,14 @@ interface TRexIBondRead {
     ) external view returns (CouponFor memory couponFor_);
 
     /**
+     * @notice Retrieves coupon amount numerator and denominator for a specific account and coupon ID
+     */
+    function getCouponAmountFor(
+        uint256 _couponID,
+        address _account
+    ) external view returns (uint256 numerator_, uint256 denominator_);
+
+    /**
      * @notice Retrieves the total number of coupons set for the bond
      * @dev Pending coupons are included in the count
      */
