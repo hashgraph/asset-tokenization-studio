@@ -230,7 +230,7 @@ const NETWORK_ENV_PREFIX_SEPARATOR_REGEX = /-/g;
  *
  * Network Types:
  * - hardhat: Hardhat's in-memory test network (ephemeral, no persistence)
- * - localhost: Generic local Ethereum node (e.g., Hardhat node, Ganache, Anvil)
+ * - local: Generic local Ethereum node (e.g., Hardhat node, Ganache, Anvil)
  * - hedera-local: Local Hedera node running in Docker
  * - hedera-previewnet: Hedera previewnet (public test network)
  * - hedera-testnet: Hedera testnet (primary test network)
@@ -238,7 +238,7 @@ const NETWORK_ENV_PREFIX_SEPARATOR_REGEX = /-/g;
  */
 export const NETWORKS = [
   "hardhat",
-  "localhost",
+  "local",
   "hedera-local",
   "hedera-previewnet",
   "hedera-testnet",
@@ -262,7 +262,7 @@ const formatNetworkEnvPrefix = (network: Network): string =>
  * @deprecated Old network names. Use new names from NETWORKS instead.
  */
 export const NETWORK_ALIASES: Record<string, Network> = {
-  local: "localhost",
+  localhost: "local",
   previewnet: "hedera-previewnet",
   testnet: "hedera-testnet",
   mainnet: "hedera-mainnet",
@@ -424,7 +424,7 @@ export default class Configuration {
           jsonRpc: Configuration._getEnvironmentVariable({
             name: `${network.toUpperCase().replace(/-/g, "_")}_JSON_RPC_ENDPOINT`,
             defaultValue:
-              network === "localhost"
+              network === "local"
                 ? "http://127.0.0.1:8545"
                 : network === "hedera-local"
                   ? "http://127.0.0.1:7546"
@@ -435,7 +435,7 @@ export default class Configuration {
           mirror: Configuration._getEnvironmentVariable({
             name: `${network.toUpperCase().replace(/-/g, "_")}_MIRROR_NODE_ENDPOINT`,
             defaultValue:
-              network === "localhost"
+              network === "local"
                 ? ""
                 : network === "hedera-local"
                   ? "http://127.0.0.1:5600"

@@ -4,7 +4,7 @@
  * Network-specific configuration for ATS deployment system.
  *
  * Provides optimized settings for different networks:
- * - Local networks (hardhat, localhost): Fast, minimal retries
+ * - Local networks (hardhat, local, hedera-local): Fast, minimal retries
  * - Hedera networks (previewnet, testnet, mainnet): Balanced reliability and speed
  *
  * @module infrastructure/networkConfig
@@ -53,13 +53,32 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
   },
 
   /**
-   * Localhost Network (local node)
-   * - Minimal confirmations, light retry logic
+   * Local Network (Hardhat node, Anvil, Ganache)
+   * - External local node but still instant transactions
+   * - Minimal confirmations, no retries needed
    * - Verification enabled for closer to production behavior
    */
-  localhost: {
+  local: {
     confirmations: 1,
-    timeout: 30_000, // 30 seconds
+    timeout: 10_000, // 10 seconds (should rarely timeout)
+    retryOptions: {
+      maxRetries: 0,
+      baseDelay: 0,
+      maxDelay: 0,
+      logRetries: false,
+    },
+    verifyDeployment: true,
+  },
+
+  /**
+   * Hedera Local Node
+   * - Local Hedera/Hiero node running in Docker
+   * - Similar to local but with Hedera-specific behavior
+   * - Minimal confirmations with light retry logic
+   */
+  "hedera-local": {
+    confirmations: 1,
+    timeout: 60_000, // 60 seconds
     retryOptions: {
       maxRetries: 1, // 2 total attempts
       baseDelay: 1000, // 1 second
@@ -78,10 +97,10 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
    */
   "hedera-previewnet": {
     confirmations: 2,
-    timeout: 30_000, // 30 seconds per attempt
+    timeout: 120_000, // 2 minutes per attempt
     retryOptions: {
       maxRetries: 2, // 3 total attempts
-      baseDelay: 1000, // 1 second base
+      baseDelay: 1000,
       maxDelay: 4000, // 4 seconds cap (1s → 2s → 4s delays)
       logRetries: true,
     },
@@ -97,10 +116,10 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
    */
   "hedera-testnet": {
     confirmations: 2,
-    timeout: 30_000, // 30 seconds per attempt
+    timeout: 120_000, // 2 minutes per attempt
     retryOptions: {
-      maxRetries: 2, // 3 total attempts
-      baseDelay: 1000, // 1 second base
+      maxRetries: 2, // 2 retries after initial attempt (3 total attempts)
+      baseDelay: 1000,
       maxDelay: 4000, // 4 seconds cap (1s → 2s → 4s delays)
       logRetries: true,
     },
@@ -116,10 +135,10 @@ export const DEPLOYMENT_CONFIGS: Record<string, DeploymentConfig> = {
    */
   "hedera-mainnet": {
     confirmations: 3,
-    timeout: 45_000, // 45 seconds per attempt
+    timeout: 60_000 * 5, // 5 minutes per attempt
     retryOptions: {
-      maxRetries: 3, // 4 total attempts
-      baseDelay: 2000, // 2 seconds base
+      maxRetries: 3, // 3 retries after initial attempt (4 total attempts)
+      baseDelay: 2000,
       maxDelay: 8000, // 8 seconds cap (2s → 4s → 8s → 8s delays)
       logRetries: true,
     },
@@ -151,11 +170,12 @@ export function getDeploymentConfig(network: string): DeploymentConfig {
 }
 
 /**
- * Check if network is a local/test environment.
- * Local networks don't need retry or verification.
+ * Check if network is a simulated local environment.
+ * These networks are instant and don't need retries (hardhat, local).
+ * Note: hedera-local is excluded - it's a real network running locally.
  *
  * @param network - Network name
- * @returns true if network is local (hardhat/localhost)
+ * @returns true if network is local (hardhat/local only - not hedera-local)
  *
  * @example
  * ```typescript
@@ -164,5 +184,5 @@ export function getDeploymentConfig(network: string): DeploymentConfig {
  * ```
  */
 export function isLocalNetwork(network: string): boolean {
-  return network === "hardhat" || network === "localhost";
+  return network === "hardhat" || network === "local";
 }

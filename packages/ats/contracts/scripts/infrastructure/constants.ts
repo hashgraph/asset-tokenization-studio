@@ -20,12 +20,12 @@ import { ethers } from "ethers";
  *
  * Network naming convention:
  * - `hardhat`: Hardhat's in-memory test network
- * - `localhost`: Generic local Ethereum-compatible node (port 8545)
+ * - `local`: Generic local Ethereum-compatible node (port 8545)
  * - `hedera-*`: Hedera networks with prefix for clear identification
  */
 export const NETWORKS = [
   "hardhat",
-  "localhost",
+  "local",
   "hedera-local",
   "hedera-previewnet",
   "hedera-testnet",
@@ -43,7 +43,7 @@ export type Network = (typeof NETWORKS)[number];
  * @deprecated Use new network names instead
  */
 export const NETWORK_ALIASES: Record<string, Network> = {
-  local: "localhost",
+  localhost: "local",
   previewnet: "hedera-previewnet",
   testnet: "hedera-testnet",
   mainnet: "hedera-mainnet",
@@ -59,7 +59,7 @@ export const CHAIN_IDS: Record<string, number> = {
   "hedera-testnet": 296,
   "hedera-previewnet": 297,
   "hedera-local": 1337,
-  localhost: 1337,
+  local: 1337,
   hardhat: 31337,
 };
 
@@ -71,7 +71,7 @@ export const DEFAULT_ENDPOINTS = {
     jsonRpc: "",
     mirror: "",
   },
-  localhost: {
+  local: {
     jsonRpc: "http://127.0.0.1:8545",
     mirror: "",
   },
@@ -98,35 +98,26 @@ export const DEFAULT_ENDPOINTS = {
 // ============================================================================
 
 /**
- * Default artifacts directory paths for different build tools.
- */
-export const ARTIFACTS_PATHS = {
-  hardhat: "./artifacts",
-  foundry: "./out",
-} as const;
-
-/**
  * Default gas multiplier for transaction overrides.
  */
 export const DEFAULT_GAS_MULTIPLIER = 1.2;
 
 /**
- * Default timeout for deployment operations (milliseconds).
+ * Default timeout for contract transactions (milliseconds).
  */
-export const DEFAULT_DEPLOYMENT_TIMEOUT = 60_000;
+export const DEFAULT_TRANSACTION_TIMEOUT = 60_000;
 
 /**
- * Default timeout for contract transactions (milliseconds).
- * Reduced from 120s to 30s for faster failure feedback.
+ * Default timeout for deployment operations (milliseconds).
  */
-export const DEFAULT_TRANSACTION_TIMEOUT = 30_000;
+export const DEFAULT_DEPLOYMENT_TIMEOUT = DEFAULT_TRANSACTION_TIMEOUT;
 
 /**
  * Block confirmations to wait for deployment verification.
  */
 export const DEFAULT_CONFIRMATIONS = {
   hardhat: 0,
-  localhost: 1,
+  local: 1,
   "hedera-local": 1,
   "hedera-previewnet": 2,
   "hedera-testnet": 2,
@@ -144,6 +135,27 @@ export const MAX_RETRIES = 3;
 export const RETRY_DELAY = 2000;
 
 /**
+ * Default number of facets to process per batch during BLR configuration.
+ *
+ * Smaller batches reduce gas per transaction, preventing transactions from
+ * exceeding block gas limits and improving reliability on congested networks.
+ *
+ * This default can be overridden:
+ * - Via `BATCH_SIZE` environment variable
+ * - Via function parameters in createEquityConfiguration/createBondConfiguration
+ *
+ * @example
+ * ```typescript
+ * // Use default (15 facets per batch)
+ * await createEquityConfiguration(blr, facetAddresses);
+ *
+ * // Override with custom batch size
+ * await createEquityConfiguration(blr, facetAddresses, false, false, 20);
+ * ```
+ */
+export const DEFAULT_BATCH_SIZE = 15;
+
+/**
  * Gas limits for various contract operations.
  *
  * These values provide explicit gas limits for operations that may fail
@@ -156,7 +168,7 @@ export const RETRY_DELAY = 2000;
  * ```
  */
 export const GAS_LIMIT = {
-  max: 30_000_000,
+  max: 15_000_000,
   default: 3_000_000,
   low: 1_000_000,
   high: 10_000_000,
@@ -170,7 +182,7 @@ export const GAS_LIMIT = {
   businessLogicResolver: {
     getStaticResolverKey: 60_000,
     registerBusinessLogics: 7_800_000,
-    createConfiguration: 26_000_000,
+    createConfiguration: 15_000_000,
   },
 } as const;
 

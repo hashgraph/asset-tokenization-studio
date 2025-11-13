@@ -13,15 +13,15 @@
  *   USE_TIMETRAVEL - Enable TimeTravel mode (default: false)
  *
  * Usage:
- *   NETWORK=hedera-testnet npx ts-node scripts/cli/standalone.ts
+ *   npm run deploy
  *   or
- *   npm run deploy:standalone
+ *   npm run deploy:hedera:testnet
  *
  * @module cli/standalone
  */
 
 import { deploySystemWithNewBlr } from "../workflows/deploySystemWithNewBlr";
-import { getAllNetworks, getNetworkConfig } from "@scripts/infrastructure";
+import { getAllNetworks, getNetworkConfig, DEFAULT_BATCH_SIZE } from "@scripts/infrastructure";
 import { Wallet, providers } from "ethers";
 
 /**
@@ -32,7 +32,7 @@ async function main() {
   const network = process.env.NETWORK || "hedera-testnet";
   const useTimeTravel = process.env.USE_TIMETRAVEL === "true";
   const partialBatchDeploy = process.env.PARTIAL_BATCH_DEPLOY === "true";
-  const batchSize = process.env.BATCH_SIZE ? parseInt(process.env.BATCH_SIZE) : 2;
+  const batchSize = process.env.BATCH_SIZE ? parseInt(process.env.BATCH_SIZE) : DEFAULT_BATCH_SIZE;
 
   console.log(`🚀 Starting ATS deployment (standalone mode)`);
   console.log("=".repeat(60));

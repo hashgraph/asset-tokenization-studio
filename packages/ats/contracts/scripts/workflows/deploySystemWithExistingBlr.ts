@@ -140,6 +140,9 @@ export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
   /** Whether to create configurations (default: true) */
   createConfigurations?: boolean;
 
+  /** Number of facets per batch for configuration creation (default: DEFAULT_BATCH_SIZE) */
+  batchSize?: number;
+
   /** Existing ProxyAdmin address (optional, will deploy new one if not provided) */
   existingProxyAdminAddress?: string;
 
@@ -210,6 +213,7 @@ export async function deploySystemWithExistingBlr(
     deployFacets: shouldDeployFacets = true,
     deployFactory: shouldDeployFactory = true,
     createConfigurations: shouldCreateConfigurations = true,
+    batchSize, // Use defaults from createEquityConfiguration/createBondConfiguration if not provided
     existingProxyAdminAddress,
     confirmations = networkConfig.confirmations,
     enableRetry = networkConfig.retryOptions.maxRetries > 0,
@@ -218,6 +222,7 @@ export async function deploySystemWithExistingBlr(
     autoResume = true,
     ignoreCheckpoint = false,
     deleteOnSuccess = false,
+    checkpointDir,
   } = options;
 
   // Validate BLR address
@@ -238,7 +243,7 @@ export async function deploySystemWithExistingBlr(
   info("═".repeat(60));
 
   // Initialize checkpoint manager
-  const checkpointManager = new CheckpointManager();
+  const checkpointManager = new CheckpointManager(checkpointDir);
   let checkpoint: DeploymentCheckpoint | null = null;
 
   // Check for existing checkpoints if not explicitly ignoring
@@ -546,7 +551,7 @@ export async function deploySystemWithExistingBlr(
         } else {
           info("\n💼 Step 5a/6: Creating Equity configuration...");
 
-          equityConfig = await createEquityConfiguration(blrContract, facetAddresses, useTimeTravel);
+          equityConfig = await createEquityConfiguration(blrContract, facetAddresses, useTimeTravel, false, batchSize);
 
           if (!equityConfig.success) {
             throw new Error(`Equity config creation failed: ${equityConfig.error} - ${equityConfig.message}`);
@@ -583,7 +588,7 @@ export async function deploySystemWithExistingBlr(
         } else {
           info("\n🏦 Step 5b/6: Creating Bond configuration...");
 
-          bondConfig = await createBondConfiguration(blrContract, facetAddresses, useTimeTravel);
+          bondConfig = await createBondConfiguration(blrContract, facetAddresses, useTimeTravel, false, batchSize);
 
           if (!bondConfig.success) {
             throw new Error(`Bond config creation failed: ${bondConfig.error} - ${bondConfig.message}`);

@@ -253,9 +253,9 @@ const config: HardhatUserConfig = {
       blockGasLimit: 30_000_000,
       hardfork: "cancun",
     },
-    localhost: {
-      url: Configuration.endpoints.localhost.jsonRpc,
-      accounts: Configuration.privateKeys.localhost,
+    local: {
+      url: Configuration.endpoints.local.jsonRpc,
+      accounts: Configuration.privateKeys.local,
       timeout: 60_000,
     },
     "hedera-local": {

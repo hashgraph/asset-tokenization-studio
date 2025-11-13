@@ -15,6 +15,7 @@
 import { BusinessLogicResolver } from "@contract-types";
 import {
   DEFAULT_TRANSACTION_TIMEOUT,
+  DEFAULT_BATCH_SIZE,
   OperationResult,
   validateBytes32,
   extractRevertReason,
@@ -207,19 +208,27 @@ function createBatchFacetConfigurations(facetIdList: string[], facetVersionList:
  * @param facetVersionList - Array of corresponding facet versions
  * @param blrContract - BusinessLogicResolver contract instance
  * @param partialBatchDeploy - If true, all batches are marked as non-final
+ * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE). Smaller batches = lower gas per transaction.
  * @param gasLimit - Optional gas limit override
  * @returns Promise that resolves when all batches are processed
  *
  * @example
  * ```typescript
+ * // Use default batch size (DEFAULT_BATCH_SIZE)
  * await processFacetLists(
  *   '0x123...', // config ID
- *   ['AccessControlFacet', 'KycFacet'], // facet IDs
- *   [1, 1], // versions
+ *   facetIds, // 44 facet IDs
+ *   versions, // versions
  *   blrContract, // contract instance
- *   false, // complete deployment
- *   5000000 // gas limit
+ *   false // complete deployment
  * )
+ * // Results in: 3 batches of 15, 15, 14 facets
+ *
+ * // Override batch size
+ * await processFacetLists(
+ *   '0x123...', configIds, versions, blrContract, false, 20
+ * )
+ * // Results in: 3 batches of 20, 20, 4 facets
  * ```
  */
 export async function processFacetLists(
@@ -228,16 +237,22 @@ export async function processFacetLists(
   facetVersionList: number[],
   blrContract: Contract,
   partialBatchDeploy: boolean,
-  batchSize: number,
+  batchSize: number = DEFAULT_BATCH_SIZE,
   gasLimit?: number,
 ): Promise<void> {
   if (facetIdList.length !== facetVersionList.length) {
     throw new Error("facetIdList and facetVersionList must have the same length");
   }
 
-  const chunkSize = Math.ceil(facetIdList.length / batchSize);
+  // Use batchSize directly as "facets per batch" (not "number of batches")
+  // This allows intuitive configuration: batchSize=15 means "15 facets per batch"
+  const chunkSize = batchSize;
 
   for (let i = 0; i < facetIdList.length; i += chunkSize) {
+    // Add delay between batches to prevent RPC node overload (skip first batch)
+    if (i > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
     const batchIds = facetIdList.slice(i, i + chunkSize);
     const batchVersions = facetVersionList.slice(i, i + chunkSize);
     const batch = createBatchFacetConfigurations(batchIds, batchVersions);
@@ -388,14 +403,14 @@ export async function createBatchConfiguration(
     /** Whether this is a partial batch deployment (all batches marked as non-final) */
     partialBatchDeploy?: boolean;
 
-    /** Batch size for partial deployments */
+    /** Number of facets per batch (default: DEFAULT_BATCH_SIZE) */
     batchSize?: number;
 
     /** Optional gas limit override */
     gasLimit?: number;
   },
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  const { configurationId, facets, partialBatchDeploy = false, batchSize = 2, gasLimit } = options;
+  const { configurationId, facets, partialBatchDeploy = false, batchSize = DEFAULT_BATCH_SIZE, gasLimit } = options;
 
   const { info } = await import("@scripts/infrastructure");
   const { ok, err } = await import("@scripts/infrastructure");

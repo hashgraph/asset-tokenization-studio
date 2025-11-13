@@ -159,6 +159,7 @@ export interface DeploymentCheckpoint {
     saveOutput?: boolean;
     outputPath?: string;
     partialBatchDeploy?: boolean;
+    /** Number of facets per batch (default: DEFAULT_BATCH_SIZE) */
     batchSize?: number;
 
     // existingBlr workflow options
@@ -226,4 +227,20 @@ export interface ResumeOptions {
    * @default false (keep for historical reference)
    */
   deleteOnSuccess?: boolean;
+
+  /**
+   * Custom checkpoint directory path.
+   *
+   * By default, checkpoints are saved in node_modules which gets wiped on npm install/ci.
+   * Specify a persistent directory to preserve checkpoints across installations.
+   *
+   * Recommended: './deployments/.checkpoints' at project root (not inside node_modules)
+   *
+   * ⚠️ WARNING: Directories inside node_modules will be deleted on npm install.
+   *
+   * @default 'node_modules/@hashgraph/asset-tokenization-contracts/build/deployments/.checkpoints'
+   * @example './deployments/.checkpoints'
+   * @example '/tmp/ats-deployments/.checkpoints'
+   */
+  checkpointDir?: string;
 }

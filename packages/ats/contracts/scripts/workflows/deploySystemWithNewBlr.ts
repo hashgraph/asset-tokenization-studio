@@ -27,6 +27,7 @@ import {
   error as logError,
   fetchHederaContractId,
   getDeploymentConfig,
+  DEFAULT_BATCH_SIZE,
   CheckpointManager,
   type DeploymentCheckpoint,
   type ResumeOptions,
@@ -222,7 +223,7 @@ export async function deploySystemWithNewBlr(
     useTimeTravel = false,
     saveOutput = true,
     partialBatchDeploy = false,
-    batchSize = 2,
+    batchSize = DEFAULT_BATCH_SIZE,
     outputPath,
     confirmations = networkConfig.confirmations,
     enableRetry = networkConfig.retryOptions.maxRetries > 0,
@@ -231,6 +232,7 @@ export async function deploySystemWithNewBlr(
     autoResume = true,
     ignoreCheckpoint = false,
     deleteOnSuccess = false,
+    checkpointDir,
   } = options;
 
   const startTime = Date.now();
@@ -247,7 +249,7 @@ export async function deploySystemWithNewBlr(
   info("═".repeat(60));
 
   // Initialize checkpoint manager
-  const checkpointManager = new CheckpointManager();
+  const checkpointManager = new CheckpointManager(checkpointDir);
   let checkpoint: DeploymentCheckpoint | null = null;
 
   // Check for existing checkpoints if not explicitly ignoring

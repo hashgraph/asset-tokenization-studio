@@ -31,7 +31,8 @@ This README provides comprehensive reference documentation for the deployment sy
 | ---------------------------------------------------- | ------------------------ | --------------------------- |
 | `npm run deploy:hardhat -- --network hardhat`        | In-memory testing        | Hardhat project             |
 | `npm run deploy:hardhat -- --network hedera-testnet` | Testnet deployment       | Hardhat + `.env`            |
-| `npm run deploy:standalone`                          | Standalone deployment    | Compiled artifacts + `.env` |
+| `npm run deploy`                                     | Standalone deployment    | Compiled artifacts + `.env` |
+| `npm run deploy:hedera:testnet`                      | Testnet shortcut         | `.env` configured           |
 | `npm run generate:registry`                          | Update contract metadata | Contracts compiled          |
 
 ---
@@ -518,11 +519,11 @@ Check the output file in `deployments/{network}_{timestamp}.json`:
 
 The deployment system supports three modes:
 
-| Mode           | Entry Point                            | Signer Source         | Use Case                                  | Command                                      |
-| -------------- | -------------------------------------- | --------------------- | ----------------------------------------- | -------------------------------------------- |
-| **Hardhat**    | [cli/hardhat.ts](cli/hardhat.ts)       | `ethers.getSigners()` | Hardhat project deployment                | `npm run deploy:hardhat -- --network <name>` |
-| **Standalone** | [cli/standalone.ts](cli/standalone.ts) | `ethers.Wallet`       | No Hardhat dependency, ~3x faster startup | `npm run deploy:standalone`                  |
-| **Module**     | Import in your code                    | Any ethers.js Signer  | Custom scripts, programmatic deployment   | See example below                            |
+| Mode           | Entry Point                            | Signer Source         | Use Case                                  | Command                                             |
+| -------------- | -------------------------------------- | --------------------- | ----------------------------------------- | --------------------------------------------------- |
+| **Hardhat**    | [cli/hardhat.ts](cli/hardhat.ts)       | `ethers.getSigners()` | Hardhat project deployment                | `npm run deploy:hardhat -- --network <name>`        |
+| **Standalone** | [cli/standalone.ts](cli/standalone.ts) | `ethers.Wallet`       | No Hardhat dependency, ~3x faster startup | `npm run deploy` or `npm run deploy:hedera:testnet` |
+| **Module**     | Import in your code                    | Any ethers.js Signer  | Custom scripts, programmatic deployment   | See example below                                   |
 
 ### Import as Module
 

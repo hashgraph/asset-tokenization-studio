@@ -18,6 +18,7 @@ import {
   ConfigurationError,
   createBatchConfiguration,
   OperationResult,
+  DEFAULT_BATCH_SIZE,
 } from "@scripts/infrastructure";
 import { BOND_CONFIG_ID, atsRegistry } from "@scripts/domain";
 
@@ -137,7 +138,7 @@ export async function createBondConfiguration(
   facetAddresses: Record<string, string>,
   useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
-  batchSize: number = 2,
+  batchSize: number = DEFAULT_BATCH_SIZE,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Get facet names based on time travel mode
   // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions

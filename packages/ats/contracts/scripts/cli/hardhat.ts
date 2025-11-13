@@ -17,7 +17,7 @@
  */
 
 import { deploySystemWithNewBlr } from "../workflows/deploySystemWithNewBlr";
-import { getNetworkConfig, getAllNetworks } from "@scripts/infrastructure";
+import { getNetworkConfig, getAllNetworks, DEFAULT_BATCH_SIZE } from "@scripts/infrastructure";
 
 /**
  * Main deployment function for Hardhat environment.
@@ -57,8 +57,8 @@ async function main() {
   // Check for PartialBatchDeploy mode from environment
   const partialBatchDeploy = process.env.PARTIAL_BATCH_DEPLOY === "true";
 
-  // Get batch size from environment or default to 2
-  const batchSize = process.env.BATCH_SIZE ? parseInt(process.env.BATCH_SIZE) : 2;
+  // Get batch size from environment or use DEFAULT_BATCH_SIZE constant
+  const batchSize = process.env.BATCH_SIZE ? parseInt(process.env.BATCH_SIZE) : DEFAULT_BATCH_SIZE;
 
   try {
     // Deploy system with new BLR

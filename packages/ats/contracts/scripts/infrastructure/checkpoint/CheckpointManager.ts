@@ -12,6 +12,7 @@
 import { promises as fs } from "fs";
 import { join } from "path";
 import type { DeploymentCheckpoint, CheckpointStatus } from "../types/checkpoint";
+import { warn } from "../utils/logging";
 
 /**
  * Parameters for creating a new checkpoint.
@@ -41,6 +42,14 @@ export class CheckpointManager {
     // Default: deployments/.checkpoints relative to this file
     // scripts/infrastructure/checkpoint/CheckpointManager.ts -> ../../../deployments/.checkpoints
     this.checkpointsDir = checkpointsDir || join(__dirname, "../../../deployments/.checkpoints");
+
+    // Warn if checkpoint directory is inside node_modules (will be deleted on npm install)
+    if (this.checkpointsDir.includes("node_modules")) {
+      warn("⚠️  Checkpoint directory is inside node_modules and will be deleted on npm install/ci.");
+      warn(`   Current path: ${this.checkpointsDir}`);
+      warn(`   Recommended: Specify a persistent directory using the 'checkpointDir' option.`);
+      warn(`   Example: { checkpointDir: './deployments/.checkpoints' }`);
+    }
   }
 
   /**

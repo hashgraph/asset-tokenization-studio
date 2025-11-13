@@ -16,22 +16,30 @@
   "exports": {
     ".": {
       "types": "./build/typechain-types/index.d.ts",
-      "require": "./build/typechain-types/index.js"
+      "import": "./build/typechain-types/index.js",
+      "require": "./build/typechain-types/index.js",
+      "default": "./build/typechain-types/index.js"
     },
     "./artifacts/*": "./artifacts/*",
     "./contracts/*": "./contracts/*",
     "./scripts/": "./scripts/index.ts",
     "./scripts": {
       "types": "./build/scripts/index.d.ts",
-      "require": "./build/scripts/index.js"
+      "import": "./build/scripts/index.js",
+      "require": "./build/scripts/index.js",
+      "default": "./build/scripts/index.js"
     },
     "./typechain-types": {
       "types": "./build/typechain-types/index.d.ts",
-      "require": "./build/typechain-types/index.js"
+      "import": "./build/typechain-types/index.js",
+      "require": "./build/typechain-types/index.js",
+      "default": "./build/typechain-types/index.js"
     },
     "./test": {
       "types": "./build/test/index.d.ts",
-      "require": "./build/test/index.js"
+      "import": "./build/test/index.js",
+      "require": "./build/test/index.js",
+      "default": "./build/test/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -52,8 +60,15 @@
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
     "generate:registry": "npx ts-node scripts/tools/generateRegistry.ts",
+    "deploy": "npm run build && npx ts-node -r tsconfig-paths/register scripts/cli/standalone.ts",
+    "deploy:local": "NETWORK=local npm run deploy",
+    "deploy:local:auto": "npx hardhat node > hardhat-node.log 2>&1 & sleep 3 && npm run deploy:local; kill $!",
+    "deploy:hedera:local": "NETWORK=hedera-local npm run deploy",
+    "deploy:hedera:previewnet": "NETWORK=hedera-previewnet npm run deploy",
+    "deploy:hedera:testnet": "NETWORK=hedera-testnet npm run deploy",
+    "deploy:hedera:mainnet": "NETWORK=hedera-mainnet npm run deploy",
+    "local:hardhat": "npx hardhat node",
     "deploy:hardhat": "npx hardhat run scripts/cli/hardhat.ts",
-    "deploy:standalone": "npm run compile && npx ts-node -r tsconfig-paths/register scripts/cli/standalone.ts",
     "publish": "npm publish",
     "compile": "npx hardhat compile",
     "compile:traces": "npx hardhat --show-stack-traces compile",
