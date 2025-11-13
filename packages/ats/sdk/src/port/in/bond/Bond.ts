@@ -266,7 +266,7 @@ class BondInPort implements IBondInPort {
   async getCouponAmountFor(
     request: GetCouponForRequest,
   ): Promise<CouponAmountForViewModel> {
-    ValidatedRequest.handleValidation('GetCouponAmountForRequest', request);
+    ValidatedRequest.handleValidation('GetCouponForRequest', request);
 
     const res = await this.queryBus.execute(
       new GetCouponAmountForQuery(

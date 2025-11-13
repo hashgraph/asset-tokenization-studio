@@ -737,7 +737,7 @@ describe('Bond', () => {
       const result = await BondToken.getCouponAmountFor(getCouponForRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetCouponAmountForRequest',
+        'GetCouponForRequest',
         getCouponForRequest,
       );
 

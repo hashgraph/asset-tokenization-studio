@@ -965,8 +965,8 @@ jest.mock('@port/out/rpc/RPCQueryAdapter', () => {
     async (address: EvmAddress, target: EvmAddress, coupon: number) => {
       const couponsBalances = couponsFor.get(coupon);
 
-      const numerator = BigNumber.from(5);
-      const denominator = BigNumber.from(3);
+      const numerator = '5';
+      const denominator = '3';
       const recordDateReached = true;
 
       return {

@@ -300,7 +300,7 @@ describe('GetCouponForQueryHandler', () => {
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
         query.targetId,
       );
-      expect(queryAdapterServiceMock.getCouponFor).toHaveBeenCalledWith(
+      expect(queryAdapterServiceMock.getCouponAmountFor).toHaveBeenCalledWith(
         evmAddress,
         targetEvmAddress,
         query.couponId,
