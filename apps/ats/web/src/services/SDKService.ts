@@ -211,6 +211,7 @@ import {
   ConnectRequest,
   ControlListRequest,
   CouponForViewModel,
+  CouponAmountForViewModel,
   CouponViewModel,
   CreateBondRequest,
   CreateEquityRequest,
@@ -632,6 +633,12 @@ export class SDKService {
     req: GetCouponForRequest,
   ): Promise<CouponForViewModel> {
     return await Bond.getCouponFor(req);
+  }
+
+  public static async getCouponAmountFor(
+    req: GetCouponForRequest,
+  ): Promise<CouponAmountForViewModel> {
+    return await Bond.getCouponAmountFor(req);
   }
 
   public static async getCoupon(
