@@ -192,6 +192,18 @@ abstract contract BondStorageWrapper is
             365 days;
     }
 
+    function _getPrincipalFor(
+        address _account
+    ) internal view returns (IBondRead.PrincipalFor memory principalFor_) {
+        IBondRead.BondDetailsData memory bondDetails = _getBondDetails();
+
+        principalFor_.numerator =
+            _balanceOfAdjusted(_account) *
+            bondDetails.nominalValue;
+        principalFor_.denominator =
+            10 ** (_decimalsAdjusted() + bondDetails.nominalValueDecimals);
+    }
+
     function _getCouponCount() internal view returns (uint256 couponCount_) {
         return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }

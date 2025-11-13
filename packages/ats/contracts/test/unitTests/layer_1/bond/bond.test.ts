@@ -286,6 +286,7 @@ const couponRateDecimals = 1
 const couponPeriod = TIME_PERIODS_S.WEEK
 const EMPTY_VC_ID = EMPTY_STRING
 const YEAR_SECONDS = 365 * 24 * 60 * 60
+const DECIMALS = 6
 
 let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
@@ -438,7 +439,7 @@ describe('Bond Tests', () => {
             isMultiPartition: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
-            decimals: 6,
+            decimals: DECIMALS,
             isin: isinGenerator(),
             currency: '0x455552',
             numberOfUnits,
@@ -461,7 +462,7 @@ describe('Bond Tests', () => {
 
     before(async () => {
         // mute | mock console.log
-        //console.log = () => {}
+        console.log = () => {}
         ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
@@ -502,6 +503,28 @@ describe('Bond Tests', () => {
     })
 
     describe('Single Partition', () => {
+        it('GIVEN token holder WHEN getting principal For THEN succeeds', async () => {
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(ISSUER_ROLE, account_C)
+
+            await erc1410Facet.connect(signer_C).issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: amount,
+                data: '0x',
+            })
+
+            const principalFor = await bondReadFacet.getPrincipalFor(account_A)
+            const bondDetails = await bondReadFacet.getBondDetails()
+
+            expect(principalFor.numerator).to.equal(
+                bondDetails.nominalValue.mul(amount)
+            )
+            expect(principalFor.denominator).to.equal(
+                10 ** (bondDetails.nominalValueDecimals + DECIMALS)
+            )
+        })
         describe('Redeem At Maturity', () => {
             it('GIVEN a zero address as token holder WHEN redeeming at maturity THEN transaction fails with ZeroAddressNotAllowed', async () => {
                 await expect(
@@ -1269,6 +1292,67 @@ describe('Bond Tests', () => {
         })
     })
     describe('Multi Partition', () => {
+        it('GIVEN token holder WHEN getting principal For THEN succeeds', async () => {
+            const init_rbacs: Rbac[] = set_initRbacs()
+
+            const newDiamond = await deployBondFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                clearingActive: false,
+                internalKycActivated: true,
+                isMultiPartition: true,
+                name: 'TEST_AccessControl',
+                symbol: 'TAC',
+                decimals: DECIMALS,
+                isin: isinGenerator(),
+                currency: '0x455552',
+                numberOfUnits: numberOfUnits * 10,
+                nominalValue: 100,
+                nominalValueDecimals: 0,
+                startingDate,
+                maturityDate,
+                regulationType: RegulationType.REG_D,
+                regulationSubType: RegulationSubType.REG_D_506_C,
+                countriesControlListType,
+                listOfCountries,
+                info,
+                init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
+            })
+
+            await setFacets({ diamond: newDiamond })
+
+            await accessControlFacet
+                .connect(signer_A)
+                .grantRole(ISSUER_ROLE, account_C)
+
+            await erc1410Facet.connect(signer_C).issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: amount,
+                data: '0x',
+            })
+
+            await erc1410Facet.connect(signer_C).issueByPartition({
+                partition: _PARTITION_ID,
+                tokenHolder: account_A,
+                value: amount,
+                data: '0x',
+            })
+
+            const principalFor = await bondReadFacet.getPrincipalFor(account_A)
+            const bondDetails = await bondReadFacet.getBondDetails()
+
+            expect(principalFor.numerator).to.equal(
+                bondDetails.nominalValue.mul(amount).mul(2)
+            )
+            expect(principalFor.denominator).to.equal(
+                10 ** (bondDetails.nominalValueDecimals + DECIMALS)
+            )
+        })
         it('GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success', async () => {
             const init_rbacs: Rbac[] = set_initRbacs()
 
@@ -1282,7 +1366,7 @@ describe('Bond Tests', () => {
                 isMultiPartition: true,
                 name: 'TEST_AccessControl',
                 symbol: 'TAC',
-                decimals: 6,
+                decimals: DECIMALS,
                 isin: isinGenerator(),
                 currency: '0x455552',
                 numberOfUnits,
