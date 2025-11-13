@@ -633,9 +633,11 @@ describe('Bond', () => {
   });
 
   describe('getCouponFor', () => {
-    getCouponForRequest = new GetCouponForRequest(
-      GetCouponForRequestFixture.create(),
-    );
+    beforeEach(() => {
+      getCouponForRequest = new GetCouponForRequest(
+        GetCouponForRequestFixture.create(),
+      );
+    });
     it('should get coupon for successfully', async () => {
       const expectedResponse = {
         payload: new BigDecimal(BigNumber.from(10)),
@@ -724,12 +726,16 @@ describe('Bond', () => {
   });
 
   describe('getCouponAmountFor', () => {
-    getCouponForRequest = new GetCouponForRequest(
-      GetCouponForRequestFixture.create(),
-    );
+    beforeEach(() => {
+      getCouponForRequest = new GetCouponForRequest(
+        GetCouponForRequestFixture.create(),
+      );
+    });
     it('should get coupon for successfully', async () => {
       const expectedResponse = {
-        payload: new BigDecimal(BigNumber.from(10)),
+        numerator: '10',
+        denominator: '4',
+        recordDateReached: true,
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
@@ -753,7 +759,9 @@ describe('Bond', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          value: expectedResponse.payload.toString(),
+          numerator: expectedResponse.numerator,
+          denominator: expectedResponse.denominator,
+          recordDateReached: expectedResponse.recordDateReached,
         }),
       );
     });
