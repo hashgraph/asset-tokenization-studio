@@ -212,6 +212,7 @@ import {
   ControlListRequest,
   CouponForViewModel,
   CouponAmountForViewModel,
+  PrincipalForViewModel,
   CouponViewModel,
   CreateBondRequest,
   CreateEquityRequest,
@@ -231,6 +232,7 @@ import {
   GetControlListMembersRequest,
   GetControlListTypeRequest,
   GetCouponForRequest,
+  GetPrincipalForRequest,
   GetCouponRequest,
   GetDividendsForRequest,
   GetDividendsRequest,
@@ -639,6 +641,12 @@ export class SDKService {
     req: GetCouponForRequest,
   ): Promise<CouponAmountForViewModel> {
     return await Bond.getCouponAmountFor(req);
+  }
+
+  public static async getPrincipalFor(
+    req: GetPrincipalForRequest,
+  ): Promise<PrincipalForViewModel> {
+    return await Bond.getPrincipalFor(req);
   }
 
   public static async getCoupon(
