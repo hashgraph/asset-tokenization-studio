@@ -127,17 +127,23 @@ describe("Clearing Tests", () => {
     );
     const clearingReadFacet = await ethers.getContractAt("ClearingReadFacet", diamond.address, signer_A);
 
-    // TODO : refactor one facet with all the interfaces
-    clearingFacet = new Contract(
-      diamond.address,
-      [
-        ...clearingTransferFacet.interface.fragments,
-        ...clearingRedeemFacet.interface.fragments,
-        ...clearingHoldCreationFacet.interface.fragments,
-        ...clearingReadFacet.interface.fragments,
-      ],
-      signer_A,
-    );
+    const fragmentMap = new Map<string, any>();
+    [
+      ...clearingTransferFacet.interface.fragments,
+      ...clearingRedeemFacet.interface.fragments,
+      ...clearingHoldCreationFacet.interface.fragments,
+      ...clearingReadFacet.interface.fragments,
+      ...clearingActionsFacet.interface.fragments,
+    ].forEach((fragment) => {
+      const key = fragment.format();
+      if (!fragmentMap.has(key)) {
+        fragmentMap.set(key, fragment);
+      }
+    });
+
+    const uniqueFragments = Array.from(fragmentMap.values());
+
+    clearingFacet = new Contract(diamond.address, uniqueFragments, signer_A);
 
     holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
     clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
