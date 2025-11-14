@@ -221,7 +221,7 @@ import {
   GetPrincipalForQueryResponse,
 } from './GetPrincipalForQuery';
 
-describe('GetCouponForQueryHandler', () => {
+describe('GetPrincipalForQueryHandler', () => {
   let handler: GetPrincipalForQueryHandler;
   let query: GetPrincipalForQuery;
 
@@ -265,12 +265,12 @@ describe('GetCouponForQueryHandler', () => {
 
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(
-          `An error occurred while querying account's coupon amount: ${errorMsg}`,
+          `An error occurred while querying account's principal: ${errorMsg}`,
         ),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });
-    it('should successfully get coupon for amount', async () => {
+    it('should successfully get principal for amount', async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
         evmAddress,
       );
