@@ -61,10 +61,7 @@ interface ILock {
      * @param _lockId The id of the lock to be released
      * @param _tokenHolder The address of the token holder
      */
-    function release(
-        uint256 _lockId,
-        address _tokenHolder
-    ) external returns (bool success_);
+    function release(uint256 _lockId, address _tokenHolder) external returns (bool success_);
 
     /**
      * @dev Returns the total amount of tokens currently locked for a specific partition and token holder
@@ -116,17 +113,13 @@ interface ILock {
      * @dev Returns the total amount of tokens currently locked for a token holder (all partitions)
      * @param _tokenHolder The address of the token holder
      */
-    function getLockedAmountFor(
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
+    function getLockedAmountFor(address _tokenHolder) external view returns (uint256 amount_);
 
     /**
      * @dev Returns the number of locks for a token holder (all partitions)
      * @param _tokenHolder The address of the token holder
      */
-    function getLockCountFor(
-        address _tokenHolder
-    ) external view returns (uint256 lockCount_);
+    function getLockCountFor(address _tokenHolder) external view returns (uint256 lockCount_);
 
     /**
      * @dev Returns the list of lock IDs for a token holder (all partitions)

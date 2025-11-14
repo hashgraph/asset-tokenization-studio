@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {Hold, HoldIdentifier} from '../interfaces/hold/IHold.sol';
-import {IHoldTokenHolder} from '../interfaces/hold/IHoldTokenHolder.sol';
-import {Common} from '../common/Common.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import { Hold, HoldIdentifier } from "../interfaces/hold/IHold.sol";
+import { IHoldTokenHolder } from "../interfaces/hold/IHoldTokenHolder.sol";
+import { Common } from "../common/Common.sol";
+import { ThirdPartyType } from "../../layer_0/common/types/ThirdPartyType.sol";
 
 abstract contract HoldTokenHolder is IHoldTokenHolder, Common {
     function createHoldByPartition(
@@ -23,22 +23,9 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Common {
         onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _msgSender(),
-            _hold,
-            '',
-            ThirdPartyType.NULL
-        );
+        (success_, holdId_) = _createHoldByPartition(_partition, _msgSender(), _hold, "", ThirdPartyType.NULL);
 
-        emit HeldByPartition(
-            _msgSender(),
-            _msgSender(),
-            _partition,
-            holdId_,
-            _hold,
-            ''
-        );
+        emit HeldByPartition(_msgSender(), _msgSender(), _partition, holdId_, _hold, "");
     }
 
     function createHoldFromByPartition(
@@ -71,21 +58,9 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Common {
             ThirdPartyType.AUTHORIZED
         );
 
-        _decreaseAllowedBalanceForHold(
-            _partition,
-            _from,
-            _hold.amount,
-            holdId_
-        );
+        _decreaseAllowedBalanceForHold(_partition, _from, _hold.amount, holdId_);
 
-        emit HeldFromByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
+        emit HeldFromByPartition(_msgSender(), _from, _partition, holdId_, _hold, _operatorData);
     }
 
     function executeHoldByPartition(
