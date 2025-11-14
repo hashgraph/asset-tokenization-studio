@@ -99,7 +99,7 @@ export {
 
 export { getNetworkConfig, getAllNetworks } from "./config";
 
-export { getDeploymentConfig, isLocalNetwork, DEPLOYMENT_CONFIGS } from "./networkConfig";
+export { getDeploymentConfig, isLocalNetwork, isInstantMiningNetwork, DEPLOYMENT_CONFIGS } from "./networkConfig";
 export type { DeploymentConfig } from "./networkConfig";
 
 // ============================================================================
@@ -207,6 +207,7 @@ export { getSelector } from "./utils/selector";
 // ============================================================================
 
 export { CheckpointManager } from "./checkpoint/CheckpointManager";
+export { NullCheckpointManager } from "./checkpoint/NullCheckpointManager";
 export type { CreateCheckpointParams } from "./checkpoint/CheckpointManager";
 
 export {
