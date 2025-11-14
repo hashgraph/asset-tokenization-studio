@@ -118,6 +118,7 @@ export async function deployEquityFromFactory(
     dividendRight: equityDetailsParams.dividendRight,
     currency: equityDetailsParams.currency,
     nominalValue: equityDetailsParams.nominalValue,
+    nominalValueDecimals: equityDetailsParams.nominalValueDecimals,
   };
 
   // Build equity data

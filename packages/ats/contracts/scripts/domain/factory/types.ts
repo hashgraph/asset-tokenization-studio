@@ -56,6 +56,7 @@ export interface SecurityDataParams {
 export interface BondDetailsDataParams {
   currency: string;
   nominalValue: ethers.BigNumberish;
+  nominalValueDecimals: number;
   startingDate: number;
   maturityDate: number;
 }
@@ -77,6 +78,7 @@ export interface EquityDetailsDataParams {
   dividendRight: DividendRight;
   currency: string;
   nominalValue: ethers.BigNumberish;
+  nominalValueDecimals: number;
 }
 
 export interface FactoryRegulationDataParams {

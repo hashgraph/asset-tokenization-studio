@@ -252,6 +252,7 @@ describe("Factory Tests", () => {
       expect(equityMetadata.dividendRight).to.equal(equityData.equityDetails.dividendRight);
       expect(equityMetadata.currency).to.equal(equityData.equityDetails.currency);
       expect(equityMetadata.nominalValue).to.equal(equityData.equityDetails.nominalValue);
+      expect(equityMetadata.nominalValueDecimals).to.equal(equityData.equityDetails.nominalValueDecimals);
 
       const capFacet = await ethers.getContractAt("Cap", equityAddress);
 
@@ -401,6 +402,7 @@ describe("Factory Tests", () => {
       const bondDetails = await bondFacet.getBondDetails();
       expect(bondDetails.currency).to.be.deep.equal(bondData.bondDetails.currency);
       expect(bondDetails.nominalValue).to.be.deep.equal(bondData.bondDetails.nominalValue);
+      expect(bondDetails.nominalValueDecimals).to.be.deep.equal(bondData.bondDetails.nominalValueDecimals);
       expect(bondDetails.startingDate).to.be.deep.equal(bondData.bondDetails.startingDate);
       expect(bondDetails.maturityDate).to.be.deep.equal(bondData.bondDetails.maturityDate);
       const couponCount = await bondFacet.getCouponCount();

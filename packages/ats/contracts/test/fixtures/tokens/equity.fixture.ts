@@ -35,6 +35,7 @@ export const DEFAULT_EQUITY_PARAMS = {
   dividendRight: DividendRight.PREFERRED,
   currency: CURRENCIES.USD,
   nominalValue: 100,
+  nominalValueDecimals: 2,
 } as const;
 
 export function getEquityDetails(params?: DeepPartial<EquityDetailsDataParams>) {
@@ -49,6 +50,7 @@ export function getEquityDetails(params?: DeepPartial<EquityDetailsDataParams>) 
     dividendRight: params?.dividendRight ?? DEFAULT_EQUITY_PARAMS.dividendRight,
     currency: params?.currency ?? DEFAULT_EQUITY_PARAMS.currency,
     nominalValue: params?.nominalValue ?? DEFAULT_EQUITY_PARAMS.nominalValue,
+    nominalValueDecimals: params?.nominalValueDecimals ?? DEFAULT_EQUITY_PARAMS.nominalValueDecimals,
   };
 }
 /**

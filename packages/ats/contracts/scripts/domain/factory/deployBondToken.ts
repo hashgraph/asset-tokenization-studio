@@ -119,6 +119,7 @@ export async function deployBondFromFactory(
   const bondDetails = {
     currency: bondDetailsParams.currency,
     nominalValue: bondDetailsParams.nominalValue,
+    nominalValueDecimals: bondDetailsParams.nominalValueDecimals,
     startingDate: bondDetailsParams.startingDate || Math.floor(Date.now() / 1000),
     maturityDate: bondDetailsParams.maturityDate || 0,
   };

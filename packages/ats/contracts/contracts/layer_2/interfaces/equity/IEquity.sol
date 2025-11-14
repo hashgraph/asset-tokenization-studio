@@ -19,6 +19,7 @@ interface IEquity {
         DividendType dividendRight;
         bytes3 currency;
         uint256 nominalValue;
+        uint8 nominalValueDecimals;
     }
 
     struct Voting {

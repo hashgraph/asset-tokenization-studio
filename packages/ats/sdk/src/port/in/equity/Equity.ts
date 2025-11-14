@@ -389,6 +389,7 @@ class EquityInPort implements IEquityInPort {
         CastDividendType.fromNumber(req.dividendRight),
         req.currency,
         req.nominalValue,
+        req.nominalValueDecimals,
         new ContractId(securityFactory),
         new ContractId(resolver),
         req.configId,
@@ -473,6 +474,7 @@ class EquityInPort implements IEquityInPort {
         CastDividendType.fromNumber(req.dividendRight),
         req.currency,
         req.nominalValue,
+        req.nominalValueDecimals,
         securityFactory ? new ContractId(securityFactory) : undefined,
         resolver ? new ContractId(resolver) : undefined,
         req.configId,
@@ -528,6 +530,7 @@ class EquityInPort implements IEquityInPort {
       dividendRight: CastDividendType.toNumber(res.equity.dividendRight),
       currency: res.equity.currency,
       nominalValue: res.equity.nominalValue.toString(),
+      nominalValueDecimals: res.equity.nominalValueDecimals,
     };
 
     return equityDetails;
