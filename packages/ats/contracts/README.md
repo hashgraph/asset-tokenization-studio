@@ -230,7 +230,23 @@ npx hardhat getProxyAdminConfig <proxyAdminAddress> <proxyAddress> --network <ne
 
 # Test
 
-The contracts tests are located in the _test_ folder at the root of the contracts module.
+The tests are organized into two main categories:
+
+- **Contract Tests** (`test/contracts/`) - Unit tests for Solidity smart contracts
+- **Scripts Tests** (`test/scripts/`) - Unit and integration tests for TypeScript deployment scripts
+
+## Test Structure
+
+```
+test/
+├── contracts/
+│   ├── unit/        # Contract unit tests (npm test, test:parallel, coverage)
+│   └── demo/        # Demo tests (test:demo - explicit only)
+│
+└── scripts/
+    ├── unit/        # Script unit tests (utilities, infrastructure)
+    └── integration/ # Script integration tests (deployment, registry operations)
+```
 
 ## Running tests
 
@@ -244,20 +260,30 @@ npm run ats:contracts:test
 
 ```bash
 cd packages/ats/contracts
-npm test
+npm test                    # Runs contract unit tests only
+npm run test:parallel       # Runs contract unit tests in parallel
+npm run test:scripts        # Runs all script tests
 ```
 
 ### Available test commands:
 
 ```bash
-# Run all tests
-npm run test
+# Contract Tests
+npm test                           # Contract unit tests only
+npm run test:parallel              # Contract unit tests (parallel execution)
+npm run test:coverage              # Contract test coverage
+npm run test:coverage:layer1       # Layer 1 coverage
+npm run test:factory               # Factory tests
+npm run test:resolver              # Resolver tests
 
-# Run tests with coverage
-npm run test:coverage
+# Script Tests
+npm run test:scripts               # All script tests
+npm run test:scripts:unit          # Script unit tests (utilities, infrastructure)
+npm run test:scripts:integration   # Script integration tests (deployment, registry)
 
-# Run specific test file
-npm run test -- test/diamond/diamond.test.ts
+# Demo Tests (explicit only, not included in npm test)
+npm run test:demo                  # Demo tests
+npm run test:demo:hedera           # Hedera-specific demo tests
 ```
 
 ### Architecture

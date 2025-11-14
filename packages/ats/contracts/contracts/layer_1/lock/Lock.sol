@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
-import {_LOCKER_ROLE} from '../constants/roles.sol';
-import {ILock} from '../interfaces/lock/ILock.sol';
-import {Common} from '../common/Common.sol';
+import { _DEFAULT_PARTITION } from "../../layer_0/constants/values.sol";
+import { _LOCKER_ROLE } from "../constants/roles.sol";
+import { ILock } from "../interfaces/lock/ILock.sol";
+import { Common } from "../common/Common.sol";
 
 abstract contract Lock is ILock, Common {
     // Functions
@@ -23,20 +23,8 @@ abstract contract Lock is ILock, Common {
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
         returns (bool success_, uint256 lockId_)
     {
-        (success_, lockId_) = _lockByPartition(
-            _partition,
-            _amount,
-            _tokenHolder,
-            _expirationTimestamp
-        );
-        emit LockedByPartition(
-            _msgSender(),
-            _tokenHolder,
-            _partition,
-            lockId_,
-            _amount,
-            _expirationTimestamp
-        );
+        (success_, lockId_) = _lockByPartition(_partition, _amount, _tokenHolder, _expirationTimestamp);
+        emit LockedByPartition(_msgSender(), _tokenHolder, _partition, lockId_, _amount, _expirationTimestamp);
     }
 
     function releaseByPartition(
@@ -53,12 +41,7 @@ abstract contract Lock is ILock, Common {
         returns (bool success_)
     {
         success_ = _releaseByPartition(_partition, _lockId, _tokenHolder);
-        emit LockByPartitionReleased(
-            _msgSender(),
-            _tokenHolder,
-            _partition,
-            _lockId
-        );
+        emit LockByPartitionReleased(_msgSender(), _tokenHolder, _partition, _lockId);
     }
 
     // Uses default parititon in case Multipartition is not activated
@@ -76,20 +59,8 @@ abstract contract Lock is ILock, Common {
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
         returns (bool success_, uint256 lockId_)
     {
-        (success_, lockId_) = _lockByPartition(
-            _DEFAULT_PARTITION,
-            _amount,
-            _tokenHolder,
-            _expirationTimestamp
-        );
-        emit LockedByPartition(
-            _msgSender(),
-            _tokenHolder,
-            _DEFAULT_PARTITION,
-            lockId_,
-            _amount,
-            _expirationTimestamp
-        );
+        (success_, lockId_) = _lockByPartition(_DEFAULT_PARTITION, _amount, _tokenHolder, _expirationTimestamp);
+        emit LockedByPartition(_msgSender(), _tokenHolder, _DEFAULT_PARTITION, lockId_, _amount, _expirationTimestamp);
     }
 
     function release(
@@ -101,24 +72,11 @@ abstract contract Lock is ILock, Common {
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyWithValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId)
-        onlyWithLockedExpirationTimestamp(
-            _DEFAULT_PARTITION,
-            _tokenHolder,
-            _lockId
-        )
+        onlyWithLockedExpirationTimestamp(_DEFAULT_PARTITION, _tokenHolder, _lockId)
         returns (bool success_)
     {
-        success_ = _releaseByPartition(
-            _DEFAULT_PARTITION,
-            _lockId,
-            _tokenHolder
-        );
-        emit LockByPartitionReleased(
-            _msgSender(),
-            _tokenHolder,
-            _DEFAULT_PARTITION,
-            _lockId
-        );
+        success_ = _releaseByPartition(_DEFAULT_PARTITION, _lockId, _tokenHolder);
+        emit LockByPartitionReleased(_msgSender(), _tokenHolder, _DEFAULT_PARTITION, _lockId);
     }
 
     function getLockedAmountForByPartition(
@@ -141,42 +99,22 @@ abstract contract Lock is ILock, Common {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory locksId_) {
-        return
-            _getLocksIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _pageIndex,
-                _pageLength
-            );
+        return _getLocksIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
     }
 
     function getLockForByPartition(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockId
-    )
-        external
-        view
-        override
-        returns (uint256 amount_, uint256 expirationTimestamp_)
-    {
-        return
-            _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
+    ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
+        return _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
     }
 
-    function getLockedAmountFor(
-        address _tokenHolder
-    ) external view override returns (uint256 amount_) {
-        return
-            _getLockedAmountForByPartitionAdjusted(
-                _DEFAULT_PARTITION,
-                _tokenHolder
-            );
+    function getLockedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
+        return _getLockedAmountForByPartitionAdjusted(_DEFAULT_PARTITION, _tokenHolder);
     }
 
-    function getLockCountFor(
-        address _tokenHolder
-    ) external view override returns (uint256 lockCount_) {
+    function getLockCountFor(address _tokenHolder) external view override returns (uint256 lockCount_) {
         return _getLockCountForByPartition(_DEFAULT_PARTITION, _tokenHolder);
     }
 
@@ -185,29 +123,13 @@ abstract contract Lock is ILock, Common {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory locksId_) {
-        return
-            _getLocksIdForByPartition(
-                _DEFAULT_PARTITION,
-                _tokenHolder,
-                _pageIndex,
-                _pageLength
-            );
+        return _getLocksIdForByPartition(_DEFAULT_PARTITION, _tokenHolder, _pageIndex, _pageLength);
     }
 
     function getLockFor(
         address _tokenHolder,
         uint256 _lockId
-    )
-        external
-        view
-        override
-        returns (uint256 amount_, uint256 expirationTimestamp_)
-    {
-        return
-            _getLockForByPartitionAdjusted(
-                _DEFAULT_PARTITION,
-                _tokenHolder,
-                _lockId
-            );
+    ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
+        return _getLockForByPartitionAdjusted(_DEFAULT_PARTITION, _tokenHolder, _lockId);
     }
 }
