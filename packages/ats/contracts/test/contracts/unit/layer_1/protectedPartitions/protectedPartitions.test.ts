@@ -267,17 +267,23 @@ describe("ProtectedPartitions Tests", () => {
     const clearingReadFacet = await ethers.getContractAt("ClearingReadFacet", address, signer_A);
     const clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", address, signer_A);
 
-    clearingFacet = new Contract(
-      address,
-      [
-        ...clearingTransferFacet.interface.fragments,
-        ...clearingRedeemFacet.interface.fragments,
-        ...clearingHoldCreationFacet.interface.fragments,
-        ...clearingReadFacet.interface.fragments,
-        ...clearingActionsFacet.interface.fragments,
-      ],
-      signer_A,
-    );
+    const fragmentMap = new Map<string, any>();
+    [
+      ...clearingTransferFacet.interface.fragments,
+      ...clearingRedeemFacet.interface.fragments,
+      ...clearingHoldCreationFacet.interface.fragments,
+      ...clearingReadFacet.interface.fragments,
+      ...clearingActionsFacet.interface.fragments,
+    ].forEach((fragment) => {
+      const key = fragment.format();
+      if (!fragmentMap.has(key)) {
+        fragmentMap.set(key, fragment);
+      }
+    });
+
+    const uniqueFragments = Array.from(fragmentMap.values());
+
+    clearingFacet = new Contract(address, uniqueFragments, signer_A);
 
     if (compliance) {
       complianceMock = await ethers.getContractAt("ComplianceMock", compliance);
