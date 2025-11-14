@@ -215,6 +215,7 @@ export interface ICreateBondFormValues {
   currency: string;
   numberOfUnits: string;
   nominalValue: number;
+  nominalValueDecimals: number;
   totalAmount: string;
   startingDate: string;
   maturityDate: string;

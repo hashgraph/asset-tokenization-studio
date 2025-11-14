@@ -496,6 +496,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         dividendRight: CastDividendType.toNumber(equityInfo.dividendRight),
         currency: equityInfo.currency,
         nominalValue: equityInfo.nominalValue.toString(),
+        nominalValueDecimals: equityInfo.nominalValueDecimals,
       };
 
       const securityTokenToCreate = new FactoryEquityToken(
@@ -607,6 +608,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       const bondDetails = new BondDetailsData(
         bondInfo.currency,
         bondInfo.nominalValue.toString(),
+        bondInfo.nominalValueDecimals,
         bondInfo.startingDate.toString(),
         bondInfo.maturityDate.toString(),
       );
@@ -3250,6 +3252,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const bondDetailsData = new BondDetailsData(
       bondDetails.currency,
       bondDetails.nominalValue.toString(),
+      bondDetails.nominalValueDecimals,
       bondDetails.startingDate.toString(),
       bondDetails.maturityDate.toString(),
     );
@@ -3397,6 +3400,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         dividendRight: CastDividendType.toNumber(equityDetails.dividendRight),
         currency: equityDetails.currency,
         nominalValue: equityDetails.nominalValue.toString(),
+        nominalValueDecimals: equityDetails.nominalValueDecimals,
       };
 
       const securityTokenToCreate = new FactoryEquityToken(

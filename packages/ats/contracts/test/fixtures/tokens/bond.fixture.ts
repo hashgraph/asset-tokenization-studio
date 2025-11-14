@@ -18,6 +18,7 @@ import { getDltTimestamp } from "@test";
 export const DEFAULT_BOND_PARAMS = {
   currency: CURRENCIES.USD,
   nominalValue: 100,
+  nominalValueDecimals: 2,
   proceedRecipients: [] as string[],
   proceedRecipientsData: [] as string[],
   startingDate: async () => {
@@ -34,6 +35,7 @@ export async function getBondDetails(params?: DeepPartial<BondDetailsDataParams>
   return {
     currency: params?.currency ?? DEFAULT_BOND_PARAMS.currency,
     nominalValue: params?.nominalValue ?? DEFAULT_BOND_PARAMS.nominalValue,
+    nominalValueDecimals: params?.nominalValueDecimals ?? DEFAULT_BOND_PARAMS.nominalValueDecimals,
     startingDate: params?.startingDate ?? (await DEFAULT_BOND_PARAMS.startingDate()),
     maturityDate: maturityDate,
   };

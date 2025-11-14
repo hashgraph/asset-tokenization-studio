@@ -283,6 +283,7 @@ export class CreateTrexSuiteEquityCommandHandler
         dividendRight,
         currency,
         nominalValue,
+        nominalValueDecimals,
         externalPauses,
         externalControlLists,
         externalKycLists,
@@ -356,6 +357,7 @@ export class CreateTrexSuiteEquityCommandHandler
         dividendRight,
         currency,
         BigDecimal.fromString(nominalValue),
+        nominalValueDecimals,
       );
 
       res = await handler.createTrexSuiteEquity(

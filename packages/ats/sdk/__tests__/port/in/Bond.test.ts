@@ -255,6 +255,7 @@ const currency = '0x455552';
 const TIME = 30;
 const numberOfUnits = '1000';
 const nominalValue = '100';
+const nominalValueDecimals = 3;
 const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1000;
 const startingDate = currentTimeInSeconds + TIME;
 const maturityDate = startingDate + 365; // 1 year maturity
@@ -343,6 +344,7 @@ describe('🧪 Bond test', () => {
       currency: currency,
       numberOfUnits: numberOfUnits.toString(),
       nominalValue: nominalValue,
+      nominalValueDecimals: nominalValueDecimals,
       startingDate: startingDate.toString(),
       maturityDate: maturityDate.toString(),
       regulationType: CastRegulationType.toNumber(regulationType),
@@ -370,6 +372,7 @@ describe('🧪 Bond test', () => {
 
     expect(bondDetails.currency).toEqual(currency);
     expect(bondDetails.nominalValue).toEqual(nominalValue);
+    expect(bondDetails.nominalValueDecimals).toEqual(nominalValueDecimals);
     expect(bondDetails.startingDate.getTime() / 1000).toEqual(startingDate);
     expect(bondDetails.maturityDate.getTime() / 1000).toEqual(maturityDate);
   }, 60_000);
