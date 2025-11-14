@@ -1,280 +1,45 @@
-/*
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-   1. Definitions.
-
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
-
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
-
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
-
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
-
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
-
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
-
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
-
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
-
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
-
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
-
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
-
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
-
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
-
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
-
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
-
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
-
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
-
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
-
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
-
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
-
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
-
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
-
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
-
-   END OF TERMS AND CONDITIONS
-
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright [yyyy] [name of copyright owner]
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
-*/
-
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { BigNumber } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import { isinGenerator } from "@thomaschaplin/isin-generator";
 import {
   ResolverProxy,
   BondUSA,
-  BondUSARead,
   AccessControl,
   Pause,
   Lock,
-  TimeTravel,
   type IERC1410,
-  IFactory,
-  BusinessLogicResolver,
-  Lock__factory,
-  Pause__factory,
-  AccessControl__factory,
-  BondUSAReadTimeTravel__factory,
-  TimeTravel__factory,
   Kyc,
   SsiManagement,
   IHold,
-  IHold__factory,
-  SsiManagement__factory,
   ControlList,
   ClearingActionsFacet,
   ProtectedPartitions,
-  BondUSAFacetTimeTravel__factory,
   FreezeFacet,
   ClearingTransferFacet,
-} from "@typechain";
+  BondUSAReadFacet,
+  TimeTravelFacet as TimeTravel,
+} from "@contract-types";
 import {
-  CORPORATE_ACTION_ROLE,
-  PAUSER_ROLE,
-  BOND_MANAGER_ROLE,
-  LOCKER_ROLE,
-  ISSUER_ROLE,
-  KYC_ROLE,
-  SSI_MANAGER_ROLE,
   DEFAULT_PARTITION,
-  Rbac,
-  deployBondFromFactory,
-  RegulationSubType,
-  RegulationType,
-  deployAtsFullInfrastructure,
-  DeployAtsFullInfrastructureCommand,
-  ADDRESS_ZERO,
-  MAX_UINT256,
-  ZERO,
-  EMPTY_STRING,
   dateToUnixTimestamp,
-  MATURITY_REDEEMER_ROLE,
-  CONTROL_LIST_ROLE,
-  CLEARING_ROLE,
-  PROTECTED_PARTITIONS_ROLE,
-  FREEZE_MANAGER_ROLE,
-  EMPTY_HEX_BYTES,
+  ATS_ROLES,
   TIME_PERIODS_S,
+  ADDRESS_ZERO,
+  ZERO,
+  EMPTY_HEX_BYTES,
+  EMPTY_STRING,
 } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { deployBondTokenFixture } from "@test";
+import { executeRbac, MAX_UINT256 } from "@test";
 
 const numberOfUnits = 1000;
 let startingDate = 0;
 const numberOfCoupons = 50;
 const frequency = TIME_PERIODS_S.DAY;
 let maturityDate = 0;
-const countriesControlListType = true;
-const listOfCountries = "ES,FR,CH";
-const info = "info";
 const amount = numberOfUnits;
 const _PARTITION_ID = "0x0000000000000000000000000000000000000000000000000000000000000002";
 
@@ -302,15 +67,8 @@ describe("Bond Tests", () => {
   let signer_C: SignerWithAddress;
   let signer_D: SignerWithAddress;
 
-  let account_A: string;
-  let account_B: string;
-  let account_C: string;
-  let account_D: string;
-
-  let factory: IFactory;
-  let businessLogicResolver: BusinessLogicResolver;
   let bondFacet: BondUSA;
-  let bondReadFacet: BondUSARead;
+  let bondReadFacet: BondUSAReadFacet;
   let accessControlFacet: AccessControl;
   let pauseFacet: Pause;
   let lockFacet: Lock;
@@ -325,115 +83,81 @@ describe("Bond Tests", () => {
   let freezeFacet: FreezeFacet;
   let clearingTransferFacet: ClearingTransferFacet;
 
-  function set_initRbacs(): Rbac[] {
-    const rbacPause: Rbac = {
-      role: PAUSER_ROLE,
-      members: [account_B],
-    };
-    const rbacKYC: Rbac = {
-      role: KYC_ROLE,
-      members: [account_B],
-    };
-    const rbacMaturityRedeemer: Rbac = {
-      role: MATURITY_REDEEMER_ROLE,
-      members: [account_A],
-    };
-    const rbacSSI: Rbac = {
-      role: SSI_MANAGER_ROLE,
-      members: [account_A],
-    };
-    const rbacControlList: Rbac = {
-      role: CONTROL_LIST_ROLE,
-      members: [account_D],
-    };
-    const rbacClearing: Rbac = {
-      role: CLEARING_ROLE,
-      members: [account_A],
-    };
-    const rbacProtectedPartitions: Rbac = {
-      role: PROTECTED_PARTITIONS_ROLE,
-      members: [account_A],
-    };
-    return [rbacPause, rbacKYC, rbacMaturityRedeemer, rbacControlList, rbacSSI, rbacClearing, rbacProtectedPartitions];
-  }
+  async function deploySecurityFixture(isMultiPartition = false) {
+    const base = await deployBondTokenFixture({
+      bondDataParams: {
+        securityData: {
+          isMultiPartition,
+        },
+        bondDetails: {
+          startingDate: startingDate,
+          maturityDate: maturityDate,
+        },
+      },
+    });
+    diamond = base.diamond;
+    signer_A = base.deployer;
+    signer_B = base.user1;
+    signer_C = base.user2;
+    signer_D = base.user3;
 
-  async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    bondFacet = BondUSAFacetTimeTravel__factory.connect(diamond.address, signer_A);
-    bondReadFacet = BondUSAReadTimeTravel__factory.connect(diamond.address, signer_A);
-    accessControlFacet = AccessControl__factory.connect(diamond.address, signer_A);
-    pauseFacet = Pause__factory.connect(diamond.address, signer_A);
-    lockFacet = Lock__factory.connect(diamond.address, signer_A);
-    holdFacet = IHold__factory.connect(diamond.address, signer_A);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
-    timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A);
+    await executeRbac(base.accessControlFacet, [
+      {
+        role: ATS_ROLES._FREEZE_MANAGER_ROLE,
+        members: [signer_A.address],
+      },
+      {
+        role: ATS_ROLES._PAUSER_ROLE,
+        members: [signer_B.address],
+      },
+      {
+        role: ATS_ROLES._KYC_ROLE,
+        members: [signer_B.address],
+      },
+      {
+        role: ATS_ROLES._MATURITY_REDEEMER_ROLE,
+        members: [signer_A.address],
+      },
+      {
+        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        members: [signer_A.address],
+      },
+      {
+        role: ATS_ROLES._CONTROL_LIST_ROLE,
+        members: [signer_D.address],
+      },
+      {
+        role: ATS_ROLES._CLEARING_ROLE,
+        members: [signer_A.address],
+      },
+      {
+        role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+        members: [signer_A.address],
+      },
+    ]);
+
+    bondFacet = await ethers.getContractAt("BondUSAFacetTimeTravel", diamond.address, signer_A);
+    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.address, signer_A);
+
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address, signer_A);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
+    lockFacet = await ethers.getContractAt("Lock", diamond.address, signer_A);
+    holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = SsiManagement__factory.connect(diamond.address, signer_A);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
 
-    await ssiManagementFacet.connect(signer_A).addIssuer(account_A);
+    await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
+
     controlListFacet = await ethers.getContractAt("ControlList", diamond.address, signer_D);
     clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
     protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.address, signer_A);
     freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address, signer_A);
     clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.address, signer_A);
-    await kycFacet.grantKyc(account_A, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A);
-    await accessControlFacet.grantRole(FREEZE_MANAGER_ROLE, account_A);
+
+    await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
   }
-
-  async function deploySecurityFixtureSinglePartition() {
-    const init_rbacs: Rbac[] = set_initRbacs();
-
-    diamond = await deployBondFromFactory({
-      adminAccount: account_A,
-      isWhiteList: false,
-      isControllable: true,
-      arePartitionsProtected: false,
-      clearingActive: false,
-      internalKycActivated: true,
-      isMultiPartition: false,
-      name: "TEST_AccessControl",
-      symbol: "TAC",
-      decimals: DECIMALS,
-      isin: isinGenerator(),
-      currency: "0x455552",
-      numberOfUnits,
-      nominalValue: 100,
-      nominalValueDecimals: 3,
-      startingDate,
-      maturityDate,
-      regulationType: RegulationType.REG_D,
-      regulationSubType: RegulationSubType.REG_D_506_C,
-      countriesControlListType,
-      listOfCountries,
-      info,
-      init_rbacs,
-      factory,
-      businessLogicResolver: businessLogicResolver.address,
-    });
-
-    await setFacets({ diamond });
-  }
-
-  before(async () => {
-    // mute | mock console.log
-    console.log = () => {};
-    [signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners();
-    account_A = signer_A.address;
-    account_B = signer_B.address;
-    account_C = signer_C.address;
-    account_D = signer_D.address;
-
-    const { ...deployedContracts } = await deployAtsFullInfrastructure(
-      await DeployAtsFullInfrastructureCommand.newInstance({
-        signer: signer_A,
-        useDeployed: false,
-        useEnvironment: true,
-        timeTravelEnabled: true,
-      }),
-    );
-
-    factory = deployedContracts.factory.contract;
-    businessLogicResolver = deployedContracts.businessLogicResolver.contract;
-  });
 
   beforeEach(async () => {
     startingDate = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
@@ -447,30 +171,27 @@ describe("Bond Tests", () => {
       rateDecimals: couponRateDecimals,
       period: couponPeriod,
     };
-    await loadFixture(deploySecurityFixtureSinglePartition);
-  });
-
-  afterEach(async () => {
-    await timeTravelFacet.resetSystemTimestamp();
+    await loadFixture(deploySecurityFixture);
   });
 
   describe("Single Partition", () => {
     it("GIVEN token holder WHEN getting principal For THEN succeeds", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ISSUER_ROLE, account_C);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
       await erc1410Facet.connect(signer_C).issueByPartition({
         partition: DEFAULT_PARTITION,
-        tokenHolder: account_A,
+        tokenHolder: signer_A.address,
         value: amount,
         data: "0x",
       });
 
-      const principalFor = await bondReadFacet.getPrincipalFor(account_A);
+      const principalFor = await bondReadFacet.getPrincipalFor(signer_A.address);
       const bondDetails = await bondReadFacet.getBondDetails();
 
       expect(principalFor.numerator).to.equal(bondDetails.nominalValue.mul(amount));
       expect(principalFor.denominator).to.equal(10 ** (bondDetails.nominalValueDecimals + DECIMALS));
     });
+
     describe("Redeem At Maturity", () => {
       it("GIVEN a zero address as token holder WHEN redeeming at maturity THEN transaction fails with ZeroAddressNotAllowed", async () => {
         await expect(
@@ -480,28 +201,28 @@ describe("Bond Tests", () => {
 
       it("GIVEN single partition mode WHEN redeeming from a non-default partition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
         await expect(
-          bondFacet.redeemAtMaturityByPartition(account_C, _PARTITION_ID, amount),
+          bondFacet.redeemAtMaturityByPartition(signer_C.address, _PARTITION_ID, amount),
         ).to.be.revertedWithCustomError(bondFacet, "PartitionNotAllowedInSinglePartitionMode");
       });
 
       it("GIVEN the token holder account is blocked WHEN redeeming at maturity THEN transaction fails with AccountIsBlocked", async () => {
-        await controlListFacet.addToControlList(account_B);
+        await controlListFacet.addToControlList(signer_B.address);
 
         await expect(
-          bondFacet.connect(signer_A).redeemAtMaturityByPartition(account_B, DEFAULT_PARTITION, amount),
+          bondFacet.connect(signer_A).redeemAtMaturityByPartition(signer_B.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "AccountIsBlocked");
       });
 
       it("GIVEN the caller lacks the Maturity Redeemer role WHEN redeeming at maturity THEN transaction fails with AccountHasNoRole", async () => {
         await expect(
-          bondFacet.connect(signer_B).redeemAtMaturityByPartition(account_C, DEFAULT_PARTITION, amount),
+          bondFacet.connect(signer_B).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "AccountHasNoRole");
       });
       it("GIVEN clearing is activated WHEN redeeming at maturity THEN transaction fails with ClearingIsActivated", async () => {
         await clearingActionsFacet.activateClearing();
 
         await expect(
-          bondFacet.redeemAtMaturityByPartition(account_C, DEFAULT_PARTITION, amount),
+          bondFacet.redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "ClearingIsActivated");
       });
 
@@ -509,7 +230,7 @@ describe("Bond Tests", () => {
         await protectedPartitionsFacet.protectPartitions();
 
         await expect(
-          bondFacet.redeemAtMaturityByPartition(account_C, DEFAULT_PARTITION, amount),
+          bondFacet.redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "PartitionsAreProtectedAndNoRole");
       });
 
@@ -517,43 +238,43 @@ describe("Bond Tests", () => {
         await grantRoleAndPauseToken(
           accessControlFacet,
           pauseFacet,
-          CORPORATE_ACTION_ROLE,
+          ATS_ROLES._CORPORATE_ACTION_ROLE,
           signer_A,
           signer_B,
-          account_C,
+          signer_C.address,
         );
 
         await expect(
-          bondFacet.connect(signer_C).redeemAtMaturityByPartition(account_C, DEFAULT_PARTITION, amount),
+          bondFacet.connect(signer_C).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "TokenIsPaused");
       });
 
       it("GIVEN the token holder lacks valid KYC status WHEN redeeming at maturity THEN transaction fails with InvalidKycStatus", async () => {
         await expect(
-          bondFacet.redeemAtMaturityByPartition(account_C, DEFAULT_PARTITION, amount),
+          bondFacet.redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "InvalidKycStatus");
       });
 
       it("GIVEN the current date is before maturity WHEN redeeming at maturity THEN transaction fails with BondMaturityDateWrong", async () => {
         await expect(
-          bondFacet.redeemAtMaturityByPartition(account_A, DEFAULT_PARTITION, amount),
+          bondFacet.redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "BondMaturityDateWrong");
       });
       it("GIVEN all conditions are met WHEN redeeming at maturity THEN transaction succeeds and emits RedeemedByPartition", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(ISSUER_ROLE, account_C);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
         await erc1410Facet.connect(signer_C).issueByPartition({
           partition: DEFAULT_PARTITION,
-          tokenHolder: account_A,
+          tokenHolder: signer_A.address,
           value: amount,
           data: "0x",
         });
 
         await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
 
-        await expect(bondFacet.redeemAtMaturityByPartition(account_A, DEFAULT_PARTITION, amount))
+        await expect(bondFacet.redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount))
           .to.emit(bondFacet, "RedeemedByPartition")
-          .withArgs(DEFAULT_PARTITION, account_A, account_A, amount, "0x", "0x");
+          .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
       });
     });
 
@@ -568,10 +289,10 @@ describe("Bond Tests", () => {
         await grantRoleAndPauseToken(
           accessControlFacet,
           pauseFacet,
-          CORPORATE_ACTION_ROLE,
+          ATS_ROLES._CORPORATE_ACTION_ROLE,
           signer_A,
           signer_B,
-          account_C,
+          signer_C.address,
         );
 
         // set coupon fails
@@ -579,7 +300,7 @@ describe("Bond Tests", () => {
       });
 
       it("GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(CORPORATE_ACTION_ROLE, account_C);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
         // set coupon
         const wrongcouponData_1 = {
           recordDate: couponExecutionDateInSeconds.toString(),
@@ -609,11 +330,7 @@ describe("Bond Tests", () => {
       });
 
       it("GIVEN an account with corporateActions role WHEN setCoupon with period THEN period is stored correctly", async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A);
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C);
-        // Using account C (with role)
-        bondFacet = bondFacet.connect(signer_C);
+        await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
         // Create coupon with specific period
         const customPeriod = 3 * 24 * 60 * 60; // 3 days in seconds
@@ -626,12 +343,12 @@ describe("Bond Tests", () => {
         };
 
         // Set coupon and verify event includes period
-        await expect(bondFacet.setCoupon(customCouponData))
+        await expect(bondFacet.connect(signer_C).setCoupon(customCouponData))
           .to.emit(bondFacet, "CouponSet")
           .withArgs(
             "0x0000000000000000000000000000000000000000000000000000000000000001",
             1,
-            account_C,
+            signer_C.address,
             couponRecordDateInSeconds,
             couponExecutionDateInSeconds,
             couponRate,
@@ -644,14 +361,14 @@ describe("Bond Tests", () => {
         expect(registeredCoupon.coupon.period).to.equal(customPeriod);
 
         // Verify couponFor data includes period
-        const couponFor = await bondReadFacet.getCouponFor(1, account_A);
+        const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
         expect(couponFor.period).to.equal(customPeriod);
       });
 
       it("GIVEN an account with corporateActions role WHEN setCoupon with period 0 THEN transaction succeeds", async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A);
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C);
+        await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
         // Using account C (with role)
         bondFacet = bondFacet.connect(signer_C);
 
@@ -669,7 +386,7 @@ describe("Bond Tests", () => {
           .withArgs(
             "0x0000000000000000000000000000000000000000000000000000000000000001",
             1,
-            account_C,
+            signer_C.address,
             couponRecordDateInSeconds,
             couponExecutionDateInSeconds,
             couponRate,
@@ -679,7 +396,7 @@ describe("Bond Tests", () => {
       });
 
       it("GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(CORPORATE_ACTION_ROLE, account_C);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
         // set coupon
         await expect(bondFacet.connect(signer_C).setCoupon(couponData))
@@ -687,7 +404,7 @@ describe("Bond Tests", () => {
           .withArgs(
             "0x0000000000000000000000000000000000000000000000000000000000000001",
             1,
-            account_C,
+            signer_C.address,
             couponRecordDateInSeconds,
             couponExecutionDateInSeconds,
             couponRate,
@@ -700,8 +417,8 @@ describe("Bond Tests", () => {
 
         const listCount = await bondReadFacet.getCouponCount();
         const coupon = await bondReadFacet.getCoupon(1);
-        const couponFor = await bondReadFacet.getCouponFor(1, account_A);
-        const couponAmountFor = await bondReadFacet.getCouponAmountFor(1, account_A);
+        const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
+        const couponAmountFor = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
         const couponTotalHolders = await bondReadFacet.getTotalCouponHolders(1);
         const couponHolders = await bondReadFacet.getCouponHolders(1, 0, couponTotalHolders);
 
@@ -725,9 +442,9 @@ describe("Bond Tests", () => {
       });
 
       it("GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(CORPORATE_ACTION_ROLE, account_C);
-        await accessControlFacet.connect(signer_A).grantRole(LOCKER_ROLE, account_C);
-        await accessControlFacet.connect(signer_A).grantRole(ISSUER_ROLE, account_C);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
         // issue and lock
         const TotalAmount = numberOfUnits;
@@ -735,12 +452,12 @@ describe("Bond Tests", () => {
 
         await erc1410Facet.connect(signer_C).issueByPartition({
           partition: DEFAULT_PARTITION,
-          tokenHolder: account_A,
+          tokenHolder: signer_A.address,
           value: TotalAmount,
           data: "0x",
         });
 
-        await lockFacet.connect(signer_C).lock(LockedAmount, account_A, MAX_UINT256);
+        await lockFacet.connect(signer_C).lock(LockedAmount, signer_A.address, MAX_UINT256);
 
         // set coupon
         await expect(bondFacet.connect(signer_C).setCoupon(couponData))
@@ -748,7 +465,7 @@ describe("Bond Tests", () => {
           .withArgs(
             "0x0000000000000000000000000000000000000000000000000000000000000001",
             1,
-            account_C,
+            signer_C.address,
             couponRecordDateInSeconds,
             couponExecutionDateInSeconds,
             couponRate,
@@ -758,10 +475,10 @@ describe("Bond Tests", () => {
 
         // check list members
         await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-        await accessControlFacet.connect(signer_A).revokeRole(ISSUER_ROLE, account_C);
+        await accessControlFacet.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
-        const couponFor = await bondReadFacet.getCouponFor(1, account_A);
-        const couponAmountFor = await bondReadFacet.getCouponAmountFor(1, account_A);
+        const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
+        const couponAmountFor = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
         const bondDetails = await bondReadFacet.getBondDetails();
         const couponTotalHolders = await bondReadFacet.getTotalCouponHolders(1);
         const couponHolders = await bondReadFacet.getCouponHolders(1, 0, couponTotalHolders);
@@ -770,7 +487,7 @@ describe("Bond Tests", () => {
         expect(couponFor.recordDateReached).to.equal(true);
         expect(couponTotalHolders).to.equal(1);
         expect(couponHolders.length).to.equal(couponTotalHolders);
-        expect(couponHolders).to.have.members([account_A]);
+        expect(couponHolders).to.have.members([signer_A.address]);
         expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
         expect(couponAmountFor.numerator).to.equal(
           couponFor.tokenBalance.mul(bondDetails.nominalValue).mul(couponFor.rate).mul(couponFor.period),
@@ -783,8 +500,8 @@ describe("Bond Tests", () => {
       });
 
       it("GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(CORPORATE_ACTION_ROLE, account_C);
-        await accessControlFacet.connect(signer_A).grantRole(ISSUER_ROLE, account_C);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
         // issue and hold
         const TotalAmount = numberOfUnits;
@@ -792,7 +509,7 @@ describe("Bond Tests", () => {
 
         await erc1410Facet.connect(signer_C).issueByPartition({
           partition: DEFAULT_PARTITION,
-          tokenHolder: account_A,
+          tokenHolder: signer_A.address,
           value: TotalAmount,
           data: "0x",
         });
@@ -800,7 +517,7 @@ describe("Bond Tests", () => {
         const hold = {
           amount: HeldAmount,
           expirationTimestamp: MAX_UINT256,
-          escrow: account_B,
+          escrow: signer_B.address,
           to: ADDRESS_ZERO,
           data: "0x",
         };
@@ -813,7 +530,7 @@ describe("Bond Tests", () => {
           .withArgs(
             "0x0000000000000000000000000000000000000000000000000000000000000001",
             1,
-            account_C,
+            signer_C.address,
             couponRecordDateInSeconds,
             couponExecutionDateInSeconds,
             couponRate,
@@ -823,10 +540,10 @@ describe("Bond Tests", () => {
 
         // check list members
         await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-        await accessControlFacet.connect(signer_A).revokeRole(ISSUER_ROLE, account_C);
+        await accessControlFacet.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
-        const couponFor = await bondReadFacet.getCouponFor(1, account_A);
-        const couponAmountFor = await bondReadFacet.getCouponAmountFor(1, account_A);
+        const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
+        const couponAmountFor = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
         const bondDetails = await bondReadFacet.getBondDetails();
         const couponTotalHolders = await bondReadFacet.getTotalCouponHolders(1);
         const couponHolders = await bondReadFacet.getCouponHolders(1, 0, couponTotalHolders);
@@ -835,7 +552,7 @@ describe("Bond Tests", () => {
         expect(couponFor.recordDateReached).to.equal(true);
         expect(couponTotalHolders).to.equal(1);
         expect(couponHolders.length).to.equal(couponTotalHolders);
-        expect(couponHolders).to.have.members([account_A]);
+        expect(couponHolders).to.have.members([signer_A.address]);
         expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
         expect(couponAmountFor.numerator).to.equal(
           couponFor.tokenBalance.mul(bondDetails.nominalValue).mul(couponFor.rate).mul(couponFor.period),
@@ -850,7 +567,7 @@ describe("Bond Tests", () => {
       it("GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds", async () => {
         // * Arrange
         // Granting Role to account C
-        await accessControlFacet.connect(signer_A).grantRole(BOND_MANAGER_ROLE, account_C);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address);
         // Get maturity date
         const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
         // New maturity date
@@ -868,7 +585,7 @@ describe("Bond Tests", () => {
       it("GIVEN an account with bondManager role WHEN setMaturityDate to earlier date THEN transaction fails", async () => {
         // * Arrange
         // Granting Role to account C
-        await accessControlFacet.connect(signer_A).grantRole(BOND_MANAGER_ROLE, account_C);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._BOND_MANAGER_ROLE, signer_C.address);
         // Get maturity date
         const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
         // New maturity date (earlier than current)
@@ -905,7 +622,14 @@ describe("Bond Tests", () => {
       it("GIVEN a paused Token WHEN setMaturityDate THEN transaction fails with TokenIsPaused", async () => {
         // * Arrange
         // Granting Role to account C and Pause
-        await grantRoleAndPauseToken(accessControlFacet, pauseFacet, BOND_MANAGER_ROLE, signer_A, signer_B, account_C);
+        await grantRoleAndPauseToken(
+          accessControlFacet,
+          pauseFacet,
+          ATS_ROLES._BOND_MANAGER_ROLE,
+          signer_A,
+          signer_B,
+          signer_C.address,
+        );
         // Get maturity date
         const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
         // New maturity date
@@ -922,9 +646,9 @@ describe("Bond Tests", () => {
       });
 
       it("Given a coupon and account with normal, cleared, held, locked and frozen balance WHEN  getCouponFor THEN sum of balances is correct", async () => {
-        await accessControlFacet.connect(signer_A).grantRole(CORPORATE_ACTION_ROLE, account_C);
-        await accessControlFacet.connect(signer_A).grantRole(LOCKER_ROLE, account_C);
-        await accessControlFacet.connect(signer_A).grantRole(ISSUER_ROLE, account_C);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_C.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
         const totalAmount = numberOfUnits;
         const lockedAmount = totalAmount / 5;
@@ -934,7 +658,7 @@ describe("Bond Tests", () => {
 
         await erc1410Facet.connect(signer_C).issueByPartition({
           partition: DEFAULT_PARTITION,
-          tokenHolder: account_A,
+          tokenHolder: signer_A.address,
           value: totalAmount,
           data: "0x",
         });
@@ -942,14 +666,14 @@ describe("Bond Tests", () => {
         const hold = {
           amount: heldAmount,
           expirationTimestamp: MAX_UINT256,
-          escrow: account_B,
+          escrow: signer_B.address,
           to: ADDRESS_ZERO,
           data: "0x",
         };
 
         await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold);
-        await lockFacet.connect(signer_C).lock(lockedAmount, account_A, MAX_UINT256);
-        await freezeFacet.freezePartialTokens(account_A, frozenAmount);
+        await lockFacet.connect(signer_C).lock(lockedAmount, signer_A.address, MAX_UINT256);
+        await freezeFacet.freezePartialTokens(signer_A.address, frozenAmount);
         await clearingActionsFacet.activateClearing();
 
         const clearingOperation = {
@@ -958,7 +682,7 @@ describe("Bond Tests", () => {
           data: EMPTY_HEX_BYTES,
         };
 
-        await clearingTransferFacet.clearingTransferByPartition(clearingOperation, clearedAmount, account_D);
+        await clearingTransferFacet.clearingTransferByPartition(clearingOperation, clearedAmount, signer_D.address);
 
         // set coupon
         await expect(bondFacet.connect(signer_C).setCoupon(couponData))
@@ -966,7 +690,7 @@ describe("Bond Tests", () => {
           .withArgs(
             "0x0000000000000000000000000000000000000000000000000000000000000001",
             1,
-            account_C,
+            signer_C.address,
             couponRecordDateInSeconds,
             couponExecutionDateInSeconds,
             couponRate,
@@ -975,8 +699,8 @@ describe("Bond Tests", () => {
           );
 
         // --- Pre: before record date -> tokenBalance should be 0 and not reached
-        const before = await bondReadFacet.getCouponFor(1, account_A);
-        const couponAmountForBefore = await bondReadFacet.getCouponAmountFor(1, account_A);
+        const before = await bondReadFacet.getCouponFor(1, signer_A.address);
+        const couponAmountForBefore = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
         expect(before.recordDateReached).to.equal(false);
         expect(before.tokenBalance).to.equal(0);
         expect(couponAmountForBefore.recordDateReached).to.equal(before.recordDateReached);
@@ -985,11 +709,11 @@ describe("Bond Tests", () => {
 
         // Forward time to record date
         await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
-        await accessControlFacet.revokeRole(ISSUER_ROLE, account_C);
+        await accessControlFacet.revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
         // --- Post: after record date -> tokenBalance should be sum of balances
-        const couponFor = await bondReadFacet.getCouponFor(1, account_A);
-        const couponAmountForAfter = await bondReadFacet.getCouponAmountFor(1, account_A);
+        const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
+        const couponAmountForAfter = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
         const bondDetails = await bondReadFacet.getBondDetails();
         expect(couponFor.recordDateReached).to.equal(true);
         expect(couponFor.tokenBalance).to.equal(totalAmount); // normal+cleared+held+locked+frozen
@@ -1007,107 +731,46 @@ describe("Bond Tests", () => {
   });
   describe("Multi Partition", () => {
     it("GIVEN token holder WHEN getting principal For THEN succeeds", async () => {
-      const init_rbacs: Rbac[] = set_initRbacs();
+      await deploySecurityFixture(true);
 
-      const newDiamond = await deployBondFromFactory({
-        adminAccount: account_A,
-        isWhiteList: false,
-        isControllable: true,
-        arePartitionsProtected: false,
-        clearingActive: false,
-        internalKycActivated: true,
-        isMultiPartition: true,
-        name: "TEST_AccessControl",
-        symbol: "TAC",
-        decimals: DECIMALS,
-        isin: isinGenerator(),
-        currency: "0x455552",
-        numberOfUnits: numberOfUnits * 10,
-        nominalValue: 100,
-        nominalValueDecimals: 0,
-        startingDate,
-        maturityDate,
-        regulationType: RegulationType.REG_D,
-        regulationSubType: RegulationSubType.REG_D_506_C,
-        countriesControlListType,
-        listOfCountries,
-        info,
-        init_rbacs,
-        factory,
-        businessLogicResolver: businessLogicResolver.address,
-      });
-
-      await setFacets({ diamond: newDiamond });
-
-      await accessControlFacet.connect(signer_A).grantRole(ISSUER_ROLE, account_C);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
       await erc1410Facet.connect(signer_C).issueByPartition({
         partition: DEFAULT_PARTITION,
-        tokenHolder: account_A,
+        tokenHolder: signer_A.address,
         value: amount,
         data: "0x",
       });
 
       await erc1410Facet.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID,
-        tokenHolder: account_A,
+        tokenHolder: signer_A.address,
         value: amount,
         data: "0x",
       });
 
-      const principalFor = await bondReadFacet.getPrincipalFor(account_A);
+      const principalFor = await bondReadFacet.getPrincipalFor(signer_A.address);
       const bondDetails = await bondReadFacet.getBondDetails();
 
       expect(principalFor.numerator).to.equal(bondDetails.nominalValue.mul(amount).mul(2));
       expect(principalFor.denominator).to.equal(10 ** (bondDetails.nominalValueDecimals + DECIMALS));
     });
+
     it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
-      const init_rbacs: Rbac[] = set_initRbacs();
-
-      const newDiamond = await deployBondFromFactory({
-        adminAccount: account_A,
-        isWhiteList: false,
-        isControllable: true,
-        arePartitionsProtected: false,
-        clearingActive: false,
-        internalKycActivated: true,
-        isMultiPartition: true,
-        name: "TEST_AccessControl",
-        symbol: "TAC",
-        decimals: DECIMALS,
-        isin: isinGenerator(),
-        currency: "0x455552",
-        numberOfUnits,
-        nominalValue: 100,
-        nominalValueDecimals: 0,
-        startingDate,
-        maturityDate,
-        regulationType: RegulationType.REG_D,
-        regulationSubType: RegulationSubType.REG_D_506_C,
-        countriesControlListType,
-        listOfCountries,
-        info,
-        init_rbacs,
-        factory,
-        businessLogicResolver: businessLogicResolver.address,
-      });
-
-      await setFacets({ diamond: newDiamond });
-
-      await accessControlFacet.connect(signer_A).grantRole(ISSUER_ROLE, account_C);
-
+      await deploySecurityFixture(true);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
       await erc1410Facet.connect(signer_C).issueByPartition({
         partition: _PARTITION_ID,
-        tokenHolder: account_A,
+        tokenHolder: signer_A.address,
         value: amount,
         data: "0x",
       });
 
       await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
 
-      await expect(bondFacet.redeemAtMaturityByPartition(account_A, _PARTITION_ID, amount))
+      await expect(bondFacet.redeemAtMaturityByPartition(signer_A.address, _PARTITION_ID, amount))
         .to.emit(bondFacet, "RedeemedByPartition")
-        .withArgs(_PARTITION_ID, account_A, account_A, amount, "0x", "0x");
+        .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x");
     });
   });
 });
