@@ -1,37 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {Common} from '../common/Common.sol';
-import {_SSI_MANAGER_ROLE} from '../constants/roles.sol';
-import {ISsiManagement} from '../interfaces/ssi/ISsiManagement.sol';
+import { Common } from "../common/Common.sol";
+import { _SSI_MANAGER_ROLE } from "../constants/roles.sol";
+import { ISsiManagement } from "../interfaces/ssi/ISsiManagement.sol";
 
 abstract contract SsiManagement is ISsiManagement, Common {
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_SSI_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
         address oldRevocationRegistryAddress = _getRevocationRegistryAddress();
         success_ = _setRevocationRegistryAddress(_revocationRegistryAddress);
-        emit RevocationRegistryUpdated(
-            oldRevocationRegistryAddress,
-            _getRevocationRegistryAddress()
-        );
+        emit RevocationRegistryUpdated(oldRevocationRegistryAddress, _getRevocationRegistryAddress());
     }
 
     function addIssuer(
         address _issuer
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_SSI_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _addIssuer(_issuer);
         if (!success_) {
             revert ListedIssuer(_issuer);
@@ -41,13 +26,7 @@ abstract contract SsiManagement is ISsiManagement, Common {
 
     function removeIssuer(
         address _issuer
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_SSI_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _removeIssuer(_issuer);
         if (!success_) {
             revert UnlistedIssuer(_issuer);
@@ -55,12 +34,7 @@ abstract contract SsiManagement is ISsiManagement, Common {
         emit RemovedFromIssuerList(_msgSender(), _issuer);
     }
 
-    function getRevocationRegistryAddress()
-        external
-        view
-        override
-        returns (address revocationRegistryAddress_)
-    {
+    function getRevocationRegistryAddress() external view override returns (address revocationRegistryAddress_) {
         return _getRevocationRegistryAddress();
     }
 
@@ -68,12 +42,7 @@ abstract contract SsiManagement is ISsiManagement, Common {
         return _isIssuer(_issuer);
     }
 
-    function getIssuerListCount()
-        external
-        view
-        override
-        returns (uint256 issuerListCount_)
-    {
+    function getIssuerListCount() external view override returns (uint256 issuerListCount_) {
         return _getIssuerListCount();
     }
 
