@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import { PauseStorageWrapper } from "../core/pause/PauseStorageWrapper.sol";
 
 abstract contract TotalBalancesStorageWrapper is PauseStorageWrapper {
-    function _getTotalBalance(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 totalBalance);
+    function _getTotalBalance(address _tokenHolder) internal view virtual returns (uint256 totalBalance);
 
     function _getTotalBalanceForAdjustedAt(
         address tokenHolder,

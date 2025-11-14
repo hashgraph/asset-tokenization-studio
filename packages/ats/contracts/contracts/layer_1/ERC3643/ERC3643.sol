@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {_AGENT_ROLE, _TREX_OWNER_ROLE} from '../constants/roles.sol';
-import {IERC3643Management} from '../interfaces/ERC3643/IERC3643Management.sol';
-import {Common} from '../common/Common.sol';
+import { _AGENT_ROLE, _TREX_OWNER_ROLE } from "../constants/roles.sol";
+import { IERC3643Management } from "../interfaces/ERC3643/IERC3643Management.sol";
+import { Common } from "../common/Common.sol";
 
 abstract contract ERC3643Management is IERC3643Management, Common {
     address private constant _ONCHAIN_ID = address(0);
@@ -17,9 +17,7 @@ abstract contract ERC3643Management is IERC3643Management, Common {
         _initialize_ERC3643(_compliance, _identityRegistry);
     }
 
-    function setName(
-        string calldata _name
-    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setName(string calldata _name) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _setName(_name);
 
         emit UpdatedTokenInformation(
@@ -31,9 +29,7 @@ abstract contract ERC3643Management is IERC3643Management, Common {
         );
     }
 
-    function setSymbol(
-        string calldata _symbol
-    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setSymbol(string calldata _symbol) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _setSymbol(_symbol);
 
         emit UpdatedTokenInformation(
@@ -45,9 +41,7 @@ abstract contract ERC3643Management is IERC3643Management, Common {
         );
     }
 
-    function setOnchainID(
-        address _onchainID
-    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setOnchainID(address _onchainID) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         ERC20Storage storage erc20Storage = _erc20Storage();
         _erc3643Storage().onchainID = _onchainID;
 
@@ -60,29 +54,21 @@ abstract contract ERC3643Management is IERC3643Management, Common {
         );
     }
 
-    function setIdentityRegistry(
-        address _identityRegistry
-    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setIdentityRegistry(address _identityRegistry) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         _setIdentityRegistry(_identityRegistry);
         emit IdentityRegistryAdded(_identityRegistry);
     }
 
-    function setCompliance(
-        address _compliance
-    ) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
+    function setCompliance(address _compliance) external override onlyUnpaused onlyRole(_TREX_OWNER_ROLE) {
         _setCompliance(_compliance);
     }
 
-    function addAgent(
-        address _agent
-    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+    function addAgent(address _agent) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
         _addAgent(_agent);
         emit AgentAdded(_agent);
     }
 
-    function removeAgent(
-        address _agent
-    ) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
+    function removeAgent(address _agent) external onlyRole(_getRoleAdmin(_AGENT_ROLE)) onlyUnpaused {
         _removeAgent(_agent);
         emit AgentRemoved(_agent);
     }

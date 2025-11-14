@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {Hold, HoldIdentifier} from './IHold.sol';
+import { Hold, HoldIdentifier } from "./IHold.sol";
 
 interface IHoldTokenHolder {
     event HeldByPartition(
@@ -97,7 +97,5 @@ interface IHoldTokenHolder {
      * @dev Can only be called after the hold is expired
      * @param _holdIdentifier The identifier of the hold to be reclaimed
      */
-    function reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier
-    ) external returns (bool success_);
+    function reclaimHoldByPartition(HoldIdentifier calldata _holdIdentifier) external returns (bool success_);
 }
