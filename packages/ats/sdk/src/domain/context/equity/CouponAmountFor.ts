@@ -203,36 +203,17 @@
 
 */
 
-import ValidatedDomain from '@core/validation/ValidatedArgs';
-import BigDecimal from '../shared/BigDecimal';
-import { SecurityDate } from '../shared/SecurityDate';
-
-export class Dividend extends ValidatedDomain<Dividend> {
-  amountPerUnitOfSecurity: BigDecimal;
-  amountDecimals: number;
-  recordTimeStamp: number;
-  executionTimeStamp: number;
-  snapshotId?: number;
-
+export class DividendAmountFor {
+  numerator: string;
+  denominator: string;
+  recordDateReached: boolean;
   constructor(
-    amountPerUnitOfSecurity: BigDecimal,
-    amountDecimals: number,
-    recordTimeStamp: number,
-    executionTimeStamp: number,
-    snapshotId?: number,
+    numerator: string,
+    denominator: string,
+    recordDateReached: boolean,
   ) {
-    super({
-      executionTimeStamp: (val) => {
-        return SecurityDate.checkDateTimestamp(val, this.recordTimeStamp);
-      },
-    });
-
-    this.amountPerUnitOfSecurity = amountPerUnitOfSecurity;
-    this.amountDecimals = amountDecimals;
-    this.recordTimeStamp = recordTimeStamp;
-    this.executionTimeStamp = executionTimeStamp;
-    this.snapshotId = snapshotId ? snapshotId : undefined;
-
-    ValidatedDomain.handleValidation(Dividend.name, this);
+    this.numerator = numerator;
+    this.denominator = denominator;
+    this.recordDateReached = recordDateReached;
   }
 }

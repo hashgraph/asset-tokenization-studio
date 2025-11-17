@@ -1049,6 +1049,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       recordDate: recordDate.toHexString(),
       executionDate: executionDate.toHexString(),
       amount: amount.toHexString(),
+      amountDecimals: amount.decimals,
     };
     return this.executeWithArgs(
       new EquityUSAFacet__factory().attach(security.toString()),

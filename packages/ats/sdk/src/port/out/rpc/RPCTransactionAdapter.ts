@@ -816,6 +816,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       recordDate: recordDate.toBigNumber(),
       executionDate: executionDate.toBigNumber(),
       amount: amount.toBigNumber(),
+      amountDecimals: amount.decimals,
     };
 
     return this.executeTransaction(

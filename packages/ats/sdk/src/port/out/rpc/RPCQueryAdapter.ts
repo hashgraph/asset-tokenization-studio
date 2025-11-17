@@ -292,6 +292,7 @@ import {
 import { HoldDetails } from '@domain/context/security/Hold';
 import { CouponAmountFor } from '@domain/context/bond/CouponAmountFor';
 import {PrincipalFor} from '@domain/context/bond/PrincipalFor';
+import { DividendAmountFor } from '@domain/context/equity/CouponAmountFor';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -758,6 +759,25 @@ export class RPCQueryAdapter {
     );
   }
 
+  async getDividendAmountFor(
+    address: EvmAddress,
+    target: EvmAddress,
+    dividend: number,
+  ): Promise<DividendAmountFor> {
+    LogService.logTrace(`Getting dividends amount for`);
+
+    const dividendAmountFor = await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getDividendAmountFor(dividend, target.toString());
+
+    return new DividendAmountFor(
+      dividendAmountFor.numerator.toString(),
+      dividendAmountFor.denominator.toString(),
+      dividendAmountFor.recordDateReached
+    );
+  }
+
   async getDividends(address: EvmAddress, dividend: number): Promise<Dividend> {
     LogService.logTrace(`Getting dividends`);
 
@@ -768,6 +788,7 @@ export class RPCQueryAdapter {
 
     return new Dividend(
       new BigDecimal(dividendInfo.dividend.amount.toString()),
+      dividendInfo.dividend.amountDecimals,
       dividendInfo.dividend.recordDate.toNumber(),
       dividendInfo.dividend.executionDate.toNumber(),
       dividendInfo.snapshotId.toNumber(),

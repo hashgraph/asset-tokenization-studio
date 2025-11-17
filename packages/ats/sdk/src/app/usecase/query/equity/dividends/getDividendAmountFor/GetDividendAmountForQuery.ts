@@ -203,36 +203,23 @@
 
 */
 
-import ValidatedDomain from '@core/validation/ValidatedArgs';
-import BigDecimal from '../shared/BigDecimal';
-import { SecurityDate } from '../shared/SecurityDate';
+import { Query } from '@core/query/Query';
+import { QueryResponse } from '@core/query/QueryResponse';
 
-export class Dividend extends ValidatedDomain<Dividend> {
-  amountPerUnitOfSecurity: BigDecimal;
-  amountDecimals: number;
-  recordTimeStamp: number;
-  executionTimeStamp: number;
-  snapshotId?: number;
-
+export class GetDividendAmountForQueryResponse implements QueryResponse {
   constructor(
-    amountPerUnitOfSecurity: BigDecimal,
-    amountDecimals: number,
-    recordTimeStamp: number,
-    executionTimeStamp: number,
-    snapshotId?: number,
+    public readonly numerator: string,
+    public readonly denominator: string,
+    public readonly recordDateReached: boolean,
+  ) {}
+}
+
+export class GetDividendAmountForQuery extends Query<GetDividendAmountForQueryResponse> {
+  constructor(
+    public readonly targetId: string,
+    public readonly securityId: string,
+    public readonly dividendId: number,
   ) {
-    super({
-      executionTimeStamp: (val) => {
-        return SecurityDate.checkDateTimestamp(val, this.recordTimeStamp);
-      },
-    });
-
-    this.amountPerUnitOfSecurity = amountPerUnitOfSecurity;
-    this.amountDecimals = amountDecimals;
-    this.recordTimeStamp = recordTimeStamp;
-    this.executionTimeStamp = executionTimeStamp;
-    this.snapshotId = snapshotId ? snapshotId : undefined;
-
-    ValidatedDomain.handleValidation(Dividend.name, this);
+    super();
   }
 }
