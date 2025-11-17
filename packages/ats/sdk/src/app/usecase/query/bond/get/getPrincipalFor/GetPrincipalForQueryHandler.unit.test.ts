@@ -203,302 +203,104 @@
 
 */
 
-import '../environmentMock';
+import { createMock } from '@golevelup/ts-jest';
 import {
-  SDK,
-  LoggerTransports,
-  CreateBondRequest,
-  GetBondDetailsRequest,
-  GetCouponRequest,
-  GetAllCouponsRequest,
-  SupportedWallets,
-  Network,
-  Bond,
-  GetCouponForRequest,
-  Role,
-  RoleRequest,
-  SetCouponRequest,
-  UpdateMaturityDateRequest,
-} from '@port/in';
-import {
-  CLIENT_ACCOUNT_ECDSA,
-  FACTORY_ADDRESS,
-  RESOLVER_ADDRESS,
-} from '@test/config';
-import { TIME_PERIODS_S } from '@core/Constants';
-import ConnectRequest from '@port/in/request/network/ConnectRequest';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
-import NetworkService from '@service/network/NetworkService';
-import SecurityViewModel from '@port/in/response/SecurityViewModel';
-import Injectable from '@core/injectable/Injectable';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import {
-  CastRegulationSubType,
-  CastRegulationType,
-  RegulationSubType,
-  RegulationType,
-} from '@domain/context/factory/RegulationType';
+  ErrorMsgFixture,
+  EvmAddressPropsFixture,
+} from '@test/fixtures/shared/DataFixture';
+import { ErrorCode } from '@core/error/BaseError';
 import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
-import { Wallet, ethers } from 'ethers';
-import BaseError from '@core/error/BaseError';
+import ContractService from '@service/contract/ContractService';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { GetPrincipalForQueryFixture } from '@test/fixtures/bond/BondFixture';
+import { GetPrincipalForQueryError } from './error/GetPrincipalForQueryError';
+import { GetPrincipalForQueryHandler } from './GetPrincipalForQueryHandler';
+import AccountService from '@service/account/AccountService';
+import {
+  GetPrincipalForQuery,
+  GetPrincipalForQueryResponse,
+} from './GetPrincipalForQuery';
 
-SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
+describe('GetPrincipalForQueryHandler', () => {
+  let handler: GetPrincipalForQueryHandler;
+  let query: GetPrincipalForQuery;
 
-const decimals = 0;
-const name = 'TEST_SECURITY_TOKEN';
-const symbol = 'TEST';
-const isin = 'ABCDE123456Z';
-const currency = '0x455552';
-const TIME = 30;
-const numberOfUnits = '1000';
-const nominalValue = '100';
-const nominalValueDecimals = 3;
-const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1000;
-const startingDate = currentTimeInSeconds + TIME;
-const maturityDate = startingDate + 365; // 1 year maturity
-const regulationType = RegulationType.REG_S;
-const regulationSubType = RegulationSubType.NONE;
-const countries = 'AF,HG,BN';
-const info = 'Anything';
-const configId =
-  '0x0000000000000000000000000000000000000000000000000000000000000000';
-const configVersion = 0;
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
-const mirrorNode: MirrorNode = {
-  name: 'testmirrorNode',
-  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
-};
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const targetEvmAddress = new EvmAddress(
+    EvmAddressPropsFixture.create().value,
+  );
 
-const rpcNode: JsonRpcRelay = {
-  name: 'testrpcNode',
-  baseUrl: 'http://127.0.0.1:7546/api',
-};
+  const errorMsg = ErrorMsgFixture.create().msg;
+  const numerator = '1';
+  const denominator = '2';
 
-describe('🧪 Bond test', () => {
-  let th: RPCTransactionAdapter;
-  let ns: NetworkService;
-  let mirrorNodeAdapter: MirrorNodeAdapter;
-  let rpcQueryAdapter: RPCQueryAdapter;
-  let bond: SecurityViewModel;
-
-  beforeAll(async () => {
-    mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
-    mirrorNodeAdapter.set(mirrorNode);
-
-    th = Injectable.resolve(RPCTransactionAdapter);
-    ns = Injectable.resolve(NetworkService);
-    rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
-
-    rpcQueryAdapter.init();
-    ns.environment = 'testnet';
-    ns.configuration = {
-      factoryAddress: FACTORY_ADDRESS,
-      resolverAddress: RESOLVER_ADDRESS,
-    };
-    ns.mirrorNode = mirrorNode;
-    ns.rpcNode = rpcNode;
-
-    await th.init(true);
-    //await th.register(undefined, true);
-
-    const url = 'http://127.0.0.1:7546';
-    const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
-
-    th.setSignerOrProvider(
-      new Wallet(
-        CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-        customHttpProvider,
-      ),
+  beforeEach(() => {
+    handler = new GetPrincipalForQueryHandler(
+      queryAdapterServiceMock,
+      accountServiceMock,
+      contractServiceMock,
     );
+    query = GetPrincipalForQueryFixture.create();
+  });
 
-    await Network.connect(
-      new ConnectRequest({
-        account: {
-          accountId: CLIENT_ACCOUNT_ECDSA.id.toString(),
-          privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
-        },
-        network: 'testnet',
-        wallet: SupportedWallets.METAMASK,
-        mirrorNode: mirrorNode,
-        rpcNode: rpcNode,
-        debug: true,
-      }),
-    );
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    const requestST = new CreateBondRequest({
-      name: name,
-      symbol: symbol,
-      isin: isin,
-      decimals: decimals,
-      isWhiteList: false,
-      erc20VotesActivated: false,
-      isControllable: true,
-      arePartitionsProtected: false,
-      clearingActive: false,
-      internalKycActivated: true,
-      isMultiPartition: false,
-      diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
-      currency: currency,
-      numberOfUnits: numberOfUnits.toString(),
-      nominalValue: nominalValue,
-      nominalValueDecimals: nominalValueDecimals,
-      startingDate: startingDate.toString(),
-      maturityDate: maturityDate.toString(),
-      regulationType: CastRegulationType.toNumber(regulationType),
-      regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
-      isCountryControlListWhiteList: true,
-      countries: countries,
-      info: info,
-      configId: configId,
-      configVersion: configVersion,
+  describe('execute', () => {
+    it('throws GetPrincipalForQueryError when query fails with uncaught error', async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(query);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(
+        GetPrincipalForQueryError,
+      );
+
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while querying account's principal: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtQueryError,
+      });
     });
+    it('should successfully get principal for amount', async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
+        evmAddress,
+      );
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
+        targetEvmAddress,
+      );
+      queryAdapterServiceMock.getPrincipalFor.mockResolvedValue({
+        numerator,
+        denominator,
+      });
 
-    Injectable.resolveTransactionHandler();
+      const result = await handler.execute(query);
 
-    bond = (await Bond.create(requestST)).security;
-
-    console.log('bond: ' + JSON.stringify(bond));
-  }, 600_000);
-
-  it('Check Bond Details', async () => {
-    const bondDetails = await Bond.getBondDetails(
-      new GetBondDetailsRequest({
-        bondId: bond.evmDiamondAddress!.toString(),
-      }),
-    );
-
-    expect(bondDetails.currency).toEqual(currency);
-    expect(bondDetails.nominalValue).toEqual(nominalValue);
-    expect(bondDetails.nominalValueDecimals).toEqual(nominalValueDecimals);
-    expect(bondDetails.startingDate.getTime() / 1000).toEqual(startingDate);
-    expect(bondDetails.maturityDate.getTime() / 1000).toEqual(maturityDate);
-  }, 60_000);
-
-  it('Coupons Fixed', async () => {
-    // Manually create a coupon since automatic creation was removed
-    const couponRate = '3';
-    const couponRecordDate = startingDate + 30;
-    const couponExecutionDate = startingDate + 35;
-
-    await Bond.setCoupon(
-      new SetCouponRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        rate: couponRate,
-        recordTimestamp: couponRecordDate.toString(),
-        executionTimestamp: couponExecutionDate.toString(),
-        period: TIME_PERIODS_S.DAY.toString(),
-      }),
-    );
-
-    const coupon = await Bond.getCoupon(
-      new GetCouponRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        couponId: 1,
-      }),
-    );
-
-    const allCoupon = await Bond.getAllCoupons(
-      new GetAllCouponsRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-      }),
-    );
-
-    const couponFor = await Bond.getCouponFor(
-      new GetCouponForRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        couponId: 1,
-      }),
-    );
-
-    const couponAmountFor = await Bond.getCouponAmountFor(
-      new GetCouponForRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        couponId: 1,
-      }),
-    );
-
-    expect(coupon.rate).toEqual(couponRate);
-    expect(coupon.couponId).toEqual(1);
-    expect(coupon.recordDate.getTime() / 1000).toEqual(couponRecordDate);
-    expect(coupon.executionDate.getTime() / 1000).toEqual(couponExecutionDate);
-    expect(couponFor.value).toEqual('0');
-    expect(allCoupon.length).toEqual(1); // Now only 1 manually created coupon
-    expect(couponAmountFor.numerator).toEqual('5');
-    expect(couponAmountFor.denominator).toEqual('3');
-    expect(couponAmountFor.recordDateReached).toEqual(true);
-  }, 600_000);
-
-  it('Coupons Custom', async () => {
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._CORPORATEACTIONS_ROLE,
-      }),
-    );
-
-    const rate = '1';
-    const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
-    const executionTimestamp = recordTimestamp + 1000;
-
-    await Bond.setCoupon(
-      new SetCouponRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        rate: rate,
-        recordTimestamp: recordTimestamp.toString(),
-        executionTimestamp: executionTimestamp.toString(),
-        period: TIME_PERIODS_S.DAY.toString(),
-      }),
-    );
-
-    const coupon = await Bond.getCoupon(
-      new GetCouponRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        couponId: 2, // Second coupon (first one was created in 'Coupons Fixed' test)
-      }),
-    );
-
-    expect(coupon.couponId).toEqual(2);
-    expect(coupon.recordDate.getTime() / 1000).toEqual(recordTimestamp);
-    expect(coupon.executionDate.getTime() / 1000).toEqual(executionTimestamp);
-  }, 600_000);
-
-  it('Update bond maturity date correctly', async () => {
-    const newMaturityDate = maturityDate + 10;
-    const request = new UpdateMaturityDateRequest({
-      securityId: bond.evmDiamondAddress!.toString(),
-      maturityDate: newMaturityDate.toString(),
+      expect(result).toBeInstanceOf(GetPrincipalForQueryResponse);
+      expect(result.numerator).toStrictEqual(numerator);
+      expect(result.denominator).toStrictEqual(denominator);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+        query.securityId,
+      );
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
+        query.targetId,
+      );
+      expect(queryAdapterServiceMock.getPrincipalFor).toHaveBeenCalledWith(
+        evmAddress,
+        targetEvmAddress,
+      );
     });
-
-    const res = await Bond.updateMaturityDate(request);
-
-    const bondDetails = await Bond.getBondDetails(
-      new GetBondDetailsRequest({
-        bondId: bond.evmDiamondAddress!.toString(),
-      }),
-    );
-    expect(bondDetails.maturityDate.getTime() / 1000).toEqual(newMaturityDate);
-    expect(res.payload).toBe(true);
-  }, 600_000);
-
-  it('Should return error if bond maturity date is earlier than current one', async () => {
-    const newMaturityDate = maturityDate - 10;
-    const request = new UpdateMaturityDateRequest({
-      securityId: bond.evmDiamondAddress!.toString(),
-      maturityDate: newMaturityDate.toString(),
-    });
-
-    let thrownError;
-    try {
-      await Bond.updateMaturityDate(request);
-    } catch (error) {
-      thrownError = error;
-    }
-    expect(thrownError).toBeInstanceOf(BaseError);
-  }, 600_000);
+  });
 });

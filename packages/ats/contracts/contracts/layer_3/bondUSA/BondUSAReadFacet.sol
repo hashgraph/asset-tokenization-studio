@@ -14,10 +14,12 @@ contract BondUSAReadFacet is BondRead, Security {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](9);
+        staticFunctionSelectors_ = new bytes4[](11);
         staticFunctionSelectors_[selectorIndex++] = this.getBondDetails.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getPrincipalFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCouponAmountFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCouponCount.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCouponHolders.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTotalCouponHolders.selector;
