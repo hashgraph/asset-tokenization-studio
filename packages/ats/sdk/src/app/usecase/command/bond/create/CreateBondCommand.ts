@@ -4,7 +4,6 @@ import { Command } from '@core/command/Command';
 import { CommandResponse } from '@core/command/CommandResponse';
 import ContractId from '@domain/context/contract/ContractId';
 import { SecurityProps } from '@domain/context/security/Security';
-import { InterestRateType } from '@domain/context/factory/InterestRateType';
 
 export class CreateBondCommandResponse implements CommandResponse {
   public readonly securityId: ContractId;
@@ -24,7 +23,6 @@ export class CreateBondCommand extends Command<CreateBondCommandResponse> {
     public readonly nominalValueDecimals: number,
     public readonly startingDate: string,
     public readonly maturityDate: string,
-    public readonly interestRateType: InterestRateType,
     public readonly factory?: ContractId,
     public readonly resolver?: ContractId,
     public readonly configId?: string,

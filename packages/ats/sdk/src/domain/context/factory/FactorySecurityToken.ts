@@ -221,20 +221,17 @@ export class FactoryEquityToken {
 export class FactoryBondToken {
   public security: SecurityData;
   public bondDetails: BondDetailsData;
-  public interestRateType: number;
   public proceedRecipients: string[];
   public proceedRecipientsData: string[];
 
   constructor(
     security: SecurityData,
     bondDetails: BondDetailsData,
-    interestRateType: number,
     proceedRecipients: string[],
     proceedRecipientsData: string[],
   ) {
     this.security = security;
     this.bondDetails = bondDetails;
-    this.interestRateType = interestRateType;
     this.proceedRecipients = proceedRecipients;
     this.proceedRecipientsData = proceedRecipientsData;
   }

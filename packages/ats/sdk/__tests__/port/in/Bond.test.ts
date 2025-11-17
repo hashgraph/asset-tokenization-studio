@@ -244,10 +244,7 @@ import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
 import { Wallet, ethers } from 'ethers';
 import BaseError from '@core/error/BaseError';
-import {
-  CastInterestRateType,
-  InterestRateType,
-} from '@domain/context/factory/InterestRateType';
+import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -265,7 +262,6 @@ const startingDate = currentTimeInSeconds + TIME;
 const maturityDate = startingDate + 365; // 1 year maturity
 const regulationType = RegulationType.REG_S;
 const regulationSubType = RegulationSubType.NONE;
-const interestRateType = InterestRateType.FIXED_PER_COUPON;
 const countries = 'AF,HG,BN';
 const info = 'Anything';
 const configId =
@@ -359,7 +355,6 @@ describe('🧪 Bond test', () => {
       info: info,
       configId: configId,
       configVersion: configVersion,
-      interestRateType: CastInterestRateType.toNumber(interestRateType),
     });
 
     Injectable.resolveTransactionHandler();
@@ -399,6 +394,7 @@ describe('🧪 Bond test', () => {
         startTimestamp: '0',
         endTimestamp: TIME_PERIODS_S.DAY.toString(),
         fixingTimestamp: couponFixingDate.toString(),
+        rateStatus: CastRateStatus.toNumber(RateStatus.SET)
       }),
     );
 
@@ -454,6 +450,7 @@ describe('🧪 Bond test', () => {
         startTimestamp: '0',
         endTimestamp: TIME_PERIODS_S.DAY.toString(),
         fixingTimestamp: couponFixingDate.toString(),
+        rateStatus: CastRateStatus.toNumber(RateStatus.PENDING)
       }),
     );
 

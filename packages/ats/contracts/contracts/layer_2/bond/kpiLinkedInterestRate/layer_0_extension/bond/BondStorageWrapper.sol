@@ -34,7 +34,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
         override
         returns (bytes32 corporateActionId_, uint256 couponID_)
     {
-        if (_newCoupon.rateSet) revert interestRateIsKpiLinked();
+        if (_newCoupon.rateStatus != IBondRead.RateCalculationStatus.PENDING) revert interestRateIsKpiLinked();
 
         _newCoupon.rate = 0;
         _newCoupon.rateDecimals = 0;
@@ -68,13 +68,13 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
         returns (IBondRead.CouponFor memory couponFor_)
     {
         couponFor_ = super._getCouponFor(_couponID, _account);
-        if (couponFor_.coupon.rateSet) return couponFor_;
+        if (couponFor_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return couponFor_;
 
         (
             couponFor_.coupon.rate,
             couponFor_.coupon.rateDecimals
         ) = _calculateKpiLinkedInterestRate(couponFor_.coupon);
-        couponFor_.coupon.rateSet = true;
+        couponFor_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
     }
 
     function _addToCouponsOrderedList(
@@ -178,7 +178,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
 
         _coupon.rate = _rate;
         _coupon.rateDecimals = _rateDecimals;
-        _coupon.rateSet = true;
+        _coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
 
         _updateCorporateActionData(actionId, abi.encode(_coupon));
     }
@@ -193,7 +193,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
 
         IBondRead.Coupon memory lastCoupon = _getCoupon(lastCouponId).coupon;
 
-        if (!lastCoupon.rateSet) {
+        if (lastCoupon.rateStatus != IBondRead.RateCalculationStatus.SET) {
             (uint256 rate, ) = _calculateKpiLinkedInterestRate(lastCoupon);
             return rate;
         }

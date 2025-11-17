@@ -309,7 +309,7 @@ import {
 import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
 import NetworkService from '@service/network/NetworkService';
 import MetamaskService from '@service/wallet/metamask/MetamaskService';
-import { CastInterestRateType, InterestRateType } from '@domain/context/factory/InterestRateType';
+import { RateStatus } from '@domain/context/bond/RateStatus';
 
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {
@@ -444,7 +444,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         new FactoryBondToken(
           security,
           details.bondDetails,
-          CastInterestRateType.toNumber(bondInfo.interestRateType),
           proceedRecipients.map((addr) => addr.toString()),
           proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
         ),
@@ -860,6 +859,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     startDate: BigDecimal,
     endDate: BigDecimal,
     fixingDate: BigDecimal,
+    rateStatus: RateStatus,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
@@ -879,6 +879,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       startDate: startDate.toBigNumber(),
       endDate: endDate.toBigNumber(),
       fixingDate: fixingDate.toBigNumber(),
+      rateStatus: rateStatus,
     };
 
     return this.executeTransaction(

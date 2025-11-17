@@ -2,6 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IBondRead {
+    enum RateCalculationStatus {
+        PENDING,
+        SET
+    }
+
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;
@@ -18,7 +23,7 @@ interface IBondRead {
         uint256 fixingDate;
         uint256 rate;
         uint8 rateDecimals;
-        bool rateSet;
+        RateCalculationStatus rateStatus;
     }
 
     struct RegisteredCoupon {

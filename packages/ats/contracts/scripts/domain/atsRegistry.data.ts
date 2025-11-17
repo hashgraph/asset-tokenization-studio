@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-07T11:22:23.317Z
- * Facets: 49
+ * Generated: 2025-11-17T12:40:14.290Z
+ * Facets: 54
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -25,6 +25,10 @@ import {
   AdjustBalancesFacetTimeTravel__factory,
   BondUSAFacet__factory,
   BondUSAFacetTimeTravel__factory,
+  BondUSAFixedRateFacet__factory,
+  BondUSAFixedRateFacetTimeTravel__factory,
+  BondUSAKpiLinkedRateFacet__factory,
+  BondUSAKpiLinkedRateFacetTimeTravel__factory,
   BondUSAReadFacet__factory,
   BondUSAReadFacetTimeTravel__factory,
   CapFacet__factory,
@@ -85,6 +89,8 @@ import {
   ExternalKycListManagementFacetTimeTravel__factory,
   ExternalPauseManagementFacet__factory,
   ExternalPauseManagementFacetTimeTravel__factory,
+  FixedRateFacet__factory,
+  FixedRateFacetTimeTravel__factory,
   FreezeFacet__factory,
   FreezeFacetTimeTravel__factory,
   HoldManagementFacet__factory,
@@ -93,6 +99,8 @@ import {
   HoldReadFacetTimeTravel__factory,
   HoldTokenHolderFacet__factory,
   HoldTokenHolderFacetTimeTravel__factory,
+  KpiLinkedRateFacet__factory,
+  KpiLinkedRateFacetTimeTravel__factory,
   KycFacet__factory,
   KycFacetTimeTravel__factory,
   LockFacet__factory,
@@ -105,10 +113,10 @@ import {
   ProtectedPartitionsFacetTimeTravel__factory,
   ScheduledBalanceAdjustmentsFacet__factory,
   ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
-  ScheduledCrossOrderedTasksFacet__factory,
-  ScheduledCrossOrderedTasksFacetTimeTravel__factory,
   ScheduledCouponListingFacet__factory,
   ScheduledCouponListingFacetTimeTravel__factory,
+  ScheduledCrossOrderedTasksFacet__factory,
+  ScheduledCrossOrderedTasksFacetTimeTravel__factory,
   ScheduledSnapshotsFacet__factory,
   ScheduledSnapshotsFacetTimeTravel__factory,
   SnapshotsFacet__factory,
@@ -214,6 +222,60 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel ? new BondUSAFacetTimeTravel__factory(signer) : new BondUSAFacet__factory(signer),
   },
 
+  BondUSAFixedRateFacet: {
+    name: "BondUSAFixedRateFacet",
+    resolverKey: {
+      name: "_BOND_RESOLVER_KEY",
+      value: "0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef",
+    },
+    inheritance: ["BondUSAFixedRate", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "_initialize_bondUSA",
+        signature: "_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)",
+        selector: "0x653458ea",
+      },
+      {
+        name: "redeemAtMaturityByPartition",
+        signature: "redeemAtMaturityByPartition(address,bytes32,uint256)",
+        selector: "0x8a647211",
+      },
+      { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
+      { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
+    ],
+    errors: [{ name: "interestRateIsFixed", signature: "interestRateIsFixed()", selector: "0x957df4ae" }],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new BondUSAFixedRateFacetTimeTravel__factory(signer) : new BondUSAFixedRateFacet__factory(signer),
+  },
+
+  BondUSAKpiLinkedRateFacet: {
+    name: "BondUSAKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_BOND_RESOLVER_KEY",
+      value: "0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef",
+    },
+    inheritance: ["BondUSAKpiLinkedRate", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "_initialize_bondUSA",
+        signature: "_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)",
+        selector: "0x653458ea",
+      },
+      {
+        name: "redeemAtMaturityByPartition",
+        signature: "redeemAtMaturityByPartition(address,bytes32,uint256)",
+        selector: "0x8a647211",
+      },
+      { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
+      { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
+    ],
+    errors: [{ name: "interestRateIsKpiLinked", signature: "interestRateIsKpiLinked()", selector: "0x556500c9" }],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new BondUSAKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new BondUSAKpiLinkedRateFacet__factory(signer),
+  },
+
   BondUSAReadFacet: {
     name: "BondUSAReadFacet",
     resolverKey: {
@@ -226,7 +288,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
       { name: "getCouponCount", signature: "getCouponCount()", selector: "0x468bb240" },
       { name: "getCouponFor", signature: "getCouponFor(uint256,address)", selector: "0xbba7b56d" },
+      { name: "getCouponFromOrderedListAt", signature: "getCouponFromOrderedListAt(uint256)", selector: "0x65a88a2c" },
       { name: "getCouponHolders", signature: "getCouponHolders(uint256,uint256,uint256)", selector: "0xa92e8371" },
+      { name: "getCouponsOrderedList", signature: "getCouponsOrderedList(uint256,uint256)", selector: "0xd7133de1" },
+      { name: "getCouponsOrderedListTotal", signature: "getCouponsOrderedListTotal()", selector: "0xee1d26eb" },
       { name: "getSecurityHolders", signature: "getSecurityHolders(uint256,uint256)", selector: "0x81438d2f" },
       { name: "getSecurityRegulationData", signature: "getSecurityRegulationData()", selector: "0x8fda5afe" },
       { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
@@ -1499,6 +1564,29 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         : new ExternalPauseManagementFacet__factory(signer),
   },
 
+  FixedRateFacet: {
+    name: "FixedRateFacet",
+    resolverKey: {
+      name: "_FIXED_RATE_RESOLVER_KEY",
+      value: "0x2871e1c37f7423765d88b16528db7e80ad8e2bae5ab5d55e26659840c1d6b504",
+    },
+    inheritance: ["FixedRate", "IStaticFunctionSelectors"],
+    methods: [
+      { name: "getRate", signature: "getRate()", selector: "0x679aefce" },
+      { name: "initialize_FixedRate", signature: "initialize_FixedRate(uint256,uint8)", selector: "0x8abf9e78" },
+      { name: "setRate", signature: "setRate(uint256,uint8)", selector: "0xd1923502" },
+    ],
+    events: [
+      {
+        name: "RateUpdated",
+        signature: "RateUpdated(address,uint256,uint8)",
+        topic0: "0xa7fd66e9450da5029fb2dfd59586274386eb4c169bfc873e265aa29d3df59424",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new FixedRateFacetTimeTravel__factory(signer) : new FixedRateFacet__factory(signer),
+  },
+
   FreezeFacet: {
     name: "FreezeFacet",
     resolverKey: {
@@ -1675,6 +1763,52 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new HoldTokenHolderFacetTimeTravel__factory(signer) : new HoldTokenHolderFacet__factory(signer),
+  },
+
+  KpiLinkedRateFacet: {
+    name: "KpiLinkedRateFacet",
+    resolverKey: {
+      name: "_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x92999bd0329d03e46274ce7743ebe0060df95286df4fa7b354937b7d21757d22",
+    },
+    inheritance: ["KpiLinkedRate", "IStaticFunctionSelectors"],
+    methods: [
+      { name: "getImpactData", signature: "getImpactData()", selector: "0x24bffca8" },
+      { name: "getInterestRate", signature: "getInterestRate()", selector: "0x5257b566" },
+      { name: "getKpiOracle", signature: "getKpiOracle()", selector: "0x507ff519" },
+      {
+        name: "initialize_KpiLinkedRate",
+        signature: "initialize_KpiLinkedRate(InterestRate,ImpactData,address)",
+        selector: "0xe5d591cb",
+      },
+      { name: "setImpactData", signature: "setImpactData(ImpactData)", selector: "0xd58c48f4" },
+      { name: "setInterestRate", signature: "setInterestRate(InterestRate)", selector: "0xf1f2d5d4" },
+      { name: "setKpiOracle", signature: "setKpiOracle(address)", selector: "0xa6a7e233" },
+    ],
+    events: [
+      {
+        name: "ImpactDataUpdated",
+        signature: "ImpactDataUpdated(address,ImpactData)",
+        topic0: "0x1332416d8a331208a5df15d5aca3cfdb455372a2258e35f219261cf3a2f50cdb",
+      },
+      {
+        name: "InterestRateUpdated",
+        signature: "InterestRateUpdated(address,InterestRate)",
+        topic0: "0xed3c060bc037e2b9f05c9d552119ccb2cf7499562ac630370d20178beb1583e7",
+      },
+      {
+        name: "KpiOracleUpdated",
+        signature: "KpiOracleUpdated(address,address)",
+        topic0: "0xb1508b1e352d7d662c2797f56b267cd7f96db139d0ba747ffa2d007bf8a8e823",
+      },
+    ],
+    errors: [
+      { name: "KpiOracleCalledFailed", signature: "KpiOracleCalledFailed()", selector: "0x75d7804c" },
+      { name: "WrongImpactDataValues", signature: "WrongImpactDataValues(ImpactData)", selector: "0xb90540b6" },
+      { name: "WrongInterestRateValues", signature: "WrongInterestRateValues(InterestRate)", selector: "0xf2973d16" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new KpiLinkedRateFacetTimeTravel__factory(signer) : new KpiLinkedRateFacet__factory(signer),
   },
 
   KycFacet: {
@@ -1906,6 +2040,27 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         : new ScheduledBalanceAdjustmentsFacet__factory(signer),
   },
 
+  ScheduledCouponListingFacet: {
+    name: "ScheduledCouponListingFacet",
+    resolverKey: {
+      name: "_SCHEDULED_COUPON_LISTING_RESOLVER_KEY",
+      value: "0x6cc7645ae5bcd122875ce8bd150bd28dda6374546c4c2421e5ae4fdeedb3ab30",
+    },
+    inheritance: ["ScheduledCouponListing", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getScheduledCouponListing",
+        signature: "getScheduledCouponListing(uint256,uint256)",
+        selector: "0x2fcfe49c",
+      },
+      { name: "scheduledCouponListingCount", signature: "scheduledCouponListingCount()", selector: "0x80a84271" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledCouponListingFacetTimeTravel__factory(signer)
+        : new ScheduledCouponListingFacet__factory(signer),
+  },
+
   ScheduledCrossOrderedTasksFacet: {
     name: "ScheduledCrossOrderedTasksFacet",
     resolverKey: {
@@ -1935,37 +2090,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel
         ? new ScheduledCrossOrderedTasksFacetTimeTravel__factory(signer)
         : new ScheduledCrossOrderedTasksFacet__factory(signer),
-  },
-
-  ScheduledCouponListingFacet: {
-    name: "ScheduledCouponListingFacet",
-    resolverKey: {
-      name: "_SCHEDULED_COUPON_LISTING_RESOLVER_KEY",
-      value: "0x6cc7645ae5bcd122875ce8bd150bd28dda6374546c4c2421e5ae4fdeedb3ab30",
-    },
-    inheritance: ["ScheduledCouponListing", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getScheduledCouponListing",
-        signature: "getScheduledCouponListing(uint256,uint256)",
-        selector: "0x72ed9041",
-      },
-      { name: "scheduledCrossOrderedTaskCount", signature: "scheduledCrossOrderedTaskCount()", selector: "0x46883133" },
-      {
-        name: "triggerPendingScheduledCouponListing",
-        signature: "triggerPendingScheduledCouponListing()",
-        selector: "0x32194dbb",
-      },
-      {
-        name: "triggerScheduledCouponListing",
-        signature: "triggerScheduledCouponListing(uint256)",
-        selector: "0x5be4a143",
-      },
-    ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ScheduledCouponListingFacetTimeTravel__factory(signer)
-        : new ScheduledCouponListingFacet__factory(signer),
   },
 
   ScheduledSnapshotsFacet: {
@@ -2178,7 +2302,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 49 as const;
+export const TOTAL_FACETS = 54 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -2287,20 +2411,48 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "BondStorageWrapper",
     inheritance: ["IBondStorageWrapper", "ERC20PermitStorageWrapper"],
     methods: [
+      { name: "_addToCouponsOrderedList", signature: "_addToCouponsOrderedList(uint256)", selector: "0x17a345a0" },
       { name: "_bondStorage", signature: "_bondStorage()", selector: "0x64ccfd52" },
       { name: "_checkMaturityDate", signature: "_checkMaturityDate(uint256)", selector: "0xb9a83231" },
       { name: "_getBondDetails", signature: "_getBondDetails()", selector: "0xdfa65894" },
       { name: "_getCoupon", signature: "_getCoupon(uint256)", selector: "0x39b68379" },
       { name: "_getCouponCount", signature: "_getCouponCount()", selector: "0x293fbc5a" },
       { name: "_getCouponFor", signature: "_getCouponFor(uint256,address)", selector: "0x2abd54cf" },
+      {
+        name: "_getCouponFromOrderedListAt",
+        signature: "_getCouponFromOrderedListAt(uint256)",
+        selector: "0xfc543649",
+      },
       { name: "_getCouponHolders", signature: "_getCouponHolders(uint256,uint256,uint256)", selector: "0xb2962e11" },
+      { name: "_getCouponsOrderedList", signature: "_getCouponsOrderedList(uint256,uint256)", selector: "0x5b924344" },
+      { name: "_getCouponsOrderedListTotal", signature: "_getCouponsOrderedListTotal()", selector: "0xe92862c4" },
+      {
+        name: "_getCouponsOrderedListTotalAdjusted",
+        signature: "_getCouponsOrderedListTotalAdjusted()",
+        selector: "0x8aec23a9",
+      },
       { name: "_getMaturityDate", signature: "_getMaturityDate()", selector: "0xa1522f44" },
       { name: "_getTotalCouponHolders", signature: "_getTotalCouponHolders(uint256)", selector: "0xfba7a1ab" },
-      { name: "_initCoupon", signature: "_initCoupon(bool,bytes32,bytes)", selector: "0x744faa4f" },
+      { name: "_initCoupon", signature: "_initCoupon(bytes32,IBondRead.Coupon)", selector: "0x9b230d29" },
+      { name: "_initialize_bond", signature: "_initialize_bond(IBondRead.BondDetailsData)", selector: "0x158876c6" },
       { name: "_setCoupon", signature: "_setCoupon(IBondRead.Coupon)", selector: "0xf9d474a4" },
       { name: "_setMaturityDate", signature: "_setMaturityDate(uint256)", selector: "0x1c73e162" },
       { name: "_storeBondDetails", signature: "_storeBondDetails(IBondRead.BondDetailsData)", selector: "0x9b11f1cd" },
     ],
+  },
+
+  BondStorageWrapperFixedInterestRate: {
+    name: "BondStorageWrapperFixedInterestRate",
+    inheritance: ["Common"],
+    methods: [],
+    errors: [{ name: "interestRateIsFixed", signature: "interestRateIsFixed()", selector: "0x957df4ae" }],
+  },
+
+  BondStorageWrapperKpiLinkedInterestRate: {
+    name: "BondStorageWrapperKpiLinkedInterestRate",
+    inheritance: ["Common"],
+    methods: [],
+    errors: [{ name: "interestRateIsKpiLinked", signature: "interestRateIsKpiLinked()", selector: "0x556500c9" }],
   },
 
   ControlListStorageWrapper: {
@@ -2339,6 +2491,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         selector: "0xcdef9970",
       },
       { name: "_getCorporateActionData", signature: "_getCorporateActionData(bytes32)", selector: "0x1b957d68" },
+      {
+        name: "_getCorporateActionIdByTypeIndex",
+        signature: "_getCorporateActionIdByTypeIndex(bytes32,uint256)",
+        selector: "0xe7268f50",
+      },
       { name: "_getCorporateActionIds", signature: "_getCorporateActionIds(uint256,uint256)", selector: "0x27b71643" },
       {
         name: "_getCorporateActionIdsByType",
@@ -2356,6 +2513,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         selector: "0x136c8ba2",
       },
       { name: "_getUintResultAt", signature: "_getUintResultAt(bytes32,uint256)", selector: "0xcef779ad" },
+      {
+        name: "_updateCorporateActionData",
+        signature: "_updateCorporateActionData(bytes32,bytes)",
+        selector: "0x56c29fb9",
+      },
       {
         name: "_updateCorporateActionResult",
         signature: "_updateCorporateActionResult(bytes32,uint256,bytes)",
@@ -2399,13 +2561,9 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       { name: "_getVotingCount", signature: "_getVotingCount()", selector: "0x76255491" },
       { name: "_getVotingFor", signature: "_getVotingFor(uint256,address)", selector: "0xe43142ce" },
       { name: "_getVotingHolders", signature: "_getVotingHolders(uint256,uint256,uint256)", selector: "0x60b33e03" },
-      {
-        name: "_initBalanceAdjustment",
-        signature: "_initBalanceAdjustment(bool,bytes32,bytes)",
-        selector: "0x4910464f",
-      },
-      { name: "_initDividend", signature: "_initDividend(bool,bytes32,bytes)", selector: "0x89c22cef" },
-      { name: "_initVotingRights", signature: "_initVotingRights(bool,bytes32,bytes)", selector: "0xdd9c8705" },
+      { name: "_initBalanceAdjustment", signature: "_initBalanceAdjustment(bytes32,bytes)", selector: "0x1e2ad860" },
+      { name: "_initDividend", signature: "_initDividend(bytes32,bytes)", selector: "0xe3abd55c" },
+      { name: "_initVotingRights", signature: "_initVotingRights(bytes32,bytes)", selector: "0xdac55178" },
       { name: "_setDividends", signature: "_setDividends(IEquity.Dividend)", selector: "0x1433fb7c" },
       {
         name: "_setScheduledBalanceAdjustment",
@@ -2766,6 +2924,30 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [{ name: "_isExternallyPaused", signature: "_isExternallyPaused()", selector: "0xb654e4bc" }],
   },
 
+  FixedRateStorageWrapper: {
+    name: "FixedRateStorageWrapper",
+    inheritance: ["KpiLinkedRateStorageWrapper"],
+    methods: [
+      { name: "_fixedRateStorage", signature: "_fixedRateStorage()", selector: "0x7fb74df4" },
+      { name: "_getRate", signature: "_getRate()", selector: "0x94e10784" },
+      { name: "_setRate", signature: "_setRate(uint256,uint8)", selector: "0xece231ea" },
+    ],
+  },
+
+  KpiLinkedRateStorageWrapper: {
+    name: "KpiLinkedRateStorageWrapper",
+    inheritance: ["PauseStorageWrapper"],
+    methods: [
+      { name: "_getImpactData", signature: "_getImpactData()", selector: "0x3d12ba2c" },
+      { name: "_getInterestRate", signature: "_getInterestRate()", selector: "0x88366f9a" },
+      { name: "_getKpiOracle", signature: "_getKpiOracle()", selector: "0xd5877b0c" },
+      { name: "_kpiLinkedRateStorage", signature: "_kpiLinkedRateStorage()", selector: "0x16761626" },
+      { name: "_setImpactData", signature: "_setImpactData(IKpiLinkedRate.ImpactData)", selector: "0xf073c118" },
+      { name: "_setInterestRate", signature: "_setInterestRate(IKpiLinkedRate.InterestRate)", selector: "0x13b3a045" },
+      { name: "_setKpiOracle", signature: "_setKpiOracle(address)", selector: "0xe9f6e413" },
+    ],
+  },
+
   KycStorageWrapper: {
     name: "KycStorageWrapper",
     inheritance: ["ExternalKycListManagementStorageWrapper"],
@@ -2905,7 +3087,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ScheduledBalanceAdjustmentsStorageWrapper: {
     name: "ScheduledBalanceAdjustmentsStorageWrapper",
-    inheritance: ["ScheduledSnapshotsStorageWrapper"],
+    inheritance: ["ScheduledCouponListingStorageWrapper"],
     methods: [
       {
         name: "_addScheduledBalanceAdjustment",
@@ -2942,6 +3124,51 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         name: "_triggerScheduledBalanceAdjustments",
         signature: "_triggerScheduledBalanceAdjustments(uint256)",
         selector: "0x7e38bedb",
+      },
+    ],
+  },
+
+  ScheduledCouponListingStorageWrapper: {
+    name: "ScheduledCouponListingStorageWrapper",
+    inheritance: ["ScheduledSnapshotsStorageWrapper"],
+    methods: [
+      {
+        name: "_addScheduledCouponListing",
+        signature: "_addScheduledCouponListing(uint256,bytes)",
+        selector: "0x38b080c0",
+      },
+      { name: "_addToCouponsOrderedList", signature: "_addToCouponsOrderedList(uint256)", selector: "0x17a345a0" },
+      { name: "_getCouponsOrderedListTotal", signature: "_getCouponsOrderedListTotal()", selector: "0xe92862c4" },
+      {
+        name: "_getPendingScheduledCouponListingTotalAt",
+        signature: "_getPendingScheduledCouponListingTotalAt(uint256)",
+        selector: "0x9c71b9c8",
+      },
+      {
+        name: "_getScheduledCouponListing",
+        signature: "_getScheduledCouponListing(uint256,uint256)",
+        selector: "0x540bf600",
+      },
+      {
+        name: "_getScheduledCouponListingCount",
+        signature: "_getScheduledCouponListingCount()",
+        selector: "0x96a18819",
+      },
+      {
+        name: "_getScheduledCouponListingIdAtIndex",
+        signature: "_getScheduledCouponListingIdAtIndex(uint256)",
+        selector: "0xc543c282",
+      },
+      {
+        name: "_onScheduledCouponListingTriggered",
+        signature: "_onScheduledCouponListingTriggered(uint256,uint256,ScheduledTask)",
+        selector: "0xb3282a32",
+      },
+      { name: "_scheduledCouponListingStorage", signature: "_scheduledCouponListingStorage()", selector: "0x1fb7ab0b" },
+      {
+        name: "_triggerScheduledCouponListing",
+        signature: "_triggerScheduledCouponListing(uint256)",
+        selector: "0x9fd6c988",
       },
     ],
   },
@@ -3000,23 +3227,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
   },
 
-  ScheduledCouponListingStorageWrapper: {
-    name: "ScheduledCouponListingStorageWrapper",
-    inheritance: ["ScheduledTasksCommon"],
-    methods: [
-      { name: "_addScheduledCouponListing", signature: "_addScheduledCouponListing(uint256,bytes)", selector: "0x38b080c0" },
-      { name: "_getScheduledCouponListingCount", signature: "_getScheduledCouponListingCount()", selector: "0x96a18819" },
-      { name: "_getScheduledCouponListing", signature: "_getScheduledCouponListing(uint256,uint256)", selector: "0x540bf600" },
-      {
-        name: "_onScheduledCouponListingTriggered",
-        signature: "_onScheduledCouponListingTriggered(uint256,uint256,ScheduledTask)",
-        selector: "0x06d6c301",
-      },
-      { name: "_scheduledCouponListingStorage", signature: "_scheduledCouponListingStorage()", selector: "0x1fb7ab0b" },
-      { name: "_triggerScheduledCouponListing", signature: "_triggerScheduledCouponListing(uint256)", selector: "09fd6c988" },
-    ],
-  },
-
   SecurityStorageWrapper: {
     name: "SecurityStorageWrapper",
     inheritance: ["EquityStorageWrapper"],
@@ -3072,7 +3282,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   TotalBalancesStorageWrapper: {
     name: "TotalBalancesStorageWrapper",
-    inheritance: ["PauseStorageWrapper"],
+    inheritance: ["FixedRateStorageWrapper"],
     methods: [
       { name: "_getTotalBalance", signature: "_getTotalBalance(address)", selector: "0xc5930def" },
       {
@@ -3142,7 +3352,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 29 as const;
+export const TOTAL_STORAGE_WRAPPERS = 34 as const;
 
 /**
  * All role identifiers extracted from contracts.
@@ -3161,6 +3371,7 @@ export const ROLES = {
   _DEFAULT_ADMIN_ROLE: "0x0000000000000000000000000000000000000000000000000000000000000000",
   _DOCUMENTER_ROLE: "0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41",
   _FREEZE_MANAGER_ROLE: "0xd0e5294c1fc630933e135c5b668c5d577576754d33964d700bbbcdbfd7e1361b",
+  _INTEREST_RATE_MANAGER_ROLE: "0xa174f099c94c902831d8b8a07810700505da86a76ea0bcb7629884ef26cf682e",
   _INTERNAL_KYC_MANAGER_ROLE: "0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e",
   _ISSUER_ROLE: "0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842",
   _KYC_MANAGER_ROLE: "0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449",
@@ -3181,4 +3392,4 @@ export const ROLES = {
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = 28 as const;
+export const TOTAL_ROLES = 29 as const;

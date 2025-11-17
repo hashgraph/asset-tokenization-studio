@@ -246,6 +246,7 @@ import {
   ClearingTransfer,
 } from '@domain/context/security/Clearing';
 import { HoldDetails } from '@domain/context/security/Hold';
+import { RateStatus } from '@domain/context/bond/RateStatus';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -549,6 +550,7 @@ function createBondMockImplementation(
       timeStamp,
       timeStamp,
       timeStamp,
+      RateStatus.PENDING,
     );
     coupons.push(coupon);
   }
@@ -1974,6 +1976,7 @@ jest.mock('@port/out/rpc/RPCTransactionAdapter', () => {
       startDate: BigDecimal,
       endDate: BigDecimal,
       fixingDate: BigDecimal,
+      rateStatus: RateStatus,
     ) => {
       const coupon = new Coupon(
         parseInt(recordDate.toString()),
@@ -1983,6 +1986,7 @@ jest.mock('@port/out/rpc/RPCTransactionAdapter', () => {
         parseInt(startDate.toString()),
         parseInt(endDate.toString()),
         parseInt(fixingDate.toString()),
+        rateStatus,
       );
       coupons.push(coupon);
       return {
@@ -2252,7 +2256,6 @@ jest.mock('@port/out/rpc/RPCTransactionAdapter', () => {
       bondInfo.nominalValueDecimals,
       bondInfo.startingDate,
       _maturityDate,
-      bondInfo.interestRateType,
     );
 
     return { status: 'success', data: [] } as TransactionResponse<

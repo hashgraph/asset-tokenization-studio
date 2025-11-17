@@ -233,6 +233,7 @@ export class SetCouponCommandHandler
         startDate,
         endDate,
         fixingDate,
+        rateStatus,
       } = command;
       const handler = this.transactionService.getHandler();
 
@@ -247,6 +248,7 @@ export class SetCouponCommandHandler
         BigDecimal.fromString(startDate),
         BigDecimal.fromString(endDate),
         BigDecimal.fromString(fixingDate),
+        rateStatus,
         address,
       );
 

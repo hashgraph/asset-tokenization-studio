@@ -59,7 +59,7 @@ import {
   GetProceedRecipientsCountRequest,
   GetProceedRecipientsRequest,
 } from '../request';
-import { CastInterestRateType } from '@domain/context/factory/InterestRateType';
+import { CastRateStatus } from '@domain/context/bond/RateStatus';
 
 interface IBondInPort {
   create(
@@ -161,7 +161,6 @@ class BondInPort implements IBondInPort {
         req.nominalValueDecimals,
         req.startingDate,
         req.maturityDate,
-        CastInterestRateType.fromNumber(req.interestRateType),
         securityFactory ? new ContractId(securityFactory) : undefined,
         resolver ? new ContractId(resolver) : undefined,
         req.configId,
@@ -214,9 +213,6 @@ class BondInPort implements IBondInPort {
       nominalValueDecimals: res.bond.nominalValueDecimals,
       startingDate: new Date(res.bond.startingDate * ONE_THOUSAND),
       maturityDate: new Date(res.bond.maturityDate * ONE_THOUSAND),
-      interestRateType: CastInterestRateType.toNumber(
-        res.bond.interestRateType,
-      ),
     };
 
     return bondDetails;
@@ -234,6 +230,7 @@ class BondInPort implements IBondInPort {
       startTimestamp,
       endTimestamp,
       fixingTimestamp,
+      rateStatus,
     } = request;
     ValidatedRequest.handleValidation('SetCouponRequest', request);
 
@@ -246,6 +243,7 @@ class BondInPort implements IBondInPort {
         startTimestamp,
         endTimestamp,
         fixingTimestamp,
+        CastRateStatus.fromNumber(rateStatus),
       ),
     );
   }
@@ -288,6 +286,7 @@ class BondInPort implements IBondInPort {
       startDate: new Date(res.coupon.startTimeStamp * ONE_THOUSAND),
       endDate: new Date(res.coupon.endTimeStamp * ONE_THOUSAND),
       fixingDate: new Date(res.coupon.fixingTimeStamp * ONE_THOUSAND),
+      rateStatus: CastRateStatus.toNumber(res.coupon.rateStatus),
     };
 
     return coupon;
@@ -439,7 +438,6 @@ class BondInPort implements IBondInPort {
         req.nominalValueDecimals,
         req.startingDate,
         req.maturityDate,
-        CastInterestRateType.fromNumber(req.interestRateType),
         new ContractId(securityFactory),
         new ContractId(resolver),
         req.configId,

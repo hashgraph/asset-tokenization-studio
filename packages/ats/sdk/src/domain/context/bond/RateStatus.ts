@@ -203,22 +203,19 @@
 
 */
 
-export enum InterestRateType {
-  FIXED_FOR_ALL_COUPONS = 'FIXED_FOR_ALL_COUPONS',
-  FIXED_PER_COUPON = 'FIXED_PER_COUPON ',
-  KPI_BASED_PER_COUPON = 'KPI_BASED_PER_COUPON',
+export enum RateStatus {
+  PENDING = 'PENDING',
+  SET = 'SET',
 }
 
-export class CastInterestRateType {
-  static fromNumber(id: number): InterestRateType {
-    if (id == 0) return InterestRateType.FIXED_FOR_ALL_COUPONS;
-    if (id == 1) return InterestRateType.FIXED_PER_COUPON;
-    return InterestRateType.KPI_BASED_PER_COUPON;
+export class CastRateStatus {
+  static fromNumber(id: number): RateStatus {
+    if (id == 0) return RateStatus.PENDING;
+    return RateStatus.SET;
   }
 
-  static toNumber(value: InterestRateType): number {
-    if (value == InterestRateType.FIXED_FOR_ALL_COUPONS) return 0;
-    if (value == InterestRateType.FIXED_PER_COUPON) return 1;
+  static toNumber(value: RateStatus): number {
+    if (value == RateStatus.PENDING) return 0;
     return 2;
   }
 }

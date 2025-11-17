@@ -80,8 +80,6 @@ export class CreateTrexSuiteBondCommandHandler
         proceedRecipientsIds,
         proceedRecipientsData,
 
-        interestRateType,
-
         externalPauses,
         externalControlLists,
         externalKycLists,
@@ -160,7 +158,6 @@ export class CreateTrexSuiteBondCommandHandler
         nominalValueDecimals,
         parseInt(startingDate),
         parseInt(maturityDate),
-        interestRateType,
       );
 
       res = await handler.createTrexSuiteBond(

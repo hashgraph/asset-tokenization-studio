@@ -62,7 +62,6 @@ export class CreateBondCommandHandler
         identityRegistryId,
         proceedRecipientsIds,
         proceedRecipientsData,
-        interestRateType,
       } = command;
 
       //TODO: Boy scout: remove request validations and adjust test
@@ -133,7 +132,6 @@ export class CreateBondCommandHandler
         nominalValueDecimals,
         parseInt(startingDate),
         parseInt(maturityDate),
-        interestRateType,
       );
 
       res = await handler.createBond(

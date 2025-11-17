@@ -8,9 +8,9 @@ import {ISecurity} from '../interfaces/ISecurity.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {BondUSAKpiLinked} from './BondUSAKpiLinked.sol';
+import {BondUSAFixedRate} from './BondUSAFixedRate.sol';
 
-contract BondUSAKpiLinkedFacet is BondUSAKpiLinked, IStaticFunctionSelectors {
+contract BondUSAFixedRateFacet is BondUSAFixedRate, IStaticFunctionSelectors {
     function getStaticResolverKey()
         external
         pure

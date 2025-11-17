@@ -206,7 +206,6 @@
 import ValidatedDomain from '@core/validation/ValidatedArgs';
 import BigDecimal from '../shared/BigDecimal';
 import { SecurityDate } from '../shared/SecurityDate';
-import { InterestRateType } from '../factory/InterestRateType';
 
 export class BondDetails extends ValidatedDomain<BondDetails> {
   currency: string;
@@ -214,7 +213,6 @@ export class BondDetails extends ValidatedDomain<BondDetails> {
   nominalValueDecimals: number;
   startingDate: number;
   maturityDate: number;
-  interestRateType: InterestRateType;
 
   constructor(
     currency: string,
@@ -222,7 +220,6 @@ export class BondDetails extends ValidatedDomain<BondDetails> {
     nominalValueDecimals: number,
     startingDate: number,
     maturityDate: number,
-    interestRateType: InterestRateType,
   ) {
     super({
       maturityDate: (val) => {
@@ -235,7 +232,6 @@ export class BondDetails extends ValidatedDomain<BondDetails> {
     this.nominalValueDecimals = nominalValueDecimals;
     this.startingDate = startingDate;
     this.maturityDate = maturityDate;
-    this.interestRateType = interestRateType;
 
     ValidatedDomain.handleValidation(BondDetails.name, this);
   }

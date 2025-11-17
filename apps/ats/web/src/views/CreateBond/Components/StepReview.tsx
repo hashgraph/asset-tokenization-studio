@@ -337,7 +337,6 @@ export const StepReview = () => {
       nominalValueDecimals: NOMINAL_VALUE_DECIMALS,
       startingDate: dateToUnixTimestamp(startingDate),
       maturityDate: dateToUnixTimestamp(maturityDate),
-      interestRateType: 1,
       currency:
         '0x' +
         currency.charCodeAt(0) +

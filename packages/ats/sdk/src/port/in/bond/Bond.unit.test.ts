@@ -83,7 +83,7 @@ import { IsProceedRecipientQuery } from '@query/security/proceedRecipient/isProc
 import { GetProceedRecipientsCountQuery } from '@query/security/proceedRecipient/getProceedRecipientsCount/GetProceedRecipientsCountQuery';
 import { GetProceedRecipientDataQuery } from '@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQuery';
 import { GetProceedRecipientsQuery } from '@query/security/proceedRecipient/getProceedRecipients/GetProceedRecipientsQuery';
-import { CastInterestRateType } from '@domain/context/factory/InterestRateType';
+import { CastRateStatus } from '@domain/context/bond/RateStatus';
 
 describe('Bond', () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -185,7 +185,6 @@ describe('Bond', () => {
           createBondRequest.nominalValueDecimals,
           createBondRequest.startingDate,
           createBondRequest.maturityDate,
-          CastInterestRateType.fromNumber(createBondRequest.interestRateType),
           new ContractId(factoryAddress),
           new ContractId(resolverAddress),
           createBondRequest.configId,
@@ -252,7 +251,6 @@ describe('Bond', () => {
           createBondRequest.nominalValueDecimals,
           createBondRequest.startingDate,
           createBondRequest.maturityDate,
-          CastInterestRateType.fromNumber(createBondRequest.interestRateType),
           new ContractId(factoryAddress),
           new ContractId(resolverAddress),
           createBondRequest.configId,
@@ -558,6 +556,7 @@ describe('Bond', () => {
           setCouponRequest.startTimestamp,
           setCouponRequest.endTimestamp,
           setCouponRequest.fixingTimestamp,
+          CastRateStatus.fromNumber(setCouponRequest.rateStatus),
         ),
       );
 
@@ -586,6 +585,7 @@ describe('Bond', () => {
           setCouponRequest.startTimestamp,
           setCouponRequest.endTimestamp,
           setCouponRequest.fixingTimestamp,
+          CastRateStatus.fromNumber(setCouponRequest.rateStatus),
         ),
       );
     });
@@ -1358,9 +1358,6 @@ describe('Bond', () => {
           createTrexSuiteBondRequest.nominalValueDecimals,
           createTrexSuiteBondRequest.startingDate,
           createTrexSuiteBondRequest.maturityDate,
-          CastInterestRateType.fromNumber(
-            createTrexSuiteBondRequest.interestRateType,
-          ),
           new ContractId(factoryAddress),
           new ContractId(resolverAddress),
           createTrexSuiteBondRequest.configId,
@@ -1442,9 +1439,6 @@ describe('Bond', () => {
           createTrexSuiteBondRequest.nominalValueDecimals,
           createTrexSuiteBondRequest.startingDate,
           createTrexSuiteBondRequest.maturityDate,
-          CastInterestRateType.fromNumber(
-            createTrexSuiteBondRequest.interestRateType,
-          ),
           new ContractId(factoryAddress),
           new ContractId(resolverAddress),
           createTrexSuiteBondRequest.configId,

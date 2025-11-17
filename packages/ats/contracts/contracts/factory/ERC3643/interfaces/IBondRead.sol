@@ -2,6 +2,11 @@
 pragma solidity ^0.8.17;
 
 interface TRexIBondRead {
+    enum RateCalculationStatus {
+        PENDING,
+        SET
+    }
+
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;
@@ -18,7 +23,7 @@ interface TRexIBondRead {
         uint256 fixingDate;
         uint256 rate;
         uint8 rateDecimals;
-        bool rateSet;
+        RateCalculationStatus rateStatus;
     }
 
     struct RegisteredCoupon {
@@ -69,17 +74,12 @@ interface TRexIBondRead {
      */
     function getTotalCouponHolders(uint256 _couponID) external view returns (uint256);
 
-    function getCouponFromOrderedListAt(
-        uint256 _pos
-    ) external view returns (uint256 couponID_);
+    function getCouponFromOrderedListAt(uint256 _pos) external view returns (uint256 couponID_);
 
     function getCouponsOrderedList(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (uint256[] memory couponIDs_);
 
-    function getCouponsOrderedListTotal()
-        external
-        view
-        returns (uint256 total_);
+    function getCouponsOrderedListTotal() external view returns (uint256 total_);
 }

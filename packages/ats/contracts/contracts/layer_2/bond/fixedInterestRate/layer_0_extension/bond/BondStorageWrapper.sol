@@ -15,10 +15,10 @@ abstract contract BondStorageWrapperFixedInterestRate is Common {
         override
         returns (bytes32 corporateActionId_, uint256 couponID_)
     {
-        if (_newCoupon.rateSet) revert interestRateIsFixed();
+        if (_newCoupon.rateStatus != IBondRead.RateCalculationStatus.PENDING) revert interestRateIsFixed();
 
         (_newCoupon.rate, _newCoupon.rateDecimals) = _getRate();
-        _newCoupon.rateSet = true;
+        _newCoupon.rateStatus = IBondRead.RateCalculationStatus.SET;
 
         return super._setCoupon(_newCoupon);
     }

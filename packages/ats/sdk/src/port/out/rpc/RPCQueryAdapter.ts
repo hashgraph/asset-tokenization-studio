@@ -290,7 +290,7 @@ import {
   ClearingTransfer,
 } from '@domain/context/security/Clearing';
 import { HoldDetails } from '@domain/context/security/Hold';
-import { CastInterestRateType } from '@domain/context/factory/InterestRateType';
+import { CastRateStatus } from '@domain/context/bond/RateStatus';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -683,10 +683,6 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getBondDetails();
 
-    const interestRateType = await this.connect(
-      BondRead__factory,
-      address.toString(),
-    ).getInterestRateType();
 
     return new BondDetails(
       res.currency,
@@ -694,9 +690,6 @@ export class RPCQueryAdapter {
       res.nominalValueDecimals,
       res.startingDate.toNumber(),
       res.maturityDate.toNumber(),
-      CastInterestRateType.fromNumber(
-        interestRateType,
-      )
     );
   }
 
@@ -864,10 +857,11 @@ export class RPCQueryAdapter {
       couponInfo.coupon.executionDate.toNumber(),
       new BigDecimal(couponInfo.coupon.rate.toString()),
       couponInfo.coupon.rateDecimals,
-      couponInfo.snapshotId.toNumber(),
       couponInfo.coupon.startDate.toNumber(),
       couponInfo.coupon.endDate.toNumber(),
       couponInfo.coupon.fixingDate.toNumber(),
+      CastRateStatus.fromNumber(couponInfo.coupon.rateStatus),
+      couponInfo.snapshotId.toNumber(),
     );
   }
 

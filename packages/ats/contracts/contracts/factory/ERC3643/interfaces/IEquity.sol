@@ -70,13 +70,13 @@ interface TRexIEquity {
      * @notice Sets a new dividend
      * @dev Can only be called by an account with the corporate actions role
      */
-    function setDividends(Dividend calldata _newDividend) external returns (bool success_, uint256 dividendID_);
+    function setDividends(Dividend calldata _newDividend) external returns (uint256 dividendID_);
 
     /**
      * @notice Sets a new voting
      * @dev Can only be called by an account with the corporate actions role
      */
-    function setVoting(Voting calldata _newVoting) external returns (bool success_, uint256 voteID_);
+    function setVoting(Voting calldata _newVoting) external returns (uint256 voteID_);
 
     /**
      * @notice Sets a new scheduled balance adjustment

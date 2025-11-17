@@ -265,6 +265,7 @@ export const ProgramCoupon = () => {
       startTimestamp: dateToUnixTimestamp(params.startTimestamp),
       endTimestamp: dateToUnixTimestamp(params.endTimestamp),
       fixingTimestamp: dateToUnixTimestamp(params.fixingTimestamp),
+      rateStatus: 1
     });
 
     createCoupon(request, {

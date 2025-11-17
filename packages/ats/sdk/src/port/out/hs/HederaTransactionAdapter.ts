@@ -312,7 +312,7 @@ import {
 import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { BaseContract, Contract, ContractTransaction } from 'ethers';
-import { CastInterestRateType } from '../../../domain/context/factory/InterestRateType';
+import { RateStatus } from '@domain/context/bond/RateStatus';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -617,7 +617,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       const securityTokenToCreate = new FactoryBondToken(
         security,
         bondDetails,
-        CastInterestRateType.toNumber(bondInfo.interestRateType),
         proceedRecipients.map((addr) => addr.toString()),
         proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
       );
@@ -1091,8 +1090,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     executionDate: BigDecimal,
     rate: BigDecimal,
     startDate: BigDecimal,
-        endDate: BigDecimal,
-        fixingDate: BigDecimal,
+    endDate: BigDecimal,
+    fixingDate: BigDecimal,
+    rateStatus: RateStatus,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(
@@ -1102,7 +1102,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       rate : ${rate},
        startDate: ${startDate},
       endDate: ${endDate},
-      fixingDate: ${fixingDate}`,
+      fixingDate: ${fixingDate},
+      rateStatus: ${rateStatus}`,
     );
 
     const coupon = {
@@ -1113,6 +1114,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       startDate: startDate.toBigNumber(),
       endDate: endDate.toBigNumber(),
       fixingDate: fixingDate.toBigNumber(),
+      rateStatus: rateStatus,
     };
     return this.executeWithArgs(
       new BondUSAFacet__factory().attach(security.toString()),
@@ -3268,7 +3270,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const securityTokenToCreate = new FactoryBondToken(
       securityData,
       bondDetailsData,
-      CastInterestRateType.toNumber(bondDetails.interestRateType),
       proceedRecipients.map((b) => b.toString()),
       proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
     );
