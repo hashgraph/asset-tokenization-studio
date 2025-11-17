@@ -4,15 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     ICorporateActionsStorageWrapper,
     CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {LibCommon} from '../../layer_0/common/libraries/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    _CORPORATE_ACTION_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {ClearingStorageWrapper1} from '../clearing/ClearingStorageWrapper1.sol';
+} from "../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
+import { LibCommon } from "../../layer_0/common/libraries/LibCommon.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { _CORPORATE_ACTION_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { ClearingStorageWrapper1 } from "../clearing/ClearingStorageWrapper1.sol";
 
 abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     using LibCommon for EnumerableSet.Bytes32Set;
@@ -66,26 +62,17 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         _corporateActionsStorage().actionsData[_actionId].data = _newData;
     }
 
-    function _updateCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId,
-        bytes memory newResult
-    ) internal {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        bytes[] memory results = corporateActions_
-            .actionsData[actionId]
-            .results;
+    function _updateCorporateActionResult(bytes32 actionId, uint256 resultId, bytes memory newResult) internal {
+        CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
+        bytes[] memory results = corporateActions_.actionsData[actionId].results;
 
         if (results.length > resultId) {
-            corporateActions_.actionsData[actionId].results[
-                resultId
-            ] = newResult;
+            corporateActions_.actionsData[actionId].results[resultId] = newResult;
             return;
         }
 
         for (uint256 i = results.length; i < resultId; ++i) {
-            corporateActions_.actionsData[actionId].results.push('');
+            corporateActions_.actionsData[actionId].results.push("");
         }
 
         corporateActions_.actionsData[actionId].results.push(newResult);
@@ -109,12 +96,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
             .actionIdByType;
     }
 
-    function _getCorporateActionCount()
-        internal
-        view
-        virtual
-        returns (uint256 corporateActionCount_)
-    {
+    function _getCorporateActionCount() internal view virtual returns (uint256 corporateActionCount_) {
         return _corporateActionsStorage().actions.length();
     }
 
@@ -122,10 +104,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
-            _pageIndex,
-            _pageLength
-        );
+        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(_pageIndex, _pageLength);
     }
 
     function _getCorporateActionCountByType(
@@ -175,27 +154,18 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         uint256 resultId
     ) internal view returns (bytes memory result_) {
         if (_getCorporateActionResultCount(actionId) > resultId)
-            result_ = _corporateActionsStorage().actionsData[actionId].results[
-                resultId
-            ];
+            result_ = _corporateActionsStorage().actionsData[actionId].results[resultId];
     }
 
-    function _getCorporateActionResultCount(
-        bytes32 actionId
-    ) internal view returns (uint256) {
+    function _getCorporateActionResultCount(bytes32 actionId) internal view returns (uint256) {
         return _corporateActionsStorage().actionsData[actionId].results.length;
     }
 
-    function _getCorporateActionData(
-        bytes32 actionId
-    ) internal view returns (bytes memory) {
+    function _getCorporateActionData(bytes32 actionId) internal view returns (bytes memory) {
         return _corporateActionsStorage().actionsData[actionId].data;
     }
 
-    function _getUintResultAt(
-        bytes32 _actionId,
-        uint256 resultId
-    ) internal view returns (uint256) {
+    function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view returns (uint256) {
         bytes memory data = _getCorporateActionResult(_actionId, resultId);
 
         uint256 bytesLength = data.length;
@@ -212,11 +182,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         return value;
     }
 
-    function _corporateActionsStorage()
-        internal
-        pure
-        returns (CorporateActionDataStorage storage corporateActions_)
-    {
+    function _corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {
         bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -224,23 +190,14 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         }
     }
 
-    function _checkMatchingActionType(
-        bytes32 _actionType,
-        uint256 _index
-    ) private view {
+    function _checkMatchingActionType(bytes32 _actionType, uint256 _index) private view {
         if (_getCorporateActionCountByType(_actionType) <= _index)
-            revert ICorporateActionsStorageWrapper.WrongIndexForAction(
-                _index,
-                _actionType
-            );
+            revert ICorporateActionsStorageWrapper.WrongIndexForAction(_index, _actionType);
     }
 
     function _checkDates(uint256 _firstDate, uint256 _secondDate) private pure {
         if (_secondDate < _firstDate) {
-            revert ICorporateActionsStorageWrapper.WrongDates(
-                _firstDate,
-                _secondDate
-            );
+            revert ICorporateActionsStorageWrapper.WrongDates(_firstDate, _secondDate);
         }
     }
 }

@@ -241,6 +241,7 @@ const currency = '0x455552';
 const TIME = 30;
 const numberOfUnits = '1000';
 const nominalValue = '100';
+const nominalValueDecimals = 3;
 const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1000;
 const startingDate = currentTimeInSeconds + TIME;
 const numberOfCoupons = 15;
@@ -311,6 +312,7 @@ describe('Fireblocks Transaction Adapter test', () => {
       currency: currency,
       numberOfUnits: numberOfUnits.toString(),
       nominalValue: nominalValue,
+      nominalValueDecimals: nominalValueDecimals,
       startingDate: startingDate.toString(),
       maturityDate: maturityDate.toString(),
       regulationType: CastRegulationType.toNumber(regulationType),

@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
+import { _CORPORATE_ACTION_ROLE } from "../../layer_1/constants/roles.sol";
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-} from '../../layer_0/constants/values.sol';
-import {IEquity} from '../interfaces/equity/IEquity.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+} from "../../layer_0/constants/values.sol";
+import { IEquity } from "../interfaces/equity/IEquity.sol";
+import { Common } from "../../layer_1/common/Common.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 abstract contract Equity is IEquity, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -86,12 +84,7 @@ abstract contract Equity is IEquity, Common {
         );
     }
 
-    function getEquityDetails()
-        external
-        view
-        override
-        returns (EquityDetailsData memory equityDetailsData_)
-    {
+    function getEquityDetails() external view override returns (EquityDetailsData memory equityDetailsData_) {
         return _getEquityDetails();
     }
 
@@ -120,12 +113,7 @@ abstract contract Equity is IEquity, Common {
         return _getDividendsFor(_dividendID, _account);
     }
 
-    function getDividendsCount()
-        external
-        view
-        override
-        returns (uint256 dividendCount_)
-    {
+    function getDividendsCount() external view override returns (uint256 dividendCount_) {
         return _getDividendsCount();
     }
 
@@ -137,9 +125,7 @@ abstract contract Equity is IEquity, Common {
         return _getDividendHolders(_dividendID, _pageIndex, _pageLength);
     }
 
-    function getTotalDividendHolders(
-        uint256 _dividendID
-    ) external view returns (uint256) {
+    function getTotalDividendHolders(uint256 _dividendID) external view returns (uint256) {
         return _getTotalDividendHolders(_dividendID);
     }
 
@@ -168,12 +154,7 @@ abstract contract Equity is IEquity, Common {
         return _getVotingFor(_voteID, _account);
     }
 
-    function getVotingCount()
-        external
-        view
-        override
-        returns (uint256 votingCount_)
-    {
+    function getVotingCount() external view override returns (uint256 votingCount_) {
         return _getVotingCount();
     }
 
@@ -185,9 +166,7 @@ abstract contract Equity is IEquity, Common {
         return _getVotingHolders(_voteID, _pageIndex, _pageLength);
     }
 
-    function getTotalVotingHolders(
-        uint256 _voteID
-    ) external view returns (uint256) {
+    function getTotalVotingHolders(uint256 _voteID) external view returns (uint256) {
         return _getTotalVotingHolders(_voteID);
     }
 
@@ -197,28 +176,18 @@ abstract contract Equity is IEquity, Common {
         external
         view
         override
-        onlyMatchingActionType(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-            _balanceAdjustmentID - 1
-        )
+        onlyMatchingActionType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, _balanceAdjustmentID - 1)
         returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
     {
         return _getScheduledBalanceAdjusment(_balanceAdjustmentID);
     }
 
-    function getScheduledBalanceAdjustmentCount()
-        external
-        view
-        override
-        returns (uint256 balanceAdjustmentCount_)
-    {
+    function getScheduledBalanceAdjustmentCount() external view override returns (uint256 balanceAdjustmentCount_) {
         return _getScheduledBalanceAdjustmentsCount();
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initializeEquity(
-        EquityDetailsData calldata _equityDetailsData
-    ) internal {
+    function _initializeEquity(EquityDetailsData calldata _equityDetailsData) internal {
         EquityDataStorage storage equityStorage = _equityStorage();
         equityStorage.initialized = true;
         _storeEquityDetails(_equityDetailsData);

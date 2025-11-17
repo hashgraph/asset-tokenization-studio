@@ -330,6 +330,9 @@ export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
     request.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
     );
+    request.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
     request.votingRight.faker((faker) => faker.datatype.boolean());
     request.liquidationRight.faker((faker) => faker.datatype.boolean());
     request.subscriptionRight.faker((faker) => faker.datatype.boolean());
@@ -601,6 +604,9 @@ export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
     command.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
     );
+    command.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
     command.votingRight.faker((faker) => faker.datatype.boolean());
     command.informationRight.faker((faker) => faker.datatype.boolean());
     command.liquidationRight.faker((faker) => faker.datatype.boolean());
@@ -662,6 +668,9 @@ export const CreateTrexSuiteEquityCommandFixture =
     command.currency.faker((faker) => faker.finance.currencyCode());
     command.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    command.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
     );
     command.votingRight.faker((faker) => faker.datatype.boolean());
     command.informationRight.faker((faker) => faker.datatype.boolean());
@@ -769,6 +778,9 @@ export const EquityDetailsFixture = createFixture<EquityDetails>((props) => {
   );
   props.currency.faker((faker) => faker.finance.currencyCode());
   props.nominalValue.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  props.nominalValueDecimals.faker((faker) =>
+    faker.number.int({ min: 1, max: 5 }),
+  );
 });
 
 export const VotingForFixture = createFixture<VotingFor>((props) => {
@@ -862,6 +874,9 @@ export const CreateTrexSuiteEquityRequestFixture =
     );
     request.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    request.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
     );
     request.votingRight.faker((faker) => faker.datatype.boolean());
     request.liquidationRight.faker((faker) => faker.datatype.boolean());

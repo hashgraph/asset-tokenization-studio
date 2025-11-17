@@ -21,6 +21,7 @@ export class CreateBondCommand extends Command<CreateBondCommandResponse> {
     public readonly security: SecurityProps,
     public readonly currency: string,
     public readonly nominalValue: string,
+    public readonly nominalValueDecimals: number,
     public readonly startingDate: string,
     public readonly maturityDate: string,
     public readonly interestRateType: InterestRateType,

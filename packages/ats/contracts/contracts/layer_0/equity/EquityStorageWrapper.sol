@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    _EQUITY_STORAGE_POSITION
-} from '../../layer_2/constants/storagePositions.sol';
+import { _EQUITY_STORAGE_POSITION } from "../../layer_2/constants/storagePositions.sol";
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
@@ -11,20 +9,13 @@ import {
     SNAPSHOT_RESULT_ID,
     SNAPSHOT_TASK_TYPE,
     BALANCE_ADJUSTMENT_TASK_TYPE
-} from '../../layer_2/constants/values.sol';
-import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    IEquityStorageWrapper
-} from '../../layer_2/interfaces/equity/IEquityStorageWrapper.sol';
-import {BondStorageWrapper} from '../bond/BondStorageWrapper.sol';
+} from "../../layer_2/constants/values.sol";
+import { IEquity } from "../../layer_2/interfaces/equity/IEquity.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { IEquityStorageWrapper } from "../../layer_2/interfaces/equity/IEquityStorageWrapper.sol";
+import { BondStorageWrapper } from "../bond/BondStorageWrapper.sol";
 
-abstract contract EquityStorageWrapper is
-    IEquityStorageWrapper,
-    BondStorageWrapper
-{
+abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrapper {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     struct EquityDataStorage {
@@ -32,9 +23,7 @@ abstract contract EquityStorageWrapper is
         bool initialized;
     }
 
-    function _storeEquityDetails(
-        IEquity.EquityDetailsData memory _equityDetailsData
-    ) internal {
+    function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal {
         _equityStorage().equityDetailsData = _equityDetailsData;
     }
 
@@ -56,15 +45,9 @@ abstract contract EquityStorageWrapper is
             revert IEquityStorageWrapper.DividendCreationFailed();
         }
 
-        IEquity.Dividend memory newDividend = abi.decode(
-            _data,
-            (IEquity.Dividend)
-        );
+        IEquity.Dividend memory newDividend = abi.decode(_data, (IEquity.Dividend));
 
-        _addScheduledCrossOrderedTask(
-            newDividend.recordDate,
-            abi.encode(SNAPSHOT_TASK_TYPE)
-        );
+        _addScheduledCrossOrderedTask(newDividend.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
         _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));
     }
 
@@ -88,10 +71,7 @@ abstract contract EquityStorageWrapper is
 
         IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
 
-        _addScheduledCrossOrderedTask(
-            newVoting.recordDate,
-            abi.encode(SNAPSHOT_TASK_TYPE)
-        );
+        _addScheduledCrossOrderedTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
         _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
     }
 
@@ -119,24 +99,16 @@ abstract contract EquityStorageWrapper is
             revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
         }
 
-        IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
-            .decode(_data, (IEquity.ScheduledBalanceAdjustment));
+        IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi.decode(
+            _data,
+            (IEquity.ScheduledBalanceAdjustment)
+        );
 
-        _addScheduledCrossOrderedTask(
-            newBalanceAdjustment.executionDate,
-            abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
-        );
-        _addScheduledBalanceAdjustment(
-            newBalanceAdjustment.executionDate,
-            abi.encode(_actionId)
-        );
+        _addScheduledCrossOrderedTask(newBalanceAdjustment.executionDate, abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE));
+        _addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, abi.encode(_actionId));
     }
 
-    function _getEquityDetails()
-        internal
-        view
-        returns (IEquity.EquityDetailsData memory equityDetails_)
-    {
+    function _getEquityDetails() internal view returns (IEquity.EquityDetailsData memory equityDetails_) {
         equityDetails_ = _equityStorage().equityDetailsData;
     }
 
@@ -161,16 +133,10 @@ abstract contract EquityStorageWrapper is
         (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
-            (registeredDividend_.dividend) = abi.decode(
-                data,
-                (IEquity.Dividend)
-            );
+            (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
         }
 
-        registeredDividend_.snapshotId = _getUintResultAt(
-            actionId,
-            SNAPSHOT_RESULT_ID
-        );
+        registeredDividend_.snapshotId = _getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
     }
 
     /**
@@ -183,9 +149,7 @@ abstract contract EquityStorageWrapper is
         uint256 _dividendID,
         address _account
     ) internal view returns (IEquity.DividendFor memory dividendFor_) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
-            _dividendID
-        );
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
 
         dividendFor_.amount = registeredDividend.dividend.amount;
         dividendFor_.recordDate = registeredDividend.dividend.recordDate;
@@ -202,11 +166,7 @@ abstract contract EquityStorageWrapper is
         );
     }
 
-    function _getDividendsCount()
-        internal
-        view
-        returns (uint256 dividendCount_)
-    {
+    function _getDividendsCount() internal view returns (uint256 dividendCount_) {
         return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
     }
 
@@ -215,36 +175,22 @@ abstract contract EquityStorageWrapper is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory holders_) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
-            _dividendID
-        );
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
 
-        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
-            return new address[](0);
+        if (registeredDividend.dividend.recordDate >= _blockTimestamp()) return new address[](0);
 
         if (registeredDividend.snapshotId != 0)
-            return
-                _tokenHoldersAt(
-                    registeredDividend.snapshotId,
-                    _pageIndex,
-                    _pageLength
-                );
+            return _tokenHoldersAt(registeredDividend.snapshotId, _pageIndex, _pageLength);
 
         return _getTokenHolders(_pageIndex, _pageLength);
     }
 
-    function _getTotalDividendHolders(
-        uint256 _dividendID
-    ) internal view returns (uint256) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
-            _dividendID
-        );
+    function _getTotalDividendHolders(uint256 _dividendID) internal view returns (uint256) {
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
 
-        if (registeredDividend.dividend.recordDate >= _blockTimestamp())
-            return 0;
+        if (registeredDividend.dividend.recordDate >= _blockTimestamp()) return 0;
 
-        if (registeredDividend.snapshotId != 0)
-            return _totalTokenHoldersAt(registeredDividend.snapshotId);
+        if (registeredDividend.snapshotId != 0) return _totalTokenHoldersAt(registeredDividend.snapshotId);
 
         return _getTotalTokenHolders();
     }
@@ -267,10 +213,7 @@ abstract contract EquityStorageWrapper is
             (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
         }
 
-        registeredVoting_.snapshotId = _getUintResultAt(
-            actionId,
-            SNAPSHOT_RESULT_ID
-        );
+        registeredVoting_.snapshotId = _getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
     }
 
     /**
@@ -301,8 +244,7 @@ abstract contract EquityStorageWrapper is
     }
 
     function _getVotingCount() internal view returns (uint256 votingCount_) {
-        return
-            _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+        return _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
     }
 
     function _getVotingHolders(
@@ -312,29 +254,20 @@ abstract contract EquityStorageWrapper is
     ) internal view returns (address[] memory holders_) {
         IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
 
-        if (registeredVoting.voting.recordDate >= _blockTimestamp())
-            return new address[](0);
+        if (registeredVoting.voting.recordDate >= _blockTimestamp()) return new address[](0);
 
         if (registeredVoting.snapshotId != 0)
-            return
-                _tokenHoldersAt(
-                    registeredVoting.snapshotId,
-                    _pageIndex,
-                    _pageLength
-                );
+            return _tokenHoldersAt(registeredVoting.snapshotId, _pageIndex, _pageLength);
 
         return _getTokenHolders(_pageIndex, _pageLength);
     }
 
-    function _getTotalVotingHolders(
-        uint256 _voteID
-    ) internal view returns (uint256) {
+    function _getTotalVotingHolders(uint256 _voteID) internal view returns (uint256) {
         IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
 
         if (registeredVoting.voting.recordDate >= _blockTimestamp()) return 0;
 
-        if (registeredVoting.snapshotId != 0)
-            return _totalTokenHoldersAt(registeredVoting.snapshotId);
+        if (registeredVoting.snapshotId != 0) return _totalTokenHoldersAt(registeredVoting.snapshotId);
 
         return _getTotalTokenHolders();
     }
@@ -354,33 +287,19 @@ abstract contract EquityStorageWrapper is
         (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
-            (balanceAdjustment_) = abi.decode(
-                data,
-                (IEquity.ScheduledBalanceAdjustment)
-            );
+            (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));
         }
     }
 
-    function _getScheduledBalanceAdjustmentsCount()
-        internal
-        view
-        returns (uint256 balanceAdjustmentCount_)
-    {
-        return
-            _getCorporateActionCountByType(
-                BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-            );
+    function _getScheduledBalanceAdjustmentsCount() internal view returns (uint256 balanceAdjustmentCount_) {
+        return _getCorporateActionCountByType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE);
     }
 
     function _getSnapshotBalanceForIfDateReached(
         uint256 _date,
         uint256 _snapshotId,
         address _account
-    )
-        internal
-        view
-        returns (uint256 balance_, uint8 decimals_, bool dateReached_)
-    {
+    ) internal view returns (uint256 balance_, uint8 decimals_, bool dateReached_) {
         if (_date < _blockTimestamp()) {
             dateReached_ = true;
 
@@ -388,17 +307,11 @@ abstract contract EquityStorageWrapper is
                 ? _getTotalBalanceOfAtSnapshot(_snapshotId, _account)
                 : (_getTotalBalanceForAdjustedAt(_account, _date));
 
-            decimals_ = (_snapshotId != 0)
-                ? _decimalsAtSnapshot(_snapshotId)
-                : _decimalsAdjustedAt(_date);
+            decimals_ = (_snapshotId != 0) ? _decimalsAtSnapshot(_snapshotId) : _decimalsAdjustedAt(_date);
         }
     }
 
-    function _equityStorage()
-        internal
-        pure
-        returns (EquityDataStorage storage equityData_)
-    {
+    function _equityStorage() internal pure returns (EquityDataStorage storage equityData_) {
         bytes32 position = _EQUITY_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    ICorporateActions
-} from '../interfaces/corporateActions/ICorporateActions.sol';
-import {Common} from '../common/Common.sol';
-import {_CORPORATE_ACTION_ROLE} from '../constants/roles.sol';
+import { ICorporateActions } from "../interfaces/corporateActions/ICorporateActions.sol";
+import { Common } from "../common/Common.sol";
+import { _CORPORATE_ACTION_ROLE } from "../constants/roles.sol";
 
 abstract contract CorporateActions is ICorporateActions, Common {
     function addCorporateAction(
@@ -75,10 +73,6 @@ abstract contract CorporateActions is ICorporateActions, Common {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _getCorporateActionIdsByType(
-            _actionType,
-            _pageIndex,
-            _pageLength
-        );
+        corporateActionIds_ = _getCorporateActionIdsByType(_actionType, _pageIndex, _pageLength);
     }
 }

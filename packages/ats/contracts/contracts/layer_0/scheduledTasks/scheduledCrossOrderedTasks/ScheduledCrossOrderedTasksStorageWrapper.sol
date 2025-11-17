@@ -3,13 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     IScheduledCrossOrderedTasks
-} from '../../../layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol';
-import {
-    ScheduledTasksLib
-} from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
-import {
-    _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
+} from "../../../layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
+import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
+import { _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from '../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
@@ -21,25 +17,14 @@ import {
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol';
+} from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
-abstract contract ScheduledCrossOrderedTasksStorageWrapper is
-    ScheduledBalanceAdjustmentsStorageWrapper
-{
-    function _addScheduledCrossOrderedTask(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal {
-        ScheduledTasksLib.addScheduledTask(
-            _scheduledCrossOrderedTaskStorage(),
-            _newScheduledTimestamp,
-            _newData
-        );
+abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAdjustmentsStorageWrapper {
+    function _addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes memory _newData) internal {
+        ScheduledTasksLib.addScheduledTask(_scheduledCrossOrderedTaskStorage(), _newScheduledTimestamp, _newData);
     }
 
-    function _triggerScheduledCrossOrderedTasks(
-        uint256 _max
-    ) internal returns (uint256) {
+    function _triggerScheduledCrossOrderedTasks(uint256 _max) internal returns (uint256) {
         return
             _triggerScheduledTasks(
                 _scheduledCrossOrderedTaskStorage(),
@@ -74,27 +59,15 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is
         }
     }
 
-    function _getScheduledCrossOrderedTaskCount()
-        internal
-        view
-        returns (uint256)
-    {
-        return
-            ScheduledTasksLib.getScheduledTaskCount(
-                _scheduledCrossOrderedTaskStorage()
-            );
+    function _getScheduledCrossOrderedTaskCount() internal view returns (uint256) {
+        return ScheduledTasksLib.getScheduledTaskCount(_scheduledCrossOrderedTaskStorage());
     }
 
     function _getScheduledCrossOrderedTasks(
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (ScheduledTask[] memory scheduledTask_) {
-        return
-            ScheduledTasksLib.getScheduledTasks(
-                _scheduledCrossOrderedTaskStorage(),
-                _pageIndex,
-                _pageLength
-            );
+        return ScheduledTasksLib.getScheduledTasks(_scheduledCrossOrderedTaskStorage(), _pageIndex, _pageLength);
     }
 
     function _scheduledCrossOrderedTaskStorage()

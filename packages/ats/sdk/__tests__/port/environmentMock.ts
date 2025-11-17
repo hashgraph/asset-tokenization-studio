@@ -2249,6 +2249,7 @@ jest.mock('@port/out/rpc/RPCTransactionAdapter', () => {
     bondInfo = new BondDetails(
       bondInfo.currency,
       bondInfo.nominalValue,
+      bondInfo.nominalValueDecimals,
       bondInfo.startingDate,
       _maturityDate,
       bondInfo.interestRateType,

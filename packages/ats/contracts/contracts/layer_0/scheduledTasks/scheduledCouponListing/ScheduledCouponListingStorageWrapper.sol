@@ -28,7 +28,7 @@ abstract contract ScheduledCouponListingStorageWrapper is
         bytes memory _newData
     ) internal {
         ScheduledTasksLib.addScheduledTask(
-            _scheduledCouponListingtorage(),
+            _scheduledCouponListingStorage(),
             _newScheduledTimestamp,
             _newData
         );
@@ -39,7 +39,7 @@ abstract contract ScheduledCouponListingStorageWrapper is
     ) internal returns (uint256) {
         return
             _triggerScheduledTasks(
-                _scheduledCouponListingtorage(),
+                _scheduledCouponListingStorage(),
                 _onScheduledCouponListingTriggered,
                 _max,
                 _blockTimestamp()
@@ -77,7 +77,7 @@ abstract contract ScheduledCouponListingStorageWrapper is
     function _getScheduledCouponListingCount() internal view returns (uint256) {
         return
             ScheduledTasksLib.getScheduledTaskCount(
-                _scheduledCouponListingtorage()
+                _scheduledCouponListingStorage()
             );
     }
 
@@ -87,7 +87,7 @@ abstract contract ScheduledCouponListingStorageWrapper is
     ) internal view returns (ScheduledTask[] memory scheduledCouponListing_) {
         return
             ScheduledTasksLib.getScheduledTasks(
-                _scheduledCouponListingtorage(),
+                _scheduledCouponListingStorage(),
                 _pageIndex,
                 _pageLength
             );
@@ -99,7 +99,7 @@ abstract contract ScheduledCouponListingStorageWrapper is
         total_ = 0;
 
         ScheduledTasksDataStorage
-            storage scheduledCouponListing = _scheduledCouponListingtorage();
+            storage scheduledCouponListing = _scheduledCouponListingStorage();
 
         uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(
             scheduledCouponListing
@@ -123,14 +123,14 @@ abstract contract ScheduledCouponListingStorageWrapper is
         uint256 _index
     ) internal view returns (uint256 couponID_) {
         ScheduledTask memory couponListing = ScheduledTasksLib
-            .getScheduledTasksByIndex(_scheduledCouponListingtorage(), _index);
+            .getScheduledTasksByIndex(_scheduledCouponListingStorage(), _index);
 
         bytes32 actionId = abi.decode(couponListing.data, (bytes32));
 
         (, couponID_, ) = _getCorporateAction(actionId);
     }
 
-    function _scheduledCouponListingtorage()
+    function _scheduledCouponListingStorage()
         internal
         pure
         returns (ScheduledTasksDataStorage storage scheduledCouponListing_)

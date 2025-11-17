@@ -235,7 +235,7 @@ import {
   textToHex,
 } from '../../../utils/format';
 import { FormStepContainer } from '../../../components/FormStepContainer';
-import { NOMINAL_VALUE_FACTOR } from '../../../utils/constants';
+import { NOMINAL_VALUE_DECIMALS } from '../../../utils/constants';
 import { CountriesList } from '../../CreateSecurityCommons/CountriesList';
 import {
   COUNTRY_LIST_ALLOWED,
@@ -333,7 +333,8 @@ export const StepReview = () => {
       isMultiPartition: false,
       diamondOwnerAccount: address,
       numberOfUnits: numberToExponential(numberOfUnits, decimals),
-      nominalValue: (nominalValue * NOMINAL_VALUE_FACTOR).toString(),
+      nominalValue: (nominalValue * 10 ** NOMINAL_VALUE_DECIMALS).toString(),
+      nominalValueDecimals: NOMINAL_VALUE_DECIMALS,
       startingDate: dateToUnixTimestamp(startingDate),
       maturityDate: dateToUnixTimestamp(maturityDate),
       interestRateType: 1,

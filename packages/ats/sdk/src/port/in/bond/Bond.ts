@@ -158,6 +158,7 @@ class BondInPort implements IBondInPort {
         newSecurity,
         req.currency,
         req.nominalValue,
+        req.nominalValueDecimals,
         req.startingDate,
         req.maturityDate,
         CastInterestRateType.fromNumber(req.interestRateType),
@@ -210,6 +211,7 @@ class BondInPort implements IBondInPort {
     const bondDetails: BondDetailsViewModel = {
       currency: res.bond.currency,
       nominalValue: res.bond.nominalValue.toString(),
+      nominalValueDecimals: res.bond.nominalValueDecimals,
       startingDate: new Date(res.bond.startingDate * ONE_THOUSAND),
       maturityDate: new Date(res.bond.maturityDate * ONE_THOUSAND),
       interestRateType: CastInterestRateType.toNumber(
@@ -434,6 +436,7 @@ class BondInPort implements IBondInPort {
         newSecurity,
         req.currency,
         req.nominalValue,
+        req.nominalValueDecimals,
         req.startingDate,
         req.maturityDate,
         CastInterestRateType.fromNumber(req.interestRateType),

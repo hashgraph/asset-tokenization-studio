@@ -232,7 +232,7 @@ import { RouterManager } from '../../../router/RouterManager';
 import { RouteName } from '../../../router/RouteName';
 import { numberToExponential } from '../../../utils/format';
 import { FormStepContainer } from '../../../components/FormStepContainer';
-import { NOMINAL_VALUE_FACTOR } from '../../../utils/constants';
+import { NOMINAL_VALUE_DECIMALS } from '../../../utils/constants';
 import { formatNumber } from '../../../utils/format';
 import { CountriesList } from '../../CreateSecurityCommons/CountriesList';
 import {
@@ -324,7 +324,8 @@ export const StepReview = () => {
         currency.charCodeAt(1) +
         currency.charCodeAt(2),
       numberOfShares: numberToExponential(numberOfShares, decimals),
-      nominalValue: (nominalValue * NOMINAL_VALUE_FACTOR).toString(),
+      nominalValue: (nominalValue * 10 ** NOMINAL_VALUE_DECIMALS).toString(),
+      nominalValueDecimals: NOMINAL_VALUE_DECIMALS,
       regulationType: regulationType,
       regulationSubType: regulationSubType,
       isCountryControlListWhiteList: countriesListType === 2,

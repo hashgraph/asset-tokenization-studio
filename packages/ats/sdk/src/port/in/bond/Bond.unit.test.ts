@@ -182,6 +182,7 @@ describe('Bond', () => {
           }),
           createBondRequest.currency,
           createBondRequest.nominalValue,
+          createBondRequest.nominalValueDecimals,
           createBondRequest.startingDate,
           createBondRequest.maturityDate,
           CastInterestRateType.fromNumber(createBondRequest.interestRateType),
@@ -248,6 +249,7 @@ describe('Bond', () => {
           }),
           createBondRequest.currency,
           createBondRequest.nominalValue,
+          createBondRequest.nominalValueDecimals,
           createBondRequest.startingDate,
           createBondRequest.maturityDate,
           CastInterestRateType.fromNumber(createBondRequest.interestRateType),
@@ -487,6 +489,7 @@ describe('Bond', () => {
         expect.objectContaining({
           currency: expectedResponse.bond.currency,
           nominalValue: expectedResponse.bond.nominalValue.toString(),
+          nominalValueDecimals: expectedResponse.bond.nominalValueDecimals,
           startingDate: new Date(
             expectedResponse.bond.startingDate * ONE_THOUSAND,
           ),
@@ -1352,6 +1355,7 @@ describe('Bond', () => {
           }),
           createTrexSuiteBondRequest.currency,
           createTrexSuiteBondRequest.nominalValue,
+          createTrexSuiteBondRequest.nominalValueDecimals,
           createTrexSuiteBondRequest.startingDate,
           createTrexSuiteBondRequest.maturityDate,
           CastInterestRateType.fromNumber(
@@ -1435,6 +1439,7 @@ describe('Bond', () => {
           }),
           createTrexSuiteBondRequest.currency,
           createTrexSuiteBondRequest.nominalValue,
+          createTrexSuiteBondRequest.nominalValueDecimals,
           createTrexSuiteBondRequest.startingDate,
           createTrexSuiteBondRequest.maturityDate,
           CastInterestRateType.fromNumber(

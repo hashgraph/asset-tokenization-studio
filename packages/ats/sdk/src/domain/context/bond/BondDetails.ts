@@ -211,6 +211,7 @@ import { InterestRateType } from '../factory/InterestRateType';
 export class BondDetails extends ValidatedDomain<BondDetails> {
   currency: string;
   nominalValue: BigDecimal;
+  nominalValueDecimals: number;
   startingDate: number;
   maturityDate: number;
   interestRateType: InterestRateType;
@@ -218,6 +219,7 @@ export class BondDetails extends ValidatedDomain<BondDetails> {
   constructor(
     currency: string,
     nominalValue: BigDecimal,
+    nominalValueDecimals: number,
     startingDate: number,
     maturityDate: number,
     interestRateType: InterestRateType,
@@ -230,6 +232,7 @@ export class BondDetails extends ValidatedDomain<BondDetails> {
 
     this.currency = currency;
     this.nominalValue = nominalValue;
+    this.nominalValueDecimals = nominalValueDecimals;
     this.startingDate = startingDate;
     this.maturityDate = maturityDate;
     this.interestRateType = interestRateType;

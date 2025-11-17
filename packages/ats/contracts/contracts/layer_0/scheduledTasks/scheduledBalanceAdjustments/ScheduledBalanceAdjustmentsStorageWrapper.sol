@@ -17,7 +17,7 @@ import {IEquity} from '../../../layer_2/interfaces/equity/IEquity.sol';
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol';
+} from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
     ScheduledCouponListingStorageWrapper
@@ -33,9 +33,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
         );
     }
 
-    function _triggerScheduledBalanceAdjustments(
-        uint256 _max
-    ) internal returns (uint256) {
+    function _triggerScheduledBalanceAdjustments(uint256 _max) internal returns (uint256) {
         return
             _triggerScheduledTasks(
                 _scheduledBalanceAdjustmentStorage(),
@@ -57,41 +55,24 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
             abi.decode(data, (bytes32))
         );
         if (balanceAdjustmentData.length == 0) return;
-        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi
-            .decode(
-                balanceAdjustmentData,
-                (IEquity.ScheduledBalanceAdjustment)
-            );
+        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
+            balanceAdjustmentData,
+            (IEquity.ScheduledBalanceAdjustment)
+        );
         _adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
 
     function _adjustBalances(uint256 _factor, uint8 _decimals) internal virtual;
 
-    function _getScheduledBalanceAdjustmentCount()
-        internal
-        view
-        returns (uint256)
-    {
-        return
-            ScheduledTasksLib.getScheduledTaskCount(
-                _scheduledBalanceAdjustmentStorage()
-            );
+    function _getScheduledBalanceAdjustmentCount() internal view returns (uint256) {
+        return ScheduledTasksLib.getScheduledTaskCount(_scheduledBalanceAdjustmentStorage());
     }
 
     function _getScheduledBalanceAdjustments(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        internal
-        view
-        returns (ScheduledTask[] memory scheduledBalanceAdjustment_)
-    {
-        return
-            ScheduledTasksLib.getScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                _pageIndex,
-                _pageLength
-            );
+    ) internal view returns (ScheduledTask[] memory scheduledBalanceAdjustment_) {
+        return ScheduledTasksLib.getScheduledTasks(_scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
     }
 
     function _getPendingScheduledBalanceAdjustmentsAt(
@@ -101,31 +82,27 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
         pendingABAF_ = 1;
         pendingDecimals_ = 0;
 
-        ScheduledTasksDataStorage
-            storage scheduledBalanceAdjustments = _scheduledBalanceAdjustmentStorage();
+        ScheduledTasksDataStorage storage scheduledBalanceAdjustments = _scheduledBalanceAdjustmentStorage();
 
-        uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(
-            scheduledBalanceAdjustments
-        );
+        uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(scheduledBalanceAdjustments);
 
         for (uint256 i = 1; i <= scheduledTaskCount; i++) {
             uint256 pos = scheduledTaskCount - i;
 
-            ScheduledTask memory scheduledTask = ScheduledTasksLib
-                .getScheduledTasksByIndex(scheduledBalanceAdjustments, pos);
+            ScheduledTask memory scheduledTask = ScheduledTasksLib.getScheduledTasksByIndex(
+                scheduledBalanceAdjustments,
+                pos
+            );
 
             if (scheduledTask.scheduledTimestamp < _timestamp) {
                 bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
 
-                bytes memory balanceAdjustmentData = _getCorporateActionData(
-                    actionId
-                );
+                bytes memory balanceAdjustmentData = _getCorporateActionData(actionId);
 
-                IEquity.ScheduledBalanceAdjustment
-                    memory balanceAdjustment = abi.decode(
-                        balanceAdjustmentData,
-                        (IEquity.ScheduledBalanceAdjustment)
-                    );
+                IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
+                    balanceAdjustmentData,
+                    (IEquity.ScheduledBalanceAdjustment)
+                );
                 pendingABAF_ *= balanceAdjustment.factor;
                 pendingDecimals_ += balanceAdjustment.decimals;
             } else {

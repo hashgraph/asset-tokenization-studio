@@ -5,6 +5,7 @@ interface TRexIBondRead {
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;
+        uint8 nominalValueDecimals;
         uint256 startingDate;
         uint256 maturityDate;
     }
@@ -34,26 +35,18 @@ interface TRexIBondRead {
     /**
      * @notice Retrieves the bond details
      */
-    function getBondDetails()
-        external
-        view
-        returns (BondDetailsData memory bondDetailsData_);
+    function getBondDetails() external view returns (BondDetailsData memory bondDetailsData_);
 
     /**
      * @notice Retrieves a registered coupon by its ID
      */
-    function getCoupon(
-        uint256 _couponID
-    ) external view returns (RegisteredCoupon memory registeredCoupon_);
+    function getCoupon(uint256 _couponID) external view returns (RegisteredCoupon memory registeredCoupon_);
 
     /**
      * @notice Retrieves coupon information for a specific account and coupon ID
      * @dev Return value includes user balance at cupon record date
      */
-    function getCouponFor(
-        uint256 _couponID,
-        address _account
-    ) external view returns (CouponFor memory couponFor_);
+    function getCouponFor(uint256 _couponID, address _account) external view returns (CouponFor memory couponFor_);
 
     /**
      * @notice Retrieves the total number of coupons set for the bond
@@ -74,9 +67,7 @@ interface TRexIBondRead {
      * @notice Retrieves the total number of coupon holders for a specific coupon ID
      * @dev It is the list of token holders at the snapshot taken at the record date
      */
-    function getTotalCouponHolders(
-        uint256 _couponID
-    ) external view returns (uint256);
+    function getTotalCouponHolders(uint256 _couponID) external view returns (uint256);
 
     function getCouponFromOrderedListAt(
         uint256 _pos

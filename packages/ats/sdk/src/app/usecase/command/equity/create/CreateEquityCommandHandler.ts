@@ -263,6 +263,7 @@ export class CreateEquityCommandHandler
         dividendRight,
         currency,
         nominalValue,
+        nominalValueDecimals,
         externalPausesIds,
         externalControlListsIds,
         externalKycListsIds,
@@ -334,6 +335,7 @@ export class CreateEquityCommandHandler
         dividendRight,
         currency,
         BigDecimal.fromString(nominalValue),
+        nominalValueDecimals,
       );
 
       res = await handler.createEquity(

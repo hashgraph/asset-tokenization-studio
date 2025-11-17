@@ -90,6 +90,9 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
     command.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
     );
+    command.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
     command.startingDate.faker((faker) =>
       faker.date.recent().getTime().toString(),
     );
@@ -153,6 +156,9 @@ export const CreateTrexSuiteBondCommandFixture =
     command.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
     );
+    command.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
     command.startingDate.faker((faker) =>
       faker.date.recent().getTime().toString(),
     );
@@ -210,6 +216,9 @@ export const BondDetailsFixture = createFixture<BondDetails>((props) => {
   props.currency.faker((faker) => faker.finance.currencyCode());
   props.nominalValue.faker((faker) =>
     faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+  );
+  props.nominalValueDecimals.faker((faker) =>
+    faker.number.int({ min: 1, max: 5 }),
   );
   props.startingDate.faker((faker) => faker.date.past());
   props.maturityDate.faker((faker) => faker.date.recent());
@@ -345,6 +354,9 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
     );
     request.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    request.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
     );
     let startingDate: Date;
     request.startingDate.faker((faker) => {
@@ -520,6 +532,9 @@ export const CreateTrexSuiteBondRequestFixture =
     );
     request.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    request.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
     );
     let startingDate: Date;
     request.startingDate.faker((faker) => {

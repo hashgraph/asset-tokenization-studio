@@ -67,6 +67,7 @@ export class CreateTrexSuiteBondCommandHandler
         security,
         currency,
         nominalValue,
+        nominalValueDecimals,
         startingDate,
         maturityDate,
 
@@ -156,6 +157,7 @@ export class CreateTrexSuiteBondCommandHandler
       const bondInfo = new BondDetails(
         currency,
         BigDecimal.fromString(nominalValue),
+        nominalValueDecimals,
         parseInt(startingDate),
         parseInt(maturityDate),
         interestRateType,

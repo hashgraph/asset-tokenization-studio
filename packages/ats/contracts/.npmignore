@@ -1,0 +1,67 @@
+# Test files
+test/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+__tests__/
+
+# Compiled test cases (exclude from distribution)
+build/test/demo/
+build/test/integration/
+build/test/unitTests/
+
+# Development files
+.env
+.env.*
+!.env.sample
+hardhat.config.ts
+tasks/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Build artifacts (not in build/ output)
+cache/
+coverage/
+coverage.json
+gas-report.txt
+slither.db.json
+.nyc_output/
+
+# Exclude massive build-info artifacts (saves ~95MB)
+artifacts/build-info/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.circleci/
+
+# Linting
+.eslintcache
+.prettierignore
+.solhintignore
+eslint.config.mjs
+prettier.config.mjs
+.solhint.json
+.solcover.js
+slither.config.json
+
+# Documentation
+docs/
+README.md
+
+# Misc
+*.log
+npm-debug.log*
+node_modules/
+extracted-methods.txt
+functions.txt
