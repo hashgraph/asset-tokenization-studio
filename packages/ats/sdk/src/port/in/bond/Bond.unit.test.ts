@@ -20,6 +20,7 @@ import {
   GetProceedRecipientsCountRequest,
   GetProceedRecipientDataRequest,
   GetProceedRecipientsRequest,
+  GetPrincipalForRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
@@ -52,6 +53,7 @@ import {
   GetProceedRecipientsCountRequestFixture,
   GetProceedRecipientDataRequestFixture,
   GetProceedRecipientsRequestFixture,
+  GetPrincipalForRequestFixture,
 } from '@test/fixtures/bond/BondFixture';
 import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import { Security } from '@domain/context/security/Security';
@@ -68,6 +70,8 @@ import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
 import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
 import { BigNumber } from 'ethers';
 import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetPrincipalForQuery } from '@query/bond/get/getPrincipalFor/GetPrincipalForQuery';
+import { GetCouponAmountForQuery } from '@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery';
 import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
 import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
@@ -100,6 +104,7 @@ describe('Bond', () => {
   let getCouponHoldersRequest: GetCouponHoldersRequest;
   let getTotalCouponHoldersRequest: GetTotalCouponHoldersRequest;
   let createTrexSuiteBondRequest: CreateTrexSuiteBondRequest;
+  let getPrincipalForRequest: GetPrincipalForRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -632,9 +637,11 @@ describe('Bond', () => {
   });
 
   describe('getCouponFor', () => {
-    getCouponForRequest = new GetCouponForRequest(
-      GetCouponForRequestFixture.create(),
-    );
+    beforeEach(() => {
+      getCouponForRequest = new GetCouponForRequest(
+        GetCouponForRequestFixture.create(),
+      );
+    });
     it('should get coupon for successfully', async () => {
       const expectedResponse = {
         payload: new BigDecimal(BigNumber.from(10)),
@@ -719,6 +726,185 @@ describe('Bond', () => {
       await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(
         ValidationError,
       );
+    });
+  });
+
+  describe('getCouponAmountFor', () => {
+    beforeEach(() => {
+      getCouponForRequest = new GetCouponForRequest(
+        GetCouponForRequestFixture.create(),
+      );
+    });
+    it('should get coupon for successfully', async () => {
+      const expectedResponse = {
+        numerator: '10',
+        denominator: '4',
+        recordDateReached: true,
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.getCouponAmountFor(getCouponForRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetCouponForRequest',
+        getCouponForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetCouponAmountForQuery(
+          getCouponForRequest.targetId,
+          getCouponForRequest.securityId,
+          getCouponForRequest.couponId,
+        ),
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          numerator: expectedResponse.numerator,
+          denominator: expectedResponse.denominator,
+          recordDateReached: expectedResponse.recordDateReached,
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetCouponForRequest',
+        getCouponForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetCouponAmountForQuery(
+          getCouponForRequest.targetId,
+          getCouponForRequest.securityId,
+          getCouponForRequest.couponId,
+        ),
+      );
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      getCouponForRequest = new GetCouponForRequest({
+        ...GetCouponForRequestFixture.create(),
+        targetId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getCouponForRequest = new GetCouponForRequest({
+        ...GetCouponForRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if couponId is invalid', async () => {
+      getCouponForRequest = new GetCouponForRequest({
+        ...GetCouponForRequestFixture.create(),
+        couponId: 0,
+      });
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getPrincipalFor', () => {
+    beforeEach(() => {
+      getPrincipalForRequest = new GetPrincipalForRequest(
+        GetPrincipalForRequestFixture.create(),
+      );
+    });
+    it('should get principal for successfully', async () => {
+      const expectedResponse = {
+        numerator: '10',
+        denominator: '4',
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.getPrincipalFor(getPrincipalForRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetPrincipalForRequest',
+        getPrincipalForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetPrincipalForQuery(
+          getPrincipalForRequest.targetId,
+          getPrincipalForRequest.securityId,
+        ),
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          numerator: expectedResponse.numerator,
+          denominator: expectedResponse.denominator,
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.getPrincipalFor(getPrincipalForRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetPrincipalForRequest',
+        getPrincipalForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetPrincipalForQuery(
+          getPrincipalForRequest.targetId,
+          getPrincipalForRequest.securityId,
+        ),
+      );
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      getPrincipalForRequest = new GetPrincipalForRequest({
+        ...GetPrincipalForRequestFixture.create(),
+        targetId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getPrincipalFor(getPrincipalForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getPrincipalForRequest = new GetPrincipalForRequest({
+        ...GetPrincipalForRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getPrincipalFor(getPrincipalForRequest),
+      ).rejects.toThrow(ValidationError);
     });
   });
 

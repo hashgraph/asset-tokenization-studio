@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-07T11:22:23.317Z
+ * Generated: 2025-11-14T10:28:51.623Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -222,9 +222,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       { name: "getBondDetails", signature: "getBondDetails()", selector: "0x4ce02414" },
       { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
+      { name: "getCouponAmountFor", signature: "getCouponAmountFor(uint256,address)", selector: "0x439efc2e" },
       { name: "getCouponCount", signature: "getCouponCount()", selector: "0x468bb240" },
       { name: "getCouponFor", signature: "getCouponFor(uint256,address)", selector: "0xbba7b56d" },
       { name: "getCouponHolders", signature: "getCouponHolders(uint256,uint256,uint256)", selector: "0xa92e8371" },
+      { name: "getPrincipalFor", signature: "getPrincipalFor(address)", selector: "0x6f131c78" },
       { name: "getSecurityHolders", signature: "getSecurityHolders(uint256,uint256)", selector: "0x81438d2f" },
       { name: "getSecurityRegulationData", signature: "getSecurityRegulationData()", selector: "0x8fda5afe" },
       { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
@@ -2258,10 +2260,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       { name: "_checkMaturityDate", signature: "_checkMaturityDate(uint256)", selector: "0xb9a83231" },
       { name: "_getBondDetails", signature: "_getBondDetails()", selector: "0xdfa65894" },
       { name: "_getCoupon", signature: "_getCoupon(uint256)", selector: "0x39b68379" },
+      { name: "_getCouponAmountFor", signature: "_getCouponAmountFor(uint256,address)", selector: "0xe744f18d" },
       { name: "_getCouponCount", signature: "_getCouponCount()", selector: "0x293fbc5a" },
       { name: "_getCouponFor", signature: "_getCouponFor(uint256,address)", selector: "0x2abd54cf" },
       { name: "_getCouponHolders", signature: "_getCouponHolders(uint256,uint256,uint256)", selector: "0xb2962e11" },
       { name: "_getMaturityDate", signature: "_getMaturityDate()", selector: "0xa1522f44" },
+      { name: "_getPrincipalFor", signature: "_getPrincipalFor(address)", selector: "0xc8e42efe" },
       { name: "_getTotalCouponHolders", signature: "_getTotalCouponHolders(uint256)", selector: "0xfba7a1ab" },
       { name: "_initCoupon", signature: "_initCoupon(bool,bytes32,bytes)", selector: "0x744faa4f" },
       { name: "_setCoupon", signature: "_setCoupon(IBondRead.Coupon)", selector: "0xf9d474a4" },

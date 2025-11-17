@@ -290,7 +290,8 @@ import {
   ClearingTransfer,
 } from '@domain/context/security/Clearing';
 import { HoldDetails } from '@domain/context/security/Hold';
-import { start } from 'repl';
+import { CouponAmountFor } from '@domain/context/bond/CouponAmountFor';
+import {PrincipalFor} from '@domain/context/bond/PrincipalFor';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -841,6 +842,42 @@ export class RPCQueryAdapter {
     ).getCouponFor(coupon, target.toString());
 
     return couponFor.tokenBalance;
+  }
+
+  async getCouponAmountFor(
+    address: EvmAddress,
+    target: EvmAddress,
+    coupon: number,
+  ): Promise<CouponAmountFor> {
+    LogService.logTrace(`Getting Coupon Amount for`);
+
+    const couponAmountFor = await this.connect(
+      BondRead__factory,
+      address.toString(),
+    ).getCouponAmountFor(coupon, target.toString());
+
+    return new CouponAmountFor(
+      couponAmountFor.numerator.toString(),
+      couponAmountFor.denominator.toString(),
+      couponAmountFor.recordDateReached
+    );
+  }
+
+  async getPrincipalFor(
+    address: EvmAddress,
+    target: EvmAddress,
+  ): Promise<PrincipalFor> {
+    LogService.logTrace(`Getting Principal for`);
+
+    const principalFor = await this.connect(
+      BondRead__factory,
+      address.toString(),
+    ).getPrincipalFor(target.toString());
+
+    return new PrincipalFor(
+      principalFor.numerator.toString(),
+      principalFor.denominator.toString(),
+    );
   }
 
   async getCoupon(address: EvmAddress, coupon: number): Promise<Coupon> {

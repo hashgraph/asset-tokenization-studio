@@ -399,6 +399,7 @@ import GetProceedRecipientDataRequest from './bond/GetProceedRecipientDataReques
 import GetProceedRecipientsCountRequest from './bond/GetProceedRecipientsCountRequest';
 import GetProceedRecipientsRequest from './bond/GetProceedRecipientsRequest';
 import IsProceedRecipientRequest from './bond/IsProceedRecipientRequest';
+import GetPrincipalForRequest from './bond/GetPrincipalForRequest';
 
 export {
   CreateEquityRequest,
@@ -424,6 +425,7 @@ export {
   GetVotingRightsRequest,
   GetAllVotingRightsRequest,
   GetCouponForRequest,
+  GetPrincipalForRequest,
   GetCouponRequest,
   GetAllCouponsRequest,
   GetRoleCountForRequest,
