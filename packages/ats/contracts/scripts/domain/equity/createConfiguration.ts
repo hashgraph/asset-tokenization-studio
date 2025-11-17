@@ -104,6 +104,9 @@ const EQUITY_FACETS = [
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
  * @param useTimeTravel - Whether to use TimeTravel variants (default: false)
+ * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
+ * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE)
+ * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
  * @returns Promise resolving to operation result
  *
  * @example
@@ -122,7 +125,10 @@ const EQUITY_FACETS = [
  *         'EquityUSAFacet': '0x123...',
  *         // ... more facets
  *     },
- *     false
+ *     false,
+ *     false,
+ *     15,
+ *     0
  * )
  *
  * if (result.success) {
@@ -139,6 +145,7 @@ export async function createEquityConfiguration(
   useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
+  confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Get facet names based on time travel mode
   // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions
@@ -169,5 +176,6 @@ export async function createEquityConfiguration(
     facets,
     partialBatchDeploy,
     batchSize,
+    confirmations,
   });
 }
