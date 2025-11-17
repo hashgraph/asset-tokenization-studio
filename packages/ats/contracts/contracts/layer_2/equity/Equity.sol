@@ -104,6 +104,19 @@ abstract contract Equity is IEquity, Common {
         return _getDividendsFor(_dividendID, _account);
     }
 
+    function getDividendAmountFor(
+        uint256 _dividendID,
+        address _account
+    ) 
+        external 
+        view 
+        override
+        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
+        returns (DividendAmountFor memory dividendAmountFor_)
+    {
+        return _getDividendAmountFor(_dividendID, _account);
+    }
+
     function getDividendsCount() external view override returns (uint256 dividendCount_) {
         return _getDividendsCount();
     }
