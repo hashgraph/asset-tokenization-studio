@@ -150,23 +150,16 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     function _getDividendAmountFor(
         uint256 _dividendID,
         address _account
-    ) 
-        internal 
-        view 
-        returns (IEquity.DividendAmountFor memory dividendAmountFor_)
-    {
+    ) internal view returns (IEquity.DividendAmountFor memory dividendAmountFor_) {
         IEquity.DividendFor memory dividendFor = _getDividendsFor(_dividendID, _account);
 
         if (!dividendFor.recordDateReached) return dividendAmountFor_;
 
         dividendAmountFor_.recordDateReached = true;
 
-        dividendAmountFor_.numerator =
-            dividendFor.tokenBalance *
-            dividendFor.amount;
+        dividendAmountFor_.numerator = dividendFor.tokenBalance * dividendFor.amount;
 
-        dividendAmountFor_.denominator =
-            10 ** (dividendFor.decimals + dividendFor.amountDecimals);
+        dividendAmountFor_.denominator = 10 ** (dividendFor.decimals + dividendFor.amountDecimals);
     }
 
     function _getDividendsCount() internal view returns (uint256 dividendCount_) {
