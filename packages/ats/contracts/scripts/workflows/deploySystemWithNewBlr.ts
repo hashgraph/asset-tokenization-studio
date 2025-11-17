@@ -29,6 +29,7 @@ import {
   getDeploymentConfig,
   DEFAULT_BATCH_SIZE,
   CheckpointManager,
+  NullCheckpointManager,
   type DeploymentCheckpoint,
   type ResumeOptions,
   formatCheckpointStatus,
@@ -249,7 +250,10 @@ export async function deploySystemWithNewBlr(
   info("═".repeat(60));
 
   // Initialize checkpoint manager
-  const checkpointManager = new CheckpointManager(checkpointDir);
+  // Use NullCheckpointManager for tests to eliminate filesystem I/O overhead
+  const checkpointManager = ignoreCheckpoint
+    ? new NullCheckpointManager(checkpointDir)
+    : new CheckpointManager(checkpointDir);
   let checkpoint: DeploymentCheckpoint | null = null;
 
   // Check for existing checkpoints if not explicitly ignoring
@@ -541,6 +545,7 @@ export async function deploySystemWithNewBlr(
         useTimeTravel,
         partialBatchDeploy,
         batchSize,
+        confirmations,
       );
 
       if (!equityConfig.success) {
@@ -586,6 +591,7 @@ export async function deploySystemWithNewBlr(
         useTimeTravel,
         partialBatchDeploy,
         batchSize,
+        confirmations,
       );
 
       if (!bondConfig.success) {
@@ -657,8 +663,6 @@ export async function deploySystemWithNewBlr(
       checkpoint.currentStep = 6;
       await checkpointManager.saveCheckpoint(checkpoint);
     }
-
-    const endTime = Date.now();
 
     // Get Hedera Contract IDs if on Hedera network
     const getContractId = async (address: string) => {
@@ -741,7 +745,7 @@ export async function deploySystemWithNewBlr(
         totalContracts: 3, // ProxyAdmin, BLR, Factory
         totalFacets: facetsResult.deployed.size,
         totalConfigurations: 2, // Equity + Bond
-        deploymentTime: endTime - startTime,
+        deploymentTime: Date.now() - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,
       },

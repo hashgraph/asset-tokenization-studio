@@ -170,19 +170,30 @@ export function getDeploymentConfig(network: string): DeploymentConfig {
 }
 
 /**
- * Check if network is a simulated local environment.
- * These networks are instant and don't need retries (hardhat, local).
- * Note: hedera-local is excluded - it's a real network running locally.
+ * Check if network uses instant mining (simulated local environment).
+ * These networks process transactions instantly and don't need delays or batching.
+ *
+ * Instant networks: hardhat, local
+ * NOT instant: hedera-local (simulates real network behavior)
  *
  * @param network - Network name
- * @returns true if network is local (hardhat/local only - not hedera-local)
+ * @returns true if network uses instant mining (hardhat/local only)
  *
  * @example
  * ```typescript
- * isLocalNetwork("hardhat") // true
- * isLocalNetwork("hedera-testnet") // false
+ * isInstantMiningNetwork("hardhat") // true - instant mining
+ * isInstantMiningNetwork("local") // true - instant mining
+ * isInstantMiningNetwork("hedera-local") // false - simulates real network
+ * isInstantMiningNetwork("hedera-testnet") // false - real network
  * ```
  */
-export function isLocalNetwork(network: string): boolean {
+export function isInstantMiningNetwork(network: string): boolean {
   return network === "hardhat" || network === "local";
+}
+
+/**
+ * @deprecated Use isInstantMiningNetwork() instead for better clarity
+ */
+export function isLocalNetwork(network: string): boolean {
+  return isInstantMiningNetwork(network);
 }

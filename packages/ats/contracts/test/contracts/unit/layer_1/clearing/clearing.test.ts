@@ -7,6 +7,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   type ResolverProxy,
   type ClearingActionsFacet,
+  ClearingActionsFacet__factory,
   type IHold,
   ControlList,
   Pause,
@@ -126,21 +127,27 @@ describe("Clearing Tests", () => {
       signer_A,
     );
     const clearingReadFacet = await ethers.getContractAt("ClearingReadFacet", diamond.address, signer_A);
+    clearingActionsFacet = ClearingActionsFacet__factory.connect(diamond.address, signer_A);
 
-    // TODO : refactor one facet with all the interfaces
-    clearingFacet = new Contract(
-      diamond.address,
-      [
-        ...clearingTransferFacet.interface.fragments,
-        ...clearingRedeemFacet.interface.fragments,
-        ...clearingHoldCreationFacet.interface.fragments,
-        ...clearingReadFacet.interface.fragments,
-      ],
-      signer_A,
-    );
+    const fragmentMap = new Map<string, any>();
+    [
+      ...clearingTransferFacet.interface.fragments,
+      ...clearingRedeemFacet.interface.fragments,
+      ...clearingHoldCreationFacet.interface.fragments,
+      ...clearingReadFacet.interface.fragments,
+      ...clearingActionsFacet.interface.fragments,
+    ].forEach((fragment) => {
+      const key = fragment.format();
+      if (!fragmentMap.has(key)) {
+        fragmentMap.set(key, fragment);
+      }
+    });
+
+    const uniqueFragments = Array.from(fragmentMap.values());
+
+    clearingFacet = new Contract(diamond.address, uniqueFragments, signer_A);
 
     holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
-    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
     equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
     accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
     adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);

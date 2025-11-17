@@ -3,9 +3,7 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { type ResolverProxy, type Pause, ERC20Permit, ERC20, AccessControl, ControlList } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES } from "@scripts";
-import { deployEquityTokenFixture } from "@test";
-
-import { executeRbac } from "@test";
+import { deployEquityTokenFixture, executeRbac, getDltTimestamp } from "@test";
 
 describe("ERC20Permit Tests", () => {
   let diamond: ResolverProxy;
@@ -70,12 +68,14 @@ describe("ERC20Permit Tests", () => {
       it("GIVEN a paused token WHEN permit is called THEN the transaction fails with TokenIsPaused", async () => {
         await pauseFacet.pause();
 
+        const expiry = (await getDltTimestamp()) + 3600;
+
         await expect(
           erc20PermitFacet.permit(
             signer_B.address,
             signer_A.address,
             1,
-            Math.floor(Date.now() / 1000) + 3600,
+            expiry,
             27,
             "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -84,12 +84,14 @@ describe("ERC20Permit Tests", () => {
       });
 
       it("GIVEN an owner address of zero WHEN permit is called THEN the transaction fails with ZeroAddressNotAllowed", async () => {
+        const expiry = (await getDltTimestamp()) + 3600;
+
         await expect(
           erc20PermitFacet.permit(
             ADDRESS_ZERO,
             signer_A.address,
             1,
-            Math.floor(Date.now() / 1000) + 3600,
+            expiry,
             27,
             "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -98,12 +100,14 @@ describe("ERC20Permit Tests", () => {
       });
 
       it("GIVEN a spender address of zero WHEN permit is called THEN the transaction fails with ZeroAddressNotAllowed", async () => {
+        const expiry = (await getDltTimestamp()) + 3600;
+
         await expect(
           erc20PermitFacet.permit(
             signer_A.address,
             ADDRESS_ZERO,
             1,
-            Math.floor(Date.now() / 1000) + 3600,
+            expiry,
             27,
             "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -116,12 +120,14 @@ describe("ERC20Permit Tests", () => {
         await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
         await controlList.connect(signer_A).addToControlList(signer_C.address);
 
+        const expiry = (await getDltTimestamp()) + 3600;
+
         await expect(
           erc20PermitFacet.permit(
             signer_C.address,
             signer_B.address,
             1,
-            Math.floor(Date.now() / 1000) + 3600,
+            expiry,
             27,
             "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -133,12 +139,14 @@ describe("ERC20Permit Tests", () => {
         await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
         await controlList.connect(signer_A).addToControlList(signer_C.address);
 
+        const expiry = (await getDltTimestamp()) + 3600;
+
         await expect(
           erc20PermitFacet.permit(
             signer_B.address,
             signer_C.address,
             1,
-            Math.floor(Date.now() / 1000) + 3600,
+            expiry,
             27,
             "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -147,7 +155,7 @@ describe("ERC20Permit Tests", () => {
       });
 
       it("GIVEN an expired signature WHEN permit is called THEN the transaction reverts with ERC2612ExpiredSignature", async () => {
-        const expiry = Math.floor(Date.now() / 1000) - 3600; // 1 hour ago
+        const expiry = (await getDltTimestamp()) - 3600; // 1 hour ago
 
         await expect(
           erc20PermitFacet.permit(
@@ -166,7 +174,7 @@ describe("ERC20Permit Tests", () => {
 
       it("GIVEN a signature from a different owner WHEN permit is called THEN the transaction reverts with ERC2612InvalidSigner", async () => {
         const nonce = await erc20PermitFacet.nonces(signer_A.address);
-        const expiry = Math.floor(Date.now() / 1000) + 3600; // 1 hour in the future
+        const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
 
         const domain = {
           name: CONTRACT_NAME_ERC20PERMIT,
@@ -203,7 +211,7 @@ describe("ERC20Permit Tests", () => {
 
       it("GIVEN a valid signature WHEN permit is called THEN the approval succeeds and emits Approval event", async () => {
         const nonce = await erc20PermitFacet.nonces(signer_A.address);
-        const expiry = Math.floor(Date.now() / 1000) + 3600; // 1 hour in the future
+        const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
 
         const domain = {
           name: CONTRACT_NAME_ERC20PERMIT,
@@ -247,6 +255,8 @@ describe("ERC20Permit Tests", () => {
         },
       });
 
+      const expiry = (await getDltTimestamp()) + 3600;
+
       await expect(
         erc20PermitFacet
           .attach(base.diamond.address)
@@ -254,7 +264,7 @@ describe("ERC20Permit Tests", () => {
             signer_B.address,
             signer_C.address,
             1,
-            Math.floor(Date.now() / 1000) + 3600,
+            expiry,
             27,
             "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x0000000000000000000000000000000000000000000000000000000000000000",
