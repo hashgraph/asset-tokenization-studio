@@ -16,7 +16,7 @@
  */
 
 import { ethers } from "hardhat";
-import { deploySystemWithNewBlr, configureLogger, LogLevel } from "../../scripts";
+import { deploySystemWithNewBlr, configureLogger, LogLevel, DEFAULT_BATCH_SIZE } from "../../scripts";
 import { Factory__factory, BusinessLogicResolver__factory, ProxyAdmin__factory } from "@contract-types";
 import type { IFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-types";
 
@@ -28,7 +28,11 @@ import type { IFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-type
  * @param useTimeTravel - Use TimeTravel facet variants (default: true for tests)
  * @returns Complete deployment output + test utilities including separated equity/bond facet addresses
  */
-export async function deployAtsInfrastructureFixture(useTimeTravel = true, partialBatchDeploy = false, batchSize = 2) {
+export async function deployAtsInfrastructureFixture(
+  useTimeTravel = true,
+  partialBatchDeploy = false,
+  batchSize = DEFAULT_BATCH_SIZE,
+) {
   // Configure logger to SILENT for tests (suppress all deployment logs)
   configureLogger({ level: LogLevel.SILENT });
 

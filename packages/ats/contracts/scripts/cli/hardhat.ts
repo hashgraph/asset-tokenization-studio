@@ -80,7 +80,6 @@ async function main() {
     console.log(`   Equity Config Version: ${output.configurations.equity.version}`);
     console.log(`   Bond Config Version: ${output.configurations.bond.version}`);
     console.log(`   Total Contracts: ${output.summary.totalContracts}`);
-    console.log(`   Deployment Time: ${output.summary.deploymentTime}ms`);
 
     process.exit(0);
   } catch (error) {

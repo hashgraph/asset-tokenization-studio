@@ -60,7 +60,6 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
   // Calculate deployment time
   const endTime = new Date(checkpoint.lastUpdate).getTime();
   const start = new Date(startTime).getTime();
-  const deploymentTime = endTime - start;
 
   // Calculate total gas used (sum from all deployments)
   let totalGasUsed = 0;
@@ -114,7 +113,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       totalContracts: 3 + steps.facets.size, // ProxyAdmin + BLR + Factory + facets
       totalFacets: steps.facets.size,
       totalConfigurations: 2,
-      deploymentTime,
+      deploymentTime: endTime - start,
       gasUsed: totalGasUsed.toString(),
       success: checkpoint.status === "completed",
     },

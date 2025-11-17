@@ -29,6 +29,7 @@ import {
   error as logError,
   getDeploymentConfig,
   CheckpointManager,
+  NullCheckpointManager,
   type DeploymentCheckpoint,
   type ResumeOptions,
   formatCheckpointStatus,
@@ -243,7 +244,10 @@ export async function deploySystemWithExistingBlr(
   info("═".repeat(60));
 
   // Initialize checkpoint manager
-  const checkpointManager = new CheckpointManager(checkpointDir);
+  // Use NullCheckpointManager for tests to eliminate filesystem I/O overhead
+  const checkpointManager = ignoreCheckpoint
+    ? new NullCheckpointManager(checkpointDir)
+    : new CheckpointManager(checkpointDir);
   let checkpoint: DeploymentCheckpoint | null = null;
 
   // Check for existing checkpoints if not explicitly ignoring
@@ -551,7 +555,14 @@ export async function deploySystemWithExistingBlr(
         } else {
           info("\n💼 Step 5a/6: Creating Equity configuration...");
 
-          equityConfig = await createEquityConfiguration(blrContract, facetAddresses, useTimeTravel, false, batchSize);
+          equityConfig = await createEquityConfiguration(
+            blrContract,
+            facetAddresses,
+            useTimeTravel,
+            false,
+            batchSize,
+            confirmations,
+          );
 
           if (!equityConfig.success) {
             throw new Error(`Equity config creation failed: ${equityConfig.error} - ${equityConfig.message}`);
@@ -588,7 +599,14 @@ export async function deploySystemWithExistingBlr(
         } else {
           info("\n🏦 Step 5b/6: Creating Bond configuration...");
 
-          bondConfig = await createBondConfiguration(blrContract, facetAddresses, useTimeTravel, false, batchSize);
+          bondConfig = await createBondConfiguration(
+            blrContract,
+            facetAddresses,
+            useTimeTravel,
+            false,
+            batchSize,
+            confirmations,
+          );
 
           if (!bondConfig.success) {
             throw new Error(`Bond config creation failed: ${bondConfig.error} - ${bondConfig.message}`);

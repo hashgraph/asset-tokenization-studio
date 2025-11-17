@@ -25,6 +25,7 @@ import {
   error as logError,
   formatGasUsage,
   waitForTransaction,
+  isInstantMiningNetwork,
 } from "@scripts/infrastructure";
 
 /**
@@ -210,6 +211,7 @@ function createBatchFacetConfigurations(facetIdList: string[], facetVersionList:
  * @param partialBatchDeploy - If true, all batches are marked as non-final
  * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE). Smaller batches = lower gas per transaction.
  * @param gasLimit - Optional gas limit override
+ * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
  * @returns Promise that resolves when all batches are processed
  *
  * @example
@@ -239,27 +241,52 @@ export async function processFacetLists(
   partialBatchDeploy: boolean,
   batchSize: number = DEFAULT_BATCH_SIZE,
   gasLimit?: number,
+  confirmations: number = 0,
 ): Promise<void> {
+  // Get network name for instant mining check
+  let networkName = "unknown";
+  try {
+    const hre = require("hardhat");
+    networkName = hre?.network?.name || "unknown";
+  } catch {
+    // Not in Hardhat context
+  }
+
+  // On instant-mining networks, use larger batches but cap at 20 to avoid gas limit issues
+  // On real networks, use configured batch size (default 15)
+  const MAX_INSTANT_BATCH_SIZE = 20;
+  const effectiveBatchSize = isInstantMiningNetwork(networkName)
+    ? Math.min(facetIdList.length, MAX_INSTANT_BATCH_SIZE)
+    : batchSize;
+
   if (facetIdList.length !== facetVersionList.length) {
     throw new Error("facetIdList and facetVersionList must have the same length");
   }
 
-  // Use batchSize directly as "facets per batch" (not "number of batches")
-  // This allows intuitive configuration: batchSize=15 means "15 facets per batch"
-  const chunkSize = batchSize;
+  // Use effectiveBatchSize as "facets per batch"
+  const chunkSize = effectiveBatchSize;
 
   for (let i = 0; i < facetIdList.length; i += chunkSize) {
-    // Add delay between batches to prevent RPC node overload (skip first batch)
-    if (i > 0) {
+    // Add delay between batches to prevent RPC node overload (skip first batch and instant networks)
+    if (i > 0 && !isInstantMiningNetwork(networkName)) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
+
     const batchIds = facetIdList.slice(i, i + chunkSize);
     const batchVersions = facetVersionList.slice(i, i + chunkSize);
     const batch = createBatchFacetConfigurations(batchIds, batchVersions);
 
     const isLastBatch = partialBatchDeploy ? false : i + chunkSize >= facetIdList.length;
 
-    await sendBatchConfiguration(configId, batch, isLastBatch, blrContract, partialBatchDeploy, gasLimit);
+    await sendBatchConfiguration(
+      configId,
+      batch,
+      isLastBatch,
+      blrContract,
+      partialBatchDeploy,
+      gasLimit,
+      confirmations,
+    );
   }
 }
 
@@ -276,6 +303,7 @@ export async function processFacetLists(
  * @param blrContract - BusinessLogicResolver contract instance
  * @param partialBatchDeploy - If true, forces isFinalBatch to false
  * @param gasLimit - Optional gas limit override
+ * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
  * @returns Promise that resolves when the transaction is confirmed
  *
  * @example
@@ -290,7 +318,8 @@ export async function processFacetLists(
  *   true, // is final batch
  *   blrContract, // contract instance
  *   false, // not partial deploy
- *   5000000 // gas limit
+ *   5000000, // gas limit
+ *   0 // confirmations for testing
  * )
  * ```
  */
@@ -301,6 +330,7 @@ export async function sendBatchConfiguration(
   blrContract: Contract,
   partialBatchDeploy: boolean,
   gasLimit?: number,
+  confirmations: number = 0,
 ): Promise<void> {
   // If this is a partial batch deploy, never mark as final batch
   const finalBatch = partialBatchDeploy ? false : isFinalBatch;
@@ -309,6 +339,7 @@ export async function sendBatchConfiguration(
   info(`  Configurations: ${configurations.length}`);
   info(`  Is final batch: ${finalBatch}`);
   info(`  Partial batch deploy: ${partialBatchDeploy}`);
+  info(`  Confirmations to wait: ${confirmations}`);
 
   try {
     // Import GAS_LIMIT constants
@@ -320,8 +351,8 @@ export async function sendBatchConfiguration(
 
     info(`Batch configuration transaction sent: ${txResponse.hash}`);
 
-    // Wait for transaction confirmation
-    const receipt = await waitForTransaction(txResponse, 1, DEFAULT_TRANSACTION_TIMEOUT);
+    // Wait for transaction confirmation with configurable confirmations
+    const receipt = await waitForTransaction(txResponse, confirmations, DEFAULT_TRANSACTION_TIMEOUT);
 
     const gasUsed = formatGasUsage(receipt, txResponse.gasLimit);
     debug(gasUsed);
@@ -408,9 +439,19 @@ export async function createBatchConfiguration(
 
     /** Optional gas limit override */
     gasLimit?: number;
+
+    /** Number of confirmations to wait for (default: 0 for test environments) */
+    confirmations?: number;
   },
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  const { configurationId, facets, partialBatchDeploy = false, batchSize = DEFAULT_BATCH_SIZE, gasLimit } = options;
+  const {
+    configurationId,
+    facets,
+    partialBatchDeploy = false,
+    batchSize = DEFAULT_BATCH_SIZE,
+    gasLimit,
+    confirmations = 0,
+  } = options;
 
   const { info } = await import("@scripts/infrastructure");
   const { ok, err } = await import("@scripts/infrastructure");
@@ -454,6 +495,7 @@ export async function createBatchConfiguration(
     info("Processing facets in batches", {
       facetCount: facetIdList.length,
       partialBatchDeploy,
+      confirmations,
     });
 
     await processFacetLists(
@@ -464,6 +506,7 @@ export async function createBatchConfiguration(
       partialBatchDeploy,
       batchSize,
       gasLimit,
+      confirmations,
     );
 
     // Query the actual configuration-specific version after batch processing

@@ -265,6 +265,7 @@ contract AssetMock is IAssetMock {
     function getBondDetails() external pure returns (BondDetailsData memory bondDetailsData_) {
         bondDetailsData_.currency = 0x555344;
         bondDetailsData_.nominalValue = 2345678901;
+        bondDetailsData_.nominalValueDecimals = 2;
         bondDetailsData_.startingDate = 1751282807;
         bondDetailsData_.maturityDate = 1761823607;
     }
@@ -321,8 +322,18 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getEquityDetails() external pure returns (EquityDetailsData memory) {
-        revert NotImplemented();
+    function getEquityDetails() external pure returns (EquityDetailsData memory equityDetailsData_) {
+        equityDetailsData_.votingRight = true;
+        equityDetailsData_.informationRight = true;
+        equityDetailsData_.liquidationRight = true;
+        equityDetailsData_.subscriptionRight = true;
+        equityDetailsData_.conversionRight = false;
+        equityDetailsData_.redemptionRight = false;
+        equityDetailsData_.putRight = false;
+        equityDetailsData_.dividendRight = DividendType.COMMON;
+        equityDetailsData_.currency = 0x555344;
+        equityDetailsData_.nominalValue = 1000000;
+        equityDetailsData_.nominalValueDecimals = 2;
     }
 
     function getDividends(uint256) external pure returns (RegisteredDividend memory registeredDividend_) {
