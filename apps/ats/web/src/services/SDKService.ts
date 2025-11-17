@@ -382,6 +382,7 @@ import {
   GetProceedRecipientsRequest,
   IsProceedRecipientRequest,
   GetProceedRecipientDataRequest,
+  DividendAmountForViewModel,
 } from '@hashgraph/asset-tokenization-sdk';
 
 export class SDKService {
@@ -805,6 +806,12 @@ export class SDKService {
     req: GetDividendsForRequest,
   ): Promise<DividendsForViewModel> {
     return await Equity.getDividendsFor(req);
+  }
+
+  public static async getDividendAmountFor(
+    req: GetDividendsForRequest,
+  ): Promise<DividendAmountForViewModel> {
+    return await Equity.getDividendAmountFor(req);
   }
 
   public static async getDividends(
