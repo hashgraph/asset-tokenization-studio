@@ -33,7 +33,8 @@ abstract contract Equity is IEquity, Common {
             _msgSender(),
             _newDividend.recordDate,
             _newDividend.executionDate,
-            _newDividend.amount
+            _newDividend.amount,
+            _newDividend.amountDecimals
         );
     }
 

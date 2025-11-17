@@ -984,11 +984,13 @@ describe("ERC1410 Tests", () => {
         recordDate: dividendsRecordDateInSeconds_1.toString(),
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: 1,
+        amountDecimals: 0,
       };
       const dividendData = {
         recordDate: dividendsRecordDateInSeconds.toString(),
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: 1,
+        amountDecimals: 0,
       };
       await equityFacet.connect(signer_C).setDividends(dividendData_1);
       await equityFacet.connect(signer_C).setDividends(dividendData);
@@ -1133,11 +1135,13 @@ describe("ERC1410 Tests", () => {
         recordDate: dividendsRecordDateInSeconds_1.toString(),
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: 1,
+        amountDecimals: 0,
       };
       const dividendData = {
         recordDate: dividendsRecordDateInSeconds.toString(),
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: 1,
+        amountDecimals: 0,
       };
       await equityFacet.connect(signer_C).setDividends(dividendData_1);
       await equityFacet.connect(signer_C).setDividends(dividendData);
@@ -1213,11 +1217,13 @@ describe("ERC1410 Tests", () => {
         recordDate: dividendsRecordDateInSeconds_1.toString(),
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: 1,
+        amountDecimals: 0,
       };
       const dividendData = {
         recordDate: dividendsRecordDateInSeconds.toString(),
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: 1,
+        amountDecimals: 0,
       };
       await equityFacet.connect(signer_C).setDividends(dividendData_1);
       await equityFacet.connect(signer_C).setDividends(dividendData);
@@ -1471,11 +1477,13 @@ describe("ERC1410 Tests", () => {
         recordDate: dividendsRecordDateInSeconds_1.toString(),
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: 1,
+        amountDecimals: 0,
       };
       const dividendData = {
         recordDate: dividendsRecordDateInSeconds.toString(),
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: 1,
+        amountDecimals: 0,
       };
       await equityFacet.connect(signer_C).setDividends(dividendData_1);
       await equityFacet.connect(signer_C).setDividends(dividendData);

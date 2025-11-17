@@ -32,7 +32,8 @@ import { executeRbac } from "@test";
 
 let dividendsRecordDateInSeconds = 0;
 let dividendsExecutionDateInSeconds = 0;
-const dividendsAmountPerEquity = 1;
+const dividendsAmountPerEquity = 10;
+const dividendsAmountDecimalsPerEquity = 1;
 
 let votingRecordDateInSeconds = 0;
 
@@ -49,6 +50,7 @@ let dividendData = {
   recordDate: dividendsRecordDateInSeconds.toString(),
   executionDate: dividendsExecutionDateInSeconds.toString(),
   amount: dividendsAmountPerEquity,
+  amountDecimals: dividendsAmountDecimalsPerEquity,
 };
 let balanceAdjustmentData = {
   executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
@@ -130,6 +132,7 @@ describe("Equity Tests", () => {
       recordDate: dividendsRecordDateInSeconds.toString(),
       executionDate: dividendsExecutionDateInSeconds.toString(),
       amount: dividendsAmountPerEquity,
+      amountDecimals: dividendsAmountDecimalsPerEquity,
     };
     balanceAdjustmentData = {
       executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
@@ -171,6 +174,7 @@ describe("Equity Tests", () => {
         recordDate: dividendsExecutionDateInSeconds.toString(),
         executionDate: dividendsRecordDateInSeconds.toString(),
         amount: dividendsAmountPerEquity,
+        amountDecimals: dividendsAmountDecimalsPerEquity,
       };
 
       await expect(equityFacet.connect(signer_C).setDividends(wrongDividendData_1)).to.be.revertedWithCustomError(
@@ -182,6 +186,7 @@ describe("Equity Tests", () => {
         recordDate: dateToUnixTimestamp("2029-12-31T23:59:59Z").toString(),
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: dividendsAmountPerEquity,
+        amountDecimals: dividendsAmountDecimalsPerEquity,
       };
 
       await expect(equityFacet.connect(signer_C).setDividends(wrongDividendData_2)).to.be.revertedWithCustomError(
@@ -204,6 +209,7 @@ describe("Equity Tests", () => {
           dividendsRecordDateInSeconds,
           dividendsExecutionDateInSeconds,
           dividendsAmountPerEquity,
+          dividendsAmountDecimalsPerEquity,
         );
 
       // check list members
@@ -220,9 +226,11 @@ describe("Equity Tests", () => {
       expect(dividend.dividend.recordDate).to.equal(dividendsRecordDateInSeconds);
       expect(dividend.dividend.executionDate).to.equal(dividendsExecutionDateInSeconds);
       expect(dividend.dividend.amount).to.equal(dividendsAmountPerEquity);
+      expect(dividend.dividend.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
       expect(dividendFor.recordDate).to.equal(dividendsRecordDateInSeconds);
       expect(dividendFor.executionDate).to.equal(dividendsExecutionDateInSeconds);
       expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
+      expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
       expect(dividendFor.tokenBalance).to.equal(0);
       expect(dividendFor.recordDateReached).to.equal(false);
       expect(dividendFor.decimals).to.equal(0);
@@ -259,6 +267,7 @@ describe("Equity Tests", () => {
           dividendsRecordDateInSeconds,
           dividendsExecutionDateInSeconds,
           dividendsAmountPerEquity,
+          dividendsAmountDecimalsPerEquity,
         );
 
       // check list members
@@ -310,6 +319,7 @@ describe("Equity Tests", () => {
           dividendsRecordDateInSeconds,
           dividendsExecutionDateInSeconds,
           dividendsAmountPerEquity,
+          dividendsAmountDecimalsPerEquity,
         );
 
       // check list members
@@ -379,6 +389,7 @@ describe("Equity Tests", () => {
       expect(dividendFor.tokenBalance).to.equal(TotalAmount);
       expect(dividendFor.recordDateReached).to.equal(true);
       expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
+      expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
     });
   });
 

@@ -133,6 +133,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
 
         dividendFor_.amount = registeredDividend.dividend.amount;
+        dividendFor_.amountDecimals = registeredDividend.dividend.amountDecimals;
         dividendFor_.recordDate = registeredDividend.dividend.recordDate;
         dividendFor_.executionDate = registeredDividend.dividend.executionDate;
 
