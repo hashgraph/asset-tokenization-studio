@@ -292,7 +292,7 @@ import {
 import { HoldDetails } from '@domain/context/security/Hold';
 import { CouponAmountFor } from '@domain/context/bond/CouponAmountFor';
 import {PrincipalFor} from '@domain/context/bond/PrincipalFor';
-import { DividendAmountFor } from '@domain/context/equity/CouponAmountFor';
+import { DividendAmountFor } from '@domain/context/equity/DividendAmountFor';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
