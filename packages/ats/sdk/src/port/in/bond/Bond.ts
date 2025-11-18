@@ -40,8 +40,9 @@ import {
 import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest';
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
+import { FullRedeemAtMaturityCommand } from '@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand';
 import RedeemAtMaturityByPartitionRequest from '../request/bond/RedeemAtMaturityByPartitionRequest';
-
+import FullRedeemAtMaturityRequest from '../request/bond/FullRedeemAtMaturityRequest';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import CreateTrexSuiteBondRequest from '../request/bond/CreateTrexSuiteBondRequest';
@@ -87,6 +88,9 @@ interface IBondInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   redeemAtMaturityByPartition(
     request: RedeemAtMaturityByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  fullRedeemAtMaturity(
+    request: FullRedeemAtMaturityRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]>;
   getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
@@ -385,6 +389,24 @@ class BondInPort implements IBondInPort {
         partitionId,
         sourceId,
         amount,
+      ),
+    );
+  }
+
+  @LogError
+  async fullRedeemAtMaturity(
+    request: FullRedeemAtMaturityRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, sourceId } = request;
+    ValidatedRequest.handleValidation(
+      FullRedeemAtMaturityRequest.name,
+      request,
+    );
+
+    return await this.commandBus.execute(
+      new FullRedeemAtMaturityCommand(
+        securityId,
+        sourceId,
       ),
     );
   }
