@@ -4,15 +4,14 @@
   "type": "commonjs",
   "main": "./build/typechain-types/index.js",
   "types": "./build/typechain-types/index.d.ts",
-  "files": [
-    "artifacts/",
-    "contracts/",
-    "typechain-types/",
-    "scripts/",
-    "build/",
-    "!artifacts/build-info/",
-    "!build/**/*.map"
-  ],
+  "typesVersions": {
+    "*": {
+      "scripts": ["./build/scripts/index.d.ts"],
+      "typechain-types": ["./build/typechain-types/index.d.ts"],
+      "test": ["./build/test/index.d.ts"]
+    }
+  },
+  "files": ["artifacts/", "contracts/", "typechain-types/", "build/", "!artifacts/build-info/", "!build/**/*.map"],
   "exports": {
     ".": {
       "types": "./build/typechain-types/index.d.ts",
@@ -22,7 +21,6 @@
     },
     "./artifacts/*": "./artifacts/*",
     "./contracts/*": "./contracts/*",
-    "./scripts/": "./scripts/index.ts",
     "./scripts": {
       "types": "./build/scripts/index.d.ts",
       "import": "./build/scripts/index.js",
@@ -104,12 +102,15 @@
     "slither:summary": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18 && solc-select use 0.8.18 && slither . --print human-summary --solc-remaps @=node_modules/@\"",
     "slither:storageLayout": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18 && solc-select use 0.8.18 && slither . --print variable-order --solc-remaps @=node_modules/@\"",
     "slither:inheritance": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18 && solc-select use 0.8.18 && slither . --print inheritance --solc-remaps @=node_modules/@\"",
+    "validate:package": "npm run build && npx publint && npx @arethetypeswrong/cli --pack",
     "prepack": "npm run build",
     "doc": "npx hardhat dodoc"
   },
   "dependencies": {
     "zod": "^3.22.4",
-    "ethers": "^5.8.0"
+    "ethers": "^5.8.0",
+    "tslib": "^2.8.1",
+    "dotenv": "^16.0.3"
   },
   "devDependencies": {
     "@hashgraph/sdk": "2.64.5",
