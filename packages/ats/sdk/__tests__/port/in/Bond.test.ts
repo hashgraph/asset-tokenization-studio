@@ -423,6 +423,7 @@ describe('🧪 Bond test', () => {
     );
 
     expect(coupon.rate).toEqual(couponRate);
+    expect(coupon.rateDecimals).toEqual(0);
     expect(coupon.couponId).toEqual(1);
     expect(coupon.recordDate.getTime() / 1000).toEqual(couponRecordDate);
     expect(coupon.executionDate.getTime() / 1000).toEqual(couponExecutionDate);

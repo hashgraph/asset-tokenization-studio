@@ -340,12 +340,14 @@ contract AssetMock is IAssetMock {
         registeredDividend_.dividend.recordDate = 1753874807;
         registeredDividend_.dividend.executionDate = 1753874807;
         registeredDividend_.dividend.amount = 400;
+        registeredDividend_.dividend.amountDecimals = 2;
         registeredDividend_.snapshotId = 1;
     }
 
     function getDividendsFor(uint256, address) external pure returns (DividendFor memory dividendFor_) {
         dividendFor_.tokenBalance = 3;
         dividendFor_.amount = 200;
+        dividendFor_.amountDecimals = 2;
         dividendFor_.recordDate = 1753874807;
         dividendFor_.executionDate = 1753874807;
         dividendFor_.decimals = 2;

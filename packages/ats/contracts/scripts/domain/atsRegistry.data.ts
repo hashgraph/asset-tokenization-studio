@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-14T10:28:51.623Z
+ * Generated: 2025-11-17T14:14:52.392Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -878,6 +878,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "_initialize_equityUSA(EquityDetailsData,RegulationData,AdditionalSecurityData)",
         selector: "0xd0299703",
       },
+      { name: "getDividendAmountFor", signature: "getDividendAmountFor(uint256,address)", selector: "0xd258b2f1" },
       { name: "getDividendHolders", signature: "getDividendHolders(uint256,uint256,uint256)", selector: "0xeba3918e" },
       { name: "getDividends", signature: "getDividends(uint256)", selector: "0x3837ac88" },
       { name: "getDividendsCount", signature: "getDividendsCount()", selector: "0x9e676952" },
@@ -2340,6 +2341,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     inheritance: ["IEquityStorageWrapper", "BondStorageWrapper"],
     methods: [
       { name: "_equityStorage", signature: "_equityStorage()", selector: "0xd722ce84" },
+      { name: "_getDividendAmountFor", signature: "_getDividendAmountFor(uint256,address)", selector: "0xd35ad27b" },
       {
         name: "_getDividendHolders",
         signature: "_getDividendHolders(uint256,uint256,uint256)",
