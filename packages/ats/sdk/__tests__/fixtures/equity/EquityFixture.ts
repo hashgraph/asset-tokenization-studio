@@ -237,6 +237,7 @@ import { Dividend } from '@domain/context/equity/Dividend';
 import { GetDividendsCountQuery } from '@query/equity/dividends/getDividendsCount/GetDividendsCountQuery';
 import { GetDividendsQuery } from '@query/equity/dividends/getDividends/GetDividendsQuery';
 import { GetDividendsForQuery } from '@query/equity/dividends/getDividendsFor/GetDividendsForQuery';
+import { GetDividendAmountForQuery } from '@query/equity/dividends/getDividendAmountFor/GetDividendAmountForQuery';
 import { DividendFor } from '@domain/context/equity/DividendFor';
 import { GetEquityDetailsQuery } from '@query/equity/get/getEquityDetails/GetEquityDetailsQuery';
 import { EquityDetails } from '@domain/context/equity/EquityDetails';
@@ -508,6 +509,16 @@ export const GetDividendsCountQueryFixture =
   });
 
 export const GetDividendsForQueryFixture = createFixture<GetDividendsForQuery>(
+  (query) => {
+    query.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+    query.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
+    query.dividendId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  },
+);
+
+export const GetDividendAmountForQueryFixture = createFixture<GetDividendAmountForQuery>(
   (query) => {
     query.securityId.as(
       () => new HederaId(HederaIdPropsFixture.create().value),
