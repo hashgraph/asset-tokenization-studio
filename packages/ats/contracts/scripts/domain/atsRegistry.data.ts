@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-17T14:14:52.392Z
+ * Generated: 2025-11-18T13:26:55.400Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -200,6 +200,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)",
         selector: "0x653458ea",
       },
+      { name: "fullRedeemAtMaturity", signature: "fullRedeemAtMaturity(address)", selector: "0xd0db5fb2" },
       {
         name: "redeemAtMaturityByPartition",
         signature: "redeemAtMaturityByPartition(address,bytes32,uint256)",
