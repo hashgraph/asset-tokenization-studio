@@ -424,6 +424,7 @@ describe('🧪 Equity test', () => {
     );
 
     expect(dividend.amountPerUnitOfSecurity).toEqual(amount);
+    expect(dividend.amountDecimals).toEqual(0);
     expect(dividend.dividendId).toEqual(1);
     expect(dividend.executionDate.getTime() / 1000).toEqual(executionTimestamp);
     expect(dividend.recordDate.getTime() / 1000).toEqual(recordTimestamp);

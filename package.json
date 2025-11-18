@@ -22,7 +22,7 @@
     "setup": "npm run ats:setup && npm run mass-payout:setup",
     "lint": "npm run lint:js && npm run lint:sol",
     "lint:js": "eslint . --cache",
-    "lint:sol": "solhint 'packages/ats/contracts/contracts/**/*.sol' --config packages/ats/contracts/.solhint.json --ignore-path packages/ats/contracts/.solhintignore",
+    "lint:sol": "solhint --config solhint.config.js 'contracts/**/*.sol'",
     "lint:fix": "eslint . --fix && npm run format",
     "format": "prettier --write '*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'packages/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml,sol}' 'apps/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' '.github/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
     "format:check": "prettier --check '*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'packages/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml,sol}' 'apps/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' '.github/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",

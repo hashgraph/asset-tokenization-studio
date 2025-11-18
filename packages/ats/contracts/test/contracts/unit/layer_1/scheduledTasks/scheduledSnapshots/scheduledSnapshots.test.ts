@@ -64,20 +64,24 @@ describe("Scheduled Snapshots Tests", () => {
     const dividendsRecordDateInSeconds_3 = dateToUnixTimestamp("2030-01-01T00:00:18Z");
     const dividendsExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:01:00Z");
     const dividendsAmountPerEquity = 1;
+    const dividendAmountDecimalsPerEquity = 3;
     const dividendData_1 = {
       recordDate: dividendsRecordDateInSeconds_1.toString(),
       executionDate: dividendsExecutionDateInSeconds.toString(),
       amount: dividendsAmountPerEquity,
+      amountDecimals: dividendAmountDecimalsPerEquity,
     };
     const dividendData_2 = {
       recordDate: dividendsRecordDateInSeconds_2.toString(),
       executionDate: dividendsExecutionDateInSeconds.toString(),
       amount: dividendsAmountPerEquity,
+      amountDecimals: dividendAmountDecimalsPerEquity,
     };
     const dividendData_3 = {
       recordDate: dividendsRecordDateInSeconds_3.toString(),
       executionDate: dividendsExecutionDateInSeconds.toString(),
       amount: dividendsAmountPerEquity,
+      amountDecimals: dividendAmountDecimalsPerEquity,
     };
     await equityFacet.connect(signer_C).setDividends(dividendData_2);
     await equityFacet.connect(signer_C).setDividends(dividendData_3);

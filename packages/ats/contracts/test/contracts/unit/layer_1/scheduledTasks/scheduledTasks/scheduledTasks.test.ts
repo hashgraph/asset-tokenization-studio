@@ -112,15 +112,18 @@ describe("Scheduled Tasks Tests", () => {
     const dividendsRecordDateInSeconds_2 = dateToUnixTimestamp("2030-01-01T00:00:30Z");
     const dividendsExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:02:30Z");
     const dividendsAmountPerEquity = 1;
+    const dividendsAmountDecimalsPerEquity = 2;
     const dividendData_1 = {
       recordDate: dividendsRecordDateInSeconds_1.toString(),
       executionDate: dividendsExecutionDateInSeconds.toString(),
       amount: dividendsAmountPerEquity,
+      amountDecimals: dividendsAmountDecimalsPerEquity,
     };
     const dividendData_2 = {
       recordDate: dividendsRecordDateInSeconds_2.toString(),
       executionDate: dividendsExecutionDateInSeconds.toString(),
       amount: dividendsAmountPerEquity,
+      amountDecimals: dividendsAmountDecimalsPerEquity,
     };
     await equityFacet.connect(signer_C).setDividends(dividendData_2);
     await equityFacet.connect(signer_C).setDividends(dividendData_1);

@@ -144,10 +144,12 @@ describe("Adjust Balances Tests", () => {
     const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(`2030-01-01T00:00:06Z`);
     const dividendsExecutionDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:01:00Z`);
     const dividendsAmountPerEquity = 1;
+    const dividendAmountDecimalsPerEquity = 2;
     const dividendData_1 = {
       recordDate: dividendsRecordDateInSeconds_1.toString(),
       executionDate: dividendsExecutionDateInSeconds.toString(),
       amount: dividendsAmountPerEquity,
+      amountDecimals: dividendAmountDecimalsPerEquity,
     };
 
     await equityFacet.connect(signer_A).setDividends(dividendData_1);
