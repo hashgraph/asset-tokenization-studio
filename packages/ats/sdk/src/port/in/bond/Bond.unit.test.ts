@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '@core/command/CommandBus';
+import { createMock } from "@golevelup/ts-jest";
+import { CommandBus } from "@core/command/CommandBus";
 import {
   CreateBondRequest,
   GetBondDetailsRequest,
@@ -22,17 +22,14 @@ import {
   GetProceedRecipientDataRequest,
   GetProceedRecipientsRequest,
   GetPrincipalForRequest,
-} from '../request';
-import {
-  HederaIdPropsFixture,
-  TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import LogService from '@service/log/LogService';
-import { QueryBus } from '@core/query/QueryBus';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import { ValidationError } from '@core/validation/ValidationError';
-import NetworkService from '@service/network/NetworkService';
-import BondToken from './Bond';
+} from "../request";
+import { HederaIdPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import LogService from "@service/log/LogService";
+import { QueryBus } from "@core/query/QueryBus";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import { ValidationError } from "@core/validation/ValidationError";
+import NetworkService from "@service/network/NetworkService";
+import BondToken from "./Bond";
 import {
   BondDetailsFixture,
   CouponFixture,
@@ -56,43 +53,40 @@ import {
   GetProceedRecipientDataRequestFixture,
   GetProceedRecipientsRequestFixture,
   GetPrincipalForRequestFixture,
-} from '@test/fixtures/bond/BondFixture';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import { Security } from '@domain/context/security/Security';
-import { CreateBondCommand } from '@command/bond/create/CreateBondCommand';
-import ContractId from '@domain/context/contract/ContractId';
-import {
-  CastRegulationSubType,
-  CastRegulationType,
-} from '@domain/context/factory/RegulationType';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { faker } from '@faker-js/faker/.';
-import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
-import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
-import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
-import { BigNumber } from 'ethers';
-import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
-import { GetPrincipalForQuery } from '@query/bond/get/getPrincipalFor/GetPrincipalForQuery';
-import { GetCouponAmountForQuery } from '@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery';
-import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
-import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
-import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
-import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
-import { FullRedeemAtMaturityCommand } from '@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand';
-import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
-import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
-import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
-import AddProceedRecipientRequest from '../request/bond/AddProceedRecipientRequest';
-import { AddProceedRecipientCommand } from '@command/security/proceedRecipients/addProceedRecipient/AddProceedRecipientCommand';
-import { RemoveProceedRecipientCommand } from '@command/security/proceedRecipients/removeProceedRecipient/RemoveProceedRecipientCommand';
-import { UpdateProceedRecipientDataCommand } from '@command/security/proceedRecipients/updateProceedRecipientData/UpdateProceedRecipientDataCommand';
-import { IsProceedRecipientQuery } from '@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery';
-import { GetProceedRecipientsCountQuery } from '@query/security/proceedRecipient/getProceedRecipientsCount/GetProceedRecipientsCountQuery';
-import { GetProceedRecipientDataQuery } from '@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQuery';
-import { GetProceedRecipientsQuery } from '@query/security/proceedRecipient/getProceedRecipients/GetProceedRecipientsQuery';
-import { CastRateStatus } from '@domain/context/bond/RateStatus';
+} from "@test/fixtures/bond/BondFixture";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import { Security } from "@domain/context/security/Security";
+import { CreateBondCommand } from "@command/bond/create/CreateBondCommand";
+import ContractId from "@domain/context/contract/ContractId";
+import { CastRegulationSubType, CastRegulationType } from "@domain/context/factory/RegulationType";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { faker } from "@faker-js/faker/.";
+import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
+import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
+import { SetCouponCommand } from "@command/bond/coupon/set/SetCouponCommand";
+import { BigNumber } from "ethers";
+import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
+import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
+import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
+import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
+import { GetCouponCountQuery } from "@query/bond/coupons/getCouponCount/GetCouponCountQuery";
+import { UpdateMaturityDateCommand } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommand";
+import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
+import { FullRedeemAtMaturityCommand } from "@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand";
+import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery";
+import { GetTotalCouponHoldersQuery } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery";
+import { CreateTrexSuiteBondCommand } from "@command/bond/createTrexSuite/CreateTrexSuiteBondCommand";
+import AddProceedRecipientRequest from "../request/bond/AddProceedRecipientRequest";
+import { AddProceedRecipientCommand } from "@command/security/proceedRecipients/addProceedRecipient/AddProceedRecipientCommand";
+import { RemoveProceedRecipientCommand } from "@command/security/proceedRecipients/removeProceedRecipient/RemoveProceedRecipientCommand";
+import { UpdateProceedRecipientDataCommand } from "@command/security/proceedRecipients/updateProceedRecipientData/UpdateProceedRecipientDataCommand";
+import { IsProceedRecipientQuery } from "@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery";
+import { GetProceedRecipientsCountQuery } from "@query/security/proceedRecipient/getProceedRecipientsCount/GetProceedRecipientsCountQuery";
+import { GetProceedRecipientDataQuery } from "@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQuery";
+import { GetProceedRecipientsQuery } from "@query/security/proceedRecipient/getProceedRecipients/GetProceedRecipientsQuery";
+import { CastRateStatus } from "@domain/context/bond/RateStatus";
 
-describe('Bond', () => {
+describe("Bond", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
   let networkServiceMock: jest.Mocked<NetworkService>;
@@ -121,14 +115,14 @@ describe('Bond', () => {
   beforeEach(() => {
     commandBusMock = createMock<CommandBus>();
     queryBusMock = createMock<QueryBus>();
-    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    handleValidationSpy = jest.spyOn(ValidatedRequest, "handleValidation");
     networkServiceMock = createMock<NetworkService>({
       configuration: {
         factoryAddress: factoryAddress,
         resolverAddress: resolverAddress,
       },
     });
-    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    jest.spyOn(LogService, "logError").mockImplementation(() => {});
     (BondToken as any).commandBus = commandBusMock;
     (BondToken as any).queryBus = queryBusMock;
     (BondToken as any).networkService = networkServiceMock;
@@ -139,11 +133,9 @@ describe('Bond', () => {
     jest.restoreAllMocks();
   });
 
-  describe('create', () => {
-    createBondRequest = new CreateBondRequest(
-      CreateBondRequestFixture.create(),
-    );
-    it('should create successfully', async () => {
+  describe("create", () => {
+    createBondRequest = new CreateBondRequest(CreateBondRequestFixture.create());
+    it("should create successfully", async () => {
       const expectedResponse = {
         securityId: new ContractId(HederaIdPropsFixture.create().value),
         transactionId: transactionId,
@@ -156,10 +148,7 @@ describe('Bond', () => {
 
       const result = await BondToken.create(createBondRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'CreateBondRequest',
-        createBondRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("CreateBondRequest", createBondRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
@@ -178,14 +167,9 @@ describe('Bond', () => {
             internalKycActivated: createBondRequest.internalKycActivated,
             isMultiPartition: createBondRequest.isMultiPartition,
             maxSupply: BigDecimal.fromString(createBondRequest.numberOfUnits),
-            regulationType: CastRegulationType.fromNumber(
-              createBondRequest.regulationType,
-            ),
-            regulationsubType: CastRegulationSubType.fromNumber(
-              createBondRequest.regulationSubType,
-            ),
-            isCountryControlListWhiteList:
-              createBondRequest.isCountryControlListWhiteList,
+            regulationType: CastRegulationType.fromNumber(createBondRequest.regulationType),
+            regulationsubType: CastRegulationSubType.fromNumber(createBondRequest.regulationSubType),
+            isCountryControlListWhiteList: createBondRequest.isCountryControlListWhiteList,
             countries: createBondRequest.countries,
             info: createBondRequest.info,
           }),
@@ -217,18 +201,13 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        'Command execution failed',
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'CreateBondRequest',
-        createBondRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("CreateBondRequest", createBondRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new CreateBondCommand(
@@ -244,14 +223,9 @@ describe('Bond', () => {
             internalKycActivated: createBondRequest.internalKycActivated,
             isMultiPartition: createBondRequest.isMultiPartition,
             maxSupply: BigDecimal.fromString(createBondRequest.numberOfUnits),
-            regulationType: CastRegulationType.fromNumber(
-              createBondRequest.regulationType,
-            ),
-            regulationsubType: CastRegulationSubType.fromNumber(
-              createBondRequest.regulationSubType,
-            ),
-            isCountryControlListWhiteList:
-              createBondRequest.isCountryControlListWhiteList,
+            regulationType: CastRegulationType.fromNumber(createBondRequest.regulationType),
+            regulationsubType: CastRegulationSubType.fromNumber(createBondRequest.regulationSubType),
+            isCountryControlListWhiteList: createBondRequest.isCountryControlListWhiteList,
             countries: createBondRequest.countries,
             info: createBondRequest.info,
           }),
@@ -276,112 +250,94 @@ describe('Bond', () => {
       );
     });
 
-    it('should not throw error if proceedRecipientsData not has bytes', async () => {
+    it("should not throw error if proceedRecipientsData not has bytes", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          proceedRecipientsData: ['', '0x1234'],
-          proceedRecipientsIds: ['0.0.1234', '0.0.5678'],
+          proceedRecipientsData: ["", "0x1234"],
+          proceedRecipientsIds: ["0.0.1234", "0.0.5678"],
         }),
       );
 
       await expect(BondToken.create(createBondRequest)).resolves.not.toThrow();
     });
 
-    it('should throw error if name is invalid', async () => {
-      createBondRequest = new CreateBondRequest(
-        CreateBondRequestFixture.create({ name: '' }),
-      );
+    it("should throw error if name is invalid", async () => {
+      createBondRequest = new CreateBondRequest(CreateBondRequestFixture.create({ name: "" }));
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if symbol is invalid', async () => {
+    it("should throw error if symbol is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          symbol: '',
+          symbol: "",
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if isin is invalid', async () => {
+    it("should throw error if isin is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          isin: '',
+          isin: "",
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if decimals is invalid', async () => {
+    it("should throw error if decimals is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
           decimals: 2.85,
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if diamondOwnerAccount is invalid', async () => {
+    it("should throw error if diamondOwnerAccount is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          diamondOwnerAccount: 'invalid',
+          diamondOwnerAccount: "invalid",
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if currency is invalid', async () => {
+    it("should throw error if currency is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          currency: 'invalid',
+          currency: "invalid",
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if numberOfUnits is invalid', async () => {
+    it("should throw error if numberOfUnits is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          numberOfUnits: 'invalid',
+          numberOfUnits: "invalid",
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if nominalValue is invalid', async () => {
+    it("should throw error if nominalValue is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          nominalValue: 'invalid',
+          nominalValue: "invalid",
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if startingDate is invalid', async () => {
+    it("should throw error if startingDate is invalid", async () => {
       const time = Math.floor(faker.date.past().getTime() / 1000);
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
@@ -390,89 +346,73 @@ describe('Bond', () => {
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if maturityDate is invalid', async () => {
+    it("should throw error if maturityDate is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
           maturityDate: faker.date.past().getTime().toString(),
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if regulationSubType is invalid', async () => {
+    it("should throw error if regulationSubType is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
           regulationSubType: 5,
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if configId is invalid', async () => {
+    it("should throw error if configId is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          configId: 'invalid',
+          configId: "invalid",
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalPausesIds is invalid', async () => {
+    it("should throw error if externalPausesIds is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          externalPausesIds: ['invalid'],
+          externalPausesIds: ["invalid"],
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalControlListsIds is invalid', async () => {
+    it("should throw error if externalControlListsIds is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          externalControlListsIds: ['invalid'],
+          externalControlListsIds: ["invalid"],
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalKycListsIds is invalid', async () => {
+    it("should throw error if externalKycListsIds is invalid", async () => {
       createBondRequest = new CreateBondRequest(
         CreateBondRequestFixture.create({
-          externalKycListsIds: ['invalid'],
+          externalKycListsIds: ["invalid"],
         }),
       );
 
-      await expect(BondToken.create(createBondRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.create(createBondRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getBondDetails', () => {
-    getBondDetailsRequest = new GetBondDetailsRequest(
-      GetBondDetailsRequestFixture.create(),
-    );
-    it('should get bond details successfully', async () => {
+  describe("getBondDetails", () => {
+    getBondDetailsRequest = new GetBondDetailsRequest(GetBondDetailsRequestFixture.create());
+    it("should get bond details successfully", async () => {
       const expectedResponse = {
         bond: BondDetailsFixture.create(),
       };
@@ -481,65 +421,47 @@ describe('Bond', () => {
 
       const result = await BondToken.getBondDetails(getBondDetailsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetBondDetailsRequest',
-        getBondDetailsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetBondDetailsRequest", getBondDetailsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetBondDetailsQuery(getBondDetailsRequest.bondId),
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetBondDetailsQuery(getBondDetailsRequest.bondId));
 
       expect(result).toEqual(
         expect.objectContaining({
           currency: expectedResponse.bond.currency,
           nominalValue: expectedResponse.bond.nominalValue.toString(),
           nominalValueDecimals: expectedResponse.bond.nominalValueDecimals,
-          startingDate: new Date(
-            expectedResponse.bond.startingDate * ONE_THOUSAND,
-          ),
-          maturityDate: new Date(
-            expectedResponse.bond.maturityDate * ONE_THOUSAND,
-          ),
+          startingDate: new Date(expectedResponse.bond.startingDate * ONE_THOUSAND),
+          maturityDate: new Date(expectedResponse.bond.maturityDate * ONE_THOUSAND),
         }),
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.getBondDetails(getBondDetailsRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(BondToken.getBondDetails(getBondDetailsRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetBondDetailsRequest',
-        getBondDetailsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetBondDetailsRequest", getBondDetailsRequest);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetBondDetailsQuery(getBondDetailsRequest.bondId),
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetBondDetailsQuery(getBondDetailsRequest.bondId));
     });
 
-    it('should throw error if bondId is invalid', async () => {
+    it("should throw error if bondId is invalid", async () => {
       getBondDetailsRequest = new GetBondDetailsRequest({
         ...GetBondDetailsRequestFixture.create(),
-        bondId: 'invalid',
+        bondId: "invalid",
       });
 
-      await expect(
-        BondToken.getBondDetails(getBondDetailsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getBondDetails(getBondDetailsRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('setCoupon', () => {
+  describe("setCoupon", () => {
     setCouponRequest = new SetCouponRequest(SetCouponRequestFixture.create());
-    it('should set coupon successfully', async () => {
+    it("should set coupon successfully", async () => {
       const expectedResponse = {
         payload: 1,
         transactionId: transactionId,
@@ -549,10 +471,7 @@ describe('Bond', () => {
 
       const result = await BondToken.setCoupon(setCouponRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'SetCouponRequest',
-        setCouponRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("SetCouponRequest", setCouponRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -572,18 +491,13 @@ describe('Bond', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(
-        'Command execution failed',
-      );
+      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'SetCouponRequest',
-        setCouponRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("SetCouponRequest", setCouponRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new SetCouponCommand(
@@ -599,20 +513,16 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if recordTimestamp is invalid', async () => {
+    it("should throw error if recordTimestamp is invalid", async () => {
       setCouponRequest = new SetCouponRequest({
         ...SetCouponRequestFixture.create(),
-        recordTimestamp: (
-          Math.ceil(new Date().getTime() / 1000) - 100
-        ).toString(),
+        recordTimestamp: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
       });
 
-      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if executionTimestamp is invalid', async () => {
+    it("should throw error if executionTimestamp is invalid", async () => {
       const time = faker.date.past().getTime();
       setCouponRequest = new SetCouponRequest({
         ...SetCouponRequestFixture.create(),
@@ -620,40 +530,32 @@ describe('Bond', () => {
         executionTimestamp: (time - 10).toString(),
       });
 
-      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       setCouponRequest = new SetCouponRequest({
         ...SetCouponRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(ValidationError);
     });
-    it('should throw error if rate is invalid', async () => {
+    it("should throw error if rate is invalid", async () => {
       setCouponRequest = new SetCouponRequest({
         ...SetCouponRequestFixture.create(),
-        rate: 'invalid',
+        rate: "invalid",
       });
 
-      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getCouponFor', () => {
+  describe("getCouponFor", () => {
     beforeEach(() => {
-      getCouponForRequest = new GetCouponForRequest(
-        GetCouponForRequestFixture.create(),
-      );
+      getCouponForRequest = new GetCouponForRequest(GetCouponForRequestFixture.create());
     });
-    it('should get coupon for successfully', async () => {
+    it("should get coupon for successfully", async () => {
       const expectedResponse = {
         payload: new BigDecimal(BigNumber.from(10)),
       };
@@ -662,10 +564,7 @@ describe('Bond', () => {
 
       const result = await BondToken.getCouponFor(getCouponForRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetCouponForRequest',
-        getCouponForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponForRequest", getCouponForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -684,18 +583,13 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(
-        'Query execution failed',
-      );
+      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetCouponForRequest',
-        getCouponForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponForRequest", getCouponForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetCouponForQuery(
@@ -706,50 +600,42 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if targetId is invalid', async () => {
+    it("should throw error if targetId is invalid", async () => {
       getCouponForRequest = new GetCouponForRequest({
         ...GetCouponForRequestFixture.create(),
-        targetId: 'invalid',
+        targetId: "invalid",
       });
 
-      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getCouponForRequest = new GetCouponForRequest({
         ...GetCouponForRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if couponId is invalid', async () => {
+    it("should throw error if couponId is invalid", async () => {
       getCouponForRequest = new GetCouponForRequest({
         ...GetCouponForRequestFixture.create(),
         couponId: 0,
       });
 
-      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getCouponAmountFor', () => {
+  describe("getCouponAmountFor", () => {
     beforeEach(() => {
-      getCouponForRequest = new GetCouponForRequest(
-        GetCouponForRequestFixture.create(),
-      );
+      getCouponForRequest = new GetCouponForRequest(GetCouponForRequestFixture.create());
     });
-    it('should get coupon for successfully', async () => {
+    it("should get coupon for successfully", async () => {
       const expectedResponse = {
-        numerator: '10',
-        denominator: '4',
+        numerator: "10",
+        denominator: "4",
         recordDateReached: true,
       };
 
@@ -757,10 +643,7 @@ describe('Bond', () => {
 
       const result = await BondToken.getCouponAmountFor(getCouponForRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetCouponForRequest',
-        getCouponForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponForRequest", getCouponForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -781,18 +664,13 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.getCouponAmountFor(getCouponForRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(BondToken.getCouponAmountFor(getCouponForRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetCouponForRequest',
-        getCouponForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponForRequest", getCouponForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetCouponAmountForQuery(
@@ -803,68 +681,54 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if targetId is invalid', async () => {
+    it("should throw error if targetId is invalid", async () => {
       getCouponForRequest = new GetCouponForRequest({
         ...GetCouponForRequestFixture.create(),
-        targetId: 'invalid',
+        targetId: "invalid",
       });
 
-      await expect(
-        BondToken.getCouponAmountFor(getCouponForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getCouponAmountFor(getCouponForRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getCouponForRequest = new GetCouponForRequest({
         ...GetCouponForRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        BondToken.getCouponAmountFor(getCouponForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getCouponAmountFor(getCouponForRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if couponId is invalid', async () => {
+    it("should throw error if couponId is invalid", async () => {
       getCouponForRequest = new GetCouponForRequest({
         ...GetCouponForRequestFixture.create(),
         couponId: 0,
       });
 
-      await expect(
-        BondToken.getCouponAmountFor(getCouponForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getCouponAmountFor(getCouponForRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getPrincipalFor', () => {
+  describe("getPrincipalFor", () => {
     beforeEach(() => {
-      getPrincipalForRequest = new GetPrincipalForRequest(
-        GetPrincipalForRequestFixture.create(),
-      );
+      getPrincipalForRequest = new GetPrincipalForRequest(GetPrincipalForRequestFixture.create());
     });
-    it('should get principal for successfully', async () => {
+    it("should get principal for successfully", async () => {
       const expectedResponse = {
-        numerator: '10',
-        denominator: '4',
+        numerator: "10",
+        denominator: "4",
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await BondToken.getPrincipalFor(getPrincipalForRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetPrincipalForRequest',
-        getPrincipalForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetPrincipalForRequest", getPrincipalForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetPrincipalForQuery(
-          getPrincipalForRequest.targetId,
-          getPrincipalForRequest.securityId,
-        ),
+        new GetPrincipalForQuery(getPrincipalForRequest.targetId, getPrincipalForRequest.securityId),
       );
 
       expect(result).toEqual(
@@ -875,53 +739,41 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.getPrincipalFor(getPrincipalForRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(BondToken.getPrincipalFor(getPrincipalForRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetPrincipalForRequest',
-        getPrincipalForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetPrincipalForRequest", getPrincipalForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetPrincipalForQuery(
-          getPrincipalForRequest.targetId,
-          getPrincipalForRequest.securityId,
-        ),
+        new GetPrincipalForQuery(getPrincipalForRequest.targetId, getPrincipalForRequest.securityId),
       );
     });
 
-    it('should throw error if targetId is invalid', async () => {
+    it("should throw error if targetId is invalid", async () => {
       getPrincipalForRequest = new GetPrincipalForRequest({
         ...GetPrincipalForRequestFixture.create(),
-        targetId: 'invalid',
+        targetId: "invalid",
       });
 
-      await expect(
-        BondToken.getPrincipalFor(getPrincipalForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getPrincipalFor(getPrincipalForRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getPrincipalForRequest = new GetPrincipalForRequest({
         ...GetPrincipalForRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        BondToken.getPrincipalFor(getPrincipalForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getPrincipalFor(getPrincipalForRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getCoupon', () => {
+  describe("getCoupon", () => {
     getCouponRequest = new GetCouponRequest(GetCouponRequestFixture.create());
-    it('should get coupon successfully', async () => {
+    it("should get coupon successfully", async () => {
       const expectedResponse = {
         coupon: CouponFixture.create(),
       };
@@ -930,83 +782,59 @@ describe('Bond', () => {
 
       const result = await BondToken.getCoupon(getCouponRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetCouponRequest',
-        getCouponRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponRequest", getCouponRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponQuery(
-          getCouponRequest.securityId,
-          getCouponRequest.couponId,
-        ),
+        new GetCouponQuery(getCouponRequest.securityId, getCouponRequest.couponId),
       );
 
       expect(result).toEqual(
         expect.objectContaining({
           couponId: getCouponRequest.couponId,
-          recordDate: new Date(
-            expectedResponse.coupon.recordTimeStamp * ONE_THOUSAND,
-          ),
-          executionDate: new Date(
-            expectedResponse.coupon.executionTimeStamp * ONE_THOUSAND,
-          ),
+          recordDate: new Date(expectedResponse.coupon.recordTimeStamp * ONE_THOUSAND),
+          executionDate: new Date(expectedResponse.coupon.executionTimeStamp * ONE_THOUSAND),
           rate: expectedResponse.coupon.rate.toString(),
         }),
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(BondToken.getCoupon(getCouponRequest)).rejects.toThrow(
-        'Query execution failed',
-      );
+      await expect(BondToken.getCoupon(getCouponRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetCouponRequest',
-        getCouponRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponRequest", getCouponRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponQuery(
-          getCouponRequest.securityId,
-          getCouponRequest.couponId,
-        ),
+        new GetCouponQuery(getCouponRequest.securityId, getCouponRequest.couponId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getCouponRequest = new GetCouponRequest({
         ...GetCouponRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(BondToken.getCoupon(getCouponRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.getCoupon(getCouponRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if couponId is invalid', async () => {
+    it("should throw error if couponId is invalid", async () => {
       getCouponRequest = new GetCouponRequest({
         ...GetCouponRequestFixture.create(),
         couponId: 0,
       });
 
-      await expect(BondToken.getCoupon(getCouponRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(BondToken.getCoupon(getCouponRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getAllCoupons', () => {
-    getAllCouponsRequest = new GetAllCouponsRequest(
-      GetAllCouponsRequestFixture.create(),
-    );
-    it('should get all coupon successfully', async () => {
+  describe("getAllCoupons", () => {
+    getAllCouponsRequest = new GetAllCouponsRequest(GetAllCouponsRequestFixture.create());
+    it("should get all coupon successfully", async () => {
       const expectedResponse = {
         payload: 1,
       };
@@ -1015,57 +843,36 @@ describe('Bond', () => {
         coupon: CouponFixture.create(),
       };
 
-      queryBusMock.execute
-        .mockResolvedValueOnce(expectedResponse)
-        .mockResolvedValueOnce(expectedResponse2);
+      queryBusMock.execute.mockResolvedValueOnce(expectedResponse).mockResolvedValueOnce(expectedResponse2);
 
       const result = await BondToken.getAllCoupons(getAllCouponsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllCouponsRequest',
-        getAllCouponsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllCouponsRequest", getAllCouponsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
 
-      expect(queryBusMock.execute).toHaveBeenNthCalledWith(
-        1,
-        new GetCouponCountQuery(getAllCouponsRequest.securityId),
-      );
+      expect(queryBusMock.execute).toHaveBeenNthCalledWith(1, new GetCouponCountQuery(getAllCouponsRequest.securityId));
 
-      expect(queryBusMock.execute).toHaveBeenNthCalledWith(
-        2,
-        new GetCouponQuery(getAllCouponsRequest.securityId, 1),
-      );
+      expect(queryBusMock.execute).toHaveBeenNthCalledWith(2, new GetCouponQuery(getAllCouponsRequest.securityId, 1));
 
       expect(result).toEqual(
         expect.arrayContaining([
           {
             couponId: 1,
-            recordDate: new Date(
-              expectedResponse2.coupon.recordTimeStamp * ONE_THOUSAND,
-            ),
-            executionDate: new Date(
-              expectedResponse2.coupon.executionTimeStamp * ONE_THOUSAND,
-            ),
+            recordDate: new Date(expectedResponse2.coupon.recordTimeStamp * ONE_THOUSAND),
+            executionDate: new Date(expectedResponse2.coupon.executionTimeStamp * ONE_THOUSAND),
             rate: expectedResponse2.coupon.rate.toString(),
             rateDecimals: expectedResponse2.coupon.rateDecimals,
-            startDate: new Date(
-              expectedResponse2.coupon.startTimeStamp * ONE_THOUSAND,
-            ),
-            endDate: new Date(
-              expectedResponse2.coupon.endTimeStamp * ONE_THOUSAND,
-            ),
-            fixingDate: new Date(
-              expectedResponse2.coupon.fixingTimeStamp * ONE_THOUSAND,
-            ),
-            rateStatus: expectedResponse2.coupon.rateStatus,
+            startDate: new Date(expectedResponse2.coupon.startTimeStamp * ONE_THOUSAND),
+            endDate: new Date(expectedResponse2.coupon.endTimeStamp * ONE_THOUSAND),
+            fixingDate: new Date(expectedResponse2.coupon.fixingTimeStamp * ONE_THOUSAND),
+            rateStatus: CastRateStatus.toNumber(expectedResponse2.coupon.rateStatus),
           },
         ]),
       );
     });
 
-    it('should return empty array if count is 0', async () => {
+    it("should return empty array if count is 0", async () => {
       const expectedResponse = {
         payload: 0,
       };
@@ -1073,44 +880,30 @@ describe('Bond', () => {
 
       const result = await BondToken.getAllCoupons(getAllCouponsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllCouponsRequest',
-        getAllCouponsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllCouponsRequest", getAllCouponsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponCountQuery(getAllCouponsRequest.securityId),
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetCouponCountQuery(getAllCouponsRequest.securityId));
 
       expect(result).toStrictEqual([]);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.getAllCoupons(getAllCouponsRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(BondToken.getAllCoupons(getAllCouponsRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllCouponsRequest',
-        getAllCouponsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllCouponsRequest", getAllCouponsRequest);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponCountQuery(getAllCouponsRequest.securityId),
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetCouponCountQuery(getAllCouponsRequest.securityId));
     });
   });
 
-  describe('updateMaturityDate', () => {
-    updateMaturityDateRequest = new UpdateMaturityDateRequest(
-      UpdateMaturityDateRequestFixture.create(),
-    );
-    it('should update maturity date successfully', async () => {
+  describe("updateMaturityDate", () => {
+    updateMaturityDateRequest = new UpdateMaturityDateRequest(UpdateMaturityDateRequestFixture.create());
+    it("should update maturity date successfully", async () => {
       const expectedResponse = {
         payload: true,
         transactionId: transactionId,
@@ -1118,76 +911,56 @@ describe('Bond', () => {
 
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await BondToken.updateMaturityDate(
-        updateMaturityDateRequest,
-      );
+      const result = await BondToken.updateMaturityDate(updateMaturityDateRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'UpdateMaturityDateRequest',
-        updateMaturityDateRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("UpdateMaturityDateRequest", updateMaturityDateRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new UpdateMaturityDateCommand(
-          updateMaturityDateRequest.maturityDate,
-          updateMaturityDateRequest.securityId,
-        ),
+        new UpdateMaturityDateCommand(updateMaturityDateRequest.maturityDate, updateMaturityDateRequest.securityId),
       );
 
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.updateMaturityDate(updateMaturityDateRequest),
-      ).rejects.toThrow('Command execution failed');
+      await expect(BondToken.updateMaturityDate(updateMaturityDateRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'UpdateMaturityDateRequest',
-        updateMaturityDateRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("UpdateMaturityDateRequest", updateMaturityDateRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new UpdateMaturityDateCommand(
-          updateMaturityDateRequest.maturityDate,
-          updateMaturityDateRequest.securityId,
-        ),
+        new UpdateMaturityDateCommand(updateMaturityDateRequest.maturityDate, updateMaturityDateRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       updateMaturityDateRequest = new UpdateMaturityDateRequest({
         ...UpdateMaturityDateRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        BondToken.updateMaturityDate(updateMaturityDateRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.updateMaturityDate(updateMaturityDateRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if maturityDate is invalid', async () => {
+    it("should throw error if maturityDate is invalid", async () => {
       updateMaturityDateRequest = new UpdateMaturityDateRequest({
         ...UpdateMaturityDateRequestFixture.create(),
-        maturityDate: '-1',
+        maturityDate: "-1",
       });
 
-      await expect(
-        BondToken.updateMaturityDate(updateMaturityDateRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.updateMaturityDate(updateMaturityDateRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('redeemAtMaturityByPartition', () => {
+  describe("redeemAtMaturityByPartition", () => {
     redeemAtMaturityByPartitionRequest = new RedeemAtMaturityByPartitionRequest(
       RedeemAtMaturityByPartitionRequestFixture.create(),
     );
-    it('should redeem at maturity by partition successfully', async () => {
+    it("should redeem at maturity by partition successfully", async () => {
       const expectedResponse = {
         payload: true,
         transactionId: transactionId,
@@ -1195,9 +968,7 @@ describe('Bond', () => {
 
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await BondToken.redeemAtMaturityByPartition(
-        redeemAtMaturityByPartitionRequest,
-      );
+      const result = await BondToken.redeemAtMaturityByPartition(redeemAtMaturityByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
         RedeemAtMaturityByPartitionRequest.name,
@@ -1218,15 +989,13 @@ describe('Bond', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.redeemAtMaturityByPartition(
-          redeemAtMaturityByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+      await expect(BondToken.redeemAtMaturityByPartition(redeemAtMaturityByPartitionRequest)).rejects.toThrow(
+        "Command execution failed",
+      );
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
         RedeemAtMaturityByPartitionRequest.name,
@@ -1243,67 +1012,53 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
-      redeemAtMaturityByPartitionRequest =
-        new RedeemAtMaturityByPartitionRequest({
-          ...RedeemAtMaturityByPartitionRequestFixture.create(),
-          securityId: 'invalid',
-        });
+    it("should throw error if securityId is invalid", async () => {
+      redeemAtMaturityByPartitionRequest = new RedeemAtMaturityByPartitionRequest({
+        ...RedeemAtMaturityByPartitionRequestFixture.create(),
+        securityId: "invalid",
+      });
 
-      await expect(
-        BondToken.redeemAtMaturityByPartition(
-          redeemAtMaturityByPartitionRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.redeemAtMaturityByPartition(redeemAtMaturityByPartitionRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
 
-    it('should throw error if partitionId is invalid', async () => {
-      redeemAtMaturityByPartitionRequest =
-        new RedeemAtMaturityByPartitionRequest({
-          ...RedeemAtMaturityByPartitionRequestFixture.create(),
-          partitionId: 'invalid',
-        });
+    it("should throw error if partitionId is invalid", async () => {
+      redeemAtMaturityByPartitionRequest = new RedeemAtMaturityByPartitionRequest({
+        ...RedeemAtMaturityByPartitionRequestFixture.create(),
+        partitionId: "invalid",
+      });
 
-      await expect(
-        BondToken.redeemAtMaturityByPartition(
-          redeemAtMaturityByPartitionRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.redeemAtMaturityByPartition(redeemAtMaturityByPartitionRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
 
-    it('should throw error if sourceId is invalid', async () => {
-      redeemAtMaturityByPartitionRequest =
-        new RedeemAtMaturityByPartitionRequest({
-          ...RedeemAtMaturityByPartitionRequestFixture.create(),
-          sourceId: 'invalid',
-        });
+    it("should throw error if sourceId is invalid", async () => {
+      redeemAtMaturityByPartitionRequest = new RedeemAtMaturityByPartitionRequest({
+        ...RedeemAtMaturityByPartitionRequestFixture.create(),
+        sourceId: "invalid",
+      });
 
-      await expect(
-        BondToken.redeemAtMaturityByPartition(
-          redeemAtMaturityByPartitionRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.redeemAtMaturityByPartition(redeemAtMaturityByPartitionRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
-    it('should throw error if amount is invalid', async () => {
-      redeemAtMaturityByPartitionRequest =
-        new RedeemAtMaturityByPartitionRequest({
-          ...RedeemAtMaturityByPartitionRequestFixture.create(),
-          amount: 'invalid',
-        });
+    it("should throw error if amount is invalid", async () => {
+      redeemAtMaturityByPartitionRequest = new RedeemAtMaturityByPartitionRequest({
+        ...RedeemAtMaturityByPartitionRequestFixture.create(),
+        amount: "invalid",
+      });
 
-      await expect(
-        BondToken.redeemAtMaturityByPartition(
-          redeemAtMaturityByPartitionRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.redeemAtMaturityByPartition(redeemAtMaturityByPartitionRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
   });
 
-  describe('fullRedeemAtMaturity', () => {
-    fullRedeemAtMaturityRequest = new FullRedeemAtMaturityRequest(
-      FullRedeemAtMaturityRequestFixture.create(),
-    );
-    it('should redeem at maturity successfully', async () => {
+  describe("fullRedeemAtMaturity", () => {
+    fullRedeemAtMaturityRequest = new FullRedeemAtMaturityRequest(FullRedeemAtMaturityRequestFixture.create());
+    it("should redeem at maturity successfully", async () => {
       const expectedResponse = {
         payload: true,
         transactionId: transactionId,
@@ -1311,85 +1066,56 @@ describe('Bond', () => {
 
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await BondToken.fullRedeemAtMaturity(
-        fullRedeemAtMaturityRequest,
-      );
+      const result = await BondToken.fullRedeemAtMaturity(fullRedeemAtMaturityRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        FullRedeemAtMaturityRequest.name,
-        fullRedeemAtMaturityRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith(FullRedeemAtMaturityRequest.name, fullRedeemAtMaturityRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new FullRedeemAtMaturityCommand(
-          fullRedeemAtMaturityRequest.securityId,
-          fullRedeemAtMaturityRequest.sourceId,
-        ),
+        new FullRedeemAtMaturityCommand(fullRedeemAtMaturityRequest.securityId, fullRedeemAtMaturityRequest.sourceId),
       );
 
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.fullRedeemAtMaturity(
-          fullRedeemAtMaturityRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        FullRedeemAtMaturityRequest.name,
-        fullRedeemAtMaturityRequest,
+      await expect(BondToken.fullRedeemAtMaturity(fullRedeemAtMaturityRequest)).rejects.toThrow(
+        "Command execution failed",
       );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(FullRedeemAtMaturityRequest.name, fullRedeemAtMaturityRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new FullRedeemAtMaturityCommand(
-          fullRedeemAtMaturityRequest.securityId,
-          fullRedeemAtMaturityRequest.sourceId,
-        ),
+        new FullRedeemAtMaturityCommand(fullRedeemAtMaturityRequest.securityId, fullRedeemAtMaturityRequest.sourceId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
-      fullRedeemAtMaturityRequest =
-        new FullRedeemAtMaturityRequest({
-          ...FullRedeemAtMaturityRequestFixture.create(),
-          securityId: 'invalid',
-        });
+    it("should throw error if securityId is invalid", async () => {
+      fullRedeemAtMaturityRequest = new FullRedeemAtMaturityRequest({
+        ...FullRedeemAtMaturityRequestFixture.create(),
+        securityId: "invalid",
+      });
 
-      await expect(
-        BondToken.fullRedeemAtMaturity(
-          fullRedeemAtMaturityRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.fullRedeemAtMaturity(fullRedeemAtMaturityRequest)).rejects.toThrow(ValidationError);
     });
 
+    it("should throw error if sourceId is invalid", async () => {
+      fullRedeemAtMaturityRequest = new FullRedeemAtMaturityRequest({
+        ...FullRedeemAtMaturityRequestFixture.create(),
+        sourceId: "invalid",
+      });
 
-    it('should throw error if sourceId is invalid', async () => {
-      fullRedeemAtMaturityRequest =
-        new FullRedeemAtMaturityRequest({
-          ...FullRedeemAtMaturityRequestFixture.create(),
-          sourceId: 'invalid',
-        });
-
-      await expect(
-        BondToken.fullRedeemAtMaturity(
-          fullRedeemAtMaturityRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.fullRedeemAtMaturity(fullRedeemAtMaturityRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getCouponHolders', () => {
-    getCouponHoldersRequest = new GetCouponHoldersRequest(
-      GetCouponHoldersQueryFixture.create(),
-    );
-    it('should get coupon holders successfully', async () => {
+  describe("getCouponHolders", () => {
+    getCouponHoldersRequest = new GetCouponHoldersRequest(GetCouponHoldersQueryFixture.create());
+    it("should get coupon holders successfully", async () => {
       const expectedResponse = {
         payload: [transactionId],
       };
@@ -1398,10 +1124,7 @@ describe('Bond', () => {
 
       const result = await BondToken.getCouponHolders(getCouponHoldersRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetCouponHoldersRequest.name,
-        getCouponHoldersRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith(GetCouponHoldersRequest.name, getCouponHoldersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -1417,18 +1140,13 @@ describe('Bond', () => {
       expect(result).toStrictEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.getCouponHolders(getCouponHoldersRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(BondToken.getCouponHolders(getCouponHoldersRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetCouponHoldersRequest.name,
-        getCouponHoldersRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith(GetCouponHoldersRequest.name, getCouponHoldersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -1442,133 +1160,103 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getCouponHoldersRequest = new GetCouponHoldersRequest({
         ...GetCouponHoldersQueryFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        BondToken.getCouponHolders(getCouponHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getCouponHolders(getCouponHoldersRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if couponId is invalid', async () => {
+    it("should throw error if couponId is invalid", async () => {
       getCouponHoldersRequest = new GetCouponHoldersRequest({
         ...GetCouponHoldersQueryFixture.create(),
         couponId: -1,
       });
 
-      await expect(
-        BondToken.getCouponHolders(getCouponHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getCouponHolders(getCouponHoldersRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if start is invalid', async () => {
+    it("should throw error if start is invalid", async () => {
       getCouponHoldersRequest = new GetCouponHoldersRequest({
         ...GetCouponHoldersQueryFixture.create(),
         start: -1,
       });
 
-      await expect(
-        BondToken.getCouponHolders(getCouponHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getCouponHolders(getCouponHoldersRequest)).rejects.toThrow(ValidationError);
     });
-    it('should throw error if end is invalid', async () => {
+    it("should throw error if end is invalid", async () => {
       getCouponHoldersRequest = new GetCouponHoldersRequest({
         ...GetCouponHoldersQueryFixture.create(),
         end: -1,
       });
 
-      await expect(
-        BondToken.getCouponHolders(getCouponHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getCouponHolders(getCouponHoldersRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getTotalCouponHolders', () => {
-    getTotalCouponHoldersRequest = new GetTotalCouponHoldersRequest(
-      GetTotalCouponHoldersRequestFixture.create(),
-    );
-    it('should get total coupon holders successfully', async () => {
+  describe("getTotalCouponHolders", () => {
+    getTotalCouponHoldersRequest = new GetTotalCouponHoldersRequest(GetTotalCouponHoldersRequestFixture.create());
+    it("should get total coupon holders successfully", async () => {
       const expectedResponse = {
         payload: 1,
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await BondToken.getTotalCouponHolders(
-        getTotalCouponHoldersRequest,
-      );
+      const result = await BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetTotalCouponHoldersRequest.name,
-        getTotalCouponHoldersRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith(GetTotalCouponHoldersRequest.name, getTotalCouponHoldersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetTotalCouponHoldersQuery(
-          getTotalCouponHoldersRequest.securityId,
-          getTotalCouponHoldersRequest.couponId,
-        ),
+        new GetTotalCouponHoldersQuery(getTotalCouponHoldersRequest.securityId, getTotalCouponHoldersRequest.couponId),
       );
 
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest),
-      ).rejects.toThrow('Query execution failed');
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetTotalCouponHoldersRequest.name,
-        getTotalCouponHoldersRequest,
+      await expect(BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest)).rejects.toThrow(
+        "Query execution failed",
       );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(GetTotalCouponHoldersRequest.name, getTotalCouponHoldersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetTotalCouponHoldersQuery(
-          getTotalCouponHoldersRequest.securityId,
-          getTotalCouponHoldersRequest.couponId,
-        ),
+        new GetTotalCouponHoldersQuery(getTotalCouponHoldersRequest.securityId, getTotalCouponHoldersRequest.couponId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getTotalCouponHoldersRequest = new GetTotalCouponHoldersRequest({
         ...GetTotalCouponHoldersRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if couponId is invalid', async () => {
+    it("should throw error if couponId is invalid", async () => {
       getTotalCouponHoldersRequest = new GetTotalCouponHoldersRequest({
         ...GetTotalCouponHoldersRequestFixture.create(),
         couponId: -1,
       });
 
-      await expect(
-        BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('createTrexSuite', () => {
-    createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
-      CreateTrexSuiteBondRequestFixture.create(),
-    );
-    it('should create successfully', async () => {
+  describe("createTrexSuite", () => {
+    createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(CreateTrexSuiteBondRequestFixture.create());
+    it("should create successfully", async () => {
       const expectedResponse = {
         securityId: new ContractId(HederaIdPropsFixture.create().value),
         transactionId: transactionId,
@@ -1579,14 +1267,9 @@ describe('Bond', () => {
         security: security,
       });
 
-      const result = await BondToken.createTrexSuite(
-        createTrexSuiteBondRequest,
-      );
+      const result = await BondToken.createTrexSuite(createTrexSuiteBondRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'CreateTrexSuiteBondRequest',
-        createTrexSuiteBondRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("CreateTrexSuiteBondRequest", createTrexSuiteBondRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
@@ -1611,23 +1294,14 @@ describe('Bond', () => {
             decimals: createTrexSuiteBondRequest.decimals,
             isWhiteList: createTrexSuiteBondRequest.isWhiteList,
             isControllable: createTrexSuiteBondRequest.isControllable,
-            arePartitionsProtected:
-              createTrexSuiteBondRequest.arePartitionsProtected,
+            arePartitionsProtected: createTrexSuiteBondRequest.arePartitionsProtected,
             clearingActive: createTrexSuiteBondRequest.clearingActive,
-            internalKycActivated:
-              createTrexSuiteBondRequest.internalKycActivated,
+            internalKycActivated: createTrexSuiteBondRequest.internalKycActivated,
             isMultiPartition: createTrexSuiteBondRequest.isMultiPartition,
-            maxSupply: BigDecimal.fromString(
-              createTrexSuiteBondRequest.numberOfUnits,
-            ),
-            regulationType: CastRegulationType.fromNumber(
-              createTrexSuiteBondRequest.regulationType,
-            ),
-            regulationsubType: CastRegulationSubType.fromNumber(
-              createTrexSuiteBondRequest.regulationSubType,
-            ),
-            isCountryControlListWhiteList:
-              createTrexSuiteBondRequest.isCountryControlListWhiteList,
+            maxSupply: BigDecimal.fromString(createTrexSuiteBondRequest.numberOfUnits),
+            regulationType: CastRegulationType.fromNumber(createTrexSuiteBondRequest.regulationType),
+            regulationsubType: CastRegulationSubType.fromNumber(createTrexSuiteBondRequest.regulationSubType),
+            isCountryControlListWhiteList: createTrexSuiteBondRequest.isCountryControlListWhiteList,
             countries: createTrexSuiteBondRequest.countries,
             info: createTrexSuiteBondRequest.info,
           }),
@@ -1659,18 +1333,13 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow('Command execution failed');
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'CreateTrexSuiteBondRequest',
-        createTrexSuiteBondRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("CreateTrexSuiteBondRequest", createTrexSuiteBondRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new CreateTrexSuiteBondCommand(
@@ -1692,23 +1361,14 @@ describe('Bond', () => {
             decimals: createTrexSuiteBondRequest.decimals,
             isWhiteList: createTrexSuiteBondRequest.isWhiteList,
             isControllable: createTrexSuiteBondRequest.isControllable,
-            arePartitionsProtected:
-              createTrexSuiteBondRequest.arePartitionsProtected,
+            arePartitionsProtected: createTrexSuiteBondRequest.arePartitionsProtected,
             clearingActive: createTrexSuiteBondRequest.clearingActive,
-            internalKycActivated:
-              createTrexSuiteBondRequest.internalKycActivated,
+            internalKycActivated: createTrexSuiteBondRequest.internalKycActivated,
             isMultiPartition: createTrexSuiteBondRequest.isMultiPartition,
-            maxSupply: BigDecimal.fromString(
-              createTrexSuiteBondRequest.numberOfUnits,
-            ),
-            regulationType: CastRegulationType.fromNumber(
-              createTrexSuiteBondRequest.regulationType,
-            ),
-            regulationsubType: CastRegulationSubType.fromNumber(
-              createTrexSuiteBondRequest.regulationSubType,
-            ),
-            isCountryControlListWhiteList:
-              createTrexSuiteBondRequest.isCountryControlListWhiteList,
+            maxSupply: BigDecimal.fromString(createTrexSuiteBondRequest.numberOfUnits),
+            regulationType: CastRegulationType.fromNumber(createTrexSuiteBondRequest.regulationType),
+            regulationsubType: CastRegulationSubType.fromNumber(createTrexSuiteBondRequest.regulationSubType),
+            isCountryControlListWhiteList: createTrexSuiteBondRequest.isCountryControlListWhiteList,
             countries: createTrexSuiteBondRequest.countries,
             info: createTrexSuiteBondRequest.info,
           }),
@@ -1733,101 +1393,85 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if name is invalid', async () => {
+    it("should throw error if name is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
-        CreateTrexSuiteBondRequestFixture.create({ name: '' }),
+        CreateTrexSuiteBondRequestFixture.create({ name: "" }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if symbol is invalid', async () => {
+    it("should throw error if symbol is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          symbol: '',
+          symbol: "",
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if isin is invalid', async () => {
+    it("should throw error if isin is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          isin: '',
+          isin: "",
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if decimals is invalid', async () => {
+    it("should throw error if decimals is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
           decimals: 2.85,
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if diamondOwnerAccount is invalid', async () => {
+    it("should throw error if diamondOwnerAccount is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          diamondOwnerAccount: 'invalid',
+          diamondOwnerAccount: "invalid",
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if currency is invalid', async () => {
+    it("should throw error if currency is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          currency: 'invalid',
+          currency: "invalid",
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if numberOfUnits is invalid', async () => {
+    it("should throw error if numberOfUnits is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          numberOfUnits: 'invalid',
+          numberOfUnits: "invalid",
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if nominalValue is invalid', async () => {
+    it("should throw error if nominalValue is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          nominalValue: 'invalid',
+          nominalValue: "invalid",
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if startingDate is invalid', async () => {
+    it("should throw error if startingDate is invalid", async () => {
       const time = Math.floor(faker.date.past().getTime() / 1000);
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
@@ -1836,91 +1480,73 @@ describe('Bond', () => {
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if maturityDate is invalid', async () => {
+    it("should throw error if maturityDate is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          maturityDate: Math.floor(
-            faker.date.past().getTime() / 1000,
-          ).toString(),
+          maturityDate: Math.floor(faker.date.past().getTime() / 1000).toString(),
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if regulationSubType is invalid', async () => {
+    it("should throw error if regulationSubType is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
           regulationSubType: 5,
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if configId is invalid', async () => {
+    it("should throw error if configId is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          configId: 'invalid',
+          configId: "invalid",
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalPauses is invalid', async () => {
+    it("should throw error if externalPauses is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          externalPauses: ['invalid'],
+          externalPauses: ["invalid"],
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalControlLists is invalid', async () => {
+    it("should throw error if externalControlLists is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          externalControlLists: ['invalid'],
+          externalControlLists: ["invalid"],
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalKycLists is invalid', async () => {
+    it("should throw error if externalKycLists is invalid", async () => {
       createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(
         CreateTrexSuiteBondRequestFixture.create({
-          externalKycLists: ['invalid'],
+          externalKycLists: ["invalid"],
         }),
       );
 
-      await expect(
-        BondToken.createTrexSuite(createTrexSuiteBondRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.createTrexSuite(createTrexSuiteBondRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('AddProceedRecipientRequest', () => {
-    const addProceedRecipientRequest = new AddProceedRecipientRequest(
-      AddProceedRecipientRequestFixture.create(),
-    );
-    it('should add proceed recipient successfully', async () => {
+  describe("AddProceedRecipientRequest", () => {
+    const addProceedRecipientRequest = new AddProceedRecipientRequest(AddProceedRecipientRequestFixture.create());
+    it("should add proceed recipient successfully", async () => {
       const expectedResponse = {
         payload: true,
         transactionId: transactionId,
@@ -1928,14 +1554,9 @@ describe('Bond', () => {
 
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await BondToken.addProceedRecipient(
-        addProceedRecipientRequest,
-      );
+      const result = await BondToken.addProceedRecipient(addProceedRecipientRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'AddProceedRecipientRequest',
-        addProceedRecipientRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("AddProceedRecipientRequest", addProceedRecipientRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -1950,18 +1571,15 @@ describe('Bond', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.addProceedRecipient(addProceedRecipientRequest),
-      ).rejects.toThrow('Command execution failed');
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'AddProceedRecipientRequest',
-        addProceedRecipientRequest,
+      await expect(BondToken.addProceedRecipient(addProceedRecipientRequest)).rejects.toThrow(
+        "Command execution failed",
       );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("AddProceedRecipientRequest", addProceedRecipientRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new AddProceedRecipientCommand(
@@ -1972,45 +1590,39 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       let addProceedRecipientRequest = new AddProceedRecipientRequest({
         ...AddProceedRecipientRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        BondToken.addProceedRecipient(addProceedRecipientRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.addProceedRecipient(addProceedRecipientRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if data is invalid', async () => {
+    it("should throw error if data is invalid", async () => {
       let addProceedRecipientRequest = new AddProceedRecipientRequest({
         ...AddProceedRecipientRequestFixture.create(),
-        data: 'invalid',
+        data: "invalid",
       });
 
-      await expect(
-        BondToken.addProceedRecipient(addProceedRecipientRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.addProceedRecipient(addProceedRecipientRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if proceedRecipientId is invalid', async () => {
+    it("should throw error if proceedRecipientId is invalid", async () => {
       let addProceedRecipientRequest = new AddProceedRecipientRequest({
         ...AddProceedRecipientRequestFixture.create(),
-        proceedRecipientId: 'invalid',
+        proceedRecipientId: "invalid",
       });
 
-      await expect(
-        BondToken.addProceedRecipient(addProceedRecipientRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.addProceedRecipient(addProceedRecipientRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('RemoveProceedRecipientRequest', () => {
+  describe("RemoveProceedRecipientRequest", () => {
     const removeProceedRecipientRequest = new RemoveProceedRecipientRequest(
       RemoveProceedRecipientRequestFixture.create(),
     );
-    it('should remove proceed recipient successfully', async () => {
+    it("should remove proceed recipient successfully", async () => {
       const expectedResponse = {
         payload: true,
         transactionId: transactionId,
@@ -2018,14 +1630,9 @@ describe('Bond', () => {
 
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await BondToken.removeProceedRecipient(
-        removeProceedRecipientRequest,
-      );
+      const result = await BondToken.removeProceedRecipient(removeProceedRecipientRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'RemoveProceedRecipientRequest',
-        removeProceedRecipientRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("RemoveProceedRecipientRequest", removeProceedRecipientRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -2039,18 +1646,15 @@ describe('Bond', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.removeProceedRecipient(removeProceedRecipientRequest),
-      ).rejects.toThrow('Command execution failed');
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'RemoveProceedRecipientRequest',
-        removeProceedRecipientRequest,
+      await expect(BondToken.removeProceedRecipient(removeProceedRecipientRequest)).rejects.toThrow(
+        "Command execution failed",
       );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("RemoveProceedRecipientRequest", removeProceedRecipientRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new RemoveProceedRecipientCommand(
@@ -2060,128 +1664,116 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       let removeProceedRecipientRequest = new RemoveProceedRecipientRequest({
         ...RemoveProceedRecipientRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        BondToken.removeProceedRecipient(removeProceedRecipientRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.removeProceedRecipient(removeProceedRecipientRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if proceedRecipientId is invalid', async () => {
+    it("should throw error if proceedRecipientId is invalid", async () => {
       let removeProceedRecipientRequest = new RemoveProceedRecipientRequest({
         ...RemoveProceedRecipientRequestFixture.create(),
-        proceedRecipientId: 'invalid',
+        proceedRecipientId: "invalid",
       });
 
-      await expect(
-        BondToken.removeProceedRecipient(removeProceedRecipientRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.removeProceedRecipient(removeProceedRecipientRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('UpdateProceedRecipientDataRequest', () => {
-    const updateProceedRecipientDataRequest =
-      new UpdateProceedRecipientDataRequest(
-        UpdateProceedRecipientDataRequestFixture.create(),
-      );
-    it('should update proceed recipient data successfully', async () => {
-      const expectedResponse = {
-        payload: true,
-        transactionId: transactionId,
-      };
-
-      commandBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await BondToken.updateProceedRecipientData(
-        updateProceedRecipientDataRequest,
-      );
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'UpdateProceedRecipientDataRequest',
-        updateProceedRecipientDataRequest,
-      );
-
-      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new UpdateProceedRecipientDataCommand(
-          updateProceedRecipientDataRequest.securityId,
-          updateProceedRecipientDataRequest.proceedRecipientId,
-          updateProceedRecipientDataRequest.data,
-        ),
-      );
-
-      expect(result).toEqual(expectedResponse);
-    });
-
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
-      commandBusMock.execute.mockRejectedValue(error);
-
-      await expect(
-        BondToken.updateProceedRecipientData(updateProceedRecipientDataRequest),
-      ).rejects.toThrow('Command execution failed');
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'UpdateProceedRecipientDataRequest',
-        updateProceedRecipientDataRequest,
-      );
-
-      expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new UpdateProceedRecipientDataCommand(
-          updateProceedRecipientDataRequest.securityId,
-          updateProceedRecipientDataRequest.proceedRecipientId,
-          updateProceedRecipientDataRequest.data,
-        ),
-      );
-    });
-
-    it('should throw error if securityId is invalid', async () => {
-      let updateProceedRecipientDataRequest =
-        new UpdateProceedRecipientDataRequest({
-          ...UpdateProceedRecipientDataRequestFixture.create(),
-          securityId: 'invalid',
-        });
-
-      await expect(
-        BondToken.updateProceedRecipientData(updateProceedRecipientDataRequest),
-      ).rejects.toThrow(ValidationError);
-    });
-
-    it('should throw error if data is invalid', async () => {
-      let updateProceedRecipientDataRequest =
-        new UpdateProceedRecipientDataRequest({
-          ...UpdateProceedRecipientDataRequestFixture.create(),
-          data: 'invalid',
-        });
-
-      await expect(
-        BondToken.updateProceedRecipientData(updateProceedRecipientDataRequest),
-      ).rejects.toThrow(ValidationError);
-    });
-
-    it('should throw error if proceedRecipientId is invalid', async () => {
-      let updateProceedRecipientDataRequest =
-        new UpdateProceedRecipientDataRequest({
-          ...UpdateProceedRecipientDataRequestFixture.create(),
-          proceedRecipientId: 'invalid',
-        });
-
-      await expect(
-        BondToken.updateProceedRecipientData(updateProceedRecipientDataRequest),
-      ).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe('IsProceedRecipientRequest', () => {
-    const isProceedRecipientRequest = new IsProceedRecipientRequest(
-      IsProceedRecipientRequestFixture.create(),
+  describe("UpdateProceedRecipientDataRequest", () => {
+    const updateProceedRecipientDataRequest = new UpdateProceedRecipientDataRequest(
+      UpdateProceedRecipientDataRequestFixture.create(),
     );
-    it('should get isProceedRecipient successfully', async () => {
+    it("should update proceed recipient data successfully", async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.updateProceedRecipientData(updateProceedRecipientDataRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        "UpdateProceedRecipientDataRequest",
+        updateProceedRecipientDataRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UpdateProceedRecipientDataCommand(
+          updateProceedRecipientDataRequest.securityId,
+          updateProceedRecipientDataRequest.proceedRecipientId,
+          updateProceedRecipientDataRequest.data,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(BondToken.updateProceedRecipientData(updateProceedRecipientDataRequest)).rejects.toThrow(
+        "Command execution failed",
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        "UpdateProceedRecipientDataRequest",
+        updateProceedRecipientDataRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new UpdateProceedRecipientDataCommand(
+          updateProceedRecipientDataRequest.securityId,
+          updateProceedRecipientDataRequest.proceedRecipientId,
+          updateProceedRecipientDataRequest.data,
+        ),
+      );
+    });
+
+    it("should throw error if securityId is invalid", async () => {
+      let updateProceedRecipientDataRequest = new UpdateProceedRecipientDataRequest({
+        ...UpdateProceedRecipientDataRequestFixture.create(),
+        securityId: "invalid",
+      });
+
+      await expect(BondToken.updateProceedRecipientData(updateProceedRecipientDataRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it("should throw error if data is invalid", async () => {
+      let updateProceedRecipientDataRequest = new UpdateProceedRecipientDataRequest({
+        ...UpdateProceedRecipientDataRequestFixture.create(),
+        data: "invalid",
+      });
+
+      await expect(BondToken.updateProceedRecipientData(updateProceedRecipientDataRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+
+    it("should throw error if proceedRecipientId is invalid", async () => {
+      let updateProceedRecipientDataRequest = new UpdateProceedRecipientDataRequest({
+        ...UpdateProceedRecipientDataRequestFixture.create(),
+        proceedRecipientId: "invalid",
+      });
+
+      await expect(BondToken.updateProceedRecipientData(updateProceedRecipientDataRequest)).rejects.toThrow(
+        ValidationError,
+      );
+    });
+  });
+
+  describe("IsProceedRecipientRequest", () => {
+    const isProceedRecipientRequest = new IsProceedRecipientRequest(IsProceedRecipientRequestFixture.create());
+    it("should get isProceedRecipient successfully", async () => {
       const expectedResponse = {
         payload: true,
         transactionId: transactionId,
@@ -2189,77 +1781,56 @@ describe('Bond', () => {
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await BondToken.isProceedRecipient(
-        isProceedRecipientRequest,
-      );
+      const result = await BondToken.isProceedRecipient(isProceedRecipientRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'IsProceedRecipientRequest',
-        isProceedRecipientRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("IsProceedRecipientRequest", isProceedRecipientRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new IsProceedRecipientQuery(
-          isProceedRecipientRequest.securityId,
-          isProceedRecipientRequest.proceedRecipientId,
-        ),
+        new IsProceedRecipientQuery(isProceedRecipientRequest.securityId, isProceedRecipientRequest.proceedRecipientId),
       );
 
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.isProceedRecipient(isProceedRecipientRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(BondToken.isProceedRecipient(isProceedRecipientRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'IsProceedRecipientRequest',
-        isProceedRecipientRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("IsProceedRecipientRequest", isProceedRecipientRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new IsProceedRecipientQuery(
-          isProceedRecipientRequest.securityId,
-          isProceedRecipientRequest.proceedRecipientId,
-        ),
+        new IsProceedRecipientQuery(isProceedRecipientRequest.securityId, isProceedRecipientRequest.proceedRecipientId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       let isProceedRecipientRequest = new IsProceedRecipientRequest({
         ...AddProceedRecipientRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        BondToken.isProceedRecipient(isProceedRecipientRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.isProceedRecipient(isProceedRecipientRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if proceedRecipientId is invalid', async () => {
+    it("should throw error if proceedRecipientId is invalid", async () => {
       let isProceedRecipientRequest = new IsProceedRecipientRequest({
         ...AddProceedRecipientRequestFixture.create(),
-        proceedRecipientId: 'invalid',
+        proceedRecipientId: "invalid",
       });
 
-      await expect(
-        BondToken.isProceedRecipient(isProceedRecipientRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.isProceedRecipient(isProceedRecipientRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('GetProceedRecipientsCountRequest', () => {
-    const getProceedRecipientsCountRequest =
-      new GetProceedRecipientsCountRequest(
-        GetProceedRecipientsCountRequestFixture.create(),
-      );
-    it('should get proceedRecipients count successfully', async () => {
+  describe("GetProceedRecipientsCountRequest", () => {
+    const getProceedRecipientsCountRequest = new GetProceedRecipientsCountRequest(
+      GetProceedRecipientsCountRequestFixture.create(),
+    );
+    it("should get proceedRecipients count successfully", async () => {
       const expectedResponse = {
         payload: true,
         transactionId: transactionId,
@@ -2267,64 +1838,57 @@ describe('Bond', () => {
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await BondToken.getProceedRecipientsCount(
-        getProceedRecipientsCountRequest,
-      );
+      const result = await BondToken.getProceedRecipientsCount(getProceedRecipientsCountRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetProceedRecipientsCountRequest',
+        "GetProceedRecipientsCountRequest",
         getProceedRecipientsCountRequest,
       );
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetProceedRecipientsCountQuery(
-          getProceedRecipientsCountRequest.securityId,
-        ),
+        new GetProceedRecipientsCountQuery(getProceedRecipientsCountRequest.securityId),
       );
 
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.getProceedRecipientsCount(getProceedRecipientsCountRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(BondToken.getProceedRecipientsCount(getProceedRecipientsCountRequest)).rejects.toThrow(
+        "Query execution failed",
+      );
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetProceedRecipientsCountRequest',
+        "GetProceedRecipientsCountRequest",
         getProceedRecipientsCountRequest,
       );
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetProceedRecipientsCountQuery(
-          getProceedRecipientsCountRequest.securityId,
-        ),
+        new GetProceedRecipientsCountQuery(getProceedRecipientsCountRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
-      let getProceedRecipientsCountRequest =
-        new GetProceedRecipientsCountRequest({
-          ...AddProceedRecipientRequestFixture.create(),
-          securityId: 'invalid',
-        });
+    it("should throw error if securityId is invalid", async () => {
+      let getProceedRecipientsCountRequest = new GetProceedRecipientsCountRequest({
+        ...AddProceedRecipientRequestFixture.create(),
+        securityId: "invalid",
+      });
 
-      await expect(
-        BondToken.getProceedRecipientsCount(getProceedRecipientsCountRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getProceedRecipientsCount(getProceedRecipientsCountRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
   });
 
-  describe('GetProceedRecipientDataRequest', () => {
+  describe("GetProceedRecipientDataRequest", () => {
     const getProceedRecipientDataRequest = new GetProceedRecipientDataRequest(
       GetProceedRecipientDataRequestFixture.create(),
     );
-    it('should get proceed recipient data successfully', async () => {
+    it("should get proceed recipient data successfully", async () => {
       const expectedResponse = {
         payload: true,
         transactionId: transactionId,
@@ -2332,12 +1896,10 @@ describe('Bond', () => {
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await BondToken.getProceedRecipientData(
-        getProceedRecipientDataRequest,
-      );
+      const result = await BondToken.getProceedRecipientData(getProceedRecipientDataRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetProceedRecipientDataRequest',
+        "GetProceedRecipientDataRequest",
         getProceedRecipientDataRequest,
       );
 
@@ -2353,16 +1915,16 @@ describe('Bond', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.getProceedRecipientData(getProceedRecipientDataRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(BondToken.getProceedRecipientData(getProceedRecipientDataRequest)).rejects.toThrow(
+        "Query execution failed",
+      );
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetProceedRecipientDataRequest',
+        "GetProceedRecipientDataRequest",
         getProceedRecipientDataRequest,
       );
 
@@ -2374,34 +1936,28 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       let isProceedRecipientRequest = new GetProceedRecipientDataRequest({
         ...AddProceedRecipientRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        BondToken.isProceedRecipient(isProceedRecipientRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.isProceedRecipient(isProceedRecipientRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if proceedRecipientId is invalid', async () => {
+    it("should throw error if proceedRecipientId is invalid", async () => {
       let isProceedRecipientRequest = new GetProceedRecipientDataRequest({
         ...AddProceedRecipientRequestFixture.create(),
-        proceedRecipientId: 'invalid',
+        proceedRecipientId: "invalid",
       });
 
-      await expect(
-        BondToken.isProceedRecipient(isProceedRecipientRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.isProceedRecipient(isProceedRecipientRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('GetProceedRecipientsRequest', () => {
-    const getProceedRecipientsRequest = new GetProceedRecipientsRequest(
-      GetProceedRecipientsRequestFixture.create(),
-    );
-    it('should get proceedRecipients successfully', async () => {
+  describe("GetProceedRecipientsRequest", () => {
+    const getProceedRecipientsRequest = new GetProceedRecipientsRequest(GetProceedRecipientsRequestFixture.create());
+    it("should get proceedRecipients successfully", async () => {
       const expectedResponse = {
         payload: true,
         transactionId: transactionId,
@@ -2409,14 +1965,9 @@ describe('Bond', () => {
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await BondToken.getProceedRecipients(
-        getProceedRecipientsRequest,
-      );
+      const result = await BondToken.getProceedRecipients(getProceedRecipientsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetProceedRecipientsRequest',
-        getProceedRecipientsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetProceedRecipientsRequest", getProceedRecipientsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -2431,18 +1982,15 @@ describe('Bond', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        BondToken.getProceedRecipients(getProceedRecipientsRequest),
-      ).rejects.toThrow('Query execution failed');
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetProceedRecipientsRequest',
-        getProceedRecipientsRequest,
+      await expect(BondToken.getProceedRecipients(getProceedRecipientsRequest)).rejects.toThrow(
+        "Query execution failed",
       );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetProceedRecipientsRequest", getProceedRecipientsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetProceedRecipientsQuery(
@@ -2453,26 +2001,22 @@ describe('Bond', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       let getProceedRecipientsRequest = new GetProceedRecipientsRequest({
         ...GetProceedRecipientsRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        BondToken.getProceedRecipients(getProceedRecipientsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getProceedRecipients(getProceedRecipientsRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if page size is invalid', async () => {
+    it("should throw error if page size is invalid", async () => {
       let getProceedRecipientsRequest = new GetProceedRecipientsRequest({
         ...GetProceedRecipientsRequestFixture.create(),
         pageSize: -1,
       });
 
-      await expect(
-        BondToken.getProceedRecipients(getProceedRecipientsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(BondToken.getProceedRecipients(getProceedRecipientsRequest)).rejects.toThrow(ValidationError);
     });
   });
 });
