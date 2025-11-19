@@ -8,6 +8,30 @@ import { Common } from "../../layer_1/common/Common.sol";
 import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../layer_1/constants/roles.sol";
 
 abstract contract Bond is IBond, Common {
+    function fullRedeemAtMaturity(
+        address _tokenHolder
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_tokenHolder)
+        onlyListedAllowed(_tokenHolder)
+        onlyRole(_MATURITY_REDEEMER_ROLE)
+        onlyClearingDisabled
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
+        onlyUnrecoveredAddress(_tokenHolder)
+        onlyAfterCurrentMaturityDate(_blockTimestamp())
+    {
+        bytes32[] memory partitions = _partitionsOf(_tokenHolder);
+        for (uint256 i = 0; i < partitions.length; i++) {
+            bytes32 partition = partitions[i];
+            uint256 balance = _balanceOfByPartition(partition, _tokenHolder);
+            if (balance > 0) {
+                _redeemByPartition(partition, _tokenHolder, _msgSender(), balance, "", "");
+            }
+        }
+    }
+
     function redeemAtMaturityByPartition(
         address _tokenHolder,
         bytes32 _partition,
@@ -21,7 +45,6 @@ abstract contract Bond is IBond, Common {
         onlyListedAllowed(_tokenHolder)
         onlyRole(_MATURITY_REDEEMER_ROLE)
         onlyClearingDisabled
-        onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyAfterCurrentMaturityDate(_blockTimestamp())

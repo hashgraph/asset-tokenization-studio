@@ -3044,6 +3044,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async fullRedeemAtMaturity(
+    security: EvmAddress,
+    sourceId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Full redeeming at maturity to address ${security.toString()}`,
+    );
+
+    return this.executeTransaction(
+      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'fullRedeemAtMaturity',
+      [sourceId.toString()],
+      GAS.FULL_REDEEM_AT_MATURITY_GAS,
+    );
+  }
+
   private async executeTransaction<
     C extends BaseContract,
     F extends {
