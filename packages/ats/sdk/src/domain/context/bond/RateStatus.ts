@@ -216,6 +216,6 @@ export class CastRateStatus {
 
   static toNumber(value: RateStatus): number {
     if (value == RateStatus.PENDING) return 0;
-    return 2;
+    return 1;
   }
 }

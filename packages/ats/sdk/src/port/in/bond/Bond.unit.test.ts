@@ -1049,6 +1049,7 @@ describe('Bond', () => {
               expectedResponse2.coupon.executionTimeStamp * ONE_THOUSAND,
             ),
             rate: expectedResponse2.coupon.rate.toString(),
+            rateDecimals: expectedResponse2.coupon.rateDecimals,
             startDate: new Date(
               expectedResponse2.coupon.startTimeStamp * ONE_THOUSAND,
             ),
@@ -1058,6 +1059,7 @@ describe('Bond', () => {
             fixingDate: new Date(
               expectedResponse2.coupon.fixingTimeStamp * ONE_THOUSAND,
             ),
+            rateStatus: expectedResponse2.coupon.rateStatus,
           },
         ]),
       );
