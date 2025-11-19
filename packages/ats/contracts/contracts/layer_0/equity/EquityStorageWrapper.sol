@@ -32,10 +32,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     ) internal returns (bytes32 corporateActionId_, uint256 dividendId_) {
         bytes memory data = abi.encode(_newDividend);
 
-        (corporateActionId_, dividendId_) = _addCorporateAction(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
-            data
-        );
+        (corporateActionId_, dividendId_) = _addCorporateAction(DIVIDEND_CORPORATE_ACTION_TYPE, data);
 
         _initDividend(corporateActionId_, data);
     }
@@ -56,10 +53,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     ) internal returns (bytes32 corporateActionId_, uint256 voteID_) {
         bytes memory data = abi.encode(_newVoting);
 
-        (corporateActionId_, voteID_) = _addCorporateAction(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            data
-        );
+        (corporateActionId_, voteID_) = _addCorporateAction(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, data);
 
         _initVotingRights(corporateActionId_, data);
     }
@@ -77,10 +71,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _setScheduledBalanceAdjustment(
         IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    )
-        internal
-        returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_)
-    {
+    ) internal returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_) {
         bytes memory data = abi.encode(_newBalanceAdjustment);
 
         (corporateActionId_, balanceAdjustmentID_) = _addCorporateAction(
@@ -91,10 +82,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         _initBalanceAdjustment(corporateActionId_, data);
     }
 
-    function _initBalanceAdjustment(
-        bytes32 _actionId,
-        bytes memory _data
-    ) internal {
+    function _initBalanceAdjustment(bytes32 _actionId, bytes memory _data) internal {
         if (_actionId == bytes32(0)) {
             revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
         }
@@ -120,15 +108,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
      */
     function _getDividends(
         uint256 _dividendID
-    )
-        internal
-        view
-        returns (IEquity.RegisteredDividend memory registeredDividend_)
-    {
-        bytes32 actionId = _getCorporateActionIdByTypeIndex(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
-            _dividendID - 1
-        );
+    ) internal view returns (IEquity.RegisteredDividend memory registeredDividend_) {
+        bytes32 actionId = _getCorporateActionIdByTypeIndex(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
 
         (, , bytes memory data) = _getCorporateAction(actionId);
 
@@ -211,17 +192,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         return _getTotalTokenHolders();
     }
 
-    function _getVoting(
-        uint256 _voteID
-    )
-        internal
-        view
-        returns (IEquity.RegisteredVoting memory registeredVoting_)
-    {
-        bytes32 actionId = _getCorporateActionIdByTypeIndex(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            _voteID - 1
-        );
+    function _getVoting(uint256 _voteID) internal view returns (IEquity.RegisteredVoting memory registeredVoting_) {
+        bytes32 actionId = _getCorporateActionIdByTypeIndex(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
 
         (, , bytes memory data) = _getCorporateAction(actionId);
 
@@ -290,11 +262,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _getScheduledBalanceAdjusment(
         uint256 _balanceAdjustmentID
-    )
-        internal
-        view
-        returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
-    {
+    ) internal view returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_) {
         bytes32 actionId = _getCorporateActionIdByTypeIndex(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             _balanceAdjustmentID - 1

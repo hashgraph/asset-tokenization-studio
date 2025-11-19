@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {IBondRead} from './IBondRead.sol';
+import { IBondRead } from "./IBondRead.sol";
 
 interface IBondStorageWrapper {
     /**
@@ -11,12 +11,7 @@ interface IBondStorageWrapper {
      * @param operator Address that performed the operation.
      * @param coupon Coupon struct containing recordDate, executionDate, rate, and period.
      */
-    event CouponSet(
-        bytes32 corporateActionId,
-        uint256 couponId,
-        address indexed operator,
-        IBondRead.Coupon coupon
-    );
+    event CouponSet(bytes32 corporateActionId, uint256 couponId, address indexed operator, IBondRead.Coupon coupon);
 
     /**
      * @notice Emitted when a bond's maturity date is modified.

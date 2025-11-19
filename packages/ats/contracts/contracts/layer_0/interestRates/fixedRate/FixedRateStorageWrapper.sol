@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    _FIXED_RATE_STORAGE_POSITION
-} from '../../../layer_2/constants/storagePositions.sol';
-import {
-    KpiLinkedRateStorageWrapper
-} from '../kpiLinkedRate/KpiLinkedRateStorageWrapper.sol';
+import { _FIXED_RATE_STORAGE_POSITION } from "../../../layer_2/constants/storagePositions.sol";
+import { KpiLinkedRateStorageWrapper } from "../kpiLinkedRate/KpiLinkedRateStorageWrapper.sol";
 
 contract FixedRateStorageWrapper is KpiLinkedRateStorageWrapper {
     struct FixedRateDataStorage {
@@ -27,11 +23,7 @@ contract FixedRateStorageWrapper is KpiLinkedRateStorageWrapper {
         decimals_ = _fixedRateStorage().decimals;
     }
 
-    function _fixedRateStorage()
-        internal
-        pure
-        returns (FixedRateDataStorage storage fixedRateDataStorage_)
-    {
+    function _fixedRateStorage() internal pure returns (FixedRateDataStorage storage fixedRateDataStorage_) {
         bytes32 position = _FIXED_RATE_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

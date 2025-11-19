@@ -1,15 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    BondKpiLinkedInterestRate
-} from '../../layer_2/bond/kpiLinkedInterestRate/Bond.sol';
-import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
-import {IBondUSA} from '../interfaces/IBondUSA.sol';
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
+import { BondKpiLinkedInterestRate } from "../../layer_2/bond/kpiLinkedInterestRate/Bond.sol";
+import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
+import { IBondUSA } from "../interfaces/IBondUSA.sol";
+import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 
 abstract contract BondUSAKpiLinkedRate is IBondUSA, BondKpiLinkedInterestRate {
     // solhint-disable func-name-mixedcase

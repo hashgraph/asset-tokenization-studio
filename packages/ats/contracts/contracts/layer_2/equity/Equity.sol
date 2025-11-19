@@ -50,13 +50,7 @@ abstract contract Equity is IEquity, Common {
     {
         bytes32 corporateActionID;
         (corporateActionID, voteID_) = _setVoting(_newVoting);
-        emit VotingSet(
-            corporateActionID,
-            voteID_,
-            _msgSender(),
-            _newVoting.recordDate,
-            _newVoting.data
-        );
+        emit VotingSet(corporateActionID, voteID_, _msgSender(), _newVoting.recordDate, _newVoting.data);
     }
 
     function setScheduledBalanceAdjustment(
@@ -71,10 +65,7 @@ abstract contract Equity is IEquity, Common {
         returns (uint256 balanceAdjustmentID_)
     {
         bytes32 corporateActionID;
-        (
-            corporateActionID,
-            balanceAdjustmentID_
-        ) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
+        (corporateActionID, balanceAdjustmentID_) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
         emit ScheduledBalanceAdjustmentSet(
             corporateActionID,
             balanceAdjustmentID_,

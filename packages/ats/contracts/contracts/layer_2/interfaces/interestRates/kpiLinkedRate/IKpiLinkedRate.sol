@@ -19,10 +19,7 @@ interface IKpiLinkedRate {
         uint8 impactDataDecimals;
     }
 
-    event InterestRateUpdated(
-        address indexed operator,
-        InterestRate newInterestRate
-    );
+    event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);
     event ImpactDataUpdated(address indexed operator, ImpactData newImpactData);
     event KpiOracleUpdated(address indexed operator, address kpiOracle);
 
@@ -40,14 +37,8 @@ interface IKpiLinkedRate {
     function setImpactData(ImpactData calldata _newImpactData) external;
     function setKpiOracle(address _kpiOracle) external;
 
-    function getInterestRate()
-        external
-        view
-        returns (InterestRate memory interestRate_);
+    function getInterestRate() external view returns (InterestRate memory interestRate_);
 
-    function getImpactData()
-        external
-        view
-        returns (ImpactData memory impactData_);
+    function getImpactData() external view returns (ImpactData memory impactData_);
     function getKpiOracle() external view returns (address kpiOracle_);
 }

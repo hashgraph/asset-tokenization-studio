@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {PauseStorageWrapper} from '../../core/pause/PauseStorageWrapper.sol';
-import {
-    _KPI_LINKED_RATE_STORAGE_POSITION
-} from '../../../layer_2/constants/storagePositions.sol';
-import {
-    IKpiLinkedRate
-} from '../../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol';
+import { PauseStorageWrapper } from "../../core/pause/PauseStorageWrapper.sol";
+import { _KPI_LINKED_RATE_STORAGE_POSITION } from "../../../layer_2/constants/storagePositions.sol";
+import { IKpiLinkedRate } from "../../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 
 contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
     struct KpiLinkedRateDataStorage {
@@ -28,20 +24,16 @@ contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         bool initialized;
     }
 
-    modifier checkInterestRate(
-        IKpiLinkedRate.InterestRate calldata _newInterestRate
-    ) {
+    modifier checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
         if (
-            _newInterestRate.minRate > _newInterestRate.baseRate ||
-            _newInterestRate.baseRate > _newInterestRate.maxRate
+            _newInterestRate.minRate > _newInterestRate.baseRate || _newInterestRate.baseRate > _newInterestRate.maxRate
         ) {
             revert IKpiLinkedRate.WrongInterestRateValues(_newInterestRate);
         }
         _;
     }
 
-    modifier checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData)
-    {
+    modifier checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
         if (
             _newImpactData.maxDeviationFloor > _newImpactData.baseLine ||
             _newImpactData.baseLine > _newImpactData.maxDeviationCap
@@ -51,11 +43,8 @@ contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         _;
     }
 
-    function _setInterestRate(
-        IKpiLinkedRate.InterestRate calldata _newInterestRate
-    ) internal {
-        KpiLinkedRateDataStorage
-            storage kpiLinkedRateDataStorage = _kpiLinkedRateStorage();
+    function _setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal {
+        KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage = _kpiLinkedRateStorage();
         kpiLinkedRateDataStorage.maxRate = _newInterestRate.maxRate;
         kpiLinkedRateDataStorage.baseRate = _newInterestRate.baseRate;
         kpiLinkedRateDataStorage.minRate = _newInterestRate.minRate;
@@ -65,29 +54,19 @@ contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         kpiLinkedRateDataStorage.reportPeriod = _newInterestRate.reportPeriod;
         kpiLinkedRateDataStorage.rateDecimals = _newInterestRate.rateDecimals;
     }
-    function _setImpactData(
-        IKpiLinkedRate.ImpactData calldata _newImpactData
-    ) internal {
-        KpiLinkedRateDataStorage
-            storage kpiLinkedRateDataStorage = _kpiLinkedRateStorage();
-        kpiLinkedRateDataStorage.maxDeviationCap = _newImpactData
-            .maxDeviationCap;
+    function _setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal {
+        KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage = _kpiLinkedRateStorage();
+        kpiLinkedRateDataStorage.maxDeviationCap = _newImpactData.maxDeviationCap;
         kpiLinkedRateDataStorage.baseLine = _newImpactData.baseLine;
-        kpiLinkedRateDataStorage.maxDeviationFloor = _newImpactData
-            .maxDeviationFloor;
-        kpiLinkedRateDataStorage.impactDataDecimals = _newImpactData
-            .impactDataDecimals;
+        kpiLinkedRateDataStorage.maxDeviationFloor = _newImpactData.maxDeviationFloor;
+        kpiLinkedRateDataStorage.impactDataDecimals = _newImpactData.impactDataDecimals;
     }
 
     function _setKpiOracle(address _kpiOracle) internal {
         _kpiLinkedRateStorage().kpiOracle = _kpiOracle;
     }
 
-    function _getInterestRate()
-        internal
-        view
-        returns (IKpiLinkedRate.InterestRate memory interestRate_)
-    {
+    function _getInterestRate() internal view returns (IKpiLinkedRate.InterestRate memory interestRate_) {
         interestRate_ = IKpiLinkedRate.InterestRate({
             maxRate: _kpiLinkedRateStorage().maxRate,
             baseRate: _kpiLinkedRateStorage().baseRate,
@@ -100,11 +79,7 @@ contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         });
     }
 
-    function _getImpactData()
-        internal
-        view
-        returns (IKpiLinkedRate.ImpactData memory impactData_)
-    {
+    function _getImpactData() internal view returns (IKpiLinkedRate.ImpactData memory impactData_) {
         impactData_ = IKpiLinkedRate.ImpactData({
             maxDeviationCap: _kpiLinkedRateStorage().maxDeviationCap,
             baseLine: _kpiLinkedRateStorage().baseLine,

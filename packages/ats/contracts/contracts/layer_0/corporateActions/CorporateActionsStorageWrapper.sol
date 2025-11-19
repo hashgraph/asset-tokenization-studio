@@ -28,12 +28,8 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     function _addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
-    )
-        internal
-        returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)
-    {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
+    ) internal returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_) {
+        CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
         corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
         // TODO: Review when it can return false.
         bool success = corporateActions_.actions.add(corporateActionId_);
@@ -46,19 +42,12 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
 
         corporateActionIdByType_ = _getCorporateActionCountByType(_actionType);
 
-        corporateActions_
-            .actionsData[corporateActionId_]
-            .actionType = _actionType;
+        corporateActions_.actionsData[corporateActionId_].actionType = _actionType;
         corporateActions_.actionsData[corporateActionId_].data = _data;
-        corporateActions_
-            .actionsData[corporateActionId_]
-            .actionIdByType = corporateActionIdByType_;
+        corporateActions_.actionsData[corporateActionId_].actionIdByType = corporateActionIdByType_;
     }
 
-    function _updateCorporateActionData(
-        bytes32 _actionId,
-        bytes memory _newData
-    ) internal {
+    function _updateCorporateActionData(bytes32 _actionId, bytes memory _newData) internal {
         _corporateActionsStorage().actionsData[_actionId].data = _newData;
     }
 
@@ -80,20 +69,11 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
 
     function _getCorporateAction(
         bytes32 _corporateActionId
-    )
-        internal
-        view
-        returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_)
-    {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        actionType_ = corporateActions_
-            .actionsData[_corporateActionId]
-            .actionType;
+    ) internal view returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {
+        CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
+        actionType_ = corporateActions_.actionsData[_corporateActionId].actionType;
         data_ = corporateActions_.actionsData[_corporateActionId].data;
-        actionTypeId_ = corporateActions_
-            .actionsData[_corporateActionId]
-            .actionIdByType;
+        actionTypeId_ = corporateActions_.actionsData[_corporateActionId].actionIdByType;
     }
 
     function _getCorporateActionCount() internal view virtual returns (uint256 corporateActionCount_) {
@@ -107,9 +87,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(_pageIndex, _pageLength);
     }
 
-    function _getCorporateActionCountByType(
-        bytes32 _actionType
-    ) internal view returns (uint256 corporateActionCount_) {
+    function _getCorporateActionCountByType(bytes32 _actionType) internal view returns (uint256 corporateActionCount_) {
         return _corporateActionsStorage().actionsByType[_actionType].length;
     }
 
@@ -117,8 +95,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         bytes32 _actionType,
         uint256 _typeIndex
     ) internal view returns (bytes32 corporateActionId_) {
-        return
-            _corporateActionsStorage().actionsByType[_actionType][_typeIndex];
+        return _corporateActionsStorage().actionsByType[_actionType][_typeIndex];
     }
 
     function _getCorporateActionIdsByType(
@@ -126,26 +103,14 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory corporateActionIds_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
-            _pageIndex,
-            _pageLength
-        );
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
 
-        corporateActionIds_ = new bytes32[](
-            LibCommon.getSize(
-                start,
-                end,
-                _getCorporateActionCountByType(_actionType)
-            )
-        );
+        corporateActionIds_ = new bytes32[](LibCommon.getSize(start, end, _getCorporateActionCountByType(_actionType)));
 
-        CorporateActionDataStorage
-            storage corporateActions = _corporateActionsStorage();
+        CorporateActionDataStorage storage corporateActions = _corporateActionsStorage();
 
         for (uint256 i = 0; i < corporateActionIds_.length; i++) {
-            corporateActionIds_[i] = corporateActions.actionsByType[
-                _actionType
-            ][start + i];
+            corporateActionIds_[i] = corporateActions.actionsByType[_actionType][start + i];
         }
     }
 

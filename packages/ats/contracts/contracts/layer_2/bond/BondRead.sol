@@ -69,9 +69,7 @@ abstract contract BondRead is IBondRead, IStaticFunctionSelectors, Common {
         return _getTotalCouponHolders(_couponID);
     }
 
-    function getCouponFromOrderedListAt(
-        uint256 _pos
-    ) external view returns (uint256 couponID_) {
+    function getCouponFromOrderedListAt(uint256 _pos) external view returns (uint256 couponID_) {
         return _getCouponFromOrderedListAt(_pos);
     }
 
@@ -82,11 +80,7 @@ abstract contract BondRead is IBondRead, IStaticFunctionSelectors, Common {
         return _getCouponsOrderedList(_pageIndex, _pageLength);
     }
 
-    function getCouponsOrderedListTotal()
-        external
-        view
-        returns (uint256 total_)
-    {
+    function getCouponsOrderedListTotal() external view returns (uint256 total_) {
         return _getCouponsOrderedListTotalAdjusted();
     }
 }

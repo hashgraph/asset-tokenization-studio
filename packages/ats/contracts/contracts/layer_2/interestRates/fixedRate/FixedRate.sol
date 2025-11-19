@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {Common} from '../../../layer_1/common/Common.sol';
-import {
-    IFixedRate
-} from '../../interfaces/interestRates/fixedRate/IFixedRate.sol';
-import {_INTEREST_RATE_MANAGER_ROLE} from '../../constants/roles.sol';
+import { Common } from "../../../layer_1/common/Common.sol";
+import { IFixedRate } from "../../interfaces/interestRates/fixedRate/IFixedRate.sol";
+import { _INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
 
 contract FixedRate is IFixedRate, Common {
     function initialize_FixedRate(
@@ -24,12 +22,7 @@ contract FixedRate is IFixedRate, Common {
         emit RateUpdated(_msgSender(), _newRate, _newRateDecimals);
     }
 
-    function getRate()
-        external
-        view
-        override
-        returns (uint256 rate_, uint8 decimals_)
-    {
+    function getRate() external view override returns (uint256 rate_, uint8 decimals_) {
         return _getRate();
     }
 }

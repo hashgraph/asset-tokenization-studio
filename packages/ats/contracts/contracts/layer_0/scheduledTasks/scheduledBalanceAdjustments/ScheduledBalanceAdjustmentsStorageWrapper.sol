@@ -3,34 +3,21 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     IScheduledBalanceAdjustments
-} from '../../../layer_2/interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
+} from "../../../layer_2/interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol";
 import {
     ScheduledCouponListingStorageWrapper
-} from '../scheduledCouponListing/ScheduledCouponListingStorageWrapper.sol';
-import {
-    ScheduledTasksLib
-} from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
-import {
-    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {IEquity} from '../../../layer_2/interfaces/equity/IEquity.sol';
+} from "../scheduledCouponListing/ScheduledCouponListingStorageWrapper.sol";
+import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
+import { _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { IEquity } from "../../../layer_2/interfaces/equity/IEquity.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
 } from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
-abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
-    ScheduledCouponListingStorageWrapper
-{
-    function _addScheduledBalanceAdjustment(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal {
-        ScheduledTasksLib.addScheduledTask(
-            _scheduledBalanceAdjustmentStorage(),
-            _newScheduledTimestamp,
-            _newData
-        );
+abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponListingStorageWrapper {
+    function _addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes memory _newData) internal {
+        ScheduledTasksLib.addScheduledTask(_scheduledBalanceAdjustmentStorage(), _newScheduledTimestamp, _newData);
     }
 
     function _triggerScheduledBalanceAdjustments(uint256 _max) internal returns (uint256) {
@@ -51,9 +38,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
         bytes memory data = _scheduledTask.data;
 
         if (data.length == 0) return;
-        (, , bytes memory balanceAdjustmentData) = _getCorporateAction(
-            abi.decode(data, (bytes32))
-        );
+        (, , bytes memory balanceAdjustmentData) = _getCorporateAction(abi.decode(data, (bytes32)));
         if (balanceAdjustmentData.length == 0) return;
         IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
             balanceAdjustmentData,

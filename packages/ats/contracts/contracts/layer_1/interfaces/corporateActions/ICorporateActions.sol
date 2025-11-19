@@ -24,9 +24,7 @@ interface ICorporateActions {
     function addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
-    )
-        external
-        returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_);
+    ) external returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_);
 
     /**
      * @dev Returns a corporate action info
@@ -38,14 +36,7 @@ interface ICorporateActions {
      */
     function getCorporateAction(
         bytes32 _corporateActionId
-    )
-        external
-        view
-        returns (
-            bytes32 actionType_,
-            uint256 actionTypeIndex_,
-            bytes memory data_
-        );
+    ) external view returns (bytes32 actionType_, uint256 actionTypeIndex_, bytes memory data_);
 
     /**
      * @dev Returns the number of corporate actions the token currently has

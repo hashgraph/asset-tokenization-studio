@@ -1,56 +1,30 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-import {
-    IKpiLinkedRate
-} from '../../interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol';
-import {_KPI_LINKED_RATE_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {KpiLinkedRate} from './KpiLinkedRate.sol';
+import { IKpiLinkedRate } from "../../interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { _KPI_LINKED_RATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { IStaticFunctionSelectors } from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { KpiLinkedRate } from "./KpiLinkedRate.sol";
 
 contract KpiLinkedRateFacet is KpiLinkedRate, IStaticFunctionSelectors {
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _KPI_LINKED_RATE_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_KpiLinkedRate
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setInterestRate
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initialize_KpiLinkedRate.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setInterestRate.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setImpactData.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setKpiOracle.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getInterestRate
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getInterestRate.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getImpactData.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getKpiOracle.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IKpiLinkedRate)
-            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IKpiLinkedRate).interfaceId;
     }
 }

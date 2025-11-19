@@ -1,18 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {Bond} from '../Bond.sol';
-import {CommonKpiLinkedInterestRate} from './layer_0_extension/Common.sol';
-import {IBondRead} from '../../interfaces/bond/IBondRead.sol';
-import {BondStorageWrapper} from '../../../layer_0/bond/BondStorageWrapper.sol';
-import {
-    BondStorageWrapperKpiLinkedInterestRate
-} from './layer_0_extension/bond/BondStorageWrapper.sol';
+import { Bond } from "../Bond.sol";
+import { CommonKpiLinkedInterestRate } from "./layer_0_extension/Common.sol";
+import { IBondRead } from "../../interfaces/bond/IBondRead.sol";
+import { BondStorageWrapper } from "../../../layer_0/bond/BondStorageWrapper.sol";
+import { BondStorageWrapperKpiLinkedInterestRate } from "./layer_0_extension/bond/BondStorageWrapper.sol";
 
-abstract contract BondKpiLinkedInterestRate is
-    Bond,
-    CommonKpiLinkedInterestRate
-{
+abstract contract BondKpiLinkedInterestRate is Bond, CommonKpiLinkedInterestRate {
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
     )
@@ -27,15 +22,8 @@ abstract contract BondKpiLinkedInterestRate is
     function _initCoupon(
         bytes32 _actionId,
         IBondRead.Coupon memory _newCoupon
-    )
-        internal
-        virtual
-        override(BondStorageWrapper, BondStorageWrapperKpiLinkedInterestRate)
-    {
-        BondStorageWrapperKpiLinkedInterestRate._initCoupon(
-            _actionId,
-            _newCoupon
-        );
+    ) internal virtual override(BondStorageWrapper, BondStorageWrapperKpiLinkedInterestRate) {
+        BondStorageWrapperKpiLinkedInterestRate._initCoupon(_actionId, _newCoupon);
     }
 
     function _getCouponFor(
@@ -48,22 +36,12 @@ abstract contract BondKpiLinkedInterestRate is
         override(BondStorageWrapper, BondStorageWrapperKpiLinkedInterestRate)
         returns (IBondRead.CouponFor memory couponFor_)
     {
-        return
-            BondStorageWrapperKpiLinkedInterestRate._getCouponFor(
-                _couponID,
-                _account
-            );
+        return BondStorageWrapperKpiLinkedInterestRate._getCouponFor(_couponID, _account);
     }
 
     function _addToCouponsOrderedList(
         uint256 _couponID
-    )
-        internal
-        virtual
-        override(BondStorageWrapper, BondStorageWrapperKpiLinkedInterestRate)
-    {
-        BondStorageWrapperKpiLinkedInterestRate._addToCouponsOrderedList(
-            _couponID
-        );
+    ) internal virtual override(BondStorageWrapper, BondStorageWrapperKpiLinkedInterestRate) {
+        BondStorageWrapperKpiLinkedInterestRate._addToCouponsOrderedList(_couponID);
     }
 }

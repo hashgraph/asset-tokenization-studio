@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-19T08:50:45.569Z
+ * Generated: 2025-11-19T10:03:32.774Z
  * Facets: 54
  * Infrastructure: 2
  *
@@ -200,8 +200,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   BondUSAFacet: {
     name: "BondUSAFacet",
     resolverKey: {
-      name: "_BOND_RESOLVER_KEY",
-      value: "0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef",
+      name: "_BOND_VARIABLE_RATE_RESOLVER_KEY",
+      value: "0xe6594ee8f54f346ab25268fdc7955031a6b06102355e1446353d89ab1d593de3",
     },
     inheritance: ["BondUSA", "IStaticFunctionSelectors"],
     methods: [
@@ -226,8 +226,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   BondUSAFixedRateFacet: {
     name: "BondUSAFixedRateFacet",
     resolverKey: {
-      name: "_BOND_RESOLVER_KEY",
-      value: "0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef",
+      name: "_BOND_FIXED_RATE_RESOLVER_KEY",
+      value: "0xd55d8787d23b78e70dada1ade45b8758f5c027e2cddf3556606c07d388ce159a",
     },
     inheritance: ["BondUSAFixedRate", "IStaticFunctionSelectors"],
     methods: [
@@ -253,8 +253,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   BondUSAKpiLinkedRateFacet: {
     name: "BondUSAKpiLinkedRateFacet",
     resolverKey: {
-      name: "_BOND_RESOLVER_KEY",
-      value: "0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef",
+      name: "_BOND_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x99c145ff21354eb7b25cb096873143fa3d3aba98457b96bcd13f1d1f2b9bf28c",
     },
     inheritance: ["BondUSAKpiLinkedRate", "IStaticFunctionSelectors"],
     methods: [
