@@ -253,14 +253,6 @@ describe("Bond Tests", () => {
         );
       });
 
-      it("GIVEN partitions are protected AND caller lacks required role WHEN redeeming at maturity THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        await protectedPartitionsFacet.protectPartitions();
-
-        await expect(
-          bondFacet.redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
-        ).to.be.revertedWithCustomError(bondFacet, "PartitionsAreProtectedAndNoRole");
-      });
-
       it("GIVEN the token is paused WHEN redeeming at maturity THEN transaction fails with TokenIsPaused", async () => {
         await grantRoleAndPauseToken(
           accessControlFacet,

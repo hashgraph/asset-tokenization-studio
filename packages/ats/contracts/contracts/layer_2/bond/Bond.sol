@@ -45,7 +45,6 @@ abstract contract Bond is IBond, Common {
         onlyListedAllowed(_tokenHolder)
         onlyRole(_MATURITY_REDEEMER_ROLE)
         onlyClearingDisabled
-        onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyUnrecoveredAddress(_tokenHolder)
         onlyAfterCurrentMaturityDate(_blockTimestamp())
