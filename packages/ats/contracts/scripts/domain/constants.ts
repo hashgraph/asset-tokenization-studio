@@ -25,12 +25,20 @@
 export const EQUITY_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000001";
 
 /**
- * Bond configuration ID.
+ * Bond Variable Rate configuration ID.
  *
  * bytes32(uint256(2)) = 0x00...02
- * Used by BusinessLogicResolver to identify bond facet configuration.
+ * Used by BusinessLogicResolver to identify bond variable rate facet configuration.
  */
 export const BOND_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000002";
+
+/**
+ * Bond Fixed Rate configuration ID.
+ *
+ * bytes32(uint256(3)) = 0x00...03
+ * Used by BusinessLogicResolver to identify bond fixed rate facet configuration.
+ */
+export const BOND_FIXED_RATE_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000003";
 
 // ============================================================================
 // ATS-Specific Contract Names
