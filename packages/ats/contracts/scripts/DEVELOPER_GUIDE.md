@@ -1,15 +1,167 @@
 # Developer Guide: ATS Contracts Scripts
 
-**Last Updated**: 2025-11-04
+**Last Updated**: 2025-01-19
 
 This guide provides practical, step-by-step instructions for the most common development tasks when working with ATS contract deployment scripts.
 
 ## Table of Contents
 
-1. [Scenario 1: Add/Remove Facet from Existing Asset](#scenario-1-addremove-facet-from-existing-asset)
-2. [Scenario 2: Create New Asset Type (Configuration ID)](#scenario-2-create-new-asset-type-configuration-id)
-3. [Registry System](#registry-system)
-4. [Troubleshooting](#troubleshooting)
+1. [Architecture Overview](#architecture-overview)
+2. [Quick Start - Using the CLI](#quick-start---using-the-cli)
+3. [Scenario 1: Add/Remove Facet from Existing Asset](#scenario-1-addremove-facet-from-existing-asset)
+4. [Scenario 2: Create New Asset Type (Configuration ID)](#scenario-2-create-new-asset-type-configuration-id)
+5. [Complete Deployment Workflows](#complete-deployment-workflows)
+6. [Registry System](#registry-system)
+7. [Advanced Topics](#advanced-topics)
+8. [Troubleshooting](#troubleshooting)
+
+---
+
+## Architecture Overview
+
+### Core Concepts
+
+The ATS deployment scripts follow a **modular, infrastructure/domain separation** architecture:
+
+- **`infrastructure/`**: Generic, reusable operations that work with any smart contract project
+- **`domain/`**: ATS-specific business logic (equity, bond, factory modules)
+- **`workflows/`**: Complete end-to-end deployment orchestration
+- **`tools/`**: Code generation utilities (registry generation)
+
+### Signer-Based API
+
+All deployment operations accept standard **`ethers.Signer`** objects directly, providing:
+
+- ✅ Full TypeScript type safety with TypeChain
+- ✅ Framework-agnostic (works with Hardhat, standalone, hardware wallets)
+- ✅ No custom abstractions - pure ethers.js
+
+**Example**:
+
+```typescript
+import { ethers } from "ethers";
+import { deployFacets } from "@scripts/infrastructure";
+
+const [signer] = await ethers.getSigners(); // From Hardhat
+// or
+const signer = new ethers.Wallet(privateKey, provider); // Standalone
+
+const result = await deployFacets(signer, {
+  facetNames: ["AccessControlFacet"],
+  network: "hedera-testnet",
+});
+```
+
+### Getting a Signer
+
+**Option 1: Hardhat Context**
+
+```typescript
+import { ethers } from "hardhat";
+const [signer] = await ethers.getSigners();
+```
+
+**Option 2: Standalone Wallet**
+
+```typescript
+import { ethers } from "ethers";
+const provider = new ethers.providers.JsonRpcProvider("https://testnet.hashio.io/api");
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+```
+
+**Option 3: Hardware Wallet**
+
+```typescript
+import { LedgerSigner } from "@ethersproject/hardware-wallets";
+const signer = new LedgerSigner(provider);
+```
+
+### TypeChain Contract Instances
+
+Functions accept **TypeChain contract instances** instead of plain addresses, providing full type safety:
+
+```typescript
+import { BusinessLogicResolver__factory } from "@contract-types";
+
+// Connect to existing contract with full typing
+const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
+
+// Pass typed instance to functions
+const result = await createEquityConfiguration(blr, facetAddresses);
+```
+
+### Understanding the Registry
+
+The **registry is optional but recommended** for deployment metadata. Key points:
+
+- **Purpose**: Provides facet information (resolver keys, selectors, metadata)
+- **Usage**: Used internally for LOOKUP, not passed as function parameter
+- **Generation**: Auto-generated from Solidity contracts
+- **Command**: `npm run generate:registry`
+
+**Registry is used internally**:
+
+```typescript
+// Inside createEquityConfiguration():
+const facetDef = atsRegistry.getFacetDefinition("AccessControlFacet");
+const resolverKey = facetDef.resolverKey.value; // Looked up from registry
+```
+
+**You don't pass registry** to domain functions - it's used internally to extract resolver keys.
+
+### Import Path Conventions
+
+- **`@scripts/infrastructure`**: Generic operations (deployFacets, registerFacets, etc.)
+- **`@scripts/domain`**: ATS-specific modules (createEquityConfiguration, atsRegistry, etc.)
+- **`@contract-types`**: TypeChain-generated contract factories and types
+
+---
+
+## Quick Start - Using the CLI
+
+### Hardhat Mode
+
+Deploy using Hardhat's built-in ethers and network configuration:
+
+```bash
+# Default network (from hardhat.config.ts)
+npm run deploy:hardhat
+
+# Specific network
+npm run deploy:hardhat -- --network hedera-testnet
+npm run deploy:hardhat -- --network hedera-mainnet
+npm run deploy:hardhat -- --network hardhat  # Local in-memory
+```
+
+**When to use**: Working within Hardhat project, need access to Hardhat tasks/helpers.
+
+### Standalone Mode
+
+Deploy without Hardhat runtime (~3x faster startup):
+
+```bash
+# Default to hedera-testnet
+npm run deploy
+
+# Specific network
+npm run deploy:hedera:testnet
+npm run deploy:hedera:mainnet
+```
+
+**When to use**: Production deployments, CI/CD pipelines, faster iteration cycles.
+
+### Network Configuration
+
+Both modes read from `.env` files for network configuration:
+
+```bash
+# Required environment variables
+HEDERA_TESTNET_RPC_URL=https://testnet.hashio.io/api
+HEDERA_TESTNET_PRIVATE_KEY=0x...
+HEDERA_TESTNET_MIRROR_NODE_URL=https://testnet.mirrornode.hedera.com
+```
+
+See [Configuration.ts](/Users/work/Projects/asset-tokenization-studio/packages/ats/contracts/scripts/infrastructure/config.ts) for all network options.
 
 ---
 
@@ -277,6 +429,9 @@ const FUND_FACETS = [
  * @param blrContract - BusinessLogicResolver contract instance
  * @param facetAddresses - Map of facet names to their deployed addresses
  * @param useTimeTravel - Whether to use TimeTravel variants (default: false)
+ * @param partialBatchDeploy - Whether this is a partial batch deployment (default: false)
+ * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE)
+ * @param confirmations - Number of confirmations to wait for (default: 0)
  * @returns Promise resolving to operation result
  */
 export async function createFundConfiguration(
@@ -284,16 +439,38 @@ export async function createFundConfiguration(
   facetAddresses: Record<string, string>,
   useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
-  batchSize: number = 2,
+  batchSize: number = DEFAULT_BATCH_SIZE,
+  confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
+  // Get facet names based on time travel mode
+  const baseFacets = useTimeTravel ? [...FUND_FACETS, "TimeTravelFacet"] : FUND_FACETS;
+
+  const facetNames = useTimeTravel
+    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
+    : baseFacets;
+
+  // Build facet data with resolver keys from registry (internal lookup)
+  const facets = facetNames.map((name) => {
+    // Strip "TimeTravel" suffix to get base name for registry lookup
+    const baseName = name.replace(/TimeTravel$/, "");
+
+    const facetDef = atsRegistry.getFacetDefinition(baseName);
+    if (!facetDef?.resolverKey?.value) {
+      throw new Error(`No resolver key found for facet: ${baseName}`);
+    }
+    return {
+      facetName: name,
+      resolverKey: facetDef.resolverKey.value,
+      address: facetAddresses[name],
+    };
+  });
+
   return createBatchConfiguration(blrContract, {
     configurationId: FUND_CONFIG_ID,
-    facetNames: FUND_FACETS,
-    facetAddresses,
-    useTimeTravel,
+    facets, // Pass facets array with resolver keys already looked up
     partialBatchDeploy,
     batchSize,
-    registry: atsRegistry,
+    confirmations,
   });
 }
 ```
@@ -448,6 +625,122 @@ When creating a new asset, touch these files:
 
 ---
 
+## Complete Deployment Workflows
+
+For deploying the entire ATS system, use the pre-built workflows in `workflows/`. These handle complex orchestration and provide comprehensive deployment output.
+
+### Workflow 1: Deploy Complete System (New BLR)
+
+Deploy the entire ATS infrastructure from scratch:
+
+```typescript
+import { ethers } from "ethers";
+import { deploySystemWithNewBlr } from "@scripts/workflows";
+
+async function main() {
+  const [signer] = await ethers.getSigners();
+
+  const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
+    useTimeTravel: false, // Use standard facets (not TimeTravel variants)
+    saveOutput: true, // Save deployment.json file
+    batchSize: 15, // Deploy 15 facets per transaction
+    confirmations: 2, // Wait for 2 confirmations per tx
+    verifyDeployment: true, // Verify bytecode matches expected
+  });
+
+  console.log("✅ Deployment complete!");
+  console.log(`  ProxyAdmin: ${output.infrastructure.proxyAdmin.address}`);
+  console.log(`  BLR: ${output.infrastructure.blr.proxy}`);
+  console.log(`  Factory: ${output.infrastructure.factory.proxy}`);
+  console.log(
+    `  Equity config v${output.configurations.equity.version} (${output.configurations.equity.facetCount} facets)`,
+  );
+  console.log(`  Bond config v${output.configurations.bond.version} (${output.configurations.bond.facetCount} facets)`);
+}
+```
+
+**What Gets Deployed**:
+
+- ✅ ProxyAdmin (for upgrade management)
+- ✅ BusinessLogicResolver with TransparentUpgradeableProxy
+- ✅ All equity facets (43 facets)
+- ✅ All bond facets (43 facets)
+- ✅ Facet registration in BLR
+- ✅ Equity configuration (version 1)
+- ✅ Bond configuration (version 1)
+- ✅ Factory contract with TransparentUpgradeableProxy
+
+**Output File**: Saves `deployments/deployment-{network}-{timestamp}.json` with all addresses and Hedera contract IDs.
+
+### Workflow 2: Deploy to Existing BLR
+
+Add new configurations or facets to an already-deployed BLR:
+
+```typescript
+import { ethers } from "ethers";
+import { deploySystemWithExistingBlr } from "@scripts/workflows";
+
+async function main() {
+  const [signer] = await ethers.getSigners();
+  const existingBlrAddress = "0x1234..."; // Your deployed BLR address
+
+  const output = await deploySystemWithExistingBlr(signer, "hedera-testnet", existingBlrAddress, {
+    deployFacets: true, // Deploy all facets
+    deployFactory: true, // Deploy Factory
+    createConfigurations: true, // Create equity/bond configs
+    useTimeTravel: false,
+    saveOutput: true,
+    batchSize: 15,
+  });
+
+  console.log("✅ Deployment complete!");
+  console.log(`  Using existing BLR: ${existingBlrAddress}`);
+  console.log(`  Factory: ${output.infrastructure.factory.proxy}`);
+  console.log(`  Equity config v${output.configurations.equity.version}`);
+  console.log(`  Bond config v${output.configurations.bond.version}`);
+}
+```
+
+**When to Use**:
+
+- ✅ Updating an existing deployment
+- ✅ Adding new asset types to deployed BLR
+- ✅ Deploying Factory to existing infrastructure
+- ✅ Creating new configuration versions
+
+**Note**: This workflow skips ProxyAdmin and BLR deployment, reusing existing contracts.
+
+### Resumable Deployments (Checkpoints)
+
+For long-running deployments on slow networks, enable checkpointing to resume failed deployments:
+
+```typescript
+import { CheckpointManager } from "@scripts/infrastructure";
+
+const checkpointManager = new CheckpointManager({
+  checkpointsDir: "./checkpoints",
+  network: "hedera-testnet",
+  workflowType: "deployWithNewBlr",
+});
+
+const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
+  checkpointManager, // Enable checkpointing
+  saveOutput: true,
+  batchSize: 15,
+});
+```
+
+**How It Works**:
+
+1. Saves state after each successful operation
+2. If deployment fails, re-run the same command
+3. Automatically skips already-deployed contracts
+4. Resumes from last successful operation
+
+**Use Case**: Production deployments, unreliable networks, CI/CD pipelines.
+
+---
+
 ## Registry System
 
 ### What Is It?
@@ -570,6 +863,139 @@ await blr.registerBusinessLogics([
 - Cannot be generated from names (they're keccak256 of descriptive strings)
 - Registry ensures JavaScript code uses actual contract values
 - Prevents mismatches between deployment scripts and contracts
+
+### Multi-Registry Support (Custom Facets)
+
+If you have custom facets alongside ATS facets, you can combine multiple registries when registering facets in BLR:
+
+```typescript
+import { registerFacets, combineRegistries } from "@scripts/infrastructure";
+import { atsRegistry } from "@scripts/domain";
+import { BusinessLogicResolver__factory } from "@contract-types";
+
+// Your custom registry (separate project)
+import { customRegistry } from "./myProject/registry";
+
+const [signer] = await ethers.getSigners();
+const blr = BusinessLogicResolver__factory.connect(blrAddress, signer);
+
+// Register facets from both registries
+await registerFacets(blr, {
+  facets: {
+    AccessControlFacet: "0xabc...", // From ATS registry
+    ERC20Facet: "0xdef...", // From ATS registry
+    CustomComplianceFacet: "0x123...", // From your custom registry
+  },
+  registries: [atsRegistry, customRegistry], // Automatically combined
+});
+```
+
+**Conflict Resolution Strategies**:
+
+- `'warn'` (default): Use last registry's definition, log warning
+- `'error'`: Throw if facet exists in multiple registries
+- `'first'`: Use first registry's definition
+- `'last'`: Use last registry's definition
+
+```typescript
+await registerFacets(blr, {
+  facets: { ... },
+  registries: [atsRegistry, customRegistry],
+  conflictResolution: 'error' // Strict mode - fail on conflicts
+});
+```
+
+**Use Case**: Downstream projects (e.g., Green Bonds Platform) that add custom facets to ATS base functionality.
+
+---
+
+## Advanced Topics
+
+### Error Handling with OperationResult
+
+All operations return `OperationResult<T, E>` with discriminated unions for type-safe error handling:
+
+```typescript
+import { createEquityConfiguration } from "@scripts/domain";
+
+const result = await createEquityConfiguration(blr, facetAddresses);
+
+// Type-safe error handling
+if (result.success) {
+  // result.data is available (type: ConfigurationData)
+  console.log(`Configuration version: ${result.data.version}`);
+  console.log(`Facets registered: ${result.data.facetKeys.length}`);
+  console.log(`Config ID: ${result.data.configurationId}`);
+} else {
+  // result.error and result.message are available
+  console.error(`Failed: ${result.error}`);
+  console.error(`Message: ${result.message}`);
+
+  // Handle specific errors
+  if (result.error === "VALIDATION_FAILED") {
+    console.error("Check that all facet addresses are valid");
+  } else if (result.error === "TRANSACTION_FAILED") {
+    console.error("Transaction reverted - check gas limits");
+  }
+}
+```
+
+**Philosophy**: No exceptions thrown for expected failures - all errors returned as results for predictable error handling.
+
+### Custom Registry Generation
+
+Downstream projects can generate their own registries for custom facets:
+
+```bash
+# In your project
+npm install @ats/contracts
+
+# Generate your registry
+npx ts-node node_modules/@ats/contracts/scripts/tools/generateRegistry.ts \
+  --contracts ./contracts \
+  --output ./src/myRegistry.data.ts
+```
+
+This enables you to maintain a separate registry for your custom facets while using ATS's base registry for standard facets.
+
+### Extending Infrastructure Operations
+
+Infrastructure operations are designed to be composable and extensible:
+
+```typescript
+import { deployFacets, registerFacets } from "@scripts/infrastructure";
+import { atsRegistry } from "@scripts/domain";
+
+// Custom workflow combining operations
+export async function deployAndRegisterCustomFacets(signer: Signer, blr: Contract, customFacets: string[]) {
+  // Deploy facets
+  const deployResult = await deployFacets(signer, {
+    facetNames: customFacets,
+    network: "hedera-testnet",
+  });
+
+  if (!deployResult.success) {
+    throw new Error(`Deployment failed: ${deployResult.message}`);
+  }
+
+  // Build address map
+  const facetAddresses: Record<string, string> = {};
+  for (const facetName of customFacets) {
+    const deployed = deployResult.deployed.get(facetName);
+    if (deployed) {
+      facetAddresses[facetName] = deployed.address;
+    }
+  }
+
+  // Register in BLR
+  return registerFacets(blr, {
+    facets: facetAddresses,
+    registries: [atsRegistry],
+  });
+}
+```
+
+**Pattern**: Small, focused operations that can be composed into custom workflows.
 
 ---
 
