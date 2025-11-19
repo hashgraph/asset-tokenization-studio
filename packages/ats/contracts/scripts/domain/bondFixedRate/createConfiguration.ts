@@ -88,6 +88,9 @@ const BOND_FIXED_RATE_FACETS = [
   "SsiManagementFacet",
   "TransferAndLockFacet",
 
+  //Interest Rate
+  "FixedRateFacet",
+
   // Jurisdiction-Specific
   "BondUSAFixedRateFacet",
   "BondUSAReadFacet",
