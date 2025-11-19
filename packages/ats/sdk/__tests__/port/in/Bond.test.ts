@@ -419,12 +419,24 @@ describe('🧪 Bond test', () => {
       }),
     );
 
+    const couponAmountFor = await Bond.getCouponAmountFor(
+      new GetCouponForRequest({
+        securityId: bond.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        couponId: 1,
+      }),
+    );
+
     expect(coupon.rate).toEqual(couponRate);
+    expect(coupon.rateDecimals).toEqual(0);
     expect(coupon.couponId).toEqual(1);
     expect(coupon.recordDate.getTime() / 1000).toEqual(couponRecordDate);
     expect(coupon.executionDate.getTime() / 1000).toEqual(couponExecutionDate);
     expect(couponFor.value).toEqual('0');
     expect(allCoupon.length).toEqual(1); // Now only 1 manually created coupon
+    expect(couponAmountFor.numerator).toEqual('5');
+    expect(couponAmountFor.denominator).toEqual('3');
+    expect(couponAmountFor.recordDateReached).toEqual(true);
   }, 600_000);
 
   it('Coupons Custom', async () => {

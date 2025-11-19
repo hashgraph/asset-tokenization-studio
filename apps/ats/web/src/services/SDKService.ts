@@ -211,6 +211,8 @@ import {
   ConnectRequest,
   ControlListRequest,
   CouponForViewModel,
+  CouponAmountForViewModel,
+  PrincipalForViewModel,
   CouponViewModel,
   CreateBondRequest,
   CreateEquityRequest,
@@ -230,6 +232,7 @@ import {
   GetControlListMembersRequest,
   GetControlListTypeRequest,
   GetCouponForRequest,
+  GetPrincipalForRequest,
   GetCouponRequest,
   GetDividendsForRequest,
   GetDividendsRequest,
@@ -379,6 +382,7 @@ import {
   GetProceedRecipientsRequest,
   IsProceedRecipientRequest,
   GetProceedRecipientDataRequest,
+  DividendAmountForViewModel,
 } from '@hashgraph/asset-tokenization-sdk';
 
 export class SDKService {
@@ -634,6 +638,18 @@ export class SDKService {
     return await Bond.getCouponFor(req);
   }
 
+  public static async getCouponAmountFor(
+    req: GetCouponForRequest,
+  ): Promise<CouponAmountForViewModel> {
+    return await Bond.getCouponAmountFor(req);
+  }
+
+  public static async getPrincipalFor(
+    req: GetPrincipalForRequest,
+  ): Promise<PrincipalForViewModel> {
+    return await Bond.getPrincipalFor(req);
+  }
+
   public static async getCoupon(
     req: GetCouponRequest,
   ): Promise<CouponViewModel> {
@@ -790,6 +806,12 @@ export class SDKService {
     req: GetDividendsForRequest,
   ): Promise<DividendsForViewModel> {
     return await Equity.getDividendsFor(req);
+  }
+
+  public static async getDividendAmountFor(
+    req: GetDividendsForRequest,
+  ): Promise<DividendAmountForViewModel> {
+    return await Equity.getDividendAmountFor(req);
   }
 
   public static async getDividends(

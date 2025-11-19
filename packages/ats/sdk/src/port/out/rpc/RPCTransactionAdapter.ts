@@ -817,6 +817,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       recordDate: recordDate.toBigNumber(),
       executionDate: executionDate.toBigNumber(),
       amount: amount.toBigNumber(),
+      amountDecimals: amount.decimals,
     };
 
     return this.executeTransaction(
@@ -3049,6 +3050,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       'redeemAtMaturityByPartition',
       [sourceId.toString(), partitionId, amount.toBigNumber()],
       GAS.REDEEM_AT_MATURITY_BY_PARTITION_GAS,
+    );
+  }
+
+  async fullRedeemAtMaturity(
+    security: EvmAddress,
+    sourceId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Full redeeming at maturity to address ${security.toString()}`,
+    );
+
+    return this.executeTransaction(
+      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      'fullRedeemAtMaturity',
+      [sourceId.toString()],
+      GAS.FULL_REDEEM_AT_MATURITY_GAS,
     );
   }
 

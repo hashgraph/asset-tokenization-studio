@@ -36,6 +36,7 @@ interface IEquity {
         uint256 recordDate;
         uint256 executionDate;
         uint256 amount;
+        uint8 amountDecimals;
     }
 
     struct RegisteredDividend {
@@ -46,9 +47,16 @@ interface IEquity {
     struct DividendFor {
         uint256 tokenBalance;
         uint256 amount;
+        uint8 amountDecimals;
         uint256 recordDate;
         uint256 executionDate;
         uint8 decimals;
+        bool recordDateReached;
+    }
+
+    struct DividendAmountFor {
+        uint256 numerator;
+        uint256 denominator;
         bool recordDateReached;
     }
 
@@ -105,6 +113,14 @@ interface IEquity {
         uint256 _dividendID,
         address _account
     ) external view returns (DividendFor memory dividendFor_);
+
+    /**
+     * @notice Retrieves dividend amount numerator and denominator for a specific account and dividend ID
+     */
+    function getDividendAmountFor(
+        uint256 _dividendID,
+        address _account
+    ) external view returns (DividendAmountFor memory dividendAmountFor_);
 
     /**
      * @notice returns the dividends count.

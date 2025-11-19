@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-17T12:40:14.290Z
+ * Generated: 2025-11-19T08:50:45.569Z
  * Facets: 54
  * Infrastructure: 2
  *
@@ -210,6 +210,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)",
         selector: "0x653458ea",
       },
+      { name: "fullRedeemAtMaturity", signature: "fullRedeemAtMaturity(address)", selector: "0xd0db5fb2" },
       {
         name: "redeemAtMaturityByPartition",
         signature: "redeemAtMaturityByPartition(address,bytes32,uint256)",
@@ -235,6 +236,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)",
         selector: "0x653458ea",
       },
+      { name: "fullRedeemAtMaturity", signature: "fullRedeemAtMaturity(address)", selector: "0xd0db5fb2" },
       {
         name: "redeemAtMaturityByPartition",
         signature: "redeemAtMaturityByPartition(address,bytes32,uint256)",
@@ -261,6 +263,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)",
         selector: "0x653458ea",
       },
+      { name: "fullRedeemAtMaturity", signature: "fullRedeemAtMaturity(address)", selector: "0xd0db5fb2" },
       {
         name: "redeemAtMaturityByPartition",
         signature: "redeemAtMaturityByPartition(address,bytes32,uint256)",
@@ -286,12 +289,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       { name: "getBondDetails", signature: "getBondDetails()", selector: "0x4ce02414" },
       { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
+      { name: "getCouponAmountFor", signature: "getCouponAmountFor(uint256,address)", selector: "0x439efc2e" },
       { name: "getCouponCount", signature: "getCouponCount()", selector: "0x468bb240" },
       { name: "getCouponFor", signature: "getCouponFor(uint256,address)", selector: "0xbba7b56d" },
       { name: "getCouponFromOrderedListAt", signature: "getCouponFromOrderedListAt(uint256)", selector: "0x65a88a2c" },
       { name: "getCouponHolders", signature: "getCouponHolders(uint256,uint256,uint256)", selector: "0xa92e8371" },
       { name: "getCouponsOrderedList", signature: "getCouponsOrderedList(uint256,uint256)", selector: "0xd7133de1" },
       { name: "getCouponsOrderedListTotal", signature: "getCouponsOrderedListTotal()", selector: "0xee1d26eb" },
+      { name: "getPrincipalFor", signature: "getPrincipalFor(address)", selector: "0x6f131c78" },
       { name: "getSecurityHolders", signature: "getSecurityHolders(uint256,uint256)", selector: "0x81438d2f" },
       { name: "getSecurityRegulationData", signature: "getSecurityRegulationData()", selector: "0x8fda5afe" },
       { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
@@ -943,6 +948,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "_initialize_equityUSA(EquityDetailsData,RegulationData,AdditionalSecurityData)",
         selector: "0xd0299703",
       },
+      { name: "getDividendAmountFor", signature: "getDividendAmountFor(uint256,address)", selector: "0xd258b2f1" },
       { name: "getDividendHolders", signature: "getDividendHolders(uint256,uint256,uint256)", selector: "0xeba3918e" },
       { name: "getDividends", signature: "getDividends(uint256)", selector: "0x3837ac88" },
       { name: "getDividendsCount", signature: "getDividendsCount()", selector: "0x9e676952" },
@@ -2416,6 +2422,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       { name: "_checkMaturityDate", signature: "_checkMaturityDate(uint256)", selector: "0xb9a83231" },
       { name: "_getBondDetails", signature: "_getBondDetails()", selector: "0xdfa65894" },
       { name: "_getCoupon", signature: "_getCoupon(uint256)", selector: "0x39b68379" },
+      { name: "_getCouponAmountFor", signature: "_getCouponAmountFor(uint256,address)", selector: "0xe744f18d" },
       { name: "_getCouponCount", signature: "_getCouponCount()", selector: "0x293fbc5a" },
       { name: "_getCouponFor", signature: "_getCouponFor(uint256,address)", selector: "0x2abd54cf" },
       {
@@ -2432,6 +2439,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         selector: "0x8aec23a9",
       },
       { name: "_getMaturityDate", signature: "_getMaturityDate()", selector: "0xa1522f44" },
+      { name: "_getPrincipalFor", signature: "_getPrincipalFor(address)", selector: "0xc8e42efe" },
       { name: "_getTotalCouponHolders", signature: "_getTotalCouponHolders(uint256)", selector: "0xfba7a1ab" },
       { name: "_initCoupon", signature: "_initCoupon(bytes32,IBondRead.Coupon)", selector: "0x9b230d29" },
       { name: "_initialize_bond", signature: "_initialize_bond(IBondRead.BondDetailsData)", selector: "0x158876c6" },
@@ -2531,6 +2539,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     inheritance: ["IEquityStorageWrapper", "BondStorageWrapper"],
     methods: [
       { name: "_equityStorage", signature: "_equityStorage()", selector: "0xd722ce84" },
+      { name: "_getDividendAmountFor", signature: "_getDividendAmountFor(uint256,address)", selector: "0xd35ad27b" },
       {
         name: "_getDividendHolders",
         signature: "_getDividendHolders(uint256,uint256,uint256)",

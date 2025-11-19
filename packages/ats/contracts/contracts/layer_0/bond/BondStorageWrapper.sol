@@ -209,6 +209,35 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         }
     }
 
+    function _getCouponAmountFor(
+        uint256 _couponID,
+        address _account
+    ) internal view returns (IBondRead.CouponAmountFor memory couponAmountFor_) {
+        IBondRead.CouponFor memory couponFor = _getCouponFor(_couponID, _account);
+
+        if (!couponFor.recordDateReached) return couponAmountFor_;
+
+        IBondRead.BondDetailsData memory bondDetails = _getBondDetails();
+
+        couponAmountFor_.recordDateReached = true;
+
+        couponAmountFor_.numerator =
+            couponFor.tokenBalance *
+            bondDetails.nominalValue *
+            couponFor.coupon.rate *
+            couponFor.coupon.endDate - couponFor.coupon.startDate;
+        couponAmountFor_.denominator =
+            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
+            365 days;
+    }
+
+    function _getPrincipalFor(address _account) internal view returns (IBondRead.PrincipalFor memory principalFor_) {
+        IBondRead.BondDetailsData memory bondDetails = _getBondDetails();
+
+        principalFor_.numerator = _balanceOfAdjusted(_account) * bondDetails.nominalValue;
+        principalFor_.denominator = 10 ** (_decimalsAdjusted() + bondDetails.nominalValueDecimals);
+    }
+
     function _getCouponCount() internal view returns (uint256 couponCount_) {
         return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }

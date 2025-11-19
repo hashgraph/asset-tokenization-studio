@@ -1050,6 +1050,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       recordDate: recordDate.toHexString(),
       executionDate: executionDate.toHexString(),
       amount: amount.toHexString(),
+      amountDecimals: amount.decimals,
     };
     return this.executeWithArgs(
       new EquityUSAFacet__factory().attach(security.toString()),
@@ -3179,6 +3180,24 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       securityId,
       GAS.REDEEM_AT_MATURITY_BY_PARTITION_GAS,
       [sourceId.toString(), partitionId, amount.toBigNumber()],
+    );
+  }
+
+  async fullRedeemAtMaturity(
+    security: EvmAddress,
+    sourceId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Redeeming at maturity by partition to address ${security.toString()}`,
+    );
+    const contract = new Contract(security.toString(), Bond__factory.abi);
+    return this.executeWithArgs(
+      contract,
+      'fullRedeemAtMaturity',
+      securityId,
+      GAS.FULL_REDEEM_AT_MATURITY_GAS,
+      [sourceId.toString()],
     );
   }
 

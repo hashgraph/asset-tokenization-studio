@@ -19,6 +19,7 @@ import {
   ClearingTransferFacet,
   BondUSAReadFacet,
   TimeTravelFacet as TimeTravel,
+  IERC3643,
 } from "@contract-types";
 import {
   DEFAULT_PARTITION,
@@ -49,6 +50,8 @@ const couponRate = 50;
 const couponRateDecimals = 1;
 const couponPeriod = TIME_PERIODS_S.WEEK;
 const EMPTY_VC_ID = EMPTY_STRING;
+const YEAR_SECONDS = 365 * 24 * 60 * 60;
+const DECIMALS = 6;
 
 let couponData = {
   recordDate: couponRecordDateInSeconds.toString(),
@@ -80,6 +83,7 @@ describe("Bond Tests", () => {
   let protectedPartitionsFacet: ProtectedPartitions;
   let freezeFacet: FreezeFacet;
   let clearingTransferFacet: ClearingTransferFacet;
+  let erc3643Facet: IERC3643;
 
   async function deploySecurityFixture(isMultiPartition = false) {
     const base = await deployBondTokenFixture({
@@ -132,6 +136,10 @@ describe("Bond Tests", () => {
         role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
         members: [signer_A.address],
       },
+      {
+        role: ATS_ROLES._AGENT_ROLE,
+        members: [signer_A.address],
+      },
     ]);
 
     bondFacet = await ethers.getContractAt("BondUSAFacetTimeTravel", diamond.address, signer_A);
@@ -145,6 +153,7 @@ describe("Bond Tests", () => {
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+    erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
 
@@ -173,11 +182,33 @@ describe("Bond Tests", () => {
   });
 
   describe("Single Partition", () => {
+    it("GIVEN token holder WHEN getting principal For THEN succeeds", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+
+      const principalFor = await bondReadFacet.getPrincipalFor(signer_A.address);
+      const bondDetails = await bondReadFacet.getBondDetails();
+
+      expect(principalFor.numerator).to.equal(bondDetails.nominalValue.mul(amount));
+      expect(principalFor.denominator).to.equal(10 ** (bondDetails.nominalValueDecimals + DECIMALS));
+    });
+
     describe("Redeem At Maturity", () => {
       it("GIVEN a zero address as token holder WHEN redeeming at maturity THEN transaction fails with ZeroAddressNotAllowed", async () => {
         await expect(
           bondFacet.redeemAtMaturityByPartition(ADDRESS_ZERO, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "ZeroAddressNotAllowed");
+
+        await expect(bondFacet.fullRedeemAtMaturity(ADDRESS_ZERO)).to.be.revertedWithCustomError(
+          bondFacet,
+          "ZeroAddressNotAllowed",
+        );
       });
 
       it("GIVEN single partition mode WHEN redeeming from a non-default partition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
@@ -192,12 +223,22 @@ describe("Bond Tests", () => {
         await expect(
           bondFacet.connect(signer_A).redeemAtMaturityByPartition(signer_B.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "AccountIsBlocked");
+
+        await expect(bondFacet.connect(signer_A).fullRedeemAtMaturity(signer_B.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "AccountIsBlocked",
+        );
       });
 
       it("GIVEN the caller lacks the Maturity Redeemer role WHEN redeeming at maturity THEN transaction fails with AccountHasNoRole", async () => {
         await expect(
           bondFacet.connect(signer_B).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "AccountHasNoRole");
+
+        await expect(bondFacet.connect(signer_B).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "AccountHasNoRole",
+        );
       });
       it("GIVEN clearing is activated WHEN redeeming at maturity THEN transaction fails with ClearingIsActivated", async () => {
         await clearingActionsFacet.activateClearing();
@@ -205,14 +246,11 @@ describe("Bond Tests", () => {
         await expect(
           bondFacet.redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "ClearingIsActivated");
-      });
 
-      it("GIVEN partitions are protected AND caller lacks required role WHEN redeeming at maturity THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        await protectedPartitionsFacet.protectPartitions();
-
-        await expect(
-          bondFacet.redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
-        ).to.be.revertedWithCustomError(bondFacet, "PartitionsAreProtectedAndNoRole");
+        await expect(bondFacet.fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "ClearingIsActivated",
+        );
       });
 
       it("GIVEN the token is paused WHEN redeeming at maturity THEN transaction fails with TokenIsPaused", async () => {
@@ -228,19 +266,48 @@ describe("Bond Tests", () => {
         await expect(
           bondFacet.connect(signer_C).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "TokenIsPaused");
+
+        await expect(bondFacet.connect(signer_C).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "TokenIsPaused",
+        );
       });
 
       it("GIVEN the token holder lacks valid KYC status WHEN redeeming at maturity THEN transaction fails with InvalidKycStatus", async () => {
         await expect(
           bondFacet.redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "InvalidKycStatus");
+
+        await expect(bondFacet.fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "InvalidKycStatus",
+        );
       });
 
       it("GIVEN the current date is before maturity WHEN redeeming at maturity THEN transaction fails with BondMaturityDateWrong", async () => {
         await expect(
           bondFacet.redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "BondMaturityDateWrong");
+
+        await expect(bondFacet.fullRedeemAtMaturity(signer_A.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "BondMaturityDateWrong",
+        );
       });
+
+      it("GIVEN a recovered wallet WHEN redeeming at maturity THEN transaction fails with WalletRecovered", async () => {
+        await erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        await expect(
+          bondFacet.redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount),
+        ).to.be.revertedWithCustomError(bondFacet, "WalletRecovered");
+
+        await expect(bondFacet.fullRedeemAtMaturity(signer_A.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "WalletRecovered",
+        );
+      });
+
       it("GIVEN all conditions are met WHEN redeeming at maturity THEN transaction succeeds and emits RedeemedByPartition", async () => {
         await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
@@ -254,6 +321,23 @@ describe("Bond Tests", () => {
         await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
 
         await expect(bondFacet.redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount))
+          .to.emit(bondFacet, "RedeemedByPartition")
+          .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
+      });
+
+      it("GIVEN all conditions are met WHEN redeeming all at maturity THEN transaction succeeds and emits RedeemedByPartition", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+
+        await erc1410Facet.connect(signer_C).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: amount,
+          data: "0x",
+        });
+
+        await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
+
+        await expect(bondFacet.fullRedeemAtMaturity(signer_A.address))
           .to.emit(bondFacet, "RedeemedByPartition")
           .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
       });
@@ -399,6 +483,7 @@ describe("Bond Tests", () => {
         const listCount = await bondReadFacet.getCouponCount();
         const coupon = await bondReadFacet.getCoupon(1);
         const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
+        const couponAmountFor = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
         const couponTotalHolders = await bondReadFacet.getTotalCouponHolders(1);
         const couponHolders = await bondReadFacet.getCouponHolders(1, 0, couponTotalHolders);
 
@@ -416,6 +501,9 @@ describe("Bond Tests", () => {
         expect(couponFor.recordDateReached).to.equal(false);
         expect(couponTotalHolders).to.equal(0);
         expect(couponHolders.length).to.equal(couponTotalHolders);
+        expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
+        expect(couponAmountFor.numerator).to.equal(0);
+        expect(couponAmountFor.denominator).to.equal(0);
       });
 
       it("GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds", async () => {
@@ -455,6 +543,8 @@ describe("Bond Tests", () => {
         await accessControlFacet.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
         const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
+        const couponAmountFor = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
+        const bondDetails = await bondReadFacet.getBondDetails();
         const couponTotalHolders = await bondReadFacet.getTotalCouponHolders(1);
         const couponHolders = await bondReadFacet.getCouponHolders(1, 0, couponTotalHolders);
 
@@ -463,6 +553,15 @@ describe("Bond Tests", () => {
         expect(couponTotalHolders).to.equal(1);
         expect(couponHolders.length).to.equal(couponTotalHolders);
         expect(couponHolders).to.have.members([signer_A.address]);
+        expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
+        expect(couponAmountFor.numerator).to.equal(
+          couponFor.tokenBalance.mul(bondDetails.nominalValue).mul(couponFor.rate).mul(couponFor.period),
+        );
+        expect(couponAmountFor.denominator).to.equal(
+          BigNumber.from(10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.rateDecimals)).mul(
+            YEAR_SECONDS,
+          ),
+        );
       });
 
       it("GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds", async () => {
@@ -509,6 +608,8 @@ describe("Bond Tests", () => {
         await accessControlFacet.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
         const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
+        const couponAmountFor = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
+        const bondDetails = await bondReadFacet.getBondDetails();
         const couponTotalHolders = await bondReadFacet.getTotalCouponHolders(1);
         const couponHolders = await bondReadFacet.getCouponHolders(1, 0, couponTotalHolders);
 
@@ -517,6 +618,15 @@ describe("Bond Tests", () => {
         expect(couponTotalHolders).to.equal(1);
         expect(couponHolders.length).to.equal(couponTotalHolders);
         expect(couponHolders).to.have.members([signer_A.address]);
+        expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
+        expect(couponAmountFor.numerator).to.equal(
+          couponFor.tokenBalance.mul(bondDetails.nominalValue).mul(couponFor.rate).mul(couponFor.period),
+        );
+        expect(couponAmountFor.denominator).to.equal(
+          BigNumber.from(10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.rateDecimals)).mul(
+            YEAR_SECONDS,
+          ),
+        );
       });
 
       it("GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds", async () => {
@@ -655,8 +765,12 @@ describe("Bond Tests", () => {
 
         // --- Pre: before record date -> tokenBalance should be 0 and not reached
         const before = await bondReadFacet.getCouponFor(1, signer_A.address);
+        const couponAmountForBefore = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
         expect(before.recordDateReached).to.equal(false);
         expect(before.tokenBalance).to.equal(0);
+        expect(couponAmountForBefore.recordDateReached).to.equal(before.recordDateReached);
+        expect(couponAmountForBefore.numerator).to.equal(0);
+        expect(couponAmountForBefore.denominator).to.equal(0);
 
         // Forward time to record date
         await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
@@ -664,12 +778,49 @@ describe("Bond Tests", () => {
 
         // --- Post: after record date -> tokenBalance should be sum of balances
         const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
+        const couponAmountForAfter = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
+        const bondDetails = await bondReadFacet.getBondDetails();
         expect(couponFor.recordDateReached).to.equal(true);
         expect(couponFor.tokenBalance).to.equal(totalAmount); // normal+cleared+held+locked+frozen
+        expect(couponAmountForAfter.recordDateReached).to.equal(couponFor.recordDateReached);
+        expect(couponAmountForAfter.numerator).to.equal(
+          couponFor.tokenBalance.mul(bondDetails.nominalValue).mul(couponFor.rate).mul(couponFor.period),
+        );
+        expect(couponAmountForAfter.denominator).to.equal(
+          BigNumber.from(10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.rateDecimals)).mul(
+            YEAR_SECONDS,
+          ),
+        );
       });
     });
   });
   describe("Multi Partition", () => {
+    it("GIVEN token holder WHEN getting principal For THEN succeeds", async () => {
+      await deploySecurityFixture(true);
+
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: _PARTITION_ID,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+
+      const principalFor = await bondReadFacet.getPrincipalFor(signer_A.address);
+      const bondDetails = await bondReadFacet.getBondDetails();
+
+      expect(principalFor.numerator).to.equal(bondDetails.nominalValue.mul(amount).mul(2));
+      expect(principalFor.denominator).to.equal(10 ** (bondDetails.nominalValueDecimals + DECIMALS));
+    });
+
     it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
       await deploySecurityFixture(true);
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
@@ -685,6 +836,31 @@ describe("Bond Tests", () => {
       await expect(bondFacet.redeemAtMaturityByPartition(signer_A.address, _PARTITION_ID, amount))
         .to.emit(bondFacet, "RedeemedByPartition")
         .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x");
+    });
+
+    it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
+      await deploySecurityFixture(true);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: _PARTITION_ID,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+
+      await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
+
+      await expect(bondFacet.fullRedeemAtMaturity(signer_A.address))
+        .to.emit(bondFacet, "RedeemedByPartition")
+        .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x")
+        .to.emit(bondFacet, "RedeemedByPartition")
+        .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
     });
   });
 });

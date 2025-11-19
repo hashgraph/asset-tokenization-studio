@@ -248,6 +248,7 @@ interface IAssetMock {
         uint256 recordDate;
         uint256 executionDate;
         uint256 amount;
+        uint8 amountDecimals;
     }
 
     struct RegisteredDividend {
@@ -258,6 +259,7 @@ interface IAssetMock {
     struct DividendFor {
         uint256 tokenBalance;
         uint256 amount;
+        uint8 amountDecimals;
         uint256 recordDate;
         uint256 executionDate;
         uint8 decimals;

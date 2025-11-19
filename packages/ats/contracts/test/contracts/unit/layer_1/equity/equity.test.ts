@@ -29,10 +29,12 @@ import { grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
+import { BigNumber } from "ethers";
 
 let dividendsRecordDateInSeconds = 0;
 let dividendsExecutionDateInSeconds = 0;
-const dividendsAmountPerEquity = 1;
+const dividendsAmountPerEquity = 10;
+const dividendsAmountDecimalsPerEquity = 1;
 
 let votingRecordDateInSeconds = 0;
 
@@ -49,6 +51,7 @@ let dividendData = {
   recordDate: dividendsRecordDateInSeconds.toString(),
   executionDate: dividendsExecutionDateInSeconds.toString(),
   amount: dividendsAmountPerEquity,
+  amountDecimals: dividendsAmountDecimalsPerEquity,
 };
 let balanceAdjustmentData = {
   executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
@@ -130,6 +133,7 @@ describe("Equity Tests", () => {
       recordDate: dividendsRecordDateInSeconds.toString(),
       executionDate: dividendsExecutionDateInSeconds.toString(),
       amount: dividendsAmountPerEquity,
+      amountDecimals: dividendsAmountDecimalsPerEquity,
     };
     balanceAdjustmentData = {
       executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
@@ -171,6 +175,7 @@ describe("Equity Tests", () => {
         recordDate: dividendsExecutionDateInSeconds.toString(),
         executionDate: dividendsRecordDateInSeconds.toString(),
         amount: dividendsAmountPerEquity,
+        amountDecimals: dividendsAmountDecimalsPerEquity,
       };
 
       await expect(equityFacet.connect(signer_C).setDividends(wrongDividendData_1)).to.be.revertedWithCustomError(
@@ -182,6 +187,7 @@ describe("Equity Tests", () => {
         recordDate: dateToUnixTimestamp("2029-12-31T23:59:59Z").toString(),
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: dividendsAmountPerEquity,
+        amountDecimals: dividendsAmountDecimalsPerEquity,
       };
 
       await expect(equityFacet.connect(signer_C).setDividends(wrongDividendData_2)).to.be.revertedWithCustomError(
@@ -204,6 +210,7 @@ describe("Equity Tests", () => {
           dividendsRecordDateInSeconds,
           dividendsExecutionDateInSeconds,
           dividendsAmountPerEquity,
+          dividendsAmountDecimalsPerEquity,
         );
 
       // check list members
@@ -212,6 +219,7 @@ describe("Equity Tests", () => {
       const listCount = await equityFacet.getDividendsCount();
       const dividend = await equityFacet.getDividends(1);
       const dividendFor = await equityFacet.getDividendsFor(1, signer_A.address);
+      const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
       const dividendTotalHolder = await equityFacet.getTotalDividendHolders(1);
       const dividendHolders = await equityFacet.getDividendHolders(1, 0, dividendTotalHolder);
 
@@ -220,14 +228,19 @@ describe("Equity Tests", () => {
       expect(dividend.dividend.recordDate).to.equal(dividendsRecordDateInSeconds);
       expect(dividend.dividend.executionDate).to.equal(dividendsExecutionDateInSeconds);
       expect(dividend.dividend.amount).to.equal(dividendsAmountPerEquity);
+      expect(dividend.dividend.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
       expect(dividendFor.recordDate).to.equal(dividendsRecordDateInSeconds);
       expect(dividendFor.executionDate).to.equal(dividendsExecutionDateInSeconds);
       expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
+      expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
       expect(dividendFor.tokenBalance).to.equal(0);
       expect(dividendFor.recordDateReached).to.equal(false);
       expect(dividendFor.decimals).to.equal(0);
       expect(dividendTotalHolder).to.equal(0);
       expect(dividendHolders.length).to.equal(dividendTotalHolder);
+      expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
+      expect(dividendAmountFor.numerator).to.equal(0);
+      expect(dividendAmountFor.denominator).to.equal(0);
     });
 
     it("GIVEN an account with corporateActions role WHEN setDividends and lock THEN transaction succeeds", async () => {
@@ -259,11 +272,13 @@ describe("Equity Tests", () => {
           dividendsRecordDateInSeconds,
           dividendsExecutionDateInSeconds,
           dividendsAmountPerEquity,
+          dividendsAmountDecimalsPerEquity,
         );
 
       // check list members
       await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
       const dividendFor = await equityFacet.getDividendsFor(1, signer_A.address);
+      const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
       const dividendTotalHolder = await equityFacet.getTotalDividendHolders(1);
       const dividendHolders = await equityFacet.getDividendHolders(1, 0, dividendTotalHolder);
 
@@ -272,6 +287,11 @@ describe("Equity Tests", () => {
       expect(dividendTotalHolder).to.equal(1);
       expect(dividendHolders.length).to.equal(dividendTotalHolder);
       expect(dividendHolders).to.have.members([signer_A.address]);
+      expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
+      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance.mul(dividendFor.amount));
+      expect(dividendAmountFor.denominator).to.equal(
+        BigNumber.from(10 ** (dividendFor.decimals + dividendFor.amountDecimals)),
+      );
     });
 
     it("GIVEN an account with corporateActions role WHEN setDividends and hold THEN transaction succeeds", async () => {
@@ -310,11 +330,13 @@ describe("Equity Tests", () => {
           dividendsRecordDateInSeconds,
           dividendsExecutionDateInSeconds,
           dividendsAmountPerEquity,
+          dividendsAmountDecimalsPerEquity,
         );
 
       // check list members
       await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
       const dividendFor = await equityFacet.getDividendsFor(1, signer_A.address);
+      const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
       const dividendTotalHolder = await equityFacet.getTotalDividendHolders(1);
       const dividendHolders = await equityFacet.getDividendHolders(1, 0, dividendTotalHolder);
 
@@ -323,6 +345,11 @@ describe("Equity Tests", () => {
       expect(dividendTotalHolder).to.equal(1);
       expect(dividendHolders.length).to.equal(dividendTotalHolder);
       expect(dividendHolders).to.have.members([signer_A.address]);
+      expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
+      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance.mul(dividendFor.amount));
+      expect(dividendAmountFor.denominator).to.equal(
+        BigNumber.from(10 ** (dividendFor.decimals + dividendFor.amountDecimals)),
+      );
     });
 
     it("GIVEN scheduled dividends WHEN record date is reached AND scheduled balance adjustments is set after record date THEN dividends are paid without adjusted balance", async () => {
@@ -376,9 +403,16 @@ describe("Equity Tests", () => {
 
       // Check user dividend balance does not include balance adjustment
       const dividendFor = await equityFacet.getDividendsFor(1, signer_A.address);
+      const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
       expect(dividendFor.tokenBalance).to.equal(TotalAmount);
       expect(dividendFor.recordDateReached).to.equal(true);
       expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
+      expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
+      expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
+      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance.mul(dividendFor.amount));
+      expect(dividendAmountFor.denominator).to.equal(
+        BigNumber.from(10 ** (dividendFor.decimals + dividendFor.amountDecimals)),
+      );
     });
   });
 

@@ -37,6 +37,17 @@ interface TRexIBondRead {
         bool recordDateReached;
         Coupon coupon;
     }
+
+    struct CouponAmountFor {
+        uint256 numerator;
+        uint256 denominator;
+        bool recordDateReached;
+    }
+
+    struct PrincipalFor {
+        uint256 numerator;
+        uint256 denominator;
+    }
     /**
      * @notice Retrieves the bond details
      */
@@ -52,6 +63,19 @@ interface TRexIBondRead {
      * @dev Return value includes user balance at cupon record date
      */
     function getCouponFor(uint256 _couponID, address _account) external view returns (CouponFor memory couponFor_);
+
+    /**
+     * @notice Retrieves coupon amount numerator and denominator for a specific account and coupon ID
+     */
+    function getCouponAmountFor(
+        uint256 _couponID,
+        address _account
+    ) external view returns (CouponAmountFor memory couponAmountFor_);
+
+    /**
+     * @notice Retrieves principal numerator and denominator for a specific account
+     */
+    function getPrincipalFor(address _account) external view returns (PrincipalFor memory principalFor_);
 
     /**
      * @notice Retrieves the total number of coupons set for the bond
