@@ -380,6 +380,7 @@ import SetAddressFrozenRequest from './security/operations/freeze/SetAddressFroz
 import DeactivateInternalKycRequest from './security/kyc/DeactivateInternalKycRequest';
 import TakeSnapshotRequest from './security/operations/snapshot/TakeSnapshotRequest';
 import RedeemAtMaturityByPartitionRequest from './bond/RedeemAtMaturityByPartitionRequest';
+import FullRedeemAtMaturityRequest from './bond/FullRedeemAtMaturityRequest';
 import GetTokenHoldersAtSnapshotRequest from './security/operations/snapshot/GetTokenHoldersAtSnapshotRequest';
 import GetTotalTokenHoldersAtSnapshotRequest from './security/operations/snapshot/GetTotalTokenHoldersAtSnapshotRequest';
 import GetCouponHoldersRequest from './bond/GetCouponHoldersRequest';
@@ -579,6 +580,7 @@ export {
   SetAddressFrozenRequest,
   TakeSnapshotRequest,
   RedeemAtMaturityByPartitionRequest,
+  FullRedeemAtMaturityRequest,
   GetTokenHoldersAtSnapshotRequest,
   GetTotalTokenHoldersAtSnapshotRequest,
   GetCouponHoldersRequest,

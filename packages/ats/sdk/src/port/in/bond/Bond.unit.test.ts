@@ -11,6 +11,7 @@ import {
   GetAllCouponsRequest,
   UpdateMaturityDateRequest,
   RedeemAtMaturityByPartitionRequest,
+  FullRedeemAtMaturityRequest,
   GetCouponHoldersRequest,
   GetTotalCouponHoldersRequest,
   CreateTrexSuiteBondRequest,
@@ -42,6 +43,7 @@ import {
   GetCouponHoldersQueryFixture,
   GetCouponRequestFixture,
   RedeemAtMaturityByPartitionRequestFixture,
+  FullRedeemAtMaturityRequestFixture,
   GetTotalCouponHoldersRequestFixture,
   SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,
@@ -76,6 +78,7 @@ import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
 import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
+import { FullRedeemAtMaturityCommand } from '@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
@@ -101,6 +104,7 @@ describe('Bond', () => {
   let getAllCouponsRequest: GetAllCouponsRequest;
   let updateMaturityDateRequest: UpdateMaturityDateRequest;
   let redeemAtMaturityByPartitionRequest: RedeemAtMaturityByPartitionRequest;
+  let fullRedeemAtMaturityRequest: FullRedeemAtMaturityRequest;
   let getCouponHoldersRequest: GetCouponHoldersRequest;
   let getTotalCouponHoldersRequest: GetTotalCouponHoldersRequest;
   let createTrexSuiteBondRequest: CreateTrexSuiteBondRequest;
@@ -1272,6 +1276,92 @@ describe('Bond', () => {
       await expect(
         BondToken.redeemAtMaturityByPartition(
           redeemAtMaturityByPartitionRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('fullRedeemAtMaturity', () => {
+    fullRedeemAtMaturityRequest = new FullRedeemAtMaturityRequest(
+      FullRedeemAtMaturityRequestFixture.create(),
+    );
+    it('should redeem at maturity successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.fullRedeemAtMaturity(
+        fullRedeemAtMaturityRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        FullRedeemAtMaturityRequest.name,
+        fullRedeemAtMaturityRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new FullRedeemAtMaturityCommand(
+          fullRedeemAtMaturityRequest.securityId,
+          fullRedeemAtMaturityRequest.sourceId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.fullRedeemAtMaturity(
+          fullRedeemAtMaturityRequest,
+        ),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        FullRedeemAtMaturityRequest.name,
+        fullRedeemAtMaturityRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new FullRedeemAtMaturityCommand(
+          fullRedeemAtMaturityRequest.securityId,
+          fullRedeemAtMaturityRequest.sourceId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      fullRedeemAtMaturityRequest =
+        new FullRedeemAtMaturityRequest({
+          ...FullRedeemAtMaturityRequestFixture.create(),
+          securityId: 'invalid',
+        });
+
+      await expect(
+        BondToken.fullRedeemAtMaturity(
+          fullRedeemAtMaturityRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+
+    it('should throw error if sourceId is invalid', async () => {
+      fullRedeemAtMaturityRequest =
+        new FullRedeemAtMaturityRequest({
+          ...FullRedeemAtMaturityRequestFixture.create(),
+          sourceId: 'invalid',
+        });
+
+      await expect(
+        BondToken.fullRedeemAtMaturity(
+          fullRedeemAtMaturityRequest,
         ),
       ).rejects.toThrow(ValidationError);
     });

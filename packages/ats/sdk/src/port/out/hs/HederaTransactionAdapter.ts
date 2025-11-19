@@ -3173,6 +3173,24 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async fullRedeemAtMaturity(
+    security: EvmAddress,
+    sourceId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Redeeming at maturity by partition to address ${security.toString()}`,
+    );
+    const contract = new Contract(security.toString(), Bond__factory.abi);
+    return this.executeWithArgs(
+      contract,
+      'fullRedeemAtMaturity',
+      securityId,
+      GAS.FULL_REDEEM_AT_MATURITY_GAS,
+      [sourceId.toString()],
+    );
+  }
+
   async createTrexSuiteBond(
     salt: string,
     owner: string,

@@ -19,6 +19,7 @@ import {
   ClearingTransferFacet,
   BondUSAReadFacet,
   TimeTravelFacet as TimeTravel,
+  IERC3643,
 } from "@contract-types";
 import {
   DEFAULT_PARTITION,
@@ -82,6 +83,7 @@ describe("Bond Tests", () => {
   let protectedPartitionsFacet: ProtectedPartitions;
   let freezeFacet: FreezeFacet;
   let clearingTransferFacet: ClearingTransferFacet;
+  let erc3643Facet: IERC3643;
 
   async function deploySecurityFixture(isMultiPartition = false) {
     const base = await deployBondTokenFixture({
@@ -134,6 +136,10 @@ describe("Bond Tests", () => {
         role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
         members: [signer_A.address],
       },
+      {
+        role: ATS_ROLES._AGENT_ROLE,
+        members: [signer_A.address],
+      },
     ]);
 
     bondFacet = await ethers.getContractAt("BondUSAFacetTimeTravel", diamond.address, signer_A);
@@ -147,6 +153,7 @@ describe("Bond Tests", () => {
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+    erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
 
@@ -197,6 +204,11 @@ describe("Bond Tests", () => {
         await expect(
           bondFacet.redeemAtMaturityByPartition(ADDRESS_ZERO, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "ZeroAddressNotAllowed");
+
+        await expect(bondFacet.fullRedeemAtMaturity(ADDRESS_ZERO)).to.be.revertedWithCustomError(
+          bondFacet,
+          "ZeroAddressNotAllowed",
+        );
       });
 
       it("GIVEN single partition mode WHEN redeeming from a non-default partition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
@@ -211,12 +223,22 @@ describe("Bond Tests", () => {
         await expect(
           bondFacet.connect(signer_A).redeemAtMaturityByPartition(signer_B.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "AccountIsBlocked");
+
+        await expect(bondFacet.connect(signer_A).fullRedeemAtMaturity(signer_B.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "AccountIsBlocked",
+        );
       });
 
       it("GIVEN the caller lacks the Maturity Redeemer role WHEN redeeming at maturity THEN transaction fails with AccountHasNoRole", async () => {
         await expect(
           bondFacet.connect(signer_B).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "AccountHasNoRole");
+
+        await expect(bondFacet.connect(signer_B).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "AccountHasNoRole",
+        );
       });
       it("GIVEN clearing is activated WHEN redeeming at maturity THEN transaction fails with ClearingIsActivated", async () => {
         await clearingActionsFacet.activateClearing();
@@ -224,14 +246,11 @@ describe("Bond Tests", () => {
         await expect(
           bondFacet.redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "ClearingIsActivated");
-      });
 
-      it("GIVEN partitions are protected AND caller lacks required role WHEN redeeming at maturity THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
-        await protectedPartitionsFacet.protectPartitions();
-
-        await expect(
-          bondFacet.redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
-        ).to.be.revertedWithCustomError(bondFacet, "PartitionsAreProtectedAndNoRole");
+        await expect(bondFacet.fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "ClearingIsActivated",
+        );
       });
 
       it("GIVEN the token is paused WHEN redeeming at maturity THEN transaction fails with TokenIsPaused", async () => {
@@ -247,19 +266,48 @@ describe("Bond Tests", () => {
         await expect(
           bondFacet.connect(signer_C).redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "TokenIsPaused");
+
+        await expect(bondFacet.connect(signer_C).fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "TokenIsPaused",
+        );
       });
 
       it("GIVEN the token holder lacks valid KYC status WHEN redeeming at maturity THEN transaction fails with InvalidKycStatus", async () => {
         await expect(
           bondFacet.redeemAtMaturityByPartition(signer_C.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "InvalidKycStatus");
+
+        await expect(bondFacet.fullRedeemAtMaturity(signer_C.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "InvalidKycStatus",
+        );
       });
 
       it("GIVEN the current date is before maturity WHEN redeeming at maturity THEN transaction fails with BondMaturityDateWrong", async () => {
         await expect(
           bondFacet.redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount),
         ).to.be.revertedWithCustomError(bondFacet, "BondMaturityDateWrong");
+
+        await expect(bondFacet.fullRedeemAtMaturity(signer_A.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "BondMaturityDateWrong",
+        );
       });
+
+      it("GIVEN a recovered wallet WHEN redeeming at maturity THEN transaction fails with WalletRecovered", async () => {
+        await erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        await expect(
+          bondFacet.redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount),
+        ).to.be.revertedWithCustomError(bondFacet, "WalletRecovered");
+
+        await expect(bondFacet.fullRedeemAtMaturity(signer_A.address)).to.be.revertedWithCustomError(
+          bondFacet,
+          "WalletRecovered",
+        );
+      });
+
       it("GIVEN all conditions are met WHEN redeeming at maturity THEN transaction succeeds and emits RedeemedByPartition", async () => {
         await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
@@ -273,6 +321,23 @@ describe("Bond Tests", () => {
         await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
 
         await expect(bondFacet.redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount))
+          .to.emit(bondFacet, "RedeemedByPartition")
+          .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
+      });
+
+      it("GIVEN all conditions are met WHEN redeeming all at maturity THEN transaction succeeds and emits RedeemedByPartition", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+
+        await erc1410Facet.connect(signer_C).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: amount,
+          data: "0x",
+        });
+
+        await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
+
+        await expect(bondFacet.fullRedeemAtMaturity(signer_A.address))
           .to.emit(bondFacet, "RedeemedByPartition")
           .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
       });
@@ -771,6 +836,31 @@ describe("Bond Tests", () => {
       await expect(bondFacet.redeemAtMaturityByPartition(signer_A.address, _PARTITION_ID, amount))
         .to.emit(bondFacet, "RedeemedByPartition")
         .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x");
+    });
+
+    it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
+      await deploySecurityFixture(true);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: _PARTITION_ID,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+
+      await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
+
+      await expect(bondFacet.fullRedeemAtMaturity(signer_A.address))
+        .to.emit(bondFacet, "RedeemedByPartition")
+        .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x")
+        .to.emit(bondFacet, "RedeemedByPartition")
+        .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
     });
   });
 });

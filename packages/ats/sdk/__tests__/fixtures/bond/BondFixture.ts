@@ -40,6 +40,8 @@ import { BigNumber } from 'ethers';
 import { Coupon } from '@domain/context/bond/Coupon';
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
 import RedeemAtMaturityByPartitionRequest from '@port/in/request/bond/RedeemAtMaturityByPartitionRequest';
+import { FullRedeemAtMaturityCommand } from '@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand';
+import FullRedeemAtMaturityRequest from '@port/in/request/bond/FullRedeemAtMaturityRequest';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import GetCouponHoldersRequest from '@port/in/request/bond/GetCouponHoldersRequest';
@@ -193,6 +195,12 @@ export const RedeemAtMaturityByPartitionCommandFixture =
     command.securityId.as(() => HederaIdPropsFixture.create().value);
     command.sourceId.as(() => HederaIdPropsFixture.create().value);
     command.partitionId.as(() => PartitionIdFixture.create().value);
+  });
+
+export const FullRedeemAtMaturityCommandFixture =
+  createFixture<FullRedeemAtMaturityCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
   });
 
 export const BondDetailsFixture = createFixture<BondDetails>((props) => {
@@ -442,6 +450,12 @@ export const RedeemAtMaturityByPartitionRequestFixture =
     request.securityId.as(() => HederaIdPropsFixture.create().value);
     request.sourceId.as(() => HederaIdPropsFixture.create().value);
     request.partitionId.as(() => PartitionIdFixture.create().value);
+  });
+
+export const FullRedeemAtMaturityRequestFixture =
+  createFixture<FullRedeemAtMaturityRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.sourceId.as(() => HederaIdPropsFixture.create().value);
   });
 
 export const CreateTrexSuiteBondRequestFixture =
