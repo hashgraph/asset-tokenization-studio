@@ -27,6 +27,7 @@ interface IKpiLinkedRate {
     error WrongImpactDataValues(ImpactData impactData);
     error KpiOracleCalledFailed();
 
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_KpiLinkedRate(
         InterestRate calldata _interestRate,
         ImpactData calldata _impactData,

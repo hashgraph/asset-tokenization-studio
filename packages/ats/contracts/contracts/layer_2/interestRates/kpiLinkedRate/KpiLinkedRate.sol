@@ -6,6 +6,7 @@ import { IKpiLinkedRate } from "../../interfaces/interestRates/kpiLinkedRate/IKp
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
 
 contract KpiLinkedRate is IKpiLinkedRate, Common {
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_KpiLinkedRate(
         InterestRate calldata _interestRate,
         ImpactData calldata _impactData,

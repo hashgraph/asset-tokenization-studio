@@ -25,6 +25,11 @@ abstract contract BondKpiLinkedInterestRate is Bond, CommonKpiLinkedInterestRate
     ) internal virtual override(BondStorageWrapper, BondStorageWrapperKpiLinkedInterestRate) {
         BondStorageWrapperKpiLinkedInterestRate._initCoupon(_actionId, _newCoupon);
     }
+    function _addToCouponsOrderedList(
+        uint256 _couponID
+    ) internal virtual override(BondStorageWrapper, BondStorageWrapperKpiLinkedInterestRate) {
+        BondStorageWrapperKpiLinkedInterestRate._addToCouponsOrderedList(_couponID);
+    }
 
     function _getCouponFor(
         uint256 _couponID,
@@ -37,11 +42,5 @@ abstract contract BondKpiLinkedInterestRate is Bond, CommonKpiLinkedInterestRate
         returns (IBondRead.CouponFor memory couponFor_)
     {
         return BondStorageWrapperKpiLinkedInterestRate._getCouponFor(_couponID, _account);
-    }
-
-    function _addToCouponsOrderedList(
-        uint256 _couponID
-    ) internal virtual override(BondStorageWrapper, BondStorageWrapperKpiLinkedInterestRate) {
-        BondStorageWrapperKpiLinkedInterestRate._addToCouponsOrderedList(_couponID);
     }
 }

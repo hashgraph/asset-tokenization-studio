@@ -88,7 +88,10 @@ task("erc3643-clone-interfaces", async (_, hre) => {
   const constants = [
     { src: "layer_3/constants/regulation", dst: "regulation" },
     { src: "layer_1/constants/roles", dst: "roles" },
-    { src: "layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon", dst: "IScheduledTasksCommon" },
+    {
+      src: "layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon",
+      dst: "IScheduledTasksCommon",
+    },
   ];
 
   function rewriteImports(source: string): string {

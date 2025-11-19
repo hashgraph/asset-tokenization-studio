@@ -6,6 +6,7 @@ import { IFixedRate } from "../../interfaces/interestRates/fixedRate/IFixedRate.
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
 
 contract FixedRate is IFixedRate, Common {
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_FixedRate(
         FixedRateData calldata _initData
     ) external override onlyUninitialized(_erc1410BasicStorage().initialized) {

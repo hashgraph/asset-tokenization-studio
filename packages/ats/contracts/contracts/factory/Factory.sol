@@ -179,6 +179,24 @@ contract Factory is IFactory, Common {
         regulationData_ = buildRegulationData(_regulationType, _regulationSubType);
     }
 
+    function _deployBond(
+        BondData calldata _bondData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) internal returns (address bondAddress_) {
+        bondAddress_ = _deploySecurity(_bondData.security, SecurityType.Bond);
+
+        IBondUSA(bondAddress_)._initialize_bondUSA(
+            _bondData.bondDetails,
+            buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
+            _factoryRegulationData.additionalSecurityData
+        );
+
+        IProceedRecipients(bondAddress_).initialize_ProceedRecipients(
+            _bondData.proceedRecipients,
+            _bondData.proceedRecipientsData
+        );
+    }
+
     function _deploySecurity(
         SecurityData calldata _securityData,
         SecurityType _securityType
@@ -233,23 +251,5 @@ contract Factory is IFactory, Common {
 
         IERC20Permit(securityAddress_).initialize_ERC20Permit();
         IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance, _securityData.identityRegistry);
-    }
-
-    function _deployBond(
-        BondData calldata _bondData,
-        FactoryRegulationData calldata _factoryRegulationData
-    ) internal returns (address bondAddress_) {
-        bondAddress_ = _deploySecurity(_bondData.security, SecurityType.Bond);
-
-        IBondUSA(bondAddress_)._initialize_bondUSA(
-            _bondData.bondDetails,
-            buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
-            _factoryRegulationData.additionalSecurityData
-        );
-
-        IProceedRecipients(bondAddress_).initialize_ProceedRecipients(
-            _bondData.proceedRecipients,
-            _bondData.proceedRecipientsData
-        );
     }
 }

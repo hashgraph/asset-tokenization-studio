@@ -32,17 +32,6 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
         _addScheduledCouponListing(_newCoupon.fixingDate, abi.encode(_actionId));
     }
 
-    function _getCouponFor(
-        uint256 _couponID,
-        address _account
-    ) internal view virtual override returns (IBondRead.CouponFor memory couponFor_) {
-        couponFor_ = super._getCouponFor(_couponID, _account);
-        if (couponFor_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return couponFor_;
-
-        (couponFor_.coupon.rate, couponFor_.coupon.rateDecimals) = _calculateKpiLinkedInterestRate(couponFor_.coupon);
-        couponFor_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
-    }
-
     function _addToCouponsOrderedList(uint256 _couponID) internal virtual override {
         _setKpiLinkedInterestRate(_couponID);
         super._addToCouponsOrderedList(_couponID);
@@ -54,6 +43,32 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
         (uint256 rate, uint8 rateDecimals) = _calculateKpiLinkedInterestRate(coupon);
 
         _updateCouponRate(_couponID, coupon, rate, rateDecimals);
+    }
+
+    function _updateCouponRate(
+        uint256 _couponID,
+        IBondRead.Coupon memory _coupon,
+        uint256 _rate,
+        uint8 _rateDecimals
+    ) internal virtual {
+        bytes32 actionId = _getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+
+        _coupon.rate = _rate;
+        _coupon.rateDecimals = _rateDecimals;
+        _coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
+
+        _updateCorporateActionData(actionId, abi.encode(_coupon));
+    }
+
+    function _getCouponFor(
+        uint256 _couponID,
+        address _account
+    ) internal view virtual override returns (IBondRead.CouponFor memory couponFor_) {
+        couponFor_ = super._getCouponFor(_couponID, _account);
+        if (couponFor_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return couponFor_;
+
+        (couponFor_.coupon.rate, couponFor_.coupon.rateDecimals) = _calculateKpiLinkedInterestRate(couponFor_.coupon);
+        couponFor_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
     }
 
     function _calculateKpiLinkedInterestRate(
@@ -113,21 +128,6 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
         }
 
         return (rate, kpiLinkedRateStorage.rateDecimals);
-    }
-
-    function _updateCouponRate(
-        uint256 _couponID,
-        IBondRead.Coupon memory _coupon,
-        uint256 _rate,
-        uint8 _rateDecimals
-    ) internal virtual {
-        bytes32 actionId = _getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
-
-        _coupon.rate = _rate;
-        _coupon.rateDecimals = _rateDecimals;
-        _coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
-
-        _updateCorporateActionData(actionId, abi.encode(_coupon));
     }
 
     function _previousRate() internal view returns (uint256) {

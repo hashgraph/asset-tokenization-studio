@@ -9,6 +9,7 @@ interface IFixedRate {
 
     event RateUpdated(address indexed operator, uint256 newRate, uint8 newRateDecimals);
 
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_FixedRate(FixedRateData calldata _initData) external;
 
     function setRate(uint256 _newRate, uint8 _newRateDecimals) external;
