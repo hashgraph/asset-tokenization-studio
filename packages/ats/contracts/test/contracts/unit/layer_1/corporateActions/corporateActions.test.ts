@@ -87,6 +87,7 @@ describe("Corporate Actions Tests", () => {
     expect(listMembersByType.length).to.equal(listCountByType);
     expect(listMembersByType[0]).to.equal(corporateActionId_1);
     expect(corporateAction[0].toUpperCase()).to.equal(actionType.toUpperCase());
-    expect(corporateAction[1].toUpperCase()).to.equal(actionData.toUpperCase());
+    expect(corporateAction[1]).to.equal(BigInt(listMembersByType[0]));
+    expect(corporateAction[2].toUpperCase()).to.equal(actionData.toUpperCase());
   });
 });

@@ -165,12 +165,9 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
 
         couponAmountFor_.recordDateReached = true;
 
-        couponAmountFor_.numerator =
-            couponFor.tokenBalance *
-            bondDetails.nominalValue *
-            couponFor.coupon.rate *
-            couponFor.coupon.endDate -
-            couponFor.coupon.startDate;
+        uint256 period = couponFor.coupon.endDate - couponFor.coupon.startDate;
+
+        couponAmountFor_.numerator = couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period;
         couponAmountFor_.denominator =
             10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
             365 days;
