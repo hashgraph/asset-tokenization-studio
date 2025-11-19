@@ -2,9 +2,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IFixedRate {
+    struct FixedRateData {
+        uint256 rate;
+        uint8 rateDecimals;
+    }
+
     event RateUpdated(address indexed operator, uint256 newRate, uint8 newRateDecimals);
 
-    function initialize_FixedRate(uint256 _initialRate, uint8 _initialRateDecimals) external;
+    function initialize_FixedRate(FixedRateData calldata _initData) external;
 
     function setRate(uint256 _newRate, uint8 _newRateDecimals) external;
 

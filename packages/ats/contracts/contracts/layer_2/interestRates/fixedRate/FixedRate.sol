@@ -7,10 +7,9 @@ import { _INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
 
 contract FixedRate is IFixedRate, Common {
     function initialize_FixedRate(
-        uint256 _initialRate,
-        uint8 _initialRateDecimals
+        FixedRateData calldata _initData
     ) external override onlyUninitialized(_erc1410BasicStorage().initialized) {
-        _setRate(_initialRate, _initialRateDecimals);
+        _setRate(_initData.rate, _initData.rateDecimals);
         _fixedRateStorage().initialized = true;
     }
 

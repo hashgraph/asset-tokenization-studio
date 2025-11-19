@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-19T10:03:32.774Z
+ * Generated: 2025-11-19T13:46:51.881Z
  * Facets: 54
  * Infrastructure: 2
  *
@@ -1579,7 +1579,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["FixedRate", "IStaticFunctionSelectors"],
     methods: [
       { name: "getRate", signature: "getRate()", selector: "0x679aefce" },
-      { name: "initialize_FixedRate", signature: "initialize_FixedRate(uint256,uint8)", selector: "0x8abf9e78" },
+      { name: "initialize_FixedRate", signature: "initialize_FixedRate(FixedRateData)", selector: "0xc6acf7e3" },
       { name: "setRate", signature: "setRate(uint256,uint8)", selector: "0xd1923502" },
     ],
     events: [
@@ -2360,9 +2360,15 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
 
   Factory: {
     name: "Factory",
-    inheritance: ["IFactory", "LocalContext"],
+    inheritance: ["IFactory", "Common"],
     methods: [
       { name: "deployBond", signature: "deployBond(BondData,FactoryRegulationData)", selector: "0x5010503b" },
+      { name: "deployBondFixedRate", signature: "deployBondFixedRate(BondFixedRateData)", selector: "0xfa4cb8bd" },
+      {
+        name: "deployBondKpiLinkedRate",
+        signature: "deployBondKpiLinkedRate(BondKpiLinkedRateData)",
+        selector: "0x39293807",
+      },
       { name: "deployEquity", signature: "deployEquity(EquityData,FactoryRegulationData)", selector: "0x7c03575b" },
       {
         name: "getAppliedRegulationData",
