@@ -8,7 +8,9 @@ Welcome to the Asset Tokenization Studio (ATS)! This tutorial will walk you thro
 
 ## Quick Links
 
-- **For a visual quick-start guide**: See the [Official ATS Documentation](https://docs.hedera.com/hedera/open-source-solutions/asset-tokenization-studio-ats/web-user-interface-ui) (with screenshots)
+- **For the full Documentation**: See the [Official ATS Documentation on the Hedera Website](https://docs.hedera.com/hedera/open-source-solutions/asset-tokenization-studio-ats)
+- **For a visual quick-start guide**: See the [UI Walkthrough on the Hedera Website](https://docs.hedera.com/hedera/open-source-solutions/asset-tokenization-studio-ats/web-user-interface-ui) (with screenshots)
+- **For the Video Tutorial**: See the [ATS UI Tutorial on the Hedera Youtube Channel](https://www.youtube.com/watch?v=U3_Btg663Rs)
 - **Need help?** Check the [Troubleshooting](#10-troubleshooting) section
 
 ## Table of Contents
