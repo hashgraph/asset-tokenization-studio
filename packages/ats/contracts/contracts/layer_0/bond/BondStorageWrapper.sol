@@ -16,8 +16,12 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     struct BondDataStorage {
-        IBondRead.BondDetailsData bondDetail;
+        bytes3 currency;
+        uint256 nominalValue;
+        uint256 startingDate;
+        uint256 maturityDate;
         bool initialized;
+        uint8 nominalValueDecimals;
     }
 
     /**
@@ -32,7 +36,11 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     }
 
     function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal {
-        _bondStorage().bondDetail = _bondDetails;
+        _bondStorage().currency = _bondDetails.currency;
+        _bondStorage().nominalValue = _bondDetails.nominalValue;
+        _bondStorage().nominalValueDecimals = _bondDetails.nominalValueDecimals;
+        _bondStorage().startingDate = _bondDetails.startingDate;
+        _bondStorage().maturityDate = _bondDetails.maturityDate;
     }
 
     function _setCoupon(
@@ -62,16 +70,22 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
      * @return success_ True if the maturity date was set successfully.
      */
     function _setMaturityDate(uint256 _maturityDate) internal returns (bool success_) {
-        _bondStorage().bondDetail.maturityDate = _maturityDate;
+        _bondStorage().maturityDate = _maturityDate;
         return true;
     }
 
     function _getBondDetails() internal view returns (IBondRead.BondDetailsData memory bondDetails_) {
-        bondDetails_ = _bondStorage().bondDetail;
+        bondDetails_ = IBondRead.BondDetailsData({
+            currency: _bondStorage().currency,
+            nominalValue: _bondStorage().nominalValue,
+            nominalValueDecimals: _bondStorage().nominalValueDecimals,
+            startingDate: _bondStorage().startingDate,
+            maturityDate: _bondStorage().maturityDate
+        });
     }
 
     function _getMaturityDate() internal view returns (uint256 maturityDate_) {
-        return _bondStorage().bondDetail.maturityDate;
+        return _bondStorage().maturityDate;
     }
 
     function _getCoupon(uint256 _couponID) internal view returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
