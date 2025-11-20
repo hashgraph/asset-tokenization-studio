@@ -2,4 +2,4 @@
 "@hashgraph/asset-tokenization-contracts": minor
 ---
 
-Bond and Equity sotrage layout updated to avoid breaking change and inconsistency with previous versions
+Bond and Equity storage layout updated to avoid breaking change and inconsistency with previous versions
