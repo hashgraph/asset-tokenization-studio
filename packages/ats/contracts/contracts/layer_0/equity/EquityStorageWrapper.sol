@@ -19,12 +19,32 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     struct EquityDataStorage {
-        IEquity.EquityDetailsData equityDetailsData;
+        bool votingRight;
+        bool informationRight;
+        bool liquidationRight;
+        bool subscriptionRight;
+        bool conversionRight;
+        bool redemptionRight;
+        bool putRight;
+        IEquity.DividendType dividendRight;
+        bytes3 currency;
+        uint256 nominalValue;
         bool initialized;
+        uint8 nominalValueDecimals;
     }
 
     function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal {
-        _equityStorage().equityDetailsData = _equityDetailsData;
+        _equityStorage().votingRight = _equityDetailsData.votingRight;
+        _equityStorage().informationRight = _equityDetailsData.informationRight;
+        _equityStorage().liquidationRight = _equityDetailsData.liquidationRight;
+        _equityStorage().subscriptionRight = _equityDetailsData.subscriptionRight;
+        _equityStorage().conversionRight = _equityDetailsData.conversionRight;
+        _equityStorage().redemptionRight = _equityDetailsData.redemptionRight;
+        _equityStorage().putRight = _equityDetailsData.putRight;
+        _equityStorage().dividendRight = _equityDetailsData.dividendRight;
+        _equityStorage().currency = _equityDetailsData.currency;
+        _equityStorage().nominalValue = _equityDetailsData.nominalValue;
+        _equityStorage().nominalValueDecimals = _equityDetailsData.nominalValueDecimals;
     }
 
     function _setDividends(
@@ -97,7 +117,19 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     }
 
     function _getEquityDetails() internal view returns (IEquity.EquityDetailsData memory equityDetails_) {
-        equityDetails_ = _equityStorage().equityDetailsData;
+        equityDetails_ = IEquity.EquityDetailsData({
+            votingRight: _equityStorage().votingRight,
+            informationRight: _equityStorage().informationRight,
+            liquidationRight: _equityStorage().liquidationRight,
+            subscriptionRight: _equityStorage().subscriptionRight,
+            conversionRight: _equityStorage().conversionRight,
+            redemptionRight: _equityStorage().redemptionRight,
+            putRight: _equityStorage().putRight,
+            dividendRight: _equityStorage().dividendRight,
+            currency: _equityStorage().currency,
+            nominalValue: _equityStorage().nominalValue,
+            nominalValueDecimals: _equityStorage().nominalValueDecimals
+        });
     }
 
     /**
