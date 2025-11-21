@@ -114,8 +114,12 @@ export interface DeploymentCheckpoint {
     blr?: DeployedContract & {
       /** Implementation address */
       implementation: string;
+      /** Hedera Contract ID for implementation (if deployed on Hedera network) */
+      implementationContractId?: string;
       /** Proxy address */
       proxy: string;
+      /** Hedera Contract ID for proxy (if deployed on Hedera network) */
+      proxyContractId?: string;
       /** Whether BLR is external (existingBlr workflow) */
       isExternal?: boolean;
     };
@@ -141,8 +145,12 @@ export interface DeploymentCheckpoint {
     factory?: DeployedContract & {
       /** Implementation address */
       implementation: string;
+      /** Hedera Contract ID for implementation (if deployed on Hedera network) */
+      implementationContractId?: string;
       /** Proxy address */
       proxy: string;
+      /** Hedera Contract ID for proxy (if deployed on Hedera network) */
+      proxyContractId?: string;
     };
   };
 
