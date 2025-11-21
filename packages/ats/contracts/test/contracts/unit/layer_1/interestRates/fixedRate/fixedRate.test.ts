@@ -4,18 +4,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { type ResolverProxy, Pause, FixedRate } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondFixedRateTokenFixture } from "@test";
+import { DEFAULT_BOND_FIXED_RATE_PARAMS, deployBondFixedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
 
-const numberOfUnits = 1000;
-const _amount = numberOfUnits;
-const _PARTITION_ID = "0x0000000000000000000000000000000000000000000000000000000000000002";
-
-interface _Adjustment {
-  executionDate: string;
-  factor: number;
-  decimals: number;
-}
 
 describe("Fixed Rate Tests", () => {
   let diamond: ResolverProxy;
@@ -77,17 +68,24 @@ describe("Fixed Rate Tests", () => {
     });
   });
 
-  /*describe("New Interest Rate OK", () => {
+  describe("New Interest Rate OK", () => {
     it("GIVEN a token WHEN setFixedRate THEN transaction succeeds", async () => {
-      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_C.address);
+      const newRate = 355;
+      const newRateDecimals = 3;
 
-      await expect(capFacet.connect(signer_C).setMaxSupply(maxSupply * 4))
-        .to.emit(capFacet, "MaxSupplySet")
-        .withArgs(signer_C.address, maxSupply * 4, maxSupply * 2);
+      const oldRateValues = await fixedRateFacet.getRate();
 
-      const currentMaxSupply = await capFacet.getMaxSupply();
+      await expect(fixedRateFacet.connect(signer_A).setRate(newRate, newRateDecimals))
+        .to.emit(fixedRateFacet, "RateUpdated")
+        .withArgs(signer_A.address, newRate, newRateDecimals);
 
-      expect(currentMaxSupply).to.equal(maxSupply * 4);
+      const newRateValues = await fixedRateFacet.getRate();
+
+      expect(oldRateValues.rate_).to.equal(DEFAULT_BOND_FIXED_RATE_PARAMS.rate);
+      expect(oldRateValues.decimals_).to.equal(DEFAULT_BOND_FIXED_RATE_PARAMS.rateDecimals);
+      expect(newRateValues.rate_).to.equal(newRate);
+      expect(newRateValues.decimals_).to.equal(newRateDecimals);
+
     });
-  });*/
+  });
 });
