@@ -33,8 +33,9 @@ describe("Checkpoint Utilities", () => {
           blr: {
             address: "0x2222222222222222222222222222222222222222",
             implementation: "0x2222222222222222222222222222222222222221",
+            implementationContractId: "0.0.2221",
             proxy: "0x2222222222222222222222222222222222222222",
-            contractId: "0.0.2222",
+            proxyContractId: "0.0.2222",
             txHash: "0xdef456",
             deployedAt: "2025-11-08T10:02:00.000Z",
           },
@@ -78,8 +79,9 @@ describe("Checkpoint Utilities", () => {
           factory: {
             address: "0x5555555555555555555555555555555555555555",
             implementation: "0x5555555555555555555555555555555555555554",
+            implementationContractId: "0.0.5554",
             proxy: "0x5555555555555555555555555555555555555555",
-            contractId: "0.0.5555",
+            proxyContractId: "0.0.5555",
             txHash: "0xstu901",
             gasUsed: "800000",
             deployedAt: "2025-11-08T10:14:00.000Z",
@@ -99,12 +101,14 @@ describe("Checkpoint Utilities", () => {
       expect(output.infrastructure.proxyAdmin.contractId).to.equal("0.0.1111");
 
       expect(output.infrastructure.blr.implementation).to.equal("0x2222222222222222222222222222222222222221");
+      expect(output.infrastructure.blr.implementationContractId).to.equal("0.0.2221");
       expect(output.infrastructure.blr.proxy).to.equal("0x2222222222222222222222222222222222222222");
-      expect(output.infrastructure.blr.contractId).to.equal("0.0.2222");
+      expect(output.infrastructure.blr.proxyContractId).to.equal("0.0.2222");
 
       expect(output.infrastructure.factory.implementation).to.equal("0x5555555555555555555555555555555555555554");
+      expect(output.infrastructure.factory.implementationContractId).to.equal("0.0.5554");
       expect(output.infrastructure.factory.proxy).to.equal("0x5555555555555555555555555555555555555555");
-      expect(output.infrastructure.factory.contractId).to.equal("0.0.5555");
+      expect(output.infrastructure.factory.proxyContractId).to.equal("0.0.5555");
 
       // Facets
       expect(output.facets).to.have.lengthOf(2);
