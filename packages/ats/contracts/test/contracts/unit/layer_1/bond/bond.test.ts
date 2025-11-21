@@ -14,7 +14,6 @@ import {
   IHold,
   ControlList,
   ClearingActionsFacet,
-  ProtectedPartitions,
   FreezeFacet,
   ClearingTransferFacet,
   BondUSAReadFacet,
@@ -80,7 +79,6 @@ describe("Bond Tests", () => {
   let ssiManagementFacet: SsiManagement;
   let controlListFacet: ControlList;
   let clearingActionsFacet: ClearingActionsFacet;
-  let protectedPartitionsFacet: ProtectedPartitions;
   let freezeFacet: FreezeFacet;
   let clearingTransferFacet: ClearingTransferFacet;
   let erc3643Facet: IERC3643;
@@ -159,7 +157,7 @@ describe("Bond Tests", () => {
 
     controlListFacet = await ethers.getContractAt("ControlList", diamond.address, signer_D);
     clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
-    protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.address, signer_A);
+
     freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address, signer_A);
     clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.address, signer_A);
 
