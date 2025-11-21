@@ -31,6 +31,7 @@ describe("DiamondCutManager", () => {
   let pause: Pause;
   let equityFacetIdList: string[] = [];
   let bondFacetIdList: string[] = [];
+  let bondFixedRateFacetIdList: string[] = [];
   let equityFacetVersionList: number[] = [];
 
   before(async () => {
@@ -49,6 +50,7 @@ describe("DiamondCutManager", () => {
     diamondCutManager = await ethers.getContractAt("DiamondCutManager", businessLogicResolver.address, signer_A);
     equityFacetIdList = Object.values(infrastructure.equityFacetKeys);
     bondFacetIdList = Object.values(infrastructure.bondFacetKeys);
+    bondFixedRateFacetIdList = Object.values(infrastructure.bondFixedRateFacetKeys);
     equityFacetVersionList = Array(equityFacetIdList.length).fill(1);
   });
 
@@ -251,7 +253,13 @@ describe("DiamondCutManager", () => {
     expect(facetAddresses).to.have.members(facetAddresses_2);
 
     const expectedFacetIdList =
-      configId === EQUITY_CONFIG_ID ? equityFacetIdList : configId === BOND_CONFIG_ID ? bondFacetIdList : null;
+      configId === EQUITY_CONFIG_ID
+        ? equityFacetIdList
+        : configId === BOND_CONFIG_ID
+          ? bondFacetIdList
+          : configId == BOND_FIXED_RATE_CONFIG_ID
+            ? bondFixedRateFacetIdList
+            : null;
 
     if (!expectedFacetIdList) {
       expect.fail("Unknown configId");
@@ -422,7 +430,7 @@ describe("DiamondCutManager", () => {
     const originalDiamondCutManager = diamondCutManager;
     diamondCutManager = batchDiamondCutManager;
 
-    for (const configId of [EQUITY_CONFIG_ID, BOND_CONFIG_ID]) {
+    for (const configId of [EQUITY_CONFIG_ID, BOND_CONFIG_ID, BOND_FIXED_RATE_CONFIG_ID]) {
       const configLatestVersion = (await batchDiamondCutManager.getLatestVersionByConfiguration(configId)).toNumber();
       expect(configLatestVersion).to.equal(0);
 

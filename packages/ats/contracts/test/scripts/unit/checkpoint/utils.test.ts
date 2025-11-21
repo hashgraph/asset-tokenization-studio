@@ -131,6 +131,11 @@ describe("Checkpoint Utilities", () => {
       );
       expect(output.configurations.bond.version).to.equal(1);
       expect(output.configurations.bond.facetCount).to.equal(43);
+      expect(output.configurations.bondFixedRate.configId).to.equal(
+        "0x0000000000000000000000000000000000000000000000000000000000000003",
+      );
+      expect(output.configurations.bondFixedRate.version).to.equal(1);
+      expect(output.configurations.bondFixedRate.facetCount).to.equal(44);
 
       // Summary
       expect(output.summary.totalContracts).to.equal(5); // ProxyAdmin + BLR + Factory + 2 facets
@@ -217,6 +222,12 @@ describe("Checkpoint Utilities", () => {
               version: 1,
               facetCount: 0,
               txHash: "0xpqr678",
+            },
+            bondFixedRate: {
+              configId: "0x0000000000000000000000000000000000000000000000000000000000000003",
+              version: 1,
+              facetCount: 0,
+              txHash: "0xabc789",
             },
           },
         },
