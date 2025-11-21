@@ -1,10 +1,10 @@
 import { ethers } from "ethers";
-import type { IFactory, ResolverProxy } from "@contract-types";
+import type { ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
 import {
   ATS_ROLES,
-  BOND_CONFIG_ID,
+  BOND_FIXED_RATE_CONFIG_ID,
   DeployBondFromFactoryParams,
   FactoryRegulationDataParams,
   Rbac,
@@ -14,8 +14,7 @@ import {
 // Types
 // ============================================================================
 
-
-export interface FixedRateParams{
+export interface FixedRateParams {
   rate: number;
   rateDecimals: number;
 }
@@ -56,7 +55,7 @@ export interface FixedRateParams{
 export async function deployBondFixedRateFromFactory(
   bondDataParams: DeployBondFromFactoryParams,
   regulationTypeParams: FactoryRegulationDataParams,
-  fixedRate: FixedRateParams
+  fixedRate: FixedRateParams,
 ): Promise<ResolverProxy> {
   const {
     factory,
@@ -67,10 +66,7 @@ export async function deployBondFixedRateFromFactory(
     proceedRecipientsData,
   } = bondDataParams;
 
-  const {
-    rate,
-    rateDecimals,
-  } = fixedRate
+  const { rate, rateDecimals } = fixedRate;
 
   // Build RBAC array with admin
   const rbacs: Rbac[] = [
@@ -83,7 +79,7 @@ export async function deployBondFixedRateFromFactory(
 
   // Build resolver proxy configuration
   const resolverProxyConfiguration = {
-    key: BOND_CONFIG_ID,
+    key: BOND_FIXED_RATE_CONFIG_ID,
     version: 1,
   };
 
@@ -144,13 +140,13 @@ export async function deployBondFixedRateFromFactory(
   const fixedRateData = {
     rate: rate,
     rateDecimals: rateDecimals,
-  }
+  };
 
   const bondFixedRateData = {
     bondData: bondData,
     factoryRegulationData: factoryRegulationData,
     fixedRateData: fixedRateData,
-  }
+  };
 
   // Deploy bond token via factory
   const tx = await factory.deployBondFixedRate(bondFixedRateData, {

@@ -118,7 +118,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
     summary: {
       totalContracts: 3 + steps.facets.size, // ProxyAdmin + BLR + Factory + facets
       totalFacets: steps.facets.size,
-      totalConfigurations: 2,
+      totalConfigurations: 3,
       deploymentTime: endTime - start,
       gasUsed: totalGasUsed.toString(),
       success: checkpoint.status === "completed",
@@ -199,7 +199,7 @@ export function getStepName(step: number, workflowType: "newBlr" | "existingBlr"
  * @returns Total number of steps
  */
 export function getTotalSteps(workflowType: "newBlr" | "existingBlr" = "newBlr"): number {
-  return workflowType === "newBlr" ? 7 : 6;
+  return workflowType === "newBlr" ? 8 : 7;
 }
 
 /**

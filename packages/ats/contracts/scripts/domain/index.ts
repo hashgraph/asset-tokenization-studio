@@ -42,7 +42,6 @@ export * from "./factory/deployEquityToken";
 export * from "./factory/deployBondToken";
 export * from "./factory/deployBondFixedRateToken";
 
-
 // Equity configuration
 export * from "./equity/createConfiguration";
 

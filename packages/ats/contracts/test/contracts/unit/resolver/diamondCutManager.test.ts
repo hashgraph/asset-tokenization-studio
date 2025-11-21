@@ -10,7 +10,7 @@ import {
   IDiamondCutManager,
   IDiamondLoupe,
 } from "@contract-types";
-import { ATS_ROLES, BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
+import { ATS_ROLES, BOND_CONFIG_ID, BOND_FIXED_RATE_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
 import { deployAtsInfrastructureFixture } from "@test";
 
 // Test-specific configuration IDs for negative test cases
@@ -263,10 +263,10 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN reading configuration information THEN everything matches", async () => {
     const configLength = (await diamondCutManager.getConfigurationsLength()).toNumber();
-    expect(configLength).to.equal(2);
+    expect(configLength).to.equal(3);
 
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
-    expect(configIds).to.have.members([EQUITY_CONFIG_ID, BOND_CONFIG_ID]);
+    expect(configIds).to.have.members([EQUITY_CONFIG_ID, BOND_CONFIG_ID, BOND_FIXED_RATE_CONFIG_ID]);
 
     for (const configId of configIds) {
       const configLatestVersion = (await diamondCutManager.getLatestVersionByConfiguration(configId)).toNumber();

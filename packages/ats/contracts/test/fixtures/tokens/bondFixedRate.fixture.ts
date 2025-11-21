@@ -9,7 +9,7 @@ import {
 import { DeployBondFromFactoryParams, FixedRateParams, deployBondFixedRateFromFactory } from "@scripts/domain";
 import { FactoryRegulationDataParams } from "@scripts/domain";
 import { getRegulationData, getSecurityData } from "./common.fixture";
-import {getBondDetails} from "./bond.fixture";
+import { getBondDetails } from "./bond.fixture";
 import { getDltTimestamp } from "@test";
 
 /**
@@ -26,7 +26,7 @@ export const DEFAULT_BOND_FIXED_RATE_PARAMS = {
     return (await getDltTimestamp()) + 3600; //block.timestamp + 1 hour
   },
   rate: 50,
-  rateDecimals: 1
+  rateDecimals: 1,
 } as const;
 
 /**
@@ -69,14 +69,15 @@ export async function deployBondFixedRateTokenFixture({
         ...((bondDataParams?.proceedRecipients as string[]) ?? DEFAULT_BOND_FIXED_RATE_PARAMS.proceedRecipients),
       ],
       proceedRecipientsData: [
-        ...((bondDataParams?.proceedRecipientsData as string[]) ?? DEFAULT_BOND_FIXED_RATE_PARAMS.proceedRecipientsData),
+        ...((bondDataParams?.proceedRecipientsData as string[]) ??
+          DEFAULT_BOND_FIXED_RATE_PARAMS.proceedRecipientsData),
       ],
     },
     getRegulationData(regulationTypeParams),
     {
       rate: fixedRateParams?.rate ?? DEFAULT_BOND_FIXED_RATE_PARAMS.rate,
       rateDecimals: fixedRateParams?.rateDecimals ?? DEFAULT_BOND_FIXED_RATE_PARAMS.rateDecimals,
-    }
+    },
   );
 
   // Connect commonly used facets to diamond

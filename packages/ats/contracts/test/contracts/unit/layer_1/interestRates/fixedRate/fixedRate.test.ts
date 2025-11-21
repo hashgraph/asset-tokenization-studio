@@ -1,35 +1,23 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import {
-  type ResolverProxy,
-  type IERC1410,
-  AccessControl,
-  Pause,
-  Kyc,
-  SsiManagement,
-  Bond,
-  Snapshots,
-  TimeTravelFacet,
-  FixedRate,
-} from "@contract-types";
-import { ZERO, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
+import { type ResolverProxy, Pause, FixedRate } from "@contract-types";
+import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondFixedRateTokenFixture, MAX_UINT256 } from "@test";
+import { deployBondFixedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
 
 const numberOfUnits = 1000;
-const amount = numberOfUnits;
+const _amount = numberOfUnits;
 const _PARTITION_ID = "0x0000000000000000000000000000000000000000000000000000000000000002";
 
-
-interface Adjustment {
+interface _Adjustment {
   executionDate: string;
   factor: number;
   decimals: number;
 }
 
-describe.only("Fixed Rate Tests", () => {
+describe("Fixed Rate Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: SignerWithAddress;
   let signer_B: SignerWithAddress;
@@ -37,7 +25,6 @@ describe.only("Fixed Rate Tests", () => {
 
   let fixedRateFacet: FixedRate;
   let pauseFacet: Pause;
-  let bondFacet: Bond;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployBondFixedRateTokenFixture();
@@ -59,16 +46,16 @@ describe.only("Fixed Rate Tests", () => {
 
     fixedRateFacet = await ethers.getContractAt("FixedRate", diamond.address, signer_A);
     pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
-    bondFacet = await ethers.getContractAt("Bond", diamond.address, signer_A);
   }
 
   beforeEach(async () => {
     await loadFixture(deploySecurityFixtureMultiPartition);
   });
 
-
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(fixedRateFacet.initialize_FixedRate({rate: 1, rateDecimals: 0})).to.be.rejectedWith("AlreadyInitialized");
+    await expect(fixedRateFacet.initialize_FixedRate({ rate: 1, rateDecimals: 0 })).to.be.rejectedWith(
+      "AlreadyInitialized",
+    );
   });
 
   describe("Paused", () => {
@@ -81,7 +68,6 @@ describe.only("Fixed Rate Tests", () => {
       // transfer with data fails
       await expect(fixedRateFacet.connect(signer_A).setRate(1, 2)).to.be.rejectedWith("TokenIsPaused");
     });
-
   });
 
   describe("AccessControl", () => {
@@ -90,7 +76,6 @@ describe.only("Fixed Rate Tests", () => {
       await expect(fixedRateFacet.connect(signer_C).setRate(1, 2)).to.be.rejectedWith("AccountHasNoRole");
     });
   });
-
 
   /*describe("New Interest Rate OK", () => {
     it("GIVEN a token WHEN setFixedRate THEN transaction succeeds", async () => {
@@ -105,5 +90,4 @@ describe.only("Fixed Rate Tests", () => {
       expect(currentMaxSupply).to.equal(maxSupply * 4);
     });
   });*/
-
 });
