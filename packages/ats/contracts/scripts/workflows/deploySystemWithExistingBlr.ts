@@ -64,14 +64,16 @@ export interface DeploymentWithExistingBlrOutput {
     };
     blr: {
       implementation: string;
+      implementationContractId?: string;
       proxy: string;
-      contractId?: string;
+      proxyContractId?: string;
       isExternal: true; // Marker to indicate BLR was not deployed here
     };
     factory: {
       implementation: string;
+      implementationContractId?: string;
       proxy: string;
-      contractId?: string;
+      proxyContractId?: string;
     };
   };
 
@@ -155,6 +157,9 @@ export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
 
   /** Enable post-deployment bytecode verification (default: from network config) */
   verifyDeployment?: boolean;
+
+  /** Existing BLR implementation address (optional, for documentation) */
+  existingBlrImplementation?: string;
 }
 
 /**
@@ -351,7 +356,7 @@ export async function deploySystemWithExistingBlr(
     if (!checkpoint.steps.blr) {
       checkpoint.steps.blr = {
         address: blrAddress,
-        implementation: "N/A (External BLR)",
+        implementation: options.existingBlrImplementation || "N/A (External BLR)",
         proxy: blrAddress,
         txHash: "",
         deployedAt: new Date().toISOString(),
@@ -707,16 +712,20 @@ export async function deploySystemWithExistingBlr(
           contractId: await getContractId(proxyAdmin.address),
         },
         blr: {
-          implementation: "N/A (External BLR)",
+          implementation: options.existingBlrImplementation || "N/A (External BLR)",
+          implementationContractId: options.existingBlrImplementation
+            ? await getContractId(options.existingBlrImplementation)
+            : undefined,
           proxy: blrAddress,
-          contractId: await getContractId(blrAddress),
+          proxyContractId: await getContractId(blrAddress),
           isExternal: true,
         },
         factory: factoryResult
           ? {
               implementation: factoryResult.implementationAddress,
+              implementationContractId: await getContractId(factoryResult.implementationAddress),
               proxy: factoryResult.factoryAddress,
-              contractId: await getContractId(factoryResult.factoryAddress),
+              proxyContractId: await getContractId(factoryResult.factoryAddress),
             }
           : {
               implementation: "N/A (Not deployed)",
