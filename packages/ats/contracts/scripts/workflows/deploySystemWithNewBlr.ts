@@ -39,7 +39,13 @@ import {
   convertCheckpointFacets,
   isSuccess,
 } from "@scripts/infrastructure";
-import { atsRegistry, deployFactory, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
+import {
+  atsRegistry,
+  deployFactory,
+  createEquityConfiguration,
+  createBondConfiguration,
+  createBondFixedRateConfiguration,
+} from "@scripts/domain";
 
 import { promises as fs } from "fs";
 import { dirname } from "path";
@@ -106,6 +112,16 @@ export interface DeploymentOutput {
         address: string;
       }>;
     };
+    bondFixedRate: {
+      configId: string;
+      version: number;
+      facetCount: number;
+      facets: Array<{
+        facetName: string;
+        key: string;
+        address: string;
+      }>;
+    };
   };
 
   /** Deployment summary */
@@ -130,6 +146,13 @@ export interface DeploymentOutput {
 
     /** Get only bond-specific facets for testing */
     getBondFacets(): Array<{
+      name: string;
+      address: string;
+      contractId?: string;
+      key: string;
+    }>;
+
+    getBondFixedRateFacets(): Array<{
       name: string;
       address: string;
       contractId?: string;
@@ -613,7 +636,52 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
-    // Step 6: Deploy Factory
+    // Step 6: Create Bond Fixed Rate configuration
+    let bondFixedRateConfig: Awaited<ReturnType<typeof createBondFixedRateConfiguration>>;
+
+    if (checkpoint.steps.configurations?.bondFixedRate && checkpoint.currentStep >= 5) {
+      info("\n✓ Step 6/7: Bond FixedRate configuration already created (resuming)");
+      const bondFixedRateConfigData = checkpoint.steps.configurations.bondFixedRate;
+      info(`✅ Bond FixedRate Config ID: ${bondFixedRateConfigData.configId}`);
+      info(`✅ Bond FixedRate Version: ${bondFixedRateConfigData.version}`);
+      info(`✅ Bond FixedRate Facets: ${bondFixedRateConfigData.facetCount}`);
+
+      // Use converter to reconstruct full ConfigurationData from checkpoint
+      bondFixedRateConfig = toConfigurationData(bondFixedRateConfigData);
+    } else {
+      info("\n🏦 Step 6/7: Creating Bond FixedRate FixedRateconfiguration...");
+
+      bondFixedRateConfig = await createBondFixedRateConfiguration(
+        blrContract,
+        facetAddresses,
+        useTimeTravel,
+        partialBatchDeploy,
+        batchSize,
+        confirmations,
+      );
+
+      if (!bondFixedRateConfig.success) {
+        throw new Error(
+          `Bond FixedRate config creation failed: ${bondFixedRateConfig.error} - ${bondFixedRateConfig.message}`,
+        );
+      }
+
+      info(`✅ Bond FixedRate Config ID: ${bondFixedRateConfig.data.configurationId}`);
+      info(`✅ Bond FixedRate Version: ${bondFixedRateConfig.data.version}`);
+      info(`✅ Bond FixedRate Facets: ${bondFixedRateConfig.data.facetKeys.length}`);
+
+      // Save checkpoint
+      checkpoint.steps.configurations!.bondFixedRate = {
+        configId: bondFixedRateConfig.data.configurationId,
+        version: bondFixedRateConfig.data.version,
+        facetCount: bondFixedRateConfig.data.facetKeys.length,
+        txHash: "", // createBondFixedRateConfiguration doesn't return tx hash currently
+      };
+      checkpoint.currentStep = 5;
+      await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    // Step 7: Deploy Factory
     let factoryResult: Awaited<ReturnType<typeof deployFactory>>;
 
     if (checkpoint.steps.factory && checkpoint.currentStep >= 6) {
@@ -702,12 +770,15 @@ export async function deploySystemWithNewBlr(
           const bondFacet = isSuccess(bondConfig)
             ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
             : undefined;
+          const bondFixedRateFacet = isSuccess(bondFixedRateConfig)
+            ? bondFixedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+            : undefined;
 
           return {
             name: facetName,
             address: facetAddress,
             contractId: await getContractId(facetAddress),
-            key: equityFacet?.key || bondFacet?.key || "",
+            key: equityFacet?.key || bondFacet?.key || bondFixedRateFacet?.key || "",
           };
         }),
       ),
@@ -739,12 +810,25 @@ export async function deploySystemWithNewBlr(
               facetCount: 0,
               facets: [],
             },
+        bondFixedRate: isSuccess(bondFixedRateConfig)
+          ? {
+              configId: bondFixedRateConfig.data.configurationId,
+              version: bondFixedRateConfig.data.version,
+              facetCount: bondFixedRateConfig.data.facetKeys.length,
+              facets: bondFixedRateConfig.data.facetKeys,
+            }
+          : {
+              configId: "",
+              version: 0,
+              facetCount: 0,
+              facets: [],
+            },
       },
 
       summary: {
         totalContracts: 3, // ProxyAdmin, BLR, Factory
         totalFacets: facetsResult.deployed.size,
-        totalConfigurations: 2, // Equity + Bond
+        totalConfigurations: 3, // Equity + Bond + BondFixedRate
         deploymentTime: Date.now() - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,
@@ -762,6 +846,12 @@ export async function deploySystemWithNewBlr(
           if (!isSuccess(bondConfig)) return [];
           const bondKeys = new Set(bondConfig.data.facetKeys.map((f) => f.key));
           return output.facets.filter((facet) => bondKeys.has(facet.key));
+        },
+        getBondFixedRateFacets() {
+          // Use type guard to safely access .data property
+          if (!isSuccess(bondFixedRateConfig)) return [];
+          const bondFixedRateKeys = new Set(bondFixedRateConfig.data.facetKeys.map((f) => f.key));
+          return output.facets.filter((facet) => bondFixedRateKeys.has(facet.key));
         },
       },
     };
