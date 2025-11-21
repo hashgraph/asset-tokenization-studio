@@ -45,7 +45,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
   if (!steps.facets || steps.facets.size === 0) {
     throw new Error("Checkpoint missing facet deployments");
   }
-  if (!steps.configurations?.equity || !steps.configurations?.bond) {
+  if (!steps.configurations?.equity || !steps.configurations?.bond || !steps.configurations?.bondFixedRate) {
     throw new Error("Checkpoint missing configurations");
   }
 
@@ -107,6 +107,12 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
         facetCount: steps.configurations.bond.facetCount,
         facets: [], // Will be populated in actual workflow
       },
+      bondFixedRate: {
+        configId: steps.configurations.bondFixedRate.configId,
+        version: steps.configurations.bondFixedRate.version,
+        facetCount: steps.configurations.bondFixedRate.facetCount,
+        facets: [], // Will be populated in actual workflow
+      },
     },
 
     summary: {
@@ -121,6 +127,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
     helpers: {
       getEquityFacets: () => [],
       getBondFacets: () => [],
+      getBondFixedRateFacets: () => [],
     },
   };
 }
@@ -156,6 +163,8 @@ export function getStepName(step: number, workflowType: "newBlr" | "existingBlr"
       case 5:
         return "Bond Configuration";
       case 6:
+        return "Bond Fixed Rate Configuration";
+      case 7:
         return "Factory";
       default:
         return `Unknown Step ${step}`;
@@ -174,6 +183,8 @@ export function getStepName(step: number, workflowType: "newBlr" | "existingBlr"
       case 4:
         return "Bond Configuration";
       case 5:
+        return "Bond Fixed Rate Configuration";
+      case 6:
         return "Factory";
       default:
         return `Unknown Step ${step}`;
