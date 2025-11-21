@@ -9,7 +9,7 @@ contract FixedRate is IFixedRate, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_FixedRate(
         FixedRateData calldata _initData
-    ) external override onlyUninitialized(_erc1410BasicStorage().initialized) {
+    ) external override onlyUninitialized(_fixedRateStorage().initialized) {
         _setRate(_initData.rate, _initData.rateDecimals);
         _fixedRateStorage().initialized = true;
     }
