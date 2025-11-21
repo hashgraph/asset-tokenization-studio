@@ -62,6 +62,8 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         (corporateActionId_, couponID_) = _addCorporateAction(COUPON_CORPORATE_ACTION_TYPE, data);
 
         _initCoupon(corporateActionId_, _newCoupon);
+
+        emit CouponSet(corporateActionId_, couponID_, _msgSender(), _newCoupon);
     }
 
     function _initCoupon(bytes32 _actionId, IBondRead.Coupon memory _newCoupon) internal virtual {

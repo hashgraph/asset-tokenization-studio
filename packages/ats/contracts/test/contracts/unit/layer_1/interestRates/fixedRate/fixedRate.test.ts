@@ -7,7 +7,6 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { DEFAULT_BOND_FIXED_RATE_PARAMS, deployBondFixedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
 
-
 describe("Fixed Rate Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: SignerWithAddress;
@@ -85,7 +84,6 @@ describe("Fixed Rate Tests", () => {
       expect(oldRateValues.decimals_).to.equal(DEFAULT_BOND_FIXED_RATE_PARAMS.rateDecimals);
       expect(newRateValues.rate_).to.equal(newRate);
       expect(newRateValues.decimals_).to.equal(newRateDecimals);
-
     });
   });
 });

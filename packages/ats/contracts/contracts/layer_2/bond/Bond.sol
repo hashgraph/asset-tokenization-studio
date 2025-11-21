@@ -68,7 +68,6 @@ abstract contract Bond is IBond, Common {
     {
         bytes32 corporateActionID;
         (corporateActionID, couponID_) = _setCoupon(_newCoupon);
-        emit CouponSet(corporateActionID, couponID_, _msgSender(), _newCoupon);
     }
 
     function updateMaturityDate(

@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-19T13:46:51.881Z
+ * Generated: 2025-11-21T13:22:30.092Z
  * Facets: 54
  * Infrastructure: 2
  *
@@ -245,7 +245,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
       { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
     ],
-    errors: [{ name: "interestRateIsFixed", signature: "interestRateIsFixed()", selector: "0x957df4ae" }],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new BondUSAFixedRateFacetTimeTravel__factory(signer) : new BondUSAFixedRateFacet__factory(signer),
   },
@@ -2459,7 +2459,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "BondStorageWrapperFixedInterestRate",
     inheritance: ["Common"],
     methods: [],
-    errors: [{ name: "interestRateIsFixed", signature: "interestRateIsFixed()", selector: "0x957df4ae" }],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
   },
 
   BondStorageWrapperKpiLinkedInterestRate: {

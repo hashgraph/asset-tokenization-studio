@@ -18,10 +18,12 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
     ) internal virtual override returns (bytes32 corporateActionId_, uint256 couponID_) {
-        if (_newCoupon.rateStatus != IBondRead.RateCalculationStatus.PENDING) revert interestRateIsKpiLinked();
+        if (
+            _newCoupon.rateStatus != IBondRead.RateCalculationStatus.PENDING ||
+            _newCoupon.rate != 0 ||
+            _newCoupon.rateDecimals != 0
+        ) revert interestRateIsKpiLinked();
 
-        _newCoupon.rate = 0;
-        _newCoupon.rateDecimals = 0;
         return super._setCoupon(_newCoupon);
     }
 
