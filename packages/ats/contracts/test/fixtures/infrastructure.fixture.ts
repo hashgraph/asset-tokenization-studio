@@ -102,7 +102,7 @@ export async function deployAtsInfrastructureFixture(
       },
       {} as Record<string, string>,
     ),
-    bondFixedRateFacetKeys: deployment.helpers.getBondFacets().reduce(
+    bondFixedRateFacetKeys: deployment.helpers.getBondFixedRateFacets().reduce(
       (acc, f) => {
         acc[f.name] = f.key;
         return acc;

@@ -135,7 +135,7 @@ describe("Checkpoint Utilities", () => {
         "0x0000000000000000000000000000000000000000000000000000000000000003",
       );
       expect(output.configurations.bondFixedRate.version).to.equal(1);
-      expect(output.configurations.bondFixedRate.facetCount).to.equal(44);
+      expect(output.configurations.bondFixedRate.facetCount).to.equal(47);
 
       // Summary
       expect(output.summary.totalContracts).to.equal(5); // ProxyAdmin + BLR + Factory + 2 facets
@@ -388,7 +388,7 @@ describe("Checkpoint Utilities", () => {
 
       expect(formatted).to.include("Checkpoint: hedera-testnet-1731085200000");
       expect(formatted).to.include("Status: in-progress");
-      expect(formatted).to.include("Step: 3/7 - Facets");
+      expect(formatted).to.include("Step: 3/8 - Facets");
       expect(formatted).to.include("Started: 2025-11-08T10:00:00.000Z");
       expect(formatted).to.include("Last Update: 2025-11-08T10:05:00.000Z");
       expect(formatted).to.not.include("Failed:");
@@ -456,7 +456,7 @@ describe("Checkpoint Utilities", () => {
 
       const formatted = formatCheckpointStatus(checkpoint);
 
-      expect(formatted).to.include("Step: 2/6 - Facets");
+      expect(formatted).to.include("Step: 2/7 - Facets");
     });
   });
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { TotalBalancesStorageWrapper } from "../totalBalances/totalBalancesStorageWrapper.sol";
+import { TotalBalancesStorageWrapper } from "../totalBalances/TotalBalancesStorageWrapper.sol";
 import {
     _PROCEED_RECIPIENTS_STORAGE_POSITION,
     _PROCEED_RECIPIENTS_DATA_STORAGE_POSITION
