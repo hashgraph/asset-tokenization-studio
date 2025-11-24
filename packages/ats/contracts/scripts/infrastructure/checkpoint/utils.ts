@@ -82,13 +82,15 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       },
       blr: {
         implementation: steps.blr.implementation,
+        implementationContractId: steps.blr.implementationContractId,
         proxy: steps.blr.proxy,
-        contractId: steps.blr.contractId,
+        proxyContractId: steps.blr.proxyContractId,
       },
       factory: {
         implementation: steps.factory.implementation,
+        implementationContractId: steps.factory.implementationContractId,
         proxy: steps.factory.proxy,
-        contractId: steps.factory.contractId,
+        proxyContractId: steps.factory.proxyContractId,
       },
     },
 

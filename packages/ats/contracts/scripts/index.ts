@@ -43,6 +43,7 @@ export * from "./infrastructure/networkConfig";
 // Infrastructure operations
 export * from "./infrastructure/operations/deployContract";
 export * from "./infrastructure/operations/deployProxy";
+export * from "./infrastructure/operations/transparentProxyDeployment";
 export * from "./infrastructure/operations/upgradeProxy";
 export * from "./infrastructure/operations/registerFacets";
 export * from "./infrastructure/operations/registerAdditionalFacets";
@@ -55,9 +56,13 @@ export * from "./infrastructure/operations/generateRegistryPipeline";
 
 // Infrastructure utilities
 export * from "./infrastructure/utils/validation";
+export * from "./infrastructure/utils/deploymentFiles";
+export * from "./infrastructure/utils/verification";
 export * from "./infrastructure/utils/transaction";
 export * from "./infrastructure/utils/logging";
 export * from "./infrastructure/utils/naming";
+export * from "./infrastructure/utils/hedera";
+export * from "./infrastructure/utils/selector";
 export * from "./infrastructure/utils/time";
 
 // Infrastructure checkpoint system (deployment resumability)
@@ -112,6 +117,7 @@ export * from "./domain/factory/deploy";
 
 // Token deployment from factory
 export * from "./domain/factory/deployEquityToken";
+export * from "./domain/factory/deployBondToken";
 
 // ========================================
 // Workflows

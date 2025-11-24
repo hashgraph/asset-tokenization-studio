@@ -72,13 +72,15 @@ export interface DeploymentOutput {
     };
     blr: {
       implementation: string;
+      implementationContractId?: string;
       proxy: string;
-      contractId?: string;
+      proxyContractId?: string;
     };
     factory: {
       implementation: string;
+      implementationContractId?: string;
       proxy: string;
-      contractId?: string;
+      proxyContractId?: string;
     };
   };
 
@@ -749,13 +751,15 @@ export async function deploySystemWithNewBlr(
         },
         blr: {
           implementation: blrResult.implementationAddress,
+          implementationContractId: await getContractId(blrResult.implementationAddress),
           proxy: blrResult.blrAddress,
-          contractId: await getContractId(blrResult.blrAddress),
+          proxyContractId: await getContractId(blrResult.blrAddress),
         },
         factory: {
           implementation: factoryResult.implementationAddress,
+          implementationContractId: await getContractId(factoryResult.implementationAddress),
           proxy: factoryResult.factoryAddress,
-          contractId: await getContractId(factoryResult.factoryAddress),
+          proxyContractId: await getContractId(factoryResult.factoryAddress),
         },
       },
 
