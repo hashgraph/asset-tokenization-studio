@@ -5,15 +5,15 @@ on:
   workflow_dispatch:
     inputs:
       dry-run-enabled:
-        description: 'Run npm publish with dry-run flag'
+        description: "Run npm publish with dry-run flag"
         required: false
         type: boolean
         default: false
       ref:
-        description: 'Branch/tag/commit to publish from'
+        description: "Branch/tag/commit to publish from"
         required: false
         type: string
-        default: 'main'
+        default: "main"
 
   # Release published trigger (GitHub release creation) - only for ATS releases (tags ending with -ats)
   release:
@@ -32,8 +32,8 @@ jobs:
   contracts:
     name: Publish ATS Contracts
     runs-on: token-studio-linux-large
-    # Only run if manual trigger OR release tag contains 'ats'/'ATS'
-    if: github.event_name == 'workflow_dispatch' || contains(github.ref_name, 'ats') || contains(github.ref_name, 'ATS')
+    # Only run if manual trigger OR release tag contains/ends with '-ats'/'-ATS'
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-ats-') || contains(github.ref_name, '-ATS-') || endsWith(github.ref_name, '-ats') || endsWith(github.ref_name, '-ATS') }}
     permissions:
       contents: read
       id-token: write
@@ -90,8 +90,8 @@ jobs:
   sdk:
     name: Publish ATS SDK
     runs-on: token-studio-linux-large
-    # Only run if manual trigger OR release tag contains 'ats'/'ATS'
-    if: github.event_name == 'workflow_dispatch' || contains(github.ref_name, 'ats') || contains(github.ref_name, 'ATS')
+    # Only run if manual trigger OR release tag contains/ends with '-ats'/'-ATS'
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-ats-') || contains(github.ref_name, '-ATS-') || endsWith(github.ref_name, '-ats') || endsWith(github.ref_name, '-ATS') }}
     # needs: contracts  # Commented out for parallel execution
     permissions:
       contents: read
