@@ -9,6 +9,11 @@ on:
         required: false
         type: boolean
         default: false
+      ref:
+        description: 'Branch/tag/commit to publish from'
+        required: false
+        type: string
+        default: 'main'
 
   # Release published trigger (GitHub release creation) - only for ATS releases (tags ending with -ats)
   release:
@@ -27,8 +32,11 @@ jobs:
   contracts:
     name: Publish ATS Contracts
     runs-on: token-studio-linux-large
-    # Only run if manual trigger OR release tag contains '-ats-'/'-ATS-'
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-ats-') || contains(github.ref_name, '-ATS-') }}
+    # Only run if manual trigger OR release tag contains/ends with '-ats'/'-ATS'
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-ats-') || contains(github.ref_name, '-ATS-') || endsWith(github.ref_name, '-ats') || endsWith(github.ref_name, '-ATS') }}
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Harden Runner
@@ -39,17 +47,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ inputs.ref || github.ref }}
           fetch-depth: 0
 
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.20.0
+          node-version: 22.x
           registry-url: https://registry.npmjs.org
 
       - name: Create .npmrc file
-        working-directory: packages/ats/contracts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cat << 'EOF' > .npmrc
           //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
@@ -65,26 +74,28 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           DRY_RUN: ${{ inputs.dry-run-enabled }}
-        working-directory: packages/ats/contracts
         run: |
-          PUBLISH_ARGS=("--access=restricted")
+          echo "DRY_RUN is set to: '${DRY_RUN}'"
+
+          cd packages/ats/contracts
+
+          PUBLISH_ARGS=("--access=public")
           if [[ "${DRY_RUN}" == "true" ]]; then
             PUBLISH_ARGS+=("--dry-run")
             echo "🔍 DRY RUN MODE: Would publish @hashgraph/asset-tokenization-contracts"
           fi
 
-          if ! npm publish "${PUBLISH_ARGS[@]}"; then
-            echo "❌ Failed to publish package: ${package_name}"
-            echo "📋 Package info:" && cat package.json | jq '.name, .version'
-            exit 1
-          fi
+          npm publish "${PUBLISH_ARGS[@]}"
 
   sdk:
     name: Publish ATS SDK
     runs-on: token-studio-linux-large
-    # Only run if manual trigger OR release tag contains '-ats-'/'-ATS-'
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-ats-') || contains(github.ref_name, '-ATS-') }}
+    # Only run if manual trigger OR release tag contains/ends with '-ats'/'-ATS'
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-ats-') || contains(github.ref_name, '-ATS-') || endsWith(github.ref_name, '-ats') || endsWith(github.ref_name, '-ATS') }}
     # needs: contracts  # Commented out for parallel execution
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Harden Runner
@@ -95,17 +106,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ inputs.ref || github.ref }}
           fetch-depth: 0
 
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.20.0
+          node-version: 22.x
           registry-url: https://registry.npmjs.org
 
       - name: Create .npmrc file
-        working-directory: packages/ats/sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cat << 'EOF' > .npmrc
           //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
@@ -123,28 +135,25 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           DRY_RUN: ${{ inputs.dry-run-enabled }}
-        working-directory: packages/ats/sdk
         run: |
-          PUBLISH_ARGS=("--access=restricted")
+          echo "DRY_RUN is set to: '${DRY_RUN}'"
+
+          cd packages/ats/sdk
+
+          PUBLISH_ARGS=("--access=public")
           if [[ "${DRY_RUN}" == "true" ]]; then
             PUBLISH_ARGS+=("--dry-run")
             echo "🔍 DRY RUN MODE: Would publish @hashgraph/asset-tokenization-sdk"
           fi
 
-          if ! npm publish "${PUBLISH_ARGS[@]}"; then
-            echo "❌ Failed to publish package: ${package_name}"
-            echo "📋 Package info:" && cat package.json | jq '.name, .version'
-            exit 1
-          fi
+          npm publish "${PUBLISH_ARGS[@]}"
 
   # Summary job to report results
   summary:
     name: Publish Summary
     runs-on: token-studio-linux-large
-    needs:
-      - contracts
-      - sdk
-    if: ${{ always() }}
+    needs: [contracts, sdk]
+    if: always()
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
@@ -153,13 +162,13 @@ jobs:
 
       - name: Report Results
         run: |
-          echo "## ATS Publish Results" >> "${GITHUB_STEP_SUMMARY}"
-          echo "| Package | Status |" >> "${GITHUB_STEP_SUMMARY}"
-          echo "| --- | --- |" >> "${GITHUB_STEP_SUMMARY}"
-          echo "| Contracts | ${{ needs.contracts.result }} |" >> "${GITHUB_STEP_SUMMARY}"
-          echo "| SDK | ${{ needs.sdk.result }} |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "## ATS Publish Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Contracts | ${{ needs.contracts.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| SDK | ${{ needs.sdk.result }} |" >> $GITHUB_STEP_SUMMARY
 
           if [[ "${{ inputs.dry-run-enabled }}" == "true" ]]; then
-            echo "" >> "${GITHUB_STEP_SUMMARY}"
-            echo "🔍 **DRY RUN MODE** - No packages were actually published" >> "${GITHUB_STEP_SUMMARY}"
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "🔍 **DRY RUN MODE** - No packages were actually published" >> $GITHUB_STEP_SUMMARY
           fi
