@@ -79,7 +79,7 @@ jobs:
 
           cd packages/ats/contracts
 
-          PUBLISH_ARGS=("--access=restricted")
+          PUBLISH_ARGS=("--access=public")
           if [[ "${DRY_RUN}" == "true" ]]; then
             PUBLISH_ARGS+=("--dry-run")
             echo "🔍 DRY RUN MODE: Would publish @hashgraph/asset-tokenization-contracts"
@@ -140,7 +140,7 @@ jobs:
 
           cd packages/ats/sdk
 
-          PUBLISH_ARGS=("--access=restricted")
+          PUBLISH_ARGS=("--access=public")
           if [[ "${DRY_RUN}" == "true" ]]; then
             PUBLISH_ARGS+=("--dry-run")
             echo "🔍 DRY RUN MODE: Would publish @hashgraph/asset-tokenization-sdk"
