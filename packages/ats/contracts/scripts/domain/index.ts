@@ -1,0 +1,48 @@
+// SPDX-License-Identifier: Apache-2.0
+
+/**
+ * Domain layer exports for Asset Tokenization Studio.
+ *
+ * This module provides ATS-specific business logic. These are not generic
+ * infrastructure and should not be considered reusable for other projects.
+ *
+ * @module domain
+ *
+ * @example
+ * ```typescript
+ * // Import from domain layer
+ * import {
+ *   EQUITY_CONFIG_ID,
+ *   BOND_CONFIG_ID,
+ *   deployFactory,
+ *   createEquityConfiguration,
+ *   createBondConfiguration,
+ *   FACET_REGISTRY,
+ *   ROLES,
+ *   getFacetDefinition
+ * } from '@scripts/domain'
+ * ```
+ */
+
+// Domain registry data (auto-generated) - MUST be first, others depend on it
+export * from "./atsRegistry.data";
+
+// Domain constants (depends on ROLES from registry.data)
+export * from "./constants";
+
+// Domain registry (ATS-specific contract registry helpers)
+export * from "./atsRegistry";
+
+// Equity configuration
+export * from "./equity/createConfiguration";
+
+// Bond configuration
+export * from "./bond/createConfiguration";
+
+// Factory deployment and types
+export * from "./factory/deploy";
+export * from "./factory/types";
+
+// Token deployment from factory
+export * from "./factory/deployEquityToken";
+export * from "./factory/deployBondToken";

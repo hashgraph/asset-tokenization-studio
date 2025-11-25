@@ -1,24 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    ERC20VotesStorageWrapper
-} from '../../ERC1400/ERC20Votes/ERC20VotesStorageWrapper.sol';
-import {
-    IERC20Permit
-} from '../../../layer_1/interfaces/ERC1400/IERC20Permit.sol';
-import {ECDSA} from '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
-import {ERC20PERMIT_TYPEHASH} from '../../constants/values.sol';
-import {
-    _CONTRACT_NAME_ERC20PERMIT,
-    _CONTRACT_VERSION_ERC20PERMIT
-} from '../../../layer_1/constants/values.sol';
-import {
-    getDomainHash
-} from '../../../layer_1/protectedPartitions/signatureVerification.sol';
-import {
-    _ERC20PERMIT_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
+import { ERC20VotesStorageWrapper } from "../../ERC1400/ERC20Votes/ERC20VotesStorageWrapper.sol";
+import { IERC20Permit } from "../../../layer_1/interfaces/ERC1400/IERC20Permit.sol";
+import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import { ERC20PERMIT_TYPEHASH } from "../../constants/values.sol";
+import { _CONTRACT_NAME_ERC20PERMIT, _CONTRACT_VERSION_ERC20PERMIT } from "../../../layer_1/constants/values.sol";
+import { getDomainHash } from "../../../layer_1/protectedPartitions/signatureVerification.sol";
+import { _ERC20PERMIT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
 abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
     struct ERC20PermitStorage {
@@ -50,12 +39,7 @@ abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
                 deadline
             )
         );
-        address signer = ECDSA.recover(
-            ECDSA.toTypedDataHash(_DOMAIN_SEPARATOR(), structHash),
-            v,
-            r,
-            s
-        );
+        address signer = ECDSA.recover(ECDSA.toTypedDataHash(_DOMAIN_SEPARATOR(), structHash), v, r, s);
 
         if (signer != owner) {
             revert IERC20Permit.ERC2612InvalidSigner(signer, owner);
@@ -65,20 +49,10 @@ abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
 
     // solhint-disable-next-line func-name-mixedcase
     function _DOMAIN_SEPARATOR() internal view returns (bytes32) {
-        return
-            getDomainHash(
-                _CONTRACT_NAME_ERC20PERMIT,
-                _CONTRACT_VERSION_ERC20PERMIT,
-                _blockChainid(),
-                address(this)
-            );
+        return getDomainHash(_CONTRACT_NAME_ERC20PERMIT, _CONTRACT_VERSION_ERC20PERMIT, _blockChainid(), address(this));
     }
 
-    function _erc20PermitStorage()
-        internal
-        pure
-        returns (ERC20PermitStorage storage erc20permitStorage_)
-    {
+    function _erc20PermitStorage() internal pure returns (ERC20PermitStorage storage erc20permitStorage_) {
         bytes32 position = _ERC20PERMIT_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

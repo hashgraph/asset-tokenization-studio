@@ -316,6 +316,7 @@ const dividendRight = 1;
 const currency = '0x345678';
 const numberOfShares = 0;
 const nominalValue = 1000;
+const nominalValueDecimals = 3;
 const regulationType = RegulationType.REG_D;
 const regulationSubType = RegulationSubType.B_506;
 const countries = 'AF,HG,BN';
@@ -401,6 +402,7 @@ describe('🧪 Security tests', () => {
       currency: currency,
       numberOfShares: numberOfShares.toString(),
       nominalValue: nominalValue.toString(),
+      nominalValueDecimals: nominalValueDecimals,
       regulationType: CastRegulationType.toNumber(regulationType),
       regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
       isCountryControlListWhiteList: true,

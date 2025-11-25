@@ -3,9 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 interface IProtectedPartitions {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProtectedPartitions(
-        bool _arePartitionsProtected
-    ) external returns (bool success_);
+    function initialize_ProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
 
     /**
      * @notice Activates the protected partitions mode
@@ -38,7 +36,5 @@ interface IProtectedPartitions {
      * @param _partition The partition to calculate the role for
      * @return roleForPartition_ The role required to transfer tokens from the given partition
      */
-    function calculateRoleForPartition(
-        bytes32 _partition
-    ) external pure returns (bytes32 roleForPartition_);
+    function calculateRoleForPartition(bytes32 _partition) external pure returns (bytes32 roleForPartition_);
 }

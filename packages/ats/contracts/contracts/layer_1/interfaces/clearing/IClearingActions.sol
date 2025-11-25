@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {IClearing} from './IClearing.sol';
+import { IClearing } from "./IClearing.sol";
 
 interface IClearingActions {
     enum ClearingActionType {
@@ -56,8 +56,7 @@ interface IClearingActions {
      * @param _clearingOperationIdentifier Struct containing the parameters that identify the clearing operation
      */
     function approveClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external returns (bool success_);
 
     /**
@@ -67,16 +66,14 @@ interface IClearingActions {
      * @param _clearingOperationIdentifier Struct containing the parameters that identify the clearing operation
      */
     function cancelClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external returns (bool success_);
 
     /**
      * @notice Reclaims a clearing operation returning funds back to the token holder
      */
     function reclaimClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external returns (bool success_);
 
     /**

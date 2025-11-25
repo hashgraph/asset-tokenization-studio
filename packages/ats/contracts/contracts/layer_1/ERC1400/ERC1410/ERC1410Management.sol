@@ -1,15 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {_CONTROLLER_ROLE, _AGENT_ROLE} from '../../constants/roles.sol';
-import {
-    BasicTransferInfo,
-    OperatorTransferData
-} from '../../interfaces/ERC1400/IERC1410.sol';
-import {
-    IERC1410Management
-} from '../../interfaces/ERC1400/IERC1410Management.sol';
-import {Common} from '../../common/Common.sol';
+import { _CONTROLLER_ROLE, _AGENT_ROLE, _ISSUER_ROLE } from "../../constants/roles.sol";
+import { BasicTransferInfo, OperatorTransferData } from "../../interfaces/ERC1400/IERC1410.sol";
+import { IERC1410Management } from "../../interfaces/ERC1400/IERC1410Management.sol";
+import { Common } from "../../common/Common.sol";
+import { IssueData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
 
 abstract contract ERC1410Management is IERC1410Management, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -27,27 +23,14 @@ abstract contract ERC1410Management is IERC1410Management, Common {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
-    {
+    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) onlyControllable {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        _transferByPartition(
-            _from,
-            BasicTransferInfo(_to, _value),
-            _partition,
-            _data,
-            _msgSender(),
-            _operatorData
-        );
+        _transferByPartition(_from, BasicTransferInfo(_to, _value), _partition, _data, _msgSender(), _operatorData);
     }
 
     function controllerRedeemByPartition(
@@ -56,27 +39,14 @@ abstract contract ERC1410Management is IERC1410Management, Common {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
-    {
+    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) onlyControllable {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        _redeemByPartition(
-            _partition,
-            _tokenHolder,
-            _msgSender(),
-            _value,
-            _data,
-            _operatorData
-        );
+        _redeemByPartition(_partition, _tokenHolder, _msgSender(), _value, _data, _operatorData);
     }
 
     function operatorTransferByPartition(
@@ -85,10 +55,7 @@ abstract contract ERC1410Management is IERC1410Management, Common {
         external
         override
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
-        onlyOperator(
-            _operatorTransferData.partition,
-            _operatorTransferData.from
-        )
+        onlyOperator(_operatorTransferData.partition, _operatorTransferData.from)
         onlyUnProtectedPartitionsOrWildCardRole
         validateAddress(_operatorTransferData.to)
         onlyCanTransferFromByPartition(
@@ -118,22 +85,9 @@ abstract contract ERC1410Management is IERC1410Management, Common {
         onlyUnProtectedPartitionsOrWildCardRole
     {
         {
-            _checkCanRedeemFromByPartition(
-                _tokenHolder,
-                _partition,
-                _value,
-                _data,
-                _operatorData
-            );
+            _checkCanRedeemFromByPartition(_tokenHolder, _partition, _value, _data, _operatorData);
         }
-        _redeemByPartition(
-            _partition,
-            _tokenHolder,
-            _msgSender(),
-            _value,
-            _data,
-            _operatorData
-        );
+        _redeemByPartition(_partition, _tokenHolder, _msgSender(), _value, _data, _operatorData);
     }
 
     function protectedTransferFromByPartition(
@@ -149,17 +103,9 @@ abstract contract ERC1410Management is IERC1410Management, Common {
         override
         onlyRole(_protectedPartitionsRole(_partition))
         onlyProtectedPartitions
-        onlyCanTransferFromByPartition(_from, _to, _partition, _amount, '', '')
+        onlyCanTransferFromByPartition(_from, _to, _partition, _amount, "", "")
     {
-        _protectedTransferFromByPartition(
-            _partition,
-            _from,
-            _to,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
+        _protectedTransferFromByPartition(_partition, _from, _to, _amount, _deadline, _nounce, _signature);
     }
 
     function protectedRedeemFromByPartition(
@@ -174,15 +120,8 @@ abstract contract ERC1410Management is IERC1410Management, Common {
         override
         onlyRole(_protectedPartitionsRole(_partition))
         onlyProtectedPartitions
-        onlyCanRedeemFromByPartition(_from, _partition, _amount, '', '')
+        onlyCanRedeemFromByPartition(_from, _partition, _amount, "", "")
     {
-        _protectedRedeemFromByPartition(
-            _partition,
-            _from,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
+        _protectedRedeemFromByPartition(_partition, _from, _amount, _deadline, _nounce, _signature);
     }
 }
