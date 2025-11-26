@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-26T11:35:59.791Z
+ * Generated: 2025-11-26T15:01:42.212Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -300,8 +300,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "ClearingOperationApproved",
-        signature: "ClearingOperationApproved(address,address,bytes32,uint256,IClearing.ClearingOperationType,bytes32)",
-        topic0: "0x86630917d994da43ab11efcd2e465cbcc4f476e83e131f4f9589c86ba3c82d01",
+        signature: "ClearingOperationApproved(address,address,bytes32,uint256,IClearing.ClearingOperationType,bytes)",
+        topic0: "0x02f980b59ce0d0d56d120ea10fd65c1761039caa1b51c65ab99a770ecbf956e9",
       },
       {
         name: "ClearingOperationCanceled",

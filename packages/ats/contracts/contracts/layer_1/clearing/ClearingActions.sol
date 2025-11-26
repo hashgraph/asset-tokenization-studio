@@ -50,7 +50,7 @@ abstract contract ClearingActions is IClearingActions, Common {
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.clearingId,
             _clearingOperationIdentifier.clearingOperationType,
-            bytes32(holdId)
+            abi.encode(holdId)
         );
     }
 

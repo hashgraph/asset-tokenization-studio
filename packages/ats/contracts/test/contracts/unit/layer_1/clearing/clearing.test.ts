@@ -1807,7 +1807,7 @@ describe("Clearing Tests", () => {
             _PARTITION_ID_1,
             1,
             ClearingOperationType.HoldCreation,
-            ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 32),
+            ethers.utils.defaultAbiCoder.encode(["uint256"], [1]),
           );
 
         const balance_A_final_HoldCreation = await erc1410Facet.balanceOf(signer_A.address);

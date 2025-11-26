@@ -19,7 +19,7 @@ interface IClearingActions {
         bytes32 indexed partition,
         uint256 clearingId,
         IClearing.ClearingOperationType clearingOperationType,
-        bytes32 operationData
+        bytes operationData
     );
 
     event ClearingOperationCanceled(
