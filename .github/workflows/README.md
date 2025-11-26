@@ -11,28 +11,6 @@ The repository uses **Changesets** for version management with independent relea
 
 All development happens on the `develop` branch with automated testing, changeset validation, and manual release controls by authorized teams.
 
-## How to test github workflows locally
-
-To be able to test github workflows locally you can use act, a github actions simulator [act homepage](https://nektosact.com/introduction.html)
-
-### Install act
-
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
-```
-
-### Run workflow
-
-Substitute \<workflow\> for the workflow you want to test (ats.pubilsh, mp.release, ...)
-
-```bash
-./bin/act workflow_dispatch \
-  -W .github/workflows/<workflow>.yml \
-  --input dry-run-enabled=true \
-  -s NPM_TOKEN=fake_token \
-  -P token-studio-linux-large=catthehacker/ubuntu:act-latest
-```
-
 ## Developer Workflow
 
 ### Daily Development Process
@@ -80,13 +58,11 @@ sequenceDiagram
 
 4. **Commit with DCO and Signature compliance**:
 
-Commit messages should comply with the [conventional commits standard](https://www.conventionalcommits.org/en/v1.0.0/)
-
-```bash
-git add .
-git commit --signoff -S -m "feat: your commit message"
-git push origin feature/your-feature-name
-```
+   ```bash
+   git add .
+   git commit --signoff -S -m "feat: your commit message"
+   git push origin feature/your-feature-name
+   ```
 
 5. **Open PR to develop branch** - automated checks will run
 
@@ -340,13 +316,13 @@ sequenceDiagram
 
 ```bash
 # Development
-npm run changeset                # Create changeset
+npm run changeset                 # Create changeset
 npm run changeset:status         # Check pending changes
 npm run ats:test                 # Run ATS tests
 npm run mass-payout:test         # Run MP tests
 
 # Preview releases
-npm run release:preview         # Show all pending releases
+npm run release:preview          # Show all pending releases
 npm run release:ats             # Preview ATS release (local)
 npm run release:mp              # Preview MP release (local)
 ```
