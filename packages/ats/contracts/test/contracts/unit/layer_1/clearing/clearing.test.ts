@@ -1763,7 +1763,14 @@ describe("Clearing Tests", () => {
 
         await expect(clearingActionsFacet.approveClearingOperationByPartition(clearingIdentifier))
           .to.emit(clearingActionsFacet, "ClearingOperationApproved")
-          .withArgs(signer_A.address, signer_A.address, _PARTITION_ID_1, 1, ClearingOperationType.Transfer, 0);
+          .withArgs(
+            signer_A.address,
+            signer_A.address,
+            _PARTITION_ID_1,
+            1,
+            ClearingOperationType.Transfer,
+            ethers.constants.HashZero,
+          );
 
         const balance_A_final_Transfer = await erc1410Facet.balanceOf(signer_A.address);
         const balance_B_final_Transfer = await erc1410Facet.balanceOf(signer_B.address);
@@ -1775,7 +1782,14 @@ describe("Clearing Tests", () => {
 
         await expect(clearingActionsFacet.approveClearingOperationByPartition(clearingIdentifier))
           .to.emit(clearingActionsFacet, "ClearingOperationApproved")
-          .withArgs(signer_A.address, signer_A.address, _PARTITION_ID_1, 1, ClearingOperationType.Redeem, 0);
+          .withArgs(
+            signer_A.address,
+            signer_A.address,
+            _PARTITION_ID_1,
+            1,
+            ClearingOperationType.Redeem,
+            ethers.constants.HashZero,
+          );
 
         const balance_A_final_Redeem = await erc1410Facet.balanceOf(signer_A.address);
         const balance_B_final_Redeem = await erc1410Facet.balanceOf(signer_B.address);
@@ -1787,7 +1801,14 @@ describe("Clearing Tests", () => {
 
         await expect(clearingActionsFacet.approveClearingOperationByPartition(clearingIdentifier))
           .to.emit(clearingActionsFacet, "ClearingOperationApproved")
-          .withArgs(signer_A.address, signer_A.address, _PARTITION_ID_1, 1, ClearingOperationType.HoldCreation, 1);
+          .withArgs(
+            signer_A.address,
+            signer_A.address,
+            _PARTITION_ID_1,
+            1,
+            ClearingOperationType.HoldCreation,
+            ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 32),
+          );
 
         const balance_A_final_HoldCreation = await erc1410Facet.balanceOf(signer_A.address);
         const balance_B_final_HoldCreation = await erc1410Facet.balanceOf(signer_B.address);
