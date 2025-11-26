@@ -2,6 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IKpi {
+    function setMinValidDate(uint256 _minValidDate) external;
+
     function getKpiData(
         uint256 _fromDate,
         uint256 _toDate

@@ -93,7 +93,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
 
   // Jurisdiction-Specific
   "BondUSAKpiLinkedRateFacet",
-  "BondUSAReadFacet",
+  "BondUSAKpiLinkedReadFacet",
 ] as const;
 
 /**

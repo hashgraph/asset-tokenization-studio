@@ -18,6 +18,9 @@ bytes32 constant _BOND_KPI_LINKED_RATE_RESOLVER_KEY = 0x99c145ff21354eb7b25cb096
 // keccak256('security.token.standard.bond.read.resolverKey');
 bytes32 constant _BOND_READ_RESOLVER_KEY = 0xe7ca0b805514da05524faf33d2d9d9432bf1dfa53096073a7267041cfdfb6d68;
 
+// keccak256('security.token.standard.bond.kpilinked.read.resolverKey');
+bytes32 constant _BOND_KPI_LINKED_READ_RESOLVER_KEY = 0xcced91a2a03bf45bd62730a7f4703ee2d762f8ebccff315c7145258265f73249;
+
 // keccak256('security.token.standard.scheduled.snapshots.resolverKey');
 bytes32 constant _SCHEDULED_SNAPSHOTS_RESOLVER_KEY = 0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793;
 

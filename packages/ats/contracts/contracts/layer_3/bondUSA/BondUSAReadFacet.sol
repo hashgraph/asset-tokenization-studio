@@ -8,7 +8,7 @@ import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
 import { ISecurity } from "../interfaces/ISecurity.sol";
 
 contract BondUSAReadFacet is BondRead, Security {
-    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
+    function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _BOND_READ_RESOLVER_KEY;
     }
 

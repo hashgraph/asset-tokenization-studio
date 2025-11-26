@@ -13,7 +13,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
     using LowLevelCall for address;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    error interestRateIsKpiLinked();
+    error InterestRateIsKpiLinked();
 
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
@@ -22,7 +22,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
             _newCoupon.rateStatus != IBondRead.RateCalculationStatus.PENDING ||
             _newCoupon.rate != 0 ||
             _newCoupon.rateDecimals != 0
-        ) revert interestRateIsKpiLinked();
+        ) revert InterestRateIsKpiLinked();
 
         return super._setCoupon(_newCoupon);
     }
@@ -68,6 +68,8 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
     ) internal view virtual override returns (IBondRead.CouponFor memory couponFor_) {
         couponFor_ = super._getCouponFor(_couponID, _account);
         if (couponFor_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return couponFor_;
+
+        if (couponFor_.coupon.fixingDate > _blockTimestamp()) return couponFor_;
 
         (couponFor_.coupon.rate, couponFor_.coupon.rateDecimals) = _calculateKpiLinkedInterestRate(couponFor_.coupon);
         couponFor_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;

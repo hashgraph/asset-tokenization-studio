@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-21T13:22:30.092Z
- * Facets: 54
+ * Generated: 2025-11-26T16:27:24.744Z
+ * Facets: 55
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -29,6 +29,8 @@ import {
   BondUSAFixedRateFacetTimeTravel__factory,
   BondUSAKpiLinkedRateFacet__factory,
   BondUSAKpiLinkedRateFacetTimeTravel__factory,
+  BondUSAKpiLinkedReadFacet__factory,
+  BondUSAKpiLinkedReadFacetTimeTravel__factory,
   BondUSAReadFacet__factory,
   BondUSAReadFacetTimeTravel__factory,
   CapFacet__factory,
@@ -272,11 +274,41 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
       { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
     ],
-    errors: [{ name: "interestRateIsKpiLinked", signature: "interestRateIsKpiLinked()", selector: "0x556500c9" }],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new BondUSAKpiLinkedRateFacetTimeTravel__factory(signer)
         : new BondUSAKpiLinkedRateFacet__factory(signer),
+  },
+
+  BondUSAKpiLinkedReadFacet: {
+    name: "BondUSAKpiLinkedReadFacet",
+    resolverKey: {
+      name: "_BOND_KPI_LINKED_READ_RESOLVER_KEY",
+      value: "0xcced91a2a03bf45bd62730a7f4703ee2d762f8ebccff315c7145258265f73249",
+    },
+    inheritance: ["BondReadKpiLinkedInterestRate", "BondUSAReadFacet"],
+    methods: [
+      { name: "getBondDetails", signature: "getBondDetails()", selector: "0x4ce02414" },
+      { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
+      { name: "getCouponAmountFor", signature: "getCouponAmountFor(uint256,address)", selector: "0x439efc2e" },
+      { name: "getCouponCount", signature: "getCouponCount()", selector: "0x468bb240" },
+      { name: "getCouponFor", signature: "getCouponFor(uint256,address)", selector: "0xbba7b56d" },
+      { name: "getCouponFromOrderedListAt", signature: "getCouponFromOrderedListAt(uint256)", selector: "0x65a88a2c" },
+      { name: "getCouponHolders", signature: "getCouponHolders(uint256,uint256,uint256)", selector: "0xa92e8371" },
+      { name: "getCouponsOrderedList", signature: "getCouponsOrderedList(uint256,uint256)", selector: "0xd7133de1" },
+      { name: "getCouponsOrderedListTotal", signature: "getCouponsOrderedListTotal()", selector: "0xee1d26eb" },
+      { name: "getPrincipalFor", signature: "getPrincipalFor(address)", selector: "0x6f131c78" },
+      { name: "getSecurityHolders", signature: "getSecurityHolders(uint256,uint256)", selector: "0x81438d2f" },
+      { name: "getSecurityRegulationData", signature: "getSecurityRegulationData()", selector: "0x8fda5afe" },
+      { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
+      { name: "getTotalSecurityHolders", signature: "getTotalSecurityHolders()", selector: "0xbd007c8f" },
+    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new BondUSAKpiLinkedReadFacetTimeTravel__factory(signer)
+        : new BondUSAKpiLinkedReadFacet__factory(signer),
   },
 
   BondUSAReadFacet: {
@@ -2308,7 +2340,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 54 as const;
+export const TOTAL_FACETS = 55 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -2466,7 +2498,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "BondStorageWrapperKpiLinkedInterestRate",
     inheritance: ["Common"],
     methods: [],
-    errors: [{ name: "interestRateIsKpiLinked", signature: "interestRateIsKpiLinked()", selector: "0x556500c9" }],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
   },
 
   ControlListStorageWrapper: {

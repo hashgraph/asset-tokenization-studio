@@ -1,5 +1,5 @@
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
-import { CURRENCIES, DeepPartial, BOND_KPI_LINKED_RATE_CONFIG_ID } from "../../../scripts";
+import { CURRENCIES, DeepPartial, BOND_KPI_LINKED_RATE_CONFIG_ID, ADDRESS_ZERO } from "../../../scripts";
 import {
   AccessControlFacet__factory,
   PauseFacet__factory,
@@ -42,7 +42,7 @@ export const DEFAULT_BOND_KPI_LINKED_RATE_PARAMS = {
   baseLine: 750,
   maxDeviationFloor: 500,
   impactDataDecimals: 2,
-  kpiOracle: "",
+  kpiOracle: ADDRESS_ZERO,
 } as const;
 
 /**
@@ -71,6 +71,7 @@ export async function deployBondKpiLinkedRateTokenFixture({
   const { factory, blr, deployer } = infrastructure;
 
   const securityData = getSecurityData(blr, {
+    internalKycActivated: false,
     ...bondDataParams?.securityData,
     resolverProxyConfiguration: {
       key: BOND_KPI_LINKED_RATE_CONFIG_ID,
