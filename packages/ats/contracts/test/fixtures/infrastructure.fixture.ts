@@ -109,5 +109,12 @@ export async function deployAtsInfrastructureFixture(
       },
       {} as Record<string, string>,
     ),
+    bondKpiLinkedRateFacetKeys: deployment.helpers.getBondKpiLinkedRateFacets().reduce(
+      (acc, f) => {
+        acc[f.name] = f.key;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
   };
 }

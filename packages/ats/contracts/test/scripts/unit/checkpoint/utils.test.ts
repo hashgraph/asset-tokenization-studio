@@ -81,6 +81,12 @@ describe("Checkpoint Utilities", () => {
               facetCount: 47,
               txHash: "0xabc789",
             },
+            bondKpiLinkedRate: {
+              configId: "0x0000000000000000000000000000000000000000000000000000000000000004",
+              version: 1,
+              facetCount: 47,
+              txHash: "0xdef123",
+            },
           },
           factory: {
             address: "0x5555555555555555555555555555555555555555",
@@ -233,6 +239,12 @@ describe("Checkpoint Utilities", () => {
               facetCount: 0,
               txHash: "0xabc789",
             },
+            bondKpiLinkedRate: {
+              configId: "0x0000000000000000000000000000000000000000000000000000000000000004",
+              version: 1,
+              facetCount: 0,
+              txHash: "0xdef123",
+            },
           },
         },
         options: {},
@@ -336,7 +348,8 @@ describe("Checkpoint Utilities", () => {
         expect(getStepName(4, "newBlr")).to.equal("Equity Configuration");
         expect(getStepName(5, "newBlr")).to.equal("Bond Configuration");
         expect(getStepName(6, "newBlr")).to.equal("Bond Fixed Rate Configuration");
-        expect(getStepName(7, "newBlr")).to.equal("Factory");
+        expect(getStepName(7, "newBlr")).to.equal("Bond KpiLinked Rate Configuration");
+        expect(getStepName(8, "newBlr")).to.equal("Factory");
       });
 
       it("should handle unknown step numbers", () => {
@@ -353,7 +366,8 @@ describe("Checkpoint Utilities", () => {
         expect(getStepName(3, "existingBlr")).to.equal("Equity Configuration");
         expect(getStepName(4, "existingBlr")).to.equal("Bond Configuration");
         expect(getStepName(5, "existingBlr")).to.equal("Bond Fixed Rate Configuration");
-        expect(getStepName(6, "existingBlr")).to.equal("Factory");
+        expect(getStepName(6, "existingBlr")).to.equal("Bond KpiLinked Rate Configuration");
+        expect(getStepName(7, "existingBlr")).to.equal("Factory");
       });
 
       it("should handle unknown step numbers", () => {
@@ -430,7 +444,7 @@ describe("Checkpoint Utilities", () => {
         network: "hedera-testnet",
         deployer: "0x1234567890123456789012345678901234567890",
         status: "completed",
-        currentStep: 7,
+        currentStep: 8,
         workflowType: "newBlr",
         startTime: "2025-11-08T10:00:00.000Z",
         lastUpdate: "2025-11-08T10:15:00.000Z",
@@ -441,7 +455,7 @@ describe("Checkpoint Utilities", () => {
       const formatted = formatCheckpointStatus(checkpoint);
 
       expect(formatted).to.include("Status: completed");
-      expect(formatted).to.include("Step: 8/8 - Factory");
+      expect(formatted).to.include("Step: 9/8 - Factory");
     });
 
     it("should format existingBlr workflow correctly", () => {
