@@ -16,10 +16,7 @@ interface IControlList {
      * @param account The account that was removed from the controllist
      * @param operator The caller of the function that emitted the event
      */
-    event RemovedFromControlList(
-        address indexed operator,
-        address indexed account
-    );
+    event RemovedFromControlList(address indexed operator, address indexed account);
 
     error ListedAccount(address account);
     error UnlistedAccount(address account);
@@ -38,9 +35,7 @@ interface IControlList {
      * @param _account account address
      * @return success_ true or false
      */
-    function addToControlList(
-        address _account
-    ) external returns (bool success_);
+    function addToControlList(address _account) external returns (bool success_);
 
     /**
      * @dev Remove an account from the control list
@@ -48,9 +43,7 @@ interface IControlList {
      * @param _account account address
      * @return success_ true or false
      */
-    function removeFromControlList(
-        address _account
-    ) external returns (bool success_);
+    function removeFromControlList(address _account) external returns (bool success_);
 
     /**
      * @dev Checks if an account is in the control list
@@ -72,10 +65,7 @@ interface IControlList {
      *
      * @return controlListCount_ The number of members
      */
-    function getControlListCount()
-        external
-        view
-        returns (uint256 controlListCount_);
+    function getControlListCount() external view returns (uint256 controlListCount_);
 
     /**
      * @dev Returns an array of members the controllist currently has

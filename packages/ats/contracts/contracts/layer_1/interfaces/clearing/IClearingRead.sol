@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {IClearing} from './IClearing.sol';
+import { IClearing } from "./IClearing.sol";
 
 interface IClearingRead is IClearing {
     /**
      * @notice Gets the total cleared amount for a token holder across all partitions
      */
-    function getClearedAmountFor(
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
+    function getClearedAmountFor(address _tokenHolder) external view returns (uint256 amount_);
 
     /**
      * @notice Gets the total cleared amount for a token holder by partition

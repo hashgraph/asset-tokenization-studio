@@ -255,6 +255,7 @@ const currency = '0x455552';
 const TIME = 30;
 const numberOfUnits = '1000';
 const nominalValue = '100';
+const nominalValueDecimals = 3;
 const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1000;
 const startingDate = currentTimeInSeconds + TIME;
 const maturityDate = startingDate + 365; // 1 year maturity
@@ -343,6 +344,7 @@ describe('🧪 Bond test', () => {
       currency: currency,
       numberOfUnits: numberOfUnits.toString(),
       nominalValue: nominalValue,
+      nominalValueDecimals: nominalValueDecimals,
       startingDate: startingDate.toString(),
       maturityDate: maturityDate.toString(),
       regulationType: CastRegulationType.toNumber(regulationType),
@@ -370,6 +372,7 @@ describe('🧪 Bond test', () => {
 
     expect(bondDetails.currency).toEqual(currency);
     expect(bondDetails.nominalValue).toEqual(nominalValue);
+    expect(bondDetails.nominalValueDecimals).toEqual(nominalValueDecimals);
     expect(bondDetails.startingDate.getTime() / 1000).toEqual(startingDate);
     expect(bondDetails.maturityDate.getTime() / 1000).toEqual(maturityDate);
   }, 60_000);
@@ -411,12 +414,24 @@ describe('🧪 Bond test', () => {
       }),
     );
 
+    const couponAmountFor = await Bond.getCouponAmountFor(
+      new GetCouponForRequest({
+        securityId: bond.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        couponId: 1,
+      }),
+    );
+
     expect(coupon.rate).toEqual(couponRate);
+    expect(coupon.rateDecimals).toEqual(0);
     expect(coupon.couponId).toEqual(1);
     expect(coupon.recordDate.getTime() / 1000).toEqual(couponRecordDate);
     expect(coupon.executionDate.getTime() / 1000).toEqual(couponExecutionDate);
     expect(couponFor.value).toEqual('0');
     expect(allCoupon.length).toEqual(1); // Now only 1 manually created coupon
+    expect(couponAmountFor.numerator).toEqual('5');
+    expect(couponAmountFor.denominator).toEqual('3');
+    expect(couponAmountFor.recordDateReached).toEqual(true);
   }, 600_000);
 
   it('Coupons Custom', async () => {

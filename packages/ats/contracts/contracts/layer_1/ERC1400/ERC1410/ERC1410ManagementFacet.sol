@@ -1,16 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    _ERC1410_MANAGEMENT_RESOLVER_KEY
-} from '../../../layer_1/constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {
-    IERC1410Management
-} from '../../interfaces/ERC1400/IERC1410Management.sol';
-import {ERC1410Management} from './ERC1410Management.sol';
+import { _ERC1410_MANAGEMENT_RESOLVER_KEY } from "../../../layer_1/constants/resolverKeys.sol";
+import { IStaticFunctionSelectors } from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { IERC1410Management } from "../../interfaces/ERC1400/IERC1410Management.sol";
+import { ERC1410Management } from "./ERC1410Management.sol";
 
 /**
  * @title ERC1410ManagementFacet
@@ -29,53 +23,27 @@ import {ERC1410Management} from './ERC1410Management.sol';
  *
  */
 contract ERC1410ManagementFacet is IStaticFunctionSelectors, ERC1410Management {
-    function getStaticResolverKey()
-        external
-        pure
-        returns (bytes32 staticResolverKey_)
-    {
+    function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _ERC1410_MANAGEMENT_RESOLVER_KEY;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
+    function getStaticFunctionSelectors() external pure returns (bytes4[] memory staticFunctionSelectors_) {
         staticFunctionSelectors_ = new bytes4[](7);
         uint256 selectorIndex = 0;
         // Initialization function
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_ERC1410
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initialize_ERC1410.selector;
         // Controller functions
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerRedeemByPartition
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.controllerTransferByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.controllerRedeemByPartition.selector;
         // Operator functions
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorRedeemByPartition
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.operatorTransferByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.operatorRedeemByPartition.selector;
         // Protected functions
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedTransferFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedRedeemFromByPartition
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.protectedTransferFromByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.protectedRedeemFromByPartition.selector;
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
+    function getStaticInterfaceIds() external pure returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](1);
         staticInterfaceIds_[0] = type(IERC1410Management).interfaceId;
     }

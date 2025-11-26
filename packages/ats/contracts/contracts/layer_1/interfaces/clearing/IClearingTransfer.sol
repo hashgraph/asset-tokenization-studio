@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {IClearing} from './IClearing.sol';
+import { IClearing } from "./IClearing.sol";
 
 interface IClearingTransfer is IClearing {
     /**
