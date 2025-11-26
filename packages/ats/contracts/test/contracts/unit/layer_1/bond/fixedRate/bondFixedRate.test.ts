@@ -1,24 +1,11 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { BigNumber } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { ResolverProxy, BondUSAFixedRate, FixedRate, BondUSAReadFacet } from "@contract-types";
-import {
-  DEFAULT_PARTITION,
-  dateToUnixTimestamp,
-  ATS_ROLES,
-  TIME_PERIODS_S,
-  ADDRESS_ZERO,
-  ZERO,
-  EMPTY_HEX_BYTES,
-  EMPTY_STRING,
-  ATS_CONTRACTS,
-  atsRegistry,
-} from "@scripts";
-import { grantRoleAndPauseToken } from "@test";
+import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondFixedRateTokenFixture } from "@test";
-import { executeRbac, MAX_UINT256 } from "@test";
+import { executeRbac } from "@test";
 
 let couponRecordDateInSeconds = 0;
 let couponExecutionDateInSeconds = 0;

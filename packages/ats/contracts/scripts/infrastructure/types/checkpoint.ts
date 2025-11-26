@@ -141,6 +141,8 @@ export interface DeploymentCheckpoint {
       bond?: ConfigurationResult;
       /** Bond Fixed Rate configuration */
       bondFixedRate?: ConfigurationResult;
+      /** Bond KpiLinked Rate configuration */
+      bondKpiLinkedRate?: ConfigurationResult;
     };
 
     /** Factory deployment (step 6) */

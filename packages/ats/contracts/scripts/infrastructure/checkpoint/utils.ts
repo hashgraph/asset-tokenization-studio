@@ -45,7 +45,12 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
   if (!steps.facets || steps.facets.size === 0) {
     throw new Error("Checkpoint missing facet deployments");
   }
-  if (!steps.configurations?.equity || !steps.configurations?.bond || !steps.configurations?.bondFixedRate) {
+  if (
+    !steps.configurations?.equity ||
+    !steps.configurations?.bond ||
+    !steps.configurations?.bondFixedRate ||
+    !steps.configurations?.bondKpiLinkedRate
+  ) {
     throw new Error("Checkpoint missing configurations");
   }
 
@@ -115,6 +120,12 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
         facetCount: steps.configurations.bondFixedRate.facetCount,
         facets: [], // Will be populated in actual workflow
       },
+      bondKpiLinkedRate: {
+        configId: steps.configurations.bondKpiLinkedRate.configId,
+        version: steps.configurations.bondKpiLinkedRate.version,
+        facetCount: steps.configurations.bondKpiLinkedRate.facetCount,
+        facets: [], // Will be populated in actual workflow
+      },
     },
 
     summary: {
@@ -130,6 +141,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       getEquityFacets: () => [],
       getBondFacets: () => [],
       getBondFixedRateFacets: () => [],
+      getBondKpiLinkedRateFacets: () => [],
     },
   };
 }
@@ -167,6 +179,8 @@ export function getStepName(step: number, workflowType: "newBlr" | "existingBlr"
       case 6:
         return "Bond Fixed Rate Configuration";
       case 7:
+        return "Bond KpiLinked Rate Configuration";
+      case 8:
         return "Factory";
       default:
         return `Unknown Step ${step}`;
@@ -187,6 +201,8 @@ export function getStepName(step: number, workflowType: "newBlr" | "existingBlr"
       case 5:
         return "Bond Fixed Rate Configuration";
       case 6:
+        return "Bond KpiLinked Rate Configuration";
+      case 7:
         return "Factory";
       default:
         return `Unknown Step ${step}`;

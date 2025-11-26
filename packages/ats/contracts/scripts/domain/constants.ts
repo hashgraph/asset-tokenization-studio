@@ -40,6 +40,14 @@ export const BOND_CONFIG_ID = "0x00000000000000000000000000000000000000000000000
  */
 export const BOND_FIXED_RATE_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000003";
 
+/**
+ * Bond Kpi Linked Rate configuration ID.
+ *
+ * bytes32(uint256(3)) = 0x00...04
+ * Used by BusinessLogicResolver to identify bond kpi linked rate facet configuration.
+ */
+export const BOND_KPI_LINKED_RATE_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000004";
+
 // ============================================================================
 // ATS-Specific Contract Names
 // ============================================================================

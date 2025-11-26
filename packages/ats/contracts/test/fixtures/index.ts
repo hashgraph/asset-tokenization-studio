@@ -22,6 +22,11 @@ export { deployBondTokenFixture, DEFAULT_BOND_PARAMS, getBondDetails } from "./t
 
 export { deployBondFixedRateTokenFixture, DEFAULT_BOND_FIXED_RATE_PARAMS } from "./tokens/bondFixedRate.fixture";
 
+export {
+  deployBondKpiLinkedRateTokenFixture,
+  DEFAULT_BOND_KPI_LINKED_RATE_PARAMS,
+} from "./tokens/bondKpiLinkedRate.fixture";
+
 // Common token utilities
 export {
   MAX_UINT256,

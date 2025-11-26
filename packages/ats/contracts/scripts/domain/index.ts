@@ -41,6 +41,7 @@ export * from "./factory/types";
 export * from "./factory/deployEquityToken";
 export * from "./factory/deployBondToken";
 export * from "./factory/deployBondFixedRateToken";
+export * from "./factory/deployBondKpiLinkedRateToken";
 
 // Equity configuration
 export * from "./equity/createConfiguration";
@@ -50,3 +51,6 @@ export * from "./bond/createConfiguration";
 
 // Bond Fixed Rate configuration
 export * from "./bondFixedRate/createConfiguration";
+
+// Bond Kpi Linked Rate configuration
+export * from "./bondKpiLinkedRate/createConfiguration";
