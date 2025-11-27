@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     _PROTECTED_TRANSFER_AND_LOCK_FROM_PARTITION_TYPEHASH,
     _PROTECTED_TRANSFER_AND_LOCK_BY_PARTITION_FROM_PARTITION_TYPEHASH
-} from '../constants/values.sol';
+} from "../constants/values.sol";
 
 function getMessageHashTransferAndLock(
     address _from,

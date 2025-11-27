@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    IExternalPause
-} from '../layer_1/interfaces/externalPauses/IExternalPause.sol';
+import { IExternalPause } from "../layer_1/interfaces/externalPauses/IExternalPause.sol";
 
 contract MockedExternalPause is IExternalPause {
     bool private _paused;

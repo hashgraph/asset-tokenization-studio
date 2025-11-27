@@ -270,6 +270,7 @@ const dividendRight = 1;
 const currency = '0x858368';
 const numberOfShares = 200000;
 const nominalValue = 1000;
+const nominalValueDecimals = 3;
 const regulationType = RegulationType.REG_D;
 const regulationSubType = RegulationSubType.C_506;
 const countries = 'AF,HG,BN';
@@ -364,6 +365,7 @@ describe('🧪 Equity test', () => {
       currency: currency,
       numberOfShares: numberOfShares.toString(),
       nominalValue: nominalValue.toString(),
+      nominalValueDecimals: nominalValueDecimals,
       regulationType: CastRegulationType.toNumber(regulationType),
       regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
       isCountryControlListWhiteList: true,
@@ -422,6 +424,7 @@ describe('🧪 Equity test', () => {
     );
 
     expect(dividend.amountPerUnitOfSecurity).toEqual(amount);
+    expect(dividend.amountDecimals).toEqual(0);
     expect(dividend.dividendId).toEqual(1);
     expect(dividend.executionDate.getTime() / 1000).toEqual(executionTimestamp);
     expect(dividend.recordDate.getTime() / 1000).toEqual(recordTimestamp);

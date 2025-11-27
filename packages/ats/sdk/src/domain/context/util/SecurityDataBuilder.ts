@@ -287,6 +287,7 @@ export class SecurityDataBuilder {
       dividendRight: CastDividendType.toNumber(equityInfo.dividendRight),
       currency: equityInfo.currency,
       nominalValue: equityInfo.nominalValue.toString(),
+      nominalValueDecimals: equityInfo.nominalValueDecimals,
     };
   }
 
@@ -294,6 +295,7 @@ export class SecurityDataBuilder {
     return new BondDetailsData(
       bondInfo.currency,
       bondInfo.nominalValue.toString(),
+      bondInfo.nominalValueDecimals,
       bondInfo.startingDate.toString(),
       bondInfo.maturityDate.toString(),
     );

@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       dry-run-enabled:
-        description: 'Run npm publish with dry-run flag'
+        description: "Run npm publish with dry-run flag"
         required: false
         type: boolean
         default: false
@@ -28,7 +28,7 @@ jobs:
     name: Publish ATS Contracts
     runs-on: token-studio-linux-large
     # Only run if manual trigger OR release tag contains/ends with '-ats'/'-ATS'
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-ats-') || contains(github.ref_name, '-ATS-') || endsWith(github.ref_name, '-ats') || endsWith(github.ref_name, '-ATS') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-ats-') || endsWith(github.ref_name, '-ats') }}
 
     steps:
       - name: Harden Runner
@@ -83,7 +83,7 @@ jobs:
     name: Publish ATS SDK
     runs-on: token-studio-linux-large
     # Only run if manual trigger OR release tag contains/ends with '-ats'/'-ATS'
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-ats-') || contains(github.ref_name, '-ATS-') || endsWith(github.ref_name, '-ats') || endsWith(github.ref_name, '-ATS') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-ats-') || endsWith(github.ref_name, '-ats') }}
     # needs: contracts  # Commented out for parallel execution
 
     steps:

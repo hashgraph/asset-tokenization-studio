@@ -208,6 +208,7 @@ import { CreateEquityCommandHandler } from '@command/equity/create/CreateEquityC
 import { SetDividendsCommandHandler } from '@command/equity/dividends/set/SetDividendsCommandHandler';
 import { SetVotingRightsCommandHandler } from '@command/equity/votingRights/set/SetVotingRightsCommandHandler';
 import { GetDividendsForQueryHandler } from '@query/equity/dividends/getDividendsFor/GetDividendsForQueryHandler';
+import { GetDividendAmountForQueryHandler } from '@query/equity/dividends/getDividendAmountFor/GetDividendAmountForQueryHandler';
 import { GetDividendsQueryHandler } from '@query/equity/dividends/getDividends/GetDividendsQueryHandler';
 import { GetDividendsCountQueryHandler } from '@query/equity/dividends/getDividendsCount/GetDividendsCountQueryHandler';
 import { GetVotingForQueryHandler } from '@query/equity/votingRights/getVotingFor/GetVotingForQueryHandler';
@@ -239,6 +240,10 @@ export const QUERY_HANDLERS_EQUITY = [
     token: TOKENS.QUERY_HANDLER,
     useClass: GetDividendsForQueryHandler,
   },
+  {
+      token: TOKENS.QUERY_HANDLER,
+      useClass: GetDividendAmountForQueryHandler,
+    },
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetDividendsQueryHandler,

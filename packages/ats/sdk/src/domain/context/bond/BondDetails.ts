@@ -210,12 +210,14 @@ import { SecurityDate } from '../shared/SecurityDate';
 export class BondDetails extends ValidatedDomain<BondDetails> {
   currency: string;
   nominalValue: BigDecimal;
+  nominalValueDecimals: number;
   startingDate: number;
   maturityDate: number;
 
   constructor(
     currency: string,
     nominalValue: BigDecimal,
+    nominalValueDecimals: number,
     startingDate: number,
     maturityDate: number,
   ) {
@@ -227,6 +229,7 @@ export class BondDetails extends ValidatedDomain<BondDetails> {
 
     this.currency = currency;
     this.nominalValue = nominalValue;
+    this.nominalValueDecimals = nominalValueDecimals;
     this.startingDate = startingDate;
     this.maturityDate = maturityDate;
 

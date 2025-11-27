@@ -34,14 +34,8 @@ library LowLevelCall {
         return _verifyCallResultFromTarget(success, returndata, _errorSelector);
     }
 
-    function revertWithData(
-        bytes4 _reasonCode,
-        bytes memory _details
-    ) internal pure {
-        bytes memory revertData = abi.encodePacked(
-            bytes4(_reasonCode),
-            _details
-        );
+    function revertWithData(bytes4 _reasonCode, bytes memory _details) internal pure {
+        bytes memory revertData = abi.encodePacked(bytes4(_reasonCode), _details);
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let len := mload(revertData)

@@ -1,25 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
+import { ISnapshots } from "../interfaces/snapshots/ISnapshots.sol";
+import { Common } from "../common/Common.sol";
+import { _SNAPSHOT_ROLE } from "../constants/roles.sol";
 
 abstract contract Snapshots is ISnapshots, Common {
-    function takeSnapshot()
-        external
-        override
-        onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID_)
-    {
+    function takeSnapshot() external override onlyUnpaused onlyRole(_SNAPSHOT_ROLE) returns (uint256 snapshotID_) {
         _triggerScheduledCrossOrderedTasks(0);
         snapshotID_ = _takeSnapshot();
     }
 
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint8 decimals_) {
+    function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_) {
         decimals_ = _decimalsAtSnapshot(_snapshotID);
     }
 
@@ -38,9 +30,7 @@ abstract contract Snapshots is ISnapshots, Common {
         return _tokenHoldersAt(_snapshotID, _pageIndex, _pageLength);
     }
 
-    function getTotalTokenHoldersAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256) {
+    function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view returns (uint256) {
         return _totalTokenHoldersAt(_snapshotID);
     }
 
@@ -49,11 +39,7 @@ abstract contract Snapshots is ISnapshots, Common {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view override returns (uint256 balance_) {
-        balance_ = _balanceOfAtSnapshotByPartition(
-            _partition,
-            _snapshotID,
-            _tokenHolder
-        );
+        balance_ = _balanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
     function partitionsOfAtSnapshot(
@@ -63,9 +49,7 @@ abstract contract Snapshots is ISnapshots, Common {
         return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view override returns (uint256 totalSupply_) {
+    function totalSupplyAtSnapshot(uint256 _snapshotID) external view override returns (uint256 totalSupply_) {
         totalSupply_ = _totalSupplyAtSnapshot(_snapshotID);
     }
 
@@ -73,10 +57,7 @@ abstract contract Snapshots is ISnapshots, Common {
         bytes32 _partition,
         uint256 _snapshotID
     ) external view override returns (uint256 totalSupply_) {
-        totalSupply_ = _totalSupplyAtSnapshotByPartition(
-            _partition,
-            _snapshotID
-        );
+        totalSupply_ = _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
     }
 
     function lockedBalanceOfAtSnapshot(
@@ -91,11 +72,7 @@ abstract contract Snapshots is ISnapshots, Common {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view override returns (uint256 balance_) {
-        balance_ = _lockedBalanceOfAtSnapshotByPartition(
-            _partition,
-            _snapshotID,
-            _tokenHolder
-        );
+        balance_ = _lockedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
     function heldBalanceOfAtSnapshot(
@@ -110,11 +87,7 @@ abstract contract Snapshots is ISnapshots, Common {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_) {
-        balance_ = _heldBalanceOfAtSnapshotByPartition(
-            _partition,
-            _snapshotID,
-            _tokenHolder
-        );
+        balance_ = _heldBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
     function clearedBalanceOfAtSnapshot(
@@ -129,10 +102,6 @@ abstract contract Snapshots is ISnapshots, Common {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_) {
-        balance_ = _clearedBalanceOfAtSnapshotByPartition(
-            _partition,
-            _snapshotID,
-            _tokenHolder
-        );
+        balance_ = _clearedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 }

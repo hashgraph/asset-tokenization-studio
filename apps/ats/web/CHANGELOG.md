@@ -39,8 +39,5 @@
 ### Patch Changes
 
 - Display proceed recipients' data in text format in ats web
-- Add REACT_APP_NETWORK to .env to be able to select testnet, previewnet or mainnet
-- Fix Hedera ID validation rule to accept until 9 digits after "0.0."
-- Fix maxWidth in EditRole component to prevent text from overflowing to the left when resizing the window to a smaller size
 - Updated dependencies
   - @hashgraph/asset-tokenization-sdk@1.17.0
