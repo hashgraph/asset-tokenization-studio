@@ -18,7 +18,8 @@ interface IClearingActions {
         address indexed tokenHolder,
         bytes32 indexed partition,
         uint256 clearingId,
-        IClearing.ClearingOperationType clearingOperationType
+        IClearing.ClearingOperationType clearingOperationType,
+        bytes operationData
     );
 
     event ClearingOperationCanceled(
