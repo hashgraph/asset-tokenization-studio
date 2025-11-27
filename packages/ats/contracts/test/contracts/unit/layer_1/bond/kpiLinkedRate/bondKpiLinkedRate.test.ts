@@ -37,7 +37,7 @@ let couponData = {
   rateStatus: 0,
 };
 
-describe.only("Bond KpiLinked Rate Tests", () => {
+describe("Bond KpiLinked Rate Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: SignerWithAddress;
 
