@@ -37,12 +37,8 @@ abstract contract ClearingActions is IClearingActions, Common {
         validateExpirationTimestamp(_clearingOperationIdentifier, false)
         returns (bool success_)
     {
-        uint256 holdId;
-        if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.HoldCreation) {
-            (success_, holdId) = _approveClearingHoldOperationByPartition(_clearingOperationIdentifier);
-        } else {
-            (success_) = _approveClearingOperationByPartition(_clearingOperationIdentifier);
-        }
+        bytes memory operationData;
+        (success_, operationData) = _approveClearingOperationByPartition(_clearingOperationIdentifier);
 
         emit ClearingOperationApproved(
             _msgSender(),
@@ -50,7 +46,7 @@ abstract contract ClearingActions is IClearingActions, Common {
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.clearingId,
             _clearingOperationIdentifier.clearingOperationType,
-            abi.encode(holdId)
+            operationData
         );
     }
 
