@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    CountersUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-import {ISnapshotsStorageWrapper} from './ISnapshotsStorageWrapper.sol';
+import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import { ISnapshotsStorageWrapper } from "./ISnapshotsStorageWrapper.sol";
 
 // Snapshotted values have arrays of ids and the value corresponding to that id. These could be an array of a
 // Snapshot struct, but that would impede usage of functions that work on an array.
@@ -60,17 +58,12 @@ interface ISnapshots is ISnapshotsStorageWrapper {
     /**
      * @notice Returns the decimals at the time of a given snapshot
      */
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint8 decimals_);
+    function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_);
 
     /**
      * @notice Returns the balance of an account at the time of a given snapshot
      */
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
+    function balanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (uint256 balance_);
 
     /**
      * @notice Returns the balance of an account for a given partition at the time of a given snapshot
@@ -84,17 +77,12 @@ interface ISnapshots is ISnapshotsStorageWrapper {
     /**
      * @notice Returns the list of partitions held by an account at the time of a given snapshot
      */
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (bytes32[] memory);
+    function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) external view returns (bytes32[] memory);
 
     /**
      * @notice Returns the total supply at the time of a given snapshot
      */
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 totalSupply_);
+    function totalSupplyAtSnapshot(uint256 _snapshotID) external view returns (uint256 totalSupply_);
 
     /**
      * @notice Returns the total supply for a given partition at the time of a given snapshot
@@ -133,7 +121,5 @@ interface ISnapshots is ISnapshotsStorageWrapper {
     /**
      * @notice Returns the total number of token holders at the time of a given snapshot
      */
-    function getTotalTokenHoldersAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256);
+    function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view returns (uint256);
 }

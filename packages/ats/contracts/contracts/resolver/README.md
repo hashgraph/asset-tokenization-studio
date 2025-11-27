@@ -8,7 +8,7 @@
 
 - **[DESCRIPTION](#description)**<br>
 - **[EXAMPLE](#example)**<br>
-    - [REGISTER](#register)<br>
+  - [REGISTER](#register)<br>
 
 # DESCRIPTION
 

@@ -219,6 +219,7 @@ export class EquityDetails extends ValidatedDomain<EquityDetails> {
   dividendRight: DividendType;
   currency: string;
   nominalValue: BigDecimal;
+  nominalValueDecimals: number;
 
   constructor(
     votingRight: boolean,
@@ -231,6 +232,7 @@ export class EquityDetails extends ValidatedDomain<EquityDetails> {
     dividendRight: DividendType,
     currency: string,
     nominalValue: BigDecimal,
+    nominalValueDecimals: number,
   ) {
     super({
       dividendRight: (val) => {
@@ -247,6 +249,7 @@ export class EquityDetails extends ValidatedDomain<EquityDetails> {
     this.dividendRight = dividendRight;
     this.currency = currency;
     this.nominalValue = nominalValue;
+    this.nominalValueDecimals = nominalValueDecimals;
 
     ValidatedDomain.handleValidation(EquityDetails.name, this);
   }

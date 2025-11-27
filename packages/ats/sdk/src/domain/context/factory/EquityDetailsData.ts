@@ -214,4 +214,5 @@ export class EquityDetailsData {
   public dividendRight: number;
   public currency: string;
   public nominalValue: string;
+  public nominalValueDecimals: number;
 }

@@ -380,6 +380,7 @@ import SetAddressFrozenRequest from './security/operations/freeze/SetAddressFroz
 import DeactivateInternalKycRequest from './security/kyc/DeactivateInternalKycRequest';
 import TakeSnapshotRequest from './security/operations/snapshot/TakeSnapshotRequest';
 import RedeemAtMaturityByPartitionRequest from './bond/RedeemAtMaturityByPartitionRequest';
+import FullRedeemAtMaturityRequest from './bond/FullRedeemAtMaturityRequest';
 import GetTokenHoldersAtSnapshotRequest from './security/operations/snapshot/GetTokenHoldersAtSnapshotRequest';
 import GetTotalTokenHoldersAtSnapshotRequest from './security/operations/snapshot/GetTotalTokenHoldersAtSnapshotRequest';
 import GetCouponHoldersRequest from './bond/GetCouponHoldersRequest';
@@ -399,6 +400,7 @@ import GetProceedRecipientDataRequest from './bond/GetProceedRecipientDataReques
 import GetProceedRecipientsCountRequest from './bond/GetProceedRecipientsCountRequest';
 import GetProceedRecipientsRequest from './bond/GetProceedRecipientsRequest';
 import IsProceedRecipientRequest from './bond/IsProceedRecipientRequest';
+import GetPrincipalForRequest from './bond/GetPrincipalForRequest';
 
 export {
   CreateEquityRequest,
@@ -424,6 +426,7 @@ export {
   GetVotingRightsRequest,
   GetAllVotingRightsRequest,
   GetCouponForRequest,
+  GetPrincipalForRequest,
   GetCouponRequest,
   GetAllCouponsRequest,
   GetRoleCountForRequest,
@@ -577,6 +580,7 @@ export {
   SetAddressFrozenRequest,
   TakeSnapshotRequest,
   RedeemAtMaturityByPartitionRequest,
+  FullRedeemAtMaturityRequest,
   GetTokenHoldersAtSnapshotRequest,
   GetTotalTokenHoldersAtSnapshotRequest,
   GetCouponHoldersRequest,

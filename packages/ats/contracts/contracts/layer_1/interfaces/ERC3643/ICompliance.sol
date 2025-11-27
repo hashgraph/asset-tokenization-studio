@@ -24,9 +24,5 @@ interface ICompliance {
     /**
      * @notice Query the compliance module to check if a transfer can be made
      */
-    function canTransfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external view returns (bool);
+    function canTransfer(address _from, address _to, uint256 _amount) external view returns (bool);
 }

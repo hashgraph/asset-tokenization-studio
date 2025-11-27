@@ -2,33 +2,18 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IExternalControlListManagement {
-    event ExternalControlListsUpdated(
-        address indexed operator,
-        address[] controlLists,
-        bool[] actives
-    );
-    event AddedToExternalControlLists(
-        address indexed operator,
-        address controlList
-    );
-    event RemovedFromExternalControlLists(
-        address indexed operator,
-        address controlList
-    );
+    event ExternalControlListsUpdated(address indexed operator, address[] controlLists, bool[] actives);
+    event AddedToExternalControlLists(address indexed operator, address controlList);
+    event RemovedFromExternalControlLists(address indexed operator, address controlList);
 
     error ListedControlList(address controlList);
 
     error UnlistedControlList(address controlList);
 
-    error ExternalControlListsNotUpdated(
-        address[] controlLista,
-        bool[] actives
-    );
+    error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives);
 
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalControlLists(
-        address[] calldata _controlLists
-    ) external;
+    function initialize_ExternalControlLists(address[] calldata _controlLists) external;
 
     /**
      * @notice Updates the status of multiple external control lists
@@ -41,31 +26,22 @@ interface IExternalControlListManagement {
     /**
      * @notice Adds a new external control list
      */
-    function addExternalControlList(
-        address _controlList
-    ) external returns (bool success_);
+    function addExternalControlList(address _controlList) external returns (bool success_);
 
     /**
      * @notice Removes existing control lists
      */
-    function removeExternalControlList(
-        address _controlList
-    ) external returns (bool success_);
+    function removeExternalControlList(address _controlList) external returns (bool success_);
 
     /**
      * @notice Checks if an address is a listed external control list
      */
-    function isExternalControlList(
-        address _controlList
-    ) external view returns (bool);
+    function isExternalControlList(address _controlList) external view returns (bool);
 
     /**
      * @notice Returns the number of listed external control lists
      */
-    function getExternalControlListsCount()
-        external
-        view
-        returns (uint256 externalControlListsCount_);
+    function getExternalControlListsCount() external view returns (uint256 externalControlListsCount_);
 
     /**
      * @notice Returns a paginated list of listed external control lists

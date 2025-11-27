@@ -93,9 +93,7 @@ interface IKyc {
      * @param _account the account to check
      * @return kycStatus_ GRANTED or NOT_GRANTED
      */
-    function getKycStatusFor(
-        address _account
-    ) external view returns (KycStatus kycStatus_);
+    function getKycStatusFor(address _account) external view returns (KycStatus kycStatus_);
 
     /**
      * @dev Get all the info of the Kyc for an account
@@ -103,9 +101,7 @@ interface IKyc {
      * @param _account the account to check
      * @return kyc_
      */
-    function getKycFor(
-        address _account
-    ) external view returns (KycData memory kyc_);
+    function getKycFor(address _account) external view returns (KycData memory kyc_);
 
     /**
      * @dev Get the count of accounts with a given Kyc status
@@ -113,9 +109,7 @@ interface IKyc {
      * @param _kycStatus GRANTED or NOT_GRANTED
      * @return kycAccountsCount_ count of accounts with the given Kyc status
      */
-    function getKycAccountsCount(
-        KycStatus _kycStatus
-    ) external view returns (uint256 kycAccountsCount_);
+    function getKycAccountsCount(KycStatus _kycStatus) external view returns (uint256 kycAccountsCount_);
 
     /**
      * @dev Get the internal kyc flag
@@ -137,8 +131,5 @@ interface IKyc {
         KycStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        returns (address[] memory accounts_, KycData[] memory kycData_);
+    ) external view returns (address[] memory accounts_, KycData[] memory kycData_);
 }

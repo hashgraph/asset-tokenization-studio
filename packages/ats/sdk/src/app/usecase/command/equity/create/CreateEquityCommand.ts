@@ -232,6 +232,7 @@ export class CreateEquityCommand extends Command<CreateEquityCommandResponse> {
     public readonly dividendRight: DividendType,
     public readonly currency: string,
     public readonly nominalValue: string,
+    public readonly nominalValueDecimals: number,
     public readonly factory?: ContractId,
     public readonly resolver?: ContractId,
     public readonly configId?: string,

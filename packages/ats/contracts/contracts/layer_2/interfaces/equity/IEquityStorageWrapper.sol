@@ -16,7 +16,8 @@ interface IEquityStorageWrapper {
         address indexed operator,
         uint256 indexed recordDate,
         uint256 indexed executionDate,
-        uint256 amount
+        uint256 amount,
+        uint8 amountDecimals
     );
 
     event ScheduledBalanceAdjustmentSet(

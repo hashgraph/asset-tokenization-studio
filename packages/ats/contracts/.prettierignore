@@ -4,10 +4,8 @@ artifacts/
 cache/
 coverage/
 node_modules/
-package.json
 package-lock.json
 typechain-types/
 .gitlab-ci.yml
 build
-**/*.md
 slither.db.json

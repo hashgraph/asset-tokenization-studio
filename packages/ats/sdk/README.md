@@ -174,6 +174,7 @@ Sets a new configuration into the SDK.
   - Currency: hexadecimal of the currency's 3 letter ISO code
   - numberOfUnits: maximum supply
   - nominalValue: only for information, represents the value of a single bond.
+  - nominalValueDecimals: only for information, represents the decimals of the nominal Value.
   - startingDate: Bond's starting date in seconds
   - maturityDate: Bond's maturity date in seconds
   - regulationType:
@@ -230,6 +231,7 @@ Creates a new coupon for the bond.
   - Currency: hexadecimal of the currency's 3 letter ISO code
   - numberOfShares: maximum supply
   - nominalValue: only for information, represents the value of a single equity.
+  - nominalValueDecimals: only for information, represents the decimals of the nominal Value.
   - regulationType:
     - 0 : no regulation
     - 1 : Reg S

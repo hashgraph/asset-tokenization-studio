@@ -259,6 +259,8 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   currency: string;
   numberOfShares: string;
   nominalValue: string;
+  nominalValueDecimals: number;
+
   regulationType: number;
   regulationSubType: number;
   isCountryControlListWhiteList: boolean;
@@ -294,6 +296,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     currency,
     numberOfShares,
     nominalValue,
+    nominalValueDecimals,
     regulationType,
     regulationSubType,
     isCountryControlListWhiteList,
@@ -330,6 +333,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     currency: string;
     numberOfShares: string;
     nominalValue: string;
+    nominalValueDecimals: number;
     regulationType: number;
     regulationSubType: number;
     isCountryControlListWhiteList: boolean;
@@ -420,6 +424,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.currency = currency;
     this.numberOfShares = numberOfShares;
     this.nominalValue = nominalValue;
+    this.nominalValueDecimals = nominalValueDecimals;
     this.regulationType = regulationType;
     this.regulationSubType = regulationSubType;
     this.isCountryControlListWhiteList = isCountryControlListWhiteList;

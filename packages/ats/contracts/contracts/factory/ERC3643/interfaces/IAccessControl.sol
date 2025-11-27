@@ -9,11 +9,7 @@ interface TRexIAccessControl {
      * @param account The account for which the role is to be granted
      * @param operator The caller of the function that emitted the event
      */
-    event RoleGranted(
-        address indexed operator,
-        address indexed account,
-        bytes32 indexed role
-    );
+    event RoleGranted(address indexed operator, address indexed account, bytes32 indexed role);
 
     /**
      * @dev Emitted when a role is revoked from an account
@@ -22,11 +18,7 @@ interface TRexIAccessControl {
      * @param account The account for which the role is to be revoked
      * @param operator The caller of the function that emitted the event
      */
-    event RoleRevoked(
-        address indexed operator,
-        address indexed account,
-        bytes32 indexed role
-    );
+    event RoleRevoked(address indexed operator, address indexed account, bytes32 indexed role);
 
     /**
      * @dev Emitted when a role is renounced by an account
@@ -56,10 +48,7 @@ interface TRexIAccessControl {
      * @param _account The account address
      * @return success_ true or false
      */
-    function grantRole(
-        bytes32 _role,
-        address _account
-    ) external returns (bool success_);
+    function grantRole(bytes32 _role, address _account) external returns (bool success_);
 
     /**
      * @dev Revokes a role
@@ -68,10 +57,7 @@ interface TRexIAccessControl {
      * @param _account The account address
      * @return success_ true or false
      */
-    function revokeRole(
-        bytes32 _role,
-        address _account
-    ) external returns (bool success_);
+    function revokeRole(bytes32 _role, address _account) external returns (bool success_);
 
     /**
      * @dev Renounces a role
@@ -101,9 +87,7 @@ interface TRexIAccessControl {
      * @param _account The account address
      * @return roleCount_ The number of roles
      */
-    function getRoleCountFor(
-        address _account
-    ) external view returns (uint256 roleCount_);
+    function getRoleCountFor(address _account) external view returns (uint256 roleCount_);
 
     /**
      * @dev Returns an array of roles the account currently has
@@ -125,9 +109,7 @@ interface TRexIAccessControl {
      * @param _role The role id
      * @return memberCount_ The number of members
      */
-    function getRoleMemberCount(
-        bytes32 _role
-    ) external view returns (uint256 memberCount_);
+    function getRoleMemberCount(bytes32 _role) external view returns (uint256 memberCount_);
 
     /**
      * @dev Returns an array of members the role currently has
@@ -150,8 +132,5 @@ interface TRexIAccessControl {
      * @param _account the account address
      * @return bool true or false
      */
-    function hasRole(
-        bytes32 _role,
-        address _account
-    ) external view returns (bool);
+    function hasRole(bytes32 _role, address _account) external view returns (bool);
 }

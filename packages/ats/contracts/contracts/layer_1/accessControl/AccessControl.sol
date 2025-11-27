@@ -1,20 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {IAccessControl} from '../interfaces/accessControl/IAccessControl.sol';
-import {Common} from '../common/Common.sol';
+import { IAccessControl } from "../interfaces/accessControl/IAccessControl.sol";
+import { Common } from "../common/Common.sol";
 
 abstract contract AccessControl is IAccessControl, Common {
     function grantRole(
         bytes32 _role,
         address _account
-    )
-        external
-        override
-        onlyRole(_getRoleAdmin(_role))
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_getRoleAdmin(_role)) onlyUnpaused returns (bool success_) {
         if (!_grantRole(_role, _account)) {
             revert AccountAssignedToRole(_role, _account);
         }
@@ -25,13 +19,7 @@ abstract contract AccessControl is IAccessControl, Common {
     function revokeRole(
         bytes32 _role,
         address _account
-    )
-        external
-        override
-        onlyRole(_getRoleAdmin(_role))
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_getRoleAdmin(_role)) onlyUnpaused returns (bool success_) {
         success_ = _revokeRole(_role, _account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, _account);
@@ -58,9 +46,7 @@ abstract contract AccessControl is IAccessControl, Common {
         emit RolesApplied(_roles, _actives, _account);
     }
 
-    function renounceRole(
-        bytes32 _role
-    ) external override onlyUnpaused returns (bool success_) {
+    function renounceRole(bytes32 _role) external override onlyUnpaused returns (bool success_) {
         address account = _msgSender();
         success_ = _revokeRole(_role, account);
         if (!success_) {
@@ -69,16 +55,11 @@ abstract contract AccessControl is IAccessControl, Common {
         emit RoleRenounced(account, _role);
     }
 
-    function hasRole(
-        bytes32 _role,
-        address _account
-    ) external view override returns (bool) {
+    function hasRole(bytes32 _role, address _account) external view override returns (bool) {
         return _hasRole(_role, _account);
     }
 
-    function getRoleCountFor(
-        address _account
-    ) external view override returns (uint256 roleCount_) {
+    function getRoleCountFor(address _account) external view override returns (uint256 roleCount_) {
         roleCount_ = _getRoleCountFor(_account);
     }
 
@@ -90,9 +71,7 @@ abstract contract AccessControl is IAccessControl, Common {
         roles_ = _getRolesFor(_account, _pageIndex, _pageLength);
     }
 
-    function getRoleMemberCount(
-        bytes32 _role
-    ) external view override returns (uint256 memberCount_) {
+    function getRoleMemberCount(bytes32 _role) external view override returns (uint256 memberCount_) {
         memberCount_ = _getRoleMemberCount(_role);
     }
 

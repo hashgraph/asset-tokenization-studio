@@ -237,6 +237,7 @@ import { Dividend } from '@domain/context/equity/Dividend';
 import { GetDividendsCountQuery } from '@query/equity/dividends/getDividendsCount/GetDividendsCountQuery';
 import { GetDividendsQuery } from '@query/equity/dividends/getDividends/GetDividendsQuery';
 import { GetDividendsForQuery } from '@query/equity/dividends/getDividendsFor/GetDividendsForQuery';
+import { GetDividendAmountForQuery } from '@query/equity/dividends/getDividendAmountFor/GetDividendAmountForQuery';
 import { DividendFor } from '@domain/context/equity/DividendFor';
 import { GetEquityDetailsQuery } from '@query/equity/get/getEquityDetails/GetEquityDetailsQuery';
 import { EquityDetails } from '@domain/context/equity/EquityDetails';
@@ -329,6 +330,9 @@ export const CreateEquityRequestFixture = createFixture<CreateEquityRequest>(
     );
     request.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    request.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
     );
     request.votingRight.faker((faker) => faker.datatype.boolean());
     request.liquidationRight.faker((faker) => faker.datatype.boolean());
@@ -514,6 +518,16 @@ export const GetDividendsForQueryFixture = createFixture<GetDividendsForQuery>(
   },
 );
 
+export const GetDividendAmountForQueryFixture = createFixture<GetDividendAmountForQuery>(
+  (query) => {
+    query.securityId.as(
+      () => new HederaId(HederaIdPropsFixture.create().value),
+    );
+    query.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
+    query.dividendId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  },
+);
+
 export const GetDividendsQueryFixture = createFixture<GetDividendsQuery>(
   (query) => {
     query.securityId.as(
@@ -601,6 +615,9 @@ export const CreateEquityCommandFixture = createFixture<CreateEquityCommand>(
     command.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
     );
+    command.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
     command.votingRight.faker((faker) => faker.datatype.boolean());
     command.informationRight.faker((faker) => faker.datatype.boolean());
     command.liquidationRight.faker((faker) => faker.datatype.boolean());
@@ -662,6 +679,9 @@ export const CreateTrexSuiteEquityCommandFixture =
     command.currency.faker((faker) => faker.finance.currencyCode());
     command.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    command.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
     );
     command.votingRight.faker((faker) => faker.datatype.boolean());
     command.informationRight.faker((faker) => faker.datatype.boolean());
@@ -769,6 +789,9 @@ export const EquityDetailsFixture = createFixture<EquityDetails>((props) => {
   );
   props.currency.faker((faker) => faker.finance.currencyCode());
   props.nominalValue.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  props.nominalValueDecimals.faker((faker) =>
+    faker.number.int({ min: 1, max: 5 }),
+  );
 });
 
 export const VotingForFixture = createFixture<VotingFor>((props) => {
@@ -862,6 +885,9 @@ export const CreateTrexSuiteEquityRequestFixture =
     );
     request.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    request.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
     );
     request.votingRight.faker((faker) => faker.datatype.boolean());
     request.liquidationRight.faker((faker) => faker.datatype.boolean());

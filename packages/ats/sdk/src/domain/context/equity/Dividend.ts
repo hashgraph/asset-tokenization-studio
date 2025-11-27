@@ -209,12 +209,14 @@ import { SecurityDate } from '../shared/SecurityDate';
 
 export class Dividend extends ValidatedDomain<Dividend> {
   amountPerUnitOfSecurity: BigDecimal;
+  amountDecimals: number;
   recordTimeStamp: number;
   executionTimeStamp: number;
   snapshotId?: number;
 
   constructor(
     amountPerUnitOfSecurity: BigDecimal,
+    amountDecimals: number,
     recordTimeStamp: number,
     executionTimeStamp: number,
     snapshotId?: number,
@@ -226,6 +228,7 @@ export class Dividend extends ValidatedDomain<Dividend> {
     });
 
     this.amountPerUnitOfSecurity = amountPerUnitOfSecurity;
+    this.amountDecimals = amountDecimals;
     this.recordTimeStamp = recordTimeStamp;
     this.executionTimeStamp = executionTimeStamp;
     this.snapshotId = snapshotId ? snapshotId : undefined;

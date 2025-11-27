@@ -16,11 +16,7 @@ interface IERC1594 {
      * for the token contract to interpret or record. This could be signed data authorising the transfer
      * (e.g. a dynamic whitelist) but is flexible enough to accomadate other use-cases.
      */
-    function transferWithData(
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function transferWithData(address _to, uint256 _value, bytes calldata _data) external;
 
     /**
      * @notice Transfer restrictions can take many forms and typically involve on-chain rules or whitelists.
@@ -35,12 +31,7 @@ interface IERC1594 {
      * for the token contract to interpret or record. This could be signed data authorising the transfer
      * (e.g. a dynamic whitelist) but is flexible enough to accomadate other use-cases.
      */
-    function transferFromWithData(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function transferFromWithData(address _from, address _to, uint256 _value, bytes calldata _data) external;
 
     /**
      * @notice This function must be called to increase the total supply (Corresponds to mint function of ERC20).
@@ -52,11 +43,7 @@ interface IERC1594 {
      * @param _data The `bytes calldata _data` allows arbitrary data to be submitted alongside the transfer.
      */
 
-    function issue(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function issue(address _tokenHolder, uint256 _value, bytes calldata _data) external;
 
     /**
      * @notice This function redeem an amount of the token of a msg.sender. For doing so msg.sender may incentivize
@@ -76,11 +63,7 @@ interface IERC1594 {
      * @param _value The amount of tokens need to be redeemed
      * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
      */
-    function redeemFrom(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+    function redeemFrom(address _tokenHolder, uint256 _value, bytes calldata _data) external;
 
     /**
      * @notice A security token issuer can specify that issuance has finished for the token

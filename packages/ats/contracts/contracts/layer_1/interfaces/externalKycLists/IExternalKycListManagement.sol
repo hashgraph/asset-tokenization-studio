@@ -1,19 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {IKyc} from '../kyc/IKyc.sol';
+import { IKyc } from "../kyc/IKyc.sol";
 
 interface IExternalKycListManagement {
-    event ExternalKycListsUpdated(
-        address indexed operator,
-        address[] kycLists,
-        bool[] actives
-    );
+    event ExternalKycListsUpdated(address indexed operator, address[] kycLists, bool[] actives);
     event AddedToExternalKycLists(address indexed operator, address kycList);
-    event RemovedFromExternalKycLists(
-        address indexed operator,
-        address kycList
-    );
+    event RemovedFromExternalKycLists(address indexed operator, address kycList);
 
     error ListedKycList(address kycList);
 
@@ -35,16 +28,12 @@ interface IExternalKycListManagement {
     /**
      * @notice Adds a new external kyc list
      */
-    function addExternalKycList(
-        address _kycList
-    ) external returns (bool success_);
+    function addExternalKycList(address _kycList) external returns (bool success_);
 
     /**
      * @notice Removes existing kyc lists
      */
-    function removeExternalKycList(
-        address _kycList
-    ) external returns (bool success_);
+    function removeExternalKycList(address _kycList) external returns (bool success_);
 
     /**
      * @notice Checks if an address is a listed external kyc list
@@ -54,18 +43,12 @@ interface IExternalKycListManagement {
     /**
      * @notice Queries the KYC status of the user in all the listed external KYC lists
      */
-    function isExternallyGranted(
-        address _account,
-        IKyc.KycStatus _kycStatus
-    ) external view returns (bool);
+    function isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) external view returns (bool);
 
     /**
      * @notice Returns the number of listed external kyc lists
      */
-    function getExternalKycListsCount()
-        external
-        view
-        returns (uint256 externalKycListsCount_);
+    function getExternalKycListsCount() external view returns (uint256 externalKycListsCount_);
 
     /**
      * @notice Returns a paginated list of listed external kyc lists

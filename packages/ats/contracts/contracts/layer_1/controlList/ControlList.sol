@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {IControlList} from '../interfaces/controlList/IControlList.sol';
-import {Common} from '../common/Common.sol';
-import {_CONTROL_LIST_ROLE} from '../constants/roles.sol';
+import { IControlList } from "../interfaces/controlList/IControlList.sol";
+import { Common } from "../common/Common.sol";
+import { _CONTROL_LIST_ROLE } from "../constants/roles.sol";
 
 abstract contract ControlList is IControlList, Common {
     // TODO: UNPAUSED
@@ -18,13 +18,7 @@ abstract contract ControlList is IControlList, Common {
 
     function addToControlList(
         address _account
-    )
-        external
-        override
-        onlyRole(_CONTROL_LIST_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_CONTROL_LIST_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _addToControlList(_account);
         if (!success_) {
             revert ListedAccount(_account);
@@ -34,13 +28,7 @@ abstract contract ControlList is IControlList, Common {
 
     function removeFromControlList(
         address _account
-    )
-        external
-        override
-        onlyRole(_CONTROL_LIST_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
+    ) external override onlyRole(_CONTROL_LIST_ROLE) onlyUnpaused returns (bool success_) {
         success_ = _removeFromControlList(_account);
         if (!success_) {
             revert UnlistedAccount(_account);
@@ -52,18 +40,11 @@ abstract contract ControlList is IControlList, Common {
         return _getControlListType();
     }
 
-    function isInControlList(
-        address _account
-    ) external view override returns (bool) {
+    function isInControlList(address _account) external view override returns (bool) {
         return _isInControlList(_account);
     }
 
-    function getControlListCount()
-        external
-        view
-        override
-        returns (uint256 controlListCount_)
-    {
+    function getControlListCount() external view override returns (uint256 controlListCount_) {
         controlListCount_ = _getControlListCount();
     }
 

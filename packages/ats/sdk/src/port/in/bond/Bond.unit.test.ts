@@ -11,6 +11,7 @@ import {
   GetAllCouponsRequest,
   UpdateMaturityDateRequest,
   RedeemAtMaturityByPartitionRequest,
+  FullRedeemAtMaturityRequest,
   GetCouponHoldersRequest,
   GetTotalCouponHoldersRequest,
   CreateTrexSuiteBondRequest,
@@ -20,6 +21,7 @@ import {
   GetProceedRecipientsCountRequest,
   GetProceedRecipientDataRequest,
   GetProceedRecipientsRequest,
+  GetPrincipalForRequest,
 } from '../request';
 import {
   HederaIdPropsFixture,
@@ -41,6 +43,7 @@ import {
   GetCouponHoldersQueryFixture,
   GetCouponRequestFixture,
   RedeemAtMaturityByPartitionRequestFixture,
+  FullRedeemAtMaturityRequestFixture,
   GetTotalCouponHoldersRequestFixture,
   SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,
@@ -52,6 +55,7 @@ import {
   GetProceedRecipientsCountRequestFixture,
   GetProceedRecipientDataRequestFixture,
   GetProceedRecipientsRequestFixture,
+  GetPrincipalForRequestFixture,
 } from '@test/fixtures/bond/BondFixture';
 import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
 import { Security } from '@domain/context/security/Security';
@@ -68,10 +72,13 @@ import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
 import { SetCouponCommand } from '@command/bond/coupon/set/SetCouponCommand';
 import { BigNumber } from 'ethers';
 import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetPrincipalForQuery } from '@query/bond/get/getPrincipalFor/GetPrincipalForQuery';
+import { GetCouponAmountForQuery } from '@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery';
 import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
 import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
+import { FullRedeemAtMaturityCommand } from '@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import { CreateTrexSuiteBondCommand } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommand';
@@ -97,9 +104,11 @@ describe('Bond', () => {
   let getAllCouponsRequest: GetAllCouponsRequest;
   let updateMaturityDateRequest: UpdateMaturityDateRequest;
   let redeemAtMaturityByPartitionRequest: RedeemAtMaturityByPartitionRequest;
+  let fullRedeemAtMaturityRequest: FullRedeemAtMaturityRequest;
   let getCouponHoldersRequest: GetCouponHoldersRequest;
   let getTotalCouponHoldersRequest: GetTotalCouponHoldersRequest;
   let createTrexSuiteBondRequest: CreateTrexSuiteBondRequest;
+  let getPrincipalForRequest: GetPrincipalForRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -181,6 +190,7 @@ describe('Bond', () => {
           }),
           createBondRequest.currency,
           createBondRequest.nominalValue,
+          createBondRequest.nominalValueDecimals,
           createBondRequest.startingDate,
           createBondRequest.maturityDate,
           new ContractId(factoryAddress),
@@ -246,6 +256,7 @@ describe('Bond', () => {
           }),
           createBondRequest.currency,
           createBondRequest.nominalValue,
+          createBondRequest.nominalValueDecimals,
           createBondRequest.startingDate,
           createBondRequest.maturityDate,
           new ContractId(factoryAddress),
@@ -484,6 +495,7 @@ describe('Bond', () => {
         expect.objectContaining({
           currency: expectedResponse.bond.currency,
           nominalValue: expectedResponse.bond.nominalValue.toString(),
+          nominalValueDecimals: expectedResponse.bond.nominalValueDecimals,
           startingDate: new Date(
             expectedResponse.bond.startingDate * ONE_THOUSAND,
           ),
@@ -629,9 +641,11 @@ describe('Bond', () => {
   });
 
   describe('getCouponFor', () => {
-    getCouponForRequest = new GetCouponForRequest(
-      GetCouponForRequestFixture.create(),
-    );
+    beforeEach(() => {
+      getCouponForRequest = new GetCouponForRequest(
+        GetCouponForRequestFixture.create(),
+      );
+    });
     it('should get coupon for successfully', async () => {
       const expectedResponse = {
         payload: new BigDecimal(BigNumber.from(10)),
@@ -716,6 +730,185 @@ describe('Bond', () => {
       await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(
         ValidationError,
       );
+    });
+  });
+
+  describe('getCouponAmountFor', () => {
+    beforeEach(() => {
+      getCouponForRequest = new GetCouponForRequest(
+        GetCouponForRequestFixture.create(),
+      );
+    });
+    it('should get coupon for successfully', async () => {
+      const expectedResponse = {
+        numerator: '10',
+        denominator: '4',
+        recordDateReached: true,
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.getCouponAmountFor(getCouponForRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetCouponForRequest',
+        getCouponForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetCouponAmountForQuery(
+          getCouponForRequest.targetId,
+          getCouponForRequest.securityId,
+          getCouponForRequest.couponId,
+        ),
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          numerator: expectedResponse.numerator,
+          denominator: expectedResponse.denominator,
+          recordDateReached: expectedResponse.recordDateReached,
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetCouponForRequest',
+        getCouponForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetCouponAmountForQuery(
+          getCouponForRequest.targetId,
+          getCouponForRequest.securityId,
+          getCouponForRequest.couponId,
+        ),
+      );
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      getCouponForRequest = new GetCouponForRequest({
+        ...GetCouponForRequestFixture.create(),
+        targetId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getCouponForRequest = new GetCouponForRequest({
+        ...GetCouponForRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if couponId is invalid', async () => {
+      getCouponForRequest = new GetCouponForRequest({
+        ...GetCouponForRequestFixture.create(),
+        couponId: 0,
+      });
+
+      await expect(
+        BondToken.getCouponAmountFor(getCouponForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe('getPrincipalFor', () => {
+    beforeEach(() => {
+      getPrincipalForRequest = new GetPrincipalForRequest(
+        GetPrincipalForRequestFixture.create(),
+      );
+    });
+    it('should get principal for successfully', async () => {
+      const expectedResponse = {
+        numerator: '10',
+        denominator: '4',
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.getPrincipalFor(getPrincipalForRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetPrincipalForRequest',
+        getPrincipalForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetPrincipalForQuery(
+          getPrincipalForRequest.targetId,
+          getPrincipalForRequest.securityId,
+        ),
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          numerator: expectedResponse.numerator,
+          denominator: expectedResponse.denominator,
+        }),
+      );
+    });
+
+    it('should throw an error if query execution fails', async () => {
+      const error = new Error('Query execution failed');
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.getPrincipalFor(getPrincipalForRequest),
+      ).rejects.toThrow('Query execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        'GetPrincipalForRequest',
+        getPrincipalForRequest,
+      );
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetPrincipalForQuery(
+          getPrincipalForRequest.targetId,
+          getPrincipalForRequest.securityId,
+        ),
+      );
+    });
+
+    it('should throw error if targetId is invalid', async () => {
+      getPrincipalForRequest = new GetPrincipalForRequest({
+        ...GetPrincipalForRequestFixture.create(),
+        targetId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getPrincipalFor(getPrincipalForRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      getPrincipalForRequest = new GetPrincipalForRequest({
+        ...GetPrincipalForRequestFixture.create(),
+        securityId: 'invalid',
+      });
+
+      await expect(
+        BondToken.getPrincipalFor(getPrincipalForRequest),
+      ).rejects.toThrow(ValidationError);
     });
   });
 
@@ -1088,6 +1281,92 @@ describe('Bond', () => {
     });
   });
 
+  describe('fullRedeemAtMaturity', () => {
+    fullRedeemAtMaturityRequest = new FullRedeemAtMaturityRequest(
+      FullRedeemAtMaturityRequestFixture.create(),
+    );
+    it('should redeem at maturity successfully', async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.fullRedeemAtMaturity(
+        fullRedeemAtMaturityRequest,
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        FullRedeemAtMaturityRequest.name,
+        fullRedeemAtMaturityRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new FullRedeemAtMaturityCommand(
+          fullRedeemAtMaturityRequest.securityId,
+          fullRedeemAtMaturityRequest.sourceId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if command execution fails', async () => {
+      const error = new Error('Command execution failed');
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        BondToken.fullRedeemAtMaturity(
+          fullRedeemAtMaturityRequest,
+        ),
+      ).rejects.toThrow('Command execution failed');
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        FullRedeemAtMaturityRequest.name,
+        fullRedeemAtMaturityRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new FullRedeemAtMaturityCommand(
+          fullRedeemAtMaturityRequest.securityId,
+          fullRedeemAtMaturityRequest.sourceId,
+        ),
+      );
+    });
+
+    it('should throw error if securityId is invalid', async () => {
+      fullRedeemAtMaturityRequest =
+        new FullRedeemAtMaturityRequest({
+          ...FullRedeemAtMaturityRequestFixture.create(),
+          securityId: 'invalid',
+        });
+
+      await expect(
+        BondToken.fullRedeemAtMaturity(
+          fullRedeemAtMaturityRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+
+    it('should throw error if sourceId is invalid', async () => {
+      fullRedeemAtMaturityRequest =
+        new FullRedeemAtMaturityRequest({
+          ...FullRedeemAtMaturityRequestFixture.create(),
+          sourceId: 'invalid',
+        });
+
+      await expect(
+        BondToken.fullRedeemAtMaturity(
+          fullRedeemAtMaturityRequest,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
   describe('getCouponHolders', () => {
     getCouponHoldersRequest = new GetCouponHoldersRequest(
       GetCouponHoldersQueryFixture.create(),
@@ -1336,6 +1615,7 @@ describe('Bond', () => {
           }),
           createTrexSuiteBondRequest.currency,
           createTrexSuiteBondRequest.nominalValue,
+          createTrexSuiteBondRequest.nominalValueDecimals,
           createTrexSuiteBondRequest.startingDate,
           createTrexSuiteBondRequest.maturityDate,
           new ContractId(factoryAddress),
@@ -1416,6 +1696,7 @@ describe('Bond', () => {
           }),
           createTrexSuiteBondRequest.currency,
           createTrexSuiteBondRequest.nominalValue,
+          createTrexSuiteBondRequest.nominalValueDecimals,
           createTrexSuiteBondRequest.startingDate,
           createTrexSuiteBondRequest.maturityDate,
           new ContractId(factoryAddress),

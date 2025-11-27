@@ -1,16 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    SnapshotsStorageWrapper1
-} from '../snapshots/SnapshotsStorageWrapper1.sol';
-import {
-    ScheduledTasksLib
-} from '../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
+import { SnapshotsStorageWrapper1 } from "../snapshots/SnapshotsStorageWrapper1.sol";
+import { ScheduledTasksLib } from "../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from '../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol';
+} from "../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     error WrongTimestamp(uint256 timeStamp);
@@ -32,9 +28,7 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
         uint256 _max,
         uint256 _timestamp
     ) internal returns (uint256) {
-        uint256 scheduledTasksLength = ScheduledTasksLib.getScheduledTaskCount(
-            _scheduledTasks
-        );
+        uint256 scheduledTasksLength = ScheduledTasksLib.getScheduledTaskCount(_scheduledTasks);
 
         if (scheduledTasksLength == 0) {
             return 0;
@@ -51,8 +45,10 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = scheduledTasksLength - j;
 
-            ScheduledTask memory currentScheduledTask = ScheduledTasksLib
-                .getScheduledTasksByIndex(_scheduledTasks, pos);
+            ScheduledTask memory currentScheduledTask = ScheduledTasksLib.getScheduledTasksByIndex(
+                _scheduledTasks,
+                pos
+            );
 
             if (currentScheduledTask.scheduledTimestamp < _timestamp) {
                 ScheduledTasksLib.popScheduledTask(_scheduledTasks);

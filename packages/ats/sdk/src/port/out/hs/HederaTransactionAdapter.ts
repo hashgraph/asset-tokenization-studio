@@ -496,6 +496,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         dividendRight: CastDividendType.toNumber(equityInfo.dividendRight),
         currency: equityInfo.currency,
         nominalValue: equityInfo.nominalValue.toString(),
+        nominalValueDecimals: equityInfo.nominalValueDecimals,
       };
 
       const securityTokenToCreate = new FactoryEquityToken(
@@ -607,6 +608,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       const bondDetails = new BondDetailsData(
         bondInfo.currency,
         bondInfo.nominalValue.toString(),
+        bondInfo.nominalValueDecimals,
         bondInfo.startingDate.toString(),
         bondInfo.maturityDate.toString(),
       );
@@ -1047,6 +1049,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       recordDate: recordDate.toHexString(),
       executionDate: executionDate.toHexString(),
       amount: amount.toHexString(),
+      amountDecimals: amount.decimals,
     };
     return this.executeWithArgs(
       new EquityUSAFacet__factory().attach(security.toString()),
@@ -3170,6 +3173,24 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async fullRedeemAtMaturity(
+    security: EvmAddress,
+    sourceId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Redeeming at maturity by partition to address ${security.toString()}`,
+    );
+    const contract = new Contract(security.toString(), Bond__factory.abi);
+    return this.executeWithArgs(
+      contract,
+      'fullRedeemAtMaturity',
+      securityId,
+      GAS.FULL_REDEEM_AT_MATURITY_GAS,
+      [sourceId.toString()],
+    );
+  }
+
   async createTrexSuiteBond(
     salt: string,
     owner: string,
@@ -3250,6 +3271,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const bondDetailsData = new BondDetailsData(
       bondDetails.currency,
       bondDetails.nominalValue.toString(),
+      bondDetails.nominalValueDecimals,
       bondDetails.startingDate.toString(),
       bondDetails.maturityDate.toString(),
     );
@@ -3397,6 +3419,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         dividendRight: CastDividendType.toNumber(equityDetails.dividendRight),
         currency: equityDetails.currency,
         nominalValue: equityDetails.nominalValue.toString(),
+        nominalValueDecimals: equityDetails.nominalValueDecimals,
       };
 
       const securityTokenToCreate = new FactoryEquityToken(

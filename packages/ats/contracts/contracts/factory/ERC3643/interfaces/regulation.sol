@@ -2,37 +2,28 @@
 pragma solidity ^0.8.17;
 
 uint256 constant _REGS_DEAL_SIZE = 0;
-AccreditedInvestors constant _REGS_ACCREDITED_INVESTORS = AccreditedInvestors
-    .ACCREDITATION_REQUIRED;
+AccreditedInvestors constant _REGS_ACCREDITED_INVESTORS = AccreditedInvestors.ACCREDITATION_REQUIRED;
 uint256 constant _REGS_MAX_NON_ACCREDITED_INVESTORS = 0;
 ManualInvestorVerification constant _REGS_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
     .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
-InternationalInvestors constant _REGS_INTERNATIONAL_INVESTORS = InternationalInvestors
-    .ALLOWED;
-ResaleHoldPeriod constant _REGS_RESALE_HOLD_PERIOD = ResaleHoldPeriod
-    .NOT_APPLICABLE;
+InternationalInvestors constant _REGS_INTERNATIONAL_INVESTORS = InternationalInvestors.ALLOWED;
+ResaleHoldPeriod constant _REGS_RESALE_HOLD_PERIOD = ResaleHoldPeriod.NOT_APPLICABLE;
 
 uint256 constant _REGD_506_B_DEAL_SIZE = 0;
-AccreditedInvestors constant _REGD_506_B_ACCREDITED_INVESTORS = AccreditedInvestors
-    .ACCREDITATION_REQUIRED;
+AccreditedInvestors constant _REGD_506_B_ACCREDITED_INVESTORS = AccreditedInvestors.ACCREDITATION_REQUIRED;
 uint256 constant _REGD_506_B_MAX_NON_ACCREDITED_INVESTORS = 35;
 ManualInvestorVerification constant _REGD_506_B_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
     .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
-InternationalInvestors constant _REGD_506_B_INTERNATIONAL_INVESTORS = InternationalInvestors
-    .NOT_ALLOWED;
-ResaleHoldPeriod constant _REGD_506_B_RESALE_HOLD_PERIOD = ResaleHoldPeriod
-    .APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
+InternationalInvestors constant _REGD_506_B_INTERNATIONAL_INVESTORS = InternationalInvestors.NOT_ALLOWED;
+ResaleHoldPeriod constant _REGD_506_B_RESALE_HOLD_PERIOD = ResaleHoldPeriod.APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
 
 uint256 constant _REGD_506_C_DEAL_SIZE = 0;
-AccreditedInvestors constant _REGD_506_C_ACCREDITED_INVESTORS = AccreditedInvestors
-    .ACCREDITATION_REQUIRED;
+AccreditedInvestors constant _REGD_506_C_ACCREDITED_INVESTORS = AccreditedInvestors.ACCREDITATION_REQUIRED;
 uint256 constant _REGD_506_C_MAX_NON_ACCREDITED_INVESTORS = 0;
 ManualInvestorVerification constant _REGD_506_C_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
     .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
-InternationalInvestors constant _REGD_506_C_INTERNATIONAL_INVESTORS = InternationalInvestors
-    .NOT_ALLOWED;
-ResaleHoldPeriod constant _REGD_506_C_RESALE_HOLD_PERIOD = ResaleHoldPeriod
-    .APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
+InternationalInvestors constant _REGD_506_C_INTERNATIONAL_INVESTORS = InternationalInvestors.NOT_ALLOWED;
+ResaleHoldPeriod constant _REGD_506_C_RESALE_HOLD_PERIOD = ResaleHoldPeriod.APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
 
 enum RegulationType {
     NONE,
@@ -89,10 +80,7 @@ struct RegulationData {
     ResaleHoldPeriod resaleHoldPeriod;
 }
 
-error RegulationTypeAndSubTypeForbidden(
-    RegulationType regulationType,
-    RegulationSubType regulationSubType
-);
+error RegulationTypeAndSubTypeForbidden(RegulationType regulationType, RegulationSubType regulationSubType);
 
 function buildRegulationData(
     RegulationType _regulationType,
@@ -102,26 +90,11 @@ function buildRegulationData(
         regulationType: _regulationType,
         regulationSubType: _regulationSubType,
         dealSize: buildDealSize(_regulationType, _regulationSubType),
-        accreditedInvestors: buildAccreditedInvestors(
-            _regulationType,
-            _regulationSubType
-        ),
-        maxNonAccreditedInvestors: buildMaxNonAccreditedInvestors(
-            _regulationType,
-            _regulationSubType
-        ),
-        manualInvestorVerification: buildManualInvestorVerification(
-            _regulationType,
-            _regulationSubType
-        ),
-        internationalInvestors: buildInternationalInvestors(
-            _regulationType,
-            _regulationSubType
-        ),
-        resaleHoldPeriod: buildResaleHoldPeriod(
-            _regulationType,
-            _regulationSubType
-        )
+        accreditedInvestors: buildAccreditedInvestors(_regulationType, _regulationSubType),
+        maxNonAccreditedInvestors: buildMaxNonAccreditedInvestors(_regulationType, _regulationSubType),
+        manualInvestorVerification: buildManualInvestorVerification(_regulationType, _regulationSubType),
+        internationalInvestors: buildInternationalInvestors(_regulationType, _regulationSubType),
+        resaleHoldPeriod: buildResaleHoldPeriod(_regulationType, _regulationSubType)
     });
 }
 
@@ -203,17 +176,11 @@ function buildResaleHoldPeriod(
     resaleHoldPeriod_ = _REGD_506_C_RESALE_HOLD_PERIOD;
 }
 
-function checkRegulationTypeAndSubType(
-    RegulationType _regulationType,
-    RegulationSubType _regulationSubType
-) pure {
+function checkRegulationTypeAndSubType(RegulationType _regulationType, RegulationSubType _regulationSubType) pure {
     if (isValidTypeAndSubType(_regulationType, _regulationSubType)) {
         return;
     }
-    revert RegulationTypeAndSubTypeForbidden(
-        _regulationType,
-        _regulationSubType
-    );
+    revert RegulationTypeAndSubTypeForbidden(_regulationType, _regulationSubType);
 }
 
 function isValidTypeAndSubType(
@@ -229,16 +196,12 @@ function isValidTypeAndSubTypeForRegS(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (bool isValid_) {
-    isValid_ =
-        _regulationType == RegulationType.REG_S &&
-        _regulationSubType == RegulationSubType.NONE;
+    isValid_ = _regulationType == RegulationType.REG_S && _regulationSubType == RegulationSubType.NONE;
 }
 
 function isValidTypeAndSubTypeForRegD(
     RegulationType _regulationType,
     RegulationSubType _regulationSubType
 ) pure returns (bool isValid_) {
-    isValid_ =
-        _regulationType == RegulationType.REG_D &&
-        _regulationSubType != RegulationSubType.NONE;
+    isValid_ = _regulationType == RegulationType.REG_D && _regulationSubType != RegulationSubType.NONE;
 }

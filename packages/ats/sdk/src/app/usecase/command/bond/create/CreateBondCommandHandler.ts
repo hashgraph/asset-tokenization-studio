@@ -47,6 +47,7 @@ export class CreateBondCommandHandler
         security,
         currency,
         nominalValue,
+        nominalValueDecimals,
         startingDate,
         maturityDate,
         factory,
@@ -128,6 +129,7 @@ export class CreateBondCommandHandler
       const bondInfo = new BondDetails(
         currency,
         BigDecimal.fromString(nominalValue),
+        nominalValueDecimals,
         parseInt(startingDate),
         parseInt(maturityDate),
       );

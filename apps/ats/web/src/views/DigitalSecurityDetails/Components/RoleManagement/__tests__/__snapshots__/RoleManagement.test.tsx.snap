@@ -52,7 +52,7 @@ exports[`RoleManagement should render correctly 1`] = `
             class="chakra-stack css-1pa0k2v"
           >
             <div
-              class="chakra-stack css-1dafx51"
+              class="chakra-stack css-1nb7vi4"
             >
               <p
                 class="css-1mk5tlk"
@@ -66,7 +66,7 @@ exports[`RoleManagement should render correctly 1`] = `
               </p>
             </div>
             <div
-              class="chakra-stack css-jf522b"
+              class="chakra-stack css-1ao5vqt"
             >
               <div
                 class="chakra-stack css-1eowlil"

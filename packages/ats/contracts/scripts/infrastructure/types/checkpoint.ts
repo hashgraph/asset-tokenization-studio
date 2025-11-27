@@ -1,0 +1,254 @@
+// SPDX-License-Identifier: Apache-2.0
+
+/**
+ * Checkpoint types for deployment resumability.
+ *
+ * These types enable saving and resuming deployment state at granular steps,
+ * allowing automatic recovery from failures without re-deploying completed contracts.
+ *
+ * @module infrastructure/types/checkpoint
+ */
+
+/**
+ * Deployed contract information for checkpoint tracking.
+ */
+export interface DeployedContract {
+  /** Contract address */
+  address: string;
+
+  /** Hedera Contract ID (if deployed on Hedera network) */
+  contractId?: string;
+
+  /** Transaction hash of deployment */
+  txHash: string;
+
+  /** Gas used for deployment */
+  gasUsed?: string;
+
+  /** Deployment timestamp (ISO 8601) */
+  deployedAt: string;
+}
+
+/**
+ * Configuration creation result for checkpoint tracking.
+ */
+export interface ConfigurationResult {
+  /** Configuration ID (bytes32) */
+  configId: string;
+
+  /** Configuration version number */
+  version: number;
+
+  /** Number of facets in configuration */
+  facetCount: number;
+
+  /** Transaction hash of configuration creation */
+  txHash: string;
+
+  /** Gas used for configuration */
+  gasUsed?: string;
+}
+
+/**
+ * Checkpoint status values.
+ */
+export type CheckpointStatus = "in-progress" | "completed" | "failed";
+
+/**
+ * Workflow type for checkpoint tracking.
+ */
+export type WorkflowType = "newBlr" | "existingBlr";
+
+/**
+ * Deployment checkpoint for state tracking and resumability.
+ *
+ * Checkpoints are saved after each major deployment step, enabling
+ * automatic resume from the exact point of failure.
+ */
+export interface DeploymentCheckpoint {
+  // ============================================================================
+  // Identity
+  // ============================================================================
+
+  /** Unique checkpoint ID (timestamp-based) */
+  checkpointId: string;
+
+  /** Network name (hedera-testnet, hedera-mainnet, etc.) */
+  network: string;
+
+  /** Address of deployer */
+  deployer: string;
+
+  // ============================================================================
+  // Status Tracking
+  // ============================================================================
+
+  /** Current checkpoint status */
+  status: CheckpointStatus;
+
+  /** Current step number (0-indexed) */
+  currentStep: number;
+
+  /** Workflow type */
+  workflowType: WorkflowType;
+
+  // ============================================================================
+  // Metadata
+  // ============================================================================
+
+  /** Deployment start time (ISO 8601) */
+  startTime: string;
+
+  /** Last checkpoint update time (ISO 8601) */
+  lastUpdate: string;
+
+  // ============================================================================
+  // Deployment State (incremental tracking)
+  // ============================================================================
+
+  steps: {
+    /** ProxyAdmin deployment (step 0) */
+    proxyAdmin?: DeployedContract;
+
+    /** BLR deployment (step 1) */
+    blr?: DeployedContract & {
+      /** Implementation address */
+      implementation: string;
+      /** Hedera Contract ID for implementation (if deployed on Hedera network) */
+      implementationContractId?: string;
+      /** Proxy address */
+      proxy: string;
+      /** Hedera Contract ID for proxy (if deployed on Hedera network) */
+      proxyContractId?: string;
+      /** Whether BLR is external (existingBlr workflow) */
+      isExternal?: boolean;
+    };
+
+    /**
+     * Facets deployment (step 2) - INCREMENTAL
+     * Saved after EACH facet deployment for fine-grained resumability
+     */
+    facets?: Map<string, DeployedContract>;
+
+    /** Facets registered in BLR (step 3) */
+    facetsRegistered?: boolean;
+
+    /** Configurations (steps 4-5) */
+    configurations?: {
+      /** Equity configuration */
+      equity?: ConfigurationResult;
+      /** Bond configuration */
+      bond?: ConfigurationResult;
+    };
+
+    /** Factory deployment (step 6) */
+    factory?: DeployedContract & {
+      /** Implementation address */
+      implementation: string;
+      /** Hedera Contract ID for implementation (if deployed on Hedera network) */
+      implementationContractId?: string;
+      /** Proxy address */
+      proxy: string;
+      /** Hedera Contract ID for proxy (if deployed on Hedera network) */
+      proxyContractId?: string;
+    };
+  };
+
+  // ============================================================================
+  // Options Preservation (for resume)
+  // ============================================================================
+
+  /** Original deployment options */
+  options: {
+    useTimeTravel?: boolean;
+    confirmations?: number;
+    enableRetry?: boolean;
+    verifyDeployment?: boolean;
+    saveOutput?: boolean;
+    outputPath?: string;
+    partialBatchDeploy?: boolean;
+    /** Number of facets per batch (default: DEFAULT_BATCH_SIZE) */
+    batchSize?: number;
+
+    // existingBlr workflow options
+    deployFacets?: boolean;
+    deployFactory?: boolean;
+    createConfigurations?: boolean;
+    existingProxyAdminAddress?: string;
+  };
+
+  // ============================================================================
+  // Failure Information (if status='failed')
+  // ============================================================================
+
+  failure?: {
+    /** Step number where failure occurred */
+    step: number;
+
+    /** Step name (human-readable) */
+    stepName: string;
+
+    /** Error message */
+    error: string;
+
+    /** Failure timestamp (ISO 8601) */
+    timestamp: string;
+
+    /** Stack trace (optional) */
+    stackTrace?: string;
+  };
+}
+
+/**
+ * Options for resuming deployments from checkpoints.
+ */
+export interface ResumeOptions {
+  /**
+   * Explicit checkpoint ID to resume from.
+   * Overrides auto-detection.
+   *
+   * @example 'hedera-testnet-1731085200000'
+   */
+  resumeFrom?: string;
+
+  /**
+   * Automatically resume incomplete deployments if detected.
+   * - In interactive mode (TTY): prompts user for confirmation
+   * - In CI/non-interactive mode: auto-resumes without prompt
+   *
+   * @default true
+   */
+  autoResume?: boolean;
+
+  /**
+   * Force fresh deployment, ignore checkpoints.
+   * Useful when you want to start clean despite incomplete deployments.
+   *
+   * @default false
+   */
+  ignoreCheckpoint?: boolean;
+
+  /**
+   * Delete checkpoint after successful completion.
+   * Set to true for CI environments to avoid checkpoint accumulation.
+   *
+   * @default false (keep for historical reference)
+   */
+  deleteOnSuccess?: boolean;
+
+  /**
+   * Custom checkpoint directory path.
+   *
+   * By default, checkpoints are saved in node_modules which gets wiped on npm install/ci.
+   * Specify a persistent directory to preserve checkpoints across installations.
+   *
+   * Recommended: './deployments/.checkpoints' at project root (not inside node_modules)
+   *
+   * ⚠️ WARNING: Directories inside node_modules will be deleted on npm install.
+   *
+   * @default 'node_modules/@hashgraph/asset-tokenization-contracts/build/deployments/.checkpoints'
+   * @example './deployments/.checkpoints'
+   * @example '/tmp/ats-deployments/.checkpoints'
+   */
+  checkpointDir?: string;
+}

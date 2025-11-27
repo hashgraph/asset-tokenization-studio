@@ -1,31 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    IResolverProxy
-} from '../../../interfaces/resolver/resolverProxy/IResolverProxy.sol';
-import {
-    IBusinessLogicResolver
-} from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
-import {
-    IDiamondLoupe
-} from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
-import {
-    AccessControlStorageWrapper
-} from '../../../layer_0/core/accessControl/AccessControlStorageWrapper.sol';
-import {
-    PauseStorageWrapper
-} from '../../../layer_0/core/pause/PauseStorageWrapper.sol';
-import {
-    _RESOLVER_PROXY_STORAGE_POSITION
-} from '../../../layer_1/constants/storagePositions.sol';
+import { IResolverProxy } from "../../../interfaces/resolver/resolverProxy/IResolverProxy.sol";
+import { IBusinessLogicResolver } from "../../../interfaces/resolver/IBusinessLogicResolver.sol";
+import { IDiamondLoupe } from "../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
+import { AccessControlStorageWrapper } from "../../../layer_0/core/accessControl/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../layer_0/core/pause/PauseStorageWrapper.sol";
+import { _RESOLVER_PROXY_STORAGE_POSITION } from "../../../layer_1/constants/storagePositions.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
 // The loupe functions are required by the EIP2535 ResolverProxys standard
-abstract contract ResolverProxyUnstructured is
-    AccessControlStorageWrapper,
-    PauseStorageWrapper
-{
+abstract contract ResolverProxyUnstructured is AccessControlStorageWrapper, PauseStorageWrapper {
     struct FacetIdsAndSelectorPosition {
         bytes32 facetId;
         uint16 selectorPosition;
@@ -44,10 +29,7 @@ abstract contract ResolverProxyUnstructured is
         uint256 _version,
         IResolverProxy.Rbac[] memory _rbacs
     ) internal {
-        _resolver.checkResolverProxyConfigurationRegistered(
-            _resolverProxyConfigurationId,
-            _version
-        );
+        _resolver.checkResolverProxyConfigurationRegistered(_resolverProxyConfigurationId, _version);
         ResolverProxyStorage storage ds = _resolverProxyStorage();
         _updateResolver(ds, _resolver);
         _updateConfigId(ds, _resolverProxyConfigurationId);
@@ -55,45 +37,27 @@ abstract contract ResolverProxyUnstructured is
         _assignRbacRoles(_rbacs);
     }
 
-    function _updateResolver(
-        ResolverProxyStorage storage _ds,
-        IBusinessLogicResolver _resolver
-    ) internal {
+    function _updateResolver(ResolverProxyStorage storage _ds, IBusinessLogicResolver _resolver) internal {
         _ds.resolver = _resolver;
     }
 
-    function _updateConfigId(
-        ResolverProxyStorage storage _ds,
-        bytes32 _resolverProxyConfigurationId
-    ) internal {
+    function _updateConfigId(ResolverProxyStorage storage _ds, bytes32 _resolverProxyConfigurationId) internal {
         _ds.resolverProxyConfigurationId = _resolverProxyConfigurationId;
     }
 
-    function _updateVersion(
-        ResolverProxyStorage storage _ds,
-        uint256 _version
-    ) internal {
+    function _updateVersion(ResolverProxyStorage storage _ds, uint256 _version) internal {
         _ds.version = _version;
     }
 
     function _assignRbacRoles(IResolverProxy.Rbac[] memory _rbacs) internal {
         for (uint256 rbacIndex; rbacIndex < _rbacs.length; rbacIndex++) {
-            for (
-                uint256 memberIndex;
-                memberIndex < _rbacs[rbacIndex].members.length;
-                memberIndex++
-            ) {
-                _grantRole(
-                    _rbacs[rbacIndex].role,
-                    _rbacs[rbacIndex].members[memberIndex]
-                );
+            for (uint256 memberIndex; memberIndex < _rbacs[rbacIndex].members.length; memberIndex++) {
+                _grantRole(_rbacs[rbacIndex].role, _rbacs[rbacIndex].members[memberIndex]);
             }
         }
     }
 
-    function _getFacetsLength(
-        ResolverProxyStorage storage _ds
-    ) internal view returns (uint256 facetsLength_) {
+    function _getFacetsLength(ResolverProxyStorage storage _ds) internal view returns (uint256 facetsLength_) {
         facetsLength_ = _ds.resolver.getFacetsLengthByConfigurationIdAndVersion(
             _ds.resolverProxyConfigurationId,
             _ds.version
@@ -117,13 +81,11 @@ abstract contract ResolverProxyUnstructured is
         ResolverProxyStorage storage _ds,
         bytes32 _facetId
     ) internal view returns (uint256 facetSelectorsLength_) {
-        facetSelectorsLength_ = _ds
-            .resolver
-            .getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
-                _ds.resolverProxyConfigurationId,
-                _ds.version,
-                _facetId
-            );
+        facetSelectorsLength_ = _ds.resolver.getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _facetId
+        );
     }
 
     function _getFacetSelectors(
@@ -132,15 +94,13 @@ abstract contract ResolverProxyUnstructured is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes4[] memory facetSelectors_) {
-        facetSelectors_ = _ds
-            .resolver
-            .getFacetSelectorsByConfigurationIdVersionAndFacetId(
-                _ds.resolverProxyConfigurationId,
-                _ds.version,
-                _facetId,
-                _pageIndex,
-                _pageLength
-            );
+        facetSelectors_ = _ds.resolver.getFacetSelectorsByConfigurationIdVersionAndFacetId(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _facetId,
+            _pageIndex,
+            _pageLength
+        );
     }
 
     function _getFacetIds(
@@ -161,14 +121,12 @@ abstract contract ResolverProxyUnstructured is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory facetAddresses_) {
-        facetAddresses_ = _ds
-            .resolver
-            .getFacetAddressesByConfigurationIdAndVersion(
-                _ds.resolverProxyConfigurationId,
-                _ds.version,
-                _pageIndex,
-                _pageLength
-            );
+        facetAddresses_ = _ds.resolver.getFacetAddressesByConfigurationIdAndVersion(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _pageIndex,
+            _pageLength
+        );
     }
 
     function _getFacetIdBySelector(
@@ -193,16 +151,8 @@ abstract contract ResolverProxyUnstructured is
         );
     }
 
-    function _getFacetAddress(
-        ResolverProxyStorage storage _ds,
-        bytes4 _selector
-    ) internal view returns (address) {
-        return
-            _ds.resolver.resolveResolverProxyCall(
-                _ds.resolverProxyConfigurationId,
-                _ds.version,
-                _selector
-            );
+    function _getFacetAddress(ResolverProxyStorage storage _ds, bytes4 _selector) internal view returns (address) {
+        return _ds.resolver.resolveResolverProxyCall(_ds.resolverProxyConfigurationId, _ds.version, _selector);
     }
 
     function _supportsInterface(
@@ -216,11 +166,7 @@ abstract contract ResolverProxyUnstructured is
         );
     }
 
-    function _resolverProxyStorage()
-        internal
-        pure
-        returns (ResolverProxyStorage storage ds)
-    {
+    function _resolverProxyStorage() internal pure returns (ResolverProxyStorage storage ds) {
         bytes32 position = _RESOLVER_PROXY_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

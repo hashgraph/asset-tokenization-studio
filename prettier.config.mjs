@@ -5,61 +5,61 @@
  * @type {import("prettier").Config}
  */
 const baseConfig = {
-  printWidth: 80,
+  printWidth: 120,
   tabWidth: 2,
   useTabs: false,
   semi: true,
-  singleQuote: true,
-  quoteProps: 'as-needed',
+  singleQuote: false,
+  quoteProps: "as-needed",
   jsxSingleQuote: false,
-  trailingComma: 'all',
+  trailingComma: "all",
   bracketSpacing: true,
   bracketSameLine: false,
-  arrowParens: 'always',
-  endOfLine: 'auto',
+  arrowParens: "always",
+  endOfLine: "lf",
 
   // Include Solidity plugin for global formatting scripts
-  plugins: ['prettier-plugin-solidity'],
+  plugins: ["prettier-plugin-solidity"],
 
   overrides: [
     {
-      files: '*.sol',
+      files: "*.sol",
       options: {
         tabWidth: 4,
         printWidth: 120,
-        singleQuote: true,
-        semi: false,
-        compiler: '0.8.18',
+        singleQuote: false,
+        semi: true,
+        compiler: "0.8.18",
       },
     },
     {
-      files: ['*.ts', '*.tsx', '*.mts'],
+      files: ["*.ts", "*.tsx", "*.mts"],
       options: {
-        parser: 'typescript',
+        parser: "typescript",
       },
     },
     {
-      files: ['*.js', '*.jsx', '*.mjs', '*.cjs'],
+      files: ["*.js", "*.jsx", "*.mjs", "*.cjs"],
       options: {
-        parser: 'babel',
+        parser: "babel",
       },
     },
     {
-      files: ['*.json'],
+      files: ["*.json"],
       options: {
-        parser: 'json',
+        parser: "json",
       },
     },
     {
-      files: ['*.md'],
+      files: ["*.md"],
       options: {
-        parser: 'markdown',
+        parser: "markdown",
       },
     },
     {
-      files: ['*.yml', '*.yaml'],
+      files: ["*.yml", "*.yaml"],
       options: {
-        parser: 'yaml',
+        parser: "yaml",
       },
     },
   ],

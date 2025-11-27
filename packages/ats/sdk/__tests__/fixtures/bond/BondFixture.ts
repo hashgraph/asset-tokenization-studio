@@ -16,6 +16,8 @@ import { BondDetails } from '@domain/context/bond/BondDetails';
 import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
 import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
 import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetCouponAmountForQuery } from '@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery';
+import { GetPrincipalForQuery } from '@query/bond/get/getPrincipalFor/GetPrincipalForQuery';
 import { GetBondDetailsQuery } from '@query/bond/get/getBondDetails/GetBondDetailsQuery';
 import { HederaId } from '@domain/context/shared/HederaId';
 import CreateBondRequest from '@port/in/request/bond/CreateBondRequest';
@@ -29,6 +31,7 @@ import { faker } from '@faker-js/faker/.';
 import GetBondDetailsRequest from '@port/in/request/bond/GetBondDetailsRequest';
 import SetCouponRequest from '@port/in/request/bond/SetCouponRequest';
 import GetCouponForRequest from '@port/in/request/bond/GetCouponForRequest';
+import GetPrincipalForRequest from '@port/in/request/bond/GetPrincipalForRequest';
 import GetCouponRequest from '@port/in/request/bond/GetCouponRequest';
 import GetAllCouponsRequest from '@port/in/request/bond/GetAllCouponsRequest';
 import UpdateMaturityDateRequest from '@port/in/request/bond/UpdateMaturityDateRequest';
@@ -37,6 +40,8 @@ import { BigNumber } from 'ethers';
 import { Coupon } from '@domain/context/bond/Coupon';
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
 import RedeemAtMaturityByPartitionRequest from '@port/in/request/bond/RedeemAtMaturityByPartitionRequest';
+import { FullRedeemAtMaturityCommand } from '@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand';
+import FullRedeemAtMaturityRequest from '@port/in/request/bond/FullRedeemAtMaturityRequest';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import GetCouponHoldersRequest from '@port/in/request/bond/GetCouponHoldersRequest';
@@ -77,6 +82,9 @@ export const CreateBondCommandFixture = createFixture<CreateBondCommand>(
     command.currency.faker((faker) => faker.finance.currencyCode());
     command.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    command.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
     );
     command.startingDate.faker((faker) =>
       faker.date.recent().getTime().toString(),
@@ -137,6 +145,9 @@ export const CreateTrexSuiteBondCommandFixture =
     command.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
     );
+    command.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
     command.startingDate.faker((faker) =>
       faker.date.recent().getTime().toString(),
     );
@@ -186,10 +197,19 @@ export const RedeemAtMaturityByPartitionCommandFixture =
     command.partitionId.as(() => PartitionIdFixture.create().value);
   });
 
+export const FullRedeemAtMaturityCommandFixture =
+  createFixture<FullRedeemAtMaturityCommand>((command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.sourceId.as(() => HederaIdPropsFixture.create().value);
+  });
+
 export const BondDetailsFixture = createFixture<BondDetails>((props) => {
   props.currency.faker((faker) => faker.finance.currencyCode());
   props.nominalValue.faker((faker) =>
     faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+  );
+  props.nominalValueDecimals.faker((faker) =>
+    faker.number.int({ min: 1, max: 5 }),
   );
   props.startingDate.faker((faker) => faker.date.past());
   props.maturityDate.faker((faker) => faker.date.recent());
@@ -211,6 +231,20 @@ export const GetCouponForQueryFixture = createFixture<GetCouponForQuery>(
     query.securityId.as(() => HederaIdPropsFixture.create().value);
     query.targetId.as(() => HederaIdPropsFixture.create().value);
     query.couponId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  },
+);
+
+export const GetCouponAmountForQueryFixture =
+  createFixture<GetCouponAmountForQuery>((query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
+    query.couponId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  });
+
+export const GetPrincipalForQueryFixture = createFixture<GetPrincipalForQuery>(
+  (query) => {
+    query.securityId.as(() => HederaIdPropsFixture.create().value);
+    query.targetId.as(() => HederaIdPropsFixture.create().value);
   },
 );
 
@@ -316,6 +350,9 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>(
     request.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
     );
+    request.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
+    );
     let startingDate: Date;
     request.startingDate.faker((faker) => {
       startingDate = faker.date.recent();
@@ -378,6 +415,12 @@ export const GetCouponForRequestFixture = createFixture<GetCouponForRequest>(
   },
 );
 
+export const GetPrincipalForRequestFixture =
+  createFixture<GetPrincipalForRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.targetId.as(() => HederaIdPropsFixture.create().value);
+  });
+
 export const GetCouponRequestFixture = createFixture<GetCouponRequest>(
   (request) => {
     request.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -407,6 +450,12 @@ export const RedeemAtMaturityByPartitionRequestFixture =
     request.securityId.as(() => HederaIdPropsFixture.create().value);
     request.sourceId.as(() => HederaIdPropsFixture.create().value);
     request.partitionId.as(() => PartitionIdFixture.create().value);
+  });
+
+export const FullRedeemAtMaturityRequestFixture =
+  createFixture<FullRedeemAtMaturityRequest>((request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.sourceId.as(() => HederaIdPropsFixture.create().value);
   });
 
 export const CreateTrexSuiteBondRequestFixture =
@@ -482,6 +531,9 @@ export const CreateTrexSuiteBondRequestFixture =
     );
     request.nominalValue.faker((faker) =>
       faker.finance.amount({ min: 1, max: 10, dec: 2 }),
+    );
+    request.nominalValueDecimals.faker((faker) =>
+      faker.number.int({ min: 1, max: 5 }),
     );
     let startingDate: Date;
     request.startingDate.faker((faker) => {

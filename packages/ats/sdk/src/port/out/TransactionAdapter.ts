@@ -514,6 +514,11 @@ interface ITransactionAdapter {
     amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  fullRedeemAtMaturity(
+    security: EvmAddress,
+    sourceId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 interface RoleTransactionAdapter {
@@ -1859,6 +1864,11 @@ export default abstract class TransactionAdapter
     partitionId: string,
     sourceId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract fullRedeemAtMaturity(
+    security: EvmAddress,
+    sourceId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 

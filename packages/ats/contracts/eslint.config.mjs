@@ -1,24 +1,24 @@
-// @ts-check
+/**
+ * ESLint configuration for ATS Contracts package
+ * Extends root configuration with Hardhat/Mocha-specific overrides
+ * @see https://eslint.org/docs/latest/use/configure/configuration-files
+ */
+import rootConfig from "../../../eslint.config.mjs";
+import globals from "globals";
 
-import eslint from '@eslint/js'
-import { globalIgnores } from 'eslint/config'
-import tseslint from 'typescript-eslint'
+export default [
+  ...rootConfig,
 
-export default tseslint.config(
-    eslint.configs.recommended,
-    tseslint.configs.recommended,
-    globalIgnores([
-        'typechain-types/**/**',
-        'test/demo/**/**',
-        'build/**/**',
-        'coverage/**/**',
-        '.solcover.js',
-    ]),
-    {
-        // * Overrides: Remove no-unused-expressions rule for test files
-        files: ['**/*.test.ts', '**/*.spec.ts', 'test/**/*', 'tests/**/*'], // File patterns for test files
-        rules: {
-            '@typescript-eslint/no-unused-expressions': 'off', // Disable the rule for test files
-        },
-    }
-)
+  // Hardhat/Mocha test files - add test globals and relax rules
+  {
+    files: ["test/**/*.ts", "**/*.test.ts", "**/*.spec.ts"],
+    languageOptions: {
+      globals: {
+        ...globals.mocha, // describe, it, before, after, beforeEach, afterEach
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-unused-expressions": "off", // Chai assertions use expressions
+    },
+  },
+];

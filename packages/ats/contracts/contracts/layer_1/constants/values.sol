@@ -32,13 +32,13 @@ bytes1 constant _SUCCESS = 0x00;
 //    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
 //);
 bytes32 constant _DOMAIN_TYPE_HASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
-string constant _SALT = '\x19\x01';
-string constant _CONTRACT_NAME_PROTECTEDPARTITIONS = 'ProtectedPartitions';
-string constant _CONTRACT_VERSION_PROTECTEDPARTITIONS = '1.0.0';
-string constant _CONTRACT_NAME_ERC20VOTES = 'ERC20Votes';
-string constant _CONTRACT_VERSION_ERC20VOTES = '1.0.0';
-string constant _CONTRACT_NAME_ERC20PERMIT = 'ERC20Permit';
-string constant _CONTRACT_VERSION_ERC20PERMIT = '1.0.0';
+string constant _SALT = "\x19\x01";
+string constant _CONTRACT_NAME_PROTECTEDPARTITIONS = "ProtectedPartitions";
+string constant _CONTRACT_VERSION_PROTECTEDPARTITIONS = "1.0.0";
+string constant _CONTRACT_NAME_ERC20VOTES = "ERC20Votes";
+string constant _CONTRACT_VERSION_ERC20VOTES = "1.0.0";
+string constant _CONTRACT_NAME_ERC20PERMIT = "ERC20Permit";
+string constant _CONTRACT_VERSION_ERC20PERMIT = "1.0.0";
 //keccak256(
 //    'protectedTransferFromByPartition(bytes32 _partition,address _from,address _to,uint256 _amount,uint256 _deadline,uint256 _nounce)'
 //);

@@ -66,6 +66,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
   currency: string;
   numberOfUnits: string;
   nominalValue: string;
+  nominalValueDecimals: number;
   startingDate: string;
   maturityDate: string;
   regulationType: number;
@@ -107,6 +108,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     currency,
     numberOfUnits,
     nominalValue,
+    nominalValueDecimals,
     startingDate,
     maturityDate,
     regulationType,
@@ -151,6 +153,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     currency: string;
     numberOfUnits: string;
     nominalValue: string;
+    nominalValueDecimals: number;
     startingDate: string;
     maturityDate: string;
     regulationType: number;
@@ -284,6 +287,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     this.currency = currency;
     this.numberOfUnits = numberOfUnits;
     this.nominalValue = nominalValue;
+    this.nominalValueDecimals = nominalValueDecimals;
     this.startingDate = startingDate;
     this.maturityDate = maturityDate;
     this.regulationType = regulationType;

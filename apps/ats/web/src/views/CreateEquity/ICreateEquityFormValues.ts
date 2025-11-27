@@ -213,6 +213,7 @@ export interface ICreateEquityFormValues {
   isApproval: boolean;
   isClearing: boolean;
   nominalValue: number;
+  nominalValueDecimals: number;
   currency: string;
   numberOfShares: string;
   totalAmount: string;

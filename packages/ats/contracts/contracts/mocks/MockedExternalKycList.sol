@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    IExternalKycList
-} from '../layer_1/interfaces/externalKycLists/IExternalKycList.sol';
-import {IKyc} from '../layer_1/interfaces/kyc/IKyc.sol';
+import { IExternalKycList } from "../layer_1/interfaces/externalKycLists/IExternalKycList.sol";
+import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
 
 contract MockedExternalKycList is IExternalKycList {
     mapping(address => IKyc.KycStatus) private _kycStatus;
@@ -22,9 +20,7 @@ contract MockedExternalKycList is IExternalKycList {
         emit KycRevoked(account);
     }
 
-    function getKycStatus(
-        address account
-    ) external view override returns (IKyc.KycStatus) {
+    function getKycStatus(address account) external view override returns (IKyc.KycStatus) {
         return _kycStatus[account];
     }
 }

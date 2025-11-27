@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {Common} from '../common/Common.sol';
-import {IClearingRedeem} from '../interfaces/clearing/IClearingRedeem.sol';
-import {ThirdPartyType} from '../../layer_0/common/types/ThirdPartyType.sol';
+import { Common } from "../common/Common.sol";
+import { IClearingRedeem } from "../interfaces/clearing/IClearingRedeem.sol";
+import { ThirdPartyType } from "../../layer_0/common/types/ThirdPartyType.sol";
 
 abstract contract ClearingRedeem is IClearingRedeem, Common {
     function clearingRedeemByPartition(
@@ -24,7 +24,7 @@ abstract contract ClearingRedeem is IClearingRedeem, Common {
             _clearingOperation,
             _amount,
             _msgSender(),
-            '',
+            "",
             ThirdPartyType.NULL
         );
     }
@@ -37,13 +37,9 @@ abstract contract ClearingRedeem is IClearingRedeem, Common {
         override
         onlyUnpaused
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyUnrecoveredAddress(_msgSender())
         validateAddress(_clearingOperationFrom.from)
         onlyClearingActivated
@@ -73,23 +69,16 @@ abstract contract ClearingRedeem is IClearingRedeem, Common {
         override
         onlyUnpaused
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         validateAddress(_clearingOperationFrom.from)
         onlyUnrecoveredAddress(_msgSender())
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
-            _checkOperator(
-                _clearingOperationFrom.clearingOperation.partition,
-                _clearingOperationFrom.from
-            );
+            _checkOperator(_clearingOperationFrom.clearingOperation.partition, _clearingOperationFrom.from);
         }
 
         (success_, clearingId_) = _clearingRedeemCreation(
@@ -111,40 +100,20 @@ abstract contract ClearingRedeem is IClearingRedeem, Common {
         onlyUnpaused
         onlyProtectedPartitions
         validateAddress(_protectedClearingOperation.from)
-        onlyWithValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        )
-        onlyRole(
-            _protectedPartitionsRole(
-                _protectedClearingOperation.clearingOperation.partition
-            )
-        )
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
+        onlyRole(_protectedPartitionsRole(_protectedClearingOperation.clearingOperation.partition))
         onlyClearingActivated
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
         returns (bool success_, uint256 clearingId_)
     {
-        (success_, clearingId_) = _protectedClearingRedeemByPartition(
-            _protectedClearingOperation,
-            _amount,
-            _signature
-        );
+        (success_, clearingId_) = _protectedClearingRedeemByPartition(_protectedClearingOperation, _amount, _signature);
     }
 
     function getClearingRedeemForByPartition(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    )
-        external
-        view
-        override
-        returns (ClearingRedeemData memory clearingRedeemData_)
-    {
-        return
-            _getClearingRedeemForByPartitionAdjusted(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
+    ) external view override returns (ClearingRedeemData memory clearingRedeemData_) {
+        return _getClearingRedeemForByPartitionAdjusted(_partition, _tokenHolder, _clearingId);
     }
 }

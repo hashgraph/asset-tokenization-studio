@@ -2,12 +2,12 @@
 pragma solidity ^0.8.17;
 
 // solhint-disable no-global-import
-import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import {TRexIFactory, FactoryRegulationData} from '../interfaces/IFactory.sol';
-import '@onchain-id/solidity/contracts/factory/IIdFactory.sol';
-import {TREXFactoryAts} from '../TREXFactory.sol';
-import {SecurityDeploymentLib} from './core/SecurityDeploymentLib.sol';
-import {TREXBaseDeploymentLib} from './core/TREXBaseDeploymentLib.sol';
+import "@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol";
+import { TRexIFactory, FactoryRegulationData } from "../interfaces/IFactory.sol";
+import "@onchain-id/solidity/contracts/factory/IIdFactory.sol";
+import { TREXFactoryAts } from "../TREXFactory.sol";
+import { SecurityDeploymentLib } from "./core/SecurityDeploymentLib.sol";
+import { TREXBaseDeploymentLib } from "./core/TREXBaseDeploymentLib.sol";
 
 library TREXBondDeploymentLib {
     function deployTREXSuiteAtsBond(

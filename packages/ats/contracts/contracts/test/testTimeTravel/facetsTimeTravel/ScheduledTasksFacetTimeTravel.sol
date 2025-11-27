@@ -3,31 +3,16 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ScheduledCrossOrderedTasksFacet
-} from '../../../layer_2/scheduledTasks/scheduledCrossOrderedTasks/ScheduledCrossOrderedTasksFacet.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+} from "../../../layer_2/scheduledTasks/scheduledCrossOrderedTasks/ScheduledCrossOrderedTasksFacet.sol";
+import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
+import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 
-contract ScheduledCrossOrderedTasksFacetTimeTravel is
-    ScheduledCrossOrderedTasksFacet,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+contract ScheduledCrossOrderedTasksFacetTimeTravel is ScheduledCrossOrderedTasksFacet, TimeTravelStorageWrapper {
+    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 
-    function _blockNumber()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
+    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockNumber();
     }
 }

@@ -1,24 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    ArraysUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
-import {
-    CountersUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {
-    ISnapshotsStorageWrapper
-} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../corporateActions/CorporateActionsStorageWrapper.sol';
+import { ArraysUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol";
+import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import { _SNAPSHOT_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { ISnapshotsStorageWrapper } from "../../layer_1/interfaces/snapshots/ISnapshots.sol";
+import { CorporateActionsStorageWrapper } from "../corporateActions/CorporateActionsStorageWrapper.sol";
 
-abstract contract SnapshotsStorageWrapper1 is
-    ISnapshotsStorageWrapper,
-    CorporateActionsStorageWrapper
-{
+abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, CorporateActionsStorageWrapper {
     using ArraysUpgradeable for uint256[];
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
@@ -97,10 +86,7 @@ abstract contract SnapshotsStorageWrapper1 is
         return currentId;
     }
 
-    function _updateSnapshot(
-        Snapshots storage snapshots,
-        uint256 currentValue
-    ) internal {
+    function _updateSnapshot(Snapshots storage snapshots, uint256 currentValue) internal {
         uint256 currentId = _getCurrentSnapshotId();
         if (_lastSnapshotId(snapshots.ids) < currentId) {
             snapshots.ids.push(currentId);
@@ -108,10 +94,7 @@ abstract contract SnapshotsStorageWrapper1 is
         }
     }
 
-    function _updateSnapshotAddress(
-        SnapshotsAddress storage snapshots,
-        address currentValue
-    ) internal {
+    function _updateSnapshotAddress(SnapshotsAddress storage snapshots, address currentValue) internal {
         uint256 currentId = _getCurrentSnapshotId();
         if (_lastSnapshotId(snapshots.ids) < currentId) {
             snapshots.ids.push(currentId);
@@ -134,9 +117,7 @@ abstract contract SnapshotsStorageWrapper1 is
         }
         if (_lastSnapshotId(partitionSnapshots.ids) < currentId) {
             partitionSnapshots.ids.push(currentId);
-            ListOfPartitions memory listOfPartitions = ListOfPartitions(
-                partitionIds
-            );
+            ListOfPartitions memory listOfPartitions = ListOfPartitions(partitionIds);
             partitionSnapshots.values.push(listOfPartitions);
         }
     }
@@ -145,10 +126,7 @@ abstract contract SnapshotsStorageWrapper1 is
         return _snapshotStorage().currentSnapshotId.current();
     }
 
-    function _valueAt(
-        uint256 snapshotId,
-        Snapshots storage snapshots
-    ) internal view returns (bool, uint256) {
+    function _valueAt(uint256 snapshotId, Snapshots storage snapshots) internal view returns (bool, uint256) {
         (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
 
         return (found, found ? snapshots.values[index] : 0);
@@ -163,10 +141,7 @@ abstract contract SnapshotsStorageWrapper1 is
         return (found, found ? snapshots.values[index] : address(0));
     }
 
-    function _indexFor(
-        uint256 snapshotId,
-        uint256[] storage ids
-    ) internal view returns (bool, uint256) {
+    function _indexFor(uint256 snapshotId, uint256[] storage ids) internal view returns (bool, uint256) {
         if (snapshotId == 0) {
             revert SnapshotIdNull();
         }
@@ -183,9 +158,7 @@ abstract contract SnapshotsStorageWrapper1 is
         }
     }
 
-    function _lastSnapshotId(
-        uint256[] storage ids
-    ) internal view returns (uint256) {
+    function _lastSnapshotId(uint256[] storage ids) internal view returns (uint256) {
         if (ids.length == 0) {
             return 0;
         } else {
@@ -193,12 +166,7 @@ abstract contract SnapshotsStorageWrapper1 is
         }
     }
 
-    function _snapshotStorage()
-        internal
-        pure
-        virtual
-        returns (SnapshotStorage storage snapshotStorage_)
-    {
+    function _snapshotStorage() internal pure virtual returns (SnapshotStorage storage snapshotStorage_) {
         bytes32 position = _SNAPSHOT_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

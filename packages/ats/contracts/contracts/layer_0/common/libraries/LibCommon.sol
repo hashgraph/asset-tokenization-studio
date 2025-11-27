@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {EnumerableSetBytes4} from './EnumerableSetBytes4.sol';
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { EnumerableSetBytes4 } from "./EnumerableSetBytes4.sol";
 
 library LibCommon {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -73,11 +71,7 @@ library LibCommon {
         }
     }
 
-    function getSize(
-        uint256 _start,
-        uint256 _end,
-        uint256 _listCount
-    ) internal pure returns (uint256) {
+    function getSize(uint256 _start, uint256 _end, uint256 _listCount) internal pure returns (uint256) {
         if (_start >= _end) {
             return 0;
         }

@@ -7,11 +7,7 @@ interface ICapStorageWrapper {
      *
      * @param operator The caller of the function that emitted the event
      */
-    event MaxSupplySet(
-        address indexed operator,
-        uint256 newMaxSupply,
-        uint256 previousMaxSupply
-    );
+    event MaxSupplySet(address indexed operator, uint256 newMaxSupply, uint256 previousMaxSupply);
 
     /**
      * @dev Emitted when the token max supply is set for a partition
@@ -52,18 +48,10 @@ interface ICapStorageWrapper {
      * @dev Emitted when the token new max supply is less than the total supply
      *
      */
-    error NewMaxSupplyForPartitionTooLow(
-        bytes32 partition,
-        uint256 maxSupply,
-        uint256 totalSupply
-    );
+    error NewMaxSupplyForPartitionTooLow(bytes32 partition, uint256 maxSupply, uint256 totalSupply);
 
     /**
      * @dev Emitted when the new total max supply by partition is set to ZERO
      */
-    error NewMaxSupplyByPartitionTooHigh(
-        bytes32 partition,
-        uint256 newMaxSupplyByPartition,
-        uint256 maxSupply
-    );
+    error NewMaxSupplyByPartitionTooHigh(bytes32 partition, uint256 newMaxSupplyByPartition, uint256 maxSupply);
 }

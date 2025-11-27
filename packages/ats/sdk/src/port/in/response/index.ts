@@ -207,8 +207,11 @@ import AccountViewModel from './AccountViewModel';
 import BalanceViewModel from './BalanceViewModel';
 import ContractViewModel from './ContractViewModel';
 import DividendsForViewModel from './DividendsForViewModel';
+import DividendAmountForViewModel from './DividendAmountForViewModel';
 import DividendsViewModel from './DividendsViewModel';
 import CouponForViewModel from './CouponForViewModel';
+import CouponAmountForViewModel from './CouponAmountForViewModel';
+import PrincipalForViewModel from './PrincipalForViewModel';
 import CouponViewModel from './CouponViewModel';
 import SecurityViewModel from './SecurityViewModel';
 import TransactionResultViewModel from './TransactionResultViewModel';
@@ -234,8 +237,11 @@ export {
   BalanceViewModel,
   ContractViewModel,
   DividendsForViewModel,
+  DividendAmountForViewModel,
   DividendsViewModel,
   CouponForViewModel,
+  CouponAmountForViewModel,
+  PrincipalForViewModel,
   CouponViewModel,
   SecurityViewModel,
   TransactionResultViewModel,

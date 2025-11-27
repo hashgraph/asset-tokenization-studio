@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {IStaticFunctionSelectors} from './IStaticFunctionSelectors.sol';
+import { IStaticFunctionSelectors } from "./IStaticFunctionSelectors.sol";
 
 // A loupe is a small magnifying glass used to look at resolverProxys.
 // These functions look at resolverProxys
@@ -40,28 +40,21 @@ interface IDiamondLoupe is IStaticFunctionSelectors {
      * @param _pageLength number of members to return
      * @return facets_ Facet
      */
-    function getFacetsByPage(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (Facet[] memory facets_);
+    function getFacetsByPage(uint256 _pageIndex, uint256 _pageLength) external view returns (Facet[] memory facets_);
 
     /**
      * @notice Gets all the function selectors supported by a specific facet.
      * @param _facetId The facet key for the resolver.
      * @return facetSelectors_
      */
-    function getFacetSelectors(
-        bytes32 _facetId
-    ) external view returns (bytes4[] memory facetSelectors_);
+    function getFacetSelectors(bytes32 _facetId) external view returns (bytes4[] memory facetSelectors_);
 
     /**
      * @notice Gets the function selectors length.
      * @param _facetId The facet key for the resolver.
      * @return facetSelectorsLength_
      */
-    function getFacetSelectorsLength(
-        bytes32 _facetId
-    ) external view returns (uint256 facetSelectorsLength_);
+    function getFacetSelectorsLength(bytes32 _facetId) external view returns (uint256 facetSelectorsLength_);
 
     /**
      * @notice Gets all the function selectors supported by a specific facet.
@@ -97,10 +90,7 @@ interface IDiamondLoupe is IStaticFunctionSelectors {
      * @notice Get all the facet addresses used by a resolverProxy
      * @return facetAddresses_
      */
-    function getFacetAddresses()
-        external
-        view
-        returns (address[] memory facetAddresses_);
+    function getFacetAddresses() external view returns (address[] memory facetAddresses_);
 
     /**
      * @notice Get all the facet addresses used by a resolverProxy
@@ -119,9 +109,7 @@ interface IDiamondLoupe is IStaticFunctionSelectors {
      * @param _selector The function selector
      * @return facetId_ The facet key
      */
-    function getFacetIdBySelector(
-        bytes4 _selector
-    ) external view returns (bytes32 facetId_);
+    function getFacetIdBySelector(bytes4 _selector) external view returns (bytes32 facetId_);
 
     /**
      * @notice Get the information associated with an specific facet
@@ -129,9 +117,7 @@ interface IDiamondLoupe is IStaticFunctionSelectors {
      * @param _facetId The facet key for the resolver
      * @return facet_ Facet data
      */
-    function getFacet(
-        bytes32 _facetId
-    ) external view returns (Facet memory facet_);
+    function getFacet(bytes32 _facetId) external view returns (Facet memory facet_);
 
     /**
      * @notice Gets the facet that supports the given selector
@@ -139,7 +125,5 @@ interface IDiamondLoupe is IStaticFunctionSelectors {
      * @param _selector The function selector
      * @return facetAddress_ The facet address
      */
-    function getFacetAddress(
-        bytes4 _selector
-    ) external view returns (address facetAddress_);
+    function getFacetAddress(bytes4 _selector) external view returns (address facetAddress_);
 }

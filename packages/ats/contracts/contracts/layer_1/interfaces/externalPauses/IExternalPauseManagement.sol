@@ -2,11 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IExternalPauseManagement {
-    event ExternalPausesUpdated(
-        address indexed operator,
-        address[] pauses,
-        bool[] actives
-    );
+    event ExternalPausesUpdated(address indexed operator, address[] pauses, bool[] actives);
     event AddedToExternalPauses(address indexed operator, address pause);
     event RemovedFromExternalPauses(address indexed operator, address pause);
 
@@ -35,9 +31,7 @@ interface IExternalPauseManagement {
     /**
      * @notice Removes existing external pauses
      */
-    function removeExternalPause(
-        address _pause
-    ) external returns (bool success_);
+    function removeExternalPause(address _pause) external returns (bool success_);
 
     /**
      * @notice Checks if an address is a listed external pause
@@ -47,10 +41,7 @@ interface IExternalPauseManagement {
     /**
      * @notice Returns the number of listed external pauses
      */
-    function getExternalPausesCount()
-        external
-        view
-        returns (uint256 externalPausesCount_);
+    function getExternalPausesCount() external view returns (uint256 externalPausesCount_);
 
     /**
      * @notice Returns a paginated list of listed external pauses
