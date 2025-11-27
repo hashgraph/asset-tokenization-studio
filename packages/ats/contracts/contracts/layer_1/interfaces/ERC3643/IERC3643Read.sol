@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ICompliance} from './ICompliance.sol';
-import {IIdentityRegistry} from './IIdentityRegistry.sol';
+import { ICompliance } from "./ICompliance.sol";
+import { IIdentityRegistry } from "./IIdentityRegistry.sol";
 
 interface IERC3643Read {
     /**

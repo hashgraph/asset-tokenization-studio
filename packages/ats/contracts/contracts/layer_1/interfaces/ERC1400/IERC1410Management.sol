@@ -2,9 +2,8 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    OperatorTransferData
-} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import { OperatorTransferData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
+import { IssueData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
 
 /**
  * @title IERC1410Management

@@ -10,10 +10,15 @@ import GetBondDetailsRequest from '../request/bond/GetBondDetailsRequest';
 import BondDetailsViewModel from '../response/BondDetailsViewModel';
 import CouponViewModel from '../response/CouponViewModel';
 import CouponForViewModel from '../response/CouponForViewModel';
+import CouponAmountForViewModel from '../response/CouponAmountForViewModel';
+import PrincipalForViewModel from '../response/PrincipalForViewModel';
 import GetAllCouponsRequest from '../request/bond/GetAllCouponsRequest';
 import GetCouponForRequest from '../request/bond/GetCouponForRequest';
+import GetPrincipalForRequest from '../request/bond/GetPrincipalForRequest';
 import GetCouponRequest from '../request/bond/GetCouponRequest';
 import { GetCouponForQuery } from '@query/bond/coupons/getCouponFor/GetCouponForQuery';
+import { GetCouponAmountForQuery } from '@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery';
+import { GetPrincipalForQuery } from '@query/bond/get/getPrincipalFor/GetPrincipalForQuery';
 import { GetCouponQuery } from '@query/bond/coupons/getCoupon/GetCouponQuery';
 import { GetCouponCountQuery } from '@query/bond/coupons/getCouponCount/GetCouponCountQuery';
 import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
@@ -35,8 +40,9 @@ import {
 import UpdateMaturityDateRequest from '../request/bond/UpdateMaturityDateRequest';
 import { UpdateMaturityDateCommand } from '@command/bond/updateMaturityDate/UpdateMaturityDateCommand';
 import { RedeemAtMaturityByPartitionCommand } from '@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand';
+import { FullRedeemAtMaturityCommand } from '@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand';
 import RedeemAtMaturityByPartitionRequest from '../request/bond/RedeemAtMaturityByPartitionRequest';
-
+import FullRedeemAtMaturityRequest from '../request/bond/FullRedeemAtMaturityRequest';
 import { GetCouponHoldersQuery } from '@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery';
 import { GetTotalCouponHoldersQuery } from '@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery';
 import CreateTrexSuiteBondRequest from '../request/bond/CreateTrexSuiteBondRequest';
@@ -69,6 +75,12 @@ interface IBondInPort {
     request: SetCouponRequest,
   ): Promise<{ payload: number; transactionId: string }>;
   getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
+  getCouponAmountFor(
+    request: GetCouponForRequest,
+  ): Promise<CouponAmountForViewModel>;
+  getPrincipalFor(
+    request: GetPrincipalForRequest,
+  ): Promise<PrincipalForViewModel>;
   getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
   getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
   updateMaturityDate(
@@ -76,6 +88,9 @@ interface IBondInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   redeemAtMaturityByPartition(
     request: RedeemAtMaturityByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  fullRedeemAtMaturity(
+    request: FullRedeemAtMaturityRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]>;
   getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
@@ -157,6 +172,7 @@ class BondInPort implements IBondInPort {
         newSecurity,
         req.currency,
         req.nominalValue,
+        req.nominalValueDecimals,
         req.startingDate,
         req.maturityDate,
         securityFactory ? new ContractId(securityFactory) : undefined,
@@ -208,6 +224,7 @@ class BondInPort implements IBondInPort {
     const bondDetails: BondDetailsViewModel = {
       currency: res.bond.currency,
       nominalValue: res.bond.nominalValue.toString(),
+      nominalValueDecimals: res.bond.nominalValueDecimals,
       startingDate: new Date(res.bond.startingDate * ONE_THOUSAND),
       maturityDate: new Date(res.bond.maturityDate * ONE_THOUSAND),
     };
@@ -253,6 +270,47 @@ class BondInPort implements IBondInPort {
     };
 
     return couponFor;
+  }
+
+  @LogError
+  async getCouponAmountFor(
+    request: GetCouponForRequest,
+  ): Promise<CouponAmountForViewModel> {
+    ValidatedRequest.handleValidation('GetCouponForRequest', request);
+
+    const res = await this.queryBus.execute(
+      new GetCouponAmountForQuery(
+        request.targetId,
+        request.securityId,
+        request.couponId,
+      ),
+    );
+
+    const couponAmountFor: CouponAmountForViewModel = {
+      numerator: res.numerator,
+      denominator: res.denominator,
+      recordDateReached: res.recordDateReached,
+    };
+
+    return couponAmountFor;
+  }
+
+  @LogError
+  async getPrincipalFor(
+    request: GetPrincipalForRequest,
+  ): Promise<PrincipalForViewModel> {
+    ValidatedRequest.handleValidation('GetPrincipalForRequest', request);
+
+    const res = await this.queryBus.execute(
+      new GetPrincipalForQuery(request.targetId, request.securityId),
+    );
+
+    const principalFor: PrincipalForViewModel = {
+      numerator: res.numerator,
+      denominator: res.denominator,
+    };
+
+    return principalFor;
   }
 
   @LogError
@@ -331,6 +389,24 @@ class BondInPort implements IBondInPort {
         partitionId,
         sourceId,
         amount,
+      ),
+    );
+  }
+
+  @LogError
+  async fullRedeemAtMaturity(
+    request: FullRedeemAtMaturityRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, sourceId } = request;
+    ValidatedRequest.handleValidation(
+      FullRedeemAtMaturityRequest.name,
+      request,
+    );
+
+    return await this.commandBus.execute(
+      new FullRedeemAtMaturityCommand(
+        securityId,
+        sourceId,
       ),
     );
   }
@@ -418,6 +494,7 @@ class BondInPort implements IBondInPort {
         newSecurity,
         req.currency,
         req.nominalValue,
+        req.nominalValueDecimals,
         req.startingDate,
         req.maturityDate,
         new ContractId(securityFactory),

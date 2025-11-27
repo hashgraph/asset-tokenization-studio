@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {Hold} from '../hold/IHold.sol';
-import {IClearing} from './IClearing.sol';
+import { Hold } from "../hold/IHold.sol";
+import { IClearing } from "./IClearing.sol";
 
 interface IClearingHoldCreation is IClearing {
     /**
@@ -67,8 +67,5 @@ interface IClearingHoldCreation is IClearing {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    )
-        external
-        view
-        returns (ClearingHoldCreationData memory clearingHoldCreationData_);
+    ) external view returns (ClearingHoldCreationData memory clearingHoldCreationData_);
 }

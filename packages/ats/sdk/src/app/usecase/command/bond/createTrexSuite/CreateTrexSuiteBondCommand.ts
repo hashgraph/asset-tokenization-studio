@@ -32,6 +32,7 @@ export class CreateTrexSuiteBondCommand extends Command<CreateTrexSuiteBondComma
     public readonly security: SecurityProps,
     public readonly currency: string,
     public readonly nominalValue: string,
+    public readonly nominalValueDecimals: number,
     public readonly startingDate: string,
     public readonly maturityDate: string,
 

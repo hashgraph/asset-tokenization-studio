@@ -1,26 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    IBusinessLogicResolver
-} from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {LibCommon} from '../layer_0/common/libraries/LibCommon.sol';
-import {
-    EnumerableSetBytes4
-} from '../layer_0/common/libraries/EnumerableSetBytes4.sol';
-import {
-    IBusinessLogicResolverWrapper
-} from '../interfaces/resolver/IBusinessLogicResolverWrapper.sol';
-import {
-    IBusinessLogicResolver
-} from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {
-    _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
+import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
+import { LibCommon } from "../layer_0/common/libraries/LibCommon.sol";
+import { EnumerableSetBytes4 } from "../layer_0/common/libraries/EnumerableSetBytes4.sol";
+import { IBusinessLogicResolverWrapper } from "../interfaces/resolver/IBusinessLogicResolverWrapper.sol";
+import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
+import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../constants/storagePositions.sol";
 
-abstract contract BusinessLogicResolverWrapper is
-    IBusinessLogicResolverWrapper
-{
+abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     struct BusinessLogicResolverDataStorage {
         uint256 latestVersion;
         // list of facetIds
@@ -42,36 +30,22 @@ abstract contract BusinessLogicResolverWrapper is
         _;
     }
 
-    modifier onlyValidKeys(
-        IBusinessLogicResolver.BusinessLogicRegistryData[]
-            calldata _businessLogicsRegistryDatas
-    ) {
+    modifier onlyValidKeys(IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas) {
         _checkValidKeys(_businessLogicsRegistryDatas);
         _;
     }
 
     function _registerBusinessLogics(
-        IBusinessLogicResolver.BusinessLogicRegistryData[]
-            calldata _businessLogicsRegistryDatas
+        IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
     ) internal returns (uint256 latestVersion_) {
-        BusinessLogicResolverDataStorage
-            storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
+        BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
 
         businessLogicResolverDataStorage.latestVersion++;
-        IBusinessLogicResolver.BusinessLogicRegistryData
-            memory _businessLogicsRegistryData;
-        for (
-            uint256 index;
-            index < _businessLogicsRegistryDatas.length;
-            index++
-        ) {
+        IBusinessLogicResolver.BusinessLogicRegistryData memory _businessLogicsRegistryData;
+        for (uint256 index; index < _businessLogicsRegistryDatas.length; index++) {
             _businessLogicsRegistryData = _businessLogicsRegistryDatas[index];
 
-            if (
-                !businessLogicResolverDataStorage.businessLogicActive[
-                    _businessLogicsRegistryData.businessLogicKey
-                ]
-            ) {
+            if (!businessLogicResolverDataStorage.businessLogicActive[_businessLogicsRegistryData.businessLogicKey]) {
                 businessLogicResolverDataStorage.businessLogicActive[
                     _businessLogicsRegistryData.businessLogicKey
                 ] = true;
@@ -80,11 +54,8 @@ abstract contract BusinessLogicResolverWrapper is
                 );
             }
 
-            IBusinessLogicResolver.BusinessLogicVersion[]
-                storage versions = businessLogicResolverDataStorage
-                    .businessLogics[
-                        _businessLogicsRegistryData.businessLogicKey
-                    ];
+            IBusinessLogicResolver.BusinessLogicVersion[] storage versions = businessLogicResolverDataStorage
+                .businessLogics[_businessLogicsRegistryData.businessLogicKey];
 
             versions.push(
                 IBusinessLogicResolver.BusinessLogicVersion({
@@ -92,8 +63,7 @@ abstract contract BusinessLogicResolverWrapper is
                         version: businessLogicResolverDataStorage.latestVersion,
                         status: IBusinessLogicResolver.VersionStatus.ACTIVATED
                     }),
-                    businessLogicAddress: _businessLogicsRegistryData
-                        .businessLogicAddress
+                    businessLogicAddress: _businessLogicsRegistryData.businessLogicAddress
                 })
             );
             businessLogicResolverDataStorage.businessLogicVersionIndex[
@@ -113,13 +83,10 @@ abstract contract BusinessLogicResolverWrapper is
         return businessLogicResolverDataStorage.latestVersion;
     }
 
-    function _addSelectorsToBlacklist(
-        bytes32 _configurationId,
-        bytes4[] calldata _selectors
-    ) internal {
-        EnumerableSetBytes4.Bytes4Set
-            storage selectorBlacklist = _businessLogicResolverStorage()
-                .selectorBlacklist[_configurationId];
+    function _addSelectorsToBlacklist(bytes32 _configurationId, bytes4[] calldata _selectors) internal {
+        EnumerableSetBytes4.Bytes4Set storage selectorBlacklist = _businessLogicResolverStorage().selectorBlacklist[
+            _configurationId
+        ];
         uint256 length = _selectors.length;
         for (uint256 index; index < length; ) {
             bytes4 selector = _selectors[index];
@@ -132,13 +99,10 @@ abstract contract BusinessLogicResolverWrapper is
         }
     }
 
-    function _removeSelectorsFromBlacklist(
-        bytes32 _configurationId,
-        bytes4[] calldata _selectors
-    ) internal {
-        EnumerableSetBytes4.Bytes4Set
-            storage selectorBlacklist = _businessLogicResolverStorage()
-                .selectorBlacklist[_configurationId];
+    function _removeSelectorsFromBlacklist(bytes32 _configurationId, bytes4[] calldata _selectors) internal {
+        EnumerableSetBytes4.Bytes4Set storage selectorBlacklist = _businessLogicResolverStorage().selectorBlacklist[
+            _configurationId
+        ];
         uint256 length = _selectors.length;
         for (uint256 index; index < length; ) {
             bytes4 selector = _selectors[index];
@@ -151,17 +115,11 @@ abstract contract BusinessLogicResolverWrapper is
         }
     }
 
-    function _getVersionStatus(
-        uint256 _version
-    ) internal view returns (IBusinessLogicResolver.VersionStatus status_) {
+    function _getVersionStatus(uint256 _version) internal view returns (IBusinessLogicResolver.VersionStatus status_) {
         status_ = _businessLogicResolverStorage().versionStatuses[_version];
     }
 
-    function _getLatestVersion()
-        internal
-        view
-        returns (uint256 latestVersion_)
-    {
+    function _getLatestVersion() internal view returns (uint256 latestVersion_) {
         latestVersion_ = _businessLogicResolverStorage().latestVersion;
     }
 
@@ -174,38 +132,23 @@ abstract contract BusinessLogicResolverWrapper is
         );
     }
 
-    function _getBusinessLogicCount()
-        internal
-        view
-        returns (uint256 businessLogicCount_)
-    {
-        businessLogicCount_ = _businessLogicResolverStorage()
-            .activeBusinessLogics
-            .length;
+    function _getBusinessLogicCount() internal view returns (uint256 businessLogicCount_) {
+        businessLogicCount_ = _businessLogicResolverStorage().activeBusinessLogics.length;
     }
 
     function _getBusinessLogicKeys(
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory businessLogicKeys_) {
-        BusinessLogicResolverDataStorage
-            storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
+        BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
 
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
-            _pageIndex,
-            _pageLength
-        );
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
 
-        uint256 size = LibCommon.getSize(
-            start,
-            end,
-            businessLogicResolverDataStorage.activeBusinessLogics.length
-        );
+        uint256 size = LibCommon.getSize(start, end, businessLogicResolverDataStorage.activeBusinessLogics.length);
         businessLogicKeys_ = new bytes32[](size);
 
         for (uint256 index; index < size; index++) {
-            businessLogicKeys_[index] = businessLogicResolverDataStorage
-                .activeBusinessLogics[index + start];
+            businessLogicKeys_[index] = businessLogicResolverDataStorage.activeBusinessLogics[index + start];
         }
     }
 
@@ -213,23 +156,16 @@ abstract contract BusinessLogicResolverWrapper is
         bytes32 _businessLogicKey,
         uint256 _version
     ) internal view returns (address) {
-        BusinessLogicResolverDataStorage
-            storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
+        BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
 
-        if (
-            !businessLogicResolverDataStorage.businessLogicActive[
-                _businessLogicKey
-            ]
-        ) {
+        if (!businessLogicResolverDataStorage.businessLogicActive[_businessLogicKey]) {
             return address(0);
         }
-        uint256 position = businessLogicResolverDataStorage
-            .businessLogicVersionIndex[
-                keccak256(abi.encodePacked(_businessLogicKey, _version))
-            ];
-        IBusinessLogicResolver.BusinessLogicVersion
-            memory businessLogicVersion = businessLogicResolverDataStorage
-                .businessLogics[_businessLogicKey][position];
+        uint256 position = businessLogicResolverDataStorage.businessLogicVersionIndex[
+            keccak256(abi.encodePacked(_businessLogicKey, _version))
+        ];
+        IBusinessLogicResolver.BusinessLogicVersion memory businessLogicVersion = businessLogicResolverDataStorage
+            .businessLogics[_businessLogicKey][position];
         return businessLogicVersion.businessLogicAddress;
     }
 
@@ -238,22 +174,16 @@ abstract contract BusinessLogicResolverWrapper is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes4[] memory page_) {
-        EnumerableSetBytes4.Bytes4Set
-            storage selectorBlacklist = _businessLogicResolverStorage()
-                .selectorBlacklist[_configurationId];
-        page_ = LibCommon.getFromSet(
-            selectorBlacklist,
-            _pageIndex,
-            _pageLength
-        );
+        EnumerableSetBytes4.Bytes4Set storage selectorBlacklist = _businessLogicResolverStorage().selectorBlacklist[
+            _configurationId
+        ];
+        page_ = LibCommon.getFromSet(selectorBlacklist, _pageIndex, _pageLength);
     }
 
     function _businessLogicResolverStorage()
         internal
         pure
-        returns (
-            BusinessLogicResolverDataStorage storage businessLogicResolverData_
-        )
+        returns (BusinessLogicResolverDataStorage storage businessLogicResolverData_)
     {
         bytes32 position = _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -263,18 +193,14 @@ abstract contract BusinessLogicResolverWrapper is
     }
 
     function _checkValidVersion(uint256 _version) private view {
-        if (
-            _version == 0 ||
-            _version > _businessLogicResolverStorage().latestVersion
-        ) revert BusinessLogicVersionDoesNotExist(_version);
+        if (_version == 0 || _version > _businessLogicResolverStorage().latestVersion)
+            revert BusinessLogicVersionDoesNotExist(_version);
     }
 
     function _checkValidKeys(
-        IBusinessLogicResolver.BusinessLogicRegistryData[]
-            calldata _businessLogicsRegistryDatas
+        IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
     ) private view {
-        BusinessLogicResolverDataStorage
-            storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
+        BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
 
         // Check all previously activated keys are in the array.this
         // Check non duplicated keys.
@@ -284,20 +210,15 @@ abstract contract BusinessLogicResolverWrapper is
         uint256 innerIndex;
         for (uint256 index; index < length; ) {
             currentKey = _businessLogicsRegistryDatas[index].businessLogicKey;
-            if (uint256(currentKey) == 0)
-                revert ZeroKeyNotValidForBusinessLogic();
+            if (uint256(currentKey) == 0) revert ZeroKeyNotValidForBusinessLogic();
 
-            if (
-                businessLogicResolverDataStorage.businessLogicActive[currentKey]
-            ) ++activesBusinessLogicsKeys;
+            if (businessLogicResolverDataStorage.businessLogicActive[currentKey]) ++activesBusinessLogicsKeys;
             unchecked {
                 innerIndex = index + 1;
             }
             for (; innerIndex < length; ) {
-                if (
-                    currentKey ==
-                    _businessLogicsRegistryDatas[innerIndex].businessLogicKey
-                ) revert BusinessLogicKeyDuplicated(currentKey);
+                if (currentKey == _businessLogicsRegistryDatas[innerIndex].businessLogicKey)
+                    revert BusinessLogicKeyDuplicated(currentKey);
                 unchecked {
                     ++innerIndex;
                 }
@@ -306,9 +227,7 @@ abstract contract BusinessLogicResolverWrapper is
                 ++index;
             }
         }
-        if (
-            activesBusinessLogicsKeys !=
-            businessLogicResolverDataStorage.activeBusinessLogics.length
-        ) revert AllBusinessLogicKeysMustBeenInformed();
+        if (activesBusinessLogicsKeys != businessLogicResolverDataStorage.activeBusinessLogics.length)
+            revert AllBusinessLogicKeysMustBeenInformed();
     }
 }

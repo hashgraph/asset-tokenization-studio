@@ -231,6 +231,7 @@ interface IAssetMock {
         DividendType dividendRight;
         bytes3 currency;
         uint256 nominalValue;
+        uint8 nominalValueDecimals;
     }
 
     struct Voting {
@@ -247,6 +248,7 @@ interface IAssetMock {
         uint256 recordDate;
         uint256 executionDate;
         uint256 amount;
+        uint8 amountDecimals;
     }
 
     struct RegisteredDividend {
@@ -257,6 +259,7 @@ interface IAssetMock {
     struct DividendFor {
         uint256 tokenBalance;
         uint256 amount;
+        uint8 amountDecimals;
         uint256 recordDate;
         uint256 executionDate;
         uint8 decimals;
@@ -280,6 +283,7 @@ interface IAssetMock {
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;
+        uint8 nominalValueDecimals;
         uint256 startingDate;
         uint256 maturityDate;
     }
