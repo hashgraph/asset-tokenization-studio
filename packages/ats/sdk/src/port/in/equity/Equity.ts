@@ -207,6 +207,7 @@ import { SetDividendsCommand } from '@command/equity/dividends/set/SetDividendsC
 import { GetDividendsQuery } from '@query/equity/dividends/getDividends/GetDividendsQuery';
 import { GetDividendsCountQuery } from '@query/equity/dividends/getDividendsCount/GetDividendsCountQuery';
 import { GetDividendsForQuery } from '@query/equity/dividends/getDividendsFor/GetDividendsForQuery';
+import { GetDividendAmountForQuery } from '@query/equity/dividends/getDividendAmountFor/GetDividendAmountForQuery';
 import { SetVotingRightsCommand } from '@command/equity/votingRights/set/SetVotingRightsCommand';
 import { GetVotingQuery } from '@query/equity/votingRights/getVoting/GetVotingQuery';
 import { GetVotingCountQuery } from '@query/equity/votingRights/getVotingCount/GetVotingCountQuery';
@@ -264,6 +265,8 @@ import GetVotingHoldersRequest from '../request/equity/GetVotingHoldersRequest';
 import GetTotalVotingHoldersRequest from '../request/equity/GetTotalVotingHoldersRequest';
 import CreateTrexSuiteEquityRequest from '../request/equity/CreateTrexSuiteEquityRequest';
 import { CreateTrexSuiteEquityCommand } from '@command/equity/createTrexSuite/CreateTrexSuiteEquityCommand';
+import DividendAmountForViewModel from '../response/DividendAmountForViewModel';
+
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{
     security: SecurityViewModel;
@@ -278,6 +281,9 @@ interface IEquityInPort {
   getDividendsFor(
     request: GetDividendsForRequest,
   ): Promise<DividendsForViewModel>;
+  getDividendAmountFor(
+      request: GetDividendsForRequest,
+    ): Promise<DividendAmountForViewModel>;
   getDividends(request: GetDividendsRequest): Promise<DividendsViewModel>;
   getAllDividends(
     request: GetAllDividendsRequest,
@@ -389,6 +395,7 @@ class EquityInPort implements IEquityInPort {
         CastDividendType.fromNumber(req.dividendRight),
         req.currency,
         req.nominalValue,
+        req.nominalValueDecimals,
         new ContractId(securityFactory),
         new ContractId(resolver),
         req.configId,
@@ -473,6 +480,7 @@ class EquityInPort implements IEquityInPort {
         CastDividendType.fromNumber(req.dividendRight),
         req.currency,
         req.nominalValue,
+        req.nominalValueDecimals,
         securityFactory ? new ContractId(securityFactory) : undefined,
         resolver ? new ContractId(resolver) : undefined,
         req.configId,
@@ -528,6 +536,7 @@ class EquityInPort implements IEquityInPort {
       dividendRight: CastDividendType.toNumber(res.equity.dividendRight),
       currency: res.equity.currency,
       nominalValue: res.equity.nominalValue.toString(),
+      nominalValueDecimals: res.equity.nominalValueDecimals,
     };
 
     return equityDetails;
@@ -662,6 +671,29 @@ class EquityInPort implements IEquityInPort {
   }
 
   @LogError
+    async getDividendAmountFor(
+      request: GetDividendsForRequest,
+    ): Promise<DividendAmountForViewModel> {
+      ValidatedRequest.handleValidation('GetDividendForRequest', request);
+  
+      const res = await this.queryBus.execute(
+        new GetDividendAmountForQuery(
+          request.targetId,
+          request.securityId,
+          request.dividendId,
+        ),
+      );
+  
+      const dividendAmountFor: DividendAmountForViewModel = {
+        numerator: res.numerator,
+        denominator: res.denominator,
+        recordDateReached: res.recordDateReached,
+      };
+  
+      return dividendAmountFor;
+    }
+
+  @LogError
   async getDividends(
     request: GetDividendsRequest,
   ): Promise<DividendsViewModel> {
@@ -674,6 +706,7 @@ class EquityInPort implements IEquityInPort {
     const dividend: DividendsViewModel = {
       dividendId: request.dividendId,
       amountPerUnitOfSecurity: res.dividend.amountPerUnitOfSecurity.toString(),
+      amountDecimals: res.dividend.amountDecimals,
       recordDate: new Date(res.dividend.recordTimeStamp * ONE_THOUSAND),
       executionDate: new Date(res.dividend.executionTimeStamp * ONE_THOUSAND),
     };
@@ -704,6 +737,7 @@ class EquityInPort implements IEquityInPort {
         dividendId: i,
         amountPerUnitOfSecurity:
           res.dividend.amountPerUnitOfSecurity.toString(),
+        amountDecimals: res.dividend.amountDecimals,
         recordDate: new Date(res.dividend.recordTimeStamp * ONE_THOUSAND),
         executionDate: new Date(res.dividend.executionTimeStamp * ONE_THOUSAND),
       };

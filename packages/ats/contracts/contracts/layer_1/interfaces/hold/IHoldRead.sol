@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {ThirdPartyType} from '../../../layer_0/common/types/ThirdPartyType.sol';
-import {HoldIdentifier} from './IHold.sol';
+import { ThirdPartyType } from "../../../layer_0/common/types/ThirdPartyType.sol";
+import { HoldIdentifier } from "./IHold.sol";
 
 interface IHoldRead {
     /**
@@ -10,9 +10,7 @@ interface IHoldRead {
      * @param _tokenHolder The address of the token holder
      * @return amount_ The total amount of tokens held for the token holder
      */
-    function getHeldAmountFor(
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
+    function getHeldAmountFor(address _tokenHolder) external view returns (uint256 amount_);
 
     /**
      * @notice Gets the total amount of tokens held for a specific token holder on a specific partition
@@ -76,7 +74,5 @@ interface IHoldRead {
             ThirdPartyType thirdPartyType_
         );
 
-    function getHoldThirdParty(
-        HoldIdentifier calldata _holdIdentifier
-    ) external view returns (address thirdParty_);
+    function getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) external view returns (address thirdParty_);
 }

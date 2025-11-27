@@ -1,34 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    _BOND_STORAGE_POSITION
-} from '../../layer_2/constants/storagePositions.sol';
+import { _BOND_STORAGE_POSITION } from "../../layer_2/constants/storagePositions.sol";
 import {
     COUPON_CORPORATE_ACTION_TYPE,
     SNAPSHOT_RESULT_ID,
     SNAPSHOT_TASK_TYPE
-} from '../../layer_2/constants/values.sol';
-import {IBondRead} from '../../layer_2/interfaces/bond/IBondRead.sol';
-import {
-    IBondStorageWrapper
-} from '../../layer_2/interfaces/bond/IBondStorageWrapper.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    ERC20PermitStorageWrapper
-} from '../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol';
+} from "../../layer_2/constants/values.sol";
+import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
+import { IBondStorageWrapper } from "../../layer_2/interfaces/bond/IBondStorageWrapper.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { ERC20PermitStorageWrapper } from "../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol";
 
-abstract contract BondStorageWrapper is
-    IBondStorageWrapper,
-    ERC20PermitStorageWrapper
-{
+abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageWrapper {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     struct BondDataStorage {
-        IBondRead.BondDetailsData bondDetail;
+        bytes3 currency;
+        uint256 nominalValue;
+        uint256 startingDate;
+        uint256 maturityDate;
         bool initialized;
+        uint8 nominalValueDecimals;
     }
 
     /**
@@ -42,46 +35,32 @@ abstract contract BondStorageWrapper is
         _;
     }
 
-    function _storeBondDetails(
-        IBondRead.BondDetailsData memory _bondDetails
-    ) internal {
-        _bondStorage().bondDetail = _bondDetails;
+    function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal {
+        _bondStorage().currency = _bondDetails.currency;
+        _bondStorage().nominalValue = _bondDetails.nominalValue;
+        _bondStorage().nominalValueDecimals = _bondDetails.nominalValueDecimals;
+        _bondStorage().startingDate = _bondDetails.startingDate;
+        _bondStorage().maturityDate = _bondDetails.maturityDate;
     }
 
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
-    )
-        internal
-        returns (bool success_, bytes32 corporateActionId_, uint256 couponID_)
-    {
+    ) internal returns (bool success_, bytes32 corporateActionId_, uint256 couponID_) {
         bytes memory data = abi.encode(_newCoupon);
 
-        (success_, corporateActionId_, couponID_) = _addCorporateAction(
-            COUPON_CORPORATE_ACTION_TYPE,
-            data
-        );
+        (success_, corporateActionId_, couponID_) = _addCorporateAction(COUPON_CORPORATE_ACTION_TYPE, data);
 
         _initCoupon(success_, corporateActionId_, data);
     }
 
-    function _initCoupon(
-        bool _success,
-        bytes32 _actionId,
-        bytes memory _data
-    ) internal {
+    function _initCoupon(bool _success, bytes32 _actionId, bytes memory _data) internal {
         if (!_success) {
             revert IBondStorageWrapper.CouponCreationFailed();
         }
 
-        IBondRead.Coupon memory newCoupon = abi.decode(
-            _data,
-            (IBondRead.Coupon)
-        );
+        IBondRead.Coupon memory newCoupon = abi.decode(_data, (IBondRead.Coupon));
 
-        _addScheduledCrossOrderedTask(
-            newCoupon.recordDate,
-            abi.encode(SNAPSHOT_TASK_TYPE)
-        );
+        _addScheduledCrossOrderedTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
         _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
     }
 
@@ -90,35 +69,27 @@ abstract contract BondStorageWrapper is
      * @param _maturityDate The new maturity date to be set.
      * @return success_ True if the maturity date was set successfully.
      */
-    function _setMaturityDate(
-        uint256 _maturityDate
-    ) internal returns (bool success_) {
-        _bondStorage().bondDetail.maturityDate = _maturityDate;
+    function _setMaturityDate(uint256 _maturityDate) internal returns (bool success_) {
+        _bondStorage().maturityDate = _maturityDate;
         return true;
     }
 
-    function _getBondDetails()
-        internal
-        view
-        returns (IBondRead.BondDetailsData memory bondDetails_)
-    {
-        bondDetails_ = _bondStorage().bondDetail;
+    function _getBondDetails() internal view returns (IBondRead.BondDetailsData memory bondDetails_) {
+        bondDetails_ = IBondRead.BondDetailsData({
+            currency: _bondStorage().currency,
+            nominalValue: _bondStorage().nominalValue,
+            nominalValueDecimals: _bondStorage().nominalValueDecimals,
+            startingDate: _bondStorage().startingDate,
+            maturityDate: _bondStorage().maturityDate
+        });
     }
 
     function _getMaturityDate() internal view returns (uint256 maturityDate_) {
-        return _bondStorage().bondDetail.maturityDate;
+        return _bondStorage().maturityDate;
     }
 
-    function _getCoupon(
-        uint256 _couponID
-    )
-        internal
-        view
-        returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
-    {
-        bytes32 actionId = _corporateActionsStorage()
-            .actionsByType[COUPON_CORPORATE_ACTION_TYPE]
-            .at(_couponID - 1);
+    function _getCoupon(uint256 _couponID) internal view returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
+        bytes32 actionId = _corporateActionsStorage().actionsByType[COUPON_CORPORATE_ACTION_TYPE].at(_couponID - 1);
 
         (, bytes memory data) = _getCorporateAction(actionId);
 
@@ -126,19 +97,14 @@ abstract contract BondStorageWrapper is
             (registeredCoupon_.coupon) = abi.decode(data, (IBondRead.Coupon));
         }
 
-        registeredCoupon_.snapshotId = _getUintResultAt(
-            actionId,
-            SNAPSHOT_RESULT_ID
-        );
+        registeredCoupon_.snapshotId = _getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
     }
 
     function _getCouponFor(
         uint256 _couponID,
         address _account
     ) internal view returns (IBondRead.CouponFor memory couponFor_) {
-        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(
-            _couponID
-        );
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
 
         couponFor_.rate = registeredCoupon.coupon.rate;
         couponFor_.rateDecimals = registeredCoupon.coupon.rateDecimals;
@@ -150,14 +116,40 @@ abstract contract BondStorageWrapper is
             couponFor_.recordDateReached = true;
 
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? _getTotalBalanceOfAtSnapshot(
-                    registeredCoupon.snapshotId,
-                    _account
-                )
+                ? _getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, _account)
                 : _getTotalBalance(_account);
 
             couponFor_.decimals = _decimalsAdjusted();
         }
+    }
+
+    function _getCouponAmountFor(
+        uint256 _couponID,
+        address _account
+    ) internal view returns (IBondRead.CouponAmountFor memory couponAmountFor_) {
+        IBondRead.CouponFor memory couponFor = _getCouponFor(_couponID, _account);
+
+        if (!couponFor.recordDateReached) return couponAmountFor_;
+
+        IBondRead.BondDetailsData memory bondDetails = _getBondDetails();
+
+        couponAmountFor_.recordDateReached = true;
+
+        couponAmountFor_.numerator =
+            couponFor.tokenBalance *
+            bondDetails.nominalValue *
+            couponFor.rate *
+            couponFor.period;
+        couponAmountFor_.denominator =
+            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.rateDecimals) *
+            365 days;
+    }
+
+    function _getPrincipalFor(address _account) internal view returns (IBondRead.PrincipalFor memory principalFor_) {
+        IBondRead.BondDetailsData memory bondDetails = _getBondDetails();
+
+        principalFor_.numerator = _balanceOfAdjusted(_account) * bondDetails.nominalValue;
+        principalFor_.denominator = 10 ** (_decimalsAdjusted() + bondDetails.nominalValueDecimals);
     }
 
     function _getCouponCount() internal view returns (uint256 couponCount_) {
@@ -169,44 +161,27 @@ abstract contract BondStorageWrapper is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory holders_) {
-        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(
-            _couponID
-        );
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
 
-        if (registeredCoupon.coupon.recordDate >= _blockTimestamp())
-            return new address[](0);
+        if (registeredCoupon.coupon.recordDate >= _blockTimestamp()) return new address[](0);
 
         if (registeredCoupon.snapshotId != 0)
-            return
-                _tokenHoldersAt(
-                    registeredCoupon.snapshotId,
-                    _pageIndex,
-                    _pageLength
-                );
+            return _tokenHoldersAt(registeredCoupon.snapshotId, _pageIndex, _pageLength);
 
         return _getTokenHolders(_pageIndex, _pageLength);
     }
 
-    function _getTotalCouponHolders(
-        uint256 _couponID
-    ) internal view returns (uint256) {
-        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(
-            _couponID
-        );
+    function _getTotalCouponHolders(uint256 _couponID) internal view returns (uint256) {
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
 
         if (registeredCoupon.coupon.recordDate >= _blockTimestamp()) return 0;
 
-        if (registeredCoupon.snapshotId != 0)
-            return _totalTokenHoldersAt(registeredCoupon.snapshotId);
+        if (registeredCoupon.snapshotId != 0) return _totalTokenHoldersAt(registeredCoupon.snapshotId);
 
         return _getTotalTokenHolders();
     }
 
-    function _bondStorage()
-        internal
-        pure
-        returns (BondDataStorage storage bondData_)
-    {
+    function _bondStorage() internal pure returns (BondDataStorage storage bondData_) {
         bytes32 position = _BOND_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

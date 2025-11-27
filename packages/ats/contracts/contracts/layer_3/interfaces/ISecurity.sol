@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../constants/regulation.sol';
+import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 
 interface ISecurity {
     struct SecurityRegulationData {
@@ -14,10 +11,7 @@ interface ISecurity {
     /**
      * @notice Returns the security regulation data
      */
-    function getSecurityRegulationData()
-        external
-        view
-        returns (SecurityRegulationData memory securityRegulationData_);
+    function getSecurityRegulationData() external view returns (SecurityRegulationData memory securityRegulationData_);
 
     /**
      * @notice Returns the security holders for a given page index and page length

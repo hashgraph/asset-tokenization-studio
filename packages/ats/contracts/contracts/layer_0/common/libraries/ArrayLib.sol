@@ -9,17 +9,12 @@ library ArrayLib {
         uint256 _itemIndex,
         uint256 _itemsSize
     ) internal pure returns (uint256) {
-        uint256 dynamicArrayBaseSlot = uint256(
-            keccak256(abi.encode(_dynamicArraySlot))
-        );
+        uint256 dynamicArrayBaseSlot = uint256(keccak256(abi.encode(_dynamicArraySlot)));
 
         return dynamicArrayBaseSlot + _itemIndex * _itemsSize;
     }
 
-    function checkUniqueValues(
-        address[] memory _addresses,
-        bool[] memory _bools
-    ) internal pure {
+    function checkUniqueValues(address[] memory _addresses, bool[] memory _bools) internal pure {
         uint256 length = _addresses.length;
         uint256 innerIndex;
         for (uint256 index; index < length; ) {
@@ -27,10 +22,8 @@ library ArrayLib {
                 innerIndex = index + 1;
             }
             for (; innerIndex < length; ) {
-                if (
-                    _addresses[index] == _addresses[innerIndex] &&
-                    _bools[index] != _bools[innerIndex]
-                ) revert ContradictoryValuesInArray(index, innerIndex);
+                if (_addresses[index] == _addresses[innerIndex] && _bools[index] != _bools[innerIndex])
+                    revert ContradictoryValuesInArray(index, innerIndex);
                 unchecked {
                     ++innerIndex;
                 }
@@ -41,10 +34,7 @@ library ArrayLib {
         }
     }
 
-    function checkUniqueValues(
-        bytes32[] memory _bytes32s,
-        bool[] memory _bools
-    ) internal pure {
+    function checkUniqueValues(bytes32[] memory _bytes32s, bool[] memory _bools) internal pure {
         uint256 length = _bytes32s.length;
         uint256 innerIndex;
         for (uint256 index; index < length; ) {
@@ -52,10 +42,8 @@ library ArrayLib {
                 innerIndex = index + 1;
             }
             for (; innerIndex < length; ) {
-                if (
-                    _bytes32s[index] == _bytes32s[innerIndex] &&
-                    _bools[index] != _bools[innerIndex]
-                ) revert ContradictoryValuesInArray(index, innerIndex);
+                if (_bytes32s[index] == _bytes32s[innerIndex] && _bools[index] != _bools[innerIndex])
+                    revert ContradictoryValuesInArray(index, innerIndex);
                 unchecked {
                     ++innerIndex;
                 }

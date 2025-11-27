@@ -4,11 +4,11 @@ pragma solidity ^0.8.17;
 // solhint-disable no-global-import
 // solhint-disable no-empty-blocks
 // solhint-disable private-vars-leading-underscore
-import '@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import {TRexIFactory, FactoryRegulationData} from './interfaces/IFactory.sol';
-import {TREXBondDeploymentLib} from './libraries/TREXBondDeploymentLib.sol';
-import {TREXEquityDeploymentLib} from './libraries/TREXEquityDeploymentLib.sol';
+import "@tokenysolutions/t-rex/contracts/factory/TREXFactory.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import { TRexIFactory, FactoryRegulationData } from "./interfaces/IFactory.sol";
+import { TREXBondDeploymentLib } from "./libraries/TREXBondDeploymentLib.sol";
+import { TREXEquityDeploymentLib } from "./libraries/TREXEquityDeploymentLib.sol";
 
 /**
  * @author Tokeny Solutions
@@ -58,11 +58,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
      * @dev Constructor is setting the implementation authority and the Identity Factory of the TREX factory
      * @dev The constructor has been adjusted to allow null addresses later set by the owner
      */
-    constructor(
-        address _implementationAuthority,
-        address _idFactory,
-        address _atsFactory
-    ) {
+    constructor(address _implementationAuthority, address _idFactory, address _atsFactory) {
         implementationAuthority = _implementationAuthority;
         idFactory = _idFactory;
         atsFactory = _atsFactory;
@@ -126,45 +122,27 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         );
     }
 
-    function recoverContractOwnership(
-        address _contract,
-        address _newOwner
-    ) external override onlyOwner {
+    function recoverContractOwnership(address _contract, address _newOwner) external override onlyOwner {
         (Ownable(_contract)).transferOwnership(_newOwner);
     }
 
-    function setImplementationAuthority(
-        address _implementationAuthority
-    ) external override onlyOwner {
-        require(
-            _implementationAuthority != address(0),
-            'invalid argument - zero address'
-        );
+    function setImplementationAuthority(address _implementationAuthority) external override onlyOwner {
+        require(_implementationAuthority != address(0), "invalid argument - zero address");
         // should not be possible to set an implementation authority that is not complete
         require(
-            (ITREXImplementationAuthority(_implementationAuthority))
-                .getCTRImplementation() !=
-                address(0) &&
-                (ITREXImplementationAuthority(_implementationAuthority))
-                    .getIRImplementation() !=
-                address(0) &&
-                (ITREXImplementationAuthority(_implementationAuthority))
-                    .getIRSImplementation() !=
-                address(0) &&
-                (ITREXImplementationAuthority(_implementationAuthority))
-                    .getMCImplementation() !=
-                address(0) &&
-                (ITREXImplementationAuthority(_implementationAuthority))
-                    .getTIRImplementation() !=
-                address(0),
-            'invalid Implementation Authority'
+            (ITREXImplementationAuthority(_implementationAuthority)).getCTRImplementation() != address(0) &&
+                (ITREXImplementationAuthority(_implementationAuthority)).getIRImplementation() != address(0) &&
+                (ITREXImplementationAuthority(_implementationAuthority)).getIRSImplementation() != address(0) &&
+                (ITREXImplementationAuthority(_implementationAuthority)).getMCImplementation() != address(0) &&
+                (ITREXImplementationAuthority(_implementationAuthority)).getTIRImplementation() != address(0),
+            "invalid Implementation Authority"
         );
         implementationAuthority = _implementationAuthority;
         emit ImplementationAuthoritySet(_implementationAuthority);
     }
 
     function setIdFactory(address _idFactory) external override onlyOwner {
-        require(_idFactory != address(0), 'invalid argument - zero address');
+        require(_idFactory != address(0), "invalid argument - zero address");
         idFactory = _idFactory;
         emit IdFactorySet(_idFactory);
     }
@@ -173,16 +151,11 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
      *  @dev Sets the address of the ATS factory
      */
     function setAtsFactory(address _atsFactory) external onlyOwner {
-        require(_atsFactory != address(0), 'invalid argument - zero address');
+        require(_atsFactory != address(0), "invalid argument - zero address");
         atsFactory = _atsFactory;
     }
 
-    function getImplementationAuthority()
-        external
-        view
-        override
-        returns (address)
-    {
+    function getImplementationAuthority() external view override returns (address) {
         return implementationAuthority;
     }
 
@@ -190,9 +163,7 @@ contract TREXFactoryAts is ITREXFactory, Ownable {
         return idFactory;
     }
 
-    function getToken(
-        string calldata _salt
-    ) external view override returns (address) {
+    function getToken(string calldata _salt) external view override returns (address) {
         return tokenDeployed[_salt];
     }
 }
