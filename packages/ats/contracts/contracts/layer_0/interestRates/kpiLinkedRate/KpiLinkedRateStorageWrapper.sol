@@ -64,6 +64,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         kpiLinkedRateDataStorage.baseLine = _newImpactData.baseLine;
         kpiLinkedRateDataStorage.maxDeviationFloor = _newImpactData.maxDeviationFloor;
         kpiLinkedRateDataStorage.impactDataDecimals = _newImpactData.impactDataDecimals;
+        kpiLinkedRateDataStorage.adjustmentPrecision = _newImpactData.adjustmentPrecision;
     }
 
     function _setKpiOracle(address _kpiOracle) internal {
@@ -92,7 +93,8 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
             maxDeviationCap: _kpiLinkedRateStorage().maxDeviationCap,
             baseLine: _kpiLinkedRateStorage().baseLine,
             maxDeviationFloor: _kpiLinkedRateStorage().maxDeviationFloor,
-            impactDataDecimals: _kpiLinkedRateStorage().impactDataDecimals
+            impactDataDecimals: _kpiLinkedRateStorage().impactDataDecimals,
+            adjustmentPrecision: _kpiLinkedRateStorage().adjustmentPrecision
         });
     }
 

@@ -42,6 +42,7 @@ export const DEFAULT_BOND_KPI_LINKED_RATE_PARAMS = {
   baseLine: 750,
   maxDeviationFloor: 500,
   impactDataDecimals: 2,
+  adjustmentPrecision: 2,
   kpiOracle: ADDRESS_ZERO,
 } as const;
 
@@ -94,6 +95,7 @@ export async function deployBondKpiLinkedRateTokenFixture({
     baseLine: impactDataParams?.baseLine ?? 0,
     maxDeviationFloor: impactDataParams?.maxDeviationFloor ?? 0,
     impactDataDecimals: impactDataParams?.impactDataDecimals ?? 0,
+    adjustmentPrecision: impactDataParams?.adjustmentPrecision ?? 0,
   };
 
   const diamond = await deployBondKpiLinkedRateFromFactory(

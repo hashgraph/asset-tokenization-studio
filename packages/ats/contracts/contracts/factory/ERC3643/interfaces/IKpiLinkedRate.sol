@@ -17,6 +17,7 @@ interface TRexIKpiLinkedRate {
         uint256 baseLine;
         uint256 maxDeviationFloor;
         uint8 impactDataDecimals;
+        uint256 adjustmentPrecision;
     }
 
     event InterestRateUpdated(address indexed operator, InterestRate newInterestRate);

@@ -30,6 +30,7 @@ export interface ImpactDataParams {
   baseLine: number;
   maxDeviationFloor: number;
   impactDataDecimals: number;
+  adjustmentPrecision: number;
 }
 
 // ============================================================================

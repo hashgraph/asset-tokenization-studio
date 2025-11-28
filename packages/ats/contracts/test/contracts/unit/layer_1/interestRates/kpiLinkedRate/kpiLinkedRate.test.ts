@@ -60,6 +60,7 @@ describe("Kpi Linked Rate Tests", () => {
           baseLine: 700,
           maxDeviationFloor: 300,
           impactDataDecimals: 1,
+          adjustmentPrecision: 3,
         },
         ADDRESS_ZERO,
       ),
@@ -96,6 +97,7 @@ describe("Kpi Linked Rate Tests", () => {
           baseLine: 700,
           maxDeviationFloor: 300,
           impactDataDecimals: 1,
+          adjustmentPrecision: 3,
         }),
       ).to.be.rejectedWith("TokenIsPaused");
     });
@@ -133,6 +135,7 @@ describe("Kpi Linked Rate Tests", () => {
           baseLine: 700,
           maxDeviationFloor: 300,
           impactDataDecimals: 1,
+          adjustmentPrecision: 3,
         }),
       ).to.be.rejectedWith("AccountHasNoRole");
     });
@@ -225,6 +228,7 @@ describe("Kpi Linked Rate Tests", () => {
           baseLine: 700,
           maxDeviationFloor: 800,
           impactDataDecimals: 1,
+          adjustmentPrecision: 8,
         }),
       ).to.be.rejectedWith("WrongImpactDataValues");
     });
@@ -237,6 +241,7 @@ describe("Kpi Linked Rate Tests", () => {
           baseLine: 7000,
           maxDeviationFloor: 800,
           impactDataDecimals: 1,
+          adjustmentPrecision: 8,
         }),
       ).to.be.rejectedWith("WrongImpactDataValues");
     });
@@ -247,6 +252,7 @@ describe("Kpi Linked Rate Tests", () => {
         baseLine: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.baseLine + 100,
         maxDeviationFloor: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.maxDeviationFloor + 100,
         impactDataDecimals: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.impactDataDecimals + 1,
+        adjustmentPrecision: DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.adjustmentPrecision + 1,
       };
 
       await expect(kpiLinkedRateFacet.connect(signer_A).setImpactData(newImpactData))
@@ -256,6 +262,7 @@ describe("Kpi Linked Rate Tests", () => {
           newImpactData.baseLine,
           newImpactData.maxDeviationFloor,
           newImpactData.impactDataDecimals,
+          newImpactData.adjustmentPrecision,
         ]);
 
       const impactData = await kpiLinkedRateFacet.getImpactData();
@@ -264,6 +271,7 @@ describe("Kpi Linked Rate Tests", () => {
       expect(impactData.baseLine).to.equal(newImpactData.baseLine);
       expect(impactData.maxDeviationFloor).to.equal(newImpactData.maxDeviationFloor);
       expect(impactData.impactDataDecimals).to.equal(newImpactData.impactDataDecimals);
+      expect(impactData.adjustmentPrecision).to.equal(newImpactData.adjustmentPrecision);
     });
   });
 
