@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _FIXED_RATE_STORAGE_POSITION } from "../../../layer_2/constants/storagePositions.sol";
 import { KpiLinkedRateStorageWrapper } from "../kpiLinkedRate/KpiLinkedRateStorageWrapper.sol";
 
-contract FixedRateStorageWrapper is KpiLinkedRateStorageWrapper {
+abstract contract FixedRateStorageWrapper is KpiLinkedRateStorageWrapper {
     struct FixedRateDataStorage {
         uint256 rate;
         uint8 decimals;

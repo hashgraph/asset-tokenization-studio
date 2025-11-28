@@ -5,7 +5,7 @@ import { PauseStorageWrapper } from "../../core/pause/PauseStorageWrapper.sol";
 import { _KPI_LINKED_RATE_STORAGE_POSITION } from "../../../layer_2/constants/storagePositions.sol";
 import { IKpiLinkedRate } from "../../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 
-contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
+abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
     struct KpiLinkedRateDataStorage {
         uint256 maxRate;
         uint256 baseRate;
@@ -44,6 +44,8 @@ contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
     }
 
     function _setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal {
+        _triggerScheduledCrossOrderedTasks(0);
+
         KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage = _kpiLinkedRateStorage();
         kpiLinkedRateDataStorage.maxRate = _newInterestRate.maxRate;
         kpiLinkedRateDataStorage.baseRate = _newInterestRate.baseRate;
@@ -55,6 +57,8 @@ contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         kpiLinkedRateDataStorage.rateDecimals = _newInterestRate.rateDecimals;
     }
     function _setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal {
+        _triggerScheduledCrossOrderedTasks(0);
+
         KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage = _kpiLinkedRateStorage();
         kpiLinkedRateDataStorage.maxDeviationCap = _newImpactData.maxDeviationCap;
         kpiLinkedRateDataStorage.baseLine = _newImpactData.baseLine;
@@ -63,8 +67,12 @@ contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
     }
 
     function _setKpiOracle(address _kpiOracle) internal {
+        _triggerScheduledCrossOrderedTasks(0);
+
         _kpiLinkedRateStorage().kpiOracle = _kpiOracle;
     }
+
+    function _triggerScheduledCrossOrderedTasks(uint256 _max) internal virtual returns (uint256);
 
     function _getInterestRate() internal view returns (IKpiLinkedRate.InterestRate memory interestRate_) {
         interestRate_ = IKpiLinkedRate.InterestRate({

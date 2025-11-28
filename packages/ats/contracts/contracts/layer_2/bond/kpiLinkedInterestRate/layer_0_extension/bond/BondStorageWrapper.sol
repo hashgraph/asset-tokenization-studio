@@ -8,6 +8,7 @@ import { IKpi } from "../../../../interfaces/interestRates/kpiLinkedRate/IKpi.so
 import { IKpiLinkedRate } from "../../../../interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { LowLevelCall } from "../../../../../layer_0/common/libraries/LowLevelCall.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { DecimalsLib } from "../../../../../layer_0/common/libraries/DecimalsLib.sol";
 
 abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
     using LowLevelCall for address;
@@ -35,14 +36,14 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
     }
 
     function _addToCouponsOrderedList(uint256 _couponID) internal virtual override {
-        _setKpiLinkedInterestRate(_couponID);
         super._addToCouponsOrderedList(_couponID);
+        _setKpiLinkedInterestRate(_couponID);
     }
 
     function _setKpiLinkedInterestRate(uint256 _couponID) internal {
         IBondRead.Coupon memory coupon = _getCoupon(_couponID).coupon;
 
-        (uint256 rate, uint8 rateDecimals) = _calculateKpiLinkedInterestRate(coupon);
+        (uint256 rate, uint8 rateDecimals) = _calculateKpiLinkedInterestRate(_couponID, coupon);
 
         _updateCouponRate(_couponID, coupon, rate, rateDecimals);
     }
@@ -62,20 +63,24 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
         _updateCorporateActionData(actionId, abi.encode(_coupon));
     }
 
-    function _getCouponFor(
-        uint256 _couponID,
-        address _account
-    ) internal view virtual override returns (IBondRead.CouponFor memory couponFor_) {
-        couponFor_ = super._getCouponFor(_couponID, _account);
-        if (couponFor_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return couponFor_;
+    function _getCoupon(
+        uint256 _couponID
+    ) internal view virtual override returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
+        registeredCoupon_ = super._getCoupon(_couponID);
 
-        if (couponFor_.coupon.fixingDate > _blockTimestamp()) return couponFor_;
+        if (registeredCoupon_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return registeredCoupon_;
 
-        (couponFor_.coupon.rate, couponFor_.coupon.rateDecimals) = _calculateKpiLinkedInterestRate(couponFor_.coupon);
-        couponFor_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
+        if (registeredCoupon_.coupon.fixingDate > _blockTimestamp()) return registeredCoupon_;
+
+        (registeredCoupon_.coupon.rate, registeredCoupon_.coupon.rateDecimals) = _calculateKpiLinkedInterestRate(
+            _couponID,
+            registeredCoupon_.coupon
+        );
+        registeredCoupon_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
     }
 
     function _calculateKpiLinkedInterestRate(
+        uint256 _couponID,
         IBondRead.Coupon memory _coupon
     ) internal view returns (uint256 rate_, uint8 rateDecimals) {
         KpiLinkedRateDataStorage memory kpiLinkedRateStorage = _kpiLinkedRateStorage();
@@ -103,7 +108,15 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
         uint256 rate;
 
         if (!reportFound) {
-            rate = _previousRate() + kpiLinkedRateStorage.missedPenalty;
+            (uint256 previousRate, uint8 previousRateDecimals) = _previousRate(_couponID);
+
+            previousRate = DecimalsLib.calculateDecimalsAdjustment(
+                previousRate,
+                previousRateDecimals,
+                kpiLinkedRateStorage.rateDecimals
+            );
+
+            rate = previousRate + kpiLinkedRateStorage.missedPenalty;
 
             if (rate > kpiLinkedRateStorage.maxRate) rate = kpiLinkedRateStorage.maxRate;
 
@@ -134,21 +147,27 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
         return (rate, kpiLinkedRateStorage.rateDecimals);
     }
 
-    function _previousRate() internal view returns (uint256) {
-        uint256 lastCouponPos = _getCouponsOrderedListTotalAdjusted();
-        if (lastCouponPos == 0) return 0;
+    function _previousRate(uint256 _couponID) internal view returns (uint256 rate_, uint8 rateDecimals_) {
+        uint256 orderedListLength = _getCouponsOrderedListTotalAdjusted();
 
-        lastCouponPos--;
+        if (orderedListLength < 2) return (0, 0);
 
-        uint256 lastCouponId = _getCouponFromOrderedListAt(lastCouponPos);
+        if (_getCouponFromOrderedListAt(0) == _couponID) return (0, 0);
 
-        IBondRead.Coupon memory lastCoupon = _getCoupon(lastCouponId).coupon;
+        orderedListLength--;
+        uint256 previousCouponId;
 
-        if (lastCoupon.rateStatus != IBondRead.RateCalculationStatus.SET) {
-            (uint256 rate, ) = _calculateKpiLinkedInterestRate(lastCoupon);
-            return rate;
+        for (uint256 index = 0; index < orderedListLength; index++) {
+            previousCouponId = _getCouponFromOrderedListAt(index);
+            uint256 couponId = _getCouponFromOrderedListAt(index + 1);
+            if (couponId == _couponID) break;
         }
 
-        return lastCoupon.rate;
+        IBondRead.Coupon memory previousCoupon = _getCoupon(previousCouponId).coupon;
+
+        if (previousCoupon.rateStatus != IBondRead.RateCalculationStatus.SET) {
+            return _calculateKpiLinkedInterestRate(previousCouponId, previousCoupon);
+        }
+        return (previousCoupon.rate, previousCoupon.rateDecimals);
     }
 }

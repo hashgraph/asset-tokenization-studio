@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../../layer_1/common/Common.sol";
+import { CommonKpiLinkedInterestRate } from "../../bond/kpiLinkedInterestRate/layer_0_extension/Common.sol";
 import { IKpiLinkedRate } from "../../interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
 
-contract KpiLinkedRate is IKpiLinkedRate, Common {
+contract KpiLinkedRate is IKpiLinkedRate, CommonKpiLinkedInterestRate {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_KpiLinkedRate(
         InterestRate calldata _interestRate,

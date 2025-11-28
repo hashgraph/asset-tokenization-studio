@@ -76,7 +76,7 @@ abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStor
             );
 
             if (scheduledTask.scheduledTimestamp < _timestamp) {
-                total_ += 1;
+                total_++;
             } else {
                 break;
             }

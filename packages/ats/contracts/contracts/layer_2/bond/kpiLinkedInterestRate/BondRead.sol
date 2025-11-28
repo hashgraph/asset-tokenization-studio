@@ -31,16 +31,15 @@ abstract contract BondReadKpiLinkedInterestRate is BondRead, CommonKpiLinkedInte
         BondStorageWrapperKpiLinkedInterestRate._addToCouponsOrderedList(_couponID);
     }
 
-    function _getCouponFor(
-        uint256 _couponID,
-        address _account
+    function _getCoupon(
+        uint256 _couponID
     )
         internal
         view
         virtual
         override(BondStorageWrapper, BondStorageWrapperKpiLinkedInterestRate)
-        returns (IBondRead.CouponFor memory couponFor_)
+        returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
     {
-        return BondStorageWrapperKpiLinkedInterestRate._getCouponFor(_couponID, _account);
+        return BondStorageWrapperKpiLinkedInterestRate._getCoupon(_couponID);
     }
 }

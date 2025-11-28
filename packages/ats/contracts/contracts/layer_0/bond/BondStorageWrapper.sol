@@ -138,7 +138,9 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         return _bondStorage().maturityDate;
     }
 
-    function _getCoupon(uint256 _couponID) internal view returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
+    function _getCoupon(
+        uint256 _couponID
+    ) internal view virtual returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
         bytes32 actionId = _getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
 
         (, , bytes memory data) = _getCorporateAction(actionId);

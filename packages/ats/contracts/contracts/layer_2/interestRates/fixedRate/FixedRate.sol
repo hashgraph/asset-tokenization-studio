@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../../layer_1/common/Common.sol";
+import { CommonFixedInterestRate } from "../../bond/fixedInterestRate/layer_0_extension/Common.sol";
 import { IFixedRate } from "../../interfaces/interestRates/fixedRate/IFixedRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
 
-contract FixedRate is IFixedRate, Common {
+contract FixedRate is IFixedRate, CommonFixedInterestRate {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_FixedRate(
         FixedRateData calldata _initData

@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-26T16:27:24.744Z
+ * Generated: 2025-11-27T14:49:57.946Z
  * Facets: 55
  * Infrastructure: 2
  *
@@ -1621,6 +1621,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xa7fd66e9450da5029fb2dfd59586274386eb4c169bfc873e265aa29d3df59424",
       },
     ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new FixedRateFacetTimeTravel__factory(signer) : new FixedRateFacet__factory(signer),
   },
@@ -1841,6 +1842,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
       { name: "KpiOracleCalledFailed", signature: "KpiOracleCalledFailed()", selector: "0x75d7804c" },
       { name: "WrongImpactDataValues", signature: "WrongImpactDataValues(ImpactData)", selector: "0xb90540b6" },
       { name: "WrongInterestRateValues", signature: "WrongInterestRateValues(InterestRate)", selector: "0xf2973d16" },
@@ -2992,6 +2994,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       { name: "_setImpactData", signature: "_setImpactData(IKpiLinkedRate.ImpactData)", selector: "0xf073c118" },
       { name: "_setInterestRate", signature: "_setInterestRate(IKpiLinkedRate.InterestRate)", selector: "0x13b3a045" },
       { name: "_setKpiOracle", signature: "_setKpiOracle(address)", selector: "0xe9f6e413" },
+      {
+        name: "_triggerScheduledCrossOrderedTasks",
+        signature: "_triggerScheduledCrossOrderedTasks(uint256)",
+        selector: "0xa3608e20",
+      },
     ],
   },
 

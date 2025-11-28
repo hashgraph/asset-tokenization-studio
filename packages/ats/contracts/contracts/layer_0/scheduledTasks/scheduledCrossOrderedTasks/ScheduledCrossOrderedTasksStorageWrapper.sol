@@ -20,7 +20,7 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
         ScheduledTasksLib.addScheduledTask(_scheduledCrossOrderedTaskStorage(), _newScheduledTimestamp, _newData);
     }
 
-    function _triggerScheduledCrossOrderedTasks(uint256 _max) internal returns (uint256) {
+    function _triggerScheduledCrossOrderedTasks(uint256 _max) internal override returns (uint256) {
         return
             _triggerScheduledTasks(
                 _scheduledCrossOrderedTaskStorage(),
