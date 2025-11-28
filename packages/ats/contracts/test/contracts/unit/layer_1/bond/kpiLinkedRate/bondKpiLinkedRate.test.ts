@@ -343,5 +343,36 @@ describe("Bond KpiLinked Rate Tests", () => {
     await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
 
     await checkCouponPostValues(rate, newInterestRate.rateDecimals, amount, 3, signer_A.address);
+
+    // Test missed penalty when previous coupon had more decimals
+    const previousCouponRate_2 = rate;
+    const previousCouponRateDecimals_2 = newInterestRate.rateDecimals;
+
+    newInterestRate.missedPenalty = previousCouponRate_2;
+    newInterestRate.rateDecimals = previousCouponRateDecimals_2 - 1;
+
+    await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
+
+    const newFixingDate_3 = parseInt(couponData.recordDate) + 10;
+    const newRecordDate_3 = newFixingDate_3 + 100;
+    const newExecutionDate_3 = newRecordDate_3 + 100;
+
+    couponData.fixingDate = newFixingDate_3.toString();
+    couponData.recordDate = newRecordDate_3.toString();
+    couponData.executionDate = newExecutionDate_3.toString();
+
+    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+
+    await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+
+    const rate_2 = previousCouponRate_2 / 10 + newInterestRate.missedPenalty;
+
+    await checkCouponPostValues(previousCouponRate / 2, previousCouponRateDecimals, amount, 1, signer_A.address);
+
+    await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
+
+    await checkCouponPostValues(previousCouponRate_2, previousCouponRateDecimals_2, amount, 3, signer_A.address);
+
+    await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 4, signer_A.address);
   });
 });
