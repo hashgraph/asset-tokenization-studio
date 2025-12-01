@@ -19,6 +19,7 @@ import {
   AccessControl,
   AdjustBalances,
   Equity,
+  Snapshots,
 } from "@contract-types";
 import { ADDRESS_ZERO, ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
@@ -112,6 +113,7 @@ describe("Clearing Tests", () => {
   let timeTravelFacet: TimeTravelFacet;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
+  let snapshotFacet: Snapshots;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -158,6 +160,7 @@ describe("Clearing Tests", () => {
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -480,6 +483,83 @@ describe("Clearing Tests", () => {
   describe("Single Partition", async () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
+    });
+
+    describe("snapshot", () => {
+      it("GIVEN an account with snapshot role WHEN takeSnapshot and Clearing THEN transaction succeeds", async () => {
+        const EXPIRATION_TIMESTAMP = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
+
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_A.address);
+
+        // snapshot
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // Operations
+        clearingOperation.expirationTimestamp = EXPIRATION_TIMESTAMP;
+        const hold = {
+          amount: 1,
+          expirationTimestamp: EXPIRATION_TIMESTAMP,
+          escrow: signer_A.address,
+          to: ADDRESS_ZERO,
+          data: EMPTY_HEX_BYTES,
+        };
+
+        await clearingFacet.connect(signer_A).clearingTransferByPartition(clearingOperation, 1, signer_C.address);
+        await clearingFacet.connect(signer_A).clearingRedeemByPartition(clearingOperation, 1);
+        await clearingFacet.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold);
+
+        // snapshot
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // Operations
+        clearingIdentifier.clearingId = 1;
+        clearingIdentifier.clearingOperationType = ClearingOperationType.Transfer;
+        await clearingFacet.connect(signer_A).approveClearingOperationByPartition(clearingIdentifier);
+
+        clearingIdentifier.clearingOperationType = ClearingOperationType.Redeem;
+        await clearingFacet.connect(signer_A).cancelClearingOperationByPartition(clearingIdentifier);
+
+        await timeTravelFacet.changeSystemTimestamp(EXPIRATION_TIMESTAMP + 1);
+
+        clearingIdentifier.clearingOperationType = ClearingOperationType.HoldCreation;
+        await clearingFacet.connect(signer_A).reclaimClearingOperationByPartition(clearingIdentifier);
+
+        // snapshot
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // checks
+        const snapshot_Balance_Of_A_1 = await snapshotFacet.balanceOfAtSnapshot(1, signer_A.address);
+        const snapshot_Balance_Of_C_1 = await snapshotFacet.balanceOfAtSnapshot(1, signer_C.address);
+        const snapshot_ClearingBalance_Of_A_1 = await snapshotFacet.clearedBalanceOfAtSnapshot(1, signer_A.address);
+        const snapshot_Total_Supply_1 = await snapshotFacet.totalSupplyAtSnapshot(1);
+
+        expect(snapshot_Balance_Of_A_1).to.equal(3 * _AMOUNT);
+        expect(snapshot_Balance_Of_C_1).to.equal(0);
+        expect(snapshot_ClearingBalance_Of_A_1).to.equal(0);
+        expect(snapshot_Total_Supply_1).to.equal(6 * _AMOUNT);
+
+        const snapshot_Balance_Of_A_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_A.address);
+        const snapshot_Balance_Of_C_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_C.address);
+        const snapshot_ClearingBalance_Of_A_2 = await snapshotFacet.clearedBalanceOfAtSnapshot(2, signer_A.address);
+        const snapshot_Total_Supply_2 = await snapshotFacet.totalSupplyAtSnapshot(2);
+
+        expect(snapshot_Balance_Of_A_2).to.equal(3 * _AMOUNT - 3);
+        expect(snapshot_Balance_Of_C_2).to.equal(0);
+        expect(snapshot_ClearingBalance_Of_A_2).to.equal(3);
+        expect(snapshot_Total_Supply_2).to.equal(6 * _AMOUNT);
+
+        const snapshot_Balance_Of_A_3 = await snapshotFacet.balanceOfAtSnapshot(3, signer_A.address);
+        const snapshot_Balance_Of_C_3 = await snapshotFacet.balanceOfAtSnapshot(3, signer_C.address);
+        const snapshot_ClearingBalance_Of_A_3 = await snapshotFacet.clearedBalanceOfAtSnapshot(3, signer_A.address);
+        const snapshot_Total_Supply_3 = await snapshotFacet.totalSupplyAtSnapshot(3);
+
+        expect(snapshot_Balance_Of_A_3).to.equal(3 * _AMOUNT - 1);
+        expect(snapshot_Balance_Of_C_3).to.equal(1);
+        expect(snapshot_ClearingBalance_Of_A_3).to.equal(0);
+        expect(snapshot_Total_Supply_3).to.equal(6 * _AMOUNT);
+      });
     });
 
     describe("Not in clearing mode", () => {
