@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-26T15:01:42.212Z
+ * Generated: 2025-12-01T14:53:46.712Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -1981,6 +1981,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x386e1405",
       },
       { name: "decimalsAtSnapshot", signature: "decimalsAtSnapshot(uint256)", selector: "0x69ed346f" },
+      {
+        name: "frozenBalanceOfAtSnapshot",
+        signature: "frozenBalanceOfAtSnapshot(uint256,address)",
+        selector: "0x5e6c70ec",
+      },
+      {
+        name: "frozenBalanceOfAtSnapshotByPartition",
+        signature: "frozenBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        selector: "0x0749c323",
+      },
       {
         name: "getTokenHoldersAtSnapshot",
         signature: "getTokenHoldersAtSnapshot(uint256,uint256,uint256)",

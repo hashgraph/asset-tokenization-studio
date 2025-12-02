@@ -13,7 +13,7 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](15);
+        staticFunctionSelectors_ = new bytes4[](17);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.balanceOfAtSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.totalSupplyAtSnapshot.selector;
@@ -26,6 +26,8 @@ contract SnapshotsFacet is Snapshots, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this.heldBalanceOfAtSnapshotByPartition.selector;
         staticFunctionSelectors_[selectorIndex++] = this.clearedBalanceOfAtSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.clearedBalanceOfAtSnapshotByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.frozenBalanceOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.frozenBalanceOfAtSnapshotByPartition.selector;
         staticFunctionSelectors_[selectorIndex++] = this.decimalsAtSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTokenHoldersAtSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTotalTokenHoldersAtSnapshot.selector;
