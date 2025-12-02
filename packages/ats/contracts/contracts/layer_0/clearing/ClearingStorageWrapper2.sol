@@ -370,6 +370,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         address _to
     ) internal {
         _adjustClearingBalances(_clearingOperationIdentifier, _to);
+        _updateAccountSnapshot(_clearingOperationIdentifier.tokenHolder, _clearingOperationIdentifier.partition);
         _updateAccountSnapshot(_to, _clearingOperationIdentifier.partition);
         _updateAccountClearedBalancesSnapshot(
             _clearingOperationIdentifier.tokenHolder,

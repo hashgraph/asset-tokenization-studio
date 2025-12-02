@@ -2175,6 +2175,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "decimalsAtSnapshot", signature: "decimalsAtSnapshot(uint256)", selector: "0x69ed346f" },
       {
+        name: "frozenBalanceOfAtSnapshot",
+        signature: "frozenBalanceOfAtSnapshot(uint256,address)",
+        selector: "0x5e6c70ec",
+      },
+      {
+        name: "frozenBalanceOfAtSnapshotByPartition",
+        signature: "frozenBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        selector: "0x0749c323",
+      },
+      {
         name: "getTokenHoldersAtSnapshot",
         signature: "getTokenHoldersAtSnapshot(uint256,uint256,uint256)",
         selector: "0xd22a73df",
