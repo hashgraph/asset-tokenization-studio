@@ -9,7 +9,7 @@ import { _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION } from "../../constants
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from "../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol";
-import { SNAPSHOT_TASK_TYPE } from "../../constants/values.sol";
+import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE, COUPON_LISTING_TASK_TYPE } from "../../constants/values.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
@@ -20,7 +20,7 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
         ScheduledTasksLib.addScheduledTask(_scheduledCrossOrderedTaskStorage(), _newScheduledTimestamp, _newData);
     }
 
-    function _triggerScheduledCrossOrderedTasks(uint256 _max) internal returns (uint256) {
+    function _triggerScheduledCrossOrderedTasks(uint256 _max) internal override returns (uint256) {
         return
             _triggerScheduledTasks(
                 _scheduledCrossOrderedTaskStorage(),
@@ -38,11 +38,21 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
         bytes memory data = _scheduledTask.data;
 
         if (data.length == 0) return;
-        if (abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE) {
+
+        bytes32 taskType = abi.decode(data, (bytes32));
+
+        if (taskType == SNAPSHOT_TASK_TYPE) {
             _triggerScheduledSnapshots(1);
             return;
         }
-        _triggerScheduledBalanceAdjustments(1);
+        if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
+            _triggerScheduledBalanceAdjustments(1);
+            return;
+        }
+        if (taskType == COUPON_LISTING_TASK_TYPE) {
+            _triggerScheduledCouponListing(1);
+            return;
+        }
     }
 
     function _getScheduledCrossOrderedTaskCount() internal view returns (uint256) {

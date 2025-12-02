@@ -481,11 +481,40 @@ Add exports to [domain/index.ts](domain/index.ts):
 
 ```typescript
 // Fund configuration
+export * from "./factory/deployFundToken";
 export { createFundConfiguration } from "./fund/createConfiguration";
 export { FUND_CONFIG_ID } from "./constants";
 ```
 
-### Step 4: Deploy Custom Facets (if any)
+### Step 4: Add factory
+
+Add 'deployFundToken.ts' factory to [domain/factory](domain/factory/deployFundToken.ts):
+
+### Step 5: Add to workflows scripts
+
+Add new asset to
+
+- [domain/workflows/deploySystemWithExistingBlr](domain/factory/workflows/deploySystemWithExistingBlr.ts):
+- [domain/workflows/deploySystemWithNewBlr](domain/factory/workflows/deploySystemWithNewBlr.ts):
+
+### Step 6: Add to checkpoint scripts
+
+Add new asset to
+
+- [infrastructure/checkpoint/utils](infrastructure/checkpoint/utils.ts):
+- [infrastructure/types/checkpoint](infrastructure/types/checkpoint.ts):
+
+### Step 7: (Only for Testing) Add token fixture
+
+Add new fixture to
+
+- [test/fixture/tokens](test/fixture/tokens/fund.fixture.ts):
+
+Add fixture to index
+
+- [test/fixture/index](test/fixture/index.ts):
+
+### Step 8: Deploy Custom Facets (if any)
 
 If you have fund-specific facets, deploy them:
 
@@ -507,7 +536,7 @@ console.log("Fund facets deployed:", {
 });
 ```
 
-### Step 5: Register All Facets
+### Step 9: Register All Facets
 
 Register both common facets and fund-specific facets:
 
@@ -538,7 +567,7 @@ const result = await registerFacets(blr, {
 
 **Note**: Registering an already-registered facet is safe and will update to the new address.
 
-### Step 6: Create Initial Configuration
+### Step 10: Create Initial Configuration
 
 Create the first version of your fund configuration:
 
@@ -573,7 +602,7 @@ if (result.success) {
 }
 ```
 
-### Step 7: Update Workflows (Optional)
+### Step 11: Update Workflows (Optional)
 
 If you want to include your new asset in complete deployment workflows, update [workflows/deployCompleteSystem.ts](workflows/deployCompleteSystem.ts):
 
@@ -595,7 +624,7 @@ output.configurations.fund = {
 };
 ```
 
-### Step 8: Verify
+### Step 12: Verify
 
 Verify your new asset configuration:
 
@@ -620,6 +649,13 @@ When creating a new asset, touch these files:
 - [ ] `domain/constants.ts` - Add `FUND_CONFIG_ID`
 - [ ] `domain/fund/createConfiguration.ts` - Create module with `FUND_FACETS` array
 - [ ] `domain/index.ts` - Export `createFundConfiguration` and `FUND_CONFIG_ID`
+- [ ] `domain/factory/deployFund.ts`
+- [ ] `infrastructure/checkpoint/utils.ts`
+- [ ] `infrastructure/types/checkpoint.ts`
+- [ ] `workflows/deploySystemWithExistingBlr.ts` - Add to deployment workflow
+- [ ] `workflows/deploySystemWithNewBlr.ts` - Add to deployment workflow
+- [ ] `tests/fixtures/tokens/fund.fixture.ts`
+- [ ] `tests/fixtures/index.ts`
 - [ ] `contracts/layer_3/jurisdiction/usa/FundUSAFacet.sol` - Implement custom facets (if needed)
 - [ ] `workflows/deployCompleteSystem.ts` - Add to deployment workflow (optional)
 

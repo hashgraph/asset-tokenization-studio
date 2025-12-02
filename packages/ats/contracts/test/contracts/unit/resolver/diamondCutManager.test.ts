@@ -10,15 +10,21 @@ import {
   IDiamondCutManager,
   IDiamondLoupe,
 } from "@contract-types";
-import { ATS_ROLES, BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
+import {
+  ATS_ROLES,
+  BOND_CONFIG_ID,
+  BOND_FIXED_RATE_CONFIG_ID,
+  BOND_KPI_LINKED_RATE_CONFIG_ID,
+  EQUITY_CONFIG_ID,
+} from "@scripts";
 import { deployAtsInfrastructureFixture } from "@test";
 
 // Test-specific configuration IDs for negative test cases
 // These are separate from EQUITY_CONFIG_ID/BOND_CONFIG_ID to avoid conflicts
 const TEST_CONFIG_IDS = {
-  PAUSE_TEST: "0x0000000000000000000000000000000000000000000000000000000000000003",
-  PAUSE_BATCH_TEST: "0x0000000000000000000000000000000000000000000000000000000000000004",
-  BLACKLIST_TEST: "0x0000000000000000000000000000000000000000000000000000000000000005",
+  PAUSE_TEST: "0x0000000000000000000000000000000000000000000000000000000000000004",
+  PAUSE_BATCH_TEST: "0x0000000000000000000000000000000000000000000000000000000000000005",
+  BLACKLIST_TEST: "0x0000000000000000000000000000000000000000000000000000000000000006",
 };
 
 describe("DiamondCutManager", () => {
@@ -31,6 +37,8 @@ describe("DiamondCutManager", () => {
   let pause: Pause;
   let equityFacetIdList: string[] = [];
   let bondFacetIdList: string[] = [];
+  let bondFixedRateFacetIdList: string[] = [];
+  let bondKpiLinkedRateFacetIdList: string[] = [];
   let equityFacetVersionList: number[] = [];
 
   before(async () => {
@@ -49,6 +57,8 @@ describe("DiamondCutManager", () => {
     diamondCutManager = await ethers.getContractAt("DiamondCutManager", businessLogicResolver.address, signer_A);
     equityFacetIdList = Object.values(infrastructure.equityFacetKeys);
     bondFacetIdList = Object.values(infrastructure.bondFacetKeys);
+    bondFixedRateFacetIdList = Object.values(infrastructure.bondFixedRateFacetKeys);
+    bondKpiLinkedRateFacetIdList = Object.values(infrastructure.bondKpiLinkedRateFacetKeys);
     equityFacetVersionList = Array(equityFacetIdList.length).fill(1);
   });
 
@@ -59,7 +69,12 @@ describe("DiamondCutManager", () => {
     }
     // Clean up blacklisted selectors for all test config IDs
     const pauseSelector = "0x8456cb59";
-    const configIdsToCleanup = [EQUITY_CONFIG_ID, TEST_CONFIG_IDS.BLACKLIST_TEST];
+    const configIdsToCleanup = [
+      EQUITY_CONFIG_ID,
+      TEST_CONFIG_IDS.PAUSE_TEST,
+      TEST_CONFIG_IDS.PAUSE_BATCH_TEST,
+      TEST_CONFIG_IDS.BLACKLIST_TEST,
+    ];
 
     for (const configId of configIdsToCleanup) {
       try {
@@ -251,7 +266,15 @@ describe("DiamondCutManager", () => {
     expect(facetAddresses).to.have.members(facetAddresses_2);
 
     const expectedFacetIdList =
-      configId === EQUITY_CONFIG_ID ? equityFacetIdList : configId === BOND_CONFIG_ID ? bondFacetIdList : null;
+      configId === EQUITY_CONFIG_ID
+        ? equityFacetIdList
+        : configId === BOND_CONFIG_ID
+          ? bondFacetIdList
+          : configId == BOND_FIXED_RATE_CONFIG_ID
+            ? bondFixedRateFacetIdList
+            : configId == BOND_KPI_LINKED_RATE_CONFIG_ID
+              ? bondKpiLinkedRateFacetIdList
+              : null;
 
     if (!expectedFacetIdList) {
       expect.fail("Unknown configId");
@@ -263,10 +286,15 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN reading configuration information THEN everything matches", async () => {
     const configLength = (await diamondCutManager.getConfigurationsLength()).toNumber();
-    expect(configLength).to.equal(2);
+    expect(configLength).to.equal(4);
 
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
-    expect(configIds).to.have.members([EQUITY_CONFIG_ID, BOND_CONFIG_ID]);
+    expect(configIds).to.have.members([
+      EQUITY_CONFIG_ID,
+      BOND_CONFIG_ID,
+      BOND_FIXED_RATE_CONFIG_ID,
+      BOND_KPI_LINKED_RATE_CONFIG_ID,
+    ]);
 
     for (const configId of configIds) {
       const configLatestVersion = (await diamondCutManager.getLatestVersionByConfiguration(configId)).toNumber();
@@ -422,7 +450,7 @@ describe("DiamondCutManager", () => {
     const originalDiamondCutManager = diamondCutManager;
     diamondCutManager = batchDiamondCutManager;
 
-    for (const configId of [EQUITY_CONFIG_ID, BOND_CONFIG_ID]) {
+    for (const configId of [EQUITY_CONFIG_ID, BOND_CONFIG_ID, BOND_FIXED_RATE_CONFIG_ID]) {
       const configLatestVersion = (await batchDiamondCutManager.getLatestVersionByConfiguration(configId)).toNumber();
       expect(configLatestVersion).to.equal(0);
 

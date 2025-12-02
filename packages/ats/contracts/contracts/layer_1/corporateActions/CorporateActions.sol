@@ -14,20 +14,20 @@ abstract contract CorporateActions is ICorporateActions, Common {
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        returns (bool success_, bytes32 corporateActionId_, uint256 corporateActionIndexByType_)
+        returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)
     {
-        (success_, corporateActionId_, corporateActionIndexByType_) = _addCorporateAction(_actionType, _data);
+        (corporateActionId_, corporateActionIdByType_) = _addCorporateAction(_actionType, _data);
 
-        if (!success_) {
+        if (corporateActionId_ == bytes32(0)) {
             revert DuplicatedCorporateAction(_actionType, _data);
         }
-        emit CorporateActionAdded(_msgSender(), _actionType, corporateActionId_, corporateActionIndexByType_, _data);
+        emit CorporateActionAdded(_msgSender(), _actionType, corporateActionId_, corporateActionIdByType_, _data);
     }
 
     function getCorporateAction(
         bytes32 _corporateActionId
-    ) external view override returns (bytes32 actionType_, bytes memory data_) {
-        (actionType_, data_) = _getCorporateAction(_corporateActionId);
+    ) external view override returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {
+        (actionType_, actionTypeId_, data_) = _getCorporateAction(_corporateActionId);
     }
 
     function getCorporateActionCount() external view override returns (uint256 corporateActionCount_) {

@@ -227,7 +227,7 @@ import {
   useGetCoupons,
   useGetCouponsFor,
 } from '../../../../hooks/queries/useCoupons';
-import { formatDate, formatCouponPeriod } from '../../../../utils/format';
+import { formatDate } from '../../../../utils/format';
 import { DATE_TIME_FORMAT } from '../../../../utils/constants';
 
 interface SeeCouponFormValues {
@@ -406,10 +406,22 @@ export const SeeCoupon = () => {
                 valueToCopy: coupons.executionDate.toDateString(),
               },
               {
-                title: tDetail('period'),
-                description: formatCouponPeriod(coupons.period),
+                title: tDetail('startDay'),
+                description: formatDate(coupons.startDate, DATE_TIME_FORMAT),
                 canCopy: true,
-                valueToCopy: coupons.period.toString(),
+                valueToCopy: coupons.startDate.toDateString(),
+              },
+              {
+                title: tDetail('endDay'),
+                description: formatDate(coupons.endDate, DATE_TIME_FORMAT),
+                canCopy: true,
+                valueToCopy: coupons.endDate.toDateString(),
+              },
+              {
+                title: tDetail('fixingDay'),
+                description: formatDate(coupons.fixingDate, DATE_TIME_FORMAT),
+                canCopy: true,
+                valueToCopy: coupons.fixingDate.toDateString(),
               },
               {
                 title: tDetail('amount'),

@@ -37,7 +37,14 @@ import {
   toConfigurationData,
   convertCheckpointFacets,
 } from "@scripts/infrastructure";
-import { atsRegistry, deployFactory, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
+import {
+  atsRegistry,
+  deployFactory,
+  createEquityConfiguration,
+  createBondConfiguration,
+  createBondFixedRateConfiguration,
+  createBondKpiLinkedRateConfiguration,
+} from "@scripts/domain";
 
 import { promises as fs } from "fs";
 import { dirname } from "path";
@@ -98,6 +105,26 @@ export interface DeploymentWithExistingBlrOutput {
       }>;
     };
     bond: {
+      configId: string;
+      version: number;
+      facetCount: number;
+      facets: Array<{
+        facetName: string;
+        key: string;
+        address: string;
+      }>;
+    };
+    bondFixedRate: {
+      configId: string;
+      version: number;
+      facetCount: number;
+      facets: Array<{
+        facetName: string;
+        key: string;
+        address: string;
+      }>;
+    };
+    bondKpiLinkedRate: {
       configId: string;
       version: number;
       facetCount: number;
@@ -538,11 +565,18 @@ export async function deploySystemWithExistingBlr(
     // Steps 3 & 4: Create configurations (optional - controlled by createConfigurations flag)
     let equityConfig: Awaited<ReturnType<typeof createEquityConfiguration>> | undefined;
     let bondConfig: Awaited<ReturnType<typeof createBondConfiguration>> | undefined;
+    let bondFixedRateConfig: Awaited<ReturnType<typeof createBondFixedRateConfiguration>> | undefined;
+    let bondKpiLinkedRateConfig: Awaited<ReturnType<typeof createBondKpiLinkedRateConfiguration>> | undefined;
 
     if (shouldCreateConfigurations) {
       if (Object.keys(facetAddresses).length === 0) {
         info("\n⚠️  Step 5/6: Skipping configurations (no facets deployed)...");
-        skippedSteps.push("Equity configuration", "Bond configuration");
+        skippedSteps.push(
+          "Equity configuration",
+          "Bond configuration",
+          "Bond Fixed Rate configuration",
+          "Bond Kpi Linked Rate configuration",
+        );
       } else {
         // Get BLR contract instance
         const blrContract = BusinessLogicResolver__factory.connect(blrAddress, signer);
@@ -631,10 +665,101 @@ export async function deploySystemWithExistingBlr(
           checkpoint.currentStep = 4;
           await checkpointManager.saveCheckpoint(checkpoint);
         }
+
+        // Step 5: Create Bond Fixed Rate Configuration
+        if (checkpoint.steps.configurations?.bondFixedRate && checkpoint.currentStep >= 5) {
+          info("\n✓ Step 5b/6: Bond Fixed Rate configuration already created (resuming)");
+          const bondFixedRateConfigData = checkpoint.steps.configurations.bondFixedRate;
+          info(`✅ Bond Fixed Rate Config ID: ${bondFixedRateConfigData.configId}`);
+          info(`✅ Bond Fixed Rate Version: ${bondFixedRateConfigData.version}`);
+          info(`✅ Bond Fixed Rate Facets: ${bondFixedRateConfigData.facetCount}`);
+
+          // Use converter to reconstruct full ConfigurationData from checkpoint
+          bondFixedRateConfig = toConfigurationData(bondFixedRateConfigData);
+        } else {
+          info("\n🏦 Step 5b/6: Creating Bond Fixed Rate configuration...");
+
+          bondFixedRateConfig = await createBondFixedRateConfiguration(
+            blrContract,
+            facetAddresses,
+            useTimeTravel,
+            false,
+            batchSize,
+            confirmations,
+          );
+
+          if (!bondFixedRateConfig.success) {
+            throw new Error(
+              `Bond Fixed Rate config creation failed: ${bondFixedRateConfig.error} - ${bondFixedRateConfig.message}`,
+            );
+          }
+
+          info(`✅ Bond Fixed Rate Config ID: ${bondFixedRateConfig.data.configurationId}`);
+          info(`✅ Bond Fixed Rate Version: ${bondFixedRateConfig.data.version}`);
+          info(`✅ Bond Fixed Rate Facets: ${bondFixedRateConfig.data.facetKeys.length}`);
+
+          // Save checkpoint
+          checkpoint.steps.configurations!.bondFixedRate = {
+            configId: bondFixedRateConfig.data.configurationId,
+            version: bondFixedRateConfig.data.version,
+            facetCount: bondFixedRateConfig.data.facetKeys.length,
+            txHash: "",
+          };
+          checkpoint.currentStep = 5;
+          await checkpointManager.saveCheckpoint(checkpoint);
+        }
+
+        // Step 6: Create Bond KpiLinked Rate Configuration
+        if (checkpoint.steps.configurations?.bondKpiLinkedRate && checkpoint.currentStep >= 5) {
+          info("\n✓ Step 5b/6: Bond KpiLinked Rate configuration already created (resuming)");
+          const bondKpiLinkedRateConfigData = checkpoint.steps.configurations.bondKpiLinkedRate;
+          info(`✅ Bond KpiLinked Rate Config ID: ${bondKpiLinkedRateConfigData.configId}`);
+          info(`✅ Bond KpiLinked Rate Version: ${bondKpiLinkedRateConfigData.version}`);
+          info(`✅ Bond KpiLinked Rate Facets: ${bondKpiLinkedRateConfigData.facetCount}`);
+
+          // Use converter to reconstruct full ConfigurationData from checkpoint
+          bondKpiLinkedRateConfig = toConfigurationData(bondKpiLinkedRateConfigData);
+        } else {
+          info("\n🏦 Step 6b/7: Creating Bond configuration...");
+
+          bondKpiLinkedRateConfig = await createBondKpiLinkedRateConfiguration(
+            blrContract,
+            facetAddresses,
+            useTimeTravel,
+            false,
+            batchSize,
+            confirmations,
+          );
+
+          if (!bondKpiLinkedRateConfig.success) {
+            throw new Error(
+              `Bond KpiLinked Rate config creation failed: ${bondKpiLinkedRateConfig.error} - ${bondKpiLinkedRateConfig.message}`,
+            );
+          }
+
+          info(`✅ Bond KpiLinked Rate Config ID: ${bondKpiLinkedRateConfig.data.configurationId}`);
+          info(`✅ Bond KpiLinked Rate Version: ${bondKpiLinkedRateConfig.data.version}`);
+          info(`✅ Bond KpiLinked Rate Facets: ${bondKpiLinkedRateConfig.data.facetKeys.length}`);
+
+          // Save checkpoint
+          checkpoint.steps.configurations!.bondKpiLinkedRate = {
+            configId: bondKpiLinkedRateConfig.data.configurationId,
+            version: bondKpiLinkedRateConfig.data.version,
+            facetCount: bondKpiLinkedRateConfig.data.facetKeys.length,
+            txHash: "",
+          };
+          checkpoint.currentStep = 6;
+          await checkpointManager.saveCheckpoint(checkpoint);
+        }
       }
     } else {
-      info("\n💼 Step 5/6: Skipping configurations...");
-      skippedSteps.push("Equity configuration", "Bond configuration");
+      info("\n💼 Step 6/7: Skipping configurations...");
+      skippedSteps.push(
+        "Equity configuration",
+        "Bond configuration",
+        "Bond Fixed Rate configuration",
+        "Bond KpiLinked Rate configuration",
+      );
     }
 
     // Step 5: Deploy Factory (optional - controlled by deployFactory flag)
@@ -642,7 +767,7 @@ export async function deploySystemWithExistingBlr(
 
     if (shouldDeployFactory) {
       if (checkpoint.steps.factory && checkpoint.currentStep >= 5) {
-        info("\n✓ Step 6/6: Factory already deployed (resuming)");
+        info("\n✓ Step 7/7: Factory already deployed (resuming)");
         // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
         const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || proxyAdmin.address;
         factoryResult = {
@@ -690,7 +815,7 @@ export async function deploySystemWithExistingBlr(
         await checkpointManager.saveCheckpoint(checkpoint);
       }
     } else {
-      info("\n🏭 Step 6/6: Skipping Factory deployment...");
+      info("\n🏭 Step 7/7: Skipping Factory deployment...");
       skippedSteps.push("Factory deployment");
     }
 
@@ -745,12 +870,18 @@ export async function deploySystemWithExistingBlr(
               const bondFacet = bondConfig?.success
                 ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
                 : undefined;
+              const bondFixedRateFacet = bondFixedRateConfig?.success
+                ? bondFixedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                : undefined;
+              const bondKpiLinkedRateFacet = bondKpiLinkedRateConfig?.success
+                ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+                : undefined;
 
               return {
                 name: facetName,
                 address: facetAddress,
                 contractId: await getContractId(facetAddress),
-                key: equityFacet?.key || bondFacet?.key || "",
+                key: equityFacet?.key || bondFacet?.key || bondFixedRateFacet?.key || bondKpiLinkedRateFacet?.key || "",
               };
             }),
           )
@@ -785,12 +916,44 @@ export async function deploySystemWithExistingBlr(
                 facetCount: 0,
                 facets: [],
               },
+        bondFixedRate:
+          bondFixedRateConfig && bondFixedRateConfig.success
+            ? {
+                configId: bondFixedRateConfig.data.configurationId,
+                version: bondFixedRateConfig.data.version,
+                facetCount: bondFixedRateConfig.data.facetKeys.length,
+                facets: bondFixedRateConfig.data.facetKeys,
+              }
+            : {
+                configId: "N/A (Not created)",
+                version: 0,
+                facetCount: 0,
+                facets: [],
+              },
+        bondKpiLinkedRate:
+          bondKpiLinkedRateConfig && bondKpiLinkedRateConfig.success
+            ? {
+                configId: bondKpiLinkedRateConfig.data.configurationId,
+                version: bondKpiLinkedRateConfig.data.version,
+                facetCount: bondKpiLinkedRateConfig.data.facetKeys.length,
+                facets: bondKpiLinkedRateConfig.data.facetKeys,
+              }
+            : {
+                configId: "N/A (Not created)",
+                version: 0,
+                facetCount: 0,
+                facets: [],
+              },
       },
 
       summary: {
         totalContracts: 1 + (factoryResult ? 1 : 0), // ProxyAdmin + Factory (if deployed)
         totalFacets: facetsResult?.deployed.size || 0,
-        totalConfigurations: (equityConfig ? 1 : 0) + (bondConfig ? 1 : 0),
+        totalConfigurations:
+          (equityConfig ? 1 : 0) +
+          (bondConfig ? 1 : 0) +
+          (bondFixedRateConfig ? 1 : 0) +
+          (bondKpiLinkedRateConfig ? 1 : 0),
         deploymentTime: endTime - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,

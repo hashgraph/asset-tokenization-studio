@@ -244,6 +244,7 @@ import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
 import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
 import { Wallet, ethers } from 'ethers';
 import BaseError from '@core/error/BaseError';
+import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -382,6 +383,7 @@ describe('🧪 Bond test', () => {
     const couponRate = '3';
     const couponRecordDate = startingDate + 30;
     const couponExecutionDate = startingDate + 35;
+    const couponFixingDate = startingDate + 25;
 
     await Bond.setCoupon(
       new SetCouponRequest({
@@ -389,7 +391,10 @@ describe('🧪 Bond test', () => {
         rate: couponRate,
         recordTimestamp: couponRecordDate.toString(),
         executionTimestamp: couponExecutionDate.toString(),
-        period: TIME_PERIODS_S.DAY.toString(),
+        startTimestamp: '0',
+        endTimestamp: TIME_PERIODS_S.DAY.toString(),
+        fixingTimestamp: couponFixingDate.toString(),
+        rateStatus: CastRateStatus.toNumber(RateStatus.SET)
       }),
     );
 
@@ -446,6 +451,7 @@ describe('🧪 Bond test', () => {
     const rate = '1';
     const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
     const executionTimestamp = recordTimestamp + 1000;
+    const couponFixingDate = recordTimestamp - 1000;
 
     await Bond.setCoupon(
       new SetCouponRequest({
@@ -453,7 +459,10 @@ describe('🧪 Bond test', () => {
         rate: rate,
         recordTimestamp: recordTimestamp.toString(),
         executionTimestamp: executionTimestamp.toString(),
-        period: TIME_PERIODS_S.DAY.toString(),
+        startTimestamp: '0',
+        endTimestamp: TIME_PERIODS_S.DAY.toString(),
+        fixingTimestamp: couponFixingDate.toString(),
+        rateStatus: CastRateStatus.toNumber(RateStatus.PENDING)
       }),
     );
 

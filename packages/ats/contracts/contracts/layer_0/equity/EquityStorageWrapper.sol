@@ -49,16 +49,16 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _setDividends(
         IEquity.Dividend calldata _newDividend
-    ) internal returns (bool success_, bytes32 corporateActionId_, uint256 dividendId_) {
+    ) internal returns (bytes32 corporateActionId_, uint256 dividendId_) {
         bytes memory data = abi.encode(_newDividend);
 
-        (success_, corporateActionId_, dividendId_) = _addCorporateAction(DIVIDEND_CORPORATE_ACTION_TYPE, data);
+        (corporateActionId_, dividendId_) = _addCorporateAction(DIVIDEND_CORPORATE_ACTION_TYPE, data);
 
-        _initDividend(success_, corporateActionId_, data);
+        _initDividend(corporateActionId_, data);
     }
 
-    function _initDividend(bool _success, bytes32 _actionId, bytes memory _data) internal {
-        if (!_success) {
+    function _initDividend(bytes32 _actionId, bytes memory _data) internal {
+        if (_actionId == bytes32(0)) {
             revert IEquityStorageWrapper.DividendCreationFailed();
         }
 
@@ -70,16 +70,16 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _setVoting(
         IEquity.Voting calldata _newVoting
-    ) internal returns (bool success_, bytes32 corporateActionId_, uint256 voteID_) {
+    ) internal returns (bytes32 corporateActionId_, uint256 voteID_) {
         bytes memory data = abi.encode(_newVoting);
 
-        (success_, corporateActionId_, voteID_) = _addCorporateAction(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, data);
+        (corporateActionId_, voteID_) = _addCorporateAction(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, data);
 
-        _initVotingRights(success_, corporateActionId_, data);
+        _initVotingRights(corporateActionId_, data);
     }
 
-    function _initVotingRights(bool _success, bytes32 _actionId, bytes memory _data) internal {
-        if (!_success) {
+    function _initVotingRights(bytes32 _actionId, bytes memory _data) internal {
+        if (_actionId == bytes32(0)) {
             revert IEquityStorageWrapper.VotingRightsCreationFailed();
         }
 
@@ -91,19 +91,19 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _setScheduledBalanceAdjustment(
         IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    ) internal returns (bool success_, bytes32 corporateActionId_, uint256 balanceAdjustmentID_) {
+    ) internal returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_) {
         bytes memory data = abi.encode(_newBalanceAdjustment);
 
-        (success_, corporateActionId_, balanceAdjustmentID_) = _addCorporateAction(
+        (corporateActionId_, balanceAdjustmentID_) = _addCorporateAction(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             data
         );
 
-        _initBalanceAdjustment(success_, corporateActionId_, data);
+        _initBalanceAdjustment(corporateActionId_, data);
     }
 
-    function _initBalanceAdjustment(bool _success, bytes32 _actionId, bytes memory _data) internal {
-        if (!_success) {
+    function _initBalanceAdjustment(bytes32 _actionId, bytes memory _data) internal {
+        if (_actionId == bytes32(0)) {
             revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
         }
 
@@ -141,9 +141,9 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     function _getDividends(
         uint256 _dividendID
     ) internal view returns (IEquity.RegisteredDividend memory registeredDividend_) {
-        bytes32 actionId = _corporateActionsStorage().actionsByType[DIVIDEND_CORPORATE_ACTION_TYPE].at(_dividendID - 1);
+        bytes32 actionId = _getCorporateActionIdByTypeIndex(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
 
-        (, bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
             (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
@@ -225,11 +225,9 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     }
 
     function _getVoting(uint256 _voteID) internal view returns (IEquity.RegisteredVoting memory registeredVoting_) {
-        bytes32 actionId = _corporateActionsStorage().actionsByType[VOTING_RIGHTS_CORPORATE_ACTION_TYPE].at(
-            _voteID - 1
-        );
+        bytes32 actionId = _getCorporateActionIdByTypeIndex(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
 
-        (, bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
             (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
@@ -297,11 +295,12 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     function _getScheduledBalanceAdjusment(
         uint256 _balanceAdjustmentID
     ) internal view returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_) {
-        bytes32 actionId = _corporateActionsStorage().actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE].at(
+        bytes32 actionId = _getCorporateActionIdByTypeIndex(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             _balanceAdjustmentID - 1
         );
 
-        (, bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
             (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));

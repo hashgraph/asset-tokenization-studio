@@ -45,7 +45,12 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
   if (!steps.facets || steps.facets.size === 0) {
     throw new Error("Checkpoint missing facet deployments");
   }
-  if (!steps.configurations?.equity || !steps.configurations?.bond) {
+  if (
+    !steps.configurations?.equity ||
+    !steps.configurations?.bond ||
+    !steps.configurations?.bondFixedRate ||
+    !steps.configurations?.bondKpiLinkedRate
+  ) {
     throw new Error("Checkpoint missing configurations");
   }
 
@@ -109,12 +114,24 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
         facetCount: steps.configurations.bond.facetCount,
         facets: [], // Will be populated in actual workflow
       },
+      bondFixedRate: {
+        configId: steps.configurations.bondFixedRate.configId,
+        version: steps.configurations.bondFixedRate.version,
+        facetCount: steps.configurations.bondFixedRate.facetCount,
+        facets: [], // Will be populated in actual workflow
+      },
+      bondKpiLinkedRate: {
+        configId: steps.configurations.bondKpiLinkedRate.configId,
+        version: steps.configurations.bondKpiLinkedRate.version,
+        facetCount: steps.configurations.bondKpiLinkedRate.facetCount,
+        facets: [], // Will be populated in actual workflow
+      },
     },
 
     summary: {
       totalContracts: 3 + steps.facets.size, // ProxyAdmin + BLR + Factory + facets
       totalFacets: steps.facets.size,
-      totalConfigurations: 2,
+      totalConfigurations: 3,
       deploymentTime: endTime - start,
       gasUsed: totalGasUsed.toString(),
       success: checkpoint.status === "completed",
@@ -123,6 +140,8 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
     helpers: {
       getEquityFacets: () => [],
       getBondFacets: () => [],
+      getBondFixedRateFacets: () => [],
+      getBondKpiLinkedRateFacets: () => [],
     },
   };
 }
@@ -158,6 +177,10 @@ export function getStepName(step: number, workflowType: "newBlr" | "existingBlr"
       case 5:
         return "Bond Configuration";
       case 6:
+        return "Bond Fixed Rate Configuration";
+      case 7:
+        return "Bond KpiLinked Rate Configuration";
+      case 8:
         return "Factory";
       default:
         return `Unknown Step ${step}`;
@@ -176,6 +199,10 @@ export function getStepName(step: number, workflowType: "newBlr" | "existingBlr"
       case 4:
         return "Bond Configuration";
       case 5:
+        return "Bond Fixed Rate Configuration";
+      case 6:
+        return "Bond KpiLinked Rate Configuration";
+      case 7:
         return "Factory";
       default:
         return `Unknown Step ${step}`;
@@ -190,7 +217,7 @@ export function getStepName(step: number, workflowType: "newBlr" | "existingBlr"
  * @returns Total number of steps
  */
 export function getTotalSteps(workflowType: "newBlr" | "existingBlr" = "newBlr"): number {
-  return workflowType === "newBlr" ? 7 : 6;
+  return workflowType === "newBlr" ? 8 : 7;
 }
 
 /**

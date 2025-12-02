@@ -8,13 +8,13 @@ import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
 import { ISecurity } from "../interfaces/ISecurity.sol";
 
 contract BondUSAReadFacet is BondRead, Security {
-    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
+    function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _BOND_READ_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](11);
+        staticFunctionSelectors_ = new bytes4[](14);
         staticFunctionSelectors_[selectorIndex++] = this.getBondDetails.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
@@ -26,6 +26,9 @@ contract BondUSAReadFacet is BondRead, Security {
         staticFunctionSelectors_[selectorIndex++] = this.getSecurityRegulationData.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getSecurityHolders.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getTotalSecurityHolders.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCouponFromOrderedListAt.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCouponsOrderedList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCouponsOrderedListTotal.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

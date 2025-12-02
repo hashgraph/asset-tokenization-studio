@@ -36,6 +36,9 @@ bytes32 constant _SCHEDULED_SNAPSHOTS_STORAGE_POSITION = 0xe5334ddaa6268d55c7efe
 // keccak256('security.token.standard.scheduledBalanceAdjustments.storage');
 bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION = 0xaf4aaa3de473ec9b58645d40f5a2fe4e176157e247b2d875db61f1a70935ac68;
 
+// keccak256('security.token.standard.scheduledCouponListing.storage');
+bytes32 constant _SCHEDULED_COUPON_LISTING_STORAGE_POSITION = 0x020cecc946ba57a1f8569220f46e5763939a3e864a1a4064efc2be63a845635a;
+
 // keccak256('security.token.standard.scheduledCrossOrderedTasks.storage');
 bytes32 constant _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION = 0x07c301a048b8fa80688acfab6d93f7e94a43ce454031a02cdd132b92ca943a70;
 

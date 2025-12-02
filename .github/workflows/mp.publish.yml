@@ -5,15 +5,15 @@ on:
   workflow_dispatch:
     inputs:
       dry-run-enabled:
-        description: 'Run npm publish with dry-run flag'
+        description: "Run npm publish with dry-run flag"
         required: false
         type: boolean
         default: false
       ref:
-        description: 'Branch/tag/commit to publish from'
+        description: "Branch/tag/commit to publish from"
         required: false
         type: string
-        default: 'main'
+        default: "main"
 
   # Release published trigger (GitHub release creation) - only for Mass Payout releases (tags ending with -mp)
   release:
