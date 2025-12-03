@@ -1,5 +1,33 @@
 # @hashgraph/asset-tokenization-sdk
 
+## 2.0.0
+
+### Major Changes
+
+- c748529: nominal value decimals added to Bonds and Equities.
+  Now the nominal value decimals must be provided when deploying new Bonds/Equities and must be retrieved when reading the nominal value.
+
+### Minor Changes
+
+- c748529: full redeem at maturity method added
+- c748529: Dividend Amount For added
+- c748529: Coupon Amount For and Principal For methods added
+
+### Patch Changes
+
+- Updated dependencies [c748529]
+- Updated dependencies [c748529]
+- Updated dependencies [c748529]
+- Updated dependencies [c748529]
+- Updated dependencies [c748529]
+- Updated dependencies [c748529]
+- Updated dependencies [c748529]
+- Updated dependencies [c748529]
+- Updated dependencies [c748529]
+- Updated dependencies [c748529]
+- Updated dependencies [c748529]
+  - @hashgraph/asset-tokenization-contracts@2.0.0
+
 ## 1.17.0
 
 ### Minor Changes
