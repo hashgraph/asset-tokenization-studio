@@ -5,15 +5,10 @@ on:
   workflow_dispatch:
     inputs:
       dry-run-enabled:
-        description: 'Run npm publish with dry-run flag'
+        description: "Run npm publish with dry-run flag"
         required: false
         type: boolean
         default: false
-      ref:
-        description: 'Branch/tag/commit to publish from'
-        required: false
-        type: string
-        default: 'main'
 
   # Release published trigger (GitHub release creation) - only for Mass Payout releases (tags ending with -mp)
   release:
@@ -33,10 +28,7 @@ jobs:
     name: Publish Mass Payout Packages
     runs-on: token-studio-linux-large
     # Only run if manual trigger OR release tag contains 'mp'
-    if: github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-mp')
-    permissions:
-      contents: read
-      id-token: write
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-mp') }}
 
     steps:
       - name: Harden Runner
@@ -47,18 +39,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ inputs.ref || github.ref }}
+          ref: ${{ github.ref }}
           fetch-depth: 0
 
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.x
+          node-version: 22.20.0
           registry-url: https://registry.npmjs.org
 
       - name: Create .npmrc file
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cat << 'EOF' > .npmrc
           //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
@@ -66,6 +56,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Install NestJS CLI globally
+        run: npm install -g @nestjs/cli
 
       - name: Build Mass Payout packages
         run: npm run mass-payout:build
@@ -75,17 +68,13 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           DRY_RUN: ${{ inputs.dry-run-enabled }}
         run: |
-          echo "DRY_RUN is set to: '${DRY_RUN}'"
-
-          # Find and publish all Mass Payout packages
           for package_dir in packages/mass-payout/*/; do
-            if [ -d "$package_dir" ] && [ -f "${package_dir}package.json" ]; then
-              package_name=$(basename "$package_dir")
-              echo "📦 Processing Mass Payout package: $package_name"
+            if [ -d "${package_dir}" ] && [ -f "${package_dir}package.json" ]; then
+              package_name=$(basename "${package_dir}")
+              echo "📦 Processing Mass Payout package: ${package_name}"
 
-              cd "$package_dir"
+              cd "${package_dir}"
 
-              # Check if package is publishable (not private)
               if ! node -p "require('./package.json').private || false" | grep -q "true"; then
                 PUBLISH_ARGS=("--access=restricted")
                 if [[ "${DRY_RUN}" == "true" ]]; then
@@ -93,9 +82,13 @@ jobs:
                   echo "🔍 DRY RUN MODE: Would publish @hashgraph/mass-payout-${package_name}"
                 fi
 
-                npm publish "${PUBLISH_ARGS[@]}"
+                if ! npm publish "${PUBLISH_ARGS[@]}"; then
+                  echo "❌ Failed to publish package: ${package_name}"
+                  echo "📋 Package info:" && cat package.json | jq '.name, .version'
+                  exit 1
+                fi
               else
-                echo "⏭️  Skipping private package: $package_name"
+                echo "⏭️  Skipping private package: ${package_name}"
               fi
 
               cd - > /dev/null
@@ -106,8 +99,9 @@ jobs:
   summary:
     name: Publish Summary
     runs-on: token-studio-linux-large
-    needs: [mass-payout]
-    if: always()
+    needs:
+      - mass-payout
+    if: ${{ always() }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
@@ -116,12 +110,12 @@ jobs:
 
       - name: Report Results
         run: |
-          echo "## Mass Payout Publish Results" >> $GITHUB_STEP_SUMMARY
-          echo "| Package Type | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mass Payout | ${{ needs.mass-payout.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "## Mass Payout Publish Results" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Package Type | Status |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| --- | --- |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Mass Payout | ${{ needs.mass-payout.result }} |" >> "${GITHUB_STEP_SUMMARY}"
 
           if [[ "${{ inputs.dry-run-enabled }}" == "true" ]]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "🔍 **DRY RUN MODE** - No packages were actually published" >> $GITHUB_STEP_SUMMARY
+            echo "" >> "${GITHUB_STEP_SUMMARY}"
+            echo "🔍 **DRY RUN MODE** - No packages were actually published" >> "${GITHUB_STEP_SUMMARY}"
           fi

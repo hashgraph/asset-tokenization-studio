@@ -5,13 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       release-type:
-        description: 'Type of release to perform'
+        description: "Type of release to perform"
         required: true
         type: choice
         options:
           - preview # Show what would be released (dry-run)
           - release # Full production release
-        default: 'preview'
+        default: "preview"
 
 defaults:
   run:
@@ -25,13 +25,6 @@ jobs:
   ats-release:
     name: Create ATS Release
     runs-on: token-studio-linux-large
-    # Only allow authorized teams to trigger releases per CODEOWNERS
-    if: >
-      github.event_name == 'workflow_dispatch' && (
-        contains(fromJSON('["platform-ci", "platform-ci-committers", "release-engineering-managers", "developer-advocates", "iobuilders-hedera"]'),
-                 github.actor) ||
-        contains(github.actor, 'hashgraph')
-      )
 
     steps:
       - name: Harden Runner
@@ -49,7 +42,7 @@ jobs:
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.x
+          node-version: v22.20.0
 
       - name: Install dependencies
         run: npm ci
@@ -57,30 +50,27 @@ jobs:
       - name: Validate ATS changesets exist
         id: validate
         run: |
-          # Use changeset status with JSON output to detect ATS packages with changes
           echo "📋 Getting changeset status..."
           npx changeset status --output=changeset-status.json
 
-          # Parse JSON to check if ATS packages have pending changes
           ATS_PACKAGES_TO_BUMP=$(jq -r '.releases[] | select(.name | test("@hashgraph/asset-tokenization-")) | .name' changeset-status.json | wc -l)
 
-          echo "ats-packages-to-bump=$ATS_PACKAGES_TO_BUMP" >> $GITHUB_OUTPUT
+          echo "ats-packages-to-bump=${ATS_PACKAGES_TO_BUMP}" >> "${GITHUB_OUTPUT}"
 
-          if [ "$ATS_PACKAGES_TO_BUMP" -eq 0 ]; then
+          if [ "${ATS_PACKAGES_TO_BUMP}" -eq 0 ]; then
             echo "❌ No ATS packages found to be bumped"
             echo "📋 Current changeset status:"
             npx changeset status
             exit 1
           fi
 
-          echo "✅ Found $ATS_PACKAGES_TO_BUMP ATS package(s) ready for release"
+          echo "✅ Found ${ATS_PACKAGES_TO_BUMP} ATS package(s) ready for release"
 
-          # Show which packages will be bumped
           echo "📦 ATS packages to be released:"
           jq -r '.releases[] | select(.name | test("@hashgraph/asset-tokenization-")) | "  - \(.name) (\(.oldVersion) → \(.newVersion))"' changeset-status.json
 
       - name: Preview ATS release
-        if: inputs.release-type == 'preview'
+        if: ${{ inputs.release-type == 'preview' }}
         run: |
           echo "🔍 PREVIEW MODE - What would be released for ATS packages:"
           echo ""
@@ -93,14 +83,12 @@ jobs:
           echo "To proceed with actual release, run this workflow with 'release' option."
 
       - name: Version ATS packages
-        if: inputs.release-type == 'release'
+        if: ${{ inputs.release-type == 'release' }}
         run: |
           echo "🚀 Releasing ATS packages only (ignoring Mass Payout packages)"
 
-          # Run changeset version with ignore flag for Mass Payout packages
           npx changeset version --ignore "@hashgraph/mass-payout*"
 
-          # Check if any files were changed
           if [[ -n "$(git status --porcelain)" ]]; then
             echo "✅ Version bump completed for ATS packages"
           else
@@ -109,76 +97,59 @@ jobs:
           fi
 
       - name: Commit version changes
-        if: inputs.release-type == 'release'
+        if: ${{ inputs.release-type == 'release' }}
         run: |
-          # GitHub Actions bot automatically handles git config for branch protection bypass
-          # When using GITHUB_TOKEN, GitHub automatically configures the correct identity
-
-          # Add all changed files
           git add .
 
-          # Commit with DCO sign-off using GitHub Actions bot identity
-          if git commit --signoff -m "chore: release ATS packages"; then
+          if git commit --signoff -S -m "chore: release ATS packages"; then
             echo "✅ Version changes committed"
           else
             echo "ℹ️ No changes to commit"
           fi
 
       - name: Create ATS release
-        if: inputs.release-type == 'release'
+        id: create-release-tag
+        if: ${{ inputs.release-type == 'release' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get the current ATS version (all ATS packages use fixed versioning)
           ATS_VERSION=$(node -p "require('./packages/ats/contracts/package.json').version")
           TAG_NAME="v${ATS_VERSION}-ats"
-
-          echo "📦 Creating ATS release: $TAG_NAME"
-
-          # Create and push tag
+          echo "📦 Creating ATS release tag: ${TAG_NAME}"
           git tag "${TAG_NAME}"
           git push origin "${TAG_NAME}"
 
-          # Generate release notes from ATS package changelogs
-          RELEASE_NOTES=""
-          for package in contracts sdk; do
-            CHANGELOG_FILE="packages/ats/${package}/CHANGELOG.md"
-            if [ -f "$CHANGELOG_FILE" ]; then
-              echo "📋 Including changelog from $package"
-              RELEASE_NOTES="$RELEASE_NOTES\n\n## @hashgraph/asset-tokenization-${package}\n"
-              # Get the latest version section from changelog
-              sed -n "/^## $ATS_VERSION/,/^## /p" "$CHANGELOG_FILE" | head -n -1 >> release-notes.md
-            fi
-          done
+          echo "tag-name=${TAG_NAME}" >> "${GITHUB_OUTPUT}"
 
-          # Create GitHub release
-          gh release create "$TAG_NAME" \
-            --title "ATS Release v${ATS_VERSION}" \
-            --notes-file release-notes.md \
-            --target main
-
-          echo "✅ GitHub release created: $TAG_NAME"
-          echo "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/$TAG_NAME"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create github release
+        if: ${{ inputs.release-type == 'release' }}
+        uses: step-security/release-action@03a57407052f15d1537fd5469a6fbbc536aba326 # v1.20.0
+        with:
+          tag: ${{ steps.create-release-tag.outputs.tag-name }}
+          prerelease: false
+          draft: false
+          generateReleaseNotes: true
+          skipIfReleaseExists: true
 
       - name: Release Summary
         if: always()
         run: |
           if [ "${{ inputs.release-type }}" = "preview" ]; then
-            echo "## 🔍 ATS Release Preview Completed" >> $GITHUB_STEP_SUMMARY
-            echo "Preview mode was selected. No actual release was created." >> $GITHUB_STEP_SUMMARY
+            echo "## 🔍 ATS Release Preview Completed" >> "${GITHUB_STEP_SUMMARY}"
+            echo "Preview mode was selected. No actual release was created." >> "${GITHUB_STEP_SUMMARY}"
           elif [ "${{ job.status }}" = "success" ]; then
             ATS_VERSION=$(node -p "require('./packages/ats/contracts/package.json').version" 2>/dev/null || echo "unknown")
-            echo "## ✅ ATS Release v${ATS_VERSION} Completed Successfully" >> $GITHUB_STEP_SUMMARY
-            echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
-            echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
-            echo "| ATS Contracts | ✅ Released |" >> $GITHUB_STEP_SUMMARY
-            echo "| ATS SDK | ✅ Released |" >> $GITHUB_STEP_SUMMARY
-            echo "| GitHub Release | ✅ Created |" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
-            echo "- NPM publishing will be triggered automatically via ats.publish.yml" >> $GITHUB_STEP_SUMMARY
-            echo "- Mass Payout packages were ignored and remain available for separate release" >> $GITHUB_STEP_SUMMARY
+            echo "## ✅ ATS Release v${ATS_VERSION} Completed Successfully" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| Package | Status |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| --- | --- |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| ATS Contracts | ✅ Released |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| ATS SDK | ✅ Released |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| GitHub Release | ✅ Created |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "" >> "${GITHUB_STEP_SUMMARY}"
+            echo "**Next Steps:**" >> "${GITHUB_STEP_SUMMARY}"
+            echo "- NPM publishing will be triggered automatically via ats.publish.yml" >> "${GITHUB_STEP_SUMMARY}"
+            echo "- Mass Payout packages were ignored and remain available for separate release" >> "${GITHUB_STEP_SUMMARY}"
           else
-            echo "## ❌ ATS Release Failed" >> $GITHUB_STEP_SUMMARY
-            echo "Check the logs above for details on what went wrong." >> $GITHUB_STEP_SUMMARY
+            echo "## ❌ ATS Release Failed" >> "${GITHUB_STEP_SUMMARY}"
+            echo "Check the logs above for details on what went wrong." >> "${GITHUB_STEP_SUMMARY}"
           fi
