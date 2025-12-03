@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { OperatorTransferData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { IssueData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
+import { IProtectedPartitionsStorageWrapper } from "../protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 
 /**
  * @title IERC1410Management
@@ -26,7 +27,7 @@ interface IERC1410Management {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external;
+    ) external returns (bytes32);
 
     /**
      * @notice Forces a redeem in a partition from a token holder
@@ -74,10 +75,8 @@ interface IERC1410Management {
         address _from,
         address _to,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) external;
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) external returns (bytes32);
 
     /**
      * @notice Redeems tokens from the token holder by presenting an off-chain signature
@@ -87,8 +86,6 @@ interface IERC1410Management {
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) external;
 }

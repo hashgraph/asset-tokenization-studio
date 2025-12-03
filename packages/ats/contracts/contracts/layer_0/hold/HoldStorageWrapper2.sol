@@ -90,10 +90,11 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
-    ) internal returns (bool success_) {
+    ) internal returns (bool success_, bytes32 partition_) {
         _beforeExecuteHold(_holdIdentifier, _to);
 
         success_ = _operateHoldByPartition(_holdIdentifier, _to, _amount, OperationType.Execute);
+        partition_ = _holdIdentifier.partition;
 
         HoldData memory holdData = _getHold(_holdIdentifier);
 

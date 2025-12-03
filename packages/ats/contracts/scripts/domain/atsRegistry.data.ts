@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-01T14:53:46.712Z
+ * Generated: 2025-12-03T13:07:17.737Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -960,13 +960,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "protectedRedeemFromByPartition",
-        signature: "protectedRedeemFromByPartition(bytes32,address,uint256,uint256,uint256,bytes)",
-        selector: "0xc98d9723",
+        signature:
+          "protectedRedeemFromByPartition(bytes32,address,uint256,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0x648ad69d",
       },
       {
         name: "protectedTransferFromByPartition",
-        signature: "protectedTransferFromByPartition(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        selector: "0x12e41c0a",
+        signature:
+          "protectedTransferFromByPartition(bytes32,address,address,uint256,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0xf8edc4b5",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -2136,13 +2138,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "protectedTransferAndLock",
-        signature: "protectedTransferAndLock(TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0xaf33faac",
+        signature: "protectedTransferAndLock(TransferAndLockStruct,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0x51d4bc03",
       },
       {
         name: "protectedTransferAndLockByPartition",
-        signature: "protectedTransferAndLockByPartition(bytes32,TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0xbd2951ce",
+        signature:
+          "protectedTransferAndLockByPartition(bytes32,TransferAndLockStruct,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0xa2cf2efd",
       },
       { name: "transferAndLock", signature: "transferAndLock(address,uint256,bytes,uint256)", selector: "0x0e92b90b" },
       {
@@ -2467,13 +2470,15 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [
       {
         name: "_protectedRedeemFromByPartition",
-        signature: "_protectedRedeemFromByPartition(bytes32,address,uint256,uint256,uint256,bytes)",
-        selector: "0x6d27f455",
+        signature:
+          "_protectedRedeemFromByPartition(bytes32,address,uint256,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0xa0d2a3c0",
       },
       {
         name: "_protectedTransferFromByPartition",
-        signature: "_protectedTransferFromByPartition(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        selector: "0xfac1472b",
+        signature:
+          "_protectedTransferFromByPartition(bytes32,address,address,uint256,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0x5bda1de2",
       },
     ],
   },
@@ -2839,14 +2844,15 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       { name: "_checkProtectedPartitions", signature: "_checkProtectedPartitions()", selector: "0xed6f719a" },
       {
         name: "_checkRedeemSignature",
-        signature: "_checkRedeemSignature(bytes32,address,uint256,uint256,uint256,bytes)",
-        selector: "0x2546b4b4",
+        signature: "_checkRedeemSignature(bytes32,address,uint256,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0x86f1789d",
       },
       { name: "_checkRoleForPartition", signature: "_checkRoleForPartition(bytes32,address)", selector: "0x67323be5" },
       {
         name: "_checkTransferSignature",
-        signature: "_checkTransferSignature(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        selector: "0x6ee3d1e2",
+        signature:
+          "_checkTransferSignature(bytes32,address,address,uint256,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0x75734433",
       },
       { name: "_checkValidPartition", signature: "_checkValidPartition(bytes32)", selector: "0x836740a4" },
       { name: "_getNounceFor", signature: "_getNounceFor(address)", selector: "0x795a18cb" },
@@ -2872,13 +2878,14 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
       {
         name: "_isRedeemSignatureValid",
-        signature: "_isRedeemSignatureValid(bytes32,address,uint256,uint256,uint256,bytes)",
-        selector: "0x21058b93",
+        signature: "_isRedeemSignatureValid(bytes32,address,uint256,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0xf603fc7b",
       },
       {
         name: "_isTransferSignatureValid",
-        signature: "_isTransferSignatureValid(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        selector: "0x30a87935",
+        signature:
+          "_isTransferSignatureValid(bytes32,address,address,uint256,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0x006444f7",
       },
       { name: "_protectedPartitionsRole", signature: "_protectedPartitionsRole(bytes32)", selector: "0xde41fe7d" },
       { name: "_protectedPartitionsStorage", signature: "_protectedPartitionsStorage()", selector: "0x00840cb7" },
@@ -3072,35 +3079,38 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       {
         name: "_checkTransferAndLockByPartitionSignature",
         signature:
-          "_checkTransferAndLockByPartitionSignature(bytes32,ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0xa89ed8df",
+          "_checkTransferAndLockByPartitionSignature(bytes32,ITransferAndLock.TransferAndLockStruct,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0x0ecc448e",
       },
       {
         name: "_checkTransferAndLockSignature",
-        signature: "_checkTransferAndLockSignature(ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0x8a1708d9",
+        signature:
+          "_checkTransferAndLockSignature(ITransferAndLock.TransferAndLockStruct,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0x47053ca4",
       },
       {
         name: "_isTransferAndLockByPartitionSignatureValid",
         signature:
-          "_isTransferAndLockByPartitionSignatureValid(bytes32,ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0x8b429f59",
+          "_isTransferAndLockByPartitionSignatureValid(bytes32,ITransferAndLock.TransferAndLockStruct,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0xd862c589",
       },
       {
         name: "_isTransferAndLockSignatureValid",
-        signature: "_isTransferAndLockSignatureValid(ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0x6274de2d",
+        signature:
+          "_isTransferAndLockSignatureValid(ITransferAndLock.TransferAndLockStruct,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0x1f7ea122",
       },
       {
         name: "_protectedTransferAndLock",
-        signature: "_protectedTransferAndLock(ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0x108b43ed",
+        signature:
+          "_protectedTransferAndLock(ITransferAndLock.TransferAndLockStruct,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0xb5da390a",
       },
       {
         name: "_protectedTransferAndLockByPartition",
         signature:
-          "_protectedTransferAndLockByPartition(bytes32,ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0x472a5931",
+          "_protectedTransferAndLockByPartition(bytes32,ITransferAndLock.TransferAndLockStruct,IProtectedPartitionsStorageWrapper.ProtectionData)",
+        selector: "0x94e698c1",
       },
     ],
   },
