@@ -1955,15 +1955,11 @@ describe("ERC3643 Tests", () => {
         await accessControlFacet.grantRole(ProtectedPartitionRole_1, signer_A.address);
         await protectedPartitionsFacet.protectPartitions();
         await expect(
-          erc1410Facet.protectedTransferFromByPartition(
-            DEFAULT_PARTITION,
-            signer_C.address,
-            signer_B.address,
-            amount,
-            MAX_UINT256,
-            1,
-            "0x1234",
-          ),
+          erc1410Facet.protectedTransferFromByPartition(DEFAULT_PARTITION, signer_C.address, signer_B.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature: "0x1234",
+          }),
         ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
         await protectedPartitionsFacet.unprotectPartitions();
         const operatorTransferData = {
@@ -2017,15 +2013,11 @@ describe("ERC3643 Tests", () => {
         );
         await protectedPartitionsFacet.protectPartitions();
         await expect(
-          erc1410Facet.protectedTransferFromByPartition(
-            DEFAULT_PARTITION,
-            signer_B.address,
-            signer_C.address,
-            amount,
-            MAX_UINT256,
-            1,
-            "0x1234",
-          ),
+          erc1410Facet.protectedTransferFromByPartition(DEFAULT_PARTITION, signer_B.address, signer_C.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature: "0x1234",
+          }),
         ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
         await protectedPartitionsFacet.unprotectPartitions();
         operatorTransferData.to = signer_C.address;
@@ -2083,14 +2075,11 @@ describe("ERC3643 Tests", () => {
         );
         await protectedPartitionsFacet.protectPartitions();
         await expect(
-          erc1410Facet.protectedRedeemFromByPartition(
-            DEFAULT_PARTITION,
-            signer_C.address,
-            amount,
-            MAX_UINT256,
-            1,
-            "0x1234",
-          ),
+          erc1410Facet.protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_C.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature: "0x1234",
+          }),
         ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
         await protectedPartitionsFacet.unprotectPartitions();
         await expect(
