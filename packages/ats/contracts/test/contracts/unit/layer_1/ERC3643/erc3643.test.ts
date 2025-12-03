@@ -1461,6 +1461,20 @@ describe("ERC3643 Tests", () => {
           ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
         });
 
+        it("GIVEN paused token WHEN batchSetAddressFrozen THEN fails with TokenIsPaused", async () => {
+          const userAddresses = [signer_D.address, signer_E.address];
+          // grant KYC to signer_A.address
+          await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+
+          await pauseFacet.connect(signer_B).pause();
+
+          // First, freeze the addresses
+          await expect(freezeFacet.batchSetAddressFrozen(userAddresses, [true, true])).to.revertedWithCustomError(
+            pauseFacet,
+            "TokenIsPaused",
+          );
+        });
+
         it("GIVEN frozen addresses WHEN batchSetAddressFrozen with false THEN transfers from those addresses succeed", async () => {
           const userAddresses = [signer_D.address, signer_E.address];
           // grant KYC to signer_A.address

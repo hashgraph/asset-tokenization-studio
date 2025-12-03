@@ -62,7 +62,7 @@ abstract contract Freeze is IFreeze, Common {
     function batchSetAddressFrozen(
         address[] calldata _userAddresses,
         bool[] calldata _freeze
-    ) external onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
+    ) external onlyUnpaused onlyValidInputBoolArrayLength(_userAddresses, _freeze) {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _FREEZE_MANAGER_ROLE;
