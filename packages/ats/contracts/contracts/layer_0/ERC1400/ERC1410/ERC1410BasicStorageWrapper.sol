@@ -6,10 +6,10 @@ import { ICompliance } from "../../../layer_1/interfaces/ERC3643/ICompliance.sol
 import { IERC3643Management } from "../../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
 import { BasicTransferInfo } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { IERC1410StorageWrapper } from "../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol";
-import { ERC20StorageWrapper1 } from "../ERC20/ERC20StorageWrapper1.sol";
+import { ERC1410BasicStorageWrapperRead } from "./ERC1410BasicStorageWrapperRead.sol";
 import { LowLevelCall } from "../../common/libraries/LowLevelCall.sol";
 
-abstract contract ERC1410BasicStorageWrapper is IERC1410StorageWrapper, ERC20StorageWrapper1 {
+abstract contract ERC1410BasicStorageWrapper is IERC1410StorageWrapper, ERC1410BasicStorageWrapperRead {
     using LowLevelCall for address;
 
     function _transferByPartition(

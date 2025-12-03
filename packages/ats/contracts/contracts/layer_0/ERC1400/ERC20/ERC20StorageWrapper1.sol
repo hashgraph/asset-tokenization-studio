@@ -3,10 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IERC20 } from "../../../layer_1/interfaces/ERC1400/IERC20.sol";
-import { ERC1410BasicStorageWrapperRead } from "../ERC1410/ERC1410BasicStorageWrapperRead.sol";
 import { IFactory } from "../../../interfaces/factory/IFactory.sol";
+import { LockStorageWrapper1 } from "../../lock/LockStorageWrapper1.sol";
+import { IERC20StorageWrapper } from "../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
 
-abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
+abstract contract ERC20StorageWrapper1 is IERC20StorageWrapper, LockStorageWrapper1 {
     struct ERC20Storage {
         string name;
         string symbol;
@@ -15,6 +16,42 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         bool initialized;
         mapping(address => mapping(address => uint256)) allowed;
         IFactory.SecurityType securityType;
+        uint256 totalSupply;
+        mapping(address => uint256) balances;
+    }
+
+    function _adjustTotalSupply(uint256 factor) internal {
+        _erc20Storage().totalSupply *= factor;
+    }
+
+    function _reduceTotalSupply(uint256 amount) internal {
+        _erc20Storage().totalSupply -= amount;
+    }
+
+    function _increaseTotalSupply(uint256 amount) internal {
+        _erc20Storage().totalSupply += amount;
+    }
+
+    function _adjustTotalBalanceFor(uint256 abaf, address account) internal {
+        uint256 factor = _calculateFactorByAbafAndTokenHolder(abaf, account);
+        _erc20Storage().balances[account] *= factor;
+        _updateLabafByTokenHolder(abaf, account);
+    }
+
+    function _reduceBalanceFor(address account, uint256 amount) internal {
+        _erc20Storage().balances[account] -= amount;
+        _emitTransferEvent(account, address(0), amount);
+    }
+
+    function _increaseBalanceFor(address account, uint256 amount) internal {
+        _erc20Storage().balances[account] += amount;
+        _emitTransferEvent(address(0), account, amount);
+    }
+
+    function _transferBalanceBetween(address from, address to, uint256 amount) internal {
+        _erc20Storage().balances[from] -= amount;
+        _erc20Storage().balances[to] += amount;
+        _emitTransferEvent(from, to, amount);
     }
 
     function _adjustDecimals(uint8 decimals) internal {
@@ -73,11 +110,24 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         return _erc20Storage().decimals;
     }
 
+    function _totalSupply() internal view returns (uint256) {
+        return _erc20Storage().totalSupply;
+    }
+
+    function _balanceOf(address _tokenHolder) internal view returns (uint256) {
+        return _erc20Storage().balances[_tokenHolder];
+    }
+
     function _erc20Storage() internal pure returns (ERC20Storage storage erc20Storage_) {
         bytes32 position = _ERC20_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             erc20Storage_.slot := position
         }
+    }
+
+    function _emitTransferEvent(address from, address to, uint256 value) private returns (bool) {
+        emit Transfer(from, to, value);
+        return true;
     }
 }

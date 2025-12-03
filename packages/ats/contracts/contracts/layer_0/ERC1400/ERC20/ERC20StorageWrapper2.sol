@@ -2,11 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _DEFAULT_PARTITION } from "../../../layer_0/constants/values.sol";
-import { IERC20StorageWrapper } from "../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
 import { BasicTransferInfo, IssueData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { ERC1410StandardStorageWrapper } from "../ERC1410/ERC1410StandardStorageWrapper.sol";
 
-abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardStorageWrapper {
+abstract contract ERC20StorageWrapper2 is ERC1410StandardStorageWrapper {
     function _beforeAllowanceUpdate(address _owner, address _spender) internal {
         _triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
 
@@ -60,22 +59,20 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
     function _transferFrom(address spender, address from, address to, uint256 value) internal returns (bool) {
         _decreaseAllowedBalance(from, spender, value);
         _transferByPartition(from, BasicTransferInfo(to, value), _DEFAULT_PARTITION, "", spender, "");
-        return _emitTransferEvent(from, to, value);
+        return true;
     }
 
     function _transfer(address from, address to, uint256 value) internal returns (bool) {
         _transferByPartition(from, BasicTransferInfo(to, value), _DEFAULT_PARTITION, "", address(0), "");
-        return _emitTransferEvent(from, to, value);
+        return true;
     }
 
     function _mint(address to, uint256 value) internal {
         _issueByPartition(IssueData(_DEFAULT_PARTITION, to, value, ""));
-        _emitTransferEvent(address(0), to, value);
     }
 
     function _burn(address from, uint256 value) internal {
         _redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, "", "");
-        _emitTransferEvent(from, address(0), value);
     }
 
     function _burnFrom(address account, uint256 value) internal {
@@ -103,10 +100,5 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
         erc20Storage.allowed[from][spender] += value;
 
         emit Approval(from, spender, _erc20Storage().allowed[from][spender]);
-    }
-
-    function _emitTransferEvent(address from, address to, uint256 value) private returns (bool) {
-        emit Transfer(from, to, value);
-        return true;
     }
 }
