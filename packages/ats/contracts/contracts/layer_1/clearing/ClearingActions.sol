@@ -35,10 +35,10 @@ abstract contract ClearingActions is IClearingActions, Common {
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyClearingActivated
         validateExpirationTimestamp(_clearingOperationIdentifier, false)
-        returns (bool success_)
+        returns (bool success_, bytes32 partition_)
     {
         bytes memory operationData;
-        (success_, operationData) = _approveClearingOperationByPartition(_clearingOperationIdentifier);
+        (success_, operationData, partition_) = _approveClearingOperationByPartition(_clearingOperationIdentifier);
 
         emit ClearingOperationApproved(
             _msgSender(),

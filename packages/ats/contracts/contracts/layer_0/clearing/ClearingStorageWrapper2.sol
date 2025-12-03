@@ -246,7 +246,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
 
     function _approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) internal returns (bool success_, bytes memory operationData_) {
+    ) internal returns (bool success_, bytes memory operationData_, bytes32 partition_) {
         return
             _handleClearingOperationByPartition(
                 _clearingOperationIdentifier,
@@ -257,7 +257,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
     function _cancelClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) internal returns (bool success_) {
-        (success_, ) = _handleClearingOperationByPartition(
+        (success_, , ) = _handleClearingOperationByPartition(
             _clearingOperationIdentifier,
             IClearingActions.ClearingActionType.Cancel
         );
@@ -266,7 +266,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
     function _reclaimClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) internal returns (bool success_) {
-        (success_, ) = _handleClearingOperationByPartition(
+        (success_, , ) = _handleClearingOperationByPartition(
             _clearingOperationIdentifier,
             IClearingActions.ClearingActionType.Reclaim
         );
@@ -275,14 +275,14 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
     function _handleClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         IClearingActions.ClearingActionType operationType
-    ) internal returns (bool success_, bytes memory operationData_) {
+    ) internal returns (bool success_, bytes memory operationData_, bytes32 partition_) {
         _beforeClearingOperation(
             _clearingOperationIdentifier,
             _getClearingBasicInfo(_clearingOperationIdentifier).destination
         );
         uint256 amount;
         ThirdPartyType operatorType;
-        (success_, amount, operatorType, operationData_) = _operateClearingAction(
+        (success_, amount, operatorType, operationData_, partition_) = _operateClearingAction(
             _clearingOperationIdentifier,
             operationType
         );
@@ -292,15 +292,24 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
     function _operateClearingAction(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         IClearingActions.ClearingActionType _operation
-    ) internal returns (bool success_, uint256 amount_, ThirdPartyType operatorType_, bytes memory operationData_) {
+    )
+        internal
+        returns (
+            bool success_,
+            uint256 amount_,
+            ThirdPartyType operatorType_,
+            bytes memory operationData_,
+            bytes32 partition_
+        )
+    {
         if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Transfer) {
-            (success_, amount_, operatorType_) = _clearingTransferExecution(
+            (success_, amount_, operatorType_, partition_) = _clearingTransferExecution(
                 _clearingOperationIdentifier.partition,
                 _clearingOperationIdentifier.tokenHolder,
                 _clearingOperationIdentifier.clearingId,
                 _operation
             );
-            return (success_, amount_, operatorType_, operationData_);
+            return (success_, amount_, operatorType_, operationData_, partition_);
         }
 
         if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem) {
@@ -310,16 +319,17 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
                 _clearingOperationIdentifier.clearingId,
                 _operation
             );
-            return (success_, amount_, operatorType_, operationData_);
+            return (success_, amount_, operatorType_, operationData_, bytes32(0));
         }
 
-        return
-            _clearingHoldCreationExecution(
-                _clearingOperationIdentifier.partition,
-                _clearingOperationIdentifier.tokenHolder,
-                _clearingOperationIdentifier.clearingId,
-                _operation
-            );
+        (success_, amount_, operatorType_, operationData_) = _clearingHoldCreationExecution(
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.clearingId,
+            _operation
+        );
+
+        return (success_, amount_, operatorType_, operationData_, bytes32(0));
     }
 
     function _transferClearingBalance(bytes32 _partition, address _to, uint256 _amount) internal {
@@ -622,7 +632,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         address _tokenHolder,
         uint256 _clearingId,
         IClearingActions.ClearingActionType _operation
-    ) private returns (bool success_, uint256 amount_, ThirdPartyType operatorType_) {
+    ) private returns (bool success_, uint256 amount_, ThirdPartyType operatorType_, bytes32 partition_) {
         IClearing.ClearingTransferData memory clearingTransferData = _getClearingTransferForByPartition(
             _partition,
             _tokenHolder,
@@ -636,6 +646,8 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
             _checkCompliance(_tokenHolder, clearingTransferData.destination, false);
 
             destination = clearingTransferData.destination;
+
+            partition_ = _partition;
         }
 
         _transferClearingBalance(_partition, destination, clearingTransferData.amount);

@@ -79,7 +79,7 @@ interface IHoldTokenHolder {
         HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
-    ) external returns (bool success_);
+    ) external returns (bool success_, bytes32 partition_);
 
     /**
      * @notice Releases the held tokens back to the token holde
