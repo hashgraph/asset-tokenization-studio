@@ -16,6 +16,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Common {
         );
         uint256 length = _pauses.length;
         for (uint256 index; index < length; ) {
+            _checkValidAddress(_pauses[index]);
             _addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pauses[index]);
             unchecked {
                 ++index;
@@ -44,7 +45,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Common {
 
     function addExternalPause(
         address _pause
-    ) external override onlyRole(_PAUSE_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
+    ) external override onlyRole(_PAUSE_MANAGER_ROLE) onlyUnpaused validateAddress(_pause) returns (bool success_) {
         success_ = _addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert ListedPause(_pause);
