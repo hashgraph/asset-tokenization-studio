@@ -70,6 +70,7 @@ abstract contract Freeze is IFreeze, Common {
             _checkAnyRole(roles, _msgSender());
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
+            _checkValidAddress(_userAddresses[i]);
             _setAddressFrozen(_userAddresses[i], _freeze[i]);
             emit AddressFrozen(_userAddresses[i], _freeze[i], _msgSender());
         }
