@@ -288,12 +288,10 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     }
 
     function _beforeReleaseHold(HoldIdentifier calldata _holdIdentifier) internal {
-        _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
         _beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
     function _beforeReclaimHold(HoldIdentifier calldata _holdIdentifier) internal {
-        _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
         _beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
