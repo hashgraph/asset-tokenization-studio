@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-03T13:07:17.737Z
+ * Generated: 2025-12-04T09:38:43.078Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -512,6 +512,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["CorporateActions", "IStaticFunctionSelectors"],
     methods: [
+      { name: "actionContentHashExists", signature: "actionContentHashExists(bytes32)", selector: "0x14f1d784" },
       { name: "addCorporateAction", signature: "addCorporateAction(bytes32,bytes)", selector: "0xd9e4d92c" },
       { name: "getCorporateAction", signature: "getCorporateAction(bytes32)", selector: "0x911181da" },
       { name: "getCorporateActionCount", signature: "getCorporateActionCount()", selector: "0x8859794c" },
@@ -2309,6 +2310,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "CorporateActionsStorageWrapper",
     inheritance: ["ClearingStorageWrapper1"],
     methods: [
+      { name: "_actionContentHashExists", signature: "_actionContentHashExists(bytes32)", selector: "0x9e442b55" },
       { name: "_addCorporateAction", signature: "_addCorporateAction(bytes32,bytes)", selector: "0xb2a57bb4" },
       { name: "_checkDates", signature: "_checkDates(uint256,uint256)", selector: "0x970b0e20" },
       {

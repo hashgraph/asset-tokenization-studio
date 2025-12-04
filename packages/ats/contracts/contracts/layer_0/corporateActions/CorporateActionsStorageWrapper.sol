@@ -34,6 +34,13 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         bytes memory _data
     ) internal returns (bool success_, bytes32 corporateActionId_, uint256 corporateActionIndexByType_) {
         CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
+
+        bytes32 contentHash = keccak256(abi.encode(_actionType, _data));
+        if (corporateActions_.actionsContentHashes[contentHash]) {
+            return (false, bytes32(0), 0);
+        }
+        corporateActions_.actionsContentHashes[contentHash] = true;
+
         corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
         // TODO: Review when it can return false.
         success_ =
@@ -122,6 +129,10 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         }
 
         return value;
+    }
+
+    function _actionContentHashExists(bytes32 _contentHash) internal view returns (bool) {
+        return _corporateActionsStorage().actionsContentHashes[_contentHash];
     }
 
     function _corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {
