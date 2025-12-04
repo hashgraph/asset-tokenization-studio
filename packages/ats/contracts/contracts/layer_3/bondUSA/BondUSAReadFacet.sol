@@ -29,7 +29,7 @@ contract BondUSAReadFacet is BondRead, Security {
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
-        staticInterfaceIds_ = new bytes4[](3);
+        staticInterfaceIds_ = new bytes4[](2);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IBondRead).interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
