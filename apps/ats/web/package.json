@@ -29,7 +29,7 @@
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@rollup/plugin-commonjs": "^28.0.6",
     "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^14.0.0",
+    "@testing-library/react": "^14.2.0",
     "@testing-library/user-event": "^14.4.3",
     "@types/format-util": "^1.0.2",
     "@types/jest": "^29.5.1",
