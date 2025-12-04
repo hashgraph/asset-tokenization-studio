@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-04T13:26:43.976Z
+ * Generated: 2025-12-04T15:10:02.770Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -2371,9 +2371,9 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       { name: "_getDividendsFor", signature: "_getDividendsFor(uint256,address)", selector: "0x5a1270c7" },
       { name: "_getEquityDetails", signature: "_getEquityDetails()", selector: "0x3571999f" },
       {
-        name: "_getScheduledBalanceAdjusment",
-        signature: "_getScheduledBalanceAdjusment(uint256)",
-        selector: "0xb2106163",
+        name: "_getScheduledBalanceAdjustment",
+        signature: "_getScheduledBalanceAdjustment(uint256)",
+        selector: "0x6d94b10c",
       },
       {
         name: "_getScheduledBalanceAdjustmentsCount",
