@@ -42,7 +42,6 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         corporateActions_.actionsContentHashes[contentHash] = true;
 
         corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
-        // TODO: Review when it can return false.
         success_ =
             corporateActions_.actions.add(corporateActionId_) &&
             corporateActions_.actionsByType[_actionType].add(corporateActionId_);
