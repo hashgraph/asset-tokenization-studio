@@ -260,6 +260,7 @@ import {
   ERC3643ReadFacet__factory,
   TREXFactoryAts__factory,
   ProceedRecipientsFacet__factory,
+  CorporateActionsFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -2139,6 +2140,7 @@ export class RPCQueryAdapter {
       ).getProceedRecipientsCount()
     ).toNumber();
   }
+
   async getProceedRecipients(
     address: EvmAddress,
     page: number,
@@ -2151,5 +2153,18 @@ export class RPCQueryAdapter {
       ProceedRecipientsFacet__factory,
       address.toString(),
     ).getProceedRecipients(page, pageLength);
+  }
+
+  async actionContentHashExists(
+    address: EvmAddress,
+    contentHash: string,
+  ): Promise<boolean> {
+    LogService.logTrace(
+      `Getting actionContentHashExists for ${contentHash} for the security: ${address.toString()}`,
+    );
+    return await this.connect(
+      CorporateActionsFacet__factory,
+      address.toString(),
+    ).actionContentHashExists(contentHash);
   }
 }
