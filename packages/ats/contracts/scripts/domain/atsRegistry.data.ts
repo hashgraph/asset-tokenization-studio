@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-04T09:38:43.078Z
+ * Generated: 2025-12-04T13:26:43.976Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -631,6 +631,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "TokenIsPaused", signature: "TokenIsPaused()", selector: "0x649815a5" },
       { name: "TokenIsUnpaused", signature: "TokenIsUnpaused()", selector: "0x72058d69" },
       { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
+      { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
       {
         name: "ZeroKeyNotValidForBusinessLogic",
         signature: "ZeroKeyNotValidForBusinessLogic()",
@@ -748,6 +749,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "TokenIsPaused", signature: "TokenIsPaused()", selector: "0x649815a5" },
       { name: "TokenIsUnpaused", signature: "TokenIsUnpaused()", selector: "0x72058d69" },
       { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
+      { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
       {
         name: "ZeroKeyNotValidForBusinessLogic",
         signature: "ZeroKeyNotValidForBusinessLogic()",
@@ -857,6 +859,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "TokenIsPaused", signature: "TokenIsPaused()", selector: "0x649815a5" },
       { name: "TokenIsUnpaused", signature: "TokenIsUnpaused()", selector: "0x72058d69" },
       { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
+      { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
       {
         name: "ZeroKeyNotValidForBusinessLogic",
         signature: "ZeroKeyNotValidForBusinessLogic()",
@@ -2734,6 +2737,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     inheritance: ["SsiManagementStorageWrapper"],
     methods: [
       { name: "_addExternalList", signature: "_addExternalList(bytes32,address)", selector: "0x7b548517" },
+      { name: "_checkValidAddress", signature: "_checkValidAddress(address)", selector: "0x42d56018" },
       { name: "_externalListStorage", signature: "_externalListStorage(bytes32)", selector: "0x4c938df7" },
       { name: "_getExternalListsCount", signature: "_getExternalListsCount(bytes32)", selector: "0x91794627" },
       {
@@ -2749,6 +2753,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         selector: "0x7b9dc6c3",
       },
     ],
+    errors: [{ name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" }],
   },
 
   ExternalPauseManagementStorageWrapper: {

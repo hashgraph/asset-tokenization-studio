@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import { ATS_ROLES, GAS_LIMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 import { ResolverProxy, ExternalKycListManagement, MockedExternalKycList } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -68,6 +68,14 @@ describe("ExternalKycList Management Tests", () => {
         externalKycListManagement.addExternalKycList(externalKycListMock1.address, { gasLimit: GAS_LIMIT.default }),
       ).to.be.revertedWithCustomError(externalKycListManagement, "ListedKycList");
     });
+
+    it("GIVEN an invalid address WHEN adding it THEN it reverts with ZeroAddressNotAllowed", async () => {
+      await expect(
+        externalKycListManagement.addExternalKycList(ADDRESS_ZERO, {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.be.revertedWithCustomError(externalKycListManagement, "ZeroAddressNotAllowed");
+    });
   });
 
   describe("Remove Tests", () => {
@@ -98,6 +106,17 @@ describe("ExternalKycList Management Tests", () => {
   });
 
   describe("Update Tests", () => {
+    it("GIVEN invalid address WHEN updated THEN it reverts with ZeroAddressNotAllowed", async () => {
+      const kycListsToUpdate = [ADDRESS_ZERO];
+      const actives = [true];
+
+      await expect(
+        externalKycListManagement.updateExternalKycLists(kycListsToUpdate, actives, {
+          gasLimit: GAS_LIMIT.high,
+        }),
+      ).to.be.revertedWithCustomError(externalKycListManagement, "ZeroAddressNotAllowed");
+    });
+
     it("GIVEN multiple external kyc WHEN updated THEN their statuses are updated and event is emitted", async () => {
       expect(await externalKycListManagement.isExternalKycList(externalKycListMock1.address)).to.be.true;
       expect(await externalKycListManagement.isExternalKycList(externalKycListMock2.address)).to.be.true;
