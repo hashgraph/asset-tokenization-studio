@@ -1475,6 +1475,18 @@ describe("ERC3643 Tests", () => {
           );
         });
 
+        it("GIVEN invalid address WHEN batchSetAddressFrozen THEN fails with ZeroAddressNotAllowed", async () => {
+          const userAddresses = [signer_D.address, signer_E.address, ADDRESS_ZERO];
+          // grant KYC to signer_A.address
+          await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+
+          // First, freeze the addresses
+          await expect(freezeFacet.batchSetAddressFrozen(userAddresses, [true, true, true])).to.revertedWithCustomError(
+            freezeFacet,
+            "ZeroAddressNotAllowed",
+          );
+        });
+
         it("GIVEN frozen addresses WHEN batchSetAddressFrozen with false THEN transfers from those addresses succeed", async () => {
           const userAddresses = [signer_D.address, signer_E.address];
           // grant KYC to signer_A.address
