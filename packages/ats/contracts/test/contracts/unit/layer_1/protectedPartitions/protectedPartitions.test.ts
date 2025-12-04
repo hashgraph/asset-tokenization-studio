@@ -13,7 +13,6 @@ import {
   ControlList,
   Kyc,
   SsiManagement,
-  IHold,
   ComplianceMock,
 } from "@contract-types";
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
@@ -219,7 +218,7 @@ describe("ProtectedPartitions Tests", () => {
   let accessControlFacet: AccessControl;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
-  let holdFacet: IHold;
+  let holdFacet: Contract;
   let clearingFacet: Contract;
   let protectedHold: ProtectedHoldData;
   let hold: HoldData;
@@ -249,6 +248,27 @@ describe("ProtectedPartitions Tests", () => {
   }
 
   async function setFacets(address: string, compliance?: string) {
+    const holdManagementFacet = await ethers.getContractAt("HoldManagementFacet", address, signer_A);
+
+    const holdReadFacet = await ethers.getContractAt("HoldReadFacet", address, signer_A);
+    const holdTokenHolderFacet = await ethers.getContractAt("HoldTokenHolderFacet", address, signer_A);
+
+    const fragmentMapHold = new Map<string, any>();
+    [
+      ...holdManagementFacet.interface.fragments,
+      ...holdReadFacet.interface.fragments,
+      ...holdTokenHolderFacet.interface.fragments,
+    ].forEach((fragment) => {
+      const key = fragment.format();
+      if (!fragmentMapHold.has(key)) {
+        fragmentMapHold.set(key, fragment);
+      }
+    });
+
+    const uniqueFragmentsHold = Array.from(fragmentMapHold.values());
+
+    holdFacet = new Contract(address, uniqueFragmentsHold, signer_A);
+
     protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", address);
     pauseFacet = await ethers.getContractAt("Pause", address);
     erc1410Facet = await ethers.getContractAt("IERC1410", address);
@@ -257,7 +277,6 @@ describe("ProtectedPartitions Tests", () => {
     transferAndLockFacet = await ethers.getContractAt("TransferAndLock", address);
     controlListFacet = await ethers.getContractAt("ControlList", address);
     accessControlFacet = await ethers.getContractAt("AccessControl", address);
-    holdFacet = await ethers.getContractAt("IHold", address);
     kycFacet = await ethers.getContractAt("Kyc", address);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", address);
     const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", address, signer_A);
@@ -267,7 +286,7 @@ describe("ProtectedPartitions Tests", () => {
     const clearingReadFacet = await ethers.getContractAt("ClearingReadFacet", address, signer_A);
     const clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", address, signer_A);
 
-    const fragmentMap = new Map<string, any>();
+    const fragmentMapClearing = new Map<string, any>();
     [
       ...clearingTransferFacet.interface.fragments,
       ...clearingRedeemFacet.interface.fragments,
@@ -276,14 +295,14 @@ describe("ProtectedPartitions Tests", () => {
       ...clearingActionsFacet.interface.fragments,
     ].forEach((fragment) => {
       const key = fragment.format();
-      if (!fragmentMap.has(key)) {
-        fragmentMap.set(key, fragment);
+      if (!fragmentMapClearing.has(key)) {
+        fragmentMapClearing.set(key, fragment);
       }
     });
 
-    const uniqueFragments = Array.from(fragmentMap.values());
+    const uniqueFragmentsClearing = Array.from(fragmentMapClearing.values());
 
-    clearingFacet = new Contract(address, uniqueFragments, signer_A);
+    clearingFacet = new Contract(address, uniqueFragmentsClearing, signer_A);
 
     if (compliance) {
       complianceMock = await ethers.getContractAt("ComplianceMock", compliance);
