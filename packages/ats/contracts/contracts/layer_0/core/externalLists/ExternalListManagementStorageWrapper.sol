@@ -14,6 +14,8 @@ abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWr
         EnumerableSet.AddressSet list;
     }
 
+    error ZeroAddressNotAllowed();
+
     function _updateExternalLists(
         bytes32 _position,
         address[] calldata _lists,
@@ -21,6 +23,7 @@ abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWr
     ) internal returns (bool success_) {
         uint256 length = _lists.length;
         for (uint256 index; index < length; ) {
+            _checkValidAddress(_lists[index]);
             if (_actives[index]) {
                 if (!_isExternalList(_position, _lists[index])) {
                     _addExternalList(_position, _lists[index]);
@@ -62,6 +65,10 @@ abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWr
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
         members_ = _externalListStorage(_position).list.getFromSet(_pageIndex, _pageLength);
+    }
+
+    function _checkValidAddress(address account) internal pure {
+        if (account == address(0)) revert ZeroAddressNotAllowed();
     }
 
     function _externalListStorage(
