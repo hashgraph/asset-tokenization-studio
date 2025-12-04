@@ -245,13 +245,13 @@ describe("ActionContentHashExistsQueryHandler", () => {
 
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(
-          `An error occurred while querying actions cotnent hash exists status: ${errorMsg}`,
+          `An error occurred while querying action content hash exists: ${errorMsg}`,
         ),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });
 
-    it("should successfully check is issuer", async () => {
+    it("should successfully check action content hash exist", async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
 
       queryAdapterServiceMock.actionContentHashExists.mockResolvedValueOnce(true);
