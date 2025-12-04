@@ -240,7 +240,7 @@ describe("Corporate Actions", () => {
     const expectedResponse = {
       payload: true,
     };
-    it("should check is issuer successfully", async () => {
+    it("should check action content hash exist successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await CorporateActions.actionContentHashExists(actionContentHashExistsRequest);
@@ -267,7 +267,7 @@ describe("Corporate Actions", () => {
         "Query execution failed",
       );
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("IsIssuerRequest", actionContentHashExistsRequest);
+      expect(handleValidationSpy).toHaveBeenCalledWith("ActionContentHashExistsRequest", actionContentHashExistsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new ActionContentHashExistsQuery(
