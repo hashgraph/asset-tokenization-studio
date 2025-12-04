@@ -68,8 +68,15 @@ describe("Corporate Actions Tests", () => {
     );
   });
 
-  it("GIVEN an account with corporateActions role WHEN addCorporateAction THEN transaction succeeds", async () => {
+  it("GIVEN an account with corporateActions role WHEN addCorporateAction (two identical CA) THEN transaction first succeeds but second fails with DuplicatedCorporateAction", async () => {
     await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+    const encoded = ethers.utils.defaultAbiCoder.encode(["bytes32", "bytes"], [actionType, actionData]);
+
+    const contentHash = ethers.utils.keccak256(encoded);
+
+    const actionContentHashExistsBefore = await corporateActionsFacet.actionContentHashExists(contentHash);
+
     // add to list
     await corporateActionsFacet.connect(signer_C).addCorporateAction(actionType, actionData);
 
@@ -79,6 +86,7 @@ describe("Corporate Actions Tests", () => {
     const listCountByType = await corporateActionsFacet.getCorporateActionCountByType(actionType);
     const listMembersByType = await corporateActionsFacet.getCorporateActionIdsByType(actionType, 0, listCount);
     const corporateAction = await corporateActionsFacet.getCorporateAction(corporateActionId_1);
+    const actionContentHashExistsAfter = await corporateActionsFacet.actionContentHashExists(contentHash);
 
     expect(listCount).to.equal(1);
     expect(listMembers.length).to.equal(listCount);
@@ -88,5 +96,11 @@ describe("Corporate Actions Tests", () => {
     expect(listMembersByType[0]).to.equal(corporateActionId_1);
     expect(corporateAction[0].toUpperCase()).to.equal(actionType.toUpperCase());
     expect(corporateAction[1].toUpperCase()).to.equal(actionData.toUpperCase());
+    expect(actionContentHashExistsBefore).to.be.false;
+    expect(actionContentHashExistsAfter).to.be.true;
+
+    await expect(
+      corporateActionsFacet.connect(signer_C).addCorporateAction(actionType, actionData),
+    ).to.revertedWithCustomError(corporateActionsFacet, "DuplicatedCorporateAction");
   });
 });

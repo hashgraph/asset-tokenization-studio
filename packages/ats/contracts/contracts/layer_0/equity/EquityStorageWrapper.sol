@@ -294,7 +294,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         return _getTotalTokenHolders();
     }
 
-    function _getScheduledBalanceAdjusment(
+    function _getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
     ) internal view returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_) {
         bytes32 actionId = _corporateActionsStorage().actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE].at(
