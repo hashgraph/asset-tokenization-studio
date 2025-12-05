@@ -175,7 +175,7 @@ exports[`DigitalSecurityForceRedeem render correctly 1`] = `
             <p
               class="css-7e29f4"
             >
-              Select to redeem the full amount at maturity
+              Select to redeem the full amount after maturity date
             </p>
           </span>
         </label>

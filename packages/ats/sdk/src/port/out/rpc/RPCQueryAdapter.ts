@@ -293,6 +293,7 @@ import { HoldDetails } from '@domain/context/security/Hold';
 import { CouponAmountFor } from '@domain/context/bond/CouponAmountFor';
 import {PrincipalFor} from '@domain/context/bond/PrincipalFor';
 import { DividendAmountFor } from '@domain/context/equity/DividendAmountFor';
+import { CouponFor } from '@domain/context/bond/CouponFor';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -854,7 +855,7 @@ export class RPCQueryAdapter {
     address: EvmAddress,
     target: EvmAddress,
     coupon: number,
-  ): Promise<BigNumber> {
+  ): Promise<CouponFor> {
     LogService.logTrace(`Getting Coupon for`);
 
     const couponFor = await this.connect(
@@ -862,7 +863,10 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getCouponFor(coupon, target.toString());
 
-    return couponFor.tokenBalance;
+    return new CouponFor(
+      new BigDecimal(couponFor.tokenBalance),
+      couponFor.decimals,
+    );
   }
 
   async getCouponAmountFor(

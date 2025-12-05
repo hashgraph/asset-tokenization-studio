@@ -169,15 +169,16 @@ export const SeeDividend = () => {
     setDividendsAmountForRequest(dividendsAmountForReq);
   };
 
-  let dividendsPaymentDay = "";
-  let dividendsAmount = "0";
+  let dividendsPaymentDay = dividends?.executionDate?.toDateString() || "";
 
-  if (dividends && dividendsFor) {
-    dividendsPaymentDay = dividends.executionDate.toDateString();
-    const amount = (parseFloat(dividends.amountPerUnitOfSecurity) * parseFloat(dividendsFor.tokenBalance)).toString();
-
-    dividendsAmount = `${formatNumberLocale(amount, parseFloat(dividendsFor.decimals))} $`;
-  }
+  const calculateAmount = () => {
+    const numerator = Number(dividendsAmountFor?.numerator) || 0;
+    const denominator = Number(dividendsAmountFor?.denominator) || 0;
+    if (numerator === 0 || denominator === 0) {
+      return "0";
+    }
+    return `${formatNumberLocale(numerator / denominator, 3)} $`;
+  };
 
   return (
     <Center h="full" bg="neutral.dark.600">
@@ -232,22 +233,16 @@ export const SeeDividend = () => {
                 valueToCopy: dividendsPaymentDay,
               },
               {
+                title: tDetail("balance"),
+                description: formatNumberLocale(dividendsFor.tokenBalance, parseFloat(dividendsFor.decimals)),
+                canCopy: true,
+                valueToCopy: formatNumberLocale(dividendsFor.tokenBalance, parseFloat(dividendsFor.decimals)),
+              },
+              {
                 title: tDetail("amount"),
-                description: dividendsAmount,
+                description: calculateAmount(),
                 canCopy: true,
-                valueToCopy: dividendsAmount,
-              },
-              {
-                title: tDetail("numerator"),
-                description: dividendsAmountFor?.numerator,
-                canCopy: true,
-                valueToCopy: dividendsAmountFor?.numerator,
-              },
-              {
-                title: tDetail("denominator"),
-                description: dividendsAmountFor?.denominator,
-                canCopy: true,
-                valueToCopy: dividendsAmountFor?.denominator,
+                valueToCopy: calculateAmount(),
               },
               {
                 title: tDetail("recordDateReached"),
