@@ -27,17 +27,17 @@ const defaultHookResponse = {
 };
 
 const mockCouponsForData = {
-  value: "100.50",
+  tokenBalance: "10050",
+  decimals: "2",
 };
 
 const mockCouponsData = {
   executionDate: new Date("2024-06-15T10:00:00Z"),
-  period: 30,
 };
 
 const mockCouponsAmountForData = {
   numerator: "150",
-  denominator: "1000",
+  denominator: "100",
   recordDateReached: true,
 };
 
@@ -146,17 +146,79 @@ describe(`${SeeCoupon.name}`, () => {
     render(<SeeCoupon />);
 
     await waitFor(() => {
-      // Verify amount from couponsFor
+      // Verify balance from couponsFor.value
       expect(screen.getByText("100.50")).toBeInTheDocument();
 
-      // Verify numerator from couponsAmountFor
-      expect(screen.getByText("150")).toBeInTheDocument();
-
-      // Verify denominator from couponsAmountFor
-      expect(screen.getByText("1000")).toBeInTheDocument();
+      // Verify amount calculated as numerator/denominator (150/100 = 1.500 $)
+      expect(screen.getByText("1.500 $")).toBeInTheDocument();
 
       // Verify recordDateReached from couponsAmountFor
-      expect(screen.getByText("true")).toBeInTheDocument();
+      expect(screen.getByText("Yes")).toBeInTheDocument();
+    });
+  });
+
+  test("should display 0 for amount when numerator is 0", async () => {
+    mockUseGetCouponsFor.mockReturnValue({
+      ...defaultHookResponse,
+      data: mockCouponsForData,
+      refetch: mockRefetchCouponsFor,
+    });
+
+    mockUseGetCoupons.mockReturnValue({
+      ...defaultHookResponse,
+      data: mockCouponsData,
+      refetch: mockRefetchCoupons,
+    });
+
+    mockUseGetCouponsAmountFor.mockReturnValue({
+      ...defaultHookResponse,
+      data: {
+        numerator: "0",
+        denominator: "100",
+        recordDateReached: true,
+      },
+      refetch: mockRefetchCouponsAmountFor,
+    });
+
+    render(<SeeCoupon />);
+
+    await waitFor(() => {
+      // Amount should be "0" when numerator is 0
+      const zeroElements = screen.getAllByText("0");
+      expect(zeroElements.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  test("should display 0 for amount when denominator is 0", async () => {
+    mockUseGetCouponsFor.mockReturnValue({
+      ...defaultHookResponse,
+      data: mockCouponsForData,
+      refetch: mockRefetchCouponsFor,
+    });
+
+    mockUseGetCoupons.mockReturnValue({
+      ...defaultHookResponse,
+      data: mockCouponsData,
+      refetch: mockRefetchCoupons,
+    });
+
+    mockUseGetCouponsAmountFor.mockReturnValue({
+      ...defaultHookResponse,
+      data: {
+        numerator: "100",
+        denominator: "0",
+        recordDateReached: false,
+      },
+      refetch: mockRefetchCouponsAmountFor,
+    });
+
+    render(<SeeCoupon />);
+
+    await waitFor(() => {
+      // Amount should be "0" when denominator is 0
+      const zeroElements = screen.getAllByText("0");
+      expect(zeroElements.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText("No")).toBeInTheDocument();
     });
   });
 
@@ -186,15 +248,15 @@ describe(`${SeeCoupon.name}`, () => {
     render(<SeeCoupon />);
 
     await waitFor(() => {
-      // Verify default values are displayed
+      // Amount should be "0" when numerator/denominator are undefined
       const zeroElements = screen.getAllByText("0");
-      expect(zeroElements.length).toBeGreaterThanOrEqual(2);
+      expect(zeroElements.length).toBeGreaterThanOrEqual(1);
 
-      expect(screen.getByText("false")).toBeInTheDocument();
+      expect(screen.getByText("No")).toBeInTheDocument();
     });
   });
 
-  test("should display recordDateReached as false when it is false", async () => {
+  test("should display recordDateReached as No when it is false", async () => {
     mockUseGetCouponsFor.mockReturnValue({
       ...defaultHookResponse,
       data: mockCouponsForData,
@@ -210,8 +272,8 @@ describe(`${SeeCoupon.name}`, () => {
     mockUseGetCouponsAmountFor.mockReturnValue({
       ...defaultHookResponse,
       data: {
-        numerator: "50",
-        denominator: "500",
+        numerator: "500",
+        denominator: "100",
         recordDateReached: false,
       },
       refetch: mockRefetchCouponsAmountFor,
@@ -220,17 +282,17 @@ describe(`${SeeCoupon.name}`, () => {
     render(<SeeCoupon />);
 
     await waitFor(() => {
-      expect(screen.getByText("50")).toBeInTheDocument();
-      expect(screen.getByText("500")).toBeInTheDocument();
-      expect(screen.getByText("false")).toBeInTheDocument();
+      // Verify amount calculated as 500/100 = 5.000
+      expect(screen.getByText("5.000 $")).toBeInTheDocument();
+      expect(screen.getByText("No")).toBeInTheDocument();
     });
   });
 
   test("should not display details when data is not loaded", () => {
     render(<SeeCoupon />);
 
-    expect(screen.queryByText(/numerator/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/denominator/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/balance/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/amount/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/recordDateReached/i)).not.toBeInTheDocument();
   });
 
@@ -259,6 +321,37 @@ describe(`${SeeCoupon.name}`, () => {
     await waitFor(() => {
       const submitButton = screen.getByRole("button");
       expect(submitButton).toBeDisabled();
+    });
+  });
+
+  test("should calculate amount with 3 decimal places", async () => {
+    mockUseGetCouponsFor.mockReturnValue({
+      ...defaultHookResponse,
+      data: mockCouponsForData,
+      refetch: mockRefetchCouponsFor,
+    });
+
+    mockUseGetCoupons.mockReturnValue({
+      ...defaultHookResponse,
+      data: mockCouponsData,
+      refetch: mockRefetchCoupons,
+    });
+
+    mockUseGetCouponsAmountFor.mockReturnValue({
+      ...defaultHookResponse,
+      data: {
+        numerator: "1",
+        denominator: "3",
+        recordDateReached: true,
+      },
+      refetch: mockRefetchCouponsAmountFor,
+    });
+
+    render(<SeeCoupon />);
+
+    await waitFor(() => {
+      // 1/3 = 0.333... should be formatted to 0.333 $
+      expect(screen.getByText("0.333 $")).toBeInTheDocument();
     });
   });
 });

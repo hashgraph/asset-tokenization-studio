@@ -55,9 +55,8 @@ export default {
     details: {
       title: "Detail",
       paymentDay: "Payment day",
+      balance: "Balance",
       amount: "Amount",
-      numerator: "Numerator",
-      denominator: "Denominator",
       recordDateReached: "Record date reached",
     },
   },

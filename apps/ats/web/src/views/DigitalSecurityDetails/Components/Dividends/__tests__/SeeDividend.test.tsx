@@ -31,7 +31,7 @@ const defaultHookResponse = {
 };
 
 const mockDividendsForData = {
-  tokenBalance: "100",
+  tokenBalance: "10000",
   decimals: "2",
 };
 
@@ -42,7 +42,7 @@ const mockDividendsData = {
 
 const mockDividendsAmountForData = {
   numerator: "150",
-  denominator: "1000",
+  denominator: "100",
   recordDateReached: true,
 };
 
@@ -151,11 +151,11 @@ describe(`${SeeDividend.name}`, () => {
     render(<SeeDividend />);
 
     await waitFor(() => {
-      // Verify numerator from dividendsAmountFor
-      expect(screen.getByText("150")).toBeInTheDocument();
+      // Verify balance from dividendsFor (tokenBalance: "10000", decimals: "2" -> 100.00)
+      expect(screen.getByText("100.00")).toBeInTheDocument();
 
-      // Verify denominator from dividendsAmountFor
-      expect(screen.getByText("1000")).toBeInTheDocument();
+      // Verify amount calculated as numerator/denominator (150/100 = 1.500 $)
+      expect(screen.getByText("1.500 $")).toBeInTheDocument();
 
       // Verify recordDateReached from dividendsAmountFor (displays "Yes")
       expect(screen.getByText("Yes")).toBeInTheDocument();
@@ -178,8 +178,8 @@ describe(`${SeeDividend.name}`, () => {
     mockUseGetDividendsAmountFor.mockReturnValue({
       ...defaultHookResponse,
       data: {
-        numerator: "50",
-        denominator: "500",
+        numerator: "500",
+        denominator: "100",
         recordDateReached: false,
       },
       refetch: mockRefetchDividendsAmountFor,
@@ -188,8 +188,73 @@ describe(`${SeeDividend.name}`, () => {
     render(<SeeDividend />);
 
     await waitFor(() => {
-      expect(screen.getByText("50")).toBeInTheDocument();
-      expect(screen.getByText("500")).toBeInTheDocument();
+      // Verify amount calculated as 500/100 = 5.000 $
+      expect(screen.getByText("5.000 $")).toBeInTheDocument();
+      expect(screen.getByText("No")).toBeInTheDocument();
+    });
+  });
+
+  test("should display 0 for amount when numerator is 0", async () => {
+    mockUseGetDividendsFor.mockReturnValue({
+      ...defaultHookResponse,
+      data: mockDividendsForData,
+      refetch: mockRefetchDividendsFor,
+    });
+
+    mockUseGetDividends.mockReturnValue({
+      ...defaultHookResponse,
+      data: mockDividendsData,
+      refetch: mockRefetchDividends,
+    });
+
+    mockUseGetDividendsAmountFor.mockReturnValue({
+      ...defaultHookResponse,
+      data: {
+        numerator: "0",
+        denominator: "100",
+        recordDateReached: true,
+      },
+      refetch: mockRefetchDividendsAmountFor,
+    });
+
+    render(<SeeDividend />);
+
+    await waitFor(() => {
+      // Amount should be "0" when numerator is 0
+      const zeroElements = screen.getAllByText("0");
+      expect(zeroElements.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  test("should display 0 for amount when denominator is 0", async () => {
+    mockUseGetDividendsFor.mockReturnValue({
+      ...defaultHookResponse,
+      data: mockDividendsForData,
+      refetch: mockRefetchDividendsFor,
+    });
+
+    mockUseGetDividends.mockReturnValue({
+      ...defaultHookResponse,
+      data: mockDividendsData,
+      refetch: mockRefetchDividends,
+    });
+
+    mockUseGetDividendsAmountFor.mockReturnValue({
+      ...defaultHookResponse,
+      data: {
+        numerator: "100",
+        denominator: "0",
+        recordDateReached: false,
+      },
+      refetch: mockRefetchDividendsAmountFor,
+    });
+
+    render(<SeeDividend />);
+
+    await waitFor(() => {
+      // Amount should be "0" when denominator is 0
+      const zeroElements = screen.getAllByText("0");
+      expect(zeroElements.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText("No")).toBeInTheDocument();
     });
   });
@@ -197,8 +262,8 @@ describe(`${SeeDividend.name}`, () => {
   test("should not display details when data is not loaded", () => {
     render(<SeeDividend />);
 
-    expect(screen.queryByText(/numerator/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/denominator/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/balance/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/amount/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/recordDateReached/i)).not.toBeInTheDocument();
   });
 
@@ -218,7 +283,7 @@ describe(`${SeeDividend.name}`, () => {
     render(<SeeDividend />);
 
     // Details should not be visible without dividendsFor
-    expect(screen.queryByText("150")).not.toBeInTheDocument();
+    expect(screen.queryByText("1.500 $")).not.toBeInTheDocument();
   });
 
   test("should not display details when dividends is missing", () => {
@@ -237,7 +302,7 @@ describe(`${SeeDividend.name}`, () => {
     render(<SeeDividend />);
 
     // Details should not be visible without dividends
-    expect(screen.queryByText("150")).not.toBeInTheDocument();
+    expect(screen.queryByText("1.500 $")).not.toBeInTheDocument();
   });
 
   test("should not display details when dividendsAmountFor is missing", () => {
@@ -256,7 +321,7 @@ describe(`${SeeDividend.name}`, () => {
     render(<SeeDividend />);
 
     // Details should not be visible without dividendsAmountFor
-    expect(screen.queryByText("150")).not.toBeInTheDocument();
+    expect(screen.queryByText("1.500 $")).not.toBeInTheDocument();
   });
 
   test("should validate dividendId with min value of 0", async () => {
@@ -309,36 +374,34 @@ describe(`${SeeDividend.name}`, () => {
     });
   });
 
-  test("should calculate and display correct dividend amount", async () => {
+  test("should calculate amount with 3 decimal places", async () => {
     mockUseGetDividendsFor.mockReturnValue({
       ...defaultHookResponse,
-      data: {
-        tokenBalance: "100",
-        decimals: "2",
-      },
+      data: mockDividendsForData,
       refetch: mockRefetchDividendsFor,
     });
 
     mockUseGetDividends.mockReturnValue({
       ...defaultHookResponse,
-      data: {
-        executionDate: new Date("2024-06-15T10:00:00Z"),
-        amountPerUnitOfSecurity: "1.5",
-      },
+      data: mockDividendsData,
       refetch: mockRefetchDividends,
     });
 
     mockUseGetDividendsAmountFor.mockReturnValue({
       ...defaultHookResponse,
-      data: mockDividendsAmountForData,
+      data: {
+        numerator: "1",
+        denominator: "3",
+        recordDateReached: true,
+      },
       refetch: mockRefetchDividendsAmountFor,
     });
 
     render(<SeeDividend />);
 
     await waitFor(() => {
-      // Amount = tokenBalance * amountPerUnitOfSecurity = 100 * 1.5 = 150
-      expect(screen.getByText(/150/)).toBeInTheDocument();
+      // 1/3 = 0.333... should be formatted to 0.333 $
+      expect(screen.getByText("0.333 $")).toBeInTheDocument();
     });
   });
 });
