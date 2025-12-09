@@ -209,7 +209,14 @@ import { AddressZero } from "@ethersproject/constants";
 import { deployLifeCycleCashFlowContracts } from "../scripts/deploy";
 import DeployContractCommand from "../scripts/commands/DeployContractCommand";
 import { type LifeCycleCashFlowTimeTravel } from "@typechain";
-import { PAYOUT_ROLE, CASHOUT_ROLE, TRANSFERER_ROLE, PAYMENT_TOKEN_MANAGER_ROLE } from "../scripts/constants";
+import {
+  DEFAULT_ADMIN_ROLE,
+  PAUSER_ROLE,
+  PAYOUT_ROLE,
+  CASHOUT_ROLE,
+  TRANSFERER_ROLE,
+  PAYMENT_TOKEN_MANAGER_ROLE,
+} from "../scripts/constants";
 
 const assetInitialPaymentDate = 1753874807;
 const assetPaymentRequestDate = 1749247100;
@@ -255,11 +262,38 @@ describe("Security operations", () => {
         stablecoin = await stablecoinMock.deploy();
         await stablecoin.deployed();
 
+        const rbacList = [
+          {
+            role: DEFAULT_ADMIN_ROLE,
+            members: [signer_A.address],
+          },
+          {
+            role: PAUSER_ROLE,
+            members: [signer_A.address],
+          },
+          {
+            role: PAYOUT_ROLE,
+            members: [signer_A.address],
+          },
+          {
+            role: CASHOUT_ROLE,
+            members: [signer_A.address],
+          },
+          {
+            role: TRANSFERER_ROLE,
+            members: [signer_A.address],
+          },
+          {
+            role: PAYMENT_TOKEN_MANAGER_ROLE,
+            members: [signer_A.address],
+          },
+        ];
+
         const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
           new DeployContractCommand({
             name: "LifeCycleCashFlowTimeTravel",
             signer: signer_A,
-            args: [asset_A.address, stablecoin.address],
+            args: [asset_A.address, stablecoin.address, rbacList],
           }),
         );
 
@@ -333,11 +367,18 @@ describe("Security operations", () => {
           const asset_C = await assetMock_C.deploy(assetType, false);
           await asset_C.deployed();
 
+          const rbacList = [
+            {
+              role: PAYOUT_ROLE,
+              members: [signer_A.address],
+            },
+          ];
+
           const resultLifeCycleCashFlowWithoutHolders = await deployLifeCycleCashFlowContracts(
             new DeployContractCommand({
               name: "LifeCycleCashFlowTimeTravel",
               signer: signer_A,
-              args: [asset_C.address, stablecoin.address],
+              args: [asset_C.address, stablecoin.address, rbacList],
             }),
           );
 
@@ -560,11 +601,18 @@ describe("Security operations", () => {
             const asset_C = await assetMock_C.deploy(assetType, false);
             await asset_C.deployed();
 
+            const rbacList = [
+              {
+                role: CASHOUT_ROLE,
+                members: [signer_A.address],
+              },
+            ];
+
             const resultLifeCycleCashFlowWithoutHolders = await deployLifeCycleCashFlowContracts(
               new DeployContractCommand({
                 name: "LifeCycleCashFlowTimeTravel",
                 signer: signer_A,
-                args: [asset_C.address, stablecoin.address],
+                args: [asset_C.address, stablecoin.address, rbacList],
               }),
             );
 
@@ -734,11 +782,18 @@ describe("Security operations", () => {
           const asset_C = await assetMock_C.deploy(assetType, false);
           await asset_C.deployed();
 
+          const rbacList = [
+            {
+              role: PAYOUT_ROLE,
+              members: [signer_A.address],
+            },
+          ];
+
           const resultLifeCycleCashFlowWithoutHolders = await deployLifeCycleCashFlowContracts(
             new DeployContractCommand({
               name: "LifeCycleCashFlowTimeTravel",
               signer: signer_A,
-              args: [asset_C.address, stablecoin.address],
+              args: [asset_C.address, stablecoin.address, rbacList],
             }),
           );
 
@@ -855,11 +910,18 @@ describe("Security operations", () => {
           const asset_C = await assetMock_C.deploy(assetType, false);
           await asset_C.deployed();
 
+          const rbacList = [
+            {
+              role: PAYOUT_ROLE,
+              members: [signer_A.address],
+            },
+          ];
+
           const resultLifeCycleCashFlowWithoutHolders = await deployLifeCycleCashFlowContracts(
             new DeployContractCommand({
               name: "LifeCycleCashFlowTimeTravel",
               signer: signer_A,
-              args: [asset_C.address, stablecoin.address],
+              args: [asset_C.address, stablecoin.address, rbacList],
             }),
           );
 

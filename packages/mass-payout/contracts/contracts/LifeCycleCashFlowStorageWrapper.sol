@@ -499,6 +499,19 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     }
 
     /*
+     * @dev Assign RBAC roles to members
+     *
+     * @param rbac The array of RBAC roles and members
+     */
+    function _assignRbacRoles(ILifeCycleCashFlow.Rbac[] memory _rbac) internal {
+        for (uint256 rbacIndex; rbacIndex < _rbac.length; rbacIndex++) {
+            for (uint256 memberIndex; memberIndex < _rbac[rbacIndex].members.length; memberIndex++) {
+                _grantRole(_rbac[rbacIndex].role, _rbac[rbacIndex].members[memberIndex]);
+            }
+        }
+    }
+
+    /*
      * @dev Associate with payment token to the contract
      *
      * @param token The address of the token we want to associate with the contract
