@@ -218,6 +218,15 @@ interface ILifeCycleCashFlow {
         address[] members;
     }
 
+    struct SnapshotAmountInfo {
+        address asset;
+        uint256 snapshotID;
+        address holder;
+        uint256 amountOrPercentage;
+        uint256 paymentTokenBalance;
+        uint256 totalSupplyAtSnapshot;
+    }
+
     /*
      * @dev Emitted when a coupon/dividend by page is executed
      *
