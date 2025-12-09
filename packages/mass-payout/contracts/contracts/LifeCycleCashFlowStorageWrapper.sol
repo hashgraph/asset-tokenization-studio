@@ -432,7 +432,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _snapshotID,
         address[] memory _holders,
         uint256 _amount,
-        function(address, uint256, address, uint256, uint256) internal returns (uint256) _getSnapshotAmount
+        function(ILifeCycleCashFlow.SnapshotAmountInfo memory) internal returns (uint256) _getSnapshotAmount
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_) {
         address[] memory filteredHolders = _filterZeroAddresses(_holders);
         (failed_, succeeded_, paidAmount_) = _paySnapshotHolders(
@@ -535,14 +535,13 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @return The amount to be paid
      */
     function _getSnapshotAmountByAmount(
-        address _asset,
-        uint256 _snapshotID,
-        address _holder,
-        uint256 _amount,
-        uint256 _totalSupplyAtSnapshot
+        ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo
     ) internal view returns (uint256) {
-        uint256 holderTokens = ISnapshots(_asset).balanceOfAtSnapshot(_snapshotID, _holder);
-        return ((_amount * holderTokens) / _totalSupplyAtSnapshot);
+        uint256 holderTokens = ISnapshots(amountInfo.asset).balanceOfAtSnapshot(
+            amountInfo.snapshotID,
+            amountInfo.holder
+        );
+        return ((amountInfo.amountOrPercentage * holderTokens) / amountInfo.totalSupplyAtSnapshot);
     }
 
     /*
@@ -556,16 +555,14 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      * @return The amount to be paid
      */
     function _getSnapshotAmountByPercentage(
-        address _asset,
-        uint256 _snapshotID,
-        address _holder,
-        uint256 _percentage,
-        uint256 _totalSupplyAtSnapshot
+        ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo
     ) internal view returns (uint256) {
-        uint256 paymentTokenBalance = _lifeCycleCashFlowStorage().paymentToken.balanceOf(address(this));
-        uint256 holderTokens = ISnapshots(_asset).balanceOfAtSnapshot(_snapshotID, _holder);
-        return ((((paymentTokenBalance * _percentage) / (100 * 10 ** _PERCENTAGE_DECIMALS_SIZE)) * holderTokens) /
-            _totalSupplyAtSnapshot);
+        uint256 holderTokens = ISnapshots(amountInfo.asset).balanceOfAtSnapshot(
+            amountInfo.snapshotID,
+            amountInfo.holder
+        );
+        return ((amountInfo.paymentTokenBalance * amountInfo.amountOrPercentage * holderTokens) /
+            ((100 * 10 ** _PERCENTAGE_DECIMALS_SIZE) * amountInfo.totalSupplyAtSnapshot));
     }
 
     /*
@@ -741,7 +738,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address[] memory _holders,
         uint256 _snapshotID,
         uint256 _amountOrPercentage,
-        function(address, uint256, address, uint256, uint256) internal returns (uint256) _getSnapshotAmount
+        function(ILifeCycleCashFlow.SnapshotAmountInfo memory) internal returns (uint256) _getSnapshotAmount
     )
         private
         returns (address[] memory failedAddresses_, address[] memory succeededAddresses_, uint256[] memory paidAmount_)
@@ -749,6 +746,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         failedAddresses_ = new address[](_holders.length);
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
+        uint256 paymentTokenBalance = _lifeCycleCashFlowStorage().paymentToken.balanceOf(address(this));
         uint256 assetTotalSupply = _getTotalSupplyAtSnapshot(_asset, _snapshotID);
 
         uint256 failedIndex;
@@ -764,7 +762,14 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
                 continue;
             }
 
-            uint256 amount = _getSnapshotAmount(_asset, _snapshotID, holder, _amountOrPercentage, assetTotalSupply);
+            ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo;
+            amountInfo.asset = _asset;
+            amountInfo.snapshotID = _snapshotID;
+            amountInfo.holder = holder;
+            amountInfo.amountOrPercentage = _amountOrPercentage;
+            amountInfo.paymentTokenBalance = paymentTokenBalance;
+            amountInfo.totalSupplyAtSnapshot = assetTotalSupply;
+            uint256 amount = _getSnapshotAmount(amountInfo);
 
             if (!_paySnapshotHolder(_snapshotID, holder, amount, _lifeCycleCashFlowStorage().paymentToken)) {
                 failedAddresses_[failedIndex] = holder;
