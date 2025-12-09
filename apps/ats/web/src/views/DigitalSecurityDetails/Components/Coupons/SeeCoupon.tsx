@@ -18,7 +18,7 @@ import { GetCouponForRequest, GetCouponRequest } from "@hashgraph/asset-tokeniza
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetCoupons, useGetCouponsFor, useGetCouponsAmountFor } from "../../../../hooks/queries/useCoupons";
-import { formatDate } from "../../../../utils/format";
+import { formatDate, formatNumberLocale } from "../../../../utils/format";
 import { DATE_TIME_FORMAT } from "../../../../utils/constants";
 
 interface SeeCouponFormValues {
@@ -165,6 +165,15 @@ export const SeeCoupon = () => {
     setCouponAmountForRequest(couponsAmountForReq);
   };
 
+  const calculateAmount = () => {
+    const numerator = Number(couponsAmountFor?.numerator) || 0;
+    const denominator = Number(couponsAmountFor?.denominator) || 0;
+    if (numerator === 0 || denominator === 0) {
+      return "0";
+    }
+    return `${formatNumberLocale(numerator / denominator, 3)} $`;
+  };
+
   return (
     <Center h="full" bg="neutral.dark.600">
       <VStack>
@@ -236,28 +245,22 @@ export const SeeCoupon = () => {
                 valueToCopy: coupons.fixingDate.toDateString(),
               },
               {
+                title: tDetail("balance"),
+                description: formatNumberLocale(couponsFor.tokenBalance, parseFloat(couponsFor.decimals)),
+                canCopy: true,
+                valueToCopy: formatNumberLocale(couponsFor.tokenBalance, parseFloat(couponsFor.decimals)),
+              },
+              {
                 title: tDetail("amount"),
-                description: couponsFor.value,
+                description: calculateAmount(),
                 canCopy: true,
-                valueToCopy: couponsFor.value,
-              },
-              {
-                title: tDetail("numerator"),
-                description: couponsAmountFor?.numerator || "0",
-                canCopy: true,
-                valueToCopy: couponsAmountFor?.numerator || "0",
-              },
-              {
-                title: tDetail("denominator"),
-                description: couponsAmountFor?.denominator || "0",
-                canCopy: true,
-                valueToCopy: couponsAmountFor?.denominator || "0",
+                valueToCopy: calculateAmount(),
               },
               {
                 title: tDetail("recordDateReached"),
-                description: couponsAmountFor?.recordDateReached?.toString() || "false",
+                description: couponsAmountFor?.recordDateReached ? "Yes" : "No",
                 canCopy: true,
-                valueToCopy: couponsAmountFor?.recordDateReached?.toString() || "false",
+                valueToCopy: couponsAmountFor?.recordDateReached ? "Yes" : "No",
               },
             ]}
             title={tDetail("title")}
