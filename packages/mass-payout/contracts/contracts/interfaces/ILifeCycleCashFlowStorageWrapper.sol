@@ -250,4 +250,10 @@ interface ILifeCycleCashFlowStorageWrapper {
      * @param percentage The percentage
      */
     error InvalidPercentage(uint256 percentage);
+
+    /**
+     * @notice Error thrown when the payment token to set is not valid
+     * @param paymentToken The payment token
+     */
+    error InvalidPaymentToken(address paymentToken);
 }
