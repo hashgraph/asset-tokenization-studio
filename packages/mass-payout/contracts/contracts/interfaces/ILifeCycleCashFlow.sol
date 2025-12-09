@@ -213,6 +213,11 @@ interface ILifeCycleCashFlow {
         Equity
     }
 
+    struct Rbac {
+        bytes32 role;
+        address[] members;
+    }
+
     /*
      * @dev Emitted when a coupon/dividend by page is executed
      *
