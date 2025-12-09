@@ -1,7 +1,5 @@
 # Developer Guide: ATS Contracts Scripts
 
-**Last Updated**: 2025-01-19
-
 This guide provides practical, step-by-step instructions for the most common development tasks when working with ATS contract deployment scripts.
 
 ## Table of Contents
@@ -44,7 +42,7 @@ import { deployFacets } from "@scripts/infrastructure";
 
 const [signer] = await ethers.getSigners(); // From Hardhat
 // or
-const signer = new ethers.Wallet(privateKey, provider); // Standalone
+const signer = new ethers.Walet(privateKey, provider); // Standalone
 
 const result = await deployFacets(signer, {
   facetNames: ["AccessControlFacet"],
