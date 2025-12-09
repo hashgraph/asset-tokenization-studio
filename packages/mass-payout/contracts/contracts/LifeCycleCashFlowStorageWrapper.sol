@@ -207,12 +207,12 @@ pragma solidity 0.8.18;
 
 // solhint-disable max-line-length
 
-import { ILifeCycleCashFlowStorageWrapper } from "./interfaces/ILifeCycleCashFlowStorageWrapper.sol";
-import { AssetType } from "./interfaces/ILifeCycleCashFlow.sol";
-import { LocalContext } from "./common/LocalContext.sol";
+import { ILifeCycleCashFlow } from "./interfaces/ILifeCycleCashFlow.sol";
 import {
     HederaTokenService
 } from "@hashgraph/smart-contracts/contracts/system-contracts/hedera-token-service/HederaTokenService.sol";
+import { Pause } from "./core/Pause.sol";
+import { AccessControl } from "./core/AccessControl.sol";
 import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol";
 import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/ERC1400/ERC20/ERC20.sol";
@@ -227,14 +227,10 @@ import { ISecurity } from "@hashgraph/asset-tokenization-contracts/contracts/lay
 import { _DEFAULT_PARTITION, _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
 import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
 
-abstract contract LifeCycleCashFlowStorageWrapper is
-    ILifeCycleCashFlowStorageWrapper,
-    HederaTokenService,
-    LocalContext
-{
+abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaTokenService, Pause, AccessControl {
     struct LifeCycleCashFlowStorage {
         address asset;
-        AssetType assetType;
+        ILifeCycleCashFlow.AssetType assetType;
         OZ_IERC20 paymentToken;
         mapping(uint256 => mapping(address => bool)) paidAddressesByDistribution;
         mapping(uint256 => mapping(address => bool)) paidAddressesBySnapshot;
@@ -271,7 +267,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @return The array of the holders addresses whose payment were not successful
      */
     function _executeDistribution(
-        AssetType _assetType,
+        ILifeCycleCashFlow.AssetType _assetType,
         address _asset,
         uint256 _distributionID,
         uint256 _pageIndex,
@@ -299,7 +295,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @return The array of the holders addresses whose payment were not successful
      */
     function _executeDistributionByAddresses(
-        AssetType _assetType,
+        ILifeCycleCashFlow.AssetType _assetType,
         address _asset,
         uint256 _distributionID,
         address[] memory _holders
@@ -406,7 +402,8 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         internal
         returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_, bool executed_)
     {
-        if (_percentage > 100 * 10 ** _PERCENTAGE_DECIMALS_SIZE) revert InvalidPercentage(_percentage);
+        if (_percentage > 100 * 10 ** _PERCENTAGE_DECIMALS_SIZE)
+            revert ILifeCycleCashFlow.InvalidPercentage(_percentage);
         address[] memory holders = _getHoldersBySnapshot(_asset, _snapshotID, _pageIndex, _pageLength);
         if (holders.length == 0) return (failed_, succeeded_, paidAmount_, false);
         (failed_, succeeded_, paidAmount_) = _executeSnapshotByAddresses(
@@ -456,11 +453,11 @@ abstract contract LifeCycleCashFlowStorageWrapper is
     function _transferPaymentToken(address _to, uint256 _amount) internal {
         OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
         if (paymentToken.balanceOf(address(this)) < _amount) {
-            revert NotEnoughBalance(_amount);
+            revert ILifeCycleCashFlow.NotEnoughBalance(_amount);
         }
 
         if (!paymentToken.transfer(_to, _amount)) {
-            revert TransferERC20TokenFailed(_to, _amount);
+            revert ILifeCycleCashFlow.TransferERC20TokenFailed(_to, _amount);
         }
     }
 
@@ -488,7 +485,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      *
      * @param assetType The asset type to be set
      */
-    function _setAssetType(AssetType _assetType) internal {
+    function _setAssetType(ILifeCycleCashFlow.AssetType _assetType) internal {
         _lifeCycleCashFlowStorage().assetType = _assetType;
     }
 
@@ -508,10 +505,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      */
     function _associateToken(address _token) internal virtual {
         if (HederaTokenService.associateToken(address(this), _token) != 22) {
-            revert AssociateTokenFailed();
+            revert ILifeCycleCashFlow.AssociateTokenFailed();
         }
 
-        emit TokenAssociated(_token);
+        emit ILifeCycleCashFlow.TokenAssociated(_token);
     }
 
     /*
@@ -658,7 +655,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @return The array of the holders addresses whose payment were not successful for the distribution
      */
     function _payHoldersDistribution(
-        AssetType _assetType,
+        ILifeCycleCashFlow.AssetType _assetType,
         address _asset,
         uint256 _distributionID,
         address[] memory _holders
@@ -675,7 +672,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 succeededIndex;
         uint256 nominalValue;
 
-        if (_assetType == AssetType.Bond) {
+        if (_assetType == ILifeCycleCashFlow.AssetType.Bond) {
             nominalValue = IBondRead(_asset).getBondDetails().nominalValue;
         }
 
@@ -691,7 +688,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
                 continue;
             }
 
-            (bool success, uint256 amount) = (_assetType == AssetType.Bond)
+            (bool success, uint256 amount) = (_assetType == ILifeCycleCashFlow.AssetType.Bond)
                 ? _getCouponAmount(_asset, _distributionID, holder, nominalValue)
                 : _getDividendAmount(_asset, _distributionID, holder);
 
@@ -917,13 +914,13 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @return The array of the holders addresses
      */
     function _getHolders(
-        AssetType _assetType,
+        ILifeCycleCashFlow.AssetType _assetType,
         address _asset,
         uint256 _distributionID,
         uint256 _pageIndex,
         uint256 _pageLength
     ) private view returns (address[] memory holders_) {
-        if (_assetType == AssetType.Bond) {
+        if (_assetType == ILifeCycleCashFlow.AssetType.Bond) {
             return IBondRead(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
         } else {
             return IEquity(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
@@ -956,7 +953,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      */
     function _checkAsset(address _assetAddress) private view {
         if (_assetAddress != _lifeCycleCashFlowStorage().asset) {
-            revert InvalidAsset(_assetAddress);
+            revert ILifeCycleCashFlow.InvalidAsset(_assetAddress);
         }
     }
 
@@ -1081,7 +1078,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      */
     function _getDistributionExecutionDate(address _asset, uint256 _distributionID) private view returns (uint256) {
         return
-            (_lifeCycleCashFlowStorage().assetType == AssetType.Bond)
+            (_lifeCycleCashFlowStorage().assetType == ILifeCycleCashFlow.AssetType.Bond)
                 ? IBondRead(_asset).getCoupon(_distributionID).coupon.executionDate
                 : IEquity(_asset).getDividends(_distributionID).dividend.executionDate;
     }
@@ -1093,7 +1090,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      */
     function _checkPaymentToken(address _paymentToken) private pure {
         if (_paymentToken == address(0)) {
-            revert InvalidPaymentToken(_paymentToken);
+            revert ILifeCycleCashFlow.InvalidPaymentToken(_paymentToken);
         }
     }
 
@@ -1108,7 +1105,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      */
     function _checkPaymentDate(uint256 _initialDate, uint256 _currentDate) private pure {
         if (_currentDate < _initialDate) {
-            revert NotPaymentDate(_initialDate, _currentDate);
+            revert ILifeCycleCashFlow.NotPaymentDate(_initialDate, _currentDate);
         }
     }
 
