@@ -937,19 +937,6 @@ const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider); // Must be
 
 If a deployment fails, **the recommended approach is to start fresh** with new contracts.
 
-#### Why Not Resume?
-
-The deployment system saves checkpoints in `deployments/.checkpoints/` after each major step. However, **automatic resume is not recommended** because:
-
-1. **Partial configurations**: If a batch configuration fails mid-way, some facets may be registered while others aren't. Resuming would attempt to re-register existing facets, causing transaction reverts.
-
-2. **State complexity**: The on-chain contract state may not match the checkpoint exactly, especially if:
-   - Configuration batches completed partially
-   - Manual contract interactions occurred
-   - Network indexing delays caused inconsistencies
-
-3. **Cost vs Benefit**: Deploying fresh takes 5-10 minutes. Debugging partial state can take hours.
-
 #### Recommended: Deploy Fresh
 
 ```bash
