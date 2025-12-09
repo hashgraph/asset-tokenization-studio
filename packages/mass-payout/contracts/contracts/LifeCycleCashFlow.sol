@@ -242,7 +242,7 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
      * @param asset The address of the asset that the coupon/dividend belongs to
      * @param distributionID The coupon/dividend identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      *
      * @return The array of the holders addresses whose payment were not successful
      * @return The array of the holders addresses whose payment were successful
@@ -313,7 +313,7 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
      *
      * @param bond The address of the bond for the cash out to be performed
      * @param pageIndex The index of the page whose cash outs will be performed
-     * @param pageLenth The number of holders who owns the bond to be cashed out
+     * @param pageLength The number of holders who owns the bond to be cashed out
      *
      * @return The array of the holders addresses whose cashes outs were not successful
      * @return The array of the holders addresses whose payment were successful
@@ -375,7 +375,7 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
      * @param asset The address of the asset that the snapshot belongs to
      * @param snapshotID The snapshot identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      * @param amount The fixed amount to be paid distributed proportionally among the holders
      *
      * @return The array of the holders addresses whose payment were not successful
@@ -413,7 +413,7 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
      * @param asset The address of the asset that the snapshot belongs to
      * @param snapshotID The snapshot identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      * @param percentage The contract balance percentage to be paid distributed proportionally among the holders
      *
      * @return The array of the holders addresses whose payment were not successful
