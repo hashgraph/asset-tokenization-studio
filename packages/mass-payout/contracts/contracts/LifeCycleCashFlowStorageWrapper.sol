@@ -669,17 +669,28 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         }
 
         for (uint256 index; index < _holders.length; ) {
-            (bool success, uint256 amount) = (_assetType == AssetType.Bond)
-                ? _getCouponAmount(_asset, _distributionID, _holders[index], nominalValue)
-                : _getDividendAmount(_asset, _distributionID, _holders[index]);
+            address holder = _holders[index];
 
-            if (!success || !_payHolderDistribution(_distributionID, _holders[index], amount, paymentToken)) {
-                failedAddresses_[failedIndex] = _holders[index];
+            if (_isDistributionHolderPaid(_distributionID, holder)) {
+                failedAddresses_[failedIndex] = holder;
+                unchecked {
+                    ++failedIndex;
+                    ++index;
+                }
+                continue;
+            }
+
+            (bool success, uint256 amount) = (_assetType == AssetType.Bond)
+                ? _getCouponAmount(_asset, _distributionID, holder, nominalValue)
+                : _getDividendAmount(_asset, _distributionID, holder);
+
+            if (!success || !_payHolderDistribution(_distributionID, holder, amount, paymentToken)) {
+                failedAddresses_[failedIndex] = holder;
                 unchecked {
                     ++failedIndex;
                 }
             } else {
-                succeededAddresses_[succeededIndex] = _holders[index];
+                succeededAddresses_[succeededIndex] = holder;
                 paidAmount_[succeededIndex] = amount;
                 unchecked {
                     ++succeededIndex;
@@ -722,15 +733,25 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 failedIndex;
         uint256 succeededIndex;
         for (uint256 index; index < _holders.length; ) {
-            uint256 amount = _getSnapshotAmount(_asset, _snapshotID, _holders[index], _amountOrPercentage);
+            address holder = _holders[index];
+            if (_isSnapshotHolderPaid(_snapshotID, holder)) {
+                failedAddresses_[failedIndex] = holder;
+                unchecked {
+                    ++failedIndex;
+                    ++index;
+                }
+                continue;
+            }
 
-            if (!_paySnapshotHolder(_snapshotID, _holders[index], amount, paymentToken)) {
-                failedAddresses_[failedIndex] = _holders[index];
+            uint256 amount = _getSnapshotAmount(_asset, _snapshotID, holder, _amountOrPercentage);
+
+            if (!_paySnapshotHolder(_snapshotID, holder, amount, paymentToken)) {
+                failedAddresses_[failedIndex] = holder;
                 unchecked {
                     ++failedIndex;
                 }
             } else {
-                succeededAddresses_[succeededIndex] = _holders[index];
+                succeededAddresses_[succeededIndex] = holder;
                 paidAmount_[succeededIndex] = amount;
                 unchecked {
                     ++succeededIndex;
@@ -767,17 +788,18 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 failedIndex;
         uint256 succeededIndex;
         for (uint256 index; index < _holders.length; ) {
-            uint256 cashAmount = _getCashOutAmount(_bond, _holders[index]);
+            address holder = _holders[index];
+            uint256 cashAmount = _getCashOutAmount(_bond, holder);
 
-            if (!_payHolderCashOut(_holders[index], cashAmount, paymentToken)) {
-                failedAddresses_[failedIndex] = _holders[index];
+            if (!_payHolderCashOut(holder, cashAmount, paymentToken)) {
+                failedAddresses_[failedIndex] = holder;
                 unchecked {
                     ++failedIndex;
                 }
             } else {
-                uint256 tokensAmount = _getTokensAmount(_bond, _holders[index]);
-                IBond(_bond).redeemAtMaturityByPartition(_holders[index], _DEFAULT_PARTITION, tokensAmount);
-                succeededAddresses_[succeededIndex] = _holders[index];
+                uint256 tokensAmount = _getTokensAmount(_bond, holder);
+                IBond(_bond).redeemAtMaturityByPartition(holder, _DEFAULT_PARTITION, tokensAmount);
+                succeededAddresses_[succeededIndex] = holder;
                 paidAmount_[succeededIndex] = cashAmount;
                 unchecked {
                     ++succeededIndex;
@@ -806,10 +828,6 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 _amount,
         OZ_IERC20 _paymentToken
     ) private returns (bool) {
-        if (_isDistributionHolderPaid(_distributionID, _holder)) {
-            return false;
-        }
-
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
         }
@@ -841,10 +859,6 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 _amount,
         OZ_IERC20 _paymentToken
     ) private returns (bool) {
-        if (_isSnapshotHolderPaid(_snapshotID, _holder)) {
-            return false;
-        }
-
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
         }
