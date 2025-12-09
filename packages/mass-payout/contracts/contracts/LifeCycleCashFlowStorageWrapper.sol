@@ -432,7 +432,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _snapshotID,
         address[] memory _holders,
         uint256 _amount,
-        function(address, uint256, address, uint256) internal returns (uint256) _getSnapshotAmount
+        function(address, uint256, address, uint256, uint256) internal returns (uint256) _getSnapshotAmount
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_) {
         address[] memory filteredHolders = _filterZeroAddresses(_holders);
         (failed_, succeeded_, paidAmount_) = _paySnapshotHolders(
@@ -521,7 +521,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
             revert ILifeCycleCashFlow.AssociateTokenFailed();
         }
 
-        emit ILifeCycleCashFlow.TokenAssociated(_token);
+        emit TokenAssociated(_token);
     }
 
     /*
@@ -538,11 +538,11 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _asset,
         uint256 _snapshotID,
         address _holder,
-        uint256 _amount
+        uint256 _amount,
+        uint256 _totalSupplyAtSnapshot
     ) internal view returns (uint256) {
-        uint256 assetTotalSupply = _getAssetTotalSupply(_asset);
         uint256 holderTokens = ISnapshots(_asset).balanceOfAtSnapshot(_snapshotID, _holder);
-        return ((_amount * holderTokens) / assetTotalSupply);
+        return ((_amount * holderTokens) / _totalSupplyAtSnapshot);
     }
 
     /*
@@ -559,13 +559,13 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _asset,
         uint256 _snapshotID,
         address _holder,
-        uint256 _percentage
+        uint256 _percentage,
+        uint256 _totalSupplyAtSnapshot
     ) internal view returns (uint256) {
         uint256 paymentTokenBalance = _lifeCycleCashFlowStorage().paymentToken.balanceOf(address(this));
-        uint256 assetTotalSupply = _getAssetTotalSupply(_asset);
         uint256 holderTokens = ISnapshots(_asset).balanceOfAtSnapshot(_snapshotID, _holder);
         return ((((paymentTokenBalance * _percentage) / (100 * 10 ** _PERCENTAGE_DECIMALS_SIZE)) * holderTokens) /
-            assetTotalSupply);
+            _totalSupplyAtSnapshot);
     }
 
     /*
@@ -741,7 +741,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address[] memory _holders,
         uint256 _snapshotID,
         uint256 _amountOrPercentage,
-        function(address, uint256, address, uint256) internal returns (uint256) _getSnapshotAmount
+        function(address, uint256, address, uint256, uint256) internal returns (uint256) _getSnapshotAmount
     )
         private
         returns (address[] memory failedAddresses_, address[] memory succeededAddresses_, uint256[] memory paidAmount_)
@@ -749,7 +749,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         failedAddresses_ = new address[](_holders.length);
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
-        OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        uint256 assetTotalSupply = _getTotalSupplyAtSnapshot(_asset, _snapshotID);
 
         uint256 failedIndex;
         uint256 succeededIndex;
@@ -764,9 +764,9 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
                 continue;
             }
 
-            uint256 amount = _getSnapshotAmount(_asset, _snapshotID, holder, _amountOrPercentage);
+            uint256 amount = _getSnapshotAmount(_asset, _snapshotID, holder, _amountOrPercentage, assetTotalSupply);
 
-            if (!_paySnapshotHolder(_snapshotID, holder, amount, paymentToken)) {
+            if (!_paySnapshotHolder(_snapshotID, holder, amount, _lifeCycleCashFlowStorage().paymentToken)) {
                 failedAddresses_[failedIndex] = holder;
                 unchecked {
                     ++failedIndex;
@@ -1010,8 +1010,8 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      *
      * @return The asset total supply
      */
-    function _getAssetTotalSupply(address _asset) private view returns (uint256) {
-        return IERC1410(_asset).totalSupply();
+    function _getTotalSupplyAtSnapshot(address _asset, uint256 _snapshotID) private view returns (uint256) {
+        return ISnapshots(_asset).totalSupplyAtSnapshot(_snapshotID);
     }
 
     /*

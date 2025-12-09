@@ -489,7 +489,7 @@ contract AssetMock is IAssetMock {
     }
 
     function totalSupply() external pure returns (uint256) {
-        return 1000;
+        revert NotImplemented();
     }
 
     function isMultiPartition() external pure returns (bool) {
