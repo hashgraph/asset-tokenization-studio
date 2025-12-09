@@ -853,8 +853,12 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
             return false;
         }
 
+        if (_amount == 0) {
+            _setDistributionHolderPaid(_distributionID, _holder);
+            return true;
+        }
+
         try _paymentToken.transfer(_holder, _amount) returns (bool result) {
-            // If the transfer was successful, we set the holder as paid
             if (result) {
                 _setDistributionHolderPaid(_distributionID, _holder);
             }
@@ -884,6 +888,11 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
             return false;
         }
 
+        if (_amount == 0) {
+            _setSnapshotHolderPaid(_snapshotID, _holder);
+            return true;
+        }
+
         try _paymentToken.transfer(_holder, _amount) returns (bool result) {
             if (result) {
                 _setSnapshotHolderPaid(_snapshotID, _holder);
@@ -906,6 +915,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     function _payHolderCashOut(address _holder, uint256 _amount, OZ_IERC20 _paymentToken) private returns (bool) {
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
+        }
+
+        if (_amount == 0) {
+            return true;
         }
 
         try _paymentToken.transfer(_holder, _amount) returns (bool result) {
