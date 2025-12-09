@@ -207,25 +207,25 @@ pragma solidity 0.8.18;
 
 // solhint-disable max-line-length
 
-import { ILifeCycleCashFlowStorageWrapper } from './interfaces/ILifeCycleCashFlowStorageWrapper.sol';
-import { AssetType } from './interfaces/ILifeCycleCashFlow.sol';
-import { LocalContext } from './common/LocalContext.sol';
+import { ILifeCycleCashFlowStorageWrapper } from "./interfaces/ILifeCycleCashFlowStorageWrapper.sol";
+import { AssetType } from "./interfaces/ILifeCycleCashFlow.sol";
+import { LocalContext } from "./common/LocalContext.sol";
 import {
     HederaTokenService
-} from '@hashgraph/smart-contracts/contracts/system-contracts/hedera-token-service/HederaTokenService.sol';
-import { IERC20 } from '@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol';
-import { IERC20 as OZ_IERC20 } from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import { ERC20 } from '@hashgraph/asset-tokenization-contracts/contracts/layer_1/ERC1400/ERC20/ERC20.sol';
-import { IERC1410 } from '@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC1410.sol';
+} from "@hashgraph/smart-contracts/contracts/system-contracts/hedera-token-service/HederaTokenService.sol";
+import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol";
+import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { ERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/ERC1400/ERC20/ERC20.sol";
+import { IERC1410 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC1410.sol";
 import {
     ISnapshots
-} from '@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/snapshots/ISnapshots.sol';
-import { IBond } from '@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBond.sol';
-import { IBondRead } from '@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBondRead.sol';
-import { IEquity } from '@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/equity/IEquity.sol';
-import { ISecurity } from '@hashgraph/asset-tokenization-contracts/contracts/layer_3/interfaces/ISecurity.sol';
-import { _DEFAULT_PARTITION, _PERCENTAGE_DECIMALS_SIZE } from './constants/values.sol';
-import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from './constants/storagePositions.sol';
+} from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/snapshots/ISnapshots.sol";
+import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBond.sol";
+import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBondRead.sol";
+import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/equity/IEquity.sol";
+import { ISecurity } from "@hashgraph/asset-tokenization-contracts/contracts/layer_3/interfaces/ISecurity.sol";
+import { _DEFAULT_PARTITION, _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
+import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
 
 abstract contract LifeCycleCashFlowStorageWrapper is
     ILifeCycleCashFlowStorageWrapper,
@@ -238,7 +238,6 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         OZ_IERC20 paymentToken;
         mapping(uint256 => mapping(address => bool)) paidAddressesByDistribution;
         mapping(uint256 => mapping(address => bool)) paidAddressesBySnapshot;
-        mapping(address => bool) cashOutPaidAddresses;
     }
 
     modifier isAsset(address _asset) {
@@ -638,15 +637,6 @@ abstract contract LifeCycleCashFlowStorageWrapper is
     }
 
     /*
-     * @dev Sets a cash out to a holder
-     *
-     * @param holder The holder who was cashed out
-     */
-    function _setHolderCashOutPaid(address holder) private {
-        _lifeCycleCashFlowStorage().cashOutPaidAddresses[holder] = true;
-    }
-
-    /*
      * @dev Returns the array containing holders addresses who couldn't be paid for a distribution id
      *
      * @param assetType The type of the asset, bond/equity, the distribution belongs to
@@ -879,18 +869,11 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @return True if the payment succeeded, false otherwise
      */
     function _payHolderCashOut(address _holder, uint256 _amount, OZ_IERC20 _paymentToken) private returns (bool) {
-        if (_isHolderCashOutPaid(_holder)) {
-            return false;
-        }
-
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
         }
 
         try _paymentToken.transfer(_holder, _amount) returns (bool result) {
-            if (result) {
-                _setHolderCashOutPaid(_holder);
-            }
             return result;
         } catch {
             return false;
@@ -950,17 +933,6 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         if (_assetAddress != _lifeCycleCashFlowStorage().asset) {
             revert InvalidAsset(_assetAddress);
         }
-    }
-
-    /*
-     * @dev Check if a certain holder was already cashed out
-     *
-     * @param holder The holder to check if the cash out was already paid
-     *
-     * @return True if the holder was already cashed out, false otherwise
-     */
-    function _isHolderCashOutPaid(address holder) private view returns (bool paid) {
-        return _lifeCycleCashFlowStorage().cashOutPaidAddresses[holder];
     }
 
     /*
