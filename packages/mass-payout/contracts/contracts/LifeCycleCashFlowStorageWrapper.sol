@@ -215,7 +215,6 @@ import { Pause } from "./core/Pause.sol";
 import { AccessControl } from "./core/AccessControl.sol";
 import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol";
 import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { IERC1410 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC1410.sol";
 import {
     ISnapshots
 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/snapshots/ISnapshots.sol";
@@ -223,7 +222,7 @@ import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2
 import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBondRead.sol";
 import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/equity/IEquity.sol";
 import { ISecurity } from "@hashgraph/asset-tokenization-contracts/contracts/layer_3/interfaces/ISecurity.sol";
-import { _DEFAULT_PARTITION, _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
+import { _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
 import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
 
 abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaTokenService, Pause, AccessControl {
@@ -819,8 +818,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
                     ++failedIndex;
                 }
             } else {
-                uint256 tokensAmount = _getTokensAmount(_bond, holder);
-                IBond(_bond).redeemAtMaturityByPartition(holder, _DEFAULT_PARTITION, tokensAmount);
+                IBond(_bond).fullRedeemAtMaturity(holder);
                 succeededAddresses_[succeededIndex] = holder;
                 paidAmount_[succeededIndex] = cashAmount;
                 unchecked {
@@ -1003,18 +1001,6 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     function _checkMaturityDate(address _bond) private view {
         uint256 maturityDateInit = IBondRead(_bond).getBondDetails().maturityDate;
         _checkPaymentDate(maturityDateInit, _blockTimestamp());
-    }
-
-    /*
-     * @dev Get the amount of asset tokens of a holder
-     *
-     * @param asset The asset the holder's balance is requested
-     * @param holder The holder whose tokens are requested
-     *
-     * @return The amount of tokens
-     */
-    function _getTokensAmount(address _asset, address _holder) private view returns (uint256) {
-        return IERC1410(_asset).balanceOf(_holder);
     }
 
     /*

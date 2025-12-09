@@ -254,9 +254,8 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function fullRedeemAtMaturity(address) external pure {
-        revert NotImplemented();
-    }
+    // solhint-disable no-empty-blocks
+    function fullRedeemAtMaturity(address) external pure {}
 
     function increaseAllowance(address, uint256) external pure returns (bool) {
         revert NotImplemented();
