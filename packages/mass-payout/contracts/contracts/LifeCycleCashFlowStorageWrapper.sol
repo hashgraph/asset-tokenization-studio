@@ -215,7 +215,6 @@ import { Pause } from "./core/Pause.sol";
 import { AccessControl } from "./core/AccessControl.sol";
 import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol";
 import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { ERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/ERC1400/ERC20/ERC20.sol";
 import { IERC1410 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC1410.sol";
 import {
     ISnapshots
@@ -677,14 +676,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
         OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        uint8 paymentTokenDecimals = _getPaymentTokenDecimals();
 
         uint256 failedIndex;
         uint256 succeededIndex;
-        uint256 nominalValue;
-
-        if (_assetType == ILifeCycleCashFlow.AssetType.Bond) {
-            nominalValue = IBondRead(_asset).getBondDetails().nominalValue;
-        }
 
         for (uint256 index; index < _holders.length; ) {
             address holder = _holders[index];
@@ -698,11 +693,11 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
                 continue;
             }
 
-            (bool success, uint256 amount) = (_assetType == ILifeCycleCashFlow.AssetType.Bond)
-                ? _getCouponAmount(_asset, _distributionID, holder, nominalValue)
-                : _getDividendAmount(_asset, _distributionID, holder);
+            uint256 amount = (_assetType == ILifeCycleCashFlow.AssetType.Bond)
+                ? _getCouponAmount(_asset, _distributionID, holder, paymentTokenDecimals)
+                : _getDividendAmount(_asset, _distributionID, holder, paymentTokenDecimals);
 
-            if (!success || !_payHolderDistribution(_distributionID, holder, amount, paymentToken)) {
+            if (!_payHolderDistribution(_distributionID, holder, amount, paymentToken)) {
                 failedAddresses_[failedIndex] = holder;
                 unchecked {
                     ++failedIndex;
@@ -810,12 +805,13 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
         OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        uint8 paymentTokenDecimals = _getPaymentTokenDecimals();
 
         uint256 failedIndex;
         uint256 succeededIndex;
         for (uint256 index; index < _holders.length; ) {
             address holder = _holders[index];
-            uint256 cashAmount = _getCashOutAmount(_bond, holder);
+            uint256 cashAmount = _getCashOutAmount(_bond, holder, paymentTokenDecimals);
 
             if (!_payHolderCashOut(holder, cashAmount, paymentToken)) {
                 failedAddresses_[failedIndex] = holder;
@@ -1047,18 +1043,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _asset,
         uint256 _couponID,
         address _holder,
-        uint256 _nominalValue
-    ) private view returns (bool success, uint256 amount) {
-        try IBondRead(_asset).getCouponFor(_couponID, _holder) returns (IBondRead.CouponFor memory couponFor) {
-            amount = ((couponFor.tokenBalance * _nominalValue * couponFor.period * couponFor.rate) /
-                100 /
-                (365 * 24 * 60 * 60) /
-                10 ** couponFor.decimals /
-                10 ** couponFor.rateDecimals);
-            return (true, amount);
-        } catch {
-            return (false, 0);
-        }
+        uint8 _paymentTokenDecimals
+    ) private view returns (uint256 amount) {
+        IBondRead.CouponAmountFor memory couponAmountFor = IBondRead(_asset).getCouponAmountFor(_couponID, _holder);
+        return (couponAmountFor.numerator * 10 ** _paymentTokenDecimals) / couponAmountFor.denominator;
     }
 
     /*
@@ -1074,15 +1062,11 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     function _getDividendAmount(
         address _asset,
         uint256 _dividendID,
-        address _holder
-    ) private view returns (bool success, uint256 amount) {
-        IEquity equity = IEquity(_asset);
-        try equity.getDividendsFor(_dividendID, _holder) returns (IEquity.DividendFor memory dividendFor) {
-            amount = ((dividendFor.tokenBalance * dividendFor.amount) / 10 ** dividendFor.decimals);
-            return (true, amount);
-        } catch {
-            return (false, 0);
-        }
+        address _holder,
+        uint8 _paymentTokenDecimals
+    ) private view returns (uint256) {
+        IEquity.DividendAmountFor memory dividendAmountFor = IEquity(_asset).getDividendAmountFor(_dividendID, _holder);
+        return (dividendAmountFor.numerator * 10 ** _paymentTokenDecimals) / dividendAmountFor.denominator;
     }
 
     /*
@@ -1093,10 +1077,13 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      *
      * @return The amount to be paid
      */
-    function _getCashOutAmount(address _asset, address _holder) private view returns (uint256) {
-        IBondRead.BondDetailsData memory bondDetailsData = IBondRead(_asset).getBondDetails();
-        uint8 bondDecimals = ERC20(_asset).getERC20Metadata().info.decimals;
-        return ((IERC1410(_asset).balanceOf(_holder) * bondDetailsData.nominalValue) / 10 ** bondDecimals);
+    function _getCashOutAmount(
+        address _asset,
+        address _holder,
+        uint8 _paymentTokenDecimals
+    ) private view returns (uint256) {
+        IBondRead.PrincipalFor memory principalFor = IBondRead(_asset).getPrincipalFor(_holder);
+        return (principalFor.numerator * 10 ** _paymentTokenDecimals) / principalFor.denominator;
     }
 
     /*

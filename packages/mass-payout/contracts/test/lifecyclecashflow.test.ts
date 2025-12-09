@@ -246,7 +246,7 @@ describe("Security operations", () => {
       });
 
       beforeEach(async () => {
-        amountToBePaid = assetType == AssetType.BOND ? "11567" : "6";
+        amountToBePaid = assetType == AssetType.BOND ? "10000" : "10000";
 
         [signer_A, signer_B] = await ethers.getSigners();
 
@@ -641,9 +641,9 @@ describe("Security operations", () => {
 
             await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
               .to.emit(lifeCycleCashFlow, "CashOutExecuted")
-              .withArgs(1, 1, [AddressZero], [signer_B.address], [281481]);
+              .withArgs(1, 1, [AddressZero], [signer_B.address], [10000]);
 
-            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("281481", 0));
+            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("10000", 0));
           });
         });
 
@@ -723,9 +723,9 @@ describe("Security operations", () => {
 
             await expect(lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [signer_B.address]))
               .to.emit(lifeCycleCashFlow, "CashOutByAddressesExecuted")
-              .withArgs([signer_B.address], [AddressZero], [signer_B.address], [281481]);
+              .withArgs([signer_B.address], [AddressZero], [signer_B.address], [10000]);
 
-            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("281481", 0));
+            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("10000", 0));
           });
         });
       }

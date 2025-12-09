@@ -250,6 +250,23 @@ contract AssetMock is IAssetMock {
         holders_[0] = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
     }
 
+    function decreaseAllowance(address, uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function fullRedeemAtMaturity(address) external pure {
+        revert NotImplemented();
+    }
+
+    function increaseAllowance(address, uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function getPrincipalFor(address) external pure returns (PrincipalFor memory principalFor_) {
+        principalFor_.numerator = 100;
+        principalFor_.denominator = 1;
+    }
+
     function redeemAtMaturityByPartition(address, bytes32, uint256) external pure {
         return;
     }
@@ -268,10 +285,6 @@ contract AssetMock is IAssetMock {
         bondDetailsData_.nominalValueDecimals = 2;
         bondDetailsData_.startingDate = 1751282807;
         bondDetailsData_.maturityDate = 1761823607;
-    }
-
-    function getCouponDetails() external pure returns (CouponDetailsData memory) {
-        revert NotImplemented();
     }
 
     function getCoupon(uint256) external pure returns (RegisteredCoupon memory registeredCoupon_) {
@@ -294,19 +307,17 @@ contract AssetMock is IAssetMock {
         couponFor_.recordDateReached = true;
     }
 
+    function getCouponAmountFor(uint256, address) external pure returns (CouponAmountFor memory couponAmountFor_) {
+        couponAmountFor_.numerator = 100;
+        couponAmountFor_.denominator = 1;
+        couponAmountFor_.recordDateReached = true;
+    }
+
     function getCouponCount() external pure returns (uint256) {
         revert NotImplemented();
     }
 
     function getTotalCouponHolders(uint256) external pure returns (uint256) {
-        revert NotImplemented();
-    }
-
-    function getSecurityRegulationData() external pure returns (SecurityRegulationData memory) {
-        revert NotImplemented();
-    }
-
-    function getTotalSecurityHolders() external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -352,6 +363,15 @@ contract AssetMock is IAssetMock {
         dividendFor_.executionDate = 1753874807;
         dividendFor_.decimals = 2;
         dividendFor_.recordDateReached = true;
+    }
+
+    function getDividendAmountFor(
+        uint256,
+        address
+    ) external pure returns (DividendAmountFor memory dividendAmountFor_) {
+        dividendAmountFor_.numerator = 100;
+        dividendAmountFor_.denominator = 1;
+        dividendAmountFor_.recordDateReached = true;
     }
 
     function getDividendsCount() external pure returns (uint256) {
@@ -469,10 +489,6 @@ contract AssetMock is IAssetMock {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410_Basic(bool) external pure {
-        revert NotImplemented();
-    }
-
-    function transferByPartition(bytes32, BasicTransferInfo calldata, bytes calldata) external pure returns (bytes32) {
         revert NotImplemented();
     }
 
