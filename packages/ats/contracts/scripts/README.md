@@ -1,7 +1,5 @@
 # ATS Contracts Deployment Scripts
 
-**Last Updated**: 2025-11-07
-
 ---
 
 **🚀 Quick Start for Developers**
@@ -513,6 +511,22 @@ Check the output file in `deployments/{network}_{timestamp}.json`:
 - All facets (43 for Equity, 43 for Bond)
 - Equity & Bond configurations
 
+### If Deployment Fails
+
+**⚠️ Important**: If deployment fails (especially during configuration creation), **start fresh** instead of trying to resume:
+
+```bash
+# Clean up failed checkpoint
+rm deployments/.checkpoints/*.json
+
+# Deploy fresh (adjust network as needed)
+npm run deploy:hedera:testnet
+npm run deploy:hedera:mainnet
+npm run deploy:hardhat -- --network hardhat
+```
+
+**Why?** Partial configurations can't be resumed reliably. See [Troubleshooting](#when-deployment-fails) for details.
+
 ---
 
 ## Usage Modes
@@ -919,11 +933,73 @@ const provider = new ethers.providers.JsonRpcProvider("...");
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider); // Must be valid hex private key
 ```
 
+### When Deployment Fails
+
+If a deployment fails, **the recommended approach is to start fresh** with new contracts.
+
+#### Why Not Resume?
+
+The deployment system saves checkpoints in `deployments/.checkpoints/` after each major step. However, **automatic resume is not recommended** because:
+
+1. **Partial configurations**: If a batch configuration fails mid-way, some facets may be registered while others aren't. Resuming would attempt to re-register existing facets, causing transaction reverts.
+
+2. **State complexity**: The on-chain contract state may not match the checkpoint exactly, especially if:
+   - Configuration batches completed partially
+   - Manual contract interactions occurred
+   - Network indexing delays caused inconsistencies
+
+3. **Cost vs Benefit**: Deploying fresh takes 5-10 minutes. Debugging partial state can take hours.
+
+#### Recommended: Deploy Fresh
+
+```bash
+# 1. Clean up the failed checkpoint (optional)
+rm deployments/.checkpoints/*.json
+
+# 2. Deploy with new contracts (adjust for your network)
+npm run deploy:hedera:testnet
+npm run deploy:hedera:mainnet
+npm run deploy:hardhat -- --network hardhat
+```
+
+This will deploy:
+
+- ✅ New ProxyAdmin, BLR, Factory
+- ✅ New Facets (or reuse if identical bytecode)
+- ✅ Clean Equity & Bond configurations
+
+**Cost**: Varies by network (~$20-50 on testnet, same as partial failed deployment)
+**Time**: 5-10 minutes
+**Success Rate**: ~100% (vs uncertain resume)
+
+#### When Old Contracts Exist
+
+The previously deployed contracts (from the failed attempt) will remain on-chain but unused. This is normal and doesn't cause issues:
+
+- They don't interfere with new deployments
+- They don't consume ongoing resources
+- They can be ignored safely
+
+#### Understanding Checkpoint Failures
+
+**Common failure scenario:**
+
+```
+✓ Step 1-4: Infrastructure deployed (ProxyAdmin, BLR, Factory, Facets)
+⏳ Step 5: Creating Equity configuration...
+  ✓ Batch 1/2: 15 facets registered
+  ❌ Batch 2/2: Transaction reverted
+```
+
+**Problem**: Batch 1 succeeded on-chain, but checkpoint can't resume because it tries to register all facets again from the start.
+
+**Solution**: Deploy fresh. The $10-20 in gas from the failed attempt is less than the time cost of debugging.
+
 ### "UNPREDICTABLE_GAS_LIMIT" or Gas Estimation Failures
 
 This error occurs when deploying complex transactions (like creating configurations with many facets) to real networks. The scripts automatically use explicit gas limits for known operations.
 
-**Solution**: The deployment system uses `GAS_LIMIT` constants from [scripts/core/constants.ts](core/constants.ts) for operations that commonly fail gas estimation:
+**Solution**: The deployment system uses `GAS_LIMIT` constants for operations that commonly fail gas estimation:
 
 - `createConfiguration`: 24,000,000 gas
 - `registerBusinessLogics`: 7,800,000 gas
