@@ -557,7 +557,8 @@ describe("Bond", () => {
     });
     it("should get coupon for successfully", async () => {
       const expectedResponse = {
-        payload: new BigDecimal(BigNumber.from(10)),
+        tokenBalance: new BigDecimal(BigNumber.from(1000)),
+        decimals: 2,
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
@@ -578,7 +579,8 @@ describe("Bond", () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          value: expectedResponse.payload.toString(),
+          tokenBalance: expectedResponse.tokenBalance.toString(),
+          decimals: expectedResponse.decimals.toString(),
         }),
       );
     });
