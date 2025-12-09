@@ -14,14 +14,14 @@ abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper
     }
 
     modifier onlyIfProceedRecipient(address _proceedRecipient) {
-        if (!_isExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient)) {
+        if (!_isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientNotFound(_proceedRecipient);
         }
         _;
     }
 
     modifier onlyIfNotProceedRecipient(address _proceedRecipient) {
-        if (_isExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient)) {
+        if (_isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientAlreadyExists(_proceedRecipient);
         }
         _;
@@ -47,6 +47,14 @@ abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper
 
     function _getProceedRecipientData(address _proceedRecipient) internal view returns (bytes memory) {
         return _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
+    }
+
+    function _isProceedRecipient(address _proceedRecipient) internal view returns (bool) {
+        return _isExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
+    }
+
+    function _getProceedRecipientsCount() internal view returns (uint256) {
+        return _getExternalListsCount(_PROCEED_RECIPIENTS_STORAGE_POSITION);
     }
 
     function _proceedRecipientsDataStorage()

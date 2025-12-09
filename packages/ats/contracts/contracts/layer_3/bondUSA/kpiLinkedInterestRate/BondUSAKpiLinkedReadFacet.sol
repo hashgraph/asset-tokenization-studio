@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BondReadKpiLinkedInterestRate } from "../../../layer_2/bond/kpiLinkedInterestRate/BondRead.sol";
+import {
+    BondReadKpiLinkedInterestRate
+} from "../../../layer_2/bond/fixingDateInterestRate/kpiLinkedInterestRate/BondRead.sol";
 import { BondUSAReadFacet } from "../BondUSAReadFacet.sol";
 import { _BOND_KPI_LINKED_READ_RESOLVER_KEY } from "../../../layer_2/constants/resolverKeys.sol";
 import { IBondRead } from "../../../layer_2/interfaces/bond/IBondRead.sol";

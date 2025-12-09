@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CommonKpiLinkedInterestRate } from "../../bond/kpiLinkedInterestRate/layer_0_extension/Common.sol";
+import {
+    CommonKpiLinkedInterestRate
+} from "../../bond/fixingDateInterestRate/kpiLinkedInterestRate/layer_0_extension/Common.sol";
 import { IKpiLinkedRate } from "../../interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
 

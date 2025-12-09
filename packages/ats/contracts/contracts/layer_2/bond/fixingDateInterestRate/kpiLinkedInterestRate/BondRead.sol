@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Bond } from "../Bond.sol";
+import { BondRead } from "../../BondRead.sol";
 import { CommonKpiLinkedInterestRate } from "./layer_0_extension/Common.sol";
-import { IBondRead } from "../../interfaces/bond/IBondRead.sol";
-import { BondStorageWrapper } from "../../../layer_0/bond/BondStorageWrapper.sol";
+import { IBondRead } from "../../../interfaces/bond/IBondRead.sol";
+import { BondStorageWrapper } from "../../../../layer_0/bond/BondStorageWrapper.sol";
 import { BondStorageWrapperKpiLinkedInterestRate } from "./layer_0_extension/bond/BondStorageWrapper.sol";
+import { BondStorageWrapperFixingDateInterestRate } from "../BondStorageWrapperFixingDateInterestRate.sol";
 
-abstract contract BondKpiLinkedInterestRate is Bond, CommonKpiLinkedInterestRate {
+abstract contract BondReadKpiLinkedInterestRate is BondRead, CommonKpiLinkedInterestRate {
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
     )
@@ -22,8 +23,8 @@ abstract contract BondKpiLinkedInterestRate is Bond, CommonKpiLinkedInterestRate
     function _initCoupon(
         bytes32 _actionId,
         IBondRead.Coupon memory _newCoupon
-    ) internal virtual override(BondStorageWrapper, BondStorageWrapperKpiLinkedInterestRate) {
-        BondStorageWrapperKpiLinkedInterestRate._initCoupon(_actionId, _newCoupon);
+    ) internal virtual override(BondStorageWrapper, BondStorageWrapperFixingDateInterestRate) {
+        BondStorageWrapperFixingDateInterestRate._initCoupon(_actionId, _newCoupon);
     }
     function _addToCouponsOrderedList(
         uint256 _couponID

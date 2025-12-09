@@ -66,7 +66,7 @@ contract ProceedRecipients is IProceedRecipients, Common {
     }
 
     function isProceedRecipient(address _proceedRecipient) external view override returns (bool) {
-        return _isExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
+        return _isProceedRecipient(_proceedRecipient);
     }
 
     function getProceedRecipientData(address _proceedRecipient) external view override returns (bytes memory) {
@@ -74,7 +74,7 @@ contract ProceedRecipients is IProceedRecipients, Common {
     }
 
     function getProceedRecipientsCount() external view override returns (uint256) {
-        return _getExternalListsCount(_PROCEED_RECIPIENTS_STORAGE_POSITION);
+        return _getProceedRecipientsCount();
     }
 
     function getProceedRecipients(

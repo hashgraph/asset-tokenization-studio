@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../../../../layer_1/common/Common.sol";
-import { IBondRead } from "../../../../interfaces/bond/IBondRead.sol";
-import { COUPON_LISTING_TASK_TYPE, COUPON_CORPORATE_ACTION_TYPE } from "../../../../../layer_0/constants/values.sol";
-import { IKpi } from "../../../../interfaces/interestRates/kpiLinkedRate/IKpi.sol";
-import { IKpiLinkedRate } from "../../../../interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
-import { LowLevelCall } from "../../../../../layer_0/common/libraries/LowLevelCall.sol";
+import { IBondRead } from "../../../../../interfaces/bond/IBondRead.sol";
+import { IKpi } from "../../../../../interfaces/interestRates/kpiLinkedRate/IKpi.sol";
+import { IKpiLinkedRate } from "../../../../../interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { LowLevelCall } from "../../../../../../layer_0/common/libraries/LowLevelCall.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { DecimalsLib } from "../../../../../layer_0/common/libraries/DecimalsLib.sol";
+import { DecimalsLib } from "../../../../../../layer_0/common/libraries/DecimalsLib.sol";
+import { BondStorageWrapperFixingDateInterestRate } from "../../../BondStorageWrapperFixingDateInterestRate.sol";
 
-abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
+abstract contract BondStorageWrapperKpiLinkedInterestRate is BondStorageWrapperFixingDateInterestRate {
     using LowLevelCall for address;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -19,20 +18,9 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
     ) internal virtual override returns (bytes32 corporateActionId_, uint256 couponID_) {
-        if (
-            _newCoupon.rateStatus != IBondRead.RateCalculationStatus.PENDING ||
-            _newCoupon.rate != 0 ||
-            _newCoupon.rateDecimals != 0
-        ) revert InterestRateIsKpiLinked();
+        _checkCoupon(_newCoupon, InterestRateIsKpiLinked.selector, "");
 
         return super._setCoupon(_newCoupon);
-    }
-
-    function _initCoupon(bytes32 _actionId, IBondRead.Coupon memory _newCoupon) internal virtual override {
-        super._initCoupon(_actionId, _newCoupon);
-
-        _addScheduledCrossOrderedTask(_newCoupon.fixingDate, abi.encode(COUPON_LISTING_TASK_TYPE));
-        _addScheduledCouponListing(_newCoupon.fixingDate, abi.encode(_actionId));
     }
 
     function _addToCouponsOrderedList(uint256 _couponID) internal virtual override {
@@ -48,35 +36,10 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is Common {
         _updateCouponRate(_couponID, coupon, rate, rateDecimals);
     }
 
-    function _updateCouponRate(
-        uint256 _couponID,
-        IBondRead.Coupon memory _coupon,
-        uint256 _rate,
-        uint8 _rateDecimals
-    ) internal virtual {
-        bytes32 actionId = _getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
-
-        _coupon.rate = _rate;
-        _coupon.rateDecimals = _rateDecimals;
-        _coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
-
-        _updateCorporateActionData(actionId, abi.encode(_coupon));
-    }
-
     function _getCoupon(
         uint256 _couponID
     ) internal view virtual override returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
-        registeredCoupon_ = super._getCoupon(_couponID);
-
-        if (registeredCoupon_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return registeredCoupon_;
-
-        if (registeredCoupon_.coupon.fixingDate > _blockTimestamp()) return registeredCoupon_;
-
-        (registeredCoupon_.coupon.rate, registeredCoupon_.coupon.rateDecimals) = _calculateKpiLinkedInterestRate(
-            _couponID,
-            registeredCoupon_.coupon
-        );
-        registeredCoupon_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
+        return _getCouponAdjusted(_couponID, _calculateKpiLinkedInterestRate);
     }
 
     function _calculateKpiLinkedInterestRate(

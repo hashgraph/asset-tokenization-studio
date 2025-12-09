@@ -44,3 +44,6 @@ bytes32 constant _FIXED_RATE_RESOLVER_KEY = 0x2871e1c37f7423765d88b16528db7e80ad
 
 // keccak256('security.token.standard.kpiLinkedRate.resolverKey');
 bytes32 constant _KPI_LINKED_RATE_RESOLVER_KEY = 0x92999bd0329d03e46274ce7743ebe0060df95286df4fa7b354937b7d21757d22;
+
+// keccak256('security.token.standard.sustainabilityPerformanceTargetRate.resolverKey');
+bytes32 constant _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0xa261a7434029a925924f47ccea7fbe12af1e56efd74e8f1d8ac23bec19a27e49;

@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-27T14:49:57.946Z
- * Facets: 55
+ * Generated: 2025-12-09T13:40:37.354Z
+ * Facets: 56
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -125,6 +125,8 @@ import {
   SnapshotsFacetTimeTravel__factory,
   SsiManagementFacet__factory,
   SsiManagementFacetTimeTravel__factory,
+  SustainabilityPerformanceTargetRateFacet__factory,
+  SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   TimeTravelFacet__factory,
   TransferAndLockFacet__factory,
   TransferAndLockFacetTimeTravel__factory,
@@ -2273,6 +2275,50 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel ? new SsiManagementFacetTimeTravel__factory(signer) : new SsiManagementFacet__factory(signer),
   },
 
+  SustainabilityPerformanceTargetRateFacet: {
+    name: "SustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa261a7434029a925924f47ccea7fbe12af1e56efd74e8f1d8ac23bec19a27e49",
+    },
+    inheritance: ["SustainabilityPerformanceTargetRate", "IStaticFunctionSelectors"],
+    methods: [
+      { name: "getImpactDataFor", signature: "getImpactDataFor(address)", selector: "0xb8cf9d2a" },
+      { name: "getInterestRate", signature: "getInterestRate()", selector: "0x5257b566" },
+      {
+        name: "initialize_SustainabilityPerformanceTargetRate",
+        signature: "initialize_SustainabilityPerformanceTargetRate(InterestRate,ImpactData[],address[])",
+        selector: "0xcccfaa36",
+      },
+      { name: "setImpactData", signature: "setImpactData(ImpactData[],address[])", selector: "0x9278f4db" },
+      { name: "setInterestRate", signature: "setInterestRate(InterestRate)", selector: "0xf1f2d5d4" },
+    ],
+    events: [
+      {
+        name: "ImpactDataUpdated",
+        signature: "ImpactDataUpdated(address,ImpactData[],address[])",
+        topic0: "0x8ac5147acc7918904f238d103d9306aaa3208ad0a679f15a37f43e6767a8aa03",
+      },
+      {
+        name: "InterestRateUpdated",
+        signature: "InterestRateUpdated(address,InterestRate)",
+        topic0: "0xed3c060bc037e2b9f05c9d552119ccb2cf7499562ac630370d20178beb1583e7",
+      },
+    ],
+    errors: [
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+      { name: "NotExistingProject", signature: "NotExistingProject(address)", selector: "0x2f850995" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new SustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new SustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
   TimeTravelFacet: {
     name: "TimeTravelFacet",
     resolverKey: {
@@ -2352,7 +2398,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 55 as const;
+export const TOTAL_FACETS = 56 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -2496,6 +2542,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       { name: "_setCoupon", signature: "_setCoupon(IBondRead.Coupon)", selector: "0xf9d474a4" },
       { name: "_setMaturityDate", signature: "_setMaturityDate(uint256)", selector: "0x1c73e162" },
       { name: "_storeBondDetails", signature: "_storeBondDetails(IBondRead.BondDetailsData)", selector: "0x9b11f1cd" },
+      {
+        name: "_updateCouponRate",
+        signature: "_updateCouponRate(uint256,IBondRead.Coupon,uint256,uint8)",
+        selector: "0xc1e90d33",
+      },
     ],
   },
 
@@ -2508,9 +2559,22 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   BondStorageWrapperKpiLinkedInterestRate: {
     name: "BondStorageWrapperKpiLinkedInterestRate",
-    inheritance: ["Common"],
+    inheritance: ["BondStorageWrapperFixingDateInterestRate"],
     methods: [],
     errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
+  },
+
+  BondStorageWrapperSustainabilityPerformanceTargetInterestRate: {
+    name: "BondStorageWrapperSustainabilityPerformanceTargetInterestRate",
+    inheritance: ["BondStorageWrapperFixingDateInterestRate"],
+    methods: [],
+    errors: [
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
   },
 
   ControlListStorageWrapper: {
@@ -2985,7 +3049,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   FixedRateStorageWrapper: {
     name: "FixedRateStorageWrapper",
-    inheritance: ["KpiLinkedRateStorageWrapper"],
+    inheritance: ["SustainabilityPerformanceTargetRateStorageWrapper"],
     methods: [
       { name: "_fixedRateStorage", signature: "_fixedRateStorage()", selector: "0x7fb74df4" },
       { name: "_getRate", signature: "_getRate()", selector: "0x94e10784" },
@@ -3057,6 +3121,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [
       { name: "_addProceedRecipient", signature: "_addProceedRecipient(address,bytes)", selector: "0x9fd61d20" },
       { name: "_getProceedRecipientData", signature: "_getProceedRecipientData(address)", selector: "0x36ec9fbe" },
+      { name: "_getProceedRecipientsCount", signature: "_getProceedRecipientsCount()", selector: "0x29b5ccc8" },
+      { name: "_isProceedRecipient", signature: "_isProceedRecipient(address)", selector: "0x1d905e31" },
       { name: "_proceedRecipientsDataStorage", signature: "_proceedRecipientsDataStorage()", selector: "0xd6abf4ee" },
       { name: "_removeProceedRecipient", signature: "_removeProceedRecipient(address)", selector: "0x8761abcc" },
       {
@@ -3330,6 +3396,30 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
   },
 
+  SustainabilityPerformanceTargetRateStorageWrapper: {
+    name: "SustainabilityPerformanceTargetRateStorageWrapper",
+    inheritance: ["KpiLinkedRateStorageWrapper"],
+    methods: [
+      { name: "_getSPTImpactDataFor", signature: "_getSPTImpactDataFor(address)", selector: "0xdd4f254a" },
+      { name: "_getSPTInterestRate", signature: "_getSPTInterestRate()", selector: "0x839cfe94" },
+      {
+        name: "_setSPTImpactData",
+        signature: "_setSPTImpactData(ISustainabilityPerformanceTargetRate.ImpactData,address)",
+        selector: "0xd2b995c6",
+      },
+      {
+        name: "_setSPTInterestRate",
+        signature: "_setSPTInterestRate(ISustainabilityPerformanceTargetRate.InterestRate)",
+        selector: "0x0e30e08a",
+      },
+      {
+        name: "_sustainabilityPerformanceTargetRateStorage",
+        signature: "_sustainabilityPerformanceTargetRateStorage()",
+        selector: "0x51bdde97",
+      },
+    ],
+  },
+
   TimeTravelStorageWrapper: {
     name: "TimeTravelStorageWrapper",
     inheritance: ["ITimeTravelStorageWrapper", "LocalContext"],
@@ -3416,7 +3506,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 34 as const;
+export const TOTAL_STORAGE_WRAPPERS = 36 as const;
 
 /**
  * All role identifiers extracted from contracts.
