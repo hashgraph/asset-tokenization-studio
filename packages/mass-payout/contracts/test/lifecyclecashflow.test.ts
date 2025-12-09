@@ -203,18 +203,13 @@
 
 */
 
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { AddressZero } from '@ethersproject/constants';
-import { deployLifeCycleCashFlowContracts } from '../scripts/deploy';
-import DeployContractCommand from '../scripts/commands/DeployContractCommand';
-import { type LifeCycleCashFlowTimeTravel } from '@typechain';
-import {
-  PAYOUT_ROLE,
-  CASHOUT_ROLE,
-  TRANSFERER_ROLE,
-  PAYMENT_TOKEN_MANAGER_ROLE,
-} from '../scripts/constants';
+import { expect } from "chai";
+import { ethers } from "hardhat";
+import { AddressZero } from "@ethersproject/constants";
+import { deployLifeCycleCashFlowContracts } from "../scripts/deploy";
+import DeployContractCommand from "../scripts/commands/DeployContractCommand";
+import { type LifeCycleCashFlowTimeTravel } from "@typechain";
+import { PAYOUT_ROLE, CASHOUT_ROLE, TRANSFERER_ROLE, PAYMENT_TOKEN_MANAGER_ROLE } from "../scripts/constants";
 
 const assetInitialPaymentDate = 1753874807;
 const assetPaymentRequestDate = 1749247100;
@@ -233,7 +228,7 @@ enum AssetType {
   EQUITY = 1,
 }
 
-describe('Security operations', () => {
+describe("Security operations", () => {
   [AssetType.BOND, AssetType.EQUITY].forEach((assetType) => {
     describe(`Security operations with assetType: ${assetType}`, () => {
       let asset_A, asset_B;
@@ -244,26 +239,25 @@ describe('Security operations', () => {
       });
 
       beforeEach(async () => {
-        amountToBePaid = assetType == AssetType.BOND ? '11567' : '6';
+        amountToBePaid = assetType == AssetType.BOND ? "11567" : "6";
 
         [signer_A, signer_B] = await ethers.getSigners();
 
-        const assetMock_A = await ethers.getContractFactory('AssetMock');
+        const assetMock_A = await ethers.getContractFactory("AssetMock");
         asset_A = await assetMock_A.deploy(assetType, true);
         await asset_A.deployed();
 
-        const assetMock_B = await ethers.getContractFactory('AssetMock');
+        const assetMock_B = await ethers.getContractFactory("AssetMock");
         asset_B = await assetMock_B.deploy(assetType, true);
         await asset_B.deployed();
 
-        const stablecoinMock =
-          await ethers.getContractFactory('StablecoinMock');
+        const stablecoinMock = await ethers.getContractFactory("StablecoinMock");
         stablecoin = await stablecoinMock.deploy();
         await stablecoin.deployed();
 
         const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
           new DeployContractCommand({
-            name: 'LifeCycleCashFlowTimeTravel',
+            name: "LifeCycleCashFlowTimeTravel",
             signer: signer_A,
             args: [asset_A.address, stablecoin.address],
           }),
@@ -271,1621 +265,918 @@ describe('Security operations', () => {
 
         lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
 
-        lifeCycleCashFlow = await ethers.getContractAt(
-          'LifeCycleCashFlowTimeTravel',
-          lifeCycleCashFlowAddress,
-        );
+        lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
       });
 
-      describe('Distribute a coupon by page', () => {
-        it('An account cannot distribute a coupon if the contract is paused', async () => {
+      describe("Distribute a coupon by page", () => {
+        it("An account cannot distribute a coupon if the contract is paused", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.pause();
 
-          await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
-          ).to.be.revertedWithCustomError(
+          await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1)).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused',
+            "LifeCycleCashFlowIsPaused",
           );
         });
 
-        it('An account not granted the _PAYOUT_ROLE role cannot distribute a coupon', async () => {
+        it("An account not granted the _PAYOUT_ROLE role cannot distribute a coupon", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
-          await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
 
-        it('An account with the _PAYOUT_ROLE role revoked cannot distribute a coupon', async () => {
+        it("An account with the _PAYOUT_ROLE role revoked cannot distribute a coupon", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
-          await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
 
-        it('An account cannot distribute a coupon of an asset not managed by the contract', async () => {
+        it("An account cannot distribute a coupon of an asset not managed by the contract", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await expect(
-            lifeCycleCashFlow.executeDistribution(asset_B.address, 1, 1, 1),
-          )
-            .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
+          await expect(lifeCycleCashFlow.executeDistribution(asset_B.address, 1, 1, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
             .withArgs(asset_B.address);
         });
 
-        it('An account cannot distribute a coupon in a date not matches the execution date', async () => {
+        it("An account cannot distribute a coupon in a date not matches the execution date", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await lifeCycleCashFlow.changeSystemTimestamp(
-            assetPaymentRequestDate,
-          );
+          await lifeCycleCashFlow.changeSystemTimestamp(assetPaymentRequestDate);
 
-          await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
-          )
-            .to.be.revertedWithCustomError(lifeCycleCashFlow, 'NotPaymentDate')
+          await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "NotPaymentDate")
             .withArgs(assetInitialPaymentDate, assetPaymentRequestDate);
         });
 
-        it('An account cannot distribute a coupon to a holder if there is not enough balance', async () => {
+        it("An account cannot distribute a coupon to a holder if there is not enough balance", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
-          await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
-          )
-            .to.emit(lifeCycleCashFlow, 'DistributionExecuted')
+          await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
+            .to.emit(lifeCycleCashFlow, "DistributionExecuted")
             .withArgs(1, 1, 1, [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
         });
 
-        it('An account cannot distribute a coupon if there are no holders', async () => {
-          const assetMock_C = await ethers.getContractFactory('AssetMock');
+        it("An account cannot distribute a coupon if there are no holders", async () => {
+          const assetMock_C = await ethers.getContractFactory("AssetMock");
           const asset_C = await assetMock_C.deploy(assetType, false);
           await asset_C.deployed();
 
-          const resultLifeCycleCashFlowWithoutHolders =
-            await deployLifeCycleCashFlowContracts(
-              new DeployContractCommand({
-                name: 'LifeCycleCashFlowTimeTravel',
-                signer: signer_A,
-                args: [asset_C.address, stablecoin.address],
-              }),
-            );
+          const resultLifeCycleCashFlowWithoutHolders = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_C.address, stablecoin.address],
+            }),
+          );
 
-          const lifeCycleCashFlowAddressWithoutHolders =
-            resultLifeCycleCashFlowWithoutHolders.proxyAddress;
+          const lifeCycleCashFlowAddressWithoutHolders = resultLifeCycleCashFlowWithoutHolders.proxyAddress;
 
           let lifeCycleCashFlowWithoutHolders = await ethers.getContractAt(
-            'LifeCycleCashFlowTimeTravel',
+            "LifeCycleCashFlowTimeTravel",
             lifeCycleCashFlowAddressWithoutHolders,
           );
 
-          lifeCycleCashFlowWithoutHolders =
-            lifeCycleCashFlowWithoutHolders.connect(signer_A);
+          lifeCycleCashFlowWithoutHolders = lifeCycleCashFlowWithoutHolders.connect(signer_A);
 
-          await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(
-            1753874807,
-          );
+          await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(1753874807);
 
-          const result =
-            await lifeCycleCashFlowWithoutHolders.callStatic.executeDistribution(
-              asset_C.address,
-              1,
-              1,
-              1,
-            );
+          const result = await lifeCycleCashFlowWithoutHolders.callStatic.executeDistribution(asset_C.address, 1, 1, 1);
 
           expect(result.executed_).to.equal(false);
         });
 
-        it('An account can distribute a coupon', async () => {
+        it("An account can distribute a coupon", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
-          await stablecoin.transfer(
-            lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2),
-          );
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
-          )
-            .to.emit(lifeCycleCashFlow, 'DistributionExecuted')
-            .withArgs(
-              1,
-              1,
-              1,
-              [AddressZero],
-              [signer_B.address],
-              [amountToBePaid],
-            );
+          await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
+            .to.emit(lifeCycleCashFlow, "DistributionExecuted")
+            .withArgs(1, 1, 1, [AddressZero], [signer_B.address], [amountToBePaid]);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits(amountToBePaid, 0),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits(amountToBePaid, 0));
         });
 
-        it('An account cannot distribute a certain coupon to a holder twice', async () => {
+        it("An account cannot distribute a certain coupon to a holder twice", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
-          await stablecoin.transfer(
-            lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2),
-          );
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
-          )
-            .to.emit(lifeCycleCashFlow, 'DistributionExecuted')
-            .withArgs(
-              1,
-              1,
-              1,
-              [AddressZero],
-              [signer_B.address],
-              [amountToBePaid],
-            );
+          await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
+            .to.emit(lifeCycleCashFlow, "DistributionExecuted")
+            .withArgs(1, 1, 1, [AddressZero], [signer_B.address], [amountToBePaid]);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            amountToBePaid,
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(amountToBePaid);
 
-          await expect(
-            lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1),
-          )
-            .to.emit(lifeCycleCashFlow, 'DistributionExecuted')
+          await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
+            .to.emit(lifeCycleCashFlow, "DistributionExecuted")
             .withArgs(1, 1, 1, [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            amountToBePaid,
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(amountToBePaid);
         });
       });
 
-      describe('Distribute a coupon by addresses', () => {
-        it('An account cannot distribute a coupon by addresses if the contract is paused', async () => {
+      describe("Distribute a coupon by addresses", () => {
+        it("An account cannot distribute a coupon by addresses if the contract is paused", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.pause();
 
           await expect(
-            lifeCycleCashFlow.executeDistributionByAddresses(
-              asset_A.address,
-              1,
-              [asset_A.address, asset_B.address],
-            ),
-          ).to.be.revertedWithCustomError(
-            lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused',
-          );
+            lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [asset_A.address, asset_B.address]),
+          ).to.be.revertedWithCustomError(lifeCycleCashFlow, "LifeCycleCashFlowIsPaused");
         });
 
-        it('An account not granted the _PAYOUT_ROLE role cannot distribute a coupon by addresses', async () => {
+        it("An account not granted the _PAYOUT_ROLE role cannot distribute a coupon by addresses", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
           await expect(
-            lifeCycleCashFlow.executeDistributionByAddresses(
-              asset_A.address,
-              1,
-              [asset_A.address, asset_B.address],
-            ),
+            lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [asset_A.address, asset_B.address]),
           )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
 
-        it('An account with the _PAYOUT_ROLE role revoked cannot distribute a coupon by addresses', async () => {
+        it("An account with the _PAYOUT_ROLE role revoked cannot distribute a coupon by addresses", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
           await expect(
-            lifeCycleCashFlow.executeDistributionByAddresses(
-              asset_A.address,
-              1,
-              [asset_A.address, asset_B.address],
-            ),
+            lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [asset_A.address, asset_B.address]),
           )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
 
-        it('An account cannot distribute a coupon by addresses of an asset not managed by the contract', async () => {
+        it("An account cannot distribute a coupon by addresses of an asset not managed by the contract", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await expect(
-            lifeCycleCashFlow.executeDistributionByAddresses(
-              asset_B.address,
-              1,
-              [asset_A.address, asset_B.address],
-            ),
+            lifeCycleCashFlow.executeDistributionByAddresses(asset_B.address, 1, [asset_A.address, asset_B.address]),
           )
-            .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
             .withArgs(asset_B.address);
         });
 
-        it('An account cannot distribute a coupon by addresses in a date not matches the execution date', async () => {
+        it("An account cannot distribute a coupon by addresses in a date not matches the execution date", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await lifeCycleCashFlow.changeSystemTimestamp(
-            assetPaymentRequestDate,
-          );
+          await lifeCycleCashFlow.changeSystemTimestamp(assetPaymentRequestDate);
 
           await expect(
-            lifeCycleCashFlow.executeDistributionByAddresses(
-              asset_A.address,
-              1,
-              [asset_A.address, asset_B.address],
-            ),
+            lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [asset_A.address, asset_B.address]),
           )
-            .to.be.revertedWithCustomError(lifeCycleCashFlow, 'NotPaymentDate')
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "NotPaymentDate")
             .withArgs(assetInitialPaymentDate, assetPaymentRequestDate);
         });
 
-        it('An account can distribute a coupon by addresses to a holder if there is not enough balance', async () => {
+        it("An account can distribute a coupon by addresses to a holder if there is not enough balance", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
-          await expect(
-            lifeCycleCashFlow.executeDistributionByAddresses(
-              asset_A.address,
-              1,
-              [signer_B.address],
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'DistributionByAddressesExecuted')
+          await expect(lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [signer_B.address]))
+            .to.emit(lifeCycleCashFlow, "DistributionByAddressesExecuted")
             .withArgs(1, [signer_B.address], [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
         });
 
-        it('An account can distribute a coupon by addresses', async () => {
+        it("An account can distribute a coupon by addresses", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
-          await stablecoin.transfer(
-            lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2),
-          );
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(
-            lifeCycleCashFlow.executeDistributionByAddresses(
-              asset_A.address,
-              1,
-              [signer_B.address],
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'DistributionByAddressesExecuted')
-            .withArgs(
-              1,
-              [signer_B.address],
-              [AddressZero],
-              [signer_B.address],
-              [amountToBePaid],
-            );
+          await expect(lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [signer_B.address]))
+            .to.emit(lifeCycleCashFlow, "DistributionByAddressesExecuted")
+            .withArgs(1, [signer_B.address], [AddressZero], [signer_B.address], [amountToBePaid]);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            amountToBePaid,
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(amountToBePaid);
         });
 
-        it('An account can distribute a certain coupon by addresses to a holder twice', async () => {
+        it("An account can distribute a certain coupon by addresses to a holder twice", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
-          await stablecoin.transfer(
-            lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2),
-          );
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(
-            lifeCycleCashFlow.executeDistributionByAddresses(
-              asset_A.address,
-              1,
-              [signer_B.address],
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'DistributionByAddressesExecuted')
-            .withArgs(
-              1,
-              [signer_B.address],
-              [AddressZero],
-              [signer_B.address],
-              [amountToBePaid],
-            );
+          await expect(lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [signer_B.address]))
+            .to.emit(lifeCycleCashFlow, "DistributionByAddressesExecuted")
+            .withArgs(1, [signer_B.address], [AddressZero], [signer_B.address], [amountToBePaid]);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            amountToBePaid,
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(amountToBePaid);
 
-          await expect(
-            lifeCycleCashFlow.executeDistributionByAddresses(
-              asset_A.address,
-              1,
-              [signer_B.address],
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'DistributionByAddressesExecuted')
+          await expect(lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [signer_B.address]))
+            .to.emit(lifeCycleCashFlow, "DistributionByAddressesExecuted")
             .withArgs(1, [signer_B.address], [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            amountToBePaid,
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(amountToBePaid);
         });
       });
 
       if (assetType == AssetType.BOND) {
-        describe('Cash out a bond by page', () => {
-          it('An account cannot cash out a bond if the contract is paused', async () => {
+        describe("Cash out a bond by page", () => {
+          it("An account cannot cash out a bond if the contract is paused", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.pause();
 
-            await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
-            ).to.be.revertedWithCustomError(
+            await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1)).to.be.revertedWithCustomError(
               lifeCycleCashFlow,
-              'LifeCycleCashFlowIsPaused',
+              "LifeCycleCashFlowIsPaused",
             );
           });
 
-          it('An account not not grated the _CASHOUT_ROLE role cannot cash out a bond by page', async () => {
+          it("An account not not grated the _CASHOUT_ROLE role cannot cash out a bond by page", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
-            await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
-            )
-              .to.be.revertedWithCustomError(
-                lifeCycleCashFlow,
-                'AccountHasNoRole',
-              )
+            await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
+              .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
               .withArgs(signer_B.address, CASHOUT_ROLE);
           });
 
-          it('An account with the _CASHOUT_ROLE role revoked cannot cash out a bond', async () => {
+          it("An account with the _CASHOUT_ROLE role revoked cannot cash out a bond", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.revokeRole(CASHOUT_ROLE, signer_A.address);
 
-            await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
-            )
-              .to.be.revertedWithCustomError(
-                lifeCycleCashFlow,
-                'AccountHasNoRole',
-              )
+            await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
+              .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
               .withArgs(signer_A.address, CASHOUT_ROLE);
           });
 
-          it('An account cannot cash out a bond not managed by the contract', async () => {
+          it("An account cannot cash out a bond not managed by the contract", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-            await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_B.address, 1, 1),
-            )
-              .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
+            await expect(lifeCycleCashFlow.executeBondCashOut(asset_B.address, 1, 1))
+              .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
               .withArgs(asset_B.address);
           });
 
-          it('An account cannot cash out a bond in a date does not match the maturity date', async () => {
+          it("An account cannot cash out a bond in a date does not match the maturity date", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-            await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutRequestDate,
-            );
+            await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutRequestDate);
 
-            await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
-            )
-              .to.be.revertedWithCustomError(
-                lifeCycleCashFlow,
-                'NotPaymentDate',
-              )
+            await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
+              .to.be.revertedWithCustomError(lifeCycleCashFlow, "NotPaymentDate")
               .withArgs(bondCashoutInitialDate, bondCashoutRequestDate);
           });
 
-          it('An account cannot cash out a bond to a holder if there is not enough balance', async () => {
+          it("An account cannot cash out a bond to a holder if there is not enough balance", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-            await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate,
-            );
+            await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
 
-            await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
-            )
-              .to.emit(lifeCycleCashFlow, 'CashOutExecuted')
+            await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
+              .to.emit(lifeCycleCashFlow, "CashOutExecuted")
               .withArgs(1, 1, [signer_B.address], [], []);
 
-            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('0', 0),
-            );
+            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
           });
 
-          it('An account cannot cash out if there are no holders', async () => {
-            const assetMock_C = await ethers.getContractFactory('AssetMock');
+          it("An account cannot cash out if there are no holders", async () => {
+            const assetMock_C = await ethers.getContractFactory("AssetMock");
             const asset_C = await assetMock_C.deploy(assetType, false);
             await asset_C.deployed();
 
-            const resultLifeCycleCashFlowWithoutHolders =
-              await deployLifeCycleCashFlowContracts(
-                new DeployContractCommand({
-                  name: 'LifeCycleCashFlowTimeTravel',
-                  signer: signer_A,
-                  args: [asset_C.address, stablecoin.address],
-                }),
-              );
+            const resultLifeCycleCashFlowWithoutHolders = await deployLifeCycleCashFlowContracts(
+              new DeployContractCommand({
+                name: "LifeCycleCashFlowTimeTravel",
+                signer: signer_A,
+                args: [asset_C.address, stablecoin.address],
+              }),
+            );
 
-            const lifeCycleCashFlowAddressWithoutHolders =
-              resultLifeCycleCashFlowWithoutHolders.proxyAddress;
+            const lifeCycleCashFlowAddressWithoutHolders = resultLifeCycleCashFlowWithoutHolders.proxyAddress;
 
             let lifeCycleCashFlowWithoutHolders = await ethers.getContractAt(
-              'LifeCycleCashFlowTimeTravel',
+              "LifeCycleCashFlowTimeTravel",
               lifeCycleCashFlowAddressWithoutHolders,
             );
 
-            lifeCycleCashFlowWithoutHolders =
-              lifeCycleCashFlowWithoutHolders.connect(signer_A);
+            lifeCycleCashFlowWithoutHolders = lifeCycleCashFlowWithoutHolders.connect(signer_A);
 
-            await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(
-              bondCashoutInitialDate,
-            );
+            await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(bondCashoutInitialDate);
 
-            const result =
-              await lifeCycleCashFlowWithoutHolders.callStatic.executeBondCashOut(
-                asset_C.address,
-                1,
-                1,
-              );
+            const result = await lifeCycleCashFlowWithoutHolders.callStatic.executeBondCashOut(asset_C.address, 1, 1);
 
             expect(result.executed_).to.equal(false);
           });
 
-          it('An account can cash out a bond', async () => {
+          it("An account can cash out a bond", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-            await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate,
-            );
+            await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
 
-            await stablecoin.transfer(
-              lifeCycleCashFlowAddress,
-              ethers.utils.parseUnits('1000000', 2),
-            );
+            await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-            await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
-            )
-              .to.emit(lifeCycleCashFlow, 'CashOutExecuted')
+            await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
+              .to.emit(lifeCycleCashFlow, "CashOutExecuted")
               .withArgs(1, 1, [AddressZero], [signer_B.address], [281481]);
 
-            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0),
-            );
-          });
-
-          it('An account cannot cash out a certain bond to a holder twice', async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
-            await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate,
-            );
-
-            await stablecoin.transfer(
-              lifeCycleCashFlowAddress,
-              ethers.utils.parseUnits('1000000', 2),
-            );
-
-            await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
-            )
-              .to.emit(lifeCycleCashFlow, 'CashOutExecuted')
-              .withArgs(1, 1, [AddressZero], [signer_B.address], [281481]);
-
-            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0),
-            );
-
-            await expect(
-              lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1),
-            )
-              .to.emit(lifeCycleCashFlow, 'CashOutExecuted')
-              .withArgs(1, 1, [signer_B.address], [], []);
-
-            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0),
-            );
+            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("281481", 0));
           });
         });
 
-        describe('Cash out a bond by addresses', () => {
-          it('An account cannot cash out a bond by addresses if the contract is paused', async () => {
+        describe("Cash out a bond by addresses", () => {
+          it("An account cannot cash out a bond by addresses if the contract is paused", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.pause();
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
-                asset_A.address,
-                asset_B.address,
-              ]),
-            ).to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'LifeCycleCashFlowIsPaused',
-            );
+              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [asset_A.address, asset_B.address]),
+            ).to.be.revertedWithCustomError(lifeCycleCashFlow, "LifeCycleCashFlowIsPaused");
           });
 
-          it('An account not not grated the _CASHOUT_ROLE role cannot cash out a bond by addresses by page', async () => {
+          it("An account not not grated the _CASHOUT_ROLE role cannot cash out a bond by addresses by page", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
-                asset_A.address,
-                asset_B.address,
-              ]),
+              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [asset_A.address, asset_B.address]),
             )
-              .to.be.revertedWithCustomError(
-                lifeCycleCashFlow,
-                'AccountHasNoRole',
-              )
+              .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
               .withArgs(signer_B.address, CASHOUT_ROLE);
           });
 
-          it('An account with the _CASHOUT_ROLE role revoked cannot cash out a bond by addresses', async () => {
+          it("An account with the _CASHOUT_ROLE role revoked cannot cash out a bond by addresses", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await lifeCycleCashFlow.revokeRole(CASHOUT_ROLE, signer_A.address);
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
-                asset_A.address,
-                asset_B.address,
-              ]),
+              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [asset_A.address, asset_B.address]),
             )
-              .to.be.revertedWithCustomError(
-                lifeCycleCashFlow,
-                'AccountHasNoRole',
-              )
+              .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
               .withArgs(signer_A.address, CASHOUT_ROLE);
           });
 
-          it('An account cannot cash out a bond by addresses not managed by the contract', async () => {
+          it("An account cannot cash out a bond by addresses not managed by the contract", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_B.address, [
-                asset_A.address,
-                asset_B.address,
-              ]),
+              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_B.address, [asset_A.address, asset_B.address]),
             )
-              .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
+              .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
               .withArgs(asset_B.address);
           });
 
-          it('An account cannot cash out a bond by addresses in a date does not match the maturity date', async () => {
+          it("An account cannot cash out a bond by addresses in a date does not match the maturity date", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-            await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutRequestDate,
-            );
+            await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutRequestDate);
 
             await expect(
-              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
-                asset_A.address,
-                asset_B.address,
-              ]),
+              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [asset_A.address, asset_B.address]),
             )
-              .to.be.revertedWithCustomError(
-                lifeCycleCashFlow,
-                'NotPaymentDate',
-              )
+              .to.be.revertedWithCustomError(lifeCycleCashFlow, "NotPaymentDate")
               .withArgs(bondCashoutInitialDate, bondCashoutRequestDate);
           });
 
-          it('An account cannot cash out by addresses a bond to a holder if there is not enough balance', async () => {
+          it("An account cannot cash out by addresses a bond to a holder if there is not enough balance", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-            await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate,
-            );
+            await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
 
-            await expect(
-              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
-                signer_B.address,
-              ]),
-            )
-              .to.emit(lifeCycleCashFlow, 'CashOutByAddressesExecuted')
+            await expect(lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [signer_B.address]))
+              .to.emit(lifeCycleCashFlow, "CashOutByAddressesExecuted")
               .withArgs([signer_B.address], [signer_B.address], [], []);
 
-            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('0', 0),
-            );
+            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
           });
 
-          it('An account can cash out by addresses a bond', async () => {
+          it("An account can cash out by addresses a bond", async () => {
             lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-            await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate,
-            );
+            await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
 
-            await stablecoin.transfer(
-              lifeCycleCashFlowAddress,
-              ethers.utils.parseUnits('1000000', 2),
-            );
+            await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-            await expect(
-              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
-                signer_B.address,
-              ]),
-            )
-              .to.emit(lifeCycleCashFlow, 'CashOutByAddressesExecuted')
-              .withArgs(
-                [signer_B.address],
-                [AddressZero],
-                [signer_B.address],
-                [281481],
-              );
+            await expect(lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [signer_B.address]))
+              .to.emit(lifeCycleCashFlow, "CashOutByAddressesExecuted")
+              .withArgs([signer_B.address], [AddressZero], [signer_B.address], [281481]);
 
-            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0),
-            );
-          });
-
-          it('An account cannot cash out by addresses a certain bond to a holder twice', async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
-            await lifeCycleCashFlow.changeSystemTimestamp(
-              bondCashoutInitialDate,
-            );
-
-            await stablecoin.transfer(
-              lifeCycleCashFlowAddress,
-              ethers.utils.parseUnits('1000000', 2),
-            );
-
-            await expect(
-              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
-                signer_B.address,
-              ]),
-            )
-              .to.emit(lifeCycleCashFlow, 'CashOutByAddressesExecuted')
-              .withArgs(
-                [signer_B.address],
-                [AddressZero],
-                [signer_B.address],
-                [281481],
-              );
-
-            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0),
-            );
-
-            await expect(
-              lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [
-                signer_B.address,
-              ]),
-            )
-              .to.emit(lifeCycleCashFlow, 'CashOutByAddressesExecuted')
-              .withArgs([signer_B.address], [signer_B.address], [], []);
-
-            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-              ethers.utils.parseUnits('281481', 0),
-            );
+            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("281481", 0));
           });
         });
       }
 
-      describe('Pay amount snapshot', () => {
-        it('An account cannot pay the holders a snapshot by amount if the contract is paused', async () => {
+      describe("Pay amount snapshot", () => {
+        it("An account cannot pay the holders a snapshot by amount if the contract is paused", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.pause();
 
           await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              1,
-            ),
-          ).to.be.revertedWithCustomError(
-            lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused',
-          );
+            lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1),
+          ).to.be.revertedWithCustomError(lifeCycleCashFlow, "LifeCycleCashFlowIsPaused");
         });
 
-        it('An account not granted the _PAYOUT_ROLE role cannot pay the holders a snapshot by amount', async () => {
+        it("An account not granted the _PAYOUT_ROLE role cannot pay the holders a snapshot by amount", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              1,
-            ),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
 
-        it('An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by amount', async () => {
+        it("An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by amount", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              1,
-            ),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
 
-        it('An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by amount of an asset not managed by the contract', async () => {
+        it("An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by amount of an asset not managed by the contract", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(
-              asset_B.address,
-              1,
-              1,
-              1,
-              1,
-            ),
-          )
-            .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
+          await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_B.address, 1, 1, 1, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
             .withArgs(asset_B.address);
         });
 
-        it('An account cannot pay a snapshot to a holder if there is not enough balance', async () => {
+        it("An account cannot pay a snapshot to a holder if there is not enough balance", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              1000,
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'AmountSnapshotExecuted')
+          await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1000))
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
             .withArgs(1, 1, 1, 1000, [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
         });
 
-        it('An account cannot pay a snapshot if there are no holders', async () => {
-          const assetMock_C = await ethers.getContractFactory('AssetMock');
+        it("An account cannot pay a snapshot if there are no holders", async () => {
+          const assetMock_C = await ethers.getContractFactory("AssetMock");
           const asset_C = await assetMock_C.deploy(assetType, false);
           await asset_C.deployed();
 
-          const resultLifeCycleCashFlowWithoutHolders =
-            await deployLifeCycleCashFlowContracts(
-              new DeployContractCommand({
-                name: 'LifeCycleCashFlowTimeTravel',
-                signer: signer_A,
-                args: [asset_C.address, stablecoin.address],
-              }),
-            );
+          const resultLifeCycleCashFlowWithoutHolders = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_C.address, stablecoin.address],
+            }),
+          );
 
-          const lifeCycleCashFlowAddressWithoutHolders =
-            resultLifeCycleCashFlowWithoutHolders.proxyAddress;
+          const lifeCycleCashFlowAddressWithoutHolders = resultLifeCycleCashFlowWithoutHolders.proxyAddress;
 
           let lifeCycleCashFlowWithoutHolders = await ethers.getContractAt(
-            'LifeCycleCashFlowTimeTravel',
+            "LifeCycleCashFlowTimeTravel",
             lifeCycleCashFlowAddressWithoutHolders,
           );
 
-          lifeCycleCashFlowWithoutHolders =
-            lifeCycleCashFlowWithoutHolders.connect(signer_A);
+          lifeCycleCashFlowWithoutHolders = lifeCycleCashFlowWithoutHolders.connect(signer_A);
 
-          await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(
-            bondCashoutInitialDate,
+          await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(bondCashoutInitialDate);
+
+          const result = await lifeCycleCashFlowWithoutHolders.callStatic.executeAmountSnapshot(
+            asset_C.address,
+            1,
+            1,
+            1,
+            1000,
           );
-
-          const result =
-            await lifeCycleCashFlowWithoutHolders.callStatic.executeAmountSnapshot(
-              asset_C.address,
-              1,
-              1,
-              1,
-              1000,
-            );
 
           expect(result.executed_).to.equal(false);
         });
 
-        it('An account can pay a snapshot', async () => {
+        it("An account can pay a snapshot", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await stablecoin.transfer(
-            lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2),
-          );
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              1000,
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'AmountSnapshotExecuted')
-            .withArgs(
-              1,
-              1,
-              1,
-              1000,
-              [AddressZero],
-              [signer_B.address],
-              [ethers.utils.parseUnits('80', 0)],
-            );
+          await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1000))
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
+            .withArgs(1, 1, 1, 1000, [AddressZero], [signer_B.address], [ethers.utils.parseUnits("80", 0)]);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('80', 0),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("80", 0));
         });
 
-        it('An account cannot pay a snapshot to a holder twice', async () => {
+        it("An account cannot pay a snapshot to a holder twice", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await stablecoin.transfer(
-            lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2),
-          );
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              1000,
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'AmountSnapshotExecuted')
-            .withArgs(
-              1,
-              1,
-              1,
-              1000,
-              [AddressZero],
-              [signer_B.address],
-              [ethers.utils.parseUnits('80', 0)],
-            );
+          await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1000))
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
+            .withArgs(1, 1, 1, 1000, [AddressZero], [signer_B.address], [ethers.utils.parseUnits("80", 0)]);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('80', 0),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("80", 0));
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              1000,
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'AmountSnapshotExecuted')
+          await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1000))
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
             .withArgs(1, 1, 1, 1000, [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('80', 0),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("80", 0));
         });
       });
 
-      describe('Pay percentage snapshot', () => {
-        it('An account cannot pay the holders a snapshot by percentage if the contract is paused', async () => {
+      describe("Pay percentage snapshot", () => {
+        it("An account cannot pay the holders a snapshot by percentage if the contract is paused", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.pause();
 
           await expect(
-            lifeCycleCashFlow.executePercentageSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              1,
-            ),
-          ).to.be.revertedWithCustomError(
-            lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused',
-          );
+            lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 1),
+          ).to.be.revertedWithCustomError(lifeCycleCashFlow, "LifeCycleCashFlowIsPaused");
         });
 
-        it('An account not granted the _PAYOUT_ROLE role cannot pay the holders a snapshot by percentage', async () => {
+        it("An account not granted the _PAYOUT_ROLE role cannot pay the holders a snapshot by percentage", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
-          await expect(
-            lifeCycleCashFlow.executePercentageSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              1,
-            ),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
 
-        it('An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by percentage', async () => {
+        it("An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by percentage", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
-          await expect(
-            lifeCycleCashFlow.executePercentageSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              1,
-            ),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
 
-        it('An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by percentage of an asset not managed by the contract', async () => {
+        it("An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by percentage of an asset not managed by the contract", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await expect(
-            lifeCycleCashFlow.executePercentageSnapshot(
-              asset_B.address,
-              1,
-              1,
-              1,
-              1,
-            ),
-          )
-            .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
+          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_B.address, 1, 1, 1, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
             .withArgs(asset_B.address);
         });
 
-        it('An account cannot pay more than 100 percentage of the contract payment token balance', async () => {
+        it("An account cannot pay more than 100 percentage of the contract payment token balance", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await expect(
-            lifeCycleCashFlow.executePercentageSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              10100,
-            ),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'InvalidPercentage',
-            )
+          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 10100))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidPercentage")
             .withArgs(10100);
         });
 
-        it('An account cannot pay a snapshot by percentage to a holder if there is not enough balance', async () => {
+        it("An account cannot pay a snapshot by percentage to a holder if there is not enough balance", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await expect(
-            lifeCycleCashFlow.executePercentageSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              50,
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'PercentageSnapshotExecuted')
+          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 50))
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
             .withArgs(1, 1, 1, 50, [AddressZero], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
         });
 
-        it('An account cannot pay a snapshot by percentage if there are no holders', async () => {
-          const assetMock_C = await ethers.getContractFactory('AssetMock');
+        it("An account cannot pay a snapshot by percentage if there are no holders", async () => {
+          const assetMock_C = await ethers.getContractFactory("AssetMock");
           const asset_C = await assetMock_C.deploy(assetType, false);
           await asset_C.deployed();
 
-          const resultLifeCycleCashFlowWithoutHolders =
-            await deployLifeCycleCashFlowContracts(
-              new DeployContractCommand({
-                name: 'LifeCycleCashFlowTimeTravel',
-                signer: signer_A,
-                args: [asset_C.address, stablecoin.address],
-              }),
-            );
+          const resultLifeCycleCashFlowWithoutHolders = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_C.address, stablecoin.address],
+            }),
+          );
 
-          const lifeCycleCashFlowAddressWithoutHolders =
-            resultLifeCycleCashFlowWithoutHolders.proxyAddress;
+          const lifeCycleCashFlowAddressWithoutHolders = resultLifeCycleCashFlowWithoutHolders.proxyAddress;
 
           let lifeCycleCashFlowWithoutHolders = await ethers.getContractAt(
-            'LifeCycleCashFlowTimeTravel',
+            "LifeCycleCashFlowTimeTravel",
             lifeCycleCashFlowAddressWithoutHolders,
           );
 
-          lifeCycleCashFlowWithoutHolders =
-            lifeCycleCashFlowWithoutHolders.connect(signer_A);
+          lifeCycleCashFlowWithoutHolders = lifeCycleCashFlowWithoutHolders.connect(signer_A);
 
-          await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(
-            bondCashoutInitialDate,
+          await lifeCycleCashFlowWithoutHolders.changeSystemTimestamp(bondCashoutInitialDate);
+
+          const result = await lifeCycleCashFlowWithoutHolders.callStatic.executePercentageSnapshot(
+            asset_C.address,
+            1,
+            1,
+            1,
+            50,
           );
-
-          const result =
-            await lifeCycleCashFlowWithoutHolders.callStatic.executePercentageSnapshot(
-              asset_C.address,
-              1,
-              1,
-              1,
-              50,
-            );
 
           expect(result.executed_).to.equal(false);
         });
 
-        it('An account can pay a snapshot by percentage', async () => {
+        it("An account can pay a snapshot by percentage", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await stablecoin.transfer(
-            lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2),
-          );
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(
-            lifeCycleCashFlow.executePercentageSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              50,
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'PercentageSnapshotExecuted')
-            .withArgs(
-              1,
-              1,
-              1,
-              50,
-              [AddressZero],
-              [signer_B.address],
-              [ethers.utils.parseUnits('400', 2)],
-            );
+          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 50))
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
+            .withArgs(1, 1, 1, 50, [AddressZero], [signer_B.address], [ethers.utils.parseUnits("400", 2)]);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('400', 2),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("400", 2));
         });
 
-        it('An account cannot pay a snapshot by percentage to a holder twice', async () => {
+        it("An account cannot pay a snapshot by percentage to a holder twice", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await stablecoin.transfer(
-            lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2),
-          );
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(
-            lifeCycleCashFlow.executePercentageSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              50,
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'PercentageSnapshotExecuted')
-            .withArgs(
-              1,
-              1,
-              1,
-              50,
-              [AddressZero],
-              [signer_B.address],
-              [ethers.utils.parseUnits('400', 2)],
-            );
+          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 50))
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
+            .withArgs(1, 1, 1, 50, [AddressZero], [signer_B.address], [ethers.utils.parseUnits("400", 2)]);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('400', 2),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("400", 2));
 
-          await expect(
-            lifeCycleCashFlow.executePercentageSnapshot(
-              asset_A.address,
-              1,
-              1,
-              1,
-              50,
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'PercentageSnapshotExecuted')
+          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 50))
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
             .withArgs(1, 1, 1, 50, [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('400', 2),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("400", 2));
         });
       });
 
-      describe('Pay amount snapshot by addresses', () => {
-        it('An account cannot pay the holders a snapshot by amount and addresses if the contract is paused', async () => {
+      describe("Pay amount snapshot by addresses", () => {
+        it("An account cannot pay the holders a snapshot by amount and addresses if the contract is paused", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.pause();
 
           await expect(
-            lifeCycleCashFlow.executeAmountSnapshotByAddresses(
-              asset_A.address,
-              1,
-              [signer_A.address],
-              1,
-            ),
-          ).to.be.revertedWithCustomError(
-            lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused',
-          );
+            lifeCycleCashFlow.executeAmountSnapshotByAddresses(asset_A.address, 1, [signer_A.address], 1),
+          ).to.be.revertedWithCustomError(lifeCycleCashFlow, "LifeCycleCashFlowIsPaused");
         });
 
-        it('An account not granted the _PAYOUT_ROLE role cannot pay the holders a snapshot by amount and addresses', async () => {
+        it("An account not granted the _PAYOUT_ROLE role cannot pay the holders a snapshot by amount and addresses", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshotByAddresses(
-              asset_A.address,
-              1,
-              [signer_A.address],
-              1,
-            ),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.executeAmountSnapshotByAddresses(asset_A.address, 1, [signer_A.address], 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
 
-        it('An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by amount and addresses', async () => {
+        it("An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by amount and addresses", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshotByAddresses(
-              asset_A.address,
-              1,
-              [signer_A.address],
-              1,
-            ),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.executeAmountSnapshotByAddresses(asset_A.address, 1, [signer_A.address], 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
 
-        it('An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by amount and addresses of an asset not managed by the contract', async () => {
+        it("An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by amount and addresses of an asset not managed by the contract", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshotByAddresses(
-              asset_B.address,
-              1,
-              [signer_A.address],
-              1,
-            ),
-          )
-            .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
+          await expect(lifeCycleCashFlow.executeAmountSnapshotByAddresses(asset_B.address, 1, [signer_A.address], 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
             .withArgs(asset_B.address);
         });
 
-        it('An account cannot pay an amount snapshot by addresses to a holder if there is not enough balance', async () => {
+        it("An account cannot pay an amount snapshot by addresses to a holder if there is not enough balance", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshotByAddresses(
-              asset_A.address,
-              1,
-              [signer_B.address],
-              1000,
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'AmountSnapshotByAddressesExecuted')
+          await expect(lifeCycleCashFlow.executeAmountSnapshotByAddresses(asset_A.address, 1, [signer_B.address], 1000))
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotByAddressesExecuted")
             .withArgs(1, [signer_B.address], 1000, [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
         });
 
-        it('An account can pay an amount snapshot by addresses', async () => {
+        it("An account can pay an amount snapshot by addresses", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await stablecoin.transfer(
-            lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2),
-          );
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(
-            lifeCycleCashFlow.executeAmountSnapshotByAddresses(
-              asset_A.address,
-              1,
-              [signer_B.address],
-              1000,
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'AmountSnapshotByAddressesExecuted')
+          await expect(lifeCycleCashFlow.executeAmountSnapshotByAddresses(asset_A.address, 1, [signer_B.address], 1000))
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotByAddressesExecuted")
             .withArgs(
               1,
               [signer_B.address],
               1000,
               [AddressZero],
               [signer_B.address],
-              [ethers.utils.parseUnits('80', 0)],
+              [ethers.utils.parseUnits("80", 0)],
             );
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('80', 0),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("80", 0));
         });
       });
 
-      describe('Pay percentage snapshot by addresses', () => {
-        it('An account cannot pay the holders a snapshot by percentage and addresses if the contract is paused', async () => {
+      describe("Pay percentage snapshot by addresses", () => {
+        it("An account cannot pay the holders a snapshot by percentage and addresses if the contract is paused", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.pause();
 
           await expect(
-            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
-              asset_A.address,
-              1,
-              [signer_A.address],
-              1,
-            ),
-          ).to.be.revertedWithCustomError(
-            lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused',
-          );
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(asset_A.address, 1, [signer_A.address], 1),
+          ).to.be.revertedWithCustomError(lifeCycleCashFlow, "LifeCycleCashFlowIsPaused");
         });
 
-        it('An account not granted the _PAYOUT_ROLE role cannot pay the holders a snapshot by percentage and addresses', async () => {
+        it("An account not granted the _PAYOUT_ROLE role cannot pay the holders a snapshot by percentage and addresses", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
           await expect(
-            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
-              asset_A.address,
-              1,
-              [signer_A.address],
-              1,
-            ),
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(asset_A.address, 1, [signer_A.address], 1),
           )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_B.address, PAYOUT_ROLE);
         });
 
-        it('An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by percentage and addresses', async () => {
+        it("An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by percentage and addresses", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
           await expect(
-            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
-              asset_A.address,
-              1,
-              [signer_A.address],
-              1,
-            ),
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(asset_A.address, 1, [signer_A.address], 1),
           )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_A.address, PAYOUT_ROLE);
         });
 
-        it('An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by percentage and addresses of an asset not managed by the contract', async () => {
+        it("An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by percentage and addresses of an asset not managed by the contract", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await expect(
-            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
-              asset_B.address,
-              1,
-              [signer_A.address],
-              1,
-            ),
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(asset_B.address, 1, [signer_A.address], 1),
           )
-            .to.be.revertedWithCustomError(lifeCycleCashFlow, 'InvalidAsset')
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
             .withArgs(asset_B.address);
         });
 
-        it('An account cannot pay a percentage snapshot by addresses to a holder if there is not enough balance', async () => {
+        it("An account cannot pay a percentage snapshot by addresses to a holder if there is not enough balance", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await expect(
-            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
-              asset_A.address,
-              1,
-              [signer_B.address],
-              50,
-            ),
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(asset_A.address, 1, [signer_B.address], 50),
           )
-            .to.emit(lifeCycleCashFlow, 'PercentageSnapshotByAddressesExecuted')
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotByAddressesExecuted")
             .withArgs(1, [signer_B.address], 50, [AddressZero], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('0', 0),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
         });
 
-        it('An account can pay a percentage snapshot by addresses', async () => {
+        it("An account can pay a percentage snapshot by addresses", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await stablecoin.transfer(
-            lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1000000', 2),
-          );
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
           await expect(
-            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
-              asset_A.address,
-              1,
-              [signer_B.address],
-              50,
-            ),
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(asset_A.address, 1, [signer_B.address], 50),
           )
-            .to.emit(lifeCycleCashFlow, 'PercentageSnapshotByAddressesExecuted')
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotByAddressesExecuted")
             .withArgs(
               1,
               [signer_B.address],
               50,
               [AddressZero],
               [signer_B.address],
-              [ethers.utils.parseUnits('400', 2)],
+              [ethers.utils.parseUnits("400", 2)],
             );
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('400', 2),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("400", 2));
         });
       });
 
-      describe('Transfer stablecoins', () => {
-        it('An account cannot transfer stablecoins if the contract is paused', async () => {
+      describe("Transfer stablecoins", () => {
+        it("An account cannot transfer stablecoins if the contract is paused", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.pause();
 
-          await expect(
-            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1),
-          ).to.be.revertedWithCustomError(
+          await expect(lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1)).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused',
+            "LifeCycleCashFlowIsPaused",
           );
         });
 
-        it('An account not granted the _TRANSFERER_ROLE role cannot transfer stablecoins', async () => {
+        it("An account not granted the _TRANSFERER_ROLE role cannot transfer stablecoins", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
-          await expect(
-            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_B.address, TRANSFERER_ROLE);
         });
 
-        it('An account with the _TRANSFERER_ROLE role revoked cannot transfer stablecoins', async () => {
+        it("An account with the _TRANSFERER_ROLE role revoked cannot transfer stablecoins", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.revokeRole(TRANSFERER_ROLE, signer_A.address);
 
-          await expect(
-            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_A.address, TRANSFERER_ROLE);
         });
 
-        it('An account cannot transfer more stablecoins than the balance of the LifeCycleCashFlow contract', async () => {
+        it("An account cannot transfer more stablecoins than the balance of the LifeCycleCashFlow contract", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await expect(
-            lifeCycleCashFlow.transferPaymentToken(signer_A.address, 200),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'NotEnoughBalance',
-            )
+          await expect(lifeCycleCashFlow.transferPaymentToken(signer_A.address, 200))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "NotEnoughBalance")
             .withArgs(200);
         });
 
-        it('An account can transfer 1 stablecoin', async () => {
+        it("An account can transfer 1 stablecoin", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await stablecoin.transfer(
-            lifeCycleCashFlowAddress,
-            ethers.utils.parseUnits('1', 2),
-          );
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1", 2));
 
-          await expect(
-            lifeCycleCashFlow.transferPaymentToken(
-              signer_B.address,
-              ethers.utils.parseUnits('1', 2),
-            ),
-          )
-            .to.emit(lifeCycleCashFlow, 'PaymentTokenTransferred')
-            .withArgs(signer_B.address, ethers.utils.parseUnits('1', 2));
+          await expect(lifeCycleCashFlow.transferPaymentToken(signer_B.address, ethers.utils.parseUnits("1", 2)))
+            .to.emit(lifeCycleCashFlow, "PaymentTokenTransferred")
+            .withArgs(signer_B.address, ethers.utils.parseUnits("1", 2));
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(
-            ethers.utils.parseUnits('1', 2),
-          );
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("1", 2));
         });
       });
 
-      describe('Update stablecoin', () => {
+      describe("Update stablecoin", () => {
         let stablecoin_B;
 
         beforeEach(async () => {
-          const stablecoinMock_B =
-            await ethers.getContractFactory('StablecoinMock');
+          const stablecoinMock_B = await ethers.getContractFactory("StablecoinMock");
           stablecoin_B = await stablecoinMock_B.deploy();
           await stablecoin_B.deployed();
         });
 
-        it('An account cannot update the stablecoin if the contract is paused', async () => {
+        it("An account cannot update the stablecoin if the contract is paused", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           await lifeCycleCashFlow.pause();
 
-          await expect(
-            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address),
-          ).to.be.revertedWithCustomError(
+          await expect(lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address)).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
-            'LifeCycleCashFlowIsPaused',
+            "LifeCycleCashFlowIsPaused",
           );
         });
 
-        it('An account not granted the PAYMENT_TOKEN_MANAGER_ROLE role cannot set the stablecoin', async () => {
+        it("An account not granted the PAYMENT_TOKEN_MANAGER_ROLE role cannot set the stablecoin", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
 
-          await expect(
-            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_B.address, PAYMENT_TOKEN_MANAGER_ROLE);
         });
 
-        it('An account with the PAYMENT_TOKEN_MANAGER_ROLE role revoked cannot set the stablecoin', async () => {
+        it("An account with the PAYMENT_TOKEN_MANAGER_ROLE role revoked cannot set the stablecoin", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await lifeCycleCashFlow.revokeRole(
-            PAYMENT_TOKEN_MANAGER_ROLE,
-            signer_A.address,
-          );
+          await lifeCycleCashFlow.revokeRole(PAYMENT_TOKEN_MANAGER_ROLE, signer_A.address);
 
-          await expect(
-            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address),
-          )
-            .to.be.revertedWithCustomError(
-              lifeCycleCashFlow,
-              'AccountHasNoRole',
-            )
+          await expect(lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
             .withArgs(signer_A.address, PAYMENT_TOKEN_MANAGER_ROLE);
 
-          await lifeCycleCashFlow.grantRole(
-            PAYMENT_TOKEN_MANAGER_ROLE,
-            signer_A.address,
-          );
+          await lifeCycleCashFlow.grantRole(PAYMENT_TOKEN_MANAGER_ROLE, signer_A.address);
         });
 
-        it('An account can set the stablecoin', async () => {
+        it("An account can set the stablecoin", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          await expect(
-            lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address),
-          )
-            .to.emit(lifeCycleCashFlow, 'PaymentTokenChanged')
+          await expect(lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address))
+            .to.emit(lifeCycleCashFlow, "PaymentTokenChanged")
             .withArgs(stablecoin_B.address);
 
-          expect(await lifeCycleCashFlow.getPaymentToken()).to.equal(
-            stablecoin_B.address,
-          );
+          expect(await lifeCycleCashFlow.getPaymentToken()).to.equal(stablecoin_B.address);
         });
       });
 
-      describe('Get the stablecoin', () => {
-        it('An account can get the stablecoin', async () => {
+      describe("Get the stablecoin", () => {
+        it("An account can get the stablecoin", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
-          const stablecoinMock_B =
-            await ethers.getContractFactory('StablecoinMock');
+          const stablecoinMock_B = await ethers.getContractFactory("StablecoinMock");
           const stablecoin_B = await stablecoinMock_B.deploy();
           await stablecoin_B.deployed();
 
           await lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address);
-          expect(await lifeCycleCashFlow.getPaymentToken()).to.equal(
-            stablecoin_B.address,
-          );
+          expect(await lifeCycleCashFlow.getPaymentToken()).to.equal(stablecoin_B.address);
         });
       });
 
-      describe('Get the stablecoin decimals', () => {
-        it('An account can get the stablecoin decimals', async () => {
+      describe("Get the stablecoin decimals", () => {
+        it("An account can get the stablecoin decimals", async () => {
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
           expect(await lifeCycleCashFlow.getPaymentTokenDecimals()).to.equal(2);

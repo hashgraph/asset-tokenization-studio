@@ -205,8 +205,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import { IAssetMock } from './interfaces/IAssetMock.sol';
-import { IFactory } from '@hashgraph/asset-tokenization-contracts/contracts/interfaces/factory/IFactory.sol';
+import { IAssetMock } from "./interfaces/IAssetMock.sol";
+import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/interfaces/factory/IFactory.sol";
 
 // solhint-disable no-unused-vars
 contract AssetMock is IAssetMock {
@@ -219,9 +219,9 @@ contract AssetMock is IAssetMock {
     }
 
     function getERC20Metadata() external view returns (ERC20Metadata memory erc20Metadata_) {
-        erc20Metadata_.info.name = 'Mock Asset';
-        erc20Metadata_.info.symbol = 'MOCK';
-        erc20Metadata_.info.isin = 'MK0322861238';
+        erc20Metadata_.info.name = "Mock Asset";
+        erc20Metadata_.info.symbol = "MOCK";
+        erc20Metadata_.info.isin = "MK0322861238";
         erc20Metadata_.info.decimals = 6;
         erc20Metadata_.securityType = _securityType;
     }
