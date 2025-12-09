@@ -300,9 +300,14 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 _distributionID,
         address[] memory _holders
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_) {
-        (failed_, succeeded_, paidAmount_) = _payHoldersDistribution(_assetType, _asset, _distributionID, _holders);
+        address[] memory filteredHolders = _filterZeroAddresses(_holders);
+        (failed_, succeeded_, paidAmount_) = _payHoldersDistribution(
+            _assetType,
+            _asset,
+            _distributionID,
+            filteredHolders
+        );
     }
-
     /*
      * @dev Perform a bond cash out to a page of holders
      *
@@ -337,7 +342,8 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         address _bond,
         address[] memory _holders
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_) {
-        (failed_, succeeded_, paidAmount_) = _payHoldersCashOut(_bond, _holders);
+        address[] memory filteredHolders = _filterZeroAddresses(_holders);
+        (failed_, succeeded_, paidAmount_) = _payHoldersCashOut(_bond, filteredHolders);
     }
 
     /*
@@ -427,9 +433,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 _amount,
         function(address, uint256, address, uint256) internal returns (uint256) _getSnapshotAmount
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_) {
+        address[] memory filteredHolders = _filterZeroAddresses(_holders);
         (failed_, succeeded_, paidAmount_) = _paySnapshotHolders(
             _asset,
-            _holders,
+            filteredHolders,
             _snapshotID,
             _amount,
             _getSnapshotAmount
@@ -1088,5 +1095,34 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         if (_currentDate < _initialDate) {
             revert NotPaymentDate(_initialDate, _currentDate);
         }
+    }
+
+    /*
+     * @dev Filter zero address addresses from an array of holders
+     *
+     * @param holders The holder's array
+     *
+     * @returns The array of holder's addresses without zero address addresses
+     */
+    function _filterZeroAddresses(address[] memory holders) private pure returns (address[] memory) {
+        uint256 count;
+
+        for (uint256 i = 0; i < holders.length; i++) {
+            if (holders[i] != address(0)) {
+                count++;
+            }
+        }
+
+        address[] memory filtered = new address[](count);
+
+        uint256 index;
+        for (uint256 i = 0; i < holders.length; i++) {
+            if (holders[i] != address(0)) {
+                filtered[index] = holders[i];
+                index++;
+            }
+        }
+
+        return filtered;
     }
 }
