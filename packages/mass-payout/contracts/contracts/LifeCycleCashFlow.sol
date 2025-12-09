@@ -207,9 +207,7 @@ pragma solidity 0.8.18;
 
 // solhint-disable max-line-length
 
-import { ILifeCycleCashFlow, AssetType } from "./interfaces/ILifeCycleCashFlow.sol";
-import { Pause } from "./core/Pause.sol";
-import { AccessControl } from "./core/AccessControl.sol";
+import { ILifeCycleCashFlow } from "./interfaces/ILifeCycleCashFlow.sol";
 import { LifeCycleCashFlowStorageWrapper } from "./LifeCycleCashFlowStorageWrapper.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -223,7 +221,7 @@ import {
     _PAYMENT_TOKEN_MANAGER_ROLE
 } from "./constants/roles.sol";
 
-contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFlowStorageWrapper, Pause, AccessControl {
+contract LifeCycleCashFlow is Initializable, LifeCycleCashFlowStorageWrapper {
     function initialize(address _asset, address _paymentToken) public initializer onlyValidPaymentToken(_paymentToken) {
         _grantRole(_DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(_PAUSER_ROLE, _msgSender());
@@ -232,7 +230,7 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
         _grantRole(_TRANSFERER_ROLE, _msgSender());
         _grantRole(_PAYMENT_TOKEN_MANAGER_ROLE, _msgSender());
         _setAsset(_asset);
-        _setAssetType(AssetType(uint8(ERC20(_asset).getERC20Metadata().securityType)));
+        _setAssetType(ILifeCycleCashFlow.AssetType(uint8(ERC20(_asset).getERC20Metadata().securityType)));
         _updatePaymentToken(_paymentToken);
     }
 
