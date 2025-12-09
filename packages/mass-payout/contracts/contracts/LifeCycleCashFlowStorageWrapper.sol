@@ -262,7 +262,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @param asset The asset the distribution belongs to
      * @param distributionID The coupon/dividend identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      *
      * @return The array of the holders addresses whose payment were not successful
      */
@@ -308,7 +308,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      *
      * @param bond The bond the cash out belongs to
      * @param pageIndex The index of the page whose cash outs will be performed
-     * @param pageLenth The number of holders who owns the bond to be cashed out
+     * @param pageLength The number of holders who owns the bond to be cashed out
      *
      * @return The array of the holders addresses whose cashes outs were not successful
      * @return True if ATS returns holders for their bonds to be cashed out, and false otherwise
@@ -346,7 +346,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @param asset The asset the snapshot belongs to
      * @param snapshotID The snapshot identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      * @param amount The fixed amount to be paid distributed proportionally among the holders
      *
      * @return The array of the holders addresses whose payment were not successful
@@ -458,9 +458,9 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      *
      * @param newPaymentToken The new payment token
      */
-    function _updatePaymentToken(address _newPaymenToken) internal {
-        _setPaymentToken(OZ_IERC20(_newPaymenToken));
-        _associateToken(_newPaymenToken);
+    function _updatePaymentToken(address _newPaymentToken) internal {
+        _setPaymentToken(OZ_IERC20(_newPaymentToken));
+        _associateToken(_newPaymentToken);
     }
 
     /*
@@ -901,7 +901,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @param asset The asset the holders belongs to
      * @param distributionID The coupon/dividend identifier
      * @param pageIndex The index of the page
-     * @param pageLenth The number of holders
+     * @param pageLength The number of holders
      *
      * @return The array of the holders addresses
      */
@@ -925,7 +925,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @param asset The asset the snapshot belongs to
      * @param snapshotID The snapshot identifier
      * @param pageIndex The index of the page
-     * @param pageLenth The number of holders
+     * @param pageLength The number of holders
      *
      * @return The array of the holders addresses
      */
