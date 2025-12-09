@@ -224,7 +224,7 @@ import {
 } from "./constants/roles.sol";
 
 contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFlowStorageWrapper, Pause, AccessControl {
-    function initialize(address _asset, address _paymentToken) public initializer {
+    function initialize(address _asset, address _paymentToken) public initializer onlyValidPaymentToken(_paymentToken) {
         _grantRole(_DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(_PAUSER_ROLE, _msgSender());
         _grantRole(_PAYOUT_ROLE, _msgSender());
@@ -545,7 +545,9 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
      *
      * @param paymentToken The new payment token
      */
-    function updatePaymentToken(address _paymentToken) external onlyUnpaused onlyRole(_PAYMENT_TOKEN_MANAGER_ROLE) {
+    function updatePaymentToken(
+        address _paymentToken
+    ) external onlyUnpaused onlyRole(_PAYMENT_TOKEN_MANAGER_ROLE) onlyValidPaymentToken(_paymentToken) {
         _updatePaymentToken(_paymentToken);
         emit PaymentTokenChanged(_paymentToken);
     }

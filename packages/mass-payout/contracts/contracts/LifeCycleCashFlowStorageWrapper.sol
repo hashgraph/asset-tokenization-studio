@@ -255,6 +255,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         _;
     }
 
+    modifier onlyValidPaymentToken(address _paymentToken) {
+        _checkPaymentToken(_paymentToken);
+        _;
+    }
     /*
      * @dev Pay a coupon or dividend to a list of holders
      *
@@ -1080,6 +1084,17 @@ abstract contract LifeCycleCashFlowStorageWrapper is
             (_lifeCycleCashFlowStorage().assetType == AssetType.Bond)
                 ? IBondRead(_asset).getCoupon(_distributionID).coupon.executionDate
                 : IEquity(_asset).getDividends(_distributionID).dividend.executionDate;
+    }
+
+    /*
+     * @dev Check that the payment token is valid
+     *
+     * @param paymentToken The payment token address
+     */
+    function _checkPaymentToken(address _paymentToken) private pure {
+        if (_paymentToken == address(0)) {
+            revert InvalidPaymentToken(_paymentToken);
+        }
     }
 
     /*
