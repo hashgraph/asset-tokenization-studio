@@ -14,7 +14,7 @@ export const useFullRedeemAtMaturity = (
 
   return useMutation((request: FullRedeemAtMaturityRequest) => SDKService.fullRedeemAtMaturity(request), {
     onSuccess: (data) => {
-      if (data === true) {
+      if (data) {
         toast.show({
           duration: 3000,
           title: `${t("messages.success")}`,
