@@ -454,7 +454,11 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
             revert ILifeCycleCashFlow.NotEnoughBalance(_amount);
         }
 
-        if (!paymentToken.transfer(_to, _amount)) {
+        try paymentToken.transfer(_to, _amount) returns (bool result) {
+            if (!result) {
+                revert ILifeCycleCashFlow.TransferERC20TokenFailed(_to, _amount);
+            }
+        } catch {
             revert ILifeCycleCashFlow.TransferERC20TokenFailed(_to, _amount);
         }
     }
