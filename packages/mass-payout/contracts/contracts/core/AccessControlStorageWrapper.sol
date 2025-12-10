@@ -214,7 +214,6 @@ import { _ACCESS_CONTROL_STORAGE_POSITION } from "../constants/storagePositions.
 
 abstract contract AccessControlStorageWrapper is IAccessControlStorageWrapper, LocalContext {
     using LibCommon for EnumerableSet.AddressSet;
-    using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -256,14 +255,6 @@ abstract contract AccessControlStorageWrapper is IAccessControlStorageWrapper, L
 
     function _getRoleCountFor(address _account) internal view returns (uint256 roleCount_) {
         roleCount_ = _rolesStorage().memberRoles[_account].length();
-    }
-
-    function _getRolesFor(
-        address _account,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (bytes32[] memory roles_) {
-        roles_ = _rolesStorage().memberRoles[_account].getFromSet(_pageIndex, _pageLength);
     }
 
     function _getRoleMemberCount(bytes32 _role) internal view returns (uint256 memberCount_) {

@@ -203,10 +203,11 @@
 
    */
 
-import { ethers } from 'hardhat';
+import { ethers } from "hardhat";
 
-import DeployContractCommand from './commands/DeployContractCommand';
-import DeployContractResult from './results/DeployContractResult';
+import DeployContractCommand from "./commands/DeployContractCommand";
+import DeployContractResult from "./results/DeployContractResult";
+import { HEDERA_PRECOMPILED_ADDRESS } from "./constants";
 
 const SuccessStatus = 22;
 
@@ -247,47 +248,33 @@ export async function deployLifeCycleCashFlowContracts({
 
   const proxyAdminContractResult = await deployContract(
     new DeployContractCommand({
-      name: 'ProxyAdmin',
+      name: "ProxyAdmin",
       signer,
       args: [],
     }),
   );
 
-  console.log(
-    `${name} Proxy Admin deployed at ${proxyAdminContractResult.address}`,
-  );
+  console.log(`${name} Proxy Admin deployed at ${proxyAdminContractResult.address}`);
 
   console.log(`Deploying ${name} Proxy. please wait...`);
 
   const proxyContractResult = await deployContract(
     new DeployContractCommand({
-      name: 'TransparentUpgradeableProxy',
+      name: "TransparentUpgradeableProxy",
       signer,
-      args: [contractResult.address, proxyAdminContractResult.address, '0x'],
+      args: [contractResult.address, proxyAdminContractResult.address, "0x"],
     }),
   );
 
   console.log(`${name} Proxy deployed at ${proxyContractResult.address}`);
 
-  let lifeCycleCashFlow = await ethers.getContractAt(
-    name,
-    proxyContractResult.address,
-  );
+  let lifeCycleCashFlow = await ethers.getContractAt(name, proxyContractResult.address);
 
   lifeCycleCashFlow = lifeCycleCashFlow.connect(signer);
 
-  try {
-    const tx = await lifeCycleCashFlow.initialize(
-      ...(args as [string, string]),
-    );
-    const receipt = await tx.wait(); // wait for execution & revert to be caught
-    console.log(`${name} initialize function was successfully executed`);
-  } catch (error: any) {
-    console.error(`${name} initialize function failed!`);
-    console.error(`Message: ${error.message}`);
-  }
-
-  // associateToken((args as [string, string])[1], contractResult.address, signer)
+  const tx = await lifeCycleCashFlow.initialize(...(args as [string, string, []]));
+  const receipt = await tx.wait(); // wait for execution & revert to be caught
+  console.log(`${name} initialize function was successfully executed`);
 
   return new DeployContractResult({
     name,
@@ -299,11 +286,7 @@ export async function deployLifeCycleCashFlowContracts({
   });
 }
 
-export async function deployContract({
-  name,
-  signer,
-  args,
-}: DeployContractCommand): Promise<DeployContractResult> {
+export async function deployContract({ name, signer, args }: DeployContractCommand): Promise<DeployContractResult> {
   const contractFactory = await ethers.getContractFactory(name, signer);
   const contract = await contractFactory.deploy(...args);
   const receipt = contract.deployTransaction.wait();
@@ -314,4 +297,15 @@ export async function deployContract({
     address: contract.address,
     receipt: await receipt,
   });
+}
+
+export async function deployPrecompiledMock() {
+  const PrecompiledMockContract = await ethers.getContractFactory("PrecompiledMock");
+
+  const deployed = await PrecompiledMockContract.deploy();
+  await deployed.deployed();
+
+  const runtimeBytecode = await ethers.provider.getCode(deployed.address);
+  await ethers.provider.send("hardhat_setCode", [HEDERA_PRECOMPILED_ADDRESS, runtimeBytecode]);
+  const mockPrecompiled = await ethers.getContractAt("PrecompiledMock", HEDERA_PRECOMPILED_ADDRESS);
 }

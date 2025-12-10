@@ -209,27 +209,7 @@ pragma solidity 0.8.18;
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 library LibCommon {
-    using EnumerableSet for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.AddressSet;
-
-    // functions for set
-    function getFromSet(
-        EnumerableSet.Bytes32Set storage _set,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (bytes32[] memory items_) {
-        (uint256 start, uint256 end) = getStartAndEnd(_pageIndex, _pageLength);
-
-        uint256 length = getSize(start, end, _set.length());
-        items_ = new bytes32[](length);
-        for (uint256 index; index < length; ) {
-            items_[index] = _set.at(start);
-            unchecked {
-                ++start;
-                ++index;
-            }
-        }
-    }
 
     function getFromSet(
         EnumerableSet.AddressSet storage _set,

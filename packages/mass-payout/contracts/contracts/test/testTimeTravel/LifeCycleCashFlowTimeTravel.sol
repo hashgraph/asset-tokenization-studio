@@ -211,9 +211,6 @@ import { LocalContext } from "../../common/LocalContext.sol";
 import { TimeTravel } from "./timeTravel/TimeTravel.sol";
 
 contract LifeCycleCashFlowTimeTravel is LifeCycleCashFlow, TimeTravel {
-    // solhint-disable-next-line no-empty-blocks
-    function _associateToken(address _newPaymenToken) internal override {}
-
     function _blockTimestamp() internal view override(LocalContext, TimeTravel) returns (uint256) {
         return TimeTravel._blockTimestamp();
     }

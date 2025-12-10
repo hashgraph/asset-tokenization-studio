@@ -627,16 +627,6 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
     }
 
     /*
-     * @dev Change the payment token
-     *
-     * @param paymentToken The new payment token
-     */
-    function _setNewPaymentToken(address _paymentToken) private {
-        _setPaymentToken(OZ_IERC20(_paymentToken));
-        _associateToken(_paymentToken);
-    }
-
-    /*
      * @dev Sets a payment to a holder for a distribution
      *
      * @param distributionID The distribution paid to a holder
