@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-11-18T13:26:55.400Z
+ * Generated: 2025-12-01T14:53:46.712Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -300,8 +300,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "ClearingOperationApproved",
-        signature: "ClearingOperationApproved(address,address,bytes32,uint256,IClearing.ClearingOperationType)",
-        topic0: "0xa354a2e4470100aac8b04cd5b7573db08c1ccb8fe0da2166760fc9eb37b14342",
+        signature: "ClearingOperationApproved(address,address,bytes32,uint256,IClearing.ClearingOperationType,bytes)",
+        topic0: "0x02f980b59ce0d0d56d120ea10fd65c1761039caa1b51c65ab99a770ecbf956e9",
       },
       {
         name: "ClearingOperationCanceled",
@@ -1981,6 +1981,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x386e1405",
       },
       { name: "decimalsAtSnapshot", signature: "decimalsAtSnapshot(uint256)", selector: "0x69ed346f" },
+      {
+        name: "frozenBalanceOfAtSnapshot",
+        signature: "frozenBalanceOfAtSnapshot(uint256,address)",
+        selector: "0x5e6c70ec",
+      },
+      {
+        name: "frozenBalanceOfAtSnapshotByPartition",
+        signature: "frozenBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        selector: "0x0749c323",
+      },
       {
         name: "getTokenHoldersAtSnapshot",
         signature: "getTokenHoldersAtSnapshot(uint256,uint256,uint256)",

@@ -5,13 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       release-type:
-        description: 'Type of release to perform'
+        description: "Type of release to perform"
         required: true
         type: choice
         options:
           - preview # Show what would be released (dry-run)
           - release # Full production release
-        default: 'preview'
+        default: "preview"
 
 defaults:
   run:
