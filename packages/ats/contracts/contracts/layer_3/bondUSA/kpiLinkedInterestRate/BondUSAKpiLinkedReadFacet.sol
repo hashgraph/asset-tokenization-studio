@@ -10,7 +10,6 @@ import { IBondRead } from "../../../layer_2/interfaces/bond/IBondRead.sol";
 import { ISecurity } from "../../interfaces/ISecurity.sol";
 import { IStaticFunctionSelectors } from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
 import { BondStorageWrapper } from "../../../layer_0/bond/BondStorageWrapper.sol";
-import { KpisStorageWrapper } from "../../../layer_0/kpis/KpisStorageWrapper.sol";
 
 contract BondUSAKpiLinkedReadFacet is BondReadKpiLinkedInterestRate, BondUSAReadFacet {
     function getStaticResolverKey()
@@ -41,7 +40,7 @@ contract BondUSAKpiLinkedReadFacet is BondReadKpiLinkedInterestRate, BondUSARead
     }
     function _addToCouponsOrderedList(
         uint256 _couponID
-    ) internal virtual override(KpisStorageWrapper, BondReadKpiLinkedInterestRate) {
+    ) internal virtual override(BondStorageWrapper, BondReadKpiLinkedInterestRate) {
         BondReadKpiLinkedInterestRate._addToCouponsOrderedList(_couponID);
     }
 

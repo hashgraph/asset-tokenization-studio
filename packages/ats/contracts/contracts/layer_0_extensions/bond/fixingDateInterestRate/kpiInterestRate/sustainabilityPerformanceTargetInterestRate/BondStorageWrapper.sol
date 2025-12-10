@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BondStorageWrapperFixingDateInterestRate } from "../../../../BondStorageWrapperFixingDateInterestRate.sol";
-import { IBondRead } from "../../../../../../interfaces/bond/IBondRead.sol";
+import { IBondRead } from "../../../../../layer_2/interfaces/bond/IBondRead.sol";
 
 import {
     ISustainabilityPerformanceTargetRate
-} from "../../../../../../interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../../../../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { DecimalsLib } from "../../../../../../../layer_0/common/libraries/DecimalsLib.sol";
+import { DecimalsLib } from "../../../../../layer_0/common/libraries/DecimalsLib.sol";
+import {KpisStorageWrapper} from "./kpis/KpisStorageWrapper.sol";
 
 abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate is
-    BondStorageWrapperFixingDateInterestRate
+    KpisStorageWrapper
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 

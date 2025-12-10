@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-10T13:17:39.721Z
+ * Generated: 2025-12-10T14:42:41.252Z
  * Facets: 57
  * Infrastructure: 2
  *
@@ -1876,6 +1876,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
       { name: "InvalidDate", signature: "InvalidDate(uint256,uint256,uint256)", selector: "0x1addb674" },
       { name: "InvalidDateRange", signature: "InvalidDateRange(uint256,uint256)", selector: "0x8914d40b" },
       { name: "KpiDataAlreadyExists", signature: "KpiDataAlreadyExists(uint256)", selector: "0x74efd82c" },
@@ -2597,7 +2602,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   BondStorageWrapperSustainabilityPerformanceTargetInterestRate: {
     name: "BondStorageWrapperSustainabilityPerformanceTargetInterestRate",
-    inheritance: ["BondStorageWrapperFixingDateInterestRate"],
+    inheritance: ["KpisStorageWrapper"],
     methods: [],
     errors: [
       {
@@ -3103,7 +3108,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   KpisStorageWrapper: {
     name: "KpisStorageWrapper",
-    inheritance: ["TransferAndLockStorageWrapper"],
+    inheritance: ["BondStorageWrapperFixingDateInterestRate"],
     methods: [
       { name: "_addKpiData", signature: "_addKpiData(uint256,uint256,address)", selector: "0xb645ae9f" },
       { name: "_addToCouponsOrderedList", signature: "_addToCouponsOrderedList(uint256)", selector: "0x17a345a0" },

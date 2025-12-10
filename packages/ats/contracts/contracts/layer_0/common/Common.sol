@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _WILD_CARD_ROLE } from "../constants/roles.sol";
 import { IClearing } from "../../layer_1/interfaces/clearing/IClearing.sol";
-import { KpisStorageWrapper } from "../kpis/KpisStorageWrapper.sol";
+import { TransferAndLockStorageWrapper } from "../transferAndLock/TransferAndLockStorageWrapper.sol";
 
-abstract contract Common is KpisStorageWrapper {
+abstract contract Common is TransferAndLockStorageWrapper {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();
 

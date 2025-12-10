@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _KPIS_STORAGE_POSITION } from "../constants/storagePositions.sol";
-import { IKpis } from "../../layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
-import { CheckpointsLib } from "../common/libraries/CheckpointsLib.sol";
-import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
-import { TransferAndLockStorageWrapper } from "../../layer_0/transferAndLock/TransferAndLockStorageWrapper.sol";
+import { _KPIS_STORAGE_POSITION } from "contracts/layer_0/constants/storagePositions.sol";
+import { IKpis } from "../../../../../../layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
+import { CheckpointsLib } from "contracts/layer_0/common/libraries/CheckpointsLib.sol";
+import { IBondRead } from "../../../../../../layer_2/interfaces/bond/IBondRead.sol";
+import { BondStorageWrapperFixingDateInterestRate } from "../../../BondStorageWrapperFixingDateInterestRate.sol";
 
-abstract contract KpisStorageWrapper is TransferAndLockStorageWrapper {
+abstract contract KpisStorageWrapper is BondStorageWrapperFixingDateInterestRate {
     using CheckpointsLib for CheckpointsLib.Checkpoint[];
 
     struct KpisDataStorage {
