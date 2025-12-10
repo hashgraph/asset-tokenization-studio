@@ -362,8 +362,8 @@ describe("ERC20Votes Tests", () => {
       await erc20VotesFacet.delegate(signer_B.address);
 
       const checkpoint = await erc20VotesFacet.checkpoints(signer_B.address, 0);
-      expect(checkpoint.fromBlock).to.be.gt(0);
-      expect(checkpoint.votes).to.equal(amount);
+      expect(checkpoint.from).to.be.gt(0);
+      expect(checkpoint.value).to.equal(amount);
     });
   });
 
