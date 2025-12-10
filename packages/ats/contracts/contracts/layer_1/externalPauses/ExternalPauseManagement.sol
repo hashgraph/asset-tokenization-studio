@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalPauseManagement } from "../interfaces/externalPauses/IExternalPauseManagement.sol";
-import { Common } from "../common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 import { _PAUSE_MANAGER_ROLE } from "../constants/roles.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../layer_0/constants/storagePositions.sol";
 

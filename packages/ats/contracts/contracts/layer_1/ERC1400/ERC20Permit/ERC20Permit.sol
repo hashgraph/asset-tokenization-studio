@@ -2,7 +2,7 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../common/Common.sol";
+import { Common } from "../../../layer_0/common/Common.sol";
 import { IERC20Permit } from "../../interfaces/ERC1400/IERC20Permit.sol";
 import { _CONTRACT_NAME_ERC20PERMIT, _CONTRACT_VERSION_ERC20PERMIT } from "../../constants/values.sol";
 

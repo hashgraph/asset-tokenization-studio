@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Read } from "../../interfaces/ERC1400/IERC1410Read.sol";
-import { Common } from "../../common/Common.sol";
+import { Common } from "../../../layer_0/common/Common.sol";
 
 /**
  * @title ERC1410Read

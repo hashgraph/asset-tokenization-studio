@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _AGENT_ROLE, _TREX_OWNER_ROLE } from "../constants/roles.sol";
 import { IERC3643Management } from "../interfaces/ERC3643/IERC3643Management.sol";
-import { Common } from "../common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 
 abstract contract ERC3643Management is IERC3643Management, Common {
     address private constant _ONCHAIN_ID = address(0);

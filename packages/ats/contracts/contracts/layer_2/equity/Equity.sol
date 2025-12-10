@@ -8,7 +8,7 @@ import {
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from "../../layer_0/constants/values.sol";
 import { IEquity } from "../interfaces/equity/IEquity.sol";
-import { Common } from "../../layer_1/common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 abstract contract Equity is IEquity, Common {

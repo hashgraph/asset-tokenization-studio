@@ -5,7 +5,7 @@ import { _AGENT_ROLE } from "../constants/roles.sol";
 import { IERC3643Read } from "../interfaces/ERC3643/IERC3643Read.sol";
 import { ICompliance } from "../interfaces/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../interfaces/ERC3643/IIdentityRegistry.sol";
-import { Common } from "../common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 
 abstract contract ERC3643Read is IERC3643Read, Common {
     function isAgent(address _agent) external view returns (bool) {

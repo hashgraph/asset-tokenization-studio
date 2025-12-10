@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 import { IClearingActions } from "../interfaces/clearing/IClearingActions.sol";
 import { IClearing } from "../interfaces/clearing/IClearing.sol";
 import { _CLEARING_VALIDATOR_ROLE } from "../constants/roles.sol";

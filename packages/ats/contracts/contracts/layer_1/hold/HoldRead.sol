@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { HoldIdentifier } from "../interfaces/hold/IHold.sol";
 import { IHoldRead } from "../interfaces/hold/IHoldRead.sol";
 import { ThirdPartyType } from "../../layer_0/common/types/ThirdPartyType.sol";
-import { Common } from "../common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 
 abstract contract HoldRead is IHoldRead, Common {
     function getHeldAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {

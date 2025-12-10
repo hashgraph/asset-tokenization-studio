@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Hold, HoldIdentifier } from "../interfaces/hold/IHold.sol";
 import { IHoldTokenHolder } from "../interfaces/hold/IHoldTokenHolder.sol";
-import { Common } from "../common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 import { ThirdPartyType } from "../../layer_0/common/types/ThirdPartyType.sol";
 
 abstract contract HoldTokenHolder is IHoldTokenHolder, Common {

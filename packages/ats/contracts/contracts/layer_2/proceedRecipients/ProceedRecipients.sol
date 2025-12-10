@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients } from "../interfaces/proceedRecipients/IProceedRecipients.sol";
-import { Common } from "../../layer_1/common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 import { _PROCEED_RECIPIENT_MANAGER_ROLE } from "../constants/roles.sol";
 import { _PROCEED_RECIPIENTS_STORAGE_POSITION } from "../../layer_0/constants/storagePositions.sol";
 

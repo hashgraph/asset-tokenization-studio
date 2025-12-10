@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "../interfaces/bond/IBondRead.sol";
-import { Common } from "../../layer_1/common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../layer_0/constants/values.sol";
 import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
 

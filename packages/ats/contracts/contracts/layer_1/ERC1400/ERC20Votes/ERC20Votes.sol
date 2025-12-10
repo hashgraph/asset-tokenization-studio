@@ -2,7 +2,7 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../common/Common.sol";
+import { Common } from "../../../layer_0/common/Common.sol";
 import { IERC20Votes } from "../../interfaces/ERC1400/IERC20Votes.sol";
 import { _CONTRACT_NAME_ERC20VOTES, _CONTRACT_VERSION_ERC20VOTES } from "../../constants/values.sol";
 import { CheckpointsLib } from "../../../layer_0/common/libraries/CheckpointsLib.sol";

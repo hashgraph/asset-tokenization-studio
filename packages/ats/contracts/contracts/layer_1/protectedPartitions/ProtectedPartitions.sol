@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 import { IProtectedPartitions } from "../interfaces/protectedPartitions/IProtectedPartitions.sol";
 import { _CONTRACT_NAME_PROTECTEDPARTITIONS, _CONTRACT_VERSION_PROTECTEDPARTITIONS } from "../constants/values.sol";
 import { _PROTECTED_PARTITIONS_ROLE } from "../constants/roles.sol";

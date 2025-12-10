@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _ISSUER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
 import { IERC1594 } from "../../interfaces/ERC1400/IERC1594.sol";
-import { Common } from "../../common/Common.sol";
+import { Common } from "../../../layer_0/common/Common.sol";
 import { _DEFAULT_PARTITION } from "../../../layer_0/constants/values.sol";
 
 abstract contract ERC1594 is IERC1594, Common {

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAccessControl } from "../interfaces/accessControl/IAccessControl.sol";
-import { Common } from "../common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 
 abstract contract AccessControl is IAccessControl, Common {
     function grantRole(

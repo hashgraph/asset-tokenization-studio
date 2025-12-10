@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 
 import { IPause } from './interfaces/IPause.sol';
 import { _PAUSER_ROLE } from '../constants/roles.sol';
-import { Common } from '../common/Common.sol';
+import { Common } from '../../layer_0/common/Common.sol';
 
 abstract contract Pause is IPause, Common {
     function pause() external override onlyUnpaused onlyRole(_PAUSER_ROLE) returns (bool success_) {

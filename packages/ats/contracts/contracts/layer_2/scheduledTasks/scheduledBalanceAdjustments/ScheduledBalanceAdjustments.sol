@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../../layer_1/common/Common.sol";
+import { Common } from "../../../layer_0/common/Common.sol";
 import {
     IScheduledBalanceAdjustments
 } from "../../interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol";

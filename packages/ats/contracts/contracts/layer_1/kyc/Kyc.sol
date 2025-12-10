@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _KYC_ROLE, _INTERNAL_KYC_MANAGER_ROLE } from "../constants/roles.sol";
 import { IKyc } from "../interfaces/kyc/IKyc.sol";
-import { Common } from "../common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 
 abstract contract Kyc is IKyc, Common {
     function initializeInternalKyc(bool _internalKycActivated) external onlyUninitialized(_kycStorage().initialized) {

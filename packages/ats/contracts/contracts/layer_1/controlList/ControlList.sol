@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IControlList } from "../interfaces/controlList/IControlList.sol";
-import { Common } from "../common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 import { _CONTROL_LIST_ROLE } from "../constants/roles.sol";
 
 abstract contract ControlList is IControlList, Common {
