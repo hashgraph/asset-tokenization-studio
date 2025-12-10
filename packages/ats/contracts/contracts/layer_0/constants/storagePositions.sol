@@ -98,3 +98,6 @@ bytes32 constant _PROCEED_RECIPIENTS_STORAGE_POSITION = 0xd76ee368b4f6f14377350e
 
 // keccak256('security.token.standard.proceedRecipients.data.storage');
 bytes32 constant _PROCEED_RECIPIENTS_DATA_STORAGE_POSITION = 0xc7c4e0ff0ace36b5d2de5287c034dccef63aa2fb6c2498a31a48fd5516019f8c;
+
+// keccak256('security.token.standard.kpis.data.storage');
+bytes32 constant _KPIS_STORAGE_POSITION = 0x15e2583fed61d8b30b191451b67403569c6ee36d7d93206cb4a6de2f6f69c0b9;

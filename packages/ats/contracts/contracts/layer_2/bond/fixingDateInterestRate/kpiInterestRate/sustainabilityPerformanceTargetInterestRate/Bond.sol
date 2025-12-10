@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Bond } from "../../Bond.sol";
+import { Bond } from "../../../Bond.sol";
 import { CommonSustainabilityPerformanceTargetInterestRate } from "./layer_0_extension/Common.sol";
-import { IBondRead } from "../../../interfaces/bond/IBondRead.sol";
-import { BondStorageWrapper } from "../../../../layer_0/bond/BondStorageWrapper.sol";
+import { IBondRead } from "../../../../interfaces/bond/IBondRead.sol";
+import { BondStorageWrapper } from "../../../../../layer_0/bond/BondStorageWrapper.sol";
 import {
     BondStorageWrapperSustainabilityPerformanceTargetInterestRate
 } from "./layer_0_extension/bond/BondStorageWrapper.sol";
-import { BondStorageWrapperFixingDateInterestRate } from "../BondStorageWrapperFixingDateInterestRate.sol";
+import { BondStorageWrapperFixingDateInterestRate } from "../../BondStorageWrapperFixingDateInterestRate.sol";
+import { KpisStorageWrapper } from "../../../../../layer_0/kpis/KpisStorageWrapper.sol";
 
 abstract contract BondSustainabilityPerformanceTargetInterestRate is
     Bond,
@@ -33,7 +34,7 @@ abstract contract BondSustainabilityPerformanceTargetInterestRate is
     }
     function _addToCouponsOrderedList(
         uint256 _couponID
-    ) internal virtual override(BondStorageWrapper, BondStorageWrapperSustainabilityPerformanceTargetInterestRate) {
+    ) internal virtual override(KpisStorageWrapper, BondStorageWrapperSustainabilityPerformanceTargetInterestRate) {
         BondStorageWrapperSustainabilityPerformanceTargetInterestRate._addToCouponsOrderedList(_couponID);
     }
 

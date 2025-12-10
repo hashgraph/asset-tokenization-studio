@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-09T13:40:37.354Z
- * Facets: 56
+ * Generated: 2025-12-10T13:17:39.721Z
+ * Facets: 57
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -103,6 +103,8 @@ import {
   HoldTokenHolderFacetTimeTravel__factory,
   KpiLinkedRateFacet__factory,
   KpiLinkedRateFacetTimeTravel__factory,
+  KpisFacet__factory,
+  KpisFacetTimeTravel__factory,
   KycFacet__factory,
   KycFacetTimeTravel__factory,
   LockFacet__factory,
@@ -1853,6 +1855,35 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel ? new KpiLinkedRateFacetTimeTravel__factory(signer) : new KpiLinkedRateFacet__factory(signer),
   },
 
+  KpisFacet: {
+    name: "KpisFacet",
+    resolverKey: {
+      name: "_KPIS_RESOLVER_KEY",
+      value: "0xb228c36d89348606afcfbad286f8eddb0d0cdd727eefd0f0fd87f17ea0793051",
+    },
+    inheritance: ["Kpis", "IStaticFunctionSelectors"],
+    methods: [
+      { name: "addKpiData", signature: "addKpiData(uint256,uint256,address)", selector: "0x0de2be70" },
+      { name: "getLatestKpiData", signature: "getLatestKpiData(uint256,uint256,address)", selector: "0xfc7f5cb3" },
+      { name: "getMinDate", signature: "getMinDate()", selector: "0x48de6fa7" },
+      { name: "isCheckPointDate", signature: "isCheckPointDate(uint256,address)", selector: "0x8078ccd5" },
+    ],
+    events: [
+      {
+        name: "KpiDataAdded",
+        signature: "KpiDataAdded(address,uint256,uint256)",
+        topic0: "0xb14d0e5a6665e6c690dc5c7ffc777323768a449038bc6bfed9986ecd52547303",
+      },
+    ],
+    errors: [
+      { name: "InvalidDate", signature: "InvalidDate(uint256,uint256,uint256)", selector: "0x1addb674" },
+      { name: "InvalidDateRange", signature: "InvalidDateRange(uint256,uint256)", selector: "0x8914d40b" },
+      { name: "KpiDataAlreadyExists", signature: "KpiDataAlreadyExists(uint256)", selector: "0x74efd82c" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new KpisFacetTimeTravel__factory(signer) : new KpisFacet__factory(signer),
+  },
+
   KycFacet: {
     name: "KycFacet",
     resolverKey: {
@@ -2398,7 +2429,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 56 as const;
+export const TOTAL_FACETS = 57 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -2954,11 +2985,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         selector: "0x0a26c25f",
       },
       { name: "_checkpoints", signature: "_checkpoints(address,uint256)", selector: "0x9d654e74" },
-      {
-        name: "_checkpointsLookup",
-        signature: "_checkpointsLookup(IERC20Votes.Checkpoint[],uint256)",
-        selector: "0x86a272a4",
-      },
       { name: "_clock", signature: "_clock()", selector: "0x32bdbe3f" },
       { name: "_CLOCK_MODE", signature: "_CLOCK_MODE()", selector: "0xc980d5f5" },
       { name: "_delegate", signature: "_delegate(address)", selector: "0xf13101e9" },
@@ -2969,10 +2995,9 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       { name: "_getVotes", signature: "_getVotes(address)", selector: "0xc6c66a0a" },
       {
         name: "_getVotesAdjusted",
-        signature: "_getVotesAdjusted(uint256,IERC20Votes.Checkpoint[])",
-        selector: "0x7ee325f3",
+        signature: "_getVotesAdjusted(uint256,CheckpointsLib.Checkpoint[])",
+        selector: "0x7b3bfd1d",
       },
-      { name: "_hashTypedDataV4", signature: "_hashTypedDataV4(bytes32)", selector: "0xc8f1ecd8" },
       { name: "_isActivated", signature: "_isActivated()", selector: "0x717cc228" },
       { name: "_moveVotingPower", signature: "_moveVotingPower(address,address,uint256)", selector: "0x82851b84" },
       { name: "_numCheckpoints", signature: "_numCheckpoints(address)", selector: "0x51bc76cc" },
@@ -2981,8 +3006,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       { name: "_takeAbafCheckpoint", signature: "_takeAbafCheckpoint()", selector: "0x3910625e" },
       {
         name: "_writeCheckpoint",
-        signature: "_writeCheckpoint(IERC20Votes.Checkpoint[],function(uint256,uint256)",
-        selector: "0xade2877a",
+        signature: "_writeCheckpoint(CheckpointsLib.Checkpoint[],function(uint256,uint256)",
+        selector: "0x419810fc",
       },
     ],
     events: [
@@ -3073,6 +3098,31 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         signature: "_triggerScheduledCrossOrderedTasks(uint256)",
         selector: "0xa3608e20",
       },
+    ],
+  },
+
+  KpisStorageWrapper: {
+    name: "KpisStorageWrapper",
+    inheritance: ["TransferAndLockStorageWrapper"],
+    methods: [
+      { name: "_addKpiData", signature: "_addKpiData(uint256,uint256,address)", selector: "0xb645ae9f" },
+      { name: "_addToCouponsOrderedList", signature: "_addToCouponsOrderedList(uint256)", selector: "0x17a345a0" },
+      { name: "_getLatestKpiData", signature: "_getLatestKpiData(uint256,uint256,address)", selector: "0x37f6c9cd" },
+      { name: "_getMinDateAdjusted", signature: "_getMinDateAdjusted()", selector: "0x88652963" },
+      { name: "_isCheckpointDate", signature: "_isCheckpointDate(uint256,address)", selector: "0x6b1af257" },
+      { name: "_kpisDataStorage", signature: "_kpisDataStorage()", selector: "0x6be9c949" },
+      {
+        name: "_overwriteKpiData",
+        signature: "_overwriteKpiData(CheckpointsLib.Checkpoint[],uint256,uint256,uint256)",
+        selector: "0xe67b61c2",
+      },
+      {
+        name: "_pushKpiData",
+        signature: "_pushKpiData(CheckpointsLib.Checkpoint[],uint256,uint256)",
+        selector: "0xb0a489a0",
+      },
+      { name: "_setCheckpointDate", signature: "_setCheckpointDate(uint256,address)", selector: "0xdc837d51" },
+      { name: "_setMinDate", signature: "_setMinDate(uint256)", selector: "0x93d61f50" },
     ],
   },
 
@@ -3506,7 +3556,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 36 as const;
+export const TOTAL_STORAGE_WRAPPERS = 37 as const;
 
 /**
  * All role identifiers extracted from contracts.
@@ -3528,6 +3578,7 @@ export const ROLES = {
   _INTEREST_RATE_MANAGER_ROLE: "0xa174f099c94c902831d8b8a07810700505da86a76ea0bcb7629884ef26cf682e",
   _INTERNAL_KYC_MANAGER_ROLE: "0x3916c5c9e68488134c2ee70660332559707c133d0a295a25971da4085441522e",
   _ISSUER_ROLE: "0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842",
+  _KPI_MANAGER_ROLE: "0x441e549cc2c88d01fa80bd9e7b40412d3106214149223501aa25d4fa23bf306d",
   _KYC_MANAGER_ROLE: "0x8ebae577938c1afa7fb3dc7b06459c79c86ffd2ac9805b6da92ee4cbbf080449",
   _KYC_ROLE: "0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d",
   _LOCKER_ROLE: "0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88",
@@ -3546,4 +3597,4 @@ export const ROLES = {
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = 29 as const;
+export const TOTAL_ROLES = 30 as const;

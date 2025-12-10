@@ -3,8 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     SustainabilityPerformanceTargetRateFacet
-} from 
-"../../../layer_2/interestRates/sustainabilityPerformanceTargetRate/SustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../layer_2/interestRates/sustainabilityPerformanceTargetRate/SustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 

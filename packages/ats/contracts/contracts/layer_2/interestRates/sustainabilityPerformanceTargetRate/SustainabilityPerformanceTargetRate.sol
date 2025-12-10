@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     CommonSustainabilityPerformanceTargetInterestRate
-} from "../../bond/fixingDateInterestRate/sustainabilityPerformanceTargetInterestRate/layer_0_extension/Common.sol";
+} from "../../bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/layer_0_extension/Common.sol";
 import {
     ISustainabilityPerformanceTargetRate
 } from "../../interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";

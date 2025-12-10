@@ -11,3 +11,6 @@ bytes32 constant _PROCEED_RECIPIENT_MANAGER_ROLE = 0xebc53fe99fea28c7aa9476a7149
 
 // keccak256('security.token.standard.role.interestRateManager');
 bytes32 constant _INTEREST_RATE_MANAGER_ROLE = 0xa174f099c94c902831d8b8a07810700505da86a76ea0bcb7629884ef26cf682e;
+
+// keccak256('security.token.standard.role.kpiManager');
+bytes32 constant _KPI_MANAGER_ROLE = 0x441e549cc2c88d01fa80bd9e7b40412d3106214149223501aa25d4fa23bf306d;
