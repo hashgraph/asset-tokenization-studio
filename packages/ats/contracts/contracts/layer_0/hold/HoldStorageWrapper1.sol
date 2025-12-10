@@ -17,25 +17,25 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
         _;
     }
 
-    function _isHoldIdValid(HoldIdentifier memory _holdIdentifier) internal view returns (bool) {
+    function _isHoldIdValid(HoldIdentifier memory _holdIdentifier) internal view override returns (bool) {
         return _getHold(_holdIdentifier).id != 0;
     }
 
-    function _getHold(HoldIdentifier memory _holdIdentifier) internal view returns (HoldData memory) {
+    function _getHold(HoldIdentifier memory _holdIdentifier) internal view override returns (HoldData memory) {
         return
             _holdStorage().holdsByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
                 _holdIdentifier.holdId
             ];
     }
 
-    function _getHeldAmountFor(address _tokenHolder) internal view returns (uint256 amount_) {
+    function _getHeldAmountFor(address _tokenHolder) internal view override returns (uint256 amount_) {
         return _holdStorage().totalHeldAmountByAccount[_tokenHolder];
     }
 
     function _getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view returns (uint256 amount_) {
+    ) internal view override returns (uint256 amount_) {
         return _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition];
     }
 
@@ -44,7 +44,7 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
         address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (uint256[] memory holdsId_) {
+    ) internal view override returns (uint256[] memory holdsId_) {
         return
             _holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(_pageIndex, _pageLength);
     }
@@ -54,6 +54,7 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
     )
         internal
         view
+        override
         returns (
             uint256 amount_,
             uint256 expirationTimestamp_,
@@ -76,19 +77,19 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
         );
     }
 
-    function _getHoldCountForByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
+    function _getHoldCountForByPartition(bytes32 _partition, address _tokenHolder) internal view override returns (uint256) {
         return _holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
     }
 
-    function _isHoldExpired(Hold memory _hold) internal view returns (bool) {
+    function _isHoldExpired(Hold memory _hold) internal view override returns (bool) {
         return _blockTimestamp() > _hold.expirationTimestamp;
     }
 
-    function _isEscrow(Hold memory _hold, address _escrow) internal pure returns (bool) {
+    function _isEscrow(Hold memory _hold, address _escrow) internal pure override returns (bool) {
         return _escrow == _hold.escrow;
     }
 
-    function _checkHoldAmount(uint256 _amount, HoldData memory holdData) internal pure {
+    function _checkHoldAmount(uint256 _amount, HoldData memory holdData) internal pure override {
         if (_amount > holdData.hold.amount) revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
     }
 

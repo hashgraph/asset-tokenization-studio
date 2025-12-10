@@ -12,7 +12,7 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         uint256 _amount,
         address _tokenHolder,
         uint256 _expirationTimestamp
-    ) internal returns (bool success_, uint256 lockId_) {
+    ) internal override returns (bool success_, uint256 lockId_) {
         _triggerAndSyncAll(_partition, _tokenHolder, address(0));
 
         uint256 abaf = _updateTotalLock(_partition, _tokenHolder);
@@ -39,7 +39,7 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) internal returns (bool success_) {
+    ) internal override returns (bool success_) {
         _triggerAndSyncAll(_partition, address(0), _tokenHolder);
 
         uint256 abaf = _updateTotalLock(_partition, _tokenHolder);
@@ -68,7 +68,7 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         _removeLabafLock(_partition, _tokenHolder, _lockId);
     }
 
-    function _updateTotalLock(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {
+    function _updateTotalLock(bytes32 _partition, address _tokenHolder) internal override returns (uint256 abaf_) {
         abaf_ = _getAbaf();
 
         uint256 labaf = _getTotalLockLabaf(_tokenHolder);
@@ -92,7 +92,7 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
      * LABAF (Locked Amount Before Adjustment Factor) for each lock is not updated
      * because the lock is deleted right after, optimizing gas usage.
      */
-    function _updateLockByIndex(bytes32 _partition, uint256 _lockId, address _tokenHolder, uint256 _abaf) internal {
+    function _updateLockByIndex(bytes32 _partition, uint256 _lockId, address _tokenHolder, uint256 _abaf) internal override {
         uint256 lockLabaf = _getLockLabafById(_partition, _tokenHolder, _lockId);
 
         if (_abaf != lockLabaf) {
@@ -107,12 +107,12 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         uint256 _lockId,
         address _tokenHolder,
         uint256 _factor
-    ) internal {
+    ) internal override {
         if (_factor == 1) return;
         _lockStorage().locksByAccountPartitionAndId[_tokenHolder][_partition][_lockId].amount *= _factor;
     }
 
-    function _updateTotalLockedAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal {
+    function _updateTotalLockedAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal override {
         if (_factor == 1) return;
         LockDataStorage storage lockStorage = _lockStorage();
 
@@ -125,7 +125,7 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         address _tokenHolder,
         uint256 _factor,
         uint256 _abaf
-    ) internal {
+    ) internal override {
         if (_factor == 1) return;
         LockDataStorage storage lockStorage = _lockStorage();
 
@@ -138,7 +138,7 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         uint256 /*_amount*/,
         address _tokenHolder,
         uint256 /*_expirationTimestamp*/
-    ) internal {
+    ) internal override {
         _updateAccountSnapshot(_tokenHolder, _partition);
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
@@ -147,7 +147,7 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         bytes32 _partition,
         uint256 /*_lockId*/,
         address _tokenHolder
-    ) internal {
+    ) internal override {
         _updateAccountSnapshot(_tokenHolder, _partition);
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }

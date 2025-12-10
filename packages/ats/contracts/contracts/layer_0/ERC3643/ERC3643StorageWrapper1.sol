@@ -41,7 +41,7 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
         _setIdentityRegistry(_identityRegistry);
     }
 
-    function _setAddressFrozen(address _userAddress, bool _freezeStatus) internal {
+    function _setAddressFrozen(address _userAddress, bool _freezeStatus) internal override {
         if (_freezeStatus) {
             _getControlListType() ? _removeFromControlList(_userAddress) : _addToControlList(_userAddress);
             return;
@@ -49,42 +49,42 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
         _getControlListType() ? _addToControlList(_userAddress) : _removeFromControlList(_userAddress);
     }
 
-    function _addAgent(address _agent) internal {
+    function _addAgent(address _agent) internal override {
         if (!_grantRole(_AGENT_ROLE, _agent)) {
             revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
         }
     }
 
-    function _removeAgent(address _agent) internal {
+    function _removeAgent(address _agent) internal override {
         if (!_revokeRole(_AGENT_ROLE, _agent)) {
             revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
         }
     }
 
-    function _setCompliance(address _compliance) internal {
+    function _setCompliance(address _compliance) internal override {
         _erc3643Storage().compliance = _compliance;
         emit ComplianceAdded(_compliance);
     }
 
-    function _setIdentityRegistry(address _identityRegistry) internal {
+    function _setIdentityRegistry(address _identityRegistry) internal override {
         _erc3643Storage().identityRegistry = _identityRegistry;
     }
 
-    function _getFrozenAmountFor(address _userAddress) internal view returns (uint256) {
+    function _getFrozenAmountFor(address _userAddress) internal view override returns (uint256) {
         IERC3643Management.ERC3643Storage storage st = _erc3643Storage();
         return st.frozenTokens[_userAddress];
     }
 
-    function _getFrozenAmountForByPartition(bytes32 _partition, address _userAddress) internal view returns (uint256) {
+    function _getFrozenAmountForByPartition(bytes32 _partition, address _userAddress) internal view override returns (uint256) {
         IERC3643Management.ERC3643Storage storage st = _erc3643Storage();
         return st.frozenTokensByPartition[_userAddress][_partition];
     }
 
-    function _checkRecoveredAddress(address _sender) internal view {
+    function _checkRecoveredAddress(address _sender) internal view override {
         if (_isRecovered(_sender)) revert IERC3643Management.WalletRecovered();
     }
 
-    function _isRecovered(address _sender) internal view returns (bool) {
+    function _isRecovered(address _sender) internal view override returns (bool) {
         return _erc3643Storage().addressRecovered[_sender];
     }
 

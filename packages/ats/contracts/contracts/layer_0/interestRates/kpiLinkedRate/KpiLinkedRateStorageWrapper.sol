@@ -73,8 +73,6 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         _kpiLinkedRateStorage().kpiOracle = _kpiOracle;
     }
 
-    function _triggerScheduledCrossOrderedTasks(uint256 _max) internal virtual returns (uint256);
-
     function _getInterestRate() internal view returns (IKpiLinkedRate.InterestRate memory interestRate_) {
         interestRate_ = IKpiLinkedRate.InterestRate({
             maxRate: _kpiLinkedRateStorage().maxRate,

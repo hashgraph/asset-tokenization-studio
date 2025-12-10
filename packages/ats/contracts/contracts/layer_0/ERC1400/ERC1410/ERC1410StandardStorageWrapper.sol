@@ -154,16 +154,6 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
         erc1410Storage.totalSupplyByPartition[_partition] += _value;
     }
 
-    function _updateAccountSnapshot(address account, bytes32 partition) internal virtual;
-
-    function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
-
-    function _updateTokenHolderSnapshot(address account) internal virtual;
-
-    function _updateTotalTokenHolderSnapshot() internal virtual;
-
-    function _adjustTotalAndMaxSupplyForPartition(bytes32 _partition) internal virtual;
-
     function _totalSupplyAdjusted() internal view returns (uint256) {
         return _totalSupplyAdjustedAt(_blockTimestamp());
     }
@@ -202,8 +192,6 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
         );
         return _balanceOfByPartition(_partition, _tokenHolder) * factor;
     }
-
-    function _getLabafByUserAndPartition(bytes32 _partition, address _account) internal view virtual returns (uint256);
 
     function _getTotalBalance(address _tokenHolder) internal view virtual override returns (uint256) {
         return super._getTotalBalance(_tokenHolder) + _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());

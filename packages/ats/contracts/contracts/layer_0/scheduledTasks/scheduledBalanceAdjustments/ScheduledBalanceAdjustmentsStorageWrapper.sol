@@ -47,8 +47,6 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponLi
         _adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
 
-    function _adjustBalances(uint256 _factor, uint8 _decimals) internal virtual;
-
     function _getScheduledBalanceAdjustmentCount() internal view returns (uint256) {
         return ScheduledTasksLib.getScheduledTaskCount(_scheduledBalanceAdjustmentStorage());
     }

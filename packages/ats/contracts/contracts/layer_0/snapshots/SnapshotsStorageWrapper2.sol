@@ -234,7 +234,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
         return tk;
     }
 
-    function _totalTokenHoldersAt(uint256 snapshotId) internal view virtual returns (uint256) {
+    function _totalTokenHoldersAt(uint256 snapshotId) internal view override returns (uint256) {
         (bool snapshotted, uint256 value) = _valueAt(snapshotId, _snapshotStorage().totalTokenHoldersSnapshots);
 
         return snapshotted ? value : _getTotalTokenHolders();
@@ -392,25 +392,4 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
 
         return snapshotted ? value : _totalSupply();
     }
-
-    function _getHeldAmountForAdjusted(address _tokenHolder) internal view virtual returns (uint256 amount_);
-
-    function _getHeldAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 amount_);
-
-    function _getFrozenAmountForAdjusted(address _tokenHolder) internal view virtual returns (uint256 amount_);
-
-    function _getFrozenAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 amount_);
-
-    function _getClearedAmountForAdjusted(address _tokenHolder) internal view virtual returns (uint256 amount_);
-
-    function _getClearedAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 amount_);
 }

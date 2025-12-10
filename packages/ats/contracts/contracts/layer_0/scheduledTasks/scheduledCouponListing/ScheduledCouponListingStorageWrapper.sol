@@ -46,9 +46,6 @@ abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStor
         _updateCorporateActionResult(actionId, COUPON_LISTING_RESULT_ID, abi.encodePacked(pos));
     }
 
-    function _addToCouponsOrderedList(uint256 _couponID) internal virtual;
-    function _getCouponsOrderedListTotal() internal view virtual returns (uint256 total_);
-
     function _getScheduledCouponListingCount() internal view returns (uint256) {
         return ScheduledTasksLib.getScheduledTaskCount(_scheduledCouponListingStorage());
     }

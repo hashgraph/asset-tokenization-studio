@@ -43,14 +43,14 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         _;
     }
 
-    function _getLockedAmountForByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
+    function _getLockedAmountForByPartition(bytes32 _partition, address _tokenHolder) internal view override returns (uint256) {
         return _lockStorage().totalLockedAmountByAccountAndPartition[_tokenHolder][_partition];
     }
 
     function _getLockCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view returns (uint256 lockCount_) {
+    ) internal view override returns (uint256 lockCount_) {
         return _lockStorage().lockIdsByAccountAndPartition[_tokenHolder][_partition].length();
     }
 
@@ -59,7 +59,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (uint256[] memory locksId_) {
+    ) internal view override returns (uint256[] memory locksId_) {
         return
             _lockStorage().lockIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(_pageIndex, _pageLength);
     }
@@ -68,7 +68,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         bytes32 partition,
         address tokenHolder,
         uint256 lockId
-    ) internal view returns (uint256 amount, uint256 expirationTimestamp) {
+    ) internal view override returns (uint256 amount, uint256 expirationTimestamp) {
         LockData memory lock = _getLock(partition, tokenHolder, lockId);
         amount = lock.amount;
         expirationTimestamp = lock.expirationTimestamp;
@@ -78,14 +78,14 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockId
-    ) internal view returns (uint256 amount_, uint256 expirationTimestamp_) {
+    ) internal view override returns (uint256 amount_, uint256 expirationTimestamp_) {
         uint256 factor = _calculateFactor(_getAbafAdjusted(), _getLockLabafById(_partition, _tokenHolder, _lockId));
 
         (amount_, expirationTimestamp_) = _getLockForByPartition(_partition, _tokenHolder, _lockId);
         amount_ *= factor;
     }
 
-    function _getLockedAmountFor(address _tokenHolder) internal view returns (uint256 amount_) {
+    function _getLockedAmountFor(address _tokenHolder) internal view override returns (uint256 amount_) {
         return _lockStorage().totalLockedAmountByAccount[_tokenHolder];
     }
 
@@ -93,7 +93,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     function _getLockedAmountForAdjustedAt(
         address tokenHolder,
         uint256 timestamp
-    ) internal view returns (uint256 amount_) {
+    ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactorForLockedAmountByTokenHolderAdjustedAt(tokenHolder, timestamp);
         return _getLockedAmountFor(tokenHolder) * factor;
     }
@@ -121,7 +121,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     function _getLockedAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view returns (uint256 amount_) {
+    ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactor(_getAbafAdjusted(), _getTotalLockLabafByPartition(_partition, _tokenHolder));
         return _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
     }
@@ -130,7 +130,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockId
-    ) internal view returns (LockData memory) {
+    ) internal view override returns (LockData memory) {
         return _lockStorage().locksByAccountPartitionAndId[_tokenHolder][_partition][_lockId];
     }
 
@@ -138,7 +138,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockIndex
-    ) internal view returns (LockData memory) {
+    ) internal view override returns (LockData memory) {
         LockDataStorage storage lockStorage = _lockStorage();
 
         if (_lockIndex == 0) return LockData(0, 0, 0);
@@ -156,7 +156,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockId
-    ) internal view returns (bool) {
+    ) internal view override returns (bool) {
         LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
 
         if (lock.expirationTimestamp > _blockTimestamp()) return false;
@@ -164,7 +164,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         return true;
     }
 
-    function _isLockIdValid(bytes32 _partition, address _tokenHolder, uint256 _lockId) internal view returns (bool) {
+    function _isLockIdValid(bytes32 _partition, address _tokenHolder, uint256 _lockId) internal view override returns (bool) {
         return _lockStorage().lockIdsByAccountAndPartition[_tokenHolder][_partition].contains(_lockId);
     }
 

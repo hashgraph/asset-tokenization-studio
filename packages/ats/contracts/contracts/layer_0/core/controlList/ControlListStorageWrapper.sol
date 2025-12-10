@@ -30,38 +30,38 @@ abstract contract ControlListStorageWrapper is IControlListStorageWrapper, Exter
     }
 
     // Internal
-    function _addToControlList(address _account) internal returns (bool success_) {
+    function _addToControlList(address _account) internal override returns (bool success_) {
         success_ = _controlListStorage().list.add(_account);
     }
 
-    function _removeFromControlList(address _account) internal returns (bool success_) {
+    function _removeFromControlList(address _account) internal override returns (bool success_) {
         success_ = _controlListStorage().list.remove(_account);
     }
 
-    function _getControlListType() internal view returns (bool) {
+    function _getControlListType() internal view override returns (bool) {
         return _controlListStorage().isWhiteList;
     }
 
-    function _getControlListCount() internal view returns (uint256 controlListCount_) {
+    function _getControlListCount() internal view override returns (uint256 controlListCount_) {
         controlListCount_ = _controlListStorage().list.length();
     }
 
     function _getControlListMembers(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
+    ) internal view override returns (address[] memory members_) {
         return _controlListStorage().list.getFromSet(_pageIndex, _pageLength);
     }
 
-    function _isInControlList(address _account) internal view returns (bool) {
+    function _isInControlList(address _account) internal view override returns (bool) {
         return _controlListStorage().list.contains(_account);
     }
 
-    function _isAbleToAccess(address _account) internal view returns (bool) {
+    function _isAbleToAccess(address _account) internal view override returns (bool) {
         return (_getControlListType() == _isInControlList(_account) && _isExternallyAuthorized(_account));
     }
 
-    function _checkControlList(address _account) internal view {
+    function _checkControlList(address _account) internal view override {
         if (!_isAbleToAccess(_account)) {
             revert AccountIsBlocked(_account);
         }

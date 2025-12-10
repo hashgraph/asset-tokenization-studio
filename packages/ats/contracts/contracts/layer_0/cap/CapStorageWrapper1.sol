@@ -12,47 +12,47 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         bool initialized;
     }
 
-    function _adjustMaxSupply(uint256 factor) internal {
+    function _adjustMaxSupply(uint256 factor) internal override {
         CapDataStorage storage capStorage = _capStorage();
         if (capStorage.maxSupply == MAX_UINT256) return;
         capStorage.maxSupply *= factor;
     }
 
-    function _adjustMaxSupplyByPartition(bytes32 partition, uint256 factor) internal {
+    function _adjustMaxSupplyByPartition(bytes32 partition, uint256 factor) internal override {
         CapDataStorage storage capStorage = _capStorage();
         if (capStorage.maxSupplyByPartition[partition] == MAX_UINT256) return;
         capStorage.maxSupplyByPartition[partition] *= factor;
     }
 
-    function _getMaxSupply() internal view returns (uint256) {
+    function _getMaxSupply() internal view override returns (uint256) {
         return _capStorage().maxSupply;
     }
 
-    function _getMaxSupplyByPartition(bytes32 partition) internal view returns (uint256) {
+    function _getMaxSupplyByPartition(bytes32 partition) internal view override returns (uint256) {
         return _capStorage().maxSupplyByPartition[partition];
     }
 
-    function _getMaxSupplyAdjusted() internal view returns (uint256 maxSupply_) {
+    function _getMaxSupplyAdjusted() internal view override returns (uint256 maxSupply_) {
         return _getMaxSupplyAdjustedAt(_blockTimestamp());
     }
 
-    function _getMaxSupplyAdjustedAt(uint256 timestamp) internal view returns (uint256) {
+    function _getMaxSupplyAdjustedAt(uint256 timestamp) internal view override returns (uint256) {
         CapDataStorage storage capStorage = _capStorage();
         if (capStorage.maxSupply == MAX_UINT256) return MAX_UINT256;
         (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(timestamp);
         return capStorage.maxSupply * pendingAbaf;
     }
 
-    function _getMaxSupplyByPartitionAdjusted(bytes32 _partition) internal view returns (uint256 maxSupply_) {
+    function _getMaxSupplyByPartitionAdjusted(bytes32 _partition) internal view override returns (uint256 maxSupply_) {
         return _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
     }
 
-    function _getMaxSupplyByPartitionAdjustedAt(bytes32 partition, uint256 timestamp) internal view returns (uint256) {
+    function _getMaxSupplyByPartitionAdjustedAt(bytes32 partition, uint256 timestamp) internal view override returns (uint256) {
         uint256 factor = _calculateFactor(_getAbafAdjustedAt(timestamp), _getLabafByPartition(partition));
         return _getMaxSupplyByPartition(partition) * factor;
     }
 
-    function _isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure returns (bool) {
+    function _isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure override returns (bool) {
         return (_maxSupply == 0) || (_amount <= _maxSupply);
     }
 
