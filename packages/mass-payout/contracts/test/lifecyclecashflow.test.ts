@@ -206,7 +206,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
-import { deployLifeCycleCashFlowContracts } from "../scripts/deploy";
+import { deployLifeCycleCashFlowContracts, deployPrecompiledMock } from "../scripts/deploy";
 import DeployContractCommand from "../scripts/commands/DeployContractCommand";
 import { type LifeCycleCashFlowTimeTravel } from "@typechain";
 import {
@@ -229,6 +229,8 @@ let signer_A, signer_B;
 let lifeCycleCashFlow: LifeCycleCashFlowTimeTravel;
 let lifeCycleCashFlowAddress: string;
 let amountToBePaid;
+let stablecoinMock;
+let assetMock;
 
 enum AssetType {
   BOND = 0,
@@ -239,6 +241,7 @@ describe("Security operations", () => {
   [AssetType.BOND, AssetType.EQUITY].forEach((assetType) => {
     describe(`Security operations with assetType: ${assetType}`, () => {
       let asset_A, asset_B;
+      let rbacList;
 
       before(() => {
         // mute | mock console.log
@@ -246,23 +249,23 @@ describe("Security operations", () => {
       });
 
       beforeEach(async () => {
+        await deployPrecompiledMock();
+
         amountToBePaid = assetType == AssetType.BOND ? "10000" : "10000";
 
         [signer_A, signer_B] = await ethers.getSigners();
 
-        const assetMock_A = await ethers.getContractFactory("AssetMock");
-        asset_A = await assetMock_A.deploy(assetType, true);
+        assetMock = await ethers.getContractFactory("AssetMock");
+        asset_A = await assetMock.deploy(assetType, true, 100);
         await asset_A.deployed();
 
-        const assetMock_B = await ethers.getContractFactory("AssetMock");
-        asset_B = await assetMock_B.deploy(assetType, true);
+        asset_B = await assetMock.deploy(assetType, true, 100);
         await asset_B.deployed();
 
-        const stablecoinMock = await ethers.getContractFactory("StablecoinMock");
-        stablecoin = await stablecoinMock.deploy();
-        await stablecoin.deployed();
+        stablecoinMock = await ethers.getContractFactory("StablecoinMock");
+        stablecoin = await stablecoinMock.deploy(false, false);
 
-        const rbacList = [
+        rbacList = [
           {
             role: DEFAULT_ADMIN_ROLE,
             members: [signer_A.address],
@@ -288,7 +291,6 @@ describe("Security operations", () => {
             members: [signer_A.address],
           },
         ];
-
         const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
           new DeployContractCommand({
             name: "LifeCycleCashFlowTimeTravel",
@@ -302,11 +304,260 @@ describe("Security operations", () => {
         lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
       });
 
-      describe("Distribute a coupon by page", () => {
-        it("An account cannot distribute a coupon if the contract is paused", async () => {
+      describe("Deploy a LifeCycleCashFlow contract", () => {
+        it("A LifeCycleCashFlow contract cannot be deployed with an invalid payment token", async () => {
+          await expect(
+            deployLifeCycleCashFlowContracts(
+              new DeployContractCommand({
+                name: "LifeCycleCashFlowTimeTravel",
+                signer: signer_A,
+                args: [asset_A.address, AddressZero, rbacList],
+              }),
+            ),
+          )
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidPaymentToken")
+            .withArgs(AddressZero);
+        });
+
+        it("A LifeCycleCashFlow contract cannot be initialized twice", async () => {
+          await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_A.address, stablecoin.address, rbacList],
+            }),
+          );
+
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
 
+          await expect(lifeCycleCashFlow.initialize(asset_A.address, stablecoin.address, rbacList)).to.be.revertedWith(
+            "Initializable: contract is already initialized",
+          );
+        });
+      });
+
+      describe("Pause a LifeCycleCashFlow contract", () => {
+        it("An account not granted the _PAUSER_ROLE cannot pause the contract", async () => {
+          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
+
+          await expect(lifeCycleCashFlow.pause())
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
+            .withArgs(signer_B.address, PAUSER_ROLE);
+        });
+
+        it("An account granted the _PAUSER_ROLE can pause the contract", async () => {
           await lifeCycleCashFlow.pause();
+
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
+        });
+
+        it("An account granted the _PAUSER_ROLE cannot pause the contract twice", async () => {
+          await lifeCycleCashFlow.pause();
+
+          await expect(lifeCycleCashFlow.pause()).to.be.revertedWithCustomError(
+            lifeCycleCashFlow,
+            "LifeCycleCashFlowIsPaused",
+          );
+        });
+      });
+
+      describe("Unpause a LifeCycleCashFlow contract", () => {
+        it("An account not granted the _PAUSER_ROLE cannot unpause the contract", async () => {
+          await lifeCycleCashFlow.pause();
+
+          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
+
+          await expect(lifeCycleCashFlow.unpause())
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
+            .withArgs(signer_B.address, PAUSER_ROLE);
+        });
+
+        it("An account granted the _PAUSER_ROLE can unpause the contract", async () => {
+          await lifeCycleCashFlow.pause();
+          await lifeCycleCashFlow.unpause();
+
+          expect(await lifeCycleCashFlow.isPaused()).to.be.false;
+        });
+
+        it("An account granted the _PAUSER_ROLE cannot unpause the contract twice", async () => {
+          await lifeCycleCashFlow.pause();
+          await lifeCycleCashFlow.unpause();
+
+          await expect(lifeCycleCashFlow.unpause()).to.be.revertedWithCustomError(
+            lifeCycleCashFlow,
+            "LifeCycleCashFlowIsUnpaused",
+          );
+        });
+      });
+
+      describe("Grant role", () => {
+        it("An account cannot grant a role if the contract is paused", async () => {
+          await lifeCycleCashFlow.pause();
+
+          await expect(lifeCycleCashFlow.grantRole(PAUSER_ROLE, signer_B.address)).to.be.revertedWithCustomError(
+            lifeCycleCashFlow,
+            "LifeCycleCashFlowIsPaused",
+          );
+        });
+
+        it("An account not granted the DEFAULT_ADMIN_ROLE cannot grant a role", async () => {
+          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
+
+          await expect(lifeCycleCashFlow.grantRole(PAUSER_ROLE, signer_B.address))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
+            .withArgs(signer_B.address, DEFAULT_ADMIN_ROLE);
+        });
+
+        it("An account granted the DEFAULT_ADMIN_ROLE cannot grant a role twice", async () => {
+          await lifeCycleCashFlow.grantRole(PAUSER_ROLE, signer_B.address);
+
+          await expect(lifeCycleCashFlow.grantRole(PAUSER_ROLE, signer_B.address))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountAssignedToRole")
+            .withArgs(PAUSER_ROLE, signer_B.address);
+        });
+
+        it("An account granted the DEFAULT_ADMIN_ROLE can grant a role", async () => {
+          await expect(lifeCycleCashFlow.grantRole(PAUSER_ROLE, signer_B.address))
+            .to.emit(lifeCycleCashFlow, "RoleGranted")
+            .withArgs(signer_A.address, signer_B.address, PAUSER_ROLE);
+
+          expect(await lifeCycleCashFlow.hasRole(PAUSER_ROLE, signer_B.address)).to.be.true;
+        });
+      });
+
+      describe("Revoke role", () => {
+        it("An account cannot revoke a role if the contract is paused", async () => {
+          await lifeCycleCashFlow.pause();
+
+          await expect(lifeCycleCashFlow.revokeRole(PAUSER_ROLE, signer_B.address)).to.be.revertedWithCustomError(
+            lifeCycleCashFlow,
+            "LifeCycleCashFlowIsPaused",
+          );
+        });
+
+        it("An account not granted the DEFAULT_ADMIN_ROLE cannot revoke a role", async () => {
+          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_B);
+
+          await expect(lifeCycleCashFlow.revokeRole(PAUSER_ROLE, signer_B.address))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountHasNoRole")
+            .withArgs(signer_B.address, DEFAULT_ADMIN_ROLE);
+        });
+
+        it("An account granted the DEFAULT_ADMIN_ROLE cannot revoke a role twice", async () => {
+          await lifeCycleCashFlow.grantRole(PAUSER_ROLE, signer_B.address);
+
+          await lifeCycleCashFlow.revokeRole(PAUSER_ROLE, signer_B.address);
+          await expect(lifeCycleCashFlow.revokeRole(PAUSER_ROLE, signer_B.address))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountNotAssignedToRole")
+            .withArgs(PAUSER_ROLE, signer_B.address);
+        });
+
+        it("An account granted the DEFAULT_ADMIN_ROLE can revoke a role", async () => {
+          await expect(lifeCycleCashFlow.revokeRole(PAUSER_ROLE, signer_A.address))
+            .to.emit(lifeCycleCashFlow, "RoleRevoked")
+            .withArgs(signer_A.address, signer_A.address, PAUSER_ROLE);
+
+          expect(await lifeCycleCashFlow.hasRole(PAUSER_ROLE, signer_A.address)).to.be.false;
+        });
+      });
+
+      describe("Renounce role", () => {
+        it("An account cannot renounce a role if the contract is paused", async () => {
+          await lifeCycleCashFlow.pause();
+
+          await expect(lifeCycleCashFlow.renounceRole(PAUSER_ROLE)).to.be.revertedWithCustomError(
+            lifeCycleCashFlow,
+            "LifeCycleCashFlowIsPaused",
+          );
+        });
+
+        it("An account granted the DEFAULT_ADMIN_ROLE can renounce a role", async () => {
+          await expect(lifeCycleCashFlow.renounceRole(PAUSER_ROLE))
+            .to.emit(lifeCycleCashFlow, "RoleRenounced")
+            .withArgs(signer_A.address, PAUSER_ROLE);
+
+          expect(await lifeCycleCashFlow.hasRole(PAUSER_ROLE, signer_A.address)).to.be.false;
+        });
+
+        it("An account granted the DEFAULT_ADMIN_ROLE cannot renounce a role twice", async () => {
+          await lifeCycleCashFlow.renounceRole(PAUSER_ROLE);
+          await expect(lifeCycleCashFlow.renounceRole(PAUSER_ROLE))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "AccountNotAssignedToRole")
+            .withArgs(PAUSER_ROLE, signer_A.address);
+        });
+      });
+
+      describe("Has role", () => {
+        it("An account can check whether has a role", async () => {
+          expect(await lifeCycleCashFlow.hasRole(PAYOUT_ROLE, signer_A.address)).to.be.true;
+        });
+      });
+
+      describe("getRoleCountFor", () => {
+        it("An account can get the number of roles an account is granted", async () => {
+          expect(await lifeCycleCashFlow.getRoleCountFor(signer_A.address)).to.equals(6);
+        });
+      });
+
+      describe("getRoleMemberCount", () => {
+        it("An account can get the number accounts a role is granted", async () => {
+          expect(await lifeCycleCashFlow.getRoleMemberCount(PAYOUT_ROLE)).to.equals(1);
+        });
+      });
+
+      describe("getRoleMembers", () => {
+        it("An account cannot get the accounts a role is granted if the page index is the max uint256", async () => {
+          expect(
+            await lifeCycleCashFlow.getRoleMembers(
+              PAYOUT_ROLE,
+              115792089237316195423570985008687907853269984665640564039457584007913129639935n,
+              10,
+            ),
+          ).to.deep.equals([]);
+        });
+
+        it("An account cannot get the accounts a role is granted if the page index and length do not match an existing account", async () => {
+          expect(await lifeCycleCashFlow.getRoleMembers(PAYOUT_ROLE, 1, 2)).to.deep.equals([]);
+        });
+
+        it("An account cannot get the accounts a role is granted if the page index and length do not match an existing account 2", async () => {
+          expect(await lifeCycleCashFlow.getRoleMembers(PAYOUT_ROLE, 0, 2)).to.deep.equals([signer_A.address]);
+        });
+
+        it("An account han get the accounts a role is granted", async () => {
+          expect(await lifeCycleCashFlow.getRoleMembers(PAYOUT_ROLE, 0, 1)).to.deep.equals([signer_A.address]);
+        });
+      });
+
+      describe("getRolesFor", () => {
+        it("An account cannot get the accounts a role is granted if the page index is the max uint256", async () => {
+          expect(
+            await lifeCycleCashFlow.getRoleMembers(
+              PAYOUT_ROLE,
+              115792089237316195423570985008687907853269984665640564039457584007913129639935n,
+              10,
+            ),
+          ).to.deep.equals([]);
+        });
+
+        it("An account cannot get the accounts a role is granted if the page index and length do not match an existing account", async () => {
+          expect(await lifeCycleCashFlow.getRoleMembers(PAYOUT_ROLE, 1, 2)).to.deep.equals([]);
+        });
+
+        it("An account cannot get the accounts a role is granted if the page index and length do not match an existing account 2", async () => {
+          expect(await lifeCycleCashFlow.getRoleMembers(PAYOUT_ROLE, 0, 2)).to.deep.equals([signer_A.address]);
+        });
+
+        it("An account han get the accounts a role is granted", async () => {
+          expect(await lifeCycleCashFlow.getRoleMembers(PAYOUT_ROLE, 0, 1)).to.deep.equals([signer_A.address]);
+        });
+      });
+
+      describe("Distribute a coupon by page", () => {
+        it("An account cannot distribute a coupon if the contract is paused", async () => {
+          await lifeCycleCashFlow.pause();
+
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
 
           await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1)).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
@@ -323,8 +574,6 @@ describe("Security operations", () => {
         });
 
         it("An account with the _PAYOUT_ROLE role revoked cannot distribute a coupon", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
           await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
@@ -333,16 +582,12 @@ describe("Security operations", () => {
         });
 
         it("An account cannot distribute a coupon of an asset not managed by the contract", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await expect(lifeCycleCashFlow.executeDistribution(asset_B.address, 1, 1, 1))
             .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
             .withArgs(asset_B.address);
         });
 
         it("An account cannot distribute a coupon in a date not matches the execution date", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.changeSystemTimestamp(assetPaymentRequestDate);
 
           await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
@@ -351,8 +596,6 @@ describe("Security operations", () => {
         });
 
         it("An account cannot distribute a coupon to a holder if there is not enough balance", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
           await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
@@ -363,8 +606,7 @@ describe("Security operations", () => {
         });
 
         it("An account cannot distribute a coupon if there are no holders", async () => {
-          const assetMock_C = await ethers.getContractFactory("AssetMock");
-          const asset_C = await assetMock_C.deploy(assetType, false);
+          const asset_C = await assetMock.deploy(assetType, false, 100);
           await asset_C.deployed();
 
           const rbacList = [
@@ -398,8 +640,121 @@ describe("Security operations", () => {
           expect(result.executed_).to.equal(false);
         });
 
-        it("An account can distribute a coupon", async () => {
+        it("An account cannot distribute a coupon if the transfer fails", async () => {
+          const stablecoin = await stablecoinMock.deploy(true, false);
+
+          const rbacList = [
+            {
+              role: PAYOUT_ROLE,
+              members: [signer_A.address],
+            },
+          ];
+
+          const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_A.address, stablecoin.address, rbacList],
+            }),
+          );
+
+          const lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
+
+          lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
+
+          await stablecoin.transferWithoutErrors(lifeCycleCashFlowAddress, 10000);
+
+          await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
+
+          await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
+            .to.emit(lifeCycleCashFlow, "DistributionExecuted")
+            .withArgs(1, 1, 1, [signer_B.address], [AddressZero], [0]);
+        });
+
+        it("An account cannot distribute a coupon if the transfer reverts", async () => {
+          const stablecoin = await stablecoinMock.deploy(false, true);
+
+          const rbacList = [
+            {
+              role: PAYOUT_ROLE,
+              members: [signer_A.address],
+            },
+          ];
+
+          const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_A.address, stablecoin.address, rbacList],
+            }),
+          );
+
+          const lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
+
+          lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
+
+          await stablecoin.transferWithoutErrors(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
+
+          await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
+
+          await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
+            .to.emit(lifeCycleCashFlow, "DistributionExecuted")
+            .withArgs(1, 1, 1, [signer_B.address], [AddressZero], [0]);
+        });
+
+        it("An account can distribute a coupon to a holder with 0 amount", async () => {
+          const asset_C = await assetMock.deploy(assetType, true, 0);
+          await asset_C.deployed();
+
+          const rbacList = [
+            {
+              role: PAYOUT_ROLE,
+              members: [signer_A.address],
+            },
+          ];
+
+          const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_C.address, stablecoin.address, rbacList],
+            }),
+          );
+
+          const lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
+
+          let lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
+
           lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
+
+          await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
+
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
+
+          await expect(lifeCycleCashFlow.executeDistribution(asset_C.address, 1, 1, 1))
+            .to.emit(lifeCycleCashFlow, "DistributionExecuted")
+            .withArgs(1, 1, 1, [AddressZero], [signer_B.address], [0]);
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(0);
+        });
+
+        it("An account can distribute a coupon", async () => {
+          await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
+
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
+
+          await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
+            .to.emit(lifeCycleCashFlow, "DistributionExecuted")
+            .withArgs(1, 1, 1, [AddressZero], [signer_B.address], [amountToBePaid]);
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits(amountToBePaid, 0));
+        });
+
+        it("An account can distribute a coupon in the contract is unpaused", async () => {
+          await lifeCycleCashFlow.pause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
+          await lifeCycleCashFlow.unpause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.false;
 
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
@@ -413,31 +768,29 @@ describe("Security operations", () => {
         });
 
         it("An account cannot distribute a certain coupon to a holder twice", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
           await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
           await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
             .to.emit(lifeCycleCashFlow, "DistributionExecuted")
-            .withArgs(1, 1, 1, [AddressZero], [signer_B.address], [amountToBePaid]);
+            .withArgs(1, 1, 1, [AddressZero], [signer_B.address], [ethers.utils.parseUnits(amountToBePaid, 0)]);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(amountToBePaid);
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits(amountToBePaid, 0));
 
           await expect(lifeCycleCashFlow.executeDistribution(asset_A.address, 1, 1, 1))
             .to.emit(lifeCycleCashFlow, "DistributionExecuted")
             .withArgs(1, 1, 1, [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(amountToBePaid);
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits(amountToBePaid, 0));
         });
       });
 
       describe("Distribute a coupon by addresses", () => {
         it("An account cannot distribute a coupon by addresses if the contract is paused", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.pause();
+
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
 
           await expect(
             lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [asset_A.address, asset_B.address]),
@@ -455,8 +808,6 @@ describe("Security operations", () => {
         });
 
         it("An account with the _PAYOUT_ROLE role revoked cannot distribute a coupon by addresses", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
           await expect(
@@ -467,8 +818,6 @@ describe("Security operations", () => {
         });
 
         it("An account cannot distribute a coupon by addresses of an asset not managed by the contract", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await expect(
             lifeCycleCashFlow.executeDistributionByAddresses(asset_B.address, 1, [asset_A.address, asset_B.address]),
           )
@@ -477,8 +826,6 @@ describe("Security operations", () => {
         });
 
         it("An account cannot distribute a coupon by addresses in a date not matches the execution date", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.changeSystemTimestamp(assetPaymentRequestDate);
 
           await expect(
@@ -488,9 +835,7 @@ describe("Security operations", () => {
             .withArgs(assetInitialPaymentDate, assetPaymentRequestDate);
         });
 
-        it("An account can distribute a coupon by addresses to a holder if there is not enough balance", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
+        it("An account cannot distribute a coupon by addresses to a holder if there is not enough balance", async () => {
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
           await expect(lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [signer_B.address]))
@@ -500,8 +845,37 @@ describe("Security operations", () => {
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
         });
 
+        it("An account cannot distribute a coupon by addresses to a zero address holder", async () => {
+          await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
+
+          await expect(lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [AddressZero]))
+            .to.emit(lifeCycleCashFlow, "DistributionByAddressesExecuted")
+            .withArgs(1, [AddressZero], [], [], []);
+        });
+
         it("An account can distribute a coupon by addresses", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
+          await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
+
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
+
+          await expect(lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [signer_B.address]))
+            .to.emit(lifeCycleCashFlow, "DistributionByAddressesExecuted")
+            .withArgs(
+              1,
+              [signer_B.address],
+              [AddressZero],
+              [signer_B.address],
+              [ethers.utils.parseUnits(amountToBePaid, 0)],
+            );
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits(amountToBePaid, 0));
+        });
+
+        it("An account can distribute a coupon by addresses if the contract is unpaused", async () => {
+          await lifeCycleCashFlow.pause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
+          await lifeCycleCashFlow.unpause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.false;
 
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
@@ -509,38 +883,48 @@ describe("Security operations", () => {
 
           await expect(lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [signer_B.address]))
             .to.emit(lifeCycleCashFlow, "DistributionByAddressesExecuted")
-            .withArgs(1, [signer_B.address], [AddressZero], [signer_B.address], [amountToBePaid]);
+            .withArgs(
+              1,
+              [signer_B.address],
+              [AddressZero],
+              [signer_B.address],
+              [ethers.utils.parseUnits(amountToBePaid, 0)],
+            );
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(amountToBePaid);
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits(amountToBePaid, 0));
         });
 
         it("An account can distribute a certain coupon by addresses to a holder twice", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
           await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
           await expect(lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [signer_B.address]))
             .to.emit(lifeCycleCashFlow, "DistributionByAddressesExecuted")
-            .withArgs(1, [signer_B.address], [AddressZero], [signer_B.address], [amountToBePaid]);
+            .withArgs(
+              1,
+              [signer_B.address],
+              [AddressZero],
+              [signer_B.address],
+              [ethers.utils.parseUnits(amountToBePaid, 0)],
+            );
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(amountToBePaid);
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits(amountToBePaid, 0));
 
           await expect(lifeCycleCashFlow.executeDistributionByAddresses(asset_A.address, 1, [signer_B.address]))
             .to.emit(lifeCycleCashFlow, "DistributionByAddressesExecuted")
             .withArgs(1, [signer_B.address], [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(amountToBePaid);
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits(amountToBePaid, 0));
         });
       });
 
       if (assetType == AssetType.BOND) {
         describe("Cash out a bond by page", () => {
           it("An account cannot cash out a bond if the contract is paused", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
             await lifeCycleCashFlow.pause();
+
+            expect(await lifeCycleCashFlow.isPaused()).to.be.true;
 
             await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1)).to.be.revertedWithCustomError(
               lifeCycleCashFlow,
@@ -557,8 +941,6 @@ describe("Security operations", () => {
           });
 
           it("An account with the _CASHOUT_ROLE role revoked cannot cash out a bond", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
             await lifeCycleCashFlow.revokeRole(CASHOUT_ROLE, signer_A.address);
 
             await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
@@ -567,16 +949,12 @@ describe("Security operations", () => {
           });
 
           it("An account cannot cash out a bond not managed by the contract", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
             await expect(lifeCycleCashFlow.executeBondCashOut(asset_B.address, 1, 1))
               .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
               .withArgs(asset_B.address);
           });
 
           it("An account cannot cash out a bond in a date does not match the maturity date", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
             await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutRequestDate);
 
             await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
@@ -585,8 +963,6 @@ describe("Security operations", () => {
           });
 
           it("An account cannot cash out a bond to a holder if there is not enough balance", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
             await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
 
             await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
@@ -597,8 +973,7 @@ describe("Security operations", () => {
           });
 
           it("An account cannot cash out if there are no holders", async () => {
-            const assetMock_C = await ethers.getContractFactory("AssetMock");
-            const asset_C = await assetMock_C.deploy(assetType, false);
+            const asset_C = await assetMock.deploy(assetType, false, 100);
             await asset_C.deployed();
 
             const rbacList = [
@@ -632,8 +1007,11 @@ describe("Security operations", () => {
             expect(result.executed_).to.equal(false);
           });
 
-          it("An account can cash out a bond", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
+          it("An account can cash out a bond if the contract is unpaused", async () => {
+            await lifeCycleCashFlow.pause();
+            expect(await lifeCycleCashFlow.isPaused()).to.be.true;
+            await lifeCycleCashFlow.unpause();
+            expect(await lifeCycleCashFlow.isPaused()).to.be.false;
 
             await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
 
@@ -641,17 +1019,131 @@ describe("Security operations", () => {
 
             await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
               .to.emit(lifeCycleCashFlow, "CashOutExecuted")
-              .withArgs(1, 1, [AddressZero], [signer_B.address], [10000]);
+              .withArgs(1, 1, [AddressZero], [signer_B.address], [ethers.utils.parseUnits("10000", 0)]);
 
             expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("10000", 0));
           });
         });
 
+        it("An account cannot cash out a bond if the transfer fails", async () => {
+          const stablecoin = await stablecoinMock.deploy(false, true);
+
+          const rbacList = [
+            {
+              role: CASHOUT_ROLE,
+              members: [signer_A.address],
+            },
+          ];
+
+          const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_A.address, stablecoin.address, rbacList],
+            }),
+          );
+
+          const lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
+
+          lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
+
+          await stablecoin.transferWithoutErrors(lifeCycleCashFlowAddress, ethers.utils.parseUnits("10000", 0));
+
+          await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
+
+          await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
+            .to.emit(lifeCycleCashFlow, "CashOutExecuted")
+            .withArgs(1, 1, [signer_B.address], [AddressZero], [0]);
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(0);
+        });
+
+        it("An account cannot cash out a bond if the transfer reverts", async () => {
+          const stablecoin = await stablecoinMock.deploy(false, true);
+
+          const rbacList = [
+            {
+              role: CASHOUT_ROLE,
+              members: [signer_A.address],
+            },
+          ];
+
+          const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_A.address, stablecoin.address, rbacList],
+            }),
+          );
+
+          const lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
+
+          lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
+
+          await stablecoin.transferWithoutErrors(lifeCycleCashFlowAddress, ethers.utils.parseUnits("10000", 0));
+
+          await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
+
+          await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
+            .to.emit(lifeCycleCashFlow, "CashOutExecuted")
+            .withArgs(1, 1, [signer_B.address], [AddressZero], [0]);
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(0);
+        });
+
+        it("An account can cash out a bond with 0 amount", async () => {
+          const asset_C = await assetMock.deploy(assetType, true, 0);
+          await asset_C.deployed();
+
+          const rbacList = [
+            {
+              role: CASHOUT_ROLE,
+              members: [signer_A.address],
+            },
+          ];
+
+          const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_C.address, stablecoin.address, rbacList],
+            }),
+          );
+
+          const lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
+
+          let lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
+
+          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
+
+          await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
+
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
+
+          await expect(lifeCycleCashFlow.executeBondCashOut(asset_C.address, 1, 1))
+            .to.emit(lifeCycleCashFlow, "CashOutExecuted")
+            .withArgs(1, 1, [AddressZero], [signer_B.address], [0]);
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(0);
+        });
+
+        it("An account can cash out a bond", async () => {
+          await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
+
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
+
+          await expect(lifeCycleCashFlow.executeBondCashOut(asset_A.address, 1, 1))
+            .to.emit(lifeCycleCashFlow, "CashOutExecuted")
+            .withArgs(1, 1, [AddressZero], [signer_B.address], [ethers.utils.parseUnits("10000", 0)]);
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("10000", 0));
+        });
+
         describe("Cash out a bond by addresses", () => {
           it("An account cannot cash out a bond by addresses if the contract is paused", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
             await lifeCycleCashFlow.pause();
+
+            expect(await lifeCycleCashFlow.isPaused()).to.be.true;
 
             await expect(
               lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [asset_A.address, asset_B.address]),
@@ -669,8 +1161,6 @@ describe("Security operations", () => {
           });
 
           it("An account with the _CASHOUT_ROLE role revoked cannot cash out a bond by addresses", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
             await lifeCycleCashFlow.revokeRole(CASHOUT_ROLE, signer_A.address);
 
             await expect(
@@ -681,8 +1171,6 @@ describe("Security operations", () => {
           });
 
           it("An account cannot cash out a bond by addresses not managed by the contract", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
             await expect(
               lifeCycleCashFlow.executeBondCashOutByAddresses(asset_B.address, [asset_A.address, asset_B.address]),
             )
@@ -691,8 +1179,6 @@ describe("Security operations", () => {
           });
 
           it("An account cannot cash out a bond by addresses in a date does not match the maturity date", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
             await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutRequestDate);
 
             await expect(
@@ -703,8 +1189,6 @@ describe("Security operations", () => {
           });
 
           it("An account cannot cash out by addresses a bond to a holder if there is not enough balance", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
             await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
 
             await expect(lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [signer_B.address]))
@@ -714,8 +1198,11 @@ describe("Security operations", () => {
             expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
           });
 
-          it("An account can cash out by addresses a bond", async () => {
-            lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
+          it("An account cannot cash out by addresses a bond if the contract is unpaused", async () => {
+            await lifeCycleCashFlow.pause();
+            expect(await lifeCycleCashFlow.isPaused()).to.be.true;
+            await lifeCycleCashFlow.unpause();
+            expect(await lifeCycleCashFlow.isPaused()).to.be.false;
 
             await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
 
@@ -723,7 +1210,27 @@ describe("Security operations", () => {
 
             await expect(lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [signer_B.address]))
               .to.emit(lifeCycleCashFlow, "CashOutByAddressesExecuted")
-              .withArgs([signer_B.address], [AddressZero], [signer_B.address], [10000]);
+              .withArgs([signer_B.address], [AddressZero], [signer_B.address], [ethers.utils.parseUnits("10000", 0)]);
+
+            expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("10000", 0));
+          });
+
+          it("An account cannot cash out by addresses to a zero address holder", async () => {
+            await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
+
+            await expect(lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [AddressZero]))
+              .to.emit(lifeCycleCashFlow, "CashOutByAddressesExecuted")
+              .withArgs([AddressZero], [], [], []);
+          });
+
+          it("An account can cash out by addresses a bond", async () => {
+            await lifeCycleCashFlow.changeSystemTimestamp(bondCashoutInitialDate);
+
+            await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
+
+            await expect(lifeCycleCashFlow.executeBondCashOutByAddresses(asset_A.address, [signer_B.address]))
+              .to.emit(lifeCycleCashFlow, "CashOutByAddressesExecuted")
+              .withArgs([signer_B.address], [AddressZero], [signer_B.address], [ethers.utils.parseUnits("10000", 0)]);
 
             expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("10000", 0));
           });
@@ -732,9 +1239,9 @@ describe("Security operations", () => {
 
       describe("Pay amount snapshot", () => {
         it("An account cannot pay the holders a snapshot by amount if the contract is paused", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.pause();
+
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
 
           await expect(
             lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1),
@@ -750,8 +1257,6 @@ describe("Security operations", () => {
         });
 
         it("An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by amount", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
           await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1))
@@ -760,17 +1265,15 @@ describe("Security operations", () => {
         });
 
         it("An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by amount of an asset not managed by the contract", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_B.address, 1, 1, 1, 1))
             .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
             .withArgs(asset_B.address);
         });
 
         it("An account cannot pay a snapshot to a holder if there is not enough balance", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
-          await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1000))
+          await expect(
+            lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, ethers.utils.parseUnits("1000", 0)),
+          )
             .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
             .withArgs(1, 1, 1, 1000, [signer_B.address], [], []);
 
@@ -778,8 +1281,7 @@ describe("Security operations", () => {
         });
 
         it("An account cannot pay a snapshot if there are no holders", async () => {
-          const assetMock_C = await ethers.getContractFactory("AssetMock");
-          const asset_C = await assetMock_C.deploy(assetType, false);
+          const asset_C = await assetMock.deploy(assetType, false, 100);
           await asset_C.deployed();
 
           const rbacList = [
@@ -813,48 +1315,155 @@ describe("Security operations", () => {
             1,
             1,
             1,
-            1000,
+            ethers.utils.parseUnits("1000", 0),
           );
 
           expect(result.executed_).to.equal(false);
         });
 
+        it("An account cannot pay a snapshot if the transfer fails", async () => {
+          const stablecoin = await stablecoinMock.deploy(true, false);
+
+          const rbacList = [
+            {
+              role: PAYOUT_ROLE,
+              members: [signer_A.address],
+            },
+          ];
+
+          const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_A.address, stablecoin.address, rbacList],
+            }),
+          );
+
+          const lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
+
+          lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
+
+          await stablecoin.transferWithoutErrors(lifeCycleCashFlowAddress, ethers.utils.parseUnits("10000", 0));
+
+          await expect(
+            lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, ethers.utils.parseUnits("100", 0)),
+          )
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
+            .withArgs(1, 1, 1, ethers.utils.parseUnits("100", 0), [signer_B.address], [AddressZero], [0]);
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(0);
+        });
+
+        it("An account cannot pay a snapshot if the transfer reverts", async () => {
+          const stablecoin = await stablecoinMock.deploy(false, true);
+
+          const rbacList = [
+            {
+              role: PAYOUT_ROLE,
+              members: [signer_A.address],
+            },
+          ];
+
+          const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_A.address, stablecoin.address, rbacList],
+            }),
+          );
+
+          const lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
+
+          lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
+
+          await stablecoin.transferWithoutErrors(lifeCycleCashFlowAddress, ethers.utils.parseUnits("10000", 0));
+
+          await expect(
+            lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, ethers.utils.parseUnits("100", 0)),
+          )
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
+            .withArgs(1, 1, 1, ethers.utils.parseUnits("100", 0), [signer_B.address], [AddressZero], [0]);
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(0);
+        });
+
         it("An account can pay a snapshot", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
+
+          await expect(
+            lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, ethers.utils.parseUnits("1000", 0)),
+          )
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
+            .withArgs(
+              1,
+              1,
+              1,
+              ethers.utils.parseUnits("1000", 0),
+              [AddressZero],
+              [signer_B.address],
+              [ethers.utils.parseUnits("500", 0)],
+            );
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("500", 0));
+        });
+
+        it("An account can pay a snapshot if the contract is unpaused", async () => {
+          await lifeCycleCashFlow.pause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
+          await lifeCycleCashFlow.unpause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.false;
 
           await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1000))
+          await expect(
+            lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, ethers.utils.parseUnits("1000", 0)),
+          )
             .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
-            .withArgs(1, 1, 1, 1000, [AddressZero], [signer_B.address], [ethers.utils.parseUnits("80", 0)]);
+            .withArgs(
+              1,
+              1,
+              1,
+              ethers.utils.parseUnits("1000", 0),
+              [AddressZero],
+              [signer_B.address],
+              [ethers.utils.parseUnits("500", 0)],
+            );
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("80", 0));
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("500", 0));
         });
 
         it("An account cannot pay a snapshot to a holder twice", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
+          await expect(
+            lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, ethers.utils.parseUnits("1000", 0)),
+          )
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
+            .withArgs(
+              1,
+              1,
+              1,
+              ethers.utils.parseUnits("1000", 0),
+              [AddressZero],
+              [signer_B.address],
+              [ethers.utils.parseUnits("500", 0)],
+            );
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("500", 0));
+
           await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1000))
             .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
-            .withArgs(1, 1, 1, 1000, [AddressZero], [signer_B.address], [ethers.utils.parseUnits("80", 0)]);
+            .withArgs(1, 1, 1, ethers.utils.parseUnits("1000", 0), [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("80", 0));
-
-          await expect(lifeCycleCashFlow.executeAmountSnapshot(asset_A.address, 1, 1, 1, 1000))
-            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
-            .withArgs(1, 1, 1, 1000, [signer_B.address], [], []);
-
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("80", 0));
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("500", 0));
         });
       });
 
       describe("Pay percentage snapshot", () => {
         it("An account cannot pay the holders a snapshot by percentage if the contract is paused", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.pause();
+
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
 
           await expect(
             lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 1),
@@ -870,8 +1479,6 @@ describe("Security operations", () => {
         });
 
         it("An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by percentage", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
           await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 1))
@@ -880,34 +1487,29 @@ describe("Security operations", () => {
         });
 
         it("An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by percentage of an asset not managed by the contract", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_B.address, 1, 1, 1, 1))
             .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
             .withArgs(asset_B.address);
         });
 
         it("An account cannot pay more than 100 percentage of the contract payment token balance", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 10100))
             .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidPercentage")
             .withArgs(10100);
         });
 
         it("An account cannot pay a snapshot by percentage to a holder if there is not enough balance", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
-          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 50))
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, ethers.utils.parseUnits("50", 2)),
+          )
             .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
-            .withArgs(1, 1, 1, 50, [AddressZero], [], []);
+            .withArgs(1, 1, 1, ethers.utils.parseUnits("50", 2), [AddressZero], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
         });
 
         it("An account cannot pay a snapshot by percentage if there are no holders", async () => {
-          const assetMock_C = await ethers.getContractFactory("AssetMock");
-          const asset_C = await assetMock_C.deploy(assetType, false);
+          const asset_C = await assetMock.deploy(assetType, false, 100);
           await asset_C.deployed();
 
           const rbacList = [
@@ -941,48 +1543,109 @@ describe("Security operations", () => {
             1,
             1,
             1,
-            50,
+            ethers.utils.parseUnits("50", 2),
           );
 
           expect(result.executed_).to.equal(false);
         });
 
         it("An account can pay a snapshot by percentage", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
+
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, ethers.utils.parseUnits("50", 2)),
+          )
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
+            .withArgs(
+              1,
+              1,
+              1,
+              ethers.utils.parseUnits("50", 2),
+              [AddressZero],
+              [signer_B.address],
+              [ethers.utils.parseUnits("250000", 2)],
+            );
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("250000", 2));
+        });
+
+        it("An account can pay a snapshot by percentage if the contract is unpaused", async () => {
+          await lifeCycleCashFlow.pause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
+          await lifeCycleCashFlow.unpause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.false;
 
           await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 50))
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, ethers.utils.parseUnits("50", 2)),
+          )
             .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
-            .withArgs(1, 1, 1, 50, [AddressZero], [signer_B.address], [ethers.utils.parseUnits("400", 2)]);
+            .withArgs(
+              1,
+              1,
+              1,
+              ethers.utils.parseUnits("50", 2),
+              [AddressZero],
+              [signer_B.address],
+              [ethers.utils.parseUnits("250000", 2)],
+            );
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("400", 2));
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("250000", 2));
         });
 
         it("An account cannot pay a snapshot by percentage to a holder twice", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 50))
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, ethers.utils.parseUnits("50", 2)),
+          )
             .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
-            .withArgs(1, 1, 1, 50, [AddressZero], [signer_B.address], [ethers.utils.parseUnits("400", 2)]);
+            .withArgs(
+              1,
+              1,
+              1,
+              ethers.utils.parseUnits("50", 2),
+              [AddressZero],
+              [signer_B.address],
+              [ethers.utils.parseUnits("250000", 2)],
+            );
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("400", 2));
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("250000", 2));
 
-          await expect(lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, 50))
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 1, ethers.utils.parseUnits("50", 2)),
+          )
             .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
-            .withArgs(1, 1, 1, 50, [signer_B.address], [], []);
+            .withArgs(1, 1, 1, ethers.utils.parseUnits("50", 2), [signer_B.address], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("400", 2));
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("250000", 2));
+        });
+
+        it("An account can pay a snapshot by percentage to two holders", async () => {
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
+
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshot(asset_A.address, 1, 1, 2, ethers.utils.parseUnits("50", 2)),
+          )
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
+            .withArgs(
+              1,
+              1,
+              2,
+              ethers.utils.parseUnits("50", 2),
+              [],
+              [signer_B.address, signer_A.address],
+              [ethers.utils.parseUnits("250000", 2), ethers.utils.parseUnits("250000", 2)],
+            );
         });
       });
 
       describe("Pay amount snapshot by addresses", () => {
         it("An account cannot pay the holders a snapshot by amount and addresses if the contract is paused", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.pause();
+
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
 
           await expect(
             lifeCycleCashFlow.executeAmountSnapshotByAddresses(asset_A.address, 1, [signer_A.address], 1),
@@ -998,8 +1661,6 @@ describe("Security operations", () => {
         });
 
         it("An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by amount and addresses", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
           await expect(lifeCycleCashFlow.executeAmountSnapshotByAddresses(asset_A.address, 1, [signer_A.address], 1))
@@ -1008,48 +1669,69 @@ describe("Security operations", () => {
         });
 
         it("An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by amount and addresses of an asset not managed by the contract", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await expect(lifeCycleCashFlow.executeAmountSnapshotByAddresses(asset_B.address, 1, [signer_A.address], 1))
             .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidAsset")
             .withArgs(asset_B.address);
         });
 
         it("An account cannot pay an amount snapshot by addresses to a holder if there is not enough balance", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
-          await expect(lifeCycleCashFlow.executeAmountSnapshotByAddresses(asset_A.address, 1, [signer_B.address], 1000))
+          await expect(
+            lifeCycleCashFlow.executeAmountSnapshotByAddresses(
+              asset_A.address,
+              1,
+              [signer_B.address],
+              ethers.utils.parseUnits("1000", 0),
+            ),
+          )
             .to.emit(lifeCycleCashFlow, "AmountSnapshotByAddressesExecuted")
-            .withArgs(1, [signer_B.address], 1000, [signer_B.address], [], []);
+            .withArgs(1, [signer_B.address], ethers.utils.parseUnits("1000", 0), [signer_B.address], [], []);
 
           expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
         });
 
-        it("An account can pay an amount snapshot by addresses", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
+        it("An account cannot pay a snapshot to a zero address holder", async () => {
+          await expect(
+            lifeCycleCashFlow.executeAmountSnapshotByAddresses(
+              asset_A.address,
+              1,
+              [AddressZero],
+              ethers.utils.parseUnits("1000", 0),
+            ),
+          )
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotByAddressesExecuted")
+            .withArgs(1, [AddressZero], ethers.utils.parseUnits("1000", 0), [], [], []);
+        });
 
+        it("An account can pay an amount snapshot by addresses", async () => {
           await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
-          await expect(lifeCycleCashFlow.executeAmountSnapshotByAddresses(asset_A.address, 1, [signer_B.address], 1000))
+          await expect(
+            lifeCycleCashFlow.executeAmountSnapshotByAddresses(
+              asset_A.address,
+              1,
+              [signer_B.address],
+              ethers.utils.parseUnits("1000", 0),
+            ),
+          )
             .to.emit(lifeCycleCashFlow, "AmountSnapshotByAddressesExecuted")
             .withArgs(
               1,
               [signer_B.address],
-              1000,
+              ethers.utils.parseUnits("1000", 0),
               [AddressZero],
               [signer_B.address],
-              [ethers.utils.parseUnits("80", 0)],
+              [ethers.utils.parseUnits("500", 0)],
             );
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("80", 0));
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("500", 0));
         });
       });
 
       describe("Pay percentage snapshot by addresses", () => {
         it("An account cannot pay the holders a snapshot by percentage and addresses if the contract is paused", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.pause();
+
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
 
           await expect(
             lifeCycleCashFlow.executePercentageSnapshotByAddresses(asset_A.address, 1, [signer_A.address], 1),
@@ -1067,8 +1749,6 @@ describe("Security operations", () => {
         });
 
         it("An account with the _PAYOUT_ROLE role revoked cannot pay the holders a snapshot by percentage and addresses", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.revokeRole(PAYOUT_ROLE, signer_A.address);
 
           await expect(
@@ -1079,8 +1759,6 @@ describe("Security operations", () => {
         });
 
         it("An account granted the _PAYOUT_ROLE cannot pay the holders a snapshot by percentage and addresses of an asset not managed by the contract", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await expect(
             lifeCycleCashFlow.executePercentageSnapshotByAddresses(asset_B.address, 1, [signer_A.address], 1),
           )
@@ -1089,44 +1767,92 @@ describe("Security operations", () => {
         });
 
         it("An account cannot pay a percentage snapshot by addresses to a holder if there is not enough balance", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await expect(
-            lifeCycleCashFlow.executePercentageSnapshotByAddresses(asset_A.address, 1, [signer_B.address], 50),
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
+              asset_A.address,
+              1,
+              [signer_B.address],
+              ethers.utils.parseUnits("5000", 2),
+            ),
           )
             .to.emit(lifeCycleCashFlow, "PercentageSnapshotByAddressesExecuted")
-            .withArgs(1, [signer_B.address], 50, [AddressZero], [], []);
+            .withArgs(1, [signer_B.address], ethers.utils.parseUnits("5000", 2), [AddressZero], [], []);
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("0", 0));
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(0);
+        });
+
+        it("An account cannot pay a snapshot by addresses to a zero address holder", async () => {
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
+              asset_A.address,
+              1,
+              [AddressZero],
+              ethers.utils.parseUnits("5000", 2),
+            ),
+          )
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotByAddressesExecuted")
+            .withArgs(1, [AddressZero], ethers.utils.parseUnits("5000", 2), [], [], []);
         });
 
         it("An account can pay a percentage snapshot by addresses", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
 
           await expect(
-            lifeCycleCashFlow.executePercentageSnapshotByAddresses(asset_A.address, 1, [signer_B.address], 50),
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
+              asset_A.address,
+              1,
+              [signer_B.address],
+              ethers.utils.parseUnits("50", 2),
+            ),
           )
             .to.emit(lifeCycleCashFlow, "PercentageSnapshotByAddressesExecuted")
             .withArgs(
               1,
               [signer_B.address],
-              50,
+              ethers.utils.parseUnits("50", 2),
               [AddressZero],
               [signer_B.address],
-              [ethers.utils.parseUnits("400", 2)],
+              [ethers.utils.parseUnits("250000", 2)],
             );
 
-          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("400", 2));
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("250000", 2));
+        });
+
+        it("An account can pay a percentage snapshot by addresses if the contract is unpaused", async () => {
+          await lifeCycleCashFlow.pause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
+          await lifeCycleCashFlow.unpause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.false;
+
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1000000", 2));
+
+          await expect(
+            lifeCycleCashFlow.executePercentageSnapshotByAddresses(
+              asset_A.address,
+              1,
+              [signer_B.address],
+              ethers.utils.parseUnits("50", 2),
+            ),
+          )
+            .to.emit(lifeCycleCashFlow, "PercentageSnapshotByAddressesExecuted")
+            .withArgs(
+              1,
+              [signer_B.address],
+              ethers.utils.parseUnits("50", 2),
+              [AddressZero],
+              [signer_B.address],
+              [ethers.utils.parseUnits("250000", 2)],
+            );
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("250000", 2));
         });
       });
 
       describe("Transfer stablecoins", () => {
         it("An account cannot transfer stablecoins if the contract is paused", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.pause();
+
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
 
           await expect(lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1)).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
@@ -1143,8 +1869,6 @@ describe("Security operations", () => {
         });
 
         it("An account with the _TRANSFERER_ROLE role revoked cannot transfer stablecoins", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.revokeRole(TRANSFERER_ROLE, signer_A.address);
 
           await expect(lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1))
@@ -1153,15 +1877,70 @@ describe("Security operations", () => {
         });
 
         it("An account cannot transfer more stablecoins than the balance of the LifeCycleCashFlow contract", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await expect(lifeCycleCashFlow.transferPaymentToken(signer_A.address, 200))
             .to.be.revertedWithCustomError(lifeCycleCashFlow, "NotEnoughBalance")
             .withArgs(200);
         });
 
+        it("When the transfer fail the transaction reverts with a TransferERC20TokenFailed error", async () => {
+          const stablecoin = await stablecoinMock.deploy(true, false);
+
+          const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_A.address, stablecoin.address, rbacList],
+            }),
+          );
+
+          const lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
+
+          lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
+
+          await stablecoin.transferWithoutErrors(lifeCycleCashFlowAddress, 1);
+
+          await expect(lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "TransferERC20TokenFailed")
+            .withArgs(signer_A.address, 1);
+        });
+
+        it("When the transfer reverts the transaction reverts with a TransferERC20TokenFailed error", async () => {
+          const stablecoin = await stablecoinMock.deploy(false, true);
+
+          const resultLifeCycleCashFlow = await deployLifeCycleCashFlowContracts(
+            new DeployContractCommand({
+              name: "LifeCycleCashFlowTimeTravel",
+              signer: signer_A,
+              args: [asset_A.address, stablecoin.address, rbacList],
+            }),
+          );
+
+          const lifeCycleCashFlowAddress = resultLifeCycleCashFlow.proxyAddress;
+
+          lifeCycleCashFlow = await ethers.getContractAt("LifeCycleCashFlowTimeTravel", lifeCycleCashFlowAddress);
+
+          await stablecoin.transferWithoutErrors(lifeCycleCashFlowAddress, 1);
+
+          await expect(lifeCycleCashFlow.transferPaymentToken(signer_A.address, 1))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "TransferERC20TokenFailed")
+            .withArgs(signer_A.address, 1);
+        });
+
         it("An account can transfer 1 stablecoin", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
+          await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1", 2));
+
+          await expect(lifeCycleCashFlow.transferPaymentToken(signer_B.address, ethers.utils.parseUnits("1", 2)))
+            .to.emit(lifeCycleCashFlow, "PaymentTokenTransferred")
+            .withArgs(signer_B.address, ethers.utils.parseUnits("1", 2));
+
+          expect(await stablecoin.balanceOf(signer_B.address)).to.equal(ethers.utils.parseUnits("1", 2));
+        });
+
+        it("An account can transfer 1 stablecoin if the contract is unpaused", async () => {
+          await lifeCycleCashFlow.pause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
+          await lifeCycleCashFlow.unpause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.false;
 
           await stablecoin.transfer(lifeCycleCashFlowAddress, ethers.utils.parseUnits("1", 2));
 
@@ -1177,15 +1956,13 @@ describe("Security operations", () => {
         let stablecoin_B;
 
         beforeEach(async () => {
-          const stablecoinMock_B = await ethers.getContractFactory("StablecoinMock");
-          stablecoin_B = await stablecoinMock_B.deploy();
-          await stablecoin_B.deployed();
+          stablecoin_B = await stablecoinMock.deploy(false, false);
         });
 
         it("An account cannot update the stablecoin if the contract is paused", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.pause();
+
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
 
           await expect(lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address)).to.be.revertedWithCustomError(
             lifeCycleCashFlow,
@@ -1202,8 +1979,6 @@ describe("Security operations", () => {
         });
 
         it("An account with the PAYMENT_TOKEN_MANAGER_ROLE role revoked cannot set the stablecoin", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           await lifeCycleCashFlow.revokeRole(PAYMENT_TOKEN_MANAGER_ROLE, signer_A.address);
 
           await expect(lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address))
@@ -1213,8 +1988,17 @@ describe("Security operations", () => {
           await lifeCycleCashFlow.grantRole(PAYMENT_TOKEN_MANAGER_ROLE, signer_A.address);
         });
 
+        it("An account cannot set an invalid stablecoin", async () => {
+          await expect(lifeCycleCashFlow.updatePaymentToken(AddressZero))
+            .to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidPaymentToken")
+            .withArgs(AddressZero);
+        });
+
         it("An account can set the stablecoin", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
+          await lifeCycleCashFlow.pause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.true;
+          await lifeCycleCashFlow.unpause();
+          expect(await lifeCycleCashFlow.isPaused()).to.be.false;
 
           await expect(lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address))
             .to.emit(lifeCycleCashFlow, "PaymentTokenChanged")
@@ -1222,15 +2006,29 @@ describe("Security operations", () => {
 
           expect(await lifeCycleCashFlow.getPaymentToken()).to.equal(stablecoin_B.address);
         });
+
+        it("An account can set the stablecoin if the contract is unpaused", async () => {
+          await expect(lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address))
+            .to.emit(lifeCycleCashFlow, "PaymentTokenChanged")
+            .withArgs(stablecoin_B.address);
+
+          expect(await lifeCycleCashFlow.getPaymentToken()).to.equal(stablecoin_B.address);
+        });
+
+        it("An account cannot set the stablecoin if the association fails", async () => {
+          const stableCoinToFail = "0x0000000000000000000000000000000000000001";
+          await expect(lifeCycleCashFlow.updatePaymentToken(stableCoinToFail)).to.be.revertedWithCustomError(
+            lifeCycleCashFlow,
+            "AssociateTokenFailed",
+          );
+
+          expect(await lifeCycleCashFlow.getPaymentToken()).to.equal(stablecoin.address);
+        });
       });
 
       describe("Get the stablecoin", () => {
         it("An account can get the stablecoin", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
-          const stablecoinMock_B = await ethers.getContractFactory("StablecoinMock");
-          const stablecoin_B = await stablecoinMock_B.deploy();
-          await stablecoin_B.deployed();
+          const stablecoin_B = await stablecoinMock.deploy(false, false);
 
           await lifeCycleCashFlow.updatePaymentToken(stablecoin_B.address);
           expect(await lifeCycleCashFlow.getPaymentToken()).to.equal(stablecoin_B.address);
@@ -1239,8 +2037,6 @@ describe("Security operations", () => {
 
       describe("Get the stablecoin decimals", () => {
         it("An account can get the stablecoin decimals", async () => {
-          lifeCycleCashFlow = lifeCycleCashFlow.connect(signer_A);
-
           expect(await lifeCycleCashFlow.getPaymentTokenDecimals()).to.equal(2);
         });
       });
