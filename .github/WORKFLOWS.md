@@ -105,28 +105,34 @@ For non-feature changes, add these labels to skip changeset requirement:
 
 The repository supports **two release approaches**:
 
-1. **Automated Release Workflows** (recommended for most releases)
+1. **Semi-Automated Release Workflows** (recommended for most releases)
 2. **Manual Release Branches** (alternative for complex releases or when automation is unavailable)
 
-### Option 1: Automated Release Workflows
+### Option 1: Semi-Automated Release Workflows
+
+**IMPORTANT:** All commits require GPG signatures. The version bump must be done manually on your local machine before triggering the release workflow.
 
 #### ATS Release Flow
 
 ```mermaid
 sequenceDiagram
     participant Dev as Developer
+    participant Local as Local Machine
     participant M as main
     participant GH as GitHub Actions
     participant NPM as NPM Registry
 
+    Dev->>Local: npm run changeset:version
+    Note over Local: Updates package.json & CHANGELOGs
+    Note over Local: Consumes changesets
+    Dev->>Local: git commit -S (GPG signed)
+    Dev->>M: git push
     Dev->>GH: Trigger ATS Release Workflow
-    GH->>GH: Validate ATS changesets exist
-    GH->>M: Run changeset version --ignore MP packages
-    GH->>M: Commit version changes
-    GH->>M: Push tag v1.16.0-ats
+    GH->>GH: Validate version is committed
+    GH->>M: Create & push tag v1.16.0-ats
+    GH->>GH: Create GitHub release
     Note over GH,NPM: Tag push auto-triggers publish workflow
     GH->>NPM: Publish contracts & SDK
-    Note over GH: GitHub release created (optional, for notes)
 ```
 
 #### Mass Payout Release Flow
@@ -134,26 +140,72 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Dev as Developer
+    participant Local as Local Machine
     participant M as main
     participant GH as GitHub Actions
     participant NPM as NPM Registry
 
+    Dev->>Local: npx changeset version --ignore ATS
+    Note over Local: Updates package.json & CHANGELOGs
+    Note over Local: Consumes changesets
+    Dev->>Local: git commit -S (GPG signed)
+    Dev->>M: git push
     Dev->>GH: Trigger MP Release Workflow
-    GH->>GH: Validate MP changesets exist
-    GH->>M: Run changeset version --ignore ATS packages
-    GH->>M: Commit version changes
-    GH->>M: Push tag v2.4.0-mp
+    GH->>GH: Validate version is committed
+    GH->>M: Create & push tag v2.4.0-mp
+    GH->>GH: Create GitHub release
     Note over GH,NPM: Tag push auto-triggers publish workflow
     GH->>NPM: Publish MP packages
-    Note over GH: GitHub release created (optional, for notes)
 ```
+
+#### Manual Version Bump & Release Steps
+
+**Step 1: Local Version Bump (Required)**
+
+```bash
+# For ATS release
+npm run changeset:version
+# Or manually ignore Mass Payout packages:
+npx changeset version \
+  --ignore "@mass-payout/contracts" \
+  --ignore "@mass-payout/sdk" \
+  --ignore "@mass-payout/backend" \
+  --ignore "@mass-payout/frontend"
+
+# Review changes
+git diff
+
+# Commit with GPG signature (REQUIRED)
+git commit -S -m "chore: release ATS packages v3.0.0"
+
+# Push to remote
+git push
+```
+
+**Step 2: Trigger Release Workflow (GitHub UI)**
+
+1. Go to **Actions** → **ATS Release** (or **Mass Payout Release**)
+2. Click **Run workflow**
+3. Select **preview** to dry-run, or **release** to create the release
+4. The workflow will:
+   - Validate that version bump is committed
+   - Create and push git tag (e.g., `v3.0.0-ats`)
+   - Create GitHub release with auto-generated notes
+   - Trigger NPM publishing automatically
 
 #### Release Options
 
-Both automated workflows support:
+Both workflows support:
 
-- **Preview Mode**: Shows what would be released (dry-run)
-- **Release Mode**: Actually creates releases and triggers publishing
+- **Preview Mode**: Shows current version and what would be released (dry-run)
+- **Release Mode**: Creates tag, GitHub release, and triggers publishing
+
+**Important Notes:**
+
+- All commits MUST be GPG-signed (hence manual version bump)
+- The workflow will fail if uncommitted changes are detected
+- The workflow will fail if the tag already exists
+- Never run `changeset version` in CI - always do it locally
 
 ### Option 2: Manual Release Branches
 
@@ -266,6 +318,8 @@ Only these teams can trigger releases:
 
 ```mermaid
 sequenceDiagram
+    participant Dev as Developer
+    participant Local as Local Machine
     participant D as develop
     participant M as main
     participant GH as GitHub Actions
@@ -280,12 +334,13 @@ sequenceDiagram
     end
 
     Note over M: Ready for release
-    M->>GH: Manual release workflow trigger
-    GH->>M: Version packages
-    GH->>M: Push tag (e.g., v2.0.0-ats)
+    Dev->>Local: Run changeset:version locally
+    Dev->>M: Commit version changes (GPG signed)
+    Dev->>GH: Trigger release workflow
+    GH->>M: Create & push tag (e.g., v3.0.0-ats)
+    GH->>GH: Create GitHub release
     Note over GH,NPM: Tag push auto-triggers publish
     GH->>NPM: Publish to NPM
-    Note over GH: GitHub release optional (for notes)
 
     M->>D: Sync version changes back
 ```
@@ -298,10 +353,29 @@ sequenceDiagram
 
 - **Solution**: Create changeset with `npm run changeset` or add bypass label
 
+**❌ "Uncommitted changes detected" in release workflow**
+
+- **Solution**: Run `changeset:version` locally and commit changes before triggering release workflow
+- **Cause**: Version bump must be done manually with GPG signature
+
+**❌ "Tag already exists" in release workflow**
+
+- **Solution**: Check if version was already released or if version bump didn't occur
+- Use `git tag -l` to list existing tags
+
 **❌ "No changesets found to be bumped"**
 
 - **Solution**: Ensure changesets exist for the project you're releasing
 - Use `npm run changeset:status` to check pending changes
+
+**❌ GPG signing error during commit**
+
+- **Solution**: Configure GPG key for Git:
+  ```bash
+  git config --global user.signingkey YOUR_GPG_KEY_ID
+  git config --global commit.gpgsign true
+  ```
+- Verify GPG key is available: `gpg --list-secret-keys --keyid-format=long`
 
 **❌ Release workflow unauthorized**
 
