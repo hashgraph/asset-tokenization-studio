@@ -3,15 +3,18 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { BondRead } from "../../layer_2/bond/BondRead.sol";
 import { Security } from "../security/Security.sol";
-import { _BOND_READ_RESOLVER_KEY } from "../../layer_2/constants/resolverKeys.sol";
+import {
+    _BOND_READ_RESOLVER_KEY,
+    _BOND_FIXED_READ_RESOLVER_KEY,
+    _BOND_KPI_LINKED_READ_RESOLVER_KEY,
+    _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY
+} from "../../layer_2/constants/resolverKeys.sol";
 import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
 import { ISecurity } from "../interfaces/ISecurity.sol";
+import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 
-contract BondUSAReadFacet is BondRead, Security {
-    function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _BOND_READ_RESOLVER_KEY;
-    }
-
+abstract contract BondUSAReadFacetBase is BondRead, IStaticFunctionSelectors, Security {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](14);
@@ -36,5 +39,11 @@ contract BondUSAReadFacet is BondRead, Security {
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IBondRead).interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
+    }
+}
+
+contract BondUSAReadFacet is BondUSAReadFacetBase, Common {
+    function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {
+        staticResolverKey_ = _BOND_READ_RESOLVER_KEY;
     }
 }

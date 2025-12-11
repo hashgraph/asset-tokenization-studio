@@ -6,7 +6,7 @@ import { SnapshotsStorageWrapper2 } from "../snapshots/SnapshotsStorageWrapper2.
 import { IERC3643Management } from "../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
 
 abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
-    modifier onlyEmptyWallet(address _tokenHolder) {
+    modifier onlyEmptyWallet(address _tokenHolder) override {
         if (!_canRecover(_tokenHolder)) revert IERC3643Management.CannotRecoverWallet();
         _;
     }

@@ -29,12 +29,12 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
     }
 
     // modifiers
-    modifier onlyProtectedPartitions() {
+    modifier onlyProtectedPartitions() override {
         _checkProtectedPartitions();
         _;
     }
 
-    modifier onlyValidParticipant(bytes32 _partition) {
+    modifier onlyValidParticipant(bytes32 _partition) override {
         _checkValidPartition(_partition);
         _;
     }

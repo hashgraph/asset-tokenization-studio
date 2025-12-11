@@ -3,6 +3,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "./IBondRead.sol";
 interface IBond {
+    event MaturityDateUpdated(
+        address indexed bondId,
+        uint256 indexed maturityDate,
+        uint256 indexed previousMaturityDate
+    );
+
     /**
      * @notice Redeems all bonds at maturity from a token holder (all partitions considered)
      * @param _tokenHolder The address of the token holder redeeming the bonds.

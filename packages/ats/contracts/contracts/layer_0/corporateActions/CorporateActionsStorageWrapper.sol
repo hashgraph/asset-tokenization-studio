@@ -14,12 +14,12 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    modifier validateDates(uint256 _firstDate, uint256 _secondDate) {
+    modifier validateDates(uint256 _firstDate, uint256 _secondDate) override {
         _checkDates(_firstDate, _secondDate);
         _;
     }
 
-    modifier onlyMatchingActionType(bytes32 _actionType, uint256 _index) {
+    modifier onlyMatchingActionType(bytes32 _actionType, uint256 _index) override {
         _checkMatchingActionType(_actionType, _index);
         _;
     }

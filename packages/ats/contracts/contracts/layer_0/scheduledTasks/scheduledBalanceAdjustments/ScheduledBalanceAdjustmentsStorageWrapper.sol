@@ -2,9 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {
-    IScheduledBalanceAdjustments
-} from "../../../layer_2/interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol";
-import {
     ScheduledCouponListingStorageWrapper
 } from "../scheduledCouponListing/ScheduledCouponListingStorageWrapper.sol";
 import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";

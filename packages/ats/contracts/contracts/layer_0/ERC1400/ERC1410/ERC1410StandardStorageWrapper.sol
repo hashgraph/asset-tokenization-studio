@@ -121,7 +121,7 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) internal {
+    ) internal override {
         _beforeTokenTransfer(_partition, _from, address(0), _value);
 
         _reduceBalanceByPartition(_from, _value, _partition);

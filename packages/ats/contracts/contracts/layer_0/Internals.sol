@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LocalContext } from "./context/LocalContext.sol";
+import { Modifiers } from "./Modifiers.sol";
 import { IClearing } from "../layer_1/interfaces/clearing/IClearing.sol";
 import { IClearingTransfer } from "../layer_1/interfaces/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "../layer_1/interfaces/clearing/IClearingRedeem.sol";
@@ -21,19 +21,16 @@ import {
     PartitionSnapshots
 } from "../layer_1/interfaces/snapshots/ISnapshots.sol";
 import { ILock } from "../layer_1/interfaces/lock/ILock.sol";
+import { ISecurity } from "../layer_3/interfaces/ISecurity.sol";
+import { IBondRead } from "../layer_2/interfaces/bond/IBondRead.sol";
+import { RegulationData, AdditionalSecurityData } from "../layer_3/constants/regulation.sol";
 
 /**
  * @title Internals
  * @notice Abstract contract declaring all internal methods for layer_0 contracts
  */
 
-// Struct definitions for snapshots
-struct SnapshotsAddress {
-    uint256[] ids;
-    address[] values;
-}
-
-abstract contract Internals is LocalContext {
+abstract contract Internals is Modifiers {
     // ===== AdjustBalances Methods =====
     function _updateAbaf(uint256 factor) internal virtual;
     function _updateLabafByPartition(bytes32 partition) internal virtual;
@@ -568,6 +565,65 @@ abstract contract Internals is LocalContext {
     // ===== Bond Methods =====
     function _addToCouponsOrderedList(uint256 _couponID) internal virtual;
     function _getCouponsOrderedListTotal() internal view virtual returns (uint256 total_);
+    function _getBondDetails() internal view virtual returns (IBondRead.BondDetailsData memory bondDetails_);
+    function _getCoupon(
+        uint256 _couponID
+    ) internal view virtual returns (IBondRead.RegisteredCoupon memory registeredCoupon_);
+    function _getCouponFor(
+        uint256 _couponID,
+        address _account
+    ) internal view virtual returns (IBondRead.CouponFor memory couponFor_);
+    function _getCouponAmountFor(
+        uint256 _couponID,
+        address _account
+    ) internal view virtual returns (IBondRead.CouponAmountFor memory couponAmountFor_);
+    function _getPrincipalFor(
+        address _account
+    ) internal view virtual returns (IBondRead.PrincipalFor memory principalFor_);
+    function _getCouponCount() internal view virtual returns (uint256 couponCount_);
+    function _getCouponHolders(
+        uint256 _couponID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (address[] memory holders_);
+    function _getTotalCouponHolders(uint256 _couponID) internal view virtual returns (uint256);
+    function _getCouponFromOrderedListAt(uint256 _pos) internal view virtual returns (uint256 couponID_);
+    function _getCouponsOrderedList(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (uint256[] memory couponIDs_);
+    function _getCouponsOrderedListTotalAdjusted() internal view virtual returns (uint256 total_);
+    function _setCoupon(
+        IBondRead.Coupon memory _newCoupon
+    ) internal virtual returns (bytes32 corporateActionId_, uint256 couponID_);
+    function _setMaturityDate(uint256 _maturityDate) internal virtual returns (bool success_);
+    function _getMaturityDate() internal view virtual returns (uint256 maturityDate_);
+    function _initialize_bond(IBondRead.BondDetailsData calldata _bondDetailsData) internal virtual;
+    function _isBondInitialized() internal view virtual returns (bool);
+
+    // ===== ERC1410 Methods =====
+    function _partitionsOf(address _tokenHolder) internal view virtual returns (bytes32[] memory);
+    function _balanceOfByPartition(bytes32 _partition, address _tokenHolder) internal view virtual returns (uint256);
+    function _redeemByPartition(
+        bytes32 _partition,
+        address _from,
+        address _operator,
+        uint256 _value,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) internal virtual;
+
+    // ===== Security Methods =====
+    function _getTokenHolders(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (address[] memory holders_);
+    function _getTotalTokenHolders() internal view virtual returns (uint256);
+    function _getSecurityRegulationData() internal pure virtual returns (ISecurity.SecurityRegulationData memory);
+    function _initializeSecurity(
+        RegulationData memory _regulationData,
+        AdditionalSecurityData calldata _additionalSecurityData
+    ) internal virtual;
 
     // ===== Scheduled Cross Ordered Task Methods =====
 

@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-11T07:35:16.294Z
- * Facets: 57
+ * Generated: 2025-12-11T10:59:59.137Z
+ * Facets: 60
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -27,12 +27,18 @@ import {
   BondUSAFacetTimeTravel__factory,
   BondUSAFixedRateFacet__factory,
   BondUSAFixedRateFacetTimeTravel__factory,
+  BondUSAFixedReadFacet__factory,
+  BondUSAFixedReadFacetTimeTravel__factory,
   BondUSAKpiLinkedRateFacet__factory,
   BondUSAKpiLinkedRateFacetTimeTravel__factory,
   BondUSAKpiLinkedReadFacet__factory,
   BondUSAKpiLinkedReadFacetTimeTravel__factory,
   BondUSAReadFacet__factory,
   BondUSAReadFacetTimeTravel__factory,
+  BondUSASustainabilityPerformanceTargetRateFacet__factory,
+  BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  BondUSASustainabilityPerformanceTargetReadFacet__factory,
+  BondUSASustainabilityPerformanceTargetReadFacetTimeTravel__factory,
   CapFacet__factory,
   CapFacetTimeTravel__factory,
   ClearingActionsFacet__factory,
@@ -209,7 +215,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_VARIABLE_RATE_RESOLVER_KEY",
       value: "0xe6594ee8f54f346ab25268fdc7955031a6b06102355e1446353d89ab1d593de3",
     },
-    inheritance: ["BondUSA", "IStaticFunctionSelectors"],
+    inheritance: ["BondUSAFacetBase", "Common"],
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -225,6 +231,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
       { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
     ],
+    events: [
+      {
+        name: "MaturityDateUpdated",
+        signature: "MaturityDateUpdated(address,uint256,uint256)",
+        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+      },
+    ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new BondUSAFacetTimeTravel__factory(signer) : new BondUSAFacet__factory(signer),
   },
@@ -235,7 +249,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_FIXED_RATE_RESOLVER_KEY",
       value: "0xd55d8787d23b78e70dada1ade45b8758f5c027e2cddf3556606c07d388ce159a",
     },
-    inheritance: ["BondUSAFixedRate", "IStaticFunctionSelectors"],
+    inheritance: ["BondUSAFacetBase", "CommonFixedInterestRate"],
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -251,9 +265,50 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
       { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
     ],
-    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
+    events: [
+      {
+        name: "MaturityDateUpdated",
+        signature: "MaturityDateUpdated(address,uint256,uint256)",
+        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new BondUSAFixedRateFacetTimeTravel__factory(signer) : new BondUSAFixedRateFacet__factory(signer),
+  },
+
+  BondUSAFixedReadFacet: {
+    name: "BondUSAFixedReadFacet",
+    resolverKey: {
+      name: "_BOND_FIXED_READ_RESOLVER_KEY",
+      value: "0xd5d703d15aa25ad6419288846269dcbba84f489f1c986be2c919f84c042b8c24",
+    },
+    inheritance: ["BondUSAReadFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      { name: "getBondDetails", signature: "getBondDetails()", selector: "0x4ce02414" },
+      { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
+      { name: "getCouponAmountFor", signature: "getCouponAmountFor(uint256,address)", selector: "0x439efc2e" },
+      { name: "getCouponCount", signature: "getCouponCount()", selector: "0x468bb240" },
+      { name: "getCouponFor", signature: "getCouponFor(uint256,address)", selector: "0xbba7b56d" },
+      { name: "getCouponFromOrderedListAt", signature: "getCouponFromOrderedListAt(uint256)", selector: "0x65a88a2c" },
+      { name: "getCouponHolders", signature: "getCouponHolders(uint256,uint256,uint256)", selector: "0xa92e8371" },
+      { name: "getCouponsOrderedList", signature: "getCouponsOrderedList(uint256,uint256)", selector: "0xd7133de1" },
+      { name: "getCouponsOrderedListTotal", signature: "getCouponsOrderedListTotal()", selector: "0xee1d26eb" },
+      { name: "getPrincipalFor", signature: "getPrincipalFor(address)", selector: "0x6f131c78" },
+      { name: "getSecurityHolders", signature: "getSecurityHolders(uint256,uint256)", selector: "0x81438d2f" },
+      { name: "getSecurityRegulationData", signature: "getSecurityRegulationData()", selector: "0x8fda5afe" },
+      { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
+      { name: "getTotalSecurityHolders", signature: "getTotalSecurityHolders()", selector: "0xbd007c8f" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new BondUSAFixedReadFacetTimeTravel__factory(signer) : new BondUSAFixedReadFacet__factory(signer),
   },
 
   BondUSAKpiLinkedRateFacet: {
@@ -262,7 +317,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0x99c145ff21354eb7b25cb096873143fa3d3aba98457b96bcd13f1d1f2b9bf28c",
     },
-    inheritance: ["BondUSAKpiLinkedRate", "IStaticFunctionSelectors"],
+    inheritance: ["BondUSAFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -278,7 +333,17 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
       { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
     ],
-    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
+    events: [
+      {
+        name: "MaturityDateUpdated",
+        signature: "MaturityDateUpdated(address,uint256,uint256)",
+        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new BondUSAKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -291,7 +356,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_KPI_LINKED_READ_RESOLVER_KEY",
       value: "0xcced91a2a03bf45bd62730a7f4703ee2d762f8ebccff315c7145258265f73249",
     },
-    inheritance: ["BondReadKpiLinkedInterestRate", "BondUSAReadFacet"],
+    inheritance: ["BondUSAReadFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
       { name: "getBondDetails", signature: "getBondDetails()", selector: "0x4ce02414" },
       { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
@@ -308,7 +373,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
       { name: "getTotalSecurityHolders", signature: "getTotalSecurityHolders()", selector: "0xbd007c8f" },
     ],
-    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new BondUSAKpiLinkedReadFacetTimeTravel__factory(signer)
@@ -321,7 +389,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_READ_RESOLVER_KEY",
       value: "0xe7ca0b805514da05524faf33d2d9d9432bf1dfa53096073a7267041cfdfb6d68",
     },
-    inheritance: ["BondRead", "Security"],
+    inheritance: ["BondUSAReadFacetBase", "Common"],
     methods: [
       { name: "getBondDetails", signature: "getBondDetails()", selector: "0x4ce02414" },
       { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
@@ -338,8 +406,89 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
       { name: "getTotalSecurityHolders", signature: "getTotalSecurityHolders()", selector: "0xbd007c8f" },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new BondUSAReadFacetTimeTravel__factory(signer) : new BondUSAReadFacet__factory(signer),
+  },
+
+  BondUSASustainabilityPerformanceTargetRateFacet: {
+    name: "BondUSASustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x8048a878c656dcf3886e69ad27a9272a4fb9499299ab5f0e1b6c99ac3b1130f8",
+    },
+    inheritance: ["BondUSAFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "_initialize_bondUSA",
+        signature: "_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)",
+        selector: "0x653458ea",
+      },
+      { name: "fullRedeemAtMaturity", signature: "fullRedeemAtMaturity(address)", selector: "0xd0db5fb2" },
+      {
+        name: "redeemAtMaturityByPartition",
+        signature: "redeemAtMaturityByPartition(address,bytes32,uint256)",
+        selector: "0x8a647211",
+      },
+      { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
+      { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
+    ],
+    events: [
+      {
+        name: "MaturityDateUpdated",
+        signature: "MaturityDateUpdated(address,uint256,uint256)",
+        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
+  BondUSASustainabilityPerformanceTargetReadFacet: {
+    name: "BondUSASustainabilityPerformanceTargetReadFacet",
+    resolverKey: {
+      name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY",
+      value: "0x339d458f2928ef5148317aab39e4375a27e6c531d2e5b9de2d4fb23ad0e8b504",
+    },
+    inheritance: ["BondUSAReadFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "getBondDetails", signature: "getBondDetails()", selector: "0x4ce02414" },
+      { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
+      { name: "getCouponAmountFor", signature: "getCouponAmountFor(uint256,address)", selector: "0x439efc2e" },
+      { name: "getCouponCount", signature: "getCouponCount()", selector: "0x468bb240" },
+      { name: "getCouponFor", signature: "getCouponFor(uint256,address)", selector: "0xbba7b56d" },
+      { name: "getCouponFromOrderedListAt", signature: "getCouponFromOrderedListAt(uint256)", selector: "0x65a88a2c" },
+      { name: "getCouponHolders", signature: "getCouponHolders(uint256,uint256,uint256)", selector: "0xa92e8371" },
+      { name: "getCouponsOrderedList", signature: "getCouponsOrderedList(uint256,uint256)", selector: "0xd7133de1" },
+      { name: "getCouponsOrderedListTotal", signature: "getCouponsOrderedListTotal()", selector: "0xee1d26eb" },
+      { name: "getPrincipalFor", signature: "getPrincipalFor(address)", selector: "0x6f131c78" },
+      { name: "getSecurityHolders", signature: "getSecurityHolders(uint256,uint256)", selector: "0x81438d2f" },
+      { name: "getSecurityRegulationData", signature: "getSecurityRegulationData()", selector: "0x8fda5afe" },
+      { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
+      { name: "getTotalSecurityHolders", signature: "getTotalSecurityHolders()", selector: "0xbd007c8f" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new BondUSASustainabilityPerformanceTargetReadFacetTimeTravel__factory(signer)
+        : new BondUSASustainabilityPerformanceTargetReadFacet__factory(signer),
   },
 
   CapFacet: {
@@ -795,6 +944,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "setVoting", signature: "setVoting(Voting)", selector: "0x99f97b27" },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new EquityUSAFacetTimeTravel__factory(signer) : new EquityUSAFacet__factory(signer),
   },
@@ -2212,7 +2362,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 57 as const;
+export const TOTAL_FACETS = 60 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -2353,6 +2503,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       { name: "_getTotalCouponHolders", signature: "_getTotalCouponHolders(uint256)", selector: "0xfba7a1ab" },
       { name: "_initCoupon", signature: "_initCoupon(bytes32,IBondRead.Coupon)", selector: "0x9b230d29" },
       { name: "_initialize_bond", signature: "_initialize_bond(IBondRead.BondDetailsData)", selector: "0x158876c6" },
+      { name: "_isBondInitialized", signature: "_isBondInitialized()", selector: "0x8a5c5929" },
       { name: "_setCoupon", signature: "_setCoupon(IBondRead.Coupon)", selector: "0xf9d474a4" },
       { name: "_setMaturityDate", signature: "_setMaturityDate(uint256)", selector: "0x1c73e162" },
       { name: "_storeBondDetails", signature: "_storeBondDetails(IBondRead.BondDetailsData)", selector: "0x9b11f1cd" },

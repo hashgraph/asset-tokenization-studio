@@ -13,14 +13,14 @@ abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper
         mapping(address => bytes) proceedRecipientData;
     }
 
-    modifier onlyIfProceedRecipient(address _proceedRecipient) {
+    modifier onlyIfProceedRecipient(address _proceedRecipient) override {
         if (!_isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientNotFound(_proceedRecipient);
         }
         _;
     }
 
-    modifier onlyIfNotProceedRecipient(address _proceedRecipient) {
+    modifier onlyIfNotProceedRecipient(address _proceedRecipient) override {
         if (_isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientAlreadyExists(_proceedRecipient);
         }

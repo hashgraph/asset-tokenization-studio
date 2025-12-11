@@ -18,17 +18,17 @@ import { _AGENT_ROLE } from "../constants/roles.sol";
 abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecipientsStorageWrapper {
     using LowLevelCall for address;
 
-    modifier onlyUnrecoveredAddress(address _account) {
+    modifier onlyUnrecoveredAddress(address _account) override {
         _checkRecoveredAddress(_account);
         _;
     }
 
-    modifier onlyValidInputAmountsArrayLength(address[] memory _addresses, uint256[] memory _amounts) {
+    modifier onlyValidInputAmountsArrayLength(address[] memory _addresses, uint256[] memory _amounts) override {
         _checkInputAmountsArrayLength(_addresses, _amounts);
         _;
     }
 
-    modifier onlyValidInputBoolArrayLength(address[] memory _addresses, bool[] memory _status) {
+    modifier onlyValidInputBoolArrayLength(address[] memory _addresses, bool[] memory _status) override {
         _checkInputBoolArrayLength(_addresses, _status);
         _;
     }

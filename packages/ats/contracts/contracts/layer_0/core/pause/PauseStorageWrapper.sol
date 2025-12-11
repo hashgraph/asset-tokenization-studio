@@ -16,7 +16,7 @@ abstract contract PauseStorageWrapper is IPauseStorageWrapper, ExternalPauseMana
         _;
     }
 
-    modifier onlyUnpaused() {
+    modifier onlyUnpaused() override {
         _checkUnpaused();
         _;
     }

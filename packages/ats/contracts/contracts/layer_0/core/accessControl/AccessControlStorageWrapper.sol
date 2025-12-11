@@ -28,22 +28,22 @@ abstract contract AccessControlStorageWrapper is IAccessControlStorageWrapper, I
         mapping(address => EnumerableSet.Bytes32Set) memberRoles;
     }
 
-    modifier onlyRole(bytes32 _role) {
+    modifier onlyRole(bytes32 _role) override {
         _checkRole(_role, _msgSender());
         _;
     }
 
-    modifier onlyRoleFor(bytes32 _role, address _account) {
+    modifier onlyRoleFor(bytes32 _role, address _account) override {
         _checkRole(_role, _account);
         _;
     }
 
-    modifier onlySameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) {
+    modifier onlySameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) override {
         _checkSameRolesAndActivesLength(_rolesLength, _activesLength);
         _;
     }
 
-    modifier onlyConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) {
+    modifier onlyConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) override {
         ArrayLib.checkUniqueValues(_roles, _actives);
         _;
     }

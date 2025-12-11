@@ -12,7 +12,7 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     error WrongTimestamp(uint256 timeStamp);
     error NotAutocalling();
 
-    modifier onlyValidTimestamp(uint256 _timestamp) {
+    modifier onlyValidTimestamp(uint256 _timestamp) override {
         _checkTimestamp(_timestamp);
         _;
     }

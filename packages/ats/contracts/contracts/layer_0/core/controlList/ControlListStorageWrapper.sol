@@ -24,7 +24,7 @@ abstract contract ControlListStorageWrapper is IControlListStorageWrapper, Exter
     }
 
     // modifiers
-    modifier onlyListedAllowed(address _account) {
+    modifier onlyListedAllowed(address _account) override {
         _checkControlList(_account);
         _;
     }

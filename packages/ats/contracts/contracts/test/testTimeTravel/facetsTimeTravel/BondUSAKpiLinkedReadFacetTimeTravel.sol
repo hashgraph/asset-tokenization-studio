@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    BondUSAKpiLinkedReadFacet
-} from "../../../layer_3/bondUSA/kpiLinkedInterestRate/BondUSAKpiLinkedReadFacet.sol";
+import { BondUSAKpiLinkedReadFacet } from "../../../layer_3/bondUSA/BondUSAKpiLinkedReadFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 

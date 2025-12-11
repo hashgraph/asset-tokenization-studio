@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    IScheduledSnapshots
-} from "../../../layer_2/interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol";
 import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import { ScheduledTasksCommon } from "../ScheduledTasksCommon.sol";
 import { _SCHEDULED_SNAPSHOTS_STORAGE_POSITION } from "../../constants/storagePositions.sol";

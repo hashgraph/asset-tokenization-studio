@@ -36,12 +36,12 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
         _;
     }
 
-    modifier onlyDefaultPartitionWithSinglePartition(bytes32 partition) {
+    modifier onlyDefaultPartitionWithSinglePartition(bytes32 partition) override {
         _checkDefaultPartitionWithSinglePartition(partition);
         _;
     }
 
-    modifier validateAddress(address account) {
+    modifier validateAddress(address account) override {
         _checkValidAddress(account);
         _;
     }
@@ -148,7 +148,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
     function _getTokenHolders(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (address[] memory holders_) {
+    ) internal view override returns (address[] memory holders_) {
         (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
 
         holders_ = new address[](LibCommon.getSize(start, end, _getTotalTokenHolders()));
@@ -166,7 +166,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
         return _erc1410BasicStorage().tokenHolders[_index];
     }
 
-    function _getTotalTokenHolders() internal view returns (uint256) {
+    function _getTotalTokenHolders() internal view override returns (uint256) {
         return _erc1410BasicStorage().totalTokenHolders;
     }
 
@@ -190,7 +190,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
         return _erc1410BasicStorage().balances[_tokenHolder];
     }
 
-    function _balanceOfByPartition(bytes32 _partition, address _tokenHolder) internal view returns (uint256) {
+    function _balanceOfByPartition(bytes32 _partition, address _tokenHolder) internal view override returns (uint256) {
         if (_validPartition(_partition, _tokenHolder)) {
             ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
             return
@@ -201,7 +201,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
         }
     }
 
-    function _partitionsOf(address _tokenHolder) internal view returns (bytes32[] memory) {
+    function _partitionsOf(address _tokenHolder) internal view override returns (bytes32[] memory) {
         ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
         bytes32[] memory partitionsList = new bytes32[](erc1410Storage.partitions[_tokenHolder].length);
         for (uint256 i = 0; i < erc1410Storage.partitions[_tokenHolder].length; i++) {

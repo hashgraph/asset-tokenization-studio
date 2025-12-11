@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    IScheduledCrossOrderedTasks
-} from "../../../layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
 import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import { _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {

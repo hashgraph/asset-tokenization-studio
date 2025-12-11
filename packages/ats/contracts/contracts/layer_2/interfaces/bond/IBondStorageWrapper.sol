@@ -14,18 +14,6 @@ interface IBondStorageWrapper {
     event CouponSet(bytes32 corporateActionId, uint256 couponId, address indexed operator, IBondRead.Coupon coupon);
 
     /**
-     * @notice Emitted when a bond's maturity date is modified.
-     * @param bondId Address of the bond whose maturity changed.
-     * @param maturityDate New maturity timestamp.
-     * @param previousMaturityDate Previous maturity timestamp prior to the update.
-     */
-    event MaturityDateUpdated(
-        address indexed bondId,
-        uint256 indexed maturityDate,
-        uint256 indexed previousMaturityDate
-    );
-
-    /**
      * @notice Coupon creation failed due to an internal failure.
      */
     error CouponCreationFailed();
