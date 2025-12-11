@@ -8,11 +8,9 @@ import {
 } from "../../../../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { DecimalsLib } from "../../../../../layer_0/common/libraries/DecimalsLib.sol";
-import {KpisStorageWrapper} from "./kpis/KpisStorageWrapper.sol";
+import { KpisStorageWrapper } from "./kpis/KpisStorageWrapper.sol";
 
-abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate is
-    KpisStorageWrapper
-{
+abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate is KpisStorageWrapper {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     error InterestRateIsSustainabilityPerformanceTarget();

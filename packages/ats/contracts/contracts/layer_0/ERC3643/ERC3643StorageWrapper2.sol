@@ -125,9 +125,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         return true;
     }
 
-    function _getFrozenAmountForAdjusted(
-        address _tokenHolder
-    ) internal view override returns (uint256 amount_) {
+    function _getFrozenAmountForAdjusted(address _tokenHolder) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactor(_getAbafAdjusted(), _getTotalFrozenLabaf(_tokenHolder));
 
         return _getFrozenAmountFor(_tokenHolder) * factor;
@@ -136,7 +134,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
     function _getFrozenAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
-    ) internal view returns (uint256 amount_) {
+    ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactorForFrozenAmountByTokenHolderAdjustedAt(_tokenHolder, _timestamp);
 
         return _getFrozenAmountFor(_tokenHolder) * factor;

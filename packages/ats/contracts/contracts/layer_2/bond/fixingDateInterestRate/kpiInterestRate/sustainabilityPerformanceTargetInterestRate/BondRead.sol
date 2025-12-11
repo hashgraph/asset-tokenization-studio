@@ -2,14 +2,20 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { BondRead } from "../../../BondRead.sol";
-import { CommonSustainabilityPerformanceTargetInterestRate } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+import {
+    CommonSustainabilityPerformanceTargetInterestRate
+} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 import { IBondRead } from "../../../../interfaces/bond/IBondRead.sol";
 import { BondStorageWrapper } from "../../../../../layer_0/bond/BondStorageWrapper.sol";
 import {
     BondStorageWrapperSustainabilityPerformanceTargetInterestRate
 } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/BondStorageWrapper.sol";
-import { BondStorageWrapperFixingDateInterestRate } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/BondStorageWrapperFixingDateInterestRate.sol";
-import { KpisStorageWrapper } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/kpis/KpisStorageWrapper.sol";
+import {
+    BondStorageWrapperFixingDateInterestRate
+} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/BondStorageWrapperFixingDateInterestRate.sol";
+import {
+    KpisStorageWrapper
+} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/kpis/KpisStorageWrapper.sol";
 
 abstract contract BondReadSustainabilityPerformanceTargetInterestRate is
     BondRead,

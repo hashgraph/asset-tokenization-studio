@@ -9,13 +9,9 @@ import {
 } from "../../../layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol";
 import { BusinessLogicResolverWrapper } from "../../../resolver/BusinessLogicResolverWrapper.sol";
 import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import {Internals} from "../../Internals.sol";
+import { Internals } from "../../Internals.sol";
 
-abstract contract AccessControlStorageWrapper is
-    IAccessControlStorageWrapper,
-    Internals,
-    BusinessLogicResolverWrapper
-{
+abstract contract AccessControlStorageWrapper is IAccessControlStorageWrapper, Internals, BusinessLogicResolverWrapper {
     // TODO: Check if it's possible to use only one dependency of AddressSet and Bytes32Set
     using LibCommon for EnumerableSet.AddressSet;
     using LibCommon for EnumerableSet.Bytes32Set;

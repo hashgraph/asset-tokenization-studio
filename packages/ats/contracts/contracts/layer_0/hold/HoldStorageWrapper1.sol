@@ -77,7 +77,10 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
         );
     }
 
-    function _getHoldCountForByPartition(bytes32 _partition, address _tokenHolder) internal view override returns (uint256) {
+    function _getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view override returns (uint256) {
         return _holdStorage().holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
     }
 

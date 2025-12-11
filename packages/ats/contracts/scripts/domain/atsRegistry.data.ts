@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-10T14:42:41.252Z
+ * Generated: 2025-12-11T07:35:16.294Z
  * Facets: 57
  * Infrastructure: 2
  *
@@ -667,80 +667,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9ed84e40",
       },
     ],
-    events: [
-      {
-        name: "PartitionsProtected",
-        signature: "PartitionsProtected(address)",
-        topic0: "0x990fbe2c0a8b93cc7974d7ab6416266441112d61fa0989af94a79de43dda48ff",
-      },
-      {
-        name: "PartitionsUnProtected",
-        signature: "PartitionsUnProtected(address)",
-        topic0: "0xd556aabec0a33d5b3b9b8c739af1745b14ba2abecc20c3c080fd4ac6143e8525",
-      },
-      {
-        name: "ProtectedRedeemFrom",
-        signature: "ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        topic0: "0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b",
-      },
-      {
-        name: "ProtectedTransferFrom",
-        signature: "ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)",
-        topic0: "0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c",
-      },
-      {
-        name: "RoleAdminChanged",
-        signature: "RoleAdminChanged(bytes32,bytes32,bytes32)",
-        topic0: "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff",
-      },
-      {
-        name: "TokenPaused",
-        signature: "TokenPaused(address)",
-        topic0: "0xf017c0de579727a3cd3ee18077ee8b4c43bf21892985952d1d5a0d52f983502d",
-      },
-      {
-        name: "TokenUnpaused",
-        signature: "TokenUnpaused(address)",
-        topic0: "0xf38578ed892ce2ce655ca8ae03c73464ad74915a1331a9b4085e637534daeedf",
-      },
-    ],
-    errors: [
-      { name: "AccountHasNoRole", signature: "AccountHasNoRole(address,bytes32)", selector: "0xa1180aad" },
-      { name: "AccountHasNoRoles", signature: "AccountHasNoRoles(address,bytes32[])", selector: "0x90e55392" },
-      { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
-      {
-        name: "AllBusinessLogicKeysMustBeenInformed",
-        signature: "AllBusinessLogicKeysMustBeenInformed()",
-        selector: "0x7d1960b7",
-      },
-      { name: "BusinessLogicKeyDuplicated", signature: "BusinessLogicKeyDuplicated(bytes32)", selector: "0x193c9b12" },
-      { name: "BusinessLogicNotActive", signature: "BusinessLogicNotActive(bytes32)", selector: "0x4649536d" },
-      {
-        name: "BusinessLogicVersionDoesNotExist",
-        signature: "BusinessLogicVersionDoesNotExist(uint256)",
-        selector: "0x0f5ce4d0",
-      },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      {
-        name: "PartitionsAreProtectedAndNoRole",
-        signature: "PartitionsAreProtectedAndNoRole(address,bytes32)",
-        selector: "0x55347310",
-      },
-      { name: "PartitionsAreUnProtected", signature: "PartitionsAreUnProtected()", selector: "0x05681565" },
-      {
-        name: "RolesAndActivesLengthMismatch",
-        signature: "RolesAndActivesLengthMismatch(uint256,uint256)",
-        selector: "0x365ff1a4",
-      },
-      { name: "TokenIsPaused", signature: "TokenIsPaused()", selector: "0x649815a5" },
-      { name: "TokenIsUnpaused", signature: "TokenIsUnpaused()", selector: "0x72058d69" },
-      { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
-      {
-        name: "ZeroKeyNotValidForBusinessLogic",
-        signature: "ZeroKeyNotValidForBusinessLogic()",
-        selector: "0x7da728b1",
-      },
-    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new DiamondCutFacetTimeTravel__factory(signer) : new DiamondCutFacet__factory(signer),
   },
@@ -784,80 +710,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9ed84e40",
       },
     ],
-    events: [
-      {
-        name: "PartitionsProtected",
-        signature: "PartitionsProtected(address)",
-        topic0: "0x990fbe2c0a8b93cc7974d7ab6416266441112d61fa0989af94a79de43dda48ff",
-      },
-      {
-        name: "PartitionsUnProtected",
-        signature: "PartitionsUnProtected(address)",
-        topic0: "0xd556aabec0a33d5b3b9b8c739af1745b14ba2abecc20c3c080fd4ac6143e8525",
-      },
-      {
-        name: "ProtectedRedeemFrom",
-        signature: "ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        topic0: "0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b",
-      },
-      {
-        name: "ProtectedTransferFrom",
-        signature: "ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)",
-        topic0: "0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c",
-      },
-      {
-        name: "RoleAdminChanged",
-        signature: "RoleAdminChanged(bytes32,bytes32,bytes32)",
-        topic0: "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff",
-      },
-      {
-        name: "TokenPaused",
-        signature: "TokenPaused(address)",
-        topic0: "0xf017c0de579727a3cd3ee18077ee8b4c43bf21892985952d1d5a0d52f983502d",
-      },
-      {
-        name: "TokenUnpaused",
-        signature: "TokenUnpaused(address)",
-        topic0: "0xf38578ed892ce2ce655ca8ae03c73464ad74915a1331a9b4085e637534daeedf",
-      },
-    ],
-    errors: [
-      { name: "AccountHasNoRole", signature: "AccountHasNoRole(address,bytes32)", selector: "0xa1180aad" },
-      { name: "AccountHasNoRoles", signature: "AccountHasNoRoles(address,bytes32[])", selector: "0x90e55392" },
-      { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
-      {
-        name: "AllBusinessLogicKeysMustBeenInformed",
-        signature: "AllBusinessLogicKeysMustBeenInformed()",
-        selector: "0x7d1960b7",
-      },
-      { name: "BusinessLogicKeyDuplicated", signature: "BusinessLogicKeyDuplicated(bytes32)", selector: "0x193c9b12" },
-      { name: "BusinessLogicNotActive", signature: "BusinessLogicNotActive(bytes32)", selector: "0x4649536d" },
-      {
-        name: "BusinessLogicVersionDoesNotExist",
-        signature: "BusinessLogicVersionDoesNotExist(uint256)",
-        selector: "0x0f5ce4d0",
-      },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      {
-        name: "PartitionsAreProtectedAndNoRole",
-        signature: "PartitionsAreProtectedAndNoRole(address,bytes32)",
-        selector: "0x55347310",
-      },
-      { name: "PartitionsAreUnProtected", signature: "PartitionsAreUnProtected()", selector: "0x05681565" },
-      {
-        name: "RolesAndActivesLengthMismatch",
-        signature: "RolesAndActivesLengthMismatch(uint256,uint256)",
-        selector: "0x365ff1a4",
-      },
-      { name: "TokenIsPaused", signature: "TokenIsPaused()", selector: "0x649815a5" },
-      { name: "TokenIsUnpaused", signature: "TokenIsUnpaused()", selector: "0x72058d69" },
-      { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
-      {
-        name: "ZeroKeyNotValidForBusinessLogic",
-        signature: "ZeroKeyNotValidForBusinessLogic()",
-        selector: "0x7da728b1",
-      },
-    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new DiamondFacetTimeTravel__factory(signer) : new DiamondFacet__factory(signer),
   },
@@ -892,80 +744,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "getFacetSelectorsLength", signature: "getFacetSelectorsLength(bytes32)", selector: "0xca1f70ec" },
       { name: "getFacetsLength", signature: "getFacetsLength()", selector: "0x430720f9" },
       { name: "supportsInterface", signature: "supportsInterface(bytes4)", selector: "0x01ffc9a7" },
-    ],
-    events: [
-      {
-        name: "PartitionsProtected",
-        signature: "PartitionsProtected(address)",
-        topic0: "0x990fbe2c0a8b93cc7974d7ab6416266441112d61fa0989af94a79de43dda48ff",
-      },
-      {
-        name: "PartitionsUnProtected",
-        signature: "PartitionsUnProtected(address)",
-        topic0: "0xd556aabec0a33d5b3b9b8c739af1745b14ba2abecc20c3c080fd4ac6143e8525",
-      },
-      {
-        name: "ProtectedRedeemFrom",
-        signature: "ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        topic0: "0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b",
-      },
-      {
-        name: "ProtectedTransferFrom",
-        signature: "ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)",
-        topic0: "0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c",
-      },
-      {
-        name: "RoleAdminChanged",
-        signature: "RoleAdminChanged(bytes32,bytes32,bytes32)",
-        topic0: "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff",
-      },
-      {
-        name: "TokenPaused",
-        signature: "TokenPaused(address)",
-        topic0: "0xf017c0de579727a3cd3ee18077ee8b4c43bf21892985952d1d5a0d52f983502d",
-      },
-      {
-        name: "TokenUnpaused",
-        signature: "TokenUnpaused(address)",
-        topic0: "0xf38578ed892ce2ce655ca8ae03c73464ad74915a1331a9b4085e637534daeedf",
-      },
-    ],
-    errors: [
-      { name: "AccountHasNoRole", signature: "AccountHasNoRole(address,bytes32)", selector: "0xa1180aad" },
-      { name: "AccountHasNoRoles", signature: "AccountHasNoRoles(address,bytes32[])", selector: "0x90e55392" },
-      { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
-      {
-        name: "AllBusinessLogicKeysMustBeenInformed",
-        signature: "AllBusinessLogicKeysMustBeenInformed()",
-        selector: "0x7d1960b7",
-      },
-      { name: "BusinessLogicKeyDuplicated", signature: "BusinessLogicKeyDuplicated(bytes32)", selector: "0x193c9b12" },
-      { name: "BusinessLogicNotActive", signature: "BusinessLogicNotActive(bytes32)", selector: "0x4649536d" },
-      {
-        name: "BusinessLogicVersionDoesNotExist",
-        signature: "BusinessLogicVersionDoesNotExist(uint256)",
-        selector: "0x0f5ce4d0",
-      },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      {
-        name: "PartitionsAreProtectedAndNoRole",
-        signature: "PartitionsAreProtectedAndNoRole(address,bytes32)",
-        selector: "0x55347310",
-      },
-      { name: "PartitionsAreUnProtected", signature: "PartitionsAreUnProtected()", selector: "0x05681565" },
-      {
-        name: "RolesAndActivesLengthMismatch",
-        signature: "RolesAndActivesLengthMismatch(uint256,uint256)",
-        selector: "0x365ff1a4",
-      },
-      { name: "TokenIsPaused", signature: "TokenIsPaused()", selector: "0x649815a5" },
-      { name: "TokenIsUnpaused", signature: "TokenIsUnpaused()", selector: "0x72058d69" },
-      { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
-      {
-        name: "ZeroKeyNotValidForBusinessLogic",
-        signature: "ZeroKeyNotValidForBusinessLogic()",
-        selector: "0x7da728b1",
-      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new DiamondLoupeFacetTimeTravel__factory(signer) : new DiamondLoupeFacet__factory(signer),
@@ -2519,7 +2297,7 @@ export const TOTAL_INFRASTRUCTURE_CONTRACTS = 2 as const;
 export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> = {
   AccessControlStorageWrapper: {
     name: "AccessControlStorageWrapper",
-    inheritance: ["IAccessControlStorageWrapper", "LocalContext", "BusinessLogicResolverWrapper"],
+    inheritance: ["IAccessControlStorageWrapper", "Internals", "BusinessLogicResolverWrapper"],
     methods: [
       { name: "_applyRoles", signature: "_applyRoles(bytes32[],bool[],address)", selector: "0xb4628c56" },
       { name: "_checkAnyRole", signature: "_checkAnyRole(bytes32[],address)", selector: "0xe066fd1b" },
@@ -2742,17 +2520,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "ERC1410BasicStorageWrapper",
     inheritance: ["IERC1410StorageWrapper", "ERC20StorageWrapper1"],
     methods: [
-      { name: "_addPartitionTo", signature: "_addPartitionTo(uint256,address,bytes32)", selector: "0x3c1a5e22" },
-      {
-        name: "_afterTokenTransfer",
-        signature: "_afterTokenTransfer(bytes32,address,address,uint256)",
-        selector: "0x91823775",
-      },
-      {
-        name: "_beforeTokenTransfer",
-        signature: "_beforeTokenTransfer(bytes32,address,address,uint256)",
-        selector: "0x594330fa",
-      },
       {
         name: "_transferByPartition",
         signature: "_transferByPartition(address,BasicTransferInfo,bytes32,bytes,address,bytes)",
@@ -2816,11 +2583,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     inheritance: ["ERC1410OperatorStorageWrapper"],
     methods: [
       { name: "_addPartitionTo", signature: "_addPartitionTo(uint256,address,bytes32)", selector: "0x3c1a5e22" },
-      {
-        name: "_adjustTotalAndMaxSupplyForPartition",
-        signature: "_adjustTotalAndMaxSupplyForPartition(bytes32)",
-        selector: "0xa631f0c2",
-      },
       { name: "_balanceOfAdjusted", signature: "_balanceOfAdjusted(address)", selector: "0x908e04a4" },
       { name: "_balanceOfAdjustedAt", signature: "_balanceOfAdjustedAt(address,uint256)", selector: "0x3f7cb27c" },
       {
@@ -2837,11 +2599,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         name: "_beforeTokenTransfer",
         signature: "_beforeTokenTransfer(bytes32,address,address,uint256)",
         selector: "0x594330fa",
-      },
-      {
-        name: "_getLabafByUserAndPartition",
-        signature: "_getLabafByUserAndPartition(bytes32,address)",
-        selector: "0xde03ae12",
       },
       { name: "_getTotalBalance", signature: "_getTotalBalance(address)", selector: "0xc5930def" },
       {
@@ -2883,14 +2640,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         selector: "0xa047058c",
       },
       { name: "_triggerAndSyncAll", signature: "_triggerAndSyncAll(bytes32,address,address)", selector: "0x46db8b21" },
-      { name: "_updateAccountSnapshot", signature: "_updateAccountSnapshot(address,bytes32)", selector: "0x79f34fd4" },
-      { name: "_updateTokenHolderSnapshot", signature: "_updateTokenHolderSnapshot(address)", selector: "0xec13fe0b" },
-      { name: "_updateTotalSupplySnapshot", signature: "_updateTotalSupplySnapshot(bytes32)", selector: "0x5b18f4fe" },
-      {
-        name: "_updateTotalTokenHolderSnapshot",
-        signature: "_updateTotalTokenHolderSnapshot()",
-        selector: "0x329e21f0",
-      },
       { name: "_validateParams", signature: "_validateParams(bytes32,uint256)", selector: "0x3e969ef5" },
     ],
   },
@@ -3098,11 +2847,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       { name: "_setImpactData", signature: "_setImpactData(IKpiLinkedRate.ImpactData)", selector: "0xf073c118" },
       { name: "_setInterestRate", signature: "_setInterestRate(IKpiLinkedRate.InterestRate)", selector: "0x13b3a045" },
       { name: "_setKpiOracle", signature: "_setKpiOracle(address)", selector: "0xe9f6e413" },
-      {
-        name: "_triggerScheduledCrossOrderedTasks",
-        signature: "_triggerScheduledCrossOrderedTasks(uint256)",
-        selector: "0xa3608e20",
-      },
     ],
   },
 
@@ -3279,7 +3023,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         signature: "_addScheduledBalanceAdjustment(uint256,bytes)",
         selector: "0xefa50553",
       },
-      { name: "_adjustBalances", signature: "_adjustBalances(uint256,uint8)", selector: "0x0b95889f" },
       {
         name: "_getPendingScheduledBalanceAdjustmentsAt",
         signature: "_getPendingScheduledBalanceAdjustmentsAt(uint256)",
@@ -3322,8 +3065,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         signature: "_addScheduledCouponListing(uint256,bytes)",
         selector: "0x38b080c0",
       },
-      { name: "_addToCouponsOrderedList", signature: "_addToCouponsOrderedList(uint256)", selector: "0x17a345a0" },
-      { name: "_getCouponsOrderedListTotal", signature: "_getCouponsOrderedListTotal()", selector: "0xe92862c4" },
       {
         name: "_getPendingScheduledCouponListingTotalAt",
         signature: "_getPendingScheduledCouponListingTotalAt(uint256)",
@@ -3498,21 +3239,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         name: "_getTotalBalanceForAdjustedAt",
         signature: "_getTotalBalanceForAdjustedAt(address,uint256)",
         selector: "0xd215b5a7",
-      },
-      {
-        name: "_getTotalBalanceForByPartitionAdjusted",
-        signature: "_getTotalBalanceForByPartitionAdjusted(bytes32,address)",
-        selector: "0xb56339d6",
-      },
-      {
-        name: "_getTotalBalanceOfAtSnapshot",
-        signature: "_getTotalBalanceOfAtSnapshot(uint256,address)",
-        selector: "0xc18cf802",
-      },
-      {
-        name: "_getTotalBalanceOfAtSnapshotByPartition",
-        signature: "_getTotalBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
-        selector: "0x64eaa333",
       },
     ],
   },

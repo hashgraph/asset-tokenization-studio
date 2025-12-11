@@ -9,7 +9,6 @@ import { PauseStorageWrapper } from "../../../layer_0/core/pause/PauseStorageWra
 import { _RESOLVER_PROXY_STORAGE_POSITION } from "../../../layer_1/constants/storagePositions.sol";
 import { Common } from "../../../layer_0/common/Common.sol";
 
-
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
 // The loupe functions are required by the EIP2535 ResolverProxys standard
 abstract contract ResolverProxyUnstructured is Common {
@@ -167,5 +166,4 @@ abstract contract ResolverProxyUnstructured is Common {
             _interfaceId
         );
     }
-
 }

@@ -1,25 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibCommon } from "..//common/libraries/LibCommon.sol";
+import { LibCommon } from "../common/libraries/LibCommon.sol";
 import { _LOCK_STORAGE_POSITION } from "../constants/storagePositions.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { CapStorageWrapper1 } from "../cap/CapStorageWrapper1.sol";
+import { ILock } from "../../layer_1/interfaces/lock/ILock.sol";
 
 abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    struct LockData {
-        uint256 id;
-        uint256 amount;
-        uint256 expirationTimestamp;
-    }
-
     struct LockDataStorage {
         mapping(address => uint256) totalLockedAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) totalLockedAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => LockData))) locksByAccountPartitionAndId;
+        mapping(address => mapping(bytes32 => mapping(uint256 => ILock.LockData))) locksByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) lockIdsByAccountAndPartition;
         mapping(address => mapping(bytes32 => uint256)) nextLockIdByAccountAndPartition;
     }
@@ -43,7 +38,10 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         _;
     }
 
-    function _getLockedAmountForByPartition(bytes32 _partition, address _tokenHolder) internal view override returns (uint256) {
+    function _getLockedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view override returns (uint256) {
         return _lockStorage().totalLockedAmountByAccountAndPartition[_tokenHolder][_partition];
     }
 
@@ -69,7 +67,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         address tokenHolder,
         uint256 lockId
     ) internal view override returns (uint256 amount, uint256 expirationTimestamp) {
-        LockData memory lock = _getLock(partition, tokenHolder, lockId);
+        ILock.LockData memory lock = _getLock(partition, tokenHolder, lockId);
         amount = lock.amount;
         expirationTimestamp = lock.expirationTimestamp;
     }
@@ -130,7 +128,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockId
-    ) internal view override returns (LockData memory) {
+    ) internal view override returns (ILock.LockData memory) {
         return _lockStorage().locksByAccountPartitionAndId[_tokenHolder][_partition][_lockId];
     }
 
@@ -138,10 +136,10 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockIndex
-    ) internal view override returns (LockData memory) {
+    ) internal view override returns (ILock.LockData memory) {
         LockDataStorage storage lockStorage = _lockStorage();
 
-        if (_lockIndex == 0) return LockData(0, 0, 0);
+        if (_lockIndex == 0) return ILock.LockData(0, 0, 0);
 
         _lockIndex--;
 
@@ -157,14 +155,18 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         address _tokenHolder,
         uint256 _lockId
     ) internal view override returns (bool) {
-        LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
+        ILock.LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
 
         if (lock.expirationTimestamp > _blockTimestamp()) return false;
 
         return true;
     }
 
-    function _isLockIdValid(bytes32 _partition, address _tokenHolder, uint256 _lockId) internal view override returns (bool) {
+    function _isLockIdValid(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view override returns (bool) {
         return _lockStorage().lockIdsByAccountAndPartition[_tokenHolder][_partition].contains(_lockId);
     }
 

@@ -73,7 +73,9 @@ abstract contract AdjustBalancesStorageWrapper1 is
         delete _adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[_tokenHolder][_partition][_lockId];
     }
 
-    function _removeLabafClearing(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier) internal override {
+    function _removeLabafClearing(
+        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
+    ) internal override {
         delete _adjustBalancesStorage().labafClearedAmountByAccountPartitionTypeAndId[
             _clearingOperationIdentifier.tokenHolder
         ][_clearingOperationIdentifier.partition][_clearingOperationIdentifier.clearingOperationType][
@@ -81,11 +83,21 @@ abstract contract AdjustBalancesStorageWrapper1 is
             ];
     }
 
-    function _setLockLabafById(bytes32 _partition, address _tokenHolder, uint256 _lockId, uint256 _labaf) internal override {
+    function _setLockLabafById(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId,
+        uint256 _labaf
+    ) internal override {
         _adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[_tokenHolder][_partition][_lockId] = _labaf;
     }
 
-    function _setHeldLabafById(bytes32 _partition, address _tokenHolder, uint256 _lockId, uint256 _labaf) internal override {
+    function _setHeldLabafById(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId,
+        uint256 _labaf
+    ) internal override {
         _adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[_tokenHolder][_partition][_lockId] = _labaf;
     }
 
@@ -101,7 +113,11 @@ abstract contract AdjustBalancesStorageWrapper1 is
         _adjustBalancesStorage().labafFrozenAmountByAccount[_tokenHolder] = _labaf;
     }
 
-    function _setTotalFreezeLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal override {
+    function _setTotalFreezeLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal override {
         _adjustBalancesStorage().labafFrozenAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
     }
 
@@ -120,7 +136,11 @@ abstract contract AdjustBalancesStorageWrapper1 is
         _adjustBalancesStorage().labafClearedAmountByAccount[_tokenHolder] = _labaf;
     }
 
-    function _setTotalClearedLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal override {
+    function _setTotalClearedLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal override {
         _adjustBalancesStorage().labafClearedAmountByAccountAndPartition[_tokenHolder][_partition] = _labaf;
     }
 

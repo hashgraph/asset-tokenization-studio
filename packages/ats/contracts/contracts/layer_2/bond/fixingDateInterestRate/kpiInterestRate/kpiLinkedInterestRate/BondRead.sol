@@ -2,11 +2,17 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { BondRead } from "../../../BondRead.sol";
-import { CommonKpiLinkedInterestRate } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+import {
+    CommonKpiLinkedInterestRate
+} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 import { IBondRead } from "../../../../interfaces/bond/IBondRead.sol";
 import { BondStorageWrapper } from "../../../../../layer_0/bond/BondStorageWrapper.sol";
-import { BondStorageWrapperKpiLinkedInterestRate } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/BondStorageWrapper.sol";
-import { BondStorageWrapperFixingDateInterestRate } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/BondStorageWrapperFixingDateInterestRate.sol";
+import {
+    BondStorageWrapperKpiLinkedInterestRate
+} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/BondStorageWrapper.sol";
+import {
+    BondStorageWrapperFixingDateInterestRate
+} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/BondStorageWrapperFixingDateInterestRate.sol";
 
 abstract contract BondReadKpiLinkedInterestRate is BondRead, CommonKpiLinkedInterestRate {
     function _setCoupon(

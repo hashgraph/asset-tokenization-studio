@@ -47,7 +47,10 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         return _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
     }
 
-    function _getMaxSupplyByPartitionAdjustedAt(bytes32 partition, uint256 timestamp) internal view override returns (uint256) {
+    function _getMaxSupplyByPartitionAdjustedAt(
+        bytes32 partition,
+        uint256 timestamp
+    ) internal view override returns (uint256) {
         uint256 factor = _calculateFactor(_getAbafAdjustedAt(timestamp), _getLabafByPartition(partition));
         return _getMaxSupplyByPartition(partition) * factor;
     }

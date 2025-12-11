@@ -75,7 +75,10 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
         return st.frozenTokens[_userAddress];
     }
 
-    function _getFrozenAmountForByPartition(bytes32 _partition, address _userAddress) internal view override returns (uint256) {
+    function _getFrozenAmountForByPartition(
+        bytes32 _partition,
+        address _userAddress
+    ) internal view override returns (uint256) {
         IERC3643Management.ERC3643Storage storage st = _erc3643Storage();
         return st.frozenTokensByPartition[_userAddress][_partition];
     }

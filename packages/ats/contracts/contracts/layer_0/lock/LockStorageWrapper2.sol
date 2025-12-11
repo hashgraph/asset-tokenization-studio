@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { AdjustBalancesStorageWrapper2 } from "../adjustBalances/AdjustBalancesStorageWrapper2.sol";
+import { ILock } from "../../layer_1/interfaces/lock/ILock.sol";
 
 abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -24,7 +25,7 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
 
         lockId_ = ++lockStorage.nextLockIdByAccountAndPartition[_tokenHolder][_partition];
 
-        LockData memory lock = LockData(lockId_, _amount, _expirationTimestamp);
+        ILock.LockData memory lock = ILock.LockData(lockId_, _amount, _expirationTimestamp);
         _setLockLabafById(_partition, _tokenHolder, lockId_, abaf);
 
         lockStorage.locksByAccountPartitionAndId[_tokenHolder][_partition][lockId_] = lock;
@@ -92,7 +93,12 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
      * LABAF (Locked Amount Before Adjustment Factor) for each lock is not updated
      * because the lock is deleted right after, optimizing gas usage.
      */
-    function _updateLockByIndex(bytes32 _partition, uint256 _lockId, address _tokenHolder, uint256 _abaf) internal override {
+    function _updateLockByIndex(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder,
+        uint256 _abaf
+    ) internal override {
         uint256 lockLabaf = _getLockLabafById(_partition, _tokenHolder, _lockId);
 
         if (_abaf != lockLabaf) {
