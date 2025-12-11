@@ -5,15 +5,16 @@ on:
   workflow_dispatch:
     inputs:
       dry-run-enabled:
-        description: 'Run npm publish with dry-run flag'
+        description: "Run npm publish with dry-run flag"
         required: false
         type: boolean
         default: false
 
-  # Release published trigger (GitHub release creation) - only for Mass Payout releases (tags ending with -mp)
-  release:
-    types:
-      - published
+  # Tag push trigger - simpler and automatic (no need to create GitHub release)
+  push:
+    tags:
+      - "v*-mp"
+      - "v*-MP"
 
 defaults:
   run:
@@ -27,8 +28,8 @@ jobs:
   mass-payout:
     name: Publish Mass Payout Packages
     runs-on: token-studio-linux-large
-    # Only run if manual trigger OR release tag contains 'mp'
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.ref_name, '-mp') }}
+    # Only run if manual trigger OR tag push (already filtered by v*-mp pattern)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
 
     steps:
       - name: Harden Runner

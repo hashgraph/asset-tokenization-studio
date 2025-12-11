@@ -5,13 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       release-type:
-        description: 'Type of release to perform'
+        description: "Type of release to perform"
         required: true
         type: choice
         options:
           - preview # Show what would be released (dry-run)
           - release # Full production release
-        default: 'preview'
+        default: "preview"
 
 defaults:
   run:
@@ -87,7 +87,12 @@ jobs:
         run: |
           echo "🚀 Releasing ATS packages only (ignoring Mass Payout packages)"
 
-          npx changeset version --ignore "@hashgraph/mass-payout*"
+          # Ignore all mass-payout packages (they use @mass-payout/* namespace)
+          npx changeset version \
+            --ignore "@mass-payout/contracts" \
+            --ignore "@mass-payout/sdk" \
+            --ignore "@mass-payout/backend" \
+            --ignore "@mass-payout/frontend"
 
           if [[ -n "$(git status --porcelain)" ]]; then
             echo "✅ Version bump completed for ATS packages"

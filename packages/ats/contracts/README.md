@@ -9,24 +9,26 @@
 ### Table of Contents
 
 - **[Description](#description)**<br>
-- **[Installation](#installation)**<br>
-- **[Build](#build)**<br>
-- **[Tasks](#tasks)**<br>
+- **[Quick Start](#quick-start)**<br>
+- **[Deployment & Tasks](#deployment--tasks)**<br>
 - **[Test](#test)**<br>
+- **[Architecture](#architecture)**<br>
+- **[ERC-3643 Compatibility](#erc-3643-compatibility)**<br>
 
 # Description
 
 The contracts module contains the code of all Solidity smart contracts deployed on Hedera. This package is part of the Asset Tokenization Studio monorepo.
 
-The standard used for security tokens is ERC-1400.
+**Standards:**
 
-Version 1.15.0 introduces partial compatibility with the ERC-3643 (TREX) standard; full identity and compliance support will be added in future releases.
+- ERC-1400 for security tokens
+- Partial ERC-3643 (TREX) compatibility (v1.15.0+)
 
-## Workspace Context
+**Location:** `packages/ats/contracts` within the monorepo
 
-This package is located at `packages/ats/contracts` within the monorepo. Other packages (like the SDK) depend on the compiled artifacts from this package.
+# Quick Start
 
-# Installation
+## Installation
 
 From the monorepo root:
 
@@ -43,18 +45,17 @@ npm install
 npm run compile
 ```
 
-# Build
-
-Build contracts using workspace commands from the root:
+## Build
 
 ```bash
+# From monorepo root
 npm run ats:contracts:build
-```
 
-Or build all ATS components:
-
-```bash
+# Or build all ATS components
 npm run ats:build
+
+# Force recompile
+npm run compile:force
 ```
 
 ## ERC-3643 compatibility
@@ -90,142 +91,30 @@ npm run ats:build
 | batchFreezePartialTokens(address[] calldata \_userAddresses, uint256[] calldata \_amounts) external                    | Done       |
 | batchUnfreezePartialTokens(address[] calldata \_userAddresses, uint256[] calldata \_amounts) external                  | Done       |
 
-# Installation
+# Deployment & Tasks
 
-Run the command :
+**For complete documentation on deployment, tasks, and Hardhat commands, see [Scripts README](scripts/README.md).**
 
-```
-npm ci
-```
+The Scripts README contains comprehensive information about:
 
-# Build
+- **🚀 Deployment workflows** - Full system deployment, individual components, network configuration
+- **📋 Hardhat tasks** - All available tasks with parameters and examples
+- **🏗️ Architecture** - Framework-agnostic design, domain separation, registry system
+- **📚 API Reference** - TypeScript APIs for programmatic deployment
+- **🔧 Troubleshooting** - Common issues and solutions
+- **💡 Developer guides** - Adding facets, creating asset types
 
-Run the command :
-
-```
-npm run compile:force
-```
-
-# Tasks
-
-### deployAll
-
-Deploys the full infrastructure (factory, resolver, facets, and initialized contracts) in a single execution.
-
-**Parameters**:
-
-- `useDeployed` (optional, default: true): Reuses already deployed contracts.
-- `file-name` (optional): The output file name.
-- `privateKey` (optional): Private key in raw hexadecimal format.
-- `signerAddress` (optional): Signer address from the Hardhat signers array.
-- `signerPosition` (optional): Index of the signer in the Hardhat signers array.
-- `network` (optional): The network to run the command on (e.g., localhost, mainnet, testnet).
+**Quick deployment commands:**
 
 ```bash
-npx hardhat deployAll --useDeployed false
-```
+# Deploy full system to Hardhat network (in-memory, fast)
+npm run deploy:hardhat -- --network hardhat
 
-### deploy
+# Deploy to Hedera Testnet (requires .env configuration)
+npm run deploy:hardhat -- --network hedera-testnet
 
-Deploys a specific contract.
-
-**Parameters**:
-
-- `contractName` (required): Name of the contract to deploy (e.g., ERC20, Bond).
-- `privateKey` (optional): Private key in raw hexadecimal format.
-- `signerAddress` (optional): Signer address from the Hardhat signers array.
-- `signerPosition` (optional): Index of the signer in the Hardhat signers array.
-
-```bash
-npx hardhat deploy --contractName ERC20
-```
-
-### keccak256
-
-Calculates and prints the Keccak-256 hash of a given string.
-
-**Parameters:**
-
-- `input` (required): The string to be hashed.
-
-```bash
-npx hardhat keccak256 "ADMIN_ROLE"
-```
-
-### getConfigurationInfo
-
-Fetches and displays detailed information about all facets (implementations) associated with a specific configuration ID from the BusinessLogicResolver.
-
-**Parameters:**
-
-- `resolver` (required): The resolver proxy admin address.
-- `configurationId` (required): The configuration ID.
-- `network` (required): The network to use (e.g., local, previewnet, testnet, mainnet).
-
-```bash
-npx hardhat getConfigurationInfo  <resolverAddress> <configurationId> --network <network-name>
-```
-
-### getResolverBusinessLogics
-
-Retrieves and lists all registered business logic keys (contract identifiers) from a BusinessLogicResolver contract.
-
-**Parameters:**
-
-- `resolver` (required): The resolver proxy admin address.
-- `network` (required): The network to use (e.g., local, previewnet, testnet, mainnet).
-
-```bash
-npx hardhat getResolverBusinessLogics <resolverAddress> --network <network-name>
-```
-
-### updateBusinessLogicKeys
-
-Registers or updates the addresses of a list of business logic implementation contracts in a specified `BusinessLogicResolver`.
-
-**Parameters:**
-
-- `resolverAddress` (required): The address of the `BusinessLogicResolver` contract.
-- `implementationAddressList` (required): A comma-separated list of contract addresses to be registered or updated in the resolver.At least all facets already registered must be included.
-- `privateKey` (optional): The private key in raw hexadecimal format of the account that will sign the transaction.
-- `signerAddress` (optional): The address of the signer to select from the Hardhat signers array.
-- `signerPosition` (optional): The index of the signer to select from the Hardhat signers array.
-- `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
-
-```bash
-npx hardhat updateBusinessLogicKeys <resolverAddress> <allFacetsAddressList> --network <network-name>
-```
-
-### updateProxyImplementation
-
-Upgrades the implementation address for a given transparent proxy contract. This task executes the upgrade by calling the `upgrade` function on the associated `ProxyAdmin` contract. The signer executing this task must be the owner of the `ProxyAdmin` contract.
-
-**Parameters:**
-
-- `proxyAdminAddress` (required): The address of the `ProxyAdmin` contract that owns the proxy.
-- `transparentProxyAddress` (required): The address of the transparent proxy contract to be upgraded.
-- `newImplementationAddress` (required): The address of the new implementation contract.
-- `privateKey` (optional): The private key in raw hexadecimal format of the account that will sign the transaction.
-- `signerAddress` (optional): The address of the signer to select from the Hardhat signers array.
-- `signerPosition` (optional): The index of the signer to select from the Hardhat signers array.
-- `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
-
-```bash
-npx hardhat updateProxyImplementation <proxyAdminAddress> <transparentProxyAddress> <newImplementationAddress> --network <networkName>
-```
-
-### getProxyAdminConfig
-
-Retrieves key configuration details from a `ProxyAdmin` contract. It fetches the owner of the `ProxyAdmin` contract and the current implementation address for a specific proxy contract that it manages.
-
-**Parameters:**
-
-- `proxyAdmin` (required): The address of the `ProxyAdmin` contract.
-- `proxy` (required): The address of the proxy contract managed by the `ProxyAdmin`.
-- `network` (required): The network to run the command on (e.g., localhost, mainnet, testnet).
-
-```bash
-npx hardhat getProxyAdminConfig <proxyAdminAddress> <proxyAddress> --network <networkName>
+# Standalone deployment (~3x faster startup)
+npm run deploy
 ```
 
 # Test
@@ -344,75 +233,21 @@ The platform implements a comprehensive role-based access control system:
 
 ### Adding a new facet
 
-When introducing a new facet to the project, make sure to follow these steps:
+For detailed instructions on adding or removing facets, see the **[Developer Guide](scripts/DEVELOPER_GUIDE.md)** in the Scripts documentation.
 
-1. **Register the contract name** <br>
-   Add the name of the new facet to the `CONTRACT_NAMES` array in the `Configuration.ts` file.
+# Reference Deployment (Hedera Testnet)
 
-2. **Update the deploy task listener** <br>
-   In the `deployAll` task, include the new facet so its contract address is properly tracked via the mirror node.
+> **Note**: These contracts were deployed for reference purposes and may not reflect the latest version. For up-to-date deployments, use the deployment scripts with the current codebase version (v1.17.0+). See [Scripts README](scripts/README.md) for deployment instructions.
 
-3. **Deploy the facet** <br>
-   In `scripts/deploy.ts`, within the `deployAtsContracts` function, add the logic to deploy the new facet and ensure the script awaits its deployment.
+- **Network:** Hedera Testnet
+- **Status:** Reference deployment (may be outdated)
+- **Last Known Update:** Prior to v1.17.0
 
-4. **Configure facet selectors** <br>
-   Ensure the facet's function selectors are properly registered in the diamond cut process.
+#### Contract Addresses
 
-# Deployed Smart Contracts
-
-| **Contract**                           | **Address**                                | **ID**      |
-| -------------------------------------- | ------------------------------------------ | ----------- |
-| Business Logic Resolver Proxy          | 0xf44be70B71f412643378bbd731Ad3081282Fb033 | 0.0.6930056 |
-| Business Logic Resolver Proxy Admin    | 0x80Dcb2A77E56E9520f8B04848D64167bfA378292 | 0.0.6930055 |
-| Business Logic Resolver                | 0xce4f0e542bcfD0d8f1229baf9adcAC271ae5978c | 0.0.6930054 |
-| Factory Proxy                          | 0x66098aa13268a3f25B37ae532d483DcB08f6f522 | 0.0.6930123 |
-| Factory Proxy Admin                    | 0xE5cdBd8d28c048D7bC4929E0D0d3d33aFE1bc929 | 0.0.6930122 |
-| Factory                                | 0xdEbA1236Ca1dac9547F54fFAF4B297241c1F4467 | 0.0.6930121 |
-| Access Control Facet                   | 0xcD296f27245dD055bb3776a27a48D80da198b202 | 0.0.6930058 |
-| Cap Facet                              | 0x4DADAab326E6ab121f7Ed23d749229127cEe318A | 0.0.6930059 |
-| Control List Facet                     | 0xFb28f952b3f16669589DA8D769B07C7718e7f1D0 | 0.0.6930060 |
-| Kyc Facet                              | 0x4b8068C39ea5Ee9cf1Ba27fd6DA2b7D6c562Ca4f | 0.0.6930062 |
-| SsiManagement Facet                    | 0x8A81DC398fC597Df28E172823b1A8f87479dC0E5 | 0.0.6930063 |
-| Pause Facet                            | 0xD2677f8E9aa3A202a15d77191c02C55E1879A2E9 | 0.0.6930064 |
-| ERC20 Facet                            | 0x629bf025B6FDDB0D44643c55686571aa73289ef0 | 0.0.6930069 |
-| ERC1410 Read Facet                     | 0x1C0b482D81E623d206F2d3A52eE40bD42a64c8Fa | 0.0.6930070 |
-| ERC1410 Management Facet               | 0xFB61834d2091eD4006cF1A346f34e5323aC30E40 | 0.0.6930071 |
-| ERC1410 Issuer Facet                   | 0x8718CDC4fD66C76eb64606035C8Ded127623A649 | 0.0.6930072 |
-| ERC1410 TokenHolder Facet              | 0x6aB85765836A5E43692fFD2579C04254501b5E28 | 0.0.6930074 |
-| ERC1594 Facet                          | 0xE7cAB8Eb1E264584C85E9f0a1D66e50502e9b83e | 0.0.6930076 |
-| ERC1643 Facet                          | 0xE30Fde8b8F31d637D835088824b3B13E0E5B2352 | 0.0.6930077 |
-| ERC1644 Facet                          | 0x97FFcd4F0b1E52e0C0Ce9565d534Bae5531B9c9b | 0.0.6930079 |
-| Snapshots Facet                        | 0xa15Ff9CC404Ea6B4a4F0790A220d8CB3cAE06572 | 0.0.6930080 |
-| Diamond Facet                          | 0x22C93F496C438C7e63E4B56092969BA03b1417AE | 0.0.6930083 |
-| Equity Facet                           | 0xB24932c4d4FE51E906921a8897a5c0C10cFb11ff | 0.0.6930085 |
-| Bond Facet                             | 0x3F83d296eAd06d74672EEFEBE993C3D707A4f6C2 | 0.0.6930086 |
-| BondRead                               | 0x1d562F43FBDD1Cfe0E75683475B9CbDe203cDced | 0.0.6930084 |
-| Scheduled Snapshots Facet              | 0xBC15Df6e164e90a8eBAfeFC848fA0605fFD22d04 | 0.0.6930087 |
-| Scheduled Balance Adjustments Facet    | 0x66eaac9f0c142D39643ACb5D283eE7cAd6778d85 | 0.0.6930088 |
-| Scheduled Cross Ordered Tasks Facet    | 0xA18e09C0AeC82c70f372fcE182F71aa7da9523c6 | 0.0.6930089 |
-| Corporate Actions Facet                | 0x2B9464e2D13278b681ad08e9741BFADc58268438 | 0.0.6930090 |
-| Lock Facet                             | 0xe7932c9aC6198Fcb4Ff3fB571dF7f05Ed1b0196b | 0.0.6930065 |
-| Hold Read Facet                        | 0x7923909D008dc07F835ECCef7B333A4EaDf08432 | 0.0.6930066 |
-| Hold Management Facet                  | 0xff99e2ec8fb9565b9A04d7c8e4EE9223CaD8B27D | 0.0.6930067 |
-| Hold TokenHolder Facet                 | 0xd8CA90867F9D9434C3cc644dc2A1856543a27D30 | 0.0.6930068 |
-| Transfer and Lock Facet                | 0xCAdCC836ffE50Aabd68137F17b914B5Bff22504e | 0.0.6930091 |
-| Adjust Balances Facet                  | 0xE4F1e2530afCd535FdAFe8CdEBFfC96ae8a5Cc70 | 0.0.6930092 |
-| Clearing Action Facet                  | 0x2F0BB35125407DFdB3BCFBcC3e947e69a0dc253e | 0.0.6930103 |
-| Clearing Transfer Facet                | 0xce70D4F37b976bee2Aa961A0d89719314312def1 | 0.0.6930095 |
-| Clearing Redeem Facet                  | 0x322bfdfB61Efa214dc3ACD61362258233A4eD240 | 0.0.6930099 |
-| Clearing Hold Creation Facet           | 0x9F72d0fD1992C10889D8B865736Ab0aFA8d6A9ac | 0.0.6930100 |
-| Clearing Read Facet                    | 0xd9c933C85b9B81C800Cd1F78c42469A6F681bAa7 | 0.0.6930101 |
-| Proceed Recipients Facet               | 0xC07A6aE17660Df4E3a93FaBb288635BaeD218F99 | 0.0.6930104 |
-| External Pause Management Facet        | 0x30FB9962a38a76Fe5A37f5B1d01A4F2d7074b5D8 | 0.0.6930105 |
-| External Control List Management Facet | 0x265dd9126e189Aa7AdF530468b0d2e97e139eBcB | 0.0.6930106 |
-| External Kyc List Management Facet     | 0xbB6f8E0BDFaF5bE2AC551cc661C881c31d647155 | 0.0.6930109 |
-| Protected Partitions Facet             | 0x903103Fb92eBBE331af410874bcad6218843518E | 0.0.6930093 |
-| ERC3643 Management Facet               | 0x72a41aC5Df74381e3ed4812a10Dbc08c26dED5c6 | 0.0.6930111 |
-| ERC3643 Operations Facet               | 0xc24bAc42E3FB05f76B47Da66791A74eFd4DeAf3c | 0.0.6930113 |
-| ERC3643 Read Facet                     | 0xB70962B5C7C670A0491fbd088e1375Eb09b54386 | 0.0.6930116 |
-| ERC3643 Batch Facet                    | 0x1dE35551d78B53B537Ba033d75D7b55D7dF5b5Ed | 0.0.6930118 |
-| Freeze Facet                           | 0xfd3C8ff63CD7648516702df850DF5B9c6dF7f17c | 0.0.6930119 |
-| ERC20Permit Facet                      | 0x4Ceb1b2df658C00a42E526bF546AEeE4E0eb6b6F | 0.0.6930075 |
+- ProxyAdmin: 0xE5ebB0990c841857fe43D6e0A8375F2991b265c0
+- BLR Proxy: 0xE13eFc5f5d8252958cA787a1F6665C63Fbd02A48
+- Factory Proxy: 0x0BC59c70933DA04C8556259BB8E78AbF7db4dC22
 
 # 🔐 Role Definitions by Layer
 

@@ -1,207 +1,4 @@
-/*
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-   1. Definitions.
-
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
-
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
-
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
-
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
-
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
-
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
-
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
-
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
-
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
-
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
-
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
-
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
-
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
-
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
-
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
-
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
-
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
-
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
-
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
-
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
-
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
-
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
-
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
-
-   END OF TERMS AND CONDITIONS
-
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright [yyyy] [name of copyright owner]
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
-*/
+//SPDX-License-Identifier: Apache-2.0
 
 import {
   ApplyRolesRequest,
@@ -383,15 +180,16 @@ import {
   IsProceedRecipientRequest,
   GetProceedRecipientDataRequest,
   DividendAmountForViewModel,
-} from '@hashgraph/asset-tokenization-sdk';
+  FullRedeemAtMaturityRequest,
+} from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
   static initData?: InitializationData = undefined;
-  static testnetNetwork = 'testnet';
+  static testnetNetwork = "testnet";
   static testnetMirrorNode = {
-    baseUrl: process.env.REACT_APP_MIRROR_NODE ?? '',
-    apiKey: '',
-    headerName: '',
+    baseUrl: process.env.REACT_APP_MIRROR_NODE ?? "",
+    apiKey: "",
+    headerName: "",
   };
   static testnetMirrorNodes = {
     nodes: [
@@ -402,10 +200,10 @@ export class SDKService {
     ],
   };
   static testnetRPCNode = {
-    baseUrl: process.env.REACT_APP_RPC_NODE ?? '',
+    baseUrl: process.env.REACT_APP_RPC_NODE ?? "",
     //baseUrl: "http://127.0.0.1:7546",
-    apiKey: '',
-    headerName: '',
+    apiKey: "",
+    headerName: "",
   };
   static testnetRPCNodes = {
     nodes: [
@@ -415,8 +213,8 @@ export class SDKService {
       },
     ],
   };
-  static testnetResolverAddress = process.env.REACT_APP_RPC_RESOLVER ?? '0.0.0';
-  static testnetFactoryAddress = process.env.REACT_APP_RPC_FACTORY ?? '0.0.0';
+  static testnetResolverAddress = process.env.REACT_APP_RPC_RESOLVER ?? "0.0.0";
+  static testnetFactoryAddress = process.env.REACT_APP_RPC_FACTORY ?? "0.0.0";
 
   static testnetConfiguration = {
     factoryAddress: this.testnetFactoryAddress,
@@ -446,11 +244,11 @@ export class SDKService {
   public static async connectWallet(wallet: SupportedWallets) {
     let hwcSettings;
     if (wallet === SupportedWallets.HWALLETCONNECT) {
-      const projectId = process.env.REACT_APP_PROJECT_ID ?? '';
-      const dappName = process.env.REACT_APP_DAPP_NAME ?? '';
-      const dappDescription = process.env.REACT_APP_DAPP_DESCRIPTION ?? '';
-      const dappURL = process.env.REACT_APP_DAPP_URL ?? '';
-      const dappIcons = process.env.REACT_APP_DAPP_ICONS?.split(',') ?? [];
+      const projectId = process.env.REACT_APP_PROJECT_ID ?? "";
+      const dappName = process.env.REACT_APP_DAPP_NAME ?? "";
+      const dappDescription = process.env.REACT_APP_DAPP_DESCRIPTION ?? "";
+      const dappURL = process.env.REACT_APP_DAPP_URL ?? "";
+      const dappIcons = process.env.REACT_APP_DAPP_ICONS?.split(",") ?? [];
 
       if (projectId) {
         hwcSettings = {
@@ -493,9 +291,9 @@ export class SDKService {
 
       return init;
     } catch (e) {
-      console.error('Error initializing the Network : ' + e);
+      console.error("Error initializing the Network : " + e);
       console.error(
-        'There was an error initializing the network, please check your .env file and make sure the configuration is correct',
+        "There was an error initializing the network, please check your .env file and make sure the configuration is correct",
       );
     }
   }
@@ -504,16 +302,12 @@ export class SDKService {
     return await Network.disconnect();
   }
   // FACTORY ////////////////////////////////////////////
-  public static async getRegulationDetails(
-    req: GetRegulationDetailsRequest,
-  ): Promise<RegulationViewModel> {
+  public static async getRegulationDetails(req: GetRegulationDetailsRequest): Promise<RegulationViewModel> {
     return await Factory.getRegulationDetails(req);
   }
 
   // SECURITY ////////////////////////////////////////////
-  public static async getSecurityDetails(
-    req: GetSecurityDetailsRequest,
-  ): Promise<SecurityViewModel> {
+  public static async getSecurityDetails(req: GetSecurityDetailsRequest): Promise<SecurityViewModel> {
     return await Security.getInfo(req);
   }
 
@@ -525,29 +319,21 @@ export class SDKService {
     return response;
   }
 
-  public static async getEquityDetails(
-    req: GetEquityDetailsRequest,
-  ): Promise<EquityDetailsViewModel> {
+  public static async getEquityDetails(req: GetEquityDetailsRequest): Promise<EquityDetailsViewModel> {
     return await Equity.getEquityDetails(req);
   }
 
   // BOND ////////////////////////////////////////////
-  public static async createBond(
-    createRequest: CreateBondRequest,
-  ): Promise<{ security: SecurityViewModel } | null> {
+  public static async createBond(createRequest: CreateBondRequest): Promise<{ security: SecurityViewModel } | null> {
     const response = await Bond.create(createRequest);
     return response;
   }
 
-  public static async getBondDetails(
-    req: GetBondDetailsRequest,
-  ): Promise<BondDetailsViewModel> {
+  public static async getBondDetails(req: GetBondDetailsRequest): Promise<BondDetailsViewModel> {
     return await Bond.getBondDetails(req);
   }
 
-  public static async updateBondMaturityDate(
-    req: UpdateMaturityDateRequest,
-  ): Promise<boolean> {
+  public static async updateBondMaturityDate(req: UpdateMaturityDateRequest): Promise<boolean> {
     const response = await Bond.updateMaturityDate(req);
     return response.payload;
   }
@@ -562,66 +348,48 @@ export class SDKService {
     return await Security.setCompliance(req);
   }
 
-  public static async getIdentityRegistry(
-    req: IdentityRegistryRequest,
-  ): Promise<string> {
+  public static async getIdentityRegistry(req: IdentityRegistryRequest): Promise<string> {
     return await Security.identityRegistry(req);
   }
 
-  public static async updateIdentityRegistry(
-    req: SetIdentityRegistryRequest,
-  ): Promise<{
+  public static async updateIdentityRegistry(req: SetIdentityRegistryRequest): Promise<{
     payload: boolean;
   }> {
     return await Security.setIdentityRegistry(req);
   }
 
   // Proceed Recipients
-  public static async getProceedRecipientsCount(
-    req: GetProceedRecipientsCountRequest,
-  ): Promise<number> {
+  public static async getProceedRecipientsCount(req: GetProceedRecipientsCountRequest): Promise<number> {
     const request = await Bond.getProceedRecipientsCount(req);
     return request.payload;
   }
 
-  public static async getProceedRecipients(
-    req: GetProceedRecipientsRequest,
-  ): Promise<string[]> {
+  public static async getProceedRecipients(req: GetProceedRecipientsRequest): Promise<string[]> {
     const request = await Bond.getProceedRecipients(req);
     return request.payload;
   }
 
-  public static async getProceedRecipientData(
-    req: GetProceedRecipientDataRequest,
-  ): Promise<string> {
+  public static async getProceedRecipientData(req: GetProceedRecipientDataRequest): Promise<string> {
     const request = await Bond.getProceedRecipientData(req);
     return request.payload;
   }
 
-  public static async isProceedRecipient(
-    req: IsProceedRecipientRequest,
-  ): Promise<boolean> {
+  public static async isProceedRecipient(req: IsProceedRecipientRequest): Promise<boolean> {
     const request = await Bond.isProceedRecipient(req);
     return request.payload;
   }
 
-  public static async addProceedRecipient(
-    req: AddProceedRecipientRequest,
-  ): Promise<boolean> {
+  public static async addProceedRecipient(req: AddProceedRecipientRequest): Promise<boolean> {
     const response = await Bond.addProceedRecipient(req);
     return response.payload;
   }
 
-  public static async removeProceedRecipient(
-    req: RemoveProceedRecipientRequest,
-  ): Promise<boolean> {
+  public static async removeProceedRecipient(req: RemoveProceedRecipientRequest): Promise<boolean> {
     const response = await Bond.removeProceedRecipient(req);
     return response.payload;
   }
 
-  public static async updateProceedRecipientData(
-    req: UpdateProceedRecipientDataRequest,
-  ): Promise<boolean> {
+  public static async updateProceedRecipientData(req: UpdateProceedRecipientDataRequest): Promise<boolean> {
     const response = await Bond.updateProceedRecipientData(req);
     return response.payload;
   }
@@ -632,45 +400,31 @@ export class SDKService {
     return response.payload;
   }
 
-  public static async getCouponFor(
-    req: GetCouponForRequest,
-  ): Promise<CouponForViewModel> {
+  public static async getCouponFor(req: GetCouponForRequest): Promise<CouponForViewModel> {
     return await Bond.getCouponFor(req);
   }
 
-  public static async getCouponAmountFor(
-    req: GetCouponForRequest,
-  ): Promise<CouponAmountForViewModel> {
+  public static async getCouponAmountFor(req: GetCouponForRequest): Promise<CouponAmountForViewModel> {
     return await Bond.getCouponAmountFor(req);
   }
 
-  public static async getPrincipalFor(
-    req: GetPrincipalForRequest,
-  ): Promise<PrincipalForViewModel> {
+  public static async getPrincipalFor(req: GetPrincipalForRequest): Promise<PrincipalForViewModel> {
     return await Bond.getPrincipalFor(req);
   }
 
-  public static async getCoupon(
-    req: GetCouponRequest,
-  ): Promise<CouponViewModel> {
+  public static async getCoupon(req: GetCouponRequest): Promise<CouponViewModel> {
     return await Bond.getCoupon(req);
   }
 
-  public static async getAllCoupons(
-    req: GetAllCouponsRequest,
-  ): Promise<CouponViewModel[]> {
+  public static async getAllCoupons(req: GetAllCouponsRequest): Promise<CouponViewModel[]> {
     return await Bond.getAllCoupons(req);
   }
 
-  public static async getCouponHolders(
-    req: GetCouponHoldersRequest,
-  ): Promise<string[]> {
+  public static async getCouponHolders(req: GetCouponHoldersRequest): Promise<string[]> {
     return await Bond.getCouponHolders(req);
   }
 
-  public static async getTotalCouponHolders(
-    req: GetTotalCouponHoldersRequest,
-  ): Promise<number> {
+  public static async getTotalCouponHolders(req: GetTotalCouponHoldersRequest): Promise<number> {
     return await Bond.getTotalCouponHolders(req);
   }
 
@@ -685,21 +439,15 @@ export class SDKService {
     return response.payload;
   }
 
-  public static async getRoleMemberCount(
-    req: GetRoleMemberCountRequest,
-  ): Promise<number> {
+  public static async getRoleMemberCount(req: GetRoleMemberCountRequest): Promise<number> {
     return await Role.getRoleMemberCount(req);
   }
 
-  public static async getRoleMembers(
-    req: GetRoleMembersRequest,
-  ): Promise<string[]> {
+  public static async getRoleMembers(req: GetRoleMembersRequest): Promise<string[]> {
     return await Role.getRoleMembers(req);
   }
 
-  public static async getRoleCountFor(
-    req: GetRoleCountForRequest,
-  ): Promise<number> {
+  public static async getRoleCountFor(req: GetRoleCountForRequest): Promise<number> {
     return await Role.getRoleCountFor(req);
   }
 
@@ -713,41 +461,29 @@ export class SDKService {
   }
 
   // CONTROL LIST ////////////////////////////////////////////
-  public static async addToControlList(
-    req: ControlListRequest,
-  ): Promise<boolean> {
+  public static async addToControlList(req: ControlListRequest): Promise<boolean> {
     const response = await Security.addToControlList(req);
     return response.payload;
   }
 
-  public static async removeFromControlList(
-    req: ControlListRequest,
-  ): Promise<boolean> {
+  public static async removeFromControlList(req: ControlListRequest): Promise<boolean> {
     const response = await Security.removeFromControlList(req);
     return response.payload;
   }
 
-  public static async isAccountInControlList(
-    req: ControlListRequest,
-  ): Promise<boolean> {
+  public static async isAccountInControlList(req: ControlListRequest): Promise<boolean> {
     return await Security.isAccountInControlList(req);
   }
 
-  public static async getControlListCount(
-    req: GetControlListCountRequest,
-  ): Promise<number> {
+  public static async getControlListCount(req: GetControlListCountRequest): Promise<number> {
     return await Security.getControlListCount(req);
   }
 
-  public static async getControlListMembers(
-    req: GetControlListMembersRequest,
-  ): Promise<string[]> {
+  public static async getControlListMembers(req: GetControlListMembersRequest): Promise<string[]> {
     return await Security.getControlListMembers(req);
   }
 
-  public static async getControlListType(
-    req: GetControlListTypeRequest,
-  ): Promise<SecurityControlListType> {
+  public static async getControlListType(req: GetControlListTypeRequest): Promise<SecurityControlListType> {
     return await Security.getControlListType(req);
   }
 
@@ -758,23 +494,17 @@ export class SDKService {
   }
 
   // FREEZE & UNFREEZE ////////////////////////////////////////////
-  public static async freezePartialTokens(
-    req: FreezePartialTokensRequest,
-  ): Promise<boolean> {
+  public static async freezePartialTokens(req: FreezePartialTokensRequest): Promise<boolean> {
     const response = await Security.freezePartialTokens(req);
     return response.payload;
   }
 
-  public static async unfreezePartialTokens(
-    req: UnfreezePartialTokensRequest,
-  ): Promise<boolean> {
+  public static async unfreezePartialTokens(req: UnfreezePartialTokensRequest): Promise<boolean> {
     const response = await Security.unfreezePartialTokens(req);
     return response.payload;
   }
 
-  public static async getFrozenTokens(
-    req: GetFrozenPartialTokensRequest,
-  ): Promise<BalanceViewModel> {
+  public static async getFrozenTokens(req: GetFrozenPartialTokensRequest): Promise<BalanceViewModel> {
     const response = await Security.getFrozenPartialTokens(req);
     return response;
   }
@@ -790,9 +520,7 @@ export class SDKService {
     return response.payload;
   }
 
-  public static async getBalanceOf(
-    req: GetAccountBalanceRequest,
-  ): Promise<BalanceViewModel> {
+  public static async getBalanceOf(req: GetAccountBalanceRequest): Promise<BalanceViewModel> {
     return await Security.getBalanceOf(req);
   }
 
@@ -802,46 +530,32 @@ export class SDKService {
     return response.payload;
   }
 
-  public static async getDividendsFor(
-    req: GetDividendsForRequest,
-  ): Promise<DividendsForViewModel> {
+  public static async getDividendsFor(req: GetDividendsForRequest): Promise<DividendsForViewModel> {
     return await Equity.getDividendsFor(req);
   }
 
-  public static async getDividendAmountFor(
-    req: GetDividendsForRequest,
-  ): Promise<DividendAmountForViewModel> {
+  public static async getDividendAmountFor(req: GetDividendsForRequest): Promise<DividendAmountForViewModel> {
     return await Equity.getDividendAmountFor(req);
   }
 
-  public static async getDividends(
-    req: GetDividendsRequest,
-  ): Promise<DividendsViewModel> {
+  public static async getDividends(req: GetDividendsRequest): Promise<DividendsViewModel> {
     return await Equity.getDividends(req);
   }
 
-  public static async getAllDividends(
-    req: GetAllDividendsRequest,
-  ): Promise<DividendsViewModel[]> {
+  public static async getAllDividends(req: GetAllDividendsRequest): Promise<DividendsViewModel[]> {
     return await Equity.getAllDividends(req);
   }
 
-  public static async getDividendHolders(
-    req: GetDividendHoldersRequest,
-  ): Promise<string[]> {
+  public static async getDividendHolders(req: GetDividendHoldersRequest): Promise<string[]> {
     return await Equity.getDividendHolders(req);
   }
 
-  public static async getTotalDividendHolders(
-    req: GetTotalDividendHoldersRequest,
-  ): Promise<number> {
+  public static async getTotalDividendHolders(req: GetTotalDividendHoldersRequest): Promise<number> {
     return await Equity.getTotalDividendHolders(req);
   }
 
   // SPLIT & REVERSE SPLIT ////////////////////////////////////////////
-  public static async setScheduledBalanceAdjustmentRequest(
-    req: SetScheduledBalanceAdjustmentRequest,
-  ): Promise<number> {
+  public static async setScheduledBalanceAdjustmentRequest(req: SetScheduledBalanceAdjustmentRequest): Promise<number> {
     const response = await Equity.setScheduledBalanceAdjustment(req);
     return response.payload;
   }
@@ -859,16 +573,12 @@ export class SDKService {
   }
 
   // CONTROLLER ////////////////////////////////////////////
-  public static async controllerTransfer(
-    req: ForceTransferRequest,
-  ): Promise<boolean> {
+  public static async controllerTransfer(req: ForceTransferRequest): Promise<boolean> {
     const response = await Security.controllerTransfer(req);
     return response.payload;
   }
 
-  public static async controllerRedeem(
-    req: ForceRedeemRequest,
-  ): Promise<boolean> {
+  public static async controllerRedeem(req: ForceRedeemRequest): Promise<boolean> {
     const response = await Security.controllerRedeem(req);
     return response.payload;
   }
@@ -894,47 +604,33 @@ export class SDKService {
     return response.payload;
   }
 
-  public static async getMaxSupply(
-    req: GetMaxSupplyRequest,
-  ): Promise<MaxSupplyViewModel> {
+  public static async getMaxSupply(req: GetMaxSupplyRequest): Promise<MaxSupplyViewModel> {
     return await Security.getMaxSupply(req);
   }
 
   // VOTING RIGHTS ////////////////////////////////////////////
-  public static async setVotingRights(
-    req: SetVotingRightsRequest,
-  ): Promise<number> {
+  public static async setVotingRights(req: SetVotingRightsRequest): Promise<number> {
     const response = await Equity.setVotingRights(req);
     return response.payload;
   }
 
-  public static async getAllVotingRights(
-    req: GetAllVotingRightsRequest,
-  ): Promise<VotingRightsViewModel[]> {
+  public static async getAllVotingRights(req: GetAllVotingRightsRequest): Promise<VotingRightsViewModel[]> {
     return await Equity.getAllVotingRights(req);
   }
 
-  public static async getVotingRightsFor(
-    req: GetVotingRightsForRequest,
-  ): Promise<VotingRightsForViewModel> {
+  public static async getVotingRightsFor(req: GetVotingRightsForRequest): Promise<VotingRightsForViewModel> {
     return await Equity.getVotingRightsFor(req);
   }
 
-  public static async getVotingRights(
-    req: GetVotingRightsRequest,
-  ): Promise<VotingRightsViewModel> {
+  public static async getVotingRights(req: GetVotingRightsRequest): Promise<VotingRightsViewModel> {
     return await Equity.getVotingRights(req);
   }
 
-  public static async getVotingHolders(
-    req: GetVotingHoldersRequest,
-  ): Promise<string[]> {
+  public static async getVotingHolders(req: GetVotingHoldersRequest): Promise<string[]> {
     return await Equity.getVotingHolders(req);
   }
 
-  public static async getTotalVotingHolders(
-    req: GetTotalVotingHoldersRequest,
-  ): Promise<number> {
+  public static async getTotalVotingHolders(req: GetTotalVotingHoldersRequest): Promise<number> {
     return await Equity.getTotalVotingHolders(req);
   }
 
@@ -949,9 +645,7 @@ export class SDKService {
     return response.payload;
   }
 
-  public static async getLockedBalanceOf(
-    req: GetLockedBalanceRequest,
-  ): Promise<BalanceViewModel> {
+  public static async getLockedBalanceOf(req: GetLockedBalanceRequest): Promise<BalanceViewModel> {
     return await Security.getLockedBalanceOf(req);
   }
 
@@ -963,118 +657,84 @@ export class SDKService {
     return await Security.getLock(req);
   }
 
-  public static async getHoldsId(
-    req: GetHoldsIdForByPartitionRequest,
-  ): Promise<number[]> {
+  public static async getHoldsId(req: GetHoldsIdForByPartitionRequest): Promise<number[]> {
     return await Security.getHoldsIdForByPartition(req);
   }
 
-  public static async getHoldDetails(
-    req: GetHoldForByPartitionRequest,
-  ): Promise<HoldViewModel> {
+  public static async getHoldDetails(req: GetHoldForByPartitionRequest): Promise<HoldViewModel> {
     return await Security.getHoldForByPartition(req);
   }
 
-  public static async createHoldFromByPartition(
-    req: CreateHoldFromByPartitionRequest,
-  ): Promise<number> {
+  public static async createHoldFromByPartition(req: CreateHoldFromByPartitionRequest): Promise<number> {
     const response = await Security.createHoldFromByPartition(req);
     return response.payload;
   }
 
-  public static async controllerCreateHoldByPartition(
-    req: CreateHoldFromByPartitionRequest,
-  ): Promise<number> {
+  public static async controllerCreateHoldByPartition(req: CreateHoldFromByPartitionRequest): Promise<number> {
     const response = await Security.controllerCreateHoldByPartition(req);
     return response.payload;
   }
 
-  public static async createHoldByPartition(
-    req: CreateHoldByPartitionRequest,
-  ): Promise<number> {
+  public static async createHoldByPartition(req: CreateHoldByPartitionRequest): Promise<number> {
     const response = await Security.createHoldByPartition(req);
     return response.payload;
   }
 
-  public static async reclaimHoldByPartition(
-    req: ReclaimHoldByPartitionRequest,
-  ): Promise<boolean> {
+  public static async reclaimHoldByPartition(req: ReclaimHoldByPartitionRequest): Promise<boolean> {
     const response = await Security.reclaimHoldByPartition(req);
     return response.payload;
   }
 
-  public static async releaseHoldByPartition(
-    req: ReleaseHoldByPartitionRequest,
-  ): Promise<boolean> {
+  public static async releaseHoldByPartition(req: ReleaseHoldByPartitionRequest): Promise<boolean> {
     const response = await Security.releaseHoldByPartition(req);
     return response.payload;
   }
 
-  public static async executeHoldByPartition(
-    req: ExecuteHoldByPartitionRequest,
-  ): Promise<boolean> {
+  public static async executeHoldByPartition(req: ExecuteHoldByPartitionRequest): Promise<boolean> {
     const response = await Security.executeHoldByPartition(req);
     return response.payload;
   }
 
-  public static async getHeldAmountFor(
-    req: GetHeldAmountForRequest,
-  ): Promise<number> {
+  public static async getHeldAmountFor(req: GetHeldAmountForRequest): Promise<number> {
     const response = await Security.getHeldAmountFor(req);
     return response;
   }
 
   // MANAGEMENT ////////////////////////////////////////////
-  public static async getConfigInfo(
-    req: GetConfigInfoRequest,
-  ): Promise<ConfigInfoViewModel> {
+  public static async getConfigInfo(req: GetConfigInfoRequest): Promise<ConfigInfoViewModel> {
     return await Management.getConfigInfo(req);
   }
 
-  public static async updateSecurityConfigVersion(
-    req: UpdateConfigVersionRequest,
-  ): Promise<boolean> {
+  public static async updateSecurityConfigVersion(req: UpdateConfigVersionRequest): Promise<boolean> {
     const response = await Management.updateConfigVersion(req);
     return response.payload;
   }
 
-  public static async updateSecurityConfig(
-    req: UpdateConfigRequest,
-  ): Promise<boolean> {
+  public static async updateSecurityConfig(req: UpdateConfigRequest): Promise<boolean> {
     const response = await Management.updateConfig(req);
     return response.payload;
   }
 
-  public static async updateSecurityResolver(
-    req: UpdateResolverRequest,
-  ): Promise<boolean> {
+  public static async updateSecurityResolver(req: UpdateResolverRequest): Promise<boolean> {
     const response = await Management.updateResolver(req);
     return response.payload;
   }
 
   // DID MANAGEMENT ////////////////////////////////////////////
-  public static async getRevocationRegistryAddress(
-    req: GetRevocationRegistryAddressRequest,
-  ): Promise<string> {
+  public static async getRevocationRegistryAddress(req: GetRevocationRegistryAddressRequest): Promise<string> {
     return await SsiManagement.getRevocationRegistryAddress(req);
   }
 
-  public static async setRevocationRegistryAddress(
-    req: SetRevocationRegistryAddressRequest,
-  ): Promise<boolean> {
+  public static async setRevocationRegistryAddress(req: SetRevocationRegistryAddressRequest): Promise<boolean> {
     const response = await SsiManagement.setRevocationRegistryAddress(req);
     return response.payload;
   }
 
-  public static async getIssuerListCount(
-    req: GetIssuerListCountRequest,
-  ): Promise<number> {
+  public static async getIssuerListCount(req: GetIssuerListCountRequest): Promise<number> {
     return await SsiManagement.getIssuerListCount(req);
   }
 
-  public static async getIssuerListMembers(
-    req: GetIssuerListMembersRequest,
-  ): Promise<string[]> {
+  public static async getIssuerListMembers(req: GetIssuerListMembersRequest): Promise<string[]> {
     return await SsiManagement.getIssuerListMembers(req);
   }
 
@@ -1097,9 +757,7 @@ export class SDKService {
     return await Kyc.getKycFor(req);
   }
 
-  public static async getKYCAccountsData(
-    req: GetKycAccountsDataRequest,
-  ): Promise<KycAccountDataViewModel[]> {
+  public static async getKYCAccountsData(req: GetKycAccountsDataRequest): Promise<KycAccountDataViewModel[]> {
     return await Kyc.getKycAccountsData(req);
   }
 
@@ -1113,31 +771,23 @@ export class SDKService {
     return response.payload;
   }
 
-  public static async isInternalKycActivated(
-    req: IsInternalKycActivatedRequest,
-  ): Promise<boolean> {
+  public static async isInternalKycActivated(req: IsInternalKycActivatedRequest): Promise<boolean> {
     const response = await Kyc.isInternalKycActivated(req);
     return response;
   }
 
-  public static async activateInternalKyc(
-    req: ActivateInternalKycRequest,
-  ): Promise<boolean> {
+  public static async activateInternalKyc(req: ActivateInternalKycRequest): Promise<boolean> {
     const response = await Kyc.activateInternalKyc(req);
     return response.payload;
   }
 
-  public static async deactivateInternalKyc(
-    req: DeactivateInternalKycRequest,
-  ): Promise<boolean> {
+  public static async deactivateInternalKyc(req: DeactivateInternalKycRequest): Promise<boolean> {
     const response = await Kyc.deactivateInternalKyc(req);
     return response.payload;
   }
 
   // CLEARING OPERATIONS ////////////////////////////////////////////
-  public static async getClearingsIdForByPartition(
-    request: GetClearingsIdForByPartitionRequest,
-  ): Promise<number[]> {
+  public static async getClearingsIdForByPartition(request: GetClearingsIdForByPartitionRequest): Promise<number[]> {
     const response = await Security.getClearingsIdForByPartition(request);
     return response;
   }
@@ -1158,28 +808,21 @@ export class SDKService {
   public static async getClearingCreateHoldForByPartition(
     request: GetClearingCreateHoldForByPartitionRequest,
   ): Promise<ClearingCreateHoldViewModel> {
-    const response =
-      await Security.getClearingCreateHoldForByPartition(request);
+    const response = await Security.getClearingCreateHoldForByPartition(request);
     return response;
   }
 
-  public static async clearingTransferByPartition(
-    request: ClearingTransferByPartitionRequest,
-  ): Promise<number> {
+  public static async clearingTransferByPartition(request: ClearingTransferByPartitionRequest): Promise<number> {
     const response = await Security.clearingTransferByPartition(request);
     return response.payload;
   }
 
-  public static async clearingRedeemByPartition(
-    request: ClearingRedeemByPartitionRequest,
-  ): Promise<number> {
+  public static async clearingRedeemByPartition(request: ClearingRedeemByPartitionRequest): Promise<number> {
     const response = await Security.clearingRedeemByPartition(request);
     return response.payload;
   }
 
-  public static async clearingCreateHoldByPartition(
-    request: ClearingCreateHoldByPartitionRequest,
-  ): Promise<number> {
+  public static async clearingCreateHoldByPartition(request: ClearingCreateHoldByPartitionRequest): Promise<number> {
     const response = await Security.clearingCreateHoldByPartition(request);
     return response.payload;
   }
@@ -1187,8 +830,7 @@ export class SDKService {
   public static async approveClearingOperationByPartition(
     request: ApproveClearingOperationByPartitionRequest,
   ): Promise<boolean> {
-    const response =
-      await Security.approveClearingOperationByPartition(request);
+    const response = await Security.approveClearingOperationByPartition(request);
     return response.payload;
   }
 
@@ -1202,80 +844,58 @@ export class SDKService {
   public static async reclaimClearingOperationByPartition(
     request: ReclaimClearingOperationByPartitionRequest,
   ): Promise<boolean> {
-    const response =
-      await Security.reclaimClearingOperationByPartition(request);
+    const response = await Security.reclaimClearingOperationByPartition(request);
     return response.payload;
   }
 
-  public static async activateClearing(
-    request: ActivateClearingRequest,
-  ): Promise<boolean> {
+  public static async activateClearing(request: ActivateClearingRequest): Promise<boolean> {
     const response = await Security.activateClearing(request);
     return response.payload;
   }
 
-  public static async deactivateClearing(
-    request: DeactivateClearingRequest,
-  ): Promise<boolean> {
+  public static async deactivateClearing(request: DeactivateClearingRequest): Promise<boolean> {
     const response = await Security.deactivateClearing(request);
     return response.payload;
   }
 
-  public static async isClearingActivated(
-    request: IsClearingActivatedRequest,
-  ): Promise<boolean> {
+  public static async isClearingActivated(request: IsClearingActivatedRequest): Promise<boolean> {
     const response = await Security.isClearingActivated(request);
     return response;
   }
 
-  public static async getClearedAmountFor(
-    req: GetClearedAmountForRequest,
-  ): Promise<number> {
+  public static async getClearedAmountFor(req: GetClearedAmountForRequest): Promise<number> {
     const response = await Security.getClearedAmountFor(req);
     return response;
   }
 
   // EXTERNAL PAUSES //////////////////////////////////////
-  public static async addExternalPause(
-    req: AddExternalPauseRequest,
-  ): Promise<boolean> {
+  public static async addExternalPause(req: AddExternalPauseRequest): Promise<boolean> {
     const response = await ExternalPausesManagement.addExternalPause(req);
     return response.payload;
   }
 
-  public static async removeExternalPause(
-    req: RemoveExternalPauseRequest,
-  ): Promise<boolean> {
+  public static async removeExternalPause(req: RemoveExternalPauseRequest): Promise<boolean> {
     const response = await ExternalPausesManagement.removeExternalPause(req);
     return response.payload;
   }
 
-  public static async updateExternalPauses(
-    req: UpdateExternalPausesRequest,
-  ): Promise<boolean> {
+  public static async updateExternalPauses(req: UpdateExternalPausesRequest): Promise<boolean> {
     const response = await ExternalPausesManagement.updateExternalPauses(req);
     return response.payload;
   }
 
-  public static async isExternalPause(
-    req: IsExternalPauseRequest,
-  ): Promise<boolean> {
+  public static async isExternalPause(req: IsExternalPauseRequest): Promise<boolean> {
     const response = await ExternalPausesManagement.isExternalPause(req);
     return response;
   }
 
-  public static async getExternalPausesCount(
-    req: GetExternalPausesCountRequest,
-  ): Promise<number> {
+  public static async getExternalPausesCount(req: GetExternalPausesCountRequest): Promise<number> {
     const response = await ExternalPausesManagement.getExternalPausesCount(req);
     return response;
   }
 
-  public static async getExternalPausesMembers(
-    req: GetExternalPausesMembersRequest,
-  ): Promise<string[]> {
-    const response =
-      await ExternalPausesManagement.getExternalPausesMembers(req);
+  public static async getExternalPausesMembers(req: GetExternalPausesMembersRequest): Promise<string[]> {
+    const response = await ExternalPausesManagement.getExternalPausesMembers(req);
     return response;
   }
 
@@ -1284,9 +904,7 @@ export class SDKService {
     return response;
   }
 
-  public static async setPausedMock(
-    req: SetPausedMockRequest,
-  ): Promise<boolean> {
+  public static async setPausedMock(req: SetPausedMockRequest): Promise<boolean> {
     const response = await ExternalPausesManagement.setPausedMock(req);
     return response.payload;
   }
@@ -1298,110 +916,72 @@ export class SDKService {
 
   // External Control
   public static async createExternalBlackListMock(): Promise<string> {
-    const response =
-      await ExternalControlListsManagement.createExternalBlackListMock();
+    const response = await ExternalControlListsManagement.createExternalBlackListMock();
     return response;
   }
 
   public static async createExternalWhiteListMock(): Promise<string> {
-    const response =
-      await ExternalControlListsManagement.createExternalWhiteListMock();
+    const response = await ExternalControlListsManagement.createExternalWhiteListMock();
     return response;
   }
 
-  public static async addExternalControlList(
-    req: AddExternalControlListRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalControlListsManagement.addExternalControlList(req);
+  public static async addExternalControlList(req: AddExternalControlListRequest): Promise<boolean> {
+    const response = await ExternalControlListsManagement.addExternalControlList(req);
     return response.payload;
   }
 
-  public static async addToBlackListMock(
-    req: AddToBlackListMockRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalControlListsManagement.addToBlackListMock(req);
+  public static async addToBlackListMock(req: AddToBlackListMockRequest): Promise<boolean> {
+    const response = await ExternalControlListsManagement.addToBlackListMock(req);
     return response.payload;
   }
 
-  public static async addToWhiteListMock(
-    req: AddToWhiteListMockRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalControlListsManagement.addToWhiteListMock(req);
+  public static async addToWhiteListMock(req: AddToWhiteListMockRequest): Promise<boolean> {
+    const response = await ExternalControlListsManagement.addToWhiteListMock(req);
     return response.payload;
   }
 
-  public static async removeExternalControlList(
-    req: RemoveExternalControlListRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalControlListsManagement.removeExternalControlList(req);
+  public static async removeExternalControlList(req: RemoveExternalControlListRequest): Promise<boolean> {
+    const response = await ExternalControlListsManagement.removeExternalControlList(req);
     return response.payload;
   }
 
-  public static async removeFromBlackListMock(
-    req: RemoveFromBlackListMockRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalControlListsManagement.removeFromBlackListMock(req);
+  public static async removeFromBlackListMock(req: RemoveFromBlackListMockRequest): Promise<boolean> {
+    const response = await ExternalControlListsManagement.removeFromBlackListMock(req);
     return response.payload;
   }
 
-  public static async removeFromWhiteListMock(
-    req: RemoveFromWhiteListMockRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalControlListsManagement.removeFromWhiteListMock(req);
+  public static async removeFromWhiteListMock(req: RemoveFromWhiteListMockRequest): Promise<boolean> {
+    const response = await ExternalControlListsManagement.removeFromWhiteListMock(req);
     return response.payload;
   }
 
-  public static async updateExternalControlLists(
-    req: UpdateExternalControlListsRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalControlListsManagement.updateExternalControlLists(req);
+  public static async updateExternalControlLists(req: UpdateExternalControlListsRequest): Promise<boolean> {
+    const response = await ExternalControlListsManagement.updateExternalControlLists(req);
     return response.payload;
   }
 
-  public static async getExternalControlListsCount(
-    req: GetExternalControlListsCountRequest,
-  ): Promise<number> {
-    const response =
-      await ExternalControlListsManagement.getExternalControlListsCount(req);
+  public static async getExternalControlListsCount(req: GetExternalControlListsCountRequest): Promise<number> {
+    const response = await ExternalControlListsManagement.getExternalControlListsCount(req);
     return response;
   }
 
-  public static async getExternalControlListsMembers(
-    req: GetExternalControlListsMembersRequest,
-  ): Promise<string[]> {
-    const response =
-      await ExternalControlListsManagement.getExternalControlListsMembers(req);
+  public static async getExternalControlListsMembers(req: GetExternalControlListsMembersRequest): Promise<string[]> {
+    const response = await ExternalControlListsManagement.getExternalControlListsMembers(req);
     return response;
   }
 
-  public static async isExternalControlList(
-    req: IsExternalControlListRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalControlListsManagement.isExternalControlList(req);
+  public static async isExternalControlList(req: IsExternalControlListRequest): Promise<boolean> {
+    const response = await ExternalControlListsManagement.isExternalControlList(req);
     return response;
   }
 
-  public static async isAuthorizedBlackListMock(
-    req: IsAuthorizedBlackListMockRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalControlListsManagement.isAuthorizedBlackListMock(req);
+  public static async isAuthorizedBlackListMock(req: IsAuthorizedBlackListMockRequest): Promise<boolean> {
+    const response = await ExternalControlListsManagement.isAuthorizedBlackListMock(req);
     return response;
   }
 
-  public static async isAuthorizedWhiteListMock(
-    req: IsAuthorizedWhiteListMockRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalControlListsManagement.isAuthorizedWhiteListMock(req);
+  public static async isAuthorizedWhiteListMock(req: IsAuthorizedWhiteListMockRequest): Promise<boolean> {
+    const response = await ExternalControlListsManagement.isAuthorizedWhiteListMock(req);
     return response;
   }
 
@@ -1411,9 +991,7 @@ export class SDKService {
     return response;
   }
 
-  public static async addExternalKycList(
-    req: AddExternalKycListRequest,
-  ): Promise<boolean> {
+  public static async addExternalKycList(req: AddExternalKycListRequest): Promise<boolean> {
     const response = await ExternalKycListsManagement.addExternalKycList(req);
     return response.payload;
   }
@@ -1423,64 +1001,49 @@ export class SDKService {
     return response.payload;
   }
 
-  public static async revokeKycMock(
-    req: RevokeKycMockRequest,
-  ): Promise<boolean> {
+  public static async revokeKycMock(req: RevokeKycMockRequest): Promise<boolean> {
     const response = await ExternalKycListsManagement.revokeKycMock(req);
     return response.payload;
   }
 
-  public static async removeExternalKycList(
-    req: RemoveExternalKycListRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalKycListsManagement.removeExternalKycList(req);
+  public static async removeExternalKycList(req: RemoveExternalKycListRequest): Promise<boolean> {
+    const response = await ExternalKycListsManagement.removeExternalKycList(req);
     return response.payload;
   }
 
-  public static async updateExternalKycLists(
-    req: UpdateExternalKycListsRequest,
-  ): Promise<boolean> {
-    const response =
-      await ExternalKycListsManagement.updateExternalKycLists(req);
+  public static async updateExternalKycLists(req: UpdateExternalKycListsRequest): Promise<boolean> {
+    const response = await ExternalKycListsManagement.updateExternalKycLists(req);
     return response.payload;
   }
 
-  public static async getExternalKycListsCount(
-    req: GetExternalKycListsCountRequest,
-  ): Promise<number> {
-    const response =
-      await ExternalKycListsManagement.getExternalKycListsCount(req);
+  public static async getExternalKycListsCount(req: GetExternalKycListsCountRequest): Promise<number> {
+    const response = await ExternalKycListsManagement.getExternalKycListsCount(req);
     return response;
   }
 
-  public static async getExternalKycListsMembers(
-    req: GetExternalKycListsMembersRequest,
-  ): Promise<string[]> {
-    const response =
-      await ExternalKycListsManagement.getExternalKycListsMembers(req);
+  public static async getExternalKycListsMembers(req: GetExternalKycListsMembersRequest): Promise<string[]> {
+    const response = await ExternalKycListsManagement.getExternalKycListsMembers(req);
     return response;
   }
 
-  public static async getKycStatusMock(
-    req: GetKycStatusMockRequest,
-  ): Promise<number> {
+  public static async getKycStatusMock(req: GetKycStatusMockRequest): Promise<number> {
     const response = await ExternalKycListsManagement.getKycStatusMock(req);
     return response;
   }
 
-  public static async isExternalKycList(
-    req: IsExternalKycListRequest,
-  ): Promise<boolean> {
+  public static async isExternalKycList(req: IsExternalKycListRequest): Promise<boolean> {
     const response = await ExternalKycListsManagement.isExternalKycList(req);
     return response;
   }
 
-  public static async isExternallyKycGranted(
-    req: IsExternallyGrantedRequest,
-  ): Promise<boolean> {
+  public static async isExternallyKycGranted(req: IsExternallyGrantedRequest): Promise<boolean> {
     const response = await ExternalKycListsManagement.isExternallyGranted(req);
     return response;
+  }
+
+  public static async fullRedeemAtMaturity(req: FullRedeemAtMaturityRequest): Promise<boolean> {
+    const response = await Bond.fullRedeemAtMaturity(req);
+    return response.payload;
   }
 }
 

@@ -14,6 +14,7 @@ import {
   Cap,
   Equity,
   TimeTravelFacet,
+  Snapshots,
 } from "@contract-types";
 
 import { deployEquityTokenFixture } from "@test";
@@ -47,6 +48,7 @@ describe("Lock Tests", () => {
   let lockFacet: Lock;
   let pauseFacet: Pause;
   let erc1410Facet: IERC1410;
+  let snapshotFacet: Snapshots;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
   let adjustBalancesFacet: AdjustBalances;
@@ -97,6 +99,7 @@ describe("Lock Tests", () => {
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
     adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
     capFacet = await ethers.getContractAt("Cap", diamond.address, signer_A);
+    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
 
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address, signer_A);
 
@@ -559,6 +562,70 @@ describe("Lock Tests", () => {
         await expect(lockFacet.releaseByPartition(_NON_DEFAULT_PARTITION, 1, signer_A.address))
           .to.be.revertedWithCustomError(lockFacet, "PartitionNotAllowedInSinglePartitionMode")
           .withArgs(_NON_DEFAULT_PARTITION);
+      });
+    });
+
+    describe("snapshot", () => {
+      it("GIVEN an account with snapshot role WHEN takeSnapshot and Lock THEN transaction succeeds", async () => {
+        const AMOUNT = 10;
+        const EXPIRATION_TIMESTAMP = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
+
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_A.address);
+
+        await erc1410Facet.connect(signer_A).issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: AMOUNT,
+          data: "0x",
+        });
+
+        // snapshot
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // Operations
+        await lockFacet
+          .connect(signer_A)
+          .lockByPartition(_DEFAULT_PARTITION, 1, signer_A.address, EXPIRATION_TIMESTAMP);
+        await lockFacet
+          .connect(signer_A)
+          .lockByPartition(_DEFAULT_PARTITION, 1, signer_A.address, EXPIRATION_TIMESTAMP);
+
+        // snapshot
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // Operations
+        await timeTravelFacet.changeSystemTimestamp(EXPIRATION_TIMESTAMP + 1);
+        await lockFacet.connect(signer_A).releaseByPartition(_DEFAULT_PARTITION, 1, signer_A.address);
+
+        // snapshot
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // checks
+        const snapshot_Balance_Of_A_1 = await snapshotFacet.balanceOfAtSnapshot(1, signer_A.address);
+        const snapshot_LockedBalance_Of_A_1 = await snapshotFacet.lockedBalanceOfAtSnapshot(1, signer_A.address);
+        const snapshot_Total_Supply_1 = await snapshotFacet.totalSupplyAtSnapshot(1);
+
+        expect(snapshot_Balance_Of_A_1).to.equal(AMOUNT);
+        expect(snapshot_LockedBalance_Of_A_1).to.equal(0);
+        expect(snapshot_Total_Supply_1).to.equal(AMOUNT);
+
+        const snapshot_Balance_Of_A_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_A.address);
+        const snapshot_LockedBalance_Of_A_2 = await snapshotFacet.lockedBalanceOfAtSnapshot(2, signer_A.address);
+        const snapshot_Total_Supply_2 = await snapshotFacet.totalSupplyAtSnapshot(2);
+
+        expect(snapshot_Balance_Of_A_2).to.equal(AMOUNT - 2);
+        expect(snapshot_LockedBalance_Of_A_2).to.equal(2);
+        expect(snapshot_Total_Supply_2).to.equal(AMOUNT);
+
+        const snapshot_Balance_Of_A_3 = await snapshotFacet.balanceOfAtSnapshot(3, signer_A.address);
+        const snapshot_LockedBalance_Of_A_3 = await snapshotFacet.lockedBalanceOfAtSnapshot(3, signer_A.address);
+        const snapshot_Total_Supply_3 = await snapshotFacet.totalSupplyAtSnapshot(3);
+
+        expect(snapshot_Balance_Of_A_3).to.equal(AMOUNT - 1);
+        expect(snapshot_LockedBalance_Of_A_3).to.equal(1);
+        expect(snapshot_Total_Supply_3).to.equal(AMOUNT);
       });
     });
 

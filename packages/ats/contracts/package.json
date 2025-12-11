@@ -67,7 +67,6 @@
     "deploy:hedera:mainnet": "NETWORK=hedera-mainnet npm run deploy",
     "local:hardhat": "npx hardhat node",
     "deploy:hardhat": "npx hardhat run scripts/cli/hardhat.ts",
-    "publish": "npm publish",
     "compile": "npx hardhat compile",
     "compile:traces": "npx hardhat --show-stack-traces compile",
     "compile:force": "npx hardhat compile --force",

@@ -104,4 +104,19 @@ abstract contract Snapshots is ISnapshots, Common {
     ) external view returns (uint256 balance_) {
         balance_ = _clearedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
+
+    function frozenBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_) {
+        balance_ = _frozenBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+    }
+
+    function frozenBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_) {
+        balance_ = _frozenBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
+    }
 }

@@ -96,10 +96,10 @@ For non-feature changes, add these labels to skip changeset requirement:
 
 ### Automatic Publishing
 
-| Workflow                | Trigger             | Purpose                     |
-| ----------------------- | ------------------- | --------------------------- |
-| **ATS Publish**         | Release tag `*-ats` | Publish ATS packages to npm |
-| **Mass Payout Publish** | Release tag `*-mp`  | Publish MP packages to npm  |
+| Workflow                | Trigger           | Purpose                     |
+| ----------------------- | ----------------- | --------------------------- |
+| **ATS Publish**         | Tag push `v*-ats` | Publish ATS packages to npm |
+| **Mass Payout Publish** | Tag push `v*-mp`  | Publish MP packages to npm  |
 
 ## Release Process
 
@@ -121,12 +121,12 @@ sequenceDiagram
 
     Dev->>GH: Trigger ATS Release Workflow
     GH->>GH: Validate ATS changesets exist
-    GH->>M: Run changeset version --ignore MP
-    GH->>M: Commit version changes to main
-    GH->>M: Create tag v1.16.0-ats
-    GH->>GH: Create GitHub release
-    GH->>NPM: Auto-trigger publish workflow
-    NPM->>NPM: Publish contracts & SDK
+    GH->>M: Run changeset version --ignore MP packages
+    GH->>M: Commit version changes
+    GH->>M: Push tag v1.16.0-ats
+    Note over GH,NPM: Tag push auto-triggers publish workflow
+    GH->>NPM: Publish contracts & SDK
+    Note over GH: GitHub release created (optional, for notes)
 ```
 
 #### Mass Payout Release Flow
@@ -140,12 +140,12 @@ sequenceDiagram
 
     Dev->>GH: Trigger MP Release Workflow
     GH->>GH: Validate MP changesets exist
-    GH->>M: Run changeset version --ignore ATS
-    GH->>M: Commit version changes to main
-    GH->>M: Create tag v2.4.0-mp
-    GH->>GH: Create GitHub release
-    GH->>NPM: Auto-trigger publish workflow
-    NPM->>NPM: Publish MP packages
+    GH->>M: Run changeset version --ignore ATS packages
+    GH->>M: Commit version changes
+    GH->>M: Push tag v2.4.0-mp
+    Note over GH,NPM: Tag push auto-triggers publish workflow
+    GH->>NPM: Publish MP packages
+    Note over GH: GitHub release created (optional, for notes)
 ```
 
 #### Release Options
@@ -202,11 +202,17 @@ sequenceDiagram
 2. **Apply changesets and version packages**:
 
    ```bash
-   # For ATS release
-   npx changeset version --ignore "@hashgraph/mass-payout*"
+   # For ATS release (ignore all Mass Payout packages)
+   npx changeset version \
+     --ignore "@mass-payout/contracts" \
+     --ignore "@mass-payout/sdk" \
+     --ignore "@mass-payout/backend" \
+     --ignore "@mass-payout/frontend"
 
-   # For Mass Payout release
-   npx changeset version --ignore "@hashgraph/asset-tokenization-*"
+   # For Mass Payout release (ignore all ATS packages)
+   npx changeset version \
+     --ignore "@hashgraph/asset-tokenization-contracts" \
+     --ignore "@hashgraph/asset-tokenization-sdk"
    ```
 
 3. **Commit version changes**:
@@ -221,10 +227,15 @@ sequenceDiagram
    - Create PR from `release/v1.22.2-ats` to `main`
    - Review and merge the version changes
 
-5. **Create GitHub release**:
-   - Create tag `v1.22.2-ats` on main branch
-   - Create GitHub release with generated changelog
-   - Publishing workflows trigger automatically
+5. **Create and push tag**:
+
+   ```bash
+   git tag v1.22.2-ats
+   git push origin v1.22.2-ats
+   ```
+
+   - Tag push automatically triggers publish workflow
+   - Optionally create GitHub release for release notes
 
 6. **Sync main back to develop**:
    ```bash
@@ -269,11 +280,12 @@ sequenceDiagram
     end
 
     Note over M: Ready for release
-    M->>GH: Manual release trigger
-    GH->>M: Version packages + create tag
-    GH->>GH: Create GitHub release
-    GH->>NPM: Auto-trigger publish
-    NPM->>NPM: Publish to NPM
+    M->>GH: Manual release workflow trigger
+    GH->>M: Version packages
+    GH->>M: Push tag (e.g., v2.0.0-ats)
+    Note over GH,NPM: Tag push auto-triggers publish
+    GH->>NPM: Publish to NPM
+    Note over GH: GitHub release optional (for notes)
 
     M->>D: Sync version changes back
 ```

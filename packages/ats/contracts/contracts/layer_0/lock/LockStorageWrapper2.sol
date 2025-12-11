@@ -139,6 +139,7 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         address _tokenHolder,
         uint256 /*_expirationTimestamp*/
     ) internal {
+        _updateAccountSnapshot(_tokenHolder, _partition);
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
 
@@ -147,6 +148,7 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         uint256 /*_lockId*/,
         address _tokenHolder
     ) internal {
+        _updateAccountSnapshot(_tokenHolder, _partition);
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
 }

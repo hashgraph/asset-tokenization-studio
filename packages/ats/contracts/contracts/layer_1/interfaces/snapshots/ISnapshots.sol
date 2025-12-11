@@ -109,6 +109,39 @@ interface ISnapshots is ISnapshotsStorageWrapper {
         address _tokenHolder
     ) external view returns (uint256 balance_);
 
+    function heldBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_);
+
+    function heldBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_);
+
+    function clearedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_);
+
+    function clearedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_);
+
+    function frozenBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_);
+
+    function frozenBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_);
+
     /**
      * @notice Returns the list of token holders at the time of a given snapshot
      */

@@ -26,6 +26,7 @@ import {
   IdentityRegistryMock,
   IERC3643,
   TimeTravelFacet,
+  Snapshots,
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { Contract } from "ethers";
@@ -85,6 +86,7 @@ describe("ERC3643 Tests", () => {
   let protectedPartitionsFacet: ProtectedPartitions;
   let diamondFacet: DiamondFacet;
   let freezeFacet: FreezeFacet;
+  let snapshotFacet: Snapshots;
 
   let identityRegistryMock: IdentityRegistryMock;
   let complianceMock: ComplianceMock;
@@ -190,6 +192,7 @@ describe("ERC3643 Tests", () => {
       erc1594Facet = await ethers.getContractAt("ERC1594", diamond.address);
       erc1644Facet = await ethers.getContractAt("ERC1644", diamond.address);
       lockFacet = await ethers.getContractAt("Lock", diamond.address);
+      snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
 
       const clearingRedeemFacet = await ethers.getContractAt("ClearingRedeemFacet", diamond.address, signer_A);
       const clearingHoldCreationFacet = await ethers.getContractAt(
@@ -395,6 +398,62 @@ describe("ERC3643 Tests", () => {
     });
 
     describe("Freeze", () => {
+      describe("snapshot", () => {
+        it("GIVEN an account with snapshot role WHEN takeSnapshot and Freeze THEN transaction succeeds", async () => {
+          const AMOUNT = 10;
+
+          await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+
+          await erc1410Facet.connect(signer_A).issueByPartition({
+            partition: DEFAULT_PARTITION,
+            tokenHolder: signer_E.address,
+            value: AMOUNT,
+            data: "0x",
+          });
+
+          // snapshot
+          await snapshotFacet.connect(signer_A).takeSnapshot();
+
+          // Operations
+          await freezeFacet.connect(signer_A).freezePartialTokens(signer_E.address, 1);
+          await freezeFacet.connect(signer_A).freezePartialTokens(signer_E.address, 1);
+
+          // snapshot
+          await snapshotFacet.connect(signer_A).takeSnapshot();
+
+          // Operations
+          await freezeFacet.connect(signer_A).unfreezePartialTokens(signer_E.address, 1);
+
+          // snapshot
+          await snapshotFacet.connect(signer_A).takeSnapshot();
+
+          // checks
+          const snapshot_Balance_Of_E_1 = await snapshotFacet.balanceOfAtSnapshot(1, signer_E.address);
+          const snapshot_FrozenBalance_Of_E_1 = await snapshotFacet.frozenBalanceOfAtSnapshot(1, signer_E.address);
+          const snapshot_Total_Supply_1 = await snapshotFacet.totalSupplyAtSnapshot(1);
+
+          expect(snapshot_Balance_Of_E_1).to.equal(AMOUNT);
+          expect(snapshot_FrozenBalance_Of_E_1).to.equal(0);
+          expect(snapshot_Total_Supply_1).to.equal(AMOUNT);
+
+          const snapshot_Balance_Of_E_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_E.address);
+          const snapshot_FrozenBalance_Of_E_2 = await snapshotFacet.frozenBalanceOfAtSnapshot(2, signer_E.address);
+          const snapshot_Total_Supply_2 = await snapshotFacet.totalSupplyAtSnapshot(2);
+
+          expect(snapshot_Balance_Of_E_2).to.equal(AMOUNT - 2);
+          expect(snapshot_FrozenBalance_Of_E_2).to.equal(2);
+          expect(snapshot_Total_Supply_2).to.equal(AMOUNT);
+
+          const snapshot_Balance_Of_E_3 = await snapshotFacet.balanceOfAtSnapshot(3, signer_E.address);
+          const snapshot_FrozenBalance_Of_E_3 = await snapshotFacet.frozenBalanceOfAtSnapshot(3, signer_E.address);
+          const snapshot_Total_Supply_3 = await snapshotFacet.totalSupplyAtSnapshot(3);
+
+          expect(snapshot_Balance_Of_E_3).to.equal(AMOUNT - 1);
+          expect(snapshot_FrozenBalance_Of_E_3).to.equal(1);
+          expect(snapshot_Total_Supply_3).to.equal(AMOUNT);
+        });
+      });
+
       it("GIVEN a invalid address WHEN attempting to setAddressFrozen THEN transactions revert with ZeroAddressNotAllowed error", async () => {
         await expect(freezeFacet.setAddressFrozen(ADDRESS_ZERO, true)).to.be.rejectedWith("ZeroAddressNotAllowed");
       });

@@ -21,6 +21,7 @@ import {
   Cap,
   AdjustBalances,
   Lock,
+  Snapshots,
 } from "@contract-types";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -71,6 +72,7 @@ describe("Hold Tests", () => {
   let accessControlFacet: AccessControl;
   let capFacet: Cap;
   let adjustBalancesFacet: AdjustBalances;
+  let snapshotFacet: Snapshots;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -127,6 +129,7 @@ describe("Hold Tests", () => {
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
     adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
     clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
+    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
 
     capFacet = await ethers.getContractAt("Cap", diamond.address, signer_A);
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address, signer_A);
@@ -239,6 +242,78 @@ describe("Hold Tests", () => {
         tokenHolder: signer_A.address,
         holdId: 1,
       };
+    });
+
+    describe("snapshot", () => {
+      it("GIVEN an account with snapshot role WHEN takeSnapshot and Hold THEN transaction succeeds", async () => {
+        const EXPIRATION_TIMESTAMP = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
+
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_A.address);
+
+        // snapshot
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // Operations
+        const hold = {
+          amount: 1,
+          expirationTimestamp: EXPIRATION_TIMESTAMP,
+          escrow: signer_A.address,
+          to: ADDRESS_ZERO,
+          data: EMPTY_HEX_BYTES,
+        };
+        await holdFacet.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, hold);
+        await holdFacet.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, hold);
+        await holdFacet.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, hold);
+        await holdFacet.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, hold);
+
+        // snapshot
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // Operations
+        holdIdentifier.holdId = 1;
+        await holdFacet.connect(signer_A).releaseHoldByPartition(holdIdentifier, 1);
+        holdIdentifier.holdId = 2;
+        await holdFacet.connect(signer_A).executeHoldByPartition(holdIdentifier, signer_B.address, 1);
+        await timeTravelFacet.changeSystemTimestamp(EXPIRATION_TIMESTAMP + 1);
+        holdIdentifier.holdId = 3;
+        await holdFacet.connect(signer_A).reclaimHoldByPartition(holdIdentifier);
+
+        // snapshot
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // checks
+        const snapshot_Balance_Of_A_1 = await snapshotFacet.balanceOfAtSnapshot(1, signer_A.address);
+        const snapshot_Balance_Of_B_1 = await snapshotFacet.balanceOfAtSnapshot(1, signer_B.address);
+        const snapshot_HeldBalance_Of_A_1 = await snapshotFacet.heldBalanceOfAtSnapshot(1, signer_A.address);
+        const snapshot_Total_Supply_1 = await snapshotFacet.totalSupplyAtSnapshot(1);
+
+        expect(snapshot_Balance_Of_A_1).to.equal(_AMOUNT);
+        expect(snapshot_Balance_Of_B_1).to.equal(0);
+        expect(snapshot_HeldBalance_Of_A_1).to.equal(0);
+        expect(snapshot_Total_Supply_1).to.equal(_AMOUNT);
+
+        const snapshot_Balance_Of_A_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_A.address);
+        const snapshot_Balance_Of_B_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_B.address);
+        const snapshot_HeldBalance_Of_A_2 = await snapshotFacet.heldBalanceOfAtSnapshot(2, signer_A.address);
+        const snapshot_Total_Supply_2 = await snapshotFacet.totalSupplyAtSnapshot(2);
+
+        expect(snapshot_Balance_Of_A_2).to.equal(_AMOUNT - 4);
+        expect(snapshot_Balance_Of_B_2).to.equal(0);
+        expect(snapshot_HeldBalance_Of_A_2).to.equal(4);
+        expect(snapshot_Total_Supply_2).to.equal(_AMOUNT);
+
+        const snapshot_Balance_Of_A_3 = await snapshotFacet.balanceOfAtSnapshot(3, signer_A.address);
+        const snapshot_Balance_Of_B_3 = await snapshotFacet.balanceOfAtSnapshot(3, signer_B.address);
+        const snapshot_HeldBalance_Of_A_3 = await snapshotFacet.heldBalanceOfAtSnapshot(3, signer_A.address);
+        const snapshot_Total_Supply_3 = await snapshotFacet.totalSupplyAtSnapshot(3);
+
+        expect(snapshot_Balance_Of_A_3).to.equal(_AMOUNT - 2);
+        expect(snapshot_Balance_Of_B_3).to.equal(1);
+        expect(snapshot_HeldBalance_Of_A_3).to.equal(1);
+        expect(snapshot_Total_Supply_3).to.equal(_AMOUNT);
+      });
     });
 
     describe("Paused", () => {
