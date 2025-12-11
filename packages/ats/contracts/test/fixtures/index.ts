@@ -30,6 +30,16 @@ export {
   getRegulationData,
 } from "./tokens/common.fixture";
 
+// ResolverProxy fixtures
+export {
+  deployResolverProxyFixture,
+  deployResolverProxyWithAltConfigFixture,
+  TEST_CONFIG_ID,
+  ALT_CONFIG_ID,
+  MAX_TEST_VERSION,
+  type ResolverProxyFixtureResult,
+} from "./resolverProxy.fixture";
+
 // T-REX fixtures (legacy support)
 export {
   deployIdentityProxy,
