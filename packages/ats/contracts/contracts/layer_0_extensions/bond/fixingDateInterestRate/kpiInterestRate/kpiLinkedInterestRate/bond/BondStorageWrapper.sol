@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "../../../../../layer_2/interfaces/bond/IBondRead.sol";
-import { IKpi } from "../../../../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpi.sol";
-import { IKpiLinkedRate } from "../../../../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
-import { LowLevelCall } from "../../../../../layer_0/common/libraries/LowLevelCall.sol";
+import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
+import { IKpi } from "contracts/layer_2/interfaces/interestRates/kpiLinkedRate/IKpi.sol";
+import { IKpiLinkedRate } from "contracts/layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { LowLevelCall } from "contracts/layer_0/common/libraries/LowLevelCall.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { DecimalsLib } from "../../../../../layer_0/common/libraries/DecimalsLib.sol";
-import { BondStorageWrapperFixingDateInterestRate } from "../../BondStorageWrapperFixingDateInterestRate.sol";
+import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
+import { InternalsKpiLinkedInterestRate } from "../Internals.sol";
 
-abstract contract BondStorageWrapperKpiLinkedInterestRate is BondStorageWrapperFixingDateInterestRate {
+abstract contract BondStorageWrapperKpiLinkedInterestRate is InternalsKpiLinkedInterestRate {
     using LowLevelCall for address;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -28,7 +28,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is BondStorageWrapperF
         _setKpiLinkedInterestRate(_couponID);
     }
 
-    function _setKpiLinkedInterestRate(uint256 _couponID) internal {
+    function _setKpiLinkedInterestRate(uint256 _couponID) internal override {
         IBondRead.Coupon memory coupon = _getCoupon(_couponID).coupon;
 
         (uint256 rate, uint8 rateDecimals) = _calculateKpiLinkedInterestRate(_couponID, coupon);
@@ -45,7 +45,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is BondStorageWrapperF
     function _calculateKpiLinkedInterestRate(
         uint256 _couponID,
         IBondRead.Coupon memory _coupon
-    ) internal view returns (uint256 rate_, uint8 rateDecimals) {
+    ) internal view override returns (uint256 rate_, uint8 rateDecimals) {
         KpiLinkedRateDataStorage memory kpiLinkedRateStorage = _kpiLinkedRateStorage();
 
         if (_coupon.fixingDate < kpiLinkedRateStorage.startPeriod) {

@@ -609,14 +609,6 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         );
     }
 
-    function _getClearingLabafByPartition(
-        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
-    ) internal view virtual returns (uint256);
-
-    function _checkCompliance(address _from, address _to, bool _checkSender) internal view virtual;
-
-    function _checkIdentity(address _from, address _to) internal view virtual;
-
     function _clearingTransferExecution(
         bytes32 _partition,
         address _tokenHolder,

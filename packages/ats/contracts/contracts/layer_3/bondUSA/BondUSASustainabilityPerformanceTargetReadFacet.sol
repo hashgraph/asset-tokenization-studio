@@ -2,9 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSAReadFacetBase } from "./BondUSAReadFacet.sol";
-import {
-    _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY
-} from "../../layer_2/constants/resolverKeys.sol";
+import { _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY } from "../../layer_2/constants/resolverKeys.sol";
 import {
     CommonSustainabilityPerformanceTargetInterestRate
 } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";

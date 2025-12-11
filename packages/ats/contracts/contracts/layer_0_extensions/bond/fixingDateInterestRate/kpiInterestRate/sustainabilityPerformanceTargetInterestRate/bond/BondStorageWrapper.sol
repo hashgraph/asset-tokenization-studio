@@ -8,7 +8,7 @@ import {
 } from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
-import { KpisStorageWrapper } from "./kpis/KpisStorageWrapper.sol";
+import { KpisStorageWrapper } from "../kpis/KpisStorageWrapper.sol";
 
 abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate is KpisStorageWrapper {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -28,7 +28,7 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
         _setSustainabilityPerformanceTargetInterestRate(_couponID);
     }
 
-    function _setSustainabilityPerformanceTargetInterestRate(uint256 _couponID) internal {
+    function _setSustainabilityPerformanceTargetInterestRate(uint256 _couponID) internal override {
         IBondRead.Coupon memory coupon = _getCoupon(_couponID).coupon;
 
         (uint256 rate, uint8 rateDecimals) = _calculateSustainabilityPerformanceTargetInterestRate(_couponID, coupon);
@@ -45,7 +45,7 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
     function _calculateSustainabilityPerformanceTargetInterestRate(
         uint256 /*_couponID*/,
         IBondRead.Coupon memory /*_coupon*/
-    ) internal view returns (uint256 rate_, uint8 rateDecimals) {
+    ) internal view override returns (uint256 rate_, uint8 rateDecimals) {
         return (0, 0);
         /*SustainabilityPerformanceTargetRateDataStorage
             memory sustainabilityPerformanceTargetRateStorage = _sustainabilityPerformanceTargetRateStorage();

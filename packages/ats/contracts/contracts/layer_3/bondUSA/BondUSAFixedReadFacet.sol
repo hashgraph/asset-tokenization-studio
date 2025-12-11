@@ -2,9 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSAReadFacetBase } from "./BondUSAReadFacet.sol";
-import {
-    _BOND_FIXED_READ_RESOLVER_KEY
-} from "../../layer_2/constants/resolverKeys.sol";
+import { _BOND_FIXED_READ_RESOLVER_KEY } from "../../layer_2/constants/resolverKeys.sol";
 import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
 import { CommonFixedInterestRate } from "../../layer_0_extensions/bond/fixedInterestRate/Common.sol";
 

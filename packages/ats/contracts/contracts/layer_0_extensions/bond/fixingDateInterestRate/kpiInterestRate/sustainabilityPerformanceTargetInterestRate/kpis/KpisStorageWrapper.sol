@@ -2,12 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _KPIS_STORAGE_POSITION } from "contracts/layer_0/constants/storagePositions.sol";
-import { IKpis } from "../../../../../../layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
+import { IKpis } from "contracts/layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
 import { CheckpointsLib } from "contracts/layer_0/common/libraries/CheckpointsLib.sol";
-import { IBondRead } from "../../../../../../layer_2/interfaces/bond/IBondRead.sol";
-import { BondStorageWrapperFixingDateInterestRate } from "../../../BondStorageWrapperFixingDateInterestRate.sol";
+import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
+import { InternalsSustainabilityPerformanceTargetInterestRate } from "../Internals.sol";
 
-abstract contract KpisStorageWrapper is BondStorageWrapperFixingDateInterestRate {
+abstract contract KpisStorageWrapper is InternalsSustainabilityPerformanceTargetInterestRate {
     using CheckpointsLib for CheckpointsLib.Checkpoint[];
 
     struct KpisDataStorage {
@@ -16,7 +16,7 @@ abstract contract KpisStorageWrapper is BondStorageWrapperFixingDateInterestRate
         uint256 minDate;
     }
 
-    modifier isValidDate(uint256 _date, address _project) {
+    modifier isValidDate(uint256 _date, address _project) override {
         if (_date <= _getMinDateAdjusted() || _date > _blockTimestamp()) {
             revert IKpis.InvalidDate(_date, _getMinDateAdjusted(), _blockTimestamp());
         }
@@ -26,7 +26,7 @@ abstract contract KpisStorageWrapper is BondStorageWrapperFixingDateInterestRate
         _;
     }
 
-    function _addKpiData(uint256 _date, uint256 _value, address _project) internal {
+    function _addKpiData(uint256 _date, uint256 _value, address _project) internal override {
         assert(_isCheckpointDate(_date, _project) == false);
         _setCheckpointDate(_date, _project);
 
@@ -58,7 +58,7 @@ abstract contract KpisStorageWrapper is BondStorageWrapperFixingDateInterestRate
         emit IKpis.KpiDataAdded(_project, _date, _value);
     }
 
-    function _pushKpiData(CheckpointsLib.Checkpoint[] storage _ckpt, uint256 _date, uint256 _value) internal {
+    function _pushKpiData(CheckpointsLib.Checkpoint[] storage _ckpt, uint256 _date, uint256 _value) internal override {
         _ckpt.push(CheckpointsLib.Checkpoint({ from: _date, value: _value }));
     }
 
@@ -67,16 +67,16 @@ abstract contract KpisStorageWrapper is BondStorageWrapperFixingDateInterestRate
         uint256 _date,
         uint256 _value,
         uint256 _pos
-    ) internal {
+    ) internal override {
         _ckpt[_pos].from = _date;
         _ckpt[_pos].value = _value;
     }
 
-    function _setMinDate(uint256 _date) internal {
+    function _setMinDate(uint256 _date) internal override {
         _kpisDataStorage().minDate = _date;
     }
 
-    function _setCheckpointDate(uint256 _date, address _project) internal {
+    function _setCheckpointDate(uint256 _date, address _project) internal override {
         _kpisDataStorage().checkpointsDatesByProject[_project][_date] = true;
     }
 
@@ -92,13 +92,13 @@ abstract contract KpisStorageWrapper is BondStorageWrapperFixingDateInterestRate
         uint256 _from,
         uint256 _to,
         address _project
-    ) internal view returns (uint256 value_, bool exists_) {
+    ) internal view override returns (uint256 value_, bool exists_) {
         (uint256 from, uint256 value) = _kpisDataStorage().checkpointsByProject[_project].checkpointsLookup(_to);
         if (from <= _from) return (0, false);
         return (value, true);
     }
 
-    function _getMinDateAdjusted() internal view returns (uint256 minDate_) {
+    function _getMinDateAdjusted() internal view override returns (uint256 minDate_) {
         minDate_ = _kpisDataStorage().minDate;
 
         uint256 total = _getCouponsOrderedListTotalAdjusted();
@@ -110,7 +110,7 @@ abstract contract KpisStorageWrapper is BondStorageWrapperFixingDateInterestRate
         if (lastFixingDate > minDate_) minDate_ = lastFixingDate;
     }
 
-    function _isCheckpointDate(uint256 _date, address _project) internal view returns (bool) {
+    function _isCheckpointDate(uint256 _date, address _project) internal view override returns (bool) {
         return _kpisDataStorage().checkpointsDatesByProject[_project][_date];
     }
 

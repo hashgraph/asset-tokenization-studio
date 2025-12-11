@@ -175,6 +175,13 @@ abstract contract Internals is Modifiers {
     function _isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure virtual returns (bool);
 
     // ===== Clearing Methods =====
+    function _getClearingLabafByPartition(
+        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
+    ) internal view virtual returns (uint256);
+
+    function _checkCompliance(address _from, address _to, bool _checkSender) internal view virtual;
+
+    function _checkIdentity(address _from, address _to) internal view virtual;
     function _setClearing(bool _activated) internal virtual returns (bool success_);
     function _isClearingIdValid(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier

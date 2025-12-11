@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-11T10:59:59.137Z
+ * Generated: 2025-12-11T13:54:11.099Z
  * Facets: 60
  * Infrastructure: 2
  *
@@ -2517,14 +2517,14 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   BondStorageWrapperFixedInterestRate: {
     name: "BondStorageWrapperFixedInterestRate",
-    inheritance: ["Common"],
+    inheritance: ["InternalsFixedInterestRate"],
     methods: [],
     errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
   },
 
   BondStorageWrapperKpiLinkedInterestRate: {
     name: "BondStorageWrapperKpiLinkedInterestRate",
-    inheritance: ["BondStorageWrapperFixingDateInterestRate"],
+    inheritance: ["InternalsKpiLinkedInterestRate"],
     methods: [],
     errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
   },
@@ -3003,7 +3003,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   KpisStorageWrapper: {
     name: "KpisStorageWrapper",
-    inheritance: ["BondStorageWrapperFixingDateInterestRate"],
+    inheritance: ["InternalsSustainabilityPerformanceTargetInterestRate"],
     methods: [
       { name: "_addKpiData", signature: "_addKpiData(uint256,uint256,address)", selector: "0xb645ae9f" },
       { name: "_addToCouponsOrderedList", signature: "_addToCouponsOrderedList(uint256)", selector: "0x17a345a0" },
