@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-11T13:54:11.099Z
+ * Generated: 2025-12-11T15:35:58.863Z
  * Facets: 60
  * Infrastructure: 2
  *
@@ -1553,7 +1553,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xa7fd66e9450da5029fb2dfd59586274386eb4c169bfc873e265aa29d3df59424",
       },
     ],
-    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new FixedRateFacetTimeTravel__factory(signer) : new FixedRateFacet__factory(signer),
   },
@@ -1774,6 +1777,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
       { name: "KpiOracleCalledFailed", signature: "KpiOracleCalledFailed()", selector: "0x75d7804c" },
       { name: "WrongImpactDataValues", signature: "WrongImpactDataValues(ImpactData)", selector: "0xb90540b6" },
@@ -1789,7 +1793,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_KPIS_RESOLVER_KEY",
       value: "0xb228c36d89348606afcfbad286f8eddb0d0cdd727eefd0f0fd87f17ea0793051",
     },
-    inheritance: ["Kpis", "IStaticFunctionSelectors"],
+    inheritance: ["KpisFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
       { name: "addKpiData", signature: "addKpiData(uint256,uint256,address)", selector: "0x0de2be70" },
       { name: "getLatestKpiData", signature: "getLatestKpiData(uint256,uint256,address)", selector: "0xfc7f5cb3" },
@@ -1804,6 +1808,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "InterestRateIsSustainabilityPerformanceTarget",
         signature: "InterestRateIsSustainabilityPerformanceTarget()",
@@ -2270,6 +2275,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "InterestRateIsSustainabilityPerformanceTarget",
         signature: "InterestRateIsSustainabilityPerformanceTarget()",
@@ -2517,14 +2523,14 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   BondStorageWrapperFixedInterestRate: {
     name: "BondStorageWrapperFixedInterestRate",
-    inheritance: ["InternalsFixedInterestRate"],
+    inheritance: ["InternalsFixedInterestRate", "Common"],
     methods: [],
     errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
   },
 
   BondStorageWrapperKpiLinkedInterestRate: {
     name: "BondStorageWrapperKpiLinkedInterestRate",
-    inheritance: ["InternalsKpiLinkedInterestRate"],
+    inheritance: ["InternalsKpiLinkedInterestRate", "BondStorageWrapperFixingDateInterestRate"],
     methods: [],
     errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
   },
@@ -3003,7 +3009,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   KpisStorageWrapper: {
     name: "KpisStorageWrapper",
-    inheritance: ["InternalsSustainabilityPerformanceTargetInterestRate"],
+    inheritance: ["InternalsSustainabilityPerformanceTargetInterestRate", "BondStorageWrapperFixingDateInterestRate"],
     methods: [
       { name: "_addKpiData", signature: "_addKpiData(uint256,uint256,address)", selector: "0xb645ae9f" },
       { name: "_addToCouponsOrderedList", signature: "_addToCouponsOrderedList(uint256)", selector: "0x17a345a0" },

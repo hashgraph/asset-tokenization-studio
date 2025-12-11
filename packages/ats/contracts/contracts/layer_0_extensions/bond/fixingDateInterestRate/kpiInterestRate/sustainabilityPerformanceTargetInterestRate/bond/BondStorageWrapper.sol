@@ -2,13 +2,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
-
 import {
     ISustainabilityPerformanceTargetRate
 } from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
 import { KpisStorageWrapper } from "../kpis/KpisStorageWrapper.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
+import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
 
 abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate is KpisStorageWrapper {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -17,7 +18,7 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
 
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
-    ) internal virtual override returns (bytes32 corporateActionId_, uint256 couponID_) {
+    ) internal virtual override(Internals, BondStorageWrapper) returns (bytes32 corporateActionId_, uint256 couponID_) {
         _checkCoupon(_newCoupon, InterestRateIsSustainabilityPerformanceTarget.selector, "");
 
         return super._setCoupon(_newCoupon);
@@ -38,7 +39,13 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
 
     function _getCoupon(
         uint256 _couponID
-    ) internal view virtual override returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
+    )
+        internal
+        view
+        virtual
+        override(Internals, BondStorageWrapper)
+        returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
+    {
         return _getCouponAdjusted(_couponID, _calculateSustainabilityPerformanceTargetInterestRate);
     }
 

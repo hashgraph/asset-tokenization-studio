@@ -6,8 +6,14 @@ import { IKpis } from "contracts/layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
 import { CheckpointsLib } from "contracts/layer_0/common/libraries/CheckpointsLib.sol";
 import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
 import { InternalsSustainabilityPerformanceTargetInterestRate } from "../Internals.sol";
+import { BondStorageWrapperFixingDateInterestRate } from "../../../BondStorageWrapperFixingDateInterestRate.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
+import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
 
-abstract contract KpisStorageWrapper is InternalsSustainabilityPerformanceTargetInterestRate {
+abstract contract KpisStorageWrapper is
+    InternalsSustainabilityPerformanceTargetInterestRate,
+    BondStorageWrapperFixingDateInterestRate
+{
     using CheckpointsLib for CheckpointsLib.Checkpoint[];
 
     struct KpisDataStorage {
@@ -80,7 +86,7 @@ abstract contract KpisStorageWrapper is InternalsSustainabilityPerformanceTarget
         _kpisDataStorage().checkpointsDatesByProject[_project][_date] = true;
     }
 
-    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override {
+    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, BondStorageWrapper) {
         super._addToCouponsOrderedList(_couponID);
 
         uint256 lastFixingDate = _getCoupon(_couponID).coupon.fixingDate;
