@@ -212,8 +212,7 @@ jobs:
                 echo "❌ Failed to publish ATS SDK package: ${{ needs.prepare-sdk.outputs.artifact-name }}"
                 exit 1
             fi
-          
-          
+          echo "::endgroup::"
 
   # Summary job to report results
   summary:
