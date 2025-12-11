@@ -203,12 +203,15 @@
 
 */
 
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
-import BigDecimal from '@domain/context/shared/BigDecimal';
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
+import BigDecimal from "@domain/context/shared/BigDecimal";
 
 export class GetCouponForQueryResponse implements QueryResponse {
-  constructor(public readonly payload: BigDecimal) {}
+  constructor(
+    public readonly tokenBalance: BigDecimal,
+    public readonly decimals: number,
+  ) {}
 }
 
 export class GetCouponForQuery extends Query<GetCouponForQueryResponse> {
