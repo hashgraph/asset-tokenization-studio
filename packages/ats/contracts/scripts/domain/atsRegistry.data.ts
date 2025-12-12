@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-12T12:38:12.419Z
+ * Generated: 2025-12-12T12:48:05.151Z
  * Facets: 66
  * Infrastructure: 2
  *
@@ -1161,77 +1161,36 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["CapFacetBase", "Common"],
     methods: [
-      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
-      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
-      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
-      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
+      {
+        name: "getMaxSupply",
+        signature: "function getMaxSupply() view returns (uint256 maxSupply_)",
+        selector: "0x4c0f38c2",
+      },
+      {
+        name: "getMaxSupplyByPartition",
+        signature: "function getMaxSupplyByPartition(bytes32 _partition) view returns (uint256 maxSupply_)",
+        selector: "0x79f3653f",
+      },
+      {
+        name: "initialize_Cap",
+        signature:
+          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
+        selector: "0x56210c4e",
+      },
+      {
+        name: "setMaxSupply",
+        signature: "function setMaxSupply(uint256 _maxSupply) returns (bool success_)",
+        selector: "0x6f8b44b0",
+      },
       {
         name: "setMaxSupplyByPartition",
-        signature: "setMaxSupplyByPartition(bytes32,uint256)",
+        signature: "function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) returns (bool success_)",
         selector: "0x99b69647",
       },
     ],
     errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new CapFixedRateFacetTimeTravel__factory(signer) : new CapFixedRateFacet__factory(signer),
-  },
-
-  CapKpiLinkedRateFacet: {
-    name: "CapKpiLinkedRateFacet",
-    resolverKey: {
-      name: "_CAP_KPI_LINKED_RATE_RESOLVER_KEY",
-      value: "0xdc8cc0612bf886bcc1666e31c5de3392bee78451de7213b01fe78d560a804435",
-    },
-    inheritance: ["CapFacetBase", "CommonKpiLinkedInterestRate"],
-    methods: [
-      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
-      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
-      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
-      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
-      {
-        name: "setMaxSupplyByPartition",
-        signature: "setMaxSupplyByPartition(bytes32,uint256)",
-        selector: "0x99b69647",
-      },
-    ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new CapKpiLinkedRateFacetTimeTravel__factory(signer) : new CapKpiLinkedRateFacet__factory(signer),
-  },
-
-  CapSustainabilityPerformanceTargetRateFacet: {
-    name: "CapSustainabilityPerformanceTargetRateFacet",
-    resolverKey: {
-      name: "_CAP_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0xa321c5301bbccd760c5aaf08286a67948cb7d49be22c17f12aa163b324a276d0",
-    },
-    inheritance: ["CapFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
-    methods: [
-      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
-      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
-      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
-      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
-      {
-        name: "setMaxSupplyByPartition",
-        signature: "setMaxSupplyByPartition(bytes32,uint256)",
-        selector: "0x99b69647",
-      },
-    ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      {
-        name: "InterestRateIsSustainabilityPerformanceTarget",
-        signature: "InterestRateIsSustainabilityPerformanceTarget()",
-        selector: "0x15a15b0a",
-      },
-    ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new CapSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
-        : new CapSustainabilityPerformanceTargetRateFacet__factory(signer),
+      useTimeTravel ? new CapFacetTimeTravel__factory(signer) : new CapFacet__factory(signer),
   },
 
   CapFixedRateFacet: {
@@ -1242,13 +1201,30 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["CapFacetBase", "CommonFixedInterestRate"],
     methods: [
-      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
-      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
-      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
-      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
+      {
+        name: "getMaxSupply",
+        signature: "function getMaxSupply() view returns (uint256 maxSupply_)",
+        selector: "0x4c0f38c2",
+      },
+      {
+        name: "getMaxSupplyByPartition",
+        signature: "function getMaxSupplyByPartition(bytes32 _partition) view returns (uint256 maxSupply_)",
+        selector: "0x79f3653f",
+      },
+      {
+        name: "initialize_Cap",
+        signature:
+          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
+        selector: "0x56210c4e",
+      },
+      {
+        name: "setMaxSupply",
+        signature: "function setMaxSupply(uint256 _maxSupply) returns (bool success_)",
+        selector: "0x6f8b44b0",
+      },
       {
         name: "setMaxSupplyByPartition",
-        signature: "setMaxSupplyByPartition(bytes32,uint256)",
+        signature: "function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) returns (bool success_)",
         selector: "0x99b69647",
       },
     ],
@@ -1268,13 +1244,30 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["CapFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
-      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
-      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
-      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
-      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
+      {
+        name: "getMaxSupply",
+        signature: "function getMaxSupply() view returns (uint256 maxSupply_)",
+        selector: "0x4c0f38c2",
+      },
+      {
+        name: "getMaxSupplyByPartition",
+        signature: "function getMaxSupplyByPartition(bytes32 _partition) view returns (uint256 maxSupply_)",
+        selector: "0x79f3653f",
+      },
+      {
+        name: "initialize_Cap",
+        signature:
+          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
+        selector: "0x56210c4e",
+      },
+      {
+        name: "setMaxSupply",
+        signature: "function setMaxSupply(uint256 _maxSupply) returns (bool success_)",
+        selector: "0x6f8b44b0",
+      },
       {
         name: "setMaxSupplyByPartition",
-        signature: "setMaxSupplyByPartition(bytes32,uint256)",
+        signature: "function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) returns (bool success_)",
         selector: "0x99b69647",
       },
     ],
@@ -1294,13 +1287,30 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["CapFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
-      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
-      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
-      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
-      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
+      {
+        name: "getMaxSupply",
+        signature: "function getMaxSupply() view returns (uint256 maxSupply_)",
+        selector: "0x4c0f38c2",
+      },
+      {
+        name: "getMaxSupplyByPartition",
+        signature: "function getMaxSupplyByPartition(bytes32 _partition) view returns (uint256 maxSupply_)",
+        selector: "0x79f3653f",
+      },
+      {
+        name: "initialize_Cap",
+        signature:
+          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
+        selector: "0x56210c4e",
+      },
+      {
+        name: "setMaxSupply",
+        signature: "function setMaxSupply(uint256 _maxSupply) returns (bool success_)",
+        selector: "0x6f8b44b0",
+      },
       {
         name: "setMaxSupplyByPartition",
-        signature: "setMaxSupplyByPartition(bytes32,uint256)",
+        signature: "function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) returns (bool success_)",
         selector: "0x99b69647",
       },
     ],
