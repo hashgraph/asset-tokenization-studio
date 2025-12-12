@@ -164,15 +164,53 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["AccessControlFacetBase", "Common"],
     methods: [
-      { name: "applyRoles", signature: "applyRoles(bytes32[],bool[],address)", selector: "0xfcfffeec" },
-      { name: "getRoleCountFor", signature: "getRoleCountFor(address)", selector: "0x8fa9b4fe" },
-      { name: "getRoleMemberCount", signature: "getRoleMemberCount(bytes32)", selector: "0xca15c873" },
-      { name: "getRoleMembers", signature: "getRoleMembers(bytes32,uint256,uint256)", selector: "0x2a861f57" },
-      { name: "getRolesFor", signature: "getRolesFor(address,uint256,uint256)", selector: "0xa28cf9a9" },
-      { name: "grantRole", signature: "grantRole(bytes32,address)", selector: "0x2f2ff15d" },
-      { name: "hasRole", signature: "hasRole(bytes32,address)", selector: "0x91d14854" },
-      { name: "renounceRole", signature: "renounceRole(bytes32)", selector: "0x8bb9c5bf" },
-      { name: "revokeRole", signature: "revokeRole(bytes32,address)", selector: "0xd547741f" },
+      {
+        name: "applyRoles",
+        signature: "function applyRoles(bytes32[] _roles, bool[] _actives, address _account) returns (bool success_)",
+        selector: "0xfcfffeec",
+      },
+      {
+        name: "getRoleCountFor",
+        signature: "function getRoleCountFor(address _account) view returns (uint256 roleCount_)",
+        selector: "0x8fa9b4fe",
+      },
+      {
+        name: "getRoleMemberCount",
+        signature: "function getRoleMemberCount(bytes32 _role) view returns (uint256 memberCount_)",
+        selector: "0xca15c873",
+      },
+      {
+        name: "getRoleMembers",
+        signature:
+          "function getRoleMembers(bytes32 _role, uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x2a861f57",
+      },
+      {
+        name: "getRolesFor",
+        signature:
+          "function getRolesFor(address _account, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] roles_)",
+        selector: "0xa28cf9a9",
+      },
+      {
+        name: "grantRole",
+        signature: "function grantRole(bytes32 _role, address _account) returns (bool success_)",
+        selector: "0x2f2ff15d",
+      },
+      {
+        name: "hasRole",
+        signature: "function hasRole(bytes32 _role, address _account) view returns (bool)",
+        selector: "0x91d14854",
+      },
+      {
+        name: "renounceRole",
+        signature: "function renounceRole(bytes32 _role) returns (bool success_)",
+        selector: "0x8bb9c5bf",
+      },
+      {
+        name: "revokeRole",
+        signature: "function revokeRole(bytes32 _role, address _account) returns (bool success_)",
+        selector: "0xd547741f",
+      },
     ],
     events: [
       {
@@ -218,15 +256,53 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["AccessControlFacetBase", "CommonFixedInterestRate"],
     methods: [
-      { name: "applyRoles", signature: "applyRoles(bytes32[],bool[],address)", selector: "0xfcfffeec" },
-      { name: "getRoleCountFor", signature: "getRoleCountFor(address)", selector: "0x8fa9b4fe" },
-      { name: "getRoleMemberCount", signature: "getRoleMemberCount(bytes32)", selector: "0xca15c873" },
-      { name: "getRoleMembers", signature: "getRoleMembers(bytes32,uint256,uint256)", selector: "0x2a861f57" },
-      { name: "getRolesFor", signature: "getRolesFor(address,uint256,uint256)", selector: "0xa28cf9a9" },
-      { name: "grantRole", signature: "grantRole(bytes32,address)", selector: "0x2f2ff15d" },
-      { name: "hasRole", signature: "hasRole(bytes32,address)", selector: "0x91d14854" },
-      { name: "renounceRole", signature: "renounceRole(bytes32)", selector: "0x8bb9c5bf" },
-      { name: "revokeRole", signature: "revokeRole(bytes32,address)", selector: "0xd547741f" },
+      {
+        name: "applyRoles",
+        signature: "function applyRoles(bytes32[] _roles, bool[] _actives, address _account) returns (bool success_)",
+        selector: "0xfcfffeec",
+      },
+      {
+        name: "getRoleCountFor",
+        signature: "function getRoleCountFor(address _account) view returns (uint256 roleCount_)",
+        selector: "0x8fa9b4fe",
+      },
+      {
+        name: "getRoleMemberCount",
+        signature: "function getRoleMemberCount(bytes32 _role) view returns (uint256 memberCount_)",
+        selector: "0xca15c873",
+      },
+      {
+        name: "getRoleMembers",
+        signature:
+          "function getRoleMembers(bytes32 _role, uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x2a861f57",
+      },
+      {
+        name: "getRolesFor",
+        signature:
+          "function getRolesFor(address _account, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] roles_)",
+        selector: "0xa28cf9a9",
+      },
+      {
+        name: "grantRole",
+        signature: "function grantRole(bytes32 _role, address _account) returns (bool success_)",
+        selector: "0x2f2ff15d",
+      },
+      {
+        name: "hasRole",
+        signature: "function hasRole(bytes32 _role, address _account) view returns (bool)",
+        selector: "0x91d14854",
+      },
+      {
+        name: "renounceRole",
+        signature: "function renounceRole(bytes32 _role) returns (bool success_)",
+        selector: "0x8bb9c5bf",
+      },
+      {
+        name: "revokeRole",
+        signature: "function revokeRole(bytes32 _role, address _account) returns (bool success_)",
+        selector: "0xd547741f",
+      },
     ],
     events: [
       {
@@ -275,15 +351,53 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["AccessControlFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
-      { name: "applyRoles", signature: "applyRoles(bytes32[],bool[],address)", selector: "0xfcfffeec" },
-      { name: "getRoleCountFor", signature: "getRoleCountFor(address)", selector: "0x8fa9b4fe" },
-      { name: "getRoleMemberCount", signature: "getRoleMemberCount(bytes32)", selector: "0xca15c873" },
-      { name: "getRoleMembers", signature: "getRoleMembers(bytes32,uint256,uint256)", selector: "0x2a861f57" },
-      { name: "getRolesFor", signature: "getRolesFor(address,uint256,uint256)", selector: "0xa28cf9a9" },
-      { name: "grantRole", signature: "grantRole(bytes32,address)", selector: "0x2f2ff15d" },
-      { name: "hasRole", signature: "hasRole(bytes32,address)", selector: "0x91d14854" },
-      { name: "renounceRole", signature: "renounceRole(bytes32)", selector: "0x8bb9c5bf" },
-      { name: "revokeRole", signature: "revokeRole(bytes32,address)", selector: "0xd547741f" },
+      {
+        name: "applyRoles",
+        signature: "function applyRoles(bytes32[] _roles, bool[] _actives, address _account) returns (bool success_)",
+        selector: "0xfcfffeec",
+      },
+      {
+        name: "getRoleCountFor",
+        signature: "function getRoleCountFor(address _account) view returns (uint256 roleCount_)",
+        selector: "0x8fa9b4fe",
+      },
+      {
+        name: "getRoleMemberCount",
+        signature: "function getRoleMemberCount(bytes32 _role) view returns (uint256 memberCount_)",
+        selector: "0xca15c873",
+      },
+      {
+        name: "getRoleMembers",
+        signature:
+          "function getRoleMembers(bytes32 _role, uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x2a861f57",
+      },
+      {
+        name: "getRolesFor",
+        signature:
+          "function getRolesFor(address _account, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] roles_)",
+        selector: "0xa28cf9a9",
+      },
+      {
+        name: "grantRole",
+        signature: "function grantRole(bytes32 _role, address _account) returns (bool success_)",
+        selector: "0x2f2ff15d",
+      },
+      {
+        name: "hasRole",
+        signature: "function hasRole(bytes32 _role, address _account) view returns (bool)",
+        selector: "0x91d14854",
+      },
+      {
+        name: "renounceRole",
+        signature: "function renounceRole(bytes32 _role) returns (bool success_)",
+        selector: "0x8bb9c5bf",
+      },
+      {
+        name: "revokeRole",
+        signature: "function revokeRole(bytes32 _role, address _account) returns (bool success_)",
+        selector: "0xd547741f",
+      },
     ],
     events: [
       {
@@ -332,15 +446,53 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["AccessControlFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
-      { name: "applyRoles", signature: "applyRoles(bytes32[],bool[],address)", selector: "0xfcfffeec" },
-      { name: "getRoleCountFor", signature: "getRoleCountFor(address)", selector: "0x8fa9b4fe" },
-      { name: "getRoleMemberCount", signature: "getRoleMemberCount(bytes32)", selector: "0xca15c873" },
-      { name: "getRoleMembers", signature: "getRoleMembers(bytes32,uint256,uint256)", selector: "0x2a861f57" },
-      { name: "getRolesFor", signature: "getRolesFor(address,uint256,uint256)", selector: "0xa28cf9a9" },
-      { name: "grantRole", signature: "grantRole(bytes32,address)", selector: "0x2f2ff15d" },
-      { name: "hasRole", signature: "hasRole(bytes32,address)", selector: "0x91d14854" },
-      { name: "renounceRole", signature: "renounceRole(bytes32)", selector: "0x8bb9c5bf" },
-      { name: "revokeRole", signature: "revokeRole(bytes32,address)", selector: "0xd547741f" },
+      {
+        name: "applyRoles",
+        signature: "function applyRoles(bytes32[] _roles, bool[] _actives, address _account) returns (bool success_)",
+        selector: "0xfcfffeec",
+      },
+      {
+        name: "getRoleCountFor",
+        signature: "function getRoleCountFor(address _account) view returns (uint256 roleCount_)",
+        selector: "0x8fa9b4fe",
+      },
+      {
+        name: "getRoleMemberCount",
+        signature: "function getRoleMemberCount(bytes32 _role) view returns (uint256 memberCount_)",
+        selector: "0xca15c873",
+      },
+      {
+        name: "getRoleMembers",
+        signature:
+          "function getRoleMembers(bytes32 _role, uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x2a861f57",
+      },
+      {
+        name: "getRolesFor",
+        signature:
+          "function getRolesFor(address _account, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] roles_)",
+        selector: "0xa28cf9a9",
+      },
+      {
+        name: "grantRole",
+        signature: "function grantRole(bytes32 _role, address _account) returns (bool success_)",
+        selector: "0x2f2ff15d",
+      },
+      {
+        name: "hasRole",
+        signature: "function hasRole(bytes32 _role, address _account) view returns (bool)",
+        selector: "0x91d14854",
+      },
+      {
+        name: "renounceRole",
+        signature: "function renounceRole(bytes32 _role) returns (bool success_)",
+        selector: "0x8bb9c5bf",
+      },
+      {
+        name: "revokeRole",
+        signature: "function revokeRole(bytes32 _role, address _account) returns (bool success_)",
+        selector: "0xd547741f",
+      },
     ],
     events: [
       {
@@ -392,7 +544,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       value: "0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8",
     },
     inheritance: ["AdjustBalances", "IStaticFunctionSelectors"],
-    methods: [{ name: "adjustBalances", signature: "adjustBalances(uint256,uint8)", selector: "0xe2d77e44" }],
+    methods: [
+      {
+        name: "adjustBalances",
+        signature: "function adjustBalances(uint256 factor, uint8 decimals) returns (bool success_)",
+        selector: "0xe2d77e44",
+      },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new AdjustBalancesFacetTimeTravel__factory(signer) : new AdjustBalancesFacet__factory(signer),
   },
@@ -407,17 +565,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "_initialize_bondUSA",
-        signature: "_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)",
-        selector: "0x653458ea",
+        signature:
+          "function _initialize_bondUSA(tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+        selector: "0x86d59729",
       },
-      { name: "fullRedeemAtMaturity", signature: "fullRedeemAtMaturity(address)", selector: "0xd0db5fb2" },
+      {
+        name: "fullRedeemAtMaturity",
+        signature: "function fullRedeemAtMaturity(address _tokenHolder)",
+        selector: "0xd0db5fb2",
+      },
       {
         name: "redeemAtMaturityByPartition",
-        signature: "redeemAtMaturityByPartition(address,bytes32,uint256)",
+        signature: "function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount)",
         selector: "0x8a647211",
       },
-      { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
-      { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
+      {
+        name: "setCoupon",
+        signature:
+          "function setCoupon(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+        selector: "0xb16fd0cc",
+      },
+      {
+        name: "updateMaturityDate",
+        signature: "function updateMaturityDate(uint256 _newMaturityDate) returns (bool success_)",
+        selector: "0xc7a6ca35",
+      },
     ],
     events: [
       {
@@ -441,17 +613,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "_initialize_bondUSA",
-        signature: "_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)",
-        selector: "0x653458ea",
+        signature:
+          "function _initialize_bondUSA(tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+        selector: "0x86d59729",
       },
-      { name: "fullRedeemAtMaturity", signature: "fullRedeemAtMaturity(address)", selector: "0xd0db5fb2" },
+      {
+        name: "fullRedeemAtMaturity",
+        signature: "function fullRedeemAtMaturity(address _tokenHolder)",
+        selector: "0xd0db5fb2",
+      },
       {
         name: "redeemAtMaturityByPartition",
-        signature: "redeemAtMaturityByPartition(address,bytes32,uint256)",
+        signature: "function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount)",
         selector: "0x8a647211",
       },
-      { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
-      { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
+      {
+        name: "setCoupon",
+        signature:
+          "function setCoupon(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+        selector: "0xb16fd0cc",
+      },
+      {
+        name: "updateMaturityDate",
+        signature: "function updateMaturityDate(uint256 _newMaturityDate) returns (bool success_)",
+        selector: "0xc7a6ca35",
+      },
     ],
     events: [
       {
@@ -476,20 +662,85 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["BondUSAReadFacetBase", "CommonFixedInterestRate"],
     methods: [
-      { name: "getBondDetails", signature: "getBondDetails()", selector: "0x4ce02414" },
-      { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
-      { name: "getCouponAmountFor", signature: "getCouponAmountFor(uint256,address)", selector: "0x439efc2e" },
-      { name: "getCouponCount", signature: "getCouponCount()", selector: "0x468bb240" },
-      { name: "getCouponFor", signature: "getCouponFor(uint256,address)", selector: "0xbba7b56d" },
-      { name: "getCouponFromOrderedListAt", signature: "getCouponFromOrderedListAt(uint256)", selector: "0x65a88a2c" },
-      { name: "getCouponHolders", signature: "getCouponHolders(uint256,uint256,uint256)", selector: "0xa92e8371" },
-      { name: "getCouponsOrderedList", signature: "getCouponsOrderedList(uint256,uint256)", selector: "0xd7133de1" },
-      { name: "getCouponsOrderedListTotal", signature: "getCouponsOrderedListTotal()", selector: "0xee1d26eb" },
-      { name: "getPrincipalFor", signature: "getPrincipalFor(address)", selector: "0x6f131c78" },
-      { name: "getSecurityHolders", signature: "getSecurityHolders(uint256,uint256)", selector: "0x81438d2f" },
-      { name: "getSecurityRegulationData", signature: "getSecurityRegulationData()", selector: "0x8fda5afe" },
-      { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
-      { name: "getTotalSecurityHolders", signature: "getTotalSecurityHolders()", selector: "0xbd007c8f" },
+      {
+        name: "getBondDetails",
+        signature:
+          "function getBondDetails() view returns (tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
+        selector: "0x4ce02414",
+      },
+      {
+        name: "getCoupon",
+        signature:
+          "function getCoupon(uint256 _couponID) view returns (tuple(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+        selector: "0x936e3169",
+      },
+      {
+        name: "getCouponAmountFor",
+        signature:
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns (tuple(uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+        selector: "0x439efc2e",
+      },
+      {
+        name: "getCouponCount",
+        signature: "function getCouponCount() view returns (uint256 couponCount_)",
+        selector: "0x468bb240",
+      },
+      {
+        name: "getCouponFor",
+        signature:
+          "function getCouponFor(uint256 _couponID, address _account) view returns (tuple(uint256 tokenBalance, uint8 decimals, bool recordDateReached, tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+        selector: "0xbba7b56d",
+      },
+      {
+        name: "getCouponFromOrderedListAt",
+        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
+        selector: "0x65a88a2c",
+      },
+      {
+        name: "getCouponHolders",
+        signature:
+          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xa92e8371",
+      },
+      {
+        name: "getCouponsOrderedList",
+        signature:
+          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
+        selector: "0xd7133de1",
+      },
+      {
+        name: "getCouponsOrderedListTotal",
+        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
+        selector: "0xee1d26eb",
+      },
+      {
+        name: "getPrincipalFor",
+        signature:
+          "function getPrincipalFor(address _account) view returns (tuple(uint256 numerator, uint256 denominator) principalFor_)",
+        selector: "0x6f131c78",
+      },
+      {
+        name: "getSecurityHolders",
+        signature:
+          "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0x81438d2f",
+      },
+      {
+        name: "getSecurityRegulationData",
+        signature:
+          "function getSecurityRegulationData() pure returns (tuple(tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
+        selector: "0x8fda5afe",
+      },
+      {
+        name: "getTotalCouponHolders",
+        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
+        selector: "0xec116ae3",
+      },
+      {
+        name: "getTotalSecurityHolders",
+        signature: "function getTotalSecurityHolders() view returns (uint256)",
+        selector: "0xbd007c8f",
+      },
     ],
     errors: [
       { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
@@ -509,17 +760,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "_initialize_bondUSA",
-        signature: "_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)",
-        selector: "0x653458ea",
+        signature:
+          "function _initialize_bondUSA(tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+        selector: "0x86d59729",
       },
-      { name: "fullRedeemAtMaturity", signature: "fullRedeemAtMaturity(address)", selector: "0xd0db5fb2" },
+      {
+        name: "fullRedeemAtMaturity",
+        signature: "function fullRedeemAtMaturity(address _tokenHolder)",
+        selector: "0xd0db5fb2",
+      },
       {
         name: "redeemAtMaturityByPartition",
-        signature: "redeemAtMaturityByPartition(address,bytes32,uint256)",
+        signature: "function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount)",
         selector: "0x8a647211",
       },
-      { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
-      { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
+      {
+        name: "setCoupon",
+        signature:
+          "function setCoupon(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+        selector: "0xb16fd0cc",
+      },
+      {
+        name: "updateMaturityDate",
+        signature: "function updateMaturityDate(uint256 _newMaturityDate) returns (bool success_)",
+        selector: "0xc7a6ca35",
+      },
     ],
     events: [
       {
@@ -546,20 +811,85 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["BondUSAReadFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
-      { name: "getBondDetails", signature: "getBondDetails()", selector: "0x4ce02414" },
-      { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
-      { name: "getCouponAmountFor", signature: "getCouponAmountFor(uint256,address)", selector: "0x439efc2e" },
-      { name: "getCouponCount", signature: "getCouponCount()", selector: "0x468bb240" },
-      { name: "getCouponFor", signature: "getCouponFor(uint256,address)", selector: "0xbba7b56d" },
-      { name: "getCouponFromOrderedListAt", signature: "getCouponFromOrderedListAt(uint256)", selector: "0x65a88a2c" },
-      { name: "getCouponHolders", signature: "getCouponHolders(uint256,uint256,uint256)", selector: "0xa92e8371" },
-      { name: "getCouponsOrderedList", signature: "getCouponsOrderedList(uint256,uint256)", selector: "0xd7133de1" },
-      { name: "getCouponsOrderedListTotal", signature: "getCouponsOrderedListTotal()", selector: "0xee1d26eb" },
-      { name: "getPrincipalFor", signature: "getPrincipalFor(address)", selector: "0x6f131c78" },
-      { name: "getSecurityHolders", signature: "getSecurityHolders(uint256,uint256)", selector: "0x81438d2f" },
-      { name: "getSecurityRegulationData", signature: "getSecurityRegulationData()", selector: "0x8fda5afe" },
-      { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
-      { name: "getTotalSecurityHolders", signature: "getTotalSecurityHolders()", selector: "0xbd007c8f" },
+      {
+        name: "getBondDetails",
+        signature:
+          "function getBondDetails() view returns (tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
+        selector: "0x4ce02414",
+      },
+      {
+        name: "getCoupon",
+        signature:
+          "function getCoupon(uint256 _couponID) view returns (tuple(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+        selector: "0x936e3169",
+      },
+      {
+        name: "getCouponAmountFor",
+        signature:
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns (tuple(uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+        selector: "0x439efc2e",
+      },
+      {
+        name: "getCouponCount",
+        signature: "function getCouponCount() view returns (uint256 couponCount_)",
+        selector: "0x468bb240",
+      },
+      {
+        name: "getCouponFor",
+        signature:
+          "function getCouponFor(uint256 _couponID, address _account) view returns (tuple(uint256 tokenBalance, uint8 decimals, bool recordDateReached, tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+        selector: "0xbba7b56d",
+      },
+      {
+        name: "getCouponFromOrderedListAt",
+        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
+        selector: "0x65a88a2c",
+      },
+      {
+        name: "getCouponHolders",
+        signature:
+          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xa92e8371",
+      },
+      {
+        name: "getCouponsOrderedList",
+        signature:
+          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
+        selector: "0xd7133de1",
+      },
+      {
+        name: "getCouponsOrderedListTotal",
+        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
+        selector: "0xee1d26eb",
+      },
+      {
+        name: "getPrincipalFor",
+        signature:
+          "function getPrincipalFor(address _account) view returns (tuple(uint256 numerator, uint256 denominator) principalFor_)",
+        selector: "0x6f131c78",
+      },
+      {
+        name: "getSecurityHolders",
+        signature:
+          "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0x81438d2f",
+      },
+      {
+        name: "getSecurityRegulationData",
+        signature:
+          "function getSecurityRegulationData() pure returns (tuple(tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
+        selector: "0x8fda5afe",
+      },
+      {
+        name: "getTotalCouponHolders",
+        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
+        selector: "0xec116ae3",
+      },
+      {
+        name: "getTotalSecurityHolders",
+        signature: "function getTotalSecurityHolders() view returns (uint256)",
+        selector: "0xbd007c8f",
+      },
     ],
     errors: [
       { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
@@ -579,20 +909,85 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["BondUSAReadFacetBase", "Common"],
     methods: [
-      { name: "getBondDetails", signature: "getBondDetails()", selector: "0x4ce02414" },
-      { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
-      { name: "getCouponAmountFor", signature: "getCouponAmountFor(uint256,address)", selector: "0x439efc2e" },
-      { name: "getCouponCount", signature: "getCouponCount()", selector: "0x468bb240" },
-      { name: "getCouponFor", signature: "getCouponFor(uint256,address)", selector: "0xbba7b56d" },
-      { name: "getCouponFromOrderedListAt", signature: "getCouponFromOrderedListAt(uint256)", selector: "0x65a88a2c" },
-      { name: "getCouponHolders", signature: "getCouponHolders(uint256,uint256,uint256)", selector: "0xa92e8371" },
-      { name: "getCouponsOrderedList", signature: "getCouponsOrderedList(uint256,uint256)", selector: "0xd7133de1" },
-      { name: "getCouponsOrderedListTotal", signature: "getCouponsOrderedListTotal()", selector: "0xee1d26eb" },
-      { name: "getPrincipalFor", signature: "getPrincipalFor(address)", selector: "0x6f131c78" },
-      { name: "getSecurityHolders", signature: "getSecurityHolders(uint256,uint256)", selector: "0x81438d2f" },
-      { name: "getSecurityRegulationData", signature: "getSecurityRegulationData()", selector: "0x8fda5afe" },
-      { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
-      { name: "getTotalSecurityHolders", signature: "getTotalSecurityHolders()", selector: "0xbd007c8f" },
+      {
+        name: "getBondDetails",
+        signature:
+          "function getBondDetails() view returns (tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
+        selector: "0x4ce02414",
+      },
+      {
+        name: "getCoupon",
+        signature:
+          "function getCoupon(uint256 _couponID) view returns (tuple(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+        selector: "0x936e3169",
+      },
+      {
+        name: "getCouponAmountFor",
+        signature:
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns (tuple(uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+        selector: "0x439efc2e",
+      },
+      {
+        name: "getCouponCount",
+        signature: "function getCouponCount() view returns (uint256 couponCount_)",
+        selector: "0x468bb240",
+      },
+      {
+        name: "getCouponFor",
+        signature:
+          "function getCouponFor(uint256 _couponID, address _account) view returns (tuple(uint256 tokenBalance, uint8 decimals, bool recordDateReached, tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+        selector: "0xbba7b56d",
+      },
+      {
+        name: "getCouponFromOrderedListAt",
+        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
+        selector: "0x65a88a2c",
+      },
+      {
+        name: "getCouponHolders",
+        signature:
+          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xa92e8371",
+      },
+      {
+        name: "getCouponsOrderedList",
+        signature:
+          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
+        selector: "0xd7133de1",
+      },
+      {
+        name: "getCouponsOrderedListTotal",
+        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
+        selector: "0xee1d26eb",
+      },
+      {
+        name: "getPrincipalFor",
+        signature:
+          "function getPrincipalFor(address _account) view returns (tuple(uint256 numerator, uint256 denominator) principalFor_)",
+        selector: "0x6f131c78",
+      },
+      {
+        name: "getSecurityHolders",
+        signature:
+          "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0x81438d2f",
+      },
+      {
+        name: "getSecurityRegulationData",
+        signature:
+          "function getSecurityRegulationData() pure returns (tuple(tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
+        selector: "0x8fda5afe",
+      },
+      {
+        name: "getTotalCouponHolders",
+        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
+        selector: "0xec116ae3",
+      },
+      {
+        name: "getTotalSecurityHolders",
+        signature: "function getTotalSecurityHolders() view returns (uint256)",
+        selector: "0xbd007c8f",
+      },
     ],
     errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
@@ -609,17 +1004,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "_initialize_bondUSA",
-        signature: "_initialize_bondUSA(IBondRead.BondDetailsData,RegulationData,AdditionalSecurityData)",
-        selector: "0x653458ea",
+        signature:
+          "function _initialize_bondUSA(tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+        selector: "0x86d59729",
       },
-      { name: "fullRedeemAtMaturity", signature: "fullRedeemAtMaturity(address)", selector: "0xd0db5fb2" },
+      {
+        name: "fullRedeemAtMaturity",
+        signature: "function fullRedeemAtMaturity(address _tokenHolder)",
+        selector: "0xd0db5fb2",
+      },
       {
         name: "redeemAtMaturityByPartition",
-        signature: "redeemAtMaturityByPartition(address,bytes32,uint256)",
+        signature: "function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount)",
         selector: "0x8a647211",
       },
-      { name: "setCoupon", signature: "setCoupon(IBondRead.Coupon)", selector: "0x94218ed1" },
-      { name: "updateMaturityDate", signature: "updateMaturityDate(uint256)", selector: "0xc7a6ca35" },
+      {
+        name: "setCoupon",
+        signature:
+          "function setCoupon(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+        selector: "0xb16fd0cc",
+      },
+      {
+        name: "updateMaturityDate",
+        signature: "function updateMaturityDate(uint256 _newMaturityDate) returns (bool success_)",
+        selector: "0xc7a6ca35",
+      },
     ],
     events: [
       {
@@ -650,20 +1059,85 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["BondUSAReadFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
-      { name: "getBondDetails", signature: "getBondDetails()", selector: "0x4ce02414" },
-      { name: "getCoupon", signature: "getCoupon(uint256)", selector: "0x936e3169" },
-      { name: "getCouponAmountFor", signature: "getCouponAmountFor(uint256,address)", selector: "0x439efc2e" },
-      { name: "getCouponCount", signature: "getCouponCount()", selector: "0x468bb240" },
-      { name: "getCouponFor", signature: "getCouponFor(uint256,address)", selector: "0xbba7b56d" },
-      { name: "getCouponFromOrderedListAt", signature: "getCouponFromOrderedListAt(uint256)", selector: "0x65a88a2c" },
-      { name: "getCouponHolders", signature: "getCouponHolders(uint256,uint256,uint256)", selector: "0xa92e8371" },
-      { name: "getCouponsOrderedList", signature: "getCouponsOrderedList(uint256,uint256)", selector: "0xd7133de1" },
-      { name: "getCouponsOrderedListTotal", signature: "getCouponsOrderedListTotal()", selector: "0xee1d26eb" },
-      { name: "getPrincipalFor", signature: "getPrincipalFor(address)", selector: "0x6f131c78" },
-      { name: "getSecurityHolders", signature: "getSecurityHolders(uint256,uint256)", selector: "0x81438d2f" },
-      { name: "getSecurityRegulationData", signature: "getSecurityRegulationData()", selector: "0x8fda5afe" },
-      { name: "getTotalCouponHolders", signature: "getTotalCouponHolders(uint256)", selector: "0xec116ae3" },
-      { name: "getTotalSecurityHolders", signature: "getTotalSecurityHolders()", selector: "0xbd007c8f" },
+      {
+        name: "getBondDetails",
+        signature:
+          "function getBondDetails() view returns (tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
+        selector: "0x4ce02414",
+      },
+      {
+        name: "getCoupon",
+        signature:
+          "function getCoupon(uint256 _couponID) view returns (tuple(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+        selector: "0x936e3169",
+      },
+      {
+        name: "getCouponAmountFor",
+        signature:
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns (tuple(uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+        selector: "0x439efc2e",
+      },
+      {
+        name: "getCouponCount",
+        signature: "function getCouponCount() view returns (uint256 couponCount_)",
+        selector: "0x468bb240",
+      },
+      {
+        name: "getCouponFor",
+        signature:
+          "function getCouponFor(uint256 _couponID, address _account) view returns (tuple(uint256 tokenBalance, uint8 decimals, bool recordDateReached, tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+        selector: "0xbba7b56d",
+      },
+      {
+        name: "getCouponFromOrderedListAt",
+        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
+        selector: "0x65a88a2c",
+      },
+      {
+        name: "getCouponHolders",
+        signature:
+          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xa92e8371",
+      },
+      {
+        name: "getCouponsOrderedList",
+        signature:
+          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
+        selector: "0xd7133de1",
+      },
+      {
+        name: "getCouponsOrderedListTotal",
+        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
+        selector: "0xee1d26eb",
+      },
+      {
+        name: "getPrincipalFor",
+        signature:
+          "function getPrincipalFor(address _account) view returns (tuple(uint256 numerator, uint256 denominator) principalFor_)",
+        selector: "0x6f131c78",
+      },
+      {
+        name: "getSecurityHolders",
+        signature:
+          "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0x81438d2f",
+      },
+      {
+        name: "getSecurityRegulationData",
+        signature:
+          "function getSecurityRegulationData() pure returns (tuple(tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
+        selector: "0x8fda5afe",
+      },
+      {
+        name: "getTotalCouponHolders",
+        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
+        selector: "0xec116ae3",
+      },
+      {
+        name: "getTotalSecurityHolders",
+        signature: "function getTotalSecurityHolders() view returns (uint256)",
+        selector: "0xbd007c8f",
+      },
     ],
     errors: [
       { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
@@ -699,7 +1173,65 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new CapFacetTimeTravel__factory(signer) : new CapFacet__factory(signer),
+      useTimeTravel ? new CapFixedRateFacetTimeTravel__factory(signer) : new CapFixedRateFacet__factory(signer),
+  },
+
+  CapKpiLinkedRateFacet: {
+    name: "CapKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_CAP_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xdc8cc0612bf886bcc1666e31c5de3392bee78451de7213b01fe78d560a804435",
+    },
+    inheritance: ["CapFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
+      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
+      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
+      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
+      {
+        name: "setMaxSupplyByPartition",
+        signature: "setMaxSupplyByPartition(bytes32,uint256)",
+        selector: "0x99b69647",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new CapKpiLinkedRateFacetTimeTravel__factory(signer) : new CapKpiLinkedRateFacet__factory(signer),
+  },
+
+  CapSustainabilityPerformanceTargetRateFacet: {
+    name: "CapSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CAP_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa321c5301bbccd760c5aaf08286a67948cb7d49be22c17f12aa163b324a276d0",
+    },
+    inheritance: ["CapFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
+      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
+      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
+      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
+      {
+        name: "setMaxSupplyByPartition",
+        signature: "setMaxSupplyByPartition(bytes32,uint256)",
+        selector: "0x99b69647",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new CapSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new CapSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   CapFixedRateFacet: {
@@ -794,24 +1326,43 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ClearingActions", "IStaticFunctionSelectors"],
     methods: [
-      { name: "activateClearing", signature: "activateClearing()", selector: "0xab2d18a9" },
+      {
+        name: "activateClearing",
+        signature: "function activateClearing() returns (bool success_)",
+        selector: "0xab2d18a9",
+      },
       {
         name: "approveClearingOperationByPartition",
-        signature: "approveClearingOperationByPartition(IClearing.ClearingOperationIdentifier)",
-        selector: "0xd4f8a256",
+        signature:
+          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0xd849cea2",
       },
       {
         name: "cancelClearingOperationByPartition",
-        signature: "cancelClearingOperationByPartition(IClearing.ClearingOperationIdentifier)",
-        selector: "0x41a35702",
+        signature:
+          "function cancelClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0x679141fb",
       },
-      { name: "deactivateClearing", signature: "deactivateClearing()", selector: "0x65c21860" },
-      { name: "initializeClearing", signature: "initializeClearing(bool)", selector: "0x86a0b46a" },
-      { name: "isClearingActivated", signature: "isClearingActivated()", selector: "0x4b4d8990" },
+      {
+        name: "deactivateClearing",
+        signature: "function deactivateClearing() returns (bool success_)",
+        selector: "0x65c21860",
+      },
+      {
+        name: "initializeClearing",
+        signature: "function initializeClearing(bool _clearingActive)",
+        selector: "0x86a0b46a",
+      },
+      {
+        name: "isClearingActivated",
+        signature: "function isClearingActivated() view returns (bool)",
+        selector: "0x4b4d8990",
+      },
       {
         name: "reclaimClearingOperationByPartition",
-        signature: "reclaimClearingOperationByPartition(IClearing.ClearingOperationIdentifier)",
-        selector: "0x5b4fda23",
+        signature:
+          "function reclaimClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0x67e57fe2",
       },
     ],
     events: [
@@ -855,28 +1406,33 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "clearingCreateHoldByPartition",
-        signature: "clearingCreateHoldByPartition(ClearingOperation,Hold)",
-        selector: "0x05a3c905",
+        signature:
+          "function clearingCreateHoldByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x6ceae590",
       },
       {
         name: "clearingCreateHoldFromByPartition",
-        signature: "clearingCreateHoldFromByPartition(ClearingOperationFrom,Hold)",
-        selector: "0xa30c2f61",
+        signature:
+          "function clearingCreateHoldFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x5f1cf8c9",
       },
       {
         name: "getClearingCreateHoldForByPartition",
-        signature: "getClearingCreateHoldForByPartition(bytes32,address,uint256)",
+        signature:
+          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
         selector: "0x190eb09b",
       },
       {
         name: "operatorClearingCreateHoldByPartition",
-        signature: "operatorClearingCreateHoldByPartition(ClearingOperationFrom,Hold)",
-        selector: "0xdf3a3dbd",
+        signature:
+          "function operatorClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x7ab0c73f",
       },
       {
         name: "protectedClearingCreateHoldByPartition",
-        signature: "protectedClearingCreateHoldByPartition(ProtectedClearingOperation,Hold,bytes)",
-        selector: "0x7a9efadf",
+        signature:
+          "function protectedClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x9b646ab9",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -893,26 +1449,34 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ClearingRead", "IStaticFunctionSelectors"],
     methods: [
-      { name: "getClearedAmountFor", signature: "getClearedAmountFor(address)", selector: "0x46f8bc94" },
+      {
+        name: "getClearedAmountFor",
+        signature: "function getClearedAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x46f8bc94",
+      },
       {
         name: "getClearedAmountForByPartition",
-        signature: "getClearedAmountForByPartition(bytes32,address)",
+        signature:
+          "function getClearedAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
         selector: "0xfed5a7d4",
       },
       {
         name: "getClearingCountForByPartition",
-        signature: "getClearingCountForByPartition(bytes32,address,ClearingOperationType)",
-        selector: "0xe62b11d9",
-      },
-      {
-        name: "getClearingsIdForByPartition",
-        signature: "getClearingsIdForByPartition(bytes32,address,ClearingOperationType,uint256,uint256)",
-        selector: "0x88cab4f2",
+        signature:
+          "function getClearingCountForByPartition(bytes32 _partition, address _tokenHolder, uint8 _clearingOperationType) view returns (uint256 clearingCount_)",
+        selector: "0xcab70f17",
       },
       {
         name: "getClearingThirdParty",
-        signature: "getClearingThirdParty(bytes32,address,ClearingOperationType,uint256)",
-        selector: "0x6a452e1d",
+        signature:
+          "function getClearingThirdParty(bytes32 _partition, address _tokenHolder, uint8 _clearingOpeartionType, uint256 _clearingId) view returns (address thirdParty_)",
+        selector: "0x2714916d",
+      },
+      {
+        name: "getClearingsIdForByPartition",
+        signature:
+          "function getClearingsIdForByPartition(bytes32 _partition, address _tokenHolder, uint8 _clearingOperationType, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] clearingsId_)",
+        selector: "0xcf38dab5",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -929,28 +1493,33 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "clearingRedeemByPartition",
-        signature: "clearingRedeemByPartition(ClearingOperation,uint256)",
-        selector: "0x6fd29928",
+        signature:
+          "function clearingRedeemByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0x39921b12",
       },
       {
         name: "clearingRedeemFromByPartition",
-        signature: "clearingRedeemFromByPartition(ClearingOperationFrom,uint256)",
-        selector: "0x695c46eb",
+        signature:
+          "function clearingRedeemFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0x35114a78",
       },
       {
         name: "getClearingRedeemForByPartition",
-        signature: "getClearingRedeemForByPartition(bytes32,address,uint256)",
+        signature:
+          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
         selector: "0x4ac3d940",
       },
       {
         name: "operatorClearingRedeemByPartition",
-        signature: "operatorClearingRedeemByPartition(ClearingOperationFrom,uint256)",
-        selector: "0xf5d203e9",
+        signature:
+          "function operatorClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0xc1d6d5a0",
       },
       {
         name: "protectedClearingRedeemByPartition",
-        signature: "protectedClearingRedeemByPartition(ProtectedClearingOperation,uint256,bytes)",
-        selector: "0x33826bc1",
+        signature:
+          "function protectedClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x498f1f65",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -967,28 +1536,33 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "clearingTransferByPartition",
-        signature: "clearingTransferByPartition(ClearingOperation,uint256,address)",
-        selector: "0x104fad9b",
+        signature:
+          "function clearingTransferByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0xde32aaa8",
       },
       {
         name: "clearingTransferFromByPartition",
-        signature: "clearingTransferFromByPartition(ClearingOperationFrom,uint256,address)",
-        selector: "0x8aaad9e1",
+        signature:
+          "function clearingTransferFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0x5c829d67",
       },
       {
         name: "getClearingTransferForByPartition",
-        signature: "getClearingTransferForByPartition(bytes32,address,uint256)",
+        signature:
+          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
         selector: "0x6f438552",
       },
       {
         name: "operatorClearingTransferByPartition",
-        signature: "operatorClearingTransferByPartition(ClearingOperationFrom,uint256,address)",
-        selector: "0xb403da58",
+        signature:
+          "function operatorClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0x2ba8508d",
       },
       {
         name: "protectedClearingTransferByPartition",
-        signature: "protectedClearingTransferByPartition(ProtectedClearingOperation,uint256,address,bytes)",
-        selector: "0x1b4edef0",
+        signature:
+          "function protectedClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x1f4eef27",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -1003,13 +1577,42 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ControlList", "IStaticFunctionSelectors"],
     methods: [
-      { name: "addToControlList", signature: "addToControlList(address)", selector: "0xe8204966" },
-      { name: "getControlListCount", signature: "getControlListCount()", selector: "0x6b5d2ea5" },
-      { name: "getControlListMembers", signature: "getControlListMembers(uint256,uint256)", selector: "0xcad7e56b" },
-      { name: "getControlListType", signature: "getControlListType()", selector: "0x1d46c292" },
-      { name: "initialize_ControlList", signature: "initialize_ControlList(bool)", selector: "0xf88bd9f2" },
-      { name: "isInControlList", signature: "isInControlList(address)", selector: "0xfd5b071b" },
-      { name: "removeFromControlList", signature: "removeFromControlList(address)", selector: "0x47b52d3b" },
+      {
+        name: "addToControlList",
+        signature: "function addToControlList(address _account) returns (bool success_)",
+        selector: "0xe8204966",
+      },
+      {
+        name: "getControlListCount",
+        signature: "function getControlListCount() view returns (uint256 controlListCount_)",
+        selector: "0x6b5d2ea5",
+      },
+      {
+        name: "getControlListMembers",
+        signature:
+          "function getControlListMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0xcad7e56b",
+      },
+      {
+        name: "getControlListType",
+        signature: "function getControlListType() view returns (bool)",
+        selector: "0x1d46c292",
+      },
+      {
+        name: "initialize_ControlList",
+        signature: "function initialize_ControlList(bool _isWhiteList)",
+        selector: "0xf88bd9f2",
+      },
+      {
+        name: "isInControlList",
+        signature: "function isInControlList(address _account) view returns (bool)",
+        selector: "0xfd5b071b",
+      },
+      {
+        name: "removeFromControlList",
+        signature: "function removeFromControlList(address _account) returns (bool success_)",
+        selector: "0x47b52d3b",
+      },
     ],
     events: [
       {
@@ -1039,18 +1642,39 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["CorporateActions", "IStaticFunctionSelectors"],
     methods: [
-      { name: "addCorporateAction", signature: "addCorporateAction(bytes32,bytes)", selector: "0xd9e4d92c" },
-      { name: "getCorporateAction", signature: "getCorporateAction(bytes32)", selector: "0x911181da" },
-      { name: "getCorporateActionCount", signature: "getCorporateActionCount()", selector: "0x8859794c" },
+      {
+        name: "addCorporateAction",
+        signature:
+          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
+        selector: "0xd9e4d92c",
+      },
+      {
+        name: "getCorporateAction",
+        signature:
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+        selector: "0x911181da",
+      },
+      {
+        name: "getCorporateActionCount",
+        signature: "function getCorporateActionCount() view returns (uint256 corporateActionCount_)",
+        selector: "0x8859794c",
+      },
       {
         name: "getCorporateActionCountByType",
-        signature: "getCorporateActionCountByType(bytes32)",
+        signature:
+          "function getCorporateActionCountByType(bytes32 _actionType) view returns (uint256 corporateActionCount_)",
         selector: "0x539b4e0b",
       },
-      { name: "getCorporateActionIds", signature: "getCorporateActionIds(uint256,uint256)", selector: "0x1b56ea1e" },
+      {
+        name: "getCorporateActionIds",
+        signature:
+          "function getCorporateActionIds(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
+        selector: "0x1b56ea1e",
+      },
       {
         name: "getCorporateActionIdsByType",
-        signature: "getCorporateActionIdsByType(bytes32,uint256,uint256)",
+        signature:
+          "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
         selector: "0xe73bbddb",
       },
     ],
@@ -1080,13 +1704,26 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["IDiamondCut", "ResolverProxyUnstructured"],
     methods: [
-      { name: "getConfigInfo", signature: "getConfigInfo()", selector: "0x78a1bf05" },
-      { name: "updateConfig", signature: "updateConfig(bytes32,uint256)", selector: "0x0b3bad61" },
-      { name: "updateConfigVersion", signature: "updateConfigVersion(uint256)", selector: "0x002eeb22" },
+      {
+        name: "getConfigInfo",
+        signature:
+          "function getConfigInfo() view returns (address resolver_, bytes32 configurationId_, uint256 version_)",
+        selector: "0x78a1bf05",
+      },
+      {
+        name: "updateConfig",
+        signature: "function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion)",
+        selector: "0x0b3bad61",
+      },
+      {
+        name: "updateConfigVersion",
+        signature: "function updateConfigVersion(uint256 _newVersion)",
+        selector: "0x002eeb22",
+      },
       {
         name: "updateResolver",
-        signature: "updateResolver(IBusinessLogicResolver,bytes32,uint256)",
-        selector: "0x9ed84e40",
+        signature: "function updateResolver(address _newResolver, bytes32 _newConfigurationId, uint256 _newVersion)",
+        selector: "0xe5d3a872",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -1101,35 +1738,102 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["IDiamond", "DiamondCutFacet", "DiamondLoupeFacet"],
     methods: [
-      { name: "getConfigInfo", signature: "getConfigInfo()", selector: "0x78a1bf05" },
-      { name: "getFacet", signature: "getFacet(bytes32)", selector: "0xe317d12f" },
-      { name: "getFacetAddress", signature: "getFacetAddress(bytes4)", selector: "0x7a070c2d" },
-      { name: "getFacetAddresses", signature: "getFacetAddresses()", selector: "0x3bed2f49" },
+      {
+        name: "getConfigInfo",
+        signature:
+          "function getConfigInfo() view returns (address resolver_, bytes32 configurationId_, uint256 version_)",
+        selector: "0x78a1bf05",
+      },
+      {
+        name: "getFacet",
+        signature:
+          "function getFacet(bytes32 _facetId) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds) facet_)",
+        selector: "0xe317d12f",
+      },
+      {
+        name: "getFacetAddress",
+        signature: "function getFacetAddress(bytes4 _selector) view returns (address facetAddress_)",
+        selector: "0x7a070c2d",
+      },
+      {
+        name: "getFacetAddresses",
+        signature: "function getFacetAddresses() view returns (address[] facetAddresses_)",
+        selector: "0x3bed2f49",
+      },
       {
         name: "getFacetAddressesByPage",
-        signature: "getFacetAddressesByPage(uint256,uint256)",
+        signature:
+          "function getFacetAddressesByPage(uint256 _pageIndex, uint256 _pageLength) view returns (address[] facetAddresses_)",
         selector: "0x9fea53e7",
       },
-      { name: "getFacetIdBySelector", signature: "getFacetIdBySelector(bytes4)", selector: "0xb3fd6894" },
-      { name: "getFacetIds", signature: "getFacetIds()", selector: "0xcd25d535" },
-      { name: "getFacetIdsByPage", signature: "getFacetIdsByPage(uint256,uint256)", selector: "0x20202e6d" },
-      { name: "getFacets", signature: "getFacets()", selector: "0x662ea47d" },
-      { name: "getFacetsByPage", signature: "getFacetsByPage(uint256,uint256)", selector: "0xbf02c5b9" },
-      { name: "getFacetSelectors", signature: "getFacetSelectors(bytes32)", selector: "0x8214de3e" },
+      {
+        name: "getFacetIdBySelector",
+        signature: "function getFacetIdBySelector(bytes4 _selector) view returns (bytes32 facetId_)",
+        selector: "0xb3fd6894",
+      },
+      {
+        name: "getFacetIds",
+        signature: "function getFacetIds() view returns (bytes32[] facetIds_)",
+        selector: "0xcd25d535",
+      },
+      {
+        name: "getFacetIdsByPage",
+        signature:
+          "function getFacetIdsByPage(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] facetIds_)",
+        selector: "0x20202e6d",
+      },
+      {
+        name: "getFacetSelectors",
+        signature: "function getFacetSelectors(bytes32 _facetId) view returns (bytes4[] facetSelectors_)",
+        selector: "0x8214de3e",
+      },
       {
         name: "getFacetSelectorsByPage",
-        signature: "getFacetSelectorsByPage(bytes32,uint256,uint256)",
+        signature:
+          "function getFacetSelectorsByPage(bytes32 _facetId, uint256 _pageIndex, uint256 _pageLength) view returns (bytes4[] facetSelectors_)",
         selector: "0x39a9e956",
       },
-      { name: "getFacetSelectorsLength", signature: "getFacetSelectorsLength(bytes32)", selector: "0xca1f70ec" },
-      { name: "getFacetsLength", signature: "getFacetsLength()", selector: "0x430720f9" },
-      { name: "supportsInterface", signature: "supportsInterface(bytes4)", selector: "0x01ffc9a7" },
-      { name: "updateConfig", signature: "updateConfig(bytes32,uint256)", selector: "0x0b3bad61" },
-      { name: "updateConfigVersion", signature: "updateConfigVersion(uint256)", selector: "0x002eeb22" },
+      {
+        name: "getFacetSelectorsLength",
+        signature: "function getFacetSelectorsLength(bytes32 _facetId) view returns (uint256 facetSelectorsLength_)",
+        selector: "0xca1f70ec",
+      },
+      {
+        name: "getFacets",
+        signature:
+          "function getFacets() view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
+        selector: "0x662ea47d",
+      },
+      {
+        name: "getFacetsByPage",
+        signature:
+          "function getFacetsByPage(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
+        selector: "0xbf02c5b9",
+      },
+      {
+        name: "getFacetsLength",
+        signature: "function getFacetsLength() view returns (uint256 facetsLength_)",
+        selector: "0x430720f9",
+      },
+      {
+        name: "supportsInterface",
+        signature: "function supportsInterface(bytes4 _interfaceId) view returns (bool)",
+        selector: "0x01ffc9a7",
+      },
+      {
+        name: "updateConfig",
+        signature: "function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion)",
+        selector: "0x0b3bad61",
+      },
+      {
+        name: "updateConfigVersion",
+        signature: "function updateConfigVersion(uint256 _newVersion)",
+        selector: "0x002eeb22",
+      },
       {
         name: "updateResolver",
-        signature: "updateResolver(IBusinessLogicResolver,bytes32,uint256)",
-        selector: "0x9ed84e40",
+        signature: "function updateResolver(address _newResolver, bytes32 _newConfigurationId, uint256 _newVersion)",
+        selector: "0xe5d3a872",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -1144,28 +1848,82 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["IDiamondLoupe", "IERC165", "ResolverProxyUnstructured"],
     methods: [
-      { name: "getFacet", signature: "getFacet(bytes32)", selector: "0xe317d12f" },
-      { name: "getFacetAddress", signature: "getFacetAddress(bytes4)", selector: "0x7a070c2d" },
-      { name: "getFacetAddresses", signature: "getFacetAddresses()", selector: "0x3bed2f49" },
+      {
+        name: "getFacet",
+        signature:
+          "function getFacet(bytes32 _facetId) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds) facet_)",
+        selector: "0xe317d12f",
+      },
+      {
+        name: "getFacetAddress",
+        signature: "function getFacetAddress(bytes4 _selector) view returns (address facetAddress_)",
+        selector: "0x7a070c2d",
+      },
+      {
+        name: "getFacetAddresses",
+        signature: "function getFacetAddresses() view returns (address[] facetAddresses_)",
+        selector: "0x3bed2f49",
+      },
       {
         name: "getFacetAddressesByPage",
-        signature: "getFacetAddressesByPage(uint256,uint256)",
+        signature:
+          "function getFacetAddressesByPage(uint256 _pageIndex, uint256 _pageLength) view returns (address[] facetAddresses_)",
         selector: "0x9fea53e7",
       },
-      { name: "getFacetIdBySelector", signature: "getFacetIdBySelector(bytes4)", selector: "0xb3fd6894" },
-      { name: "getFacetIds", signature: "getFacetIds()", selector: "0xcd25d535" },
-      { name: "getFacetIdsByPage", signature: "getFacetIdsByPage(uint256,uint256)", selector: "0x20202e6d" },
-      { name: "getFacets", signature: "getFacets()", selector: "0x662ea47d" },
-      { name: "getFacetsByPage", signature: "getFacetsByPage(uint256,uint256)", selector: "0xbf02c5b9" },
-      { name: "getFacetSelectors", signature: "getFacetSelectors(bytes32)", selector: "0x8214de3e" },
+      {
+        name: "getFacetIdBySelector",
+        signature: "function getFacetIdBySelector(bytes4 _selector) view returns (bytes32 facetId_)",
+        selector: "0xb3fd6894",
+      },
+      {
+        name: "getFacetIds",
+        signature: "function getFacetIds() view returns (bytes32[] facetIds_)",
+        selector: "0xcd25d535",
+      },
+      {
+        name: "getFacetIdsByPage",
+        signature:
+          "function getFacetIdsByPage(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] facetIds_)",
+        selector: "0x20202e6d",
+      },
+      {
+        name: "getFacetSelectors",
+        signature: "function getFacetSelectors(bytes32 _facetId) view returns (bytes4[] facetSelectors_)",
+        selector: "0x8214de3e",
+      },
       {
         name: "getFacetSelectorsByPage",
-        signature: "getFacetSelectorsByPage(bytes32,uint256,uint256)",
+        signature:
+          "function getFacetSelectorsByPage(bytes32 _facetId, uint256 _pageIndex, uint256 _pageLength) view returns (bytes4[] facetSelectors_)",
         selector: "0x39a9e956",
       },
-      { name: "getFacetSelectorsLength", signature: "getFacetSelectorsLength(bytes32)", selector: "0xca1f70ec" },
-      { name: "getFacetsLength", signature: "getFacetsLength()", selector: "0x430720f9" },
-      { name: "supportsInterface", signature: "supportsInterface(bytes4)", selector: "0x01ffc9a7" },
+      {
+        name: "getFacetSelectorsLength",
+        signature: "function getFacetSelectorsLength(bytes32 _facetId) view returns (uint256 facetSelectorsLength_)",
+        selector: "0xca1f70ec",
+      },
+      {
+        name: "getFacets",
+        signature:
+          "function getFacets() view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
+        selector: "0x662ea47d",
+      },
+      {
+        name: "getFacetsByPage",
+        signature:
+          "function getFacetsByPage(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
+        selector: "0xbf02c5b9",
+      },
+      {
+        name: "getFacetsLength",
+        signature: "function getFacetsLength() view returns (uint256 facetsLength_)",
+        selector: "0x430720f9",
+      },
+      {
+        name: "supportsInterface",
+        signature: "function supportsInterface(bytes4 _interfaceId) view returns (bool)",
+        selector: "0x01ffc9a7",
+      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new DiamondLoupeFacetTimeTravel__factory(signer) : new DiamondLoupeFacet__factory(signer),
@@ -1181,41 +1939,123 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "_initialize_equityUSA",
-        signature: "_initialize_equityUSA(EquityDetailsData,RegulationData,AdditionalSecurityData)",
-        selector: "0xd0299703",
+        signature:
+          "function _initialize_equityUSA(tuple(bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) _equityDetailsData, tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+        selector: "0x8c505179",
       },
-      { name: "getDividendAmountFor", signature: "getDividendAmountFor(uint256,address)", selector: "0xd258b2f1" },
-      { name: "getDividendHolders", signature: "getDividendHolders(uint256,uint256,uint256)", selector: "0xeba3918e" },
-      { name: "getDividends", signature: "getDividends(uint256)", selector: "0x3837ac88" },
-      { name: "getDividendsCount", signature: "getDividendsCount()", selector: "0x9e676952" },
-      { name: "getDividendsFor", signature: "getDividendsFor(uint256,address)", selector: "0x323e22da" },
-      { name: "getEquityDetails", signature: "getEquityDetails()", selector: "0xefcdcad8" },
+      {
+        name: "getDividendAmountFor",
+        signature:
+          "function getDividendAmountFor(uint256 _dividendID, address _account) view returns (tuple(uint256 numerator, uint256 denominator, bool recordDateReached) dividendAmountFor_)",
+        selector: "0xd258b2f1",
+      },
+      {
+        name: "getDividendHolders",
+        signature:
+          "function getDividendHolders(uint256 _dividendID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xeba3918e",
+      },
+      {
+        name: "getDividends",
+        signature:
+          "function getDividends(uint256 _dividendID) view returns (tuple(tuple(uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) dividend, uint256 snapshotId) registeredDividend_)",
+        selector: "0x3837ac88",
+      },
+      {
+        name: "getDividendsCount",
+        signature: "function getDividendsCount() view returns (uint256 dividendCount_)",
+        selector: "0x9e676952",
+      },
+      {
+        name: "getDividendsFor",
+        signature:
+          "function getDividendsFor(uint256 _dividendID, address _account) view returns (tuple(uint256 tokenBalance, uint256 amount, uint8 amountDecimals, uint256 recordDate, uint256 executionDate, uint8 decimals, bool recordDateReached) dividendFor_)",
+        selector: "0x323e22da",
+      },
+      {
+        name: "getEquityDetails",
+        signature:
+          "function getEquityDetails() view returns (tuple(bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetailsData_)",
+        selector: "0xefcdcad8",
+      },
       {
         name: "getScheduledBalanceAdjustment",
-        signature: "getScheduledBalanceAdjustment(uint256)",
+        signature:
+          "function getScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) view returns (tuple(uint256 executionDate, uint256 factor, uint8 decimals) balanceAdjustment_)",
         selector: "0x3d5338e8",
       },
       {
         name: "getScheduledBalanceAdjustmentCount",
-        signature: "getScheduledBalanceAdjustmentCount()",
+        signature: "function getScheduledBalanceAdjustmentCount() view returns (uint256 balanceAdjustmentCount_)",
         selector: "0x7c62c7fc",
       },
-      { name: "getSecurityHolders", signature: "getSecurityHolders(uint256,uint256)", selector: "0x81438d2f" },
-      { name: "getSecurityRegulationData", signature: "getSecurityRegulationData()", selector: "0x8fda5afe" },
-      { name: "getTotalDividendHolders", signature: "getTotalDividendHolders(uint256)", selector: "0xd61a022b" },
-      { name: "getTotalSecurityHolders", signature: "getTotalSecurityHolders()", selector: "0xbd007c8f" },
-      { name: "getTotalVotingHolders", signature: "getTotalVotingHolders(uint256)", selector: "0x92c51818" },
-      { name: "getVoting", signature: "getVoting(uint256)", selector: "0x3afc7282" },
-      { name: "getVotingCount", signature: "getVotingCount()", selector: "0x9c2aab5e" },
-      { name: "getVotingFor", signature: "getVotingFor(uint256,address)", selector: "0x7633eccf" },
-      { name: "getVotingHolders", signature: "getVotingHolders(uint256,uint256,uint256)", selector: "0x009f64ac" },
-      { name: "setDividends", signature: "setDividends(Dividend)", selector: "0xa6817476" },
+      {
+        name: "getSecurityHolders",
+        signature:
+          "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0x81438d2f",
+      },
+      {
+        name: "getSecurityRegulationData",
+        signature:
+          "function getSecurityRegulationData() pure returns (tuple(tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
+        selector: "0x8fda5afe",
+      },
+      {
+        name: "getTotalDividendHolders",
+        signature: "function getTotalDividendHolders(uint256 _dividendID) view returns (uint256)",
+        selector: "0xd61a022b",
+      },
+      {
+        name: "getTotalSecurityHolders",
+        signature: "function getTotalSecurityHolders() view returns (uint256)",
+        selector: "0xbd007c8f",
+      },
+      {
+        name: "getTotalVotingHolders",
+        signature: "function getTotalVotingHolders(uint256 _voteID) view returns (uint256)",
+        selector: "0x92c51818",
+      },
+      {
+        name: "getVoting",
+        signature:
+          "function getVoting(uint256 _voteID) view returns (tuple(tuple(uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_)",
+        selector: "0x3afc7282",
+      },
+      {
+        name: "getVotingCount",
+        signature: "function getVotingCount() view returns (uint256 votingCount_)",
+        selector: "0x9c2aab5e",
+      },
+      {
+        name: "getVotingFor",
+        signature:
+          "function getVotingFor(uint256 _voteID, address _account) view returns (tuple(uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached) votingFor_)",
+        selector: "0x7633eccf",
+      },
+      {
+        name: "getVotingHolders",
+        signature:
+          "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0x009f64ac",
+      },
+      {
+        name: "setDividends",
+        signature:
+          "function setDividends(tuple(uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
+        selector: "0x1129e1c1",
+      },
       {
         name: "setScheduledBalanceAdjustment",
-        signature: "setScheduledBalanceAdjustment(ScheduledBalanceAdjustment)",
-        selector: "0x50ebcebf",
+        signature:
+          "function setScheduledBalanceAdjustment(tuple(uint256 executionDate, uint256 factor, uint8 decimals) _newBalanceAdjustment) returns (uint256 balanceAdjustmentID_)",
+        selector: "0xd1661084",
       },
-      { name: "setVoting", signature: "setVoting(Voting)", selector: "0x99f97b27" },
+      {
+        name: "setVoting",
+        signature: "function setVoting(tuple(uint256 recordDate, bytes data) _newVoting) returns (uint256 voteID_)",
+        selector: "0x5adaa49e",
+      },
     ],
     errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
@@ -1229,7 +2069,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       value: "0x6e82b75f32c9647cc00b4c3eabbef5a82677f3e91d5d196eb4dd6a0365941344",
     },
     inheritance: ["IStaticFunctionSelectors", "ERC1410Issuer"],
-    methods: [{ name: "issueByPartition", signature: "issueByPartition(IssueData)", selector: "0x10e8a062" }],
+    methods: [
+      {
+        name: "issueByPartition",
+        signature:
+          "function issueByPartition(tuple(bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
+        selector: "0x18180262",
+      },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1410IssuerFacetTimeTravel__factory(signer) : new ERC1410IssuerFacet__factory(signer),
   },
@@ -1245,33 +2092,43 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "controllerRedeemByPartition",
-        signature: "controllerRedeemByPartition(bytes32,address,uint256,bytes,bytes)",
+        signature:
+          "function controllerRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
         selector: "0xb84777cc",
       },
       {
         name: "controllerTransferByPartition",
-        signature: "controllerTransferByPartition(bytes32,address,address,uint256,bytes,bytes)",
+        signature:
+          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
         selector: "0xfb78befa",
       },
-      { name: "initialize_ERC1410", signature: "initialize_ERC1410(bool)", selector: "0x7b1df196" },
+      {
+        name: "initialize_ERC1410",
+        signature: "function initialize_ERC1410(bool _multiPartition)",
+        selector: "0x7b1df196",
+      },
       {
         name: "operatorRedeemByPartition",
-        signature: "operatorRedeemByPartition(bytes32,address,uint256,bytes,bytes)",
+        signature:
+          "function operatorRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
         selector: "0x13d557bc",
       },
       {
         name: "operatorTransferByPartition",
-        signature: "operatorTransferByPartition(OperatorTransferData)",
-        selector: "0x53a6a0a2",
+        signature:
+          "function operatorTransferByPartition(tuple(bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
+        selector: "0x6b9894fe",
       },
       {
         name: "protectedRedeemFromByPartition",
-        signature: "protectedRedeemFromByPartition(bytes32,address,uint256,uint256,uint256,bytes)",
+        signature:
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
         selector: "0xc98d9723",
       },
       {
         name: "protectedTransferFromByPartition",
-        signature: "protectedTransferFromByPartition(bytes32,address,address,uint256,uint256,uint256,bytes)",
+        signature:
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
         selector: "0x12e41c0a",
       },
     ],
@@ -1289,29 +2146,60 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["IStaticFunctionSelectors", "ERC1410Read"],
     methods: [
-      { name: "balanceOf", signature: "balanceOf(address)", selector: "0x70a08231" },
-      { name: "balanceOfAt", signature: "balanceOfAt(address,uint256)", selector: "0x4ee2cd7e" },
-      { name: "balanceOfByPartition", signature: "balanceOfByPartition(bytes32,address)", selector: "0x30e82803" },
+      {
+        name: "balanceOf",
+        signature: "function balanceOf(address _tokenHolder) view returns (uint256)",
+        selector: "0x70a08231",
+      },
+      {
+        name: "balanceOfAt",
+        signature: "function balanceOfAt(address _tokenHolder, uint256 _timestamp) view returns (uint256)",
+        selector: "0x4ee2cd7e",
+      },
+      {
+        name: "balanceOfByPartition",
+        signature: "function balanceOfByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256)",
+        selector: "0x30e82803",
+      },
       {
         name: "canRedeemByPartition",
-        signature: "canRedeemByPartition(address,bytes32,uint256,bytes,bytes)",
+        signature:
+          "function canRedeemByPartition(address _from, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
         selector: "0x7b7322c4",
       },
       {
         name: "canTransferByPartition",
-        signature: "canTransferByPartition(address,address,bytes32,uint256,bytes,bytes)",
+        signature:
+          "function canTransferByPartition(address _from, address _to, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
         selector: "0xa7b518b1",
       },
-      { name: "isMultiPartition", signature: "isMultiPartition()", selector: "0xbd09cc54" },
-      { name: "isOperator", signature: "isOperator(address,address)", selector: "0xb6363cf2" },
+      {
+        name: "isMultiPartition",
+        signature: "function isMultiPartition() view returns (bool)",
+        selector: "0xbd09cc54",
+      },
+      {
+        name: "isOperator",
+        signature: "function isOperator(address _operator, address _tokenHolder) view returns (bool)",
+        selector: "0xb6363cf2",
+      },
       {
         name: "isOperatorForPartition",
-        signature: "isOperatorForPartition(bytes32,address,address)",
+        signature:
+          "function isOperatorForPartition(bytes32 _partition, address _operator, address _tokenHolder) view returns (bool)",
         selector: "0x6d77cad6",
       },
-      { name: "partitionsOf", signature: "partitionsOf(address)", selector: "0x740ab8f4" },
-      { name: "totalSupply", signature: "totalSupply()", selector: "0x18160ddd" },
-      { name: "totalSupplyByPartition", signature: "totalSupplyByPartition(bytes32)", selector: "0xa26734dc" },
+      {
+        name: "partitionsOf",
+        signature: "function partitionsOf(address _tokenHolder) view returns (bytes32[])",
+        selector: "0x740ab8f4",
+      },
+      { name: "totalSupply", signature: "function totalSupply() view returns (uint256)", selector: "0x18160ddd" },
+      {
+        name: "totalSupplyByPartition",
+        signature: "function totalSupplyByPartition(bytes32 _partition) view returns (uint256)",
+        selector: "0xa26734dc",
+      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1410ReadFacetTimeTravel__factory(signer) : new ERC1410ReadFacet__factory(signer),
@@ -1325,25 +2213,34 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["IStaticFunctionSelectors", "ERC1410TokenHolder"],
     methods: [
-      { name: "authorizeOperator", signature: "authorizeOperator(address)", selector: "0x959b8c3f" },
+      { name: "authorizeOperator", signature: "function authorizeOperator(address _operator)", selector: "0x959b8c3f" },
       {
         name: "authorizeOperatorByPartition",
-        signature: "authorizeOperatorByPartition(bytes32,address)",
+        signature: "function authorizeOperatorByPartition(bytes32 _partition, address _operator)",
         selector: "0x103ef9e1",
       },
-      { name: "redeemByPartition", signature: "redeemByPartition(bytes32,uint256,bytes)", selector: "0x62eb0068" },
-      { name: "revokeOperator", signature: "revokeOperator(address)", selector: "0xfad8b32a" },
+      {
+        name: "redeemByPartition",
+        signature: "function redeemByPartition(bytes32 _partition, uint256 _value, bytes _data)",
+        selector: "0x62eb0068",
+      },
+      { name: "revokeOperator", signature: "function revokeOperator(address _operator)", selector: "0xfad8b32a" },
       {
         name: "revokeOperatorByPartition",
-        signature: "revokeOperatorByPartition(bytes32,address)",
+        signature: "function revokeOperatorByPartition(bytes32 _partition, address _operator)",
         selector: "0x168ecec5",
       },
       {
         name: "transferByPartition",
-        signature: "transferByPartition(bytes32,BasicTransferInfo,bytes)",
-        selector: "0xbb4f2f08",
+        signature:
+          "function transferByPartition(bytes32 _partition, tuple(address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
+        selector: "0x3bc9bcd8",
       },
-      { name: "triggerAndSyncAll", signature: "triggerAndSyncAll(bytes32,address,address)", selector: "0x6afb79db" },
+      {
+        name: "triggerAndSyncAll",
+        signature: "function triggerAndSyncAll(bytes32 _partition, address _from, address _to)",
+        selector: "0x6afb79db",
+      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
@@ -1359,19 +2256,41 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ERC1594", "IStaticFunctionSelectors"],
     methods: [
-      { name: "canTransfer", signature: "canTransfer(address,uint256,bytes)", selector: "0x1badb25c" },
-      { name: "canTransferFrom", signature: "canTransferFrom(address,address,uint256,bytes)", selector: "0x122eb575" },
-      { name: "initialize_ERC1594", signature: "initialize_ERC1594()", selector: "0x9be12cea" },
-      { name: "isIssuable", signature: "isIssuable()", selector: "0x2f1cae85" },
-      { name: "issue", signature: "issue(address,uint256,bytes)", selector: "0xbb3acde9" },
-      { name: "redeem", signature: "redeem(uint256,bytes)", selector: "0xe77c646d" },
-      { name: "redeemFrom", signature: "redeemFrom(address,uint256,bytes)", selector: "0x9675193c" },
+      {
+        name: "canTransfer",
+        signature:
+          "function canTransfer(address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+        selector: "0x1badb25c",
+      },
+      {
+        name: "canTransferFrom",
+        signature:
+          "function canTransferFrom(address _from, address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+        selector: "0x122eb575",
+      },
+      { name: "initialize_ERC1594", signature: "function initialize_ERC1594()", selector: "0x9be12cea" },
+      { name: "isIssuable", signature: "function isIssuable() view returns (bool)", selector: "0x2f1cae85" },
+      {
+        name: "issue",
+        signature: "function issue(address _tokenHolder, uint256 _value, bytes _data)",
+        selector: "0xbb3acde9",
+      },
+      { name: "redeem", signature: "function redeem(uint256 _value, bytes _data)", selector: "0xe77c646d" },
+      {
+        name: "redeemFrom",
+        signature: "function redeemFrom(address _tokenHolder, uint256 _value, bytes _data)",
+        selector: "0x9675193c",
+      },
       {
         name: "transferFromWithData",
-        signature: "transferFromWithData(address,address,uint256,bytes)",
+        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes)",
         selector: "0xee532f31",
       },
-      { name: "transferWithData", signature: "transferWithData(address,uint256,bytes)", selector: "0x2535f762" },
+      {
+        name: "transferWithData",
+        signature: "function transferWithData(address _to, uint256 _value, bytes)",
+        selector: "0x2535f762",
+      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1594FacetTimeTravel__factory(signer) : new ERC1594Facet__factory(signer),
@@ -1385,10 +2304,22 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ERC1643", "IStaticFunctionSelectors"],
     methods: [
-      { name: "getAllDocuments", signature: "getAllDocuments()", selector: "0x9fa5f50b" },
-      { name: "getDocument", signature: "getDocument(bytes32)", selector: "0xb10d6b41" },
-      { name: "removeDocument", signature: "removeDocument(bytes32)", selector: "0xc3501848" },
-      { name: "setDocument", signature: "setDocument(bytes32,string,bytes32)", selector: "0x010648ca" },
+      {
+        name: "getAllDocuments",
+        signature: "function getAllDocuments() view returns (bytes32[])",
+        selector: "0x9fa5f50b",
+      },
+      {
+        name: "getDocument",
+        signature: "function getDocument(bytes32 _name) view returns (string, bytes32, uint256)",
+        selector: "0xb10d6b41",
+      },
+      { name: "removeDocument", signature: "function removeDocument(bytes32 _name)", selector: "0xc3501848" },
+      {
+        name: "setDocument",
+        signature: "function setDocument(bytes32 _name, string _uri, bytes32 _documentHash)",
+        selector: "0x010648ca",
+      },
     ],
     events: [
       {
@@ -1420,15 +2351,24 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ERC1644", "IStaticFunctionSelectors"],
     methods: [
-      { name: "controllerRedeem", signature: "controllerRedeem(address,uint256,bytes,bytes)", selector: "0x2bc6acc3" },
+      {
+        name: "controllerRedeem",
+        signature: "function controllerRedeem(address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0x2bc6acc3",
+      },
       {
         name: "controllerTransfer",
-        signature: "controllerTransfer(address,address,uint256,bytes,bytes)",
+        signature:
+          "function controllerTransfer(address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
         selector: "0xf282527a",
       },
-      { name: "finalizeControllable", signature: "finalizeControllable()", selector: "0xa213934f" },
-      { name: "initialize_ERC1644", signature: "initialize_ERC1644(bool)", selector: "0xaa4ea38e" },
-      { name: "isControllable", signature: "isControllable()", selector: "0x4c783bf5" },
+      { name: "finalizeControllable", signature: "function finalizeControllable()", selector: "0xa213934f" },
+      {
+        name: "initialize_ERC1644",
+        signature: "function initialize_ERC1644(bool _controllable)",
+        selector: "0xaa4ea38e",
+      },
+      { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1644FacetTimeTravel__factory(signer) : new ERC1644Facet__factory(signer),
@@ -1442,18 +2382,56 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ERC20", "IStaticFunctionSelectors"],
     methods: [
-      { name: "allowance", signature: "allowance(address,address)", selector: "0xdd62ed3e" },
-      { name: "approve", signature: "approve(address,uint256)", selector: "0x095ea7b3" },
-      { name: "decimals", signature: "decimals()", selector: "0x313ce567" },
-      { name: "decimalsAt", signature: "decimalsAt(uint256)", selector: "0x771918ca" },
-      { name: "decreaseAllowance", signature: "decreaseAllowance(address,uint256)", selector: "0xa457c2d7" },
-      { name: "getERC20Metadata", signature: "getERC20Metadata()", selector: "0x8e649195" },
-      { name: "increaseAllowance", signature: "increaseAllowance(address,uint256)", selector: "0x39509351" },
-      { name: "initialize_ERC20", signature: "initialize_ERC20(ERC20Metadata)", selector: "0xab0de864" },
-      { name: "name", signature: "name()", selector: "0x06fdde03" },
-      { name: "symbol", signature: "symbol()", selector: "0x95d89b41" },
-      { name: "transfer", signature: "transfer(address,uint256)", selector: "0xa9059cbb" },
-      { name: "transferFrom", signature: "transferFrom(address,address,uint256)", selector: "0x23b872dd" },
+      {
+        name: "allowance",
+        signature: "function allowance(address owner, address spender) view returns (uint256)",
+        selector: "0xdd62ed3e",
+      },
+      {
+        name: "approve",
+        signature: "function approve(address spender, uint256 value) returns (bool)",
+        selector: "0x095ea7b3",
+      },
+      { name: "decimals", signature: "function decimals() view returns (uint8)", selector: "0x313ce567" },
+      {
+        name: "decimalsAt",
+        signature: "function decimalsAt(uint256 _timestamp) view returns (uint8)",
+        selector: "0x771918ca",
+      },
+      {
+        name: "decreaseAllowance",
+        signature: "function decreaseAllowance(address spender, uint256 subtractedValue) returns (bool)",
+        selector: "0xa457c2d7",
+      },
+      {
+        name: "getERC20Metadata",
+        signature:
+          "function getERC20Metadata() view returns (tuple(tuple(string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
+        selector: "0x8e649195",
+      },
+      {
+        name: "increaseAllowance",
+        signature: "function increaseAllowance(address spender, uint256 addedValue) returns (bool)",
+        selector: "0x39509351",
+      },
+      {
+        name: "initialize_ERC20",
+        signature:
+          "function initialize_ERC20(tuple(tuple(string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
+        selector: "0xe04fb235",
+      },
+      { name: "name", signature: "function name() view returns (string)", selector: "0x06fdde03" },
+      { name: "symbol", signature: "function symbol() view returns (string)", selector: "0x95d89b41" },
+      {
+        name: "transfer",
+        signature: "function transfer(address to, uint256 amount) returns (bool)",
+        selector: "0xa9059cbb",
+      },
+      {
+        name: "transferFrom",
+        signature: "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+        selector: "0x23b872dd",
+      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC20FacetTimeTravel__factory(signer) : new ERC20Facet__factory(signer),
@@ -1467,12 +2445,17 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ERC20Permit", "IStaticFunctionSelectors"],
     methods: [
-      { name: "DOMAIN_SEPARATOR", signature: "DOMAIN_SEPARATOR()", selector: "0x3644e515" },
-      { name: "initialize_ERC20Permit", signature: "initialize_ERC20Permit()", selector: "0x70d162dc" },
-      { name: "nonces", signature: "nonces(address)", selector: "0x7ecebe00" },
+      {
+        name: "DOMAIN_SEPARATOR",
+        signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
+        selector: "0x3644e515",
+      },
+      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
+      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
       {
         name: "permit",
-        signature: "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)",
+        signature:
+          "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",
         selector: "0xd505accf",
       },
     ],
@@ -1492,17 +2475,46 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ERC20Votes", "IStaticFunctionSelectors"],
     methods: [
-      { name: "checkpoints", signature: "checkpoints(address,uint256)", selector: "0x0cdfebfa" },
-      { name: "clock", signature: "clock()", selector: "0x91ddadf4" },
-      { name: "CLOCK_MODE", signature: "CLOCK_MODE()", selector: "0x4bf5d7e9" },
-      { name: "delegate", signature: "delegate(address)", selector: "0x5c19a95c" },
-      { name: "delegates", signature: "delegates(address)", selector: "0x587cde1e" },
-      { name: "getPastTotalSupply", signature: "getPastTotalSupply(uint256)", selector: "0x8e539e8c" },
-      { name: "getPastVotes", signature: "getPastVotes(address,uint256)", selector: "0x3a46b1a8" },
-      { name: "getVotes", signature: "getVotes(address)", selector: "0x9ab24eb0" },
-      { name: "initialize_ERC20Votes", signature: "initialize_ERC20Votes(bool)", selector: "0x65fa0b29" },
-      { name: "isActivated", signature: "isActivated()", selector: "0x4a8c1fb4" },
-      { name: "numCheckpoints", signature: "numCheckpoints(address)", selector: "0x6fcfff45" },
+      { name: "CLOCK_MODE", signature: "function CLOCK_MODE() view returns (string)", selector: "0x4bf5d7e9" },
+      {
+        name: "checkpoints",
+        signature:
+          "function checkpoints(address _account, uint256 _pos) view returns (tuple(uint256 from, uint256 value))",
+        selector: "0x0cdfebfa",
+      },
+      { name: "clock", signature: "function clock() view returns (uint48)", selector: "0x91ddadf4" },
+      { name: "delegate", signature: "function delegate(address _delegatee)", selector: "0x5c19a95c" },
+      {
+        name: "delegates",
+        signature: "function delegates(address _account) view returns (address)",
+        selector: "0x587cde1e",
+      },
+      {
+        name: "getPastTotalSupply",
+        signature: "function getPastTotalSupply(uint256 _timepoint) view returns (uint256)",
+        selector: "0x8e539e8c",
+      },
+      {
+        name: "getPastVotes",
+        signature: "function getPastVotes(address _account, uint256 _timepoint) view returns (uint256)",
+        selector: "0x3a46b1a8",
+      },
+      {
+        name: "getVotes",
+        signature: "function getVotes(address _account) view returns (uint256)",
+        selector: "0x9ab24eb0",
+      },
+      {
+        name: "initialize_ERC20Votes",
+        signature: "function initialize_ERC20Votes(bool _activated)",
+        selector: "0x65fa0b29",
+      },
+      { name: "isActivated", signature: "function isActivated() view returns (bool)", selector: "0x4a8c1fb4" },
+      {
+        name: "numCheckpoints",
+        signature: "function numCheckpoints(address _account) view returns (uint256)",
+        selector: "0x6fcfff45",
+      },
     ],
     errors: [
       {
@@ -1523,14 +2535,26 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ERC3643Batch", "IStaticFunctionSelectors"],
     methods: [
-      { name: "batchBurn", signature: "batchBurn(address[],uint256[])", selector: "0x4a6cc677" },
+      {
+        name: "batchBurn",
+        signature: "function batchBurn(address[] _userAddresses, uint256[] _amounts)",
+        selector: "0x4a6cc677",
+      },
       {
         name: "batchForcedTransfer",
-        signature: "batchForcedTransfer(address[],address[],uint256[])",
+        signature: "function batchForcedTransfer(address[] _fromList, address[] _toList, uint256[] _amounts)",
         selector: "0x42a47abc",
       },
-      { name: "batchMint", signature: "batchMint(address[],uint256[])", selector: "0x68573107" },
-      { name: "batchTransfer", signature: "batchTransfer(address[],uint256[])", selector: "0x88d695b2" },
+      {
+        name: "batchMint",
+        signature: "function batchMint(address[] _toList, uint256[] _amounts)",
+        selector: "0x68573107",
+      },
+      {
+        name: "batchTransfer",
+        signature: "function batchTransfer(address[] _toList, uint256[] _amounts)",
+        selector: "0x88d695b2",
+      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC3643BatchFacetTimeTravel__factory(signer) : new ERC3643BatchFacet__factory(signer),
@@ -1544,15 +2568,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["IStaticFunctionSelectors", "ERC3643Management"],
     methods: [
-      { name: "addAgent", signature: "addAgent(address)", selector: "0x84e79842" },
-      { name: "initialize_ERC3643", signature: "initialize_ERC3643(address,address)", selector: "0xc047bb6c" },
-      { name: "recoveryAddress", signature: "recoveryAddress(address,address,address)", selector: "0x9285948a" },
-      { name: "removeAgent", signature: "removeAgent(address)", selector: "0x97a6278e" },
-      { name: "setCompliance", signature: "setCompliance(address)", selector: "0xf8981789" },
-      { name: "setIdentityRegistry", signature: "setIdentityRegistry(address)", selector: "0xcbf3f861" },
-      { name: "setName", signature: "setName(string)", selector: "0xc47f0027" },
-      { name: "setOnchainID", signature: "setOnchainID(address)", selector: "0x3d1ddc5b" },
-      { name: "setSymbol", signature: "setSymbol(string)", selector: "0xb84c8246" },
+      { name: "addAgent", signature: "function addAgent(address _agent)", selector: "0x84e79842" },
+      {
+        name: "initialize_ERC3643",
+        signature: "function initialize_ERC3643(address _compliance, address _identityRegistry)",
+        selector: "0xc047bb6c",
+      },
+      {
+        name: "recoveryAddress",
+        signature:
+          "function recoveryAddress(address _lostWallet, address _newWallet, address _investorOnchainID) returns (bool success_)",
+        selector: "0x9285948a",
+      },
+      { name: "removeAgent", signature: "function removeAgent(address _agent)", selector: "0x97a6278e" },
+      { name: "setCompliance", signature: "function setCompliance(address _compliance)", selector: "0xf8981789" },
+      {
+        name: "setIdentityRegistry",
+        signature: "function setIdentityRegistry(address _identityRegistry)",
+        selector: "0xcbf3f861",
+      },
+      { name: "setName", signature: "function setName(string _name)", selector: "0xc47f0027" },
+      { name: "setOnchainID", signature: "function setOnchainID(address _onchainID)", selector: "0x3d1ddc5b" },
+      { name: "setSymbol", signature: "function setSymbol(string _symbol)", selector: "0xb84c8246" },
     ],
     events: [
       {
@@ -1609,9 +2646,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["IStaticFunctionSelectors", "ERC3643Operations"],
     methods: [
-      { name: "burn", signature: "burn(address,uint256)", selector: "0x9dc29fac" },
-      { name: "forcedTransfer", signature: "forcedTransfer(address,address,uint256)", selector: "0x9fc1d0e7" },
-      { name: "mint", signature: "mint(address,uint256)", selector: "0x40c10f19" },
+      { name: "burn", signature: "function burn(address _userAddress, uint256 _amount)", selector: "0x9dc29fac" },
+      {
+        name: "forcedTransfer",
+        signature: "function forcedTransfer(address _from, address _to, uint256 _amount) returns (bool)",
+        selector: "0x9fc1d0e7",
+      },
+      { name: "mint", signature: "function mint(address _to, uint256 _amount)", selector: "0x40c10f19" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
@@ -1627,12 +2668,20 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["IStaticFunctionSelectors", "ERC3643Read"],
     methods: [
-      { name: "compliance", signature: "compliance()", selector: "0x6290865d" },
-      { name: "identityRegistry", signature: "identityRegistry()", selector: "0x134e18f4" },
-      { name: "isAddressRecovered", signature: "isAddressRecovered(address)", selector: "0x1b997ec2" },
-      { name: "isAgent", signature: "isAgent(address)", selector: "0x1ffbb064" },
-      { name: "onchainID", signature: "onchainID()", selector: "0xaba63705" },
-      { name: "version", signature: "version()", selector: "0x54fd4d50" },
+      { name: "compliance", signature: "function compliance() view returns (address)", selector: "0x6290865d" },
+      {
+        name: "identityRegistry",
+        signature: "function identityRegistry() view returns (address)",
+        selector: "0x134e18f4",
+      },
+      {
+        name: "isAddressRecovered",
+        signature: "function isAddressRecovered(address _wallet) view returns (bool)",
+        selector: "0x1b997ec2",
+      },
+      { name: "isAgent", signature: "function isAgent(address _agent) view returns (bool)", selector: "0x1ffbb064" },
+      { name: "onchainID", signature: "function onchainID() view returns (address)", selector: "0xaba63705" },
+      { name: "version", signature: "function version() view returns (string)", selector: "0x54fd4d50" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC3643ReadFacetTimeTravel__factory(signer) : new ERC3643ReadFacet__factory(signer),
@@ -1646,23 +2695,41 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ExternalControlListManagement", "IStaticFunctionSelectors"],
     methods: [
-      { name: "addExternalControlList", signature: "addExternalControlList(address)", selector: "0x995e4649" },
-      { name: "getExternalControlListsCount", signature: "getExternalControlListsCount()", selector: "0x9bec4167" },
+      {
+        name: "addExternalControlList",
+        signature: "function addExternalControlList(address _controlList) returns (bool success_)",
+        selector: "0x995e4649",
+      },
+      {
+        name: "getExternalControlListsCount",
+        signature: "function getExternalControlListsCount() view returns (uint256 externalControlListsCount_)",
+        selector: "0x9bec4167",
+      },
       {
         name: "getExternalControlListsMembers",
-        signature: "getExternalControlListsMembers(uint256,uint256)",
+        signature:
+          "function getExternalControlListsMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
         selector: "0xc4aa9df3",
       },
       {
         name: "initialize_ExternalControlLists",
-        signature: "initialize_ExternalControlLists(address[])",
+        signature: "function initialize_ExternalControlLists(address[] _controlLists)",
         selector: "0x0a0a114f",
       },
-      { name: "isExternalControlList", signature: "isExternalControlList(address)", selector: "0x07c44711" },
-      { name: "removeExternalControlList", signature: "removeExternalControlList(address)", selector: "0xb8913387" },
+      {
+        name: "isExternalControlList",
+        signature: "function isExternalControlList(address _controlList) view returns (bool)",
+        selector: "0x07c44711",
+      },
+      {
+        name: "removeExternalControlList",
+        signature: "function removeExternalControlList(address _controlList) returns (bool success_)",
+        selector: "0xb8913387",
+      },
       {
         name: "updateExternalControlLists",
-        signature: "updateExternalControlLists(address[],bool[])",
+        signature:
+          "function updateExternalControlLists(address[] _controlLists, bool[] _actives) returns (bool success_)",
         selector: "0x0ba2b922",
       },
     ],
@@ -1706,22 +2773,47 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ExternalKycListManagement", "IStaticFunctionSelectors"],
     methods: [
-      { name: "addExternalKycList", signature: "addExternalKycList(address)", selector: "0x7570e044" },
-      { name: "getExternalKycListsCount", signature: "getExternalKycListsCount()", selector: "0xd17e889e" },
+      {
+        name: "addExternalKycList",
+        signature: "function addExternalKycList(address _kycLists) returns (bool success_)",
+        selector: "0x7570e044",
+      },
+      {
+        name: "getExternalKycListsCount",
+        signature: "function getExternalKycListsCount() view returns (uint256 externalKycListsCount_)",
+        selector: "0xd17e889e",
+      },
       {
         name: "getExternalKycListsMembers",
-        signature: "getExternalKycListsMembers(uint256,uint256)",
+        signature:
+          "function getExternalKycListsMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
         selector: "0x999a2459",
       },
       {
         name: "initialize_ExternalKycLists",
-        signature: "initialize_ExternalKycLists(address[])",
+        signature: "function initialize_ExternalKycLists(address[] _kycLists)",
         selector: "0x3ac7fadc",
       },
-      { name: "isExternalKycList", signature: "isExternalKycList(address)", selector: "0x20991e17" },
-      { name: "isExternallyGranted", signature: "isExternallyGranted(address,IKyc.KycStatus)", selector: "0xd3567130" },
-      { name: "removeExternalKycList", signature: "removeExternalKycList(address)", selector: "0x16c94d54" },
-      { name: "updateExternalKycLists", signature: "updateExternalKycLists(address[],bool[])", selector: "0xc391576d" },
+      {
+        name: "isExternalKycList",
+        signature: "function isExternalKycList(address _kycList) view returns (bool)",
+        selector: "0x20991e17",
+      },
+      {
+        name: "isExternallyGranted",
+        signature: "function isExternallyGranted(address _account, uint8 _kycStatus) view returns (bool)",
+        selector: "0x1d7d5749",
+      },
+      {
+        name: "removeExternalKycList",
+        signature: "function removeExternalKycList(address _kycLists) returns (bool success_)",
+        selector: "0x16c94d54",
+      },
+      {
+        name: "updateExternalKycLists",
+        signature: "function updateExternalKycLists(address[] _kycLists, bool[] _actives) returns (bool success_)",
+        selector: "0xc391576d",
+      },
     ],
     events: [
       {
@@ -1763,17 +2855,42 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ExternalPauseManagement", "IStaticFunctionSelectors"],
     methods: [
-      { name: "addExternalPause", signature: "addExternalPause(address)", selector: "0xd438cff1" },
-      { name: "getExternalPausesCount", signature: "getExternalPausesCount()", selector: "0x1e2bc3a6" },
+      {
+        name: "addExternalPause",
+        signature: "function addExternalPause(address _pause) returns (bool success_)",
+        selector: "0xd438cff1",
+      },
+      {
+        name: "getExternalPausesCount",
+        signature: "function getExternalPausesCount() view returns (uint256 externalPausesCount_)",
+        selector: "0x1e2bc3a6",
+      },
       {
         name: "getExternalPausesMembers",
-        signature: "getExternalPausesMembers(uint256,uint256)",
+        signature:
+          "function getExternalPausesMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
         selector: "0x5b175a35",
       },
-      { name: "initialize_ExternalPauses", signature: "initialize_ExternalPauses(address[])", selector: "0x8f88d0d5" },
-      { name: "isExternalPause", signature: "isExternalPause(address)", selector: "0xe26e35be" },
-      { name: "removeExternalPause", signature: "removeExternalPause(address)", selector: "0x9648d912" },
-      { name: "updateExternalPauses", signature: "updateExternalPauses(address[],bool[])", selector: "0x361d714a" },
+      {
+        name: "initialize_ExternalPauses",
+        signature: "function initialize_ExternalPauses(address[] _pauses)",
+        selector: "0x8f88d0d5",
+      },
+      {
+        name: "isExternalPause",
+        signature: "function isExternalPause(address _pause) view returns (bool)",
+        selector: "0xe26e35be",
+      },
+      {
+        name: "removeExternalPause",
+        signature: "function removeExternalPause(address _pause) returns (bool success_)",
+        selector: "0x9648d912",
+      },
+      {
+        name: "updateExternalPauses",
+        signature: "function updateExternalPauses(address[] _pauses, bool[] _actives) returns (bool success_)",
+        selector: "0x361d714a",
+      },
     ],
     events: [
       {
@@ -1815,9 +2932,21 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["FixedRate", "IStaticFunctionSelectors"],
     methods: [
-      { name: "getRate", signature: "getRate()", selector: "0x679aefce" },
-      { name: "initialize_FixedRate", signature: "initialize_FixedRate(FixedRateData)", selector: "0xc6acf7e3" },
-      { name: "setRate", signature: "setRate(uint256,uint8)", selector: "0xd1923502" },
+      {
+        name: "getRate",
+        signature: "function getRate() view returns (uint256 rate_, uint8 decimals_)",
+        selector: "0x679aefce",
+      },
+      {
+        name: "initialize_FixedRate",
+        signature: "function initialize_FixedRate(tuple(uint256 rate, uint8 rateDecimals) _initData)",
+        selector: "0xd51e10d5",
+      },
+      {
+        name: "setRate",
+        signature: "function setRate(uint256 _newRate, uint8 _newRateDecimals)",
+        selector: "0xd1923502",
+      },
     ],
     events: [
       {
@@ -1844,19 +2973,39 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "batchFreezePartialTokens",
-        signature: "batchFreezePartialTokens(address[],uint256[])",
+        signature: "function batchFreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
         selector: "0xfc7e5fa8",
       },
-      { name: "batchSetAddressFrozen", signature: "batchSetAddressFrozen(address[],bool[])", selector: "0x1a7af379" },
+      {
+        name: "batchSetAddressFrozen",
+        signature: "function batchSetAddressFrozen(address[] _userAddresses, bool[] _freeze)",
+        selector: "0x1a7af379",
+      },
       {
         name: "batchUnfreezePartialTokens",
-        signature: "batchUnfreezePartialTokens(address[],uint256[])",
+        signature: "function batchUnfreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
         selector: "0x4710362d",
       },
-      { name: "freezePartialTokens", signature: "freezePartialTokens(address,uint256)", selector: "0x125c4a33" },
-      { name: "getFrozenTokens", signature: "getFrozenTokens(address)", selector: "0x158b1a57" },
-      { name: "setAddressFrozen", signature: "setAddressFrozen(address,bool)", selector: "0xc69c09cf" },
-      { name: "unfreezePartialTokens", signature: "unfreezePartialTokens(address,uint256)", selector: "0x1fe56f7d" },
+      {
+        name: "freezePartialTokens",
+        signature: "function freezePartialTokens(address _userAddress, uint256 _amount)",
+        selector: "0x125c4a33",
+      },
+      {
+        name: "getFrozenTokens",
+        signature: "function getFrozenTokens(address _userAddress) view returns (uint256)",
+        selector: "0x158b1a57",
+      },
+      {
+        name: "setAddressFrozen",
+        signature: "function setAddressFrozen(address _userAddress, bool _freezStatus)",
+        selector: "0xc69c09cf",
+      },
+      {
+        name: "unfreezePartialTokens",
+        signature: "function unfreezePartialTokens(address _userAddress, uint256 _amount)",
+        selector: "0x1fe56f7d",
+      },
     ],
     events: [
       {
@@ -1889,18 +3038,21 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "controllerCreateHoldByPartition",
-        signature: "controllerCreateHoldByPartition(bytes32,address,Hold,bytes)",
-        selector: "0xd601e2f8",
+        signature:
+          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0x5f3d8171",
       },
       {
         name: "operatorCreateHoldByPartition",
-        signature: "operatorCreateHoldByPartition(bytes32,address,Hold,bytes)",
-        selector: "0x049e5d89",
+        signature:
+          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0xc6062c3c",
       },
       {
         name: "protectedCreateHoldByPartition",
-        signature: "protectedCreateHoldByPartition(bytes32,address,ProtectedHold,bytes)",
-        selector: "0xfea5ee4c",
+        signature:
+          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, tuple(tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
+        selector: "0xc17f3554",
       },
     ],
     events: [
@@ -1932,24 +3084,41 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["IStaticFunctionSelectors", "HoldRead"],
     methods: [
-      { name: "getHeldAmountFor", signature: "getHeldAmountFor(address)", selector: "0x8493aabb" },
+      {
+        name: "getHeldAmountFor",
+        signature: "function getHeldAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x8493aabb",
+      },
       {
         name: "getHeldAmountForByPartition",
-        signature: "getHeldAmountForByPartition(bytes32,address)",
+        signature:
+          "function getHeldAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
         selector: "0x4d60fdc5",
       },
       {
         name: "getHoldCountForByPartition",
-        signature: "getHoldCountForByPartition(bytes32,address)",
+        signature:
+          "function getHoldCountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 holdCount_)",
         selector: "0xcecb3899",
       },
-      { name: "getHoldForByPartition", signature: "getHoldForByPartition(HoldIdentifier)", selector: "0x4fa0b1f2" },
+      {
+        name: "getHoldForByPartition",
+        signature:
+          "function getHoldForByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
+        selector: "0x8d41523d",
+      },
+      {
+        name: "getHoldThirdParty",
+        signature:
+          "function getHoldThirdParty(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
+        selector: "0x3c36a695",
+      },
       {
         name: "getHoldsIdForByPartition",
-        signature: "getHoldsIdForByPartition(bytes32,address,uint256,uint256)",
+        signature:
+          "function getHoldsIdForByPartition(bytes32 _partition, address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] holdsId_)",
         selector: "0xeb89899d",
       },
-      { name: "getHoldThirdParty", signature: "getHoldThirdParty(HoldIdentifier)", selector: "0x1c771f2b" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new HoldReadFacetTimeTravel__factory(signer) : new HoldReadFacet__factory(signer),
@@ -1963,22 +3132,35 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["IStaticFunctionSelectors", "HoldTokenHolder"],
     methods: [
-      { name: "createHoldByPartition", signature: "createHoldByPartition(bytes32,Hold)", selector: "0xae4bcf8a" },
+      {
+        name: "createHoldByPartition",
+        signature:
+          "function createHoldByPartition(bytes32 _partition, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
+        selector: "0x5d23449e",
+      },
       {
         name: "createHoldFromByPartition",
-        signature: "createHoldFromByPartition(bytes32,address,Hold,bytes)",
-        selector: "0x30b2e862",
+        signature:
+          "function createHoldFromByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0x2361f007",
       },
       {
         name: "executeHoldByPartition",
-        signature: "executeHoldByPartition(HoldIdentifier,address,uint256)",
-        selector: "0x37034df4",
+        signature:
+          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_)",
+        selector: "0x25fe8720",
       },
-      { name: "reclaimHoldByPartition", signature: "reclaimHoldByPartition(HoldIdentifier)", selector: "0x8e302e47" },
+      {
+        name: "reclaimHoldByPartition",
+        signature:
+          "function reclaimHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
+        selector: "0xb437969e",
+      },
       {
         name: "releaseHoldByPartition",
-        signature: "releaseHoldByPartition(HoldIdentifier,uint256)",
-        selector: "0x2dc66830",
+        signature:
+          "function releaseHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
+        selector: "0xf8bafc1c",
       },
     ],
     events: [
@@ -2020,17 +3202,42 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["KpiLinkedRate", "IStaticFunctionSelectors"],
     methods: [
-      { name: "getImpactData", signature: "getImpactData()", selector: "0x24bffca8" },
-      { name: "getInterestRate", signature: "getInterestRate()", selector: "0x5257b566" },
-      { name: "getKpiOracle", signature: "getKpiOracle()", selector: "0x507ff519" },
+      {
+        name: "getImpactData",
+        signature:
+          "function getImpactData() view returns (tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData_)",
+        selector: "0x24bffca8",
+      },
+      {
+        name: "getInterestRate",
+        signature:
+          "function getInterestRate() view returns (tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate_)",
+        selector: "0x5257b566",
+      },
+      {
+        name: "getKpiOracle",
+        signature: "function getKpiOracle() view returns (address kpiOracle_)",
+        selector: "0x507ff519",
+      },
       {
         name: "initialize_KpiLinkedRate",
-        signature: "initialize_KpiLinkedRate(InterestRate,ImpactData,address)",
-        selector: "0xe5d591cb",
+        signature:
+          "function initialize_KpiLinkedRate(tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _impactData, address kpiOracle)",
+        selector: "0x9a613933",
       },
-      { name: "setImpactData", signature: "setImpactData(ImpactData)", selector: "0xd58c48f4" },
-      { name: "setInterestRate", signature: "setInterestRate(InterestRate)", selector: "0xf1f2d5d4" },
-      { name: "setKpiOracle", signature: "setKpiOracle(address)", selector: "0xa6a7e233" },
+      {
+        name: "setImpactData",
+        signature:
+          "function setImpactData(tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _newImpactData)",
+        selector: "0x9ce6e100",
+      },
+      {
+        name: "setInterestRate",
+        signature:
+          "function setInterestRate(tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _newInterestRate)",
+        selector: "0x9a833a5b",
+      },
+      { name: "setKpiOracle", signature: "function setKpiOracle(address _kpiOracle)", selector: "0xa6a7e233" },
     ],
     events: [
       {
@@ -2068,10 +3275,27 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["KpisFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
-      { name: "addKpiData", signature: "addKpiData(uint256,uint256,address)", selector: "0x0de2be70" },
-      { name: "getLatestKpiData", signature: "getLatestKpiData(uint256,uint256,address)", selector: "0xfc7f5cb3" },
-      { name: "getMinDate", signature: "getMinDate()", selector: "0x48de6fa7" },
-      { name: "isCheckPointDate", signature: "isCheckPointDate(uint256,address)", selector: "0x8078ccd5" },
+      {
+        name: "addKpiData",
+        signature: "function addKpiData(uint256 _date, uint256 _value, address _project)",
+        selector: "0x0de2be70",
+      },
+      {
+        name: "getLatestKpiData",
+        signature:
+          "function getLatestKpiData(uint256 _from, uint256 _to, address _project) view returns (uint256 value_, bool exists_)",
+        selector: "0xfc7f5cb3",
+      },
+      {
+        name: "getMinDate",
+        signature: "function getMinDate() view returns (uint256 minDate_)",
+        selector: "0x48de6fa7",
+      },
+      {
+        name: "isCheckPointDate",
+        signature: "function isCheckPointDate(uint256 _date, address _project) view returns (bool exists_)",
+        selector: "0x8078ccd5",
+      },
     ],
     events: [
       {
@@ -2103,20 +3327,59 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["Kyc", "IStaticFunctionSelectors"],
     methods: [
-      { name: "activateInternalKyc", signature: "activateInternalKyc()", selector: "0xfbb08f50" },
-      { name: "deactivateInternalKyc", signature: "deactivateInternalKyc()", selector: "0x4a5df31d" },
-      { name: "getKycAccountsCount", signature: "getKycAccountsCount(KycStatus)", selector: "0x73106fa0" },
+      {
+        name: "activateInternalKyc",
+        signature: "function activateInternalKyc() returns (bool success_)",
+        selector: "0xfbb08f50",
+      },
+      {
+        name: "deactivateInternalKyc",
+        signature: "function deactivateInternalKyc() returns (bool success_)",
+        selector: "0x4a5df31d",
+      },
+      {
+        name: "getKycAccountsCount",
+        signature: "function getKycAccountsCount(uint8 _kycStatus) view returns (uint256 kycAccountsCount_)",
+        selector: "0x5b712c4b",
+      },
       {
         name: "getKycAccountsData",
-        signature: "getKycAccountsData(KycStatus,uint256,uint256)",
-        selector: "0xabe354e6",
+        signature:
+          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
+        selector: "0x00497afb",
       },
-      { name: "getKycFor", signature: "getKycFor(address)", selector: "0x41322840" },
-      { name: "getKycStatusFor", signature: "getKycStatusFor(address)", selector: "0xe788a736" },
-      { name: "grantKyc", signature: "grantKyc(address,string,uint256,uint256,address)", selector: "0x81bea54d" },
-      { name: "initializeInternalKyc", signature: "initializeInternalKyc(bool)", selector: "0xdf353624" },
-      { name: "isInternalKycActivated", signature: "isInternalKycActivated()", selector: "0x90b6c798" },
-      { name: "revokeKyc", signature: "revokeKyc(address)", selector: "0x12283191" },
+      {
+        name: "getKycFor",
+        signature:
+          "function getKycFor(address _account) view returns (tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
+        selector: "0x41322840",
+      },
+      {
+        name: "getKycStatusFor",
+        signature: "function getKycStatusFor(address _account) view returns (uint8 kycStatus_)",
+        selector: "0xe788a736",
+      },
+      {
+        name: "grantKyc",
+        signature:
+          "function grantKyc(address _account, string _vcId, uint256 _validFrom, uint256 _validTo, address _issuer) returns (bool success_)",
+        selector: "0x81bea54d",
+      },
+      {
+        name: "initializeInternalKyc",
+        signature: "function initializeInternalKyc(bool _internalKycActivated)",
+        selector: "0xdf353624",
+      },
+      {
+        name: "isInternalKycActivated",
+        signature: "function isInternalKycActivated() view returns (bool)",
+        selector: "0x90b6c798",
+      },
+      {
+        name: "revokeKyc",
+        signature: "function revokeKyc(address _account) returns (bool success_)",
+        selector: "0x12283191",
+      },
     ],
     events: [
       {
@@ -2153,38 +3416,75 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["Lock", "IStaticFunctionSelectors"],
     methods: [
-      { name: "getLockCountFor", signature: "getLockCountFor(address)", selector: "0x4f131ba4" },
+      {
+        name: "getLockCountFor",
+        signature: "function getLockCountFor(address _tokenHolder) view returns (uint256 lockCount_)",
+        selector: "0x4f131ba4",
+      },
       {
         name: "getLockCountForByPartition",
-        signature: "getLockCountForByPartition(bytes32,address)",
+        signature:
+          "function getLockCountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 lockCount_)",
         selector: "0x3b193d92",
       },
-      { name: "getLockedAmountFor", signature: "getLockedAmountFor(address)", selector: "0x36e74467" },
       {
-        name: "getLockedAmountForByPartition",
-        signature: "getLockedAmountForByPartition(bytes32,address)",
-        selector: "0x6e1c55ba",
+        name: "getLockFor",
+        signature:
+          "function getLockFor(address _tokenHolder, uint256 _lockId) view returns (uint256 amount_, uint256 expirationTimestamp_)",
+        selector: "0x6f14b024",
       },
-      { name: "getLockFor", signature: "getLockFor(address,uint256)", selector: "0x6f14b024" },
       {
         name: "getLockForByPartition",
-        signature: "getLockForByPartition(bytes32,address,uint256)",
+        signature:
+          "function getLockForByPartition(bytes32 _partition, address _tokenHolder, uint256 _lockId) view returns (uint256 amount_, uint256 expirationTimestamp_)",
         selector: "0xa9acfccb",
       },
-      { name: "getLocksIdFor", signature: "getLocksIdFor(address,uint256,uint256)", selector: "0xd2d2b9fc" },
+      {
+        name: "getLockedAmountFor",
+        signature: "function getLockedAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x36e74467",
+      },
+      {
+        name: "getLockedAmountForByPartition",
+        signature:
+          "function getLockedAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x6e1c55ba",
+      },
+      {
+        name: "getLocksIdFor",
+        signature:
+          "function getLocksIdFor(address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] locksId_)",
+        selector: "0xd2d2b9fc",
+      },
       {
         name: "getLocksIdForByPartition",
-        signature: "getLocksIdForByPartition(bytes32,address,uint256,uint256)",
+        signature:
+          "function getLocksIdForByPartition(bytes32 _partition, address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] locksId_)",
         selector: "0x3ea8b59d",
       },
-      { name: "lock", signature: "lock(uint256,address,uint256)", selector: "0xcf27cfc4" },
+      {
+        name: "lock",
+        signature:
+          "function lock(uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0xcf27cfc4",
+      },
       {
         name: "lockByPartition",
-        signature: "lockByPartition(bytes32,uint256,address,uint256)",
+        signature:
+          "function lockByPartition(bytes32 _partition, uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
         selector: "0x7a87884e",
       },
-      { name: "release", signature: "release(uint256,address)", selector: "0x8124fea6" },
-      { name: "releaseByPartition", signature: "releaseByPartition(bytes32,uint256,address)", selector: "0xdc6a3e75" },
+      {
+        name: "release",
+        signature: "function release(uint256 _lockId, address _tokenHolder) returns (bool success_)",
+        selector: "0x8124fea6",
+      },
+      {
+        name: "releaseByPartition",
+        signature:
+          "function releaseByPartition(bytes32 _partition, uint256 _lockId, address _tokenHolder) returns (bool success_)",
+        selector: "0xdc6a3e75",
+      },
     ],
     events: [
       {
@@ -2210,9 +3510,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["Pause", "IStaticFunctionSelectors"],
     methods: [
-      { name: "isPaused", signature: "isPaused()", selector: "0xb187bd26" },
-      { name: "pause", signature: "pause()", selector: "0x8456cb59" },
-      { name: "unpause", signature: "unpause()", selector: "0x3f4ba83a" },
+      { name: "isPaused", signature: "function isPaused() view returns (bool)", selector: "0xb187bd26" },
+      { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
+      { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new PauseFacetTimeTravel__factory(signer) : new PauseFacet__factory(signer),
@@ -2226,20 +3526,45 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ProceedRecipients", "IStaticFunctionSelectors"],
     methods: [
-      { name: "addProceedRecipient", signature: "addProceedRecipient(address,bytes)", selector: "0x298f6222" },
-      { name: "getProceedRecipientData", signature: "getProceedRecipientData(address)", selector: "0x94c39122" },
-      { name: "getProceedRecipients", signature: "getProceedRecipients(uint256,uint256)", selector: "0x0a4f7d71" },
-      { name: "getProceedRecipientsCount", signature: "getProceedRecipientsCount()", selector: "0x03db0e0d" },
+      {
+        name: "addProceedRecipient",
+        signature: "function addProceedRecipient(address _proceedRecipient, bytes _data)",
+        selector: "0x298f6222",
+      },
+      {
+        name: "getProceedRecipientData",
+        signature: "function getProceedRecipientData(address _proceedRecipient) view returns (bytes)",
+        selector: "0x94c39122",
+      },
+      {
+        name: "getProceedRecipients",
+        signature:
+          "function getProceedRecipients(uint256 _pageIndex, uint256 _pageLength) view returns (address[] proceedRecipients_)",
+        selector: "0x0a4f7d71",
+      },
+      {
+        name: "getProceedRecipientsCount",
+        signature: "function getProceedRecipientsCount() view returns (uint256)",
+        selector: "0x03db0e0d",
+      },
       {
         name: "initialize_ProceedRecipients",
-        signature: "initialize_ProceedRecipients(address[],bytes[])",
+        signature: "function initialize_ProceedRecipients(address[] _proceedRecipients, bytes[] _data)",
         selector: "0x9005379e",
       },
-      { name: "isProceedRecipient", signature: "isProceedRecipient(address)", selector: "0xb9b6def1" },
-      { name: "removeProceedRecipient", signature: "removeProceedRecipient(address)", selector: "0x1f9810c8" },
+      {
+        name: "isProceedRecipient",
+        signature: "function isProceedRecipient(address _proceedRecipient) view returns (bool)",
+        selector: "0xb9b6def1",
+      },
+      {
+        name: "removeProceedRecipient",
+        signature: "function removeProceedRecipient(address _proceedRecipient)",
+        selector: "0x1f9810c8",
+      },
       {
         name: "updateProceedRecipientData",
-        signature: "updateProceedRecipientData(address,bytes)",
+        signature: "function updateProceedRecipientData(address _proceedRecipient, bytes _data)",
         selector: "0x654141cf",
       },
     ],
@@ -2282,16 +3607,36 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ProtectedPartitions", "IStaticFunctionSelectors"],
     methods: [
-      { name: "arePartitionsProtected", signature: "arePartitionsProtected()", selector: "0xa151c19f" },
-      { name: "calculateRoleForPartition", signature: "calculateRoleForPartition(bytes32)", selector: "0xcb4da6fc" },
-      { name: "getNounceFor", signature: "getNounceFor(address)", selector: "0x9f6b67c2" },
+      {
+        name: "arePartitionsProtected",
+        signature: "function arePartitionsProtected() view returns (bool)",
+        selector: "0xa151c19f",
+      },
+      {
+        name: "calculateRoleForPartition",
+        signature: "function calculateRoleForPartition(bytes32 partition) pure returns (bytes32 role)",
+        selector: "0xcb4da6fc",
+      },
+      {
+        name: "getNounceFor",
+        signature: "function getNounceFor(address account) view returns (uint256)",
+        selector: "0x9f6b67c2",
+      },
       {
         name: "initialize_ProtectedPartitions",
-        signature: "initialize_ProtectedPartitions(bool)",
+        signature: "function initialize_ProtectedPartitions(bool _protectPartitions) returns (bool success_)",
         selector: "0x90c032cc",
       },
-      { name: "protectPartitions", signature: "protectPartitions()", selector: "0x6c5fde55" },
-      { name: "unprotectPartitions", signature: "unprotectPartitions()", selector: "0x1277b323" },
+      {
+        name: "protectPartitions",
+        signature: "function protectPartitions() returns (bool success_)",
+        selector: "0x6c5fde55",
+      },
+      {
+        name: "unprotectPartitions",
+        signature: "function unprotectPartitions() returns (bool success_)",
+        selector: "0x1277b323",
+      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
@@ -2309,12 +3654,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "getScheduledBalanceAdjustments",
-        signature: "getScheduledBalanceAdjustments(uint256,uint256)",
+        signature:
+          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
         selector: "0xcb884d41",
       },
       {
         name: "scheduledBalanceAdjustmentCount",
-        signature: "scheduledBalanceAdjustmentCount()",
+        signature: "function scheduledBalanceAdjustmentCount() view returns (uint256)",
         selector: "0x2de241e3",
       },
     ],
@@ -2334,10 +3680,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "getScheduledCouponListing",
-        signature: "getScheduledCouponListing(uint256,uint256)",
+        signature:
+          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
         selector: "0x2fcfe49c",
       },
-      { name: "scheduledCouponListingCount", signature: "scheduledCouponListingCount()", selector: "0x80a84271" },
+      {
+        name: "scheduledCouponListingCount",
+        signature: "function scheduledCouponListingCount() view returns (uint256)",
+        selector: "0x80a84271",
+      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
@@ -2355,18 +3706,23 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "getScheduledCrossOrderedTasks",
-        signature: "getScheduledCrossOrderedTasks(uint256,uint256)",
+        signature:
+          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
         selector: "0x72ed9041",
       },
-      { name: "scheduledCrossOrderedTaskCount", signature: "scheduledCrossOrderedTaskCount()", selector: "0x46883133" },
+      {
+        name: "scheduledCrossOrderedTaskCount",
+        signature: "function scheduledCrossOrderedTaskCount() view returns (uint256)",
+        selector: "0x46883133",
+      },
       {
         name: "triggerPendingScheduledCrossOrderedTasks",
-        signature: "triggerPendingScheduledCrossOrderedTasks()",
+        signature: "function triggerPendingScheduledCrossOrderedTasks() returns (uint256)",
         selector: "0x32194dbb",
       },
       {
         name: "triggerScheduledCrossOrderedTasks",
-        signature: "triggerScheduledCrossOrderedTasks(uint256)",
+        signature: "function triggerScheduledCrossOrderedTasks(uint256 _max) returns (uint256)",
         selector: "0x5be4a143",
       },
     ],
@@ -2384,8 +3740,17 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["ScheduledSnapshots", "IStaticFunctionSelectors"],
     methods: [
-      { name: "getScheduledSnapshots", signature: "getScheduledSnapshots(uint256,uint256)", selector: "0xca21c53a" },
-      { name: "scheduledSnapshotCount", signature: "scheduledSnapshotCount()", selector: "0xa19e91fe" },
+      {
+        name: "getScheduledSnapshots",
+        signature:
+          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
+        selector: "0xca21c53a",
+      },
+      {
+        name: "scheduledSnapshotCount",
+        signature: "function scheduledSnapshotCount() view returns (uint256)",
+        selector: "0xa19e91fe",
+      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
@@ -2401,69 +3766,102 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["Snapshots", "IStaticFunctionSelectors"],
     methods: [
-      { name: "balanceOfAtSnapshot", signature: "balanceOfAtSnapshot(uint256,address)", selector: "0x8e00ae2e" },
+      {
+        name: "balanceOfAtSnapshot",
+        signature:
+          "function balanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x8e00ae2e",
+      },
       {
         name: "balanceOfAtSnapshotByPartition",
-        signature: "balanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        signature:
+          "function balanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
         selector: "0xe002bcdf",
       },
       {
         name: "clearedBalanceOfAtSnapshot",
-        signature: "clearedBalanceOfAtSnapshot(uint256,address)",
+        signature:
+          "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
         selector: "0x2bc16e9b",
       },
       {
         name: "clearedBalanceOfAtSnapshotByPartition",
-        signature: "clearedBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        signature:
+          "function clearedBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
         selector: "0x386e1405",
       },
-      { name: "decimalsAtSnapshot", signature: "decimalsAtSnapshot(uint256)", selector: "0x69ed346f" },
+      {
+        name: "decimalsAtSnapshot",
+        signature: "function decimalsAtSnapshot(uint256 _snapshotID) view returns (uint8 decimals_)",
+        selector: "0x69ed346f",
+      },
       {
         name: "frozenBalanceOfAtSnapshot",
-        signature: "frozenBalanceOfAtSnapshot(uint256,address)",
+        signature:
+          "function frozenBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
         selector: "0x5e6c70ec",
       },
       {
         name: "frozenBalanceOfAtSnapshotByPartition",
-        signature: "frozenBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        signature:
+          "function frozenBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
         selector: "0x0749c323",
       },
       {
         name: "getTokenHoldersAtSnapshot",
-        signature: "getTokenHoldersAtSnapshot(uint256,uint256,uint256)",
+        signature:
+          "function getTokenHoldersAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
         selector: "0xd22a73df",
       },
       {
         name: "getTotalTokenHoldersAtSnapshot",
-        signature: "getTotalTokenHoldersAtSnapshot(uint256)",
+        signature: "function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) view returns (uint256)",
         selector: "0x867126e1",
       },
       {
         name: "heldBalanceOfAtSnapshot",
-        signature: "heldBalanceOfAtSnapshot(uint256,address)",
+        signature:
+          "function heldBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
         selector: "0xb52e39aa",
       },
       {
         name: "heldBalanceOfAtSnapshotByPartition",
-        signature: "heldBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        signature:
+          "function heldBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
         selector: "0x977a3a71",
       },
       {
         name: "lockedBalanceOfAtSnapshot",
-        signature: "lockedBalanceOfAtSnapshot(uint256,address)",
+        signature:
+          "function lockedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
         selector: "0xd9e6f164",
       },
       {
         name: "lockedBalanceOfAtSnapshotByPartition",
-        signature: "lockedBalanceOfAtSnapshotByPartition(bytes32,uint256,address)",
+        signature:
+          "function lockedBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
         selector: "0x4a13f5d0",
       },
-      { name: "partitionsOfAtSnapshot", signature: "partitionsOfAtSnapshot(uint256,address)", selector: "0x09e84301" },
-      { name: "takeSnapshot", signature: "takeSnapshot()", selector: "0xb3d3d37e" },
-      { name: "totalSupplyAtSnapshot", signature: "totalSupplyAtSnapshot(uint256)", selector: "0xda35f8f6" },
+      {
+        name: "partitionsOfAtSnapshot",
+        signature:
+          "function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (bytes32[])",
+        selector: "0x09e84301",
+      },
+      {
+        name: "takeSnapshot",
+        signature: "function takeSnapshot() returns (uint256 snapshotID_)",
+        selector: "0xb3d3d37e",
+      },
+      {
+        name: "totalSupplyAtSnapshot",
+        signature: "function totalSupplyAtSnapshot(uint256 _snapshotID) view returns (uint256 totalSupply_)",
+        selector: "0xda35f8f6",
+      },
       {
         name: "totalSupplyAtSnapshotByPartition",
-        signature: "totalSupplyAtSnapshotByPartition(bytes32,uint256)",
+        signature:
+          "function totalSupplyAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID) view returns (uint256 totalSupply_)",
         selector: "0x9657ddb9",
       },
     ],
@@ -2479,15 +3877,36 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["SsiManagement", "IStaticFunctionSelectors"],
     methods: [
-      { name: "addIssuer", signature: "addIssuer(address)", selector: "0x20694db0" },
-      { name: "getIssuerListCount", signature: "getIssuerListCount()", selector: "0x600b2940" },
-      { name: "getIssuerListMembers", signature: "getIssuerListMembers(uint256,uint256)", selector: "0x25ab0545" },
-      { name: "getRevocationRegistryAddress", signature: "getRevocationRegistryAddress()", selector: "0x12023976" },
-      { name: "isIssuer", signature: "isIssuer(address)", selector: "0x877b9a67" },
-      { name: "removeIssuer", signature: "removeIssuer(address)", selector: "0x47bc7093" },
+      {
+        name: "addIssuer",
+        signature: "function addIssuer(address _issuer) returns (bool success_)",
+        selector: "0x20694db0",
+      },
+      {
+        name: "getIssuerListCount",
+        signature: "function getIssuerListCount() view returns (uint256 issuerListCount_)",
+        selector: "0x600b2940",
+      },
+      {
+        name: "getIssuerListMembers",
+        signature:
+          "function getIssuerListMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x25ab0545",
+      },
+      {
+        name: "getRevocationRegistryAddress",
+        signature: "function getRevocationRegistryAddress() view returns (address revocationRegistryAddress_)",
+        selector: "0x12023976",
+      },
+      { name: "isIssuer", signature: "function isIssuer(address _issuer) view returns (bool)", selector: "0x877b9a67" },
+      {
+        name: "removeIssuer",
+        signature: "function removeIssuer(address _issuer) returns (bool success_)",
+        selector: "0x47bc7093",
+      },
       {
         name: "setRevocationRegistryAddress",
-        signature: "setRevocationRegistryAddress(address)",
+        signature: "function setRevocationRegistryAddress(address _revocationRegistryAddress) returns (bool success_)",
         selector: "0xbb3daeaf",
       },
     ],
@@ -2525,15 +3944,36 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["SustainabilityPerformanceTargetRate", "IStaticFunctionSelectors"],
     methods: [
-      { name: "getImpactDataFor", signature: "getImpactDataFor(address)", selector: "0xb8cf9d2a" },
-      { name: "getInterestRate", signature: "getInterestRate()", selector: "0x5257b566" },
+      {
+        name: "getImpactDataFor",
+        signature:
+          "function getImpactDataFor(address _project) view returns (tuple(uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode) impactData_)",
+        selector: "0xb8cf9d2a",
+      },
+      {
+        name: "getInterestRate",
+        signature:
+          "function getInterestRate() view returns (tuple(uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate_)",
+        selector: "0x5257b566",
+      },
       {
         name: "initialize_SustainabilityPerformanceTargetRate",
-        signature: "initialize_SustainabilityPerformanceTargetRate(InterestRate,ImpactData[],address[])",
-        selector: "0xcccfaa36",
+        signature:
+          "function initialize_SustainabilityPerformanceTargetRate(tuple(uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) _interestRate, tuple(uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] _impactData, address[] _projects)",
+        selector: "0xe2ebedda",
       },
-      { name: "setImpactData", signature: "setImpactData(ImpactData[],address[])", selector: "0x9278f4db" },
-      { name: "setInterestRate", signature: "setInterestRate(InterestRate)", selector: "0xf1f2d5d4" },
+      {
+        name: "setImpactData",
+        signature:
+          "function setImpactData(tuple(uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] _newImpactData, address[] _projects)",
+        selector: "0x3c200ec4",
+      },
+      {
+        name: "setInterestRate",
+        signature:
+          "function setInterestRate(tuple(uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) _newInterestRate)",
+        selector: "0xd7a0d0e8",
+      },
     ],
     events: [
       {
@@ -2570,12 +4010,24 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["IStaticFunctionSelectors", "ITimeTravel", "TimeTravelStorageWrapper"],
     methods: [
-      { name: "blockTimestamp", signature: "blockTimestamp()", selector: "0xadb61832" },
-      { name: "changeSystemBlocknumber", signature: "changeSystemBlocknumber(uint256)", selector: "0x4dd6b375" },
-      { name: "changeSystemTimestamp", signature: "changeSystemTimestamp(uint256)", selector: "0xc0f0f67e" },
-      { name: "checkBlockChainid", signature: "checkBlockChainid(uint256)", selector: "0xd939398c" },
-      { name: "resetSystemBlocknumber", signature: "resetSystemBlocknumber()", selector: "0x64b677a4" },
-      { name: "resetSystemTimestamp", signature: "resetSystemTimestamp()", selector: "0x8f145250" },
+      { name: "blockTimestamp", signature: "function blockTimestamp() view returns (uint256)", selector: "0xadb61832" },
+      {
+        name: "changeSystemBlocknumber",
+        signature: "function changeSystemBlocknumber(uint256 _newSystemBlocknumber)",
+        selector: "0x4dd6b375",
+      },
+      {
+        name: "changeSystemTimestamp",
+        signature: "function changeSystemTimestamp(uint256 newTimestamp)",
+        selector: "0xc0f0f67e",
+      },
+      {
+        name: "checkBlockChainid",
+        signature: "function checkBlockChainid(uint256 chainId) pure",
+        selector: "0xd939398c",
+      },
+      { name: "resetSystemBlocknumber", signature: "function resetSystemBlocknumber()", selector: "0x64b677a4" },
+      { name: "resetSystemTimestamp", signature: "function resetSystemTimestamp()", selector: "0x8f145250" },
     ],
     events: [
       {
@@ -2618,18 +4070,26 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       {
         name: "protectedTransferAndLock",
-        signature: "protectedTransferAndLock(TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0xaf33faac",
+        signature:
+          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
+        selector: "0xe2e20e05",
       },
       {
         name: "protectedTransferAndLockByPartition",
-        signature: "protectedTransferAndLockByPartition(bytes32,TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0xbd2951ce",
+        signature:
+          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
+        selector: "0x8a1d3a47",
       },
-      { name: "transferAndLock", signature: "transferAndLock(address,uint256,bytes,uint256)", selector: "0x0e92b90b" },
+      {
+        name: "transferAndLock",
+        signature:
+          "function transferAndLock(address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0x0e92b90b",
+      },
       {
         name: "transferAndLockByPartition",
-        signature: "transferAndLockByPartition(bytes32,address,uint256,bytes,uint256)",
+        signature:
+          "function transferAndLockByPartition(bytes32 _partition, address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
         selector: "0x3bd407b9",
       },
     ],
@@ -2654,39 +4114,226 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
     methods: [
       {
         name: "addSelectorsToBlacklist",
-        signature: "addSelectorsToBlacklist(bytes32,bytes4[])",
+        signature: "function addSelectorsToBlacklist(bytes32 _configurationId, bytes4[] _selectors)",
         selector: "0xe87c5d71",
       },
-      { name: "getBusinessLogicCount", signature: "getBusinessLogicCount()", selector: "0x8373989d" },
-      { name: "getBusinessLogicKeys", signature: "getBusinessLogicKeys(uint256,uint256)", selector: "0xe7e936ee" },
-      { name: "getLatestVersion", signature: "getLatestVersion()", selector: "0x0e6d1de9" },
+      {
+        name: "applyRoles",
+        signature: "function applyRoles(bytes32[] _roles, bool[] _actives, address _account) returns (bool success_)",
+        selector: "0xfcfffeec",
+      },
+      {
+        name: "cancelBatchConfiguration",
+        signature: "function cancelBatchConfiguration(bytes32 _configurationId)",
+        selector: "0xc5977c1f",
+      },
+      {
+        name: "checkResolverProxyConfigurationRegistered",
+        signature:
+          "function checkResolverProxyConfigurationRegistered(bytes32 _configurationId, uint256 _version) view",
+        selector: "0xc595992a",
+      },
+      {
+        name: "createBatchConfiguration",
+        signature:
+          "function createBatchConfiguration(bytes32 _configurationId, tuple(bytes32 id, uint256 version)[] _facetConfigurations, bool _isLastBatch)",
+        selector: "0xf4ec1fe4",
+      },
+      {
+        name: "createConfiguration",
+        signature:
+          "function createConfiguration(bytes32 _configurationId, tuple(bytes32 id, uint256 version)[] _facetConfigurations)",
+        selector: "0xf4d2a095",
+      },
+      {
+        name: "getBusinessLogicCount",
+        signature: "function getBusinessLogicCount() view returns (uint256 businessLogicCount_)",
+        selector: "0x8373989d",
+      },
+      {
+        name: "getBusinessLogicKeys",
+        signature:
+          "function getBusinessLogicKeys(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] businessLogicKeys_)",
+        selector: "0xe7e936ee",
+      },
+      {
+        name: "getConfigurations",
+        signature:
+          "function getConfigurations(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] configurationIds_)",
+        selector: "0xd826514c",
+      },
+      {
+        name: "getConfigurationsLength",
+        signature: "function getConfigurationsLength() view returns (uint256 configurationsLength_)",
+        selector: "0x55ff30e3",
+      },
+      {
+        name: "getFacetAddressByConfigurationIdVersionAndFacetId",
+        signature:
+          "function getFacetAddressByConfigurationIdVersionAndFacetId(bytes32 _configurationId, uint256 _version, bytes32 _facetId) view returns (address facetAddress_)",
+        selector: "0xcb17c131",
+      },
+      {
+        name: "getFacetAddressesByConfigurationIdAndVersion",
+        signature:
+          "function getFacetAddressesByConfigurationIdAndVersion(bytes32 _configurationId, uint256 _version, uint256 _pageIndex, uint256 _pageLength) view returns (address[] facetAddresses_)",
+        selector: "0x10933836",
+      },
+      {
+        name: "getFacetByConfigurationIdVersionAndFacetId",
+        signature:
+          "function getFacetByConfigurationIdVersionAndFacetId(bytes32 _configurationId, uint256 _version, bytes32 _facetId) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds) facet_)",
+        selector: "0x9e6030d1",
+      },
+      {
+        name: "getFacetIdByConfigurationIdVersionAndSelector",
+        signature:
+          "function getFacetIdByConfigurationIdVersionAndSelector(bytes32 _configurationId, uint256 _version, bytes4 _selector) view returns (bytes32 facetId_)",
+        selector: "0x6204479f",
+      },
+      {
+        name: "getFacetIdsByConfigurationIdAndVersion",
+        signature:
+          "function getFacetIdsByConfigurationIdAndVersion(bytes32 _configurationId, uint256 _version, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] facetIds_)",
+        selector: "0xe5ccd17c",
+      },
+      {
+        name: "getFacetSelectorsByConfigurationIdVersionAndFacetId",
+        signature:
+          "function getFacetSelectorsByConfigurationIdVersionAndFacetId(bytes32 _configurationId, uint256 _version, bytes32 _facetId, uint256 _pageIndex, uint256 _pageLength) view returns (bytes4[] facetSelectors_)",
+        selector: "0x45613a52",
+      },
+      {
+        name: "getFacetSelectorsLengthByConfigurationIdVersionAndFacetId",
+        signature:
+          "function getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(bytes32 _configurationId, uint256 _version, bytes32 _facetId) view returns (uint256 facetSelectorsLength_)",
+        selector: "0xf1d3d2f9",
+      },
+      {
+        name: "getFacetsByConfigurationIdAndVersion",
+        signature:
+          "function getFacetsByConfigurationIdAndVersion(bytes32 _configurationId, uint256 _version, uint256 _pageIndex, uint256 _pageLength) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
+        selector: "0x6118ce2b",
+      },
+      {
+        name: "getFacetsLengthByConfigurationIdAndVersion",
+        signature:
+          "function getFacetsLengthByConfigurationIdAndVersion(bytes32 _configurationId, uint256 _version) view returns (uint256 facetsLength_)",
+        selector: "0x45348bd8",
+      },
+      {
+        name: "getLatestVersion",
+        signature: "function getLatestVersion() view returns (uint256 latestVersion_)",
+        selector: "0x0e6d1de9",
+      },
+      {
+        name: "getLatestVersionByConfiguration",
+        signature:
+          "function getLatestVersionByConfiguration(bytes32 _configurationId) view returns (uint256 latestVersion_)",
+        selector: "0x5bf316cf",
+      },
+      {
+        name: "getRoleCountFor",
+        signature: "function getRoleCountFor(address _account) view returns (uint256 roleCount_)",
+        selector: "0x8fa9b4fe",
+      },
+      {
+        name: "getRoleMemberCount",
+        signature: "function getRoleMemberCount(bytes32 _role) view returns (uint256 memberCount_)",
+        selector: "0xca15c873",
+      },
+      {
+        name: "getRoleMembers",
+        signature:
+          "function getRoleMembers(bytes32 _role, uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x2a861f57",
+      },
+      {
+        name: "getRolesFor",
+        signature:
+          "function getRolesFor(address _account, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] roles_)",
+        selector: "0xa28cf9a9",
+      },
       {
         name: "getSelectorsBlacklist",
-        signature: "getSelectorsBlacklist(bytes32,uint256,uint256)",
+        signature:
+          "function getSelectorsBlacklist(bytes32 _configurationId, uint256 _pageIndex, uint256 _pageLength) view returns (bytes4[] selectors_)",
         selector: "0xbf3af9ea",
       },
-      { name: "getVersionStatus", signature: "getVersionStatus(uint256)", selector: "0x65b24dfc" },
       {
-        name: "initialize_BusinessLogicResolver",
-        signature: "initialize_BusinessLogicResolver()",
-        selector: "0xb86ffa1a",
+        name: "getVersionStatus",
+        signature: "function getVersionStatus(uint256 _version) view returns (uint8 status_)",
+        selector: "0x65b24dfc",
       },
       {
+        name: "grantRole",
+        signature: "function grantRole(bytes32 _role, address _account) returns (bool success_)",
+        selector: "0x2f2ff15d",
+      },
+      {
+        name: "hasRole",
+        signature: "function hasRole(bytes32 _role, address _account) view returns (bool)",
+        selector: "0x91d14854",
+      },
+      {
+        name: "initialize_BusinessLogicResolver",
+        signature: "function initialize_BusinessLogicResolver() returns (bool success_)",
+        selector: "0xb86ffa1a",
+      },
+      { name: "isPaused", signature: "function isPaused() view returns (bool)", selector: "0xb187bd26" },
+      {
+        name: "isResolverProxyConfigurationRegistered",
+        signature:
+          "function isResolverProxyConfigurationRegistered(bytes32 _configurationId, uint256 _version) view returns (bool isRegistered_)",
+        selector: "0x2b85c192",
+      },
+      { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
+      {
         name: "registerBusinessLogics",
-        signature: "registerBusinessLogics(BusinessLogicRegistryData[])",
-        selector: "0x6302f4c4",
+        signature:
+          "function registerBusinessLogics(tuple(bytes32 businessLogicKey, address businessLogicAddress)[] _businessLogics)",
+        selector: "0xb0f57ddb",
       },
       {
         name: "removeSelectorsFromBlacklist",
-        signature: "removeSelectorsFromBlacklist(bytes32,bytes4[])",
+        signature: "function removeSelectorsFromBlacklist(bytes32 _configurationId, bytes4[] _selectors)",
         selector: "0xcccae751",
       },
       {
+        name: "renounceRole",
+        signature: "function renounceRole(bytes32 _role) returns (bool success_)",
+        selector: "0x8bb9c5bf",
+      },
+      {
         name: "resolveBusinessLogicByVersion",
-        signature: "resolveBusinessLogicByVersion(bytes32,uint256)",
+        signature:
+          "function resolveBusinessLogicByVersion(bytes32 _businessLogicKey, uint256 _version) view returns (address businessLogicAddress_)",
         selector: "0x9f77ad81",
       },
-      { name: "resolveLatestBusinessLogic", signature: "resolveLatestBusinessLogic(bytes32)", selector: "0xbbced3bb" },
+      {
+        name: "resolveLatestBusinessLogic",
+        signature:
+          "function resolveLatestBusinessLogic(bytes32 _businessLogicKey) view returns (address businessLogicAddress_)",
+        selector: "0xbbced3bb",
+      },
+      {
+        name: "resolveResolverProxyCall",
+        signature:
+          "function resolveResolverProxyCall(bytes32 _configurationId, uint256 _version, bytes4 _selector) view returns (address facetAddress_)",
+        selector: "0xb9ec2620",
+      },
+      {
+        name: "resolveSupportsInterface",
+        signature:
+          "function resolveSupportsInterface(bytes32 _configurationId, uint256 _version, bytes4 _interfaceId) view returns (bool exists_)",
+        selector: "0x99ecdbd0",
+      },
+      {
+        name: "revokeRole",
+        signature: "function revokeRole(bytes32 _role, address _account) returns (bool success_)",
+        selector: "0xd547741f",
+      },
+      { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
     ],
     errors: [{ name: "Unimplemented", signature: "Unimplemented()", selector: "0x6e128399" }],
   },
@@ -2695,18 +4342,35 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
     name: "Factory",
     inheritance: ["IFactory", "Common"],
     methods: [
-      { name: "deployBond", signature: "deployBond(BondData,FactoryRegulationData)", selector: "0x5010503b" },
-      { name: "deployBondFixedRate", signature: "deployBondFixedRate(BondFixedRateData)", selector: "0xfa4cb8bd" },
+      {
+        name: "deployBond",
+        signature:
+          "function deployBond(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) _bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address bondAddress_)",
+        selector: "0x5133f0e0",
+      },
+      {
+        name: "deployBondFixedRate",
+        signature:
+          "function deployBondFixedRate(tuple(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, tuple(uint256 rate, uint8 rateDecimals) fixedRateData) _bondFixedRateData) returns (address bondAddress_)",
+        selector: "0x7c55cfdc",
+      },
       {
         name: "deployBondKpiLinkedRate",
-        signature: "deployBondKpiLinkedRate(BondKpiLinkedRateData)",
-        selector: "0x39293807",
+        signature:
+          "function deployBondKpiLinkedRate(tuple(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData, address kpiOracle) _bondKpiLinkedRateData) returns (address bondAddress_)",
+        selector: "0x16a2b067",
       },
-      { name: "deployEquity", signature: "deployEquity(EquityData,FactoryRegulationData)", selector: "0x7c03575b" },
+      {
+        name: "deployEquity",
+        signature:
+          "function deployEquity(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetails) _equityData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address equityAddress_)",
+        selector: "0xfb3c59d8",
+      },
       {
         name: "getAppliedRegulationData",
-        signature: "getAppliedRegulationData(RegulationType,RegulationSubType)",
-        selector: "0x7a0191e3",
+        signature:
+          "function getAppliedRegulationData(uint8 _regulationType, uint8 _regulationSubType) pure returns (tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData_)",
+        selector: "0x7b5208d0",
       },
     ],
   },
@@ -2727,71 +4391,13 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   AccessControlStorageWrapper: {
     name: "AccessControlStorageWrapper",
     inheritance: ["IAccessControlStorageWrapper", "Internals", "BusinessLogicResolverWrapper"],
-    methods: [
-      { name: "_applyRoles", signature: "_applyRoles(bytes32[],bool[],address)", selector: "0xb4628c56" },
-      { name: "_checkAnyRole", signature: "_checkAnyRole(bytes32[],address)", selector: "0xe066fd1b" },
-      { name: "_checkRole", signature: "_checkRole(bytes32,address)", selector: "0x5b7b2c38" },
-      {
-        name: "_checkSameRolesAndActivesLength",
-        signature: "_checkSameRolesAndActivesLength(uint256,uint256)",
-        selector: "0x61b5dd02",
-      },
-      { name: "_getRoleAdmin", signature: "_getRoleAdmin(bytes32)", selector: "0x2ec227cd" },
-      { name: "_getRoleCountFor", signature: "_getRoleCountFor(address)", selector: "0x2044d9ad" },
-      { name: "_getRoleMemberCount", signature: "_getRoleMemberCount(bytes32)", selector: "0xa313bee3" },
-      { name: "_getRoleMembers", signature: "_getRoleMembers(bytes32,uint256,uint256)", selector: "0xd8d2aeb8" },
-      { name: "_getRolesFor", signature: "_getRolesFor(address,uint256,uint256)", selector: "0x9984117f" },
-      { name: "_grant", signature: "_grant(RoleDataStorage,bytes32,address)", selector: "0xea3bbdd8" },
-      { name: "_grantRole", signature: "_grantRole(bytes32,address)", selector: "0xce2cc1d0" },
-      { name: "_has", signature: "_has(RoleDataStorage,bytes32,address)", selector: "0xd74566ee" },
-      { name: "_hasAnyRole", signature: "_hasAnyRole(bytes32[],address)", selector: "0x27adf61d" },
-      { name: "_hasRole", signature: "_hasRole(bytes32,address)", selector: "0x1cd1731c" },
-      { name: "_remove", signature: "_remove(RoleDataStorage,bytes32,address)", selector: "0xe4e0818e" },
-      { name: "_revokeRole", signature: "_revokeRole(bytes32,address)", selector: "0x2c95bd23" },
-      { name: "_rolesStorage", signature: "_rolesStorage()", selector: "0xd7b699df" },
-    ],
+    methods: [],
   },
 
   BondStorageWrapper: {
     name: "BondStorageWrapper",
     inheritance: ["IBondStorageWrapper", "ERC20PermitStorageWrapper"],
-    methods: [
-      { name: "_addToCouponsOrderedList", signature: "_addToCouponsOrderedList(uint256)", selector: "0x17a345a0" },
-      { name: "_bondStorage", signature: "_bondStorage()", selector: "0x64ccfd52" },
-      { name: "_checkMaturityDate", signature: "_checkMaturityDate(uint256)", selector: "0xb9a83231" },
-      { name: "_getBondDetails", signature: "_getBondDetails()", selector: "0xdfa65894" },
-      { name: "_getCoupon", signature: "_getCoupon(uint256)", selector: "0x39b68379" },
-      { name: "_getCouponAmountFor", signature: "_getCouponAmountFor(uint256,address)", selector: "0xe744f18d" },
-      { name: "_getCouponCount", signature: "_getCouponCount()", selector: "0x293fbc5a" },
-      { name: "_getCouponFor", signature: "_getCouponFor(uint256,address)", selector: "0x2abd54cf" },
-      {
-        name: "_getCouponFromOrderedListAt",
-        signature: "_getCouponFromOrderedListAt(uint256)",
-        selector: "0xfc543649",
-      },
-      { name: "_getCouponHolders", signature: "_getCouponHolders(uint256,uint256,uint256)", selector: "0xb2962e11" },
-      { name: "_getCouponsOrderedList", signature: "_getCouponsOrderedList(uint256,uint256)", selector: "0x5b924344" },
-      { name: "_getCouponsOrderedListTotal", signature: "_getCouponsOrderedListTotal()", selector: "0xe92862c4" },
-      {
-        name: "_getCouponsOrderedListTotalAdjusted",
-        signature: "_getCouponsOrderedListTotalAdjusted()",
-        selector: "0x8aec23a9",
-      },
-      { name: "_getMaturityDate", signature: "_getMaturityDate()", selector: "0xa1522f44" },
-      { name: "_getPrincipalFor", signature: "_getPrincipalFor(address)", selector: "0xc8e42efe" },
-      { name: "_getTotalCouponHolders", signature: "_getTotalCouponHolders(uint256)", selector: "0xfba7a1ab" },
-      { name: "_initCoupon", signature: "_initCoupon(bytes32,IBondRead.Coupon)", selector: "0x9b230d29" },
-      { name: "_initialize_bond", signature: "_initialize_bond(IBondRead.BondDetailsData)", selector: "0x158876c6" },
-      { name: "_isBondInitialized", signature: "_isBondInitialized()", selector: "0x8a5c5929" },
-      { name: "_setCoupon", signature: "_setCoupon(IBondRead.Coupon)", selector: "0xf9d474a4" },
-      { name: "_setMaturityDate", signature: "_setMaturityDate(uint256)", selector: "0x1c73e162" },
-      { name: "_storeBondDetails", signature: "_storeBondDetails(IBondRead.BondDetailsData)", selector: "0x9b11f1cd" },
-      {
-        name: "_updateCouponRate",
-        signature: "_updateCouponRate(uint256,IBondRead.Coupon,uint256,uint8)",
-        selector: "0xc1e90d33",
-      },
-    ],
+    methods: [],
   },
 
   BondStorageWrapperFixedInterestRate: {
@@ -2824,376 +4430,67 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   ControlListStorageWrapper: {
     name: "ControlListStorageWrapper",
     inheritance: ["IControlListStorageWrapper", "ExternalControlListManagementStorageWrapper"],
-    methods: [
-      { name: "_addToControlList", signature: "_addToControlList(address)", selector: "0xa5908e16" },
-      { name: "_checkControlList", signature: "_checkControlList(address)", selector: "0xaf8bea2e" },
-      { name: "_controlListStorage", signature: "_controlListStorage()", selector: "0xa58e5348" },
-      { name: "_getControlListCount", signature: "_getControlListCount()", selector: "0xa9577198" },
-      { name: "_getControlListMembers", signature: "_getControlListMembers(uint256,uint256)", selector: "0x2591bd58" },
-      { name: "_getControlListType", signature: "_getControlListType()", selector: "0x5831dfcf" },
-      { name: "_isAbleToAccess", signature: "_isAbleToAccess(address)", selector: "0xff55072e" },
-      { name: "_isInControlList", signature: "_isInControlList(address)", selector: "0xcb2e0d1b" },
-      { name: "_removeFromControlList", signature: "_removeFromControlList(address)", selector: "0x00f0016e" },
-    ],
+    methods: [],
   },
 
   CorporateActionsStorageWrapper: {
     name: "CorporateActionsStorageWrapper",
     inheritance: ["ClearingStorageWrapper1"],
-    methods: [
-      { name: "_addCorporateAction", signature: "_addCorporateAction(bytes32,bytes)", selector: "0xb2a57bb4" },
-      { name: "_checkDates", signature: "_checkDates(uint256,uint256)", selector: "0x970b0e20" },
-      {
-        name: "_checkMatchingActionType",
-        signature: "_checkMatchingActionType(bytes32,uint256)",
-        selector: "0xdc6505eb",
-      },
-      { name: "_corporateActionsStorage", signature: "_corporateActionsStorage()", selector: "0x327c5438" },
-      { name: "_getCorporateAction", signature: "_getCorporateAction(bytes32)", selector: "0x7905b020" },
-      { name: "_getCorporateActionCount", signature: "_getCorporateActionCount()", selector: "0x284c2e17" },
-      {
-        name: "_getCorporateActionCountByType",
-        signature: "_getCorporateActionCountByType(bytes32)",
-        selector: "0xcdef9970",
-      },
-      { name: "_getCorporateActionData", signature: "_getCorporateActionData(bytes32)", selector: "0x1b957d68" },
-      {
-        name: "_getCorporateActionIdByTypeIndex",
-        signature: "_getCorporateActionIdByTypeIndex(bytes32,uint256)",
-        selector: "0xe7268f50",
-      },
-      { name: "_getCorporateActionIds", signature: "_getCorporateActionIds(uint256,uint256)", selector: "0x27b71643" },
-      {
-        name: "_getCorporateActionIdsByType",
-        signature: "_getCorporateActionIdsByType(bytes32,uint256,uint256)",
-        selector: "0x4875409d",
-      },
-      {
-        name: "_getCorporateActionResult",
-        signature: "_getCorporateActionResult(bytes32,uint256)",
-        selector: "0x1ec609e1",
-      },
-      {
-        name: "_getCorporateActionResultCount",
-        signature: "_getCorporateActionResultCount(bytes32)",
-        selector: "0x136c8ba2",
-      },
-      { name: "_getUintResultAt", signature: "_getUintResultAt(bytes32,uint256)", selector: "0xcef779ad" },
-      {
-        name: "_updateCorporateActionData",
-        signature: "_updateCorporateActionData(bytes32,bytes)",
-        selector: "0x56c29fb9",
-      },
-      {
-        name: "_updateCorporateActionResult",
-        signature: "_updateCorporateActionResult(bytes32,uint256,bytes)",
-        selector: "0x626cff9a",
-      },
-    ],
+    methods: [],
   },
 
   EquityStorageWrapper: {
     name: "EquityStorageWrapper",
     inheritance: ["IEquityStorageWrapper", "BondStorageWrapper"],
-    methods: [
-      { name: "_equityStorage", signature: "_equityStorage()", selector: "0xd722ce84" },
-      { name: "_getDividendAmountFor", signature: "_getDividendAmountFor(uint256,address)", selector: "0xd35ad27b" },
-      {
-        name: "_getDividendHolders",
-        signature: "_getDividendHolders(uint256,uint256,uint256)",
-        selector: "0x64527984",
-      },
-      { name: "_getDividends", signature: "_getDividends(uint256)", selector: "0x7aa532eb" },
-      { name: "_getDividendsCount", signature: "_getDividendsCount()", selector: "0xd55edb1c" },
-      { name: "_getDividendsFor", signature: "_getDividendsFor(uint256,address)", selector: "0x5a1270c7" },
-      { name: "_getEquityDetails", signature: "_getEquityDetails()", selector: "0x3571999f" },
-      {
-        name: "_getScheduledBalanceAdjusment",
-        signature: "_getScheduledBalanceAdjusment(uint256)",
-        selector: "0xb2106163",
-      },
-      {
-        name: "_getScheduledBalanceAdjustmentsCount",
-        signature: "_getScheduledBalanceAdjustmentsCount()",
-        selector: "0xa1387389",
-      },
-      {
-        name: "_getSnapshotBalanceForIfDateReached",
-        signature: "_getSnapshotBalanceForIfDateReached(uint256,uint256,address)",
-        selector: "0x7c51c4f3",
-      },
-      { name: "_getTotalDividendHolders", signature: "_getTotalDividendHolders(uint256)", selector: "0x21ec1ebd" },
-      { name: "_getTotalVotingHolders", signature: "_getTotalVotingHolders(uint256)", selector: "0xafc8970d" },
-      { name: "_getVoting", signature: "_getVoting(uint256)", selector: "0x5be81dd8" },
-      { name: "_getVotingCount", signature: "_getVotingCount()", selector: "0x76255491" },
-      { name: "_getVotingFor", signature: "_getVotingFor(uint256,address)", selector: "0xe43142ce" },
-      { name: "_getVotingHolders", signature: "_getVotingHolders(uint256,uint256,uint256)", selector: "0x60b33e03" },
-      { name: "_initBalanceAdjustment", signature: "_initBalanceAdjustment(bytes32,bytes)", selector: "0x1e2ad860" },
-      { name: "_initDividend", signature: "_initDividend(bytes32,bytes)", selector: "0xe3abd55c" },
-      { name: "_initVotingRights", signature: "_initVotingRights(bytes32,bytes)", selector: "0xdac55178" },
-      { name: "_setDividends", signature: "_setDividends(IEquity.Dividend)", selector: "0x1433fb7c" },
-      {
-        name: "_setScheduledBalanceAdjustment",
-        signature: "_setScheduledBalanceAdjustment(IEquity.ScheduledBalanceAdjustment)",
-        selector: "0x417ebf51",
-      },
-      { name: "_setVoting", signature: "_setVoting(IEquity.Voting)", selector: "0xfb29cb04" },
-      {
-        name: "_storeEquityDetails",
-        signature: "_storeEquityDetails(IEquity.EquityDetailsData)",
-        selector: "0xd2a1d568",
-      },
-    ],
+    methods: [],
   },
 
   ERC1410BasicStorageWrapper: {
     name: "ERC1410BasicStorageWrapper",
     inheritance: ["IERC1410StorageWrapper", "ERC20StorageWrapper1"],
-    methods: [
-      {
-        name: "_transferByPartition",
-        signature: "_transferByPartition(address,BasicTransferInfo,bytes32,bytes,address,bytes)",
-        selector: "0xf860e9b7",
-      },
-    ],
+    methods: [],
   },
 
   ERC1410OperatorStorageWrapper: {
     name: "ERC1410OperatorStorageWrapper",
     inheritance: ["ERC1410BasicStorageWrapper"],
-    methods: [
-      { name: "_authorizeOperator", signature: "_authorizeOperator(address)", selector: "0x8f08a5cf" },
-      {
-        name: "_authorizeOperatorByPartition",
-        signature: "_authorizeOperatorByPartition(bytes32,address)",
-        selector: "0x0bc9aef3",
-      },
-      { name: "_checkOperator", signature: "_checkOperator(bytes32,address)", selector: "0x9a6711de" },
-      { name: "_erc1410operatorStorage", signature: "_erc1410operatorStorage()", selector: "0xc6152c9c" },
-      { name: "_isAuthorized", signature: "_isAuthorized(bytes32,address,address)", selector: "0x4fdbb54c" },
-      { name: "_isOperator", signature: "_isOperator(address,address)", selector: "0x4602b470" },
-      {
-        name: "_isOperatorForPartition",
-        signature: "_isOperatorForPartition(bytes32,address,address)",
-        selector: "0xb14e7bc1",
-      },
-      {
-        name: "_operatorTransferByPartition",
-        signature: "_operatorTransferByPartition(OperatorTransferData)",
-        selector: "0x19659369",
-      },
-      { name: "_revokeOperator", signature: "_revokeOperator(address)", selector: "0x14baa953" },
-      {
-        name: "_revokeOperatorByPartition",
-        signature: "_revokeOperatorByPartition(bytes32,address)",
-        selector: "0x0c90ed1c",
-      },
-    ],
+    methods: [],
   },
 
   ERC1410ProtectedPartitionsStorageWrapper: {
     name: "ERC1410ProtectedPartitionsStorageWrapper",
     inheritance: ["ERC1644StorageWrapper"],
-    methods: [
-      {
-        name: "_protectedRedeemFromByPartition",
-        signature: "_protectedRedeemFromByPartition(bytes32,address,uint256,uint256,uint256,bytes)",
-        selector: "0x6d27f455",
-      },
-      {
-        name: "_protectedTransferFromByPartition",
-        signature: "_protectedTransferFromByPartition(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        selector: "0xfac1472b",
-      },
-    ],
+    methods: [],
   },
 
   ERC1410StandardStorageWrapper: {
     name: "ERC1410StandardStorageWrapper",
     inheritance: ["ERC1410OperatorStorageWrapper"],
-    methods: [
-      { name: "_addPartitionTo", signature: "_addPartitionTo(uint256,address,bytes32)", selector: "0x3c1a5e22" },
-      { name: "_balanceOfAdjusted", signature: "_balanceOfAdjusted(address)", selector: "0x908e04a4" },
-      { name: "_balanceOfAdjustedAt", signature: "_balanceOfAdjustedAt(address,uint256)", selector: "0x3f7cb27c" },
-      {
-        name: "_balanceOfByPartitionAdjusted",
-        signature: "_balanceOfByPartitionAdjusted(bytes32,address)",
-        selector: "0x77e986ce",
-      },
-      {
-        name: "_balanceOfByPartitionAdjustedAt",
-        signature: "_balanceOfByPartitionAdjustedAt(bytes32,address,uint256)",
-        selector: "0xc589a51a",
-      },
-      {
-        name: "_beforeTokenTransfer",
-        signature: "_beforeTokenTransfer(bytes32,address,address,uint256)",
-        selector: "0x594330fa",
-      },
-      { name: "_getTotalBalance", signature: "_getTotalBalance(address)", selector: "0xc5930def" },
-      {
-        name: "_getTotalBalanceForAdjustedAt",
-        signature: "_getTotalBalanceForAdjustedAt(address,uint256)",
-        selector: "0xd215b5a7",
-      },
-      {
-        name: "_getTotalBalanceForByPartitionAdjusted",
-        signature: "_getTotalBalanceForByPartitionAdjusted(bytes32,address)",
-        selector: "0xb56339d6",
-      },
-      {
-        name: "_increaseTotalSupplyByPartition",
-        signature: "_increaseTotalSupplyByPartition(bytes32,uint256)",
-        selector: "0x27709fb8",
-      },
-      { name: "_issueByPartition", signature: "_issueByPartition(IssueData)", selector: "0x7223b2bb" },
-      {
-        name: "_redeemByPartition",
-        signature: "_redeemByPartition(bytes32,address,address,uint256,bytes,bytes)",
-        selector: "0x625b8e60",
-      },
-      {
-        name: "_reduceTotalSupplyByPartition",
-        signature: "_reduceTotalSupplyByPartition(bytes32,uint256)",
-        selector: "0xd763680b",
-      },
-      {
-        name: "_syncBalanceAdjustments",
-        signature: "_syncBalanceAdjustments(bytes32,address,address)",
-        selector: "0xea18fc33",
-      },
-      { name: "_totalSupplyAdjusted", signature: "_totalSupplyAdjusted()", selector: "0xe20eacdd" },
-      { name: "_totalSupplyAdjustedAt", signature: "_totalSupplyAdjustedAt(uint256)", selector: "0xd38c22d8" },
-      {
-        name: "_totalSupplyByPartitionAdjusted",
-        signature: "_totalSupplyByPartitionAdjusted(bytes32)",
-        selector: "0xa047058c",
-      },
-      { name: "_triggerAndSyncAll", signature: "_triggerAndSyncAll(bytes32,address,address)", selector: "0x46db8b21" },
-      { name: "_validateParams", signature: "_validateParams(bytes32,uint256)", selector: "0x3e969ef5" },
-    ],
+    methods: [],
   },
 
   ERC1594StorageWrapper: {
     name: "ERC1594StorageWrapper",
     inheritance: ["IERC1594StorageWrapper", "CapStorageWrapper2"],
-    methods: [
-      {
-        name: "_businessLogicChecks",
-        signature: "_businessLogicChecks(bool,address,uint256,bytes32)",
-        selector: "0x2fc94919",
-      },
-      {
-        name: "_checkCanRedeemFromByPartition",
-        signature: "_checkCanRedeemFromByPartition(address,bytes32,uint256,bytes,bytes)",
-        selector: "0xa1db13d8",
-      },
-      {
-        name: "_checkCanTransferFromByPartition",
-        signature: "_checkCanTransferFromByPartition(address,address,bytes32,uint256,bytes,bytes)",
-        selector: "0x0273a79a",
-      },
-      { name: "_checkCompliance", signature: "_checkCompliance(address,address,bool)", selector: "0x5f8ec698" },
-      { name: "_checkIdentity", signature: "_checkIdentity(address,address)", selector: "0xeb15dcae" },
-      { name: "_checkIssuable", signature: "_checkIssuable()", selector: "0xcde079d2" },
-      { name: "_erc1594Storage", signature: "_erc1594Storage()", selector: "0xcc0d2667" },
-      { name: "_genericChecks", signature: "_genericChecks()", selector: "0x9b52cf7c" },
-      { name: "_initialize_ERC1594", signature: "_initialize_ERC1594()", selector: "0xc8386725" },
-      {
-        name: "_isAbleToRedeemFromByPartition",
-        signature: "_isAbleToRedeemFromByPartition(address,bytes32,uint256,bytes,bytes)",
-        selector: "0x68779803",
-      },
-      {
-        name: "_isAbleToTransferFromByPartition",
-        signature: "_isAbleToTransferFromByPartition(address,address,bytes32,uint256,bytes,bytes)",
-        selector: "0xaab4383b",
-      },
-      { name: "_isCompliant", signature: "_isCompliant(address,address,uint256,bool)", selector: "0xde080ce4" },
-      { name: "_isIdentified", signature: "_isIdentified(address,address)", selector: "0x159f48b4" },
-      { name: "_isIssuable", signature: "_isIssuable()", selector: "0x367e587b" },
-      { name: "_issue", signature: "_issue(address,uint256,bytes)", selector: "0x7d452eec" },
-      { name: "_redeem", signature: "_redeem(uint256,bytes)", selector: "0x9a228bbc" },
-      { name: "_redeemFrom", signature: "_redeemFrom(address,uint256,bytes)", selector: "0x32f262eb" },
-    ],
+    methods: [],
   },
 
   ERC1644StorageWrapper: {
     name: "ERC1644StorageWrapper",
     inheritance: ["IERC1644StorageWrapper", "ERC3643StorageWrapper2"],
-    methods: [
-      { name: "_checkControllable", signature: "_checkControllable()", selector: "0xb41746a6" },
-      {
-        name: "_controllerRedeem",
-        signature: "_controllerRedeem(address,uint256,bytes,bytes)",
-        selector: "0x225dd841",
-      },
-      {
-        name: "_controllerTransfer",
-        signature: "_controllerTransfer(address,address,uint256,bytes,bytes)",
-        selector: "0x51673fb4",
-      },
-      { name: "_erc1644Storage", signature: "_erc1644Storage()", selector: "0xf6a4c594" },
-      { name: "_finalizeControllable", signature: "_finalizeControllable()", selector: "0x1153e570" },
-      { name: "_isControllable", signature: "_isControllable()", selector: "0x5ad249fc" },
-    ],
+    methods: [],
   },
 
   ERC20PermitStorageWrapper: {
     name: "ERC20PermitStorageWrapper",
     inheritance: ["ERC20VotesStorageWrapper"],
-    methods: [
-      { name: "_DOMAIN_SEPARATOR", signature: "_DOMAIN_SEPARATOR()", selector: "0xdc0c81b5" },
-      { name: "_erc20PermitStorage", signature: "_erc20PermitStorage()", selector: "0x027c0b9a" },
-      {
-        name: "_permit",
-        signature: "_permit(address,address,uint256,uint256,uint8,bytes32,bytes32)",
-        selector: "0x2997f119",
-      },
-    ],
+    methods: [],
   },
 
   ERC20VotesStorageWrapper: {
     name: "ERC20VotesStorageWrapper",
     inheritance: ["ERC1594StorageWrapper"],
-    methods: [
-      { name: "_add", signature: "_add(uint256,uint256)", selector: "0x3d0316c3" },
-      {
-        name: "_afterTokenTransfer",
-        signature: "_afterTokenTransfer(bytes32,address,address,uint256)",
-        selector: "0x91823775",
-      },
-      {
-        name: "_calculateFactorBetween",
-        signature: "_calculateFactorBetween(uint256,uint256)",
-        selector: "0x0a26c25f",
-      },
-      { name: "_checkpoints", signature: "_checkpoints(address,uint256)", selector: "0x9d654e74" },
-      { name: "_clock", signature: "_clock()", selector: "0x32bdbe3f" },
-      { name: "_CLOCK_MODE", signature: "_CLOCK_MODE()", selector: "0xc980d5f5" },
-      { name: "_delegate", signature: "_delegate(address)", selector: "0xf13101e9" },
-      { name: "_delegates", signature: "_delegates(address)", selector: "0x42239927" },
-      { name: "_erc20VotesStorage", signature: "_erc20VotesStorage()", selector: "0x199208ad" },
-      { name: "_getPastTotalSupply", signature: "_getPastTotalSupply(uint256)", selector: "0x1fba5479" },
-      { name: "_getPastVotes", signature: "_getPastVotes(address,uint256)", selector: "0x58317e59" },
-      { name: "_getVotes", signature: "_getVotes(address)", selector: "0xc6c66a0a" },
-      {
-        name: "_getVotesAdjusted",
-        signature: "_getVotesAdjusted(uint256,CheckpointsLib.Checkpoint[])",
-        selector: "0x7b3bfd1d",
-      },
-      { name: "_isActivated", signature: "_isActivated()", selector: "0x717cc228" },
-      { name: "_moveVotingPower", signature: "_moveVotingPower(address,address,uint256)", selector: "0x82851b84" },
-      { name: "_numCheckpoints", signature: "_numCheckpoints(address)", selector: "0x51bc76cc" },
-      { name: "_setActivate", signature: "_setActivate(bool)", selector: "0xdbd6e830" },
-      { name: "_subtract", signature: "_subtract(uint256,uint256)", selector: "0x880bf496" },
-      { name: "_takeAbafCheckpoint", signature: "_takeAbafCheckpoint()", selector: "0x3910625e" },
-      {
-        name: "_writeCheckpoint",
-        signature: "_writeCheckpoint(CheckpointsLib.Checkpoint[],function(uint256,uint256)",
-        selector: "0x419810fc",
-      },
-    ],
+    methods: [],
     events: [
       {
         name: "DelegateChanged",
@@ -3211,513 +4508,602 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   ExternalControlListManagementStorageWrapper: {
     name: "ExternalControlListManagementStorageWrapper",
     inheritance: ["ProtectedPartitionsStorageWrapper"],
-    methods: [
-      { name: "_isExternallyAuthorized", signature: "_isExternallyAuthorized(address)", selector: "0x68daeeac" },
-    ],
+    methods: [],
   },
 
   ExternalKycListManagementStorageWrapper: {
     name: "ExternalKycListManagementStorageWrapper",
     inheritance: ["ExternalListManagementStorageWrapper"],
-    methods: [
-      {
-        name: "_isExternallyGranted",
-        signature: "_isExternallyGranted(address,IKyc.KycStatus)",
-        selector: "0x94f4bbd4",
-      },
-    ],
+    methods: [],
   },
 
   ExternalListManagementStorageWrapper: {
     name: "ExternalListManagementStorageWrapper",
     inheritance: ["SsiManagementStorageWrapper"],
-    methods: [
-      { name: "_addExternalList", signature: "_addExternalList(bytes32,address)", selector: "0x7b548517" },
-      { name: "_externalListStorage", signature: "_externalListStorage(bytes32)", selector: "0x4c938df7" },
-      { name: "_getExternalListsCount", signature: "_getExternalListsCount(bytes32)", selector: "0x91794627" },
-      {
-        name: "_getExternalListsMembers",
-        signature: "_getExternalListsMembers(bytes32,uint256,uint256)",
-        selector: "0x0d7b7d12",
-      },
-      { name: "_isExternalList", signature: "_isExternalList(bytes32,address)", selector: "0x3d8252dd" },
-      { name: "_removeExternalList", signature: "_removeExternalList(bytes32,address)", selector: "0x2787a016" },
-      {
-        name: "_updateExternalLists",
-        signature: "_updateExternalLists(bytes32,address[],bool[])",
-        selector: "0x7b9dc6c3",
-      },
-    ],
+    methods: [],
   },
 
   ExternalPauseManagementStorageWrapper: {
     name: "ExternalPauseManagementStorageWrapper",
     inheritance: ["ControlListStorageWrapper"],
-    methods: [{ name: "_isExternallyPaused", signature: "_isExternallyPaused()", selector: "0xb654e4bc" }],
+    methods: [],
   },
 
   FixedRateStorageWrapper: {
     name: "FixedRateStorageWrapper",
     inheritance: ["SustainabilityPerformanceTargetRateStorageWrapper"],
-    methods: [
-      { name: "_fixedRateStorage", signature: "_fixedRateStorage()", selector: "0x7fb74df4" },
-      { name: "_getRate", signature: "_getRate()", selector: "0x94e10784" },
-      { name: "_setRate", signature: "_setRate(uint256,uint8)", selector: "0xece231ea" },
+    methods: [],
+  },
+
+  IAccessControlStorageWrapper: {
+    name: "IAccessControlStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "RoleAdminChanged",
+        signature: "RoleAdminChanged(bytes32,bytes32,bytes32)",
+        topic0: "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff",
+      },
+    ],
+    errors: [
+      { name: "AccountHasNoRole", signature: "AccountHasNoRole(address,bytes32)", selector: "0xa1180aad" },
+      { name: "AccountHasNoRoles", signature: "AccountHasNoRoles(address,bytes32[])", selector: "0x90e55392" },
+      {
+        name: "RolesAndActivesLengthMismatch",
+        signature: "RolesAndActivesLengthMismatch(uint256,uint256)",
+        selector: "0x365ff1a4",
+      },
+    ],
+  },
+
+  IAdjustBalancesStorageWrapper: {
+    name: "IAdjustBalancesStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "AdjustmentBalanceSet",
+        signature: "AdjustmentBalanceSet(address,uint256,uint8)",
+        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
+      },
+    ],
+    errors: [{ name: "FactorIsZero", signature: "FactorIsZero()", selector: "0x936e9b6d" }],
+  },
+
+  IBondStorageWrapper: {
+    name: "IBondStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "CouponSet",
+        signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
+        topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
+      },
+    ],
+    errors: [
+      { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
+      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
+    ],
+  },
+
+  ICapStorageWrapper: {
+    name: "ICapStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "MaxSupplyByPartitionSet",
+        signature: "MaxSupplyByPartitionSet(address,bytes32,uint256,uint256)",
+        topic0: "0x9c0c8826170fa45c79bf64a2913df8ccc3e77407aba502d85946253332a4d749",
+      },
+      {
+        name: "MaxSupplySet",
+        signature: "MaxSupplySet(address,uint256,uint256)",
+        topic0: "0xccc3b7560f9d81f26c619129ba9fa74ded9a6edb555a04655baaeca673e0a809",
+      },
+    ],
+    errors: [
+      { name: "MaxSupplyReached", signature: "MaxSupplyReached(uint256)", selector: "0xf9f84915" },
+      {
+        name: "MaxSupplyReachedForPartition",
+        signature: "MaxSupplyReachedForPartition(bytes32,uint256)",
+        selector: "0x57c004a9",
+      },
+      {
+        name: "NewMaxSupplyByPartitionTooHigh",
+        signature: "NewMaxSupplyByPartitionTooHigh(bytes32,uint256,uint256)",
+        selector: "0x21aa64a7",
+      },
+      { name: "NewMaxSupplyCannotBeZero", signature: "NewMaxSupplyCannotBeZero()", selector: "0x76f138fb" },
+      {
+        name: "NewMaxSupplyForPartitionTooLow",
+        signature: "NewMaxSupplyForPartitionTooLow(bytes32,uint256,uint256)",
+        selector: "0x820c68a8",
+      },
+      { name: "NewMaxSupplyTooLow", signature: "NewMaxSupplyTooLow(uint256,uint256)", selector: "0x98c2b03b" },
+    ],
+  },
+
+  IClearingStorageWrapper: {
+    name: "IClearingStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "ClearedHoldByPartition",
+        signature: "ClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0xecba87eb6d871a001547362d9a9bb69ae25dd165858d73fe5cc600a705f3f3a0",
+      },
+      {
+        name: "ClearedHoldFromByPartition",
+        signature: "ClearedHoldFromByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0xc8f249767e17c28ab7d211bf631a717a0ee7f840405af4618f625a7659bf7f63",
+      },
+      {
+        name: "ClearedOperatorHoldByPartition",
+        signature: "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0xa9683588d7eb6dd41a2a62f56bd396a439f9e506ac7ca2efa031bcc5f99b4651",
+      },
+      {
+        name: "ClearedOperatorRedeemByPartition",
+        signature: "ClearedOperatorRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0xfec64ec403134db0b1e479976a765b3e364f24c765f7c73ce9bf4b31e13ed3c8",
+      },
+      {
+        name: "ClearedOperatorTransferByPartition",
+        signature:
+          "ClearedOperatorTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x8d9578064c4e2cadfe39cab8d79866d9e1c16956b958c6cbaedcec51f80d234a",
+      },
+      {
+        name: "ClearedRedeemByPartition",
+        signature: "ClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x7aaaa46250ad330b8cea62db34f608101d55300f94dd9b5ddbe83142bb51dc5f",
+      },
+      {
+        name: "ClearedRedeemFromByPartition",
+        signature: "ClearedRedeemFromByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x376e6c31cfecec25cc3fede988557cb98dee3c5ffa5976b48a0b614b84c45d79",
+      },
+      {
+        name: "ClearedTransferByPartition",
+        signature: "ClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x3d9505d4e04c873230c8ad112ce725e8338ab4fa6c98a7699ea41d4d63c2758f",
+      },
+      {
+        name: "ClearedTransferFromByPartition",
+        signature:
+          "ClearedTransferFromByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x374f3552ea6ef855812358112ab8344010038fd2d56b9f47a1d9cb0320c275a2",
+      },
+      {
+        name: "ProtectedClearedHoldByPartition",
+        signature: "ProtectedClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0x7fd4d7541b7da42375ec1b3f05c454acb77234a17c2f4349c102add4bc61e306",
+      },
+      {
+        name: "ProtectedClearedRedeemByPartition",
+        signature: "ProtectedClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0xdd233f03eaed8aec1fe549f12e218c32dc2e73b3d5777bdeb33afa43e2fa2230",
+      },
+      {
+        name: "ProtectedClearedTransferByPartition",
+        signature:
+          "ProtectedClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x8aea721bf4270b3b07d0974586b57ecd35862ae7a8b733530161d941489283f1",
+      },
+    ],
+  },
+
+  IControlListStorageWrapper: {
+    name: "IControlListStorageWrapper",
+    methods: [],
+    errors: [{ name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" }],
+  },
+
+  ICorporateActionsStorageWrapper: {
+    name: "ICorporateActionsStorageWrapper",
+    methods: [],
+    errors: [
+      { name: "WrongDates", signature: "WrongDates(uint256,uint256)", selector: "0x1c94559c" },
+      { name: "WrongIndexForAction", signature: "WrongIndexForAction(uint256,bytes32)", selector: "0xd3924f4e" },
+    ],
+  },
+
+  IEquityStorageWrapper: {
+    name: "IEquityStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "DividendSet",
+        signature: "DividendSet(bytes32,uint256,address,uint256,uint256,uint256,uint8)",
+        topic0: "0xc849cd6d345b059ab830e5aa8ab5e38bd118833e14bcdfea70231b0e5c072a12",
+      },
+      {
+        name: "ScheduledBalanceAdjustmentSet",
+        signature: "ScheduledBalanceAdjustmentSet(bytes32,uint256,address,uint256,uint256,uint256)",
+        topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
+      },
+      {
+        name: "VotingSet",
+        signature: "VotingSet(bytes32,uint256,address,uint256,bytes)",
+        topic0: "0x5ca20e6ec9818c8d574ae3452d46ed4c9dc9d8df2ffa263150507c7e9124ac2f",
+      },
+    ],
+    errors: [
+      {
+        name: "BalanceAdjustmentCreationFailed",
+        signature: "BalanceAdjustmentCreationFailed()",
+        selector: "0x0c68e660",
+      },
+      { name: "DividendCreationFailed", signature: "DividendCreationFailed()", selector: "0x409bf2d2" },
+      { name: "VotingRightsCreationFailed", signature: "VotingRightsCreationFailed()", selector: "0x0cc16600" },
+    ],
+  },
+
+  IERC1410StorageWrapper: {
+    name: "IERC1410StorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "AuthorizedOperator",
+        signature: "AuthorizedOperator(address,address)",
+        topic0: "0xf4caeb2d6ca8932a215a353d0703c326ec2d81fc68170f320eb2ab49e9df61f9",
+      },
+      {
+        name: "AuthorizedOperatorByPartition",
+        signature: "AuthorizedOperatorByPartition(bytes32,address,address)",
+        topic0: "0x3646a897c70797ecc134b0adc32f471b07bf1d6f451133b0384badab531e3fd6",
+      },
+      {
+        name: "IssuedByPartition",
+        signature: "IssuedByPartition(bytes32,address,address,uint256,bytes)",
+        topic0: "0x5af1c8f424b104b6ba4e3c0885f2ed9fef04a9b1ea39cd9ed362432105c0791a",
+      },
+      {
+        name: "RedeemedByPartition",
+        signature: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
+        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
+      },
+      {
+        name: "RevokedOperator",
+        signature: "RevokedOperator(address,address)",
+        topic0: "0x50546e66e5f44d728365dc3908c63bc5cfeeab470722c1677e3073a6ac294aa1",
+      },
+      {
+        name: "RevokedOperatorByPartition",
+        signature: "RevokedOperatorByPartition(bytes32,address,address)",
+        topic0: "0x3b287c4f1bab4df949b33bceacef984f544dc5d5479930d00e4ee8c9d8dd96f2",
+      },
+      {
+        name: "TransferByPartition",
+        signature: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [
+      {
+        name: "InsufficientBalance",
+        signature: "InsufficientBalance(address,uint256,uint256,bytes32)",
+        selector: "0x5d6824c4",
+      },
+      { name: "InvalidPartition", signature: "InvalidPartition(address,bytes32)", selector: "0xbf84f4ec" },
+      { name: "NotAllowedInMultiPartitionMode", signature: "NotAllowedInMultiPartitionMode()", selector: "0x76d08f88" },
+      {
+        name: "PartitionNotAllowedInSinglePartitionMode",
+        signature: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
+        selector: "0xb96d9539",
+      },
+      { name: "Unauthorized", signature: "Unauthorized(address,address,bytes32)", selector: "0x1e09743f" },
+      { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
+      { name: "ZeroPartition", signature: "ZeroPartition()", selector: "0x4a6f30c3" },
+      { name: "ZeroValue", signature: "ZeroValue()", selector: "0x7c946ed7" },
+    ],
+  },
+
+  IERC1594StorageWrapper: {
+    name: "IERC1594StorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "Issued",
+        signature: "Issued(address,address,uint256,bytes)",
+        topic0: "0x0e9905d62635f049c2f4e11678ebf9dc3d1f8c4a653e290759b772e47ba00d00",
+      },
+      {
+        name: "Redeemed",
+        signature: "Redeemed(address,address,uint256,bytes)",
+        topic0: "0xb7d0d6b60740753e9f16692a2f479472a1385aec2420fa43225b02f2ffa1afe7",
+      },
+    ],
+    errors: [{ name: "IssuanceIsClosed", signature: "IssuanceIsClosed()", selector: "0xd3c3caeb" }],
+  },
+
+  IERC1644StorageWrapper: {
+    name: "IERC1644StorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "ControllerRedemption",
+        signature: "ControllerRedemption(address,address,uint256,bytes,bytes)",
+        topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
+      },
+      {
+        name: "ControllerTransfer",
+        signature: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
+        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
+      },
+      {
+        name: "FinalizedControllerFeature",
+        signature: "FinalizedControllerFeature(address)",
+        topic0: "0x08a9c42b6917e90aff41cebfd6d2815b241dc3555d2482d792eeada3fe7df6fd",
+      },
+    ],
+    errors: [{ name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" }],
+  },
+
+  IERC20StorageWrapper: {
+    name: "IERC20StorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "Approval",
+        signature: "Approval(address,address,uint256)",
+        topic0: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+      },
+      {
+        name: "Transfer",
+        signature: "Transfer(address,address,uint256)",
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
+    ],
+    errors: [
+      { name: "InsufficientAllowance", signature: "InsufficientAllowance(address,address)", selector: "0xf180d8f9" },
+      { name: "SpenderWithZeroAddress", signature: "SpenderWithZeroAddress()", selector: "0x80e32d8f" },
+      { name: "ZeroOwnerAddress", signature: "ZeroOwnerAddress()", selector: "0x42cad957" },
+    ],
+  },
+
+  IERC3643StorageWrapper: {
+    name: "IERC3643StorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "ComplianceAdded",
+        signature: "ComplianceAdded(address)",
+        topic0: "0x7f3a888862559648ec01d97deb7b5012bff86dc91e654a1de397170db40e35b6",
+      },
+    ],
+    errors: [
+      {
+        name: "InsufficientFrozenBalance",
+        signature: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
+        selector: "0xefafde54",
+      },
+    ],
+  },
+
+  IPauseStorageWrapper: {
+    name: "IPauseStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "TokenPaused",
+        signature: "TokenPaused(address)",
+        topic0: "0xf017c0de579727a3cd3ee18077ee8b4c43bf21892985952d1d5a0d52f983502d",
+      },
+      {
+        name: "TokenUnpaused",
+        signature: "TokenUnpaused(address)",
+        topic0: "0xf38578ed892ce2ce655ca8ae03c73464ad74915a1331a9b4085e637534daeedf",
+      },
+    ],
+    errors: [
+      { name: "TokenIsPaused", signature: "TokenIsPaused()", selector: "0x649815a5" },
+      { name: "TokenIsUnpaused", signature: "TokenIsUnpaused()", selector: "0x72058d69" },
+    ],
+  },
+
+  IProtectedPartitionsStorageWrapper: {
+    name: "IProtectedPartitionsStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "PartitionsProtected",
+        signature: "PartitionsProtected(address)",
+        topic0: "0x990fbe2c0a8b93cc7974d7ab6416266441112d61fa0989af94a79de43dda48ff",
+      },
+      {
+        name: "PartitionsUnProtected",
+        signature: "PartitionsUnProtected(address)",
+        topic0: "0xd556aabec0a33d5b3b9b8c739af1745b14ba2abecc20c3c080fd4ac6143e8525",
+      },
+      {
+        name: "ProtectedRedeemFrom",
+        signature: "ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)",
+        topic0: "0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b",
+      },
+      {
+        name: "ProtectedTransferFrom",
+        signature: "ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)",
+        topic0: "0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c",
+      },
+    ],
+    errors: [
+      {
+        name: "PartitionsAreProtectedAndNoRole",
+        signature: "PartitionsAreProtectedAndNoRole(address,bytes32)",
+        selector: "0x55347310",
+      },
+      { name: "PartitionsAreUnProtected", signature: "PartitionsAreUnProtected()", selector: "0x05681565" },
+      { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
+    ],
+  },
+
+  ISnapshotsStorageWrapper: {
+    name: "ISnapshotsStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "SnapshotTaken",
+        signature: "SnapshotTaken(address,uint256)",
+        topic0: "0xd252178ed4aae4bc61be5bc8161b97bca1aae7b7fbde4523d5f4498cfca42763",
+      },
+      {
+        name: "SnapshotTriggered",
+        signature: "SnapshotTriggered(address,uint256)",
+        topic0: "0xa25b876b2f3947e9c6cc9e952e8f278d53aeaddffe3aec1c86bc75c491d60a19",
+      },
+    ],
+    errors: [
+      { name: "SnapshotIdDoesNotExists", signature: "SnapshotIdDoesNotExists(uint256)", selector: "0x8e81eb83" },
+      { name: "SnapshotIdNull", signature: "SnapshotIdNull()", selector: "0xf128004d" },
+    ],
+  },
+
+  ITimeTravelStorageWrapper: {
+    name: "ITimeTravelStorageWrapper",
+    description: "Interface for the TimeTravelStorageWrapper contract",
+    methods: [],
+    events: [
+      {
+        name: "SystemBlocknumberChanged",
+        signature: "SystemBlocknumberChanged(uint256,uint256)",
+        topic0: "0x96395610c0c23ab4b071bdeae9633f3d54760b0c64cc38868c72e80d6543b987",
+      },
+      {
+        name: "SystemBlocknumberReset",
+        signature: "SystemBlocknumberReset()",
+        topic0: "0x5e1c9b0e188d9a34c3abf05ea5456e54965689aff2ae15b6f1f549dd116e927f",
+      },
+      {
+        name: "SystemTimestampChanged",
+        signature: "SystemTimestampChanged(uint256,uint256)",
+        topic0: "0x42ae45afbacb5d1779b65d1bf0fe5ed8ea40e9dd166cc8b80bcb3fa2daf222a1",
+      },
+      {
+        name: "SystemTimestampReset",
+        signature: "SystemTimestampReset()",
+        topic0: "0x93e7a31ca0d8810d390d6a3fc6ad83d230a5677c142d9aea7331a87794d11c11",
+      },
+    ],
+    errors: [
+      { name: "InvalidBlocknumber", signature: "InvalidBlocknumber(uint256)", selector: "0x769a518c" },
+      { name: "InvalidTimestamp", signature: "InvalidTimestamp(uint256)", selector: "0x25c20828" },
+      { name: "WrongChainId", signature: "WrongChainId()", selector: "0x5f87bc00" },
+    ],
+  },
+
+  ITransferAndLockStorageWrapper: {
+    name: "ITransferAndLockStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "PartitionTransferredAndLocked",
+        signature: "PartitionTransferredAndLocked(bytes32,address,address,uint256,bytes,uint256,uint256)",
+        topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
+      },
     ],
   },
 
   KpiLinkedRateStorageWrapper: {
     name: "KpiLinkedRateStorageWrapper",
     inheritance: ["PauseStorageWrapper"],
-    methods: [
-      { name: "_getImpactData", signature: "_getImpactData()", selector: "0x3d12ba2c" },
-      { name: "_getInterestRate", signature: "_getInterestRate()", selector: "0x88366f9a" },
-      { name: "_getKpiOracle", signature: "_getKpiOracle()", selector: "0xd5877b0c" },
-      { name: "_kpiLinkedRateStorage", signature: "_kpiLinkedRateStorage()", selector: "0x16761626" },
-      { name: "_setImpactData", signature: "_setImpactData(IKpiLinkedRate.ImpactData)", selector: "0xf073c118" },
-      { name: "_setInterestRate", signature: "_setInterestRate(IKpiLinkedRate.InterestRate)", selector: "0x13b3a045" },
-      { name: "_setKpiOracle", signature: "_setKpiOracle(address)", selector: "0xe9f6e413" },
-    ],
+    methods: [],
   },
 
   KpisStorageWrapper: {
     name: "KpisStorageWrapper",
     inheritance: ["InternalsSustainabilityPerformanceTargetInterestRate", "BondStorageWrapperFixingDateInterestRate"],
-    methods: [
-      { name: "_addKpiData", signature: "_addKpiData(uint256,uint256,address)", selector: "0xb645ae9f" },
-      { name: "_addToCouponsOrderedList", signature: "_addToCouponsOrderedList(uint256)", selector: "0x17a345a0" },
-      { name: "_getLatestKpiData", signature: "_getLatestKpiData(uint256,uint256,address)", selector: "0x37f6c9cd" },
-      { name: "_getMinDateAdjusted", signature: "_getMinDateAdjusted()", selector: "0x88652963" },
-      { name: "_isCheckpointDate", signature: "_isCheckpointDate(uint256,address)", selector: "0x6b1af257" },
-      { name: "_kpisDataStorage", signature: "_kpisDataStorage()", selector: "0x6be9c949" },
-      {
-        name: "_overwriteKpiData",
-        signature: "_overwriteKpiData(CheckpointsLib.Checkpoint[],uint256,uint256,uint256)",
-        selector: "0xe67b61c2",
-      },
-      {
-        name: "_pushKpiData",
-        signature: "_pushKpiData(CheckpointsLib.Checkpoint[],uint256,uint256)",
-        selector: "0xb0a489a0",
-      },
-      { name: "_setCheckpointDate", signature: "_setCheckpointDate(uint256,address)", selector: "0xdc837d51" },
-      { name: "_setMinDate", signature: "_setMinDate(uint256)", selector: "0x93d61f50" },
-    ],
+    methods: [],
   },
 
   KycStorageWrapper: {
     name: "KycStorageWrapper",
     inheritance: ["ExternalKycListManagementStorageWrapper"],
-    methods: [
-      { name: "_checkValidDates", signature: "_checkValidDates(uint256,uint256)", selector: "0xfbf50be9" },
-      {
-        name: "_checkValidKycStatus",
-        signature: "_checkValidKycStatus(IKyc.KycStatus,address)",
-        selector: "0x76481097",
-      },
-      { name: "_getKycAccountsCount", signature: "_getKycAccountsCount(IKyc.KycStatus)", selector: "0x26f8e0eb" },
-      {
-        name: "_getKycAccountsData",
-        signature: "_getKycAccountsData(IKyc.KycStatus,uint256,uint256)",
-        selector: "0xcb518137",
-      },
-      { name: "_getKycFor", signature: "_getKycFor(address)", selector: "0xd996d468" },
-      { name: "_getKycStatusFor", signature: "_getKycStatusFor(address)", selector: "0x9fe699ed" },
-      { name: "_grantKyc", signature: "_grantKyc(address,string,uint256,uint256,address)", selector: "0x9de277f6" },
-      { name: "_isInternalKycActivated", signature: "_isInternalKycActivated()", selector: "0x38166e5e" },
-      { name: "_kycStorage", signature: "_kycStorage()", selector: "0xa3dafeee" },
-      { name: "_revokeKyc", signature: "_revokeKyc(address)", selector: "0x8d603d1e" },
-      { name: "_setInternalKyc", signature: "_setInternalKyc(bool)", selector: "0x648def8f" },
-      { name: "_verifyKycStatus", signature: "_verifyKycStatus(IKyc.KycStatus,address)", selector: "0x8b2c4e12" },
-    ],
+    methods: [],
   },
 
   PauseStorageWrapper: {
     name: "PauseStorageWrapper",
     inheritance: ["IPauseStorageWrapper", "ExternalPauseManagementStorageWrapper"],
-    methods: [
-      { name: "_checkPaused", signature: "_checkPaused()", selector: "0x4bd325e4" },
-      { name: "_checkUnpaused", signature: "_checkUnpaused()", selector: "0x8482eff5" },
-      { name: "_isPaused", signature: "_isPaused()", selector: "0xe2684f08" },
-      { name: "_pauseStorage", signature: "_pauseStorage()", selector: "0x7719d6c5" },
-      { name: "_setPause", signature: "_setPause(bool)", selector: "0x69cc2731" },
-    ],
+    methods: [],
   },
 
   ProceedRecipientsStorageWrapper: {
     name: "ProceedRecipientsStorageWrapper",
     inheritance: ["TotalBalancesStorageWrapper"],
-    methods: [
-      { name: "_addProceedRecipient", signature: "_addProceedRecipient(address,bytes)", selector: "0x9fd61d20" },
-      { name: "_getProceedRecipientData", signature: "_getProceedRecipientData(address)", selector: "0x36ec9fbe" },
-      { name: "_getProceedRecipientsCount", signature: "_getProceedRecipientsCount()", selector: "0x29b5ccc8" },
-      { name: "_isProceedRecipient", signature: "_isProceedRecipient(address)", selector: "0x1d905e31" },
-      { name: "_proceedRecipientsDataStorage", signature: "_proceedRecipientsDataStorage()", selector: "0xd6abf4ee" },
-      { name: "_removeProceedRecipient", signature: "_removeProceedRecipient(address)", selector: "0x8761abcc" },
-      {
-        name: "_removeProceedRecipientData",
-        signature: "_removeProceedRecipientData(address)",
-        selector: "0x7d31cdb5",
-      },
-      {
-        name: "_setProceedRecipientData",
-        signature: "_setProceedRecipientData(address,bytes)",
-        selector: "0x2792769b",
-      },
-    ],
+    methods: [],
   },
 
   ProtectedPartitionsStorageWrapper: {
     name: "ProtectedPartitionsStorageWrapper",
     inheritance: ["IProtectedPartitionsStorageWrapper", "KycStorageWrapper"],
-    methods: [
-      { name: "_arePartitionsProtected", signature: "_arePartitionsProtected()", selector: "0xce391cb1" },
-      { name: "_calculateRoleForPartition", signature: "_calculateRoleForPartition(bytes32)", selector: "0x0f56b295" },
-      {
-        name: "_checkClearingCreateHoldSignature",
-        signature: "_checkClearingCreateHoldSignature(IClearing.ProtectedClearingOperation,Hold,bytes)",
-        selector: "0xd99754cc",
-      },
-      {
-        name: "_checkClearingRedeemSignature",
-        signature: "_checkClearingRedeemSignature(IClearing.ProtectedClearingOperation,uint256,bytes)",
-        selector: "0x2bd0774c",
-      },
-      {
-        name: "_checkClearingTransferSignature",
-        signature: "_checkClearingTransferSignature(IClearing.ProtectedClearingOperation,uint256,address,bytes)",
-        selector: "0x8f85bed1",
-      },
-      {
-        name: "_checkCreateHoldSignature",
-        signature: "_checkCreateHoldSignature(bytes32,address,ProtectedHold,bytes)",
-        selector: "0x4ede2067",
-      },
-      { name: "_checkProtectedPartitions", signature: "_checkProtectedPartitions()", selector: "0xed6f719a" },
-      {
-        name: "_checkRedeemSignature",
-        signature: "_checkRedeemSignature(bytes32,address,uint256,uint256,uint256,bytes)",
-        selector: "0x2546b4b4",
-      },
-      { name: "_checkRoleForPartition", signature: "_checkRoleForPartition(bytes32,address)", selector: "0x67323be5" },
-      {
-        name: "_checkTransferSignature",
-        signature: "_checkTransferSignature(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        selector: "0x6ee3d1e2",
-      },
-      { name: "_checkValidPartition", signature: "_checkValidPartition(bytes32)", selector: "0x836740a4" },
-      { name: "_getNounceFor", signature: "_getNounceFor(address)", selector: "0x795a18cb" },
-      {
-        name: "_isClearingCreateHoldSignatureValid",
-        signature: "_isClearingCreateHoldSignatureValid(IClearing.ProtectedClearingOperation,Hold,bytes)",
-        selector: "0xc2b1c4f2",
-      },
-      {
-        name: "_isClearingRedeemSignatureValid",
-        signature: "_isClearingRedeemSignatureValid(IClearing.ProtectedClearingOperation,uint256,bytes)",
-        selector: "0xdf96c66c",
-      },
-      {
-        name: "_isClearingTransferSignatureValid",
-        signature: "_isClearingTransferSignatureValid(IClearing.ProtectedClearingOperation,address,uint256,bytes)",
-        selector: "0xd5d548fb",
-      },
-      {
-        name: "_isCreateHoldSignatureValid",
-        signature: "_isCreateHoldSignatureValid(bytes32,address,ProtectedHold,bytes)",
-        selector: "0x8797484a",
-      },
-      {
-        name: "_isRedeemSignatureValid",
-        signature: "_isRedeemSignatureValid(bytes32,address,uint256,uint256,uint256,bytes)",
-        selector: "0x21058b93",
-      },
-      {
-        name: "_isTransferSignatureValid",
-        signature: "_isTransferSignatureValid(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        selector: "0x30a87935",
-      },
-      { name: "_protectedPartitionsRole", signature: "_protectedPartitionsRole(bytes32)", selector: "0xde41fe7d" },
-      { name: "_protectedPartitionsStorage", signature: "_protectedPartitionsStorage()", selector: "0x00840cb7" },
-      { name: "_setNounce", signature: "_setNounce(uint256,address)", selector: "0x17f2f955" },
-      { name: "_setProtectedPartitions", signature: "_setProtectedPartitions(bool)", selector: "0x9259c0a2" },
-    ],
+    methods: [],
   },
 
   ScheduledBalanceAdjustmentsStorageWrapper: {
     name: "ScheduledBalanceAdjustmentsStorageWrapper",
     inheritance: ["ScheduledCouponListingStorageWrapper"],
-    methods: [
-      {
-        name: "_addScheduledBalanceAdjustment",
-        signature: "_addScheduledBalanceAdjustment(uint256,bytes)",
-        selector: "0xefa50553",
-      },
-      {
-        name: "_getPendingScheduledBalanceAdjustmentsAt",
-        signature: "_getPendingScheduledBalanceAdjustmentsAt(uint256)",
-        selector: "0xd94bb76b",
-      },
-      {
-        name: "_getScheduledBalanceAdjustmentCount",
-        signature: "_getScheduledBalanceAdjustmentCount()",
-        selector: "0xaf3b3395",
-      },
-      {
-        name: "_getScheduledBalanceAdjustments",
-        signature: "_getScheduledBalanceAdjustments(uint256,uint256)",
-        selector: "0x1457b0a6",
-      },
-      {
-        name: "_onScheduledBalanceAdjustmentTriggered",
-        signature: "_onScheduledBalanceAdjustmentTriggered(uint256,uint256,ScheduledTask)",
-        selector: "0x5a7f6a32",
-      },
-      {
-        name: "_scheduledBalanceAdjustmentStorage",
-        signature: "_scheduledBalanceAdjustmentStorage()",
-        selector: "0xd4961ce3",
-      },
-      {
-        name: "_triggerScheduledBalanceAdjustments",
-        signature: "_triggerScheduledBalanceAdjustments(uint256)",
-        selector: "0x7e38bedb",
-      },
-    ],
+    methods: [],
   },
 
   ScheduledCouponListingStorageWrapper: {
     name: "ScheduledCouponListingStorageWrapper",
     inheritance: ["ScheduledSnapshotsStorageWrapper"],
-    methods: [
-      {
-        name: "_addScheduledCouponListing",
-        signature: "_addScheduledCouponListing(uint256,bytes)",
-        selector: "0x38b080c0",
-      },
-      {
-        name: "_getPendingScheduledCouponListingTotalAt",
-        signature: "_getPendingScheduledCouponListingTotalAt(uint256)",
-        selector: "0x9c71b9c8",
-      },
-      {
-        name: "_getScheduledCouponListing",
-        signature: "_getScheduledCouponListing(uint256,uint256)",
-        selector: "0x540bf600",
-      },
-      {
-        name: "_getScheduledCouponListingCount",
-        signature: "_getScheduledCouponListingCount()",
-        selector: "0x96a18819",
-      },
-      {
-        name: "_getScheduledCouponListingIdAtIndex",
-        signature: "_getScheduledCouponListingIdAtIndex(uint256)",
-        selector: "0xc543c282",
-      },
-      {
-        name: "_onScheduledCouponListingTriggered",
-        signature: "_onScheduledCouponListingTriggered(uint256,uint256,ScheduledTask)",
-        selector: "0xb3282a32",
-      },
-      { name: "_scheduledCouponListingStorage", signature: "_scheduledCouponListingStorage()", selector: "0x1fb7ab0b" },
-      {
-        name: "_triggerScheduledCouponListing",
-        signature: "_triggerScheduledCouponListing(uint256)",
-        selector: "0x9fd6c988",
-      },
-    ],
+    methods: [],
   },
 
   ScheduledCrossOrderedTasksStorageWrapper: {
     name: "ScheduledCrossOrderedTasksStorageWrapper",
     inheritance: ["ScheduledBalanceAdjustmentsStorageWrapper"],
-    methods: [
-      {
-        name: "_addScheduledCrossOrderedTask",
-        signature: "_addScheduledCrossOrderedTask(uint256,bytes)",
-        selector: "0x4bf21cbc",
-      },
-      {
-        name: "_getScheduledCrossOrderedTaskCount",
-        signature: "_getScheduledCrossOrderedTaskCount()",
-        selector: "0x0fbff5da",
-      },
-      {
-        name: "_getScheduledCrossOrderedTasks",
-        signature: "_getScheduledCrossOrderedTasks(uint256,uint256)",
-        selector: "0xe7c080ed",
-      },
-      {
-        name: "_onScheduledCrossOrderedTaskTriggered",
-        signature: "_onScheduledCrossOrderedTaskTriggered(uint256,uint256,ScheduledTask)",
-        selector: "0xc9ad94ce",
-      },
-      {
-        name: "_scheduledCrossOrderedTaskStorage",
-        signature: "_scheduledCrossOrderedTaskStorage()",
-        selector: "0xe62b4b77",
-      },
-      {
-        name: "_triggerScheduledCrossOrderedTasks",
-        signature: "_triggerScheduledCrossOrderedTasks(uint256)",
-        selector: "0xa3608e20",
-      },
-    ],
+    methods: [],
   },
 
   ScheduledSnapshotsStorageWrapper: {
     name: "ScheduledSnapshotsStorageWrapper",
     inheritance: ["ScheduledTasksCommon"],
-    methods: [
-      { name: "_addScheduledSnapshot", signature: "_addScheduledSnapshot(uint256,bytes)", selector: "0xc8e13c78" },
-      { name: "_getScheduledSnapshotCount", signature: "_getScheduledSnapshotCount()", selector: "0xe76117a8" },
-      { name: "_getScheduledSnapshots", signature: "_getScheduledSnapshots(uint256,uint256)", selector: "0x5bd160e9" },
-      {
-        name: "_onScheduledSnapshotTriggered",
-        signature: "_onScheduledSnapshotTriggered(uint256,uint256,ScheduledTask)",
-        selector: "0x437c47f7",
-      },
-      { name: "_scheduledSnapshotStorage", signature: "_scheduledSnapshotStorage()", selector: "0x3b412ed0" },
-      { name: "_triggerScheduledSnapshots", signature: "_triggerScheduledSnapshots(uint256)", selector: "0x1e79f595" },
-    ],
+    methods: [],
   },
 
   SecurityStorageWrapper: {
     name: "SecurityStorageWrapper",
     inheritance: ["EquityStorageWrapper"],
-    methods: [
-      { name: "_getSecurityRegulationData", signature: "_getSecurityRegulationData()", selector: "0x6e000fa6" },
-      {
-        name: "_initializeSecurity",
-        signature: "_initializeSecurity(RegulationData,AdditionalSecurityData)",
-        selector: "0x8d93918e",
-      },
-      { name: "_securityStorage", signature: "_securityStorage()", selector: "0x641844e3" },
-      {
-        name: "_storeRegulationData",
-        signature: "_storeRegulationData(RegulationData,AdditionalSecurityData)",
-        selector: "0x2012644c",
-      },
-    ],
+    methods: [],
   },
 
   SsiManagementStorageWrapper: {
     name: "SsiManagementStorageWrapper",
     inheritance: ["AccessControlStorageWrapper"],
-    methods: [
-      { name: "_addIssuer", signature: "_addIssuer(address)", selector: "0x498ce1f3" },
-      { name: "_checkIssuer", signature: "_checkIssuer(address)", selector: "0x3eeb8f18" },
-      { name: "_getIssuerListCount", signature: "_getIssuerListCount()", selector: "0x3020266b" },
-      { name: "_getIssuerListMembers", signature: "_getIssuerListMembers(uint256,uint256)", selector: "0xf197fdd3" },
-      { name: "_getRevocationRegistryAddress", signature: "_getRevocationRegistryAddress()", selector: "0x83ae00db" },
-      { name: "_isIssuer", signature: "_isIssuer(address)", selector: "0x8ca488a6" },
-      { name: "_removeIssuer", signature: "_removeIssuer(address)", selector: "0xed85057a" },
-      {
-        name: "_setRevocationRegistryAddress",
-        signature: "_setRevocationRegistryAddress(address)",
-        selector: "0x1b44629a",
-      },
-      { name: "_ssiManagementStorage", signature: "_ssiManagementStorage()", selector: "0xf5bb6aff" },
-    ],
+    methods: [],
   },
 
   SustainabilityPerformanceTargetRateStorageWrapper: {
     name: "SustainabilityPerformanceTargetRateStorageWrapper",
     inheritance: ["KpiLinkedRateStorageWrapper"],
-    methods: [
-      { name: "_getSPTImpactDataFor", signature: "_getSPTImpactDataFor(address)", selector: "0xdd4f254a" },
-      { name: "_getSPTInterestRate", signature: "_getSPTInterestRate()", selector: "0x839cfe94" },
-      {
-        name: "_setSPTImpactData",
-        signature: "_setSPTImpactData(ISustainabilityPerformanceTargetRate.ImpactData,address)",
-        selector: "0xd2b995c6",
-      },
-      {
-        name: "_setSPTInterestRate",
-        signature: "_setSPTInterestRate(ISustainabilityPerformanceTargetRate.InterestRate)",
-        selector: "0x0e30e08a",
-      },
-      {
-        name: "_sustainabilityPerformanceTargetRateStorage",
-        signature: "_sustainabilityPerformanceTargetRateStorage()",
-        selector: "0x51bdde97",
-      },
-    ],
+    methods: [],
   },
 
   TimeTravelStorageWrapper: {
     name: "TimeTravelStorageWrapper",
     inheritance: ["ITimeTravelStorageWrapper", "LocalContext"],
-    methods: [
-      { name: "_blockNumber", signature: "_blockNumber()", selector: "0xd7e0e975" },
-      { name: "_blockTimestamp", signature: "_blockTimestamp()", selector: "0xc63aa3e7" },
-      { name: "_changeSystemBlocknumber", signature: "_changeSystemBlocknumber(uint256)", selector: "0xcd07760e" },
-      { name: "_changeSystemTimestamp", signature: "_changeSystemTimestamp(uint256)", selector: "0x03af8af9" },
-      { name: "_checkBlockChainid", signature: "_checkBlockChainid(uint256)", selector: "0x7f3ceeb8" },
-      { name: "_resetSystemBlocknumber", signature: "_resetSystemBlocknumber()", selector: "0xc329fd29" },
-      { name: "_resetSystemTimestamp", signature: "_resetSystemTimestamp()", selector: "0x7cb0f2d8" },
-    ],
+    methods: [],
   },
 
   TotalBalancesStorageWrapper: {
     name: "TotalBalancesStorageWrapper",
     inheritance: ["FixedRateStorageWrapper"],
-    methods: [
-      { name: "_getTotalBalance", signature: "_getTotalBalance(address)", selector: "0xc5930def" },
-      {
-        name: "_getTotalBalanceForAdjustedAt",
-        signature: "_getTotalBalanceForAdjustedAt(address,uint256)",
-        selector: "0xd215b5a7",
-      },
-    ],
+    methods: [],
   },
 
   TransferAndLockStorageWrapper: {
     name: "TransferAndLockStorageWrapper",
     inheritance: ["ITransferAndLockStorageWrapper", "SecurityStorageWrapper"],
-    methods: [
-      {
-        name: "_checkTransferAndLockByPartitionSignature",
-        signature:
-          "_checkTransferAndLockByPartitionSignature(bytes32,ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0xa89ed8df",
-      },
-      {
-        name: "_checkTransferAndLockSignature",
-        signature: "_checkTransferAndLockSignature(ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0x8a1708d9",
-      },
-      {
-        name: "_isTransferAndLockByPartitionSignatureValid",
-        signature:
-          "_isTransferAndLockByPartitionSignatureValid(bytes32,ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0x8b429f59",
-      },
-      {
-        name: "_isTransferAndLockSignatureValid",
-        signature: "_isTransferAndLockSignatureValid(ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0x6274de2d",
-      },
-      {
-        name: "_protectedTransferAndLock",
-        signature: "_protectedTransferAndLock(ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0x108b43ed",
-      },
-      {
-        name: "_protectedTransferAndLockByPartition",
-        signature:
-          "_protectedTransferAndLockByPartition(bytes32,ITransferAndLock.TransferAndLockStruct,uint256,uint256,bytes)",
-        selector: "0x472a5931",
-      },
-    ],
+    methods: [],
   },
 };
 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 37 as const;
+export const TOTAL_STORAGE_WRAPPERS = 55 as const;
 
 /**
  * All role identifiers extracted from contracts.

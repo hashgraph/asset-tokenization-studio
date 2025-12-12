@@ -36,11 +36,21 @@ const BASE_CLASSES_TO_EXCLUDE = new Set([
  * @returns Array of contract names
  */
 export function extractContractNames(source: string): string[] {
+  // Remove single-line comments (// ...)
+  let cleanSource = source.replace(/\/\/.*$/gm, "");
+
+  // Remove multi-line comments (/* ... */)
+  cleanSource = cleanSource.replace(/\/\*[\s\S]*?\*\//g, "");
+
+  // Remove natspec comments (/// ... and /** ... */)
+  cleanSource = cleanSource.replace(/\/\/\/.*$/gm, "");
+  cleanSource = cleanSource.replace(/\/\*\*[\s\S]*?\*\//g, "");
+
   const contractRegex = /(?:abstract\s+)?(?:contract|interface|library)\s+(\w+)/g;
   const matches: string[] = [];
 
   let match;
-  while ((match = contractRegex.exec(source)) !== null) {
+  while ((match = contractRegex.exec(cleanSource)) !== null) {
     matches.push(match[1]);
   }
 
