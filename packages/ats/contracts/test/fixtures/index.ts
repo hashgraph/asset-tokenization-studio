@@ -15,6 +15,10 @@ export { deployAtsInfrastructureFixture } from "./infrastructure.fixture";
 // Integration test fixtures (lighter weight)
 export { deployBlrFixture, registerCommonFacetsFixture } from "./integration.fixture";
 
+// TUP proxy fixtures (TransparentUpgradeableProxy testing)
+export { deployTupProxyFixture, deployTupProxyWithV2Fixture, TUP_VERSIONS } from "./tupProxy.fixture";
+export type { TupProxyFixtureResult } from "./tupProxy.fixture";
+
 // Token fixtures
 export { deployEquityTokenFixture, DEFAULT_EQUITY_PARAMS, getEquityDetails } from "./tokens/equity.fixture";
 
