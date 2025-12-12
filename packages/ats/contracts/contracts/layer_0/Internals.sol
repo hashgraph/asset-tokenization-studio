@@ -24,7 +24,7 @@ import { ILock } from "../layer_1/interfaces/lock/ILock.sol";
 import { ISecurity } from "../layer_3/interfaces/ISecurity.sol";
 import { IBondRead } from "../layer_2/interfaces/bond/IBondRead.sol";
 import { RegulationData, AdditionalSecurityData } from "../layer_3/constants/regulation.sol";
-
+import { ICap } from "contracts/layer_1/interfaces/cap/ICap.sol";
 /**
  * @title Internals
  * @notice Abstract contract declaring all internal methods for layer_0 contracts
@@ -161,6 +161,9 @@ abstract contract Internals is Modifiers {
     function _afterTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal virtual;
 
     // ===== Cap Methods =====
+    function _initialize_Cap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal virtual;
+    function _setMaxSupply(uint256 _maxSupply) internal virtual;
+    function _setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) internal virtual;
     function _adjustMaxSupply(uint256 factor) internal virtual;
     function _adjustMaxSupplyByPartition(bytes32 partition, uint256 factor) internal virtual;
     function _getMaxSupply() internal view virtual returns (uint256);
@@ -173,6 +176,7 @@ abstract contract Internals is Modifiers {
         uint256 timestamp
     ) internal view virtual returns (uint256);
     function _isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure virtual returns (bool);
+    function _isCapInitialized() internal view virtual returns (bool);
 
     // ===== Clearing Methods =====
     function _getClearingLabafByPartition(
