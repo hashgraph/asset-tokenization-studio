@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { PauseStorageWrapper } from "../../core/pause/PauseStorageWrapper.sol";
 import {
     _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION
-} from "../../../layer_2/constants/storagePositions.sol";
+} from "contracts/layer_2/constants/storagePositions.sol";
 import {
     ISustainabilityPerformanceTargetRate
-} from "../../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { KpiLinkedRateStorageWrapper } from "../kpiLinkedRate/KpiLinkedRateStorageWrapper.sol";
 
 abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinkedRateStorageWrapper {

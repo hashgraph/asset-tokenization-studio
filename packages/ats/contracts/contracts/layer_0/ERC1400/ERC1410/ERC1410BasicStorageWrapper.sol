@@ -57,10 +57,4 @@ abstract contract ERC1410BasicStorageWrapper is IERC1410StorageWrapper, ERC20Sto
 
         return bytes32(0);
     }
-
-    function _beforeTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal virtual;
-
-    function _afterTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal virtual;
-
-    function _addPartitionTo(uint256 _value, address _account, bytes32 _partition) internal virtual;
 }

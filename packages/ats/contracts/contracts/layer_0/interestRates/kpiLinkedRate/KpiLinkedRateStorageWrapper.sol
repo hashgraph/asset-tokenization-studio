@@ -24,7 +24,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         bool initialized;
     }
 
-    modifier checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
+    modifier checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) override {
         if (
             _newInterestRate.minRate > _newInterestRate.baseRate || _newInterestRate.baseRate > _newInterestRate.maxRate
         ) {
@@ -33,7 +33,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         _;
     }
 
-    modifier checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
+    modifier checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) override {
         if (
             _newImpactData.maxDeviationFloor > _newImpactData.baseLine ||
             _newImpactData.baseLine > _newImpactData.maxDeviationCap
@@ -72,8 +72,6 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
 
         _kpiLinkedRateStorage().kpiOracle = _kpiOracle;
     }
-
-    function _triggerScheduledCrossOrderedTasks(uint256 _max) internal virtual returns (uint256);
 
     function _getInterestRate() internal view returns (IKpiLinkedRate.InterestRate memory interestRate_) {
         interestRate_ = IKpiLinkedRate.InterestRate({

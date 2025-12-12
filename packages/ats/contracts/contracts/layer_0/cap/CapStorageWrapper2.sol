@@ -16,24 +16,24 @@ abstract contract CapStorageWrapper2 is ICapStorageWrapper, LockStorageWrapper2 
         _;
     }
 
-    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
+    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) override {
         _checkNewMaxSupply(_newMaxSupply);
         _;
     }
 
-    modifier onlyValidNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) {
+    modifier onlyValidNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) override {
         _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
         _;
     }
 
     // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
+    function _setMaxSupply(uint256 _maxSupply) internal override {
         uint256 previousMaxSupply = _getMaxSupply();
         _capStorage().maxSupply = _maxSupply;
         emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
     }
 
-    function _setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) internal {
+    function _setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) internal override {
         uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(_partition);
         _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
         emit MaxSupplyByPartitionSet(_msgSender(), _partition, _maxSupply, previousMaxSupplyByPartition);

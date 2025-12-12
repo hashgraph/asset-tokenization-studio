@@ -2,9 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {
-    IScheduledBalanceAdjustments
-} from "../../../layer_2/interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol";
-import {
     ScheduledCouponListingStorageWrapper
 } from "../scheduledCouponListing/ScheduledCouponListingStorageWrapper.sol";
 import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
@@ -46,8 +43,6 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponLi
         );
         _adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
-
-    function _adjustBalances(uint256 _factor, uint8 _decimals) internal virtual;
 
     function _getScheduledBalanceAdjustmentCount() internal view returns (uint256) {
         return ScheduledTasksLib.getScheduledTaskCount(_scheduledBalanceAdjustmentStorage());

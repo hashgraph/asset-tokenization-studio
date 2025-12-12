@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    IScheduledCouponListing
-} from "../../../layer_2/interfaces/scheduledTasks/scheduledCouponListing/IScheduledCouponListing.sol";
 import { ScheduledSnapshotsStorageWrapper } from "../scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol";
 import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import { _SCHEDULED_COUPON_LISTING_STORAGE_POSITION } from "../../constants/storagePositions.sol";
@@ -45,9 +42,6 @@ abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStor
 
         _updateCorporateActionResult(actionId, COUPON_LISTING_RESULT_ID, abi.encodePacked(pos));
     }
-
-    function _addToCouponsOrderedList(uint256 _couponID) internal virtual;
-    function _getCouponsOrderedListTotal() internal view virtual returns (uint256 total_);
 
     function _getScheduledCouponListingCount() internal view returns (uint256) {
         return ScheduledTasksLib.getScheduledTaskCount(_scheduledCouponListingStorage());

@@ -9,7 +9,7 @@ abstract contract Common is TransferAndLockStorageWrapper {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();
 
-    modifier onlyUninitialized(bool _initialized) {
+    modifier onlyUninitialized(bool _initialized) override {
         _checkUninitialized(_initialized);
         _;
     }
@@ -19,17 +19,17 @@ abstract contract Common is TransferAndLockStorageWrapper {
         _;
     }
 
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
+    modifier onlyUnProtectedPartitionsOrWildCardRole() override {
         _checkUnProtectedPartitionsOrWildCardRole();
         _;
     }
 
-    modifier onlyClearingDisabled() {
+    modifier onlyClearingDisabled() override {
         _checkClearingDisabled();
         _;
     }
 
-    function _checkUnProtectedPartitionsOrWildCardRole() internal view {
+    function _checkUnProtectedPartitionsOrWildCardRole() internal view override {
         if (_arePartitionsProtected() && !_hasRole(_WILD_CARD_ROLE, _msgSender())) {
             revert PartitionsAreProtectedAndNoRole(_msgSender(), _WILD_CARD_ROLE);
         }

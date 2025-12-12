@@ -71,12 +71,12 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
         Snapshots totalTokenHoldersSnapshots;
     }
 
-    function _takeSnapshot() internal returns (uint256 snapshotID_) {
+    function _takeSnapshot() internal override returns (uint256 snapshotID_) {
         snapshotID_ = _snapshot();
         emit SnapshotTaken(_msgSender(), snapshotID_);
     }
 
-    function _snapshot() internal returns (uint256) {
+    function _snapshot() internal override returns (uint256) {
         _snapshotStorage().currentSnapshotId.increment();
 
         uint256 currentId = _getCurrentSnapshotId();
@@ -122,7 +122,7 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
         }
     }
 
-    function _getCurrentSnapshotId() internal view returns (uint256) {
+    function _getCurrentSnapshotId() internal view override returns (uint256) {
         return _snapshotStorage().currentSnapshotId.current();
     }
 
@@ -141,7 +141,7 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
         return (found, found ? snapshots.values[index] : address(0));
     }
 
-    function _indexFor(uint256 snapshotId, uint256[] storage ids) internal view returns (bool, uint256) {
+    function _indexFor(uint256 snapshotId, uint256[] storage ids) internal view override returns (bool, uint256) {
         if (snapshotId == 0) {
             revert SnapshotIdNull();
         }
@@ -158,7 +158,7 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
         }
     }
 
-    function _lastSnapshotId(uint256[] storage ids) internal view returns (uint256) {
+    function _lastSnapshotId(uint256[] storage ids) internal view override returns (uint256) {
         if (ids.length == 0) {
             return 0;
         } else {

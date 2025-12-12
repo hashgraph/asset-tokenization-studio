@@ -5,9 +5,6 @@ import { IKyc } from "../../../layer_1/interfaces/kyc/IKyc.sol";
 import {
     ExternalKycListManagementStorageWrapper
 } from "../externalKycLists/ExternalKycListManagementStorageWrapper.sol";
-import {
-    ExternalKycListManagementStorageWrapper
-} from "../externalKycLists/ExternalKycListManagementStorageWrapper.sol";
 import { _KYC_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { LibCommon } from "../../common/libraries/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -24,12 +21,12 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         bool internalKycActivated;
     }
 
-    modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
+    modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) override {
         _checkValidDates(_validFrom, _validTo);
         _;
     }
 
-    modifier onlyValidKycStatus(IKyc.KycStatus _kycStatus, address _account) {
+    modifier onlyValidKycStatus(IKyc.KycStatus _kycStatus, address _account) override {
         _checkValidKycStatus(_kycStatus, _account);
         _;
     }

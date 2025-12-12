@@ -6,7 +6,6 @@ import { HoldStorageWrapper1 } from "../hold/HoldStorageWrapper1.sol";
 import { IClearing } from "../../layer_1/interfaces/clearing/IClearing.sol";
 import { IClearingTransfer } from "../../layer_1/interfaces/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "../../layer_1/interfaces/clearing/IClearingRedeem.sol";
-import { IClearing } from "../../layer_1/interfaces/clearing/IClearing.sol";
 import { IClearingHoldCreation } from "../../layer_1/interfaces/clearing/IClearingHoldCreation.sol";
 import { LibCommon } from "../common/libraries/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -16,12 +15,14 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    modifier onlyWithValidClearingId(IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier) {
+    modifier onlyWithValidClearingId(IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier)
+        override
+    {
         _checkClearingId(_clearingOperationIdentifier);
         _;
     }
 
-    modifier onlyClearingActivated() {
+    modifier onlyClearingActivated() override {
         _checkClearingActivated();
         _;
     }
@@ -29,19 +30,19 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
     modifier validateExpirationTimestamp(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired
-    ) {
+    ) override {
         _checkExpirationTimestamp(_clearingOperationIdentifier, _mustBeExpired);
         _;
     }
 
-    function _setClearing(bool _activated) internal returns (bool success_) {
+    function _setClearing(bool _activated) internal override returns (bool success_) {
         _clearingStorage().activated = _activated;
         success_ = true;
     }
 
     function _isClearingIdValid(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) internal view returns (bool) {
+    ) internal view override returns (bool) {
         return
             _clearingStorage()
             .clearingIdsByAccountAndPartitionAndTypes[_clearingOperationIdentifier.tokenHolder][
@@ -49,7 +50,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             ][_clearingOperationIdentifier.clearingOperationType].contains(_clearingOperationIdentifier.clearingId);
     }
 
-    function _isClearingActivated() internal view returns (bool) {
+    function _isClearingActivated() internal view override returns (bool) {
         return _clearingStorage().activated;
     }
 
@@ -57,7 +58,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder,
         IClearing.ClearingOperationType _clearingOperationType
-    ) internal view returns (uint256) {
+    ) internal view override returns (uint256) {
         return
             _clearingStorage()
             .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][_clearingOperationType].length();
@@ -65,7 +66,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
 
     function _getClearingBasicInfo(
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
-    ) internal view returns (IClearing.ClearingOperationBasicInfo memory clearingOperationBasicInfo_) {
+    ) internal view override returns (IClearing.ClearingOperationBasicInfo memory clearingOperationBasicInfo_) {
         if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem) {
             IClearingTransfer.ClearingRedeemData memory clearingRedeemData = _getClearingRedeemForByPartition(
                 _clearingOperationIdentifier.partition,
@@ -114,7 +115,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         IClearing.ClearingOperationType _clearingOperationType,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (uint256[] memory clearingsId_) {
+    ) internal view override returns (uint256[] memory clearingsId_) {
         return
             _clearingStorage()
             .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][_clearingOperationType].getFromSet(
@@ -128,7 +129,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         address _tokenHolder,
         IClearing.ClearingOperationType _operationType,
         uint256 _clearingId
-    ) internal view returns (address thirdParty_) {
+    ) internal view override returns (address thirdParty_) {
         thirdParty_ = _clearingStorage().clearingThirdPartyByAccountPartitionTypeAndId[_tokenHolder][_partition][
             _operationType
         ][_clearingId];
@@ -138,7 +139,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) internal view returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_) {
+    ) internal view override returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_) {
         clearingTransferData_ = _clearingStorage().clearingTransferByAccountPartitionAndId[_tokenHolder][_partition][
             _clearingId
         ];
@@ -148,7 +149,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) internal view returns (IClearingRedeem.ClearingRedeemData memory clearingRedeemData_) {
+    ) internal view override returns (IClearingRedeem.ClearingRedeemData memory clearingRedeemData_) {
         clearingRedeemData_ = _clearingStorage().clearingRedeemByAccountPartitionAndId[_tokenHolder][_partition][
             _clearingId
         ];
@@ -158,27 +159,27 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) internal view returns (IClearingHoldCreation.ClearingHoldCreationData memory clearingHoldCreationData_) {
+    ) internal view override returns (IClearingHoldCreation.ClearingHoldCreationData memory clearingHoldCreationData_) {
         clearingHoldCreationData_ = _clearingStorage().clearingHoldCreationByAccountPartitionAndId[_tokenHolder][
             _partition
         ][_clearingId];
     }
 
-    function _getClearedAmountFor(address _tokenHolder) internal view returns (uint256 amount_) {
+    function _getClearedAmountFor(address _tokenHolder) internal view override returns (uint256 amount_) {
         return _clearingStorage().totalClearedAmountByAccount[_tokenHolder];
     }
 
     function _getClearedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view returns (uint256 amount_) {
+    ) internal view override returns (uint256 amount_) {
         return _clearingStorage().totalClearedAmountByAccountAndPartition[_tokenHolder][_partition];
     }
 
     function _checkExpirationTimestamp(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired
-    ) internal view {
+    ) internal view override {
         if (_isExpired(_getClearingBasicInfo(_clearingOperationIdentifier).expirationTimestamp) != _mustBeExpired) {
             if (_mustBeExpired) revert IClearing.ExpirationDateNotReached();
             revert IClearing.ExpirationDateReached();
@@ -192,7 +193,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         bytes memory _data,
         bytes memory _operatorData,
         ThirdPartyType _operatorType
-    ) internal pure returns (IClearing.ClearingTransferData memory) {
+    ) internal pure override returns (IClearing.ClearingTransferData memory) {
         return
             IClearing.ClearingTransferData({
                 amount: _amount,
@@ -210,7 +211,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         bytes memory _data,
         bytes memory _operatorData,
         ThirdPartyType _operatorType
-    ) internal pure returns (IClearing.ClearingRedeemData memory) {
+    ) internal pure override returns (IClearing.ClearingRedeemData memory) {
         return
             IClearing.ClearingRedeemData({
                 amount: _amount,
@@ -231,7 +232,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         address _to,
         bytes memory _operatorData,
         ThirdPartyType _operatorType
-    ) internal pure returns (IClearing.ClearingHoldCreationData memory) {
+    ) internal pure override returns (IClearing.ClearingHoldCreationData memory) {
         return
             IClearing.ClearingHoldCreationData({
                 amount: _amount,
@@ -251,7 +252,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         bytes32 _partition,
         uint256 _clearingId,
         IClearing.ClearingOperationType _operationType
-    ) internal pure returns (IClearing.ClearingOperationIdentifier memory) {
+    ) internal pure override returns (IClearing.ClearingOperationIdentifier memory) {
         return
             IClearing.ClearingOperationIdentifier({
                 tokenHolder: _from,
@@ -261,7 +262,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             });
     }
 
-    function _clearingStorage() internal pure returns (IClearing.ClearingDataStorage storage clearing_) {
+    function _clearingStorage() internal pure override returns (IClearing.ClearingDataStorage storage clearing_) {
         bytes32 position = _CLEARING_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -277,6 +278,10 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
 
     function _checkClearingActivated() private view {
         if (!_isClearingActivated()) revert IClearing.ClearingIsDisabled();
+    }
+
+    function _isClearingInitialized() internal view override returns (bool) {
+        return _clearingStorage().initialized;
     }
 
     function _buildClearingOperationBasicInfo(

@@ -6,11 +6,11 @@ import { _SECURITY_STORAGE_POSITION } from "../../layer_3/constants/storagePosit
 import { ISecurity } from "../../layer_3/interfaces/ISecurity.sol";
 import { EquityStorageWrapper } from "../equity/EquityStorageWrapper.sol";
 
-contract SecurityStorageWrapper is EquityStorageWrapper {
+abstract contract SecurityStorageWrapper is EquityStorageWrapper {
     function _initializeSecurity(
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    ) internal {
+    ) internal override {
         _storeRegulationData(_regulationData, _additionalSecurityData);
     }
 
@@ -26,6 +26,7 @@ contract SecurityStorageWrapper is EquityStorageWrapper {
     function _getSecurityRegulationData()
         internal
         pure
+        override
         returns (ISecurity.SecurityRegulationData memory securityRegulationData_)
     {
         securityRegulationData_ = _securityStorage();
