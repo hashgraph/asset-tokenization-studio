@@ -41,6 +41,12 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## API Documentation
+
+Once the application is running, access the interactive Swagger API documentation:
+
+- **Swagger UI**: `http://localhost:3000/swagger`
+
 ## Test
 
 ```bash
