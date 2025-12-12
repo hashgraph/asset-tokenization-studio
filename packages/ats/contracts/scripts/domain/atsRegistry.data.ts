@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-11T15:35:58.863Z
+ * Generated: 2025-12-12T10:13:51.382Z
  * Facets: 60
  * Infrastructure: 2
  *
@@ -386,8 +386,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   BondUSAReadFacet: {
     name: "BondUSAReadFacet",
     resolverKey: {
-      name: "_BOND_READ_RESOLVER_KEY",
-      value: "0xe7ca0b805514da05524faf33d2d9d9432bf1dfa53096073a7267041cfdfb6d68",
+      name: "_BOND_VARIABLE_READ_RESOLVER_KEY",
+      value: "0x624866e79d4c0a78a8dc32cbce49563cdf86eba627bd05a9821dbaa1674ac231",
     },
     inheritance: ["BondUSAReadFacetBase", "Common"],
     methods: [

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     BondUSASustainabilityPerformanceTargetRateFacet
-} from "contracts/layer_3/bondUSA/BondUSASustainabilityPerformanceTargetRateFacet.sol";
+} from "contracts/layer_3/bondUSA/sustainabilityPerformanceTargetRate/BondUSASustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BondUSAFixedRateFacet } from "../../../layer_3/bondUSA/BondUSAFixedRateFacet.sol";
+import { BondUSAFixedRateFacet } from "../../../layer_3/bondUSA/fixedRate/BondUSAFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 
