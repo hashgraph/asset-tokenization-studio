@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-12T10:13:51.382Z
- * Facets: 60
+ * Generated: 2025-12-12T11:42:22.521Z
+ * Facets: 63
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -21,6 +21,12 @@ import { FacetDefinition, ContractDefinition, StorageWrapperDefinition } from "@
 import {
   AccessControlFacet__factory,
   AccessControlFacetTimeTravel__factory,
+  AccessControlFixedRateFacet__factory,
+  AccessControlFixedRateFacetTimeTravel__factory,
+  AccessControlKpiLinkedRateFacet__factory,
+  AccessControlKpiLinkedRateFacetTimeTravel__factory,
+  AccessControlSustainabilityPerformanceTargetRateFacet__factory,
+  AccessControlSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   AdjustBalancesFacet__factory,
   AdjustBalancesFacetTimeTravel__factory,
   BondUSAFacet__factory,
@@ -150,7 +156,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ACCESS_CONTROL_RESOLVER_KEY",
       value: "0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6",
     },
-    inheritance: ["AccessControl", "IStaticFunctionSelectors"],
+    inheritance: ["AccessControlFacetBase", "Common"],
     methods: [
       { name: "applyRoles", signature: "applyRoles(bytes32[],bool[],address)", selector: "0xfcfffeec" },
       { name: "getRoleCountFor", signature: "getRoleCountFor(address)", selector: "0x8fa9b4fe" },
@@ -191,10 +197,186 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "AccountNotAssignedToRole(bytes32,address)",
         selector: "0x3ad9a7ae",
       },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "RolesNotApplied", signature: "RolesNotApplied(bytes32[],bool[],address)", selector: "0xaa4b6234" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new AccessControlFacetTimeTravel__factory(signer) : new AccessControlFacet__factory(signer),
+  },
+
+  AccessControlFixedRateFacet: {
+    name: "AccessControlFixedRateFacet",
+    resolverKey: {
+      name: "_ACCESS_CONTROL_FIXED_RATE_RESOLVER_KEY",
+      value: "0xb35ad81b5769c62538fe6a90e40db8be624645f77c1738ce582ede5da399ecb2",
+    },
+    inheritance: ["AccessControlFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      { name: "applyRoles", signature: "applyRoles(bytes32[],bool[],address)", selector: "0xfcfffeec" },
+      { name: "getRoleCountFor", signature: "getRoleCountFor(address)", selector: "0x8fa9b4fe" },
+      { name: "getRoleMemberCount", signature: "getRoleMemberCount(bytes32)", selector: "0xca15c873" },
+      { name: "getRoleMembers", signature: "getRoleMembers(bytes32,uint256,uint256)", selector: "0x2a861f57" },
+      { name: "getRolesFor", signature: "getRolesFor(address,uint256,uint256)", selector: "0xa28cf9a9" },
+      { name: "grantRole", signature: "grantRole(bytes32,address)", selector: "0x2f2ff15d" },
+      { name: "hasRole", signature: "hasRole(bytes32,address)", selector: "0x91d14854" },
+      { name: "renounceRole", signature: "renounceRole(bytes32)", selector: "0x8bb9c5bf" },
+      { name: "revokeRole", signature: "revokeRole(bytes32,address)", selector: "0xd547741f" },
+    ],
+    events: [
+      {
+        name: "RoleGranted",
+        signature: "RoleGranted(address,address,bytes32)",
+        topic0: "0x03b5d550f3da9dfe316fa35cbecc4cee6d2febeaeee1432f30504bd9ce3780a8",
+      },
+      {
+        name: "RoleRenounced",
+        signature: "RoleRenounced(address,bytes32)",
+        topic0: "0x77aa8a1aed5eadc41a8f14bcf15358ebcf49ff5263b7887e215b4b3915a10a8f",
+      },
+      {
+        name: "RoleRevoked",
+        signature: "RoleRevoked(address,address,bytes32)",
+        topic0: "0xd1c3e214f7584ab57912c23f3cead20e310547c9823c8bc891ba162e35622734",
+      },
+      {
+        name: "RolesApplied",
+        signature: "RolesApplied(bytes32[],bool[],address)",
+        topic0: "0x4267fc5085e309828a2ec01d2d3a5ad76fa27eee7beada466b9cd88872fea422",
+      },
+    ],
+    errors: [
+      { name: "AccountAssignedToRole", signature: "AccountAssignedToRole(bytes32,address)", selector: "0xa6006e94" },
+      {
+        name: "AccountNotAssignedToRole",
+        signature: "AccountNotAssignedToRole(bytes32,address)",
+        selector: "0x3ad9a7ae",
+      },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+      { name: "RolesNotApplied", signature: "RolesNotApplied(bytes32[],bool[],address)", selector: "0xaa4b6234" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new AccessControlFixedRateFacetTimeTravel__factory(signer)
+        : new AccessControlFixedRateFacet__factory(signer),
+  },
+
+  AccessControlKpiLinkedRateFacet: {
+    name: "AccessControlKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ACCESS_CONTROL_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x465c95eea6723a1645e5399789cee702b19d0bcd0ad3f894270aa25488fb4ab9",
+    },
+    inheritance: ["AccessControlFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      { name: "applyRoles", signature: "applyRoles(bytes32[],bool[],address)", selector: "0xfcfffeec" },
+      { name: "getRoleCountFor", signature: "getRoleCountFor(address)", selector: "0x8fa9b4fe" },
+      { name: "getRoleMemberCount", signature: "getRoleMemberCount(bytes32)", selector: "0xca15c873" },
+      { name: "getRoleMembers", signature: "getRoleMembers(bytes32,uint256,uint256)", selector: "0x2a861f57" },
+      { name: "getRolesFor", signature: "getRolesFor(address,uint256,uint256)", selector: "0xa28cf9a9" },
+      { name: "grantRole", signature: "grantRole(bytes32,address)", selector: "0x2f2ff15d" },
+      { name: "hasRole", signature: "hasRole(bytes32,address)", selector: "0x91d14854" },
+      { name: "renounceRole", signature: "renounceRole(bytes32)", selector: "0x8bb9c5bf" },
+      { name: "revokeRole", signature: "revokeRole(bytes32,address)", selector: "0xd547741f" },
+    ],
+    events: [
+      {
+        name: "RoleGranted",
+        signature: "RoleGranted(address,address,bytes32)",
+        topic0: "0x03b5d550f3da9dfe316fa35cbecc4cee6d2febeaeee1432f30504bd9ce3780a8",
+      },
+      {
+        name: "RoleRenounced",
+        signature: "RoleRenounced(address,bytes32)",
+        topic0: "0x77aa8a1aed5eadc41a8f14bcf15358ebcf49ff5263b7887e215b4b3915a10a8f",
+      },
+      {
+        name: "RoleRevoked",
+        signature: "RoleRevoked(address,address,bytes32)",
+        topic0: "0xd1c3e214f7584ab57912c23f3cead20e310547c9823c8bc891ba162e35622734",
+      },
+      {
+        name: "RolesApplied",
+        signature: "RolesApplied(bytes32[],bool[],address)",
+        topic0: "0x4267fc5085e309828a2ec01d2d3a5ad76fa27eee7beada466b9cd88872fea422",
+      },
+    ],
+    errors: [
+      { name: "AccountAssignedToRole", signature: "AccountAssignedToRole(bytes32,address)", selector: "0xa6006e94" },
+      {
+        name: "AccountNotAssignedToRole",
+        signature: "AccountNotAssignedToRole(bytes32,address)",
+        selector: "0x3ad9a7ae",
+      },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "RolesNotApplied", signature: "RolesNotApplied(bytes32[],bool[],address)", selector: "0xaa4b6234" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new AccessControlKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new AccessControlKpiLinkedRateFacet__factory(signer),
+  },
+
+  AccessControlSustainabilityPerformanceTargetRateFacet: {
+    name: "AccessControlSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ACCESS_CONTROL_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x9d13e61abd630355ccae4279993868d7cf3b04d4368a0fedcefe6fec3fabaa0c",
+    },
+    inheritance: ["AccessControlFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "applyRoles", signature: "applyRoles(bytes32[],bool[],address)", selector: "0xfcfffeec" },
+      { name: "getRoleCountFor", signature: "getRoleCountFor(address)", selector: "0x8fa9b4fe" },
+      { name: "getRoleMemberCount", signature: "getRoleMemberCount(bytes32)", selector: "0xca15c873" },
+      { name: "getRoleMembers", signature: "getRoleMembers(bytes32,uint256,uint256)", selector: "0x2a861f57" },
+      { name: "getRolesFor", signature: "getRolesFor(address,uint256,uint256)", selector: "0xa28cf9a9" },
+      { name: "grantRole", signature: "grantRole(bytes32,address)", selector: "0x2f2ff15d" },
+      { name: "hasRole", signature: "hasRole(bytes32,address)", selector: "0x91d14854" },
+      { name: "renounceRole", signature: "renounceRole(bytes32)", selector: "0x8bb9c5bf" },
+      { name: "revokeRole", signature: "revokeRole(bytes32,address)", selector: "0xd547741f" },
+    ],
+    events: [
+      {
+        name: "RoleGranted",
+        signature: "RoleGranted(address,address,bytes32)",
+        topic0: "0x03b5d550f3da9dfe316fa35cbecc4cee6d2febeaeee1432f30504bd9ce3780a8",
+      },
+      {
+        name: "RoleRenounced",
+        signature: "RoleRenounced(address,bytes32)",
+        topic0: "0x77aa8a1aed5eadc41a8f14bcf15358ebcf49ff5263b7887e215b4b3915a10a8f",
+      },
+      {
+        name: "RoleRevoked",
+        signature: "RoleRevoked(address,address,bytes32)",
+        topic0: "0xd1c3e214f7584ab57912c23f3cead20e310547c9823c8bc891ba162e35622734",
+      },
+      {
+        name: "RolesApplied",
+        signature: "RolesApplied(bytes32[],bool[],address)",
+        topic0: "0x4267fc5085e309828a2ec01d2d3a5ad76fa27eee7beada466b9cd88872fea422",
+      },
+    ],
+    errors: [
+      { name: "AccountAssignedToRole", signature: "AccountAssignedToRole(bytes32,address)", selector: "0xa6006e94" },
+      {
+        name: "AccountNotAssignedToRole",
+        signature: "AccountNotAssignedToRole(bytes32,address)",
+        selector: "0x3ad9a7ae",
+      },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+      { name: "RolesNotApplied", signature: "RolesNotApplied(bytes32[],bool[],address)", selector: "0xaa4b6234" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new AccessControlSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new AccessControlSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   AdjustBalancesFacet: {
@@ -2368,7 +2550,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 60 as const;
+export const TOTAL_FACETS = 63 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

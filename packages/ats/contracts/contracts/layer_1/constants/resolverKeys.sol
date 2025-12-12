@@ -6,6 +6,15 @@ pragma solidity >=0.8.0 <0.9.0;
 // keccak256('security.token.standard.accesscontrol.resolverKey');
 bytes32 constant _ACCESS_CONTROL_RESOLVER_KEY = 0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6;
 
+// keccak256('security.token.standard.accesscontrol.fixed.rate.resolverKey');
+bytes32 constant _ACCESS_CONTROL_FIXED_RATE_RESOLVER_KEY = 0xb35ad81b5769c62538fe6a90e40db8be624645f77c1738ce582ede5da399ecb2;
+
+// keccak256('security.token.standard.accesscontrol.kpilinked.rate.resolverKey');
+bytes32 constant _ACCESS_CONTROL_KPI_LINKED_RATE_RESOLVER_KEY = 0x465c95eea6723a1645e5399789cee702b19d0bcd0ad3f894270aa25488fb4ab9;
+
+// keccak256('security.token.standard.accesscontrol.SustainabilityPerformanceTarget.rate.resolverKey');
+bytes32 constant _ACCESS_CONTROL_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x9d13e61abd630355ccae4279993868d7cf3b04d4368a0fedcefe6fec3fabaa0c;
+
 // keccak256('security.token.standard.controllist.resolverKey');
 bytes32 constant _CONTROL_LIST_RESOLVER_KEY = 0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c;
 
