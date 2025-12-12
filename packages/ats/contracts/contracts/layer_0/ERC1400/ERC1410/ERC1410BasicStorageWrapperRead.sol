@@ -240,7 +240,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
         }
     }
 
-    function _checkValidAddress(address account) internal pure {
+    function _checkValidAddress(address account) internal pure override {
         if (account == address(0)) revert ZeroAddressNotAllowed();
     }
 

@@ -179,9 +179,82 @@ abstract contract Internals is Modifiers {
     function _isCapInitialized() internal view virtual returns (bool);
 
     // ===== Clearing Methods =====
+    function _clearingStorage() internal pure virtual returns (IClearing.ClearingDataStorage storage clearing_);
     function _getClearingLabafByPartition(
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
     ) internal view virtual returns (uint256);
+    function _approveClearingOperationByPartition(
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    ) internal virtual returns (bool success_, bytes memory operationData_);
+    function _cancelClearingOperationByPartition(
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    ) internal virtual returns (bool success_);
+    function _reclaimClearingOperationByPartition(
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    ) internal virtual returns (bool success_);
+    function _clearingHoldCreationCreation(
+        IClearing.ClearingOperation memory _clearingOperation,
+        address _from,
+        Hold calldata _hold,
+        bytes memory _operatorData,
+        ThirdPartyType _thirdPartyType
+    ) internal virtual returns (bool success_, uint256 clearingId_);
+    function _checkExpirationTimestamp(
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+        bool _mustBeExpired
+    ) internal view virtual;
+    function _checkExpirationTimestamp(uint256 _expirationTimestamp) internal view virtual;
+    function _checkUnProtectedPartitionsOrWildCardRole() internal view virtual;
+    function _decreaseAllowedBalanceForClearing(
+        bytes32 _partition,
+        uint256 _clearingId,
+        IClearing.ClearingOperationType _clearingOperationType,
+        address _from,
+        uint256 _amount
+    ) internal virtual;
+    function _checkOperator(bytes32 _partition, address _from) internal view virtual;
+    function _getClearingHoldCreationForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId
+    ) internal view virtual returns (IClearingTransfer.ClearingHoldCreationData memory clearingHoldCreationData_);
+    function _clearingRedeemCreation(
+        IClearing.ClearingOperation memory _clearingOperation,
+        uint256 _amount,
+        address _from,
+        bytes memory _operatorData,
+        ThirdPartyType _thirdPartyType
+    ) internal virtual returns (bool success_, uint256 clearingId_);
+    function _protectedClearingRedeemByPartition(
+        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        uint256 _amount,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 clearingId_);
+    function _getClearingRedeemForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId
+    ) internal view virtual returns (IClearingTransfer.ClearingRedeemData memory clearingRedeemData_);
+    function _clearingTransferCreation(
+        IClearing.ClearingOperation memory _clearingOperation,
+        uint256 _amount,
+        address _to,
+        address _from,
+        bytes memory _operatorData,
+        ThirdPartyType _thirdPartyType
+    ) internal virtual returns (bool success_, uint256 clearingId_);
+    function _checkValidAddress(address account) internal pure virtual;
+    function _protectedClearingTransferByPartition(
+        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        uint256 _amount,
+        address _to,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 clearingId_);
+    function _getClearingTransferForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId
+    ) internal view virtual returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_);
 
     function _checkCompliance(address _from, address _to, bool _checkSender) internal view virtual;
 
@@ -269,6 +342,7 @@ abstract contract Internals is Modifiers {
         uint256 _clearingId,
         IClearing.ClearingOperationType _operationType
     ) internal pure virtual returns (IClearing.ClearingOperationIdentifier memory);
+    function _isClearingInitialized() internal view virtual returns (bool);
 
     // ===== ControlList Methods =====
     function _addToControlList(address _account) internal virtual returns (bool success_);
@@ -640,4 +714,12 @@ abstract contract Internals is Modifiers {
 
     function _addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes memory _newData) internal virtual;
     function _triggerScheduledCrossOrderedTasks(uint256 _max) internal virtual returns (uint256);
+
+    function _protectedPartitionsRole(bytes32 _partition) internal pure virtual returns (bytes32);
+
+    function _protectedClearingCreateHoldByPartition(
+        IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
+        Hold calldata _hold,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 clearingId_);
 }

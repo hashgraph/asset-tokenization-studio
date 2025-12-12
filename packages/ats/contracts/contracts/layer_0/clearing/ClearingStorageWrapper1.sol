@@ -15,12 +15,14 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    modifier onlyWithValidClearingId(IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier) {
+    modifier onlyWithValidClearingId(IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier)
+        override
+    {
         _checkClearingId(_clearingOperationIdentifier);
         _;
     }
 
-    modifier onlyClearingActivated() {
+    modifier onlyClearingActivated() override {
         _checkClearingActivated();
         _;
     }
@@ -28,7 +30,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
     modifier validateExpirationTimestamp(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired
-    ) {
+    ) override {
         _checkExpirationTimestamp(_clearingOperationIdentifier, _mustBeExpired);
         _;
     }
@@ -177,7 +179,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
     function _checkExpirationTimestamp(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired
-    ) internal view {
+    ) internal view override {
         if (_isExpired(_getClearingBasicInfo(_clearingOperationIdentifier).expirationTimestamp) != _mustBeExpired) {
             if (_mustBeExpired) revert IClearing.ExpirationDateNotReached();
             revert IClearing.ExpirationDateReached();
@@ -260,7 +262,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             });
     }
 
-    function _clearingStorage() internal pure returns (IClearing.ClearingDataStorage storage clearing_) {
+    function _clearingStorage() internal pure override returns (IClearing.ClearingDataStorage storage clearing_) {
         bytes32 position = _CLEARING_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -276,6 +278,10 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
 
     function _checkClearingActivated() private view {
         if (!_isClearingActivated()) revert IClearing.ClearingIsDisabled();
+    }
+
+    function _isClearingInitialized() internal view override returns (bool) {
+        return _clearingStorage().initialized;
     }
 
     function _buildClearingOperationBasicInfo(

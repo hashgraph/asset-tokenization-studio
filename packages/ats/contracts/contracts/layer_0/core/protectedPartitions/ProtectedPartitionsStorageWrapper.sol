@@ -250,7 +250,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         if (!_arePartitionsProtected()) revert PartitionsAreUnProtected();
     }
 
-    function _protectedPartitionsRole(bytes32 _partition) internal pure returns (bytes32) {
+    function _protectedPartitionsRole(bytes32 _partition) internal pure override returns (bytes32) {
         return keccak256(abi.encodePacked(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));
     }
 

@@ -24,7 +24,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         uint256 _amount,
         address _to,
         bytes calldata _signature
-    ) internal returns (bool success_, uint256 clearingId_) {
+    ) internal override returns (bool success_, uint256 clearingId_) {
         checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
@@ -51,7 +51,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
         Hold calldata _hold,
         bytes calldata _signature
-    ) internal returns (bool success_, uint256 clearingId_) {
+    ) internal override returns (bool success_, uint256 clearingId_) {
         checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
@@ -77,7 +77,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature
-    ) internal returns (bool success_, uint256 clearingId_) {
+    ) internal override returns (bool success_, uint256 clearingId_) {
         checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
@@ -134,7 +134,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         address _from,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
-    ) internal returns (bool success_, uint256 clearingId_) {
+    ) internal override returns (bool success_, uint256 clearingId_) {
         bytes memory data = _clearingOperation.data;
         uint256 expirationTimestamp = _clearingOperation.expirationTimestamp;
 
@@ -170,7 +170,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         address _from,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
-    ) internal returns (bool success_, uint256 clearingId_) {
+    ) internal override returns (bool success_, uint256 clearingId_) {
         clearingId_ = _operateClearingCreation(
             _clearingOperation,
             _from,
@@ -208,7 +208,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         Hold calldata _hold,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
-    ) internal returns (bool success_, uint256 clearingId_) {
+    ) internal override returns (bool success_, uint256 clearingId_) {
         clearingId_ = _operateClearingCreation(
             _clearingOperation,
             _from,
@@ -246,7 +246,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
 
     function _approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) internal returns (bool success_, bytes memory operationData_) {
+    ) internal override returns (bool success_, bytes memory operationData_) {
         return
             _handleClearingOperationByPartition(
                 _clearingOperationIdentifier,
@@ -256,7 +256,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
 
     function _cancelClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) internal returns (bool success_) {
+    ) internal override returns (bool success_) {
         (success_, ) = _handleClearingOperationByPartition(
             _clearingOperationIdentifier,
             IClearingActions.ClearingActionType.Cancel
@@ -265,7 +265,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
 
     function _reclaimClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) internal returns (bool success_) {
+    ) internal override returns (bool success_) {
         (success_, ) = _handleClearingOperationByPartition(
             _clearingOperationIdentifier,
             IClearingActions.ClearingActionType.Reclaim
@@ -491,7 +491,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         IClearing.ClearingOperationType _clearingOperationType,
         address _from,
         uint256 _amount
-    ) internal {
+    ) internal override {
         address spender = _msgSender();
         _decreaseAllowedBalance(_from, spender, _amount);
         _clearingStorage().clearingThirdPartyByAccountPartitionTypeAndId[_from][_partition][_clearingOperationType][
@@ -553,7 +553,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) internal view returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_) {
+    ) internal view override returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_) {
         clearingTransferData_ = _getClearingTransferForByPartition(_partition, _tokenHolder, _clearingId);
 
         clearingTransferData_.amount *= _calculateFactor(
@@ -573,7 +573,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) internal view returns (IClearingTransfer.ClearingRedeemData memory clearingRedeemData_) {
+    ) internal view override returns (IClearingTransfer.ClearingRedeemData memory clearingRedeemData_) {
         clearingRedeemData_ = _getClearingRedeemForByPartition(_partition, _tokenHolder, _clearingId);
 
         clearingRedeemData_.amount *= _calculateFactor(
@@ -593,7 +593,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId
-    ) internal view returns (IClearingTransfer.ClearingHoldCreationData memory clearingHoldCreationData_) {
+    ) internal view override returns (IClearingTransfer.ClearingHoldCreationData memory clearingHoldCreationData_) {
         clearingHoldCreationData_ = _getClearingHoldCreationForByPartition(_partition, _tokenHolder, _clearingId);
 
         clearingHoldCreationData_.amount *= _calculateFactor(

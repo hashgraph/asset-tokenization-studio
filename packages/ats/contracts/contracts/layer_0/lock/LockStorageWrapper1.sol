@@ -23,7 +23,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     error WrongExpirationTimestamp();
     error LockExpirationNotReached();
 
-    modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) {
+    modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) override {
         _checkExpirationTimestamp(_expirationTimestamp);
         _;
     }
@@ -170,7 +170,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         return _lockStorage().lockIdsByAccountAndPartition[_tokenHolder][_partition].contains(_lockId);
     }
 
-    function _checkExpirationTimestamp(uint256 _expirationTimestamp) internal view {
+    function _checkExpirationTimestamp(uint256 _expirationTimestamp) internal view override {
         if (_expirationTimestamp < _blockTimestamp()) revert WrongExpirationTimestamp();
     }
 

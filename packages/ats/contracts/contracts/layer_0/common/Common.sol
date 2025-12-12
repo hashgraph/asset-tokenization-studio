@@ -29,7 +29,7 @@ abstract contract Common is TransferAndLockStorageWrapper {
         _;
     }
 
-    function _checkUnProtectedPartitionsOrWildCardRole() internal view {
+    function _checkUnProtectedPartitionsOrWildCardRole() internal view override {
         if (_arePartitionsProtected() && !_hasRole(_WILD_CARD_ROLE, _msgSender())) {
             revert PartitionsAreProtectedAndNoRole(_msgSender(), _WILD_CARD_ROLE);
         }

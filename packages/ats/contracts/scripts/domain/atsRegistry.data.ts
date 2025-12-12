@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-12T12:48:05.151Z
- * Facets: 66
+ * Generated: 2025-12-12T13:37:08.410Z
+ * Facets: 81
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -55,14 +55,44 @@ import {
   CapSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ClearingActionsFacet__factory,
   ClearingActionsFacetTimeTravel__factory,
+  ClearingActionsFixedRateFacet__factory,
+  ClearingActionsFixedRateFacetTimeTravel__factory,
+  ClearingActionsKpiLinkedRateFacet__factory,
+  ClearingActionsKpiLinkedRateFacetTimeTravel__factory,
+  ClearingActionsSustainabilityPerformanceTargetRateFacet__factory,
+  ClearingActionsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ClearingHoldCreationFacet__factory,
   ClearingHoldCreationFacetTimeTravel__factory,
+  ClearingHoldCreationFixedRateFacet__factory,
+  ClearingHoldCreationFixedRateFacetTimeTravel__factory,
+  ClearingHoldCreationKpiLinkedRateFacet__factory,
+  ClearingHoldCreationKpiLinkedRateFacetTimeTravel__factory,
+  ClearingHoldCreationSustainabilityPerformanceTargetRateFacet__factory,
+  ClearingHoldCreationSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ClearingReadFacet__factory,
   ClearingReadFacetTimeTravel__factory,
+  ClearingReadFixedRateFacet__factory,
+  ClearingReadFixedRateFacetTimeTravel__factory,
+  ClearingReadKpiLinkedRateFacet__factory,
+  ClearingReadKpiLinkedRateFacetTimeTravel__factory,
+  ClearingReadSustainabilityPerformanceTargetRateFacet__factory,
+  ClearingReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ClearingRedeemFacet__factory,
   ClearingRedeemFacetTimeTravel__factory,
+  ClearingRedeemFixedRateFacet__factory,
+  ClearingRedeemFixedRateFacetTimeTravel__factory,
+  ClearingRedeemKpiLinkedRateFacet__factory,
+  ClearingRedeemKpiLinkedRateFacetTimeTravel__factory,
+  ClearingRedeemSustainabilityPerformanceTargetRateFacet__factory,
+  ClearingRedeemSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ClearingTransferFacet__factory,
   ClearingTransferFacetTimeTravel__factory,
+  ClearingTransferFixedRateFacet__factory,
+  ClearingTransferFixedRateFacetTimeTravel__factory,
+  ClearingTransferKpiLinkedRateFacet__factory,
+  ClearingTransferKpiLinkedRateFacetTimeTravel__factory,
+  ClearingTransferSustainabilityPerformanceTargetRateFacet__factory,
+  ClearingTransferSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ControlListFacet__factory,
   ControlListFacetTimeTravel__factory,
   CorporateActionsFacet__factory,
@@ -1334,7 +1364,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CLEARING_ACTIONS_RESOLVER_KEY",
       value: "0x5472dfc5c92ad7a8651518ea7d3854d3b6494e5bcaa19f91cd61bf93bf6f2a74",
     },
-    inheritance: ["ClearingActions", "IStaticFunctionSelectors"],
+    inheritance: ["ClearingActionsFacetBase", "Common"],
     methods: [
       {
         name: "activateClearing",
@@ -1402,8 +1432,265 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x0732b59e2bff7ce1143581074f475d0ac1c2f9f702f6380def68b47959e48f7a",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ClearingActionsFacetTimeTravel__factory(signer) : new ClearingActionsFacet__factory(signer),
+  },
+
+  ClearingActionsFixedRateFacet: {
+    name: "ClearingActionsFixedRateFacet",
+    resolverKey: {
+      name: "_CLEARING_FIXED_RATE_RESOLVER_KEY",
+      value: "0x6ca7703c5d3c9cb4f6aec6434161c5b69d474332179385500feed2decb7736b2",
+    },
+    inheritance: ["ClearingActionsFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "activateClearing",
+        signature: "function activateClearing() returns (bool success_)",
+        selector: "0xab2d18a9",
+      },
+      {
+        name: "approveClearingOperationByPartition",
+        signature:
+          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0xd849cea2",
+      },
+      {
+        name: "cancelClearingOperationByPartition",
+        signature:
+          "function cancelClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0x679141fb",
+      },
+      {
+        name: "deactivateClearing",
+        signature: "function deactivateClearing() returns (bool success_)",
+        selector: "0x65c21860",
+      },
+      {
+        name: "initializeClearing",
+        signature: "function initializeClearing(bool _clearingActive)",
+        selector: "0x86a0b46a",
+      },
+      {
+        name: "isClearingActivated",
+        signature: "function isClearingActivated() view returns (bool)",
+        selector: "0x4b4d8990",
+      },
+      {
+        name: "reclaimClearingOperationByPartition",
+        signature:
+          "function reclaimClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0x67e57fe2",
+      },
+    ],
+    events: [
+      {
+        name: "ClearingActivated",
+        signature: "ClearingActivated(address)",
+        topic0: "0x569080e4e18c204a1d28f09348d781d7cfb170428b2fd33e1f9b7df132674e15",
+      },
+      {
+        name: "ClearingDeactivated",
+        signature: "ClearingDeactivated(address)",
+        topic0: "0xdb053585e5b33d19247ef59f5b465bcbb9774e6e5ce23932a7e3ffe829cd80a1",
+      },
+      {
+        name: "ClearingOperationApproved",
+        signature: "ClearingOperationApproved(address,address,bytes32,uint256,IClearing.ClearingOperationType,bytes)",
+        topic0: "0x02f980b59ce0d0d56d120ea10fd65c1761039caa1b51c65ab99a770ecbf956e9",
+      },
+      {
+        name: "ClearingOperationCanceled",
+        signature: "ClearingOperationCanceled(address,address,bytes32,uint256,IClearing.ClearingOperationType)",
+        topic0: "0x730f579c3f3d2d652106a07acfb467c6ad517dde94018569f5a1def7c0c4a0ad",
+      },
+      {
+        name: "ClearingOperationReclaimed",
+        signature: "ClearingOperationReclaimed(address,address,bytes32,uint256,IClearing.ClearingOperationType)",
+        topic0: "0x0732b59e2bff7ce1143581074f475d0ac1c2f9f702f6380def68b47959e48f7a",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingActionsFixedRateFacetTimeTravel__factory(signer)
+        : new ClearingActionsFixedRateFacet__factory(signer),
+  },
+
+  ClearingActionsKpiLinkedRateFacet: {
+    name: "ClearingActionsKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_CLEARING_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xcf4bc5b86b677595f3c2e5729878646806def9ea3b02f2d1cb2e149ed18e6b0e",
+    },
+    inheritance: ["ClearingActionsFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "activateClearing",
+        signature: "function activateClearing() returns (bool success_)",
+        selector: "0xab2d18a9",
+      },
+      {
+        name: "approveClearingOperationByPartition",
+        signature:
+          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0xd849cea2",
+      },
+      {
+        name: "cancelClearingOperationByPartition",
+        signature:
+          "function cancelClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0x679141fb",
+      },
+      {
+        name: "deactivateClearing",
+        signature: "function deactivateClearing() returns (bool success_)",
+        selector: "0x65c21860",
+      },
+      {
+        name: "initializeClearing",
+        signature: "function initializeClearing(bool _clearingActive)",
+        selector: "0x86a0b46a",
+      },
+      {
+        name: "isClearingActivated",
+        signature: "function isClearingActivated() view returns (bool)",
+        selector: "0x4b4d8990",
+      },
+      {
+        name: "reclaimClearingOperationByPartition",
+        signature:
+          "function reclaimClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0x67e57fe2",
+      },
+    ],
+    events: [
+      {
+        name: "ClearingActivated",
+        signature: "ClearingActivated(address)",
+        topic0: "0x569080e4e18c204a1d28f09348d781d7cfb170428b2fd33e1f9b7df132674e15",
+      },
+      {
+        name: "ClearingDeactivated",
+        signature: "ClearingDeactivated(address)",
+        topic0: "0xdb053585e5b33d19247ef59f5b465bcbb9774e6e5ce23932a7e3ffe829cd80a1",
+      },
+      {
+        name: "ClearingOperationApproved",
+        signature: "ClearingOperationApproved(address,address,bytes32,uint256,IClearing.ClearingOperationType,bytes)",
+        topic0: "0x02f980b59ce0d0d56d120ea10fd65c1761039caa1b51c65ab99a770ecbf956e9",
+      },
+      {
+        name: "ClearingOperationCanceled",
+        signature: "ClearingOperationCanceled(address,address,bytes32,uint256,IClearing.ClearingOperationType)",
+        topic0: "0x730f579c3f3d2d652106a07acfb467c6ad517dde94018569f5a1def7c0c4a0ad",
+      },
+      {
+        name: "ClearingOperationReclaimed",
+        signature: "ClearingOperationReclaimed(address,address,bytes32,uint256,IClearing.ClearingOperationType)",
+        topic0: "0x0732b59e2bff7ce1143581074f475d0ac1c2f9f702f6380def68b47959e48f7a",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingActionsKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ClearingActionsKpiLinkedRateFacet__factory(signer),
+  },
+
+  ClearingActionsSustainabilityPerformanceTargetRateFacet: {
+    name: "ClearingActionsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xe0882e1b46f0defd1ae995da479b696f8adecf040dffac36e0c92cefa5e257e4",
+    },
+    inheritance: ["ClearingActionsFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "activateClearing",
+        signature: "function activateClearing() returns (bool success_)",
+        selector: "0xab2d18a9",
+      },
+      {
+        name: "approveClearingOperationByPartition",
+        signature:
+          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0xd849cea2",
+      },
+      {
+        name: "cancelClearingOperationByPartition",
+        signature:
+          "function cancelClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0x679141fb",
+      },
+      {
+        name: "deactivateClearing",
+        signature: "function deactivateClearing() returns (bool success_)",
+        selector: "0x65c21860",
+      },
+      {
+        name: "initializeClearing",
+        signature: "function initializeClearing(bool _clearingActive)",
+        selector: "0x86a0b46a",
+      },
+      {
+        name: "isClearingActivated",
+        signature: "function isClearingActivated() view returns (bool)",
+        selector: "0x4b4d8990",
+      },
+      {
+        name: "reclaimClearingOperationByPartition",
+        signature:
+          "function reclaimClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+        selector: "0x67e57fe2",
+      },
+    ],
+    events: [
+      {
+        name: "ClearingActivated",
+        signature: "ClearingActivated(address)",
+        topic0: "0x569080e4e18c204a1d28f09348d781d7cfb170428b2fd33e1f9b7df132674e15",
+      },
+      {
+        name: "ClearingDeactivated",
+        signature: "ClearingDeactivated(address)",
+        topic0: "0xdb053585e5b33d19247ef59f5b465bcbb9774e6e5ce23932a7e3ffe829cd80a1",
+      },
+      {
+        name: "ClearingOperationApproved",
+        signature: "ClearingOperationApproved(address,address,bytes32,uint256,IClearing.ClearingOperationType,bytes)",
+        topic0: "0x02f980b59ce0d0d56d120ea10fd65c1761039caa1b51c65ab99a770ecbf956e9",
+      },
+      {
+        name: "ClearingOperationCanceled",
+        signature: "ClearingOperationCanceled(address,address,bytes32,uint256,IClearing.ClearingOperationType)",
+        topic0: "0x730f579c3f3d2d652106a07acfb467c6ad517dde94018569f5a1def7c0c4a0ad",
+      },
+      {
+        name: "ClearingOperationReclaimed",
+        signature: "ClearingOperationReclaimed(address,address,bytes32,uint256,IClearing.ClearingOperationType)",
+        topic0: "0x0732b59e2bff7ce1143581074f475d0ac1c2f9f702f6380def68b47959e48f7a",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingActionsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ClearingActionsSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ClearingHoldCreationFacet: {
@@ -1412,7 +1699,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CLEARING_HOLDCREATION_RESOLVER_KEY",
       value: "0x44f99a141c434fac20d69e7511932ee344d5b37b61851976c83a5df4ca468152",
     },
-    inheritance: ["ClearingHoldCreation", "IStaticFunctionSelectors"],
+    inheritance: ["ClearingHoldCreationFacetBase", "Common"],
     methods: [
       {
         name: "clearingCreateHoldByPartition",
@@ -1445,10 +1732,162 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9b646ab9",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingHoldCreationFacetTimeTravel__factory(signer)
         : new ClearingHoldCreationFacet__factory(signer),
+  },
+
+  ClearingHoldCreationFixedRateFacet: {
+    name: "ClearingHoldCreationFixedRateFacet",
+    resolverKey: {
+      name: "_CLEARING_FIXED_RATE_RESOLVER_KEY",
+      value: "0x6ca7703c5d3c9cb4f6aec6434161c5b69d474332179385500feed2decb7736b2",
+    },
+    inheritance: ["ClearingHoldCreationFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "clearingCreateHoldByPartition",
+        signature:
+          "function clearingCreateHoldByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x6ceae590",
+      },
+      {
+        name: "clearingCreateHoldFromByPartition",
+        signature:
+          "function clearingCreateHoldFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x5f1cf8c9",
+      },
+      {
+        name: "getClearingCreateHoldForByPartition",
+        signature:
+          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
+        selector: "0x190eb09b",
+      },
+      {
+        name: "operatorClearingCreateHoldByPartition",
+        signature:
+          "function operatorClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x7ab0c73f",
+      },
+      {
+        name: "protectedClearingCreateHoldByPartition",
+        signature:
+          "function protectedClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x9b646ab9",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingHoldCreationFixedRateFacetTimeTravel__factory(signer)
+        : new ClearingHoldCreationFixedRateFacet__factory(signer),
+  },
+
+  ClearingHoldCreationKpiLinkedRateFacet: {
+    name: "ClearingHoldCreationKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_CLEARING_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xcf4bc5b86b677595f3c2e5729878646806def9ea3b02f2d1cb2e149ed18e6b0e",
+    },
+    inheritance: ["ClearingHoldCreationFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "clearingCreateHoldByPartition",
+        signature:
+          "function clearingCreateHoldByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x6ceae590",
+      },
+      {
+        name: "clearingCreateHoldFromByPartition",
+        signature:
+          "function clearingCreateHoldFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x5f1cf8c9",
+      },
+      {
+        name: "getClearingCreateHoldForByPartition",
+        signature:
+          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
+        selector: "0x190eb09b",
+      },
+      {
+        name: "operatorClearingCreateHoldByPartition",
+        signature:
+          "function operatorClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x7ab0c73f",
+      },
+      {
+        name: "protectedClearingCreateHoldByPartition",
+        signature:
+          "function protectedClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x9b646ab9",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingHoldCreationKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ClearingHoldCreationKpiLinkedRateFacet__factory(signer),
+  },
+
+  ClearingHoldCreationSustainabilityPerformanceTargetRateFacet: {
+    name: "ClearingHoldCreationSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xe0882e1b46f0defd1ae995da479b696f8adecf040dffac36e0c92cefa5e257e4",
+    },
+    inheritance: ["ClearingHoldCreationFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "clearingCreateHoldByPartition",
+        signature:
+          "function clearingCreateHoldByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x6ceae590",
+      },
+      {
+        name: "clearingCreateHoldFromByPartition",
+        signature:
+          "function clearingCreateHoldFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x5f1cf8c9",
+      },
+      {
+        name: "getClearingCreateHoldForByPartition",
+        signature:
+          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
+        selector: "0x190eb09b",
+      },
+      {
+        name: "operatorClearingCreateHoldByPartition",
+        signature:
+          "function operatorClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+        selector: "0x7ab0c73f",
+      },
+      {
+        name: "protectedClearingCreateHoldByPartition",
+        signature:
+          "function protectedClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x9b646ab9",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingHoldCreationSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ClearingHoldCreationSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ClearingReadFacet: {
@@ -1457,7 +1896,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CLEARING_READ_RESOLVER_KEY",
       value: "0xebb2e29bdf4edaf4ca66a3f9b7735087f9d0474d56d856e53c94ef00596c0b1e",
     },
-    inheritance: ["ClearingRead", "IStaticFunctionSelectors"],
+    inheritance: ["ClearingReadFacetBase", "Common"],
     methods: [
       {
         name: "getClearedAmountFor",
@@ -1489,8 +1928,157 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcf38dab5",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ClearingReadFacetTimeTravel__factory(signer) : new ClearingReadFacet__factory(signer),
+  },
+
+  ClearingReadFixedRateFacet: {
+    name: "ClearingReadFixedRateFacet",
+    resolverKey: {
+      name: "_CLEARING_FIXED_RATE_RESOLVER_KEY",
+      value: "0x6ca7703c5d3c9cb4f6aec6434161c5b69d474332179385500feed2decb7736b2",
+    },
+    inheritance: ["ClearingReadFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "getClearedAmountFor",
+        signature: "function getClearedAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x46f8bc94",
+      },
+      {
+        name: "getClearedAmountForByPartition",
+        signature:
+          "function getClearedAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0xfed5a7d4",
+      },
+      {
+        name: "getClearingCountForByPartition",
+        signature:
+          "function getClearingCountForByPartition(bytes32 _partition, address _tokenHolder, uint8 _clearingOperationType) view returns (uint256 clearingCount_)",
+        selector: "0xcab70f17",
+      },
+      {
+        name: "getClearingThirdParty",
+        signature:
+          "function getClearingThirdParty(bytes32 _partition, address _tokenHolder, uint8 _clearingOpeartionType, uint256 _clearingId) view returns (address thirdParty_)",
+        selector: "0x2714916d",
+      },
+      {
+        name: "getClearingsIdForByPartition",
+        signature:
+          "function getClearingsIdForByPartition(bytes32 _partition, address _tokenHolder, uint8 _clearingOperationType, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] clearingsId_)",
+        selector: "0xcf38dab5",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingReadFixedRateFacetTimeTravel__factory(signer)
+        : new ClearingReadFixedRateFacet__factory(signer),
+  },
+
+  ClearingReadKpiLinkedRateFacet: {
+    name: "ClearingReadKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_CLEARING_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xcf4bc5b86b677595f3c2e5729878646806def9ea3b02f2d1cb2e149ed18e6b0e",
+    },
+    inheritance: ["ClearingReadFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "getClearedAmountFor",
+        signature: "function getClearedAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x46f8bc94",
+      },
+      {
+        name: "getClearedAmountForByPartition",
+        signature:
+          "function getClearedAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0xfed5a7d4",
+      },
+      {
+        name: "getClearingCountForByPartition",
+        signature:
+          "function getClearingCountForByPartition(bytes32 _partition, address _tokenHolder, uint8 _clearingOperationType) view returns (uint256 clearingCount_)",
+        selector: "0xcab70f17",
+      },
+      {
+        name: "getClearingThirdParty",
+        signature:
+          "function getClearingThirdParty(bytes32 _partition, address _tokenHolder, uint8 _clearingOpeartionType, uint256 _clearingId) view returns (address thirdParty_)",
+        selector: "0x2714916d",
+      },
+      {
+        name: "getClearingsIdForByPartition",
+        signature:
+          "function getClearingsIdForByPartition(bytes32 _partition, address _tokenHolder, uint8 _clearingOperationType, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] clearingsId_)",
+        selector: "0xcf38dab5",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingReadKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ClearingReadKpiLinkedRateFacet__factory(signer),
+  },
+
+  ClearingReadSustainabilityPerformanceTargetRateFacet: {
+    name: "ClearingReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xe0882e1b46f0defd1ae995da479b696f8adecf040dffac36e0c92cefa5e257e4",
+    },
+    inheritance: ["ClearingReadFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "getClearedAmountFor",
+        signature: "function getClearedAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x46f8bc94",
+      },
+      {
+        name: "getClearedAmountForByPartition",
+        signature:
+          "function getClearedAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0xfed5a7d4",
+      },
+      {
+        name: "getClearingCountForByPartition",
+        signature:
+          "function getClearingCountForByPartition(bytes32 _partition, address _tokenHolder, uint8 _clearingOperationType) view returns (uint256 clearingCount_)",
+        selector: "0xcab70f17",
+      },
+      {
+        name: "getClearingThirdParty",
+        signature:
+          "function getClearingThirdParty(bytes32 _partition, address _tokenHolder, uint8 _clearingOpeartionType, uint256 _clearingId) view returns (address thirdParty_)",
+        selector: "0x2714916d",
+      },
+      {
+        name: "getClearingsIdForByPartition",
+        signature:
+          "function getClearingsIdForByPartition(bytes32 _partition, address _tokenHolder, uint8 _clearingOperationType, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] clearingsId_)",
+        selector: "0xcf38dab5",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ClearingReadSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ClearingRedeemFacet: {
@@ -1499,7 +2087,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CLEARING_REDEEM_RESOLVER_KEY",
       value: "0xb341e7aa749da43976c189209de51ccdf838af9f964cd27340b914d5b2aeba97",
     },
-    inheritance: ["ClearingRedeem", "IStaticFunctionSelectors"],
+    inheritance: ["ClearingRedeemFacetBase", "Common"],
     methods: [
       {
         name: "clearingRedeemByPartition",
@@ -1532,8 +2120,160 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x498f1f65",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ClearingRedeemFacetTimeTravel__factory(signer) : new ClearingRedeemFacet__factory(signer),
+  },
+
+  ClearingRedeemFixedRateFacet: {
+    name: "ClearingRedeemFixedRateFacet",
+    resolverKey: {
+      name: "_CLEARING_FIXED_RATE_RESOLVER_KEY",
+      value: "0x6ca7703c5d3c9cb4f6aec6434161c5b69d474332179385500feed2decb7736b2",
+    },
+    inheritance: ["ClearingRedeemFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "clearingRedeemByPartition",
+        signature:
+          "function clearingRedeemByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0x39921b12",
+      },
+      {
+        name: "clearingRedeemFromByPartition",
+        signature:
+          "function clearingRedeemFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0x35114a78",
+      },
+      {
+        name: "getClearingRedeemForByPartition",
+        signature:
+          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
+        selector: "0x4ac3d940",
+      },
+      {
+        name: "operatorClearingRedeemByPartition",
+        signature:
+          "function operatorClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0xc1d6d5a0",
+      },
+      {
+        name: "protectedClearingRedeemByPartition",
+        signature:
+          "function protectedClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x498f1f65",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingRedeemFixedRateFacetTimeTravel__factory(signer)
+        : new ClearingRedeemFixedRateFacet__factory(signer),
+  },
+
+  ClearingRedeemKpiLinkedRateFacet: {
+    name: "ClearingRedeemKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_CLEARING_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xcf4bc5b86b677595f3c2e5729878646806def9ea3b02f2d1cb2e149ed18e6b0e",
+    },
+    inheritance: ["ClearingRedeemFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "clearingRedeemByPartition",
+        signature:
+          "function clearingRedeemByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0x39921b12",
+      },
+      {
+        name: "clearingRedeemFromByPartition",
+        signature:
+          "function clearingRedeemFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0x35114a78",
+      },
+      {
+        name: "getClearingRedeemForByPartition",
+        signature:
+          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
+        selector: "0x4ac3d940",
+      },
+      {
+        name: "operatorClearingRedeemByPartition",
+        signature:
+          "function operatorClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0xc1d6d5a0",
+      },
+      {
+        name: "protectedClearingRedeemByPartition",
+        signature:
+          "function protectedClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x498f1f65",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingRedeemKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ClearingRedeemKpiLinkedRateFacet__factory(signer),
+  },
+
+  ClearingRedeemSustainabilityPerformanceTargetRateFacet: {
+    name: "ClearingRedeemSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xe0882e1b46f0defd1ae995da479b696f8adecf040dffac36e0c92cefa5e257e4",
+    },
+    inheritance: ["ClearingRedeemFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "clearingRedeemByPartition",
+        signature:
+          "function clearingRedeemByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0x39921b12",
+      },
+      {
+        name: "clearingRedeemFromByPartition",
+        signature:
+          "function clearingRedeemFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0x35114a78",
+      },
+      {
+        name: "getClearingRedeemForByPartition",
+        signature:
+          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
+        selector: "0x4ac3d940",
+      },
+      {
+        name: "operatorClearingRedeemByPartition",
+        signature:
+          "function operatorClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+        selector: "0xc1d6d5a0",
+      },
+      {
+        name: "protectedClearingRedeemByPartition",
+        signature:
+          "function protectedClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x498f1f65",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingRedeemSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ClearingRedeemSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ClearingTransferFacet: {
@@ -1542,7 +2282,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CLEARING_TRANSFER_RESOLVER_KEY",
       value: "0x7399d03db62430bec60ca2c3eacf98b1b7e2253f17593ef7a226d759442e0928",
     },
-    inheritance: ["ClearingTransfer", "IStaticFunctionSelectors"],
+    inheritance: ["ClearingTransferFacetBase", "Common"],
     methods: [
       {
         name: "clearingTransferByPartition",
@@ -1575,8 +2315,160 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1f4eef27",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ClearingTransferFacetTimeTravel__factory(signer) : new ClearingTransferFacet__factory(signer),
+  },
+
+  ClearingTransferFixedRateFacet: {
+    name: "ClearingTransferFixedRateFacet",
+    resolverKey: {
+      name: "_CLEARING_FIXED_RATE_RESOLVER_KEY",
+      value: "0x6ca7703c5d3c9cb4f6aec6434161c5b69d474332179385500feed2decb7736b2",
+    },
+    inheritance: ["ClearingTransferFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "clearingTransferByPartition",
+        signature:
+          "function clearingTransferByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0xde32aaa8",
+      },
+      {
+        name: "clearingTransferFromByPartition",
+        signature:
+          "function clearingTransferFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0x5c829d67",
+      },
+      {
+        name: "getClearingTransferForByPartition",
+        signature:
+          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
+        selector: "0x6f438552",
+      },
+      {
+        name: "operatorClearingTransferByPartition",
+        signature:
+          "function operatorClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0x2ba8508d",
+      },
+      {
+        name: "protectedClearingTransferByPartition",
+        signature:
+          "function protectedClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x1f4eef27",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingTransferFixedRateFacetTimeTravel__factory(signer)
+        : new ClearingTransferFixedRateFacet__factory(signer),
+  },
+
+  ClearingTransferKpiLinkedRateFacet: {
+    name: "ClearingTransferKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_CLEARING_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xcf4bc5b86b677595f3c2e5729878646806def9ea3b02f2d1cb2e149ed18e6b0e",
+    },
+    inheritance: ["ClearingTransferFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "clearingTransferByPartition",
+        signature:
+          "function clearingTransferByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0xde32aaa8",
+      },
+      {
+        name: "clearingTransferFromByPartition",
+        signature:
+          "function clearingTransferFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0x5c829d67",
+      },
+      {
+        name: "getClearingTransferForByPartition",
+        signature:
+          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
+        selector: "0x6f438552",
+      },
+      {
+        name: "operatorClearingTransferByPartition",
+        signature:
+          "function operatorClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0x2ba8508d",
+      },
+      {
+        name: "protectedClearingTransferByPartition",
+        signature:
+          "function protectedClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x1f4eef27",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingTransferKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ClearingTransferKpiLinkedRateFacet__factory(signer),
+  },
+
+  ClearingTransferSustainabilityPerformanceTargetRateFacet: {
+    name: "ClearingTransferSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xe0882e1b46f0defd1ae995da479b696f8adecf040dffac36e0c92cefa5e257e4",
+    },
+    inheritance: ["ClearingTransferFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "clearingTransferByPartition",
+        signature:
+          "function clearingTransferByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0xde32aaa8",
+      },
+      {
+        name: "clearingTransferFromByPartition",
+        signature:
+          "function clearingTransferFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0x5c829d67",
+      },
+      {
+        name: "getClearingTransferForByPartition",
+        signature:
+          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
+        selector: "0x6f438552",
+      },
+      {
+        name: "operatorClearingTransferByPartition",
+        signature:
+          "function operatorClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+        selector: "0x2ba8508d",
+      },
+      {
+        name: "protectedClearingTransferByPartition",
+        signature:
+          "function protectedClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
+        selector: "0x1f4eef27",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ClearingTransferSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ClearingTransferSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ControlListFacet: {
@@ -4111,7 +5003,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 66 as const;
+export const TOTAL_FACETS = 81 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

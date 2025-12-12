@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { LocalContext } from "./context/LocalContext.sol";
 import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IClearing } from "contracts/layer_1/interfaces/clearing/IClearing.sol";
 
 abstract contract Modifiers is LocalContext {
     // ===== ControlList Modifiers =====
@@ -62,4 +63,16 @@ abstract contract Modifiers is LocalContext {
     // ===== Cap Modifiers =====
     modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) virtual;
     modifier onlyValidNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) virtual;
+
+    modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) virtual;
+    modifier onlyClearingActivated() virtual;
+    modifier onlyWithValidClearingId(IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier)
+        virtual;
+    modifier validateExpirationTimestamp(
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+        bool _mustBeExpired
+    ) virtual;
+
+    // ===== ERC1594 Modifiers =====
+    modifier onlyIdentified(address _from, address _to) virtual;
 }

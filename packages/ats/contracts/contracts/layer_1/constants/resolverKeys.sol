@@ -117,6 +117,15 @@ bytes32 constant _CLEARING_READ_RESOLVER_KEY = 0xebb2e29bdf4edaf4ca66a3f9b773508
 // keccak256("security.token.standard.clearing.actions.resolverKey")
 bytes32 constant _CLEARING_ACTIONS_RESOLVER_KEY = 0x5472dfc5c92ad7a8651518ea7d3854d3b6494e5bcaa19f91cd61bf93bf6f2a74;
 
+// keccak256('security.token.standard.clearing.fixed.rate.resolverKey');
+bytes32 constant _CLEARING_FIXED_RATE_RESOLVER_KEY = 0x6ca7703c5d3c9cb4f6aec6434161c5b69d474332179385500feed2decb7736b2;
+
+// keccak256('security.token.standard.clearing.kpilinked.rate.resolverKey');
+bytes32 constant _CLEARING_KPI_LINKED_RATE_RESOLVER_KEY = 0xcf4bc5b86b677595f3c2e5729878646806def9ea3b02f2d1cb2e149ed18e6b0e;
+
+// keccak256('security.token.standard.clearing.SustainabilityPerformanceTarget.rate.resolverKey');
+bytes32 constant _CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0xe0882e1b46f0defd1ae995da479b696f8adecf040dffac36e0c92cefa5e257e4;
+
 // keccak256("security.token.standard.pause.management.resolverKey")
 bytes32 constant _PAUSE_MANAGEMENT_RESOLVER_KEY = 0xadd2e196c17b4f607e327e46341eedbbbc3dce86ac90ceb3e7244b0a5f8590ac;
 

@@ -44,7 +44,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         _;
     }
 
-    modifier onlyIdentified(address _from, address _to) {
+    modifier onlyIdentified(address _from, address _to) override {
         _checkIdentity(_from, _to);
         _;
     }

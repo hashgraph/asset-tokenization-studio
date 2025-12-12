@@ -2,15 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingTransfer } from "../interfaces/clearing/IClearingTransfer.sol";
-import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import { _CLEARING_TRANSFER_RESOLVER_KEY } from "../constants/resolverKeys.sol";
 import { ClearingTransfer } from "./ClearingTransfer.sol";
+import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
 
-contract ClearingTransferFacet is ClearingTransfer, IStaticFunctionSelectors {
-    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _CLEARING_TRANSFER_RESOLVER_KEY;
-    }
-
+abstract contract ClearingTransferFacetBase is ClearingTransfer, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](5);
