@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-12T11:53:44.556Z
- * Facets: 63
+ * Generated: 2025-12-12T12:38:12.419Z
+ * Facets: 66
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -47,6 +47,12 @@ import {
   BondUSASustainabilityPerformanceTargetReadFacetTimeTravel__factory,
   CapFacet__factory,
   CapFacetTimeTravel__factory,
+  CapFixedRateFacet__factory,
+  CapFixedRateFacetTimeTravel__factory,
+  CapKpiLinkedRateFacet__factory,
+  CapKpiLinkedRateFacetTimeTravel__factory,
+  CapSustainabilityPerformanceTargetRateFacet__factory,
+  CapSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ClearingActionsFacet__factory,
   ClearingActionsFacetTimeTravel__factory,
   ClearingHoldCreationFacet__factory,
@@ -1153,37 +1159,163 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CAP_RESOLVER_KEY",
       value: "0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b",
     },
-    inheritance: ["Cap", "IStaticFunctionSelectors"],
+    inheritance: ["CapFacetBase", "Common"],
     methods: [
-      {
-        name: "getMaxSupply",
-        signature: "function getMaxSupply() view returns (uint256 maxSupply_)",
-        selector: "0x4c0f38c2",
-      },
-      {
-        name: "getMaxSupplyByPartition",
-        signature: "function getMaxSupplyByPartition(bytes32 _partition) view returns (uint256 maxSupply_)",
-        selector: "0x79f3653f",
-      },
-      {
-        name: "initialize_Cap",
-        signature:
-          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
-        selector: "0x56210c4e",
-      },
-      {
-        name: "setMaxSupply",
-        signature: "function setMaxSupply(uint256 _maxSupply) returns (bool success_)",
-        selector: "0x6f8b44b0",
-      },
+      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
+      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
+      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
+      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
       {
         name: "setMaxSupplyByPartition",
-        signature: "function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) returns (bool success_)",
+        signature: "setMaxSupplyByPartition(bytes32,uint256)",
         selector: "0x99b69647",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new CapFacetTimeTravel__factory(signer) : new CapFacet__factory(signer),
+      useTimeTravel ? new CapFixedRateFacetTimeTravel__factory(signer) : new CapFixedRateFacet__factory(signer),
+  },
+
+  CapKpiLinkedRateFacet: {
+    name: "CapKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_CAP_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xdc8cc0612bf886bcc1666e31c5de3392bee78451de7213b01fe78d560a804435",
+    },
+    inheritance: ["CapFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
+      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
+      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
+      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
+      {
+        name: "setMaxSupplyByPartition",
+        signature: "setMaxSupplyByPartition(bytes32,uint256)",
+        selector: "0x99b69647",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new CapKpiLinkedRateFacetTimeTravel__factory(signer) : new CapKpiLinkedRateFacet__factory(signer),
+  },
+
+  CapSustainabilityPerformanceTargetRateFacet: {
+    name: "CapSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CAP_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa321c5301bbccd760c5aaf08286a67948cb7d49be22c17f12aa163b324a276d0",
+    },
+    inheritance: ["CapFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
+      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
+      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
+      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
+      {
+        name: "setMaxSupplyByPartition",
+        signature: "setMaxSupplyByPartition(bytes32,uint256)",
+        selector: "0x99b69647",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new CapSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new CapSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
+  CapFixedRateFacet: {
+    name: "CapFixedRateFacet",
+    resolverKey: {
+      name: "_CAP_FIXED_RATE_RESOLVER_KEY",
+      value: "0x288b5a4b82f38369168fd49de3e5e68c76fc0394c2e89817b70a65368ba4dcf7",
+    },
+    inheritance: ["CapFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
+      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
+      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
+      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
+      {
+        name: "setMaxSupplyByPartition",
+        signature: "setMaxSupplyByPartition(bytes32,uint256)",
+        selector: "0x99b69647",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new CapFixedRateFacetTimeTravel__factory(signer) : new CapFixedRateFacet__factory(signer),
+  },
+
+  CapKpiLinkedRateFacet: {
+    name: "CapKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_CAP_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xdc8cc0612bf886bcc1666e31c5de3392bee78451de7213b01fe78d560a804435",
+    },
+    inheritance: ["CapFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
+      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
+      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
+      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
+      {
+        name: "setMaxSupplyByPartition",
+        signature: "setMaxSupplyByPartition(bytes32,uint256)",
+        selector: "0x99b69647",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new CapKpiLinkedRateFacetTimeTravel__factory(signer) : new CapKpiLinkedRateFacet__factory(signer),
+  },
+
+  CapSustainabilityPerformanceTargetRateFacet: {
+    name: "CapSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CAP_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa321c5301bbccd760c5aaf08286a67948cb7d49be22c17f12aa163b324a276d0",
+    },
+    inheritance: ["CapFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "getMaxSupply", signature: "getMaxSupply()", selector: "0x4c0f38c2" },
+      { name: "getMaxSupplyByPartition", signature: "getMaxSupplyByPartition(bytes32)", selector: "0x79f3653f" },
+      { name: "initialize_Cap", signature: "initialize_Cap(uint256,PartitionCap[])", selector: "0x91aa5bcb" },
+      { name: "setMaxSupply", signature: "setMaxSupply(uint256)", selector: "0x6f8b44b0" },
+      {
+        name: "setMaxSupplyByPartition",
+        signature: "setMaxSupplyByPartition(bytes32,uint256)",
+        selector: "0x99b69647",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new CapSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new CapSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ClearingActionsFacet: {
@@ -3969,7 +4101,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 63 as const;
+export const TOTAL_FACETS = 66 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

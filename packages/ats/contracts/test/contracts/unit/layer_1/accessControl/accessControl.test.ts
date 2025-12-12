@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import { type ResolverProxy, type AccessControl, PauseFacet } from "@contract-types";
+import { type ResolverProxy, type AccessControlFacet, PauseFacet } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -10,7 +10,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 describe("Access Control Tests", () => {
   let diamond: ResolverProxy;
   let pauseFacet: PauseFacet;
-  let accessControlFacet: AccessControl;
+  let accessControlFacet: AccessControlFacet;
   let deployer: SignerWithAddress;
   let signer_B: SignerWithAddress;
   let signer_C: SignerWithAddress;
@@ -26,7 +26,7 @@ describe("Access Control Tests", () => {
       },
     ]);
 
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address);
     deployer = base.deployer;
     pauseFacet = base.pauseFacet;
     signer_B = base.user1;

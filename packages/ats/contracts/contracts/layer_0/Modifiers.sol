@@ -58,4 +58,8 @@ abstract contract Modifiers is LocalContext {
 
     // ===== ScheduledTasks Modifiers =====
     modifier onlyValidTimestamp(uint256 _timestamp) virtual;
+
+    // ===== Cap Modifiers =====
+    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) virtual;
+    modifier onlyValidNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) virtual;
 }
