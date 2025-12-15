@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-04T15:10:02.770Z
+ * Generated: 2025-12-15T10:36:40.156Z
  * Facets: 49
  * Infrastructure: 2
  *
@@ -1072,6 +1072,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xee532f31",
       },
       { name: "transferWithData", signature: "transferWithData(address,uint256,bytes)", selector: "0x2535f762" },
+    ],
+    events: [
+      {
+        name: "TransferFromWithData",
+        signature: "TransferFromWithData(address,address,address,uint256,bytes)",
+        topic0: "0x7d32874c3a67d8bea4a75c3d32f8fda3b1d5c767d4d42b96710a820b22e31957",
+      },
+      {
+        name: "TransferWithData",
+        signature: "TransferWithData(address,address,uint256,bytes)",
+        topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
+      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1594FacetTimeTravel__factory(signer) : new ERC1594Facet__factory(signer),
