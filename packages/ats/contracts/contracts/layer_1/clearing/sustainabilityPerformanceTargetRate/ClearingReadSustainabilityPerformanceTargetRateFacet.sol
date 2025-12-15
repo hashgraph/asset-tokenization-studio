@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingReadFacetBase } from "../ClearingReadFacetBase.sol";
 import {
-    _CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
+    _CLEARING_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
 } from "contracts/layer_1/constants/resolverKeys.sol";
 import {
     CommonSustainabilityPerformanceTargetInterestRate
@@ -14,6 +14,6 @@ contract ClearingReadSustainabilityPerformanceTargetRateFacet is
     CommonSustainabilityPerformanceTargetInterestRate
 {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY;
+        staticResolverKey_ = _CLEARING_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY;
     }
 }

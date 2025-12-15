@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-12T13:37:08.410Z
+ * Generated: 2025-12-15T08:04:20.160Z
  * Facets: 81
  * Infrastructure: 2
  *
@@ -1440,8 +1440,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingActionsFixedRateFacet: {
     name: "ClearingActionsFixedRateFacet",
     resolverKey: {
-      name: "_CLEARING_FIXED_RATE_RESOLVER_KEY",
-      value: "0x6ca7703c5d3c9cb4f6aec6434161c5b69d474332179385500feed2decb7736b2",
+      name: "_CLEARING_ACTIONS_FIXED_RATE_RESOLVER_KEY",
+      value: "0x497fbb5ba36b9a6b791669e513c877ebfe079b61e0eb37afbd19b696266a0223",
     },
     inheritance: ["ClearingActionsFacetBase", "CommonFixedInterestRate"],
     methods: [
@@ -1524,8 +1524,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingActionsKpiLinkedRateFacet: {
     name: "ClearingActionsKpiLinkedRateFacet",
     resolverKey: {
-      name: "_CLEARING_KPI_LINKED_RATE_RESOLVER_KEY",
-      value: "0xcf4bc5b86b677595f3c2e5729878646806def9ea3b02f2d1cb2e149ed18e6b0e",
+      name: "_CLEARING_ACTIONS_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x4960adcd566163ba9edaee816f8739f1c788cace28ad805c136644de52929faa",
     },
     inheritance: ["ClearingActionsFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
@@ -1608,8 +1608,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingActionsSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingActionsSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
-      name: "_CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0xe0882e1b46f0defd1ae995da479b696f8adecf040dffac36e0c92cefa5e257e4",
+      name: "_CLEARING_ACTIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xae9d6d2e1d9a660994e89e185ab5a3439d2def9baa6ba47fdf854ce0a29a5033",
     },
     inheritance: ["ClearingActionsFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
@@ -1742,8 +1742,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingHoldCreationFixedRateFacet: {
     name: "ClearingHoldCreationFixedRateFacet",
     resolverKey: {
-      name: "_CLEARING_FIXED_RATE_RESOLVER_KEY",
-      value: "0x6ca7703c5d3c9cb4f6aec6434161c5b69d474332179385500feed2decb7736b2",
+      name: "_CLEARING_HOLDCREATION_FIXED_RATE_RESOLVER_KEY",
+      value: "0xf4d60b90b7a9edb9598b8c4aa2a4477e3a65750eab2cce564385f35d882a23c3",
     },
     inheritance: ["ClearingHoldCreationFacetBase", "CommonFixedInterestRate"],
     methods: [
@@ -1791,8 +1791,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingHoldCreationKpiLinkedRateFacet: {
     name: "ClearingHoldCreationKpiLinkedRateFacet",
     resolverKey: {
-      name: "_CLEARING_KPI_LINKED_RATE_RESOLVER_KEY",
-      value: "0xcf4bc5b86b677595f3c2e5729878646806def9ea3b02f2d1cb2e149ed18e6b0e",
+      name: "_CLEARING_HOLDCREATION_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x1ba40338a89cd18f2799a3e6a86f0be118236340eeff5a19a19a08d3d6e3d08c",
     },
     inheritance: ["ClearingHoldCreationFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
@@ -1840,8 +1840,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingHoldCreationSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingHoldCreationSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
-      name: "_CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0xe0882e1b46f0defd1ae995da479b696f8adecf040dffac36e0c92cefa5e257e4",
+      name: "_CLEARING_HOLDCREATION_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x0e59e36a2b1298d11c3612c3203c6d45cb185879383f5a22617c4f49495c070d",
     },
     inheritance: ["ClearingHoldCreationFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
@@ -1936,8 +1936,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingReadFixedRateFacet: {
     name: "ClearingReadFixedRateFacet",
     resolverKey: {
-      name: "_CLEARING_FIXED_RATE_RESOLVER_KEY",
-      value: "0x6ca7703c5d3c9cb4f6aec6434161c5b69d474332179385500feed2decb7736b2",
+      name: "_CLEARING_READ_FIXED_RATE_RESOLVER_KEY",
+      value: "0xcd312e798e5b62ec98cc7c8ac3547a640f68ee74e351b73397be02dab3d5b14f",
     },
     inheritance: ["ClearingReadFacetBase", "CommonFixedInterestRate"],
     methods: [
@@ -1984,8 +1984,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingReadKpiLinkedRateFacet: {
     name: "ClearingReadKpiLinkedRateFacet",
     resolverKey: {
-      name: "_CLEARING_KPI_LINKED_RATE_RESOLVER_KEY",
-      value: "0xcf4bc5b86b677595f3c2e5729878646806def9ea3b02f2d1cb2e149ed18e6b0e",
+      name: "_CLEARING_READ_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x3740ea12ff1c9c37f216ba72884079bcaabe99f51cdd9b019be5b218ba5db0e2",
     },
     inheritance: ["ClearingReadFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
@@ -2032,8 +2032,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingReadSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingReadSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
-      name: "_CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0xe0882e1b46f0defd1ae995da479b696f8adecf040dffac36e0c92cefa5e257e4",
+      name: "_CLEARING_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa188d3ee426a514ccfe03470d196ed29da48de0ae59898d9b5a30ec680515a11",
     },
     inheritance: ["ClearingReadFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
@@ -2128,8 +2128,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingRedeemFixedRateFacet: {
     name: "ClearingRedeemFixedRateFacet",
     resolverKey: {
-      name: "_CLEARING_FIXED_RATE_RESOLVER_KEY",
-      value: "0x6ca7703c5d3c9cb4f6aec6434161c5b69d474332179385500feed2decb7736b2",
+      name: "_CLEARING_REDEEM_FIXED_RATE_RESOLVER_KEY",
+      value: "0xa8edf3401d5e3f8e9a45b0992984a31a2522a24ed793e5e7980f8d66508473c9",
     },
     inheritance: ["ClearingRedeemFacetBase", "CommonFixedInterestRate"],
     methods: [
@@ -2177,8 +2177,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingRedeemKpiLinkedRateFacet: {
     name: "ClearingRedeemKpiLinkedRateFacet",
     resolverKey: {
-      name: "_CLEARING_KPI_LINKED_RATE_RESOLVER_KEY",
-      value: "0xcf4bc5b86b677595f3c2e5729878646806def9ea3b02f2d1cb2e149ed18e6b0e",
+      name: "_CLEARING_REDEEM_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xc38aaff0161104c594b7a323af3facf5beb1e304b730fcbee09f5eed74b11375",
     },
     inheritance: ["ClearingRedeemFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
@@ -2226,8 +2226,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingRedeemSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingRedeemSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
-      name: "_CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0xe0882e1b46f0defd1ae995da479b696f8adecf040dffac36e0c92cefa5e257e4",
+      name: "_CLEARING_REDEEM_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xc4731d62375990b9721357983c8f6acf3fdc78d7814919c187607f653b768d5d",
     },
     inheritance: ["ClearingRedeemFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
@@ -2323,8 +2323,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingTransferFixedRateFacet: {
     name: "ClearingTransferFixedRateFacet",
     resolverKey: {
-      name: "_CLEARING_FIXED_RATE_RESOLVER_KEY",
-      value: "0x6ca7703c5d3c9cb4f6aec6434161c5b69d474332179385500feed2decb7736b2",
+      name: "_CLEARING_TRANSFER_FIXED_RATE_RESOLVER_KEY",
+      value: "0x1ba056fe3e7ef86779515a9e7f364e84af0f60eb5f4175ac6d6e6e3f4c05fffb",
     },
     inheritance: ["ClearingTransferFacetBase", "CommonFixedInterestRate"],
     methods: [
@@ -2372,8 +2372,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingTransferKpiLinkedRateFacet: {
     name: "ClearingTransferKpiLinkedRateFacet",
     resolverKey: {
-      name: "_CLEARING_KPI_LINKED_RATE_RESOLVER_KEY",
-      value: "0xcf4bc5b86b677595f3c2e5729878646806def9ea3b02f2d1cb2e149ed18e6b0e",
+      name: "_CLEARING_TRANSFER_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x1b229a6d3b8a8ecba97d1e7c2c4a89c4cf71b9b5852317278f57384d728f8bde",
     },
     inheritance: ["ClearingTransferFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
@@ -2421,8 +2421,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ClearingTransferSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingTransferSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
-      name: "_CLEARING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0xe0882e1b46f0defd1ae995da479b696f8adecf040dffac36e0c92cefa5e257e4",
+      name: "_CLEARING_TRANSFER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x7e29efe8ee5285a43acddbe766fd9219266a74cb24ed3331b4e350d8e263d0c7",
     },
     inheritance: ["ClearingTransferFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
