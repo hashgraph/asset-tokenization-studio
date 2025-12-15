@@ -11,8 +11,8 @@
 
 import { promises as fs } from "fs";
 import { join } from "path";
-import type { DeploymentCheckpoint, CheckpointStatus } from "../types/checkpoint";
-import { warn } from "../utils/logging";
+import type { DeploymentCheckpoint, CheckpointStatus, WorkflowType } from "@scripts/infrastructure";
+import { warn } from "@scripts/infrastructure";
 
 /**
  * Parameters for creating a new checkpoint.
@@ -20,7 +20,7 @@ import { warn } from "../utils/logging";
 export interface CreateCheckpointParams {
   network: string;
   deployer: string;
-  workflowType: "newBlr" | "existingBlr";
+  workflowType: WorkflowType;
   options: Record<string, unknown>;
 }
 

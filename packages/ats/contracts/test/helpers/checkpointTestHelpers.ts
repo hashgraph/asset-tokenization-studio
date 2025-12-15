@@ -234,33 +234,30 @@ export function assertCheckpointAtStep(
 }
 
 /**
- * Create isolated test checkpoint directory.
+ * Get shared checkpoint directory path for tests.
  *
- * Returns path to a test-specific checkpoint directory that can be used
- * for integration tests without affecting production checkpoints.
+ * Returns path to the shared checkpoint directory used by both tests and production.
+ * All checkpoints (test and production) are stored in the same directory with
+ * unique filenames based on network and timestamp.
  *
- * Follows pattern: `deployments/.checkpoints-test-{suffix}` for isolation.
- *
- * @param suffix - Optional suffix for directory isolation (default: random string)
- * @returns Path to test checkpoint directory
+ * @returns Path to shared checkpoint directory
  *
  * @example
  * ```typescript
- * // Create isolated directory for test
+ * // Get shared checkpoint directory
  * const testDir = createTestCheckpointsDir()
- * // Returns: /path/to/project/deployments/.checkpoints-test-abc123
+ * // Returns: /path/to/project/deployments/.checkpoints
  *
- * // Create manager using test directory
+ * // Create manager using shared directory
  * const manager = new CheckpointManager(testDir)
  *
  * // Use manager for test...
  * const checkpoint = manager.createCheckpoint({ ... })
  * ```
  */
-export function createTestCheckpointsDir(suffix?: string): string {
-  // Use suffix or generate random suffix for isolation
-  const dirSuffix = suffix || Math.random().toString(36).substring(2, 8);
-  return join(__dirname, "../../deployments/.checkpoints-test-" + dirSuffix);
+export function createTestCheckpointsDir(): string {
+  // Return shared checkpoint directory
+  return join(__dirname, "../../deployments/.checkpoints");
 }
 
 /**
@@ -276,8 +273,8 @@ export function createTestCheckpointsDir(suffix?: string): string {
  *
  * @example
  * ```typescript
- * // Setup: Create and verify directory
- * const testDir = createTestCheckpointsDir('test-1')
+ * // Setup: Get shared directory and clean it
+ * const testDir = createTestCheckpointsDir()
  * await cleanupTestCheckpoints(testDir)
  *
  * // Run tests...

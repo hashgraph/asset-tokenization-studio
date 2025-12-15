@@ -9,7 +9,7 @@
  * @module infrastructure/checkpoint/utils
  */
 
-import type { DeploymentCheckpoint } from "../types/checkpoint";
+import type { DeploymentCheckpoint, WorkflowType } from "@scripts/infrastructure";
 import type { DeploymentOutput } from "../../workflows/deploySystemWithNewBlr";
 
 /**
@@ -132,7 +132,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
  *
  * Used for logging and error messages.
  *
- * @param step - Step number (0-6 for newBlr workflow, 0-5 for existingBlr)
+ * @param step - Step number (0-6 for newBlr workflow, 0-5 for existingBlr, 0-3 for upgradeConfigurations)
  * @param workflowType - Workflow type for context
  * @returns Step name
  *
@@ -142,7 +142,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
  * console.log(`Failed at step: ${stepName}`)
  * ```
  */
-export function getStepName(step: number, workflowType: "newBlr" | "existingBlr" = "newBlr"): string {
+export function getStepName(step: number, workflowType: WorkflowType = "newBlr"): string {
   if (workflowType === "newBlr") {
     switch (step) {
       case 0:
@@ -159,6 +159,22 @@ export function getStepName(step: number, workflowType: "newBlr" | "existingBlr"
         return "Bond Configuration";
       case 6:
         return "Factory";
+      default:
+        return `Unknown Step ${step}`;
+    }
+  } else if (workflowType === "upgradeConfigurations") {
+    // upgradeConfigurations workflow
+    switch (step) {
+      case 0:
+        return "Facets";
+      case 1:
+        return "Register Facets";
+      case 2:
+        return "Equity Configuration";
+      case 3:
+        return "Bond Configuration";
+      case 4:
+        return "Proxy Updates";
       default:
         return `Unknown Step ${step}`;
     }
@@ -189,8 +205,17 @@ export function getStepName(step: number, workflowType: "newBlr" | "existingBlr"
  * @param workflowType - Workflow type
  * @returns Total number of steps
  */
-export function getTotalSteps(workflowType: "newBlr" | "existingBlr" = "newBlr"): number {
-  return workflowType === "newBlr" ? 7 : 6;
+export function getTotalSteps(workflowType: WorkflowType = "newBlr"): number {
+  switch (workflowType) {
+    case "newBlr":
+      return 7;
+    case "existingBlr":
+      return 6;
+    case "upgradeConfigurations":
+      return 5; // Facets, Register, Equity, Bond, Proxy Updates
+    default:
+      return 7;
+  }
 }
 
 /**

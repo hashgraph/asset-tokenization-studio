@@ -13,7 +13,7 @@
  * @module infrastructure/checkpoint/NullCheckpointManager
  */
 
-import type { DeploymentCheckpoint, CheckpointStatus } from "../types/checkpoint";
+import type { DeploymentCheckpoint, CheckpointStatus } from "@scripts/infrastructure";
 import { CheckpointManager } from "./CheckpointManager";
 
 /**

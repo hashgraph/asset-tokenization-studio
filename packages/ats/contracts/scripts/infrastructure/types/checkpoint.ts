@@ -57,7 +57,7 @@ export type CheckpointStatus = "in-progress" | "completed" | "failed";
 /**
  * Workflow type for checkpoint tracking.
  */
-export type WorkflowType = "newBlr" | "existingBlr";
+export type WorkflowType = "newBlr" | "existingBlr" | "upgradeConfigurations";
 
 /**
  * Deployment checkpoint for state tracking and resumability.
@@ -152,6 +152,26 @@ export interface DeploymentCheckpoint {
       /** Hedera Contract ID for proxy (if deployed on Hedera network) */
       proxyContractId?: string;
     };
+
+    /**
+     * Proxy updates tracking (upgradeConfigurations workflow)
+     * Tracks which ResolverProxies have been updated to the new version
+     */
+    proxyUpdates?: Map<
+      string,
+      {
+        /** Whether update succeeded */
+        success: boolean;
+        /** Transaction hash of update */
+        transactionHash?: string;
+        /** Error message if failed */
+        error?: string;
+        /** Previous version before update */
+        previousVersion?: number;
+        /** New version after update */
+        newVersion?: number;
+      }
+    >;
   };
 
   // ============================================================================
@@ -175,6 +195,14 @@ export interface DeploymentCheckpoint {
     deployFactory?: boolean;
     createConfigurations?: boolean;
     existingProxyAdminAddress?: string;
+
+    // upgradeConfigurations workflow options
+    /** BLR address for upgrade workflow */
+    blrAddress?: string;
+    /** Which configurations to upgrade: 'equity', 'bond', or 'both' */
+    configurations?: "equity" | "bond" | "both";
+    /** Proxy addresses to update after configuration upgrade */
+    proxyAddresses?: string[];
   };
 
   // ============================================================================
