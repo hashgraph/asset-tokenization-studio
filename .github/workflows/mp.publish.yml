@@ -25,8 +25,8 @@ permissions:
   id-token: write
 
 jobs:
-  mass-payout:
-    name: Publish Mass Payout Packages
+  build-mass-payout:
+    name: Build Mass Payout Packages
     runs-on: token-studio-linux-large
     # Only run if manual trigger OR tag push (already filtered by v*-mp pattern)
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
@@ -49,11 +49,8 @@ jobs:
           node-version: 22.20.0
           registry-url: https://registry.npmjs.org
 
-      - name: Create .npmrc file
-        run: |
-          cat << 'EOF' > .npmrc
-          //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
-          EOF
+      - name: Update npm
+        run: npm install -g npm@11.6.4
 
       - name: Install dependencies
         run: npm ci
@@ -64,47 +61,133 @@ jobs:
       - name: Build Mass Payout packages
         run: npm run mass-payout:build
 
-      - name: Publish Mass Payout packages
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          DRY_RUN: ${{ inputs.dry-run-enabled }}
+      - name: Pack Valid Packages
+        id: pack
         run: |
+          # Create a clean directory for artifacts
+          mkdir -p dist-artifacts
+
+          # Loop through all directories in mass-payout
           for package_dir in packages/mass-payout/*/; do
             if [ -d "${package_dir}" ] && [ -f "${package_dir}package.json" ]; then
-              package_name=$(basename "${package_dir}")
-              echo "📦 Processing Mass Payout package: ${package_name}"
-
-              cd "${package_dir}"
-
-              if ! node -p "require('./package.json').private || false" | grep -q "true"; then
-                PUBLISH_ARGS=("--access=restricted")
-                if [[ "${DRY_RUN}" == "true" ]]; then
-                  PUBLISH_ARGS+=("--dry-run")
-                  echo "🔍 DRY RUN MODE: Would publish @hashgraph/mass-payout-${package_name}"
-                fi
-
-                if ! npm publish "${PUBLISH_ARGS[@]}"; then
-                  echo "❌ Failed to publish package: ${package_name}"
-                  echo "📋 Package info:" && cat package.json | jq '.name, .version'
-                  exit 1
-                fi
+              
+              pushd "${package_dir}" > /dev/null
+              PACKAGE_NAME=$(basename "${package_dir}")
+              
+              # Check if private
+              IS_PRIVATE=$(node -p "require('./package.json').private || false")
+              
+              if [[ "$IS_PRIVATE" == "true" ]]; then
+                echo "⏭️ Skipping private package: ${PACKAGE_NAME}"
               else
-                echo "⏭️  Skipping private package: ${package_name}"
-              fi
+                echo "📦 Packing Mass Payout package: ${PACKAGE_NAME}"
+                
+                # Calculate expected filename for verification
+                JSON_NAME=$(node -p "require('./package.json').name.replace('@', '').replace('/', '-')")
+                JSON_VERSION=$(node -p "require('./package.json').version")
+                EXPECTED_FILENAME="${JSON_NAME}-${JSON_VERSION}.tgz"
 
-              cd - > /dev/null
+                npm pack
+
+                if [ ! -f "$EXPECTED_FILENAME" ]; then
+                   echo "::error::Expected package file $EXPECTED_FILENAME not found in $package_dir"
+                   exit 1
+                fi
+                
+                # Move to the staging folder
+                # Full path to dist-artifacts relative to where we are
+                mv "$EXPECTED_FILENAME" "../../../dist-artifacts/"
+                echo "✅ Packed $PACKAGE_NAME to dist-artifacts"
+              fi
+              
+              popd > /dev/null
+            fi
+          done
+          
+          # Verify successful packing
+          if [ -z "$(ls -A dist-artifacts)" ]; then
+             echo "::warning::No public packages were found to pack."
+          else
+             echo "::group::Contents of dist-artifacts"
+             ls -la dist-artifacts
+             echo "::endgroup::"
+          fi
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: mass-payout-tarballs
+          path: dist-artifacts/*.tgz
+          if-no-files-found: ignore # If all are private
+
+  publish-mass-payout:
+    name: Publish Mass Payout Packages
+    needs: build-mass-payout
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      DRY_RUN: ${{ inputs.dry-run-enabled }}
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
+        with:
+          egress-policy: audit
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.20.0
+          registry-url: https://registry.npmjs.org
+
+      - name: Update npm
+        run: npm install -g npm@11.6.4
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: mass-payout-tarballs
+          path: ./dist
+
+      - name: Publish Packages
+        run: |
+          # Check if directory exists and is not empty
+          if [ ! -d "./dist" ] || [ -z "$(ls -A ./dist)" ]; then
+            echo "⚠️ No artifacts found to publish. Skipping."
+            exit 0
+          fi
+
+          # Iterate through every tarball in the dist folder
+          for FILE in ./dist/*.tgz; do
+            [ -e "$FILE" ] || continue
+            
+            echo "🚀 Processing $FILE"
+            
+            PUBLISH_ARGS=("--access=restricted")
+            
+            if [[ "${DRY_RUN}" == "true" ]]; then
+              PUBLISH_ARGS+=("--dry-run")
+              echo "🔍 DRY RUN MODE: Would publish $FILE"
+            else
+              echo "🚀 Publishing $FILE..."
+            fi
+
+            if ! npm publish "$FILE" "${PUBLISH_ARGS[@]}"; then
+              echo "❌ Failed to publish package: $FILE"
+              exit 1
             fi
           done
 
-  # Summary job to report results
   summary:
     name: Publish Summary
     runs-on: token-studio-linux-large
     needs:
-      - mass-payout
+      - publish-mass-payout
     if: ${{ always() }}
     steps:
-      - name: Harden the runner (Audit all outbound calls)
+      - name: Harden the runner
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
         with:
           egress-policy: audit
@@ -114,7 +197,7 @@ jobs:
           echo "## Mass Payout Publish Results" >> "${GITHUB_STEP_SUMMARY}"
           echo "| Package Type | Status |" >> "${GITHUB_STEP_SUMMARY}"
           echo "| --- | --- |" >> "${GITHUB_STEP_SUMMARY}"
-          echo "| Mass Payout | ${{ needs.mass-payout.result }} |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Mass Payout | ${{ needs.publish-mass-payout.result }} |" >> "${GITHUB_STEP_SUMMARY}"
 
           if [[ "${{ inputs.dry-run-enabled }}" == "true" ]]; then
             echo "" >> "${GITHUB_STEP_SUMMARY}"
