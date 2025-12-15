@@ -10,7 +10,7 @@ import {
   ERC1594,
   TransferAndLock,
   ERC20,
-  ControlList,
+  ControlListFacet,
   Kyc,
   SsiManagement,
   IHold,
@@ -215,7 +215,7 @@ describe("ProtectedPartitions Tests", () => {
   let erc1594Facet: ERC1594;
   let erc20Facet: ERC20;
   let transferAndLockFacet: TransferAndLock;
-  let controlListFacet: ControlList;
+  let controlListFacet: ControlListFacet;
   let accessControlFacet: AccessControl;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
@@ -255,7 +255,7 @@ describe("ProtectedPartitions Tests", () => {
     erc1594Facet = await ethers.getContractAt("ERC1594", address);
     erc20Facet = await ethers.getContractAt("ERC20", address);
     transferAndLockFacet = await ethers.getContractAt("TransferAndLock", address);
-    controlListFacet = await ethers.getContractAt("ControlList", address);
+    controlListFacet = await ethers.getContractAt("ControlListFacet", address);
     accessControlFacet = await ethers.getContractAt("AccessControl", address);
     holdFacet = await ethers.getContractAt("IHold", address);
     kycFacet = await ethers.getContractAt("Kyc", address);

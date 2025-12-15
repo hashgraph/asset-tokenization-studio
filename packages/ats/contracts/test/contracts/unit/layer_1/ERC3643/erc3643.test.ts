@@ -7,7 +7,7 @@ import {
   type ERC20,
   type Pause,
   Kyc,
-  type ControlList,
+  type ControlListFacet,
   SsiManagement,
   ClearingActionsFacet,
   type AccessControl,
@@ -74,7 +74,7 @@ describe("ERC3643 Tests", () => {
 
   let pauseFacet: Pause;
   let kycFacet: Kyc;
-  let controlList: ControlList;
+  let controlList: ControlListFacet;
   let clearingActionsFacet: ClearingActionsFacet;
   let ssiManagementFacet: SsiManagement;
   let accessControlFacet: AccessControl;
@@ -177,7 +177,7 @@ describe("ERC3643 Tests", () => {
       erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_E);
       erc1410SnapshotFacet = await ethers.getContractAt("IERC1410", diamond.address);
 
-      controlList = await ethers.getContractAt("ControlList", diamond.address);
+      controlList = await ethers.getContractAt("ControlListFacet", diamond.address);
 
       kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
       ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address);
@@ -2451,7 +2451,7 @@ describe("ERC3643 Tests", () => {
 
       pauseFacet = await ethers.getContractAt("Pause", diamond.address);
 
-      controlList = await ethers.getContractAt("ControlList", diamond.address);
+      controlList = await ethers.getContractAt("ControlListFacet", diamond.address);
 
       erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
 
