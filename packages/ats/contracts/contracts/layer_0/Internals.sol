@@ -356,6 +356,8 @@ abstract contract Internals is Modifiers {
     function _isInControlList(address _account) internal view virtual returns (bool);
     function _isAbleToAccess(address _account) internal view virtual returns (bool);
     function _checkControlList(address _account) internal view virtual;
+    function _isControlListInitialized() internal view virtual returns (bool);
+    function _initialize_ControlList(bool _isWhiteList) internal virtual;
 
     // ===== AccessControl Methods =====
     function _grantRole(bytes32 _role, address _account) internal virtual returns (bool success_);

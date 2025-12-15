@@ -18,6 +18,15 @@ bytes32 constant _ACCESS_CONTROL_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER
 // keccak256("security.token.standard.controllist.resolverKey");
 bytes32 constant _CONTROL_LIST_RESOLVER_KEY = 0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c;
 
+// keccak256("security.token.standard.controllist.fixed.rate.resolverKey");
+bytes32 constant _CONTROL_LIST_FIXED_RATE_RESOLVER_KEY = 0x083b7e0957ebd3a0f69bf432ce05d94c1848cbdbf0e66664919c4803b14dfdf8;
+
+// keccak256("security.token.standard.controllist.kpilinked.rate.resolverKey");
+bytes32 constant _CONTROL_LIST_KPI_LINKED_RATE_RESOLVER_KEY = 0xaaa80b13f9a051b7f9546e92763bedfbe259f511da870cbb1133fe0e79c8eac5;
+
+// keccak256("security.token.standard.controllist.SustainabilityPerformanceTarget.rate.resolverKey");
+bytes32 constant _CONTROL_LIST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0xe3fbab5a4ccf7a873a9601bf5494c43f6e4b53218ff8310ec97811471397b3cf;
+
 // keccak256("security.token.standard.pause.resolverKey");
 bytes32 constant _PAUSE_RESOLVER_KEY = 0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c;
 

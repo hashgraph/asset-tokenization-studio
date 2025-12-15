@@ -29,6 +29,12 @@ abstract contract ControlListStorageWrapper is IControlListStorageWrapper, Exter
         _;
     }
 
+    function _initialize_ControlList(bool _isWhiteList) internal override {
+        ControlListStorage storage controlListStorage = _controlListStorage();
+        controlListStorage.isWhiteList = _isWhiteList;
+        controlListStorage.initialized = true;
+    }
+
     // Internal
     function _addToControlList(address _account) internal override returns (bool success_) {
         success_ = _controlListStorage().list.add(_account);
@@ -65,6 +71,10 @@ abstract contract ControlListStorageWrapper is IControlListStorageWrapper, Exter
         if (!_isAbleToAccess(_account)) {
             revert AccountIsBlocked(_account);
         }
+    }
+
+    function _isControlListInitialized() internal view override returns (bool) {
+        return _controlListStorage().initialized;
     }
 
     function _controlListStorage() internal pure returns (ControlListStorage storage controlList_) {

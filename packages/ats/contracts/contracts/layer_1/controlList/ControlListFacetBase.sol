@@ -1,16 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IControlList } from "../interfaces/controlList/IControlList.sol";
 import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import { _CONTROL_LIST_RESOLVER_KEY } from "../constants/resolverKeys.sol";
 import { ControlList } from "./ControlList.sol";
+import { IControlList } from "../interfaces/controlList/IControlList.sol";
 
-contract ControlListFacet is ControlList, IStaticFunctionSelectors {
-    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _CONTROL_LIST_RESOLVER_KEY;
-    }
-
+abstract contract ControlListFacetBase is ControlList, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](7);

@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ControlListFacet } from "../../../layer_1/controlList/standard/ControlListFacet.sol";
+import {
+    ControlListKpiLinkedRateFacet
+} from "../../../layer_1/controlList/kpiLinkedRate/ControlListKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 
-contract ControlListFacetTimeTravel is ControlListFacet, TimeTravelStorageWrapper {
+contract ControlListKpiLinkedRateFacetTimeTravel is ControlListKpiLinkedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }

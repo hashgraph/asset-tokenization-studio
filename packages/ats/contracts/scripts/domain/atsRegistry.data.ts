@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-15T08:04:20.160Z
- * Facets: 81
+ * Generated: 2025-12-15T08:41:39.404Z
+ * Facets: 84
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -95,6 +95,12 @@ import {
   ClearingTransferSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ControlListFacet__factory,
   ControlListFacetTimeTravel__factory,
+  ControlListFixedRateFacet__factory,
+  ControlListFixedRateFacetTimeTravel__factory,
+  ControlListKpiLinkedRateFacet__factory,
+  ControlListKpiLinkedRateFacetTimeTravel__factory,
+  ControlListSustainabilityPerformanceTargetRateFacet__factory,
+  ControlListSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   CorporateActionsFacet__factory,
   CorporateActionsFacetTimeTravel__factory,
   DiamondCutFacet__factory,
@@ -2477,7 +2483,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CONTROL_LIST_RESOLVER_KEY",
       value: "0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c",
     },
-    inheritance: ["ControlList", "IStaticFunctionSelectors"],
+    inheritance: ["ControlListFacetBase", "Common"],
     methods: [
       {
         name: "addToControlList",
@@ -2529,11 +2535,223 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ControlListFacetTimeTravel__factory(signer) : new ControlListFacet__factory(signer),
+  },
+
+  ControlListFixedRateFacet: {
+    name: "ControlListFixedRateFacet",
+    resolverKey: {
+      name: "_CONTROL_LIST_FIXED_RATE_RESOLVER_KEY",
+      value: "0x083b7e0957ebd3a0f69bf432ce05d94c1848cbdbf0e66664919c4803b14dfdf8",
+    },
+    inheritance: ["ControlListFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "addToControlList",
+        signature: "function addToControlList(address _account) returns (bool success_)",
+        selector: "0xe8204966",
+      },
+      {
+        name: "getControlListCount",
+        signature: "function getControlListCount() view returns (uint256 controlListCount_)",
+        selector: "0x6b5d2ea5",
+      },
+      {
+        name: "getControlListMembers",
+        signature:
+          "function getControlListMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0xcad7e56b",
+      },
+      {
+        name: "getControlListType",
+        signature: "function getControlListType() view returns (bool)",
+        selector: "0x1d46c292",
+      },
+      {
+        name: "initialize_ControlList",
+        signature: "function initialize_ControlList(bool _isWhiteList)",
+        selector: "0xf88bd9f2",
+      },
+      {
+        name: "isInControlList",
+        signature: "function isInControlList(address _account) view returns (bool)",
+        selector: "0xfd5b071b",
+      },
+      {
+        name: "removeFromControlList",
+        signature: "function removeFromControlList(address _account) returns (bool success_)",
+        selector: "0x47b52d3b",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToControlList",
+        signature: "AddedToControlList(address,address)",
+        topic0: "0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621",
+      },
+      {
+        name: "RemovedFromControlList",
+        signature: "RemovedFromControlList(address,address)",
+        topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+      { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
+      { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ControlListFixedRateFacetTimeTravel__factory(signer)
+        : new ControlListFixedRateFacet__factory(signer),
+  },
+
+  ControlListKpiLinkedRateFacet: {
+    name: "ControlListKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_CONTROL_LIST_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xaaa80b13f9a051b7f9546e92763bedfbe259f511da870cbb1133fe0e79c8eac5",
+    },
+    inheritance: ["ControlListFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "addToControlList",
+        signature: "function addToControlList(address _account) returns (bool success_)",
+        selector: "0xe8204966",
+      },
+      {
+        name: "getControlListCount",
+        signature: "function getControlListCount() view returns (uint256 controlListCount_)",
+        selector: "0x6b5d2ea5",
+      },
+      {
+        name: "getControlListMembers",
+        signature:
+          "function getControlListMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0xcad7e56b",
+      },
+      {
+        name: "getControlListType",
+        signature: "function getControlListType() view returns (bool)",
+        selector: "0x1d46c292",
+      },
+      {
+        name: "initialize_ControlList",
+        signature: "function initialize_ControlList(bool _isWhiteList)",
+        selector: "0xf88bd9f2",
+      },
+      {
+        name: "isInControlList",
+        signature: "function isInControlList(address _account) view returns (bool)",
+        selector: "0xfd5b071b",
+      },
+      {
+        name: "removeFromControlList",
+        signature: "function removeFromControlList(address _account) returns (bool success_)",
+        selector: "0x47b52d3b",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToControlList",
+        signature: "AddedToControlList(address,address)",
+        topic0: "0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621",
+      },
+      {
+        name: "RemovedFromControlList",
+        signature: "RemovedFromControlList(address,address)",
+        topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
+      { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ControlListKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ControlListKpiLinkedRateFacet__factory(signer),
+  },
+
+  ControlListSustainabilityPerformanceTargetRateFacet: {
+    name: "ControlListSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CONTROL_LIST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xe3fbab5a4ccf7a873a9601bf5494c43f6e4b53218ff8310ec97811471397b3cf",
+    },
+    inheritance: ["ControlListFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "addToControlList",
+        signature: "function addToControlList(address _account) returns (bool success_)",
+        selector: "0xe8204966",
+      },
+      {
+        name: "getControlListCount",
+        signature: "function getControlListCount() view returns (uint256 controlListCount_)",
+        selector: "0x6b5d2ea5",
+      },
+      {
+        name: "getControlListMembers",
+        signature:
+          "function getControlListMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0xcad7e56b",
+      },
+      {
+        name: "getControlListType",
+        signature: "function getControlListType() view returns (bool)",
+        selector: "0x1d46c292",
+      },
+      {
+        name: "initialize_ControlList",
+        signature: "function initialize_ControlList(bool _isWhiteList)",
+        selector: "0xf88bd9f2",
+      },
+      {
+        name: "isInControlList",
+        signature: "function isInControlList(address _account) view returns (bool)",
+        selector: "0xfd5b071b",
+      },
+      {
+        name: "removeFromControlList",
+        signature: "function removeFromControlList(address _account) returns (bool success_)",
+        selector: "0x47b52d3b",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToControlList",
+        signature: "AddedToControlList(address,address)",
+        topic0: "0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621",
+      },
+      {
+        name: "RemovedFromControlList",
+        signature: "RemovedFromControlList(address,address)",
+        topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+      { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
+      { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ControlListSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ControlListSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   CorporateActionsFacet: {
@@ -5003,7 +5221,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 81 as const;
+export const TOTAL_FACETS = 84 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
