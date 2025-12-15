@@ -469,4 +469,248 @@ describe("Factory Tests", () => {
         .withArgs(RegulationType.REG_S, RegulationSubType.REG_D_506_C);
     });
   });
+
+  describe("getAppliedRegulationData tests", () => {
+    it("GIVEN a valid regulation type and subtype WHEN calling getAppliedRegulationData THEN returns regulation data", async () => {
+      const regulationType = RegulationType.REG_D;
+      const regulationSubType = RegulationSubType.REG_D_506_B;
+
+      const regulationData = await factory.getAppliedRegulationData(regulationType, regulationSubType);
+
+      expect(regulationData.regulationType).to.equal(regulationType);
+      expect(regulationData.regulationSubType).to.equal(regulationSubType);
+    });
+
+    it("GIVEN REG_D with 506_C subtype WHEN calling getAppliedRegulationData THEN returns correct data", async () => {
+      const regulationType = RegulationType.REG_D;
+      const regulationSubType = RegulationSubType.REG_D_506_C;
+
+      const regulationData = await factory.getAppliedRegulationData(regulationType, regulationSubType);
+
+      expect(regulationData.regulationType).to.equal(regulationType);
+      expect(regulationData.regulationSubType).to.equal(regulationSubType);
+    });
+
+    it("GIVEN REG_S regulation type WHEN calling getAppliedRegulationData THEN returns correct data", async () => {
+      const regulationType = RegulationType.REG_S;
+      const regulationSubType = RegulationSubType.NONE;
+
+      const regulationData = await factory.getAppliedRegulationData(regulationType, regulationSubType);
+
+      expect(regulationData.regulationType).to.equal(regulationType);
+      expect(regulationData.regulationSubType).to.equal(regulationSubType);
+    });
+  });
+
+  describe("ISIN validation edge cases", () => {
+    it("GIVEN an ISIN with length less than 12 WHEN deploying equity THEN transaction fails with WrongISIN", async () => {
+      const equityData = {
+        security: getSecurityData(businessLogicResolver, {
+          erc20MetadataInfo: { isin: "US037833100" }, // 11 characters - too short
+          rbacs: init_rbacs,
+        }),
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = {
+        key: EQUITY_CONFIG_ID,
+        version: 1,
+      };
+
+      const factoryRegulationData = getRegulationData();
+
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("WrongISIN");
+    });
+
+    it("GIVEN an ISIN with length greater than 12 WHEN deploying equity THEN transaction fails with WrongISIN", async () => {
+      const equityData = {
+        security: getSecurityData(businessLogicResolver, {
+          erc20MetadataInfo: { isin: "US03783310051" }, // 13 characters - too long
+          rbacs: init_rbacs,
+        }),
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = {
+        key: EQUITY_CONFIG_ID,
+        version: 1,
+      };
+
+      const factoryRegulationData = getRegulationData();
+
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("WrongISIN");
+    });
+
+    it("GIVEN an empty ISIN WHEN deploying equity THEN transaction fails with WrongISIN", async () => {
+      const equityData = {
+        security: getSecurityData(businessLogicResolver, {
+          erc20MetadataInfo: { isin: "" }, // Empty string
+          rbacs: init_rbacs,
+        }),
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = {
+        key: EQUITY_CONFIG_ID,
+        version: 1,
+      };
+
+      const factoryRegulationData = getRegulationData();
+
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("WrongISIN");
+    });
+
+    it("GIVEN an ISIN with wrong length WHEN deploying bond THEN transaction fails with WrongISIN", async () => {
+      const bondData = {
+        security: getSecurityData(businessLogicResolver, {
+          erc20MetadataInfo: { isin: "SHORT" }, // Too short
+          rbacs: init_rbacs,
+        }),
+        bondDetails: await getBondDetails(),
+        proceedRecipients: [],
+        proceedRecipientsData: [],
+      };
+      bondData.security.resolverProxyConfiguration = {
+        key: BOND_CONFIG_ID,
+        version: 1,
+      };
+
+      const factoryRegulationData = getRegulationData();
+
+      await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.rejectedWith("WrongISIN");
+    });
+  });
+
+  describe("checkAdmins edge cases", () => {
+    it("GIVEN rbacs with empty members array for admin role WHEN deploying equity THEN transaction fails", async () => {
+      const emptyAdminRbacs: Rbac[] = [
+        {
+          role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+          members: [], // Empty members array
+        },
+      ];
+
+      const equityData = {
+        security: getSecurityData(businessLogicResolver, {
+          rbacs: emptyAdminRbacs,
+        }),
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = {
+        key: EQUITY_CONFIG_ID,
+        version: 1,
+      };
+
+      const factoryRegulationData = getRegulationData();
+
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("NoInitialAdmins");
+    });
+
+    it("GIVEN rbacs with only zero address as admin WHEN deploying equity THEN transaction fails", async () => {
+      const zeroAddressAdminRbacs: Rbac[] = [
+        {
+          role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+          members: [ADDRESS_ZERO], // Only zero address
+        },
+      ];
+
+      const equityData = {
+        security: getSecurityData(businessLogicResolver, {
+          rbacs: zeroAddressAdminRbacs,
+        }),
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = {
+        key: EQUITY_CONFIG_ID,
+        version: 1,
+      };
+
+      const factoryRegulationData = getRegulationData();
+
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("NoInitialAdmins");
+    });
+
+    it("GIVEN rbacs with multiple roles but no admin role WHEN deploying equity THEN transaction fails", async () => {
+      const noAdminRbacs: Rbac[] = [
+        {
+          role: ATS_ROLES._CONTROL_LIST_ROLE,
+          members: [signer_A.address],
+        },
+        {
+          role: ATS_ROLES._ISSUER_ROLE,
+          members: [signer_B.address],
+        },
+      ];
+
+      const equityData = {
+        security: getSecurityData(businessLogicResolver, {
+          rbacs: noAdminRbacs,
+        }),
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = {
+        key: EQUITY_CONFIG_ID,
+        version: 1,
+      };
+
+      const factoryRegulationData = getRegulationData();
+
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.rejectedWith("NoInitialAdmins");
+    });
+
+    it("GIVEN rbacs with admin role having zero address followed by valid address WHEN deploying equity THEN transaction succeeds", async () => {
+      const mixedAdminRbacs: Rbac[] = [
+        {
+          role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+          members: [ADDRESS_ZERO, signer_A.address], // Zero address first, then valid address
+        },
+      ];
+
+      const equityData = {
+        security: getSecurityData(businessLogicResolver, {
+          rbacs: mixedAdminRbacs,
+        }),
+        equityDetails: getEquityDetails(),
+      };
+      equityData.security.resolverProxyConfiguration = {
+        key: EQUITY_CONFIG_ID,
+        version: 1,
+      };
+
+      const factoryRegulationData = getRegulationData();
+
+      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.emit(factory, "EquityDeployed");
+    });
+
+    it("GIVEN rbacs with non-admin roles followed by admin role WHEN deploying bond THEN transaction succeeds", async () => {
+      const orderedRbacs: Rbac[] = [
+        {
+          role: ATS_ROLES._CONTROL_LIST_ROLE,
+          members: [signer_A.address],
+        },
+        {
+          role: ATS_ROLES._ISSUER_ROLE,
+          members: [signer_B.address],
+        },
+        {
+          role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+          members: [signer_A.address],
+        },
+      ];
+
+      const bondData = {
+        security: getSecurityData(businessLogicResolver, {
+          rbacs: orderedRbacs,
+        }),
+        bondDetails: await getBondDetails(),
+        proceedRecipients: [],
+        proceedRecipientsData: [],
+      };
+      bondData.security.resolverProxyConfiguration = {
+        key: BOND_CONFIG_ID,
+        version: 1,
+      };
+
+      const factoryRegulationData = getRegulationData();
+
+      await expect(factory.deployBond(bondData, factoryRegulationData)).to.emit(factory, "BondDeployed");
+    });
+  });
 });
