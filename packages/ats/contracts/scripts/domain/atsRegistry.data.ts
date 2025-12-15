@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-15T08:41:39.404Z
- * Facets: 84
+ * Generated: 2025-12-15T08:54:22.741Z
+ * Facets: 87
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -103,6 +103,12 @@ import {
   ControlListSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   CorporateActionsFacet__factory,
   CorporateActionsFacetTimeTravel__factory,
+  CorporateActionsFixedRateFacet__factory,
+  CorporateActionsFixedRateFacetTimeTravel__factory,
+  CorporateActionsKpiLinkedRateFacet__factory,
+  CorporateActionsKpiLinkedRateFacetTimeTravel__factory,
+  CorporateActionsSustainabilityPerformanceTargetRateFacet__factory,
+  CorporateActionsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   DiamondCutFacet__factory,
   DiamondCutFacetTimeTravel__factory,
   DiamondFacet__factory,
@@ -2760,7 +2766,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CORPORATE_ACTIONS_RESOLVER_KEY",
       value: "0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077",
     },
-    inheritance: ["CorporateActions", "IStaticFunctionSelectors"],
+    inheritance: ["CorporateActionsFacetBase", "Common"],
     methods: [
       {
         name: "addCorporateAction",
@@ -2811,9 +2817,212 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "DuplicatedCorporateAction(bytes32,bytes)",
         selector: "0x3266e9e3",
       },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new CorporateActionsFacetTimeTravel__factory(signer) : new CorporateActionsFacet__factory(signer),
+  },
+
+  CorporateActionsFixedRateFacet: {
+    name: "CorporateActionsFixedRateFacet",
+    resolverKey: {
+      name: "_CORPORATE_ACTIONS_FIXED_RATE_RESOLVER_KEY",
+      value: "0xd2c0415cebdbb6dcaf014ce92df6bcae060743c622fd7ce954105b71954e0424",
+    },
+    inheritance: ["CorporateActionsFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "addCorporateAction",
+        signature:
+          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
+        selector: "0xd9e4d92c",
+      },
+      {
+        name: "getCorporateAction",
+        signature:
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+        selector: "0x911181da",
+      },
+      {
+        name: "getCorporateActionCount",
+        signature: "function getCorporateActionCount() view returns (uint256 corporateActionCount_)",
+        selector: "0x8859794c",
+      },
+      {
+        name: "getCorporateActionCountByType",
+        signature:
+          "function getCorporateActionCountByType(bytes32 _actionType) view returns (uint256 corporateActionCount_)",
+        selector: "0x539b4e0b",
+      },
+      {
+        name: "getCorporateActionIds",
+        signature:
+          "function getCorporateActionIds(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
+        selector: "0x1b56ea1e",
+      },
+      {
+        name: "getCorporateActionIdsByType",
+        signature:
+          "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
+        selector: "0xe73bbddb",
+      },
+    ],
+    events: [
+      {
+        name: "CorporateActionAdded",
+        signature: "CorporateActionAdded(address,bytes32,bytes32,uint256,bytes)",
+        topic0: "0x5874a7cfb402f641e9d5e7fe4da2993095f1d4d397e7291daa27fd6c29dd3f1a",
+      },
+    ],
+    errors: [
+      {
+        name: "DuplicatedCorporateAction",
+        signature: "DuplicatedCorporateAction(bytes32,bytes)",
+        selector: "0x3266e9e3",
+      },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new CorporateActionsFixedRateFacetTimeTravel__factory(signer)
+        : new CorporateActionsFixedRateFacet__factory(signer),
+  },
+
+  CorporateActionsKpiLinkedRateFacet: {
+    name: "CorporateActionsKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_CORPORATE_ACTIONS_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xf86b1190fb42cc572ccdeac774fdf968c303079b8c5eceaeb1c9f4f9089bb6be",
+    },
+    inheritance: ["CorporateActionsFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "addCorporateAction",
+        signature:
+          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
+        selector: "0xd9e4d92c",
+      },
+      {
+        name: "getCorporateAction",
+        signature:
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+        selector: "0x911181da",
+      },
+      {
+        name: "getCorporateActionCount",
+        signature: "function getCorporateActionCount() view returns (uint256 corporateActionCount_)",
+        selector: "0x8859794c",
+      },
+      {
+        name: "getCorporateActionCountByType",
+        signature:
+          "function getCorporateActionCountByType(bytes32 _actionType) view returns (uint256 corporateActionCount_)",
+        selector: "0x539b4e0b",
+      },
+      {
+        name: "getCorporateActionIds",
+        signature:
+          "function getCorporateActionIds(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
+        selector: "0x1b56ea1e",
+      },
+      {
+        name: "getCorporateActionIdsByType",
+        signature:
+          "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
+        selector: "0xe73bbddb",
+      },
+    ],
+    events: [
+      {
+        name: "CorporateActionAdded",
+        signature: "CorporateActionAdded(address,bytes32,bytes32,uint256,bytes)",
+        topic0: "0x5874a7cfb402f641e9d5e7fe4da2993095f1d4d397e7291daa27fd6c29dd3f1a",
+      },
+    ],
+    errors: [
+      {
+        name: "DuplicatedCorporateAction",
+        signature: "DuplicatedCorporateAction(bytes32,bytes)",
+        selector: "0x3266e9e3",
+      },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new CorporateActionsKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new CorporateActionsKpiLinkedRateFacet__factory(signer),
+  },
+
+  CorporateActionsSustainabilityPerformanceTargetRateFacet: {
+    name: "CorporateActionsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CORPORATE_ACTIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa4a23267cb0a22c52bd05b12e644136bc38b7ac51218a0cb3aed166697caa79e",
+    },
+    inheritance: ["CorporateActionsFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "addCorporateAction",
+        signature:
+          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
+        selector: "0xd9e4d92c",
+      },
+      {
+        name: "getCorporateAction",
+        signature:
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+        selector: "0x911181da",
+      },
+      {
+        name: "getCorporateActionCount",
+        signature: "function getCorporateActionCount() view returns (uint256 corporateActionCount_)",
+        selector: "0x8859794c",
+      },
+      {
+        name: "getCorporateActionCountByType",
+        signature:
+          "function getCorporateActionCountByType(bytes32 _actionType) view returns (uint256 corporateActionCount_)",
+        selector: "0x539b4e0b",
+      },
+      {
+        name: "getCorporateActionIds",
+        signature:
+          "function getCorporateActionIds(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
+        selector: "0x1b56ea1e",
+      },
+      {
+        name: "getCorporateActionIdsByType",
+        signature:
+          "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
+        selector: "0xe73bbddb",
+      },
+    ],
+    events: [
+      {
+        name: "CorporateActionAdded",
+        signature: "CorporateActionAdded(address,bytes32,bytes32,uint256,bytes)",
+        topic0: "0x5874a7cfb402f641e9d5e7fe4da2993095f1d4d397e7291daa27fd6c29dd3f1a",
+      },
+    ],
+    errors: [
+      {
+        name: "DuplicatedCorporateAction",
+        signature: "DuplicatedCorporateAction(bytes32,bytes)",
+        selector: "0x3266e9e3",
+      },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new CorporateActionsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new CorporateActionsSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   DiamondCutFacet: {
@@ -5221,7 +5430,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 84 as const;
+export const TOTAL_FACETS = 87 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

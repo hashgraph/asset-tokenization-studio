@@ -25,6 +25,10 @@ import { ISecurity } from "../layer_3/interfaces/ISecurity.sol";
 import { IBondRead } from "../layer_2/interfaces/bond/IBondRead.sol";
 import { RegulationData, AdditionalSecurityData } from "../layer_3/constants/regulation.sol";
 import { ICap } from "contracts/layer_1/interfaces/cap/ICap.sol";
+import {
+    ICorporateActionsStorageWrapper,
+    CorporateActionDataStorage
+} from "../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
 /**
  * @title Internals
  * @notice Abstract contract declaring all internal methods for layer_0 contracts
@@ -386,6 +390,59 @@ abstract contract Internals is Modifiers {
     function _checkAnyRole(bytes32[] memory _roles, address _account) internal view virtual;
 
     // ===== Hold Methods =====
+
+    // ===== CorporateActions Methods =====
+    function _addCorporateAction(
+        bytes32 _actionType,
+        bytes memory _data
+    ) internal virtual returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_);
+
+    function _updateCorporateActionData(bytes32 _actionId, bytes memory _newData) internal virtual;
+
+    function _updateCorporateActionResult(bytes32 actionId, uint256 resultId, bytes memory newResult) internal virtual;
+
+    function _getCorporateAction(
+        bytes32 _corporateActionId
+    ) internal view virtual returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_);
+
+    function _getCorporateActionCount() internal view virtual returns (uint256 corporateActionCount_);
+
+    function _getCorporateActionIds(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (bytes32[] memory corporateActionIds_);
+
+    function _getCorporateActionCountByType(
+        bytes32 _actionType
+    ) internal view virtual returns (uint256 corporateActionCount_);
+
+    function _getCorporateActionIdByTypeIndex(
+        bytes32 _actionType,
+        uint256 _typeIndex
+    ) internal view virtual returns (bytes32 corporateActionId_);
+
+    function _getCorporateActionIdsByType(
+        bytes32 _actionType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (bytes32[] memory corporateActionIds_);
+
+    function _getCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId
+    ) internal view virtual returns (bytes memory result_);
+
+    function _getCorporateActionResultCount(bytes32 actionId) internal view virtual returns (uint256);
+
+    function _getCorporateActionData(bytes32 actionId) internal view virtual returns (bytes memory);
+
+    function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view virtual returns (uint256);
+
+    function _corporateActionsStorage()
+        internal
+        pure
+        virtual
+        returns (CorporateActionDataStorage storage corporateActions_);
     function _isHoldIdValid(HoldIdentifier memory _holdIdentifier) internal view virtual returns (bool);
     function _getHold(HoldIdentifier memory _holdIdentifier) internal view virtual returns (HoldData memory);
     function _getHeldAmountFor(address _tokenHolder) internal view virtual returns (uint256 amount_);
