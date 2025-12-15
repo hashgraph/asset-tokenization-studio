@@ -31,7 +31,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
         uint256 totalTokenHolders;
     }
 
-    modifier onlyWithoutMultiPartition() {
+    modifier onlyWithoutMultiPartition() override {
         _checkWithoutMultiPartition();
         _;
     }

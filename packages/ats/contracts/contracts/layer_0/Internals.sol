@@ -29,6 +29,7 @@ import {
     ICorporateActionsStorageWrapper,
     CorporateActionDataStorage
 } from "../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
+import {IERC20} from "../layer_1/interfaces/ERC1400/IERC20.sol";
 /**
  * @title Internals
  * @notice Abstract contract declaring all internal methods for layer_0 contracts
@@ -781,4 +782,21 @@ abstract contract Internals is Modifiers {
         Hold calldata _hold,
         bytes calldata _signature
     ) internal virtual returns (bool success_, uint256 clearingId_);
+
+    // ===== ERC20 Methods =====
+    function _isERC20Initialized() internal view virtual returns (bool);
+    function _initialize_ERC20(
+        IERC20.ERC20Metadata calldata erc20Metadata
+    ) internal virtual;
+    function _approve(address owner, address spender, uint256 value) internal virtual returns (bool);
+    function _transfer(address from, address to, uint256 value) internal virtual returns (bool);
+    function _transferFrom(address spender, address from, address to, uint256 value) internal virtual returns (bool);
+    function _increaseAllowance(address spender, uint256 addedValue) internal virtual returns (bool);
+    function _decreaseAllowance(address spender, uint256 subtractedValue) internal virtual returns (bool);
+    function _allowanceAdjusted(address _owner, address _spender) internal view virtual returns (uint256);
+    function _getERC20Metadata() internal view virtual returns (IERC20.ERC20Metadata memory);
+    function _decimalsAdjusted() internal view virtual returns (uint8);
+    function _decimalsAdjustedAt(uint256 _timestamp) internal view virtual returns (uint8);
+    function _getERC20MetadataAdjusted() internal view virtual returns (IERC20.ERC20Metadata memory);
+
 }

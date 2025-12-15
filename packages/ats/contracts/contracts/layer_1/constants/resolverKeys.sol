@@ -45,6 +45,15 @@ bytes32 constant _CAP_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0xa3
 // keccak256("security.token.standard.erc20.resolverKey");
 bytes32 constant _ERC20_RESOLVER_KEY = 0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5;
 
+// keccak256("security.token.standard.erc20.fixed.rate.resolverKey");
+bytes32 constant _ERC20_FIXED_RATE_RESOLVER_KEY = 0x3e4f428a95dadb9b2d5121c4067c845270879ee5e180e4c4d03ad40f00160376;
+
+// keccak256("security.token.standard.erc20.kpilinked.rate.resolverKey");
+bytes32 constant _ERC20_KPI_LINKED_RATE_RESOLVER_KEY = 0xe4565636726032d04f6d265d3ee61c2f046ea49ecb39f4ca68dd4f65713e9620;
+
+// keccak256("security.token.standard.erc20.SustainabilityPerformanceTarget.rate.resolverKey");
+bytes32 constant _ERC20_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x002a101a46899eecb6af6a76839f76be301e6292a6a5d3eb7a1bae4a0d3574ee;
+
 // keccak256("security.token.standard.erc20votes.resolverKey");
 bytes32 constant _ERC20VOTES_RESOLVER_KEY = 0x5cbfbaa435e19a43530a00ac685c9b5252862a94af2053667ded44642a0d9f4c;
 

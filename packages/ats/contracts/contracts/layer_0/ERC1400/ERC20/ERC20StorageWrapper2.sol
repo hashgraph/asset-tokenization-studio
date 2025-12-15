@@ -25,7 +25,7 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
         _updateAllowanceLabaf(_owner, _spender, abaf);
     }
 
-    function _approve(address owner, address spender, uint256 value) internal returns (bool) {
+    function _approve(address owner, address spender, uint256 value) internal override returns (bool) {
         if (owner == address(0)) {
             revert ZeroOwnerAddress();
         }
@@ -38,7 +38,7 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
         return true;
     }
 
-    function _increaseAllowance(address spender, uint256 addedValue) internal returns (bool) {
+    function _increaseAllowance(address spender, uint256 addedValue) internal override returns (bool) {
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
@@ -48,7 +48,7 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
         return true;
     }
 
-    function _decreaseAllowance(address spender, uint256 subtractedValue) internal returns (bool) {
+    function _decreaseAllowance(address spender, uint256 subtractedValue) internal override returns (bool) {
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
@@ -57,13 +57,13 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
         return true;
     }
 
-    function _transferFrom(address spender, address from, address to, uint256 value) internal returns (bool) {
+    function _transferFrom(address spender, address from, address to, uint256 value) internal override returns (bool) {
         _decreaseAllowedBalance(from, spender, value);
         _transferByPartition(from, BasicTransferInfo(to, value), _DEFAULT_PARTITION, "", spender, "");
         return _emitTransferEvent(from, to, value);
     }
 
-    function _transfer(address from, address to, uint256 value) internal returns (bool) {
+    function _transfer(address from, address to, uint256 value) internal override returns (bool) {
         _transferByPartition(from, BasicTransferInfo(to, value), _DEFAULT_PARTITION, "", address(0), "");
         return _emitTransferEvent(from, to, value);
     }

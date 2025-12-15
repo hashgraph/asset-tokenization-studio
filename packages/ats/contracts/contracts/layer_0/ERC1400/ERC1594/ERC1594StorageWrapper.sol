@@ -33,7 +33,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         uint256 _value,
         bytes memory,
         bytes memory
-    ) {
+    ) override {
         _checkCanTransferFromByPartition(_from, _to, _partition, _value, EMPTY_BYTES, EMPTY_BYTES);
         _;
     }
@@ -49,7 +49,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         _;
     }
 
-    modifier onlyCompliant(address _from, address _to, bool _checkSender) {
+    modifier onlyCompliant(address _from, address _to, bool _checkSender) override {
         _checkCompliance(_from, _to, _checkSender);
         _;
     }
