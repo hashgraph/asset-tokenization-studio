@@ -46,7 +46,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         _delegate(_msgSender(), delegatee);
     }
 
-    function _takeAbafCheckpoint() internal {
+    function _takeAbafCheckpoint() internal override {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
 
         uint256 abaf = _getAbaf();
@@ -105,7 +105,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         _moveVotingPower(currentDelegate, delegatee, delegatorBalance);
     }
 
-    function _moveVotingPower(address src, address dst, uint256 amount) internal {
+    function _moveVotingPower(address src, address dst, uint256 amount) internal override {
         if (src != dst && amount > 0) {
             if (src != address(0)) {
                 _moveVotingPower(src, _subtract, amount);

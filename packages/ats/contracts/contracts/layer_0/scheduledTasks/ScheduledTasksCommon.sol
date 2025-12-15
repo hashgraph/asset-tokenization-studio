@@ -17,7 +17,7 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
         _;
     }
 
-    modifier onlyAutoCalling(bool _autoCalling) {
+    modifier onlyAutoCalling(bool _autoCalling) override {
         _checkAutoCalling(_autoCalling);
         _;
     }

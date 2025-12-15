@@ -11,7 +11,7 @@ abstract contract PauseStorageWrapper is IPauseStorageWrapper, ExternalPauseMana
     }
 
     // modifiers
-    modifier onlyPaused() {
+    modifier onlyPaused() override {
         _checkPaused();
         _;
     }
@@ -22,7 +22,7 @@ abstract contract PauseStorageWrapper is IPauseStorageWrapper, ExternalPauseMana
     }
 
     // Internal
-    function _setPause(bool _paused) internal {
+    function _setPause(bool _paused) internal override {
         _pauseStorage().paused = _paused;
         if (_paused) {
             emit TokenPaused(_msgSender());

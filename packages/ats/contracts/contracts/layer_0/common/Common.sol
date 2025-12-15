@@ -14,7 +14,7 @@ abstract contract Common is TransferAndLockStorageWrapper {
         _;
     }
 
-    modifier onlyDelegate() {
+    modifier onlyDelegate() override {
         _checkDelegate();
         _;
     }

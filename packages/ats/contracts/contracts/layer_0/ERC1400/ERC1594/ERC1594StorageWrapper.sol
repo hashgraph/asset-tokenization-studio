@@ -21,7 +21,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         bool initialized;
     }
 
-    modifier onlyIssuable() {
+    modifier onlyIssuable() override {
         _checkIssuable();
         _;
     }
@@ -39,6 +39,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
     }
 
     modifier onlyCanRedeemFromByPartition(address _from, bytes32 _partition, uint256 _value, bytes memory, bytes memory)
+        override
     {
         _checkCanRedeemFromByPartition(_from, _partition, _value, EMPTY_BYTES, EMPTY_BYTES);
         _;
@@ -55,7 +56,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC1594() internal {
+    function _initialize_ERC1594() internal override {
         ERC1594Storage storage ds = _erc1594Storage();
         ds.issuance = true;
         ds.initialized = true;
@@ -68,7 +69,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         emit Issued(_msgSender(), _tokenHolder, _value, _data);
     }
 
-    function _redeem(uint256 _value, bytes memory _data) internal {
+    function _redeem(uint256 _value, bytes memory _data) internal override {
         // Add a function to validate the `_data` parameter
         _burn(_msgSender(), _value);
         emit Redeemed(address(0), _msgSender(), _value, _data);

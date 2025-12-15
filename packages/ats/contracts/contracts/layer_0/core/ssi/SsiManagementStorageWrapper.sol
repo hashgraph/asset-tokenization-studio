@@ -23,16 +23,16 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
     }
 
     // Internal
-    function _setRevocationRegistryAddress(address _revocationRegistryAddress) internal returns (bool success_) {
+    function _setRevocationRegistryAddress(address _revocationRegistryAddress) internal override returns (bool success_) {
         _ssiManagementStorage().revocationRegistry = _revocationRegistryAddress;
         return true;
     }
 
-    function _addIssuer(address _issuer) internal returns (bool success_) {
+    function _addIssuer(address _issuer) internal override returns (bool success_) {
         success_ = _ssiManagementStorage().issuerList.add(_issuer);
     }
 
-    function _removeIssuer(address _issuer) internal returns (bool success_) {
+    function _removeIssuer(address _issuer) internal override returns (bool success_) {
         success_ = _ssiManagementStorage().issuerList.remove(_issuer);
     }
 

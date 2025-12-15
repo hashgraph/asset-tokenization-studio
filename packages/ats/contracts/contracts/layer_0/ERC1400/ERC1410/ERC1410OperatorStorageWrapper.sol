@@ -18,22 +18,22 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         _;
     }
 
-    function _authorizeOperator(address _operator) internal {
+    function _authorizeOperator(address _operator) internal override {
         _erc1410operatorStorage().approvals[_msgSender()][_operator] = true;
         emit AuthorizedOperator(_operator, _msgSender());
     }
 
-    function _revokeOperator(address _operator) internal {
+    function _revokeOperator(address _operator) internal override {
         _erc1410operatorStorage().approvals[_msgSender()][_operator] = false;
         emit RevokedOperator(_operator, _msgSender());
     }
 
-    function _authorizeOperatorByPartition(bytes32 _partition, address _operator) internal {
+    function _authorizeOperatorByPartition(bytes32 _partition, address _operator) internal override {
         _erc1410operatorStorage().partitionApprovals[_msgSender()][_partition][_operator] = true;
         emit AuthorizedOperatorByPartition(_partition, _operator, _msgSender());
     }
 
-    function _revokeOperatorByPartition(bytes32 _partition, address _operator) internal {
+    function _revokeOperatorByPartition(bytes32 _partition, address _operator) internal override {
         _erc1410operatorStorage().partitionApprovals[_msgSender()][_partition][_operator] = false;
         emit RevokedOperatorByPartition(_partition, _operator, _msgSender());
     }

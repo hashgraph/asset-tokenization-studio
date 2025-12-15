@@ -43,7 +43,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         _;
     }
 
-    function _setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal {
+    function _setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal override {
         _triggerScheduledCrossOrderedTasks(0);
 
         KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage = _kpiLinkedRateStorage();
@@ -56,7 +56,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         kpiLinkedRateDataStorage.reportPeriod = _newInterestRate.reportPeriod;
         kpiLinkedRateDataStorage.rateDecimals = _newInterestRate.rateDecimals;
     }
-    function _setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal {
+    function _setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal override {
         _triggerScheduledCrossOrderedTasks(0);
 
         KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage = _kpiLinkedRateStorage();
@@ -67,7 +67,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         kpiLinkedRateDataStorage.adjustmentPrecision = _newImpactData.adjustmentPrecision;
     }
 
-    function _setKpiOracle(address _kpiOracle) internal {
+    function _setKpiOracle(address _kpiOracle) internal override {
         _triggerScheduledCrossOrderedTasks(0);
 
         _kpiLinkedRateStorage().kpiOracle = _kpiOracle;

@@ -47,6 +47,7 @@ abstract contract Modifiers is LocalContext {
 
     // ===== Pause Modifiers =====
     modifier onlyUnpaused() virtual;
+    modifier onlyPaused() virtual;
 
     // ===== ERC1410 Modifiers =====
     modifier validateAddress(address account) virtual;
@@ -56,13 +57,17 @@ abstract contract Modifiers is LocalContext {
     modifier onlyUnProtectedPartitionsOrWildCardRole() virtual;
     modifier onlyClearingDisabled() virtual;
     modifier onlyUninitialized(bool _initialized) virtual;
+    modifier onlyDelegate() virtual;
 
     // ===== ScheduledTasks Modifiers =====
     modifier onlyValidTimestamp(uint256 _timestamp) virtual;
+    modifier onlyAutoCalling(bool _autoCalling) virtual;
 
     // ===== Cap Modifiers =====
     modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) virtual;
     modifier onlyValidNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) virtual;
+    modifier onlyWithinMaxSupply(uint256 _amount) virtual;
+    modifier onlyWithinMaxSupplyByPartition(bytes32 _partition, uint256 _amount) virtual;
 
     modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) virtual;
     modifier onlyClearingActivated() virtual;
@@ -79,6 +84,14 @@ abstract contract Modifiers is LocalContext {
     modifier onlyCanTransferFromByPartition(
         address _from,
         address _to,
+        bytes32 _partition,
+        uint256 _value,
+        bytes memory,
+        bytes memory
+    ) virtual;
+    modifier onlyIssuable() virtual;
+    modifier onlyCanRedeemFromByPartition(
+        address _from,
         bytes32 _partition,
         uint256 _value,
         bytes memory,

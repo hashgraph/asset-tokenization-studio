@@ -103,7 +103,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
         _erc1410BasicStorage().totalSupply *= factor;
     }
 
-    function _adjustTotalBalanceAndPartitionBalanceFor(bytes32 partition, address account) internal {
+    function _adjustTotalBalanceAndPartitionBalanceFor(bytes32 partition, address account) internal override {
         uint256 abaf = _getAbaf();
         ERC1410BasicStorage storage basicStorage = _erc1410BasicStorage();
         _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);

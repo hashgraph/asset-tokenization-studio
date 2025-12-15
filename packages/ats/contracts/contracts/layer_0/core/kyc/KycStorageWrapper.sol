@@ -31,7 +31,7 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         _;
     }
 
-    function _setInternalKyc(bool _activated) internal returns (bool success_) {
+    function _setInternalKyc(bool _activated) internal override returns (bool success_) {
         _kycStorage().internalKycActivated = _activated;
         success_ = true;
     }
@@ -48,7 +48,7 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         success_ = true;
     }
 
-    function _revokeKyc(address _account) internal returns (bool success_) {
+    function _revokeKyc(address _account) internal override returns (bool success_) {
         delete _kycStorage().kyc[_account];
 
         _kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].remove(_account);

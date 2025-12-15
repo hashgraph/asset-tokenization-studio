@@ -120,17 +120,17 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
         return IIdentityRegistry(_erc3643Storage().identityRegistry);
     }
 
-    function _getOnchainID() internal view returns (address) {
+    function _getOnchainID() internal override view returns (address) {
         return _erc3643Storage().onchainID;
     }
 
-    function _checkInputAmountsArrayLength(address[] memory _addresses, uint256[] memory _amounts) internal pure {
+    function _checkInputAmountsArrayLength(address[] memory _addresses, uint256[] memory _amounts) internal override pure {
         if (_addresses.length != _amounts.length) {
             revert IERC3643Management.InputAmountsArrayLengthMismatch();
         }
     }
 
-    function _checkInputBoolArrayLength(address[] memory _addresses, bool[] memory _status) internal pure {
+    function _checkInputBoolArrayLength(address[] memory _addresses, bool[] memory _status) internal override pure {
         if (_addresses.length != _status.length) {
             revert IERC3643Management.InputBoolArrayLengthMismatch();
         }

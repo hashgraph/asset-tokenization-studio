@@ -37,7 +37,7 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         emit ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
     }
 
-    function _finalizeControllable() internal {
+    function _finalizeControllable() internal override {
         if (!_erc1644Storage().isControllable) return;
 
         _erc1644Storage().isControllable = false;
