@@ -120,6 +120,8 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
             OperationType.Release
         );
 
+        holdData = _getHold(_holdIdentifier);
+
         if (holdData.hold.amount == 0) {
             _removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
         }
