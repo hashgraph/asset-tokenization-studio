@@ -330,7 +330,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         _addPartitionTo(_amount, _to, _partition);
     }
 
-    function _removeClearing(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier) internal {
+    function _removeClearing(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier) internal override {
         IClearing.ClearingDataStorage storage clearingStorage = _clearingStorage();
 
         uint256 amount = _getClearingBasicInfo(_clearingOperationIdentifier).amount;
@@ -381,7 +381,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
     function _adjustClearingBalances(
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         address _to
-    ) internal {
+    ) internal override {
         _triggerAndSyncAll(_clearingOperationIdentifier.partition, _clearingOperationIdentifier.tokenHolder, _to);
 
         _updateClearing(

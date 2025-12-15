@@ -865,8 +865,7 @@ abstract contract Internals is Modifiers {
     function _operateClearingAction(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier, address _to) internal virtual;
     function _transferClearingBalance(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier, address _to) internal virtual;
     function _removeClearing(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier) internal virtual;
-    function _beforeClearingOperation(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier, uint256 _value) internal virtual;
-    function _adjustClearingBalances(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier) internal virtual;
+    function _adjustClearingBalances(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier, address _to) internal virtual;
     function _updateClearing(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier, uint256 _newAmount) internal virtual;
     function _updateClearingAmountById(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier, uint256 _newAmount) internal virtual;
     function _increaseClearedAmounts(bytes32 _partition, address _account, uint256 _value) internal virtual;
