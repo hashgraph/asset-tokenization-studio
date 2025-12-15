@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-15T15:15:08.466Z
- * Facets: 90
+ * Generated: 2025-12-15T15:50:10.709Z
+ * Facets: 96
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -137,10 +137,22 @@ import {
   ERC20KpiLinkedRateFacetTimeTravel__factory,
   ERC20PermitFacet__factory,
   ERC20PermitFacetTimeTravel__factory,
+  ERC20PermitFixedRateFacet__factory,
+  ERC20PermitFixedRateFacetTimeTravel__factory,
+  ERC20PermitKpiLinkedRateFacet__factory,
+  ERC20PermitKpiLinkedRateFacetTimeTravel__factory,
+  ERC20PermitSustainabilityPerformanceTargetRateFacet__factory,
+  ERC20PermitSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC20SustainabilityPerformanceTargetRateFacet__factory,
   ERC20SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC20VotesFacet__factory,
   ERC20VotesFacetTimeTravel__factory,
+  ERC20VotesFixedRateFacet__factory,
+  ERC20VotesFixedRateFacetTimeTravel__factory,
+  ERC20VotesKpiLinkedRateFacet__factory,
+  ERC20VotesKpiLinkedRateFacetTimeTravel__factory,
+  ERC20VotesSustainabilityPerformanceTargetRateFacet__factory,
+  ERC20VotesSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC3643BatchFacet__factory,
   ERC3643BatchFacetTimeTravel__factory,
   ERC3643ManagementFacet__factory,
@@ -3915,7 +3927,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC20PERMIT_RESOLVER_KEY",
       value: "0xef05f0313623d32145212ed45620c8b2c8c294b3d6955cf26f3d1b0569fbc1fa",
     },
-    inheritance: ["ERC20Permit", "IStaticFunctionSelectors"],
+    inheritance: ["ERC20PermitFacetBase", "Common"],
     methods: [
       {
         name: "DOMAIN_SEPARATOR",
@@ -3934,9 +3946,116 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     errors: [
       { name: "ERC2612ExpiredSignature", signature: "ERC2612ExpiredSignature(uint256)", selector: "0x62791302" },
       { name: "ERC2612InvalidSigner", signature: "ERC2612InvalidSigner(address,address)", selector: "0x4b800e46" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC20PermitFacetTimeTravel__factory(signer) : new ERC20PermitFacet__factory(signer),
+  },
+
+  ERC20PermitFixedRateFacet: {
+    name: "ERC20PermitFixedRateFacet",
+    resolverKey: {
+      name: "_ERC20PERMIT_FIXED_RATE_RESOLVER_KEY",
+      value: "0xc85b8a95de0375d3b552d368932ecaeb9fe85d470eb1e89bc29040cb35d168a3",
+    },
+    inheritance: ["ERC20PermitFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "DOMAIN_SEPARATOR",
+        signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
+        selector: "0x3644e515",
+      },
+      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
+      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
+      {
+        name: "permit",
+        signature:
+          "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",
+        selector: "0xd505accf",
+      },
+    ],
+    errors: [
+      { name: "ERC2612ExpiredSignature", signature: "ERC2612ExpiredSignature(uint256)", selector: "0x62791302" },
+      { name: "ERC2612InvalidSigner", signature: "ERC2612InvalidSigner(address,address)", selector: "0x4b800e46" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC20PermitFixedRateFacetTimeTravel__factory(signer)
+        : new ERC20PermitFixedRateFacet__factory(signer),
+  },
+
+  ERC20PermitKpiLinkedRateFacet: {
+    name: "ERC20PermitKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC20PERMIT_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x468437a5a7a128b245fb2c3ac08cf17e5f2a6983dece41309b58fffa1fca80a9",
+    },
+    inheritance: ["ERC20PermitFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "DOMAIN_SEPARATOR",
+        signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
+        selector: "0x3644e515",
+      },
+      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
+      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
+      {
+        name: "permit",
+        signature:
+          "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",
+        selector: "0xd505accf",
+      },
+    ],
+    errors: [
+      { name: "ERC2612ExpiredSignature", signature: "ERC2612ExpiredSignature(uint256)", selector: "0x62791302" },
+      { name: "ERC2612InvalidSigner", signature: "ERC2612InvalidSigner(address,address)", selector: "0x4b800e46" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC20PermitKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC20PermitKpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC20PermitSustainabilityPerformanceTargetRateFacet: {
+    name: "ERC20PermitSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC20PERMIT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x3bf8d35ad3c3320d95184dd4f9a0bfc2e56b151318d9d27eefa74461d24f5c61",
+    },
+    inheritance: ["ERC20PermitFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "DOMAIN_SEPARATOR",
+        signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
+        selector: "0x3644e515",
+      },
+      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
+      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
+      {
+        name: "permit",
+        signature:
+          "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",
+        selector: "0xd505accf",
+      },
+    ],
+    errors: [
+      { name: "ERC2612ExpiredSignature", signature: "ERC2612ExpiredSignature(uint256)", selector: "0x62791302" },
+      { name: "ERC2612InvalidSigner", signature: "ERC2612InvalidSigner(address,address)", selector: "0x4b800e46" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC20PermitSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC20PermitSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ERC20SustainabilityPerformanceTargetRateFacet: {
@@ -4018,7 +4137,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC20VOTES_RESOLVER_KEY",
       value: "0x5cbfbaa435e19a43530a00ac685c9b5252862a94af2053667ded44642a0d9f4c",
     },
-    inheritance: ["ERC20Votes", "IStaticFunctionSelectors"],
+    inheritance: ["ERC20VotesFacetBase", "Common"],
     methods: [
       { name: "CLOCK_MODE", signature: "function CLOCK_MODE() view returns (string)", selector: "0x4bf5d7e9" },
       {
@@ -4067,9 +4186,206 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "AbafChangeForBlockForbidden(uint256)",
         selector: "0x5a2afdff",
       },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC20VotesFacetTimeTravel__factory(signer) : new ERC20VotesFacet__factory(signer),
+  },
+
+  ERC20VotesFixedRateFacet: {
+    name: "ERC20VotesFixedRateFacet",
+    resolverKey: {
+      name: "_ERC20VOTES_FIXED_RATE_RESOLVER_KEY",
+      value: "0xce2bc140ce5298990432f0332c33ccaa813a89e3bc3c0589eb30eabe005d2742",
+    },
+    inheritance: ["ERC20VotesFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      { name: "CLOCK_MODE", signature: "function CLOCK_MODE() view returns (string)", selector: "0x4bf5d7e9" },
+      {
+        name: "checkpoints",
+        signature:
+          "function checkpoints(address _account, uint256 _pos) view returns (tuple(uint256 from, uint256 value))",
+        selector: "0x0cdfebfa",
+      },
+      { name: "clock", signature: "function clock() view returns (uint48)", selector: "0x91ddadf4" },
+      { name: "delegate", signature: "function delegate(address _delegatee)", selector: "0x5c19a95c" },
+      {
+        name: "delegates",
+        signature: "function delegates(address _account) view returns (address)",
+        selector: "0x587cde1e",
+      },
+      {
+        name: "getPastTotalSupply",
+        signature: "function getPastTotalSupply(uint256 _timepoint) view returns (uint256)",
+        selector: "0x8e539e8c",
+      },
+      {
+        name: "getPastVotes",
+        signature: "function getPastVotes(address _account, uint256 _timepoint) view returns (uint256)",
+        selector: "0x3a46b1a8",
+      },
+      {
+        name: "getVotes",
+        signature: "function getVotes(address _account) view returns (uint256)",
+        selector: "0x9ab24eb0",
+      },
+      {
+        name: "initialize_ERC20Votes",
+        signature: "function initialize_ERC20Votes(bool _activated)",
+        selector: "0x65fa0b29",
+      },
+      { name: "isActivated", signature: "function isActivated() view returns (bool)", selector: "0x4a8c1fb4" },
+      {
+        name: "numCheckpoints",
+        signature: "function numCheckpoints(address _account) view returns (uint256)",
+        selector: "0x6fcfff45",
+      },
+    ],
+    errors: [
+      {
+        name: "AbafChangeForBlockForbidden",
+        signature: "AbafChangeForBlockForbidden(uint256)",
+        selector: "0x5a2afdff",
+      },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC20VotesFixedRateFacetTimeTravel__factory(signer)
+        : new ERC20VotesFixedRateFacet__factory(signer),
+  },
+
+  ERC20VotesKpiLinkedRateFacet: {
+    name: "ERC20VotesKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC20VOTES_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x9d720cb6c08dff4ea63b2b4f3908fa551321fdc478de6b46a67ba5ecb46f82fc",
+    },
+    inheritance: ["ERC20VotesFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      { name: "CLOCK_MODE", signature: "function CLOCK_MODE() view returns (string)", selector: "0x4bf5d7e9" },
+      {
+        name: "checkpoints",
+        signature:
+          "function checkpoints(address _account, uint256 _pos) view returns (tuple(uint256 from, uint256 value))",
+        selector: "0x0cdfebfa",
+      },
+      { name: "clock", signature: "function clock() view returns (uint48)", selector: "0x91ddadf4" },
+      { name: "delegate", signature: "function delegate(address _delegatee)", selector: "0x5c19a95c" },
+      {
+        name: "delegates",
+        signature: "function delegates(address _account) view returns (address)",
+        selector: "0x587cde1e",
+      },
+      {
+        name: "getPastTotalSupply",
+        signature: "function getPastTotalSupply(uint256 _timepoint) view returns (uint256)",
+        selector: "0x8e539e8c",
+      },
+      {
+        name: "getPastVotes",
+        signature: "function getPastVotes(address _account, uint256 _timepoint) view returns (uint256)",
+        selector: "0x3a46b1a8",
+      },
+      {
+        name: "getVotes",
+        signature: "function getVotes(address _account) view returns (uint256)",
+        selector: "0x9ab24eb0",
+      },
+      {
+        name: "initialize_ERC20Votes",
+        signature: "function initialize_ERC20Votes(bool _activated)",
+        selector: "0x65fa0b29",
+      },
+      { name: "isActivated", signature: "function isActivated() view returns (bool)", selector: "0x4a8c1fb4" },
+      {
+        name: "numCheckpoints",
+        signature: "function numCheckpoints(address _account) view returns (uint256)",
+        selector: "0x6fcfff45",
+      },
+    ],
+    errors: [
+      {
+        name: "AbafChangeForBlockForbidden",
+        signature: "AbafChangeForBlockForbidden(uint256)",
+        selector: "0x5a2afdff",
+      },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC20VotesKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC20VotesKpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC20VotesSustainabilityPerformanceTargetRateFacet: {
+    name: "ERC20VotesSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC20VOTES_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x9d7e0002a7ae9c94734d62ac85bb1cd4c333dd6c5fb308a7a2b60dd77dfa9d44",
+    },
+    inheritance: ["ERC20VotesFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "CLOCK_MODE", signature: "function CLOCK_MODE() view returns (string)", selector: "0x4bf5d7e9" },
+      {
+        name: "checkpoints",
+        signature:
+          "function checkpoints(address _account, uint256 _pos) view returns (tuple(uint256 from, uint256 value))",
+        selector: "0x0cdfebfa",
+      },
+      { name: "clock", signature: "function clock() view returns (uint48)", selector: "0x91ddadf4" },
+      { name: "delegate", signature: "function delegate(address _delegatee)", selector: "0x5c19a95c" },
+      {
+        name: "delegates",
+        signature: "function delegates(address _account) view returns (address)",
+        selector: "0x587cde1e",
+      },
+      {
+        name: "getPastTotalSupply",
+        signature: "function getPastTotalSupply(uint256 _timepoint) view returns (uint256)",
+        selector: "0x8e539e8c",
+      },
+      {
+        name: "getPastVotes",
+        signature: "function getPastVotes(address _account, uint256 _timepoint) view returns (uint256)",
+        selector: "0x3a46b1a8",
+      },
+      {
+        name: "getVotes",
+        signature: "function getVotes(address _account) view returns (uint256)",
+        selector: "0x9ab24eb0",
+      },
+      {
+        name: "initialize_ERC20Votes",
+        signature: "function initialize_ERC20Votes(bool _activated)",
+        selector: "0x65fa0b29",
+      },
+      { name: "isActivated", signature: "function isActivated() view returns (bool)", selector: "0x4a8c1fb4" },
+      {
+        name: "numCheckpoints",
+        signature: "function numCheckpoints(address _account) view returns (uint256)",
+        selector: "0x6fcfff45",
+      },
+    ],
+    errors: [
+      {
+        name: "AbafChangeForBlockForbidden",
+        signature: "AbafChangeForBlockForbidden(uint256)",
+        selector: "0x5a2afdff",
+      },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC20VotesSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC20VotesSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ERC3643BatchFacet: {
@@ -5646,7 +5962,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 90 as const;
+export const TOTAL_FACETS = 96 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

@@ -56,7 +56,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         return _protectedPartitionsStorage().arePartitionsProtected;
     }
 
-    function _getNounceFor(address _account) internal view returns (uint256) {
+    function _getNounceFor(address _account) internal view override returns (uint256) {
         return _protectedPartitionsStorage().nounces[_account];
     }
 

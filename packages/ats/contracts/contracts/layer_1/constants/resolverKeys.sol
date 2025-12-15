@@ -57,11 +57,29 @@ bytes32 constant _ERC20_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x
 // keccak256("security.token.standard.erc20votes.resolverKey");
 bytes32 constant _ERC20VOTES_RESOLVER_KEY = 0x5cbfbaa435e19a43530a00ac685c9b5252862a94af2053667ded44642a0d9f4c;
 
+// keccak256("security.token.standard.erc20votes.fixed.rate.resolverKey");
+bytes32 constant _ERC20VOTES_FIXED_RATE_RESOLVER_KEY = 0xce2bc140ce5298990432f0332c33ccaa813a89e3bc3c0589eb30eabe005d2742;
+
+// keccak256("security.token.standard.erc20votes.kpilinked.rate.resolverKey");
+bytes32 constant _ERC20VOTES_KPI_LINKED_RATE_RESOLVER_KEY = 0x9d720cb6c08dff4ea63b2b4f3908fa551321fdc478de6b46a67ba5ecb46f82fc;
+
+// keccak256("security.token.standard.erc20votes.SustainabilityPerformanceTarget.rate.resolverKey");
+bytes32 constant _ERC20VOTES_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x9d7e0002a7ae9c94734d62ac85bb1cd4c333dd6c5fb308a7a2b60dd77dfa9d44;
+
 // keccak256("security.token.standard.erc1594.resolverKey");
 bytes32 constant _ERC1594_RESOLVER_KEY = 0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f;
 
 // keccak256("security.token.standard.erc20permit.resolverKey");
 bytes32 constant _ERC20PERMIT_RESOLVER_KEY = 0xef05f0313623d32145212ed45620c8b2c8c294b3d6955cf26f3d1b0569fbc1fa;
+
+// keccak256("security.token.standard.erc20permit.fixed.rate.resolverKey");
+bytes32 constant _ERC20PERMIT_FIXED_RATE_RESOLVER_KEY = 0xc85b8a95de0375d3b552d368932ecaeb9fe85d470eb1e89bc29040cb35d168a3;
+
+// keccak256("security.token.standard.erc20permit.kpilinked.rate.resolverKey");
+bytes32 constant _ERC20PERMIT_KPI_LINKED_RATE_RESOLVER_KEY = 0x468437a5a7a128b245fb2c3ac08cf17e5f2a6983dece41309b58fffa1fca80a9;
+
+// keccak256("security.token.standard.erc20permit.SustainabilityPerformanceTarget.rate.resolverKey");
+bytes32 constant _ERC20PERMIT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x3bf8d35ad3c3320d95184dd4f9a0bfc2e56b151318d9d27eefa74461d24f5c61;
 
 // keccak256("security.token.standard.erc1643.resolverKey");
 bytes32 constant _ERC1643_RESOLVER_KEY = 0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625;

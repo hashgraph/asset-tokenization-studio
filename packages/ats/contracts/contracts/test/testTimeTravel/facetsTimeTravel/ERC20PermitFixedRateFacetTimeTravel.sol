@@ -3,11 +3,11 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC20PermitFacet } from "../../../layer_1/ERC1400/ERC20Permit/standard/ERC20PermitFacet.sol";
+import { ERC20PermitFixedRateFacet } from "../../../layer_1/ERC1400/ERC20Permit/fixedRate/ERC20PermitFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 
-contract ERC20PermitFacetTimeTravel is ERC20PermitFacet, TimeTravelStorageWrapper {
+contract ERC20PermitFixedRateFacetTimeTravel is ERC20PermitFixedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }

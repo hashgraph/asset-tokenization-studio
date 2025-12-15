@@ -8,12 +8,21 @@ import { ERC20PERMIT_TYPEHASH } from "../../constants/values.sol";
 import { _CONTRACT_NAME_ERC20PERMIT, _CONTRACT_VERSION_ERC20PERMIT } from "../../../layer_1/constants/values.sol";
 import { getDomainHash } from "../../../layer_1/protectedPartitions/signatureVerification.sol";
 import { _ERC20PERMIT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _CONTRACT_NAME_ERC20PERMIT, _CONTRACT_VERSION_ERC20PERMIT } from "contracts/layer_1/constants/values.sol";
 
 abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
     struct ERC20PermitStorage {
         string contractName;
         string contractVersion;
         bool initialized;
+    }
+
+    function _initialize_ERC20Permit(
+    ) internal override{
+        ERC20PermitStorage storage erc20PermitStorage = _erc20PermitStorage();
+        erc20PermitStorage.initialized = true;
+        erc20PermitStorage.contractName = _CONTRACT_NAME_ERC20PERMIT;
+        erc20PermitStorage.contractVersion = _CONTRACT_VERSION_ERC20PERMIT;
     }
 
     function _permit(
@@ -24,7 +33,7 @@ abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) internal {
+    ) internal override {
         if (_isExpired(deadline)) {
             revert IERC20Permit.ERC2612ExpiredSignature(deadline);
         }
@@ -48,9 +57,14 @@ abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _DOMAIN_SEPARATOR() internal view returns (bytes32) {
+    function _DOMAIN_SEPARATOR() internal view override returns (bytes32) {
         return getDomainHash(_CONTRACT_NAME_ERC20PERMIT, _CONTRACT_VERSION_ERC20PERMIT, _blockChainid(), address(this));
     }
+
+        function _isERC20PermitInitialized() internal view override returns (bool){
+            return _erc20PermitStorage().initialized;
+        }
+
 
     function _erc20PermitStorage() internal pure returns (ERC20PermitStorage storage erc20permitStorage_) {
         bytes32 position = _ERC20PERMIT_STORAGE_POSITION;

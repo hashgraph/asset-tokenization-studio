@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Modifiers } from "./Modifiers.sol";
+import { CheckpointsLib } from "./common/libraries/CheckpointsLib.sol";
 import { IClearing } from "../layer_1/interfaces/clearing/IClearing.sol";
 import { IClearingTransfer } from "../layer_1/interfaces/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "../layer_1/interfaces/clearing/IClearingRedeem.sol";
@@ -798,5 +799,36 @@ abstract contract Internals is Modifiers {
     function _decimalsAdjusted() internal view virtual returns (uint8);
     function _decimalsAdjustedAt(uint256 _timestamp) internal view virtual returns (uint8);
     function _getERC20MetadataAdjusted() internal view virtual returns (IERC20.ERC20Metadata memory);
+
+
+    function _isERC20PermitInitialized() internal view virtual returns (bool);
+    function _initialize_ERC20Permit(
+    ) internal virtual;
+    function _permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal virtual;
+    function _getNounceFor(address owner) internal view virtual returns (uint256);
+    function _DOMAIN_SEPARATOR() internal view virtual returns (bytes32);
+
+    function _isERC20VotesInitialized() internal view virtual returns (bool);
+    function _initialize_ERC20Votes(
+        bool _activated
+    ) internal virtual;
+    function _delegate(address _delegatee) internal virtual;
+    function _clock() internal view virtual returns (uint48);
+    function _CLOCK_MODE() internal view virtual returns (string memory);
+    function _getVotes(address _account) internal view virtual returns (uint256);
+    function _getPastVotes(address _account, uint256 _timepoint) internal view virtual returns (uint256);
+    function _getPastTotalSupply(uint256 _timepoint) internal view virtual returns (uint256);
+    function _delegates(address _account) internal view virtual returns (address);
+    function _checkpoints(address _account, uint256 _pos) internal view virtual returns (CheckpointsLib.Checkpoint memory);
+    function _numCheckpoints(address _account) internal view virtual returns (uint256);
+    function _isActivated() internal view virtual returns (bool);
 
 }
