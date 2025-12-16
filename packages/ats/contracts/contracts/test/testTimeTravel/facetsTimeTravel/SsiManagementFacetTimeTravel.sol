@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { SsiManagementFacet } from "../../../layer_1/ssi/SsiManagementFacet.sol";
+import { SsiManagementFacet } from "../../../layer_1/ssi/standard/SsiManagementFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 

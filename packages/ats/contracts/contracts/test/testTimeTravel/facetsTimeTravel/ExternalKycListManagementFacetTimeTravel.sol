@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ExternalKycListManagementFacet } from "../../../layer_1/externalKycLists/ExternalKycListManagementFacet.sol";
+import {
+    ExternalKycListManagementFacet
+} from "../../../layer_1/externalKycLists/standard/ExternalKycListManagementFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 

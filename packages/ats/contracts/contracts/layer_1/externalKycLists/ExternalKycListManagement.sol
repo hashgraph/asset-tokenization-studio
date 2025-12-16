@@ -2,12 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalKycListManagement } from "../interfaces/externalKycLists/IExternalKycListManagement.sol";
-import { Common } from "../../layer_0/common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { _KYC_MANAGER_ROLE } from "../constants/roles.sol";
 import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../layer_0/constants/storagePositions.sol";
 import { IKyc } from "../interfaces/kyc/IKyc.sol";
 
-abstract contract ExternalKycListManagement is IExternalKycListManagement, Common {
+abstract contract ExternalKycListManagement is IExternalKycListManagement, Internals {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalKycLists(
         address[] calldata _kycLists

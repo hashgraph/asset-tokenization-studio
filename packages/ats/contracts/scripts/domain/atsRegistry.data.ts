@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-16T13:39:20.126Z
- * Facets: 129
+ * Generated: 2025-12-16T14:31:27.347Z
+ * Facets: 168
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -231,34 +231,100 @@ import {
   EquityUSAFacetTimeTravel__factory,
   ExternalControlListManagementFacet__factory,
   ExternalControlListManagementFacetTimeTravel__factory,
+  ExternalControlListManagementFixedRateFacet__factory,
+  ExternalControlListManagementFixedRateFacetTimeTravel__factory,
+  ExternalControlListManagementKpiLinkedRateFacet__factory,
+  ExternalControlListManagementKpiLinkedRateFacetTimeTravel__factory,
+  ExternalControlListManagementSustainabilityPerformanceTargetRateFacet__factory,
+  ExternalControlListManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ExternalKycListManagementFacet__factory,
   ExternalKycListManagementFacetTimeTravel__factory,
+  ExternalKycListManagementFixedRateFacet__factory,
+  ExternalKycListManagementFixedRateFacetTimeTravel__factory,
+  ExternalKycListManagementKpiLinkedRateFacet__factory,
+  ExternalKycListManagementKpiLinkedRateFacetTimeTravel__factory,
+  ExternalKycListManagementSustainabilityPerformanceTargetRateFacet__factory,
+  ExternalKycListManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ExternalPauseManagementFacet__factory,
   ExternalPauseManagementFacetTimeTravel__factory,
+  ExternalPauseManagementFixedRateFacet__factory,
+  ExternalPauseManagementFixedRateFacetTimeTravel__factory,
+  ExternalPauseManagementKpiLinkedRateFacet__factory,
+  ExternalPauseManagementKpiLinkedRateFacetTimeTravel__factory,
+  ExternalPauseManagementSustainabilityPerformanceTargetRateFacet__factory,
+  ExternalPauseManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   FixedRateFacet__factory,
   FixedRateFacetTimeTravel__factory,
   FreezeFacet__factory,
   FreezeFacetTimeTravel__factory,
+  FreezeFixedRateFacet__factory,
+  FreezeFixedRateFacetTimeTravel__factory,
+  FreezeKpiLinkedRateFacet__factory,
+  FreezeKpiLinkedRateFacetTimeTravel__factory,
+  FreezeSustainabilityPerformanceTargetRateFacet__factory,
+  FreezeSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   HoldManagementFacet__factory,
   HoldManagementFacetTimeTravel__factory,
+  HoldManagementFixedRateFacet__factory,
+  HoldManagementFixedRateFacetTimeTravel__factory,
+  HoldManagementKpiLinkedRateFacet__factory,
+  HoldManagementKpiLinkedRateFacetTimeTravel__factory,
+  HoldManagementSustainabilityPerformanceTargetRateFacet__factory,
+  HoldManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   HoldReadFacet__factory,
   HoldReadFacetTimeTravel__factory,
+  HoldReadFixedRateFacet__factory,
+  HoldReadFixedRateFacetTimeTravel__factory,
+  HoldReadKpiLinkedRateFacet__factory,
+  HoldReadKpiLinkedRateFacetTimeTravel__factory,
+  HoldReadSustainabilityPerformanceTargetRateFacet__factory,
+  HoldReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   HoldTokenHolderFacet__factory,
   HoldTokenHolderFacetTimeTravel__factory,
+  HoldTokenHolderFixedRateFacet__factory,
+  HoldTokenHolderFixedRateFacetTimeTravel__factory,
+  HoldTokenHolderKpiLinkedRateFacet__factory,
+  HoldTokenHolderKpiLinkedRateFacetTimeTravel__factory,
+  HoldTokenHolderSustainabilityPerformanceTargetRateFacet__factory,
+  HoldTokenHolderSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KpiLinkedRateFacet__factory,
   KpiLinkedRateFacetTimeTravel__factory,
   KpisFacet__factory,
   KpisFacetTimeTravel__factory,
   KycFacet__factory,
   KycFacetTimeTravel__factory,
+  KycFixedRateFacet__factory,
+  KycFixedRateFacetTimeTravel__factory,
+  KycKpiLinkedRateFacet__factory,
+  KycKpiLinkedRateFacetTimeTravel__factory,
+  KycSustainabilityPerformanceTargetRateFacet__factory,
+  KycSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   LockFacet__factory,
   LockFacetTimeTravel__factory,
+  LockFixedRateFacet__factory,
+  LockFixedRateFacetTimeTravel__factory,
+  LockKpiLinkedRateFacet__factory,
+  LockKpiLinkedRateFacetTimeTravel__factory,
+  LockSustainabilityPerformanceTargetRateFacet__factory,
+  LockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   PauseFacet__factory,
   PauseFacetTimeTravel__factory,
+  PauseFixedRateFacet__factory,
+  PauseFixedRateFacetTimeTravel__factory,
+  PauseKpiLinkedRateFacet__factory,
+  PauseKpiLinkedRateFacetTimeTravel__factory,
+  PauseSustainabilityPerformanceTargetRateFacet__factory,
+  PauseSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ProceedRecipientsFacet__factory,
   ProceedRecipientsFacetTimeTravel__factory,
   ProtectedPartitionsFacet__factory,
   ProtectedPartitionsFacetTimeTravel__factory,
+  ProtectedPartitionsFixedRateFacet__factory,
+  ProtectedPartitionsFixedRateFacetTimeTravel__factory,
+  ProtectedPartitionsKpiLinkedRateFacet__factory,
+  ProtectedPartitionsKpiLinkedRateFacetTimeTravel__factory,
+  ProtectedPartitionsSustainabilityPerformanceTargetRateFacet__factory,
+  ProtectedPartitionsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ScheduledBalanceAdjustmentsFacet__factory,
   ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
   ScheduledCouponListingFacet__factory,
@@ -269,8 +335,20 @@ import {
   ScheduledSnapshotsFacetTimeTravel__factory,
   SnapshotsFacet__factory,
   SnapshotsFacetTimeTravel__factory,
+  SnapshotsFixedRateFacet__factory,
+  SnapshotsFixedRateFacetTimeTravel__factory,
+  SnapshotsKpiLinkedRateFacet__factory,
+  SnapshotsKpiLinkedRateFacetTimeTravel__factory,
+  SnapshotsSustainabilityPerformanceTargetRateFacet__factory,
+  SnapshotsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   SsiManagementFacet__factory,
   SsiManagementFacetTimeTravel__factory,
+  SsiManagementFixedRateFacet__factory,
+  SsiManagementFixedRateFacetTimeTravel__factory,
+  SsiManagementKpiLinkedRateFacet__factory,
+  SsiManagementKpiLinkedRateFacetTimeTravel__factory,
+  SsiManagementSustainabilityPerformanceTargetRateFacet__factory,
+  SsiManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   SustainabilityPerformanceTargetRateFacet__factory,
   SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   TimeTravelFacet__factory,
@@ -6240,10 +6318,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   ExternalControlListManagementFacet: {
     name: "ExternalControlListManagementFacet",
     resolverKey: {
-      name: "_CONTROL_LIST_MANAGEMENT_RESOLVER_KEY",
-      value: "0xb28d59e89fa116cebe06d8de737191b637a49d95f7d8d947d47ac000463e7c71",
+      name: "_EXTERNAL_CONTROL_LIST_RESOLVER_KEY",
+      value: "0x490196911bc65200514fb4568861a36670854901dffa91bc27577664fdace575",
     },
-    inheritance: ["ExternalControlListManagement", "IStaticFunctionSelectors"],
+    inheritance: ["ExternalControlListManagementFacetBase", "Common"],
     methods: [
       {
         name: "addExternalControlList",
@@ -6301,6 +6379,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "ExternalControlListsNotUpdated",
         signature: "ExternalControlListsNotUpdated(address[],bool[])",
@@ -6315,13 +6394,257 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         : new ExternalControlListManagementFacet__factory(signer),
   },
 
+  ExternalControlListManagementFixedRateFacet: {
+    name: "ExternalControlListManagementFixedRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_CONTROL_LIST_FIXED_RATE_RESOLVER_KEY",
+      value: "0xdb213fa4fc549f5bc27fc79e6094fe6a26e303e8eabc8a86a8de7bb307d570d8",
+    },
+    inheritance: ["ExternalControlListManagementFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "addExternalControlList",
+        signature: "function addExternalControlList(address _controlList) returns (bool success_)",
+        selector: "0x995e4649",
+      },
+      {
+        name: "getExternalControlListsCount",
+        signature: "function getExternalControlListsCount() view returns (uint256 externalControlListsCount_)",
+        selector: "0x9bec4167",
+      },
+      {
+        name: "getExternalControlListsMembers",
+        signature:
+          "function getExternalControlListsMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0xc4aa9df3",
+      },
+      {
+        name: "initialize_ExternalControlLists",
+        signature: "function initialize_ExternalControlLists(address[] _controlLists)",
+        selector: "0x0a0a114f",
+      },
+      {
+        name: "isExternalControlList",
+        signature: "function isExternalControlList(address _controlList) view returns (bool)",
+        selector: "0x07c44711",
+      },
+      {
+        name: "removeExternalControlList",
+        signature: "function removeExternalControlList(address _controlList) returns (bool success_)",
+        selector: "0xb8913387",
+      },
+      {
+        name: "updateExternalControlLists",
+        signature:
+          "function updateExternalControlLists(address[] _controlLists, bool[] _actives) returns (bool success_)",
+        selector: "0x0ba2b922",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToExternalControlLists",
+        signature: "AddedToExternalControlLists(address,address)",
+        topic0: "0x3d65de474cd161ee7f82f178e1edc66856cbd5f71f6fb8da9149d8c4b8af24cb",
+      },
+      {
+        name: "ExternalControlListsUpdated",
+        signature: "ExternalControlListsUpdated(address,address[],bool[])",
+        topic0: "0xf33492ee91b93cacfde1a1273fb2fe62ca266ca3e8abd548ea55c38559e0d27d",
+      },
+      {
+        name: "RemovedFromExternalControlLists",
+        signature: "RemovedFromExternalControlLists(address,address)",
+        topic0: "0xe4058444c388a9cf0c802f605695e3600e235e37a4af77aab2bb582e214e453d",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "ExternalControlListsNotUpdated",
+        signature: "ExternalControlListsNotUpdated(address[],bool[])",
+        selector: "0xbd29da3f",
+      },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+      { name: "ListedControlList", signature: "ListedControlList(address)", selector: "0x67a1e319" },
+      { name: "UnlistedControlList", signature: "UnlistedControlList(address)", selector: "0x6b4e1917" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ExternalControlListManagementFixedRateFacetTimeTravel__factory(signer)
+        : new ExternalControlListManagementFixedRateFacet__factory(signer),
+  },
+
+  ExternalControlListManagementKpiLinkedRateFacet: {
+    name: "ExternalControlListManagementKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_CONTROL_LIST_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x9ecec5a17142ae1072721e064f5e9a3f0795a2bea57673f40a9440b8adec0052",
+    },
+    inheritance: ["ExternalControlListManagementFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "addExternalControlList",
+        signature: "function addExternalControlList(address _controlList) returns (bool success_)",
+        selector: "0x995e4649",
+      },
+      {
+        name: "getExternalControlListsCount",
+        signature: "function getExternalControlListsCount() view returns (uint256 externalControlListsCount_)",
+        selector: "0x9bec4167",
+      },
+      {
+        name: "getExternalControlListsMembers",
+        signature:
+          "function getExternalControlListsMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0xc4aa9df3",
+      },
+      {
+        name: "initialize_ExternalControlLists",
+        signature: "function initialize_ExternalControlLists(address[] _controlLists)",
+        selector: "0x0a0a114f",
+      },
+      {
+        name: "isExternalControlList",
+        signature: "function isExternalControlList(address _controlList) view returns (bool)",
+        selector: "0x07c44711",
+      },
+      {
+        name: "removeExternalControlList",
+        signature: "function removeExternalControlList(address _controlList) returns (bool success_)",
+        selector: "0xb8913387",
+      },
+      {
+        name: "updateExternalControlLists",
+        signature:
+          "function updateExternalControlLists(address[] _controlLists, bool[] _actives) returns (bool success_)",
+        selector: "0x0ba2b922",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToExternalControlLists",
+        signature: "AddedToExternalControlLists(address,address)",
+        topic0: "0x3d65de474cd161ee7f82f178e1edc66856cbd5f71f6fb8da9149d8c4b8af24cb",
+      },
+      {
+        name: "ExternalControlListsUpdated",
+        signature: "ExternalControlListsUpdated(address,address[],bool[])",
+        topic0: "0xf33492ee91b93cacfde1a1273fb2fe62ca266ca3e8abd548ea55c38559e0d27d",
+      },
+      {
+        name: "RemovedFromExternalControlLists",
+        signature: "RemovedFromExternalControlLists(address,address)",
+        topic0: "0xe4058444c388a9cf0c802f605695e3600e235e37a4af77aab2bb582e214e453d",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "ExternalControlListsNotUpdated",
+        signature: "ExternalControlListsNotUpdated(address[],bool[])",
+        selector: "0xbd29da3f",
+      },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "ListedControlList", signature: "ListedControlList(address)", selector: "0x67a1e319" },
+      { name: "UnlistedControlList", signature: "UnlistedControlList(address)", selector: "0x6b4e1917" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ExternalControlListManagementKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ExternalControlListManagementKpiLinkedRateFacet__factory(signer),
+  },
+
+  ExternalControlListManagementSustainabilityPerformanceTargetRateFacet: {
+    name: "ExternalControlListManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_CONTROL_LIST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x2c56accbf6faf923cd323935455dac00c2ddffe08f0becdf49d515e4b4d355af",
+    },
+    inheritance: ["ExternalControlListManagementFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "addExternalControlList",
+        signature: "function addExternalControlList(address _controlList) returns (bool success_)",
+        selector: "0x995e4649",
+      },
+      {
+        name: "getExternalControlListsCount",
+        signature: "function getExternalControlListsCount() view returns (uint256 externalControlListsCount_)",
+        selector: "0x9bec4167",
+      },
+      {
+        name: "getExternalControlListsMembers",
+        signature:
+          "function getExternalControlListsMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0xc4aa9df3",
+      },
+      {
+        name: "initialize_ExternalControlLists",
+        signature: "function initialize_ExternalControlLists(address[] _controlLists)",
+        selector: "0x0a0a114f",
+      },
+      {
+        name: "isExternalControlList",
+        signature: "function isExternalControlList(address _controlList) view returns (bool)",
+        selector: "0x07c44711",
+      },
+      {
+        name: "removeExternalControlList",
+        signature: "function removeExternalControlList(address _controlList) returns (bool success_)",
+        selector: "0xb8913387",
+      },
+      {
+        name: "updateExternalControlLists",
+        signature:
+          "function updateExternalControlLists(address[] _controlLists, bool[] _actives) returns (bool success_)",
+        selector: "0x0ba2b922",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToExternalControlLists",
+        signature: "AddedToExternalControlLists(address,address)",
+        topic0: "0x3d65de474cd161ee7f82f178e1edc66856cbd5f71f6fb8da9149d8c4b8af24cb",
+      },
+      {
+        name: "ExternalControlListsUpdated",
+        signature: "ExternalControlListsUpdated(address,address[],bool[])",
+        topic0: "0xf33492ee91b93cacfde1a1273fb2fe62ca266ca3e8abd548ea55c38559e0d27d",
+      },
+      {
+        name: "RemovedFromExternalControlLists",
+        signature: "RemovedFromExternalControlLists(address,address)",
+        topic0: "0xe4058444c388a9cf0c802f605695e3600e235e37a4af77aab2bb582e214e453d",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "ExternalControlListsNotUpdated",
+        signature: "ExternalControlListsNotUpdated(address[],bool[])",
+        selector: "0xbd29da3f",
+      },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+      { name: "ListedControlList", signature: "ListedControlList(address)", selector: "0x67a1e319" },
+      { name: "UnlistedControlList", signature: "UnlistedControlList(address)", selector: "0x6b4e1917" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ExternalControlListManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ExternalControlListManagementSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
   ExternalKycListManagementFacet: {
     name: "ExternalKycListManagementFacet",
     resolverKey: {
-      name: "_KYC_MANAGEMENT_RESOLVER_KEY",
-      value: "0x8676785f4d841823214e8ee8c497b3336a210be7559f5571c590249f6203e821",
+      name: "_EXTERNAL_KYC_LIST_RESOLVER_KEY",
+      value: "0x32f05e55195d945105aff8ac4b041d4680824578bd72c6a34e4aa906a59237f1",
     },
-    inheritance: ["ExternalKycListManagement", "IStaticFunctionSelectors"],
+    inheritance: ["ExternalKycListManagementFacetBase", "Common"],
     methods: [
       {
         name: "addExternalKycList",
@@ -6383,6 +6706,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "ExternalKycListsNotUpdated",
         signature: "ExternalKycListsNotUpdated(address[],bool[])",
@@ -6397,13 +6721,269 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         : new ExternalKycListManagementFacet__factory(signer),
   },
 
+  ExternalKycListManagementFixedRateFacet: {
+    name: "ExternalKycListManagementFixedRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_KYC_LIST_FIXED_RATE_RESOLVER_KEY",
+      value: "0x4f9cf8c8583a46a60ec88a37a07f91d915dba024a57bdb729a4805603f5c40b2",
+    },
+    inheritance: ["ExternalKycListManagementFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "addExternalKycList",
+        signature: "function addExternalKycList(address _kycLists) returns (bool success_)",
+        selector: "0x7570e044",
+      },
+      {
+        name: "getExternalKycListsCount",
+        signature: "function getExternalKycListsCount() view returns (uint256 externalKycListsCount_)",
+        selector: "0xd17e889e",
+      },
+      {
+        name: "getExternalKycListsMembers",
+        signature:
+          "function getExternalKycListsMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x999a2459",
+      },
+      {
+        name: "initialize_ExternalKycLists",
+        signature: "function initialize_ExternalKycLists(address[] _kycLists)",
+        selector: "0x3ac7fadc",
+      },
+      {
+        name: "isExternalKycList",
+        signature: "function isExternalKycList(address _kycList) view returns (bool)",
+        selector: "0x20991e17",
+      },
+      {
+        name: "isExternallyGranted",
+        signature: "function isExternallyGranted(address _account, uint8 _kycStatus) view returns (bool)",
+        selector: "0x1d7d5749",
+      },
+      {
+        name: "removeExternalKycList",
+        signature: "function removeExternalKycList(address _kycLists) returns (bool success_)",
+        selector: "0x16c94d54",
+      },
+      {
+        name: "updateExternalKycLists",
+        signature: "function updateExternalKycLists(address[] _kycLists, bool[] _actives) returns (bool success_)",
+        selector: "0xc391576d",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToExternalKycLists",
+        signature: "AddedToExternalKycLists(address,address)",
+        topic0: "0xbcae4970725fd3096fd0bf87438db521acff164a7290d244ac387de859944b3a",
+      },
+      {
+        name: "ExternalKycListsUpdated",
+        signature: "ExternalKycListsUpdated(address,address[],bool[])",
+        topic0: "0xd601f143a291315a9f9c93550bb5299d09b105676ef1a06edcd38df1a9390fbc",
+      },
+      {
+        name: "RemovedFromExternalKycLists",
+        signature: "RemovedFromExternalKycLists(address,address)",
+        topic0: "0xf5b81cc6909f27c20ccf2b32d6f34bc169fc165d0d4ea1db1c5f392fca56765f",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "ExternalKycListsNotUpdated",
+        signature: "ExternalKycListsNotUpdated(address[],bool[])",
+        selector: "0x8a85ec02",
+      },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+      { name: "ListedKycList", signature: "ListedKycList(address)", selector: "0x91c6b79d" },
+      { name: "UnlistedKycList", signature: "UnlistedKycList(address)", selector: "0xf5cc4d79" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ExternalKycListManagementFixedRateFacetTimeTravel__factory(signer)
+        : new ExternalKycListManagementFixedRateFacet__factory(signer),
+  },
+
+  ExternalKycListManagementKpiLinkedRateFacet: {
+    name: "ExternalKycListManagementKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_KYC_LIST_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xc15c973cec2d75a95d94522af2dc05c535be214a6cce368887f7e7d3ead3a491",
+    },
+    inheritance: ["ExternalKycListManagementFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "addExternalKycList",
+        signature: "function addExternalKycList(address _kycLists) returns (bool success_)",
+        selector: "0x7570e044",
+      },
+      {
+        name: "getExternalKycListsCount",
+        signature: "function getExternalKycListsCount() view returns (uint256 externalKycListsCount_)",
+        selector: "0xd17e889e",
+      },
+      {
+        name: "getExternalKycListsMembers",
+        signature:
+          "function getExternalKycListsMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x999a2459",
+      },
+      {
+        name: "initialize_ExternalKycLists",
+        signature: "function initialize_ExternalKycLists(address[] _kycLists)",
+        selector: "0x3ac7fadc",
+      },
+      {
+        name: "isExternalKycList",
+        signature: "function isExternalKycList(address _kycList) view returns (bool)",
+        selector: "0x20991e17",
+      },
+      {
+        name: "isExternallyGranted",
+        signature: "function isExternallyGranted(address _account, uint8 _kycStatus) view returns (bool)",
+        selector: "0x1d7d5749",
+      },
+      {
+        name: "removeExternalKycList",
+        signature: "function removeExternalKycList(address _kycLists) returns (bool success_)",
+        selector: "0x16c94d54",
+      },
+      {
+        name: "updateExternalKycLists",
+        signature: "function updateExternalKycLists(address[] _kycLists, bool[] _actives) returns (bool success_)",
+        selector: "0xc391576d",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToExternalKycLists",
+        signature: "AddedToExternalKycLists(address,address)",
+        topic0: "0xbcae4970725fd3096fd0bf87438db521acff164a7290d244ac387de859944b3a",
+      },
+      {
+        name: "ExternalKycListsUpdated",
+        signature: "ExternalKycListsUpdated(address,address[],bool[])",
+        topic0: "0xd601f143a291315a9f9c93550bb5299d09b105676ef1a06edcd38df1a9390fbc",
+      },
+      {
+        name: "RemovedFromExternalKycLists",
+        signature: "RemovedFromExternalKycLists(address,address)",
+        topic0: "0xf5b81cc6909f27c20ccf2b32d6f34bc169fc165d0d4ea1db1c5f392fca56765f",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "ExternalKycListsNotUpdated",
+        signature: "ExternalKycListsNotUpdated(address[],bool[])",
+        selector: "0x8a85ec02",
+      },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "ListedKycList", signature: "ListedKycList(address)", selector: "0x91c6b79d" },
+      { name: "UnlistedKycList", signature: "UnlistedKycList(address)", selector: "0xf5cc4d79" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ExternalKycListManagementKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ExternalKycListManagementKpiLinkedRateFacet__factory(signer),
+  },
+
+  ExternalKycListManagementSustainabilityPerformanceTargetRateFacet: {
+    name: "ExternalKycListManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_KYC_LIST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x0fcfeebcf118ca3c39fbed0e2a527a866cac42bbd3fcad5f9b4f755ef97f3aa9",
+    },
+    inheritance: ["ExternalKycListManagementFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "addExternalKycList",
+        signature: "function addExternalKycList(address _kycLists) returns (bool success_)",
+        selector: "0x7570e044",
+      },
+      {
+        name: "getExternalKycListsCount",
+        signature: "function getExternalKycListsCount() view returns (uint256 externalKycListsCount_)",
+        selector: "0xd17e889e",
+      },
+      {
+        name: "getExternalKycListsMembers",
+        signature:
+          "function getExternalKycListsMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x999a2459",
+      },
+      {
+        name: "initialize_ExternalKycLists",
+        signature: "function initialize_ExternalKycLists(address[] _kycLists)",
+        selector: "0x3ac7fadc",
+      },
+      {
+        name: "isExternalKycList",
+        signature: "function isExternalKycList(address _kycList) view returns (bool)",
+        selector: "0x20991e17",
+      },
+      {
+        name: "isExternallyGranted",
+        signature: "function isExternallyGranted(address _account, uint8 _kycStatus) view returns (bool)",
+        selector: "0x1d7d5749",
+      },
+      {
+        name: "removeExternalKycList",
+        signature: "function removeExternalKycList(address _kycLists) returns (bool success_)",
+        selector: "0x16c94d54",
+      },
+      {
+        name: "updateExternalKycLists",
+        signature: "function updateExternalKycLists(address[] _kycLists, bool[] _actives) returns (bool success_)",
+        selector: "0xc391576d",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToExternalKycLists",
+        signature: "AddedToExternalKycLists(address,address)",
+        topic0: "0xbcae4970725fd3096fd0bf87438db521acff164a7290d244ac387de859944b3a",
+      },
+      {
+        name: "ExternalKycListsUpdated",
+        signature: "ExternalKycListsUpdated(address,address[],bool[])",
+        topic0: "0xd601f143a291315a9f9c93550bb5299d09b105676ef1a06edcd38df1a9390fbc",
+      },
+      {
+        name: "RemovedFromExternalKycLists",
+        signature: "RemovedFromExternalKycLists(address,address)",
+        topic0: "0xf5b81cc6909f27c20ccf2b32d6f34bc169fc165d0d4ea1db1c5f392fca56765f",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "ExternalKycListsNotUpdated",
+        signature: "ExternalKycListsNotUpdated(address[],bool[])",
+        selector: "0x8a85ec02",
+      },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+      { name: "ListedKycList", signature: "ListedKycList(address)", selector: "0x91c6b79d" },
+      { name: "UnlistedKycList", signature: "UnlistedKycList(address)", selector: "0xf5cc4d79" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ExternalKycListManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ExternalKycListManagementSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
   ExternalPauseManagementFacet: {
     name: "ExternalPauseManagementFacet",
     resolverKey: {
-      name: "_PAUSE_MANAGEMENT_RESOLVER_KEY",
-      value: "0xadd2e196c17b4f607e327e46341eedbbbc3dce86ac90ceb3e7244b0a5f8590ac",
+      name: "_EXTERNAL_PAUSE_RESOLVER_KEY",
+      value: "0x158025f9e40c5d145e7915a14d5e97459728d98c715d8329359e305df737ee3c",
     },
-    inheritance: ["ExternalPauseManagement", "IStaticFunctionSelectors"],
+    inheritance: ["ExternalPauseManagementFacetBase", "Common"],
     methods: [
       {
         name: "addExternalPause",
@@ -6460,6 +7040,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "ExternalPausesNotUpdated",
         signature: "ExternalPausesNotUpdated(address[],bool[])",
@@ -6472,6 +7053,247 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel
         ? new ExternalPauseManagementFacetTimeTravel__factory(signer)
         : new ExternalPauseManagementFacet__factory(signer),
+  },
+
+  ExternalPauseManagementFixedRateFacet: {
+    name: "ExternalPauseManagementFixedRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_PAUSE_FIXED_RATE_RESOLVER_KEY",
+      value: "0x752307e5e93ea6e9b979833cf52e6043f71fd4b983ec32aa685f9b160594e326",
+    },
+    inheritance: ["ExternalPauseManagementFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "addExternalPause",
+        signature: "function addExternalPause(address _pause) returns (bool success_)",
+        selector: "0xd438cff1",
+      },
+      {
+        name: "getExternalPausesCount",
+        signature: "function getExternalPausesCount() view returns (uint256 externalPausesCount_)",
+        selector: "0x1e2bc3a6",
+      },
+      {
+        name: "getExternalPausesMembers",
+        signature:
+          "function getExternalPausesMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x5b175a35",
+      },
+      {
+        name: "initialize_ExternalPauses",
+        signature: "function initialize_ExternalPauses(address[] _pauses)",
+        selector: "0x8f88d0d5",
+      },
+      {
+        name: "isExternalPause",
+        signature: "function isExternalPause(address _pause) view returns (bool)",
+        selector: "0xe26e35be",
+      },
+      {
+        name: "removeExternalPause",
+        signature: "function removeExternalPause(address _pause) returns (bool success_)",
+        selector: "0x9648d912",
+      },
+      {
+        name: "updateExternalPauses",
+        signature: "function updateExternalPauses(address[] _pauses, bool[] _actives) returns (bool success_)",
+        selector: "0x361d714a",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToExternalPauses",
+        signature: "AddedToExternalPauses(address,address)",
+        topic0: "0x3e5aaed9f36a606341d49642168dd1094c2394f06760d24cb81c89d0a8210c0b",
+      },
+      {
+        name: "ExternalPausesUpdated",
+        signature: "ExternalPausesUpdated(address,address[],bool[])",
+        topic0: "0x75a050d52d69209d464c91f8503b1f3e0aa6bb70550a3884bc19c53c25882878",
+      },
+      {
+        name: "RemovedFromExternalPauses",
+        signature: "RemovedFromExternalPauses(address,address)",
+        topic0: "0x3c9c4b708af23d4bd4eb63d45714a3f61f17ae8f0ece3a182c38d15667b965c8",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "ExternalPausesNotUpdated",
+        signature: "ExternalPausesNotUpdated(address[],bool[])",
+        selector: "0x2d931b36",
+      },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+      { name: "ListedPause", signature: "ListedPause(address)", selector: "0x267b9ec9" },
+      { name: "UnlistedPause", signature: "UnlistedPause(address)", selector: "0x3281637c" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ExternalPauseManagementFixedRateFacetTimeTravel__factory(signer)
+        : new ExternalPauseManagementFixedRateFacet__factory(signer),
+  },
+
+  ExternalPauseManagementKpiLinkedRateFacet: {
+    name: "ExternalPauseManagementKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_PAUSE_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x549d7aab8deeb4a493aa9765937da4290840d4a6fe04399ef4bb818694d9aee4",
+    },
+    inheritance: ["ExternalPauseManagementFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "addExternalPause",
+        signature: "function addExternalPause(address _pause) returns (bool success_)",
+        selector: "0xd438cff1",
+      },
+      {
+        name: "getExternalPausesCount",
+        signature: "function getExternalPausesCount() view returns (uint256 externalPausesCount_)",
+        selector: "0x1e2bc3a6",
+      },
+      {
+        name: "getExternalPausesMembers",
+        signature:
+          "function getExternalPausesMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x5b175a35",
+      },
+      {
+        name: "initialize_ExternalPauses",
+        signature: "function initialize_ExternalPauses(address[] _pauses)",
+        selector: "0x8f88d0d5",
+      },
+      {
+        name: "isExternalPause",
+        signature: "function isExternalPause(address _pause) view returns (bool)",
+        selector: "0xe26e35be",
+      },
+      {
+        name: "removeExternalPause",
+        signature: "function removeExternalPause(address _pause) returns (bool success_)",
+        selector: "0x9648d912",
+      },
+      {
+        name: "updateExternalPauses",
+        signature: "function updateExternalPauses(address[] _pauses, bool[] _actives) returns (bool success_)",
+        selector: "0x361d714a",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToExternalPauses",
+        signature: "AddedToExternalPauses(address,address)",
+        topic0: "0x3e5aaed9f36a606341d49642168dd1094c2394f06760d24cb81c89d0a8210c0b",
+      },
+      {
+        name: "ExternalPausesUpdated",
+        signature: "ExternalPausesUpdated(address,address[],bool[])",
+        topic0: "0x75a050d52d69209d464c91f8503b1f3e0aa6bb70550a3884bc19c53c25882878",
+      },
+      {
+        name: "RemovedFromExternalPauses",
+        signature: "RemovedFromExternalPauses(address,address)",
+        topic0: "0x3c9c4b708af23d4bd4eb63d45714a3f61f17ae8f0ece3a182c38d15667b965c8",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "ExternalPausesNotUpdated",
+        signature: "ExternalPausesNotUpdated(address[],bool[])",
+        selector: "0x2d931b36",
+      },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "ListedPause", signature: "ListedPause(address)", selector: "0x267b9ec9" },
+      { name: "UnlistedPause", signature: "UnlistedPause(address)", selector: "0x3281637c" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ExternalPauseManagementKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ExternalPauseManagementKpiLinkedRateFacet__factory(signer),
+  },
+
+  ExternalPauseManagementSustainabilityPerformanceTargetRateFacet: {
+    name: "ExternalPauseManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_PAUSE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x07846b678053cbd4be5d9d3929fa9af5ab76bb508a0f7957f5239302aad45bc3",
+    },
+    inheritance: ["ExternalPauseManagementFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "addExternalPause",
+        signature: "function addExternalPause(address _pause) returns (bool success_)",
+        selector: "0xd438cff1",
+      },
+      {
+        name: "getExternalPausesCount",
+        signature: "function getExternalPausesCount() view returns (uint256 externalPausesCount_)",
+        selector: "0x1e2bc3a6",
+      },
+      {
+        name: "getExternalPausesMembers",
+        signature:
+          "function getExternalPausesMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x5b175a35",
+      },
+      {
+        name: "initialize_ExternalPauses",
+        signature: "function initialize_ExternalPauses(address[] _pauses)",
+        selector: "0x8f88d0d5",
+      },
+      {
+        name: "isExternalPause",
+        signature: "function isExternalPause(address _pause) view returns (bool)",
+        selector: "0xe26e35be",
+      },
+      {
+        name: "removeExternalPause",
+        signature: "function removeExternalPause(address _pause) returns (bool success_)",
+        selector: "0x9648d912",
+      },
+      {
+        name: "updateExternalPauses",
+        signature: "function updateExternalPauses(address[] _pauses, bool[] _actives) returns (bool success_)",
+        selector: "0x361d714a",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToExternalPauses",
+        signature: "AddedToExternalPauses(address,address)",
+        topic0: "0x3e5aaed9f36a606341d49642168dd1094c2394f06760d24cb81c89d0a8210c0b",
+      },
+      {
+        name: "ExternalPausesUpdated",
+        signature: "ExternalPausesUpdated(address,address[],bool[])",
+        topic0: "0x75a050d52d69209d464c91f8503b1f3e0aa6bb70550a3884bc19c53c25882878",
+      },
+      {
+        name: "RemovedFromExternalPauses",
+        signature: "RemovedFromExternalPauses(address,address)",
+        topic0: "0x3c9c4b708af23d4bd4eb63d45714a3f61f17ae8f0ece3a182c38d15667b965c8",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "ExternalPausesNotUpdated",
+        signature: "ExternalPausesNotUpdated(address[],bool[])",
+        selector: "0x2d931b36",
+      },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+      { name: "ListedPause", signature: "ListedPause(address)", selector: "0x267b9ec9" },
+      { name: "UnlistedPause", signature: "UnlistedPause(address)", selector: "0x3281637c" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ExternalPauseManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ExternalPauseManagementSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   FixedRateFacet: {
@@ -6519,7 +7341,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_FREEZE_RESOLVER_KEY",
       value: "0x49f765e7155d979a148049c2a0ebed5e028b11799061897a255f99314f0bd3f1",
     },
-    inheritance: ["Freeze", "IStaticFunctionSelectors"],
+    inheritance: ["FreezeFacetBase", "Common"],
     methods: [
       {
         name: "batchFreezePartialTokens",
@@ -6574,17 +7396,233 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new FreezeFacetTimeTravel__factory(signer) : new FreezeFacet__factory(signer),
+  },
+
+  FreezeFixedRateFacet: {
+    name: "FreezeFixedRateFacet",
+    resolverKey: {
+      name: "_FREEZE_FIXED_RATE_RESOLVER_KEY",
+      value: "0xad6f49f17db4659e78d7c82e5414ef50b6bfddf3f3e15adc3d0a0e958f696841",
+    },
+    inheritance: ["FreezeFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "batchFreezePartialTokens",
+        signature: "function batchFreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
+        selector: "0xfc7e5fa8",
+      },
+      {
+        name: "batchSetAddressFrozen",
+        signature: "function batchSetAddressFrozen(address[] _userAddresses, bool[] _freeze)",
+        selector: "0x1a7af379",
+      },
+      {
+        name: "batchUnfreezePartialTokens",
+        signature: "function batchUnfreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
+        selector: "0x4710362d",
+      },
+      {
+        name: "freezePartialTokens",
+        signature: "function freezePartialTokens(address _userAddress, uint256 _amount)",
+        selector: "0x125c4a33",
+      },
+      {
+        name: "getFrozenTokens",
+        signature: "function getFrozenTokens(address _userAddress) view returns (uint256)",
+        selector: "0x158b1a57",
+      },
+      {
+        name: "setAddressFrozen",
+        signature: "function setAddressFrozen(address _userAddress, bool _freezStatus)",
+        selector: "0xc69c09cf",
+      },
+      {
+        name: "unfreezePartialTokens",
+        signature: "function unfreezePartialTokens(address _userAddress, uint256 _amount)",
+        selector: "0x1fe56f7d",
+      },
+    ],
+    events: [
+      {
+        name: "AddressFrozen",
+        signature: "AddressFrozen(address,bool,address)",
+        topic0: "0x7fa523c84ab8d7fc5b72f08b9e46dbbf10c39e119a075b3e317002d14bc9f436",
+      },
+      {
+        name: "TokensFrozen",
+        signature: "TokensFrozen(address,uint256,bytes32)",
+        topic0: "0xd736f88140588a48bf2ce0d40c8ed9eea7d10162e5667cf5054c78ac9a28b2e2",
+      },
+      {
+        name: "TokensUnfrozen",
+        signature: "TokensUnfrozen(address,uint256,bytes32)",
+        topic0: "0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new FreezeFixedRateFacetTimeTravel__factory(signer) : new FreezeFixedRateFacet__factory(signer),
+  },
+
+  FreezeKpiLinkedRateFacet: {
+    name: "FreezeKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_FREEZE_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xb03614fe7a4412f420f88bc18fc39ab43459dbfdbbdbd0a8e109356b0928272e",
+    },
+    inheritance: ["FreezeFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "batchFreezePartialTokens",
+        signature: "function batchFreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
+        selector: "0xfc7e5fa8",
+      },
+      {
+        name: "batchSetAddressFrozen",
+        signature: "function batchSetAddressFrozen(address[] _userAddresses, bool[] _freeze)",
+        selector: "0x1a7af379",
+      },
+      {
+        name: "batchUnfreezePartialTokens",
+        signature: "function batchUnfreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
+        selector: "0x4710362d",
+      },
+      {
+        name: "freezePartialTokens",
+        signature: "function freezePartialTokens(address _userAddress, uint256 _amount)",
+        selector: "0x125c4a33",
+      },
+      {
+        name: "getFrozenTokens",
+        signature: "function getFrozenTokens(address _userAddress) view returns (uint256)",
+        selector: "0x158b1a57",
+      },
+      {
+        name: "setAddressFrozen",
+        signature: "function setAddressFrozen(address _userAddress, bool _freezStatus)",
+        selector: "0xc69c09cf",
+      },
+      {
+        name: "unfreezePartialTokens",
+        signature: "function unfreezePartialTokens(address _userAddress, uint256 _amount)",
+        selector: "0x1fe56f7d",
+      },
+    ],
+    events: [
+      {
+        name: "AddressFrozen",
+        signature: "AddressFrozen(address,bool,address)",
+        topic0: "0x7fa523c84ab8d7fc5b72f08b9e46dbbf10c39e119a075b3e317002d14bc9f436",
+      },
+      {
+        name: "TokensFrozen",
+        signature: "TokensFrozen(address,uint256,bytes32)",
+        topic0: "0xd736f88140588a48bf2ce0d40c8ed9eea7d10162e5667cf5054c78ac9a28b2e2",
+      },
+      {
+        name: "TokensUnfrozen",
+        signature: "TokensUnfrozen(address,uint256,bytes32)",
+        topic0: "0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new FreezeKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new FreezeKpiLinkedRateFacet__factory(signer),
+  },
+
+  FreezeSustainabilityPerformanceTargetRateFacet: {
+    name: "FreezeSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_FREEZE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x25ca5cbe52a82389e142792fdab2ffc58f224f2628f9a92a3f717134cbe229e4",
+    },
+    inheritance: ["FreezeFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "batchFreezePartialTokens",
+        signature: "function batchFreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
+        selector: "0xfc7e5fa8",
+      },
+      {
+        name: "batchSetAddressFrozen",
+        signature: "function batchSetAddressFrozen(address[] _userAddresses, bool[] _freeze)",
+        selector: "0x1a7af379",
+      },
+      {
+        name: "batchUnfreezePartialTokens",
+        signature: "function batchUnfreezePartialTokens(address[] _userAddresses, uint256[] _amounts)",
+        selector: "0x4710362d",
+      },
+      {
+        name: "freezePartialTokens",
+        signature: "function freezePartialTokens(address _userAddress, uint256 _amount)",
+        selector: "0x125c4a33",
+      },
+      {
+        name: "getFrozenTokens",
+        signature: "function getFrozenTokens(address _userAddress) view returns (uint256)",
+        selector: "0x158b1a57",
+      },
+      {
+        name: "setAddressFrozen",
+        signature: "function setAddressFrozen(address _userAddress, bool _freezStatus)",
+        selector: "0xc69c09cf",
+      },
+      {
+        name: "unfreezePartialTokens",
+        signature: "function unfreezePartialTokens(address _userAddress, uint256 _amount)",
+        selector: "0x1fe56f7d",
+      },
+    ],
+    events: [
+      {
+        name: "AddressFrozen",
+        signature: "AddressFrozen(address,bool,address)",
+        topic0: "0x7fa523c84ab8d7fc5b72f08b9e46dbbf10c39e119a075b3e317002d14bc9f436",
+      },
+      {
+        name: "TokensFrozen",
+        signature: "TokensFrozen(address,uint256,bytes32)",
+        topic0: "0xd736f88140588a48bf2ce0d40c8ed9eea7d10162e5667cf5054c78ac9a28b2e2",
+      },
+      {
+        name: "TokensUnfrozen",
+        signature: "TokensUnfrozen(address,uint256,bytes32)",
+        topic0: "0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new FreezeSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new FreezeSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   HoldManagementFacet: {
     name: "HoldManagementFacet",
     resolverKey: {
-      name: "_HOLD_MANAGEMENT_RESOLVER_KEY",
-      value: "0xaab5a0e0978ad146ca8dc61d16bab0212224eadf68bd08e3c66600ee4f59c12a",
+      name: "_HOLD_RESOLVER_KEY",
+      value: "0x6c7216c5c52bc8f5019fc2fb333eb5e518e647fd82c807ed7c2a1fe4a03a3860",
     },
-    inheritance: ["IStaticFunctionSelectors", "HoldManagement"],
+    inheritance: ["HoldManagementFacetBase", "Common"],
     methods: [
       {
         name: "controllerCreateHoldByPartition",
@@ -6622,17 +7660,184 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new HoldManagementFacetTimeTravel__factory(signer) : new HoldManagementFacet__factory(signer),
+  },
+
+  HoldManagementFixedRateFacet: {
+    name: "HoldManagementFixedRateFacet",
+    resolverKey: {
+      name: "_HOLD_FIXED_RATE_RESOLVER_KEY",
+      value: "0xed113dc152639988cc04869ce8c061c4a3350fe3826e16fc37960453a8d20b50",
+    },
+    inheritance: ["HoldManagementFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "controllerCreateHoldByPartition",
+        signature:
+          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0x5f3d8171",
+      },
+      {
+        name: "operatorCreateHoldByPartition",
+        signature:
+          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0xc6062c3c",
+      },
+      {
+        name: "protectedCreateHoldByPartition",
+        signature:
+          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, tuple(tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
+        selector: "0xc17f3554",
+      },
+    ],
+    events: [
+      {
+        name: "ControllerHeldByPartition",
+        signature: "ControllerHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0xf6f3741306d730c309f18e6262f05de4790259d916f67334766f2f71dbf00b11",
+      },
+      {
+        name: "OperatorHeldByPartition",
+        signature: "OperatorHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0xecb0a532842468318362280a5b81ec910b4d495202a817fc545fd2b7628559e4",
+      },
+      {
+        name: "ProtectedHeldByPartition",
+        signature: "ProtectedHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new HoldManagementFixedRateFacetTimeTravel__factory(signer)
+        : new HoldManagementFixedRateFacet__factory(signer),
+  },
+
+  HoldManagementKpiLinkedRateFacet: {
+    name: "HoldManagementKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_HOLD_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xed86feb6fdd55e6a056bda1a5b7149c2d0d6d7d024625b67aa2c567ba0ef2b9e",
+    },
+    inheritance: ["HoldManagementFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "controllerCreateHoldByPartition",
+        signature:
+          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0x5f3d8171",
+      },
+      {
+        name: "operatorCreateHoldByPartition",
+        signature:
+          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0xc6062c3c",
+      },
+      {
+        name: "protectedCreateHoldByPartition",
+        signature:
+          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, tuple(tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
+        selector: "0xc17f3554",
+      },
+    ],
+    events: [
+      {
+        name: "ControllerHeldByPartition",
+        signature: "ControllerHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0xf6f3741306d730c309f18e6262f05de4790259d916f67334766f2f71dbf00b11",
+      },
+      {
+        name: "OperatorHeldByPartition",
+        signature: "OperatorHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0xecb0a532842468318362280a5b81ec910b4d495202a817fc545fd2b7628559e4",
+      },
+      {
+        name: "ProtectedHeldByPartition",
+        signature: "ProtectedHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new HoldManagementKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new HoldManagementKpiLinkedRateFacet__factory(signer),
+  },
+
+  HoldManagementSustainabilityPerformanceTargetRateFacet: {
+    name: "HoldManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_HOLD_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x4574524c203fbcc0f5b9f08bcd2b9a9d47c5a9cf3a30eeb540a93a33a8a2f834",
+    },
+    inheritance: ["HoldManagementFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "controllerCreateHoldByPartition",
+        signature:
+          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0x5f3d8171",
+      },
+      {
+        name: "operatorCreateHoldByPartition",
+        signature:
+          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0xc6062c3c",
+      },
+      {
+        name: "protectedCreateHoldByPartition",
+        signature:
+          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, tuple(tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
+        selector: "0xc17f3554",
+      },
+    ],
+    events: [
+      {
+        name: "ControllerHeldByPartition",
+        signature: "ControllerHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0xf6f3741306d730c309f18e6262f05de4790259d916f67334766f2f71dbf00b11",
+      },
+      {
+        name: "OperatorHeldByPartition",
+        signature: "OperatorHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0xecb0a532842468318362280a5b81ec910b4d495202a817fc545fd2b7628559e4",
+      },
+      {
+        name: "ProtectedHeldByPartition",
+        signature: "ProtectedHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new HoldManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new HoldManagementSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   HoldReadFacet: {
     name: "HoldReadFacet",
     resolverKey: {
-      name: "_HOLD_READ_RESOLVER_KEY",
-      value: "0xd8a2714462c01975a075ccd4be2588934afd8074afef746fac089b757b803851",
+      name: "_HOLD_RESOLVER_KEY",
+      value: "0x6c7216c5c52bc8f5019fc2fb333eb5e518e647fd82c807ed7c2a1fe4a03a3860",
     },
-    inheritance: ["IStaticFunctionSelectors", "HoldRead"],
+    inheritance: ["HoldReadFacetBase", "Common"],
     methods: [
       {
         name: "getHeldAmountFor",
@@ -6670,17 +7875,184 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xeb89899d",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new HoldReadFacetTimeTravel__factory(signer) : new HoldReadFacet__factory(signer),
+  },
+
+  HoldReadFixedRateFacet: {
+    name: "HoldReadFixedRateFacet",
+    resolverKey: {
+      name: "_HOLD_FIXED_RATE_RESOLVER_KEY",
+      value: "0xed113dc152639988cc04869ce8c061c4a3350fe3826e16fc37960453a8d20b50",
+    },
+    inheritance: ["HoldReadFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "getHeldAmountFor",
+        signature: "function getHeldAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x8493aabb",
+      },
+      {
+        name: "getHeldAmountForByPartition",
+        signature:
+          "function getHeldAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x4d60fdc5",
+      },
+      {
+        name: "getHoldCountForByPartition",
+        signature:
+          "function getHoldCountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 holdCount_)",
+        selector: "0xcecb3899",
+      },
+      {
+        name: "getHoldForByPartition",
+        signature:
+          "function getHoldForByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
+        selector: "0x8d41523d",
+      },
+      {
+        name: "getHoldThirdParty",
+        signature:
+          "function getHoldThirdParty(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
+        selector: "0x3c36a695",
+      },
+      {
+        name: "getHoldsIdForByPartition",
+        signature:
+          "function getHoldsIdForByPartition(bytes32 _partition, address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] holdsId_)",
+        selector: "0xeb89899d",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new HoldReadFixedRateFacetTimeTravel__factory(signer)
+        : new HoldReadFixedRateFacet__factory(signer),
+  },
+
+  HoldReadKpiLinkedRateFacet: {
+    name: "HoldReadKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_HOLD_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xed86feb6fdd55e6a056bda1a5b7149c2d0d6d7d024625b67aa2c567ba0ef2b9e",
+    },
+    inheritance: ["HoldReadFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "getHeldAmountFor",
+        signature: "function getHeldAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x8493aabb",
+      },
+      {
+        name: "getHeldAmountForByPartition",
+        signature:
+          "function getHeldAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x4d60fdc5",
+      },
+      {
+        name: "getHoldCountForByPartition",
+        signature:
+          "function getHoldCountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 holdCount_)",
+        selector: "0xcecb3899",
+      },
+      {
+        name: "getHoldForByPartition",
+        signature:
+          "function getHoldForByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
+        selector: "0x8d41523d",
+      },
+      {
+        name: "getHoldThirdParty",
+        signature:
+          "function getHoldThirdParty(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
+        selector: "0x3c36a695",
+      },
+      {
+        name: "getHoldsIdForByPartition",
+        signature:
+          "function getHoldsIdForByPartition(bytes32 _partition, address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] holdsId_)",
+        selector: "0xeb89899d",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new HoldReadKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new HoldReadKpiLinkedRateFacet__factory(signer),
+  },
+
+  HoldReadSustainabilityPerformanceTargetRateFacet: {
+    name: "HoldReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_HOLD_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x4574524c203fbcc0f5b9f08bcd2b9a9d47c5a9cf3a30eeb540a93a33a8a2f834",
+    },
+    inheritance: ["HoldReadFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "getHeldAmountFor",
+        signature: "function getHeldAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x8493aabb",
+      },
+      {
+        name: "getHeldAmountForByPartition",
+        signature:
+          "function getHeldAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x4d60fdc5",
+      },
+      {
+        name: "getHoldCountForByPartition",
+        signature:
+          "function getHoldCountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 holdCount_)",
+        selector: "0xcecb3899",
+      },
+      {
+        name: "getHoldForByPartition",
+        signature:
+          "function getHoldForByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
+        selector: "0x8d41523d",
+      },
+      {
+        name: "getHoldThirdParty",
+        signature:
+          "function getHoldThirdParty(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
+        selector: "0x3c36a695",
+      },
+      {
+        name: "getHoldsIdForByPartition",
+        signature:
+          "function getHoldsIdForByPartition(bytes32 _partition, address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] holdsId_)",
+        selector: "0xeb89899d",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new HoldReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new HoldReadSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   HoldTokenHolderFacet: {
     name: "HoldTokenHolderFacet",
     resolverKey: {
-      name: "_HOLD_TOKEN_HOLDER_RESOLVER_KEY",
-      value: "0x87b17a3ce9a86872f21469d26f005543a22ef5729998559f4ad433d5c4253f3e",
+      name: "_HOLD_RESOLVER_KEY",
+      value: "0x6c7216c5c52bc8f5019fc2fb333eb5e518e647fd82c807ed7c2a1fe4a03a3860",
     },
-    inheritance: ["IStaticFunctionSelectors", "HoldTokenHolder"],
+    inheritance: ["HoldTokenHolderFacetBase", "Common"],
     methods: [
       {
         name: "createHoldByPartition",
@@ -6740,8 +8112,241 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new HoldTokenHolderFacetTimeTravel__factory(signer) : new HoldTokenHolderFacet__factory(signer),
+  },
+
+  HoldTokenHolderFixedRateFacet: {
+    name: "HoldTokenHolderFixedRateFacet",
+    resolverKey: {
+      name: "_HOLD_FIXED_RATE_RESOLVER_KEY",
+      value: "0xed113dc152639988cc04869ce8c061c4a3350fe3826e16fc37960453a8d20b50",
+    },
+    inheritance: ["HoldTokenHolderFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "createHoldByPartition",
+        signature:
+          "function createHoldByPartition(bytes32 _partition, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
+        selector: "0x5d23449e",
+      },
+      {
+        name: "createHoldFromByPartition",
+        signature:
+          "function createHoldFromByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0x2361f007",
+      },
+      {
+        name: "executeHoldByPartition",
+        signature:
+          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_)",
+        selector: "0x25fe8720",
+      },
+      {
+        name: "reclaimHoldByPartition",
+        signature:
+          "function reclaimHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
+        selector: "0xb437969e",
+      },
+      {
+        name: "releaseHoldByPartition",
+        signature:
+          "function releaseHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
+        selector: "0xf8bafc1c",
+      },
+    ],
+    events: [
+      {
+        name: "HeldByPartition",
+        signature: "HeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0x8aaecda291be1880bb8f1b74d739076b63e172f3758535440d4781002a135663",
+      },
+      {
+        name: "HeldFromByPartition",
+        signature: "HeldFromByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0x89e7674560e6cad671bf2d392a62a88b25b960e62476504e038081c3aabe7ece",
+      },
+      {
+        name: "HoldByPartitionExecuted",
+        signature: "HoldByPartitionExecuted(address,bytes32,uint256,uint256,address)",
+        topic0: "0x4fb20409d1b2a56fa4c5b29c11d9b1e148649db67860c5648a8a86f35edf8582",
+      },
+      {
+        name: "HoldByPartitionReclaimed",
+        signature: "HoldByPartitionReclaimed(address,address,bytes32,uint256,uint256)",
+        topic0: "0xee0ec155026031ca64823d8fbf00832ff3f96c7da0994432ddc1a32c72022a09",
+      },
+      {
+        name: "HoldByPartitionReleased",
+        signature: "HoldByPartitionReleased(address,bytes32,uint256,uint256)",
+        topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new HoldTokenHolderFixedRateFacetTimeTravel__factory(signer)
+        : new HoldTokenHolderFixedRateFacet__factory(signer),
+  },
+
+  HoldTokenHolderKpiLinkedRateFacet: {
+    name: "HoldTokenHolderKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_HOLD_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xed86feb6fdd55e6a056bda1a5b7149c2d0d6d7d024625b67aa2c567ba0ef2b9e",
+    },
+    inheritance: ["HoldTokenHolderFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "createHoldByPartition",
+        signature:
+          "function createHoldByPartition(bytes32 _partition, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
+        selector: "0x5d23449e",
+      },
+      {
+        name: "createHoldFromByPartition",
+        signature:
+          "function createHoldFromByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0x2361f007",
+      },
+      {
+        name: "executeHoldByPartition",
+        signature:
+          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_)",
+        selector: "0x25fe8720",
+      },
+      {
+        name: "reclaimHoldByPartition",
+        signature:
+          "function reclaimHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
+        selector: "0xb437969e",
+      },
+      {
+        name: "releaseHoldByPartition",
+        signature:
+          "function releaseHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
+        selector: "0xf8bafc1c",
+      },
+    ],
+    events: [
+      {
+        name: "HeldByPartition",
+        signature: "HeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0x8aaecda291be1880bb8f1b74d739076b63e172f3758535440d4781002a135663",
+      },
+      {
+        name: "HeldFromByPartition",
+        signature: "HeldFromByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0x89e7674560e6cad671bf2d392a62a88b25b960e62476504e038081c3aabe7ece",
+      },
+      {
+        name: "HoldByPartitionExecuted",
+        signature: "HoldByPartitionExecuted(address,bytes32,uint256,uint256,address)",
+        topic0: "0x4fb20409d1b2a56fa4c5b29c11d9b1e148649db67860c5648a8a86f35edf8582",
+      },
+      {
+        name: "HoldByPartitionReclaimed",
+        signature: "HoldByPartitionReclaimed(address,address,bytes32,uint256,uint256)",
+        topic0: "0xee0ec155026031ca64823d8fbf00832ff3f96c7da0994432ddc1a32c72022a09",
+      },
+      {
+        name: "HoldByPartitionReleased",
+        signature: "HoldByPartitionReleased(address,bytes32,uint256,uint256)",
+        topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new HoldTokenHolderKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new HoldTokenHolderKpiLinkedRateFacet__factory(signer),
+  },
+
+  HoldTokenHolderSustainabilityPerformanceTargetRateFacet: {
+    name: "HoldTokenHolderSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_HOLD_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x4574524c203fbcc0f5b9f08bcd2b9a9d47c5a9cf3a30eeb540a93a33a8a2f834",
+    },
+    inheritance: ["HoldTokenHolderFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "createHoldByPartition",
+        signature:
+          "function createHoldByPartition(bytes32 _partition, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
+        selector: "0x5d23449e",
+      },
+      {
+        name: "createHoldFromByPartition",
+        signature:
+          "function createHoldFromByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+        selector: "0x2361f007",
+      },
+      {
+        name: "executeHoldByPartition",
+        signature:
+          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_)",
+        selector: "0x25fe8720",
+      },
+      {
+        name: "reclaimHoldByPartition",
+        signature:
+          "function reclaimHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
+        selector: "0xb437969e",
+      },
+      {
+        name: "releaseHoldByPartition",
+        signature:
+          "function releaseHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
+        selector: "0xf8bafc1c",
+      },
+    ],
+    events: [
+      {
+        name: "HeldByPartition",
+        signature: "HeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0x8aaecda291be1880bb8f1b74d739076b63e172f3758535440d4781002a135663",
+      },
+      {
+        name: "HeldFromByPartition",
+        signature: "HeldFromByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0x89e7674560e6cad671bf2d392a62a88b25b960e62476504e038081c3aabe7ece",
+      },
+      {
+        name: "HoldByPartitionExecuted",
+        signature: "HoldByPartitionExecuted(address,bytes32,uint256,uint256,address)",
+        topic0: "0x4fb20409d1b2a56fa4c5b29c11d9b1e148649db67860c5648a8a86f35edf8582",
+      },
+      {
+        name: "HoldByPartitionReclaimed",
+        signature: "HoldByPartitionReclaimed(address,address,bytes32,uint256,uint256)",
+        topic0: "0xee0ec155026031ca64823d8fbf00832ff3f96c7da0994432ddc1a32c72022a09",
+      },
+      {
+        name: "HoldByPartitionReleased",
+        signature: "HoldByPartitionReleased(address,bytes32,uint256,uint256)",
+        topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new HoldTokenHolderSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new HoldTokenHolderSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   KpiLinkedRateFacet: {
@@ -6875,7 +8480,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_KYC_RESOLVER_KEY",
       value: "0xf516a0f6b4726244ae916c590cd26c2b593d7d448e46e43714fb9f9435c46e32",
     },
-    inheritance: ["Kyc", "IStaticFunctionSelectors"],
+    inheritance: ["KycFacetBase", "Common"],
     methods: [
       {
         name: "activateInternalKyc",
@@ -6949,6 +8554,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InvalidDates", signature: "InvalidDates()", selector: "0xd937486c" },
       { name: "InvalidKycStatus", signature: "InvalidKycStatus()", selector: "0xfc855b1b" },
       { name: "InvalidZeroAddress", signature: "InvalidZeroAddress()", selector: "0xf6b2911f" },
@@ -6958,13 +8564,292 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel ? new KycFacetTimeTravel__factory(signer) : new KycFacet__factory(signer),
   },
 
+  KycFixedRateFacet: {
+    name: "KycFixedRateFacet",
+    resolverKey: {
+      name: "_KYC_FIXED_RATE_RESOLVER_KEY",
+      value: "0x76145b42d3591928a90298dbd705c8cdb33be9f5eee50f649fb58ed3f36b9f04",
+    },
+    inheritance: ["KycFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "activateInternalKyc",
+        signature: "function activateInternalKyc() returns (bool success_)",
+        selector: "0xfbb08f50",
+      },
+      {
+        name: "deactivateInternalKyc",
+        signature: "function deactivateInternalKyc() returns (bool success_)",
+        selector: "0x4a5df31d",
+      },
+      {
+        name: "getKycAccountsCount",
+        signature: "function getKycAccountsCount(uint8 _kycStatus) view returns (uint256 kycAccountsCount_)",
+        selector: "0x5b712c4b",
+      },
+      {
+        name: "getKycAccountsData",
+        signature:
+          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
+        selector: "0x00497afb",
+      },
+      {
+        name: "getKycFor",
+        signature:
+          "function getKycFor(address _account) view returns (tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
+        selector: "0x41322840",
+      },
+      {
+        name: "getKycStatusFor",
+        signature: "function getKycStatusFor(address _account) view returns (uint8 kycStatus_)",
+        selector: "0xe788a736",
+      },
+      {
+        name: "grantKyc",
+        signature:
+          "function grantKyc(address _account, string _vcId, uint256 _validFrom, uint256 _validTo, address _issuer) returns (bool success_)",
+        selector: "0x81bea54d",
+      },
+      {
+        name: "initializeInternalKyc",
+        signature: "function initializeInternalKyc(bool _internalKycActivated)",
+        selector: "0xdf353624",
+      },
+      {
+        name: "isInternalKycActivated",
+        signature: "function isInternalKycActivated() view returns (bool)",
+        selector: "0x90b6c798",
+      },
+      {
+        name: "revokeKyc",
+        signature: "function revokeKyc(address _account) returns (bool success_)",
+        selector: "0x12283191",
+      },
+    ],
+    events: [
+      {
+        name: "InternalKycStatusUpdated",
+        signature: "InternalKycStatusUpdated(address,bool)",
+        topic0: "0xa9f463ccc72d9e8aa9a317345756d652481f06b5ddf8aa4057f38086024a168c",
+      },
+      {
+        name: "KycGranted",
+        signature: "KycGranted(address,address)",
+        topic0: "0x0cc42ba172587888529a0b89cc75bd6914b337cf10757fd80e3246330e55ad94",
+      },
+      {
+        name: "KycRevoked",
+        signature: "KycRevoked(address,address)",
+        topic0: "0x5d9279616441228548cfb67f31b7b9b131fd30de1b3c54a6dd0062a74ce638a6",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+      { name: "InvalidDates", signature: "InvalidDates()", selector: "0xd937486c" },
+      { name: "InvalidKycStatus", signature: "InvalidKycStatus()", selector: "0xfc855b1b" },
+      { name: "InvalidZeroAddress", signature: "InvalidZeroAddress()", selector: "0xf6b2911f" },
+      { name: "KycIsNotGranted", signature: "KycIsNotGranted()", selector: "0xd5209e15" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new KycFixedRateFacetTimeTravel__factory(signer) : new KycFixedRateFacet__factory(signer),
+  },
+
+  KycKpiLinkedRateFacet: {
+    name: "KycKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_KYC_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x9cf03144d37b7b92d5b438e1f037a64ebdc48c2891bc4b475a15a1cf833574d0",
+    },
+    inheritance: ["KycFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "activateInternalKyc",
+        signature: "function activateInternalKyc() returns (bool success_)",
+        selector: "0xfbb08f50",
+      },
+      {
+        name: "deactivateInternalKyc",
+        signature: "function deactivateInternalKyc() returns (bool success_)",
+        selector: "0x4a5df31d",
+      },
+      {
+        name: "getKycAccountsCount",
+        signature: "function getKycAccountsCount(uint8 _kycStatus) view returns (uint256 kycAccountsCount_)",
+        selector: "0x5b712c4b",
+      },
+      {
+        name: "getKycAccountsData",
+        signature:
+          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
+        selector: "0x00497afb",
+      },
+      {
+        name: "getKycFor",
+        signature:
+          "function getKycFor(address _account) view returns (tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
+        selector: "0x41322840",
+      },
+      {
+        name: "getKycStatusFor",
+        signature: "function getKycStatusFor(address _account) view returns (uint8 kycStatus_)",
+        selector: "0xe788a736",
+      },
+      {
+        name: "grantKyc",
+        signature:
+          "function grantKyc(address _account, string _vcId, uint256 _validFrom, uint256 _validTo, address _issuer) returns (bool success_)",
+        selector: "0x81bea54d",
+      },
+      {
+        name: "initializeInternalKyc",
+        signature: "function initializeInternalKyc(bool _internalKycActivated)",
+        selector: "0xdf353624",
+      },
+      {
+        name: "isInternalKycActivated",
+        signature: "function isInternalKycActivated() view returns (bool)",
+        selector: "0x90b6c798",
+      },
+      {
+        name: "revokeKyc",
+        signature: "function revokeKyc(address _account) returns (bool success_)",
+        selector: "0x12283191",
+      },
+    ],
+    events: [
+      {
+        name: "InternalKycStatusUpdated",
+        signature: "InternalKycStatusUpdated(address,bool)",
+        topic0: "0xa9f463ccc72d9e8aa9a317345756d652481f06b5ddf8aa4057f38086024a168c",
+      },
+      {
+        name: "KycGranted",
+        signature: "KycGranted(address,address)",
+        topic0: "0x0cc42ba172587888529a0b89cc75bd6914b337cf10757fd80e3246330e55ad94",
+      },
+      {
+        name: "KycRevoked",
+        signature: "KycRevoked(address,address)",
+        topic0: "0x5d9279616441228548cfb67f31b7b9b131fd30de1b3c54a6dd0062a74ce638a6",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "InvalidDates", signature: "InvalidDates()", selector: "0xd937486c" },
+      { name: "InvalidKycStatus", signature: "InvalidKycStatus()", selector: "0xfc855b1b" },
+      { name: "InvalidZeroAddress", signature: "InvalidZeroAddress()", selector: "0xf6b2911f" },
+      { name: "KycIsNotGranted", signature: "KycIsNotGranted()", selector: "0xd5209e15" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new KycKpiLinkedRateFacetTimeTravel__factory(signer) : new KycKpiLinkedRateFacet__factory(signer),
+  },
+
+  KycSustainabilityPerformanceTargetRateFacet: {
+    name: "KycSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_KYC_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x1cb818916342973b46841d2ca9543c702bf6380fb0fc179f356139aa142379c3",
+    },
+    inheritance: ["KycFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "activateInternalKyc",
+        signature: "function activateInternalKyc() returns (bool success_)",
+        selector: "0xfbb08f50",
+      },
+      {
+        name: "deactivateInternalKyc",
+        signature: "function deactivateInternalKyc() returns (bool success_)",
+        selector: "0x4a5df31d",
+      },
+      {
+        name: "getKycAccountsCount",
+        signature: "function getKycAccountsCount(uint8 _kycStatus) view returns (uint256 kycAccountsCount_)",
+        selector: "0x5b712c4b",
+      },
+      {
+        name: "getKycAccountsData",
+        signature:
+          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
+        selector: "0x00497afb",
+      },
+      {
+        name: "getKycFor",
+        signature:
+          "function getKycFor(address _account) view returns (tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
+        selector: "0x41322840",
+      },
+      {
+        name: "getKycStatusFor",
+        signature: "function getKycStatusFor(address _account) view returns (uint8 kycStatus_)",
+        selector: "0xe788a736",
+      },
+      {
+        name: "grantKyc",
+        signature:
+          "function grantKyc(address _account, string _vcId, uint256 _validFrom, uint256 _validTo, address _issuer) returns (bool success_)",
+        selector: "0x81bea54d",
+      },
+      {
+        name: "initializeInternalKyc",
+        signature: "function initializeInternalKyc(bool _internalKycActivated)",
+        selector: "0xdf353624",
+      },
+      {
+        name: "isInternalKycActivated",
+        signature: "function isInternalKycActivated() view returns (bool)",
+        selector: "0x90b6c798",
+      },
+      {
+        name: "revokeKyc",
+        signature: "function revokeKyc(address _account) returns (bool success_)",
+        selector: "0x12283191",
+      },
+    ],
+    events: [
+      {
+        name: "InternalKycStatusUpdated",
+        signature: "InternalKycStatusUpdated(address,bool)",
+        topic0: "0xa9f463ccc72d9e8aa9a317345756d652481f06b5ddf8aa4057f38086024a168c",
+      },
+      {
+        name: "KycGranted",
+        signature: "KycGranted(address,address)",
+        topic0: "0x0cc42ba172587888529a0b89cc75bd6914b337cf10757fd80e3246330e55ad94",
+      },
+      {
+        name: "KycRevoked",
+        signature: "KycRevoked(address,address)",
+        topic0: "0x5d9279616441228548cfb67f31b7b9b131fd30de1b3c54a6dd0062a74ce638a6",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+      { name: "InvalidDates", signature: "InvalidDates()", selector: "0xd937486c" },
+      { name: "InvalidKycStatus", signature: "InvalidKycStatus()", selector: "0xfc855b1b" },
+      { name: "InvalidZeroAddress", signature: "InvalidZeroAddress()", selector: "0xf6b2911f" },
+      { name: "KycIsNotGranted", signature: "KycIsNotGranted()", selector: "0xd5209e15" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new KycSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new KycSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
   LockFacet: {
     name: "LockFacet",
     resolverKey: {
       name: "_LOCK_RESOLVER_KEY",
       value: "0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9",
     },
-    inheritance: ["Lock", "IStaticFunctionSelectors"],
+    inheritance: ["LockFacetBase", "Common"],
     methods: [
       {
         name: "getLockCountFor",
@@ -7048,8 +8933,311 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new LockFacetTimeTravel__factory(signer) : new LockFacet__factory(signer),
+  },
+
+  LockFixedRateFacet: {
+    name: "LockFixedRateFacet",
+    resolverKey: {
+      name: "_LOCK_FIXED_RATE_RESOLVER_KEY",
+      value: "0x053d181bbb93fc7807aafeac901706f74ec5767053695d2b769bf0fdcf065e4d",
+    },
+    inheritance: ["LockFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "getLockCountFor",
+        signature: "function getLockCountFor(address _tokenHolder) view returns (uint256 lockCount_)",
+        selector: "0x4f131ba4",
+      },
+      {
+        name: "getLockCountForByPartition",
+        signature:
+          "function getLockCountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 lockCount_)",
+        selector: "0x3b193d92",
+      },
+      {
+        name: "getLockFor",
+        signature:
+          "function getLockFor(address _tokenHolder, uint256 _lockId) view returns (uint256 amount_, uint256 expirationTimestamp_)",
+        selector: "0x6f14b024",
+      },
+      {
+        name: "getLockForByPartition",
+        signature:
+          "function getLockForByPartition(bytes32 _partition, address _tokenHolder, uint256 _lockId) view returns (uint256 amount_, uint256 expirationTimestamp_)",
+        selector: "0xa9acfccb",
+      },
+      {
+        name: "getLockedAmountFor",
+        signature: "function getLockedAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x36e74467",
+      },
+      {
+        name: "getLockedAmountForByPartition",
+        signature:
+          "function getLockedAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x6e1c55ba",
+      },
+      {
+        name: "getLocksIdFor",
+        signature:
+          "function getLocksIdFor(address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] locksId_)",
+        selector: "0xd2d2b9fc",
+      },
+      {
+        name: "getLocksIdForByPartition",
+        signature:
+          "function getLocksIdForByPartition(bytes32 _partition, address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] locksId_)",
+        selector: "0x3ea8b59d",
+      },
+      {
+        name: "lock",
+        signature:
+          "function lock(uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0xcf27cfc4",
+      },
+      {
+        name: "lockByPartition",
+        signature:
+          "function lockByPartition(bytes32 _partition, uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0x7a87884e",
+      },
+      {
+        name: "release",
+        signature: "function release(uint256 _lockId, address _tokenHolder) returns (bool success_)",
+        selector: "0x8124fea6",
+      },
+      {
+        name: "releaseByPartition",
+        signature:
+          "function releaseByPartition(bytes32 _partition, uint256 _lockId, address _tokenHolder) returns (bool success_)",
+        selector: "0xdc6a3e75",
+      },
+    ],
+    events: [
+      {
+        name: "LockByPartitionReleased",
+        signature: "LockByPartitionReleased(address,address,bytes32,uint256)",
+        topic0: "0x6b9cdd97822563ef24ac6b58b361df36a653662e434bb96e40fa50ae5c9de688",
+      },
+      {
+        name: "LockedByPartition",
+        signature: "LockedByPartition(address,address,bytes32,uint256,uint256,uint256)",
+        topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new LockFixedRateFacetTimeTravel__factory(signer) : new LockFixedRateFacet__factory(signer),
+  },
+
+  LockKpiLinkedRateFacet: {
+    name: "LockKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_LOCK_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x04caf3f62f31b8b1edd96c39948d89098fd83c1a1b5b76aa39927cf7ad8e9d42",
+    },
+    inheritance: ["LockFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "getLockCountFor",
+        signature: "function getLockCountFor(address _tokenHolder) view returns (uint256 lockCount_)",
+        selector: "0x4f131ba4",
+      },
+      {
+        name: "getLockCountForByPartition",
+        signature:
+          "function getLockCountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 lockCount_)",
+        selector: "0x3b193d92",
+      },
+      {
+        name: "getLockFor",
+        signature:
+          "function getLockFor(address _tokenHolder, uint256 _lockId) view returns (uint256 amount_, uint256 expirationTimestamp_)",
+        selector: "0x6f14b024",
+      },
+      {
+        name: "getLockForByPartition",
+        signature:
+          "function getLockForByPartition(bytes32 _partition, address _tokenHolder, uint256 _lockId) view returns (uint256 amount_, uint256 expirationTimestamp_)",
+        selector: "0xa9acfccb",
+      },
+      {
+        name: "getLockedAmountFor",
+        signature: "function getLockedAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x36e74467",
+      },
+      {
+        name: "getLockedAmountForByPartition",
+        signature:
+          "function getLockedAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x6e1c55ba",
+      },
+      {
+        name: "getLocksIdFor",
+        signature:
+          "function getLocksIdFor(address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] locksId_)",
+        selector: "0xd2d2b9fc",
+      },
+      {
+        name: "getLocksIdForByPartition",
+        signature:
+          "function getLocksIdForByPartition(bytes32 _partition, address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] locksId_)",
+        selector: "0x3ea8b59d",
+      },
+      {
+        name: "lock",
+        signature:
+          "function lock(uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0xcf27cfc4",
+      },
+      {
+        name: "lockByPartition",
+        signature:
+          "function lockByPartition(bytes32 _partition, uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0x7a87884e",
+      },
+      {
+        name: "release",
+        signature: "function release(uint256 _lockId, address _tokenHolder) returns (bool success_)",
+        selector: "0x8124fea6",
+      },
+      {
+        name: "releaseByPartition",
+        signature:
+          "function releaseByPartition(bytes32 _partition, uint256 _lockId, address _tokenHolder) returns (bool success_)",
+        selector: "0xdc6a3e75",
+      },
+    ],
+    events: [
+      {
+        name: "LockByPartitionReleased",
+        signature: "LockByPartitionReleased(address,address,bytes32,uint256)",
+        topic0: "0x6b9cdd97822563ef24ac6b58b361df36a653662e434bb96e40fa50ae5c9de688",
+      },
+      {
+        name: "LockedByPartition",
+        signature: "LockedByPartition(address,address,bytes32,uint256,uint256,uint256)",
+        topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new LockKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new LockKpiLinkedRateFacet__factory(signer),
+  },
+
+  LockSustainabilityPerformanceTargetRateFacet: {
+    name: "LockSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xe73c2eecf92b5b8eb7ecc89b379f70193694f2906188318c3407458267385b82",
+    },
+    inheritance: ["LockFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "getLockCountFor",
+        signature: "function getLockCountFor(address _tokenHolder) view returns (uint256 lockCount_)",
+        selector: "0x4f131ba4",
+      },
+      {
+        name: "getLockCountForByPartition",
+        signature:
+          "function getLockCountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 lockCount_)",
+        selector: "0x3b193d92",
+      },
+      {
+        name: "getLockFor",
+        signature:
+          "function getLockFor(address _tokenHolder, uint256 _lockId) view returns (uint256 amount_, uint256 expirationTimestamp_)",
+        selector: "0x6f14b024",
+      },
+      {
+        name: "getLockForByPartition",
+        signature:
+          "function getLockForByPartition(bytes32 _partition, address _tokenHolder, uint256 _lockId) view returns (uint256 amount_, uint256 expirationTimestamp_)",
+        selector: "0xa9acfccb",
+      },
+      {
+        name: "getLockedAmountFor",
+        signature: "function getLockedAmountFor(address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x36e74467",
+      },
+      {
+        name: "getLockedAmountForByPartition",
+        signature:
+          "function getLockedAmountForByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256 amount_)",
+        selector: "0x6e1c55ba",
+      },
+      {
+        name: "getLocksIdFor",
+        signature:
+          "function getLocksIdFor(address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] locksId_)",
+        selector: "0xd2d2b9fc",
+      },
+      {
+        name: "getLocksIdForByPartition",
+        signature:
+          "function getLocksIdForByPartition(bytes32 _partition, address _tokenHolder, uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] locksId_)",
+        selector: "0x3ea8b59d",
+      },
+      {
+        name: "lock",
+        signature:
+          "function lock(uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0xcf27cfc4",
+      },
+      {
+        name: "lockByPartition",
+        signature:
+          "function lockByPartition(bytes32 _partition, uint256 _amount, address _tokenHolder, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0x7a87884e",
+      },
+      {
+        name: "release",
+        signature: "function release(uint256 _lockId, address _tokenHolder) returns (bool success_)",
+        selector: "0x8124fea6",
+      },
+      {
+        name: "releaseByPartition",
+        signature:
+          "function releaseByPartition(bytes32 _partition, uint256 _lockId, address _tokenHolder) returns (bool success_)",
+        selector: "0xdc6a3e75",
+      },
+    ],
+    events: [
+      {
+        name: "LockByPartitionReleased",
+        signature: "LockByPartitionReleased(address,address,bytes32,uint256)",
+        topic0: "0x6b9cdd97822563ef24ac6b58b361df36a653662e434bb96e40fa50ae5c9de688",
+      },
+      {
+        name: "LockedByPartition",
+        signature: "LockedByPartition(address,address,bytes32,uint256,uint256,uint256)",
+        topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new LockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new LockSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   PauseFacet: {
@@ -7058,14 +9246,83 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_PAUSE_RESOLVER_KEY",
       value: "0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c",
     },
-    inheritance: ["Pause", "IStaticFunctionSelectors"],
+    inheritance: ["PauseFacetBase", "Common"],
     methods: [
       { name: "isPaused", signature: "function isPaused() view returns (bool)", selector: "0xb187bd26" },
       { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
       { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new PauseFacetTimeTravel__factory(signer) : new PauseFacet__factory(signer),
+  },
+
+  PauseFixedRateFacet: {
+    name: "PauseFixedRateFacet",
+    resolverKey: {
+      name: "_PAUSE_FIXED_RATE_RESOLVER_KEY",
+      value: "0x9fd7fc8200742d120881c0cf0a0541bae13e372519d986a5169b23b82ea06f12",
+    },
+    inheritance: ["PauseFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      { name: "isPaused", signature: "function isPaused() view returns (bool)", selector: "0xb187bd26" },
+      { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
+      { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new PauseFixedRateFacetTimeTravel__factory(signer) : new PauseFixedRateFacet__factory(signer),
+  },
+
+  PauseKpiLinkedRateFacet: {
+    name: "PauseKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_PAUSE_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x77ff7dc4f2d4a0cb28f09307895b94478d6655e7a545222f97b753a6c90a8f71",
+    },
+    inheritance: ["PauseFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      { name: "isPaused", signature: "function isPaused() view returns (bool)", selector: "0xb187bd26" },
+      { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
+      { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new PauseKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new PauseKpiLinkedRateFacet__factory(signer),
+  },
+
+  PauseSustainabilityPerformanceTargetRateFacet: {
+    name: "PauseSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_PAUSE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa16c7f2d6b5ab7f05dd30bd562ac9f3005fe21e3b2bde131733e37c0d42046ee",
+    },
+    inheritance: ["PauseFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "isPaused", signature: "function isPaused() view returns (bool)", selector: "0xb187bd26" },
+      { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
+      { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new PauseSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new PauseSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ProceedRecipientsFacet: {
@@ -7155,7 +9412,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_PROTECTED_PARTITIONS_RESOLVER_KEY",
       value: "0x6d65d2938c05a4d952aff0845c1baa5bea04d4544db74f8b3b26004d1d58d58f",
     },
-    inheritance: ["ProtectedPartitions", "IStaticFunctionSelectors"],
+    inheritance: ["ProtectedPartitionsFacetBase", "Common"],
     methods: [
       {
         name: "arePartitionsProtected",
@@ -7188,10 +9445,162 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1277b323",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ProtectedPartitionsFacetTimeTravel__factory(signer)
         : new ProtectedPartitionsFacet__factory(signer),
+  },
+
+  ProtectedPartitionsFixedRateFacet: {
+    name: "ProtectedPartitionsFixedRateFacet",
+    resolverKey: {
+      name: "_PROTECTED_PARTITIONS_FIXED_RATE_RESOLVER_KEY",
+      value: "0x1f8166e21922daee7192ddd5f8a1ce657013d69d412a4e4f5848ab75f1ca8db3",
+    },
+    inheritance: ["ProtectedPartitionsFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "arePartitionsProtected",
+        signature: "function arePartitionsProtected() view returns (bool)",
+        selector: "0xa151c19f",
+      },
+      {
+        name: "calculateRoleForPartition",
+        signature: "function calculateRoleForPartition(bytes32 partition) pure returns (bytes32 role)",
+        selector: "0xcb4da6fc",
+      },
+      {
+        name: "getNounceFor",
+        signature: "function getNounceFor(address account) view returns (uint256)",
+        selector: "0x9f6b67c2",
+      },
+      {
+        name: "initialize_ProtectedPartitions",
+        signature: "function initialize_ProtectedPartitions(bool _protectPartitions) returns (bool success_)",
+        selector: "0x90c032cc",
+      },
+      {
+        name: "protectPartitions",
+        signature: "function protectPartitions() returns (bool success_)",
+        selector: "0x6c5fde55",
+      },
+      {
+        name: "unprotectPartitions",
+        signature: "function unprotectPartitions() returns (bool success_)",
+        selector: "0x1277b323",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ProtectedPartitionsFixedRateFacetTimeTravel__factory(signer)
+        : new ProtectedPartitionsFixedRateFacet__factory(signer),
+  },
+
+  ProtectedPartitionsKpiLinkedRateFacet: {
+    name: "ProtectedPartitionsKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_PROTECTED_PARTITIONS_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x665aad7ee148905a0af716acbc6abd8f408eadce853caf3f84528a9810ffc436",
+    },
+    inheritance: ["ProtectedPartitionsFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "arePartitionsProtected",
+        signature: "function arePartitionsProtected() view returns (bool)",
+        selector: "0xa151c19f",
+      },
+      {
+        name: "calculateRoleForPartition",
+        signature: "function calculateRoleForPartition(bytes32 partition) pure returns (bytes32 role)",
+        selector: "0xcb4da6fc",
+      },
+      {
+        name: "getNounceFor",
+        signature: "function getNounceFor(address account) view returns (uint256)",
+        selector: "0x9f6b67c2",
+      },
+      {
+        name: "initialize_ProtectedPartitions",
+        signature: "function initialize_ProtectedPartitions(bool _protectPartitions) returns (bool success_)",
+        selector: "0x90c032cc",
+      },
+      {
+        name: "protectPartitions",
+        signature: "function protectPartitions() returns (bool success_)",
+        selector: "0x6c5fde55",
+      },
+      {
+        name: "unprotectPartitions",
+        signature: "function unprotectPartitions() returns (bool success_)",
+        selector: "0x1277b323",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ProtectedPartitionsKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ProtectedPartitionsKpiLinkedRateFacet__factory(signer),
+  },
+
+  ProtectedPartitionsSustainabilityPerformanceTargetRateFacet: {
+    name: "ProtectedPartitionsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_PROTECTED_PARTITIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x088ec2750f42a30fde9383e74f4148ce5df963263d426deffc1d29fff61a6538",
+    },
+    inheritance: ["ProtectedPartitionsFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "arePartitionsProtected",
+        signature: "function arePartitionsProtected() view returns (bool)",
+        selector: "0xa151c19f",
+      },
+      {
+        name: "calculateRoleForPartition",
+        signature: "function calculateRoleForPartition(bytes32 partition) pure returns (bytes32 role)",
+        selector: "0xcb4da6fc",
+      },
+      {
+        name: "getNounceFor",
+        signature: "function getNounceFor(address account) view returns (uint256)",
+        selector: "0x9f6b67c2",
+      },
+      {
+        name: "initialize_ProtectedPartitions",
+        signature: "function initialize_ProtectedPartitions(bool _protectPartitions) returns (bool success_)",
+        selector: "0x90c032cc",
+      },
+      {
+        name: "protectPartitions",
+        signature: "function protectPartitions() returns (bool success_)",
+        selector: "0x6c5fde55",
+      },
+      {
+        name: "unprotectPartitions",
+        signature: "function unprotectPartitions() returns (bool success_)",
+        selector: "0x1277b323",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ProtectedPartitionsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ProtectedPartitionsSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ScheduledBalanceAdjustmentsFacet: {
@@ -7314,7 +9723,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SNAPSHOTS_RESOLVER_KEY",
       value: "0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf",
     },
-    inheritance: ["Snapshots", "IStaticFunctionSelectors"],
+    inheritance: ["SnapshotsFacetBase", "Common"],
     methods: [
       {
         name: "balanceOfAtSnapshot",
@@ -7415,17 +9824,373 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9657ddb9",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new SnapshotsFacetTimeTravel__factory(signer) : new SnapshotsFacet__factory(signer),
+  },
+
+  SnapshotsFixedRateFacet: {
+    name: "SnapshotsFixedRateFacet",
+    resolverKey: {
+      name: "_SNAPSHOTS_FIXED_RATE_RESOLVER_KEY",
+      value: "0xf9b2659fdf4231d426bc34cef93a8b3f42e5cfaf762f65dbf6537ab3e5ee8348",
+    },
+    inheritance: ["SnapshotsFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "balanceOfAtSnapshot",
+        signature:
+          "function balanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x8e00ae2e",
+      },
+      {
+        name: "balanceOfAtSnapshotByPartition",
+        signature:
+          "function balanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0xe002bcdf",
+      },
+      {
+        name: "clearedBalanceOfAtSnapshot",
+        signature:
+          "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x2bc16e9b",
+      },
+      {
+        name: "clearedBalanceOfAtSnapshotByPartition",
+        signature:
+          "function clearedBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x386e1405",
+      },
+      {
+        name: "decimalsAtSnapshot",
+        signature: "function decimalsAtSnapshot(uint256 _snapshotID) view returns (uint8 decimals_)",
+        selector: "0x69ed346f",
+      },
+      {
+        name: "frozenBalanceOfAtSnapshot",
+        signature:
+          "function frozenBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x5e6c70ec",
+      },
+      {
+        name: "frozenBalanceOfAtSnapshotByPartition",
+        signature:
+          "function frozenBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x0749c323",
+      },
+      {
+        name: "getTokenHoldersAtSnapshot",
+        signature:
+          "function getTokenHoldersAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xd22a73df",
+      },
+      {
+        name: "getTotalTokenHoldersAtSnapshot",
+        signature: "function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) view returns (uint256)",
+        selector: "0x867126e1",
+      },
+      {
+        name: "heldBalanceOfAtSnapshot",
+        signature:
+          "function heldBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0xb52e39aa",
+      },
+      {
+        name: "heldBalanceOfAtSnapshotByPartition",
+        signature:
+          "function heldBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x977a3a71",
+      },
+      {
+        name: "lockedBalanceOfAtSnapshot",
+        signature:
+          "function lockedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0xd9e6f164",
+      },
+      {
+        name: "lockedBalanceOfAtSnapshotByPartition",
+        signature:
+          "function lockedBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x4a13f5d0",
+      },
+      {
+        name: "partitionsOfAtSnapshot",
+        signature:
+          "function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (bytes32[])",
+        selector: "0x09e84301",
+      },
+      {
+        name: "takeSnapshot",
+        signature: "function takeSnapshot() returns (uint256 snapshotID_)",
+        selector: "0xb3d3d37e",
+      },
+      {
+        name: "totalSupplyAtSnapshot",
+        signature: "function totalSupplyAtSnapshot(uint256 _snapshotID) view returns (uint256 totalSupply_)",
+        selector: "0xda35f8f6",
+      },
+      {
+        name: "totalSupplyAtSnapshotByPartition",
+        signature:
+          "function totalSupplyAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID) view returns (uint256 totalSupply_)",
+        selector: "0x9657ddb9",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new SnapshotsFixedRateFacetTimeTravel__factory(signer)
+        : new SnapshotsFixedRateFacet__factory(signer),
+  },
+
+  SnapshotsKpiLinkedRateFacet: {
+    name: "SnapshotsKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_SNAPSHOTS_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x9c0a9b3a98c7e535e4b1a0749f01f63ea94b600fbee8df56d7c18a1f3043ee20",
+    },
+    inheritance: ["SnapshotsFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "balanceOfAtSnapshot",
+        signature:
+          "function balanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x8e00ae2e",
+      },
+      {
+        name: "balanceOfAtSnapshotByPartition",
+        signature:
+          "function balanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0xe002bcdf",
+      },
+      {
+        name: "clearedBalanceOfAtSnapshot",
+        signature:
+          "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x2bc16e9b",
+      },
+      {
+        name: "clearedBalanceOfAtSnapshotByPartition",
+        signature:
+          "function clearedBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x386e1405",
+      },
+      {
+        name: "decimalsAtSnapshot",
+        signature: "function decimalsAtSnapshot(uint256 _snapshotID) view returns (uint8 decimals_)",
+        selector: "0x69ed346f",
+      },
+      {
+        name: "frozenBalanceOfAtSnapshot",
+        signature:
+          "function frozenBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x5e6c70ec",
+      },
+      {
+        name: "frozenBalanceOfAtSnapshotByPartition",
+        signature:
+          "function frozenBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x0749c323",
+      },
+      {
+        name: "getTokenHoldersAtSnapshot",
+        signature:
+          "function getTokenHoldersAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xd22a73df",
+      },
+      {
+        name: "getTotalTokenHoldersAtSnapshot",
+        signature: "function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) view returns (uint256)",
+        selector: "0x867126e1",
+      },
+      {
+        name: "heldBalanceOfAtSnapshot",
+        signature:
+          "function heldBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0xb52e39aa",
+      },
+      {
+        name: "heldBalanceOfAtSnapshotByPartition",
+        signature:
+          "function heldBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x977a3a71",
+      },
+      {
+        name: "lockedBalanceOfAtSnapshot",
+        signature:
+          "function lockedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0xd9e6f164",
+      },
+      {
+        name: "lockedBalanceOfAtSnapshotByPartition",
+        signature:
+          "function lockedBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x4a13f5d0",
+      },
+      {
+        name: "partitionsOfAtSnapshot",
+        signature:
+          "function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (bytes32[])",
+        selector: "0x09e84301",
+      },
+      {
+        name: "takeSnapshot",
+        signature: "function takeSnapshot() returns (uint256 snapshotID_)",
+        selector: "0xb3d3d37e",
+      },
+      {
+        name: "totalSupplyAtSnapshot",
+        signature: "function totalSupplyAtSnapshot(uint256 _snapshotID) view returns (uint256 totalSupply_)",
+        selector: "0xda35f8f6",
+      },
+      {
+        name: "totalSupplyAtSnapshotByPartition",
+        signature:
+          "function totalSupplyAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID) view returns (uint256 totalSupply_)",
+        selector: "0x9657ddb9",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new SnapshotsKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new SnapshotsKpiLinkedRateFacet__factory(signer),
+  },
+
+  SnapshotsSustainabilityPerformanceTargetRateFacet: {
+    name: "SnapshotsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SNAPSHOTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xbcc6255960c1cbe69dae32f7db730d14a35fdb81d91cc7e637e5af4d229bcbbe",
+    },
+    inheritance: ["SnapshotsFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "balanceOfAtSnapshot",
+        signature:
+          "function balanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x8e00ae2e",
+      },
+      {
+        name: "balanceOfAtSnapshotByPartition",
+        signature:
+          "function balanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0xe002bcdf",
+      },
+      {
+        name: "clearedBalanceOfAtSnapshot",
+        signature:
+          "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x2bc16e9b",
+      },
+      {
+        name: "clearedBalanceOfAtSnapshotByPartition",
+        signature:
+          "function clearedBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x386e1405",
+      },
+      {
+        name: "decimalsAtSnapshot",
+        signature: "function decimalsAtSnapshot(uint256 _snapshotID) view returns (uint8 decimals_)",
+        selector: "0x69ed346f",
+      },
+      {
+        name: "frozenBalanceOfAtSnapshot",
+        signature:
+          "function frozenBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x5e6c70ec",
+      },
+      {
+        name: "frozenBalanceOfAtSnapshotByPartition",
+        signature:
+          "function frozenBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x0749c323",
+      },
+      {
+        name: "getTokenHoldersAtSnapshot",
+        signature:
+          "function getTokenHoldersAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xd22a73df",
+      },
+      {
+        name: "getTotalTokenHoldersAtSnapshot",
+        signature: "function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) view returns (uint256)",
+        selector: "0x867126e1",
+      },
+      {
+        name: "heldBalanceOfAtSnapshot",
+        signature:
+          "function heldBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0xb52e39aa",
+      },
+      {
+        name: "heldBalanceOfAtSnapshotByPartition",
+        signature:
+          "function heldBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x977a3a71",
+      },
+      {
+        name: "lockedBalanceOfAtSnapshot",
+        signature:
+          "function lockedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0xd9e6f164",
+      },
+      {
+        name: "lockedBalanceOfAtSnapshotByPartition",
+        signature:
+          "function lockedBalanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
+        selector: "0x4a13f5d0",
+      },
+      {
+        name: "partitionsOfAtSnapshot",
+        signature:
+          "function partitionsOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (bytes32[])",
+        selector: "0x09e84301",
+      },
+      {
+        name: "takeSnapshot",
+        signature: "function takeSnapshot() returns (uint256 snapshotID_)",
+        selector: "0xb3d3d37e",
+      },
+      {
+        name: "totalSupplyAtSnapshot",
+        signature: "function totalSupplyAtSnapshot(uint256 _snapshotID) view returns (uint256 totalSupply_)",
+        selector: "0xda35f8f6",
+      },
+      {
+        name: "totalSupplyAtSnapshotByPartition",
+        signature:
+          "function totalSupplyAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID) view returns (uint256 totalSupply_)",
+        selector: "0x9657ddb9",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new SnapshotsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new SnapshotsSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   SsiManagementFacet: {
     name: "SsiManagementFacet",
     resolverKey: {
-      name: "_SSI_MANAGEMENT_RESOLVER_KEY",
-      value: "0x46df6aaf3742e0cbad136a74fb679b686e087dcc3a3d92d1c4ce2f3ef1b508a0",
+      name: "_SSI_RESOLVER_KEY",
+      value: "0x77c35dccfcdc80370e925aae86871ef8bc71db0b8e082c073cda906e89bb610e",
     },
-    inheritance: ["SsiManagement", "IStaticFunctionSelectors"],
+    inheritance: ["SsiManagementFacetBase", "Common"],
     methods: [
       {
         name: "addIssuer",
@@ -7479,11 +10244,229 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccountIsNotIssuer", signature: "AccountIsNotIssuer(address)", selector: "0xcd324f53" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "ListedIssuer", signature: "ListedIssuer(address)", selector: "0xcb2beece" },
       { name: "UnlistedIssuer", signature: "UnlistedIssuer(address)", selector: "0xd1243a92" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new SsiManagementFacetTimeTravel__factory(signer) : new SsiManagementFacet__factory(signer),
+  },
+
+  SsiManagementFixedRateFacet: {
+    name: "SsiManagementFixedRateFacet",
+    resolverKey: {
+      name: "_SSI_FIXED_RATE_RESOLVER_KEY",
+      value: "0xd3c3eb4fde853b08d2509769f85fbcc3147edd847e1e8da89c805628293effb2",
+    },
+    inheritance: ["SsiManagementFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "addIssuer",
+        signature: "function addIssuer(address _issuer) returns (bool success_)",
+        selector: "0x20694db0",
+      },
+      {
+        name: "getIssuerListCount",
+        signature: "function getIssuerListCount() view returns (uint256 issuerListCount_)",
+        selector: "0x600b2940",
+      },
+      {
+        name: "getIssuerListMembers",
+        signature:
+          "function getIssuerListMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x25ab0545",
+      },
+      {
+        name: "getRevocationRegistryAddress",
+        signature: "function getRevocationRegistryAddress() view returns (address revocationRegistryAddress_)",
+        selector: "0x12023976",
+      },
+      { name: "isIssuer", signature: "function isIssuer(address _issuer) view returns (bool)", selector: "0x877b9a67" },
+      {
+        name: "removeIssuer",
+        signature: "function removeIssuer(address _issuer) returns (bool success_)",
+        selector: "0x47bc7093",
+      },
+      {
+        name: "setRevocationRegistryAddress",
+        signature: "function setRevocationRegistryAddress(address _revocationRegistryAddress) returns (bool success_)",
+        selector: "0xbb3daeaf",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToIssuerList",
+        signature: "AddedToIssuerList(address,address)",
+        topic0: "0xed6cc767c5020f64eb4771044d11fede90f485f88204a7f6d62fb608e5615ca8",
+      },
+      {
+        name: "RemovedFromIssuerList",
+        signature: "RemovedFromIssuerList(address,address)",
+        topic0: "0x98978a12ff5bdb777720d9d8bb2cdad050bdfbc2c467144649b14cdc45df52ba",
+      },
+      {
+        name: "RevocationRegistryUpdated",
+        signature: "RevocationRegistryUpdated(address,address)",
+        topic0: "0x9b205171467d972c41c09cf31cce60bcca69d24714df66590528a49e9d9dcef7",
+      },
+    ],
+    errors: [
+      { name: "AccountIsNotIssuer", signature: "AccountIsNotIssuer(address)", selector: "0xcd324f53" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+      { name: "ListedIssuer", signature: "ListedIssuer(address)", selector: "0xcb2beece" },
+      { name: "UnlistedIssuer", signature: "UnlistedIssuer(address)", selector: "0xd1243a92" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new SsiManagementFixedRateFacetTimeTravel__factory(signer)
+        : new SsiManagementFixedRateFacet__factory(signer),
+  },
+
+  SsiManagementKpiLinkedRateFacet: {
+    name: "SsiManagementKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_SSI_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xac0a01362676a7a1370879903993e04310cb7a3b60fc327072dcf7a00ce50e5a",
+    },
+    inheritance: ["SsiManagementFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "addIssuer",
+        signature: "function addIssuer(address _issuer) returns (bool success_)",
+        selector: "0x20694db0",
+      },
+      {
+        name: "getIssuerListCount",
+        signature: "function getIssuerListCount() view returns (uint256 issuerListCount_)",
+        selector: "0x600b2940",
+      },
+      {
+        name: "getIssuerListMembers",
+        signature:
+          "function getIssuerListMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x25ab0545",
+      },
+      {
+        name: "getRevocationRegistryAddress",
+        signature: "function getRevocationRegistryAddress() view returns (address revocationRegistryAddress_)",
+        selector: "0x12023976",
+      },
+      { name: "isIssuer", signature: "function isIssuer(address _issuer) view returns (bool)", selector: "0x877b9a67" },
+      {
+        name: "removeIssuer",
+        signature: "function removeIssuer(address _issuer) returns (bool success_)",
+        selector: "0x47bc7093",
+      },
+      {
+        name: "setRevocationRegistryAddress",
+        signature: "function setRevocationRegistryAddress(address _revocationRegistryAddress) returns (bool success_)",
+        selector: "0xbb3daeaf",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToIssuerList",
+        signature: "AddedToIssuerList(address,address)",
+        topic0: "0xed6cc767c5020f64eb4771044d11fede90f485f88204a7f6d62fb608e5615ca8",
+      },
+      {
+        name: "RemovedFromIssuerList",
+        signature: "RemovedFromIssuerList(address,address)",
+        topic0: "0x98978a12ff5bdb777720d9d8bb2cdad050bdfbc2c467144649b14cdc45df52ba",
+      },
+      {
+        name: "RevocationRegistryUpdated",
+        signature: "RevocationRegistryUpdated(address,address)",
+        topic0: "0x9b205171467d972c41c09cf31cce60bcca69d24714df66590528a49e9d9dcef7",
+      },
+    ],
+    errors: [
+      { name: "AccountIsNotIssuer", signature: "AccountIsNotIssuer(address)", selector: "0xcd324f53" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "ListedIssuer", signature: "ListedIssuer(address)", selector: "0xcb2beece" },
+      { name: "UnlistedIssuer", signature: "UnlistedIssuer(address)", selector: "0xd1243a92" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new SsiManagementKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new SsiManagementKpiLinkedRateFacet__factory(signer),
+  },
+
+  SsiManagementSustainabilityPerformanceTargetRateFacet: {
+    name: "SsiManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SSI_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x5de367269fd9e98ceb172f263a954ee471605474013e206e00340c5914046c8b",
+    },
+    inheritance: ["SsiManagementFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "addIssuer",
+        signature: "function addIssuer(address _issuer) returns (bool success_)",
+        selector: "0x20694db0",
+      },
+      {
+        name: "getIssuerListCount",
+        signature: "function getIssuerListCount() view returns (uint256 issuerListCount_)",
+        selector: "0x600b2940",
+      },
+      {
+        name: "getIssuerListMembers",
+        signature:
+          "function getIssuerListMembers(uint256 _pageIndex, uint256 _pageLength) view returns (address[] members_)",
+        selector: "0x25ab0545",
+      },
+      {
+        name: "getRevocationRegistryAddress",
+        signature: "function getRevocationRegistryAddress() view returns (address revocationRegistryAddress_)",
+        selector: "0x12023976",
+      },
+      { name: "isIssuer", signature: "function isIssuer(address _issuer) view returns (bool)", selector: "0x877b9a67" },
+      {
+        name: "removeIssuer",
+        signature: "function removeIssuer(address _issuer) returns (bool success_)",
+        selector: "0x47bc7093",
+      },
+      {
+        name: "setRevocationRegistryAddress",
+        signature: "function setRevocationRegistryAddress(address _revocationRegistryAddress) returns (bool success_)",
+        selector: "0xbb3daeaf",
+      },
+    ],
+    events: [
+      {
+        name: "AddedToIssuerList",
+        signature: "AddedToIssuerList(address,address)",
+        topic0: "0xed6cc767c5020f64eb4771044d11fede90f485f88204a7f6d62fb608e5615ca8",
+      },
+      {
+        name: "RemovedFromIssuerList",
+        signature: "RemovedFromIssuerList(address,address)",
+        topic0: "0x98978a12ff5bdb777720d9d8bb2cdad050bdfbc2c467144649b14cdc45df52ba",
+      },
+      {
+        name: "RevocationRegistryUpdated",
+        signature: "RevocationRegistryUpdated(address,address)",
+        topic0: "0x9b205171467d972c41c09cf31cce60bcca69d24714df66590528a49e9d9dcef7",
+      },
+    ],
+    errors: [
+      { name: "AccountIsNotIssuer", signature: "AccountIsNotIssuer(address)", selector: "0xcd324f53" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+      { name: "ListedIssuer", signature: "ListedIssuer(address)", selector: "0xcb2beece" },
+      { name: "UnlistedIssuer", signature: "UnlistedIssuer(address)", selector: "0xd1243a92" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new SsiManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new SsiManagementSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   SustainabilityPerformanceTargetRateFacet: {
@@ -7651,7 +10634,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 129 as const;
+export const TOTAL_FACETS = 168 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

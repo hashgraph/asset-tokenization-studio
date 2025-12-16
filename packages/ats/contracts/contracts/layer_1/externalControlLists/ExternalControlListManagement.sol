@@ -2,11 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalControlListManagement } from "../interfaces/externalControlLists/IExternalControlListManagement.sol";
-import { Common } from "../../layer_0/common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { _CONTROL_LIST_MANAGER_ROLE } from "../constants/roles.sol";
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../layer_0/constants/storagePositions.sol";
 
-abstract contract ExternalControlListManagement is IExternalControlListManagement, Common {
+abstract contract ExternalControlListManagement is IExternalControlListManagement, Internals {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalControlLists(
         address[] calldata _controlLists

@@ -4,9 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _DEFAULT_PARTITION } from "../../layer_0/constants/values.sol";
 import { _LOCKER_ROLE } from "../constants/roles.sol";
 import { ILock } from "../interfaces/lock/ILock.sol";
-import { Common } from "../../layer_0/common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 
-abstract contract Lock is ILock, Common {
+abstract contract Lock is ILock, Internals {
     // Functions
     function lockByPartition(
         bytes32 _partition,
