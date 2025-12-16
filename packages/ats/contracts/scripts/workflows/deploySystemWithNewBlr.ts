@@ -43,7 +43,7 @@ import { atsRegistry, deployFactory, createEquityConfiguration, createBondConfig
 
 import { promises as fs } from "fs";
 import { dirname } from "path";
-import { BusinessLogicResolver__factory } from "@contract-types";
+import { BusinessLogicResolver__factory, IStaticFunctionSelectors__factory } from "@contract-types";
 
 /**
  * Complete deployment output structure.
@@ -699,19 +699,12 @@ export async function deploySystemWithNewBlr(
         Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
           const facetAddress = deploymentResult.address!;
 
-          // Find matching key from config (use type guard to access .data property)
-          const equityFacet = isSuccess(equityConfig)
-            ? equityConfig.data.facetKeys.find((ef) => ef.address === facetAddress)
-            : undefined;
-          const bondFacet = isSuccess(bondConfig)
-            ? bondConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
-            : undefined;
-
+          const staticFunctionSelectors = IStaticFunctionSelectors__factory.connect(facetAddress, signer);
           return {
             name: facetName,
             address: facetAddress,
             contractId: await getContractId(facetAddress),
-            key: equityFacet?.key || bondFacet?.key || "",
+            key: await staticFunctionSelectors.getStaticResolverKey(),
           };
         }),
       ),
