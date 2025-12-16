@@ -322,7 +322,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
             );
     }
 
-    function _transferClearingBalance(bytes32 _partition, address _to, uint256 _amount) internal {
+    function _transferClearingBalance(bytes32 _partition, address _to, uint256 _amount) internal override {
         if (_validPartitionForReceiver(_partition, _to)) {
             _increaseBalanceByPartition(_to, _amount, _partition);
             return;
@@ -330,7 +330,9 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         _addPartitionTo(_amount, _to, _partition);
     }
 
-    function _removeClearing(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier) internal override {
+    function _removeClearing(
+        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
+    ) internal override {
         IClearing.ClearingDataStorage storage clearingStorage = _clearingStorage();
 
         uint256 amount = _getClearingBasicInfo(_clearingOperationIdentifier).amount;
@@ -368,7 +370,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
     function _beforeClearingOperation(
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         address _to
-    ) internal {
+    ) internal override {
         _adjustClearingBalances(_clearingOperationIdentifier, _to);
         _updateAccountSnapshot(_clearingOperationIdentifier.tokenHolder, _clearingOperationIdentifier.partition);
         _updateAccountSnapshot(_to, _clearingOperationIdentifier.partition);
@@ -393,7 +395,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
     function _updateClearing(
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         uint256 _abaf
-    ) internal {
+    ) internal override {
         uint256 clearingLabaf = _getClearingLabafByPartition(_clearingOperationIdentifier);
 
         if (_abaf == clearingLabaf) {
@@ -406,7 +408,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
     function _updateClearingAmountById(
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         uint256 _factor
-    ) internal {
+    ) internal override {
         if (_factor == 1) return;
 
         if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Transfer) {
@@ -429,12 +431,12 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         ][_clearingOperationIdentifier.clearingId].amount *= _factor;
     }
 
-    function _increaseClearedAmounts(address _tokenHolder, bytes32 _partition, uint256 _amount) internal {
+    function _increaseClearedAmounts(address _tokenHolder, bytes32 _partition, uint256 _amount) internal override {
         _clearingStorage().totalClearedAmountByAccountAndPartition[_tokenHolder][_partition] += _amount;
         _clearingStorage().totalClearedAmountByAccount[_tokenHolder] += _amount;
     }
 
-    function _updateTotalCleared(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {
+    function _updateTotalCleared(bytes32 _partition, address _tokenHolder) internal override returns (uint256 abaf_) {
         abaf_ = _getAbaf();
 
         uint256 labaf = _getTotalClearedLabaf(_tokenHolder);
@@ -454,7 +456,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         }
     }
 
-    function _updateTotalClearedAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal {
+    function _updateTotalClearedAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal override {
         if (_factor == 1) return;
 
         _clearingStorage().totalClearedAmountByAccount[_tokenHolder] *= _factor;
@@ -466,7 +468,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         address _tokenHolder,
         uint256 _factor,
         uint256 _abaf
-    ) internal {
+    ) internal override {
         if (_factor == 1) return;
 
         _clearingStorage().totalClearedAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
@@ -510,7 +512,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
     function _getClearedAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
-    ) internal view returns (uint256 amount_) {
+    ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactorForClearedAmountByTokenHolderAdjustedAt(_tokenHolder, _timestamp);
 
         return _getClearedAmountFor(_tokenHolder) * factor;

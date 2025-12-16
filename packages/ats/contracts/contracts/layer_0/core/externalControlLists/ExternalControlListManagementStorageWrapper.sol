@@ -11,7 +11,21 @@ abstract contract ExternalControlListManagementStorageWrapper is ProtectedPartit
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    function _isExternallyAuthorized(address _account) internal view returns (bool) {
+    function _initialize_ExternalControlLists(address[] calldata _controlLists) internal override {
+        ExternalListDataStorage storage externalControlListDataStorage = _externalListStorage(
+            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+        );
+        uint256 length = _controlLists.length;
+        for (uint256 index; index < length; ) {
+            _addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists[index]);
+            unchecked {
+                ++index;
+            }
+        }
+        externalControlListDataStorage.initialized = true;
+    }
+
+    function _isExternallyAuthorized(address _account) internal view override returns (bool) {
         ExternalListDataStorage storage externalControlListStorage = _externalListStorage(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
         );
@@ -23,5 +37,9 @@ abstract contract ExternalControlListManagementStorageWrapper is ProtectedPartit
             }
         }
         return true;
+    }
+
+    function _isExternalControlListInitialized() internal view override returns (bool) {
+        return _externalListStorage(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION).initialized;
     }
 }

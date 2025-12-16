@@ -304,7 +304,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         _updateHold(_holdIdentifier.partition, _holdIdentifier.holdId, _holdIdentifier.tokenHolder, abaf);
     }
 
-    function _updateHold(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _abaf) internal {
+    function _updateHold(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _abaf) internal override {
         uint256 holdLabaf = _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
 
         if (_abaf != holdLabaf) {
@@ -320,7 +320,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         uint256 _holdId,
         address _tokenHolder,
         uint256 _factor
-    ) internal {
+    ) internal override {
         if (_factor == 1) return;
         HoldDataStorage storage holdStorage = _holdStorage();
 
@@ -336,7 +336,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     function _getHeldAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
-    ) internal view returns (uint256 amount_) {
+    ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactorForHeldAmountByTokenHolderAdjustedAt(_tokenHolder, _timestamp);
 
         return _getHeldAmountFor(_tokenHolder) * factor;
@@ -377,6 +377,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     )
         internal
         view
+        override
         returns (
             uint256 amount_,
             uint256 expirationTimestamp_,
@@ -404,7 +405,9 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         amount_ *= factor;
     }
 
-    function _getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) internal view returns (address thirdParty_) {
+    function _getHoldThirdParty(
+        HoldIdentifier calldata _holdIdentifier
+    ) internal view override returns (address thirdParty_) {
         HoldDataStorage storage holdStorage = _holdStorage();
 
         thirdParty_ = holdStorage.holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][

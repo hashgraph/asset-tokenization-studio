@@ -18,7 +18,7 @@ abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWr
         bytes32 _position,
         address[] calldata _lists,
         bool[] calldata _actives
-    ) internal returns (bool success_) {
+    ) internal override returns (bool success_) {
         uint256 length = _lists.length;
         for (uint256 index; index < length; ) {
             if (_actives[index]) {
@@ -48,11 +48,11 @@ abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWr
         success_ = _externalListStorage(_position).list.remove(_list);
     }
 
-    function _isExternalList(bytes32 _position, address _list) internal override view returns (bool) {
+    function _isExternalList(bytes32 _position, address _list) internal view override returns (bool) {
         return _externalListStorage(_position).list.contains(_list);
     }
 
-    function _getExternalListsCount(bytes32 _position) internal override view returns (uint256 count_) {
+    function _getExternalListsCount(bytes32 _position) internal view override returns (uint256 count_) {
         count_ = _externalListStorage(_position).list.length();
     }
 
@@ -60,7 +60,7 @@ abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWr
         bytes32 _position,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
+    ) internal view override returns (address[] memory members_) {
         members_ = _externalListStorage(_position).list.getFromSet(_pageIndex, _pageLength);
     }
 

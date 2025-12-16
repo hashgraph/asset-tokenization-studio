@@ -73,7 +73,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         _kpiLinkedRateStorage().kpiOracle = _kpiOracle;
     }
 
-    function _getInterestRate() internal view returns (IKpiLinkedRate.InterestRate memory interestRate_) {
+    function _getInterestRate() internal view override returns (IKpiLinkedRate.InterestRate memory interestRate_) {
         interestRate_ = IKpiLinkedRate.InterestRate({
             maxRate: _kpiLinkedRateStorage().maxRate,
             baseRate: _kpiLinkedRateStorage().baseRate,
@@ -86,7 +86,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         });
     }
 
-    function _getImpactData() internal view returns (IKpiLinkedRate.ImpactData memory impactData_) {
+    function _getImpactData() internal view override returns (IKpiLinkedRate.ImpactData memory impactData_) {
         impactData_ = IKpiLinkedRate.ImpactData({
             maxDeviationCap: _kpiLinkedRateStorage().maxDeviationCap,
             baseLine: _kpiLinkedRateStorage().baseLine,
@@ -96,7 +96,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         });
     }
 
-    function _getKpiOracle() internal view returns (address kpiOracle_) {
+    function _getKpiOracle() internal view override returns (address kpiOracle_) {
         kpiOracle_ = _kpiLinkedRateStorage().kpiOracle;
     }
 

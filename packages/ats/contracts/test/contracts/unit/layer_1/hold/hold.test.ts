@@ -11,7 +11,7 @@ import {
   Pause,
   IERC1410,
   ControlListFacet,
-  ERC20,
+  ERC20Facet,
   TimeTravelFacet,
   Kyc,
   SsiManagement,
@@ -63,7 +63,7 @@ describe("Hold Tests", () => {
   let lock: Lock;
   let erc1410Facet: IERC1410;
   let controlListFacet: ControlListFacet;
-  let erc20Facet: ERC20;
+  let erc20Facet: ERC20Facet;
   let timeTravelFacet: TimeTravelFacet;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
@@ -133,7 +133,7 @@ describe("Hold Tests", () => {
 
     capFacet = await ethers.getContractAt("Cap", diamond.address, signer_A);
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address, signer_A);
-    erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_A);
+    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address, signer_A);
     controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.address, signer_E);
     // Set the initial RBACs
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);

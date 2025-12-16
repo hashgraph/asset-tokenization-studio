@@ -5,6 +5,7 @@ import { LocalContext } from "./context/LocalContext.sol";
 import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IClearing } from "contracts/layer_1/interfaces/clearing/IClearing.sol";
+import { HoldIdentifier } from "../layer_1/interfaces/hold/IHold.sol";
 
 abstract contract Modifiers is LocalContext {
     // ===== ControlList Modifiers =====
@@ -90,12 +91,26 @@ abstract contract Modifiers is LocalContext {
         bytes memory
     ) virtual;
     modifier onlyIssuable() virtual;
-    modifier onlyCanRedeemFromByPartition(
-        address _from,
-        bytes32 _partition,
-        uint256 _value,
-        bytes memory,
-        bytes memory
-    ) virtual;
+    modifier onlyCanRedeemFromByPartition(address _from, bytes32 _partition, uint256 _value, bytes memory, bytes memory)
+        virtual;
     modifier onlyWithoutMultiPartition() virtual;
+
+    // ===== ERC1644 Modifiers =====
+    modifier onlyControllable() virtual;
+
+    // ===== SSI Modifiers =====
+    modifier onlyIssuerListed(address _issuer) virtual;
+
+    // ===== ERC1410 Operator Modifiers =====
+    modifier onlyOperator(bytes32 _partition, address _from) virtual;
+
+    // ===== Lock Modifiers =====
+    modifier onlyWithLockedExpirationTimestamp(bytes32 _partition, address _tokenHolder, uint256 _lockId) virtual;
+    modifier onlyWithValidLockId(bytes32 _partition, address _tokenHolder, uint256 _lockId) virtual;
+
+    // ===== Hold Modifiers =====
+    modifier onlyWithValidHoldId(HoldIdentifier calldata _holdIdentifier) virtual;
+
+    // ===== AdjustBalances Modifiers =====
+    modifier validateFactor(uint256 _factor) virtual;
 }

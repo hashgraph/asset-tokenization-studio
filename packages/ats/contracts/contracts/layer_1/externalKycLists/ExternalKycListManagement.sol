@@ -11,18 +11,8 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Commo
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalKycLists(
         address[] calldata _kycLists
-    ) external override onlyUninitialized(_externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized) {
-        ExternalListDataStorage storage externalKycListDataStorage = _externalListStorage(
-            _KYC_MANAGEMENT_STORAGE_POSITION
-        );
-        uint256 length = _kycLists.length;
-        for (uint256 index; index < length; ) {
-            _addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists[index]);
-            unchecked {
-                ++index;
-            }
-        }
-        externalKycListDataStorage.initialized = true;
+    ) external override onlyUninitialized(_isKycExternalInitialized()) {
+        _initialize_ExternalKycLists(_kycLists);
     }
 
     function updateExternalKycLists(

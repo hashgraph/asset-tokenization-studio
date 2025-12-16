@@ -19,7 +19,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal returns (bool success_, uint256 lockId_) {
+    ) internal override returns (bool success_, uint256 lockId_) {
         checkNounceAndDeadline(
             _nounce,
             _transferAndLock.from,
@@ -63,7 +63,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal returns (bool success_, uint256 lockId_) {
+    ) internal override returns (bool success_, uint256 lockId_) {
         checkNounceAndDeadline(
             _nounce,
             _transferAndLock.from,
@@ -108,7 +108,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view {
+    ) internal view override {
         if (!_isTransferAndLockByPartitionSignatureValid(_partition, _transferAndLock, _deadline, _nounce, _signature))
             revert WrongSignature();
     }
@@ -119,7 +119,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view returns (bool) {
+    ) internal view override returns (bool) {
         bytes32 functionHash = getMessageHashTransferAndLockByPartition(
             _partition,
             _transferAndLock.from,
@@ -147,7 +147,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view {
+    ) internal view override {
         if (!_isTransferAndLockSignatureValid(_transferAndLock, _deadline, _nounce, _signature))
             revert WrongSignature();
     }
@@ -157,7 +157,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view returns (bool) {
+    ) internal view override returns (bool) {
         bytes32 functionHash = getMessageHashTransferAndLock(
             _transferAndLock.from,
             _transferAndLock.to,

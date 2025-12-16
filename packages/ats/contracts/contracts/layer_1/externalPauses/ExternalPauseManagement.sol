@@ -10,18 +10,8 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalPauses(
         address[] calldata _pauses
-    ) external override onlyUninitialized(_externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized) {
-        ExternalListDataStorage storage externalPauseDataStorage = _externalListStorage(
-            _PAUSE_MANAGEMENT_STORAGE_POSITION
-        );
-        uint256 length = _pauses.length;
-        for (uint256 index; index < length; ) {
-            _addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pauses[index]);
-            unchecked {
-                ++index;
-            }
-        }
-        externalPauseDataStorage.initialized = true;
+    ) external override onlyUninitialized(_isExternalPauseInitialized()) {
+        _initialize_ExternalPauses(_pauses);
     }
 
     function updateExternalPauses(

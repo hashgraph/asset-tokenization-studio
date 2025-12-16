@@ -11,7 +11,7 @@ import {
   type IHold,
   ControlListFacet,
   Pause,
-  ERC20,
+  ERC20Facet,
   type IERC1410,
   TimeTravelFacet,
   Kyc,
@@ -109,7 +109,7 @@ describe("Clearing Tests", () => {
   let pauseFacet: Pause;
   let erc1410Facet: IERC1410;
   let controlListFacet: ControlListFacet;
-  let erc20Facet: ERC20;
+  let erc20Facet: ERC20Facet;
   let timeTravelFacet: TimeTravelFacet;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
@@ -156,7 +156,7 @@ describe("Clearing Tests", () => {
     pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_D);
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_B);
     controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.address, signer_E);
-    erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_A);
+    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);

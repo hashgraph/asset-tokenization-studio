@@ -47,7 +47,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         _storeBondDetails(_bondDetailsData);
     }
 
-    function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal {
+    function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal override {
         _bondStorage().currency = _bondDetails.currency;
         _bondStorage().nominalValue = _bondDetails.nominalValue;
         _bondStorage().nominalValueDecimals = _bondDetails.nominalValueDecimals;
@@ -67,7 +67,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         emit CouponSet(corporateActionId_, couponID_, _msgSender(), _newCoupon);
     }
 
-    function _initCoupon(bytes32 _actionId, IBondRead.Coupon memory _newCoupon) internal virtual {
+    function _initCoupon(bytes32 _actionId, IBondRead.Coupon memory _newCoupon) internal virtual override {
         if (_actionId == bytes32(0)) {
             revert IBondStorageWrapper.CouponCreationFailed();
         }
@@ -95,7 +95,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         IBondRead.Coupon memory _coupon,
         uint256 _rate,
         uint8 _rateDecimals
-    ) internal virtual {
+    ) internal virtual override {
         bytes32 actionId = _getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
 
         _coupon.rate = _rate;

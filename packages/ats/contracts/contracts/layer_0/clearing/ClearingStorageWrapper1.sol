@@ -35,6 +35,12 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         _;
     }
 
+    function _initializeClearing(bool _clearingActive) internal override {
+        IClearing.ClearingDataStorage storage clearingStorage = _clearingStorage();
+        clearingStorage.initialized = true;
+        clearingStorage.activated = _clearingActive;
+    }
+
     function _setClearing(bool _activated) internal override returns (bool success_) {
         _clearingStorage().activated = _activated;
         success_ = true;
@@ -262,7 +268,7 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             });
     }
 
-    function _clearingStorage() internal pure override returns (IClearing.ClearingDataStorage storage clearing_) {
+    function _clearingStorage() internal pure returns (IClearing.ClearingDataStorage storage clearing_) {
         bytes32 position = _CLEARING_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

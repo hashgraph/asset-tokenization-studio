@@ -31,7 +31,7 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
-    ) internal {
+    ) internal override {
         bytes memory data = _scheduledTask.data;
 
         if (data.length == 0) return;
@@ -52,14 +52,14 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
         }
     }
 
-    function _getScheduledCrossOrderedTaskCount() internal view returns (uint256) {
+    function _getScheduledCrossOrderedTaskCount() internal view override returns (uint256) {
         return ScheduledTasksLib.getScheduledTaskCount(_scheduledCrossOrderedTaskStorage());
     }
 
     function _getScheduledCrossOrderedTasks(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (ScheduledTask[] memory scheduledTask_) {
+    ) internal view override returns (ScheduledTask[] memory scheduledTask_) {
         return ScheduledTasksLib.getScheduledTasks(_scheduledCrossOrderedTaskStorage(), _pageIndex, _pageLength);
     }
 

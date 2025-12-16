@@ -12,7 +12,7 @@ abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    modifier onlyWithValidHoldId(HoldIdentifier calldata _holdIdentifier) {
+    modifier onlyWithValidHoldId(HoldIdentifier calldata _holdIdentifier) override {
         _checkHoldId(_holdIdentifier);
         _;
     }

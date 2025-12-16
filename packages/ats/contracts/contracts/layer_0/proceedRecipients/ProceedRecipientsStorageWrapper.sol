@@ -27,33 +27,33 @@ abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper
         _;
     }
 
-    function _addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal {
+    function _addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal override {
         _addExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
         _setProceedRecipientData(_proceedRecipient, _data);
     }
 
-    function _removeProceedRecipient(address _proceedRecipient) internal {
+    function _removeProceedRecipient(address _proceedRecipient) internal override {
         _removeExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
         _removeProceedRecipientData(_proceedRecipient);
     }
 
-    function _setProceedRecipientData(address _proceedRecipient, bytes calldata _data) internal {
+    function _setProceedRecipientData(address _proceedRecipient, bytes calldata _data) internal override {
         _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient] = _data;
     }
 
-    function _removeProceedRecipientData(address _proceedRecipient) internal {
+    function _removeProceedRecipientData(address _proceedRecipient) internal override {
         delete _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
     }
 
-    function _getProceedRecipientData(address _proceedRecipient) internal view returns (bytes memory) {
+    function _getProceedRecipientData(address _proceedRecipient) internal view override returns (bytes memory) {
         return _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
     }
 
-    function _isProceedRecipient(address _proceedRecipient) internal view returns (bool) {
+    function _isProceedRecipient(address _proceedRecipient) internal view override returns (bool) {
         return _isExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
     }
 
-    function _getProceedRecipientsCount() internal view returns (uint256) {
+    function _getProceedRecipientsCount() internal view override returns (uint256) {
         return _getExternalListsCount(_PROCEED_RECIPIENTS_STORAGE_POSITION);
     }
 

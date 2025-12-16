@@ -9,9 +9,7 @@ import { CheckpointsLib } from "../../../layer_0/common/libraries/CheckpointsLib
 
 abstract contract ERC20Votes is IERC20Votes, Internals {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(
-        bool _activated
-    ) external override onlyUninitialized(_isERC20VotesInitialized()) {
+    function initialize_ERC20Votes(bool _activated) external override onlyUninitialized(_isERC20VotesInitialized()) {
         _initialize_ERC20Votes(_activated);
     }
 

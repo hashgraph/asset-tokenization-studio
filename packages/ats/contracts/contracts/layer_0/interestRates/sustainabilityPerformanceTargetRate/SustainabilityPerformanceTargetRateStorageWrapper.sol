@@ -19,7 +19,9 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
         bool initialized;
     }
 
-    function _setSPTInterestRate(ISustainabilityPerformanceTargetRate.InterestRate calldata _newInterestRate) internal {
+    function _setSPTInterestRate(
+        ISustainabilityPerformanceTargetRate.InterestRate calldata _newInterestRate
+    ) internal override {
         _triggerScheduledCrossOrderedTasks(0);
         SustainabilityPerformanceTargetRateDataStorage
             storage sustainabilityPerformanceTargetRateDataStorage = _sustainabilityPerformanceTargetRateStorage();
@@ -31,7 +33,7 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
     function _setSPTImpactData(
         ISustainabilityPerformanceTargetRate.ImpactData calldata _newImpactData,
         address _project
-    ) internal {
+    ) internal override {
         _triggerScheduledCrossOrderedTasks(0);
         ISustainabilityPerformanceTargetRate.ImpactData
             storage impactData = _sustainabilityPerformanceTargetRateStorage().impactDataByProject[_project];
@@ -44,6 +46,7 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
     function _getSPTInterestRate()
         internal
         view
+        override
         returns (ISustainabilityPerformanceTargetRate.InterestRate memory interestRate_)
     {
         SustainabilityPerformanceTargetRateDataStorage
@@ -58,7 +61,7 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
 
     function _getSPTImpactDataFor(
         address _project
-    ) internal view returns (ISustainabilityPerformanceTargetRate.ImpactData memory impactData_) {
+    ) internal view override returns (ISustainabilityPerformanceTargetRate.ImpactData memory impactData_) {
         return _sustainabilityPerformanceTargetRateStorage().impactDataByProject[_project];
     }
 

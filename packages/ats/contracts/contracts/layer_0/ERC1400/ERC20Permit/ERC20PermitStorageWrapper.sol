@@ -17,8 +17,7 @@ abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
         bool initialized;
     }
 
-    function _initialize_ERC20Permit(
-    ) internal override{
+    function _initialize_ERC20Permit() internal override {
         ERC20PermitStorage storage erc20PermitStorage = _erc20PermitStorage();
         erc20PermitStorage.initialized = true;
         erc20PermitStorage.contractName = _CONTRACT_NAME_ERC20PERMIT;
@@ -61,10 +60,9 @@ abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
         return getDomainHash(_CONTRACT_NAME_ERC20PERMIT, _CONTRACT_VERSION_ERC20PERMIT, _blockChainid(), address(this));
     }
 
-        function _isERC20PermitInitialized() internal view override returns (bool){
-            return _erc20PermitStorage().initialized;
-        }
-
+    function _isERC20PermitInitialized() internal view override returns (bool) {
+        return _erc20PermitStorage().initialized;
+    }
 
     function _erc20PermitStorage() internal pure returns (ERC20PermitStorage storage erc20permitStorage_) {
         bytes32 position = _ERC20PERMIT_STORAGE_POSITION;

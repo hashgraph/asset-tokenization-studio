@@ -28,12 +28,12 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         _;
     }
 
-    modifier onlyWithValidLockId(bytes32 _partition, address _tokenHolder, uint256 _lockId) {
+    modifier onlyWithValidLockId(bytes32 _partition, address _tokenHolder, uint256 _lockId) override {
         _checkValidLockId(_partition, _tokenHolder, _lockId);
         _;
     }
 
-    modifier onlyWithLockedExpirationTimestamp(bytes32 _partition, address _tokenHolder, uint256 _lockId) {
+    modifier onlyWithLockedExpirationTimestamp(bytes32 _partition, address _tokenHolder, uint256 _lockId) override {
         _checkLockedExpirationTimestamp(_partition, _tokenHolder, _lockId);
         _;
     }

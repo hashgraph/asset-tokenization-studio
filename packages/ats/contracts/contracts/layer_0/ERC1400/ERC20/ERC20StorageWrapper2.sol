@@ -7,13 +7,13 @@ import { BasicTransferInfo, IssueData } from "../../../layer_1/interfaces/ERC140
 import { ERC1410StandardStorageWrapper } from "../ERC1410/ERC1410StandardStorageWrapper.sol";
 
 abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardStorageWrapper {
-    function _beforeAllowanceUpdate(address _owner, address _spender) internal {
+    function _beforeAllowanceUpdate(address _owner, address _spender) internal override {
         _triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
 
         _updateAllowanceAndLabaf(_owner, _spender);
     }
 
-    function _updateAllowanceAndLabaf(address _owner, address _spender) internal {
+    function _updateAllowanceAndLabaf(address _owner, address _spender) internal override {
         uint256 abaf = _getAbaf();
         uint256 labaf = _getAllowanceLabaf(_owner, _spender);
 
@@ -68,22 +68,22 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
         return _emitTransferEvent(from, to, value);
     }
 
-    function _mint(address to, uint256 value) internal {
+    function _mint(address to, uint256 value) internal override {
         _issueByPartition(IssueData(_DEFAULT_PARTITION, to, value, ""));
         _emitTransferEvent(address(0), to, value);
     }
 
-    function _burn(address from, uint256 value) internal {
+    function _burn(address from, uint256 value) internal override {
         _redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, "", "");
         _emitTransferEvent(from, address(0), value);
     }
 
-    function _burnFrom(address account, uint256 value) internal {
+    function _burnFrom(address account, uint256 value) internal override {
         _decreaseAllowedBalance(account, _msgSender(), value);
         _burn(account, value);
     }
 
-    function _decreaseAllowedBalance(address from, address spender, uint256 value) internal {
+    function _decreaseAllowedBalance(address from, address spender, uint256 value) internal override {
         _beforeAllowanceUpdate(from, spender);
 
         ERC20Storage storage erc20Storage = _erc20Storage();
@@ -95,7 +95,7 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
         erc20Storage.allowed[from][spender] -= value;
     }
 
-    function _increaseAllowedBalance(address from, address spender, uint256 value) internal {
+    function _increaseAllowedBalance(address from, address spender, uint256 value) internal override {
         _beforeAllowanceUpdate(from, spender);
 
         ERC20Storage storage erc20Storage = _erc20Storage();

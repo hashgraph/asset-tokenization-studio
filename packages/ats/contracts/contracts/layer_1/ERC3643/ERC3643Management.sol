@@ -13,7 +13,7 @@ abstract contract ERC3643Management is IERC3643Management, Common {
     function initialize_ERC3643(
         address _compliance,
         address _identityRegistry
-    ) external onlyUninitialized(_erc3643Storage().initialized) {
+    ) external onlyUninitialized(_isERC3643Initialized()) {
         _initialize_ERC3643(_compliance, _identityRegistry);
     }
 

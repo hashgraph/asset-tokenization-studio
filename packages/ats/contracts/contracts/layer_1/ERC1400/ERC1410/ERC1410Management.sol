@@ -9,11 +9,8 @@ import { IssueData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
 
 abstract contract ERC1410Management is IERC1410Management, Common {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410(
-        bool _multiPartition
-    ) external override onlyUninitialized(_erc1410BasicStorage().initialized) {
-        _erc1410BasicStorage().multiPartition = _multiPartition;
-        _erc1410BasicStorage().initialized = true;
+    function initialize_ERC1410(bool _multiPartition) external override onlyUninitialized(_isERC1410Initialized()) {
+        _initialize_ERC1410(_multiPartition);
     }
 
     function controllerTransferByPartition(

@@ -43,7 +43,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         mapping(address => mapping(bytes32 => uint256)) labafFrozenAmountByAccountAndPartition;
     }
 
-    modifier validateFactor(uint256 _factor) {
+    modifier validateFactor(uint256 _factor) override {
         _checkFactor(_factor);
         _;
     }

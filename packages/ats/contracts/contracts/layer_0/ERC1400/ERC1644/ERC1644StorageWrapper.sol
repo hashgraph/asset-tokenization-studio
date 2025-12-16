@@ -11,7 +11,7 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         bool initialized;
     }
 
-    modifier onlyControllable() {
+    modifier onlyControllable() override {
         _checkControllable();
         _;
     }
@@ -22,7 +22,7 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) internal {
+    ) internal override {
         _transfer(_from, _to, _value);
         emit ControllerTransfer(msg.sender, _from, _to, _value, _data, _operatorData);
     }
@@ -32,7 +32,7 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) internal {
+    ) internal override {
         _burn(_tokenHolder, _value);
         emit ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
     }
@@ -44,7 +44,7 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         emit FinalizedControllerFeature(_msgSender());
     }
 
-    function _isControllable() internal view returns (bool) {
+    function _isControllable() internal view override returns (bool) {
         return _erc1644Storage().isControllable;
     }
 

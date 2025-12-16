@@ -17,13 +17,15 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
     }
 
     // modifiers
-    modifier onlyIssuerListed(address _issuer) {
+    modifier onlyIssuerListed(address _issuer) override {
         _checkIssuer(_issuer);
         _;
     }
 
     // Internal
-    function _setRevocationRegistryAddress(address _revocationRegistryAddress) internal override returns (bool success_) {
+    function _setRevocationRegistryAddress(
+        address _revocationRegistryAddress
+    ) internal override returns (bool success_) {
         _ssiManagementStorage().revocationRegistry = _revocationRegistryAddress;
         return true;
     }
@@ -36,22 +38,22 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
         success_ = _ssiManagementStorage().issuerList.remove(_issuer);
     }
 
-    function _getRevocationRegistryAddress() internal view returns (address revocationRegistryAddress_) {
+    function _getRevocationRegistryAddress() internal view override returns (address revocationRegistryAddress_) {
         revocationRegistryAddress_ = _ssiManagementStorage().revocationRegistry;
     }
 
-    function _getIssuerListCount() internal view returns (uint256 issuerListCount_) {
+    function _getIssuerListCount() internal view override returns (uint256 issuerListCount_) {
         issuerListCount_ = _ssiManagementStorage().issuerList.length();
     }
 
     function _getIssuerListMembers(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
+    ) internal view override returns (address[] memory members_) {
         return _ssiManagementStorage().issuerList.getFromSet(_pageIndex, _pageLength);
     }
 
-    function _isIssuer(address _issuer) internal view returns (bool) {
+    function _isIssuer(address _issuer) internal view override returns (bool) {
         return _ssiManagementStorage().issuerList.contains(_issuer);
     }
 

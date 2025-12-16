@@ -11,7 +11,21 @@ abstract contract ExternalPauseManagementStorageWrapper is ControlListStorageWra
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    function _isExternallyPaused() internal view returns (bool) {
+    function _initialize_ExternalPauses(address[] calldata _pauses) internal override {
+        ExternalListDataStorage storage externalPauseDataStorage = _externalListStorage(
+            _PAUSE_MANAGEMENT_STORAGE_POSITION
+        );
+        uint256 length = _pauses.length;
+        for (uint256 index; index < length; ) {
+            _addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pauses[index]);
+            unchecked {
+                ++index;
+            }
+        }
+        externalPauseDataStorage.initialized = true;
+    }
+
+    function _isExternallyPaused() internal view override returns (bool) {
         ExternalListDataStorage storage externalPauseDataStorage = _externalListStorage(
             _PAUSE_MANAGEMENT_STORAGE_POSITION
         );
@@ -24,5 +38,9 @@ abstract contract ExternalPauseManagementStorageWrapper is ControlListStorageWra
             }
         }
         return false;
+    }
+
+    function _isExternalPauseInitialized() internal view override returns (bool) {
+        return _externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized;
     }
 }

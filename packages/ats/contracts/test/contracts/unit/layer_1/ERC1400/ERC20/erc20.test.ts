@@ -5,7 +5,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 import {
   type ResolverProxy,
-  type ERC20,
+  type ERC20Facet,
   type IERC1410,
   type Pause,
   type ControlList,
@@ -31,8 +31,8 @@ describe("ERC20 Tests", () => {
   let signer_C: SignerWithAddress;
   let signer_D: SignerWithAddress;
 
-  let erc20Facet: ERC20;
-  let erc20FacetBlackList: ERC20;
+  let erc20Facet: ERC20Facet;
+  let erc20FacetBlackList: ERC20Facet;
   let pauseFacet: Pause;
   let controlListFacet: ControlList;
   let erc1594Facet: ERC1594;
@@ -77,8 +77,8 @@ describe("ERC20 Tests", () => {
         },
       ]);
 
-      erc20Facet = await ethers.getContractAt("ERC20", diamond.address);
-      erc20FacetBlackList = await ethers.getContractAt("ERC20", diamond.address, signer_D);
+      erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address);
+      erc20FacetBlackList = await ethers.getContractAt("ERC20Facet", diamond.address, signer_D);
       pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_B);
       controlListFacet = await ethers.getContractAt("ControlList", diamond.address, signer_A);
       clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
@@ -151,8 +151,8 @@ describe("ERC20 Tests", () => {
   });
 
   describe("Single partition", () => {
-    let erc20SignerC: ERC20;
-    let erc20SignerE: ERC20;
+    let erc20SignerC: ERC20Facet;
+    let erc20SignerE: ERC20Facet;
     let erc1410Facet: IERC1410;
 
     async function deploySecurityFixtureSinglePartition() {
@@ -190,10 +190,10 @@ describe("ERC20 Tests", () => {
         },
       ]);
 
-      erc20Facet = await ethers.getContractAt("ERC20", diamond.address);
-      erc20FacetBlackList = await ethers.getContractAt("ERC20", diamond.address, signer_D);
-      erc20SignerC = await ethers.getContractAt("ERC20", diamond.address, signer_C);
-      erc20SignerE = await ethers.getContractAt("ERC20", diamond.address, signer_D);
+      erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address);
+      erc20FacetBlackList = await ethers.getContractAt("ERC20Facet", diamond.address, signer_D);
+      erc20SignerC = await ethers.getContractAt("ERC20Facet", diamond.address, signer_C);
+      erc20SignerE = await ethers.getContractAt("ERC20Facet", diamond.address, signer_D);
       erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
       erc1594Facet = await ethers.getContractAt("ERC1594", diamond.address, signer_B);
       kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);

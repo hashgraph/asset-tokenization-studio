@@ -39,7 +39,7 @@ abstract contract CapStorageWrapper2 is ICapStorageWrapper, LockStorageWrapper2 
         emit MaxSupplyByPartitionSet(_msgSender(), _partition, _maxSupply, previousMaxSupplyByPartition);
     }
 
-    function _checkNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) internal override view {
+    function _checkNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) internal view override {
         if (_newMaxSupply == 0) return;
         uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjusted(_partition);
         if (totalSupplyForPartition > _newMaxSupply) {
@@ -51,7 +51,7 @@ abstract contract CapStorageWrapper2 is ICapStorageWrapper, LockStorageWrapper2 
         }
     }
 
-    function _checkWithinMaxSupply(uint256 _amount) internal override view {
+    function _checkWithinMaxSupply(uint256 _amount) internal view override {
         uint256 maxSupply = _getMaxSupply();
         if (!_isCorrectMaxSupply(_totalSupply() + _amount, maxSupply)) {
             revert ICapStorageWrapper.MaxSupplyReached(maxSupply);

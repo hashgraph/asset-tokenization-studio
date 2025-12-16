@@ -17,7 +17,7 @@ abstract contract SecurityStorageWrapper is EquityStorageWrapper {
     function _storeRegulationData(
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    ) internal {
+    ) internal override {
         ISecurity.SecurityRegulationData storage data = _securityStorage();
         data.regulationData = _regulationData;
         data.additionalSecurityData = _additionalSecurityData;

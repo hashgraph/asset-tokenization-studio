@@ -31,6 +31,12 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         _;
     }
 
+    function _initializeInternalKyc(bool _internalKycActivated) internal override {
+        KycStorage storage kycStorage = _kycStorage();
+        kycStorage.initialized = true;
+        kycStorage.internalKycActivated = _internalKycActivated;
+    }
+
     function _setInternalKyc(bool _activated) internal override returns (bool success_) {
         _kycStorage().internalKycActivated = _activated;
         success_ = true;
@@ -42,7 +48,7 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         uint256 _validFrom,
         uint256 _validTo,
         address _issuer
-    ) internal returns (bool success_) {
+    ) internal override returns (bool success_) {
         _kycStorage().kyc[_account] = IKyc.KycData(_validFrom, _validTo, _vcId, _issuer, IKyc.KycStatus.GRANTED);
         _kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(_account);
         success_ = true;
@@ -55,7 +61,7 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         success_ = true;
     }
 
-    function _getKycStatusFor(address _account) internal view virtual returns (IKyc.KycStatus kycStatus_) {
+    function _getKycStatusFor(address _account) internal view override returns (IKyc.KycStatus kycStatus_) {
         IKyc.KycData memory kycFor = _getKycFor(_account);
 
         if (kycFor.validTo < _blockTimestamp()) return IKyc.KycStatus.NOT_GRANTED;
@@ -76,11 +82,13 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         return kycFor.status;
     }
 
-    function _getKycFor(address _account) internal view virtual returns (IKyc.KycData memory) {
+    function _getKycFor(address _account) internal view override returns (IKyc.KycData memory) {
         return _kycStorage().kyc[_account];
     }
 
-    function _getKycAccountsCount(IKyc.KycStatus _kycStatus) internal view virtual returns (uint256 kycAccountsCount_) {
+    function _getKycAccountsCount(
+        IKyc.KycStatus _kycStatus
+    ) internal view override returns (uint256 kycAccountsCount_) {
         kycAccountsCount_ = _kycStorage().kycAddressesByStatus[_kycStatus].length();
     }
 
@@ -88,7 +96,7 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         IKyc.KycStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (address[] memory accounts_, IKyc.KycData[] memory kycData_) {
+    ) internal view override returns (address[] memory accounts_, IKyc.KycData[] memory kycData_) {
         accounts_ = _kycStorage().kycAddressesByStatus[_kycStatus].getFromSet(_pageIndex, _pageLength);
 
         uint256 totalAccounts = accounts_.length;
@@ -103,19 +111,23 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
         }
     }
 
-    function _verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view virtual returns (bool) {
+    function _verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view override returns (bool) {
         KycStorage storage kycStorage = _kycStorage();
 
         bool internalKycValid = !kycStorage.internalKycActivated || _getKycStatusFor(_account) == _kycStatus;
         return internalKycValid && _isExternallyGranted(_account, _kycStatus);
     }
 
-    function _checkValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view {
+    function _checkValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view override {
         if (!_verifyKycStatus(_kycStatus, _account)) revert IKyc.InvalidKycStatus();
     }
 
-    function _isInternalKycActivated() internal view returns (bool) {
+    function _isInternalKycActivated() internal view override returns (bool) {
         return _kycStorage().internalKycActivated;
+    }
+
+    function _isKycInitialized() internal view override returns (bool) {
+        return _kycStorage().initialized;
     }
 
     function _kycStorage() internal pure returns (KycStorage storage kyc_) {

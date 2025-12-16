@@ -153,12 +153,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         return value;
     }
 
-    function _corporateActionsStorage()
-        internal
-        pure
-        override
-        returns (CorporateActionDataStorage storage corporateActions_)
-    {
+    function _corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {
         bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

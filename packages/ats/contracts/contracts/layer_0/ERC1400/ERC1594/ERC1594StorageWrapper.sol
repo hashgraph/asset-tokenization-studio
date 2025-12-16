@@ -63,7 +63,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
     }
 
     // TODO: In this case are able to perform that operation another role?
-    function _issue(address _tokenHolder, uint256 _value, bytes memory _data) internal {
+    function _issue(address _tokenHolder, uint256 _value, bytes memory _data) internal override {
         // Add a function to validate the `_data` parameter
         _mint(_tokenHolder, _value);
         emit Issued(_msgSender(), _tokenHolder, _value, _data);
@@ -75,17 +75,17 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         emit Redeemed(address(0), _msgSender(), _value, _data);
     }
 
-    function _redeemFrom(address _tokenHolder, uint256 _value, bytes memory _data) internal {
+    function _redeemFrom(address _tokenHolder, uint256 _value, bytes memory _data) internal override {
         // Add a function to validate the `_data` parameter
         _burnFrom(_tokenHolder, _value);
         emit Redeemed(_msgSender(), _tokenHolder, _value, _data);
     }
 
-    function _isIssuable() internal view returns (bool) {
+    function _isIssuable() internal view override returns (bool) {
         return _erc1594Storage().issuance;
     }
 
-    function _checkIssuable() internal view {
+    function _checkIssuable() internal view override {
         if (!_isIssuable()) revert IssuanceIsClosed();
     }
 
@@ -95,7 +95,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         uint256 _value,
         bytes memory,
         bytes memory
-    ) internal view {
+    ) internal view override {
         (bool isAbleToRedeemFrom, , bytes32 reasonCode, bytes memory details) = _isAbleToRedeemFromByPartition(
             _from,
             _partition,
@@ -114,7 +114,12 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         uint256 _value,
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
-    ) internal view returns (bool isAbleToRedeemFrom, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+    )
+        internal
+        view
+        override
+        returns (bool isAbleToRedeemFrom, bytes1 statusCode, bytes32 reasonCode, bytes memory details)
+    {
         (isAbleToRedeemFrom, statusCode, reasonCode, details) = _genericChecks();
         if (!isAbleToRedeemFrom) {
             return (isAbleToRedeemFrom, statusCode, reasonCode, details);
@@ -150,7 +155,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         uint256 _value,
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
-    ) internal view {
+    ) internal view override {
         (bool isAbleToTransfer, , bytes32 reasonCode, bytes memory details) = _isAbleToTransferFromByPartition(
             _from,
             _to,
@@ -171,7 +176,12 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         uint256 _value,
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
-    ) internal view returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+    )
+        internal
+        view
+        override
+        returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details)
+    {
         (isAbleToTransfer, statusCode, reasonCode, details) = _genericChecks();
         if (!isAbleToTransfer) {
             return (isAbleToTransfer, statusCode, reasonCode, details);

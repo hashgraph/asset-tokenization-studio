@@ -34,7 +34,7 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC3643(address _compliance, address _identityRegistry) internal {
+    function _initialize_ERC3643(address _compliance, address _identityRegistry) internal override {
         IERC3643Management.ERC3643Storage storage eRC3643Storage = _erc3643Storage();
         eRC3643Storage.initialized = true;
         _setCompliance(_compliance);
@@ -91,7 +91,7 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
         return _erc3643Storage().addressRecovered[_sender];
     }
 
-    function _version() internal view returns (string memory) {
+    function _version() internal view override returns (string memory) {
         return
             // solhint-disable quotes
             string(
@@ -120,20 +120,27 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
         return IIdentityRegistry(_erc3643Storage().identityRegistry);
     }
 
-    function _getOnchainID() internal override view returns (address) {
+    function _getOnchainID() internal view override returns (address) {
         return _erc3643Storage().onchainID;
     }
 
-    function _checkInputAmountsArrayLength(address[] memory _addresses, uint256[] memory _amounts) internal override pure {
+    function _checkInputAmountsArrayLength(
+        address[] memory _addresses,
+        uint256[] memory _amounts
+    ) internal pure override {
         if (_addresses.length != _amounts.length) {
             revert IERC3643Management.InputAmountsArrayLengthMismatch();
         }
     }
 
-    function _checkInputBoolArrayLength(address[] memory _addresses, bool[] memory _status) internal override pure {
+    function _checkInputBoolArrayLength(address[] memory _addresses, bool[] memory _status) internal pure override {
         if (_addresses.length != _status.length) {
             revert IERC3643Management.InputBoolArrayLengthMismatch();
         }
+    }
+
+    function _isERC3643Initialized() internal view override returns (bool) {
+        return _erc3643Storage().initialized;
     }
 
     function _erc3643Storage() internal pure returns (IERC3643Management.ERC3643Storage storage erc3643Storage_) {

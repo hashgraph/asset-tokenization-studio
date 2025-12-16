@@ -9,9 +9,7 @@ import { _CLEARING_ROLE } from "../constants/roles.sol";
 
 abstract contract ClearingActions is IClearingActions, Internals {
     function initializeClearing(bool _clearingActive) external onlyUninitialized(_isClearingInitialized()) {
-        IClearing.ClearingDataStorage storage clearingStorage = _clearingStorage();
-        clearingStorage.initialized = true;
-        clearingStorage.activated = _clearingActive;
+        _initializeClearing(_clearingActive);
     }
 
     function activateClearing() external onlyRole(_CLEARING_ROLE) onlyUnpaused returns (bool success_) {

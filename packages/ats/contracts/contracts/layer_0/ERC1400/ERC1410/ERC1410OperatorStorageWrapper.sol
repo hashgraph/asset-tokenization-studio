@@ -13,7 +13,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         mapping(address => mapping(address => bool)) approvals;
     }
 
-    modifier onlyOperator(bytes32 _partition, address _from) {
+    modifier onlyOperator(bytes32 _partition, address _from) override {
         _checkOperator(_partition, _from);
         _;
     }
@@ -40,7 +40,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
 
     function _operatorTransferByPartition(
         OperatorTransferData calldata _operatorTransferData
-    ) internal returns (bytes32) {
+    ) internal override returns (bytes32) {
         return
             _transferByPartition(
                 _operatorTransferData.from,
@@ -52,7 +52,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
             );
     }
 
-    function _isOperator(address _operator, address _tokenHolder) internal view returns (bool) {
+    function _isOperator(address _operator, address _tokenHolder) internal view override returns (bool) {
         return _erc1410operatorStorage().approvals[_tokenHolder][_operator];
     }
 
@@ -60,11 +60,15 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         bytes32 _partition,
         address _operator,
         address _tokenHolder
-    ) internal view returns (bool) {
+    ) internal view override returns (bool) {
         return _erc1410operatorStorage().partitionApprovals[_tokenHolder][_partition][_operator];
     }
 
-    function _isAuthorized(bytes32 _partition, address _operator, address _tokenHolder) internal view returns (bool) {
+    function _isAuthorized(
+        bytes32 _partition,
+        address _operator,
+        address _tokenHolder
+    ) internal view override returns (bool) {
         return _isOperator(_operator, _tokenHolder) || _isOperatorForPartition(_partition, _operator, _tokenHolder);
     }
 

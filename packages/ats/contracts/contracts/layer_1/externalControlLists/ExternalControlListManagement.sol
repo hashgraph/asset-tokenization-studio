@@ -10,18 +10,8 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalControlLists(
         address[] calldata _controlLists
-    ) external override onlyUninitialized(_externalListStorage(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION).initialized) {
-        ExternalListDataStorage storage externalControlListDataStorage = _externalListStorage(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
-        );
-        uint256 length = _controlLists.length;
-        for (uint256 index; index < length; ) {
-            _addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists[index]);
-            unchecked {
-                ++index;
-            }
-        }
-        externalControlListDataStorage.initialized = true;
+    ) external override onlyUninitialized(_isExternalControlListInitialized()) {
+        _initialize_ExternalControlLists(_controlLists);
     }
 
     function updateExternalControlLists(
