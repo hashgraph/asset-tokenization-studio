@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import { type ResolverProxy, type ERC1643, type Pause, AccessControl } from "@contract-types";
+import { type ResolverProxy, type ERC1643Facet, type PauseFacet, AccessControl } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "../../../../../common";
 import { deployEquityTokenFixture } from "@test";
@@ -21,9 +21,9 @@ describe("ERC1643 Tests", () => {
   let signer_B: SignerWithAddress;
   let signer_C: SignerWithAddress;
 
-  let erc1643Facet: ERC1643;
+  let erc1643Facet: ERC1643Facet;
   let accessControlFacet: AccessControl;
-  let pauseFacet: Pause;
+  let pauseFacet: PauseFacet;
 
   async function deploySecurityTokenFixture() {
     const base = await deployEquityTokenFixture();
@@ -40,9 +40,9 @@ describe("ERC1643 Tests", () => {
 
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
 
-    erc1643Facet = await ethers.getContractAt("ERC1643", diamond.address);
+    erc1643Facet = await ethers.getContractAt("ERC1643Facet", diamond.address);
 
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
   }
 
   beforeEach(async () => {
