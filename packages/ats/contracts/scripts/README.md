@@ -45,10 +45,11 @@ This README provides comprehensive reference documentation for the deployment sy
 6. [Import Standards](#import-standards)
 7. [Quick Start](#quick-start)
 8. [Usage Modes](#usage-modes)
-9. [Directory Structure](#directory-structure)
-10. [Examples](#examples)
-11. [API Reference](#api-reference)
-12. [Troubleshooting](#troubleshooting)
+9. [Upgrading Configurations](#upgrading-configurations)
+10. [Directory Structure](#directory-structure)
+11. [Examples](#examples)
+12. [API Reference](#api-reference)
+13. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -557,6 +558,113 @@ const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
   useTimeTravel: false,
 });
 ```
+
+---
+
+## Upgrading Configurations
+
+The upgrade workflow allows you to deploy new facet versions and update existing configurations without redeploying the entire infrastructure.
+
+### When to Use
+
+- Upgrading facet implementations to fix bugs or add features
+- Adding new facets to existing configurations
+- Updating existing ResolverProxy tokens to use new facet versions
+- Deploying configuration updates across multiple environments
+
+### Prerequisites
+
+- Existing BusinessLogicResolver (BLR) address
+- Private key with sufficient balance for deployment
+- (Optional) ResolverProxy token addresses to update
+
+### CLI Usage
+
+**Basic upgrade:**
+
+```bash
+BLR_ADDRESS=<your-blr-address> npm run upgrade:testnet
+```
+
+**Upgrade with proxy updates:**
+
+```bash
+BLR_ADDRESS=0x123... \
+PROXY_ADDRESSES=0xabc...,0xdef... \
+npm run upgrade:testnet
+```
+
+**Upgrade only equity:**
+
+```bash
+BLR_ADDRESS=0x123... \
+CONFIGURATIONS=equity \
+npm run upgrade:testnet
+```
+
+**Environment Variables:**
+
+- `BLR_ADDRESS` - Existing BLR address (required)
+- `PROXY_ADDRESSES` - Comma-separated proxy addresses to update (optional)
+- `CONFIGURATIONS` - Which configs to create: `equity`, `bond`, or `both` (default: `both`)
+- `USE_TIMETRAVEL` - Include TimeTravel facet variants (default: `false`)
+
+### What Happens During Upgrade
+
+1. **Validate BLR** - Checks BLR exists on-chain
+2. **Deploy Facets** - Deploys all 48-49 facets (with optional TimeTravel variants)
+3. **Register in BLR** - Registers facets, creating new global version
+4. **Create Configurations** - Creates new Equity/Bond configuration versions (v2, v3, etc.)
+5. **Update Proxies** (optional) - Updates ResolverProxy tokens to new version
+
+### Output
+
+Upgrade results are saved to `upgrades/{network}_{timestamp}.json`:
+
+```json
+{
+  "network": "hedera-testnet",
+  "blr": { "address": "0x123...", "isExternal": true },
+  "facets": [
+    /* 48 deployed facets */
+  ],
+  "configurations": {
+    "equity": { "configId": "0x01", "version": 2, "facetCount": 43 },
+    "bond": { "configId": "0x02", "version": 2, "facetCount": 43 }
+  },
+  "proxyUpdates": [{ "proxyAddress": "0xabc", "success": true, "previousVersion": 1, "newVersion": 2 }],
+  "summary": {
+    "totalFacetsDeployed": 48,
+    "configurationsCreated": 2,
+    "proxiesUpdated": 1,
+    "proxiesFailed": 0,
+    "deploymentTime": 45000,
+    "gasUsed": "1234567890"
+  }
+}
+```
+
+### Resume Failed Upgrades
+
+Upgrades use checkpoint-based resumability:
+
+```bash
+# Upgrade will automatically resume if previous attempt failed
+BLR_ADDRESS=0x123... npm run upgrade:testnet
+```
+
+### Troubleshooting
+
+**"Cannot find BLR at address"**
+
+- Verify BLR address is correct
+- Ensure you're on the right network
+
+**"Proxy update failed"**
+
+- Individual proxy failures don't stop the upgrade
+- Check proxy logs for specific error
+- Proxies can be updated later using updateResolverProxyConfig operation
 
 ---
 

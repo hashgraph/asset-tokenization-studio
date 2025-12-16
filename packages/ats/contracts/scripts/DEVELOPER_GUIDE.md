@@ -8,10 +8,13 @@ This guide provides practical, step-by-step instructions for the most common dev
 2. [Quick Start - Using the CLI](#quick-start---using-the-cli)
 3. [Scenario 1: Add/Remove Facet from Existing Asset](#scenario-1-addremove-facet-from-existing-asset)
 4. [Scenario 2: Create New Asset Type (Configuration ID)](#scenario-2-create-new-asset-type-configuration-id)
-5. [Complete Deployment Workflows](#complete-deployment-workflows)
-6. [Registry System](#registry-system)
-7. [Advanced Topics](#advanced-topics)
-8. [Troubleshooting](#troubleshooting)
+5. [Scenario 3: Upgrading Facet Implementations](#scenario-3-upgrading-facet-implementations)
+6. [Scenario 4: Selective Configuration Upgrades](#scenario-4-selective-configuration-upgrades)
+7. [Scenario 5: Multi-Environment Rollout](#scenario-5-multi-environment-rollout)
+8. [Complete Deployment Workflows](#complete-deployment-workflows)
+9. [Registry System](#registry-system)
+10. [Advanced Topics](#advanced-topics)
+11. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -620,6 +623,110 @@ When creating a new asset, touch these files:
 - [ ] `domain/index.ts` - Export `createFundConfiguration` and `FUND_CONFIG_ID`
 - [ ] `contracts/layer_3/jurisdiction/usa/FundUSAFacet.sol` - Implement custom facets (if needed)
 - [ ] `workflows/deployCompleteSystem.ts` - Add to deployment workflow (optional)
+
+---
+
+## Scenario 3: Upgrading Facet Implementations
+
+**Use case:** You've fixed a bug or added a feature to facets and need to upgrade production tokens.
+
+### Prerequisites
+
+- Existing BusinessLogicResolver (BLR) address
+- Private key with deployment permissions
+- (Optional) Addresses of ResolverProxy tokens to update
+
+### Step 1: Deploy New Facets and Create New Configuration
+
+```bash
+# Upgrade on testnet first
+BLR_ADDRESS=0x123abc... npm run upgrade:testnet
+```
+
+This creates new configuration v2 with updated facets.
+
+### Step 2: Test with New Token
+
+Deploy a test token using v2:
+
+```typescript
+import { Factory__factory } from "@contract-types";
+import { ethers } from "ethers";
+
+const factory = Factory__factory.connect("0xfactory...", signer);
+
+// Deploy test equity token using v2
+const tx = await factory.deployEquity(
+  { configId: "0x01", version: 2 }, // ← Use v2
+  "Test Token",
+  "TEST",
+  {
+    /* other params */
+  },
+);
+```
+
+### Step 3: Update Production Tokens
+
+Once tested, update existing tokens:
+
+```bash
+BLR_ADDRESS=0x123abc... \
+PROXY_ADDRESSES=0xtoken1...,0xtoken2... \
+npm run upgrade:testnet
+```
+
+### Step 4: Verify Updates
+
+Check each token is using v2:
+
+```typescript
+import { ResolverProxy__factory } from "@contract-types";
+
+const proxy = ResolverProxy__factory.connect("0xtoken1...", signer);
+const version = await proxy.version();
+console.log(`Token version: ${version}`); // Should print: 2
+```
+
+---
+
+## Scenario 4: Selective Configuration Upgrades
+
+**Use case:** You only want to upgrade equity tokens, not bonds.
+
+```bash
+BLR_ADDRESS=0x123abc... \
+CONFIGURATIONS=equity \
+npm run upgrade:testnet
+```
+
+This creates only equity v2, leaving bonds at v1.
+
+---
+
+## Scenario 5: Multi-Environment Rollout
+
+**Use case:** Controlled rollout across testnet → previewnet → mainnet.
+
+### Testnet
+
+```bash
+BLR_ADDRESS=0xTestnetBLR... npm run upgrade:testnet
+```
+
+### Previewnet (after testing)
+
+```bash
+BLR_ADDRESS=0xPreviewnetBLR... npm run upgrade:previewnet
+```
+
+### Mainnet (after validation)
+
+```bash
+BLR_ADDRESS=0xMainnetBLR... npm run upgrade:mainnet
+```
+
+Each environment maintains independent configuration versions.
 
 ---
 
