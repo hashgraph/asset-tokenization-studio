@@ -48,7 +48,11 @@ import {
   createBondKpiLinkedRateConfiguration,
   createBondSustainabilityPerformanceTargetRateConfiguration,
 } from "@scripts/domain";
-import { BusinessLogicResolver__factory, ProxyAdmin__factory } from "@contract-types";
+import {
+  BusinessLogicResolver__factory,
+  IStaticFunctionSelectors__factory,
+  ProxyAdmin__factory,
+} from "@contract-types";
 
 /**
  * Complete deployment output structure.
@@ -783,6 +787,7 @@ export async function deploySystemWithNewBlr(
             ? bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
             : undefined;
 
+          const staticFunctionSelectors = IStaticFunctionSelectors__factory.connect(facetAddress, signer);
           return {
             name: facetName,
             address: facetAddress,
@@ -793,7 +798,7 @@ export async function deploySystemWithNewBlr(
               bondFixedRateFacet?.key ||
               bondKpiLinkedRateFacet?.key ||
               bondSustainabilityPerformanceTargetRateFacet?.key ||
-              "",
+              (await staticFunctionSelectors.getStaticResolverKey()),
           };
         }),
       ),
