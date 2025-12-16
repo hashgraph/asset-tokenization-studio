@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-16T14:31:27.347Z
+ * Generated: 2025-12-16T15:31:01.458Z
  * Facets: 168
  * Infrastructure: 2
  *
@@ -7834,8 +7834,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   HoldReadFacet: {
     name: "HoldReadFacet",
     resolverKey: {
-      name: "_HOLD_RESOLVER_KEY",
-      value: "0x6c7216c5c52bc8f5019fc2fb333eb5e518e647fd82c807ed7c2a1fe4a03a3860",
+      name: "_HOLD_READ_RESOLVER_KEY",
+      value: "0xd8a2714462c01975a075ccd4be2588934afd8074afef746fac089b757b803851",
     },
     inheritance: ["HoldReadFacetBase", "Common"],
     methods: [
@@ -7883,8 +7883,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   HoldReadFixedRateFacet: {
     name: "HoldReadFixedRateFacet",
     resolverKey: {
-      name: "_HOLD_FIXED_RATE_RESOLVER_KEY",
-      value: "0xed113dc152639988cc04869ce8c061c4a3350fe3826e16fc37960453a8d20b50",
+      name: "_HOLD_READ_FIXED_RATE_RESOLVER_KEY",
+      value: "0xcf1b5b7fa2ca417ea3b952a93a6157f237fce01f4944d27160e5101f05335e52",
     },
     inheritance: ["HoldReadFacetBase", "CommonFixedInterestRate"],
     methods: [
@@ -7937,8 +7937,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   HoldReadKpiLinkedRateFacet: {
     name: "HoldReadKpiLinkedRateFacet",
     resolverKey: {
-      name: "_HOLD_KPI_LINKED_RATE_RESOLVER_KEY",
-      value: "0xed86feb6fdd55e6a056bda1a5b7149c2d0d6d7d024625b67aa2c567ba0ef2b9e",
+      name: "_HOLD_READ_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x6b896f9725e5d4f4b5f8cff875e71b5f3284000a933f6ab32c01cdd5f71306d6",
     },
     inheritance: ["HoldReadFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
@@ -7991,8 +7991,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   HoldReadSustainabilityPerformanceTargetRateFacet: {
     name: "HoldReadSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
-      name: "_HOLD_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0x4574524c203fbcc0f5b9f08bcd2b9a9d47c5a9cf3a30eeb540a93a33a8a2f834",
+      name: "_HOLD_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x8e7113391652a4d3d8feb1d90990cd06ee33dc67a640b4400f8bfb9fae4f91b2",
     },
     inheritance: ["HoldReadFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
@@ -8049,8 +8049,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   HoldTokenHolderFacet: {
     name: "HoldTokenHolderFacet",
     resolverKey: {
-      name: "_HOLD_RESOLVER_KEY",
-      value: "0x6c7216c5c52bc8f5019fc2fb333eb5e518e647fd82c807ed7c2a1fe4a03a3860",
+      name: "_HOLD_TOKEN_HOLDER_RESOLVER_KEY",
+      value: "0x87b17a3ce9a86872f21469d26f005543a22ef5729998559f4ad433d5c4253f3e",
     },
     inheritance: ["HoldTokenHolderFacetBase", "Common"],
     methods: [
@@ -8120,8 +8120,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   HoldTokenHolderFixedRateFacet: {
     name: "HoldTokenHolderFixedRateFacet",
     resolverKey: {
-      name: "_HOLD_FIXED_RATE_RESOLVER_KEY",
-      value: "0xed113dc152639988cc04869ce8c061c4a3350fe3826e16fc37960453a8d20b50",
+      name: "_HOLD_TOKEN_HOLDER_FIXED_RATE_RESOLVER_KEY",
+      value: "0x0d354aad4576c421c121516a105362711db178c6f0d6e0159d68d9f3ebbda486",
     },
     inheritance: ["HoldTokenHolderFacetBase", "CommonFixedInterestRate"],
     methods: [
@@ -8196,8 +8196,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   HoldTokenHolderKpiLinkedRateFacet: {
     name: "HoldTokenHolderKpiLinkedRateFacet",
     resolverKey: {
-      name: "_HOLD_KPI_LINKED_RATE_RESOLVER_KEY",
-      value: "0xed86feb6fdd55e6a056bda1a5b7149c2d0d6d7d024625b67aa2c567ba0ef2b9e",
+      name: "_HOLD_TOKEN_HOLDER_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x09f3820ce986997421b684b2482b6d982f31b5ed27a0d72e2aece5ffb3c8fd39",
     },
     inheritance: ["HoldTokenHolderFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
@@ -8272,8 +8272,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   HoldTokenHolderSustainabilityPerformanceTargetRateFacet: {
     name: "HoldTokenHolderSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
-      name: "_HOLD_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0x4574524c203fbcc0f5b9f08bcd2b9a9d47c5a9cf3a30eeb540a93a33a8a2f834",
+      name: "_HOLD_TOKEN_HOLDER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x28ae4d4cdc1846ba348a31e222161d8343223560c1875fe3efcad8c5dd5f81e0",
     },
     inheritance: ["HoldTokenHolderFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [

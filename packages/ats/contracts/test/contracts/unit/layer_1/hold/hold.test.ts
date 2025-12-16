@@ -8,20 +8,20 @@ import { EMPTY_STRING, ATS_ROLES, ZERO, EMPTY_HEX_BYTES, ADDRESS_ZERO, dateToUni
 import {
   ResolverProxy,
   IHold,
-  Pause,
+  PauseFacet,
   IERC1410,
   ControlListFacet,
   ERC20Facet,
   TimeTravelFacet,
-  Kyc,
-  SsiManagement,
+  KycFacet,
+  SsiManagementFacet,
   ClearingActionsFacet,
   Equity,
   AccessControl,
   Cap,
   AdjustBalances,
-  Lock,
-  Snapshots,
+  LockFacet,
+  SnapshotsFacet,
 } from "@contract-types";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -59,20 +59,20 @@ describe("Hold Tests", () => {
   let signer_E: SignerWithAddress;
 
   let holdFacet: IHold;
-  let pauseFacet: Pause;
-  let lock: Lock;
+  let pauseFacet: PauseFacet;
+  let lock: LockFacet;
   let erc1410Facet: IERC1410;
   let controlListFacet: ControlListFacet;
   let erc20Facet: ERC20Facet;
   let timeTravelFacet: TimeTravelFacet;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
+  let kycFacet: KycFacet;
+  let ssiManagementFacet: SsiManagementFacet;
   let clearingActionsFacet: ClearingActionsFacet;
   let equityFacet: Equity;
   let accessControlFacet: AccessControl;
   let capFacet: Cap;
   let adjustBalancesFacet: AdjustBalances;
-  let snapshotFacet: Snapshots;
+  let snapshotFacet: SnapshotsFacet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -119,17 +119,17 @@ describe("Hold Tests", () => {
   }
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    lock = await ethers.getContractAt("Lock", diamond.address, signer_A);
+    lock = await ethers.getContractAt("LockFacet", diamond.address, signer_A);
     holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_D);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_D);
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_B);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
     equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
     adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
     clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
-    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
+    snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.address);
 
     capFacet = await ethers.getContractAt("Cap", diamond.address, signer_A);
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address, signer_A);
