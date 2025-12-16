@@ -38,8 +38,6 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
     }
 
     function _finalizeControllable() internal {
-        if (!_erc1644Storage().isControllable) return;
-
         _erc1644Storage().isControllable = false;
         emit FinalizedControllerFeature(_msgSender());
     }
