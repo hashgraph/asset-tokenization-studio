@@ -4,9 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC1643 } from "../../interfaces/ERC1400/IERC1643.sol";
 import { _DOCUMENTER_ROLE } from "../../constants/roles.sol";
 import { _ERC1643_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { Common } from "../../../layer_0/common/Common.sol";
+import { Internals } from "../../../layer_0/Internals.sol";
 
-abstract contract ERC1643 is IERC1643, Common {
+abstract contract ERC1643 is IERC1643, Internals {
     function setDocument(
         bytes32 _name,
         string calldata _uri,

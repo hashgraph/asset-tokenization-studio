@@ -53,12 +53,14 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
         if (!_grantRole(_AGENT_ROLE, _agent)) {
             revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
         }
+        emit IERC3643Management.AgentAdded(_agent);
     }
 
     function _removeAgent(address _agent) internal override {
         if (!_revokeRole(_AGENT_ROLE, _agent)) {
             revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
         }
+        emit IERC3643Management.AgentRemoved(_agent);
     }
 
     function _setCompliance(address _compliance) internal override {
@@ -68,6 +70,7 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
 
     function _setIdentityRegistry(address _identityRegistry) internal override {
         _erc3643Storage().identityRegistry = _identityRegistry;
+        emit IERC3643Management.IdentityRegistryAdded(_identityRegistry);
     }
 
     function _getFrozenAmountFor(address _userAddress) internal view override returns (uint256) {
@@ -112,11 +115,11 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
         // solhint-enable quotes
     }
 
-    function _getCompliance() internal view returns (ICompliance) {
+    function _getCompliance() internal view override returns (ICompliance) {
         return ICompliance(_erc3643Storage().compliance);
     }
 
-    function _getIdentityRegistry() internal view returns (IIdentityRegistry) {
+    function _getIdentityRegistry() internal view override returns (IIdentityRegistry) {
         return IIdentityRegistry(_erc3643Storage().identityRegistry);
     }
 

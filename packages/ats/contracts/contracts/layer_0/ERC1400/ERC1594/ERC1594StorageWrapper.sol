@@ -404,4 +404,8 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
 
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
     }
+
+    function _isERC1594Initialized() internal view override returns (bool) {
+        return _erc1594Storage().initialized;
+    }
 }

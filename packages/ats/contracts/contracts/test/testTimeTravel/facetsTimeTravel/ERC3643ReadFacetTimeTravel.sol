@@ -3,7 +3,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC3643ReadFacet } from "../../../layer_1/ERC3643/ERC3643ReadFacet.sol";
+import { ERC3643ReadFacet } from "../../../layer_1/ERC3643/standard/ERC3643ReadFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 

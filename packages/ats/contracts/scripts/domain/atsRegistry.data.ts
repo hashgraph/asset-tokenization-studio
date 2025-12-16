@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-15T15:50:10.709Z
- * Facets: 96
+ * Generated: 2025-12-16T13:39:20.126Z
+ * Facets: 129
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -117,18 +117,60 @@ import {
   DiamondLoupeFacetTimeTravel__factory,
   ERC1410IssuerFacet__factory,
   ERC1410IssuerFacetTimeTravel__factory,
+  ERC1410IssuerFixedRateFacet__factory,
+  ERC1410IssuerFixedRateFacetTimeTravel__factory,
+  ERC1410IssuerKpiLinkedRateFacet__factory,
+  ERC1410IssuerKpiLinkedRateFacetTimeTravel__factory,
+  ERC1410IssuerSustainabilityPerformanceTargetRateFacet__factory,
+  ERC1410IssuerSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC1410ManagementFacet__factory,
   ERC1410ManagementFacetTimeTravel__factory,
+  ERC1410ManagementFixedRateFacet__factory,
+  ERC1410ManagementFixedRateFacetTimeTravel__factory,
+  ERC1410ManagementKpiLinkedRateFacet__factory,
+  ERC1410ManagementKpiLinkedRateFacetTimeTravel__factory,
+  ERC1410ManagementSustainabilityPerformanceTargetRateFacet__factory,
+  ERC1410ManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC1410ReadFacet__factory,
   ERC1410ReadFacetTimeTravel__factory,
+  ERC1410ReadFixedRateFacet__factory,
+  ERC1410ReadFixedRateFacetTimeTravel__factory,
+  ERC1410ReadKpiLinkedRateFacet__factory,
+  ERC1410ReadKpiLinkedRateFacetTimeTravel__factory,
+  ERC1410ReadSustainabilityPerformanceTargetRateFacet__factory,
+  ERC1410ReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC1410TokenHolderFacet__factory,
   ERC1410TokenHolderFacetTimeTravel__factory,
+  ERC1410TokenHolderFixedRateFacet__factory,
+  ERC1410TokenHolderFixedRateFacetTimeTravel__factory,
+  ERC1410TokenHolderKpiLinkedRateFacet__factory,
+  ERC1410TokenHolderKpiLinkedRateFacetTimeTravel__factory,
+  ERC1410TokenHolderSustainabilityPerformanceTargetRateFacet__factory,
+  ERC1410TokenHolderSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC1594Facet__factory,
   ERC1594FacetTimeTravel__factory,
+  ERC1594FixedRateFacet__factory,
+  ERC1594FixedRateFacetTimeTravel__factory,
+  ERC1594KpiLinkedRateFacet__factory,
+  ERC1594KpiLinkedRateFacetTimeTravel__factory,
+  ERC1594SustainabilityPerformanceTargetRateFacet__factory,
+  ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC1643Facet__factory,
   ERC1643FacetTimeTravel__factory,
+  ERC1643FixedRateFacet__factory,
+  ERC1643FixedRateFacetTimeTravel__factory,
+  ERC1643KpiLinkedRateFacet__factory,
+  ERC1643KpiLinkedRateFacetTimeTravel__factory,
+  ERC1643SustainabilityPerformanceTargetRateFacet__factory,
+  ERC1643SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC1644Facet__factory,
   ERC1644FacetTimeTravel__factory,
+  ERC1644FixedRateFacet__factory,
+  ERC1644FixedRateFacetTimeTravel__factory,
+  ERC1644KpiLinkedRateFacet__factory,
+  ERC1644KpiLinkedRateFacetTimeTravel__factory,
+  ERC1644SustainabilityPerformanceTargetRateFacet__factory,
+  ERC1644SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC20Facet__factory,
   ERC20FacetTimeTravel__factory,
   ERC20FixedRateFacet__factory,
@@ -155,12 +197,36 @@ import {
   ERC20VotesSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC3643BatchFacet__factory,
   ERC3643BatchFacetTimeTravel__factory,
+  ERC3643BatchFixedRateFacet__factory,
+  ERC3643BatchFixedRateFacetTimeTravel__factory,
+  ERC3643BatchKpiLinkedRateFacet__factory,
+  ERC3643BatchKpiLinkedRateFacetTimeTravel__factory,
+  ERC3643BatchSustainabilityPerformanceTargetRateFacet__factory,
+  ERC3643BatchSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC3643ManagementFacet__factory,
   ERC3643ManagementFacetTimeTravel__factory,
+  ERC3643ManagementFixedRateFacet__factory,
+  ERC3643ManagementFixedRateFacetTimeTravel__factory,
+  ERC3643ManagementKpiLinkedRateFacet__factory,
+  ERC3643ManagementKpiLinkedRateFacetTimeTravel__factory,
+  ERC3643ManagementSustainabilityPerformanceTargetRateFacet__factory,
+  ERC3643ManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC3643OperationsFacet__factory,
   ERC3643OperationsFacetTimeTravel__factory,
+  ERC3643OperationsFixedRateFacet__factory,
+  ERC3643OperationsFixedRateFacetTimeTravel__factory,
+  ERC3643OperationsKpiLinkedRateFacet__factory,
+  ERC3643OperationsKpiLinkedRateFacetTimeTravel__factory,
+  ERC3643OperationsSustainabilityPerformanceTargetRateFacet__factory,
+  ERC3643OperationsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ERC3643ReadFacet__factory,
   ERC3643ReadFacetTimeTravel__factory,
+  ERC3643ReadFixedRateFacet__factory,
+  ERC3643ReadFixedRateFacetTimeTravel__factory,
+  ERC3643ReadKpiLinkedRateFacet__factory,
+  ERC3643ReadKpiLinkedRateFacetTimeTravel__factory,
+  ERC3643ReadSustainabilityPerformanceTargetRateFacet__factory,
+  ERC3643ReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   EquityUSAFacet__factory,
   EquityUSAFacetTimeTravel__factory,
   ExternalControlListManagementFacet__factory,
@@ -3415,7 +3481,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1410_ISSUER_RESOLVER_KEY",
       value: "0x6e82b75f32c9647cc00b4c3eabbef5a82677f3e91d5d196eb4dd6a0365941344",
     },
-    inheritance: ["IStaticFunctionSelectors", "ERC1410Issuer"],
+    inheritance: ["ERC1410IssuerFacetBase", "Common"],
     methods: [
       {
         name: "issueByPartition",
@@ -3424,18 +3490,97 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x18180262",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1410IssuerFacetTimeTravel__factory(signer) : new ERC1410IssuerFacet__factory(signer),
   },
 
+  ERC1410IssuerFixedRateFacet: {
+    name: "ERC1410IssuerFixedRateFacet",
+    resolverKey: {
+      name: "_ERC1410_ISSUER_FIXED_RATE_RESOLVER_KEY",
+      value: "0xb9c76f134ffdac743e817a2726bdf9f28a48dfea1f9f54b1066e4e0de68f2a06",
+    },
+    inheritance: ["ERC1410IssuerFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "issueByPartition",
+        signature:
+          "function issueByPartition(tuple(bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
+        selector: "0x18180262",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410IssuerFixedRateFacetTimeTravel__factory(signer)
+        : new ERC1410IssuerFixedRateFacet__factory(signer),
+  },
+
+  ERC1410IssuerKpiLinkedRateFacet: {
+    name: "ERC1410IssuerKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC1410_ISSUER_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x97246e7c6950bcc047f6ea198308a7f304bca9f3f13d2ce5d7fdeee9cc9e0828",
+    },
+    inheritance: ["ERC1410IssuerFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "issueByPartition",
+        signature:
+          "function issueByPartition(tuple(bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
+        selector: "0x18180262",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410IssuerKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC1410IssuerKpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC1410IssuerSustainabilityPerformanceTargetRateFacet: {
+    name: "ERC1410IssuerSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_ISSUER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x4d5a3964d29183253487011c31ec3e09977b5eded43c8a3a222a2e53f4282f61",
+    },
+    inheritance: ["ERC1410IssuerFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "issueByPartition",
+        signature:
+          "function issueByPartition(tuple(bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
+        selector: "0x18180262",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410IssuerSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC1410IssuerSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
   ERC1410ManagementFacet: {
     name: "ERC1410ManagementFacet",
-    description: "Facet implementing privileged ERC1410 operations including controller transfers, operator actions,",
     resolverKey: {
       name: "_ERC1410_MANAGEMENT_RESOLVER_KEY",
       value: "0x232f8686795d3f197681faf0d8db05655e759f62d709d56b97e5d9cfff29dbf5",
     },
-    inheritance: ["IStaticFunctionSelectors", "ERC1410Management"],
+    inheritance: ["ERC1410ManagementFacetBase", "Common"],
     methods: [
       {
         name: "controllerRedeemByPartition",
@@ -3479,10 +3624,195 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x12e41c0a",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410ManagementFacetTimeTravel__factory(signer)
         : new ERC1410ManagementFacet__factory(signer),
+  },
+
+  ERC1410ManagementFixedRateFacet: {
+    name: "ERC1410ManagementFixedRateFacet",
+    resolverKey: {
+      name: "_ERC1410_MANAGEMENT_FIXED_RATE_RESOLVER_KEY",
+      value: "0xf616851e84bfcfb3b33a8cc54c54c34e9168ba2b8d233a0b3daacee27f0266ca",
+    },
+    inheritance: ["ERC1410ManagementFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "controllerRedeemByPartition",
+        signature:
+          "function controllerRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0xb84777cc",
+      },
+      {
+        name: "controllerTransferByPartition",
+        signature:
+          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0xfb78befa",
+      },
+      {
+        name: "initialize_ERC1410",
+        signature: "function initialize_ERC1410(bool _multiPartition)",
+        selector: "0x7b1df196",
+      },
+      {
+        name: "operatorRedeemByPartition",
+        signature:
+          "function operatorRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0x13d557bc",
+      },
+      {
+        name: "operatorTransferByPartition",
+        signature:
+          "function operatorTransferByPartition(tuple(bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
+        selector: "0x6b9894fe",
+      },
+      {
+        name: "protectedRedeemFromByPartition",
+        signature:
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
+        selector: "0xc98d9723",
+      },
+      {
+        name: "protectedTransferFromByPartition",
+        signature:
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
+        selector: "0x12e41c0a",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410ManagementFixedRateFacetTimeTravel__factory(signer)
+        : new ERC1410ManagementFixedRateFacet__factory(signer),
+  },
+
+  ERC1410ManagementKpiLinkedRateFacet: {
+    name: "ERC1410ManagementKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC1410_MANAGEMENT_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x831449a00c9cf218fe471b13f84f7109b57ad4b1202d4ed93009ee3d53276a2f",
+    },
+    inheritance: ["ERC1410ManagementFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "controllerRedeemByPartition",
+        signature:
+          "function controllerRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0xb84777cc",
+      },
+      {
+        name: "controllerTransferByPartition",
+        signature:
+          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0xfb78befa",
+      },
+      {
+        name: "initialize_ERC1410",
+        signature: "function initialize_ERC1410(bool _multiPartition)",
+        selector: "0x7b1df196",
+      },
+      {
+        name: "operatorRedeemByPartition",
+        signature:
+          "function operatorRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0x13d557bc",
+      },
+      {
+        name: "operatorTransferByPartition",
+        signature:
+          "function operatorTransferByPartition(tuple(bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
+        selector: "0x6b9894fe",
+      },
+      {
+        name: "protectedRedeemFromByPartition",
+        signature:
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
+        selector: "0xc98d9723",
+      },
+      {
+        name: "protectedTransferFromByPartition",
+        signature:
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
+        selector: "0x12e41c0a",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410ManagementKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC1410ManagementKpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC1410ManagementSustainabilityPerformanceTargetRateFacet: {
+    name: "ERC1410ManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x6768fcc73686ddd306656061b0e415208ded041927d9935de3747583559d0c5e",
+    },
+    inheritance: ["ERC1410ManagementFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "controllerRedeemByPartition",
+        signature:
+          "function controllerRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0xb84777cc",
+      },
+      {
+        name: "controllerTransferByPartition",
+        signature:
+          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0xfb78befa",
+      },
+      {
+        name: "initialize_ERC1410",
+        signature: "function initialize_ERC1410(bool _multiPartition)",
+        selector: "0x7b1df196",
+      },
+      {
+        name: "operatorRedeemByPartition",
+        signature:
+          "function operatorRedeemByPartition(bytes32 _partition, address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0x13d557bc",
+      },
+      {
+        name: "operatorTransferByPartition",
+        signature:
+          "function operatorTransferByPartition(tuple(bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
+        selector: "0x6b9894fe",
+      },
+      {
+        name: "protectedRedeemFromByPartition",
+        signature:
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
+        selector: "0xc98d9723",
+      },
+      {
+        name: "protectedTransferFromByPartition",
+        signature:
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
+        selector: "0x12e41c0a",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410ManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC1410ManagementSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ERC1410ReadFacet: {
@@ -3491,7 +3821,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1410_READ_RESOLVER_KEY",
       value: "0x5eb2734b83ea80c3eb63463a6192b30ab2526cb7a073f0abfda1a404c92ae497",
     },
-    inheritance: ["IStaticFunctionSelectors", "ERC1410Read"],
+    inheritance: ["ERC1410ReadFacetBase", "Common"],
     methods: [
       {
         name: "balanceOf",
@@ -3548,8 +3878,232 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa26734dc",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1410ReadFacetTimeTravel__factory(signer) : new ERC1410ReadFacet__factory(signer),
+  },
+
+  ERC1410ReadFixedRateFacet: {
+    name: "ERC1410ReadFixedRateFacet",
+    resolverKey: {
+      name: "_ERC1410_READ_FIXED_RATE_RESOLVER_KEY",
+      value: "0x289451d28da5d8ff4e7759db6b1c418b7871f0d6ad63bf7f75cd411f3d79686d",
+    },
+    inheritance: ["ERC1410ReadFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "balanceOf",
+        signature: "function balanceOf(address _tokenHolder) view returns (uint256)",
+        selector: "0x70a08231",
+      },
+      {
+        name: "balanceOfAt",
+        signature: "function balanceOfAt(address _tokenHolder, uint256 _timestamp) view returns (uint256)",
+        selector: "0x4ee2cd7e",
+      },
+      {
+        name: "balanceOfByPartition",
+        signature: "function balanceOfByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256)",
+        selector: "0x30e82803",
+      },
+      {
+        name: "canRedeemByPartition",
+        signature:
+          "function canRedeemByPartition(address _from, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
+        selector: "0x7b7322c4",
+      },
+      {
+        name: "canTransferByPartition",
+        signature:
+          "function canTransferByPartition(address _from, address _to, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
+        selector: "0xa7b518b1",
+      },
+      {
+        name: "isMultiPartition",
+        signature: "function isMultiPartition() view returns (bool)",
+        selector: "0xbd09cc54",
+      },
+      {
+        name: "isOperator",
+        signature: "function isOperator(address _operator, address _tokenHolder) view returns (bool)",
+        selector: "0xb6363cf2",
+      },
+      {
+        name: "isOperatorForPartition",
+        signature:
+          "function isOperatorForPartition(bytes32 _partition, address _operator, address _tokenHolder) view returns (bool)",
+        selector: "0x6d77cad6",
+      },
+      {
+        name: "partitionsOf",
+        signature: "function partitionsOf(address _tokenHolder) view returns (bytes32[])",
+        selector: "0x740ab8f4",
+      },
+      { name: "totalSupply", signature: "function totalSupply() view returns (uint256)", selector: "0x18160ddd" },
+      {
+        name: "totalSupplyByPartition",
+        signature: "function totalSupplyByPartition(bytes32 _partition) view returns (uint256)",
+        selector: "0xa26734dc",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410ReadFixedRateFacetTimeTravel__factory(signer)
+        : new ERC1410ReadFixedRateFacet__factory(signer),
+  },
+
+  ERC1410ReadKpiLinkedRateFacet: {
+    name: "ERC1410ReadKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC1410_READ_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x696d9b2b17b535f70254309692c77475c258c27dfa6853bbecc611bc350136cd",
+    },
+    inheritance: ["ERC1410ReadFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "balanceOf",
+        signature: "function balanceOf(address _tokenHolder) view returns (uint256)",
+        selector: "0x70a08231",
+      },
+      {
+        name: "balanceOfAt",
+        signature: "function balanceOfAt(address _tokenHolder, uint256 _timestamp) view returns (uint256)",
+        selector: "0x4ee2cd7e",
+      },
+      {
+        name: "balanceOfByPartition",
+        signature: "function balanceOfByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256)",
+        selector: "0x30e82803",
+      },
+      {
+        name: "canRedeemByPartition",
+        signature:
+          "function canRedeemByPartition(address _from, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
+        selector: "0x7b7322c4",
+      },
+      {
+        name: "canTransferByPartition",
+        signature:
+          "function canTransferByPartition(address _from, address _to, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
+        selector: "0xa7b518b1",
+      },
+      {
+        name: "isMultiPartition",
+        signature: "function isMultiPartition() view returns (bool)",
+        selector: "0xbd09cc54",
+      },
+      {
+        name: "isOperator",
+        signature: "function isOperator(address _operator, address _tokenHolder) view returns (bool)",
+        selector: "0xb6363cf2",
+      },
+      {
+        name: "isOperatorForPartition",
+        signature:
+          "function isOperatorForPartition(bytes32 _partition, address _operator, address _tokenHolder) view returns (bool)",
+        selector: "0x6d77cad6",
+      },
+      {
+        name: "partitionsOf",
+        signature: "function partitionsOf(address _tokenHolder) view returns (bytes32[])",
+        selector: "0x740ab8f4",
+      },
+      { name: "totalSupply", signature: "function totalSupply() view returns (uint256)", selector: "0x18160ddd" },
+      {
+        name: "totalSupplyByPartition",
+        signature: "function totalSupplyByPartition(bytes32 _partition) view returns (uint256)",
+        selector: "0xa26734dc",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410ReadKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC1410ReadKpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC1410ReadSustainabilityPerformanceTargetRateFacet: {
+    name: "ERC1410ReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x7c15e98edcc41b3177b8cfff7055cd57b47000fd843fce22e7ead13f07e346b6",
+    },
+    inheritance: ["ERC1410ReadFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "balanceOf",
+        signature: "function balanceOf(address _tokenHolder) view returns (uint256)",
+        selector: "0x70a08231",
+      },
+      {
+        name: "balanceOfAt",
+        signature: "function balanceOfAt(address _tokenHolder, uint256 _timestamp) view returns (uint256)",
+        selector: "0x4ee2cd7e",
+      },
+      {
+        name: "balanceOfByPartition",
+        signature: "function balanceOfByPartition(bytes32 _partition, address _tokenHolder) view returns (uint256)",
+        selector: "0x30e82803",
+      },
+      {
+        name: "canRedeemByPartition",
+        signature:
+          "function canRedeemByPartition(address _from, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
+        selector: "0x7b7322c4",
+      },
+      {
+        name: "canTransferByPartition",
+        signature:
+          "function canTransferByPartition(address _from, address _to, bytes32 _partition, uint256 _value, bytes _data, bytes _operatorData) view returns (bool, bytes1, bytes32)",
+        selector: "0xa7b518b1",
+      },
+      {
+        name: "isMultiPartition",
+        signature: "function isMultiPartition() view returns (bool)",
+        selector: "0xbd09cc54",
+      },
+      {
+        name: "isOperator",
+        signature: "function isOperator(address _operator, address _tokenHolder) view returns (bool)",
+        selector: "0xb6363cf2",
+      },
+      {
+        name: "isOperatorForPartition",
+        signature:
+          "function isOperatorForPartition(bytes32 _partition, address _operator, address _tokenHolder) view returns (bool)",
+        selector: "0x6d77cad6",
+      },
+      {
+        name: "partitionsOf",
+        signature: "function partitionsOf(address _tokenHolder) view returns (bytes32[])",
+        selector: "0x740ab8f4",
+      },
+      { name: "totalSupply", signature: "function totalSupply() view returns (uint256)", selector: "0x18160ddd" },
+      {
+        name: "totalSupplyByPartition",
+        signature: "function totalSupplyByPartition(bytes32 _partition) view returns (uint256)",
+        selector: "0xa26734dc",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410ReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC1410ReadSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ERC1410TokenHolderFacet: {
@@ -3558,7 +4112,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1410_TOKEN_HOLDER_RESOLVER_KEY",
       value: "0x0466bf860d23f1ecbc25f364735e0dc3830d236f09182599831730ddd2792caa",
     },
-    inheritance: ["IStaticFunctionSelectors", "ERC1410TokenHolder"],
+    inheritance: ["ERC1410TokenHolderFacetBase", "Common"],
     methods: [
       { name: "authorizeOperator", signature: "function authorizeOperator(address _operator)", selector: "0x959b8c3f" },
       {
@@ -3589,10 +4143,156 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x6afb79db",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410TokenHolderFacetTimeTravel__factory(signer)
         : new ERC1410TokenHolderFacet__factory(signer),
+  },
+
+  ERC1410TokenHolderFixedRateFacet: {
+    name: "ERC1410TokenHolderFixedRateFacet",
+    resolverKey: {
+      name: "_ERC1410_TOKEN_HOLDER_FIXED_RATE_RESOLVER_KEY",
+      value: "0xfd248a6ee4af07046520c6ec6f9b61a009db5407ec2f967775040cd67b66f08d",
+    },
+    inheritance: ["ERC1410TokenHolderFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      { name: "authorizeOperator", signature: "function authorizeOperator(address _operator)", selector: "0x959b8c3f" },
+      {
+        name: "authorizeOperatorByPartition",
+        signature: "function authorizeOperatorByPartition(bytes32 _partition, address _operator)",
+        selector: "0x103ef9e1",
+      },
+      {
+        name: "redeemByPartition",
+        signature: "function redeemByPartition(bytes32 _partition, uint256 _value, bytes _data)",
+        selector: "0x62eb0068",
+      },
+      { name: "revokeOperator", signature: "function revokeOperator(address _operator)", selector: "0xfad8b32a" },
+      {
+        name: "revokeOperatorByPartition",
+        signature: "function revokeOperatorByPartition(bytes32 _partition, address _operator)",
+        selector: "0x168ecec5",
+      },
+      {
+        name: "transferByPartition",
+        signature:
+          "function transferByPartition(bytes32 _partition, tuple(address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
+        selector: "0x3bc9bcd8",
+      },
+      {
+        name: "triggerAndSyncAll",
+        signature: "function triggerAndSyncAll(bytes32 _partition, address _from, address _to)",
+        selector: "0x6afb79db",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410TokenHolderFixedRateFacetTimeTravel__factory(signer)
+        : new ERC1410TokenHolderFixedRateFacet__factory(signer),
+  },
+
+  ERC1410TokenHolderKpiLinkedRateFacet: {
+    name: "ERC1410TokenHolderKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC1410_TOKEN_HOLDER_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x463e4b758e14b6cdc1dd053ae3df476d527be8131eb3b41c64b4cf8019855237",
+    },
+    inheritance: ["ERC1410TokenHolderFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      { name: "authorizeOperator", signature: "function authorizeOperator(address _operator)", selector: "0x959b8c3f" },
+      {
+        name: "authorizeOperatorByPartition",
+        signature: "function authorizeOperatorByPartition(bytes32 _partition, address _operator)",
+        selector: "0x103ef9e1",
+      },
+      {
+        name: "redeemByPartition",
+        signature: "function redeemByPartition(bytes32 _partition, uint256 _value, bytes _data)",
+        selector: "0x62eb0068",
+      },
+      { name: "revokeOperator", signature: "function revokeOperator(address _operator)", selector: "0xfad8b32a" },
+      {
+        name: "revokeOperatorByPartition",
+        signature: "function revokeOperatorByPartition(bytes32 _partition, address _operator)",
+        selector: "0x168ecec5",
+      },
+      {
+        name: "transferByPartition",
+        signature:
+          "function transferByPartition(bytes32 _partition, tuple(address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
+        selector: "0x3bc9bcd8",
+      },
+      {
+        name: "triggerAndSyncAll",
+        signature: "function triggerAndSyncAll(bytes32 _partition, address _from, address _to)",
+        selector: "0x6afb79db",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410TokenHolderKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC1410TokenHolderKpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC1410TokenHolderSustainabilityPerformanceTargetRateFacet: {
+    name: "ERC1410TokenHolderSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_TOKEN_HOLDER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x6e21f1ca6d12f08b0d36f08711a48500d02dcf7edd2e8b87e4de350b98df4822",
+    },
+    inheritance: ["ERC1410TokenHolderFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "authorizeOperator", signature: "function authorizeOperator(address _operator)", selector: "0x959b8c3f" },
+      {
+        name: "authorizeOperatorByPartition",
+        signature: "function authorizeOperatorByPartition(bytes32 _partition, address _operator)",
+        selector: "0x103ef9e1",
+      },
+      {
+        name: "redeemByPartition",
+        signature: "function redeemByPartition(bytes32 _partition, uint256 _value, bytes _data)",
+        selector: "0x62eb0068",
+      },
+      { name: "revokeOperator", signature: "function revokeOperator(address _operator)", selector: "0xfad8b32a" },
+      {
+        name: "revokeOperatorByPartition",
+        signature: "function revokeOperatorByPartition(bytes32 _partition, address _operator)",
+        selector: "0x168ecec5",
+      },
+      {
+        name: "transferByPartition",
+        signature:
+          "function transferByPartition(bytes32 _partition, tuple(address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
+        selector: "0x3bc9bcd8",
+      },
+      {
+        name: "triggerAndSyncAll",
+        signature: "function triggerAndSyncAll(bytes32 _partition, address _from, address _to)",
+        selector: "0x6afb79db",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1410TokenHolderSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC1410TokenHolderSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ERC1594Facet: {
@@ -3601,7 +4301,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1594_RESOLVER_KEY",
       value: "0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f",
     },
-    inheritance: ["ERC1594", "IStaticFunctionSelectors"],
+    inheritance: ["ERC1594FacetBase", "Common"],
     methods: [
       {
         name: "canTransfer",
@@ -3639,8 +4339,173 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x2535f762",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1594FacetTimeTravel__factory(signer) : new ERC1594Facet__factory(signer),
+  },
+
+  ERC1594FixedRateFacet: {
+    name: "ERC1594FixedRateFacet",
+    resolverKey: {
+      name: "_ERC1594_FIXED_RATE_RESOLVER_KEY",
+      value: "0x7a8f3e6d2c4b1a9e5f7d8c6b4a2e1f9d7c5b3a1e9f7d5c3b1a9e7f5d3c1b9e7f",
+    },
+    inheritance: ["ERC1594FacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "canTransfer",
+        signature:
+          "function canTransfer(address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+        selector: "0x1badb25c",
+      },
+      {
+        name: "canTransferFrom",
+        signature:
+          "function canTransferFrom(address _from, address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+        selector: "0x122eb575",
+      },
+      { name: "initialize_ERC1594", signature: "function initialize_ERC1594()", selector: "0x9be12cea" },
+      { name: "isIssuable", signature: "function isIssuable() view returns (bool)", selector: "0x2f1cae85" },
+      {
+        name: "issue",
+        signature: "function issue(address _tokenHolder, uint256 _value, bytes _data)",
+        selector: "0xbb3acde9",
+      },
+      { name: "redeem", signature: "function redeem(uint256 _value, bytes _data)", selector: "0xe77c646d" },
+      {
+        name: "redeemFrom",
+        signature: "function redeemFrom(address _tokenHolder, uint256 _value, bytes _data)",
+        selector: "0x9675193c",
+      },
+      {
+        name: "transferFromWithData",
+        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes)",
+        selector: "0xee532f31",
+      },
+      {
+        name: "transferWithData",
+        signature: "function transferWithData(address _to, uint256 _value, bytes)",
+        selector: "0x2535f762",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new ERC1594FixedRateFacetTimeTravel__factory(signer) : new ERC1594FixedRateFacet__factory(signer),
+  },
+
+  ERC1594KpiLinkedRateFacet: {
+    name: "ERC1594KpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC1594_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x1b4e7a9d3f5c2e8a6d4b9f7e5c3a1d8f6e4c2a9d7f5e3c1b8f6d4e2c9a7f5d3e",
+    },
+    inheritance: ["ERC1594FacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "canTransfer",
+        signature:
+          "function canTransfer(address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+        selector: "0x1badb25c",
+      },
+      {
+        name: "canTransferFrom",
+        signature:
+          "function canTransferFrom(address _from, address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+        selector: "0x122eb575",
+      },
+      { name: "initialize_ERC1594", signature: "function initialize_ERC1594()", selector: "0x9be12cea" },
+      { name: "isIssuable", signature: "function isIssuable() view returns (bool)", selector: "0x2f1cae85" },
+      {
+        name: "issue",
+        signature: "function issue(address _tokenHolder, uint256 _value, bytes _data)",
+        selector: "0xbb3acde9",
+      },
+      { name: "redeem", signature: "function redeem(uint256 _value, bytes _data)", selector: "0xe77c646d" },
+      {
+        name: "redeemFrom",
+        signature: "function redeemFrom(address _tokenHolder, uint256 _value, bytes _data)",
+        selector: "0x9675193c",
+      },
+      {
+        name: "transferFromWithData",
+        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes)",
+        selector: "0xee532f31",
+      },
+      {
+        name: "transferWithData",
+        signature: "function transferWithData(address _to, uint256 _value, bytes)",
+        selector: "0x2535f762",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1594KpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC1594KpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC1594SustainabilityPerformanceTargetRateFacet: {
+    name: "ERC1594SustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1594_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x2c5f8a3d6e9b1f4c7a2e5d8b1f4c7a2e5d8b1f4c7a2e5d8b1f4c7a2e5d8b1f4c",
+    },
+    inheritance: ["ERC1594FacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "canTransfer",
+        signature:
+          "function canTransfer(address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+        selector: "0x1badb25c",
+      },
+      {
+        name: "canTransferFrom",
+        signature:
+          "function canTransferFrom(address _from, address _to, uint256 _value, bytes _data) view returns (bool, bytes1, bytes32)",
+        selector: "0x122eb575",
+      },
+      { name: "initialize_ERC1594", signature: "function initialize_ERC1594()", selector: "0x9be12cea" },
+      { name: "isIssuable", signature: "function isIssuable() view returns (bool)", selector: "0x2f1cae85" },
+      {
+        name: "issue",
+        signature: "function issue(address _tokenHolder, uint256 _value, bytes _data)",
+        selector: "0xbb3acde9",
+      },
+      { name: "redeem", signature: "function redeem(uint256 _value, bytes _data)", selector: "0xe77c646d" },
+      {
+        name: "redeemFrom",
+        signature: "function redeemFrom(address _tokenHolder, uint256 _value, bytes _data)",
+        selector: "0x9675193c",
+      },
+      {
+        name: "transferFromWithData",
+        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes)",
+        selector: "0xee532f31",
+      },
+      {
+        name: "transferWithData",
+        signature: "function transferWithData(address _to, uint256 _value, bytes)",
+        selector: "0x2535f762",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC1594SustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ERC1643Facet: {
@@ -3649,7 +4514,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1643_RESOLVER_KEY",
       value: "0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625",
     },
-    inheritance: ["ERC1643", "IStaticFunctionSelectors"],
+    inheritance: ["ERC1643FacetBase", "Common"],
     methods: [
       {
         name: "getAllDocuments",
@@ -3685,9 +4550,165 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "EmptyHASH", signature: "EmptyHASH()", selector: "0x402e72be" },
       { name: "EmptyName", signature: "EmptyName()", selector: "0x2ef13105" },
       { name: "EmptyURI", signature: "EmptyURI()", selector: "0xd07b00d6" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1643FacetTimeTravel__factory(signer) : new ERC1643Facet__factory(signer),
+  },
+
+  ERC1643FixedRateFacet: {
+    name: "ERC1643FixedRateFacet",
+    resolverKey: {
+      name: "_ERC1643_FIXED_RATE_RESOLVER_KEY",
+      value: "0x3d6e9f1c5a8b2e7f4d9c6a3e1f8d5c2a9f6e3d1c8f5e2d9c6f3e1d8c5f2d9c6f",
+    },
+    inheritance: ["ERC1643FacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "getAllDocuments",
+        signature: "function getAllDocuments() view returns (bytes32[])",
+        selector: "0x9fa5f50b",
+      },
+      {
+        name: "getDocument",
+        signature: "function getDocument(bytes32 _name) view returns (string, bytes32, uint256)",
+        selector: "0xb10d6b41",
+      },
+      { name: "removeDocument", signature: "function removeDocument(bytes32 _name)", selector: "0xc3501848" },
+      {
+        name: "setDocument",
+        signature: "function setDocument(bytes32 _name, string _uri, bytes32 _documentHash)",
+        selector: "0x010648ca",
+      },
+    ],
+    events: [
+      {
+        name: "DocumentRemoved",
+        signature: "DocumentRemoved(bytes32,string,bytes32)",
+        topic0: "0x3d9bba27d3e360d8c80645beed7e991454a8271bf6f269a24f7782be0f0d0654",
+      },
+      {
+        name: "DocumentUpdated",
+        signature: "DocumentUpdated(bytes32,string,bytes32)",
+        topic0: "0xb4c22d60cd550a815744f04e3ff5278bf19684565ee00e2b084041b6024bd6f6",
+      },
+    ],
+    errors: [
+      { name: "DocumentDoesNotExist", signature: "DocumentDoesNotExist(bytes32)", selector: "0xc2e54650" },
+      { name: "EmptyHASH", signature: "EmptyHASH()", selector: "0x402e72be" },
+      { name: "EmptyName", signature: "EmptyName()", selector: "0x2ef13105" },
+      { name: "EmptyURI", signature: "EmptyURI()", selector: "0xd07b00d6" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new ERC1643FixedRateFacetTimeTravel__factory(signer) : new ERC1643FixedRateFacet__factory(signer),
+  },
+
+  ERC1643KpiLinkedRateFacet: {
+    name: "ERC1643KpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC1643_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x4e7f1a2d5c8e3f6a9d2e5f8c1d4a7e2f5c8d1e4f7c2e5d8f1e4c7d2f5e8d1f4e",
+    },
+    inheritance: ["ERC1643FacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "getAllDocuments",
+        signature: "function getAllDocuments() view returns (bytes32[])",
+        selector: "0x9fa5f50b",
+      },
+      {
+        name: "getDocument",
+        signature: "function getDocument(bytes32 _name) view returns (string, bytes32, uint256)",
+        selector: "0xb10d6b41",
+      },
+      { name: "removeDocument", signature: "function removeDocument(bytes32 _name)", selector: "0xc3501848" },
+      {
+        name: "setDocument",
+        signature: "function setDocument(bytes32 _name, string _uri, bytes32 _documentHash)",
+        selector: "0x010648ca",
+      },
+    ],
+    events: [
+      {
+        name: "DocumentRemoved",
+        signature: "DocumentRemoved(bytes32,string,bytes32)",
+        topic0: "0x3d9bba27d3e360d8c80645beed7e991454a8271bf6f269a24f7782be0f0d0654",
+      },
+      {
+        name: "DocumentUpdated",
+        signature: "DocumentUpdated(bytes32,string,bytes32)",
+        topic0: "0xb4c22d60cd550a815744f04e3ff5278bf19684565ee00e2b084041b6024bd6f6",
+      },
+    ],
+    errors: [
+      { name: "DocumentDoesNotExist", signature: "DocumentDoesNotExist(bytes32)", selector: "0xc2e54650" },
+      { name: "EmptyHASH", signature: "EmptyHASH()", selector: "0x402e72be" },
+      { name: "EmptyName", signature: "EmptyName()", selector: "0x2ef13105" },
+      { name: "EmptyURI", signature: "EmptyURI()", selector: "0xd07b00d6" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1643KpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC1643KpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC1643SustainabilityPerformanceTargetRateFacet: {
+    name: "ERC1643SustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1643_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x5f8d2a3e6c9f1d4e7a2f5c8d1e4f7c2e5d8f1e4c7d2f5e8d1f4c7e2d5f8d1f4c",
+    },
+    inheritance: ["ERC1643FacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "getAllDocuments",
+        signature: "function getAllDocuments() view returns (bytes32[])",
+        selector: "0x9fa5f50b",
+      },
+      {
+        name: "getDocument",
+        signature: "function getDocument(bytes32 _name) view returns (string, bytes32, uint256)",
+        selector: "0xb10d6b41",
+      },
+      { name: "removeDocument", signature: "function removeDocument(bytes32 _name)", selector: "0xc3501848" },
+      {
+        name: "setDocument",
+        signature: "function setDocument(bytes32 _name, string _uri, bytes32 _documentHash)",
+        selector: "0x010648ca",
+      },
+    ],
+    events: [
+      {
+        name: "DocumentRemoved",
+        signature: "DocumentRemoved(bytes32,string,bytes32)",
+        topic0: "0x3d9bba27d3e360d8c80645beed7e991454a8271bf6f269a24f7782be0f0d0654",
+      },
+      {
+        name: "DocumentUpdated",
+        signature: "DocumentUpdated(bytes32,string,bytes32)",
+        topic0: "0xb4c22d60cd550a815744f04e3ff5278bf19684565ee00e2b084041b6024bd6f6",
+      },
+    ],
+    errors: [
+      { name: "DocumentDoesNotExist", signature: "DocumentDoesNotExist(bytes32)", selector: "0xc2e54650" },
+      { name: "EmptyHASH", signature: "EmptyHASH()", selector: "0x402e72be" },
+      { name: "EmptyName", signature: "EmptyName()", selector: "0x2ef13105" },
+      { name: "EmptyURI", signature: "EmptyURI()", selector: "0xd07b00d6" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1643SustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC1643SustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ERC1644Facet: {
@@ -3696,7 +4717,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1644_RESOLVER_KEY",
       value: "0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d",
     },
-    inheritance: ["ERC1644", "IStaticFunctionSelectors"],
+    inheritance: ["ERC1644FacetBase", "Common"],
     methods: [
       {
         name: "controllerRedeem",
@@ -3717,8 +4738,122 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1644FacetTimeTravel__factory(signer) : new ERC1644Facet__factory(signer),
+  },
+
+  ERC1644FixedRateFacet: {
+    name: "ERC1644FixedRateFacet",
+    resolverKey: {
+      name: "_ERC1644_FIXED_RATE_RESOLVER_KEY",
+      value: "0x6f9e3d1c8a5f2e9d6c3f1e8d5c2f9e6d3f1e8c5f2d9e6c3f1d8e5c2f9d6e3f1d",
+    },
+    inheritance: ["ERC1644FacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "controllerRedeem",
+        signature: "function controllerRedeem(address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0x2bc6acc3",
+      },
+      {
+        name: "controllerTransfer",
+        signature:
+          "function controllerTransfer(address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0xf282527a",
+      },
+      { name: "finalizeControllable", signature: "function finalizeControllable()", selector: "0xa213934f" },
+      {
+        name: "initialize_ERC1644",
+        signature: "function initialize_ERC1644(bool _controllable)",
+        selector: "0xaa4ea38e",
+      },
+      { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new ERC1644FixedRateFacetTimeTravel__factory(signer) : new ERC1644FixedRateFacet__factory(signer),
+  },
+
+  ERC1644KpiLinkedRateFacet: {
+    name: "ERC1644KpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC1644_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x7a1f4e2d5c8f3e6d9c2f5e8d1f4c7e2d5f8c1f4e7d2e5f8c1e4d7c2f5d8e1f4c",
+    },
+    inheritance: ["ERC1644FacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "controllerRedeem",
+        signature: "function controllerRedeem(address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0x2bc6acc3",
+      },
+      {
+        name: "controllerTransfer",
+        signature:
+          "function controllerTransfer(address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0xf282527a",
+      },
+      { name: "finalizeControllable", signature: "function finalizeControllable()", selector: "0xa213934f" },
+      {
+        name: "initialize_ERC1644",
+        signature: "function initialize_ERC1644(bool _controllable)",
+        selector: "0xaa4ea38e",
+      },
+      { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1644KpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC1644KpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC1644SustainabilityPerformanceTargetRateFacet: {
+    name: "ERC1644SustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1644_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x8b2f5e3d6f9c2e5d8f1e4c7d2e5f8d1f4c7e2d5f8d1f4c7e2d5f8d1f4c7e2d5f",
+    },
+    inheritance: ["ERC1644FacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "controllerRedeem",
+        signature: "function controllerRedeem(address _tokenHolder, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0x2bc6acc3",
+      },
+      {
+        name: "controllerTransfer",
+        signature:
+          "function controllerTransfer(address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
+        selector: "0xf282527a",
+      },
+      { name: "finalizeControllable", signature: "function finalizeControllable()", selector: "0xa213934f" },
+      {
+        name: "initialize_ERC1644",
+        signature: "function initialize_ERC1644(bool _controllable)",
+        selector: "0xaa4ea38e",
+      },
+      { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC1644SustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC1644SustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ERC20Facet: {
@@ -4392,9 +5527,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     name: "ERC3643BatchFacet",
     resolverKey: {
       name: "_ERC3643_BATCH_RESOLVER_KEY",
-      value: "0x9e671b494908a7523ee4e531ae7b7076b84f1c675d31346a9697f0ff4695f249",
+      value: "0x00332311d9f0c311b31b87399043a90feb10341fcbb4d7f4ed6e3c0072a3c392",
     },
-    inheritance: ["ERC3643Batch", "IStaticFunctionSelectors"],
+    inheritance: ["ERC3643BatchFacetBase", "Common"],
     methods: [
       {
         name: "batchBurn",
@@ -4417,17 +5552,139 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x88d695b2",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC3643BatchFacetTimeTravel__factory(signer) : new ERC3643BatchFacet__factory(signer),
+  },
+
+  ERC3643BatchFixedRateFacet: {
+    name: "ERC3643BatchFixedRateFacet",
+    resolverKey: {
+      name: "_ERC3643_BATCH_FIXED_RATE_RESOLVER_KEY",
+      value: "0x3563ac36f573b2e288846d3437686b6a5137a7c9b5cbcd027816db63e07d4138",
+    },
+    inheritance: ["ERC3643BatchFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "batchBurn",
+        signature: "function batchBurn(address[] _userAddresses, uint256[] _amounts)",
+        selector: "0x4a6cc677",
+      },
+      {
+        name: "batchForcedTransfer",
+        signature: "function batchForcedTransfer(address[] _fromList, address[] _toList, uint256[] _amounts)",
+        selector: "0x42a47abc",
+      },
+      {
+        name: "batchMint",
+        signature: "function batchMint(address[] _toList, uint256[] _amounts)",
+        selector: "0x68573107",
+      },
+      {
+        name: "batchTransfer",
+        signature: "function batchTransfer(address[] _toList, uint256[] _amounts)",
+        selector: "0x88d695b2",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643BatchFixedRateFacetTimeTravel__factory(signer)
+        : new ERC3643BatchFixedRateFacet__factory(signer),
+  },
+
+  ERC3643BatchKpiLinkedRateFacet: {
+    name: "ERC3643BatchKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC3643_BATCH_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xdf3ace3e8d3a434ee6c69da03060d81e1c8c217c16fad43a2819c0bc545253ae",
+    },
+    inheritance: ["ERC3643BatchFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "batchBurn",
+        signature: "function batchBurn(address[] _userAddresses, uint256[] _amounts)",
+        selector: "0x4a6cc677",
+      },
+      {
+        name: "batchForcedTransfer",
+        signature: "function batchForcedTransfer(address[] _fromList, address[] _toList, uint256[] _amounts)",
+        selector: "0x42a47abc",
+      },
+      {
+        name: "batchMint",
+        signature: "function batchMint(address[] _toList, uint256[] _amounts)",
+        selector: "0x68573107",
+      },
+      {
+        name: "batchTransfer",
+        signature: "function batchTransfer(address[] _toList, uint256[] _amounts)",
+        selector: "0x88d695b2",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643BatchKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC3643BatchKpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC3643BatchSustainabilityPerformanceTargetRateFacet: {
+    name: "ERC3643BatchSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC3643_BATCH_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x500c4c5bff9db733228f1df9b6e818bf8fab883422d3fbe971c036b513e983d9",
+    },
+    inheritance: ["ERC3643BatchFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "batchBurn",
+        signature: "function batchBurn(address[] _userAddresses, uint256[] _amounts)",
+        selector: "0x4a6cc677",
+      },
+      {
+        name: "batchForcedTransfer",
+        signature: "function batchForcedTransfer(address[] _fromList, address[] _toList, uint256[] _amounts)",
+        selector: "0x42a47abc",
+      },
+      {
+        name: "batchMint",
+        signature: "function batchMint(address[] _toList, uint256[] _amounts)",
+        selector: "0x68573107",
+      },
+      {
+        name: "batchTransfer",
+        signature: "function batchTransfer(address[] _toList, uint256[] _amounts)",
+        selector: "0x88d695b2",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643BatchSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC3643BatchSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ERC3643ManagementFacet: {
     name: "ERC3643ManagementFacet",
     resolverKey: {
       name: "_ERC3643_MANAGEMENT_RESOLVER_KEY",
-      value: "0x06d7f1ffc912a9e44e5d742aa1c1eff596d0fabf91a1d0fb1c3ac0fba01f1773",
+      value: "0xae7b7d0da6ac02e802a8d85aa821dd5cb84e8448836471680f744f64b678a073",
     },
-    inheritance: ["IStaticFunctionSelectors", "ERC3643Management"],
+    inheritance: ["ERC3643ManagementFacetBase", "Common"],
     methods: [
       { name: "addAgent", signature: "function addAgent(address _agent)", selector: "0x84e79842" },
       {
@@ -4484,6 +5741,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
       { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
       { name: "ComplianceNotAllowed", signature: "ComplianceNotAllowed()", selector: "0x66eb1b54" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "IdentityRegistryCallFailed", signature: "IdentityRegistryCallFailed()", selector: "0xad87849e" },
       {
         name: "InputAmountsArrayLengthMismatch",
@@ -4499,13 +5757,257 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         : new ERC3643ManagementFacet__factory(signer),
   },
 
+  ERC3643ManagementFixedRateFacet: {
+    name: "ERC3643ManagementFixedRateFacet",
+    resolverKey: {
+      name: "_ERC3643_MANAGEMENT_FIXED_RATE_RESOLVER_KEY",
+      value: "0xb82ec3e8b1d44871bbfe25257f4e57b7d9778bc578af2f0ce9ef218f6b897797",
+    },
+    inheritance: ["ERC3643ManagementFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      { name: "addAgent", signature: "function addAgent(address _agent)", selector: "0x84e79842" },
+      {
+        name: "initialize_ERC3643",
+        signature: "function initialize_ERC3643(address _compliance, address _identityRegistry)",
+        selector: "0xc047bb6c",
+      },
+      {
+        name: "recoveryAddress",
+        signature:
+          "function recoveryAddress(address _lostWallet, address _newWallet, address _investorOnchainID) returns (bool success_)",
+        selector: "0x9285948a",
+      },
+      { name: "removeAgent", signature: "function removeAgent(address _agent)", selector: "0x97a6278e" },
+      { name: "setCompliance", signature: "function setCompliance(address _compliance)", selector: "0xf8981789" },
+      {
+        name: "setIdentityRegistry",
+        signature: "function setIdentityRegistry(address _identityRegistry)",
+        selector: "0xcbf3f861",
+      },
+      { name: "setName", signature: "function setName(string _name)", selector: "0xc47f0027" },
+      { name: "setOnchainID", signature: "function setOnchainID(address _onchainID)", selector: "0x3d1ddc5b" },
+      { name: "setSymbol", signature: "function setSymbol(string _symbol)", selector: "0xb84c8246" },
+    ],
+    events: [
+      {
+        name: "AgentAdded",
+        signature: "AgentAdded(address)",
+        topic0: "0xf68e73cec97f2d70aa641fb26e87a4383686e2efacb648f2165aeb02ac562ec5",
+      },
+      {
+        name: "AgentRemoved",
+        signature: "AgentRemoved(address)",
+        topic0: "0xed9c8ad8d5a0a66898ea49d2956929c93ae2e8bd50281b2ed897c5d1a6737e0b",
+      },
+      {
+        name: "IdentityRegistryAdded",
+        signature: "IdentityRegistryAdded(address)",
+        topic0: "0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c",
+      },
+      {
+        name: "RecoverySuccess",
+        signature: "RecoverySuccess(address,address,address)",
+        topic0: "0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0",
+      },
+      {
+        name: "UpdatedTokenInformation",
+        signature: "UpdatedTokenInformation(string,string,uint8,string,address)",
+        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
+      },
+    ],
+    errors: [
+      { name: "AddressNotVerified", signature: "AddressNotVerified()", selector: "0x209d2853" },
+      { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
+      { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
+      { name: "ComplianceNotAllowed", signature: "ComplianceNotAllowed()", selector: "0x66eb1b54" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "IdentityRegistryCallFailed", signature: "IdentityRegistryCallFailed()", selector: "0xad87849e" },
+      {
+        name: "InputAmountsArrayLengthMismatch",
+        signature: "InputAmountsArrayLengthMismatch()",
+        selector: "0x64f13710",
+      },
+      { name: "InputBoolArrayLengthMismatch", signature: "InputBoolArrayLengthMismatch()", selector: "0x07ac0eb9" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+      { name: "WalletRecovered", signature: "WalletRecovered()", selector: "0xf9f9bcf9" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643ManagementFixedRateFacetTimeTravel__factory(signer)
+        : new ERC3643ManagementFixedRateFacet__factory(signer),
+  },
+
+  ERC3643ManagementKpiLinkedRateFacet: {
+    name: "ERC3643ManagementKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC3643_MANAGEMENT_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x649facd691e27202b46bb9e328ca96c6f6dc0aeefdd6cfc15707ee162b7d5103",
+    },
+    inheritance: ["ERC3643ManagementFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      { name: "addAgent", signature: "function addAgent(address _agent)", selector: "0x84e79842" },
+      {
+        name: "initialize_ERC3643",
+        signature: "function initialize_ERC3643(address _compliance, address _identityRegistry)",
+        selector: "0xc047bb6c",
+      },
+      {
+        name: "recoveryAddress",
+        signature:
+          "function recoveryAddress(address _lostWallet, address _newWallet, address _investorOnchainID) returns (bool success_)",
+        selector: "0x9285948a",
+      },
+      { name: "removeAgent", signature: "function removeAgent(address _agent)", selector: "0x97a6278e" },
+      { name: "setCompliance", signature: "function setCompliance(address _compliance)", selector: "0xf8981789" },
+      {
+        name: "setIdentityRegistry",
+        signature: "function setIdentityRegistry(address _identityRegistry)",
+        selector: "0xcbf3f861",
+      },
+      { name: "setName", signature: "function setName(string _name)", selector: "0xc47f0027" },
+      { name: "setOnchainID", signature: "function setOnchainID(address _onchainID)", selector: "0x3d1ddc5b" },
+      { name: "setSymbol", signature: "function setSymbol(string _symbol)", selector: "0xb84c8246" },
+    ],
+    events: [
+      {
+        name: "AgentAdded",
+        signature: "AgentAdded(address)",
+        topic0: "0xf68e73cec97f2d70aa641fb26e87a4383686e2efacb648f2165aeb02ac562ec5",
+      },
+      {
+        name: "AgentRemoved",
+        signature: "AgentRemoved(address)",
+        topic0: "0xed9c8ad8d5a0a66898ea49d2956929c93ae2e8bd50281b2ed897c5d1a6737e0b",
+      },
+      {
+        name: "IdentityRegistryAdded",
+        signature: "IdentityRegistryAdded(address)",
+        topic0: "0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c",
+      },
+      {
+        name: "RecoverySuccess",
+        signature: "RecoverySuccess(address,address,address)",
+        topic0: "0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0",
+      },
+      {
+        name: "UpdatedTokenInformation",
+        signature: "UpdatedTokenInformation(string,string,uint8,string,address)",
+        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
+      },
+    ],
+    errors: [
+      { name: "AddressNotVerified", signature: "AddressNotVerified()", selector: "0x209d2853" },
+      { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
+      { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
+      { name: "ComplianceNotAllowed", signature: "ComplianceNotAllowed()", selector: "0x66eb1b54" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "IdentityRegistryCallFailed", signature: "IdentityRegistryCallFailed()", selector: "0xad87849e" },
+      {
+        name: "InputAmountsArrayLengthMismatch",
+        signature: "InputAmountsArrayLengthMismatch()",
+        selector: "0x64f13710",
+      },
+      { name: "InputBoolArrayLengthMismatch", signature: "InputBoolArrayLengthMismatch()", selector: "0x07ac0eb9" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "WalletRecovered", signature: "WalletRecovered()", selector: "0xf9f9bcf9" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643ManagementKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC3643ManagementKpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC3643ManagementSustainabilityPerformanceTargetRateFacet: {
+    name: "ERC3643ManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC3643_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x324a20f20a55098c207cd0bc42498561962995b82918d6a9697320c42c5b11fa",
+    },
+    inheritance: ["ERC3643ManagementFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "addAgent", signature: "function addAgent(address _agent)", selector: "0x84e79842" },
+      {
+        name: "initialize_ERC3643",
+        signature: "function initialize_ERC3643(address _compliance, address _identityRegistry)",
+        selector: "0xc047bb6c",
+      },
+      {
+        name: "recoveryAddress",
+        signature:
+          "function recoveryAddress(address _lostWallet, address _newWallet, address _investorOnchainID) returns (bool success_)",
+        selector: "0x9285948a",
+      },
+      { name: "removeAgent", signature: "function removeAgent(address _agent)", selector: "0x97a6278e" },
+      { name: "setCompliance", signature: "function setCompliance(address _compliance)", selector: "0xf8981789" },
+      {
+        name: "setIdentityRegistry",
+        signature: "function setIdentityRegistry(address _identityRegistry)",
+        selector: "0xcbf3f861",
+      },
+      { name: "setName", signature: "function setName(string _name)", selector: "0xc47f0027" },
+      { name: "setOnchainID", signature: "function setOnchainID(address _onchainID)", selector: "0x3d1ddc5b" },
+      { name: "setSymbol", signature: "function setSymbol(string _symbol)", selector: "0xb84c8246" },
+    ],
+    events: [
+      {
+        name: "AgentAdded",
+        signature: "AgentAdded(address)",
+        topic0: "0xf68e73cec97f2d70aa641fb26e87a4383686e2efacb648f2165aeb02ac562ec5",
+      },
+      {
+        name: "AgentRemoved",
+        signature: "AgentRemoved(address)",
+        topic0: "0xed9c8ad8d5a0a66898ea49d2956929c93ae2e8bd50281b2ed897c5d1a6737e0b",
+      },
+      {
+        name: "IdentityRegistryAdded",
+        signature: "IdentityRegistryAdded(address)",
+        topic0: "0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c",
+      },
+      {
+        name: "RecoverySuccess",
+        signature: "RecoverySuccess(address,address,address)",
+        topic0: "0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0",
+      },
+      {
+        name: "UpdatedTokenInformation",
+        signature: "UpdatedTokenInformation(string,string,uint8,string,address)",
+        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
+      },
+    ],
+    errors: [
+      { name: "AddressNotVerified", signature: "AddressNotVerified()", selector: "0x209d2853" },
+      { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
+      { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
+      { name: "ComplianceNotAllowed", signature: "ComplianceNotAllowed()", selector: "0x66eb1b54" },
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "IdentityRegistryCallFailed", signature: "IdentityRegistryCallFailed()", selector: "0xad87849e" },
+      {
+        name: "InputAmountsArrayLengthMismatch",
+        signature: "InputAmountsArrayLengthMismatch()",
+        selector: "0x64f13710",
+      },
+      { name: "InputBoolArrayLengthMismatch", signature: "InputBoolArrayLengthMismatch()", selector: "0x07ac0eb9" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+      { name: "WalletRecovered", signature: "WalletRecovered()", selector: "0xf9f9bcf9" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643ManagementSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC3643ManagementSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
   ERC3643OperationsFacet: {
     name: "ERC3643OperationsFacet",
     resolverKey: {
       name: "_ERC3643_OPERATIONS_RESOLVER_KEY",
-      value: "0x39de33e56c92afe3cd7ece00d0ff8a0df512878690719e48c17d5b54604d2de2",
+      value: "0xe30b6b8e9e62fb8f017c940c7ffac12709f7ef6ae90beac5570fab25c7384e9c",
     },
-    inheritance: ["IStaticFunctionSelectors", "ERC3643Operations"],
+    inheritance: ["ERC3643OperationsFacetBase", "Common"],
     methods: [
       { name: "burn", signature: "function burn(address _userAddress, uint256 _amount)", selector: "0x9dc29fac" },
       {
@@ -4515,19 +6017,102 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "mint", signature: "function mint(address _to, uint256 _amount)", selector: "0x40c10f19" },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC3643OperationsFacetTimeTravel__factory(signer)
         : new ERC3643OperationsFacet__factory(signer),
   },
 
+  ERC3643OperationsFixedRateFacet: {
+    name: "ERC3643OperationsFixedRateFacet",
+    resolverKey: {
+      name: "_ERC3643_OPERATIONS_FIXED_RATE_RESOLVER_KEY",
+      value: "0x6524c4b11c24bcfff0472462572cdfbe5c671cad2df1ac54402e8a7b4dc3ee02",
+    },
+    inheritance: ["ERC3643OperationsFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      { name: "burn", signature: "function burn(address _userAddress, uint256 _amount)", selector: "0x9dc29fac" },
+      {
+        name: "forcedTransfer",
+        signature: "function forcedTransfer(address _from, address _to, uint256 _amount) returns (bool)",
+        selector: "0x9fc1d0e7",
+      },
+      { name: "mint", signature: "function mint(address _to, uint256 _amount)", selector: "0x40c10f19" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643OperationsFixedRateFacetTimeTravel__factory(signer)
+        : new ERC3643OperationsFixedRateFacet__factory(signer),
+  },
+
+  ERC3643OperationsKpiLinkedRateFacet: {
+    name: "ERC3643OperationsKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC3643_OPERATIONS_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x87b7a50a7578f2499b459e665b6b7b809ac635280a2157d21fc5de0fc4b54715",
+    },
+    inheritance: ["ERC3643OperationsFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      { name: "burn", signature: "function burn(address _userAddress, uint256 _amount)", selector: "0x9dc29fac" },
+      {
+        name: "forcedTransfer",
+        signature: "function forcedTransfer(address _from, address _to, uint256 _amount) returns (bool)",
+        selector: "0x9fc1d0e7",
+      },
+      { name: "mint", signature: "function mint(address _to, uint256 _amount)", selector: "0x40c10f19" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643OperationsKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC3643OperationsKpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC3643OperationsSustainabilityPerformanceTargetRateFacet: {
+    name: "ERC3643OperationsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC3643_OPERATIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xbe85d38775742687362efc4fc0ffed08044614079fc51bbf7b0f29e11d3ffafa",
+    },
+    inheritance: ["ERC3643OperationsFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "burn", signature: "function burn(address _userAddress, uint256 _amount)", selector: "0x9dc29fac" },
+      {
+        name: "forcedTransfer",
+        signature: "function forcedTransfer(address _from, address _to, uint256 _amount) returns (bool)",
+        selector: "0x9fc1d0e7",
+      },
+      { name: "mint", signature: "function mint(address _to, uint256 _amount)", selector: "0x40c10f19" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643OperationsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC3643OperationsSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
   ERC3643ReadFacet: {
     name: "ERC3643ReadFacet",
     resolverKey: {
       name: "_ERC3643_READ_RESOLVER_KEY",
-      value: "0xf1a7f92f11da0b048b6417201459d4e1eaef0e112e0d58d5bd6ee4481e5394c7",
+      value: "0x7743c4e9ff26ef34c3c482d2c12dabe076035eb44bf1c736722f04c33c20ef6a",
     },
-    inheritance: ["IStaticFunctionSelectors", "ERC3643Read"],
+    inheritance: ["ERC3643ReadFacetBase", "Common"],
     methods: [
       { name: "compliance", signature: "function compliance() view returns (address)", selector: "0x6290865d" },
       {
@@ -4544,8 +6129,112 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "onchainID", signature: "function onchainID() view returns (address)", selector: "0xaba63705" },
       { name: "version", signature: "function version() view returns (string)", selector: "0x54fd4d50" },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC3643ReadFacetTimeTravel__factory(signer) : new ERC3643ReadFacet__factory(signer),
+  },
+
+  ERC3643ReadFixedRateFacet: {
+    name: "ERC3643ReadFixedRateFacet",
+    resolverKey: {
+      name: "_ERC3643_READ_FIXED_RATE_RESOLVER_KEY",
+      value: "0x53569c2059b40a4ccb6382b2180607da114ff92bfa263d7489ec7face7c4cc1f",
+    },
+    inheritance: ["ERC3643ReadFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      { name: "compliance", signature: "function compliance() view returns (address)", selector: "0x6290865d" },
+      {
+        name: "identityRegistry",
+        signature: "function identityRegistry() view returns (address)",
+        selector: "0x134e18f4",
+      },
+      {
+        name: "isAddressRecovered",
+        signature: "function isAddressRecovered(address _wallet) view returns (bool)",
+        selector: "0x1b997ec2",
+      },
+      { name: "isAgent", signature: "function isAgent(address _agent) view returns (bool)", selector: "0x1ffbb064" },
+      { name: "onchainID", signature: "function onchainID() view returns (address)", selector: "0xaba63705" },
+      { name: "version", signature: "function version() view returns (string)", selector: "0x54fd4d50" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643ReadFixedRateFacetTimeTravel__factory(signer)
+        : new ERC3643ReadFixedRateFacet__factory(signer),
+  },
+
+  ERC3643ReadKpiLinkedRateFacet: {
+    name: "ERC3643ReadKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_ERC3643_READ_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x68ba78621a8627653774f3b9800b77ac34bd334ecc2dc4d933f9e30d6197194f",
+    },
+    inheritance: ["ERC3643ReadFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      { name: "compliance", signature: "function compliance() view returns (address)", selector: "0x6290865d" },
+      {
+        name: "identityRegistry",
+        signature: "function identityRegistry() view returns (address)",
+        selector: "0x134e18f4",
+      },
+      {
+        name: "isAddressRecovered",
+        signature: "function isAddressRecovered(address _wallet) view returns (bool)",
+        selector: "0x1b997ec2",
+      },
+      { name: "isAgent", signature: "function isAgent(address _agent) view returns (bool)", selector: "0x1ffbb064" },
+      { name: "onchainID", signature: "function onchainID() view returns (address)", selector: "0xaba63705" },
+      { name: "version", signature: "function version() view returns (string)", selector: "0x54fd4d50" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643ReadKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ERC3643ReadKpiLinkedRateFacet__factory(signer),
+  },
+
+  ERC3643ReadSustainabilityPerformanceTargetRateFacet: {
+    name: "ERC3643ReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC3643_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x2fc56e8abd44d0dc70cf8876ea454caab82a906ec6333516c1feb4de9b4cb4f8",
+    },
+    inheritance: ["ERC3643ReadFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "compliance", signature: "function compliance() view returns (address)", selector: "0x6290865d" },
+      {
+        name: "identityRegistry",
+        signature: "function identityRegistry() view returns (address)",
+        selector: "0x134e18f4",
+      },
+      {
+        name: "isAddressRecovered",
+        signature: "function isAddressRecovered(address _wallet) view returns (bool)",
+        selector: "0x1b997ec2",
+      },
+      { name: "isAgent", signature: "function isAgent(address _agent) view returns (bool)", selector: "0x1ffbb064" },
+      { name: "onchainID", signature: "function onchainID() view returns (address)", selector: "0xaba63705" },
+      { name: "version", signature: "function version() view returns (string)", selector: "0x54fd4d50" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ERC3643ReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ERC3643ReadSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ExternalControlListManagementFacet: {
@@ -5962,7 +7651,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 96 as const;
+export const TOTAL_FACETS = 129 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

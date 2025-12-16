@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { BasicTransferInfo } from "../../interfaces/ERC1400/IERC1410.sol";
 import { IERC1410TokenHolder } from "../../interfaces/ERC1400/IERC1410TokenHolder.sol";
-import { Common } from "../../../layer_0/common/Common.sol";
+import { Internals } from "../../../layer_0/Internals.sol";
 
 /**
  * @title ERC1410TokenHolder
@@ -11,7 +11,7 @@ import { Common } from "../../../layer_0/common/Common.sol";
  * @dev Facet containing all transfer-related operations for ERC1410 functionality
  * @dev These methods can by called by any users (token holders).
  */
-abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Common {
+abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Internals {
     function transferByPartition(
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,

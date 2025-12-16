@@ -44,6 +44,8 @@ import {
     ScheduledTasksDataStorage
 } from "contracts/layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IssueData, OperatorTransferData, BasicTransferInfo } from "contracts/layer_1/interfaces/ERC1400/IERC1410.sol";
+import { IIdentityRegistry } from "contracts/layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
+import { ICompliance } from "contracts/layer_1/interfaces/ERC3643/ICompliance.sol";
 
 abstract contract Internals is Modifiers {
     function _CLOCK_MODE() internal view virtual returns (string memory);
@@ -1164,7 +1166,11 @@ abstract contract Internals is Modifiers {
     function _reclaimHoldByPartition(
         HoldIdentifier calldata _holdIdentifier
     ) internal virtual returns (bool success_, uint256 amount_);
-    function _recoveryAddress(address _lostWallet, address _newWallet) internal virtual returns (bool);
+    function _recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    ) internal virtual returns (bool);
     function _redeem(uint256 _value, bytes memory _data) internal virtual;
     function _redeemByPartition(
         bytes32 _partition,
@@ -1480,4 +1486,20 @@ abstract contract Internals is Modifiers {
     function _initialize_ERC1410(bool _multiPartition) internal virtual;
 
     function _isERC1410Initialized() internal view virtual returns (bool);
+
+    function _isERC1594Initialized() internal view virtual returns (bool);
+
+    function _initialize_ERC1644(bool _controllable) internal virtual;
+
+    function _isERC1644Initialized() internal view virtual returns (bool);
+
+    function _getIdentityRegistry() internal view virtual returns (IIdentityRegistry);
+
+    function _getCompliance() internal view virtual returns (ICompliance);
+
+    function _setName(string calldata _name) internal virtual;
+
+    function _setSymbol(string calldata _symbol) internal virtual;
+
+    function _setOnchainID(address _onchainID) internal virtual;
 }
