@@ -74,6 +74,12 @@
 
 - c62eb6e: Fix base implementation in TotalBalanceStorageWrapper
 
+## 1.17.1
+
+### Patch Changes
+
+- Update publishing workflows to enable non production with provenance publishing
+
 ## 1.17.0
 
 ### Minor Changes
