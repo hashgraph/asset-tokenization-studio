@@ -35,11 +35,11 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
     }
 
     function _setKpiLinkedInterestRate(uint256 _couponID) internal override {
-        IBondRead.Coupon memory coupon = _getCoupon(_couponID).coupon;
+        /*IBondRead.Coupon memory coupon = _getCoupon(_couponID).coupon;
 
         (uint256 rate, uint8 rateDecimals) = _calculateKpiLinkedInterestRate(_couponID, coupon);
 
-        _updateCouponRate(_couponID, coupon, rate, rateDecimals);
+        _updateCouponRate(_couponID, coupon, rate, rateDecimals);*/
     }
 
     function _getCoupon(
@@ -58,7 +58,8 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
         uint256 _couponID,
         IBondRead.Coupon memory _coupon
     ) internal view override returns (uint256 rate_, uint8 rateDecimals) {
-        KpiLinkedRateDataStorage memory kpiLinkedRateStorage = _kpiLinkedRateStorage();
+        return (0, 0);
+        /*KpiLinkedRateDataStorage memory kpiLinkedRateStorage = _kpiLinkedRateStorage();
 
         if (_coupon.fixingDate < kpiLinkedRateStorage.startPeriod) {
             return (kpiLinkedRateStorage.startRate, kpiLinkedRateStorage.rateDecimals);
@@ -119,10 +120,10 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
                 (((kpiLinkedRateStorage.maxRate - kpiLinkedRateStorage.baseRate) * impactDeltaRate) / factor);
         }
 
-        return (rate, kpiLinkedRateStorage.rateDecimals);
+        return (rate, kpiLinkedRateStorage.rateDecimals);*/
     }
 
-    function _previousRate(uint256 _couponID) internal view returns (uint256 rate_, uint8 rateDecimals_) {
+    /*function _previousRate(uint256 _couponID) internal view returns (uint256 rate_, uint8 rateDecimals_) {
         uint256 previousCouponId = _getPreviousCouponInOrderedList(_couponID);
 
         if (previousCouponId == 0) {
@@ -135,5 +136,5 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
             return _calculateKpiLinkedInterestRate(previousCouponId, previousCoupon);
         }
         return (previousCoupon.rate, previousCoupon.rateDecimals);
-    }
+    }*/
 }

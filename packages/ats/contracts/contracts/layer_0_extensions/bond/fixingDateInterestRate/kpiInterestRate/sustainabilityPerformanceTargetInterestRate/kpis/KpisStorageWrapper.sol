@@ -89,9 +89,9 @@ abstract contract KpisStorageWrapper is
     function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, BondStorageWrapper) {
         super._addToCouponsOrderedList(_couponID);
 
-        uint256 lastFixingDate = _getCoupon(_couponID).coupon.fixingDate;
+        //uint256 lastFixingDate = _getCoupon(_couponID).coupon.fixingDate;
 
-        if (lastFixingDate > _kpisDataStorage().minDate) _kpisDataStorage().minDate = lastFixingDate;
+        //if (lastFixingDate > _kpisDataStorage().minDate) _kpisDataStorage().minDate = lastFixingDate;
     }
 
     function _getLatestKpiData(

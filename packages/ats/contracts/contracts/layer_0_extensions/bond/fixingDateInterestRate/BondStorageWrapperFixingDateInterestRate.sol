@@ -37,7 +37,7 @@ abstract contract BondStorageWrapperFixingDateInterestRate is Common {
     ) internal view virtual returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
         registeredCoupon_ = super._getCoupon(_couponID);
 
-        if (registeredCoupon_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return registeredCoupon_;
+        /*if (registeredCoupon_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return registeredCoupon_;
 
         if (registeredCoupon_.coupon.fixingDate > _blockTimestamp()) return registeredCoupon_;
 
@@ -45,6 +45,6 @@ abstract contract BondStorageWrapperFixingDateInterestRate is Common {
             _couponID,
             registeredCoupon_.coupon
         );
-        registeredCoupon_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
+        registeredCoupon_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;*/
     }
 }

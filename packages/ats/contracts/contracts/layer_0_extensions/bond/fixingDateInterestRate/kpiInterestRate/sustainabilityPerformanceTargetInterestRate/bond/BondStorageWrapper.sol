@@ -34,11 +34,11 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
     }
 
     function _setSustainabilityPerformanceTargetInterestRate(uint256 _couponID) internal override {
-        IBondRead.Coupon memory coupon = _getCoupon(_couponID).coupon;
+        /*IBondRead.Coupon memory coupon = _getCoupon(_couponID).coupon;
 
         (uint256 rate, uint8 rateDecimals) = _calculateSustainabilityPerformanceTargetInterestRate(_couponID, coupon);
 
-        _updateCouponRate(_couponID, coupon, rate, rateDecimals);
+        _updateCouponRate(_couponID, coupon, rate, rateDecimals);*/
     }
 
     function _getCoupon(
@@ -57,7 +57,8 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
         uint256 _couponID,
         IBondRead.Coupon memory _coupon
     ) internal view override returns (uint256 rate_, uint8 rateDecimals_) {
-        SustainabilityPerformanceTargetRateDataStorage
+        return (0, 0);
+        /*SustainabilityPerformanceTargetRateDataStorage
             storage sustainabilityPerformanceTargetRateStorage = _sustainabilityPerformanceTargetRateStorage();
 
         if (_coupon.fixingDate < sustainabilityPerformanceTargetRateStorage.startPeriod) {
@@ -127,10 +128,10 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
             rate_ -= totalRateToSubtract;
         } else {
             rate_ = 0;
-        }
+        }*/
     }
 
-    function _previousFixingDate(uint256 _couponID) internal view returns (uint256 fixingDate_) {
+    /*function _previousFixingDate(uint256 _couponID) internal view returns (uint256 fixingDate_) {
         uint256 previousCouponId = _getPreviousCouponInOrderedList(_couponID);
 
         if (previousCouponId == 0) {
@@ -140,5 +141,5 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
         IBondRead.Coupon memory previousCoupon = _getCoupon(previousCouponId).coupon;
 
         return previousCoupon.fixingDate;
-    }
+    }*/
 }
