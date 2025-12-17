@@ -7,7 +7,7 @@ import {
     CommonKpiLinkedInterestRate
 } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
-contract BondUSAKpiLinkedReadFacet is BondUSAReadFacetBase, CommonKpiLinkedInterestRate {
+contract BondUSAReadKpiLinkedRateFacet is BondUSAReadFacetBase, CommonKpiLinkedInterestRate {
     function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _BOND_KPI_LINKED_READ_RESOLVER_KEY;
     }

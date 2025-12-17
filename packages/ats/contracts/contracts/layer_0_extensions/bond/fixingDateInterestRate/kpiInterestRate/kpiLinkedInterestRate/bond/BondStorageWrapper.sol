@@ -123,19 +123,10 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
     }
 
     function _previousRate(uint256 _couponID) internal view returns (uint256 rate_, uint8 rateDecimals_) {
-        uint256 orderedListLength = _getCouponsOrderedListTotalAdjusted();
+        uint256 previousCouponId = _getPreviousCouponInOrderedList(_couponID);
 
-        if (orderedListLength < 2) return (0, 0);
-
-        if (_getCouponFromOrderedListAt(0) == _couponID) return (0, 0);
-
-        orderedListLength--;
-        uint256 previousCouponId;
-
-        for (uint256 index = 0; index < orderedListLength; index++) {
-            previousCouponId = _getCouponFromOrderedListAt(index);
-            uint256 couponId = _getCouponFromOrderedListAt(index + 1);
-            if (couponId == _couponID) break;
+        if (previousCouponId == 0) {
+            return (0, 0);
         }
 
         IBondRead.Coupon memory previousCoupon = _getCoupon(previousCouponId).coupon;

@@ -9,7 +9,7 @@ import {
     CommonSustainabilityPerformanceTargetInterestRate
 } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
-contract BondUSASustainabilityPerformanceTargetReadFacet is
+contract BondUSAReadSustainabilityPerformanceTargetRateFacet is
     BondUSAReadFacetBase,
     CommonSustainabilityPerformanceTargetInterestRate
 {

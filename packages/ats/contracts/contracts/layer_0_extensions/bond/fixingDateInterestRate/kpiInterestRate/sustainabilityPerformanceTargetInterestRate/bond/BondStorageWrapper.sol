@@ -7,11 +7,15 @@ import {
 } from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
-import { KpisStorageWrapper } from "../kpis/KpisStorageWrapper.sol";
+import {
+    ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate
+} from "../proceedRecipients/ProceedRecipientsStorageWrapper.sol";
 import { Internals } from "contracts/layer_0/Internals.sol";
 import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
 
-abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate is KpisStorageWrapper {
+abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate is
+    ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate
+{
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     error InterestRateIsSustainabilityPerformanceTarget();
@@ -50,12 +54,11 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
     }
 
     function _calculateSustainabilityPerformanceTargetInterestRate(
-        uint256 /*_couponID*/,
-        IBondRead.Coupon memory /*_coupon*/
-    ) internal view override returns (uint256 rate_, uint8 rateDecimals) {
-        return (0, 0);
-        /*SustainabilityPerformanceTargetRateDataStorage
-            memory sustainabilityPerformanceTargetRateStorage = _sustainabilityPerformanceTargetRateStorage();
+        uint256 _couponID,
+        IBondRead.Coupon memory _coupon
+    ) internal view override returns (uint256 rate_, uint8 rateDecimals_) {
+        SustainabilityPerformanceTargetRateDataStorage
+            storage sustainabilityPerformanceTargetRateStorage = _sustainabilityPerformanceTargetRateStorage();
 
         if (_coupon.fixingDate < sustainabilityPerformanceTargetRateStorage.startPeriod) {
             return (
@@ -64,93 +67,78 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
             );
         }
 
-        if (sustainabilityPerformanceTargetRateStorage.kpiOracle == address(0)) {
-            return (
-                sustainabilityPerformanceTargetRateStorage.baseRate,
-                sustainabilityPerformanceTargetRateStorage.rateDecimals
-            );
-        }
+        rate_ = sustainabilityPerformanceTargetRateStorage.baseRate;
+        rateDecimals_ = sustainabilityPerformanceTargetRateStorage.rateDecimals;
 
-        (uint256 impactData, bool reportFound) = abi.decode(
-            sustainabilityPerformanceTargetRateStorage.kpiOracle.functionStaticCall(
-                abi.encodeWithSelector(
-                    IKpi.getKpiData.selector,
-                    _coupon.fixingDate - sustainabilityPerformanceTargetRateStorage.reportPeriod,
-                    _coupon.fixingDate
-                ),
-                ISustainabilityPerformanceTargetRate.KpiOracleCalledFailed.selector
-            ),
-            (uint256, bool)
-        );
+        address[] memory projects = _getProceedRecipients(0, _getProceedRecipientsCount());
+        uint256 totalRateToAdd = 0;
+        uint256 totalRateToSubtract = 0;
 
-        uint256 rate;
+        for (uint256 index = 0; index < projects.length; ) {
+            ISustainabilityPerformanceTargetRate.ImpactData memory impactData = _getSPTImpactDataFor(projects[index]);
 
-        if (!reportFound) {
-            (uint256 previousRate, uint8 previousRateDecimals) = _previousRate(_couponID);
-
-            previousRate = DecimalsLib.calculateDecimalsAdjustment(
-                previousRate,
-                previousRateDecimals,
-                sustainabilityPerformanceTargetRateStorage.rateDecimals
+            (uint256 value, bool exists) = _getLatestKpiData(
+                _previousFixingDate(_couponID),
+                _coupon.fixingDate,
+                projects[index]
             );
 
-            rate = previousRate + sustainabilityPerformanceTargetRateStorage.missedPenalty;
+            if (impactData.impactDataMode == ISustainabilityPerformanceTargetRate.ImpactDataMode.PENALTY) {
+                if (!exists) {
+                    totalRateToAdd += impactData.deltaRate;
+                    continue;
+                }
+                if (impactData.baseLineMode == ISustainabilityPerformanceTargetRate.BaseLineMode.MINIMUM) {
+                    if (value < impactData.baseLine) {
+                        totalRateToAdd += impactData.deltaRate;
+                        continue;
+                    }
+                } else {
+                    if (value > impactData.baseLine) {
+                        totalRateToAdd += impactData.deltaRate;
+                        continue;
+                    }
+                }
+            } else {
+                if (!exists) {
+                    continue;
+                }
+                if (impactData.baseLineMode == ISustainabilityPerformanceTargetRate.BaseLineMode.MINIMUM) {
+                    if (value > impactData.baseLine) {
+                        totalRateToSubtract += impactData.deltaRate;
+                        continue;
+                    }
+                } else {
+                    if (value < impactData.baseLine) {
+                        totalRateToSubtract += impactData.deltaRate;
+                        continue;
+                    }
+                }
+            }
 
-            if (rate > sustainabilityPerformanceTargetRateStorage.maxRate)
-                rate = sustainabilityPerformanceTargetRateStorage.maxRate;
-
-            return (rate, sustainabilityPerformanceTargetRateStorage.rateDecimals);
+            unchecked {
+                ++index;
+            }
         }
 
-        uint256 impactDeltaRate;
-        uint256 factor = 10 ** sustainabilityPerformanceTargetRateStorage.adjustmentPrecision;
+        rate_ += totalRateToAdd;
 
-        if (sustainabilityPerformanceTargetRateStorage.baseLine > impactData) {
-            impactDeltaRate =
-                (factor * (sustainabilityPerformanceTargetRateStorage.baseLine - impactData)) /
-                (sustainabilityPerformanceTargetRateStorage.baseLine -
-                    sustainabilityPerformanceTargetRateStorage.maxDeviationFloor);
-            if (impactDeltaRate > factor) impactDeltaRate = factor;
-            rate =
-                sustainabilityPerformanceTargetRateStorage.baseRate -
-                (((sustainabilityPerformanceTargetRateStorage.baseRate -
-                    sustainabilityPerformanceTargetRateStorage.minRate) * impactDeltaRate) / factor);
+        if (rate_ > totalRateToSubtract) {
+            rate_ -= totalRateToSubtract;
         } else {
-            impactDeltaRate =
-                (factor * (impactData - sustainabilityPerformanceTargetRateStorage.baseLine)) /
-                (sustainabilityPerformanceTargetRateStorage.maxDeviationCap -
-                    sustainabilityPerformanceTargetRateStorage.baseLine);
-            if (impactDeltaRate > factor) impactDeltaRate = factor;
-            rate =
-                sustainabilityPerformanceTargetRateStorage.baseRate +
-                (((sustainabilityPerformanceTargetRateStorage.maxRate -
-                    sustainabilityPerformanceTargetRateStorage.baseRate) * impactDeltaRate) / factor);
+            rate_ = 0;
         }
-
-        return (rate, sustainabilityPerformanceTargetRateStorage.rateDecimals);*/
     }
 
-    /*function _previousRate(uint256 _couponID) internal view returns (uint256 rate_, uint8 rateDecimals_) {
-        uint256 orderedListLength = _getCouponsOrderedListTotalAdjusted();
+    function _previousFixingDate(uint256 _couponID) internal view returns (uint256 fixingDate_) {
+        uint256 previousCouponId = _getPreviousCouponInOrderedList(_couponID);
 
-        if (orderedListLength < 2) return (0, 0);
-
-        if (_getCouponFromOrderedListAt(0) == _couponID) return (0, 0);
-
-        orderedListLength--;
-        uint256 previousCouponId;
-
-        for (uint256 index = 0; index < orderedListLength; index++) {
-            previousCouponId = _getCouponFromOrderedListAt(index);
-            uint256 couponId = _getCouponFromOrderedListAt(index + 1);
-            if (couponId == _couponID) break;
+        if (previousCouponId == 0) {
+            return 0;
         }
 
         IBondRead.Coupon memory previousCoupon = _getCoupon(previousCouponId).coupon;
 
-        if (previousCoupon.rateStatus != IBondRead.RateCalculationStatus.SET) {
-            return _calculateSustainabilityPerformanceTargetInterestRate(previousCouponId, previousCoupon);
-        }
-        return (previousCoupon.rate, previousCoupon.rateDecimals);
-    }*/
+        return previousCoupon.fixingDate;
+    }
 }

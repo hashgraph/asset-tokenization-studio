@@ -1510,4 +1510,13 @@ abstract contract Internals is Modifiers {
     ) internal virtual;
 
     function _isProceedRecipientsInitialized() internal view virtual returns (bool);
+
+    function _getProceedRecipients(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (address[] memory proceedRecipients_);
+
+    function _getPreviousCouponInOrderedList(
+        uint256 _couponID
+    ) internal view virtual returns (uint256 previousCouponID_);
 }

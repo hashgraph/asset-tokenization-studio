@@ -72,6 +72,6 @@ abstract contract ProceedRecipients is IProceedRecipients, Internals {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory proceedRecipients_) {
-        return _getExternalListsMembers(_PROCEED_RECIPIENTS_STORAGE_POSITION, _pageIndex, _pageLength);
+        return _getProceedRecipients(_pageIndex, _pageLength);
     }
 }

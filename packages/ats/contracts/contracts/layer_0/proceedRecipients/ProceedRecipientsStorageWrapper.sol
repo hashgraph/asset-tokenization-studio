@@ -43,12 +43,12 @@ abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper
         _setExternalListInitialized(_PROCEED_RECIPIENTS_STORAGE_POSITION);
     }
 
-    function _addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal override {
+    function _addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal virtual override {
         _addExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
         _setProceedRecipientData(_proceedRecipient, _data);
     }
 
-    function _removeProceedRecipient(address _proceedRecipient) internal override {
+    function _removeProceedRecipient(address _proceedRecipient) internal virtual override {
         _removeExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
         _removeProceedRecipientData(_proceedRecipient);
     }
@@ -71,6 +71,13 @@ abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper
 
     function _getProceedRecipientsCount() internal view override returns (uint256) {
         return _getExternalListsCount(_PROCEED_RECIPIENTS_STORAGE_POSITION);
+    }
+
+    function _getProceedRecipients(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view override returns (address[] memory proceedRecipients_) {
+        return _getExternalListsMembers(_PROCEED_RECIPIENTS_STORAGE_POSITION, _pageIndex, _pageLength);
     }
 
     function _isProceedRecipientsInitialized() internal view override returns (bool) {
