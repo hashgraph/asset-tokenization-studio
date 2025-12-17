@@ -7,7 +7,10 @@ import {
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 
-contract ScheduledSnapshotsKpiLinkedRateFacetTimeTravel is ScheduledSnapshotsKpiLinkedRateFacet, TimeTravelStorageWrapper {
+contract ScheduledSnapshotsKpiLinkedRateFacetTimeTravel is
+    ScheduledSnapshotsKpiLinkedRateFacet,
+    TimeTravelStorageWrapper
+{
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }

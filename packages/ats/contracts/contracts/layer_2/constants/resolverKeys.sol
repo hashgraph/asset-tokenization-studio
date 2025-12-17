@@ -113,3 +113,15 @@ bytes32 constant _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0xa261a7
 
 // keccak256('security.token.standard.kpis.resolverKey');
 bytes32 constant _KPIS_RESOLVER_KEY = 0xb228c36d89348606afcfbad286f8eddb0d0cdd727eefd0f0fd87f17ea0793051;
+
+// keccak256('security.token.standard.kpis.latest.resolverKey');
+bytes32 constant _KPIS_LATEST_RESOLVER_KEY = 0x74c5b383d6a5c70ac558779f6286a871cfb3fd94d076be0cae4861e57f4db077;
+
+// keccak256('security.token.standard.kpis.latest.fixed.rate.resolverKey');
+bytes32 constant _KPIS_LATEST_FIXED_RATE_RESOLVER_KEY = 0xd64d934b81c9185a4a06f528d8e39de9f53b7947736496d32a79d4269f3fa442;
+
+// keccak256('security.token.standard.kpis.latest.kpilinked.rate.resolverKey');
+bytes32 constant _KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY = 0x9a05806c3d9c062dfa7983f282dccc0397cb5d4ebf19b80ad4b5586c1d8c6cc6;
+
+// keccak256('security.token.standard.kpis.latest.SustainabilityPerformanceTarget.rate.resolverKey');
+bytes32 constant _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0xb668a0e99ee4bce486604d5a7097a4e5d837d1736e0cf43b190b56d0adea78b9;
