@@ -52,11 +52,77 @@ This monorepo is structured with **npm workspaces** and is designed for scalabil
 ├── apps/
 │ ├── ats/
 │ │ └── web # Frontend dApp for Asset Tokenization Studio
-│ └── mass-payout/
-│ ├── backend # API backend for payout orchestration
-│ └── frontend # Admin panel for managing payouts
+│ ├── mass-payout/
+│ │ ├── backend # API backend for payout orchestration
+│ │ └── frontend # Admin panel for managing payouts
+│ └── docs # Documentation site (Docusaurus)
+├── docs/ # Technical documentation
+│ ├── adr/ # Architecture Decision Records
+│ ├── proposals/ # Enhancement Proposals
+│ ├── guides/ # Developer Guides
+│ └── workflows/ # CI/CD Documentation
 └── package.json # Workspace configuration and root scripts
 ```
+
+## Documentation
+
+This project follows a **"Docs-as-Code"** philosophy, treating documentation with the same rigor as software. We maintain three distinct documentation layers:
+
+### Layer 1: Technical Documentation (Target: Developers)
+
+Located in the repository root and co-located within packages:
+
+- **Root README.md**: High-level project overview
+- **Module READMEs**: Package-specific documentation in `packages/` and `apps/`
+- **CONTRIBUTING.md**: Engineer's handbook covering GitFlow, environment setup, and release processes
+- **Developer Guides** (`docs/guides/`): Step-by-step tutorials for complex tasks
+- **Architecture Decision Records** (`docs/adr/`): Historical record of architectural decisions
+- **Enhancement Proposals** (`docs/proposals/`): Feature specifications and design proposals
+
+### Layer 2: Documentation Hub (Target: All Users)
+
+A public-facing Docusaurus site located at `apps/docs` that aggregates:
+
+- **Product Manuals**: End-user guides and tutorials
+- **Developer Guides**: Synced from Layer 1
+- **API Reference**: Auto-generated from TypeScript (TypeDoc) and Solidity (solidity-docgen)
+- **Architecture Documentation**: System design and patterns
+
+### Layer 3: Internal Documentation (Target: Employees)
+
+Sensitive information kept in Confluence (restricted access):
+
+- Credentials and client data
+- HR processes and meeting minutes
+- Strategic roadmap discussions (pre-public phase)
+
+### ADRs vs. Enhancement Proposals
+
+We distinguish between two types of decision documents:
+
+- **ADRs (Architecture Decision Records)**: Document decisions **already made**, providing historical context and consequences
+- **EPs (Enhancement Proposals)**: Propose **new features or changes** before implementation, enabling community discussion via Pull Requests
+
+This approach is inspired by industry standards like Kubernetes KEPs, Ethereum EIPs, and Hedera HIPs.
+
+### Documentation Commands
+
+```bash
+# Start documentation site locally
+npm run docs:dev
+
+# Build documentation site
+npm run docs:build
+
+# Serve built documentation
+npm run docs:serve
+```
+
+For more details, see:
+
+- [How to Create an ADR](docs/adr/README.md)
+- [How to Submit an Enhancement Proposal](docs/proposals/README.md)
+- [Developer Guides](docs/guides/README.md)
 
 ## Architecture
 

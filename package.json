@@ -3,7 +3,7 @@
   "license": "Apache-2.0",
   "description": "asset tokenization",
   "private": true,
-  "workspaces": ["packages/ats/*", "packages/mass-payout/*", "apps/ats/*", "apps/mass-payout/*"],
+  "workspaces": ["packages/ats/*", "packages/mass-payout/*", "apps/ats/*", "apps/mass-payout/*", "apps/docs"],
   "overrides": {
     "@hashgraph/asset-tokenization-dapp": {
       "i18next": "23.10.1",
@@ -28,6 +28,11 @@
     "format:check": "prettier --check '*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'packages/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml,sol}' 'apps/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' '.github/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
     "dev": "npm run ats:web:dev",
     "start": "npm run ats:start",
+    "docs:dev": "npm run start --workspace=apps/docs",
+    "docs:build": "npm run build --workspace=apps/docs",
+    "docs:serve": "npm run serve --workspace=apps/docs",
+    "docs:clear": "npm run clear --workspace=apps/docs",
+    "docs:typecheck": "npm run typecheck --workspace=apps/docs",
     "clean": "npm run clean:workspaces && npm run clean:root && echo '\\n✅ Full cleanup finished — workspaces and root junk removed'",
     "clean:workspaces": "npm run ats:clean && npm run mass-payout:clean && echo '\\n✅ All workspaces cleaned'",
     "clean:root": "rimraf dist build artifacts cache typechain-types node_modules/.cache .eslintcache coverage .nyc_output junit.xml test-results *.log *.tgz *.tar.gz .DS_Store Thumbs.db && echo '\\n✅ Root junk files removed'",

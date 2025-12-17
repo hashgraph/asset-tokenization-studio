@@ -1,0 +1,305 @@
+/**
+ * Asset Tokenization Studio - Custom Theme
+ *
+ * This file defines the color palette and styling for the documentation site,
+ * matching the ATS web application design system.
+ */
+
+/* ========================================================================
+   Light Mode Theme (Default)
+   ======================================================================== */
+:root {
+  /* Primary Color - Purple (ATS Brand Color) */
+  --ifm-color-primary: #764EE5;
+  --ifm-color-primary-dark: #5437A3;
+  --ifm-color-primary-darker: #412B7E;
+  --ifm-color-primary-darkest: #2E1F59;
+  --ifm-color-primary-light: #9171EA;
+  --ifm-color-primary-lighter: #C0AEF3;
+  --ifm-color-primary-lightest: #EDEFFC;
+
+  /* Secondary Color - Blue */
+  --ifm-color-secondary: #2D84EB;
+  --ifm-color-secondary-dark: #2263B0;
+  --ifm-color-secondary-darker: #143B6A;
+  --ifm-color-secondary-light: #BED9F9;
+  --ifm-color-secondary-lighter: #E0EDFC;
+  --ifm-color-secondary-lightest: #EAF3FD;
+
+  /* Tertiary Color - Green (Success/Accent) */
+  --ifm-color-tertiary: #07E78E;
+  --ifm-color-tertiary-dark: #048B55;
+  --ifm-color-tertiary-darker: #06B972;
+  --ifm-color-tertiary-light: #B2F8DC;
+  --ifm-color-tertiary-lighter: #DAFBEE;
+  --ifm-color-tertiary-lightest: #E6FDF4;
+
+  /* Neutral Colors */
+  --ifm-color-white: #FDFDFD;
+  --ifm-color-gray-50: #F8F7FC;
+  --ifm-color-gray-100: #F3F1F7;
+  --ifm-color-gray-200: #E4E2E9;
+  --ifm-color-gray-300: #D6D3DE;
+  --ifm-color-gray-400: #C3BECF;
+  --ifm-color-gray-500: #A7A0B9;
+  --ifm-color-gray-600: #958DAB;
+  --ifm-color-gray-700: #706789;
+  --ifm-color-gray-800: #57506B;
+  --ifm-color-gray-900: #332F3F;
+
+  /* Semantic Colors */
+  --ifm-color-success: #07E78E;
+  --ifm-color-info: #2D84EB;
+  --ifm-color-warning: #FFB800;
+  --ifm-color-danger: #E74C3C;
+
+  /* Background Colors */
+  --ifm-background-color: #FDFDFD;
+  --ifm-background-surface-color: #F8F7FC;
+
+  /* Text Colors */
+  --ifm-font-color-base: #332F3F;
+  --ifm-font-color-secondary: #57506B;
+
+  /* Code Block Styling */
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(118, 78, 229, 0.1);
+
+  /* Link Colors */
+  --ifm-link-color: #764EE5;
+  --ifm-link-hover-color: #5437A3;
+
+  /* Navbar */
+  --ifm-navbar-background-color: #FDFDFD;
+  --ifm-navbar-shadow: 0 1px 2px 0 rgba(51, 47, 63, 0.05);
+
+  /* Footer */
+  --ifm-footer-background-color: #332F3F;
+  --ifm-footer-color: #F8F7FC;
+  --ifm-footer-link-color: #C0AEF3;
+  --ifm-footer-link-hover-color: #EDEFFC;
+
+  /* Table of Contents */
+  --ifm-toc-border-color: #E4E2E9;
+
+  /* Sidebar */
+  --ifm-menu-color-background-active: rgba(118, 78, 229, 0.1);
+  --ifm-menu-color-background-hover: rgba(118, 78, 229, 0.05);
+}
+
+/* ========================================================================
+   Dark Mode Theme
+   ======================================================================== */
+[data-theme='dark'] {
+  /* Primary Color - Lighter shades for dark mode */
+  --ifm-color-primary: #9171EA;
+  --ifm-color-primary-dark: #764EE5;
+  --ifm-color-primary-darker: #5437A3;
+  --ifm-color-primary-darkest: #412B7E;
+  --ifm-color-primary-light: #C0AEF3;
+  --ifm-color-primary-lighter: #D5C8F7;
+  --ifm-color-primary-lightest: #EDEFFC;
+
+  /* Secondary Color */
+  --ifm-color-secondary: #BED9F9;
+  --ifm-color-secondary-dark: #2D84EB;
+  --ifm-color-secondary-darker: #2263B0;
+  --ifm-color-secondary-light: #E0EDFC;
+  --ifm-color-secondary-lighter: #EAF3FD;
+
+  /* Tertiary Color */
+  --ifm-color-tertiary: #B2F8DC;
+  --ifm-color-tertiary-dark: #07E78E;
+  --ifm-color-tertiary-darker: #06B972;
+  --ifm-color-tertiary-light: #DAFBEE;
+  --ifm-color-tertiary-lighter: #E6FDF4;
+
+  /* Background Colors */
+  --ifm-background-color: #1a1820;
+  --ifm-background-surface-color: #232129;
+
+  /* Text Colors */
+  --ifm-font-color-base: #F8F7FC;
+  --ifm-font-color-secondary: #D6D3DE;
+
+  /* Code Block Styling */
+  --docusaurus-highlighted-code-line-bg: rgba(145, 113, 234, 0.2);
+
+  /* Link Colors */
+  --ifm-link-color: #C0AEF3;
+  --ifm-link-hover-color: #EDEFFC;
+
+  /* Navbar */
+  --ifm-navbar-background-color: #232129;
+  --ifm-navbar-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+
+  /* Footer */
+  --ifm-footer-background-color: #1a1820;
+  --ifm-footer-color: #F8F7FC;
+  --ifm-footer-link-color: #D5C8F7;
+  --ifm-footer-link-hover-color: #EDEFFC;
+
+  /* Table of Contents */
+  --ifm-toc-border-color: #332F3F;
+
+  /* Sidebar */
+  --ifm-menu-color-background-active: rgba(145, 113, 234, 0.15);
+  --ifm-menu-color-background-hover: rgba(145, 113, 234, 0.08);
+}
+
+/* ========================================================================
+   Custom Components Styling
+   ======================================================================== */
+
+/* Hero Section */
+.hero--primary {
+  background: linear-gradient(135deg, #764EE5 0%, #5437A3 100%);
+  color: var(--ifm-color-white);
+}
+
+.hero__title {
+  font-weight: 700;
+}
+
+.hero__subtitle {
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+/* Buttons */
+.button--secondary {
+  background-color: var(--ifm-color-white);
+  color: var(--ifm-color-primary);
+  border: 2px solid var(--ifm-color-white);
+}
+
+.button--secondary:hover {
+  background-color: transparent;
+  color: var(--ifm-color-white);
+  border-color: var(--ifm-color-white);
+}
+
+[data-theme='dark'] .button--secondary {
+  background-color: var(--ifm-color-gray-900);
+  color: var(--ifm-color-primary-light);
+  border-color: var(--ifm-color-primary-light);
+}
+
+[data-theme='dark'] .button--secondary:hover {
+  background-color: var(--ifm-color-primary-light);
+  color: var(--ifm-color-gray-900);
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  border: 1px solid var(--ifm-table-border-color);
+}
+
+table thead {
+  background-color: var(--ifm-color-gray-50);
+}
+
+[data-theme='dark'] table thead {
+  background-color: var(--ifm-color-gray-900);
+}
+
+/* Code Blocks */
+.prism-code {
+  border-radius: 8px;
+}
+
+/* Admonitions */
+.admonition {
+  border-radius: 8px;
+}
+
+.admonition-note {
+  border-left-color: var(--ifm-color-secondary);
+}
+
+.admonition-tip {
+  border-left-color: var(--ifm-color-tertiary);
+}
+
+.admonition-info {
+  border-left-color: var(--ifm-color-info);
+}
+
+.admonition-caution {
+  border-left-color: var(--ifm-color-warning);
+}
+
+.admonition-danger {
+  border-left-color: var(--ifm-color-danger);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ifm-color-gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ifm-color-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-primary-dark);
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: var(--ifm-color-gray-900);
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: var(--ifm-color-primary-light);
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: var(--ifm-color-primary);
+}
+
+/* Markdown Content Enhancements */
+.markdown h1 {
+  border-bottom: 2px solid var(--ifm-color-primary);
+  padding-bottom: 0.5rem;
+}
+
+.markdown a {
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 0.2s ease;
+}
+
+.markdown a:hover {
+  border-bottom-color: var(--ifm-link-color);
+}
+
+/* Badges */
+.badge {
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.badge--primary {
+  background-color: var(--ifm-color-primary-lightest);
+  color: var(--ifm-color-primary-dark);
+}
+
+.badge--secondary {
+  background-color: var(--ifm-color-secondary-lightest);
+  color: var(--ifm-color-secondary-dark);
+}
+
+.badge--success {
+  background-color: var(--ifm-color-tertiary-lightest);
+  color: var(--ifm-color-tertiary-dark);
+}
