@@ -452,6 +452,38 @@ describe("ERC3643 Tests", () => {
           expect(snapshot_FrozenBalance_Of_E_3).to.equal(1);
           expect(snapshot_Total_Supply_3).to.equal(AMOUNT);
         });
+
+        it("GIVEN frozen tokens WHEN querying historical snapshot THEN balance and frozen amounts are tracked separately", async () => {
+          await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+
+          await erc1410Facet.issueByPartition({
+            partition: DEFAULT_PARTITION,
+            tokenHolder: signer_E.address,
+            value: AMOUNT,
+            data: "0x",
+          });
+
+          // snapshot
+          await snapshotFacet.connect(signer_A).takeSnapshot();
+
+          // Freeze some tokens
+          await freezeFacet.connect(signer_A).freezePartialTokens(signer_E.address, 100);
+
+          // snapshot
+          await snapshotFacet.connect(signer_A).takeSnapshot();
+
+          // Check snapshots track balance and frozen separately
+          const balance1 = await snapshotFacet.balanceOfAtSnapshot(1, signer_E.address);
+          const frozen1 = await snapshotFacet.frozenBalanceOfAtSnapshot(1, signer_E.address);
+          const balance2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_E.address);
+          const frozen2 = await snapshotFacet.frozenBalanceOfAtSnapshot(2, signer_E.address);
+
+          expect(balance1).to.equal(AMOUNT); // Full balance, no frozen
+          expect(frozen1).to.equal(0); // No frozen tokens yet
+          expect(balance2).to.equal(AMOUNT - 100); // Balance reduced
+          expect(frozen2).to.equal(100); // Frozen tokens tracked
+          expect(balance2.add(frozen2)).to.equal(AMOUNT); // Total remains same
+        });
       });
 
       it("GIVEN a invalid address WHEN attempting to setAddressFrozen THEN transactions revert with ZeroAddressNotAllowed error", async () => {
@@ -1623,6 +1655,33 @@ describe("ERC3643 Tests", () => {
         expect(hasRole).to.equal(true);
       });
 
+      it("GIVEN an agent WHEN removing agent THEN removeAgent emits AgentRemoved and revokes role", async () => {
+        await erc3643Facet.addAgent(signer_B.address);
+
+        expect(await erc3643Facet.removeAgent(signer_B.address))
+          .to.emit(erc3643Facet, "AgentRemoved")
+          .withArgs(signer_B.address);
+
+        const hasRole = await accessControlFacet.hasRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
+        const isAgent = await erc3643Facet.isAgent(signer_B.address);
+        expect(isAgent).to.equal(false);
+        expect(hasRole).to.equal(false);
+      });
+
+      it("GIVEN a non-agent address WHEN removing agent THEN reverts with AccountNotAssignedToRole", async () => {
+        await expect(erc3643Facet.removeAgent(signer_C.address))
+          .to.be.revertedWithCustomError(accessControlFacet, "AccountNotAssignedToRole")
+          .withArgs(ATS_ROLES._AGENT_ROLE, signer_C.address);
+      });
+
+      it("GIVEN an already-agent address WHEN adding agent again THEN reverts with AccountAssignedToRole", async () => {
+        await erc3643Facet.addAgent(signer_B.address);
+
+        await expect(erc3643Facet.addAgent(signer_B.address))
+          .to.be.revertedWithCustomError(accessControlFacet, "AccountAssignedToRole")
+          .withArgs(ATS_ROLES._AGENT_ROLE, signer_B.address);
+      });
+
       it("GIVEN a user with the agent role WHEN performing actions using ERC-1400 methods succeeds", async () => {
         await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
         const amount = 1000;
@@ -1853,6 +1912,121 @@ describe("ERC3643 Tests", () => {
         expect(balance_After_Partition_1).to.be.equal(
           balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor * adjustFactor),
         );
+      });
+
+      it("GIVEN frozen tokens WHEN ABAF changes and freezing again THEN frozen amount adjustment is applied", async () => {
+        // Grant necessary role for adjustBalances and connect to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+        const adjustBalancesFacetA = adjustBalancesFacet.connect(signer_A);
+
+        const amount = 1000;
+        await erc1410Facet.issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_E.address,
+          value: amount,
+          data: EMPTY_HEX_BYTES,
+        });
+
+        // Freeze tokens initially
+        await freezeFacet.freezePartialTokens(signer_E.address, amount / 2);
+
+        const frozenBefore = await freezeFacet.getFrozenTokens(signer_E.address);
+
+        // Change ABAF
+        await adjustBalancesFacetA.adjustBalances(2, 1); // 2x adjustment
+
+        // Freeze more tokens - this should trigger _updateTotalFreezeAmountAndLabaf
+        await erc1410Facet.issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_E.address,
+          value: amount,
+          data: EMPTY_HEX_BYTES,
+        });
+        await freezeFacet.freezePartialTokens(signer_E.address, amount / 2);
+
+        const frozenAfter = await freezeFacet.getFrozenTokens(signer_E.address);
+
+        // The previously frozen amount should be adjusted by factor 2
+        expect(frozenAfter).to.be.equal(frozenBefore.mul(2).add(amount / 2));
+      });
+
+      it("GIVEN frozen tokens WHEN freezing again without ABAF change THEN factor equals 1", async () => {
+        const amount = 1000;
+        await erc1410Facet.issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_E.address,
+          value: amount,
+          data: EMPTY_HEX_BYTES,
+        });
+
+        // Freeze tokens initially
+        await freezeFacet.freezePartialTokens(signer_E.address, amount / 2);
+
+        const frozenBefore = await freezeFacet.getFrozenTokens(signer_E.address);
+
+        // Freeze more tokens WITHOUT changing ABAF - this should hit the factor == 1 branch
+        await freezeFacet.freezePartialTokens(signer_E.address, amount / 4);
+
+        const frozenAfter = await freezeFacet.getFrozenTokens(signer_E.address);
+
+        // The frozen amount should just be sum (no factor adjustment)
+        expect(frozenAfter).to.be.equal(frozenBefore.add(amount / 4));
+      });
+
+      it("GIVEN frozen tokens by partition WHEN checking total balance THEN frozen tokens are included", async () => {
+        await accessControlFacet.grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+        await accessControlFacet.grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+
+        const amount = 1000;
+        const frozenAmount = 300;
+
+        await erc1410Facet.issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_E.address,
+          value: amount,
+          data: EMPTY_HEX_BYTES,
+        });
+
+        // Freeze some tokens by partition
+        await freezeFacet.freezePartialTokens(signer_E.address, frozenAmount);
+
+        // Take a snapshot - this will invoke _getTotalBalanceForByPartitionAdjusted
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // Get balances before ABAF
+        const frozenBefore = await freezeFacet.getFrozenTokens(signer_E.address);
+        const freeBefore = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address);
+
+        // Apply ABAF with factor 2 - this internally uses _getTotalBalanceForByPartitionAdjusted to calculate total balance
+        const decimals = await erc20Facet.decimals();
+        await adjustBalancesFacet.connect(signer_A).adjustBalances(2, decimals);
+
+        // Take another snapshot after ABAF to trigger _getTotalBalanceForByPartitionAdjusted again
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // After ABAF, both free and frozen should be doubled
+        const frozenAfter = await freezeFacet.getFrozenTokens(signer_E.address);
+        const freeAfter = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address);
+
+        // Verify _getTotalBalanceForByPartitionAdjusted was used: total = free + frozen, then multiplied by factor
+        expect(frozenAfter).to.equal(frozenBefore.mul(2));
+        expect(freeAfter).to.equal(freeBefore.mul(2));
+        expect(frozenAfter.add(freeAfter)).to.equal(amount * 2);
+
+        // Verify snapshots captured the total balance including frozen tokens by partition
+        const snapshot1BalanceByPartition = await snapshotFacet.balanceOfAtSnapshotByPartition(
+          DEFAULT_PARTITION,
+          1,
+          signer_E.address,
+        );
+        const snapshot2BalanceByPartition = await snapshotFacet.balanceOfAtSnapshotByPartition(
+          DEFAULT_PARTITION,
+          2,
+          signer_E.address,
+        );
+
+        expect(snapshot1BalanceByPartition).to.equal(amount - frozenAmount);
+        expect(snapshot2BalanceByPartition).to.equal((amount - frozenAmount) * 2);
       });
     });
 

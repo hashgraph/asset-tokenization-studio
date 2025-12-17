@@ -414,6 +414,55 @@ describe("Equity Tests", () => {
         BigNumber.from(10 ** (dividendFor.decimals + dividendFor.amountDecimals)),
       );
     });
+
+    it("GIVEN frozen tokens WHEN calculating dividends without snapshot THEN frozen tokens are included in dividend calculation", async () => {
+      await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+      await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+      await accessControlFacet.grantRole(ATS_ROLES._FREEZE_MANAGER_ROLE, signer_A.address);
+
+      const totalAmount = 1000n;
+      const frozenAmount = 300n;
+
+      // Issue tokens
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: totalAmount,
+        data: "0x",
+      });
+
+      // Freeze some tokens
+      await freezeFacet.freezePartialTokens(signer_A.address, frozenAmount);
+
+      // Set dividend WITHOUT snapshot (snapshotId will be 0) - this will call _getTotalBalanceForAdjustedAt
+      const dividendDataNoSnapshot = {
+        recordDate: dateToUnixTimestamp("2030-01-01T00:00:10Z").toString(),
+        executionDate: dateToUnixTimestamp("2030-01-01T00:00:20Z").toString(),
+        amount: 10,
+        amountDecimals: 0,
+      };
+      await equityFacet.setDividends(dividendDataNoSnapshot);
+
+      // Travel to after record date but before execution date
+      await timeTravelFacet.changeSystemTimestamp(dateToUnixTimestamp("2030-01-01T00:00:15Z"));
+
+      // Get dividend - this triggers _getTotalBalanceForAdjustedAt which includes frozen tokens
+      const dividendFor = await equityFacet.getDividendsFor(1, signer_A.address);
+
+      // The total balance should include frozen tokens (700 free + 300 frozen = 1000)
+      expect(dividendFor.tokenBalance).to.equal(totalAmount);
+      expect(dividendFor.recordDateReached).to.equal(true);
+
+      // Verify dividend calculation: (tokenBalance * amount) / (10^(decimals + amountDecimals))
+      const expectedDividendNumerator = dividendFor.tokenBalance.mul(dividendFor.amount);
+      const expectedDividendDenominator = BigNumber.from(10 ** (dividendFor.decimals + dividendFor.amountDecimals));
+      expectedDividendNumerator.div(expectedDividendDenominator);
+
+      // Also get the dividendAmountFor to verify
+      const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
+      expect(dividendAmountFor.numerator).to.equal(expectedDividendNumerator);
+      expect(dividendAmountFor.denominator).to.equal(expectedDividendDenominator);
+    });
   });
 
   describe("Voting rights", () => {
