@@ -1,5 +1,59 @@
 # @hashgraph/asset-tokenization-sdk
 
+## 3.0.0
+
+### Major Changes
+
+- e0a3f03: [ATS-SDK] Add tokenBalance and decimals to getCouponFor and [ATS-WEB] add fullRedeem in forceRedeem view and balance in seeCoupons and seeDividend views
+
+### Patch Changes
+
+- e0a3f03: fix: CI workflow improvements for reliable releases
+  1. **Fixed --ignore pattern in ats.release.yml**: Changed from non-existent
+     `@hashgraph/mass-payout*` to correct `@mass-payout/*` package namespace
+  2. **Simplified publish trigger in ats.publish.yml**: Changed from
+     `release: published` to `push.tags` for automatic publishing on tag push
+     (no need to manually create GitHub release)
+  3. **Removed recursive publish scripts**: Removed `"publish": "npm publish"`
+     from contracts and SDK package.json files that caused npm to recursively
+     call itself during publish lifecycle, resulting in 403 errors in CI
+
+- e0a3f03: Add a checkbox in force redeem view to redeem every tokens if the maturity date has arrived
+- Updated dependencies [e0a3f03]
+- Updated dependencies [e0a3f03]
+- Updated dependencies [e0a3f03]
+  - @hashgraph/asset-tokenization-contracts@3.0.0
+
+## 2.0.0
+
+### Major Changes
+
+- c62eb6e: **BREAKING:** Nominal value decimals support
+
+  SDK now requires and returns nominal value decimals when working with Bonds and Equities. Update all integration code to handle the new decimal field for consistent value representation.
+
+### Minor Changes
+
+- c62eb6e: Full redeem at maturity functionality added to bond lifecycle operations
+
+- c62eb6e: Dividend Amount For calculation methods added for equity dividend management
+
+- c62eb6e: Coupon Amount For and Principal For calculation methods added for bond payment management
+
+### Patch Changes
+
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+  - @hashgraph/asset-tokenization-contracts@2.0.0
+
 ## 1.17.1
 
 ### Patch Changes
