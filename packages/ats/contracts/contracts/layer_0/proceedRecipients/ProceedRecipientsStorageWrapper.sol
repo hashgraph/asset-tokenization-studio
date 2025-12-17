@@ -27,6 +27,22 @@ abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper
         _;
     }
 
+    function _initialize_ProceedRecipients(
+        address[] calldata _proceedRecipients,
+        bytes[] calldata _data
+    ) internal override {
+        uint256 length = _proceedRecipients.length;
+        for (uint256 index; index < length; ) {
+            _addExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipients[index]);
+            _setProceedRecipientData(_proceedRecipients[index], _data[index]);
+            unchecked {
+                ++index;
+            }
+        }
+
+        _setExternalListInitialized(_PROCEED_RECIPIENTS_STORAGE_POSITION);
+    }
+
     function _addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal override {
         _addExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
         _setProceedRecipientData(_proceedRecipient, _data);
@@ -55,6 +71,10 @@ abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper
 
     function _getProceedRecipientsCount() internal view override returns (uint256) {
         return _getExternalListsCount(_PROCEED_RECIPIENTS_STORAGE_POSITION);
+    }
+
+    function _isProceedRecipientsInitialized() internal view override returns (bool) {
+        return _externalListStorage(_PROCEED_RECIPIENTS_STORAGE_POSITION).initialized;
     }
 
     function _proceedRecipientsDataStorage()

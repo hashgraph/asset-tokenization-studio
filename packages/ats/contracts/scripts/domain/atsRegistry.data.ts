@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-16T15:31:01.458Z
- * Facets: 168
+ * Generated: 2025-12-17T09:56:05.423Z
+ * Facets: 171
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -317,6 +317,12 @@ import {
   PauseSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ProceedRecipientsFacet__factory,
   ProceedRecipientsFacetTimeTravel__factory,
+  ProceedRecipientsFixedRateFacet__factory,
+  ProceedRecipientsFixedRateFacetTimeTravel__factory,
+  ProceedRecipientsKpiLinkedRateFacet__factory,
+  ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory,
+  ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory,
+  ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ProtectedPartitionsFacet__factory,
   ProtectedPartitionsFacetTimeTravel__factory,
   ProtectedPartitionsFixedRateFacet__factory,
@@ -747,7 +753,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BALANCE_ADJUSTMENTS_RESOLVER_KEY",
       value: "0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8",
     },
-    inheritance: ["AdjustBalances", "IStaticFunctionSelectors"],
+    inheritance: ["AdjustBalancesFacetBase", "Common"],
     methods: [
       {
         name: "adjustBalances",
@@ -755,6 +761,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe2d77e44",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new AdjustBalancesFacetTimeTravel__factory(signer) : new AdjustBalancesFacet__factory(signer),
   },
@@ -9331,7 +9338,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_PROCEED_RECIPIENTS_RESOLVER_KEY",
       value: "0x87f4b676bf89cd24a01a78fd8e7fb2102c2f6d034be73d16402f7297e0ae625b",
     },
-    inheritance: ["ProceedRecipients", "IStaticFunctionSelectors"],
+    inheritance: ["ProceedRecipientsFacetBase", "Common"],
     methods: [
       {
         name: "addProceedRecipient",
@@ -9393,6 +9400,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "ProceedRecipientAlreadyExists",
         signature: "ProceedRecipientAlreadyExists(address)",
@@ -9404,6 +9412,259 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel
         ? new ProceedRecipientsFacetTimeTravel__factory(signer)
         : new ProceedRecipientsFacet__factory(signer),
+  },
+
+  ProceedRecipientsFixedRateFacet: {
+    name: "ProceedRecipientsFixedRateFacet",
+    resolverKey: {
+      name: "_PROCEED_RECIPIENTS_FIXED_RATE_RESOLVER_KEY",
+      value: "0xd1f2e9d8c7b6a5e4f3d2c1b9a8e7f6d5c4b3a2e1f9d8c7b6a5e4f3d2c1b9a8e7",
+    },
+    inheritance: ["ProceedRecipientsFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "addProceedRecipient",
+        signature: "function addProceedRecipient(address _proceedRecipient, bytes _data)",
+        selector: "0x298f6222",
+      },
+      {
+        name: "getProceedRecipientData",
+        signature: "function getProceedRecipientData(address _proceedRecipient) view returns (bytes)",
+        selector: "0x94c39122",
+      },
+      {
+        name: "getProceedRecipients",
+        signature:
+          "function getProceedRecipients(uint256 _pageIndex, uint256 _pageLength) view returns (address[] proceedRecipients_)",
+        selector: "0x0a4f7d71",
+      },
+      {
+        name: "getProceedRecipientsCount",
+        signature: "function getProceedRecipientsCount() view returns (uint256)",
+        selector: "0x03db0e0d",
+      },
+      {
+        name: "initialize_ProceedRecipients",
+        signature: "function initialize_ProceedRecipients(address[] _proceedRecipients, bytes[] _data)",
+        selector: "0x9005379e",
+      },
+      {
+        name: "isProceedRecipient",
+        signature: "function isProceedRecipient(address _proceedRecipient) view returns (bool)",
+        selector: "0xb9b6def1",
+      },
+      {
+        name: "removeProceedRecipient",
+        signature: "function removeProceedRecipient(address _proceedRecipient)",
+        selector: "0x1f9810c8",
+      },
+      {
+        name: "updateProceedRecipientData",
+        signature: "function updateProceedRecipientData(address _proceedRecipient, bytes _data)",
+        selector: "0x654141cf",
+      },
+    ],
+    events: [
+      {
+        name: "ProceedRecipientAdded",
+        signature: "ProceedRecipientAdded(address,address,bytes)",
+        topic0: "0x95ea4c59332446575a504e49eab7549792d2378816950a0b6efb509e4df77b95",
+      },
+      {
+        name: "ProceedRecipientDataUpdated",
+        signature: "ProceedRecipientDataUpdated(address,address,bytes)",
+        topic0: "0xd3ca7f6e7e6927a35494a3d41bf1b250b7388cb459b84f19db41a7069a70f109",
+      },
+      {
+        name: "ProceedRecipientRemoved",
+        signature: "ProceedRecipientRemoved(address,address)",
+        topic0: "0x63204e4d4571f38dab60d621fa9e61d1a9430f6fe93627d35474eba0f7ca86e6",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+      {
+        name: "ProceedRecipientAlreadyExists",
+        signature: "ProceedRecipientAlreadyExists(address)",
+        selector: "0xb7fd3b5b",
+      },
+      { name: "ProceedRecipientNotFound", signature: "ProceedRecipientNotFound(address)", selector: "0x664dc89c" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ProceedRecipientsFixedRateFacetTimeTravel__factory(signer)
+        : new ProceedRecipientsFixedRateFacet__factory(signer),
+  },
+
+  ProceedRecipientsKpiLinkedRateFacet: {
+    name: "ProceedRecipientsKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_PROCEED_RECIPIENTS_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xe2f3e1d9c8b7a6e5f4d3c2b1a9e8f7d6c5b4a3e2f1d9c8b7a6e5f4d3c2b1a9e8",
+    },
+    inheritance: ["ProceedRecipientsFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "addProceedRecipient",
+        signature: "function addProceedRecipient(address _proceedRecipient, bytes _data)",
+        selector: "0x298f6222",
+      },
+      {
+        name: "getProceedRecipientData",
+        signature: "function getProceedRecipientData(address _proceedRecipient) view returns (bytes)",
+        selector: "0x94c39122",
+      },
+      {
+        name: "getProceedRecipients",
+        signature:
+          "function getProceedRecipients(uint256 _pageIndex, uint256 _pageLength) view returns (address[] proceedRecipients_)",
+        selector: "0x0a4f7d71",
+      },
+      {
+        name: "getProceedRecipientsCount",
+        signature: "function getProceedRecipientsCount() view returns (uint256)",
+        selector: "0x03db0e0d",
+      },
+      {
+        name: "initialize_ProceedRecipients",
+        signature: "function initialize_ProceedRecipients(address[] _proceedRecipients, bytes[] _data)",
+        selector: "0x9005379e",
+      },
+      {
+        name: "isProceedRecipient",
+        signature: "function isProceedRecipient(address _proceedRecipient) view returns (bool)",
+        selector: "0xb9b6def1",
+      },
+      {
+        name: "removeProceedRecipient",
+        signature: "function removeProceedRecipient(address _proceedRecipient)",
+        selector: "0x1f9810c8",
+      },
+      {
+        name: "updateProceedRecipientData",
+        signature: "function updateProceedRecipientData(address _proceedRecipient, bytes _data)",
+        selector: "0x654141cf",
+      },
+    ],
+    events: [
+      {
+        name: "ProceedRecipientAdded",
+        signature: "ProceedRecipientAdded(address,address,bytes)",
+        topic0: "0x95ea4c59332446575a504e49eab7549792d2378816950a0b6efb509e4df77b95",
+      },
+      {
+        name: "ProceedRecipientDataUpdated",
+        signature: "ProceedRecipientDataUpdated(address,address,bytes)",
+        topic0: "0xd3ca7f6e7e6927a35494a3d41bf1b250b7388cb459b84f19db41a7069a70f109",
+      },
+      {
+        name: "ProceedRecipientRemoved",
+        signature: "ProceedRecipientRemoved(address,address)",
+        topic0: "0x63204e4d4571f38dab60d621fa9e61d1a9430f6fe93627d35474eba0f7ca86e6",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      {
+        name: "ProceedRecipientAlreadyExists",
+        signature: "ProceedRecipientAlreadyExists(address)",
+        selector: "0xb7fd3b5b",
+      },
+      { name: "ProceedRecipientNotFound", signature: "ProceedRecipientNotFound(address)", selector: "0x664dc89c" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ProceedRecipientsKpiLinkedRateFacet__factory(signer),
+  },
+
+  ProceedRecipientsSustainabilityPerformanceTargetRateFacet: {
+    name: "ProceedRecipientsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_PROCEED_RECIPIENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xf3e4f2e1d9c8b7a6e5f4d3c2b1a9e8f7d6c5b4a3e2f1d9c8b7a6e5f4d3c2b1a9",
+    },
+    inheritance: ["ProceedRecipientsFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "addProceedRecipient",
+        signature: "function addProceedRecipient(address _proceedRecipient, bytes _data)",
+        selector: "0x298f6222",
+      },
+      {
+        name: "getProceedRecipientData",
+        signature: "function getProceedRecipientData(address _proceedRecipient) view returns (bytes)",
+        selector: "0x94c39122",
+      },
+      {
+        name: "getProceedRecipients",
+        signature:
+          "function getProceedRecipients(uint256 _pageIndex, uint256 _pageLength) view returns (address[] proceedRecipients_)",
+        selector: "0x0a4f7d71",
+      },
+      {
+        name: "getProceedRecipientsCount",
+        signature: "function getProceedRecipientsCount() view returns (uint256)",
+        selector: "0x03db0e0d",
+      },
+      {
+        name: "initialize_ProceedRecipients",
+        signature: "function initialize_ProceedRecipients(address[] _proceedRecipients, bytes[] _data)",
+        selector: "0x9005379e",
+      },
+      {
+        name: "isProceedRecipient",
+        signature: "function isProceedRecipient(address _proceedRecipient) view returns (bool)",
+        selector: "0xb9b6def1",
+      },
+      {
+        name: "removeProceedRecipient",
+        signature: "function removeProceedRecipient(address _proceedRecipient)",
+        selector: "0x1f9810c8",
+      },
+      {
+        name: "updateProceedRecipientData",
+        signature: "function updateProceedRecipientData(address _proceedRecipient, bytes _data)",
+        selector: "0x654141cf",
+      },
+    ],
+    events: [
+      {
+        name: "ProceedRecipientAdded",
+        signature: "ProceedRecipientAdded(address,address,bytes)",
+        topic0: "0x95ea4c59332446575a504e49eab7549792d2378816950a0b6efb509e4df77b95",
+      },
+      {
+        name: "ProceedRecipientDataUpdated",
+        signature: "ProceedRecipientDataUpdated(address,address,bytes)",
+        topic0: "0xd3ca7f6e7e6927a35494a3d41bf1b250b7388cb459b84f19db41a7069a70f109",
+      },
+      {
+        name: "ProceedRecipientRemoved",
+        signature: "ProceedRecipientRemoved(address,address)",
+        topic0: "0x63204e4d4571f38dab60d621fa9e61d1a9430f6fe93627d35474eba0f7ca86e6",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+      {
+        name: "ProceedRecipientAlreadyExists",
+        signature: "ProceedRecipientAlreadyExists(address)",
+        selector: "0xb7fd3b5b",
+      },
+      { name: "ProceedRecipientNotFound", signature: "ProceedRecipientNotFound(address)", selector: "0x664dc89c" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ProtectedPartitionsFacet: {
@@ -10634,7 +10895,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 168 as const;
+export const TOTAL_FACETS = 171 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

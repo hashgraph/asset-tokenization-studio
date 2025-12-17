@@ -77,11 +77,9 @@ const BOND_FIXED_RATE_FACETS = [
   "ExternalPauseManagementFacet",
 
   // Advanced Features
-  "AdjustBalancesFacet",
   "LockFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
-  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "ScheduledCouponListingFacet",
   "ScheduledSnapshotsFacet",

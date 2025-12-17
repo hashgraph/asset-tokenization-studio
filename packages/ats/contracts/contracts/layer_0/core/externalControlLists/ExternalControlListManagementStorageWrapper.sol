@@ -12,9 +12,6 @@ abstract contract ExternalControlListManagementStorageWrapper is ProtectedPartit
     using EnumerableSet for EnumerableSet.AddressSet;
 
     function _initialize_ExternalControlLists(address[] calldata _controlLists) internal override {
-        ExternalListDataStorage storage externalControlListDataStorage = _externalListStorage(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
-        );
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
             _addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists[index]);
@@ -22,7 +19,7 @@ abstract contract ExternalControlListManagementStorageWrapper is ProtectedPartit
                 ++index;
             }
         }
-        externalControlListDataStorage.initialized = true;
+        _setExternalListInitialized(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
     }
 
     function _isExternallyAuthorized(address _account) internal view override returns (bool) {

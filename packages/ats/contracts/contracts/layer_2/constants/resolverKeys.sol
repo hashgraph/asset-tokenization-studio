@@ -45,8 +45,26 @@ bytes32 constant _SCHEDULED_TASKS_RESOLVER_KEY = 0xa4934195ab83f1497ce5fc99b68d0
 // keccak256('security.token.standard.balanceAdjustments.resolverKey');
 bytes32 constant _BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8;
 
+// keccak256("security.token.standard.balanceAdjustments.fixed.rate.resolverKey");
+bytes32 constant _BALANCE_ADJUSTMENTS_FIXED_RATE_RESOLVER_KEY = 0xa7e8f6d5c4b3a2e1f9d8c7b6a5e4f3d2c1b9a8e7f6d5c4b3a2e1f9d8c7b6a5e4;
+
+// keccak256("security.token.standard.balanceAdjustments.kpilinked.rate.resolverKey");
+bytes32 constant _BALANCE_ADJUSTMENTS_KPI_LINKED_RATE_RESOLVER_KEY = 0xb8f9e7d6c5b4a3e2f1d9c8b7a6e5f4d3c2b1a9e8f7d6c5b4a3e2f1d9c8b7a6e5;
+
+// keccak256("security.token.standard.balanceAdjustments.SustainabilityPerformanceTarget.rate.resolverKey");
+bytes32 constant _BALANCE_ADJUSTMENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0xc9e1f8d7c6b5a4e3f2d1c9b8a7e6f5d4c3b2a1e9f8d7c6b5a4e3f2d1c9b8a7e6;
+
 // keccak256('security.token.standard.proceedRecipients.resolverKey');
 bytes32 constant _PROCEED_RECIPIENTS_RESOLVER_KEY = 0x87f4b676bf89cd24a01a78fd8e7fb2102c2f6d034be73d16402f7297e0ae625b;
+
+// keccak256("security.token.standard.proceedRecipients.fixed.rate.resolverKey");
+bytes32 constant _PROCEED_RECIPIENTS_FIXED_RATE_RESOLVER_KEY = 0xd1f2e9d8c7b6a5e4f3d2c1b9a8e7f6d5c4b3a2e1f9d8c7b6a5e4f3d2c1b9a8e7;
+
+// keccak256("security.token.standard.proceedRecipients.kpilinked.rate.resolverKey");
+bytes32 constant _PROCEED_RECIPIENTS_KPI_LINKED_RATE_RESOLVER_KEY = 0xe2f3e1d9c8b7a6e5f4d3c2b1a9e8f7d6c5b4a3e2f1d9c8b7a6e5f4d3c2b1a9e8;
+
+// keccak256("security.token.standard.proceedRecipients.SustainabilityPerformanceTarget.rate.resolverKey");
+bytes32 constant _PROCEED_RECIPIENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0xf3e4f2e1d9c8b7a6e5f4d3c2b1a9e8f7d6c5b4a3e2f1d9c8b7a6e5f4d3c2b1a9;
 
 // keccak256('security.token.standard.fixedRate.resolverKey');
 bytes32 constant _FIXED_RATE_RESOLVER_KEY = 0x2871e1c37f7423765d88b16528db7e80ad8e2bae5ab5d55e26659840c1d6b504;

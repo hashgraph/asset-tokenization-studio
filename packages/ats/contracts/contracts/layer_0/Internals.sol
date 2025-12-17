@@ -983,6 +983,7 @@ abstract contract Internals is Modifiers {
     function _isERC20VotesInitialized() internal view virtual returns (bool);
     function _isEscrow(Hold memory _hold, address _escrow) internal pure virtual returns (bool);
     function _isExternalList(bytes32 _position, address _list) internal view virtual returns (bool);
+    function _setExternalListInitialized(bytes32 _position) internal virtual;
     function _isExternallyAuthorized(address _account) internal view virtual returns (bool);
     function _isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) internal view virtual returns (bool);
     function _isExternallyPaused() internal view virtual returns (bool);
@@ -1502,4 +1503,11 @@ abstract contract Internals is Modifiers {
     function _setSymbol(string calldata _symbol) internal virtual;
 
     function _setOnchainID(address _onchainID) internal virtual;
+
+    function _initialize_ProceedRecipients(
+        address[] calldata _proceedRecipients,
+        bytes[] calldata _data
+    ) internal virtual;
+
+    function _isProceedRecipientsInitialized() internal view virtual returns (bool);
 }

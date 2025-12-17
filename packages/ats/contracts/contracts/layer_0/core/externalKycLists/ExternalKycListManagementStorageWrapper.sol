@@ -13,9 +13,6 @@ abstract contract ExternalKycListManagementStorageWrapper is ExternalListManagem
     using EnumerableSet for EnumerableSet.AddressSet;
 
     function _initialize_ExternalKycLists(address[] calldata _kycLists) internal override {
-        ExternalListDataStorage storage externalKycListDataStorage = _externalListStorage(
-            _KYC_MANAGEMENT_STORAGE_POSITION
-        );
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {
             _addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists[index]);
@@ -23,7 +20,7 @@ abstract contract ExternalKycListManagementStorageWrapper is ExternalListManagem
                 ++index;
             }
         }
-        externalKycListDataStorage.initialized = true;
+        _setExternalListInitialized(_KYC_MANAGEMENT_STORAGE_POSITION);
     }
 
     function _isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) internal view override returns (bool) {

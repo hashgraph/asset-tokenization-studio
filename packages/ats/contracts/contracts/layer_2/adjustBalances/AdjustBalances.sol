@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 import { IAdjustBalances } from "../interfaces/adjustBalances/IAdjustBalances.sol";
-import { Common } from "../../layer_0/common/Common.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 import { _ADJUSTMENT_BALANCE_ROLE } from "../constants/roles.sol";
 
-abstract contract AdjustBalances is IAdjustBalances, Common {
+abstract contract AdjustBalances is IAdjustBalances, Internals {
     function adjustBalances(
         uint256 factor,
         uint8 decimals
