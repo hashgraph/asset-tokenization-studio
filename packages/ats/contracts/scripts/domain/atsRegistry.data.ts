@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-17T10:26:00.212Z
- * Facets: 180
+ * Generated: 2025-12-17T10:49:44.422Z
+ * Facets: 183
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -289,8 +289,8 @@ import {
   HoldTokenHolderSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KpiLinkedRateFacet__factory,
   KpiLinkedRateFacetTimeTravel__factory,
-  KpisFacet__factory,
-  KpisFacetTimeTravel__factory,
+  KpisSustainabilityPerformanceTargetRateFacet__factory,
+  KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KycFacet__factory,
   KycFacetTimeTravel__factory,
   KycFixedRateFacet__factory,
@@ -378,6 +378,12 @@ import {
   TimeTravelFacet__factory,
   TransferAndLockFacet__factory,
   TransferAndLockFacetTimeTravel__factory,
+  TransferAndLockFixedRateFacet__factory,
+  TransferAndLockFixedRateFacetTimeTravel__factory,
+  TransferAndLockKpiLinkedRateFacet__factory,
+  TransferAndLockKpiLinkedRateFacetTimeTravel__factory,
+  TransferAndLockSustainabilityPerformanceTargetRateFacet__factory,
+  TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
 } from "@contract-types";
 
 /**
@@ -8447,11 +8453,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel ? new KpiLinkedRateFacetTimeTravel__factory(signer) : new KpiLinkedRateFacet__factory(signer),
   },
 
-  KpisFacet: {
-    name: "KpisFacet",
+  KpisSustainabilityPerformanceTargetRateFacet: {
+    name: "KpisSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
-      name: "_KPIS_RESOLVER_KEY",
-      value: "0xb228c36d89348606afcfbad286f8eddb0d0cdd727eefd0f0fd87f17ea0793051",
+      name: "_KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xb668a0e99ee4bce486604d5a7097a4e5d837d1736e0cf43b190b56d0adea78b9",
     },
     inheritance: ["KpisFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
@@ -8496,7 +8502,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "KpiDataAlreadyExists", signature: "KpiDataAlreadyExists(uint256)", selector: "0x74efd82c" },
     ],
     factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new KpisFacetTimeTravel__factory(signer) : new KpisFacet__factory(signer),
+      useTimeTravel
+        ? new KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new KpisSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   KycFacet: {
@@ -11194,7 +11202,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_TRANSFER_AND_LOCK_RESOLVER_KEY",
       value: "0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08",
     },
-    inheritance: ["TransferAndLock", "IStaticFunctionSelectors"],
+    inheritance: ["TransferAndLockFacetBase", "Common"],
     methods: [
       {
         name: "protectedTransferAndLock",
@@ -11221,15 +11229,177 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x3bd407b9",
       },
     ],
+    events: [
+      {
+        name: "PartitionTransferredAndLocked",
+        signature: "PartitionTransferredAndLocked(bytes32,address,address,uint256,bytes,uint256,uint256)",
+        topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
+      },
+    ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new TransferAndLockFacetTimeTravel__factory(signer) : new TransferAndLockFacet__factory(signer),
+  },
+
+  TransferAndLockFixedRateFacet: {
+    name: "TransferAndLockFixedRateFacet",
+    resolverKey: {
+      name: "_TRANSFER_AND_LOCK_FIXED_RATE_RESOLVER_KEY",
+      value: "0x8c3d5e9f2a6b1c4d7e8f9a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d",
+    },
+    inheritance: ["TransferAndLockFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "protectedTransferAndLock",
+        signature:
+          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
+        selector: "0xe2e20e05",
+      },
+      {
+        name: "protectedTransferAndLockByPartition",
+        signature:
+          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
+        selector: "0x8a1d3a47",
+      },
+      {
+        name: "transferAndLock",
+        signature:
+          "function transferAndLock(address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0x0e92b90b",
+      },
+      {
+        name: "transferAndLockByPartition",
+        signature:
+          "function transferAndLockByPartition(bytes32 _partition, address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0x3bd407b9",
+      },
+    ],
+    events: [
+      {
+        name: "PartitionTransferredAndLocked",
+        signature: "PartitionTransferredAndLocked(bytes32,address,address,uint256,bytes,uint256,uint256)",
+        topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new TransferAndLockFixedRateFacetTimeTravel__factory(signer)
+        : new TransferAndLockFixedRateFacet__factory(signer),
+  },
+
+  TransferAndLockKpiLinkedRateFacet: {
+    name: "TransferAndLockKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_TRANSFER_AND_LOCK_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x3e5f7a9b1c2d4e6f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f",
+    },
+    inheritance: ["TransferAndLockFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "protectedTransferAndLock",
+        signature:
+          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
+        selector: "0xe2e20e05",
+      },
+      {
+        name: "protectedTransferAndLockByPartition",
+        signature:
+          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
+        selector: "0x8a1d3a47",
+      },
+      {
+        name: "transferAndLock",
+        signature:
+          "function transferAndLock(address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0x0e92b90b",
+      },
+      {
+        name: "transferAndLockByPartition",
+        signature:
+          "function transferAndLockByPartition(bytes32 _partition, address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0x3bd407b9",
+      },
+    ],
+    events: [
+      {
+        name: "PartitionTransferredAndLocked",
+        signature: "PartitionTransferredAndLocked(bytes32,address,address,uint256,bytes,uint256,uint256)",
+        topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new TransferAndLockKpiLinkedRateFacet__factory(signer),
+  },
+
+  TransferAndLockSustainabilityPerformanceTargetRateFacet: {
+    name: "TransferAndLockSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_TRANSFER_AND_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x9d1e3f5a7b9c0d2e4f6a8b0c1d3e5f7a9b0c2d4e6f8a9b1c3d5e7f9a0b2c4d6e",
+    },
+    inheritance: ["TransferAndLockFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "protectedTransferAndLock",
+        signature:
+          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
+        selector: "0xe2e20e05",
+      },
+      {
+        name: "protectedTransferAndLockByPartition",
+        signature:
+          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
+        selector: "0x8a1d3a47",
+      },
+      {
+        name: "transferAndLock",
+        signature:
+          "function transferAndLock(address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0x0e92b90b",
+      },
+      {
+        name: "transferAndLockByPartition",
+        signature:
+          "function transferAndLockByPartition(bytes32 _partition, address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
+        selector: "0x3bd407b9",
+      },
+    ],
+    events: [
+      {
+        name: "PartitionTransferredAndLocked",
+        signature: "PartitionTransferredAndLocked(bytes32,address,address,uint256,bytes,uint256,uint256)",
+        topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new TransferAndLockSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 };
 
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 180 as const;
+export const TOTAL_FACETS = 183 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -12119,18 +12289,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
   },
 
-  ITransferAndLockStorageWrapper: {
-    name: "ITransferAndLockStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "PartitionTransferredAndLocked",
-        signature: "PartitionTransferredAndLocked(bytes32,address,address,uint256,bytes,uint256,uint256)",
-        topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
-      },
-    ],
-  },
-
   KpiLinkedRateStorageWrapper: {
     name: "KpiLinkedRateStorageWrapper",
     inheritance: ["PauseStorageWrapper"],
@@ -12223,7 +12381,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   TransferAndLockStorageWrapper: {
     name: "TransferAndLockStorageWrapper",
-    inheritance: ["ITransferAndLockStorageWrapper", "SecurityStorageWrapper"],
+    inheritance: ["SecurityStorageWrapper"],
     methods: [],
   },
 };
@@ -12231,7 +12389,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 55 as const;
+export const TOTAL_STORAGE_WRAPPERS = 54 as const;
 
 /**
  * All role identifiers extracted from contracts.

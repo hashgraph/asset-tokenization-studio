@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { TransferAndLockFacet } from "../../../layer_3/transferAndLock/standard/TransferAndLockFacet.sol";
+import {
+    TransferAndLockKpiLinkedRateFacet
+} from "../../../layer_3/transferAndLock/kpiLinkedRate/TransferAndLockKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 
-contract TransferAndLockFacetTimeTravel is TransferAndLockFacet, TimeTravelStorageWrapper {
+contract TransferAndLockKpiLinkedRateFacetTimeTravel is TransferAndLockKpiLinkedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
