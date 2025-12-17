@@ -124,9 +124,6 @@ jobs:
     name: Publish Mass Payout Packages
     needs: build-mass-payout
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     env:
       DRY_RUN: ${{ inputs.dry-run-enabled }}
 
