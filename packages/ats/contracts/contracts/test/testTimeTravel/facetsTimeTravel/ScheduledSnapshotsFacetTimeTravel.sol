@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ScheduledSnapshotsFacet
-} from "../../../layer_2/scheduledTasks/scheduledSnapshots/ScheduledSnapshotsFacet.sol";
+} from "../../../layer_2/scheduledTasks/scheduledSnapshots/standard/ScheduledSnapshotsFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 

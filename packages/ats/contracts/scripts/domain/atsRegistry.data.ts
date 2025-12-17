@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-17T09:56:05.423Z
- * Facets: 171
+ * Generated: 2025-12-17T10:26:00.212Z
+ * Facets: 180
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -335,10 +335,28 @@ import {
   ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
   ScheduledCouponListingFacet__factory,
   ScheduledCouponListingFacetTimeTravel__factory,
+  ScheduledCouponListingFixedRateFacet__factory,
+  ScheduledCouponListingFixedRateFacetTimeTravel__factory,
+  ScheduledCouponListingKpiLinkedRateFacet__factory,
+  ScheduledCouponListingKpiLinkedRateFacetTimeTravel__factory,
+  ScheduledCouponListingSustainabilityPerformanceTargetRateFacet__factory,
+  ScheduledCouponListingSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksFacet__factory,
   ScheduledCrossOrderedTasksFacetTimeTravel__factory,
+  ScheduledCrossOrderedTasksFixedRateFacet__factory,
+  ScheduledCrossOrderedTasksFixedRateFacetTimeTravel__factory,
+  ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
+  ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory,
+  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
+  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ScheduledSnapshotsFacet__factory,
   ScheduledSnapshotsFacetTimeTravel__factory,
+  ScheduledSnapshotsFixedRateFacet__factory,
+  ScheduledSnapshotsFixedRateFacetTimeTravel__factory,
+  ScheduledSnapshotsKpiLinkedRateFacet__factory,
+  ScheduledSnapshotsKpiLinkedRateFacetTimeTravel__factory,
+  ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet__factory,
+  ScheduledSnapshotsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   SnapshotsFacet__factory,
   SnapshotsFacetTimeTravel__factory,
   SnapshotsFixedRateFacet__factory,
@@ -9870,7 +9888,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY",
       value: "0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0",
     },
-    inheritance: ["ScheduledBalanceAdjustments", "IStaticFunctionSelectors"],
+    inheritance: ["ScheduledBalanceAdjustmentsFacetBase", "Common"],
     methods: [
       {
         name: "getScheduledBalanceAdjustments",
@@ -9884,6 +9902,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x2de241e3",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledBalanceAdjustmentsFacetTimeTravel__factory(signer)
@@ -9896,7 +9915,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SCHEDULED_COUPON_LISTING_RESOLVER_KEY",
       value: "0x6cc7645ae5bcd122875ce8bd150bd28dda6374546c4c2421e5ae4fdeedb3ab30",
     },
-    inheritance: ["ScheduledCouponListing", "IStaticFunctionSelectors"],
+    inheritance: ["ScheduledCouponListingFacetBase", "Common"],
     methods: [
       {
         name: "getScheduledCouponListing",
@@ -9910,10 +9929,105 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x80a84271",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledCouponListingFacetTimeTravel__factory(signer)
         : new ScheduledCouponListingFacet__factory(signer),
+  },
+
+  ScheduledCouponListingFixedRateFacet: {
+    name: "ScheduledCouponListingFixedRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_COUPON_LISTING_FIXED_RATE_RESOLVER_KEY",
+      value: "0x9c249eccb68ce7eae5f58a9b4fbe1f3b6a6f2a644b36c3f1b3559077b4f4e266",
+    },
+    inheritance: ["ScheduledCouponListingFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "getScheduledCouponListing",
+        signature:
+          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
+        selector: "0x2fcfe49c",
+      },
+      {
+        name: "scheduledCouponListingCount",
+        signature: "function scheduledCouponListingCount() view returns (uint256)",
+        selector: "0x80a84271",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledCouponListingFixedRateFacetTimeTravel__factory(signer)
+        : new ScheduledCouponListingFixedRateFacet__factory(signer),
+  },
+
+  ScheduledCouponListingKpiLinkedRateFacet: {
+    name: "ScheduledCouponListingKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_COUPON_LISTING_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x9f42d2f2ae6efad6d2acf0399ec9e5a1bed9e41c68a86b58f1de78da4fe3c598",
+    },
+    inheritance: ["ScheduledCouponListingFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "getScheduledCouponListing",
+        signature:
+          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
+        selector: "0x2fcfe49c",
+      },
+      {
+        name: "scheduledCouponListingCount",
+        signature: "function scheduledCouponListingCount() view returns (uint256)",
+        selector: "0x80a84271",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledCouponListingKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ScheduledCouponListingKpiLinkedRateFacet__factory(signer),
+  },
+
+  ScheduledCouponListingSustainabilityPerformanceTargetRateFacet: {
+    name: "ScheduledCouponListingSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_COUPON_LISTING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x85c0dee450a5a4657a9de39ca4ba19881b079d55d5bb64641d52f59bea709ba8",
+    },
+    inheritance: ["ScheduledCouponListingFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "getScheduledCouponListing",
+        signature:
+          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
+        selector: "0x2fcfe49c",
+      },
+      {
+        name: "scheduledCouponListingCount",
+        signature: "function scheduledCouponListingCount() view returns (uint256)",
+        selector: "0x80a84271",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledCouponListingSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ScheduledCouponListingSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ScheduledCrossOrderedTasksFacet: {
@@ -9922,7 +10036,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SCHEDULED_TASKS_RESOLVER_KEY",
       value: "0xa4934195ab83f1497ce5fc99b68d0f41694716bcfba5f232aa6c8e0d4d504f08",
     },
-    inheritance: ["ScheduledCrossOrderedTasks", "IStaticFunctionSelectors"],
+    inheritance: ["ScheduledCrossOrderedTasksFacetBase", "Common"],
     methods: [
       {
         name: "getScheduledCrossOrderedTasks",
@@ -9946,10 +10060,135 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5be4a143",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledCrossOrderedTasksFacetTimeTravel__factory(signer)
         : new ScheduledCrossOrderedTasksFacet__factory(signer),
+  },
+
+  ScheduledCrossOrderedTasksFixedRateFacet: {
+    name: "ScheduledCrossOrderedTasksFixedRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_CROSS_ORDERED_TASKS_FIXED_RATE_RESOLVER_KEY",
+      value: "0x1312a5fa6cd5c7128015b199c47eacbf1636ef5cf437c0ee84c619dfbd372ca0",
+    },
+    inheritance: ["ScheduledCrossOrderedTasksFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "getScheduledCrossOrderedTasks",
+        signature:
+          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
+        selector: "0x72ed9041",
+      },
+      {
+        name: "scheduledCrossOrderedTaskCount",
+        signature: "function scheduledCrossOrderedTaskCount() view returns (uint256)",
+        selector: "0x46883133",
+      },
+      {
+        name: "triggerPendingScheduledCrossOrderedTasks",
+        signature: "function triggerPendingScheduledCrossOrderedTasks() returns (uint256)",
+        selector: "0x32194dbb",
+      },
+      {
+        name: "triggerScheduledCrossOrderedTasks",
+        signature: "function triggerScheduledCrossOrderedTasks(uint256 _max) returns (uint256)",
+        selector: "0x5be4a143",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledCrossOrderedTasksFixedRateFacetTimeTravel__factory(signer)
+        : new ScheduledCrossOrderedTasksFixedRateFacet__factory(signer),
+  },
+
+  ScheduledCrossOrderedTasksKpiLinkedRateFacet: {
+    name: "ScheduledCrossOrderedTasksKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_CROSS_ORDERED_TASKS_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x04d20e52e58dbadedfcf6c373a826fc5f7c665fd6caf67c8a65a9e777a8b70ec",
+    },
+    inheritance: ["ScheduledCrossOrderedTasksFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "getScheduledCrossOrderedTasks",
+        signature:
+          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
+        selector: "0x72ed9041",
+      },
+      {
+        name: "scheduledCrossOrderedTaskCount",
+        signature: "function scheduledCrossOrderedTaskCount() view returns (uint256)",
+        selector: "0x46883133",
+      },
+      {
+        name: "triggerPendingScheduledCrossOrderedTasks",
+        signature: "function triggerPendingScheduledCrossOrderedTasks() returns (uint256)",
+        selector: "0x32194dbb",
+      },
+      {
+        name: "triggerScheduledCrossOrderedTasks",
+        signature: "function triggerScheduledCrossOrderedTasks(uint256 _max) returns (uint256)",
+        selector: "0x5be4a143",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory(signer),
+  },
+
+  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet: {
+    name: "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_CROSS_ORDERED_TASKS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x23d3302e505d889e80b20005bf316ccd7cbbd3c547a7305d600e8f0d9bc73267",
+    },
+    inheritance: ["ScheduledCrossOrderedTasksFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "getScheduledCrossOrderedTasks",
+        signature:
+          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
+        selector: "0x72ed9041",
+      },
+      {
+        name: "scheduledCrossOrderedTaskCount",
+        signature: "function scheduledCrossOrderedTaskCount() view returns (uint256)",
+        selector: "0x46883133",
+      },
+      {
+        name: "triggerPendingScheduledCrossOrderedTasks",
+        signature: "function triggerPendingScheduledCrossOrderedTasks() returns (uint256)",
+        selector: "0x32194dbb",
+      },
+      {
+        name: "triggerScheduledCrossOrderedTasks",
+        signature: "function triggerScheduledCrossOrderedTasks(uint256 _max) returns (uint256)",
+        selector: "0x5be4a143",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   ScheduledSnapshotsFacet: {
@@ -9958,7 +10197,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SCHEDULED_SNAPSHOTS_RESOLVER_KEY",
       value: "0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793",
     },
-    inheritance: ["ScheduledSnapshots", "IStaticFunctionSelectors"],
+    inheritance: ["ScheduledSnapshotsFacetBase", "Common"],
     methods: [
       {
         name: "getScheduledSnapshots",
@@ -9972,10 +10211,105 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa19e91fe",
       },
     ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledSnapshotsFacetTimeTravel__factory(signer)
         : new ScheduledSnapshotsFacet__factory(signer),
+  },
+
+  ScheduledSnapshotsFixedRateFacet: {
+    name: "ScheduledSnapshotsFixedRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_SNAPSHOTS_FIXED_RATE_RESOLVER_KEY",
+      value: "0xe3f0d8c05423e6bf8dc42fb776a1ce265739fc66f9b501077b207a0c2a56cab6",
+    },
+    inheritance: ["ScheduledSnapshotsFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "getScheduledSnapshots",
+        signature:
+          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
+        selector: "0xca21c53a",
+      },
+      {
+        name: "scheduledSnapshotCount",
+        signature: "function scheduledSnapshotCount() view returns (uint256)",
+        selector: "0xa19e91fe",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledSnapshotsFixedRateFacetTimeTravel__factory(signer)
+        : new ScheduledSnapshotsFixedRateFacet__factory(signer),
+  },
+
+  ScheduledSnapshotsKpiLinkedRateFacet: {
+    name: "ScheduledSnapshotsKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_SNAPSHOTS_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xbfb6dd5a6beac6604a320b8363bc0da4093ba327dd037970ad82d422b0d88526",
+    },
+    inheritance: ["ScheduledSnapshotsFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "getScheduledSnapshots",
+        signature:
+          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
+        selector: "0xca21c53a",
+      },
+      {
+        name: "scheduledSnapshotCount",
+        signature: "function scheduledSnapshotCount() view returns (uint256)",
+        selector: "0xa19e91fe",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledSnapshotsKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ScheduledSnapshotsKpiLinkedRateFacet__factory(signer),
+  },
+
+  ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet: {
+    name: "ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_SNAPSHOTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x99a85df534e32a3b9fce8e80f0cc30d6703e578eb5c641ab2d9e95530d046b4b",
+    },
+    inheritance: ["ScheduledSnapshotsFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "getScheduledSnapshots",
+        signature:
+          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
+        selector: "0xca21c53a",
+      },
+      {
+        name: "scheduledSnapshotCount",
+        signature: "function scheduledSnapshotCount() view returns (uint256)",
+        selector: "0xa19e91fe",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledSnapshotsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   SnapshotsFacet: {
@@ -10895,7 +11229,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 171 as const;
+export const TOTAL_FACETS = 180 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

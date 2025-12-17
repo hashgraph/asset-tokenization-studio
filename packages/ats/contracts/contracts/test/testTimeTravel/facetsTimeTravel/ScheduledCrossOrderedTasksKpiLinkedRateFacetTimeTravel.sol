@@ -2,12 +2,15 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {
-    ScheduledCrossOrderedTasksFacet
-} from "../../../layer_2/scheduledTasks/scheduledCrossOrderedTasks/standard/ScheduledCrossOrderedTasksFacet.sol";
+    ScheduledCrossOrderedTasksKpiLinkedRateFacet
+} from "../../../layer_2/scheduledTasks/scheduledCrossOrderedTasks/kpiLinkedRate/ScheduledCrossOrderedTasksKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 
-contract ScheduledCrossOrderedTasksFacetTimeTravel is ScheduledCrossOrderedTasksFacet, TimeTravelStorageWrapper {
+contract ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel is
+    ScheduledCrossOrderedTasksKpiLinkedRateFacet,
+    TimeTravelStorageWrapper
+{
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
     }

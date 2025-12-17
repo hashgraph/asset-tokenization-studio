@@ -33,14 +33,50 @@ bytes32 constant _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY = 0x3
 // keccak256('security.token.standard.scheduled.snapshots.resolverKey');
 bytes32 constant _SCHEDULED_SNAPSHOTS_RESOLVER_KEY = 0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793;
 
+// keccak256("security.token.standard.scheduled.snapshots.fixed.rate.resolverKey")
+bytes32 constant _SCHEDULED_SNAPSHOTS_FIXED_RATE_RESOLVER_KEY = 0xe3f0d8c05423e6bf8dc42fb776a1ce265739fc66f9b501077b207a0c2a56cab6;
+
+// keccak256("security.token.standard.scheduled.snapshots.kpilinked.rate.resolverKey")
+bytes32 constant _SCHEDULED_SNAPSHOTS_KPI_LINKED_RATE_RESOLVER_KEY = 0xbfb6dd5a6beac6604a320b8363bc0da4093ba327dd037970ad82d422b0d88526;
+
+// keccak256("security.token.standard.scheduled.snapshots.SustainabilityPerformanceTarget.rate.resolverKey")
+bytes32 constant _SCHEDULED_SNAPSHOTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x99a85df534e32a3b9fce8e80f0cc30d6703e578eb5c641ab2d9e95530d046b4b;
+
 // keccak256('security.token.standard.scheduled.balanceAdjustments.resolverKey');
 bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0;
+
+// keccak256("security.token.standard.scheduled.balanceAdjustments.fixed.rate.resolverKey")
+bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_FIXED_RATE_RESOLVER_KEY = 0xb3336a1ececdcd807fd6e81cc57e9392c75bf3fd303a2f5df0b11c0dda87ce7f;
+
+// keccak256("security.token.standard.scheduled.balanceAdjustments.kpilinked.rate.resolverKey")
+bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_KPI_LINKED_RATE_RESOLVER_KEY = 0x3da33aed4e04baa1b9c39bd96d0bc7be51ecaa1468eff7f632c29fb134644cb4;
+
+// keccak256("security.token.standard.scheduled.balanceAdjustments.SustainabilityPerformanceTarget.rate.resolverKey")
+bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x1168df5bb8a348d137af6e29915c261dc82c495f72484a046ac4f750899625f4;
 
 // keccak256('security.token.standard.scheduled.couponListing.resolverKey');
 bytes32 constant _SCHEDULED_COUPON_LISTING_RESOLVER_KEY = 0x6cc7645ae5bcd122875ce8bd150bd28dda6374546c4c2421e5ae4fdeedb3ab30;
 
+// keccak256("security.token.standard.scheduled.couponListing.fixed.rate.resolverKey")
+bytes32 constant _SCHEDULED_COUPON_LISTING_FIXED_RATE_RESOLVER_KEY = 0x9c249eccb68ce7eae5f58a9b4fbe1f3b6a6f2a644b36c3f1b3559077b4f4e266;
+
+// keccak256("security.token.standard.scheduled.couponListing.kpilinked.rate.resolverKey")
+bytes32 constant _SCHEDULED_COUPON_LISTING_KPI_LINKED_RATE_RESOLVER_KEY = 0x9f42d2f2ae6efad6d2acf0399ec9e5a1bed9e41c68a86b58f1de78da4fe3c598;
+
+// keccak256("security.token.standard.scheduled.couponListing.SustainabilityPerformanceTarget.rate.resolverKey")
+bytes32 constant _SCHEDULED_COUPON_LISTING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x85c0dee450a5a4657a9de39ca4ba19881b079d55d5bb64641d52f59bea709ba8;
+
 // keccak256('security.token.standard.scheduled.tasks.resolverKey');
 bytes32 constant _SCHEDULED_TASKS_RESOLVER_KEY = 0xa4934195ab83f1497ce5fc99b68d0f41694716bcfba5f232aa6c8e0d4d504f08;
+
+// keccak256("security.token.standard.scheduled.crossOrderedTasks.fixed.rate.resolverKey")
+bytes32 constant _SCHEDULED_CROSS_ORDERED_TASKS_FIXED_RATE_RESOLVER_KEY = 0x1312a5fa6cd5c7128015b199c47eacbf1636ef5cf437c0ee84c619dfbd372ca0;
+
+// keccak256("security.token.standard.scheduled.crossOrderedTasks.kpilinked.rate.resolverKey")
+bytes32 constant _SCHEDULED_CROSS_ORDERED_TASKS_KPI_LINKED_RATE_RESOLVER_KEY = 0x04d20e52e58dbadedfcf6c373a826fc5f7c665fd6caf67c8a65a9e777a8b70ec;
+
+// keccak256("security.token.standard.scheduled.crossOrderedTasks.SustainabilityPerformanceTarget.rate.resolverKey")
+bytes32 constant _SCHEDULED_CROSS_ORDERED_TASKS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x23d3302e505d889e80b20005bf316ccd7cbbd3c547a7305d600e8f0d9bc73267;
 
 // keccak256('security.token.standard.balanceAdjustments.resolverKey');
 bytes32 constant _BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8;

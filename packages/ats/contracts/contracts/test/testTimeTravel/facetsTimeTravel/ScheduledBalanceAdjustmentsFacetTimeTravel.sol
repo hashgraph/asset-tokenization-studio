@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ScheduledBalanceAdjustmentsFacet
-} from "../../../layer_2/scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsFacet.sol";
+} from "../../../layer_2/scheduledTasks/scheduledBalanceAdjustments/standard/ScheduledBalanceAdjustmentsFacet.sol";
 import { TimeTravelStorageWrapper } from "../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
 
